@@ -17,7 +17,6 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -50,7 +49,6 @@ import './style.scss';
 import { navigateOrParent, attachParentListeners } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
-import { fetchActiveThemeHasMods } from '~/customize-store/intro/services';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -60,9 +58,7 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
-	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean }
-	| { type: 'ACTIVE_THEME_HAS_MODS'; payload: boolean }
-	| { type: 'START_ASSEMBLER_HUB' };
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -164,7 +160,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			activeTheme: '',
-			activeThemeHasMods: undefined,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
@@ -173,6 +168,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
+		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -194,9 +190,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		IS_FONT_LIBRARY_AVAILABLE: {
 			actions: [ 'assignIsFontLibraryAvailable' ],
-		},
-		ACTIVE_THEME_HAS_MODS: {
-			actions: [ 'assignActiveThemeHasMods' ],
 		},
 	},
 	states: {
@@ -392,13 +385,15 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				checkActiveThemeHasMods: {
 					always: [
 						{
-							cond: 'activeThemeIsNotModified',
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'activeThemeHasNoMods',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
 							target: '#customizeStore.intro',
 						},
 						{
+							// Otherwise, proceed to the next step.
 							cond: 'activeThemeHasMods',
 							target: 'preCheckAiStatus',
 						},
@@ -553,10 +548,6 @@ export const CustomizeStoreController = ( {
 				...actionOverrides,
 			},
 			guards: {
-				log: ( _ctx, _evt, { cond } ) => {
-					console.log( 'log', _ctx.intro, cond );
-					return true;
-				},
 				hasStepInUrl: ( _ctx, _evt, { cond }: { cond: unknown } ) => {
 					const { path = '' } = getQuery() as { path: string };
 					const pathFragments = path.split( '/' );
@@ -574,20 +565,10 @@ export const CustomizeStoreController = ( {
 				isWooExpress: () => isWooExpress(),
 				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
-					console.log(
-						'activeThemeHasMods',
-						_ctx.intro.activeThemeHasMods,
-						!! _ctx.intro.activeThemeHasMods
-					);
-					return !! _ctx.intro.activeThemeHasMods;
+					return !! _ctx.activeThemeHasMods;
 				},
-				activeThemeIsNotModified: ( _ctx ) => {
-					console.log(
-						'activeThemeIsNotModified',
-						_ctx.intro.activeThemeHasMods,
-						! _ctx.intro.activeThemeHasMods
-					);
-					return ! _ctx.intro.activeThemeHasMods;
+				activeThemeHasNoMods: ( _ctx ) => {
+					return ! _ctx.activeThemeHasMods;
 				},
 			},
 		} );

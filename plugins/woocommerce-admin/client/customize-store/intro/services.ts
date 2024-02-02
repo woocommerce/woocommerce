@@ -12,6 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { aiStatusResponse } from '../types';
+import { isIframe } from '~/customize-store/utils';
 
 export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
@@ -125,8 +126,11 @@ const fetchIsFontLibraryAvailable = async () => {
 };
 
 export const setFlags = async () => {
-	if ( ! window.frameElement ) {
-		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrieve flag value.
+	if ( ! isIframe( window ) ) {
+		// To improve the readability of the code, we want to use a dictionary
+		// where the key is the feature flag name and the value is the
+		// function to retrieve flag value.
+
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const _featureFlags = {
 			FONT_LIBRARY_AVAILABLE: ( async () => {
@@ -146,6 +150,8 @@ export const setFlags = async () => {
 			} )(),
 		};
 
+		// Since the _featureFlags values are promises, we need to wait for
+		// all of them to resolve before returning.
 		await Promise.all( Object.values( _featureFlags ) );
 	}
 };
