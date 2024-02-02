@@ -6,19 +6,12 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 /**
  * Handle redirecting to the old or new editor based on features and support.
  */
 class RedirectionController {
-	/**
-	 * Registered product templates.
-	 *
-	 * @var array
-	 */
-	private $product_templates = array();
-
 	/**
 	 * Set up the hooks used for redirection.
 	 */
@@ -66,12 +59,14 @@ class RedirectionController {
 		$digital_product     = $product->is_downloadable() || $product->is_virtual();
 		$product_template_id = $product->get_meta( '_product_template_id' );
 
-		foreach ( $this->product_templates as $product_template ) {
-			if ( is_null( $product_template->get_layout_template_id() ) ) {
-				continue;
-			}
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+		// TODO: Only get product form templates.
+		$product_form_templates = $layout_template_registry->instantiate_layout_templates();
 
-			$product_data      = $product_template->get_product_data();
+		foreach ( $product_form_templates as $template ) {
+			// TODO: Skip templates that have no children.
+
+			$product_data      = $template->get_product_data();
 			$product_data_type = $product_data['type'];
 			// Treat a variable product as a simple product since there is not a product template
 			// for variable products.
@@ -81,7 +76,7 @@ class RedirectionController {
 				continue;
 			}
 
-			if ( isset( $product_template_id ) && $product_template_id === $product_template->get_id() ) {
+			if ( isset( $product_template_id ) && $product_template_id === $template->get_id() ) {
 				return true;
 			}
 
@@ -94,15 +89,6 @@ class RedirectionController {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Check if a product is supported by the new experience.
-	 *
-	 * @param array $product_templates The registered product teamplates.
-	 */
-	public function set_product_templates( array $product_templates ): void {
-		$this->product_templates = $product_templates;
 	}
 
 	/**

@@ -70,7 +70,10 @@ class Init {
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
-			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+			// TODO: Need to do this in a better way. Redirection controller needs
+			// layout templates in order to decide if it should redirect to the new editor.
+			$this->register_layout_templates();
+			// add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
