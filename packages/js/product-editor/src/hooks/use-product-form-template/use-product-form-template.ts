@@ -8,6 +8,11 @@ import {
 } from '@woocommerce/block-templates';
 import { ProductType } from '@woocommerce/data';
 
+/**
+ * Internal dependencies
+ */
+import { LayoutTemplate } from '../../types';
+
 export const useProductFormTemplate = (
 	productFormTemplateId: string | undefined,
 	productType: ProductType | undefined,
@@ -21,16 +26,14 @@ export const useProductFormTemplate = (
 		}
 
 		let matchingLayoutTemplate = layoutTemplates.find(
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			( layoutTemplate: any ) =>
+			( layoutTemplate: LayoutTemplate ) =>
 				layoutTemplate.id === productFormTemplateId &&
 				layoutTemplate.productData?.type === productType
 		);
 
 		if ( ! matchingLayoutTemplate ) {
 			matchingLayoutTemplate = layoutTemplates.find(
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				( layoutTemplate: any ) =>
+				( layoutTemplate: LayoutTemplate ) =>
 					layoutTemplate.productData?.type === productType
 			);
 		}
