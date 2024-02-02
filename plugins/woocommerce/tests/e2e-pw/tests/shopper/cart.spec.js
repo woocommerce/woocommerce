@@ -146,7 +146,7 @@ test.describe( 'Cart page', () => {
 
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.is-info' ) ).toContainText(
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );

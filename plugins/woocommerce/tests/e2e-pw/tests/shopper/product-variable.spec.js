@@ -194,7 +194,7 @@ test.describe( 'Variable Product Page', () => {
 				.locator( '#size' )
 				.selectOption( attr.attributes[ 0 ].option );
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-			await expect( page.locator( '.is-success' ) ).toContainText(
+			await expect( page.locator( '.woocommerce-message' ) ).toContainText(
 				'has been added to your cart.'
 			);
 		}
@@ -228,7 +228,7 @@ test.describe( 'Variable Product Page', () => {
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.is-info' ) ).toContainText(
+		await expect( page.locator( '.cart-empty' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );
