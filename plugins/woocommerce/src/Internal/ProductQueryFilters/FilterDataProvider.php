@@ -27,14 +27,14 @@ class FilterDataProvider {
 	 *
 	 * @return void
 	 */
-	final public function init( ClausesGeneratorInterface $filter_clauses_generator ): void {
+	final public function init( FilterClausesGenerator $filter_clauses_generator ): void {
 		$this->set_filter_clauses_generator_provider( $filter_clauses_generator );
 	}
 
 	/**
 	 * Allow setting the clauses provider at run time.
 	 *
-	 * @param FilterClausesGenerator $filter_clauses_generator Instance of FilterClausesGenerator.
+	 * @param ClausesGeneratorInterface $filter_clauses_generator Instance of FilterClausesGenerator.
 	 *
 	 * @return void
 	 */

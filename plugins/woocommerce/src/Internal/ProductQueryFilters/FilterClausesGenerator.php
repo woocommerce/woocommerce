@@ -38,7 +38,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 				'max_price' => $wp_query->get( 'max_price' ),
 			);
 			$price_range = array_filter( $price_range );
-			$args = $this->add_price_clauses( $args, $price_range );
+			$args        = $this->add_price_clauses( $args, $price_range );
 		}
 
 		$args = $this->add_attribute_clauses(
@@ -80,7 +80,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 	 * @return array
 	 */
 	public function add_price_clauses( $args, $price_range ) {
-		if ( empty( $price_range['min_price'] ) && empty( $price_range['max_price'] ) ) {
+		if ( ! isset( $price_range['min_price'] ) && ! isset( $price_range['max_price'] ) ) {
 			return $args;
 		}
 
@@ -89,7 +89,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		$adjust_for_taxes = $this->adjust_price_filters_for_displayed_taxes();
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
-		if ( $price_range['min_price'] ) {
+		if ( isset( $price_range['min_price'] ) ) {
 			$min_price_filter = intval( $price_range['min_price'] );
 
 			if ( $adjust_for_taxes ) {
@@ -99,7 +99,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 			}
 		}
 
-		if ( $price_range['max_price'] ) {
+		if ( isset( $price_range['max_price'] ) ) {
 			$max_price_filter = intval( $price_range['max_price'] );
 
 			if ( $adjust_for_taxes ) {
@@ -117,7 +117,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 	 *
 	 * @param array $args              Query args.
 	 * @param array $chosen_attributes {
-	 *     Chosen attributes array
+	 *     Chosen attributes array.
 	 *
 	 *     @type array {$taxonomy: Attribute taxonomy name} {
 	 *         @type string[] $terms      Chosen terms' slug.
