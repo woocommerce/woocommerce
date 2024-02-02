@@ -7,7 +7,11 @@ const includedCategoryName = 'Included Category';
 const excludedCategoryName = 'Excluded Category';
 
 test.describe( 'Cart & Checkout Restricted Coupons', () => {
-	let firstProductId, secondProductId, firstCategoryId, secondCategoryId;
+	let firstProductId,
+		secondProductId,
+		firstCategoryId,
+		secondCategoryId,
+		shippingZoneId;
 	const couponBatchId = [];
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -25,6 +29,17 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		// enable COD
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
+		} );
+		// add a shipping zone and method
+		await api
+			.post( 'shipping/zones', {
+				name: 'Free Shipping',
+			} )
+			.then( ( response ) => {
+				shippingZoneId = response.data.id;
+			} );
+		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			method_id: 'free_shipping',
 		} );
 		// add categories
 		await api
@@ -161,6 +176,9 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 		await api.put( 'payment_gateways/cod', {
 			enabled: false,
+		} );
+		await api.delete( `shipping/zones/${ shippingZoneId }`, {
+			force: true,
 		} );
 	} );
 
