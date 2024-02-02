@@ -18,6 +18,7 @@ const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
+	console.log( user, 'user' );
 	const context = useMemo( () => {
 		return {
 			user: {
@@ -75,10 +76,12 @@ export const VariationContainer = ( { variation, children } ) => {
 		if ( variation.settings.color ) {
 			return isEqual( variation.settings.color, user.settings.color );
 		}
-		return isEqual(
-			variation.settings.typography,
-			user.settings.typography
-		);
+
+		const { theme } = user.settings.typography.fontFamilies;
+
+		return isEqual( variation.settings.typography, {
+			fontFamilies: { theme },
+		} );
 	}, [ user, variation ] );
 
 	let label = variation?.title;
