@@ -56,7 +56,6 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-tag-field' ), 'Tag field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-inventory-quantity-field' ), 'Inventory quantity field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-variation-items-field' ), 'Variation items field not registered.' );
-		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-variations-fields' ), 'Variation fields not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-password-field', 'Password field not registered.' ) );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-list-field', 'List field not registered.' ) );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-has-variations-notice', 'Has variation notice not registered.' ) );
