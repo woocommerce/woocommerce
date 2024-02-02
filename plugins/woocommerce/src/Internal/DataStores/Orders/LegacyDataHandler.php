@@ -151,10 +151,13 @@ class LegacyDataHandler {
 			throw new \Exception( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) );
 		}
 
-		$meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $order->get_id() ) );
-		foreach ( $meta_ids as $meta_id ) {
-			delete_metadata_by_mid( 'post', $meta_id );
-		}
+		// Delete all metadata.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d",
+				$order->get_id()
+			)
+		);
 
 		// wp_update_post() changes the post modified date, so we do this manually.
 		// Also, we suspect using wp_update_post() could lead to integrations mistakenly updating the entity.
