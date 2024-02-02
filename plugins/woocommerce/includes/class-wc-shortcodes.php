@@ -515,8 +515,16 @@ class WC_Shortcodes {
 		}
 
 		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
-		$valid_statuses = array( 'auto-draft', 'draft', 'future', 'pending', 'private', 'publish' );
-		if ( ! in_array( $product_status, $valid_statuses, true ) ) {
+		/**
+		 * Filters the list of invalid statuses for the `product_page` shortcode.
+		 * 
+		 * @since 8.6.0
+		 * @param array $invalid_statuses List of invalid statuses.
+		 * @param int   $product_id       Product ID.
+		 * @return array
+		 */
+		$invalid_statuses = apply_filters( 'woocommerce_shortcode_product_page_invalid_statuses', array( 'trash' ), $product_id );
+		if ( in_array( $product_status, $invalid_statuses, true ) ) {
 			return '';
 		}
 		/**
