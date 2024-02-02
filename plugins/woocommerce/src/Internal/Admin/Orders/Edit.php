@@ -250,26 +250,29 @@ class Edit {
 			'high'
 		);
 
-		/**
-		 * Customer history meta box.
-		 *
-		 * @var CustomerHistory $customer_history_meta_box
-		 */
-		$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
+		// Add customer history meta box if analytics is enabled.
+		if ( 'yes' === get_option( 'woocommerce_analytics_enabled' ) ) {
+			/**
+			 * Customer history meta box.
+			 *
+			 * @var CustomerHistory $customer_history_meta_box
+			 */
+			$customer_history_meta_box = wc_get_container()->get( CustomerHistory::class );
 
-		add_meta_box(
-			'woocommerce-customer-history',
-			__( 'Customer history', 'woocommerce' ),
-			function( $post_or_order ) use ( $customer_history_meta_box ) {
-				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
-				if ( $order instanceof WC_Order ) {
-					$customer_history_meta_box->output( $order );
-				}
-			},
-			$screen_id,
-			'side',
-			'high'
-		);
+			add_meta_box(
+				'woocommerce-customer-history',
+				__( 'Customer history', 'woocommerce' ),
+				function ( $post_or_order ) use ( $customer_history_meta_box ) {
+					$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
+					if ( $order instanceof WC_Order ) {
+						$customer_history_meta_box->output( $order );
+					}
+				},
+				$screen_id,
+				'side',
+				'high'
+			);
+		}
 	}
 
 	/**
