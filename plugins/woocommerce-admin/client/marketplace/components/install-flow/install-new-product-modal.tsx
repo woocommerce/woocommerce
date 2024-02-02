@@ -40,6 +40,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	);
 	const [ product, setProduct ] = useState< Product >();
 	const [ installedProducts, setInstalledProducts ] = useState< string[] >();
+	const [ isStoreConnected, setIsStoreConnected ] = useState< boolean >();
 	const [ activateUrl, setActivateUrl ] = useState< string >();
 	const [ documentationUrl, setDocumentationUrl ] = useState< string >();
 	const [ showModal, setShowModal ] = useState< boolean >( false );
@@ -54,22 +55,9 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	// Check if the store is connected to Woo.com. This is run once, when the component is mounted.
 	useEffect( () => {
 		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-		const isStoreConnected = wccomSettings?.isConnected;
 
 		setInstalledProducts( wccomSettings?.installedProducts );
-
-		if ( isStoreConnected === false ) {
-			setInstallStatus( InstallFlowStatus.notConnected );
-			setNotice( {
-				status: 'warning',
-				message: __(
-					'In order to install a product, you need to first connect your account.',
-					'woocommerce'
-				),
-			} );
-		} else {
-			setInstallStatus( InstallFlowStatus.notInstalled );
-		}
+		setIsStoreConnected( wccomSettings?.isConnected );
 	}, [] );
 
 	/**
@@ -107,10 +95,28 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			}
 		}
 
+		if ( ! isStoreConnected ) {
+			setInstallStatus( InstallFlowStatus.notConnected );
+			setNotice( {
+				status: 'warning',
+				message: __(
+					'In order to install a product, you need to first connect your account.',
+					'woocommerce'
+				),
+			} );
+		} else {
+			setInstallStatus( InstallFlowStatus.notInstalled );
+		}
+
 		setShowModal( true );
 		setProduct( productToInstall );
-	}, [ query, props.products, installedProducts ] );
+	}, [ query, props.products, installedProducts, isStoreConnected ] );
 
+	/**
+	 * WordPress gives us a activateURL as a response to us installig the product.
+	 * Even though it's not an API endpoint, we can hit that URL with fetch
+	 * and activate the plugin.
+	 */
 	function activateClick() {
 		if ( ! activateUrl ) {
 			return;
@@ -169,6 +175,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 				).then( ( downloadResponse ) => {
 					dispatch( installingStore ).stopInstalling( product.id );
 
+					// No activateUrl means we can't activate the plugin.
 					if ( downloadResponse.data.activateUrl ) {
 						setActivateUrl( downloadResponse.data.activateUrl );
 
@@ -184,7 +191,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 			} )
 			.catch( ( error ) => {
 				/**
-				 * apiFetch doesn't return the error code in the error condition.
+				 * apiFetch doesn't return the HTTP error code in the error condition.
 				 * We'll rely on the data returned by the server.
 				 */
 				if ( error.data.redirect_location ) {
@@ -196,6 +203,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 						),
 					} );
 
+					// Wait to allow users to read the notice.
 					setTimeout( () => {
 						window.location.href = error.data.redirect_location;
 					}, 5000 );
@@ -206,7 +214,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 						message:
 							error.data.message ??
 							__(
-								'An error ocurred. Please try again later.',
+								'An error occurred. Please try again later.',
 								'woocommerce'
 							),
 					} );

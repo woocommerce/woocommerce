@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection: fix incorrect product data being displayed when Product Collection is placed in Single Product block
