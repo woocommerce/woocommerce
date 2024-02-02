@@ -16,7 +16,7 @@ class SanitizationUtils {
 	public function wp_kses_array( array $array ) {
 		foreach ( $array as $key => $value ) {
 			if ( empty( $value ) ) {
-				$array[$key] = $value;
+				$array[ $key ] = $value;
 				continue;
 			}
 			if ( is_array( $value ) ) {
