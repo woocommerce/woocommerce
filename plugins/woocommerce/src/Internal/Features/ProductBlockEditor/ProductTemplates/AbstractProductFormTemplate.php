@@ -20,6 +20,34 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	}
 
 	/**
+	 * Get the template description.
+	 */
+	public function get_description(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template icon.
+	 */
+	public function get_icon(): string {
+		return '';
+	}
+
+	/**
+	 * Get the template order.
+	 */
+	public function get_order(): int {
+		return 999;
+	}
+
+	/**
+	 * Get the product data.
+	 */
+	public function get_product_data(): array {
+		return array();
+	}
+
+	/**
 	 * Get a group block by ID.
 	 *
 	 * @param string $group_id The group block ID.
@@ -64,5 +92,20 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function add_group( array $block_config ): GroupInterface {
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
+	}
+
+	/**
+	 * Get the template as a JSON like array.
+	 *
+	 * @return array The JSON.
+	 */
+	public function to_json(): array {
+		$json = parent::to_json();
+
+		$json['icon']         = $this->get_icon();
+		$json['order']        = $this->get_order();
+		$json['product_data'] = $this->get_product_data();
+
+		return $json;
 	}
 }
