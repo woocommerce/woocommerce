@@ -772,7 +772,7 @@ test.describe( 'Checkout Block page', () => {
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
 		await expect(
 			page
-				.locato( '.woocommerce-info' )
+				.locator( '.woocommerce-info' )
 				.getByText( 'Please log in to your account to view this order' )
 		).toBeVisible();
 
