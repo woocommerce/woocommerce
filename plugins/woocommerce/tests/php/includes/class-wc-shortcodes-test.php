@@ -1,0 +1,261 @@
+<?php
+/**
+ * @package WooCommerce\Tests\WC_Shortcodes
+ */
+
+/**
+ * Class WC_Shortcodes_Test.
+ */
+class WC_Shortcodes_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * An administrator user.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user_administrator;
+
+	/**
+	 * A contributor user.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user_contributor;
+
+    /**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_administrator = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		self::$user_contributor = $factory->user->create(
+			array(
+				'role' => 'contributor',
+			)
+		);
+	}
+
+    /**
+	 * Setup before each test method.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		wp_set_current_user( self::$user_administrator );
+	}
+
+    /**
+     * Ensure the `product_page` shortcode renders a published product correctly.
+    */
+    public function test_product_page_shortcode_published_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 1' );
+        $product->save();
+        $product_id = $product->get_id();
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product->get_name() );
+        $this->assertNotEmpty( $product->get_description() );
+        $this->assertNotEmpty( $product->get_sku() );
+        $this->assertStringContainsString( $product->get_name(), $product_page );
+        $this->assertStringContainsString( $product->get_description(), $product_page );
+        $this->assertStringContainsString( $product->get_sku(), $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode renders a public, but hidden product belonging to another user.
+     */
+    public function test_product_page_shortcode_hidden_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 1' );
+        $product->set_catalog_visibility( 'hidden' );
+        $product->save();
+        $product_id = $product->get_id();
+        wp_set_current_user( self::$user_contributor );
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'visibility' => 'hidden',
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product->get_name() );
+        $this->assertNotEmpty( $product->get_description() );
+        $this->assertNotEmpty( $product->get_sku() );
+        $this->assertStringContainsString( $product->get_name(), $product_page );
+        $this->assertStringContainsString( $product->get_description(), $product_page );
+        $this->assertStringContainsString( $product->get_sku(), $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode does not render a trashed product.
+     */
+    public function test_product_page_shortcode_trashed_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 1' );
+        $product->set_catalog_visibility( 'hidden' );
+        $product->save();
+        $product_id = $product->get_id();
+        wp_trash_post( $product_id );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'trash'
+        ] );
+
+        $this->assertEmpty( $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode does not render a draft product belonging to another user.
+     */
+    public function test_product_page_shortcode_draft_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 2' );
+        $product->set_status( 'draft' );
+        $product->save();
+        $product_id = $product->get_id();
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'draft'
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product_page );
+
+        wp_set_current_user( self::$user_contributor );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'draft'
+        ] );
+
+        $this->assertEmpty( $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode does not render a private product belonging to another user.
+     */
+    public function test_product_page_shortcode_private_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 3' );
+        $product->set_status( 'private' );
+        $product->save();
+        $product_id = $product->get_id();
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'private'
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product_page );
+
+        wp_set_current_user( self::$user_contributor );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'private'
+        ] );
+
+        $this->assertEmpty( $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode does not render a pending product belonging to another user.
+     */
+    public function test_product_page_shortcode_pending_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 4' );
+        $product->set_status( 'pending' );
+        $product->save();
+        $product_id = $product->get_id();
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'pending'
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product_page );
+
+        wp_set_current_user( self::$user_contributor );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'pending'
+        ] );
+
+        $this->assertEmpty( $product_page );
+    }
+
+    /**
+     * Ensure the `product_page` shortcode renders the password prompt for a protected product belonging to any user.
+     */
+    public function test_product_page_shortcode_protected_product() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 5' );
+        $product->set_post_password( 'test password' );
+        $product->save();
+        $product_id = $product->get_id();
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'visibility' => 'protected'
+        ] );
+
+        $this->assertStringContainsString( 'This content is password protected', $product_page );
+
+        wp_set_current_user( self::$user_contributor );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'visibility' => 'protected'
+        ] );
+
+        $this->assertStringContainsString( 'This content is password protected', $product_page );
+    }
+}
