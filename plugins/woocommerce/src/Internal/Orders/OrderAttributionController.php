@@ -111,7 +111,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		add_action( 'woocommerce_after_order_notes', array( $this, 'source_form_elements' ) );
+		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'source_form_elements' ) );
 		add_action( 'woocommerce_register_form', array( $this, 'source_form_elements' ) );
 
 		// Update order based on submitted fields.
