@@ -978,7 +978,7 @@ class WC_Discounts {
 		);
 
 		if ( ! WC()->cart->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
-			throw new Exception( $coupon->get_coupon_error( WC_Coupon::WC_COUPON_NOT_YOURS_APPLIED ), WC_Coupon::WC_COUPON_NOT_YOURS_APPLIED );
+			throw new Exception( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ), WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED );
 		}
 
 		return true;
@@ -1027,13 +1027,12 @@ class WC_Discounts {
 	 * - 114: Excluded categories.
 	 *
 	 * @param WC_Coupon $coupon Coupon data.
-	 * @param bool $soft_validations Whether to run soft validations or not.
 	 *
 	 * @return bool|WP_Error
 	 * @throws Exception Error message.
 	 * @since  3.2.0
 	 */
-	public function is_coupon_valid( $coupon, $soft_validations = false ) {
+	public function is_coupon_valid( $coupon ) {
 		try {
 			$this->validate_coupon_exists( $coupon );
 			$this->validate_coupon_usage_limit( $coupon );
@@ -1045,29 +1044,13 @@ class WC_Discounts {
 			$this->validate_coupon_product_categories( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
+			$this->validate_coupon_allowed_emails( $coupon );
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
 				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED );
 			}
 
-			// These are soft validations that need to only run after hard validations.
-			// These should also only be run on Cart object, after the order is fulfilled there's no need to supply additional feedback.
-			if ( $soft_validations && $this->object instanceof WC_Cart ) {
-				$this->validate_coupon_allowed_emails( $coupon );
-			}
 		} catch ( Exception $e ) {
-
-			/**
-			 * This soft validation doesn't prevent applying the coupon, but offer additional feedback via
-			 * WC_Coupon::add_coupon_message() which should be flushed as a notice.
-			 */
-
-			if ( (int) $e->getCode() === WC_Coupon::WC_COUPON_NOT_YOURS_APPLIED ) {
-				$coupon->add_coupon_message( $e->getCode(), 'notice' );
-
-				return true;
-			}
-
 			/**
 			 * Filter the coupon error message.
 			 *

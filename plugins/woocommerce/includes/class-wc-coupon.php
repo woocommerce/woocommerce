@@ -73,7 +73,6 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	const E_WC_COUPON_USAGE_LIMIT_COUPON_STUCK_GUEST = 116;
 	const WC_COUPON_SUCCESS                          = 200;
 	const WC_COUPON_REMOVED                          = 201;
-	const WC_COUPON_NOT_YOURS_APPLIED				 = 202;
 
 	/**
 	 * Cache group.

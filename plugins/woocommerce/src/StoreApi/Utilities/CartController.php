@@ -673,7 +673,7 @@ class CartController {
 		foreach ( $cart_coupons as $code ) {
 			$coupon = new \WC_Coupon( $code );
 			try {
-				$this->validate_cart_coupon( $coupon, true );
+				$this->validate_cart_coupon( $coupon );
 			} catch ( RouteException $error ) {
 				$errors[] = new WP_Error( $error->getErrorCode(), $error->getMessage(), $error->getAdditionalData() );
 			}
@@ -1016,15 +1016,14 @@ class CartController {
 	/**
 	 * Validates an existing cart coupon and returns any errors.
 	 *
-	 * @param bool $soft_validations Whether to run soft validations or not.
 	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 */
-	protected function validate_cart_coupon( \WC_Coupon $coupon, $soft_validations = false ) {
+	protected function validate_cart_coupon( \WC_Coupon $coupon ) {
 		$cart      = $this->get_cart_instance();
 		$discounts = new \WC_Discounts( $cart );
-		$valid     = $discounts->is_coupon_valid( $coupon, $soft_validations );
+		$valid     = $discounts->is_coupon_valid( $coupon );
 
 		if ( is_wp_error( $valid ) ) {
 			$cart->remove_coupon( $coupon->get_code() );
