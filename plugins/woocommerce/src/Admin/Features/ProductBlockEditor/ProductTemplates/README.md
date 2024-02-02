@@ -102,11 +102,11 @@ blocks directly.
 
 #### GroupInterface Methods
 
-##### `add_section( array $block_config ): SectionInterface`
+-   `add_section( array $block_config ): SectionInterface`
 
 Add a new section to the group.
 
-##### `add_block( array $block_config ): BlockInterface`
+-   `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the group.
 
@@ -118,11 +118,11 @@ if further organization is needed.
 
 #### SectionInterface Methods
 
-##### `add_subsection( array $block_config ): SubsectionInterface`
+-   `add_subsection( array $block_config ): SubsectionInterface`
 
 Add a new sub-section to the section.
 
-##### `add_block( array $block_config ): BlockInterface`
+-   `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the section.
 
@@ -133,7 +133,7 @@ They typically contain one or more blocks.
 
 #### SubsectionInterface Methods
 
-##### `add_block( array $block_config ): BlockInterface`
+-   `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the subsection.
 
@@ -145,22 +145,22 @@ They contain groups as their top-level organizational structure.
 
 #### ProductFormTemplateInterface Methods
 
-##### `add_group( array $block_config ): GroupInterface`
+-   `add_group( array $block_config ): GroupInterface`
 
 Add a new group to the template.
 
-##### `get_group_by_id( string $group_id ): ?GroupInterface`
+-   `get_group_by_id( string $group_id ): ?GroupInterface`
 
 Gets a group by ID. Returns null if the group does not exist.
 
-##### `get_section_by_id( string $section_id ): ?SectionInterface`
+-   `get_section_by_id( string $section_id ): ?SectionInterface`
 
 Gets a section by ID. Returns null if the section does not exist.
 
-##### `get_subsection_by_id( string $subsection_id ): ?SubsectionInterface`
+-   `get_subsection_by_id( string $subsection_id ): ?SubsectionInterface`
 
 Gets a subsection by ID. Returns null if the subsection does not exist.
 
-##### `get_block_by_id( string $block_id ): ?BlockInterface`
+-   `get_block_by_id( string $block_id ): ?BlockInterface`
 
 Gets a block by ID. Returns null if the block does not exist.
