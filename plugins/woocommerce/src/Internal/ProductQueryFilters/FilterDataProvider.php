@@ -181,11 +181,12 @@ class FilterDataProvider {
 		";
 
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 
 		$end = microtime(true);
-		error_log( 'FilterDataProvider::get_attribute_counts excecution time: ' . $end - $start );
+		error_log( 'FilterDataProvider::get_attribute_counts  excecution time: ' . $end - $start );
 
-		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+		return $results;
 	}
 
 	/**
