@@ -382,16 +382,11 @@ trait OrderAttributionMeta {
 	 *
 	 * @param int $customer_report_id The customer ID (not necessarily User ID).
 	 *
-	 * @return array Order count, total spend, and average spend per order.
+	 * @return array|null Order count, total spend, and average spend per order.
 	 */
-	private function get_customer_history( $customer_report_id ): array {
+	private function get_customer_history( $customer_report_id ): ?array {
 		$matching_customers = $this->get_customer_reports_rest_response( array( 'customers' => $customer_report_id ) );
-		$user_data = $matching_customers[0];
-		return array(
-			'order_count'   => $user_data['orders_count'],
-			'total_spent'   => $user_data['total_spend'],
-			'average_spent' => $user_data['avg_order_value'],
-		);
+		return $matching_customers[0] ?? null;
 	}
 
 	/**
