@@ -344,7 +344,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			states: {
 				preDesignWithoutAi: {
 					always: {
-						cond: { type: 'log', state: 'designWithoutAi' },
 						target: 'designWithoutAi',
 					},
 				},
