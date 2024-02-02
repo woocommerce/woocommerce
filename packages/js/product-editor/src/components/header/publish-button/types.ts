@@ -10,4 +10,5 @@ export type PublishButtonProps = Omit<
 > & {
 	productStatus: Product[ 'status' ];
 	productType?: string;
+	onSuccess?( product: Product ): void;
 };

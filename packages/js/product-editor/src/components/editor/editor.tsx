@@ -11,6 +11,7 @@ import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
+import { useSelect } from '@wordpress/data';
 import { Popover } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
@@ -32,6 +33,8 @@ import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
 import { EditorProps } from './types';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { PrePublishModal } from '../header/prepublish-sidebar/prepublish-sidebar';
 
 export function Editor( {
 	product,
@@ -41,6 +44,11 @@ export function Editor( {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+
+	// Check if the prepublish sidebar is open from the store.
+	const isPrepublishSidebarOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPrepublishSidebarOpen();
+	}, [] );
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
@@ -72,6 +80,14 @@ export function Editor( {
 											} }
 										/>
 									</>
+								}
+								sidebar={
+									isPrepublishSidebarOpen && (
+										<PrePublishModal
+											productType={ productType }
+											productId={ product.id }
+										/>
+									)
 								}
 							/>
 							<Popover.Slot />
