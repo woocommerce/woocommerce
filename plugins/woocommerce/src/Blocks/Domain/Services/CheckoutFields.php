@@ -220,11 +220,12 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Initialize hooks. This is not run Store API requests.
+	 * Initialize hooks.
 	 */
 	public function init() {
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_fields_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_fields_data' ) );
+		add_filter( 'woocommerce_customer_allowed_session_meta_keys', array( $this, 'add_session_meta_keys' ) );
 	}
 
 	/**
@@ -233,6 +234,18 @@ class CheckoutFields {
 	public function add_fields_data() {
 		$this->asset_data_registry->add( 'defaultFields', array_merge( $this->get_core_fields(), $this->get_additional_fields() ), true );
 		$this->asset_data_registry->add( 'addressFieldsLocations', $this->fields_locations, true );
+	}
+
+	/**
+	 * Add session meta keys.
+	 *
+	 * This is an allow-list of meta data keys which we want to store in session.
+	 *
+	 * @param array $keys Session meta keys.
+	 * @return array
+	 */
+	public function add_session_meta_keys( $keys ) {
+		return array_merge( $keys, array( self::BILLING_FIELDS_KEY, self::SHIPPING_FIELDS_KEY, self::ADDITIONAL_FIELDS_KEY ) );
 	}
 
 	/**

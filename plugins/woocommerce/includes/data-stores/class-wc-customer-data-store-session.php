@@ -9,8 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
-
 /**
  * WC Customer Data Store which stores the data in session.
  *
@@ -85,17 +83,21 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$session_key = str_replace( 'billing_', '', $session_key );
 			}
 			if ( 'meta_data' === $session_key ) {
-				// This is an allow-list of meta data keys which we want to store in session. Avoids storing everything for logged in users.
-				$allowed_meta_data_keys = array(
-					CheckoutFields::ADDITIONAL_FIELDS_KEY,
-					CheckoutFields::BILLING_FIELDS_KEY,
-					CheckoutFields::SHIPPING_FIELDS_KEY,
-				);
-				$session_value          = wp_json_encode(
+				/**
+				 * Filter the allowed session meta data keys.
+				 *
+				 * If the customer object contains any meta data with these keys, it will be stored within the WooCommerce session.
+				 *
+				 * @since 8.7.0
+				 * @param array $allowed_keys The allowed meta data keys.
+				 * @param WC_Customer $customer The customer object.
+				 */
+				$allowed_keys  = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
+				$session_value = wp_json_encode(
 					array_filter(
 						$customer->get_meta_data(),
-						function( $meta_data ) use ( $allowed_meta_data_keys ) {
-							return in_array( $meta_data->key, $allowed_meta_data_keys, true );
+						function( $meta_data ) use ( $allowed_keys ) {
+							return in_array( $meta_data->key, $allowed_keys, true );
 						}
 					)
 				);
