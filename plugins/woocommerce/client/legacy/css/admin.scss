@@ -1237,6 +1237,17 @@ table.wc_status_table {
 
 		&.run-tool {
 			text-align: right;
+
+			.run-tool-status {
+				font-size: 90%;
+				margin-right: 0.5em;
+				display: inline-block;
+				opacity: 80%;
+
+				.dashicons.spin {
+					animation: rotation 2s infinite linear;
+				}
+			}
 		}
 
 		strong.name {
