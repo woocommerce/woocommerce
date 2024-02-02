@@ -41,4 +41,19 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	 * @return BlockInterface|null
 	 */
 	public function get_block_by_id( string $block_id ): ?BlockInterface;
+
+	/**
+	 * Get the template icon.
+	 */
+	public function get_icon(): string;
+
+	/**
+	 * Get the template order.
+	 */
+	public function get_order(): int;
+
+	/**
+	 * Get the product data.
+	 */
+	public function get_product_data(): array;
 }
