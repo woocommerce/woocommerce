@@ -6,3 +6,5 @@ export { useVariationSwitcher as __experimentalUseVariationSwitcher } from './us
 export { default as __experimentalUseProductEntityProp } from './use-product-entity-prop';
 export { default as __experimentalUseProductMetadata } from './use-product-metadata';
 export { useProductTemplate as __experimentalUseProductTemplate } from './use-product-template';
+export { useProductFormTemplate as __experimentalUseProductFormTemplate } from './use-product-form-template';
+export { useProductFormTemplates as __experimentalUserProductFormTemplates } from './use-product-form-templates';
