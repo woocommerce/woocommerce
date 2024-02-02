@@ -29,7 +29,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 					type: 'simple',
 					description: `This product is a longer description of the awesome product ${ Date.now() }`,
 					short_description: `This product is pretty awesome ${ Date.now() }`,
-					regular_price: `${ 12.99 }`,
+					regular_price: '12.99',
 				} )
 				.then( ( response ) => {
 					product = response.data;
