@@ -48,6 +48,16 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( self::$user_administrator );
 	}
 
+    private function disable_deprecation_notice() {
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+    }
+
+    private function enable_deprecation_notice() {
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+    }
+
     /**
      * Ensure the `product_page` shortcode renders a published product correctly.
     */
@@ -58,15 +68,13 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->set_sku( 'Test SKU 1' );
         $product->save();
         $product_id = $product->get_id();
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product->get_name() );
         $this->assertNotEmpty( $product->get_description() );
@@ -88,16 +96,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->save();
         $product_id = $product->get_id();
         wp_set_current_user( self::$user_contributor );
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'visibility' => 'hidden',
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product->get_name() );
         $this->assertNotEmpty( $product->get_description() );
@@ -141,16 +147,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product_id = $product->get_id();
         wp_trash_post( $product_id );
         add_filter( 'woocommerce_shortcode_product_page_invalid_statuses', function() { return array(); } );
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'trash'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
     }
@@ -166,16 +170,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->set_status( 'draft' );
         $product->save();
         $product_id = $product->get_id();
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'draft'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
 
@@ -200,16 +202,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->set_status( 'private' );
         $product->save();
         $product_id = $product->get_id();
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'private'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
 
@@ -234,31 +234,27 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->set_status( 'private' );
         $product->save();
         $product_id = $product->get_id();
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'private'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
 
         wp_set_current_user( self::$user_contributor );
         add_filter( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', '__return_true');
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'private'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
     }
@@ -274,16 +270,14 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
         $product->set_status( 'pending' );
         $product->save();
         $product_id = $product->get_id();
-        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
-        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->disable_deprecation_notice();
 
         $product_page = WC_Shortcodes::product_page( [
             'id' => $product_id,
             'status' => 'pending'
         ] );
 
-        // Enable the deprecation notice again.
-        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+        $this->enable_deprecation_notice();
 
         $this->assertNotEmpty( $product_page );
 
