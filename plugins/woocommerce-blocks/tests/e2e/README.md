@@ -140,7 +140,7 @@ we've defined.
 
 It looks like this in the template:
 
-```
+```handlebars
 {{#> wp-block name="woocommerce/featured-category" attributes=attributes /}}
     You can nest content here if you want to test the block with some content.
 {{/wp-block}}
