@@ -2,6 +2,9 @@ name: Metrics Tracking
 
 on:
     pull_request:
+      paths-ignore:
+        - '**/changelog/**'
+        - '**.md'
     push:
         branches: [trunk]
 
