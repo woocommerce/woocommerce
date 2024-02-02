@@ -519,7 +519,16 @@ class WC_Shortcodes {
 		if ( ! in_array( $product_status, $valid_statuses, true ) ) {
 			return '';
 		}
-		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
+		/**
+		 * Filters whether to override read permissions for unpublished products.
+		 *
+		 * @since 8.6.0
+		 * @param bool   $override_read_permissions Whether to override read permissions for unpublished products.
+		 * @param int    $product_id                Product ID.
+		 * @return bool
+		 */
+		$override_read_permissions = apply_filters( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', false, $product_id );
+		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) && ! $override_read_permissions ) {
 			return '';
 		}
 
