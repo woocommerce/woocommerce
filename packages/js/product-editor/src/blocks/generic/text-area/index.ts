@@ -10,7 +10,8 @@ import { addFilter } from '@wordpress/hooks';
 import blockConfiguration from './block.json';
 import { TextAreaBlockEdit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
-import coreParagraphWithTextArea from './extend/core-paragraph/';
+import coreParagraphChildOfTextAreaField from './extend/core-paragraph-child';
+// import coreParagraphWithTextArea from './extend/core-paragraph/';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -34,3 +35,9 @@ export const init = () =>
 // 	'woocommerce/product-text-area-field',
 // 	coreParagraphWithTextArea
 // );
+
+addFilter(
+	'blocks.registerBlockType',
+	'woocommerce/product-text-area-field',
+	coreParagraphChildOfTextAreaField
+);
