@@ -4,6 +4,7 @@ menu_title: Payments Onboarding and Setup
 ---
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 Follow the overall [user experience guidelines for WooCommerce](https://github.com/woocommerce/woocommerce/blob/trunk/docs/user-experience/user-experience-guidelines.md).
 
@@ -17,6 +18,8 @@ A merchant can discover a payments plugin in the following ways:
 - Through the admin onboarding tasks and payments settings. To be added to the list of payment gateways in the Woo admin, the payments plugin must meet the criteria listed in these guidelines.
 
 >>>>>>> 522832ff71 (Rework UX guidelines to be in distinct folders and files)
+=======
+>>>>>>> f40f35f529 (Moved payments blurb from onboarding to readme)
 ## Payments onboarding
 
 Plugin authors should actively guide merchants through setup of the plugin once installed and activated.
