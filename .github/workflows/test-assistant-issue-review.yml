@@ -21,7 +21,7 @@ jobs:
         id: notify
         with:
             slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
-            slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }}
+            slack-channel: ${{ secrets.TEAM_SOLARIS_ISSUE_ANALYSIS_CHANNEL }}
             slack-text: |
                 <${{ github.event.issue.html_url }}|${{ github.event.issue.title }}>
                 *Labels:* ${{ join(github.event.issue.labels.*.name, ', ') }}
