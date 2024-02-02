@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Internal\ProductQueryFilters;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use WC_Product;
 use WC_Product_Variable;
 
 /**
@@ -248,12 +249,27 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 
+	/**
+	 * Manually insert the lookup data if it isn't automatically inserted.
+	 *
+	 * @param \WC_Product $product  WC_Product instance.
+	 * @param string      $taxonomy Attribute taxonomy name.
+	 * @param int         $term_id  Attribute term id.
+	 */
 	private function update_lookup_table( \WC_Product $product, $taxonomy, $term_id ) {
 		global $wpdb;
 
-		$rows = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'wc_product_attributes_lookup WHERE `product_id` = ' . $product->get_id() . ' AND `product_or_parent_id` = ' . $product->get_parent_id() . ' AND `taxonomy` = "' . $taxonomy . '" AND `term_id` = ' . $term_id );
-		var_dump($rows);
-		if( ! empty($rows)) {
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}wc_product_attributes_lookup WHERE product_id = %d AND product_or_parent_id = %d AND taxonomy = %s AND term_id = %d",
+				$product->get_id(),
+				$product->get_parent_id(),
+				$taxonomy,
+				$term_id
+			)
+		);
+
+		if ( ! empty( $rows ) ) {
 			return;
 		}
 
@@ -279,7 +295,7 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	 */
 	private function create_test_product( $product_data ) {
 		if ( isset( $product_data['variations'] ) ) {
-			$attributes       = $this->get_attributes_from_variations( $product_data['variations'] );
+			$attributes = $this->get_attributes_from_variations( $product_data['variations'] );
 
 			$variable_product = $this->fixture_data->get_variable_product(
 				$product_data,
@@ -300,7 +316,6 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 					$variation_data['props']
 				);
 
-				// Manually insert the lookup data if it isn't automatically inserted.
 				foreach ( $variation_data['attributes'] as $taxonomy => $slug ) {
 					$term = get_term_by( 'slug', "$slug-slug", $taxonomy );
 					$this->update_lookup_table( $variation, $taxonomy, $term->term_id );
