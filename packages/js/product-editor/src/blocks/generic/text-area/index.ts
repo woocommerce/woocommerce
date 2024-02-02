@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { postContent } from '@wordpress/icons';
+import { addFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -9,6 +10,7 @@ import { postContent } from '@wordpress/icons';
 import blockConfiguration from './block.json';
 import { TextAreaBlockEdit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
+import coreParagraphWithTextArea from './extend/core-paragraph/';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -26,3 +28,9 @@ export const init = () =>
 		metadata: metadata as never,
 		settings: settings as never,
 	} );
+
+addFilter(
+	'blocks.registerBlockType',
+	'woocommerce/product-text-area-field',
+	coreParagraphWithTextArea
+);
