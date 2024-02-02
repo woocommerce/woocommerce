@@ -11,13 +11,18 @@ import {
 	ACTION_MODAL_EDITOR_CLOSE,
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
+	ACTION_SIDEBAR_PREPUBLISH_CLOSE,
+	ACTION_SIDEBAR_PREPUBLISH_OPEN,
 } from './constants';
 
 export type ProductEditorUIStateProps = {
-	modalEditor: {
-		isOpen: boolean;
-		blocks: BlockInstance[];
+	modalEditor?: {
+		isOpen?: boolean;
+		blocks?: BlockInstance[];
 		hasChanged?: boolean;
+	};
+	prepublishSidebar?: {
+		isOpen: boolean;
 	};
 };
 
@@ -31,4 +36,10 @@ export type ProductEditorModalEditorAction = {
 	blocks?: BlockInstance[];
 
 	hasChanged?: boolean;
+};
+
+export type ProductEditorPrepublishSidebarAction = {
+	type:
+		| typeof ACTION_SIDEBAR_PREPUBLISH_CLOSE
+		| typeof ACTION_SIDEBAR_PREPUBLISH_OPEN;
 };

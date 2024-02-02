@@ -11,6 +11,8 @@ import {
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
 	ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
+	ACTION_SIDEBAR_PREPUBLISH_OPEN,
+	ACTION_SIDEBAR_PREPUBLISH_CLOSE,
 } from './constants';
 
 const modalEditorActions = {
@@ -33,6 +35,17 @@ const modalEditorActions = {
 	} ),
 };
 
+const prepublishSidebarActions = {
+	openPrepublishSidebar: () => ( {
+		type: ACTION_SIDEBAR_PREPUBLISH_OPEN,
+	} ),
+
+	closePrepublishSidebar: () => ( {
+		type: ACTION_SIDEBAR_PREPUBLISH_CLOSE,
+	} ),
+};
+
 export default {
 	...modalEditorActions,
+	...prepublishSidebarActions,
 };

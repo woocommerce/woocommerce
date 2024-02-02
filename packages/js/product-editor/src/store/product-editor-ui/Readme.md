@@ -5,25 +5,30 @@ This module provides a @wordpress/data store for managing the UI state of a WooC
 ## Structure
 
 Defines action types for the UI state:
-- `ACTION_MODAL_EDITOR_OPEN`
-- `ACTION_MODAL_EDITOR_CLOSE`
+
+-   `ACTION_MODAL_EDITOR_OPEN`
+-   `ACTION_MODAL_EDITOR_CLOSE`
+-   `ACTION_PREPUBLISH_SIDEBAR_OPEN`
+-   `ACTION_PREPUBLISH_SIDEBAR_CLOSE`
 
 ### Actions
 
-- `openModalEditor`
-- `closeModalEditor`
+-   `openModalEditor`
+-   `closeModalEditor`
+-   `openPrepublishSidebar`
+-   `closePrepublishSidebar`
 
 ### Selectors
 
 Selector function:
 
-- `isModalEditorOpen`
-
+-   `isModalEditorOpen`
+-   `isPrepublishSidebarOpen`
 
 ### Store
 
 Registers the WooCommerce Product Editor UI store with the following:
 
-- Store Name: `woo/product-editor-ui`
+-   Store Name: `woo/product-editor-ui`
 
 ## Usage
