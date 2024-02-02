@@ -9,9 +9,8 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 			page,
 		} ) => {
 			await page.goto( '/product-filters-rating-block/' );
-			const ratingStars = page.locator(
-				'.wc-block-components-product-rating__stars'
-			);
+
+			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
 			const count = await ratingStars.count();
 			expect( count ).toBe( 2 );
 
@@ -31,8 +30,8 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 		} ) => {
 			await page.goto( '/product-filters-rating-block/' );
 
-			const ratingCheckboxes = page.locator(
-				'.wc-block-components-checkbox__input'
+			const ratingCheckboxes = page.getByLabel(
+				/Checkbox: Rated \d out of 5/
 			);
 
 			ratingCheckboxes.nth( 0 ).check();
