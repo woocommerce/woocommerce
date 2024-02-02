@@ -197,6 +197,46 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
     }
 
     /**
+     * Ensure we can override the `product_page` shortcode's read permission check.
+     */
+    public function test_product_page_shortcode_private_product_override() {
+        $product = WC_Helper_Product::create_simple_product();
+        $product->set_name( 'Test Product' );
+        $product->set_description( 'Test Description' );
+        $product->set_sku( 'Test SKU 3' );
+        $product->set_status( 'private' );
+        $product->save();
+        $product_id = $product->get_id();
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'private'
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product_page );
+
+        wp_set_current_user( self::$user_contributor );
+        add_filter( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', '__return_true');
+        // Disable the "Unexpected deprecation notice for Theme without comments.php." message that makes the test fail but isn't relevant in this context.
+        remove_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $product_page = WC_Shortcodes::product_page( [
+            'id' => $product_id,
+            'status' => 'private'
+        ] );
+
+        // Enable the deprecation notice again.
+        add_action( 'deprecated_file_included', array( $this, 'deprecated_function_run' ), 10, 4 );
+
+        $this->assertNotEmpty( $product_page );
+    }
+
+    /**
      * Ensure the `product_page` shortcode does not render a pending product belonging to another user.
      */
     public function test_product_page_shortcode_pending_product() {
