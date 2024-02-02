@@ -18,6 +18,7 @@
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"changelog": "composer install && composer exec -- changelogger",
+		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",

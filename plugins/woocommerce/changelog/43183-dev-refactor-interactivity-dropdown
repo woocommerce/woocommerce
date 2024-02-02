@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-[Experimental] Refactor interactivity dropdown to remove FormTokenField. Also fix multi select for rating filter.
