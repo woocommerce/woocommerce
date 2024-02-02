@@ -50,7 +50,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 }: ProductEditorBlockEditProps< ProductDetailsSectionDescriptionBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const { productTemplate: selectedProductTemplate } = useSelect(
+	const { productFormTemplate: selectedProductFormTemplate } = useSelect(
 		( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
 			return getEditorSettings() as ProductEditorSettings;
@@ -178,7 +178,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	function getMenuItem( onClose: () => void ) {
 		return function renderMenuItem( template: LayoutTemplate ) {
-			const isSelected = selectedProductTemplate?.id === template.id;
+			const isSelected = selectedProductFormTemplate?.id === template.id;
 			return (
 				<MenuItem
 					key={ template.id }
@@ -291,7 +291,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						{
 							ProductTemplate: (
 								<span>
-									{ selectedProductTemplate?.title?.toLowerCase() }
+									{ selectedProductFormTemplate?.title?.toLowerCase() }
 								</span>
 							),
 						}
