@@ -1,7 +1,11 @@
 ---
-post_title: WooCommerce Extension Guidelines - Notices
+post_title: User Experience Guidelines - Notices
 menu_title: Notices
 ---
+
+Notices should guide, inform, and alert the users about various functions, updates, or any necessary actions. Effective notice design enhances user interaction, ensuring that important information is communicated succinctly and appropriately within the WooCommerce environment.
+
+## Best Practices
 
 Use notices primarily to provide user feedback in response to an action. Avoid using notices to communicate offers or announcements. Don't apply brand colors, fonts, or illustrations to your notices.
 
@@ -19,16 +23,16 @@ Use short but meaningful messages that communicate what is happening. Ensure tha
 
 The placement of feedback is vital so the user notices it. For example, when validation messages are needed to prompt the user to enter data, get the user's attention by displaying a message close to the inputs where data needs to be revised.
 
-![visualization of four different notice designs next to one another](https://developer.woo.com/wp-content/uploads/2023/12/notices1.png)
+![visualization of four different notice designs next to one another](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/notices1.png)
 
-**Success** message: When the user performs an action that is executed successfully.
+**Success** message: When the user performs an action that is executed successfully.
 
-**Error Message**: When the user performs an action that could not be completed. (This can include validation messages.) When requiring the user to input data, make sure you verify whether each field meets the requirements, such as format, ranges, and if the field is required. Provide validation messages that are adjacent to each field so that the user can act on each in context. Avoid technical jargon.
+**Error Message**: When the user performs an action that could not be completed. (This can include validation messages.) When requiring the user to input data, make sure you verify whether each field meets the requirements, such as format, ranges, and if the field is required. Provide validation messages that are adjacent to each field so that the user can act on each in context. Avoid technical jargon.
 
-**Warning Message**: When the user performs an action that may have completed successfully, but the user should review it and proceed with caution.
+**Warning Message**: When the user performs an action that may have completed successfully, but the user should review it and proceed with caution.
 
 **Informational Message**: When it's necessary to provide information before the user executes any action on the screen. Examples can be limitations within a time period or when a global setting limits actions on the current screen.
 
 ### Examples
 
-![an example of an informational message as a notice](https://developer.woo.com/wp-content/uploads/2023/12/informational-notice.png)
+![an example of an informational message as a notice](https://woo-docs-multi-com.go-vip.net/wp-content/uploads/2023/12/informational-notice.png)
