@@ -4,6 +4,7 @@ category_slug: user-experience-extensions
 post_title: Extension Guidelines
 ---
 
+<<<<<<< HEAD
 This section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.
 
 We strongly recommend you review the current [WooCommerce setup experience](https://woo.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.
@@ -19,3 +20,6 @@ Plugins which draw on WordPress' core design aesthetic will benefit from future 
 - [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)
 - [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))
 - [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)
+=======
+Create engaging user experiences in WooCommerce stores, focusing on UX design, checkout customization, and user interaction.
+>>>>>>> 6ac5d66928 (Rename general guidelines to extensions guidelines)
