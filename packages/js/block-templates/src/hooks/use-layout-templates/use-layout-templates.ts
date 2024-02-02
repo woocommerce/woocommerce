@@ -41,5 +41,5 @@ export const useLayoutTemplates = () => {
 		'wcLayoutTemplate'
 	);
 
-	return { layoutTemplates, isResolving };
+	return [ layoutTemplates, isResolving ];
 };

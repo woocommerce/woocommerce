@@ -13,8 +13,7 @@ export const useProductFormTemplate = (
 	productType: ProductType | undefined,
 	postType: string | undefined
 ) => {
-	const { layoutTemplates, isResolving: isLayoutTemplatesResolving } =
-		useLayoutTemplates();
+	const [ layoutTemplates ] = useLayoutTemplates();
 
 	const bestMatchingLayoutTemplateId = useMemo( () => {
 		if ( ! layoutTemplates ) {
