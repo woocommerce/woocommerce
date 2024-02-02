@@ -193,7 +193,7 @@ class ReceiptRenderingEngine {
 			$line_items_info[] = array(
 				'title'    => wp_kses( $line_item_title, array() ),
 				'quantity' => $line_item->get_quantity(),
-				'amount'   => wc_price( $line_item->get_total(), $get_price_args ),
+				'amount'   => wc_price( $line_item->get_subtotal(), $get_price_args ),
 			);
 		}
 
@@ -229,7 +229,7 @@ class ReceiptRenderingEngine {
 
 		$total_taxes = 0;
 		foreach ( $order->get_taxes() as $tax ) {
-			$total_taxes += (float) $tax->get_tax_total();
+			$total_taxes += (float) $tax->get_tax_total() + (float) $tax->get_shipping_tax_total();
 		}
 
 		if ( $total_taxes ) {
