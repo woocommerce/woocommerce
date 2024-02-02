@@ -915,7 +915,6 @@ class WC_Install {
 			// New installs should have Order Attribution disabled by default. We do it here to avoid disabling for existing shops.
 			add_option( 'woocommerce_feature_order_attribution_enabled', 'no', '', 'yes' );
 		}
-
 	}
 
 	/**
