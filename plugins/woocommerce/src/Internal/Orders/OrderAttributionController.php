@@ -421,8 +421,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			$source_data['utm_source'] ?? '',
 			false
 		);
-		$customer_identifier = $order->get_customer_id() ? $order->get_customer_id() : $order->get_billing_email();
-		$customer_info       = $this->get_customer_history( $customer_identifier );
+
 		$tracks_data         = array(
 			'order_id'             => $order->get_id(),
 			'source_type'          => $source_data['source_type'] ?? '',
@@ -433,10 +432,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'session_pages'        => $source_data['session_pages'] ?? 0,
 			'session_count'        => $source_data['session_count'] ?? 0,
 			'order_total'          => $order->get_total(),
-			// Add 1 to include the current order (which is currently still Pending when the event is sent).
-			'customer_order_count' => $customer_info['order_count'] + 1,
 			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
 		);
+
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
 
