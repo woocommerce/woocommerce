@@ -70,8 +70,15 @@ jobs:
         name: Runs E2E tests.
         runs-on: ubuntu-latest
         needs: non-hpos-e2e-tests-run
+        if: ${{ always() }}
         steps:
-            - run: echo Done!
+            - run: |
+                result="${{ needs.non-hpos-e2e-tests-run.result }}"
+                if [[ $result != "success" && $result != "skipped" ]]; then
+                  echo "One or more e2e tests have failed!"
+                exit 1
+                fi
+                echo "e2e tests have completed successfully."
 
     merge-reports:
         name: Merge e2e test reports
