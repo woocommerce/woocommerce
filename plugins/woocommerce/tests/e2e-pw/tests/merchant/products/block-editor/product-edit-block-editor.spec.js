@@ -30,8 +30,6 @@ baseTest.describe( 'Products > Edit Product', () => {
 					description: `This product is a longer description of the awesome product ${ Date.now() }`,
 					short_description: `This product is pretty awesome ${ Date.now() }`,
 					regular_price: `${ 12.99 }`,
-					manage_stock: true,
-					stock_quantity: 10,
 				} )
 				.then( ( response ) => {
 					product = response.data;
@@ -56,12 +54,16 @@ baseTest.describe( 'Products > Edit Product', () => {
 
 		const updatedProduct = {
 			name: `Product ${ Date.now() }`,
-			description: `This product is pretty awesome ${ Date.now() }`,
+			description: `Updated description for the awesome product ${ Date.now() }`,
+			short_description: `Updated summary for the awesome product ${ Date.now() }`,
 			regularPrice: '100.05',
 			salePrice: '99.05',
 		};
 
 		const nameTextbox = page.getByLabel( 'Name' ).getByRole( 'textbox' );
+		const summaryTextbox = page
+			.getByLabel( 'Block: Product textarea block' )
+			.getByRole( 'textbox' );
 		const descriptionTextbox = page
 			.getByLabel( 'Block: Product description' )
 			.getByRole( 'textbox' );
@@ -81,10 +83,13 @@ baseTest.describe( 'Products > Edit Product', () => {
 			await salePriceTextbox.fill( updatedProduct.salePrice );
 		} );
 
-		await test.step( 'edit the product description', async () => {
+		await test.step( 'edit the product description and summary', async () => {
 			// Need to clear the textbox before filling it, otherwise the text will be appended.
 			await descriptionTextbox.clear();
 			await descriptionTextbox.fill( updatedProduct.description );
+
+			await summaryTextbox.clear();
+			await summaryTextbox.fill( updatedProduct.short_description );
 		} );
 
 		await test.step( 'publish the updated product', async () => {
@@ -97,6 +102,10 @@ baseTest.describe( 'Products > Edit Product', () => {
 
 		await test.step( 'verify the changes', async () => {
 			await expect.soft( nameTextbox ).toHaveValue( updatedProduct.name );
+
+			await expect
+				.soft( summaryTextbox )
+				.toHaveText( updatedProduct.short_description );
 
 			await expect
 				.soft( descriptionTextbox )
