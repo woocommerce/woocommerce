@@ -6,26 +6,16 @@ import {
 	EditorSettings,
 	EditorBlockListSettings,
 } from '@wordpress/block-editor';
-import { Template } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { ProductTemplate } from '../../types';
-
-export type LayoutTemplate = {
-	id: string;
-	title: string;
-	description: string;
-	area: string;
-	blockTemplates: Template[];
-};
+import { LayoutTemplate } from '../../types';
 
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
 > & {
-	productTemplates: ProductTemplate[];
-	productTemplate?: ProductTemplate;
+	productFormTemplate?: LayoutTemplate;
 };
 
 export type EditorProps = {

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import { BlockAttributes, BlockEditProps, Template } from '@wordpress/blocks';
 import { Product } from '@woocommerce/data';
 
 // TOOD: Move this type to @woocommerce/block-templates
@@ -10,7 +10,7 @@ export type LayoutTemplate = {
 	title: string;
 	description?: string | null;
 	area?: string | null;
-	blockTemplates?: unknown[] | null;
+	blockTemplates?: Template[] | null;
 	icon?: string | null;
 	order?: number | null;
 	productData?: Partial< Product >;
