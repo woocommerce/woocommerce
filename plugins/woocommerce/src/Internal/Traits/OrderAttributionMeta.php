@@ -380,33 +380,17 @@ trait OrderAttributionMeta {
 	/**
 	 * Get the order history for the customer (data matches Customers report).
 	 *
-	 * @param mixed $customer_identifier The customer ID or billing email.
+	 * @param int $customer_report_id The customer ID (not necessarily User ID).
 	 *
 	 * @return array Order count, total spend, and average spend per order.
 	 */
-	private function get_customer_history( $customer_identifier ): array {
-		if ( ! is_numeric( $customer_identifier ) ) {
-			// Find the customer by email.
-			$matching_customers = $this->get_customer_reports_rest_response(
-				array(
-					'search'   => $customer_identifier,
-					'searchby' => 'email',
-				)
-			);
-			// If the customer_identifier is an email, that means the customer has no user id.
-			foreach ( $matching_customers as $customer ) {
-				if ( 0 === $customer['user_id'] ) {
-					$customer_identifier = $customer['id'];
-					break;
-				}
-			}
-		}
-
-		$data = $this->get_customer_reports_rest_response( array( 'customers' => $customer_identifier ) );
+	private function get_customer_history( $customer_report_id ): array {
+		$matching_customers = $this->get_customer_reports_rest_response( array( 'customers' => $customer_report_id ) );
+		$user_data = $matching_customers[0];
 		return array(
-			'order_count'   => $data[0]['orders_count'],
-			'total_spent'   => $data[0]['total_spend'],
-			'average_spent' => $data[0]['avg_order_value'],
+			'order_count'   => $user_data['orders_count'],
+			'total_spent'   => $user_data['total_spend'],
+			'average_spent' => $user_data['avg_order_value'],
 		);
 	}
 
