@@ -1,13 +1,6 @@
 {
   "posts": [
     {
-      "post_title": "Webhooks",
-      "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/webhooks.md",
-      "hash": "f69704e55bdde34927502000a9a308d302d3f7f11d10f1f64ec3fd260f6ad79c",
-      "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/webhooks.md",
-      "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
-    },
-    {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
       "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
@@ -320,6 +313,14 @@
           "hash": "fc8eb47b9e31c412838a6426965f26dad89454234692a8f26b045da3a8ed872f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/woocommerce-plugin-api-callback.md",
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
+        },
+        {
+          "post_title": "Webhooks",
+          "menu_title": "Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/webhooks.md",
+          "hash": "eae79157749e2ada34570654d0392974da81f29321663fc86c0db973fee0762e",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/webhooks.md",
+          "id": "5c1dee19b2a23240ee20f1fde448e1a8f9f58ffe"
         },
         {
           "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
@@ -1150,7 +1151,7 @@
       "categories": []
     },
     {
-      "content": "\n## Introduction to WooCommerce CLI\n\nWooCommerce CLI (WC-CLI) offers an efficient way to manage WooCommerce (WC) stores via the command line. This tool is a part of WC from version 3.0.0 onwards and leverages the capabilities of the WC REST API. This means that most tasks achievable through the REST API can also be performed via the command line.\n\nFor documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below)).\n\n## About WP-CLI\n\nWP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).\n\n## Documentation Structure\n\nThis suite of documentation includes:\n\n- [**How-to Guide**](./using-wc-cli): Step-by-step instructions for common WC-CLI tasks.\n- [**Command Reference**](./woocommerce-cli-commands): Detailed information on WC-CLI commands and their options.\n- [**FAQs**](./woocommerce-cli-frequently-asked-questions): Answers to frequently asked questions about WC-CLI.\n- **Examples**: Practical examples of WC-CLI commands in use.\n\n## Getting Started with WooCommerce CLI\n\nTo begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.\n\nFor specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.\n\n## Additional Resources\n\nFor those interested in exploring further, the following resources might be helpful:\n\n- [WC REST API Documentation](./docs/category/rest-api/)\n- [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)\n",
+      "content": "\n## Introduction to WooCommerce CLI\n\nWooCommerce CLI (WC-CLI) offers an efficient way to manage WooCommerce (WC) stores via the command line. This tool is a part of WC from version 3.0.0 onwards and leverages the capabilities of the WC REST API. This means that most tasks achievable through the REST API can also be performed via the command line.\n\nFor documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below)).\n\n## About WP-CLI\n\nWP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).\n\n## Documentation Structure\n\nThis suite of documentation includes:\n\n- [**How-to Guide**](./using-wc-cli.md): Step-by-step instructions for common WC-CLI tasks.\n- [**Command Reference**](./wc-cli-commands.md): Detailed information on WC-CLI commands and their options.\n- [**FAQs**](./cli-faq.md): Answers to frequently asked questions about WC-CLI.\n- [**Examples**](./wc-cli-examples.md): Practical examples of WC-CLI commands in use.\n\n## Getting Started with WooCommerce CLI\n\nTo begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.\n\nFor specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.\n\n## Additional Resources\n\nFor those interested in exploring further, the following resources might be helpful:\n\n- [WC REST API Documentation](../rest-api/getting-started.md)\n- [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)\n",
       "category_slug": "wc-cli",
       "category_title": "WooCommerce CLI",
       "posts": [
@@ -1194,5 +1195,5 @@
       "categories": []
     }
   ],
-  "hash": "5add14b023641e79e7e5cc7c6dfe367717a947ce0fd3d4ded8dfcf9dbe5d231b"
+  "hash": "e2bbd4e0e56fce0c7c10aa8fba780d2a5beb24f1399a5ed82af9d117439b0d89"
 }

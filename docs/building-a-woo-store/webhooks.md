@@ -1,4 +1,7 @@
-# Webhooks
+---
+post_title: Working with Webhooks in WooCommerce
+menu_title: Using Webhooks
+---
 
 ## What are Webhooks?
 
