@@ -4,6 +4,18 @@
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 import { Product } from '@woocommerce/data';
 
+// TOOD: Move this type to @woocommerce/block-templates
+export type LayoutTemplate = {
+	id: string;
+	title: string;
+	description?: string | null;
+	area?: string | null;
+	blockTemplates?: unknown[] | null;
+	icon?: string | null;
+	order?: number | null;
+	productData?: Partial< Product >;
+};
+
 export type ProductTemplate = {
 	id: string;
 	title: string;
