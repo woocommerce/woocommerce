@@ -105,6 +105,32 @@ export const emptyHiddenAddressFields = <
 	return newAddress;
 };
 
+/**
+ * Sets fields to an empty string in an address.
+ *
+ * @param {Object} address The address to empty fields from.
+ * @return {Object} The address with all fields values removed.
+ */
+export const emptyAddressFields = <
+	T extends CartResponseBillingAddress | CartResponseShippingAddress
+>(
+	address: T
+): T => {
+	const addressForm = prepareFormFields(
+		ADDRESS_FORM_KEYS,
+		{},
+		address.country
+	);
+	const newAddress = Object.assign( {}, address ) as T;
+
+	addressForm.forEach( ( { key = '' } ) => {
+		if ( isValidAddressKey( key, address ) ) {
+			newAddress[ key ] = '';
+		}
+	} );
+
+	return newAddress;
+};
 /*
  * Formats a shipping address for display.
  *

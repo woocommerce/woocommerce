@@ -17,6 +17,8 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
+import { emptyAddressFields } from '@woocommerce/base-utils';
+import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -59,6 +61,13 @@ const Block = ( {
 		}
 
 		setBillingAddress( syncValues );
+	};
+
+	const clearBillingAddress = ( address: Partial< BillingAddress > ) => {
+		const clearedAddress = emptyAddressFields(
+			address as CartResponseBillingAddress
+		);
+		setBillingAddress( clearedAddress );
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
@@ -129,6 +138,8 @@ const Block = ( {
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();
+					} else {
+						clearBillingAddress( shippingAddress );
 					}
 				} }
 			/>
