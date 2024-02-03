@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move the guest should verify email logic to the user utils
