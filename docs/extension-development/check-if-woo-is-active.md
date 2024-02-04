@@ -4,9 +4,9 @@ menu_title: Check if WooCommerce is active
 tags: how-to
 ---
 
-When developing for WooCommerce, it's important to check that WooCommerce is installed and active before your own code runs. This ensures no errors occur from missing WooCommerce functions or classes.
+When developing for WooCommerce, ensuring that WooCommerce is installed and active before your code runs is crucial. This prevents errors related to missing WooCommerce functions or classes.
 
-There are a few methods to achieve this. The first is to initialize your code on `woocommerce_loaded`. This means you can be sure that WooCommerce has loaded and its functions are ready to use. This is fired at the same time as the core `plugins_loaded` action. **Note**: at this point, the current user has not yet been set.
+There are a few methods to achieve this. The first is to execute your code on the `woocommerce_loaded` action. This approach guarantees that WooCommerce and its functionalities are fully loaded and available for use. This is fired around the same time as the core `plugins_loaded` action. 
 
 ```php
 add_action( 'woocommerce_loaded', 'prefix_woocommerce_loaded' );
@@ -16,7 +16,9 @@ function prefix_woocommerce_loaded() {
 }
 ```
 
-You can also initialize your code on the `woocommerce_init` hook. We know this only runs when WooCommerce is active and initialized. This fires around the same time as the core `init` action, but is triggered _after_ WooCommerce initialization finishes. **Note**: you can also utilize the `before_woocommerce_init` hook, which is fired on the core `init` hook, just _before_ WooCommerce is initialized.
+**Note**: At this stage, WordPress has not yet initialized the current user data.
+
+Another method is to execute your code on the `woocommerce_init` action. This is executed right _after_ WooCommerce is active and initialized.
 
 ```php
 add_action( 'woocommerce_init', 'prefix_woocommerce_init' );
@@ -26,7 +28,9 @@ function prefix_woocommerce_init() {
 }
 ```
 
-Using the hooks recommended above means you have access to WooCommerce functions, which can then be used to check for additional conditions. For example, you might want to check the version of WooCommerce before proceeding:
+**Note**: The `before_woocommerce_init` hook is also an option, running just _before_ WooCommerce's initialization
+
+Using the above hooks grants access to WooCommerce functions, enabling further condition checks. For instance, you might want to verify WooCommerce's version to ensure compatibility with your code:
 
 ```php
 add_action( 'woocommerce_init', 'prefix_woocommerce_init' );
@@ -40,3 +44,5 @@ function prefix_woocommerce_init() {
 	// Custom code here. WooCommerce is active and initialized...
 }
 ```
+
+Choosing the right hook based on your development needs ensures your WooCommerce extensions or customizations work seamlessly and efficiently.
