@@ -172,7 +172,7 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
     non-hpos-e2e-new-product-editor-tests-run:
-        name: Runs E2E new product editor tests with HPOS enabled.
+        name: Runs E2E new product editor tests with HPOS disabled.
         runs-on: ubuntu-latest
         timeout-minutes: 60
         strategy:
