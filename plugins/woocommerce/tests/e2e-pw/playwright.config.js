@@ -72,7 +72,7 @@ const config = {
 			testIgnore: '**/products/block-editor/**', // Ignore 'block-editor' tests.
 		},
 		{
-			name: 'chrome-new-editor',
+			name: 'chrome-new-product-editor',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			testDir: 'tests/merchant/products/block-editor',
 		},
