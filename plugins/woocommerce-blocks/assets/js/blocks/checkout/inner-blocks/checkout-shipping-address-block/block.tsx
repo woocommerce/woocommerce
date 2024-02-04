@@ -15,9 +15,12 @@ import {
 } from '@woocommerce/blocks-components';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
-import { useSelect } from '@wordpress/data';
-import { CART_STORE_KEY } from '@woocommerce/block-data';
-import { emptyAddressFields } from '@woocommerce/base-utils';
+import { useSelect, dispatch } from '@wordpress/data';
+import { CART_STORE_KEY, processErrorResponse } from '@woocommerce/block-data';
+import {
+	emptyAddressFields,
+	removeNoticesWithContext,
+} from '@woocommerce/base-utils';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
@@ -41,6 +44,7 @@ const Block = ( {
 	const {
 		setBillingAddress,
 		shippingAddress,
+		billingAddress,
 		useShippingAsBilling,
 		setUseShippingAsBilling,
 	} = useCheckoutAddress();
@@ -63,11 +67,33 @@ const Block = ( {
 		setBillingAddress( syncValues );
 	};
 
-	const clearBillingAddress = ( address: Partial< BillingAddress > ) => {
-		const clearedAddress = emptyAddressFields(
+	// Syncs the billing address on the server with the new address.
+	const syncBillingAddress = ( newAddress: BillingAddress ) => {
+		const noticeContext = 'wc/checkout/billing-address';
+		dispatch( CART_STORE_KEY )
+			.updateCustomerData(
+				{
+					billing_address: newAddress,
+				},
+				false
+			)
+			.then( () => {
+				removeNoticesWithContext( noticeContext );
+			} )
+			.catch( ( response ) => {
+				processErrorResponse( response, noticeContext );
+			} );
+	};
+
+	const clearBillingAddress = ( address: BillingAddress ) => {
+		if ( ! address ) {
+			return;
+		}
+		const emptyAddress = emptyAddressFields(
 			address as CartResponseBillingAddress
 		);
-		setBillingAddress( clearedAddress );
+		setBillingAddress( emptyAddress );
+		syncBillingAddress( emptyAddress );
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
@@ -139,7 +165,7 @@ const Block = ( {
 					if ( checked ) {
 						syncBillingWithShipping();
 					} else {
-						clearBillingAddress( shippingAddress );
+						clearBillingAddress( billingAddress );
 					}
 				} }
 			/>
