@@ -49,7 +49,9 @@ test.describe( `${ blockData.name } Block`, () => {
 		const block = await frontendUtils.getBlockByName( blockData.name );
 		let firstReview;
 		firstReview = block.locator( blockData.selectors.frontend.firstReview );
-		await expect( firstReview ).toHaveText( reviews[ 1 ].review );
+		await expect( firstReview ).toHaveText(
+			reviews[ reviews.length - 1 ].review
+		);
 
 		const select = page.getByLabel( 'Order by' );
 		select.selectOption( 'Highest rating' );
