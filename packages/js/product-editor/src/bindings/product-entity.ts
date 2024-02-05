@@ -62,11 +62,18 @@ export default {
 			[ contextPostType ]
 		);
 
-		const [ entityPropValue, setEntityPropValue ] = useEntityProp(
+		const [ entityPropValue ] = useEntityProp(
 			'postType',
 			postType,
 			entityPropName
 		);
+
+		/*
+		 * Set a noop function for now.
+		 * Let's ensure core handles the setting of the entity prop value.
+		 * @see https://github.com/WordPress/gutenberg/blob/f38eb429b8ba5153c50fabad3367f94c3289746d/packages/block-editor/src/hooks/use-bindings-attributes.js#L51
+		 */
+		const setEntityPropValue = () => {};
 
 		return {
 			placeholder: entityPropName,
