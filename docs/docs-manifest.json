@@ -218,9 +218,12 @@
           "menu_title": "Assessing PR impact",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/deciding-pr-high-impact.md",
-          "hash": "091fd9acb51a272439d2c0378cc54ee45bbb90211b2a8953d25a5cbddd40ad70",
+          "hash": "7eeaa690b09bfe9d2c0e9c3b6fe65dd19c459522835df02722cdbb581715f5c2",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/deciding-pr-high-impact.md",
-          "id": "40d381fdc10bff338677228736249ba87df9e102"
+          "id": "40d381fdc10bff338677228736249ba87df9e102",
+          "links": {
+            "./reporting-security-issues.md": "363d7eb1b42e6974cfab7f62659b4effc8417774"
+          }
         },
         {
           "post_title": "Common issues",
@@ -1204,5 +1207,5 @@
       "categories": []
     }
   ],
-  "hash": "19fff439ddbee80f3f6c932d45314d0831a0130c4b9940c40fe8b5f8c581346a"
+  "hash": "5bb145692cbf8c20fa0cf1a995d9722e5b6f68a8c55b0401b0fbe88698cad367"
 }
