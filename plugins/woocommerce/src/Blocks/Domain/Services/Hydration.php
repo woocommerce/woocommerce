@@ -48,6 +48,13 @@ class Hydration {
 		$available_routes = StoreApi::container()->get( RoutesController::class )->get_all_routes( 'v1', true );
 		$controller_class = $this->match_route_to_handler( $path, $available_routes );
 
+		/**
+		 * We disable nonce check to support endpoints such as checkout. The caveat here is that we need to be careful to only support GET requests. No other request type should be processed without nonce check. Additionally, no GET request can modify data as part of hydration request, for example adding items to cart.
+		 *
+		 * Long term, we should consider validating nonce here, instead of disabling it temporarily.
+		 */
+		$this->disable_nonce_check();
+
 		if ( null !== $controller_class ) {
 			$request           = new \WP_REST_Request( 'GET', $path );
 			$schema_controller = StoreApi::container()->get( SchemaController::class );
@@ -64,7 +71,6 @@ class Hydration {
 		}
 
 		$this->cache_store_notices();
-		$this->disable_nonce_check();
 
 		// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
 		$preloaded_requests = rest_preload_api_request( [], $path );
