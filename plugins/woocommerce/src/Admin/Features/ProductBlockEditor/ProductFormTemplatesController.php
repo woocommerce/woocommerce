@@ -8,6 +8,7 @@ class ProductFormTemplatesController {
      * Init
      */
     public function init() {
+		add_filter( 'default_wp_template_part_areas', array( $this, 'register_product_form_template_part_area' ), 10, 1 );
         add_action( 'get_block_templates', [ $this, 'add_block_templates' ], 10, 3 );
     }
 
@@ -58,5 +59,22 @@ class ProductFormTemplatesController {
 
         return $is_not_custom && $fits_slug_query && $fits_area_query;
     }
+
+    /**
+	 * Add Mini-Cart to the default template part areas.
+	 *
+	 * @param array $default_area_definitions An array of supported area objects.
+	 * @return array The supported template part areas including the Mini-Cart one.
+	 */
+	public function register_product_form_template_part_area( $default_area_definitions ) {
+		$product_form_template_part_area = [
+			'area'        => 'product-form',
+			'label'       => __( 'Product Form', 'woocommerce' ),
+			'description' => __( 'The form used to create products.', 'woocommerce' ),
+			'icon'        => 'product',
+			'area_tag'    => 'product-form',
+		];
+		return array_merge( $default_area_definitions, [ $product_form_template_part_area ] );
+	}
 
 }
