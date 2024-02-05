@@ -14,6 +14,9 @@ interface CoreBlockEditProps< T extends Record< string, any > >
 }
 
 type SourceAttributes = {
+	/*
+	 * The name of the entity property to bind.
+	 */
 	prop: string;
 };
 
@@ -21,7 +24,23 @@ type SourceAttributes = {
  * Create the product-entity
  * block binding source handler.
  *
- * The data source are product entities.
+ * source ID:
+ * `woo/product-entity`
+ * args:
+ * - prop: The name of the entity property to bind.
+ *
+ * example:
+ * ```
+ * metadata: {
+ *   bindings: {
+ *     content: {
+ *       source: 'woo/product-entity',
+ *       args: {
+ *         prop: 'short_description',
+ *       },
+ *    },
+ * },
+ * ```
  */
 export default {
 	name: 'woo/product-entity',
@@ -32,7 +51,6 @@ export default {
 	) {
 		const { context } = props;
 		const { postType: contextPostType } = context;
-
 		const { prop: entityPropName } = sourceAttributes;
 
 		const postType = useSelect(
