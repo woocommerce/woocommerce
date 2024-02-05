@@ -62,14 +62,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 	}
 
+	// This method was already available as non-final, marking it as final now would make it backwards-incompatible.
+	// phpcs:disable WooCommerce.Functions.InternalInjectionMethod.MissingFinal
+
 	/**
 	 * Set up all the hooks for maintaining and populating table data.
 	 *
 	 * @internal
 	 */
-	final public static function init() {
+	public static function init() {
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 5 );
 	}
+
+	// phpcs:enable WooCommerce.Functions.InternalInjectionMethod.MissingFinal
 
 	/**
 	 * Returns an array of ids of included coupons, based on query arguments from the user.

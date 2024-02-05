@@ -1100,7 +1100,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
 	 * Get the coupon information that is needed to reapply the coupon to an existing order.
-	 * This information is intended to be stored as a meta value in the order line item corresponding to the coupon.
+	 * This information is intended to be stored as a meta value in the order line item corresponding to the coupon
+	 * and should NOT be modified or extended (additional/custom data should go in a separate metadata entry).
 	 *
 	 * The information returned is a JSON-encoded string of an array with the following coupon information:
 	 *
