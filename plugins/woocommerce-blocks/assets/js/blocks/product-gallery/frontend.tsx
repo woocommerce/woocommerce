@@ -67,15 +67,25 @@ const productGallery = {
 			document.body.classList.add(
 				'wc-block-product-gallery-modal-open'
 			);
-
-			const dialogCloseButton = document.querySelector(
-				'.wc-block-product-gallery-dialog__close'
+			const dialogOverlay = document.querySelector(
+				'.wc-block-product-gallery-dialog__overlay'
 			);
-
-			if ( ! dialogCloseButton ) {
+			if ( ! dialogOverlay ) {
 				return;
 			}
-			( dialogCloseButton as HTMLButtonElement ).focus();
+			( dialogOverlay as HTMLElement ).focus();
+
+			const dialogPreviousButton = dialogOverlay.querySelectorAll(
+				'.wc-block-product-gallery-large-image-next-previous--button'
+			)[ 0 ];
+
+			if ( ! dialogPreviousButton ) {
+				return;
+			}
+
+			setTimeout( () => {
+				( dialogPreviousButton as HTMLButtonElement ).focus();
+			}, 100 );
 		},
 		selectImage: () => {
 			const context = getContext();
