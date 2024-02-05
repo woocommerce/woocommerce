@@ -13,9 +13,22 @@ const {
 	registerBlockBindingsSource,
 } = dispatch( blockEditorStore );
 
-export default function registerCoreParagraphBindingSource() {
-	if ( ! registerBlockBindingsSource ) {
+/**
+ * Check if the block binding API is available.
+ * Todo: polish the conditions to check if the API is available.
+ *
+ * @return {boolean} Whether the block binding API is available.
+ */
+export function isBlockBindingAPIAvailable() {
+	const isAvailable = Boolean( registerBlockBindingsSource );
+	if ( ! isAvailable ) {
 		console.warn( 'Binding API not available' ); // eslint-disable-line no-console
+	}
+	return isAvailable;
+}
+
+export default function registerCoreParagraphBindingSource() {
+	if ( ! isBlockBindingAPIAvailable() ) {
 		return;
 	}
 	registerBlockBindingsSource( productMeta );
