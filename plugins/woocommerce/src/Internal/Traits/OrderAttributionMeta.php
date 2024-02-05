@@ -385,7 +385,7 @@ trait OrderAttributionMeta {
 	 * @return array|null Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_report_id ): ?array {
-		$matching_customers = $this->get_customer_reports_rest_response( array( 'customers' => $customer_report_id ) );
+		$matching_customers = wc()->api->get_endpoint_data( '/wc-analytics/reports/customers',  array( 'customers' => $customer_report_id );
 		return $matching_customers[0] ?? null;
 	}
 
