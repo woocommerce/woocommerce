@@ -15,7 +15,7 @@ import type {
 	TextAreaBlockEditAttributes,
 } from '../../../types';
 
-const coreParagraphBlockEditWithTextareaToolbar =
+const coreBlockEditWithTextareaToolbar =
 	createHigherOrderComponent< ConnectedBlockEditComponent >(
 		( BlockEdit: ConnectedBlockEditComponent ) => {
 			return ( props: ConnectedBlockEditInstance ) => {
@@ -43,7 +43,7 @@ const coreParagraphBlockEditWithTextareaToolbar =
 				);
 			};
 		},
-		'coreParagraphBlockEditWithTextareaToolbar'
+		'coreBlockEditWithTextareaToolbar'
 	);
 
-export default coreParagraphBlockEditWithTextareaToolbar;
+export default coreBlockEditWithTextareaToolbar;

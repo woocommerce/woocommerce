@@ -12,7 +12,7 @@ import type {
 	ConnectedBlockEditInstance,
 } from '../../../types';
 
-const connectCoreParagraphWithWithEntityProp =
+const updateEntityPropFromBlockAttribute =
 	createHigherOrderComponent< ConnectedBlockEditComponent >(
 		( BlockEdit: ConnectedBlockEditComponent ) => {
 			return ( props: ConnectedBlockEditInstance ) => {
@@ -26,26 +26,14 @@ const connectCoreParagraphWithWithEntityProp =
 					return <BlockEdit { ...props } />;
 				}
 
-				const { attributes, setAttributes } = props;
+				const { attributes } = props;
 				const { content } = attributes;
 
-				const [ propertyContent, setPropertyContent ] = useEntityProp(
+				const [ , setPropertyContent ] = useEntityProp(
 					'postType',
 					'product',
 					entityProp
 				);
-
-				/*
-				 * Populate initial content
-				 * from the product entity to the block
-				 */
-				useEffect( () => {
-					if ( ! propertyContent ) {
-						return;
-					}
-
-					setAttributes( { content: propertyContent } );
-				}, [ setAttributes ] ); // eslint-disable-line
 
 				/*
 				 * Update the product entity
@@ -62,7 +50,7 @@ const connectCoreParagraphWithWithEntityProp =
 				return <BlockEdit { ...props } />;
 			};
 		},
-		'connectCoreParagraphWithWithEntityProp'
+		'updateEntityPropFromBlockAttribute'
 	);
 
-export default connectCoreParagraphWithWithEntityProp;
+export default updateEntityPropFromBlockAttribute;
