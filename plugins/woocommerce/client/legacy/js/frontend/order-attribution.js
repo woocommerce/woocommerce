@@ -32,8 +32,8 @@
 	 * @param {Object} values Object containing field values.
 	 */
 	function updateFormValues( values ) {
-		// Update `<wc-order-attribution-input>` elements if any exist.
-		for( const element of document.querySelectorAll( 'wc-order-attribution-input' ) ) {
+		// Update `<wc-order-attribution-inputs>` elements if any exist.
+		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
 			element.values = values;
 		}
 
@@ -130,7 +130,7 @@
 	 * Define an element to contribute order attribute values to the enclosing form.
 	 * To be used with the classic checkout.
 	 */
-	window.customElements.define( 'wc-order-attribution-input', class extends HTMLElement {
+	window.customElements.define( 'wc-order-attribution-inputs', class extends HTMLElement {
 		// Our bundler version does not support private class members, so we use a convention od `_` prefix.
 		// #values
 		// #fieldNames
@@ -172,7 +172,7 @@
 					if( input ) {
 						input.value = stringifyFalsyInputValue( this.values[ fieldName ] );
 					} else {
-						console.warn( `Field "${fieldName}" not found. Most likely, the '<wc-order-attribution-input>' element was manipulated.`);
+						console.warn( `Field "${fieldName}" not found. Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`);
 					}
 				}
 			}

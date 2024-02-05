@@ -330,11 +330,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add `<wc-order-attribution-input>` element that contributes the order attribution values to the enclosing form.
+	 * Add `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
 	 * Used for checkout & customer register forms.
 	 */
 	public function stamp_html_element() {
-		printf( '<wc-order-attribution-input></wc-order-attribution-input>' );
+		printf( '<wc-order-attribution-inputs></wc-order-attribution-inputs>' );
 	}
 
 	/**
