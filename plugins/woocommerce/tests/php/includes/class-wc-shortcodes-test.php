@@ -68,8 +68,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_published_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 1' );
 		$product->save();
 		$product_id = $product->get_id();
 		$this->disable_deprecation_notice();
@@ -83,11 +81,29 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->enable_deprecation_notice();
 
 		$this->assertNotEmpty( $product->get_name() );
-		$this->assertNotEmpty( $product->get_description() );
-		$this->assertNotEmpty( $product->get_sku() );
 		$this->assertStringContainsString( $product->get_name(), $product_page );
-		$this->assertStringContainsString( $product->get_description(), $product_page );
-		$this->assertStringContainsString( $product->get_sku(), $product_page );
+	}
+
+	/**
+	 * Ensure the `product_page` shortcode renders a published product correctly when given an SKU.
+	 */
+	public function test_product_page_shortcode_published_product_by_sku() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_sku( 'test-sku' );
+		$product->save();
+		$this->disable_deprecation_notice();
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'sku' => 'test-sku',
+			)
+		);
+
+		$this->enable_deprecation_notice();
+
+		$this->assertNotEmpty( $product->get_name() );
+		$this->assertStringContainsString( $product->get_name(), $product_page );
 	}
 
 	/**
@@ -96,8 +112,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_hidden_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 1' );
 		$product->set_catalog_visibility( 'hidden' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -113,11 +127,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->enable_deprecation_notice();
 
 		$this->assertNotEmpty( $product->get_name() );
-		$this->assertNotEmpty( $product->get_description() );
-		$this->assertNotEmpty( $product->get_sku() );
 		$this->assertStringContainsString( $product->get_name(), $product_page );
-		$this->assertStringContainsString( $product->get_description(), $product_page );
-		$this->assertStringContainsString( $product->get_sku(), $product_page );
 	}
 
 	/**
@@ -126,8 +136,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_trashed_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 1' );
 		$product->set_catalog_visibility( 'hidden' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -144,13 +152,32 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure the `product_page` shortcode does not render a trashed product given by SKU.
+	 */
+	public function test_product_page_shortcode_trashed_product_sku() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_sku( 'test-sku' );
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		wp_trash_post( $product_id );
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'sku'    => 'test-sku',
+				'status' => 'trash',
+			)
+		);
+
+		$this->assertEmpty( $product_page );
+	}
+
+	/**
 	 * Ensure we can override the list of invalid statuses for the `product_page` shortcode so that a trashed product is rendered.
 	 */
 	public function test_product_page_shortcode_trashed_product_override() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 1' );
 		$product->set_catalog_visibility( 'hidden' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -178,8 +205,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_draft_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 2' );
 		$product->set_status( 'draft' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -214,8 +239,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_private_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 3' );
 		$product->set_status( 'private' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -245,13 +268,45 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure the `product_page` shortcode does not render a private product that is given by SKU and belongs to another user.
+	 */
+	public function test_product_page_shortcode_private_product_by_sku() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->set_status( 'private' );
+		$product->set_sku( 'test-sku' );
+		$product->save();
+		$this->disable_deprecation_notice();
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'sku'    => 'test-sku',
+				'status' => 'private',
+			)
+		);
+
+		$this->enable_deprecation_notice();
+
+		$this->assertNotEmpty( $product_page );
+
+		wp_set_current_user( self::$user_contributor );
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'sku'    => 'test-sku',
+				'status' => 'private',
+			)
+		);
+
+		$this->assertEmpty( $product_page );
+	}
+
+	/**
 	 * Ensure we can override the `product_page` shortcode's read permission check to allow rendering a private product belonging to another user.
 	 */
 	public function test_product_page_shortcode_private_product_override() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 3' );
 		$product->set_status( 'private' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -338,8 +393,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_pending_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 4' );
 		$product->set_status( 'pending' );
 		$product->save();
 		$product_id = $product->get_id();
@@ -374,8 +427,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	public function test_product_page_shortcode_protected_product() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
-		$product->set_description( 'Test Description' );
-		$product->set_sku( 'Test SKU 5' );
 		$product->set_post_password( 'test password' );
 		$product->save();
 		$product_id = $product->get_id();
