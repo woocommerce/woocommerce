@@ -159,7 +159,8 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					{ ! isPublished ? (
+					{ ! isPublished &&
+					window.wcAdminFeatures[ 'product-pre-publish-modal' ] ? (
 						<PrepublishButton
 							productId={ productId }
 							productType={ productType }
