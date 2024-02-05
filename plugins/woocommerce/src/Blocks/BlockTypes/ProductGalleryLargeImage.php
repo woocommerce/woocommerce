@@ -87,7 +87,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		return strtr(
 			'<div class="wc-block-product-gallery-large-image wp-block-woocommerce-product-gallery-large-image" {directives}>
-				<ul class="wc-block-product-gallery-large-image__container">
+				<ul class="wc-block-product-gallery-large-image__container" tabindex="-1">
 					{main_images}
 				</ul>
 					{content}
