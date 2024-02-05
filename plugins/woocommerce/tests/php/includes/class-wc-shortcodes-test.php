@@ -155,12 +155,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product->save();
 		$product_id = $product->get_id();
 		wp_trash_post( $product_id );
-		add_filter(
-			'woocommerce_shortcode_product_page_invalid_statuses',
-			function() {
-				return array();
-			}
-		);
+		add_filter( 'woocommerce_shortcode_product_page_invalid_statuses', '__return_empty_array' );
 		$this->disable_deprecation_notice();
 
 		$product_page = WC_Shortcodes::product_page(
@@ -173,6 +168,8 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->enable_deprecation_notice();
 
 		$this->assertNotEmpty( $product_page );
+
+		remove_filter( 'woocommerce_shortcode_product_page_invalid_statuses', '__return_empty_array' );
 	}
 
 	/**
