@@ -72,6 +72,12 @@ export const reviews = [
 		review: 'Not bad.',
 		rating: 4,
 	},
+	{
+		name: `${ customer.first_name } ${ customer.last_name }`,
+		email: customer.email,
+		review: 'Really awful.',
+		rating: 1,
+	},
 ];
 
 export const storeDetails = {
