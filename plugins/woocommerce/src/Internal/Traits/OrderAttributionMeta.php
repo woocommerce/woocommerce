@@ -385,24 +385,10 @@ trait OrderAttributionMeta {
 	 * @return array|null Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_report_id ): ?array {
-		$matching_customers = wc()->api->get_endpoint_data( '/wc-analytics/reports/customers',  array( 'customers' => $customer_report_id );
+		$matching_customers = wc()->api->get_endpoint_data(
+			'/wc-analytics/reports/customers',
+			array( 'customers' => $customer_report_id )
+		);
 		return $matching_customers[0] ?? null;
-	}
-
-	/**
-	 * Make a REST request to the customer reports (analytics) endpoint.
-	 *
-	 * @param array  $params The query parameters to use.
-	 * @param string $method The HTTP method to use, defaults to GET.
-	 *
-	 * @return array The server response data.
-	 *
-	 * @since 8.5.3
-	 */
-	private function get_customer_reports_rest_response( $params, $method = 'GET' ) {
-		$request = new \WP_REST_Request( 'GET', '/wc-analytics/reports/customers' );
-		$request->set_query_params( $params );
-		$response = rest_do_request( $request );
-		return rest_get_server()->response_to_data( $response, false );
 	}
 }
