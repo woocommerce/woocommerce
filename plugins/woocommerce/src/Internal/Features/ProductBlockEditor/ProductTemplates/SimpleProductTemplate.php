@@ -225,13 +225,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
-					'label'    => __( 'Summary', 'woocommerce' ),
-					'help'     => __(
+					'label'       => __( 'Summary', 'woocommerce' ),
+					'help'        => __(
 						"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
 						'woocommerce'
 					),
 					'placeholder' => __( 'Add a short summary of the product', 'woocommerce' ),
-					'property' => 'short_description',
+					'property'    => 'short_description',
 				),
 			)
 		);
