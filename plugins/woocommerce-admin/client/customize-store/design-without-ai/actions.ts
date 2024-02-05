@@ -53,7 +53,8 @@ const redirectToAssemblerHub = async () => {
 	// This means that the iframe instance will have different state machines
 	// than the parent window.
 	// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
-	window.parent.__wcCustomizeStore.activeThemeHasMods = true;
+	console.log( 'set to true in parent' );
+	// window.parent.__wcCustomizeStore.activeThemeHasMods = true;
 };
 
 const redirectToIntroWithError = sendParent<
@@ -64,7 +65,17 @@ const redirectToIntroWithError = sendParent<
 	type: 'NO_AI_FLOW_ERROR',
 } );
 
+const sendActiveThemeHasMods = sendParent<
+	DesignWithoutAIStateMachineContext,
+	DesignWithoutAIStateMachineEvents,
+	DesignWithoutAIStateMachineEvents
+>( {
+	type: 'ACTIVE_THEME_HAS_MODS',
+	payload: true,
+} );
+
 export const actions = {
+	sendActiveThemeHasMods,
 	redirectToAssemblerHub,
 	redirectToIntroWithError,
 };

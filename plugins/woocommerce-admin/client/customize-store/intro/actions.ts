@@ -157,6 +157,16 @@ export const assignIsFontLibraryAvailable = assign<
 	},
 } );
 
+export const assignActiveThemeHasMods = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	activeThemeHasMods: ( context, event: unknown ) => {
+		console.log( 'assignActiveThemeHasMods!', context, event );
+		return true;
+	},
+} );
+
 export const assignFlags = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents

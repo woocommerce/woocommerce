@@ -175,6 +175,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 						onDone: {
 							target: '#designWithoutAI.showAssembleHub',
+							actions: [ 'sendActiveThemeHasMods' ],
 						},
 					},
 				},

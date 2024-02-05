@@ -58,6 +58,7 @@ export type customizeStoreStateMachineEvents =
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
+	| { type: 'ACTIVE_THEME_HAS_MODS'; payload: boolean }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
 const updateQueryStep = (
@@ -190,6 +191,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		IS_FONT_LIBRARY_AVAILABLE: {
 			actions: [ 'assignIsFontLibraryAvailable' ],
+		},
+		ACTIVE_THEME_HAS_MODS: {
+			actions: [ 'assignActiveThemeHasMods' ],
 		},
 	},
 	states: {
@@ -567,6 +571,7 @@ export const CustomizeStoreController = ( {
 					return !! _ctx.activeThemeHasMods;
 				},
 				activeThemeHasNoMods: ( _ctx ) => {
+					console.log( 'guard', _ctx );
 					return ! _ctx.activeThemeHasMods;
 				},
 			},
