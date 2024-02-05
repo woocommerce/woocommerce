@@ -21,6 +21,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
+import ExpressPaymentButtonWrapper from './express-payment/express-payment-button-wrapper';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
@@ -143,14 +144,16 @@ const ExpressPaymentMethods = () => {
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
 					<li key={ id } id={ `express-payment-method-${ id }` }>
-						{ cloneElement( expressPaymentMethod, {
-							...paymentMethodInterface,
-							onClick: onExpressPaymentClick( id ),
-							onClose: onExpressPaymentClose,
-							onError: onExpressPaymentError,
-							setExpressPaymentError:
-								deprecatedSetExpressPaymentError,
-						} ) }
+						<ExpressPaymentButtonWrapper>
+							{ cloneElement( expressPaymentMethod, {
+								...paymentMethodInterface,
+								onClick: onExpressPaymentClick( id ),
+								onClose: onExpressPaymentClose,
+								onError: onExpressPaymentError,
+								setExpressPaymentError:
+									deprecatedSetExpressPaymentError,
+							} ) }
+						</ExpressPaymentButtonWrapper>
 					</li>
 				) : null;
 			} )
