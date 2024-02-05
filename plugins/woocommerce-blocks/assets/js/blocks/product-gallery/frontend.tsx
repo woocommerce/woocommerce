@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { store, getContext as getContextFn } from '@woocommerce/interactivity';
 import { StorePart } from '@woocommerce/utils';
 
 export interface ProductGalleryContext {
