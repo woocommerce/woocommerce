@@ -95,8 +95,8 @@ class ProductGallery extends AbstractBlock {
 			</dialog>
 		</div>',
 			array(
-				'{{html}}' => $html_processor->get_updated_html(),
-				'{{dialog_aria_label}}' => __( 'Product gallery', 'woocommerce' ),
+				'{{html}}'                    => $html_processor->get_updated_html(),
+				'{{dialog_aria_label}}'       => __( 'Product gallery', 'woocommerce' ),
 				'{{close_dialog_aria_label}}' => __( 'Close Product Gallery dialog', 'woocommerce' ),
 			)
 		);
