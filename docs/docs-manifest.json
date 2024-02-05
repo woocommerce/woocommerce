@@ -1,13 +1,6 @@
 {
   "posts": [
     {
-      "post_title": "Webhooks",
-      "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/webhooks.md",
-      "hash": "f69704e55bdde34927502000a9a308d302d3f7f11d10f1f64ec3fd260f6ad79c",
-      "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/webhooks.md",
-      "id": "2c687171ced32ac451780d6ac95b29d19c70b0b5"
-    },
-    {
       "post_title": "WooCommerce developer documentation",
       "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/README.md",
       "hash": "5090b3208cadaa22f3c85d563ccd8f86194ff9e61c614df6021be805050713f2",
@@ -25,6 +18,14 @@
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
       "posts": [
+        {
+          "post_title": "Working with Webhooks in WooCommerce",
+          "menu_title": "Using Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/webhooks.md",
+          "hash": "102727c5217162eb5a363f95664f0c1554dce96c58e4b506cd350d50800a5381",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/webhooks.md",
+          "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
+        },
         {
           "post_title": "How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
@@ -406,9 +407,15 @@
           "post_title": "WooCommerce extension development best practices",
           "menu_title": "Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
-          "hash": "86442bed88a67c95a805d3bd36b71b0f6cbb2a48edf8c4ac54c348f9f7ec94ff",
+          "hash": "11a9e5f380426b3e05e68ba2ef87b59a33ab3be70c0cff83ffc0fa13d6bcee3f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
-          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12"
+          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12",
+          "links": {
+            "./check-if-woo-is-active.md": "2c2e89013ad76ff2596680224047723163512bc2",
+            "./data-storage.md": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102",
+            "../security/prevent-data-leaks.md": "91b86abe2953e1cd4e9d6d407238093245346cf9",
+            "./example-plugin-header-comment.md": "2fb49dc6ccad894e02f123940a9db98c7724dddc"
+          }
         },
         {
           "post_title": "Example WordPress plugin header comment for WooCommerce extensions",
@@ -1150,7 +1157,7 @@
       "categories": []
     },
     {
-      "content": "\n## Introduction to WooCommerce CLI\n\nWooCommerce CLI (WC-CLI) offers an efficient way to manage WooCommerce (WC) stores via the command line. This tool is a part of WC from version 3.0.0 onwards and leverages the capabilities of the WC REST API. This means that most tasks achievable through the REST API can also be performed via the command line.\n\nFor documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below)).\n\n## About WP-CLI\n\nWP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).\n\n## Documentation Structure\n\nThis suite of documentation includes:\n\n- [**How-to Guide**](./using-wc-cli): Step-by-step instructions for common WC-CLI tasks.\n- [**Command Reference**](./woocommerce-cli-commands): Detailed information on WC-CLI commands and their options.\n- [**FAQs**](./woocommerce-cli-frequently-asked-questions): Answers to frequently asked questions about WC-CLI.\n- **Examples**: Practical examples of WC-CLI commands in use.\n\n## Getting Started with WooCommerce CLI\n\nTo begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.\n\nFor specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.\n\n## Additional Resources\n\nFor those interested in exploring further, the following resources might be helpful:\n\n- [WC REST API Documentation](./docs/category/rest-api/)\n- [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)\n",
+      "content": "\n## Introduction to WooCommerce CLI\n\nWooCommerce CLI (WC-CLI) offers an efficient way to manage WooCommerce (WC) stores via the command line. This tool is a part of WC from version 3.0.0 onwards and leverages the capabilities of the WC REST API. This means that most tasks achievable through the REST API can also be performed via the command line.\n\nFor documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](https://github.com/woocommerce/woocommerce/wiki/Legacy-CLI-commands-(v2.6-and-below)).\n\n## About WP-CLI\n\nWP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).\n\n## Documentation Structure\n\nThis suite of documentation includes:\n\n- [**How-to Guide**](./using-wc-cli.md): Step-by-step instructions for common WC-CLI tasks.\n- [**Command Reference**](./wc-cli-commands.md): Detailed information on WC-CLI commands and their options.\n- [**FAQs**](./cli-faq.md): Answers to frequently asked questions about WC-CLI.\n- [**Examples**](./wc-cli-examples.md): Practical examples of WC-CLI commands in use.\n\n## Getting Started with WooCommerce CLI\n\nTo begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.\n\nFor specific details on commands and their usage, refer to the Command Reference section. The How-to Guide provides a practical approach to common tasks, ideal for those new to WC-CLI or looking for quick solutions.\n\n## Additional Resources\n\nFor those interested in exploring further, the following resources might be helpful:\n\n- [WC REST API Documentation](../rest-api/getting-started.md)\n- [Testing files for our CLI tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/cli/features)\n",
       "category_slug": "wc-cli",
       "category_title": "WooCommerce CLI",
       "posts": [
@@ -1177,9 +1184,12 @@
           "menu_title": "Using WooCommerce CLI",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/using-wc-cli.md",
-          "hash": "693d457ca0156408c16e4f24edf90f3838a38706dacc840031e21ab38190a629",
+          "hash": "f25bbfa7c85f05878b5f569414f46bb11974d1e9cacf3a6f5d708c6141edf0cd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/using-wc-cli.md",
-          "id": "cfdf72385ec51c15ad9c57aa7a6d83f699416849"
+          "id": "cfdf72385ec51c15ad9c57aa7a6d83f699416849",
+          "links": {
+            "./wc-cli-commands.md": "73d6bc6468d23a9e93d16d574399105b143e43af"
+          }
         },
         {
           "post_title": "WooCommerce CLI Frequently Asked Questions",
@@ -1194,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "5add14b023641e79e7e5cc7c6dfe367717a947ce0fd3d4ded8dfcf9dbe5d231b"
+  "hash": "19fff439ddbee80f3f6c932d45314d0831a0130c4b9940c40fe8b5f8c581346a"
 }

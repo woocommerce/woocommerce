@@ -2,12 +2,18 @@ const { test, expect } = require( '@playwright/test' );
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
 
-let productId, orderId;
+let productId, orderId, zoneId;
 
 const product = {
 	name: 'Order email product',
 	type: 'simple',
 	regular_price: '42.77',
+};
+const zoneInfo = {
+	name: 'Free shipping',
+};
+const methodInfo = {
+	method_id: 'free_shipping',
 };
 
 const storeName = 'WooCommerce Core E2E Test Suite';
@@ -18,6 +24,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 	test.beforeAll( async () => {
 		productId = await api.create.product( product );
 		await api.update.enableCashOnDelivery();
+
+		zoneId = await api.create.shippingZone( zoneInfo );
+		await api.create.shippingMethod( zoneId, methodInfo );
 	} );
 
 	test.beforeEach( async ( { page } ) => {
@@ -48,6 +57,8 @@ test.describe( 'Shopper Order Email Receiving', () => {
 			await api.deletePost.order( orderId );
 		}
 		await api.update.disableCashOnDelivery();
+
+		await api.deletePost.shippingZone( zoneId );
 	} );
 
 	test( 'should receive order email after purchasing an item', async ( {

@@ -14,6 +14,7 @@ import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { services } from './services';
 import { actions } from './actions';
+import { hasFontLibraryInstalled } from './guards';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -139,8 +140,19 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 								},
 							},
 							installFontFamilies: {
-								initial: 'pending',
+								initial: 'checkFontLibrary',
 								states: {
+									checkFontLibrary: {
+										always: [
+											{
+												cond: {
+													type: 'hasFontLibraryInstalled',
+												},
+												target: 'pending',
+											},
+											{ target: 'success' },
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'installFontFamilies',
@@ -182,6 +194,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			hasFontLibraryInstalled,
 		},
 	}
 );
