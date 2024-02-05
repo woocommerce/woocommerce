@@ -45,7 +45,7 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 			/**
 			 * Action hook fired after an address in the order customer details.
 			 *
-			 * @since 8.6.0
+			 * @since 8.7.0
 			 * @param string $address_type Type of address (billing or shipping).
 			 * @param WC_Order $order Order object.
 			 */
@@ -70,7 +70,7 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 					/**
 					 * Action hook fired after an address in the order customer details.
 					 *
-					 * @since 8.6.0
+					 * @since 8.7.0
 					 * @param string $address_type Type of address (billing or shipping).
 					 * @param WC_Order $order Order object.
 					 */

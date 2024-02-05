@@ -70,7 +70,7 @@ $col    = 1;
 				 * Used to output content after core address fields.
 				 *
 				 * @param string $name Address type.
-				 * @since 8.6.0
+				 * @since 8.7.0
 				 */
 				do_action( 'woocommerce_my_account_after_my_address', $name );
 			?>
