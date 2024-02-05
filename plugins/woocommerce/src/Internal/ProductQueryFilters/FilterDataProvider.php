@@ -28,7 +28,7 @@ class FilterDataProvider {
 	 * @return void
 	 */
 	final public function init( FilterClausesGenerator $filter_clauses_generator ): void {
-		$this->set_filter_clauses_generator_provider( $filter_clauses_generator );
+		$this->set_filter_clauses_generator( $filter_clauses_generator );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class FilterDataProvider {
 	 *
 	 * @return void
 	 */
-	final public function set_filter_clauses_generator_provider( ClausesGeneratorInterface $filter_clauses_generator ): void {
+	final public function set_filter_clauses_generator( ClausesGeneratorInterface $filter_clauses_generator ): void {
 		$this->filter_clauses_generator = $filter_clauses_generator;
 	}
 
