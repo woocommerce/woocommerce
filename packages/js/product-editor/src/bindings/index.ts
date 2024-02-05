@@ -14,5 +14,9 @@ const {
 } = dispatch( blockEditorStore );
 
 export default function registerCoreParagraphBindingSource() {
+	if ( ! registerBlockBindingsSource ) {
+		console.warn( 'Binding API not available' ); // eslint-disable-line no-console
+		return;
+	}
 	registerBlockBindingsSource( productMeta );
 }
