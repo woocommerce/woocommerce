@@ -11,7 +11,7 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { Tabs } from '../';
-import { Edit as Tab } from '../../../blocks/generic/tab/edit';
+import { TabBlockEdit as Tab } from '../../../blocks/generic/tab/edit';
 
 jest.mock( '@woocommerce/block-templates', () => ( {
 	...jest.requireActual( '@woocommerce/block-templates' ),
@@ -54,6 +54,7 @@ function MockTabs( { onChange = jest.fn() } ) {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test1"
 			/>
 			<Tab
 				{ ...blockProps }
@@ -61,6 +62,7 @@ function MockTabs( { onChange = jest.fn() } ) {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test2"
 			/>
 			<Tab
 				{ ...blockProps }
@@ -68,6 +70,7 @@ function MockTabs( { onChange = jest.fn() } ) {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore editedProduct is not used, so we can just ignore the fact that our context doesn't have it
 				context={ mockContext }
+				name="test3"
 			/>
 		</SlotFillProvider>
 	);

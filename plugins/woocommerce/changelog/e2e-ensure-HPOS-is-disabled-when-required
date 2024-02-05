@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Ensure HPOS is disabled when ENABLE_HPOS is undefined or set to '0'

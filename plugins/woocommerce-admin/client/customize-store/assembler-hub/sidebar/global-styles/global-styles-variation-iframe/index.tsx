@@ -18,7 +18,7 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
  * Internal dependencies
  */
 import './style.scss';
-import Iframe from '../iframe';
+import Iframe from '../../../iframe';
 
 const { useGlobalStylesOutput } = unlock( blockEditorPrivateApis );
 
@@ -71,6 +71,7 @@ export const GlobalStylesVariationIframe = ( {
 				visibility: width ? 'visible' : 'hidden',
 			} }
 			tabIndex={ -1 }
+			loadStyles={ false }
 			contentRef={ useRefEffect( ( bodyElement ) => {
 				// Disable moving focus to the writing flow wrapper if the focus disappears
 				// See https://github.com/WordPress/gutenberg/blob/aa8e1c52c7cb497e224a479673e584baaca97113/packages/block-editor/src/components/writing-flow/use-tab-nav.js#L136

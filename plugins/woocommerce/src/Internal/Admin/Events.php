@@ -36,7 +36,6 @@ use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
-use Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
@@ -92,7 +91,6 @@ class Events {
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
-		TestCheckout::class,
 		TrackingOptIn::class,
 		WooCommercePayments::class,
 		WooCommerceSubscriptions::class,
@@ -156,7 +154,7 @@ class Events {
 			MerchantEmailNotifications::run();
 		}
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
+		if ( Features::is_enabled( 'core-profiler' ) ) {
 			( new MailchimpScheduler() )->run();
 		}
 	}

@@ -1,0 +1,36 @@
+name: Add Community Label
+
+on:
+    pull_request_target:
+        types: [opened]
+    issues:
+        types: [opened]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+    verify:
+        name: Verify and add label
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+            pull-requests: write
+            issues: write
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
+
+            - name: npm install
+              run: npm install -D
+
+            - name: Check if user is a community contributor
+              id: check
+              run: node .github/workflows/scripts/is-community-contributor.js
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

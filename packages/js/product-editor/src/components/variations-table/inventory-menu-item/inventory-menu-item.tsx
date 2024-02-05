@@ -15,19 +15,22 @@ import { PRODUCT_STOCK_STATUS_KEYS } from '../../../utils/get-product-stock-stat
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { VariationActionsMenuItemProps } from '../types';
 import { handlePrompt } from '../../../utils/handle-prompt';
+import { VariationQuickUpdateMenuItem } from '../variation-actions-menus';
 
 export function InventoryMenuItem( {
 	selection,
 	onChange,
 	onClose,
+	supportsMultipleSelection = false,
 }: VariationActionsMenuItemProps ) {
-	const ids = Array.isArray( selection )
-		? selection.map( ( { id } ) => id )
-		: selection.id;
+	const ids = selection.map( ( { id } ) => id );
 
 	return (
 		<Dropdown
-			position="middle right"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				placement: 'right-start',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
@@ -65,20 +68,14 @@ export function InventoryMenuItem( {
 										variation_id: ids,
 									}
 								);
-								if ( Array.isArray( selection ) ) {
-									onChange(
-										selection.map(
-											( { id, manage_stock } ) => ( {
-												id,
-												manage_stock: ! manage_stock,
-											} )
-										)
-									);
-								} else {
-									onChange( {
-										manage_stock: ! selection.manage_stock,
-									} );
-								}
+								onChange(
+									selection.map(
+										( { id, manage_stock } ) => ( {
+											id,
+											manage_stock: ! manage_stock,
+										} )
+									)
+								);
 								onClose();
 							} }
 						>
@@ -94,22 +91,14 @@ export function InventoryMenuItem( {
 										variation_id: ids,
 									}
 								);
-								if ( Array.isArray( selection ) ) {
-									onChange(
-										selection.map( ( { id } ) => ( {
-											id,
-											stock_status:
-												PRODUCT_STOCK_STATUS_KEYS.instock,
-											manage_stock: false,
-										} ) )
-									);
-								} else {
-									onChange( {
+								onChange(
+									selection.map( ( { id } ) => ( {
+										id,
 										stock_status:
 											PRODUCT_STOCK_STATUS_KEYS.instock,
 										manage_stock: false,
-									} );
-								}
+									} ) )
+								);
 								onClose();
 							} }
 						>
@@ -125,22 +114,14 @@ export function InventoryMenuItem( {
 										variation_id: ids,
 									}
 								);
-								if ( Array.isArray( selection ) ) {
-									onChange(
-										selection.map( ( { id } ) => ( {
-											id,
-											stock_status:
-												PRODUCT_STOCK_STATUS_KEYS.outofstock,
-											manage_stock: false,
-										} ) )
-									);
-								} else {
-									onChange( {
+								onChange(
+									selection.map( ( { id } ) => ( {
+										id,
 										stock_status:
 											PRODUCT_STOCK_STATUS_KEYS.outofstock,
 										manage_stock: false,
-									} );
-								}
+									} ) )
+								);
 								onClose();
 							} }
 						>
@@ -159,22 +140,14 @@ export function InventoryMenuItem( {
 										variation_id: ids,
 									}
 								);
-								if ( Array.isArray( selection ) ) {
-									onChange(
-										selection.map( ( { id } ) => ( {
-											id,
-											stock_status:
-												PRODUCT_STOCK_STATUS_KEYS.onbackorder,
-											manage_stock: false,
-										} ) )
-									);
-								} else {
-									onChange( {
+								onChange(
+									selection.map( ( { id } ) => ( {
+										id,
 										stock_status:
 											PRODUCT_STOCK_STATUS_KEYS.onbackorder,
 										manage_stock: false,
-									} );
-								}
+									} ) )
+								);
 								onClose();
 							} }
 						>
@@ -207,22 +180,14 @@ export function InventoryMenuItem( {
 										if ( Number.isNaN( lowStockAmount ) ) {
 											return null;
 										}
-										if ( Array.isArray( selection ) ) {
-											onChange(
-												selection.map( ( { id } ) => ( {
-													id,
-													low_stock_amount:
-														lowStockAmount,
-													manage_stock: true,
-												} ) )
-											);
-										} else {
-											onChange( {
+										onChange(
+											selection.map( ( { id } ) => ( {
+												id,
 												low_stock_amount:
 													lowStockAmount,
 												manage_stock: true,
-											} );
-										}
+											} ) )
+										);
 									},
 								} );
 								onClose();
@@ -231,6 +196,13 @@ export function InventoryMenuItem( {
 							{ __( 'Edit low stock threshold', 'woocommerce' ) }
 						</MenuItem>
 					</MenuGroup>
+					<VariationQuickUpdateMenuItem.Slot
+						group={ 'inventory' }
+						onChange={ onChange }
+						onClose={ onClose }
+						selection={ selection }
+						supportsMultipleSelection={ supportsMultipleSelection }
+					/>
 				</div>
 			) }
 		/>

@@ -186,8 +186,8 @@ describe( 'colorPaletteResponseValidator', () => {
 			'Lightning',
 			'Midnight Citrus',
 			'Purple Twilight',
-			'Crimson Tide',
-			'Ice',
+			'Fuchsia',
+			'Charcoal',
 		],
 	};
 	it( 'should validate a correct color palette response', () => {

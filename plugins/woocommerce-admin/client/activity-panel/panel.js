@@ -22,6 +22,9 @@ export const Panel = ( {
 } ) => {
 	const panelClass = 'woocommerce-layout__activity-panel-wrapper';
 
+	const focusOnMountRef = useFocusOnMount();
+	const containerRef = useRef( null );
+
 	const handleFocusOutside = ( event ) => {
 		const isClickOnModalOrSnackbar =
 			event.relatedTarget &&
@@ -50,9 +53,7 @@ export const Panel = ( {
 		}
 	};
 
-	const focusOnMountRef = useFocusOnMount();
 	const useFocusOutsideProps = useFocusOutside( handleFocusOutside );
-	const containerRef = useRef( null );
 
 	const mergedContainerRef = useCallback( ( node ) => {
 		containerRef.current = node;

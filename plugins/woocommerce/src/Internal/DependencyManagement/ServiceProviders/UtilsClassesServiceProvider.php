@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
+use Automattic\WooCommerce\Utilities\TimeUtil;
 
 /**
  * Service provider for the non-static utils classes in the Automattic\WooCommerce\src namespace.
@@ -34,7 +35,8 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		PluginUtil::class,
 		COTMigrationUtil::class,
 		WebhookUtil::class,
-		RestApiUtil::class
+		RestApiUtil::class,
+		TimeUtil::class
 	);
 
 	/**
@@ -50,5 +52,6 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 			->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class ) );
 		$this->share( WebhookUtil::class );
 		$this->share( RestApiUtil::class );
+		$this->share( TimeUtil::class );
 	}
 }

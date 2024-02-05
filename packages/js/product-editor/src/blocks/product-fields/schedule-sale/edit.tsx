@@ -143,6 +143,8 @@ export function Edit( {
 				label={ __( 'Schedule sale', 'woocommerce' ) }
 				checked={ showScheduleSale }
 				onChange={ handleToggleChange }
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore disabled prop exists
 				disabled={ ! isSalePriceGreaterThanZero }
 			/>
 
@@ -165,7 +167,7 @@ export function Edit( {
 								dateOnSaleFromGmtValidationError && 'has-error'
 							}
 							help={ dateOnSaleFromGmtValidationError as string }
-							onBlur={ validateDateOnSaleFromGmt }
+							onBlur={ () => validateDateOnSaleFromGmt() }
 						/>
 					</div>
 
@@ -188,7 +190,7 @@ export function Edit( {
 										.toISOString()
 								)
 							}
-							onBlur={ validateDateOnSaleToGmt }
+							onBlur={ () => validateDateOnSaleToGmt() }
 							className={
 								dateOnSaleToGmtValidationError && 'has-error'
 							}

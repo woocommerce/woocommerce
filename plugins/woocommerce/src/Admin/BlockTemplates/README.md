@@ -203,6 +203,32 @@ Removes the block from its parent. When a block is removed from its parent, it i
 
 Check if the block is detached from its parent or root template. A detached block is no longer a part of the template and will not be included in the formatted template.
 
+##### `add_hide_condition( string $expression ): string`
+
+Adds a hide condition to the block. The hide condition is a JavaScript-like expression that is evaluated at runtime on the client to determine if the block should be hidden.
+
+See [@woocommerce/expression-evaluation](../../../../../packages/js/expression-evaluation/README.md) for more information on the expression syntax.
+
+##### `remove_hide_condition( string $key )`
+
+Removes a hide condition from the block, referenced by the key returned from `add_hide_condition()`.
+
+##### `get_hide_conditions(): array`
+
+Get the hide conditions for the block.
+
+##### `add_disable_condition( string $expression ): string`
+
+Adds a disable condition to the block. Similar to `add_hide_condition()`, but the block is shown as disabled instead of hidden.
+
+##### `remove_disable_condition( string $key )`
+
+Removes a disable condition from the block, referenced by the key returned from `add_disable_condition()`.
+
+##### `get_disable_conditions(): array`
+
+Get the disable conditions for the block.
+
 ##### `get_formatted_template(): array`
 
 Get the block configuration as a formatted template.

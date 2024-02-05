@@ -67,10 +67,6 @@ const MenuItem = ( {
 		}
 	};
 
-	const onFocusFormToggle = () => {
-		container?.current?.focus();
-	};
-
 	if ( isCheckbox ) {
 		return (
 			<div
@@ -89,7 +85,6 @@ const MenuItem = ( {
 						aria-hidden="true"
 						checked={ checked }
 						onChange={ onInvoke }
-						onFocus={ onFocusFormToggle }
 						onClick={ ( e ) => e.stopPropagation() }
 						tabIndex={ -1 }
 					/>

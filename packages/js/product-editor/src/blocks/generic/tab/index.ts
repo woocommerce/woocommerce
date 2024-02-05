@@ -1,13 +1,13 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import { registerWooBlockType } from '@woocommerce/block-templates';
+import { registerProductEditorBlockType } from '../../../utils';
 
 /**
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import { Edit } from './edit';
+import { TabBlockEdit } from './edit';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -15,11 +15,11 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: Edit,
+	edit: TabBlockEdit,
 };
 
 export function init() {
-	return registerWooBlockType( {
+	return registerProductEditorBlockType( {
 		name,
 		metadata: metadata as never,
 		settings: settings as never,

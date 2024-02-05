@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-The Select all and Clear selection buttons are only displayed when at least 1 item is selected

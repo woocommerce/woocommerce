@@ -31,6 +31,8 @@ import {
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
 	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	WCUser,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
@@ -99,6 +101,8 @@ export type BusinessInfoEvent = {
 		industry?: IndustryChoice;
 		storeLocation: CountryStateOption[ 'key' ];
 		geolocationOverruled: boolean;
+		isOptInMarketing: boolean;
+		storeEmailAddress: string;
 	};
 };
 
@@ -139,6 +143,8 @@ export type OnboardingProfile = {
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
 	is_store_country_set: boolean | null;
+	store_email?: string;
+	is_agree_marketing?: boolean;
 };
 
 export type PluginsPageSkippedEvent = {
@@ -195,6 +201,7 @@ export type CoreProfilerStateMachineContext = {
 	persistBusinessInfoRef?: ReturnType< typeof spawn >;
 	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
 	spawnGeolocationRef?: ReturnType< typeof spawn >;
+	currentUserEmail: string | undefined;
 };
 
 const getAllowTrackingOption = async () =>
@@ -306,6 +313,29 @@ const handleOnboardingProfileOption = assign( {
 			sellingOnlineAnswer,
 			sellingPlatforms,
 		};
+	},
+} );
+
+const getCurrentUserEmail = async () => {
+	const currentUser: WCUser< 'email' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser?.email;
+};
+
+const assignCurrentUserEmail = assign( {
+	currentUserEmail: (
+		_context,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		if (
+			event.data &&
+			event.data.length > 0 &&
+			event.data !== 'wordpress@example.com' // wordpress default prefilled email address
+		) {
+			return event.data;
+		}
+		return undefined;
 	},
 } );
 
@@ -499,6 +529,11 @@ const updateBusinessInfo = async (
 			...refreshedOnboardingProfile,
 			is_store_country_set: true,
 			industry: [ event.payload.industry ],
+			is_agree_marketing: event.payload.isOptInMarketing,
+			store_email:
+				event.payload.storeEmailAddress.length > 0
+					? event.payload.storeEmailAddress
+					: null,
 		},
 	} );
 };
@@ -644,6 +679,7 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
+	assignCurrentUserEmail,
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
@@ -657,6 +693,7 @@ const coreProfilerMachineServices = {
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
+	getCurrentUserEmail,
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
@@ -693,6 +730,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
+		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -1026,6 +1064,28 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							},
 						},
+						currentUserEmail: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCurrentUserEmail',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignCurrentUserEmail',
+											],
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
 					},
 					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
 					onDone: {
@@ -1046,7 +1106,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					on: {
 						BUSINESS_INFO_COMPLETED: {
 							target: 'postBusinessInfo',
-							actions: [ 'recordTracksBusinessInfoCompleted' ],
+							actions: [
+								'recordTracksBusinessInfoCompleted',
+								'recordTracksIsEmailChanged',
+							],
 						},
 					},
 				},

@@ -10,8 +10,9 @@ import {
 	useRef,
 	useState,
 	createContext,
+	cloneElement,
 } from '@wordpress/element';
-import { DragEvent, DragEventHandler, KeyboardEvent } from 'react';
+import { DragEvent, KeyboardEvent } from 'react';
 import { speak } from '@wordpress/a11y';
 import { throttle } from 'lodash';
 import { v4 } from 'uuid';
@@ -29,17 +30,14 @@ import {
 	isLastDroppable,
 	moveIndex,
 } from './utils';
-import { SortableItem } from './sortable-item';
 import { SortableChild } from './types';
 
-export type SortableProps = {
-	children: SortableChild | SortableChild[] | null | undefined;
+export type SortableProps = React.DetailedHTMLProps<
+	React.HTMLAttributes< HTMLDivElement >,
+	HTMLDivElement
+> & {
 	isHorizontal?: boolean;
-	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLLIElement >;
-	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onOrderChange?: ( items: SortableChild[] ) => void;
-	className?: string;
 };
 
 const THROTTLE_TIME = 16;
@@ -54,8 +52,10 @@ export const Sortable = ( {
 	onDragStart = () => null,
 	onOrderChange = () => null,
 	className,
+	role = 'listbox',
+	...props
 }: SortableProps ) => {
-	const ref = useRef< HTMLOListElement >( null );
+	const ref = useRef< HTMLDivElement >( null );
 	const [ items, setItems ] = useState< SortableChild[] >( [] );
 	const [ selectedIndex, setSelectedIndex ] = useState< number >( -1 );
 	const [ dragIndex, setDragIndex ] = useState< number | null >( null );
@@ -103,7 +103,7 @@ export const Sortable = ( {
 	};
 
 	const handleDragOver = (
-		event: DragEvent< HTMLLIElement >,
+		event: DragEvent< HTMLDivElement >,
 		index: number
 	) => {
 		if ( dragIndex === null ) {
@@ -127,7 +127,7 @@ export const Sortable = ( {
 		[ dragIndex ]
 	);
 
-	const handleKeyDown = ( event: KeyboardEvent< HTMLLIElement > ) => {
+	const handleKeyDown = ( event: KeyboardEvent< HTMLDivElement > ) => {
 		const { key } = event;
 		const isSelecting = dragIndex === null || dropIndex === null;
 		const selectedLabel = getItemName( ref.current, selectedIndex );
@@ -228,17 +228,27 @@ export const Sortable = ( {
 
 	return (
 		<SortableContext.Provider value={ {} }>
-			<ol
+			<div
+				{ ...props }
 				className={ classnames( 'woocommerce-sortable', className, {
 					'is-dragging': dragIndex !== null,
 					'is-horizontal': isHorizontal,
 				} ) }
 				ref={ ref }
-				role="listbox"
+				role={ role }
 			>
 				{ items.map( ( child, index ) => {
 					const isDragging = index === dragIndex;
-					const itemClasses = classnames( {
+
+					if (
+						child.props.className &&
+						child.props.className.indexOf( 'non-sortable-item' ) !==
+							-1
+					) {
+						return child;
+					}
+
+					const itemClasses = classnames( child.props.className, {
 						'is-dragging-over-after': isDraggingOverAfter(
 							index,
 							dragIndex,
@@ -256,37 +266,25 @@ export const Sortable = ( {
 						),
 					} );
 
-					if (
-						child.props.className &&
-						child.props.className.indexOf( 'non-sortable-item' ) !==
-							-1
-					) {
-						return <li>{ child }</li>;
-					}
-
-					return (
-						<SortableItem
-							key={ child.key || index }
-							className={ itemClasses }
-							id={ `${ index }-${ v4() }` }
-							index={ index }
-							isDragging={ isDragging }
-							isSelected={ selectedIndex === index }
-							onDragEnd={ ( event ) => handleDragEnd( event ) }
-							onDragStart={ ( event ) =>
-								handleDragStart( event, index )
-							}
-							onDragOver={ ( event ) => {
-								event.preventDefault();
-								throttledHandleDragOver( event, index );
-							} }
-							onKeyDown={ ( event ) => handleKeyDown( event ) }
-						>
-							{ child }
-						</SortableItem>
-					);
+					return cloneElement( child, {
+						key: child.key || index,
+						className: itemClasses,
+						id: `${ index }-${ v4() }`,
+						index,
+						isDragging,
+						isSelected: selectedIndex === index,
+						onDragEnd: handleDragEnd,
+						onDragStart: ( event: DragEvent< HTMLDivElement > ) =>
+							handleDragStart( event, index ),
+						onDragOver: ( event: DragEvent< HTMLDivElement > ) => {
+							event.preventDefault();
+							throttledHandleDragOver( event, index );
+						},
+						onKeyDown: ( event: KeyboardEvent< HTMLDivElement > ) =>
+							handleKeyDown( event ),
+					} );
 				} ) }
-			</ol>
+			</div>
 		</SortableContext.Provider>
 	);
 };

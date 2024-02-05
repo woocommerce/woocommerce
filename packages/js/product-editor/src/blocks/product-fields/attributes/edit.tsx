@@ -16,7 +16,7 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
 import { Attributes as AttributesContainer } from '../../../components/attributes/attributes';
 import { ProductEditorBlockEditProps } from '../../../types';
 
-export function Edit( {
+export function AttributesBlockEdit( {
 	attributes,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<

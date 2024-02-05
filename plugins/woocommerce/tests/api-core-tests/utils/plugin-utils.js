@@ -1,9 +1,24 @@
-const { APIRequest } = require( '@playwright/test' );
+const { APIRequest, expect } = require( '@playwright/test' );
 const axios = require( 'axios' ).default;
 const fs = require( 'fs' );
 const path = require( 'path' );
 const { promisify } = require( 'util' );
 const execAsync = promisify( require( 'child_process' ).exec );
+
+/**
+ * GitHub [release asset](https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28) object.
+ * @typedef {Object} ReleaseAsset
+ * @property {string} name
+ * @property {string} url
+ */
+
+/**
+ * GitHub [release](https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28) object.
+ * @typedef {Object} Release
+ * @property {ReleaseAsset[]} assets
+ * @property {string} tag_name
+ * @property {string} name
+ */
 
 /**
  * Encode basic auth username and password to be used in HTTP Authorization header.
@@ -257,4 +272,95 @@ export const installPluginThruWpCli = async ( pluginPath ) => {
 	);
 
 	await runWpCliCommand( `wp plugin list` );
+};
+
+/**
+ * Download the WooCommerce release zip. Can download draft releases when `token` is specified.
+ *
+ * @param {Object} params
+ * @param {import("@playwright/test").APIRequestContext} params.request
+ * @param {string} params.version The version indicated in the release `tag_name` or `name` field.
+ * @param {string} params.token
+ * @param {string} params.downloadDir
+ *
+ * @throws When `version` was not found.
+ *
+ * @returns {Promise<string>} Absolute path to the downloaded WooCommerce zip.
+ */
+export const downloadWooCommerceRelease = async ( {
+	request,
+	version = process.env.UPDATE_WC,
+	token = process.env.GITHUB_TOKEN,
+	downloadDir = 'tmp',
+} ) => {
+	/**
+	 *
+	 * @returns {Promise<Release>}
+	 */
+	const getRelease = async () => {
+		const url =
+			'https://api.github.com/repos/woocommerce/woocommerce/releases';
+		const options = {
+			params: {
+				per_page: 100,
+			},
+			headers: {
+				Authorization: token ? `Bearer ${ token }` : undefined,
+			},
+		};
+		const response = await request.get( url, options );
+
+		/**
+		 * @type {Release[]}
+		 */
+		const releases = await response.json();
+
+		const match = releases.find( ( { tag_name, name } ) =>
+			[ tag_name, name ].includes( version )
+		);
+
+		if ( ! match ) {
+			throw new Error( `Release ${ version } not found!` );
+		}
+
+		return match;
+	};
+
+	/**
+	 *
+	 * @param {Release} release
+	 * @throws When `release` does not contain a woocommerce zip.
+	 * @returns {ReleaseAsset}
+	 */
+	const getWooCommerceZipAsset = ( release ) => {
+		const zipName =
+			version.toLowerCase() === 'nightly'
+				? 'woocommerce-trunk-nightly.zip'
+				: 'woocommerce.zip';
+		const asset = release.assets.find( ( { name } ) => name === zipName );
+
+		if ( ! asset ) {
+			throw new Error(
+				`Release ${ version } does not contain a WooCommerce ZIP asset`
+			);
+		}
+
+		return asset;
+	};
+
+	const release = await getRelease();
+	const asset = getWooCommerceZipAsset( release );
+	const downloadResponse = await request.get( asset.url, {
+		headers: {
+			Authorization: token ? `Bearer ${ token }` : undefined,
+			Accept: 'application/octet-stream',
+		},
+	} );
+	expect( downloadResponse.ok() ).toBeTruthy();
+	const body = await downloadResponse.body();
+	const zipPath = path.resolve( downloadDir, asset.name );
+	fs.mkdirSync( path.resolve( downloadDir ), { recursive: true } );
+	fs.writeFileSync( zipPath, body );
+
+	return zipPath;
 };

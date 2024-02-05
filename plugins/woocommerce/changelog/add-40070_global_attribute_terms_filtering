@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add attributes filter to variations endpoint and deprecate local_attributes filter.

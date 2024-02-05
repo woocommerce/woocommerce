@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5](https://github.com/woocommerce/woocommerce/releases/tag/0.5) - 2023-10-19
+
+-   Minor - Adding background removal for legacy product editor images.
+-   Minor - Adding feedback snackbar after image background removal
+-   Minor - Adding number of images to tracks events for background removal.
+-   Minor - Adding spotlight to bring attention to background removal link on Media Library.
+
 ## [0.4](https://github.com/woocommerce/woocommerce/releases/tag/0.4) - 2023-09-12
 
 -   Patch - Add Woo AI Personalization setting and check setting when generating descriptions with AI.
@@ -10,6 +17,7 @@
 
 -   Patch - Fix Woo AI settings page fields persistence bug when disabling the feature.
 -   Patch - Woo AI - Fix store branding settings retrieval for use with description generation.
+-   Patch - Update `wp-env` to version 8.2.0.
 -   Minor - Adding settings screen for AI centric settings.
 -   Minor - Generating short description after long description on product editor.
 -   Minor - [Woo AI] Add Store Branding data to product description generation prompt.
@@ -18,10 +26,9 @@
 -   Minor - Use additional product data (categories, tags, and attributes) when generating product descriptions.
 -   Minor - Update pnpm monorepo-wide to 8.6.5
 -   Minor - Update pnpm to 8.6.7
--   Patch - Update `wp-env` to version 8.2.0.
 -   Minor - Upgrade TypeScript to 5.1.6
 
-## [0.2](https://github.com/woocommerce/woocommerce/releases/tag/0.2) - 2023-06-28 
+## [0.2](https://github.com/woocommerce/woocommerce/releases/tag/0.2) - 2023-06-28
 
 -   Minor - Adding error handling for a bad token request.
 -   Minor - Adding tracks events to indicate view for ai features.

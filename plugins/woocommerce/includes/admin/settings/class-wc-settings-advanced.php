@@ -41,7 +41,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
-			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			'woocommerce_com' => __( 'Woo.com', 'woocommerce' ),
 		);
 	}
 
@@ -63,7 +63,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Cart page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) ),
+					'desc'     => __( 'Page where shoppers review their shopping cart', 'woocommerce' ),
 					'id'       => 'woocommerce_cart_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => '',
@@ -83,7 +83,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'    => __( 'Checkout page', 'woocommerce' ),
 					/* Translators: %s Page contents. */
-					'desc'     => sprintf( __( 'Page contents: [%s]', 'woocommerce' ), apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) ),
+					'desc'     => __( 'Page where shoppers go to finalize their purchase', 'woocommerce' ),
 					'id'       => 'woocommerce_checkout_page_id',
 					'type'     => 'single_select_page_with_search',
 					'default'  => wc_get_page_id( 'checkout' ),
@@ -153,7 +153,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'checkboxgroup'   => 'start',
 					'show_if_checked' => 'option',
 					/* Translators: %s Docs URL. */
-					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/#section-3' ),
+					'desc_tip'        => sprintf( __( 'Force SSL (HTTPS) on the checkout pages (<a href="%s" target="_blank">an SSL Certificate is required</a>).', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/#section-3' ),
 				),
 
 				'unforce_ssl_checkout' => array(
@@ -322,12 +322,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the WooCommerce.com section.
+	 * Get settings for the Woo.com section.
 	 *
 	 * @return array
 	 */
 	protected function get_settings_for_woocommerce_com_section() {
-		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woo.com/usage-tracking', esc_html__( 'Woo.com Usage Tracking Documentation', 'woocommerce' ) );
 
 		$settings =
 			array(

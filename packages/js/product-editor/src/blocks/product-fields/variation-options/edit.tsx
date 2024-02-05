@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
+import { Button } from '@wordpress/components';
 import {
 	createElement,
 	createInterpolateElement,
@@ -16,6 +17,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
+import { getAdminLink } from '@woocommerce/settings';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -25,19 +27,23 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { useProductAttributes } from '../../../hooks/use-product-attributes';
-import { AttributeControl } from '../../../components/attribute-control';
+import {
+	AttributeControl,
+	AttributeControlEmptyStateProps,
+} from '../../../components/attribute-control';
 import { useProductVariationsHelper } from '../../../hooks/use-product-variations-helper';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { ProductTShirt } from './images';
 
 export function Edit( {
 	attributes: blockAttributes,
+	context,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
 	const blockProps = useWooBlockProps( blockAttributes );
 	const { generateProductVariations } = useProductVariationsHelper();
 	const {
 		updateUserPreferences,
-		product_block_variable_options_notice_dismissed:
-			hasDismissedVariableOptionsNotice,
+		local_attributes_notice_dismissed_ids: dismissedNoticesIds = [],
 	} = useUserPreferences();
 
 	const [ entityAttributes, setEntityAttributes ] = useEntityProp<
@@ -50,6 +56,9 @@ export function Edit( {
 			'product',
 			'default_attributes'
 		);
+
+	const { postType } = context;
+	const productId = useEntityId( 'postType', postType );
 
 	const { attributes, handleChange } = useProductAttributes( {
 		allAttributes: entityAttributes,
@@ -68,7 +77,7 @@ export function Edit( {
 	let notice: string | React.ReactElement = '';
 	if (
 		localAttributeNames.length > 0 &&
-		hasDismissedVariableOptionsNotice !== 'yes'
+		! dismissedNoticesIds?.includes( productId )
 	) {
 		notice = createInterpolateElement(
 			__(
@@ -87,7 +96,9 @@ export function Edit( {
 				),
 				globalAttributeLink: (
 					<Link
-						href="https://woocommerce.com/document/variable-product/#add-attributes-to-use-for-variations"
+						href={ getAdminLink(
+							'edit.php?post_type=product&page=product_attributes'
+						) }
 						type="external"
 						target="_blank"
 					/>
@@ -107,6 +118,49 @@ export function Edit( {
 		} ) );
 	}
 
+	function renderCustomEmptyState( {
+		addAttribute,
+	}: AttributeControlEmptyStateProps ) {
+		return (
+			<div className="wp-block-woocommerce-product-variations-options-field__empty-state">
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-image">
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+					<ProductTShirt className="wp-block-woocommerce-product-variations-options-field__empty-state-image-product" />
+				</div>
+
+				<p className="wp-block-woocommerce-product-variations-options-field__empty-state-description">
+					{ __(
+						'Sell your product in multiple variations like size or color.',
+						'woocommerce'
+					) }
+				</p>
+
+				<div className="wp-block-woocommerce-product-variations-options-field__empty-state-actions">
+					<Button variant="primary" onClick={ () => addAttribute() }>
+						{ __( 'Add options', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Size', 'woocommerce' ) )
+						}
+					>
+						{ __( 'Add sizes', 'woocommerce' ) }
+					</Button>
+					<Button
+						variant="secondary"
+						onClick={ () =>
+							addAttribute( __( 'Color', 'woocommerce' ) )
+						}
+					>
+						{ __( 'Add colors', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div { ...blockProps }>
 			<AttributeControl
@@ -122,7 +176,10 @@ export function Edit( {
 				useRemoveConfirmationModal={ true }
 				onNoticeDismiss={ () =>
 					updateUserPreferences( {
-						product_block_variable_options_notice_dismissed: 'yes',
+						local_attributes_notice_dismissed_ids: [
+							...dismissedNoticesIds,
+							productId,
+						],
 					} )
 				}
 				onAddAnother={ () => {
@@ -151,6 +208,7 @@ export function Edit( {
 						'product_remove_option_confirmation_cancel_click'
 					)
 				}
+				renderCustomEmptyState={ renderCustomEmptyState }
 				disabledAttributeIds={ entityAttributes
 					.filter( ( attr ) => ! attr.variation )
 					.map( ( attr ) => attr.id ) }

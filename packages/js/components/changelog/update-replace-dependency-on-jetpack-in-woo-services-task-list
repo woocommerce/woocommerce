@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove dependency on Jetpack from WooCommerce Shipping & Tax onboarding tasks

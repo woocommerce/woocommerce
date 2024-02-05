@@ -70,7 +70,10 @@ export function InsertUrlMenuItem( {
 
 	return (
 		<Dropdown
-			position="middle left"
+			// @ts-expect-error missing prop in types.
+			popoverProps={ {
+				placement: 'left',
+			} }
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					aria-expanded={ isOpen }
@@ -78,7 +81,7 @@ export function InsertUrlMenuItem( {
 					iconPosition="left"
 					onClick={ onToggle }
 					info={ __(
-						'Import a file hosted elsewhere',
+						'Link to a file hosted elsewhere',
 						'woocommerce'
 					) }
 				>

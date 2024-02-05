@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 2,
+    "name": "woocommerce/product-gallery-large-image",
+    "version": "1.0.0",
+    "title": "Large Image",
+    "description": "Display the Large Image of a product.",
+    "category": "woocommerce",
+    "keywords": [ "WooCommerce" ],
+	"usesContext": [ "nextPreviousButtonsPosition", "postId", "hoverZoom", "fullScreenOnClick", "cropImages"],
+	"supports": {
+		"interactivity": true
+	},
+    "textdomain": "woocommerce",
+	"ancestor": [ "woocommerce/product-gallery" ]
+}

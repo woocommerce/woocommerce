@@ -4,11 +4,16 @@
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
 import { AnyInterpreter, Sender } from 'xstate';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { CustomizeStoreComponent } from '../types';
+import {
+	CustomizeStoreComponent,
+	FlowType,
+	customizeStoreStateMachineContext,
+} from '../types';
 import { designWithAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
@@ -18,8 +23,9 @@ import {
 	ToneOfVoice,
 } from './pages';
 import { customizeStoreStateMachineEvents } from '..';
-
 import './style.scss';
+import { isAIFlow } from '../guards';
+import { navigateOrParent } from '../utils';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
@@ -33,10 +39,15 @@ export type DesignWithAiComponentMeta = {
 
 export const DesignWithAiController = ( {
 	parentMachine,
+	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
+	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
+	designWithAiStateMachineDefinition.context.aiOnline =
+		parentContext?.flowType === FlowType.AIOnline;
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
@@ -84,10 +95,22 @@ export const DesignWithAiController = ( {
 };
 
 //loader should send event 'THEME_SUGGESTED' when it's done
-export const DesignWithAi: CustomizeStoreComponent = ( { parentMachine } ) => {
+export const DesignWithAi: CustomizeStoreComponent = ( {
+	parentMachine,
+	context,
+} ) => {
+	const assemblerUrl = getNewPath( {}, '/customize-store', {} );
+
+	if ( ! isAIFlow( context.flowType ) ) {
+		navigateOrParent( window, assemblerUrl );
+		return null;
+	}
 	return (
 		<>
-			<DesignWithAiController parentMachine={ parentMachine } />
+			<DesignWithAiController
+				parentMachine={ parentMachine }
+				parentContext={ context }
+			/>
 		</>
 	);
 };

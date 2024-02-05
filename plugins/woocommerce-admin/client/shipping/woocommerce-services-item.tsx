@@ -31,7 +31,7 @@ const WooCommerceServicesItem: React.FC< {
 				actions.push( {
 					url: getAdminLink( 'plugins.php' ),
 					label: __(
-						'Finish the setup by connecting your store to Jetpack.',
+						'Finish the setup by connecting your store to WordPress.com.',
 						'woocommerce'
 					),
 				} );
@@ -66,7 +66,7 @@ const WooCommerceServicesItem: React.FC< {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/woocommerce-shipping/">
+					<ExternalLink href="https://woo.com/woocommerce-shipping/">
 						{ __( 'Learn more', 'woocommerce' ) }
 					</ExternalLink>
 				</span>

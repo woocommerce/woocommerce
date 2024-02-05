@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Skip the assembler-hub e2e tests on the daily run

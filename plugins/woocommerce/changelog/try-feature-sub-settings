@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Consolidate HPOS back into a single "feature" for the purposes of showing it on the Features settings screen.

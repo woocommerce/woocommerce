@@ -8,24 +8,24 @@ During the fetching of the specifications, each specification and the rules with
 
 Following is the structure of the JSON feed, including the different rules that can be used to build up an inbox notification specification.
 
-## JSON file:
+## JSON file
 
-```
+```json
 [
 	<spec>,
 	...
 ]
 ```
 
-## Spec:
+## Spec
 
-```
+```json
 {
 	"slug": "ad-for-automate-woo-2020-04-20",
 	"type": "info",
 	"status": "unactioned",
 	"is_snoozable": 0,
-	"source": "woocommerce.com",
+	"source": "woo.com",
 	"locales": [
 		<Locale>,
 		...
@@ -72,7 +72,7 @@ There are other note statuses but we just use them **internally**:
 
 The note locales contain the title and content of the note. Having this broken up by locale allows different translations of the note to be used. The default locale used if none of the locales match the WordPress locale is `en_US`.
 
-```
+```json
 {
 	"locale": "en_US",
 	"title": "Ad for Automate Woo",
@@ -94,7 +94,7 @@ The note locales contain the title and content of the note. Having this broken u
 
 These are the actions that can be interacted with on the note. This might be a link to a blog post, or an internal link to an admin page.
 
-```
+```json
 {
 	"name": "install-automate-woo",
 	 "locales": [
@@ -127,7 +127,7 @@ The `status` is what the status of the created note will be set to after interac
 
 #### ActionLocale
 
-```
+```json
 {
 	"locale": "en_US",
 	"label": "Install"
@@ -189,7 +189,7 @@ This passes if all of the listed plugins are installed and activated.
 
 `plugins` is required.
 
-```
+```json
 {
 	"type": "plugins_activated",
 	"plugins": [
@@ -207,7 +207,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 
 `publish_after` is required.
 
-```
+```json
 {
 	"type": "publish_after_time",
 	"publish_after": "2020-04-22 00:00:00"
@@ -222,7 +222,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 
 `publish_before` is required.
 
-```
+```json
 {
 	"type": "publish_before_time",
 	"publish_before": "2020-04-22 00:00:00"
@@ -235,7 +235,7 @@ This negates the rules in the provided set of rules. Note that the rules in `ope
 
 `operand` is required.
 
-```
+```json
 {
 	"type": "not",
 	"operand": [
@@ -251,7 +251,7 @@ This performs an OR operation on the operands, passing if any of the operands ev
 
 `operands` is required.
 
-```
+```json
 {
 	"type": "or",
 	"operands": [
@@ -269,7 +269,7 @@ This performs an OR operation on the operands, passing if any of the operands ev
 
 Alternatively:
 
-```
+```json
 {
 	"type": "or",
 	"operands": [
@@ -283,7 +283,7 @@ Alternatively:
 
 This just returns a false value. This is useful if you want to keep a specification around, but don't want it displayed.
 
-```
+```json
 {
 	"type": "fail"
 }
@@ -297,7 +297,7 @@ This compares the installed version of the plugin to the required version, using
 
 This example passes if Jetpack 8.4.1 is installed and activated.
 
-```
+```json
 {
 	"type": "plugin_version",
 	"plugin": "jetpack",
@@ -312,7 +312,7 @@ This allows access to a stored state containing calculated values that otherwise
 
 This example passes if the `there_were_no_products` index is equal to `true`.
 
-```
+```json
 {
 	"type": "stored_state",
 	"index": "there_were_no_products",
@@ -325,7 +325,7 @@ There are only a limited amount of indices available to this rule, and new indic
 
 The currently available indices are:
 
-```
+```json
 there_were_no_products
 there_are_now_products
 new_product_count
@@ -339,7 +339,7 @@ This passes if the number of products currently in the system match the comparis
 
 This example passes if there are more than 10 products currently in the system.
 
-```
+```json
 {
 	"type": "product_count",
 	"operation": ">",
@@ -355,7 +355,7 @@ This passes if the number of orders currently in the system match the comparison
 
 This example passes if there are more than 10 orders currently in the system.
 
-```
+```json
 {
 	"type": "order_count",
 	"operation": ">",
@@ -373,7 +373,7 @@ This is used as a proxy indicator of the age of the shop.
 
 This example passes if it has been active for more than 8 days.
 
-```
+```json
 {
 	"type": "wcadmin_active_for",
 	"operation": ">",
@@ -387,7 +387,7 @@ This example passes if it has been active for more than 8 days.
 
 This allows access to the onboarding profile that was built up in the onboarding wizard. The below example passes when the current revenue selected was "none".
 
-```
+```json
 {
 	"type": "onboarding_profile",
 	"index": "revenue",
@@ -402,7 +402,7 @@ This allows access to the onboarding profile that was built up in the onboarding
 
 This passes when the store is on a WordPress.com site with the eCommerce plan.
 
-```
+```json
 {
 	"type": "is_ecommerce",
 	"value": true
@@ -411,11 +411,27 @@ This passes when the store is on a WordPress.com site with the eCommerce plan.
 
 `value` is required.
 
+### Is Woo Express
+
+This passes when the store is on a WordPress.com site with a Woo Express plan active.
+You can optionally pass the `plan` name to target a specific Woo Express plan, e.g. `performance`.
+
+```json
+{
+	"type": "is_woo_express",
+	"plan": "trial|essential|performance",
+	"value": true
+}
+```
+
+`value` is required.
+`plan` is optional, e.g. `trial`, `essential`, `performance`.
+
 ### Base location - country
 
 This passes when the store is located in the specified country.
 
-```
+```json
 {
 	"type": "base_location_country",
 	"value": "US",
@@ -429,7 +445,7 @@ This passes when the store is located in the specified country.
 
 This passes when the store is located in the specified state.
 
-```
+```json
 {
 	"type": "base_location_state",
 	"value": "TX",
@@ -445,7 +461,7 @@ This passes when the status of the specified note matches the specified status.
 The below example passes when the `wc-admin-mobile-app` note has not been
 actioned.
 
-```
+```json
 {
 	"type": "note_status",
 	"note_name": "wc-admin-mobile-app",
@@ -461,7 +477,7 @@ compared to the provided value pass the operation test.
 
 `timeframe` can be one of `last_week`, `last_month`, `last_quarter`, `last_6_months`, `last_year`
 
-```
+```json
 {
 	"type": "total_payments_value",
 	"timeframe": "last_month",
@@ -476,7 +492,7 @@ compared to the provided value pass the operation test.
 
 This passes when the option value matches the value using the operation.
 
-```
+```json
 {
 	"type": "option",
 	"option_name": "woocommerce_currency",
@@ -494,7 +510,7 @@ This transforms the given option value into a different value by a series of tra
 
 Example option value:
 
-```
+```php
 Array
 (
     [setup_client] =>
@@ -515,7 +531,7 @@ Array
 
 If you want to ensure that the industry array contains `fashion-apparel-accessories`, you can use the following Option definition with transformers.
 
-```
+```json
 {
 	"type": "option",
 	"transformers": [
@@ -554,7 +570,7 @@ on update. Note that this doesn't provide a way to check the version number as
 the `plugin_version` rule can be used to check for a specific version of the
 WooCommerce Admin plugin.
 
-```
+```json
 {
 	type: "wca_updated"
 }

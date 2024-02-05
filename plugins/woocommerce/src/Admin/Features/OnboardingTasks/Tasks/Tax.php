@@ -79,7 +79,7 @@ class Tax extends Task {
 	public function get_content() {
 		return self::can_use_automated_taxes()
 			? __(
-				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+				'Good news! WooCommerce Tax can automate your sales tax calculations for you.',
 				'woocommerce'
 			)
 			: __(

@@ -17,14 +17,12 @@ import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/compo
  * Internal dependencies
  */
 import { designWithAiStateMachineContext } from './types';
-import { lookAndTone } from './prompts';
 import { FONT_PAIRINGS } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
-import {
-	patternsToNameMap,
-	getTemplatePatterns,
-} from '../assembler-hub/hooks/use-home-templates';
 import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
+import { updateTemplate } from '../data/actions';
+import { installAndActivateTheme as setTheme } from '../data/service';
+import { THEME_SLUG } from '../data/constants';
 
 const { escalate } = actions;
 
@@ -45,12 +43,14 @@ export const getCompletion = async < ValidResponseObject >( {
 	version,
 	responseValidation,
 	retryCount,
+	abortSignal = AbortSignal.timeout( 10000 ),
 }: {
 	queryId: string;
 	prompt: string;
 	version: string;
 	responseValidation: ( arg0: string ) => ValidResponseObject;
 	retryCount: number;
+	abortSignal?: AbortSignal;
 } ) => {
 	const { token } = await requestJetpackToken();
 	let data: {
@@ -72,6 +72,7 @@ export const getCompletion = async < ValidResponseObject >( {
 				prompt,
 				_fields: 'completion',
 			},
+			signal: abortSignal,
 		} );
 	} catch ( error ) {
 		recordEvent( 'customize_your_store_ai_completion_api_error', {
@@ -116,18 +117,6 @@ export const getCompletion = async < ValidResponseObject >( {
 		} );
 		throw error;
 	}
-};
-
-export const getLookAndTone = async (
-	context: designWithAiStateMachineContext
-) => {
-	return getCompletion( {
-		...lookAndTone,
-		prompt: lookAndTone.prompt(
-			context.businessInfoDescription.descriptionText
-		),
-		retryCount: 0,
-	} );
 };
 
 export const queryAiEndpoint = createMachine(
@@ -208,26 +197,138 @@ export const queryAiEndpoint = createMachine(
 	}
 );
 
+const resetPatternsAndProducts = () => async () => {
+	await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_blocks_allow_ai_connection: 'yes',
+	} );
+
+	const response = await apiFetch< {
+		is_ai_generated: boolean;
+	} >( {
+		path: '/wc/private/ai/store-info',
+		method: 'GET',
+	} );
+
+	if ( response.is_ai_generated ) {
+		return;
+	}
+
+	return Promise.all( [
+		apiFetch( {
+			path: '/wc/private/ai/patterns',
+			method: 'DELETE',
+		} ),
+		apiFetch( {
+			path: '/wc/private/ai/products',
+			method: 'DELETE',
+		} ),
+	] );
+};
+
 export const updateStorePatterns = async (
 	context: designWithAiStateMachineContext
 ) => {
 	try {
 		// TODO: Probably move this to a more appropriate place with a check. We should set this when the user granted permissions during the onboarding phase.
 		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_blocks_allow_ai_connection: true,
+			woocommerce_blocks_allow_ai_connection: 'yes',
 		} );
 
-		const response: {
+		const { images } = await apiFetch< {
 			ai_content_generated: boolean;
-			additional_errors?: unknown[];
-		} = await apiFetch( {
-			path: '/wc/store/patterns',
+			images: { images: Array< unknown >; search_term: string };
+		} >( {
+			path: '/wc/private/ai/images',
 			method: 'POST',
 			data: {
 				business_description:
 					context.businessInfoDescription.descriptionText,
 			},
 		} );
+
+		const { is_ai_generated } = await apiFetch< {
+			is_ai_generated: boolean;
+		} >( {
+			path: '/wc/private/ai/store-info',
+			method: 'GET',
+		} );
+
+		if ( ! images.images.length ) {
+			if ( is_ai_generated ) {
+				throw new Error(
+					'AI content not generated: images not available'
+				);
+			}
+
+			await resetPatternsAndProducts()();
+			return;
+		}
+
+		const [ response ] = await Promise.all< {
+			ai_content_generated: boolean;
+			product_content: Array< {
+				title: string;
+				description: string;
+				image: {
+					src: string;
+					alt: string;
+				};
+			} >;
+			additional_errors?: unknown[];
+		} >( [
+			apiFetch( {
+				path: '/wc/private/ai/products',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/patterns',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+					images,
+				},
+			} ),
+		] );
+
+		const productContents = response.product_content.map(
+			( product, index ) => {
+				return apiFetch( {
+					path: '/wc/private/ai/product',
+					method: 'POST',
+					data: {
+						products_information: product,
+						last_product:
+							index === response.product_content.length - 1,
+					},
+				} );
+			}
+		);
+
+		await Promise.all( [
+			...productContents,
+			apiFetch( {
+				path: '/wc/private/ai/business-description',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+			apiFetch( {
+				path: '/wc/private/ai/store-title',
+				method: 'POST',
+				data: {
+					business_description:
+						context.businessInfoDescription.descriptionText,
+				},
+			} ),
+		] );
 
 		if ( ! response.ai_content_generated ) {
 			throw new Error(
@@ -259,6 +360,12 @@ const updateGlobalStyles = async ( {
 		( pairing ) => pairing.title === fontPairingName
 	);
 
+	// @ts-ignore No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
+	);
+
 	const globalStylesId = await resolveSelect(
 		coreStore
 		// @ts-ignore No types for this exist yet.
@@ -287,54 +394,6 @@ const updateGlobalStyles = async ( {
 	);
 };
 
-// Update the current theme template
-const updateTemplate = async ( {
-	homepageTemplateId,
-}: {
-	homepageTemplateId: keyof typeof HOMEPAGE_TEMPLATES;
-} ) => {
-	// @ts-ignore No types for this exist yet.
-	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
-
-	// Ensure that the patterns are up to date because we populate images and content in previous step.
-	invalidateResolutionForStoreSelector( 'getBlockPatterns' );
-
-	const patterns = ( await resolveSelect(
-		coreStore
-		// @ts-ignore No types for this exist yet.
-	).getBlockPatterns() ) as Pattern[];
-	const patternsByName = patternsToNameMap( patterns );
-	const homepageTemplate = getTemplatePatterns(
-		HOMEPAGE_TEMPLATES[ homepageTemplateId ].blocks,
-		patternsByName
-	);
-
-	const content = [ ...homepageTemplate ]
-		.filter( Boolean )
-		.map( ( pattern ) => pattern.content )
-		.join( '\n\n' );
-
-	const currentTemplate = await resolveSelect(
-		coreStore
-		// @ts-ignore No types for this exist yet.
-	).__experimentalGetTemplateForLink( '/' );
-
-	// @ts-ignore No types for this exist yet.
-	const { saveEntityRecord } = dispatch( coreStore );
-
-	await saveEntityRecord(
-		'postType',
-		currentTemplate.type,
-		{
-			id: currentTemplate.id,
-			content,
-		},
-		{
-			throwOnError: true,
-		}
-	);
-};
-
 export const assembleSite = async (
 	context: designWithAiStateMachineContext
 ) => {
@@ -345,7 +404,6 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent(
@@ -354,6 +412,7 @@ export const assembleSite = async (
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);
+		throw error;
 	}
 
 	try {
@@ -364,33 +423,23 @@ export const assembleSite = async (
 		} );
 		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
-		// TODO handle error
 		// eslint-disable-next-line no-console
 		console.error( error );
 		recordEvent( 'customize_your_store_ai_update_template_response_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
+		throw error;
 	}
 };
 
 const installAndActivateTheme = async () => {
-	const themeSlug = 'twentytwentythree';
-
 	try {
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/install?theme=${ themeSlug }`,
-			method: 'POST',
-		} );
-
-		await apiFetch( {
-			path: `/wc-admin/onboarding/themes/activate?theme=${ themeSlug }&theme_switch_via_cys_ai_loader=1`,
-			method: 'POST',
-		} );
+		await setTheme( THEME_SLUG );
 	} catch ( error ) {
 		recordEvent(
 			'customize_your_store_ai_install_and_activate_theme_error',
 			{
-				theme: themeSlug,
+				theme: THEME_SLUG,
 				error: error instanceof Error ? error.message : 'unknown',
 			}
 		);
@@ -408,11 +457,11 @@ const saveAiResponseToOption = ( context: designWithAiStateMachineContext ) => {
 };
 
 export const services = {
-	getLookAndTone,
 	browserPopstateHandler,
 	queryAiEndpoint,
 	assembleSite,
 	updateStorePatterns,
 	saveAiResponseToOption,
 	installAndActivateTheme,
+	resetPatternsAndProducts,
 };

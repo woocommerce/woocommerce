@@ -1,0 +1,24 @@
+{
+    "name": "woocommerce/monorepo-plugin",
+    "type": "composer-plugin",
+    "require": {
+        "composer-plugin-api": "^2.0"
+    },
+    "require-dev": {
+        "composer/composer": "^2.0",
+        "wp-coding-standards/wpcs": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Automattic\\WooCommerce\\Monorepo\\Composer\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "Automattic\\WooCommerce\\Monorepo\\Composer\\Plugin"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

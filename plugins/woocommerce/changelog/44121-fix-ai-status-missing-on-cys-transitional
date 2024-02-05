@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix the missing AI status when reloading the CYS transitional page.

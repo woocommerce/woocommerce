@@ -16,7 +16,6 @@
 			"default": []
 		}
 	},
-	"usesContext": [ "editedProduct" ],
 	"supports": {
 		"align": false,
 		"html": false,

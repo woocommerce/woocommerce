@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use WC_Cache_Helper;
 
 /**
  * Class with utility methods for dealing with webhooks.
@@ -132,5 +133,24 @@ class WebhookUtil {
 				'user_id' => $user_id,
 			)
 		);
+	}
+
+	/**
+	 * Gets the count of webhooks that are configured to use the Legacy REST API to compose their payloads.
+	 *
+	 * @return int
+	 */
+	public function get_legacy_webhooks_count(): int {
+		global $wpdb;
+
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'legacy_count';
+		$count     = wp_cache_get( $cache_key, 'webhooks' );
+
+		if ( false === $count ) {
+			$count = absint( $wpdb->get_var( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `api_version` < 1;" ) );
+			wp_cache_add( $cache_key, $count, 'webhooks' );
+		}
+
+		return $count;
 	}
 }

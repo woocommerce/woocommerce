@@ -25,13 +25,18 @@ class DataSynchronizerTests extends HposTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->reset_legacy_proxy_mocks();
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		OrderHelper::delete_order_custom_tables(); // We need this since non-temporary tables won't drop automatically.
 		OrderHelper::create_order_custom_table_if_not_exist();
 		OrderHelper::toggle_cot_feature_and_usage( false );
-		$this->sut = wc_get_container()->get( DataSynchronizer::class );
+		$this->sut = $container->get( DataSynchronizer::class );
 	}
 
 	/**
@@ -531,6 +536,53 @@ class DataSynchronizerTests extends HposTestCase {
 	}
 
 	/**
+	 * Test that trashed orders are deleted after the time set in `EMPTY_TRASH_DAYS`.
+	 */
+	public function test_trashed_order_deletion(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = new WC_Order();
+		$order->save();
+
+		// Ensure the placeholder post is there.
+		$placeholder = get_post( $order->get_id() );
+		$this->assertEquals( $order->get_id(), $placeholder->ID );
+
+		// Trashed orders should be deleted by the collection mechanism.
+		$order->get_data_store()->delete( $order );
+		$this->assertEquals( $order->get_status(), 'trash' );
+		$order->save();
+
+		// Run scheduled deletion.
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		// Refresh order and ensure it's *not* gone.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertNotNull( $order );
+
+		// Time-travel into the future so that the time required to delete a trashed order has passed.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'time' => function() {
+					return time() + DAY_IN_SECONDS * EMPTY_TRASH_DAYS + 1;
+				},
+			)
+		);
+
+		// Run scheduled deletion.
+		do_action( 'wp_scheduled_delete' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+		// Ensure the placeholder post is gone.
+		$placeholder = get_post( $order->get_id() );
+		$this->assertNull( $placeholder );
+
+		// Refresh order and ensure it's gone.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertFalse( $order );
+	}
+
+	/**
 	 * @testDox When HPOS is enabled, the custom orders table is created.
 	 */
 	public function test_tables_are_created_when_hpos_enabled() {
@@ -565,8 +617,16 @@ class DataSynchronizerTests extends HposTestCase {
 
 	/**
 	 * @testDox HPOS cannot be turned on when there are pending orders.
+	 *
+	 * @testWith [true, []]
+	 *           [false, ["yes", "no"]]
+	 *
+	 * @param bool  $auth_table_change_allowed_with_sync_pending True if changing the authoritative data source for orders while synchronization is pending is allowed, false otherwise.
+	 * @param array $expected_setting_disabled_status Expected value for the 'disabled' key in the setting configuration array.
 	 */
-	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders() {
+	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders( $auth_table_change_allowed_with_sync_pending, $expected_setting_disabled_status ) {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', fn() => $auth_table_change_allowed_with_sync_pending );
+
 		$this->sut->delete_database_tables();
 		$this->toggle_cot_authoritative( false );
 		$this->disable_cot_sync();
@@ -583,7 +643,7 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$cot_setting = array_values( $cot_setting )[0];
 		$this->assertEquals( $cot_setting['value'], 'no' );
-		$this->assertEquals( $cot_setting['disabled'], array( 'yes', 'no' ) );
+		$this->assertEquals( $cot_setting['disabled'], $expected_setting_disabled_status );
 
 		$sync_setting = array_filter(
 			$features,
@@ -593,7 +653,16 @@ class DataSynchronizerTests extends HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], 'Sync 1 pending order' ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], "There's 1 order pending sync" ) );
+		$this->assertTrue(
+			str_contains(
+				$sync_setting['desc_tip'],
+				$auth_table_change_allowed_with_sync_pending ?
+				'Switching data storage while sync is incomplete is dangerous' :
+				'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>'
+			)
+		);
+		$this->assertEquals( $auth_table_change_allowed_with_sync_pending, $sync_setting['description_is_error'] );
 	}
 
 	/**

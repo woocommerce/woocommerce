@@ -1,27 +1,23 @@
 /**
- * External dependencies
- */
-import { BlockConfiguration } from '@wordpress/blocks';
-import { registerWooBlockType } from '@woocommerce/block-templates';
-
-/**
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import { Edit } from './edit';
-import { UploadsBlockAttributes } from './types';
+import { DownloadBlockEdit } from './edit';
+import { registerProductEditorBlockType } from '../../../utils';
 
-const { name, ...metadata } =
-	blockConfiguration as BlockConfiguration< UploadsBlockAttributes >;
+const { name, ...metadata } = blockConfiguration;
 
 export { metadata, name };
 
-export const settings: Partial< BlockConfiguration< UploadsBlockAttributes > > =
-	{
-		example: {},
-		edit: Edit,
-	};
+export const settings = {
+	example: {},
+	edit: DownloadBlockEdit,
+};
 
 export function init() {
-	return registerWooBlockType( { name, metadata, settings } );
+	return registerProductEditorBlockType( {
+		name,
+		metadata: metadata as never,
+		settings: settings as never,
+	} );
 }

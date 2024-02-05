@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { default as ConnectForm } from '~/dashboard/components/connect';
 
 type ConnectProps = {
-	onConnect: () => void;
+	onConnect?: () => void;
 };
 
 export const Connect: React.FC< ConnectProps > = ( { onConnect } ) => {

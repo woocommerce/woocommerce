@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Refactored network offline detection into its own hook

@@ -22,6 +22,7 @@ $dropins_mu_plugins = $report['dropins_mu_plugins'];
 $theme              = $report['theme'];
 $security           = $report['security'];
 $settings           = $report['settings'];
+$logging            = $report['logging'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) );
@@ -32,7 +33,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 	</p>
 	<p class="submit">
 		<a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
-		<a class="button-secondary docs" href="https://docs.woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
+		<a class="button-secondary docs" href="https://woo.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
 			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
 		</a>
 	</p>
@@ -462,7 +463,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 				<?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
 					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://docs.woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woo.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -573,7 +574,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 					<mark class="error"><span class="dashicons dashicons-warning"></span>
 					<?php
 					/* Translators: %s: docs link. */
-					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/ssl-and-https/' ) );
+					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/' ) );
 					?>
 					</mark>
 				<?php endif; ?>
@@ -738,8 +739,8 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			</td>
 		</tr>
 		<tr>
-			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Connected to Woo.com"><?php esc_html_e( 'Connected to Woo.com', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to Woo.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
@@ -769,6 +770,55 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			<td><?php echo $settings['HPOS_sync_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+	<tr>
+		<th colspan="3" data-export-label="Logging"><h2><?php esc_html_e( 'Logging', 'woocommerce' ); ?></h2></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td data-export-label="Enabled"><?php esc_html_e( 'Enabled', 'woocommerce' ); ?></td>
+		<td class="help"><?php echo wc_help_tip( esc_html__( 'Is logging enabled?', 'woocommerce' ) ); ?></td>
+		<td><?php echo $logging['logging_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+	</tr>
+	<tr>
+		<td data-export-label="Handler"><?php esc_html_e( 'Handler', 'woocommerce' ); ?></td>
+		<td class="help"><?php echo wc_help_tip( esc_html__( 'How log entries are being stored.', 'woocommerce' ) ); ?></td>
+		<td><?php echo esc_html( $logging['default_handler'] ); ?></td>
+	</tr>
+	<tr>
+		<td data-export-label="Retention period"><?php esc_html_e( 'Retention period', 'woocommerce' ); ?></td>
+		<td class="help"><?php echo wc_help_tip( esc_html__( 'How many days log entries will be kept before being auto-deleted.', 'woocommerce' ) ); ?></td>
+		<td>
+			<?php
+			printf(
+				esc_html(
+					// translators: %s is a number of days.
+					_n(
+						'%s day',
+						'%s days',
+						$logging['retention_period_days'],
+						'woocommerce'
+					)
+				),
+				esc_html( number_format_i18n( $logging['retention_period_days'] ) )
+			);
+			?>
+		</td>
+	</tr>
+	<tr>
+		<td data-export-label="Level threshold"><?php esc_html_e( 'Level threshold', 'woocommerce' ); ?></td>
+		<td class="help"><?php echo wc_help_tip( esc_html__( 'The minimum severity level of logs that will be stored.', 'woocommerce' ) ); ?></td>
+		<td><?php echo $logging['level_threshold'] ? esc_html( $logging['level_threshold'] ) : '<mark class="no">&ndash;</mark>'; ?></td>
+	</tr>
+	<tr>
+		<td data-export-label="Log directory size"><?php esc_html_e( 'Log directory size', 'woocommerce' ); ?></td>
+		<td class="help"><?php echo wc_help_tip( esc_html__( 'The total size of the files in the log directory.', 'woocommerce' ) ); ?></td>
+		<td><?php echo esc_html( $logging['log_directory_size'] ); ?></td>
+	</tr>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
@@ -969,7 +1019,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 					<mark class="error">
 						<span class="dashicons dashicons-warning"></span>
 					</mark>
-					<a href="https://docs.woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
+					<a href="https://woo.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
 					</a>
 				</td>

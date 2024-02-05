@@ -13,7 +13,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import NotFilterableIcon from './not-filterable-icon';
-import HiddenIcon from '../../icons/hidden-icon';
+import SeenIcon from '../../icons/seen-icon';
 
 type AttributeListItemProps = {
 	attribute: ProductAttribute;
@@ -25,7 +25,7 @@ type AttributeListItemProps = {
 	onRemoveClick?: ( attribute: ProductAttribute ) => void;
 };
 
-const NOT_VISIBLE_TEXT = __( 'Not visible', 'woocommerce' );
+const VISIBLE_TEXT = __( 'Visible in product details', 'woocommerce' );
 const NOT_FILTERABLE_CUSTOM_ATTR_TEXT = __(
 	'Custom attribute. Customers can’t filter or search by it to find this product',
 	'woocommerce'
@@ -56,7 +56,8 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 				{ attribute.options.length > 3 && (
 					<Tag
 						label={ sprintf(
-							__( '+ %i more', 'woocommerce' ),
+							/* translators: %i: number of additional attribute values that are hidden */
+							__( '+ %d more', 'woocommerce' ),
 							attribute.options.length - 2
 						) }
 					/>
@@ -75,15 +76,15 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 						</div>
 					</Tooltip>
 				) }
-				{ ! attribute.visible && (
+				{ attribute.visible && (
 					<Tooltip
 						// @ts-expect-error className is missing in TS, should remove this when it is included.
 						className="woocommerce-attribute-list-item__actions-tooltip"
 						position="top center"
-						text={ NOT_VISIBLE_TEXT }
+						text={ VISIBLE_TEXT }
 					>
 						<div className="woocommerce-attribute-list-item__actions-icon-wrapper">
-							<HiddenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
+							<SeenIcon className="woocommerce-attribute-list-item__actions-icon-wrapper-icon" />
 						</div>
 					</Tooltip>
 				) }

@@ -12,6 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	OPTIONS_STORE_NAME,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -139,7 +140,19 @@ export const VariableProductTour: React.FC = () => {
 		}
 	}, [ totalCount ] );
 
-	if ( hasShownTour === 'yes' || ! isTourOpen ) {
+	const { hasShownProductEditorTour } = useSelect( ( select ) => {
+		const { getOption } = select( OPTIONS_STORE_NAME );
+		return {
+			hasShownProductEditorTour:
+				getOption( 'woocommerce_block_product_tour_shown' ) === 'yes',
+		};
+	} );
+
+	if (
+		hasShownTour === 'yes' ||
+		! isTourOpen ||
+		! hasShownProductEditorTour
+	) {
 		return null;
 	}
 

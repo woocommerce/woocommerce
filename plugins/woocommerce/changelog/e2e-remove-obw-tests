@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Removes the onboarding wizard e2e tests (has been replaced by core profiler)

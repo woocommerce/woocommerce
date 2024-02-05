@@ -4,8 +4,8 @@
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	PartialProductVariation,
 	Product,
-	ProductVariation,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -71,7 +71,7 @@ export function Edit( {
 					),
 			};
 		},
-		[ productId ]
+		[ totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
@@ -115,17 +115,20 @@ export function Edit( {
 	);
 
 	function onSetPrices(
-		handleUpdateAll: ( update: Partial< ProductVariation >[] ) => void
+		handleUpdateAll: ( update: PartialProductVariation[] ) => void
 	) {
 		recordEvent( 'product_variations_set_prices_select', {
 			source: TRACKS_SOURCE,
 		} );
 		const productVariationsListPromise = resolveSelect(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
-		).getProductVariations< Pick< ProductVariation, 'id' >[] >( {
+		).getProductVariations< PartialProductVariation[] >( {
 			product_id: productId,
+			order: 'asc',
+			orderby: 'menu_order',
 			has_price: false,
 			_fields: [ 'id' ],
+			per_page: totalCountWithoutPrice,
 		} );
 		handlePrompt( {
 			onOk( value ) {
@@ -187,8 +190,8 @@ export function Edit( {
 							update &&
 							update.find(
 								( variation ) =>
-									variation.regular_price ||
-									variation.sale_price
+									'regular_price' in variation ||
+									'sale_price' in variation
 							) )
 					) {
 						invalidateResolution(

@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { BlockConfiguration } from '@wordpress/blocks';
-import { registerWooBlockType } from '@woocommerce/block-templates';
+
+/**
+ * Internal dependencies
+ */
+import { registerProductEditorBlockType } from '../../../utils';
 
 /**
  * Internal dependencies
@@ -22,7 +26,7 @@ export const settings = {
 };
 
 export const init = () =>
-	registerWooBlockType( {
+	registerProductEditorBlockType( {
 		name,
 		metadata: metadata as never,
 		settings: settings as never,

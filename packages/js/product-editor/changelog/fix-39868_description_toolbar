@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix positioning of fixed block toolbar in IFrame editor used for product description, to make work with latest WordPress versions.

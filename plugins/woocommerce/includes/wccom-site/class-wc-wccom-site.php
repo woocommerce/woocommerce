@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce.com Product Installation.
+ * Woo.com Product Installation.
  *
  * @package WooCommerce\WCCom
  * @since   3.7.0
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC_WCCOM_Site Class
  *
- * Main class for WooCommerce.com connected site.
+ * Main class for Woo.com connected site.
  */
 class WC_WCCOM_Site {
 
@@ -41,11 +41,10 @@ class WC_WCCOM_Site {
 	protected static function includes() {
 		require_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/class-wc-wccom-site-installer-requirements-check.php';
 	}
 
 	/**
-	 * Authenticate WooCommerce.com request.
+	 * Authenticate Woo.com request.
 	 *
 	 * @since 3.7.0
 	 * @param int|false $user_id User ID.
@@ -184,7 +183,7 @@ class WC_WCCOM_Site {
 	}
 
 	/**
-	 * Verify WooCommerce.com request from a given body and signature request.
+	 * Verify Woo.com request from a given body and signature request.
 	 *
 	 * @since 3.7.0
 	 * @param string $body                Request body.
@@ -221,8 +220,8 @@ class WC_WCCOM_Site {
 
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error-codes.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php';
+		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/abstract-wc-rest-wccom-site-controller.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller.php';
-		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-installer-controller-v2.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/rest-api/endpoints/class-wc-rest-wccom-site-ssr-controller.php';
 
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/class-wc-wccom-site-installation-state.php';
@@ -236,13 +235,9 @@ class WC_WCCOM_Site {
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php';
 		require_once WC_ABSPATH . 'includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-activate-product.php';
 
-		$namespaces['wccom-site/v1'] = array(
+		$namespaces['wccom-site/v2'] = array(
 			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller',
 			'ssr'       => 'WC_REST_WCCOM_Site_SSR_Controller',
-		);
-
-		$namespaces['wccom-site/v2'] = array(
-			'installer' => 'WC_REST_WCCOM_Site_Installer_Controller_V2',
 		);
 
 		return $namespaces;

@@ -10,7 +10,6 @@ import {
 	CB,
 	UnionPay,
 	JCB,
-	Sofort,
 } from '@woocommerce/onboarding';
 
 /**
@@ -28,8 +27,7 @@ const PaymentMethods: React.FC = () => {
 			<GooglePay />
 			<CB />
 			<UnionPay />
-			<JCB />
-			<Sofort /> { strings.andMore }
+			<JCB /> { strings.andMore }
 		</div>
 	);
 };

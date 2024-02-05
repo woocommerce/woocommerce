@@ -1,16 +1,19 @@
 /**
  * External dependencies
  */
-import { WooHeaderItem } from '@woocommerce/admin-layout';
-import { Product, ProductVariation } from '@woocommerce/data';
+import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -21,7 +24,7 @@ import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
 import { Tabs } from '../tabs';
-import { TRACKS_SOURCE } from '../../constants';
+import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -46,11 +49,7 @@ export function Header( {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord< Product | ProductVariation >(
-				'postType',
-				productType,
-				productId
-			);
+			return getEntityRecord( 'postType', productType, productId );
 		},
 		[ productId ]
 	);
@@ -61,9 +60,25 @@ export function Header( {
 		'name'
 	);
 
+	const sidebarWidth = useAdminSidebarWidth();
+
+	useEffect( () => {
+		document
+			.querySelectorAll( '.interface-interface-skeleton__header' )
+			.forEach( ( el ) => {
+				if ( ( el as HTMLElement ).style ) {
+					( el as HTMLElement ).style.width =
+						'calc(100% - ' + sidebarWidth + 'px)';
+					( el as HTMLElement ).style.left = sidebarWidth + 'px';
+				}
+			} );
+	}, [ sidebarWidth ] );
+
 	if ( ! productId ) {
 		return null;
 	}
+
+	const isVariation = lastPersistedProduct?.parent_id > 0;
 
 	return (
 		<div
@@ -73,7 +88,7 @@ export function Header( {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
-				{ lastPersistedProduct?.parent_id > 0 ? (
+				{ isVariation ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
 							// @ts-expect-error className is missing in TS, should remove this when it is included.
@@ -93,7 +108,7 @@ export function Header( {
 										);
 										const url = getNewPath(
 											{ tab: 'variations' },
-											`/product/${ lastPersistedProduct.parent_id }`
+											`/product/${ lastPersistedProduct?.parent_id }`
 										);
 										navigateTo( { url } );
 									} }
@@ -108,41 +123,44 @@ export function Header( {
 				) }
 
 				<h1 className="woocommerce-product-header__title">
-					{ lastPersistedProduct?.parent_id > 0 ? (
+					{ isVariation ? (
 						<div className="woocommerce-product-header__variable-product-title">
 							<Icon icon={ group } />
 							<span className="woocommerce-product-header__variable-product-name">
 								{ lastPersistedProduct?.name }
 							</span>
 							<span className="woocommerce-product-header__variable-product-id">
-								# { lastPersistedProduct.id }
+								# { lastPersistedProduct?.id }
 							</span>
 						</div>
 					) : (
 						getHeaderTitle(
 							editedProductName,
-							lastPersistedProduct.name
+							lastPersistedProduct?.name
 						)
 					) }
 				</h1>
 
 				<div className="woocommerce-product-header__actions">
-					<SaveDraftButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
-					/>
+					{ ! isVariation && (
+						<SaveDraftButton
+							productType={ productType }
+							productStatus={ lastPersistedProduct?.status }
+						/>
+					) }
 
 					<PreviewButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<PublishButton
 						productType={ productType }
-						productStatus={ lastPersistedProduct.status }
+						productStatus={ lastPersistedProduct?.status }
 					/>
 
 					<WooHeaderItem.Slot name="product" />
+					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />
 					<MoreMenu />
 				</div>
 			</div>

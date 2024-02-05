@@ -53,7 +53,9 @@ test.describe( 'General tab', () => {
 			await clickOnTab( 'General', page );
 			await page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' ).isVisible();
 
-			expect( page.locator( '.block-editor-warning' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.block-editor-warning' ) ).toHaveCount(
+				0
+			);
 		} );
 	} );
 
@@ -95,7 +97,10 @@ test.describe( 'General tab', () => {
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
 				.fill( productData.name );
 			await page
-				.locator( '.components-summary-control' )
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
 				.fill( productData.summary );
 			await page
 				.locator(
@@ -117,20 +122,16 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = await page.locator(
-				'div.components-snackbar__content'
-			);
+			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
 			await expect( textContent ).toMatch( /Product added/ );
 
-			const title = await page.locator(
-				'.woocommerce-product-header__title'
-			);
+			const title = page.locator( '.woocommerce-product-header__title' );
 
 			// Save product ID
 			const productIdRegex = /product%2F(\d+)/;
-			const url = await page.url();
+			const url = page.url();
 			const productIdMatch = productIdRegex.exec( url );
 			productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
@@ -146,7 +147,9 @@ test.describe( 'General tab', () => {
 				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
 				.fill( productData.name );
 			await page
-				.locator( '.components-summary-control' )
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
 				.fill( productData.summary );
 			await page
 				.locator(
@@ -161,9 +164,7 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = await page.locator(
-				'div.components-snackbar__content'
-			);
+			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
 			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
@@ -174,9 +175,9 @@ test.describe( 'General tab', () => {
 			await page.goto( `/?post_type=product&p=${ productId }`, {
 				waitUntil: 'networkidle',
 			} );
-			await expect( page.locator( '.product_title' ) ).toHaveText(
-				productData.name
-			);
+			await expect(
+				page.getByRole( 'heading', { name: productData.name } )
+			).toBeVisible();
 			const productPriceElements = await page
 				.locator( '.summary .woocommerce-Price-amount' )
 				.all();
@@ -205,7 +206,7 @@ test.describe( 'General tab', () => {
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page.locator( `a.remove[data-product_id='${ productId }']` )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );

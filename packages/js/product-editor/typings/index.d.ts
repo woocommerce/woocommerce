@@ -6,6 +6,10 @@ declare module '@woocommerce/settings' {
 		filter = ( val: unknown, fb: unknown ) =>
 			typeof val !== 'undefined' ? val : fb
 	): T;
+	export declare function isWpVersion(
+		version: string,
+		operator: '>' | '>=' | '=' | '<' | '<='
+	): boolean;
 }
 
 declare module '@wordpress/core-data' {

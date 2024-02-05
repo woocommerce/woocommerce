@@ -1440,7 +1440,7 @@ jQuery( function ( $ ) {
 		grant_access: function() {
 			var products = $( '#grant_access_id' ).val();
 
-			if ( ! products ) {
+			if ( ! products || 0 === products.length ) {
 				return;
 			}
 
@@ -1462,7 +1462,7 @@ jQuery( function ( $ ) {
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 
-				if ( response ) {
+				if ( response && -1 !== parseInt( response ) ) {
 					$( '.order_download_permissions .wc-metaboxes' ).append( response );
 				} else {
 					window.alert( woocommerce_admin_meta_boxes.i18n_download_permission_fail );

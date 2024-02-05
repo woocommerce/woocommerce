@@ -4,13 +4,24 @@
 	}
 }
 
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 .variation-items-product-tour {
 	.tour-kit-spotlight {
 		border-radius: $gap-smaller;
 		padding: $gap-large;
+		animation: fade-in 0.6s;
 	}
 	.tour-kit-frame__container,
 	.woocommerce-tour-kit-step {
 		border-radius: $gap-smaller;
+		animation: fade-in 0.6s;
 	}
 }

@@ -39,7 +39,7 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 				'test-block-name',
 				[
 					'_templateBlockId'    => 'test-block-name-1',
-					'_templateBlockOrder' => 10,
+					'_templateBlockOrder' => 10000,
 				],
 				[
 					[
@@ -47,7 +47,7 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 						[
 							'title'               => 'a',
 							'_templateBlockId'    => 'custom-inner-block-1',
-							'_templateBlockOrder' => 10,
+							'_templateBlockOrder' => 10000,
 						],
 					],
 					[
@@ -55,7 +55,7 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 						[
 							'title'               => 'b',
 							'_templateBlockId'    => 'custom-inner-block-2',
-							'_templateBlockOrder' => 10,
+							'_templateBlockOrder' => 10000,
 						],
 					],
 				],
@@ -81,7 +81,7 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 				'test-block-name',
 				[
 					'_templateBlockId'    => 'test-block-name-1',
-					'_templateBlockOrder' => 10,
+					'_templateBlockOrder' => 10000,
 				],
 				[
 					[
@@ -89,7 +89,7 @@ class CustomBlockTest extends WC_Unit_Test_Case {
 						[
 							'title'               => 'b',
 							'_templateBlockId'    => 'custom-inner-block-2',
-							'_templateBlockOrder' => 10,
+							'_templateBlockOrder' => 10000,
 						],
 					],
 				],

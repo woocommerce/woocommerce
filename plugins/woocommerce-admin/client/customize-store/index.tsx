@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { Sender, createMachine } from 'xstate';
+import { EventData, Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -16,6 +16,8 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
+import { PluginArea } from '@wordpress/plugins';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -28,16 +30,26 @@ import {
 	actions as introActions,
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
+import { DesignWithoutAi } from './design-without-ai';
+
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import { events as transitionalEvents } from './transitional';
+import {
+	events as transitionalEvents,
+	services as transitionalServices,
+	actions as transitionalActions,
+} from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
+	FlowType,
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
+import { navigateOrParent, attachParentListeners } from './utils';
+import useBodyClass from './hooks/use-body-class';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -45,7 +57,9 @@ export type customizeStoreStateMachineEvents =
 	| assemblerHubEvents
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
-	| { type: 'EXTERNAL_URL_UPDATE' };
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -65,7 +79,8 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	window.location.href = getNewPath( {}, '/', {} );
+	const url = getNewPath( {}, '/', {} );
+	navigateOrParent( window, url );
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
@@ -98,6 +113,24 @@ const browserPopstateHandler =
 		};
 	};
 
+const CYSSpinner = () => (
+	<div className="woocommerce-customize-store__loading">
+		<Spinner />
+	</div>
+);
+
+const fetchIsFontLibraryAvailable = async () => {
+	try {
+		await apiFetch( {
+			path: '/wp/v2/font-collections',
+			method: 'GET',
+		} );
+
+		return true;
+	} catch ( err ) {
+		return false;
+	}
+};
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
@@ -106,11 +139,13 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
+	...transitionalActions,
 	...machineActions,
 };
 
 export const customizeStoreStateMachineServices = {
 	...introServices,
+	...transitionalServices,
 	browserPopstateHandler,
 	markTaskComplete,
 };
@@ -142,6 +177,11 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
+		transitionalScreen: {
+			hasCompleteSurvey: false,
+		},
+		flowType: FlowType.noAI,
+		isFontLibraryAvailable: null,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -153,6 +193,16 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
 			target: 'intro',
 			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
+		NO_AI_FLOW_ERROR: {
+			target: 'intro',
+			actions: [
+				{ type: 'assignNoAIFlowError' },
+				{ type: 'updateQueryStep', step: 'intro' },
+			],
+		},
+		IS_FONT_LIBRARY_AVAILABLE: {
+			actions: [ 'assignIsFontLibraryAvailable' ],
 		},
 	},
 	states: {
@@ -170,6 +220,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					cond: {
 						type: 'hasStepInUrl',
 						step: 'design-with-ai',
+					},
+				},
+				{
+					target: 'designWithoutAi',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'design',
 					},
 				},
 				{
@@ -193,25 +250,65 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'preIntro',
+			initial: 'flowType',
 			states: {
-				preIntro: {
-					invoke: {
-						src: 'fetchIntroData',
-						onError: {
-							actions: 'assignFetchIntroDataError',
-							target: 'intro',
+				flowType: {
+					always: [
+						{
+							target: 'fetchIntroData',
+							cond: 'isNotWooExpress',
+							actions: 'assignNoAI',
 						},
-						onDone: {
-							target: 'intro',
-							actions: [
-								'assignThemeData',
-								'assignActiveThemeHasMods',
-								'assignCustomizeStoreCompleted',
-								'assignCurrentThemeIsAiGenerated',
-							],
+						{
+							target: 'checkAiStatus',
+							cond: 'isWooExpress',
 						},
+					],
+				},
+				checkAiStatus: {
+					initial: 'pending',
+					states: {
+						pending: {
+							invoke: {
+								src: 'fetchAiStatus',
+								onDone: {
+									actions: 'assignAiStatus',
+									target: 'success',
+								},
+								onError: {
+									actions: 'assignAiOffline',
+									target: 'success',
+								},
+							},
+						},
+						success: { type: 'final' },
 					},
+					onDone: 'fetchIntroData',
+				},
+				fetchIntroData: {
+					initial: 'pending',
+					states: {
+						pending: {
+							invoke: {
+								src: 'fetchIntroData',
+								onError: {
+									actions: 'assignFetchIntroDataError',
+									target: 'success',
+								},
+								onDone: {
+									target: 'success',
+									actions: [
+										'assignThemeData',
+										'assignActiveThemeHasMods',
+										'assignCustomizeStoreCompleted',
+										'assignCurrentThemeIsAiGenerated',
+									],
+								},
+							},
+						},
+						success: { type: 'final' },
+					},
+					onDone: 'intro',
 				},
 				intro: {
 					meta: {
@@ -227,6 +324,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
 					target: 'designWithAi',
 				},
+				DESIGN_WITHOUT_AI: {
+					actions: [ 'recordTracksDesignWithAIClicked' ],
+					target: 'designWithoutAi',
+				},
 				SELECTED_NEW_THEME: {
 					actions: [ 'recordTracksThemeSelected' ],
 					target: 'appearanceTask',
@@ -240,6 +341,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						'recordTracksBrowseAllThemesClicked',
 						'redirectToThemes',
 					],
+				},
+			},
+		},
+		designWithoutAi: {
+			initial: 'preDesignWithoutAi',
+			states: {
+				preDesignWithoutAi: {
+					always: {
+						target: 'designWithoutAi',
+					},
+				},
+				designWithoutAi: {
+					entry: [ { type: 'updateQueryStep', step: 'design' } ],
+					meta: {
+						component: DesignWithoutAi,
+					},
 				},
 			},
 		},
@@ -267,8 +384,54 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'assemblerHub',
+			initial: 'fetchActiveThemeHasMods',
 			states: {
+				fetchActiveThemeHasMods: {
+					invoke: {
+						src: 'fetchIntroData',
+						onDone: {
+							target: 'checkActiveThemeHasMods',
+							actions: [ 'assignActiveThemeHasMods' ],
+						},
+					},
+				},
+				checkActiveThemeHasMods: {
+					always: [
+						{
+							cond: 'activeThemeIsNotModified',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							cond: 'activeThemeHasMods',
+							target: 'preCheckAiStatus',
+						},
+					],
+				},
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
+					],
+				},
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'assemblerHub',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'assemblerHub',
+						},
+					},
+				},
 				assemblerHub: {
 					entry: [
 						{ type: 'updateQueryStep', step: 'assembler-hub' },
@@ -278,12 +441,19 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					},
 				},
 				postAssemblerHub: {
-					invoke: {
-						src: 'markTaskComplete',
-						onDone: {
-							target: '#customizeStore.transitionalScreen',
+					invoke: [
+						{
+							src: 'markTaskComplete',
+							// eslint-disable-next-line xstate/no-ondone-outside-compound-state
+							onDone: {
+								target: '#customizeStore.transitionalScreen',
+							},
 						},
-					},
+						{
+							// Pre-fetch survey completed option so we can show the screen immediately.
+							src: 'fetchSurveyCompletedOption',
+						},
+					],
 				},
 			},
 			on: {
@@ -293,22 +463,121 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
 				},
+				GO_BACK_TO_DESIGN_WITHOUT_AI: {
+					target: 'intro',
+				},
 			},
 		},
 		transitionalScreen: {
-			entry: [ { type: 'updateQueryStep', step: 'transitional' } ],
-			meta: {
-				component: AssemblerHub,
-			},
-			on: {
-				GO_BACK_TO_HOME: {
-					actions: 'redirectToWooHome',
+			initial: 'preTransitional',
+			states: {
+				preTransitional: {
+					meta: {
+						component: CYSSpinner,
+					},
+					invoke: {
+						src: 'fetchSurveyCompletedOption',
+						onError: {
+							target: 'preCheckAiStatus', // leave it as initialised default on error
+						},
+						onDone: {
+							target: 'preCheckAiStatus',
+							actions: [ 'assignHasCompleteSurvey' ],
+						},
+					},
+				},
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'transitional' },
+					],
+				},
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'transitional',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'transitional',
+						},
+					},
+				},
+				transitional: {
+					entry: [
+						{ type: 'updateQueryStep', step: 'transitional' },
+					],
+					meta: {
+						component: AssemblerHub,
+					},
+					on: {
+						GO_BACK_TO_HOME: {
+							actions: 'redirectToWooHome',
+						},
+						COMPLETE_SURVEY: {
+							actions: 'completeSurvey',
+						},
+					},
 				},
 			},
 		},
 		appearanceTask: {},
 	},
 } );
+
+declare global {
+	interface Window {
+		__wcCustomizeStore: {
+			isFontLibraryAvailable: boolean | null;
+		};
+	}
+}
+
+// HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
+// This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
+// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
+const setFlagsForIframeInstance = async (
+	send: (
+		event: customizeStoreStateMachineEvents,
+		payload?: EventData | undefined
+	) => void
+) => {
+	if ( ! window.frameElement ) {
+		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrive flag value.
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const _featureFlags = {
+			FONT_LIBRARY_AVAILABLE: ( async () => {
+				const isFontLibraryAvailable =
+					await fetchIsFontLibraryAvailable();
+
+				window.__wcCustomizeStore = {
+					...window.__wcCustomizeStore,
+					isFontLibraryAvailable,
+				};
+			} )(),
+		};
+		return;
+	}
+
+	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const _featureFlagsEvents = {
+		FONT_LIBRARY_AVAILABLE: ( async () => {
+			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
+			const isFontLibraryAvailable =
+				window.__wcCustomizeStore.isFontLibraryAvailable || false;
+			send( {
+				type: 'IS_FONT_LIBRARY_AVAILABLE',
+				payload: isFontLibraryAvailable,
+			} );
+		} )(),
+	};
+};
 
 export const CustomizeStoreController = ( {
 	actionOverrides,
@@ -338,6 +607,20 @@ export const CustomizeStoreController = ( {
 						( cond as { step: string | undefined } ).step
 					);
 				},
+				isAiOnline: ( _ctx ) => {
+					return _ctx.flowType === FlowType.AIOnline;
+				},
+				isAiOffline: ( _ctx ) => {
+					return _ctx.flowType === FlowType.AIOffline;
+				},
+				isWooExpress: () => isWooExpress(),
+				isNotWooExpress: () => ! isWooExpress(),
+				activeThemeHasMods: ( _ctx ) => {
+					return _ctx.intro.activeThemeHasMods;
+				},
+				activeThemeIsNotModified: ( _ctx ) => {
+					return ! _ctx.intro.activeThemeHasMods;
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
@@ -345,6 +628,11 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
+
+	useEffect( () => {
+		setFlagsForIframeInstance( send );
+	}, [ send ] );
+
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< CustomizeStoreComponentMeta >(
@@ -359,6 +647,14 @@ export const CustomizeStoreController = ( {
 			setCurrentComponent( () => currentNodeMeta?.component );
 		}
 	}, [ CurrentComponent, currentNodeMeta?.component ] );
+
+	// Run listeners for parent window.
+	useEffect( () => {
+		const removeListener = attachParentListeners();
+		return removeListener;
+	}, [] );
+
+	useBodyClass( 'is-fullscreen-mode' );
 
 	const currentNodeCssLabel =
 		state.value instanceof Object
@@ -378,11 +674,11 @@ export const CustomizeStoreController = ( {
 						currentState={ state.value }
 					/>
 				) : (
-					<div className="woocommerce-customize-store__loading">
-						<Spinner />
-					</div>
+					<CYSSpinner />
 				) }
 			</div>
+			{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+			<PluginArea scope="woocommerce-customize-store" />
 		</>
 	);
 };

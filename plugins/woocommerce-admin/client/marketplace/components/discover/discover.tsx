@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useContext, useEffect, useState } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -20,6 +21,19 @@ export default function Discover(): JSX.Element | null {
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, setIsLoading } = marketplaceContextValue;
 
+	function recordTracksEvent( products: ProductGroup[] ) {
+		const product_ids = products
+			.flatMap( ( group ) => group.items )
+			.map( ( product ) => {
+				return product.id;
+			} );
+
+		recordEvent( 'marketplace_discover_viewed', {
+			view: 'discover',
+			product_ids,
+		} );
+	}
+
 	// Get the content for this screen
 	useEffect( () => {
 		setIsLoading( true );
@@ -35,6 +49,7 @@ export default function Discover(): JSX.Element | null {
 			)
 			.then( ( products: Array< ProductGroup > ) => {
 				setProductGroups( products );
+				recordTracksEvent( products );
 			} )
 			.finally( () => {
 				setIsLoading( false );
@@ -58,6 +73,7 @@ export default function Discover(): JSX.Element | null {
 			{ groupsList.map( ( groups ) => (
 				<ProductList
 					key={ groups.id }
+					productGroup={ groups.id }
 					title={ groups.title }
 					products={ groups.items }
 					groupURL={ groups.url }

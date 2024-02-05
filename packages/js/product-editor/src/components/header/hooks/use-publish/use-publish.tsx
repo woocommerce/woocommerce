@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Product } from '@woocommerce/data';
+import type { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -12,8 +12,8 @@ import { MouseEvent } from 'react';
  * Internal dependencies
  */
 import { useValidations } from '../../../../contexts/validation-context';
-import { WPError } from '../../../../utils/get-product-error-message';
-import { PublishButtonProps } from '../../publish-button';
+import type { WPError } from '../../../../utils/get-product-error-message';
+import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
 	productType = 'product',
@@ -35,12 +35,29 @@ export function usePublish( {
 		'id'
 	);
 
-	const { isSaving } = useSelect(
+	const { isSaving, isDirty } = useSelect(
 		( select ) => {
-			const { isSavingEntityRecord } = select( 'core' );
+			const {
+				// @ts-expect-error There are no types for this.
+				isSavingEntityRecord,
+				// @ts-expect-error There are no types for this.
+				hasEditsForEntityRecord,
+				// @ts-expect-error There are no types for this.
+				getRawEntityRecord,
+			} = select( 'core' );
 
 			return {
 				isSaving: isSavingEntityRecord< boolean >(
+					'postType',
+					productType,
+					productId
+				),
+				isDirty: hasEditsForEntityRecord(
+					'postType',
+					productType,
+					productId
+				),
+				currentPost: getRawEntityRecord< boolean >(
 					'postType',
 					productType,
 					productId
@@ -51,9 +68,12 @@ export function usePublish( {
 	);
 
 	const isBusy = isSaving || isValidating;
+	const isDisabled = disabled || isBusy || ! isDirty;
 
-	const isPublished = productStatus === 'publish';
+	const isPublished =
+		productType === 'product' ? productStatus === 'publish' : true;
 
+	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
@@ -62,17 +82,25 @@ export function usePublish( {
 		}
 
 		try {
-			await validate( {
-				status: 'publish',
-			} );
-
-			// The publish button click not only change the status of the product
-			// but also save all the pending changes. So even if the status is
-			// publish it's possible to save the product too.
-			if ( ! isPublished ) {
-				await editEntityRecord( 'postType', productType, productId, {
+			if ( productType === 'product' ) {
+				await validate( {
 					status: 'publish',
 				} );
+				// The publish button click not only change the status of the product
+				// but also save all the pending changes. So even if the status is
+				// publish it's possible to save the product too.
+				if ( ! isPublished ) {
+					await editEntityRecord(
+						'postType',
+						productType,
+						productId,
+						{
+							status: 'publish',
+						}
+					);
+				}
+			} else {
+				await validate();
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
@@ -101,6 +129,16 @@ export function usePublish( {
 						wpError.message = (
 							error as Record< string, string >
 						 ).variations;
+					} else {
+						const errorMessage = Object.values(
+							error as Record< string, string >
+						).find( ( value ) => value !== undefined ) as
+							| string
+							| undefined;
+						if ( errorMessage !== undefined ) {
+							wpError.code = 'product_form_field_error';
+							wpError.message = errorMessage;
+						}
 					}
 				}
 				onPublishError( wpError );
@@ -114,6 +152,7 @@ export function usePublish( {
 			: __( 'Add', 'woocommerce' ),
 		...props,
 		isBusy,
+		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
 	};

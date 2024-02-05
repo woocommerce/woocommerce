@@ -9,7 +9,7 @@ const headerChoices = [
 		label: 'Essential Header',
 	},
 	{
-		slug: 'woocommerce-blocks/header-centered-menu-with-search',
+		slug: 'woocommerce-blocks/header-centered-menu',
 		label: 'Centered Menu with search Header',
 	},
 	{
@@ -43,7 +43,7 @@ export const defaultHeader = {
             Chosen look and tone: ${ look } look, ${ tone } tone.
             Business description: ${ businessDescription }
 
-            Headers to choose from: 
+            Headers to choose from:
             ${ JSON.stringify( headerChoices ) }
         `;
 	},

@@ -29,6 +29,21 @@ export type RecommendThemesAPIResponse = {
 	};
 };
 
+export type aiStatusResponse = {
+	status: {
+		indicator: 'major' | 'critical' | 'ok';
+	};
+};
+
+export enum FlowType {
+	// Flow when the AI is online.
+	AIOnline = 'AIOnline',
+	// Flow when the AI is offline because the AI endpoints are down.
+	AIOffline = 'AIOffline',
+	// Flow when the AI isn't available in the site. E.g. the site is not on a paid plan.
+	noAI = 'noAI',
+}
+
 export type customizeStoreStateMachineContext = {
 	themeConfiguration: Record< string, unknown >; // placeholder for theme configuration until we know what it looks like
 	intro: {
@@ -39,4 +54,9 @@ export type customizeStoreStateMachineContext = {
 		customizeStoreTaskCompleted: boolean;
 		currentThemeIsAiGenerated: boolean;
 	};
+	transitionalScreen: {
+		hasCompleteSurvey: boolean;
+	};
+	flowType: FlowType;
+	isFontLibraryAvailable: boolean | null;
 };

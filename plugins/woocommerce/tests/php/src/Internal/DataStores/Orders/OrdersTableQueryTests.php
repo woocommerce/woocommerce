@@ -23,6 +23,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->toggle_cot_feature_and_usage( true );
@@ -33,6 +34,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 
@@ -399,5 +401,178 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $query->max_num_pages );
 
 		remove_all_filters( 'woocommerce_hpos_pre_query' );
+	}
+
+	/**
+	 * @testdox Orders will be correctly returned by inexact queries using the 's' search argument.
+	 */
+	public function test_query_s_argument() {
+		$order1 = new \WC_Order();
+		$order1->set_billing_first_name( '%ir Woo' );
+		$order1->set_billing_email( 'test_user@woo.test' );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->set_billing_email( 'other_user@woo.test' );
+		$order2->save();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['s'] = '%';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = '%ir';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'woo.test';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id(), $order2->get_id() ), $query->orders );
+
+		$query_args['s'] = '_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id(), $order2->get_id() ), $query->orders );
+
+		$query_args['s'] = 'nowhere_to_be_found';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
+	/**
+	 * Set up some dummy orders, to help test the search filter.
+	 *
+	 * @return array Order IDs
+	 */
+	private function setup_dummy_orders_for_search_filter() {
+		$customer_order = new \WC_Order();
+		$customer_order->set_billing_first_name( 'Customer name' );
+		$customer_order->set_billing_email( 'customer@woo.test' );
+		$customer_order->set_status( 'completed' );
+		$customer_order->save();
+
+		$test_product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Product name' ) );
+		$test_product->save();
+		$product_order = new WC_Order();
+		$product_order->add_product( $test_product );
+		$product_order->set_status( 'completed' );
+		$product_order->save();
+
+		return array( $customer_order->get_id(), $product_order->get_id() );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with a 'customer' param passed in.
+	 */
+	public function test_query_s_filters_customers() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customers';
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with a 'product' param passed in.
+	 */
+	public function test_query_s_filters_products() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'products';
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'all' param passed in.
+	 */
+	public function test_query_s_filters_all() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		// Default search filter is all, so we don't need to set it explicitly.
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = 'name';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( $orders, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'order_id' param passed in.
+	 */
+	public function test_query_s_filters_order_id() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => $orders[0],
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'order_id';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = $orders[1];
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'customer_email' param passed in.
+	 */
+	public function test_query_s_filters_customer_email() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => 'customer@woo.t',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customer_email';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
 	}
 }

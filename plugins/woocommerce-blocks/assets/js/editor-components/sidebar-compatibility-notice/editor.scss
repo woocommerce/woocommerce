@@ -1,0 +1,25 @@
+.wc-blocks-sidebar-compatibility-notice.is-dismissible {
+	margin: 0;
+	padding: 0 0 0 $gap;
+
+	.components-notice__dismiss {
+		min-width: $gap-large;
+	}
+
+	.components-notice__content {
+		margin: 0 0 $gap-smallest;
+	}
+
+	svg {
+		width: $gap;
+		height: $gap;
+	}
+
+	&.is-hidden {
+		display: none;
+	}
+
+	button {
+		margin: $gap 0;
+	}
+}

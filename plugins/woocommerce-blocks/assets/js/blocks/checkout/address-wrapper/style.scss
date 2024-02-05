@@ -1,0 +1,32 @@
+.wc-block-components-address-address-wrapper {
+	position: relative;
+
+	.wc-block-components-address-card-wrapper,
+	.wc-block-components-address-form-wrapper {
+		transition: all 300ms ease-in-out;
+		width: 100%;
+	}
+
+	&.is-editing {
+		.wc-block-components-address-form-wrapper {
+			opacity: 1;
+		}
+		.wc-block-components-address-card-wrapper {
+			opacity: 0;
+			visibility: hidden;
+			position: absolute;
+			top: 0;
+		}
+	}
+
+	&:not(.is-editing) {
+		.wc-block-components-address-form-wrapper {
+			opacity: 0;
+			visibility: hidden;
+			height: 0;
+		}
+		.wc-block-components-address-card-wrapper {
+			opacity: 1;
+		}
+	}
+}

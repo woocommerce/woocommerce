@@ -12,7 +12,7 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 import { useSelect } from '@wordpress/data';
 import { BlockInstance } from '@wordpress/blocks';
 
-type ChangeHandler = (
+export type ChangeHandler = (
 	blocks: BlockInstance[],
 	options: Record< string, unknown >
 ) => void;
@@ -34,10 +34,10 @@ export const useEditorBlocks = (): [
 
 	// @ts-ignore Types are not up to date.
 	const [ blocks, onInput, onChange ]: [
-		BlockInstance[],
+		BlockInstance[] | undefined,
 		ChangeHandler,
 		ChangeHandler
 	] = useEntityBlockEditor( 'postType', templateType );
 
-	return [ blocks, onInput, onChange ];
+	return [ blocks ?? [], onInput, onChange ];
 };

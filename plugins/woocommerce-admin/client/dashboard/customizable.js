@@ -185,7 +185,9 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 
 		return (
 			<Dropdown
-				position="top center"
+				popoverProps={ {
+					placement: 'top',
+				} }
 				className="woocommerce-dashboard-section__add-more"
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<Button
@@ -210,6 +212,7 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 										) }
 										className="woocommerce-dashboard-section__add-more-btn"
 										title={ sprintf(
+											/* translators: %s: dashboard section titles which are hidden, this button allows unhiding them */
 											__(
 												'Add %s section',
 												'woocommerce'

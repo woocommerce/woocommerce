@@ -25,6 +25,7 @@ class Init {
 	 */
 	public function __construct() {
 		PaymentGatewaysController::init();
+		add_action( 'update_option_woocommerce_default_country', array( $this, 'delete_specs_transient' ) );
 	}
 
 	/**
@@ -40,8 +41,13 @@ class Init {
 		}
 
 		foreach ( $specs as $spec ) {
-			$suggestion    = EvaluateSuggestion::evaluate( $spec );
-			$suggestions[] = $suggestion;
+			try {
+				$suggestion    = EvaluateSuggestion::evaluate( $spec );
+				$suggestions[] = $suggestion;
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Throwable $e ) {
+				// Ignore errors.
+			}
 		}
 
 		return array_values(

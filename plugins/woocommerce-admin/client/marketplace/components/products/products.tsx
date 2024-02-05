@@ -16,17 +16,16 @@ import CategorySelector from '../category-selector/category-selector';
 import ProductListContent from '../product-list-content/product-list-content';
 import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
-import { Product, ProductType } from '../product-list/types';
-import {
-	MARKETPLACE_ITEMS_PER_PAGE,
-	MARKETPLACE_SEARCH_RESULTS_PER_PAGE,
-} from '../constants';
+import { Product, ProductType, SearchResultType } from '../product-list/types';
+import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 
 interface ProductsProps {
 	categorySelector?: boolean;
 	products?: Product[];
 	perPage?: number;
 	type: ProductType;
+	searchTerm?: string;
+	showAllButton?: boolean;
 }
 
 const LABELS = {
@@ -46,15 +45,12 @@ export default function Products( props: ProductsProps ): JSX.Element {
 	const label = LABELS[ props.type ].label;
 	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
+	const category = query?.category;
 
-	const perPage =
-		// Limit results when on search tab, and not showing only one section.
-		query?.tab === 'search' && ! query?.section
-			? MARKETPLACE_SEARCH_RESULTS_PER_PAGE
-			: MARKETPLACE_ITEMS_PER_PAGE;
+	const perPage = props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE;
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
-	const showAllButton = query.tab === 'search' && ! query.section;
+	const showAllButton = props.showAllButton ?? false;
 
 	function showSection( section: ProductType ) {
 		navigateTo( {
@@ -109,15 +105,32 @@ export default function Products( props: ProductsProps ): JSX.Element {
 		}
 
 		if ( products.length === 0 ) {
-			return <NoResults type={ props.type } />;
+			const type =
+				props.type === ProductType.extension
+					? SearchResultType.extension
+					: SearchResultType.theme;
+
+			return <NoResults type={ type } showHeading={ false } />;
 		}
+
+		const productListClass = classnames(
+			showAllButton
+				? 'woocommerce-marketplace__product-list-content--collapsed'
+				: ''
+		);
 
 		return (
 			<>
 				{ props.categorySelector && (
 					<CategorySelector type={ props.type } />
 				) }
-				<ProductListContent products={ products } type={ props.type } />
+				<ProductListContent
+					products={ products }
+					type={ props.type }
+					className={ productListClass }
+					searchTerm={ props.searchTerm }
+					category={ category }
+				/>
 				{ showAllButton && (
 					<Button
 						className={ viewAllButonClassName }

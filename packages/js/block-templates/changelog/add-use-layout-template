@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added useLayoutTemplate React hook, to load layout templates via the REST API

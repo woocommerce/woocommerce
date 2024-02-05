@@ -133,7 +133,10 @@ class WC_Tracker {
 		$data = array();
 
 		// General site info.
-		$data['url'] = home_url();
+		$data['url']      = home_url();
+		$data['store_id'] = get_option( \WC_Install::STORE_ID_OPTION, null );
+		$data['blog_id']  = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null;
+
 		/**
 		 * Filter the admin email that's sent with data.
 		 *
@@ -361,7 +364,7 @@ class WC_Tracker {
 	}
 
 	/**
-	 * Check to see if the helper is connected to woocommerce.com
+	 * Check to see if the helper is connected to Woo.com
 	 *
 	 * @return string
 	 */
@@ -622,8 +625,8 @@ class WC_Tracker {
 				$curr_tokens = preg_split( '/[ :,\-_]+/', $key );
 				$prev_tokens = preg_split( '/[ :,\-_]+/', $prev );
 
-				$len_curr = count( $curr_tokens );
-				$len_prev = count( $prev_tokens );
+				$len_curr = is_array( $curr_tokens ) ? count( $curr_tokens ) : 0;
+				$len_prev = is_array( $prev_tokens ) ? count( $prev_tokens ) : 0;
 
 				$index_unique = -1;
 				// Gather the common tokens.
@@ -637,7 +640,7 @@ class WC_Tracker {
 				}
 
 				// If only one token is different, and those tokens contain digits, then that could be the unique id.
-				if ( count( $curr_tokens ) - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 && $index_unique > -1 ) {
+				if ( $len_curr - count( $comm_tokens ) <= 1 && count( $comm_tokens ) > 0 && $index_unique > -1 ) {
 					$objects[ $key ]->group_key  = implode( ' ', $comm_tokens );
 					$objects[ $prev ]->group_key = implode( ' ', $comm_tokens );
 				} else {
@@ -1069,8 +1072,9 @@ class WC_Tracker {
 	 * - pickup_locations_count
 	 */
 	public static function get_pickup_location_data() {
-		$pickup_location_enabled = false;
-		$pickup_locations_count  = count( get_option( 'pickup_location_pickup_locations', array() ) );
+		$pickup_location_enabled          = false;
+		$pickup_location_pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
+		$pickup_locations_count           = is_countable( $pickup_location_pickup_locations ) ? count( $pickup_location_pickup_locations ) : 0;
 
 		// Get the available shipping methods.
 		$shipping_methods = WC()->shipping()->get_shipping_methods();

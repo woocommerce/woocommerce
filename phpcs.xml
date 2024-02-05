@@ -107,18 +107,24 @@
 	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod.MissingFinal">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod.MissingInternalTag">
 		<exclude-pattern>src/Internal/Admin/</exclude-pattern>
 		<exclude-pattern>src/Admin/</exclude-pattern>
+		<exclude-pattern>src/Blocks/</exclude-pattern>
+		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
 
 	<!-- Temporary -->

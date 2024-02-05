@@ -303,12 +303,13 @@ class WC_Admin_Importers {
 		} else {
 			wp_send_json_success(
 				array(
-					'position'   => $importer->get_file_position(),
-					'percentage' => $percent_complete,
-					'imported'   => count( $results['imported'] ),
-					'failed'     => count( $results['failed'] ),
-					'updated'    => count( $results['updated'] ),
-					'skipped'    => count( $results['skipped'] ),
+					'position'            => $importer->get_file_position(),
+					'percentage'          => $percent_complete,
+					'imported'            => count( $results['imported'] ),
+					'imported_variations' => count( $results['imported_variations'] ),
+					'failed'              => count( $results['failed'] ),
+					'updated'             => count( $results['updated'] ),
+					'skipped'             => count( $results['skipped'] ),
 				)
 			);
 		}

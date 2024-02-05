@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The main entry-point for all things related to the Helper.
  * The Helper manages the connection between the store and
- * an account on WooCommerce.com.
+ * an account on Woo.com.
  */
 class WC_Helper_Admin {
 
@@ -39,51 +39,55 @@ class WC_Helper_Admin {
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
+		// Get the all installed themes and plugins. Knowing this will help us decide to show Add to Store button on product cards.
+		$installed_products = array_merge( WC_Helper::get_local_plugins(), WC_Helper::get_local_themes() );
+		$installed_products = array_map(
+			function ( $product ) {
+				return $product['slug'];
+			},
+			$installed_products
+		);
+
 		$settings['wccomHelper'] = array(
-			'isConnected' => WC_Helper::is_site_connected(),
-			'connectURL'  => self::get_connection_url(),
-			'userEmail'   => $auth_user_email,
-			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry' => wc_get_base_location()['country'],
+			'isConnected'            => WC_Helper::is_site_connected(),
+			'connectURL'             => self::get_connection_url(),
+			'userEmail'              => $auth_user_email,
+			'userAvatar'             => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'           => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'      => $installed_products,
 		);
 
 		return $settings;
 	}
 
 	/**
-	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
+	 * Generates the URL for connecting or disconnecting the store to/from Woo.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
 	 * @return string
 	 */
 	public static function get_connection_url() {
-		// No active connection.
-		if ( ! WC_Helper::is_site_connected() ) {
-			$connect_url = add_query_arg(
-				array(
-					'page'              => 'wc-addons',
-					'section'           => 'helper',
-					'wc-helper-connect' => 1,
-					'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
-				),
-				admin_url( 'admin.php' )
-			);
+		global $current_screen;
 
-			return $connect_url;
-		}
-
-		$connect_url = add_query_arg(
-			array(
-				'page'                 => 'wc-addons',
-				'section'              => 'helper',
-				'wc-helper-disconnect' => 1,
-				'wc-helper-nonce'      => wp_create_nonce( 'disconnect' ),
-			),
-			admin_url( 'admin.php' )
+		$connect_url_args = array(
+			'page'    => 'wc-addons',
+			'section' => 'helper',
 		);
 
-		return $connect_url;
+		// No active connection.
+		if ( WC_Helper::is_site_connected() ) {
+			$connect_url_args['wc-helper-disconnect'] = 1;
+			$connect_url_args['wc-helper-nonce']      = wp_create_nonce( 'disconnect' );
+		} else {
+			$connect_url_args['wc-helper-connect'] = 1;
+			$connect_url_args['wc-helper-nonce']   = wp_create_nonce( 'connect' );
+		}
+
+		return add_query_arg(
+			$connect_url_args,
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**
@@ -112,7 +116,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured procucts from WooCommerce.com and serve them
+	 * Fetch featured products from Woo.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {
@@ -124,7 +128,6 @@ class WC_Helper_Admin {
 
 		wp_send_json( $featured );
 	}
-
 }
 
 WC_Helper_Admin::load();

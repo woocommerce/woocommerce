@@ -1,6 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Prevented a 1.5px cosmetic shift of contents in the Extension Search box when focussing/unfocussing.
-
-
-

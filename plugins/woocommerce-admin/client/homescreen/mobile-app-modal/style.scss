@@ -14,7 +14,7 @@
 	max-width: 964px;
 	min-width: 534px;
 	// Overrides the default modal max-height.
-	max-height: 663px;
+	max-height: unset;
 
 	.components-modal__header {
 		height: 0;
@@ -154,7 +154,14 @@
 	}
 }
 
-.woocommerce-stepper.is-vertical .woocommerce-stepper__step.is-complete {
+.login-stepper-wrapper {
+	button.install-app-button {
+		position: relative;
+		margin-top: 1em;
+	}
+}
+
+.woocommerce-stepper.is-vertical .woocommerce-stepper__step {
 	// default vertical step distance is 36px which is too much and doesn't match the design
 	padding-bottom: 16px;
 }

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix regression setting readOnlyWhenClosed to false by default on attribute term input field

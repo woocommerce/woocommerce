@@ -44,6 +44,7 @@ build-style/
 build-style.js
 build-types/
 dist/
+oclif.manifest.json
 
 # Project files
 node_modules/
@@ -76,6 +77,7 @@ nbproject/private/
 
 # E2E and API Test Results
 test-results
+.auth/
 
 # Admin Feature config
 plugins/woocommerce/includes/react-admin/feature-config.php
@@ -94,8 +96,17 @@ allure-results
 changes.json
 .env
 
-# Turborepo
+# Build Cache
 .turbo
+.wireit
 
 # Support .gitkeep Files
 !.gitkeep
+
+# default docs manifest
+/manifest.json
+
+# Metrics tests
+/artifacts
+/plugins/*/artifacts
+/tools/*/artifacts

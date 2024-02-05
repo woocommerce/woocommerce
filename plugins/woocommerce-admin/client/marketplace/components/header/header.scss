@@ -31,6 +31,14 @@
 	}
 }
 
+.woocommerce-marketplace--my-subscriptions {
+	@media (width <= $breakpoint-medium) {
+		.woocommerce-marketplace__search {
+			display: none;
+		}
+	}
+}
+
 .woocommerce-marketplace__header-title {
 	align-items: center;
 	align-self: stretch;

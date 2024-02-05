@@ -19,10 +19,8 @@ This is the documentation for the new e2e testing setup based on Playwright and 
 
 ## Pre-requisites
 
--   Node.js ([Installation instructions](https://nodejs.org/en/download/))
--   NVM ([Installation instructions](https://github.com/nvm-sh/nvm))
--   PNPM ([Installation instructions](https://pnpm.io/installation))
--   Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/))
+-   Go through the [WooCommerce Monorepo prerequisites](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#prerequisites) first, including the commands to get everything working.
+-   Install Docker and Docker Compose ([Installation instructions](https://docs.docker.com/engine/install/)). Docker Compose comes installed in Docker Desktop by default.
 
 Note, that if you are on Mac and you install docker through other methods such as homebrew, for example, your steps to set it up might be different. The commands listed in steps below may also vary.
 
@@ -36,7 +34,7 @@ End-to-end tests are powered by Playwright. The test site is spinned up using `w
 
 -   `nvm use` (uses the default node version you have set in NVM)
 -   `pnpm install` (installs dependencies)
--   `pnpm run build --filter=woocommerce` (builds WooCommerce locally)
+-   `pnpm --filter='@woocommerce/plugin-woocommerce' build` (builds WooCommerce locally)
 -   `cd plugins/woocommerce` (changes into the WooCommerce plugin folder)
 -   `npx playwright install` (installs the latest Playwright version)
 -   `pnpm env:start` (starts the local environment)

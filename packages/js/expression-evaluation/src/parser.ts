@@ -79,6 +79,23 @@ const grammar = `
 			}
 		}, head );
 	}
+
+	function getPropertyValue( obj, propertyName ) {
+		if ( Object.hasOwn( obj, propertyName ) ) {
+			return obj[ propertyName ];
+		} else if (
+			Array.isArray( obj ) &&
+			obj.length > 0 &&
+			Object.hasOwn( obj[ 0 ], 'key' ) &&
+			Object.hasOwn( obj[ 0 ], 'value' )
+		) {
+			// We likely dealing with an array of objects with key/value pairs (like post meta data)
+			const item = obj.find( ( item ) => item.key === propertyName );
+			return item?.value;
+		}
+
+		return undefined;
+	}
 }}
 
 Start
@@ -116,10 +133,10 @@ __ "skipped"
 IdentifierPath
 	= variable:Identifier accessor:(__ "." __ Identifier)* {
 		const path = variable.split( '.' );
-		let result = path.reduce( ( nextObject, propertyName ) => nextObject[ propertyName ], options.context );
+		let result = path.reduce( getPropertyValue, options.context );
 
 		for ( let i = 0; i < accessor.length; i++ ) {
-			result = result[ accessor[ i ][ 3 ] ];
+			result = getPropertyValue( result, accessor[ i ][ 3 ] );
 		}
 
 		return result;

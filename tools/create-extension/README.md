@@ -11,7 +11,7 @@ Scaffold a modern JavaScript WordPress plugin with WooCommerce tooling.
 ### Usage
 
 ```
-pnpm run create-extension
+pnpm create-extension
 ```
 
 The script will create a sibling directory by a name of your choosing. Once you change directories into the new folder, install dependencies and start a development build.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes the logic responsible for removing duplicate notices from the (classic) cart page.

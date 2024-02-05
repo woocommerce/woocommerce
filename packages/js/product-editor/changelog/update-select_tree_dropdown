@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix issue with category parent select control clearing search value when typing.

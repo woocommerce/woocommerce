@@ -21,7 +21,7 @@ $uploads = wp_get_upload_dir();
 				/* translators: 1: uploads directory URL 2: documentation URL */
 				__( 'Your store\'s uploads directory is <a href="%1$s">browsable via the web</a>. We strongly recommend <a href="%2$s">configuring your web server to prevent directory indexing</a>.', 'woocommerce' ),
 				esc_url( $uploads['baseurl'] . '/woocommerce_uploads' ),
-				'https://docs.woocommerce.com/document/digital-downloadable-product-handling/#protecting-your-uploads-directory'
+				'https://woo.com/document/digital-downloadable-product-handling/#protecting-your-uploads-directory'
 			)
 		);
 		?>

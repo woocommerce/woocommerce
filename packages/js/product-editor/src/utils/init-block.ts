@@ -3,7 +3,11 @@
  */
 import { Block, BlockConfiguration } from '@wordpress/blocks';
 import deprecated from '@wordpress/deprecated';
-import { registerWooBlockType } from '@woocommerce/block-templates';
+
+/**
+ * Internal dependencies
+ */
+import { registerProductEditorBlockType } from './register-product-editor-block-type';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -22,12 +26,12 @@ export function initBlock<
 	T extends Record< string, any > = Record< string, any >
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
 	deprecated( 'initBlock()', {
-		alternative: 'registerWooBlockType() from @woocommerce/block-templates',
+		alternative: 'registerProductEditorBlockType()',
 	} );
 
 	if ( ! block ) {
 		return;
 	}
 
-	return registerWooBlockType( block );
+	return registerProductEditorBlockType( block );
 }

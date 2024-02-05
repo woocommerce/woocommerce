@@ -1,0 +1,24 @@
+name: Pull Request Label Validation
+
+on:
+  pull_request:
+    branches:
+      - trunk
+    types:
+      - labeled
+      - unlabeled
+      - opened
+      - reopened
+      - synchronize
+      - edited
+
+env:
+  LABELS: ${{ join( github.event.pull_request.labels.*.name, ' ' ) }}
+
+jobs:
+  check-type-label:
+    name: Check [Type] Label
+    runs-on: ubuntu-latest
+    steps:
+      - if: contains( env.LABELS, 'type' ) == false && contains( env.LABELS, 'skip-changelog' ) == false
+        run: exit 1

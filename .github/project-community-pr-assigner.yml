@@ -1,7 +1,7 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 ".github/*":
-  - team: atlas
+  - team: vortex
 
 "packages/js/api/**/*":
   - team: solaris
@@ -82,4 +82,4 @@
   - team: ghidorah
 
 "plugins/woocommerce-beta-tester/**/*":
-  - team: atlas
+  - team: vortex

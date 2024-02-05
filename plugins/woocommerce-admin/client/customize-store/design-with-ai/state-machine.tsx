@@ -19,6 +19,7 @@ import {
 	LookAndFeel,
 	ToneOfVoice,
 	ApiCallLoader,
+	AssembleHubLoader,
 } from './pages';
 import { actions } from './actions';
 import { services } from './services';
@@ -35,6 +36,10 @@ export const hasStepInUrl = (
 		pathFragments[ 3 ] === // [0] '', [1] 'customize-store', [2] cys step slug [3] design-with-ai step slug
 		( cond as { step: string | undefined } ).step
 	);
+};
+
+export const isAiOnline = ( _ctx: designWithAiStateMachineContext ) => {
+	return _ctx.aiOnline;
 };
 
 export const designWithAiStateMachineDefinition = createMachine(
@@ -61,6 +66,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			},
 		},
 		context: {
+			startLoadingTime: null,
 			businessInfoDescription: {
 				descriptionText: '',
 			},
@@ -82,6 +88,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
+			aiOnline: true,
 		},
 		initial: 'navigate',
 		states: {
@@ -145,34 +152,18 @@ export const designWithAiStateMachineDefinition = createMachine(
 								actions: [
 									'assignBusinessInfoDescription',
 									'spawnSaveDescriptionToOption',
+									{
+										type: 'recordTracksStepCompleted',
+										step: 'business_info_description',
+									},
 								],
 								target: 'postBusinessInfoDescription',
 							},
 						},
 					},
 					postBusinessInfoDescription: {
-						invoke: {
-							src: 'getLookAndTone',
-							onError: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'logAIAPIRequestError',
-								],
-								target: '#lookAndFeel',
-							},
-							onDone: {
-								actions: [
-									{
-										type: 'recordTracksStepCompleted',
-										step: 'business_info_description',
-									},
-									'assignLookAndTone',
-								],
-								target: '#lookAndFeel',
-							},
+						always: {
+							target: '#lookAndFeel',
 						},
 					},
 				},
@@ -281,12 +272,24 @@ export const designWithAiStateMachineDefinition = createMachine(
 								type: 'updateQueryStep',
 								step: 'api-call-loader',
 							},
+							'assignStartLoadingTime',
 						],
 						type: 'parallel',
 						states: {
 							chooseColorPairing: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'success',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'queryAiEndpoint',
@@ -332,11 +335,36 @@ export const designWithAiStateMachineDefinition = createMachine(
 								},
 							},
 							updateStorePatterns: {
-								initial: 'pending',
+								initial: 'executeOrSkip',
 								states: {
+									executeOrSkip: {
+										always: [
+											{
+												target: 'pending',
+												cond: 'isAiOnline',
+											},
+											{
+												target: 'resetPatternsAndProducts',
+											},
+										],
+									},
 									pending: {
 										invoke: {
 											src: 'updateStorePatterns',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions: [
+													'assignAPICallLoaderError',
+												],
+												target: '#toneOfVoice',
+											},
+										},
+									},
+									resetPatternsAndProducts: {
+										invoke: {
+											src: 'resetPatternsAndProducts',
 											onDone: {
 												target: 'success',
 											},
@@ -423,13 +451,17 @@ export const designWithAiStateMachineDefinition = createMachine(
 							},
 						},
 						onDone: {
-							actions: [
-								// Full redirect to the Assembler Hub to ensure the user see the new generated content.
-								'redirectToAssemblerHub',
-							],
+							target: '#designWithAi.showAssembleHub',
 						},
 					},
 				},
+			},
+			showAssembleHub: {
+				meta: {
+					component: AssembleHubLoader,
+				},
+				entry: [ 'redirectToAssemblerHub' ],
+				type: 'final',
 			},
 		},
 	},
@@ -438,6 +470,7 @@ export const designWithAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			isAiOnline,
 		},
 	}
 );

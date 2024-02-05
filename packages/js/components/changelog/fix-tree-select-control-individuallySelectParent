@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-TreeSelectControl Component - Make sure individuallySelectParent prop is respected

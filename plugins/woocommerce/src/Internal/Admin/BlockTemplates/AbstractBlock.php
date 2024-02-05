@@ -31,14 +31,42 @@ class AbstractBlock implements BlockInterface {
 	 *
 	 * @var int
 	 */
-	private $order = 10;
+	private $order = 10000;
 
 	/**
 	 * The block attributes.
 	 *
 	 * @var array
 	 */
-	private $attributes = [];
+	private $attributes = array();
+
+	/**
+	 * The block hide conditions.
+	 *
+	 * @var array
+	 */
+	private $hide_conditions = array();
+
+	/**
+	 * The block hide conditions counter.
+	 *
+	 * @var int
+	 */
+	private $hide_conditions_counter = 0;
+
+	/**
+	 * The block disable conditions.
+	 *
+	 * @var array
+	 */
+	private $disable_conditions = array();
+
+	/**
+	 * The block disable conditions counter.
+	 *
+	 * @var int
+	 */
+	private $disable_conditions_counter = 0;
 
 	/**
 	 * The block template that this block belongs to.
@@ -84,6 +112,18 @@ class AbstractBlock implements BlockInterface {
 
 		if ( isset( $config[ self::ATTRIBUTES_KEY ] ) ) {
 			$this->attributes = $config[ self::ATTRIBUTES_KEY ];
+		}
+
+		if ( isset( $config[ self::HIDE_CONDITIONS_KEY ] ) ) {
+			foreach ( $config[ self::HIDE_CONDITIONS_KEY ] as $hide_condition ) {
+				$this->add_hide_condition( $hide_condition['expression'] );
+			}
+		}
+
+		if ( isset( $config[ self::DISABLE_CONDITIONS_KEY ] ) ) {
+			foreach ( $config[ self::DISABLE_CONDITIONS_KEY ] as $disable_condition ) {
+				$this->add_disable_condition( $disable_condition['expression'] );
+			}
 		}
 	}
 
@@ -192,5 +232,97 @@ class AbstractBlock implements BlockInterface {
 		$is_in_root_template = $this->get_root_template()->get_block( $this->id ) === $this;
 
 		return ! ( $is_in_parent && $is_in_root_template );
+	}
+
+	/**
+	 * Add a hide condition to the block.
+	 *
+	 * The hide condition is a JavaScript-like expression that will be evaluated on the client to determine if the block should be hidden.
+	 * See [@woocommerce/expression-evaluation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/expression-evaluation/README.md) for more details.
+	 *
+	 * @param string $expression An expression, which if true, will hide the block.
+	 */
+	public function add_hide_condition( string $expression ): string {
+		$key = 'k' . $this->hide_conditions_counter;
+		$this->hide_conditions_counter++;
+
+		// Storing the expression in an array to allow for future expansion
+		// (such as adding the plugin that added the condition).
+		$this->hide_conditions[ $key ] = array(
+			'expression' => $expression,
+		);
+
+		/**
+		 * Action called after a hide condition is added to a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_add_hide_condition', $this );
+
+		return $key;
+	}
+
+	/**
+	 * Remove a hide condition from the block.
+	 *
+	 * @param string $key The key of the hide condition to remove.
+	 */
+	public function remove_hide_condition( string $key ) {
+		unset( $this->hide_conditions[ $key ] );
+
+		/**
+		 * Action called after a hide condition is removed from a block.
+		 *
+		 * @param BlockInterface $block The block.
+		 *
+		 * @since 8.4.0
+		 */
+		do_action( 'woocommerce_block_template_after_remove_hide_condition', $this );
+	}
+
+	/**
+	 * Get the hide conditions of the block.
+	 */
+	public function get_hide_conditions(): array {
+		return $this->hide_conditions;
+	}
+
+	/**
+	 * Add a disable condition to the block.
+	 *
+	 * The disable condition is a JavaScript-like expression that will be evaluated on the client to determine if the block should be hidden.
+	 * See [@woocommerce/expression-evaluation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/expression-evaluation/README.md) for more details.
+	 *
+	 * @param string $expression An expression, which if true, will disable the block.
+	 */
+	public function add_disable_condition( string $expression ): string {
+		$key = 'k' . $this->disable_conditions_counter;
+		$this->disable_conditions_counter++;
+
+		// Storing the expression in an array to allow for future expansion
+		// (such as adding the plugin that added the condition).
+		$this->disable_conditions[ $key ] = array(
+			'expression' => $expression,
+		);
+
+		return $key;
+	}
+
+	/**
+	 * Remove a disable condition from the block.
+	 *
+	 * @param string $key The key of the disable condition to remove.
+	 */
+	public function remove_disable_condition( string $key ) {
+		unset( $this->disable_conditions[ $key ] );
+	}
+
+	/**
+	 * Get the disable conditions of the block.
+	 */
+	public function get_disable_conditions(): array {
+		return $this->disable_conditions;
 	}
 }

@@ -5,39 +5,39 @@ import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
-import { useInstanceId } from '@wordpress/compose';
-import {
-	BaseControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 /**
  * Internal dependencies
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { useNumberInputProps } from '../../../hooks/use-number-input-props';
 import { NumberBlockAttributes } from './types';
 import { useValidation } from '../../../contexts/validation-context';
+import { NumberControl } from '../../../components/number-control';
+import { useProductEdits } from '../../../hooks/use-product-edits';
 
 export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< NumberBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, property, suffix, placeholder, help, min, max } = attributes;
+	const {
+		label,
+		property,
+		suffix,
+		placeholder,
+		help,
+		min,
+		max,
+		required,
+		tooltip,
+		disabled,
+		step,
+	} = attributes;
 	const [ value, setValue ] = useProductEntityProp( property, {
 		postType,
 		fallbackValue: '',
 	} );
-
-	const inputProps = useNumberInputProps( {
-		value: value || '',
-		onChange: setValue,
-	} );
-
-	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
+	const { hasEdit } = useProductEdits();
 
 	const { error, validate } = useValidation< Product >(
 		property,
@@ -48,8 +48,8 @@ export function Edit( {
 				parseFloat( value ) < min
 			) {
 				return sprintf(
+					// translators: %d is the minimum value of the number input.
 					__(
-						// translators: %d is the minimum value of the number input.
 						'Value must be greater than or equal to %d',
 						'woocommerce'
 					),
@@ -62,36 +62,40 @@ export function Edit( {
 				parseFloat( value ) > max
 			) {
 				return sprintf(
+					// translators: %d is the maximum value of the number input.
 					__(
-						// translators: %d is the maximum value of the number input.
 						'Value must be less than or equal to %d',
 						'woocommerce'
 					),
 					max
 				);
 			}
+			if ( required && ! value ) {
+				return __( 'This field is required.', 'woocommerce' );
+			}
 		},
 		[ value ]
 	);
-
 	return (
 		<div { ...blockProps }>
-			<BaseControl
-				className={ classNames( {
-					'has-error': error,
-				} ) }
-				id={ id }
+			<NumberControl
 				label={ label }
-				help={ error || help }
-			>
-				<InputControl
-					{ ...inputProps }
-					id={ id }
-					suffix={ suffix }
-					placeholder={ placeholder }
-					onBlur={ validate }
-				/>
-			</BaseControl>
+				onChange={ setValue }
+				value={ value || '' }
+				help={ help }
+				suffix={ suffix }
+				placeholder={ placeholder }
+				error={ error }
+				onBlur={ () => {
+					if ( hasEdit( property ) ) {
+						validate();
+					}
+				} }
+				required={ required }
+				tooltip={ tooltip }
+				disabled={ disabled }
+				step={ step }
+			/>
 		</div>
 	);
 }

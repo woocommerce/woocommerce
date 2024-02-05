@@ -166,9 +166,9 @@ class EditLock {
 	 * @return void
 	 */
 	public function render_dialog( $order ) {
-		$locked = $this->is_locked_by_another_user( $order );
 		$lock   = $this->get_lock( $order );
-		$user   = get_user_by( 'id', $lock['user_id'] );
+		$user   = $lock ? get_user_by( 'id', $lock['user_id'] ) : false;
+		$locked = $user && ( get_current_user_id() !== $user->ID );
 
 		$edit_url = wc_get_container()->get( \Automattic\WooCommerce\Internal\Admin\Orders\PageController::class )->get_edit_url( $order->get_id() );
 

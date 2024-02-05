@@ -1,4 +1,6 @@
 .woocommerce-product-block-editor {
+	padding-top: 43px; // required space to locate the dashboard just below the admin bar. @todo: find a better way to do this.
+
 	h1,
 	h2,
 	h3,
@@ -40,6 +42,25 @@
 		max-width: unset;
 	}
 
+	.components-base-control {
+		&.has-error {
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+
+			.components-base-control__help {
+				color: $studio-red-50;
+			}
+		}
+
+		.components-input-control__container .components-input-control__input {
+			min-height: $grid-unit-40 + $grid-unit-05;
+		}
+	}
+
+	// This is wrong for @wordpress/components/InputControl since it is
+	// wrapped within the BaseControl by default. So it does not need
+	// to be wrapped again.
 	.has-error {
 		.components-base-control {
 			margin-bottom: 0;
@@ -126,31 +147,16 @@
 
 	.block-editor-block-list__layout {
 		&.is-root-container {
-			padding-left: calc(2 * $gap);
-			padding-right: calc(2 * $gap);
 			padding-bottom: 128px;
-
-			@include breakpoint(">782px") {
-				padding-left: 0;
-				padding-right: 0;
-				max-width: 650px;
-				margin-left: auto;
-				margin-right: auto;
-			}
 		}
 
 		.block-editor-block-list__block:not([contenteditable]):focus:after {
 			display: none; // use important or increase specificity.
 		}
-	}
-}
 
-.woocommerce-layout:has(.woocommerce-product-block-editor) {
-	.woocommerce-layout__primary {
-		margin-top: calc($gap-largest + $gap-smaller);
-	}
-	.woocommerce-layout__header {
-		display: none;
+		.block-editor-block-list__block fieldset {
+			min-width: 0;
+		}
 	}
 }
 

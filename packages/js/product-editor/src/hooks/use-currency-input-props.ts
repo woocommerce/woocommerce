@@ -8,7 +8,7 @@ import { useContext } from '@wordpress/element';
  * Internal dependencies
  */
 import { useProductHelper } from './use-product-helper';
-import { formatCurrencyDisplayValue } from '../utils';
+import { deferSelectInFocus, formatCurrencyDisplayValue } from '../utils';
 
 export type CurrencyInputProps = {
 	prefix: string;
@@ -51,18 +51,7 @@ export const useCurrencyInputProps = ( {
 			return sanitizePrice( String( val ) );
 		},
 		onFocus( event: React.FocusEvent< HTMLInputElement > ) {
-			// In some browsers like safari .select() function inside
-			// the onFocus event doesn't work as expected because it
-			// conflicts with onClick the first time user click the
-			// input. Using setTimeout defers the text selection and
-			// avoid the unexpected behaviour.
-			setTimeout(
-				function deferSelection( element: HTMLInputElement ) {
-					element.select();
-				},
-				0,
-				event.currentTarget
-			);
+			deferSelectInFocus( event.currentTarget );
 			if ( onFocus ) {
 				onFocus( event );
 			}

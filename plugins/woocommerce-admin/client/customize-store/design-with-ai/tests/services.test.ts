@@ -26,6 +26,11 @@ jest.mock(
 	} )
 );
 
+// @ts-expect-error Mock AbortSignal.
+global.AbortSignal = {
+	timeout: jest.fn(),
+};
+
 describe( 'getCompletion', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();

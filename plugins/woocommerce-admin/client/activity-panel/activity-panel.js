@@ -73,6 +73,19 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 	const activeSetupList = useActiveSetupTasklist();
 
+	const closePanel = () => {
+		setIsPanelClosing( true );
+		setIsPanelOpen( false );
+	};
+
+	const clearPanel = () => {
+		if ( ! isPanelOpen ) {
+			setIsPanelClosing( false );
+			setIsPanelSwitching( false );
+			setCurrentTab( '' );
+		}
+	};
+
 	useEffect( () => {
 		return addHistoryListener( () => {
 			closePanel();
@@ -215,19 +228,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		setCurrentTab( tabName );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
-	};
-
-	const closePanel = () => {
-		setIsPanelClosing( true );
-		setIsPanelOpen( false );
-	};
-
-	const clearPanel = () => {
-		if ( ! isPanelOpen ) {
-			setIsPanelClosing( false );
-			setIsPanelSwitching( false );
-			setCurrentTab( '' );
-		}
 	};
 
 	const isHomescreen = () => {

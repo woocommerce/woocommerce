@@ -12,7 +12,7 @@ mkdir -p "$DEST_PATH"
 echo "Installing PHP and JS dependencies..."
 pnpm install
 echo "Running JS Build..."
-pnpm -w run build --filter=woo-ai || exit "$?"
+pnpm --filter='@woocommerce/plugin-woo-ai' build || exit "$?"
 
 echo "Syncing files..."
 rsync -rc --exclude-from="$PROJECT_PATH/.distignore" "$PROJECT_PATH/" "$DEST_PATH/" --delete --delete-excluded

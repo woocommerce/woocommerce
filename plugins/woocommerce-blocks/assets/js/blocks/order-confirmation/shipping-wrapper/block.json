@@ -1,0 +1,30 @@
+{
+	"name": "woocommerce/order-confirmation-shipping-wrapper",
+	"version": "1.0.0",
+	"title": "Shipping Address Section",
+	"description": "Display the order confirmation shipping section.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": "Shipping"
+		}
+	},
+	"supports": {
+		"multiple": false,
+		"align": [ "wide", "full" ],
+		"html": false,
+		"spacing": {
+			"padding": true,
+			"margin": true,
+			"__experimentalDefaultControls": {
+				"margin": false,
+				"padding": false
+			}
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 2,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

@@ -126,8 +126,13 @@ class Init {
 		$specs       = self::get_specs();
 
 		foreach ( $specs as $spec ) {
-			$suggestion    = EvaluateSuggestion::evaluate( $spec );
-			$suggestions[] = $suggestion;
+			try {
+				$suggestion    = EvaluateSuggestion::evaluate( $spec );
+				$suggestions[] = $suggestion;
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Throwable $e ) {
+				// Ignore errors.
+			}
 		}
 
 		return array_values(
