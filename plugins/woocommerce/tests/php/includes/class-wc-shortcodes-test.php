@@ -106,7 +106,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 
 		$product_page = WC_Shortcodes::product_page(
 			array(
-				'id'         => $product_id,
+				'id' => $product_id,
 			)
 		);
 
@@ -245,7 +245,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure we can override the `product_page` shortcode's read permission check.
+	 * Ensure we can override the `product_page` shortcode's read permission check to allow rendering a private product belonging to another user.
 	 */
 	public function test_product_page_shortcode_private_product_override() {
 		$product = WC_Helper_Product::create_simple_product();
@@ -269,7 +269,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $product_page );
 
 		wp_set_current_user( self::$user_contributor );
-		add_filter( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', '__return_true' );
+		add_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_true' );
 		$this->disable_deprecation_notice();
 
 		$product_page = WC_Shortcodes::product_page(
@@ -282,6 +282,54 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$this->enable_deprecation_notice();
 
 		$this->assertNotEmpty( $product_page );
+
+		remove_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_true' );
+		add_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_null' );
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
+
+		$this->assertEmpty( $product_page );
+
+		remove_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_null' );
+	}
+
+	/**
+	 * Ensure we can override the `product_page` shortcode's read permission check to block rendering a public product.
+	 */
+	public function test_product_page_shortcode_public_product_override() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+		$product_id = $product->get_id();
+		$this->disable_deprecation_notice();
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id' => $product_id,
+			)
+		);
+
+		$this->enable_deprecation_notice();
+
+		$this->assertNotEmpty( $product_page );
+
+		add_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_false' );
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'private',
+			)
+		);
+
+		$this->assertEmpty( $product_page );
+
+		remove_filter( 'woocommerce_shortcode_product_page_force_rendering', '__return_false' );
 	}
 
 	/**
