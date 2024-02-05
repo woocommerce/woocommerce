@@ -12,6 +12,11 @@ import type {
 	ConnectedBlockEditInstance,
 } from '../../../types';
 
+/**
+ * Higher order component to connect the block with the product entity property.
+ * This component is responsible ONLY for updating the product entity property.
+ * This is a temporary solution until the Block Binding API is 100% available.
+ */
 const updateEntityPropFromBlockAttribute =
 	createHigherOrderComponent< ConnectedBlockEditComponent >(
 		( BlockEdit: ConnectedBlockEditComponent ) => {
