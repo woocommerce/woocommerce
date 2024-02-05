@@ -5,8 +5,9 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import coreParagraphBlockEditChildTextArea from './components/core-paragraph-with-text-area-role';
 import { isBlockBindingAPIAvailable } from '../../../../../bindings';
+import connectCoreParagraphWithWithEntityProp from './components/connect-core-paragraph-with-entity-prop';
+import coreParagraphBlockEditWithTextareaToolbar from './components/core-paragraph-with-text-area-toolbar';
 
 /**
  * Extend core/paragraph block with attributes
@@ -24,22 +25,37 @@ export default function coreParagraphChildOfTextAreaField(
 		return settings;
 	}
 
-	if ( isBlockBindingAPIAvailable() ) {
-		// Dont extend when block binding API is available.
-		return settings;
+	/*
+	 * Use `product-editor/entity-prop` context.
+	 * This is part of a temporary fallback
+	 * until the block binding API is available.
+	 * Todo: remove this when the block binding API is available.
+	 */
+	const usesContext = settings.usesContext
+		? [ ...settings.usesContext, 'product-editor/entity-prop' ]
+		: [];
+
+	let edit = settings.edit;
+	// Extend edit component with text area toolbar.
+	if ( edit ) {
+		edit = coreParagraphBlockEditWithTextareaToolbar( edit );
 	}
 
-	// Use `product-editor/entity-prop` context.
-	const usesContext = [
-		...( settings.usesContext, [] ),
-		'product-editor/entity-prop',
-	];
+	/*
+	 * Connect the paragraph block with entity prop
+	 * when the block binding API is not available.
+	 */
+	if ( ! isBlockBindingAPIAvailable() && edit ) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Block binding API not available. Connect the paragraph block with entity prop.'
+		);
+		edit = connectCoreParagraphWithWithEntityProp( edit );
+	}
 
 	return {
 		...settings,
 		usesContext,
-		edit: settings.edit
-			? coreParagraphBlockEditChildTextArea( settings.edit )
-			: null,
+		edit,
 	};
 }

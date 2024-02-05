@@ -50,6 +50,7 @@ export default {
 		sourceAttributes: SourceAttributes
 	) {
 		const { context } = props;
+
 		const { postType: contextPostType } = context;
 		const { prop: entityPropName } = sourceAttributes;
 

@@ -1,9 +1,18 @@
 /**
+ * External dependencies
+ */
+import type { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
+import {
+	// @ts-expect-error no exported member.
+	type ComponentType,
+} from '@wordpress/element';
+
+/**
  * Internal dependencies
  */
 import {
 	ProductEditorBlockAttributes,
-	ProductEditorBlockEditProps,
+	ProductEditorContext,
 } from '../../../types';
 
 type AllowedFormat =
@@ -32,4 +41,19 @@ export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
 };
 
 export type TextAreaBlockEditProps =
-	ProductEditorBlockEditProps< TextAreaBlockEditAttributes >;
+	BlockEditProps< TextAreaBlockEditAttributes >;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ConnectedBlockEditProps< T extends Record< string, any > >
+	extends BlockEditProps< T > {
+	readonly context: ProductEditorContext & {
+		readonly 'product-editor/entity-prop': string;
+	};
+	readonly name: string;
+}
+
+export type ConnectedBlockEditInstance =
+	ConnectedBlockEditProps< BlockAttributes >;
+
+export type ConnectedBlockEditComponent =
+	ComponentType< ConnectedBlockEditInstance >;
