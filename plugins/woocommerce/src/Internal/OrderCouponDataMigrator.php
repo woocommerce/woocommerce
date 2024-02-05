@@ -166,7 +166,7 @@ class OrderCouponDataMigrator implements BatchProcessorInterface, RegisterHooksI
 	 */
 	private function handle_woocommerce_debug_tools( array $tools ): array {
 		$batch_processor = wc_get_container()->get( BatchProcessingController::class );
-		$pending_count = $this->get_total_pending_count();
+		$pending_count   = $this->get_total_pending_count();
 
 		if ( 0 === $pending_count ) {
 			$tools['start_convert_order_coupon_data'] = array(

@@ -291,7 +291,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add additional applied coupon information.
 		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon         = new WC_Coupon();
+			$temp_coupon = new WC_Coupon();
 			$coupon_info = $item->get_meta( 'coupon_info', true );
 			if ( $coupon_info ) {
 				$temp_coupon->set_short_info( $coupon_info );
