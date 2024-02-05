@@ -107,7 +107,6 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product_page = WC_Shortcodes::product_page(
 			array(
 				'id'         => $product_id,
-				'visibility' => 'hidden',
 			)
 		);
 
