@@ -97,7 +97,7 @@ const coreParagraphBlockEditChildTextArea =
 								setAlignment={ setAlignment }
 							/>
 						</BlockControls>
-						<BlockEdit { ...props } />;
+						<BlockEdit { ...props } />
 					</>
 				);
 			};
