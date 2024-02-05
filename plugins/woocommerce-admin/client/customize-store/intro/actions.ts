@@ -174,6 +174,7 @@ export const assignFlags = assign<
 		}
 		const isFontLibraryAvailable =
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
+
 		return isFontLibraryAvailable;
 	},
 } );

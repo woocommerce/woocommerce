@@ -56,6 +56,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
+			isFontLibraryInstalled: false,
 		},
 		initial: 'navigate',
 		states: {

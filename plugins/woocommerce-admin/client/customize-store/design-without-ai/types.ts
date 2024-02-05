@@ -9,4 +9,5 @@ export type DesignWithoutAIStateMachineContext = {
 		hasErrors: boolean;
 	};
 	flowType: FlowType.noAI;
+	isFontLibraryInstalled: boolean;
 };
