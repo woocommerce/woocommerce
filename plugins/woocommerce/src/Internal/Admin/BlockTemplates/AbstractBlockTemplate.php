@@ -12,9 +12,9 @@ abstract class AbstractBlockTemplate implements BlockTemplateInterface {
 	use BlockContainerTrait;
 
 	/**
-	 * Get the template ID.
+	 * Get the template slug.
 	 */
-	abstract public function get_id(): string;
+	abstract public function get_slug(): string;
 
 	/**
 	 * Get the template title.

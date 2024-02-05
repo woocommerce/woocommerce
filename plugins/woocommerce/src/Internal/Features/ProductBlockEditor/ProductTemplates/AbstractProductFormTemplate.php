@@ -7,11 +7,18 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Gr
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SectionInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Block template class.
  */
 abstract class AbstractProductFormTemplate extends AbstractBlockTemplate implements ProductFormTemplateInterface {
+
+	/**
+	 * Get the template slug.
+	 */
+	abstract public function get_slug(): string;
+
 	/**
 	 * Get the template area.
 	 */

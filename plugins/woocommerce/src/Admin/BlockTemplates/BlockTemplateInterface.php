@@ -7,9 +7,9 @@ namespace Automattic\WooCommerce\Admin\BlockTemplates;
  */
 interface BlockTemplateInterface extends ContainerInterface {
 	/**
-	 * Get the template ID.
+	 * Get the template slug.
 	 */
-	public function get_id(): string;
+	public function get_slug(): string;
 
 	/**
 	 * Get the template title.
