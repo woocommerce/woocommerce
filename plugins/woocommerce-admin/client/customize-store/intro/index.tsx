@@ -75,10 +75,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
 			themeData,
-			activeThemeHasMods,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
 		},
+		activeThemeHasMods,
 	} = context;
 
 	const isJetpackOffline = false;
