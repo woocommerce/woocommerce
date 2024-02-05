@@ -143,10 +143,11 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		}
 
 		$attribute_ids_for_and_filtering = array();
+		$all_terms                       = get_terms( array_keys( $chosen_attributes ), array( 'hide_empty' => false ) );
 
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
-			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
-			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+			$current_attribute_terms    = $this->get_current_attribute_terms( $all_terms, $taxonomy, count( $chosen_attributes ) );
+			$term_ids_by_slug           = wp_list_pluck( $current_attribute_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );
 			$term_ids_to_filter_by_list = '(' . join( ',', $term_ids_to_filter_by ) . ')';
@@ -200,6 +201,28 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Get all the term for current attribute.
+	 *
+	 * @param \WP_Term[] $all_terms      Aggreated terms array.
+	 * @param string     $taxonomy       Attribute taxonomy name.
+	 * @param int        $taxonomy_count Taxonomy count. If there is only one
+	 *                                   taxonomy, return all terms.
+	 * @return mixed
+	 */
+	private function get_current_attribute_terms( $all_terms, $taxonomy, $taxonomy_count ) {
+		if ( 1 === $taxonomy_count ) {
+			return $all_terms;
+		}
+
+		return array_filter(
+			$all_terms,
+			function( $term ) use ( $taxonomy ) {
+				return $term->taxonomy === $taxonomy;
+			}
+		);
 	}
 
 	/**
