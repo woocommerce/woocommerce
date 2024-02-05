@@ -9,6 +9,7 @@ import { postContent } from '@wordpress/icons';
 import blockConfiguration from './block.json';
 import { TextAreaBlockEdit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
+import bindParagraphBlockToTextAreaField from './bindings/index';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -26,3 +27,6 @@ export const init = () =>
 		metadata: metadata as never,
 		settings: settings as never,
 	} );
+
+// Bind paragraph block to text area field.
+bindParagraphBlockToTextAreaField();
