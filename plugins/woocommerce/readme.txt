@@ -175,6 +175,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fixed an issue where the notices shown in classic themes were using the updated styles. [#44283](https://github.com/woocommerce/woocommerce/pull/44283)
 * Fix - Prevent a PHP Warning when sending order emails to the shopper and merchant. [#44178](https://github.com/woocommerce/woocommerce/pull/44178)
 * Fix - Fix alignment of date fields in the order panel [#44174](https://github.com/woocommerce/woocommerce/pull/44174)
 * Fix - Add rudimentary try catch for all remote endpoint spec evaluators [#44037](https://github.com/woocommerce/woocommerce/pull/44037)
