@@ -416,23 +416,23 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$origin_label        = $this->get_origin_label(
+		$origin_label = $this->get_origin_label(
 			$source_data['source_type'] ?? '',
 			$source_data['utm_source'] ?? '',
 			false
 		);
 
-		$tracks_data         = array(
-			'order_id'             => $order->get_id(),
-			'source_type'          => $source_data['source_type'] ?? '',
-			'medium'               => $source_data['utm_medium'] ?? '',
-			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
-			'origin_label'         => strtolower( $origin_label ),
-			'session_pages'        => $source_data['session_pages'] ?? 0,
-			'session_count'        => $source_data['session_count'] ?? 0,
-			'order_total'          => $order->get_total(),
-			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
+		$tracks_data = array(
+			'order_id'            => $order->get_id(),
+			'source_type'         => $source_data['source_type'] ?? '',
+			'medium'              => $source_data['utm_medium'] ?? '',
+			'source'              => $source_data['utm_source'] ?? '',
+			'device_type'         => strtolower( $source_data['device_type'] ?? 'unknown' ),
+			'origin_label'        => strtolower( $origin_label ),
+			'session_pages'       => $source_data['session_pages'] ?? 0,
+			'session_count'       => $source_data['session_count'] ?? 0,
+			'order_total'         => $order->get_total(),
+			'customer_registered' => $order->get_customer_id() ? 'yes' : 'no',
 		);
 
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
