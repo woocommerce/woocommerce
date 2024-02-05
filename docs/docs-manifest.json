@@ -19,6 +19,14 @@
       "category_title": "Building a Woo Store",
       "posts": [
         {
+          "post_title": "Working with Webhooks in WooCommerce",
+          "menu_title": "Using Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/webhooks.md",
+          "hash": "102727c5217162eb5a363f95664f0c1554dce96c58e4b506cd350d50800a5381",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/webhooks.md",
+          "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
+        },
+        {
           "post_title": "How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
@@ -315,14 +323,6 @@
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
         },
         {
-          "post_title": "Webhooks",
-          "menu_title": "Webhooks",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/webhooks.md",
-          "hash": "eae79157749e2ada34570654d0392974da81f29321663fc86c0db973fee0762e",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/webhooks.md",
-          "id": "5c1dee19b2a23240ee20f1fde448e1a8f9f58ffe"
-        },
-        {
           "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
           "menu_title": "Custom attributes in menus",
           "tags": "how-to",
@@ -443,7 +443,7 @@
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
-          "hash": "47cb6a0f60dad691e3dfd1f26e00b5582d51ec23e7de3f800126701b5967f557",
+          "hash": "dca930ebe334bb3bb276ec912d050830b784ec9f755be491d41c3c32f5b65637",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
           "id": "2c2e89013ad76ff2596680224047723163512bc2"
         },
@@ -1195,5 +1195,5 @@
       "categories": []
     }
   ],
-  "hash": "e2bbd4e0e56fce0c7c10aa8fba780d2a5beb24f1399a5ed82af9d117439b0d89"
+  "hash": "a138874d270595236e1db122206be746424ea22f376a8799473e5505486c4b11"
 }
