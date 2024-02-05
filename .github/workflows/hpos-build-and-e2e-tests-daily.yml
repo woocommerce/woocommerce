@@ -44,7 +44,7 @@ jobs:
               env:
                   USE_WP_ENV: 1
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --project=Chrome --config=tests/e2e-pw/playwright.config.js
 
             - name: Generate Playwright E2E Test report.
               id: generate_e2e_report
@@ -100,7 +100,7 @@ jobs:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+              run: pnpm exec playwright test --project=Chrome --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate Playwright API Test report.
               id: generate_api_report

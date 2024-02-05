@@ -57,7 +57,7 @@ jobs:
               id: count_e2e_total
               working-directory: plugins/woocommerce
               run: |
-                  TOTAL_STR=$(pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
+                  TOTAL_STR=$(pnpm exec playwright test --project=Chrome --config=tests/e2e-pw/playwright.config.js --list | grep "Total:")
                   NO_PREFIX=${TOTAL_STR#*"Total: "}
                   COUNT=${NO_PREFIX%" tests in"*}
                   echo "E2E_GRAND_TOTAL=$COUNT" >> $GITHUB_OUTPUT
@@ -69,7 +69,7 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
               id: run_playwright_e2e_tests
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+              run: pnpm exec playwright test --project=Chrome --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Upload reports to GitHub Actions Artifacts
               if: always()
@@ -161,7 +161,7 @@ jobs:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
                   USER_SECRET: password
-              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js
+              run: pnpm exec playwright test --project=Chrome --config=tests/api-core-tests/playwright.config.js
 
             - name: Generate Playwright API Test report.
               id: generate_api_report
