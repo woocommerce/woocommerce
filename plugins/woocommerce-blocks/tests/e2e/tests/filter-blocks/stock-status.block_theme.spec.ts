@@ -12,7 +12,7 @@ import {
 	createPostFromTemplate,
 } from '../../utils/create-dynamic-content';
 
-const TEMPLATE_PATH = path.join( __dirname, 'stock-status.handlebars' );
+const TEMPLATE_PATH = './stock-status.handlebars';
 
 test.describe( 'Product Filter: Stock Status Block', async () => {
 	let defaultBlockPost: GeneratedPost;
