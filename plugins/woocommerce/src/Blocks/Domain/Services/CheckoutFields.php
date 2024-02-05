@@ -242,55 +242,47 @@ class CheckoutFields {
 	 * @return \WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
-
 		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
-		$result = $this->validate_options( $options );
-		if ( false === $result ) {
+		if ( false === $this->validate_options( $options ) ) {
 			return;
 		}
 
 		// The above validate_options function ensures these options are valid. Type might not be supplied but then it defaults to text.
-		$id       = $options['id'];
-		$location = $options['location'];
-		$type     = $options['type'] ?? 'text';
-
-		$field_data = array(
-			'label'         => $options['label'],
-			'hidden'        => false,
-			'type'          => $type,
-			'optionalLabel' => empty( $options['optionalLabel'] ) ? sprintf(
-			/* translators: %s Field label. */
-				__( '%s (optional)', 'woocommerce' ),
-				$options['label']
-			) : $options['optionalLabel'],
-			'required'      => empty( $options['required'] ) ? false : $options['required'],
+		$field_data = wp_parse_args(
+			$options,
+			array(
+				'id'                         => '',
+				'label'                      => '',
+				'optionalLabel'              => sprintf(
+					/* translators: %s Field label. */
+					__( '%s (optional)', 'woocommerce' ),
+					$options['label']
+				),
+				'location'                   => '',
+				'type'                       => 'text',
+				'hidden'                     => false,
+				'required'                   => false,
+				'attributes'                 => array(),
+				'show_in_order_confirmation' => true,
+			)
 		);
 
-		$field_data['attributes'] = $this->register_field_attributes( $id, $options['attributes'] ?? [] );
+		$field_data['attributes'] = $this->register_field_attributes( $field_data['id'], $field_data['attributes'] );
 
-		if ( 'checkbox' === $type ) {
-			$result = $this->process_checkbox_field( $options, $field_data );
-
-			// $result will be false if an error that will prevent the field being registered is encountered.
-			if ( false === $result ) {
-				return;
-			}
-			$field_data = $result;
+		if ( 'checkbox' === $field_data['type'] ) {
+			$field_data = $this->process_checkbox_field( $field_data, $options );
+		} elseif ( 'select' === $field_data['type'] ) {
+			$field_data = $this->process_select_field( $field_data, $options );
 		}
 
-		if ( 'select' === $type ) {
-			$result = $this->process_select_field( $options, $field_data );
-
-			// $result will be false if an error that will prevent the field being registered is encountered.
-			if ( false === $result ) {
-				return;
-			}
-			$field_data = $result;
+		// $field_data will be false if an error that will prevent the field being registered is encountered.
+		if ( false === $field_data ) {
+			return;
 		}
 
 		// Insert new field into the correct location array.
-		$this->additional_fields[ $id ]        = $field_data;
-		$this->fields_locations[ $location ][] = $id;
+		$this->additional_fields[ $field_data['id'] ]        = $field_data;
+		$this->fields_locations[ $field_data['location'] ][] = $field_data['id'];
 	}
 
 	/**
@@ -367,12 +359,12 @@ class CheckoutFields {
 	/**
 	 * Processes the options for a select field and returns the new field_options array.
 	 *
-	 * @param array $options     The options supplied during field registration.
 	 * @param array $field_data  The field data array to be updated.
+	 * @param array $options     The options supplied during field registration.
 	 *
 	 * @return array|false The updated $field_data array or false if an error was encountered.
 	 */
-	private function process_select_field( $options, $field_data ) {
+	private function process_select_field( $field_data, $options ) {
 		$id = $options['id'];
 
 		if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
@@ -423,12 +415,12 @@ class CheckoutFields {
 	/**
 	 * Processes the options for a checkbox field and returns the new field_options array.
 	 *
-	 * @param array $options     The options supplied during field registration.
 	 * @param array $field_data  The field data array to be updated.
+	 * @param array $options     The options supplied during field registration.
 	 *
 	 * @return array|false The updated $field_data array or false if an error was encountered.
 	 */
-	private function process_checkbox_field( $options, $field_data ) {
+	private function process_checkbox_field( $field_data, $options ) {
 		$id = $options['id'];
 
 		// Checkbox fields are always optional. Log a warning if it's set explicitly as true.
@@ -451,11 +443,8 @@ class CheckoutFields {
 	 * @return array The processed attributes.
 	 */
 	private function register_field_attributes( $id, $attributes ) {
-
 		// We check if attributes are valid. This is done to prevent too much nesting and also to allow field registration
 		// even if the attributes property is invalid. We can just skip it and register the field without attributes.
-		$has_attributes = false;
-
 		if ( empty( $attributes ) ) {
 			return [];
 		}
@@ -997,7 +986,6 @@ class CheckoutFields {
 	 * For now, this only supports fields in address location.
 	 *
 	 * @param array $fields The fields to filter.
-	 *
 	 * @return array The filtered fields.
 	 */
 	public function filter_fields_for_customer( $fields ) {
@@ -1011,6 +999,21 @@ class CheckoutFields {
 				return in_array( $key, $customer_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Filter fields for order confirmation.
+	 *
+	 * @param array $fields The fields to filter.
+	 * @return array The filtered fields.
+	 */
+	public function filter_fields_for_order_confirmation( $fields ) {
+		return array_filter(
+			$fields,
+			function( $field ) {
+				return ! empty( $field['show_in_order_confirmation'] );
+			}
 		);
 	}
 
