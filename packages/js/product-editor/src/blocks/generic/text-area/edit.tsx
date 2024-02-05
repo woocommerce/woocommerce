@@ -41,6 +41,12 @@ export function TextAreaBlockEdit( { attributes }: TextAreaBlockEditProps ) {
 					'core/paragraph',
 					{
 						placeholder,
+						/*
+						 * `metadata` is used to bind the block to the product entity.
+						 * @see https://github.com/WordPress/gutenberg/issues/54536
+						 * Currently, it isn't available in the block editor.
+						 * Anyway, let's keep it here for future reference.
+						 */
 						metadata: {
 							bindings: {
 								content: {
