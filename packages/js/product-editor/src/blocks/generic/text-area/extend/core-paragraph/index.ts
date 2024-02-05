@@ -6,6 +6,7 @@ import type { BlockConfiguration } from '@wordpress/blocks';
  * Internal dependencies
  */
 import coreParagraphBlockEditChildTextArea from './components/core-paragraph-with-text-area-role';
+import { isBlockBindingAPIAvailable } from '../../../../../bindings';
 
 /**
  * Extend core/paragraph block with attributes
@@ -20,6 +21,11 @@ export default function coreParagraphChildOfTextAreaField(
 	name: string
 ) {
 	if ( name !== 'core/paragraph' ) {
+		return settings;
+	}
+
+	if ( isBlockBindingAPIAvailable() ) {
+		// Dont extend when block binding API is available.
 		return settings;
 	}
 
