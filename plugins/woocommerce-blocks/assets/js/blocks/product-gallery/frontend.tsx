@@ -87,17 +87,38 @@ const productGallery = {
 		},
 		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
 			const context = getContext();
-			if ( event.code === 'Enter' ) {
+			if (
+				event.code === 'Enter' ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
 				context.selectedImage = context.imageId;
 			}
 		},
 		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
-			if ( state.isSelected && event.code === 'Enter' ) {
+			if (
+				( state.isSelected && event.code === 'Enter' ) ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
 				actions.openDialog();
 			}
 		},
 		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'Enter' ) {
+			if (
+				event.code === 'Enter' ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
 				actions.openDialog();
 			}
 		},
