@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { EventData, Sender, createMachine } from 'xstate';
+import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
@@ -17,7 +17,6 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -119,18 +118,6 @@ const CYSSpinner = () => (
 	</div>
 );
 
-const fetchIsFontLibraryAvailable = async () => {
-	try {
-		await apiFetch( {
-			path: '/wp/v2/font-collections',
-			method: 'GET',
-		} );
-
-		return true;
-	} catch ( err ) {
-		return false;
-	}
-};
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
@@ -151,7 +138,7 @@ export const customizeStoreStateMachineServices = {
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
-	initial: 'navigate',
+	initial: 'setFlags',
 	predictableActionArguments: true,
 	preserveActionOrder: true,
 	schema: {
@@ -173,7 +160,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			activeTheme: '',
-			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
@@ -182,6 +168,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
+		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -206,6 +193,15 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 	},
 	states: {
+		setFlags: {
+			invoke: {
+				src: 'setFlags',
+				onDone: {
+					actions: 'assignFlags',
+					target: 'navigate',
+				},
+			},
+		},
 		navigate: {
 			always: [
 				{
@@ -299,7 +295,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 									target: 'success',
 									actions: [
 										'assignThemeData',
-										'assignActiveThemeHasMods',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
 									],
@@ -384,27 +379,20 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'fetchActiveThemeHasMods',
+			initial: 'checkActiveThemeHasMods',
 			states: {
-				fetchActiveThemeHasMods: {
-					invoke: {
-						src: 'fetchIntroData',
-						onDone: {
-							target: 'checkActiveThemeHasMods',
-							actions: [ 'assignActiveThemeHasMods' ],
-						},
-					},
-				},
 				checkActiveThemeHasMods: {
 					always: [
 						{
-							cond: 'activeThemeIsNotModified',
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'activeThemeHasNoMods',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
 							target: '#customizeStore.intro',
 						},
 						{
+							// Otherwise, proceed to the next step.
 							cond: 'activeThemeHasMods',
 							target: 'preCheckAiStatus',
 						},
@@ -534,50 +522,10 @@ declare global {
 	interface Window {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
+			activeThemeHasMods: boolean | undefined;
 		};
 	}
 }
-
-// HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
-// This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
-// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
-const setFlagsForIframeInstance = async (
-	send: (
-		event: customizeStoreStateMachineEvents,
-		payload?: EventData | undefined
-	) => void
-) => {
-	if ( ! window.frameElement ) {
-		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrive flag value.
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const _featureFlags = {
-			FONT_LIBRARY_AVAILABLE: ( async () => {
-				const isFontLibraryAvailable =
-					await fetchIsFontLibraryAvailable();
-
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					isFontLibraryAvailable,
-				};
-			} )(),
-		};
-		return;
-	}
-
-	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const _featureFlagsEvents = {
-		FONT_LIBRARY_AVAILABLE: ( async () => {
-			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
-			const isFontLibraryAvailable =
-				window.__wcCustomizeStore.isFontLibraryAvailable || false;
-			send( {
-				type: 'IS_FONT_LIBRARY_AVAILABLE',
-				payload: isFontLibraryAvailable,
-			} );
-		} )(),
-	};
-};
 
 export const CustomizeStoreController = ( {
 	actionOverrides,
@@ -616,10 +564,10 @@ export const CustomizeStoreController = ( {
 				isWooExpress: () => isWooExpress(),
 				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
-					return _ctx.intro.activeThemeHasMods;
+					return !! _ctx.activeThemeHasMods;
 				},
-				activeThemeIsNotModified: ( _ctx ) => {
-					return ! _ctx.intro.activeThemeHasMods;
+				activeThemeHasNoMods: ( _ctx ) => {
+					return ! _ctx.activeThemeHasMods;
 				},
 			},
 		} );
@@ -628,10 +576,6 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
-
-	useEffect( () => {
-		setFlagsForIframeInstance( send );
-	}, [ send ] );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>

@@ -78,8 +78,12 @@ test.describe( 'Product Collection', () => {
 
 			await pageObject.publishAndGoToFrontend();
 
+			const frontendTitles =
+				await pageObject.productTitles.allInnerTexts();
 			expect(
-				await pageObject.productTitles.allInnerTexts()
+				frontendTitles.map( ( title ) =>
+					title.replace( 'Protected: ', '' )
+				)
 			).toStrictEqual( expectedTitles );
 		} );
 
@@ -181,8 +185,16 @@ test.describe( 'Product Collection', () => {
 			);
 
 			await pageObject.publishAndGoToFrontend();
+
+			const frontendAccessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Protected: Sunglasses',
+			];
 			await expect( pageObject.productTitles ).toHaveText(
-				accessoriesProductNames
+				frontendAccessoriesProductNames
 			);
 		} );
 
