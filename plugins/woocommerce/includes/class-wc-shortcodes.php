@@ -531,12 +531,15 @@ class WC_Shortcodes {
 		 * Filters whether to override read permissions for unpublished products.
 		 *
 		 * @since 8.6.0
-		 * @param bool   $override_read_permissions Whether to override read permissions for unpublished products.
+		 * @param bool   $force_rendering Whether to override read permissions for unpublished products. `true` to force rendering the product page, `false` to block rendering, or `null` to use the default behavior.
 		 * @param int    $product_id                Product ID.
 		 * @return bool
 		 */
-		$override_read_permissions = apply_filters( 'woocommerce_shortcode_product_page_override_read_permissions_unpublished', false, $product_id );
-		if ( 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) && ! $override_read_permissions ) {
+		$force_rendering = apply_filters( 'woocommerce_shortcode_product_page_force_rendering', null, $product_id );
+		if ( isset( $force_rendering ) && ! $force_rendering ) {
+			return '';
+		}
+		if ( ! isset( $force_rendering ) && 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
 			return '';
 		}
 
