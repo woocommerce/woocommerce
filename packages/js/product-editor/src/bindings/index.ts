@@ -8,10 +8,9 @@ import { dispatch } from '@wordpress/data';
  */
 import productMeta from './product-entity';
 
-const {
+const registerBlockBindingsSource =
 	// @ts-expect-error There are no types for this.
-	registerBlockBindingsSource,
-} = dispatch( blockEditorStore );
+	dispatch( blockEditorStore )?.registerBlockBindingsSource;
 
 /**
  * Check if the block binding API is available.
