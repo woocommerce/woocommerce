@@ -71,9 +71,8 @@ export const useGetLocation = < T, >(
 
 	const getEntitySlug = prepareGetEntitySlug( templateSlug );
 	const isInSpecificTemplate = prepareIsInSpecificTemplate( templateSlug );
-	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
 
-	// Detec Specific Templates
+	// Detect Specific Templates
 	const isInSpecificProductTemplate = isInSpecificTemplate(
 		templateSlugs.singleProduct
 	);
@@ -83,48 +82,6 @@ export const useGetLocation = < T, >(
 	const isInSpecificTagTemplate = isInSpecificTemplate(
 		templateSlugs.productTag
 	);
-
-	// Detec Generic Templates
-	const isInSingleProductTemplate = isInGenericTemplate(
-		templateSlugs.singleProduct
-	);
-	const isInProductsByCategoryTemplate = isInGenericTemplate(
-		templateSlugs.productCategory
-	);
-	const isInProductsByTagTemplate = isInGenericTemplate(
-		templateSlugs.productTag
-	);
-	const isInProductsByAttributeTemplate = isInGenericTemplate(
-		templateSlugs.productAttribute
-	);
-	const isInOrderTemplate = isInGenericTemplate(
-		templateSlugs.orderConfirmation
-	);
-
-	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
-		( select ) => ( {
-			isInSingleProductBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/single-product'
-				).length > 0,
-			isInMiniCartBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/mini-cart-contents'
-				).length > 0,
-		} ),
-		[ clientId ]
-	);
-
-	const isInCartContext =
-		templateSlug === templateSlugs.cart ||
-		templateSlug === templateSlugs.checkout ||
-		isInMiniCartBlock;
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ categoryId, setCategoryId ] = useState< number | null >( null );
@@ -152,6 +109,26 @@ export const useGetLocation = < T, >(
 		getEntitySlug,
 	] );
 
+	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
+		( select ) => ( {
+			isInSingleProductBlock:
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore No types for this selector exist yet
+				select( blockEditorStore ).getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/single-product'
+				).length > 0,
+			isInMiniCartBlock:
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore No types for this selector exist yet
+				select( blockEditorStore ).getBlockParentsByBlockName(
+					clientId,
+					'woocommerce/mini-cart-contents'
+				).length > 0,
+		} ),
+		[ clientId ]
+	);
+
 	/**
 	 * Case 1.1: SPECIFIC PRODUCT
 	 * Single Product block - take product ID from context
@@ -170,10 +147,16 @@ export const useGetLocation = < T, >(
 		return createLocationObject( 'product', { productId } );
 	}
 
+	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
+
 	/**
 	 * Case 1.3: GENERIC PRODUCT
 	 * Generic Single Product template
 	 */
+
+	const isInSingleProductTemplate = isInGenericTemplate(
+		templateSlugs.singleProduct
+	);
 
 	if ( isInSingleProductTemplate ) {
 		return createLocationObject( 'product', { productId: null } );
@@ -208,6 +191,10 @@ export const useGetLocation = < T, >(
 	 * Generic Taxonomy template
 	 */
 
+	const isInProductsByCategoryTemplate = isInGenericTemplate(
+		templateSlugs.productCategory
+	);
+
 	if ( isInProductsByCategoryTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'product_cat',
@@ -215,12 +202,20 @@ export const useGetLocation = < T, >(
 		} );
 	}
 
+	const isInProductsByTagTemplate = isInGenericTemplate(
+		templateSlugs.productTag
+	);
+
 	if ( isInProductsByTagTemplate ) {
 		return createLocationObject( 'archive', {
 			taxonomy: 'product_tag',
 			termId: null,
 		} );
 	}
+
+	const isInProductsByAttributeTemplate = isInGenericTemplate(
+		templateSlugs.productAttribute
+	);
 
 	if ( isInProductsByAttributeTemplate ) {
 		return createLocationObject( 'archive', {
@@ -234,6 +229,11 @@ export const useGetLocation = < T, >(
 	 * Cart/Checkout templates or Mini Cart
 	 */
 
+	const isInCartContext =
+		templateSlug === templateSlugs.cart ||
+		templateSlug === templateSlugs.checkout ||
+		isInMiniCartBlock;
+
 	if ( isInCartContext ) {
 		return createLocationObject( 'cart' );
 	}
@@ -242,6 +242,10 @@ export const useGetLocation = < T, >(
 	 * Case 4: GENERIC ORDER
 	 * Order Confirmation template
 	 */
+
+	const isInOrderTemplate = isInGenericTemplate(
+		templateSlugs.orderConfirmation
+	);
 
 	if ( isInOrderTemplate ) {
 		return createLocationObject( 'order' );
