@@ -233,7 +233,27 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 			)
 		);
 
-		if ( is_wp_error( $files ) || count( $files ) < 1 ) {
+		if ( is_wp_error( $files ) ) {
+			return 0;
+		}
+
+		$files = array_filter(
+			$files,
+			function( $file ) use ( $timestamp ) {
+				/**
+				 * Allows preventing an expired log file from being deleted.
+				 *
+				 * @param bool $delete    True to delete the file.
+				 * @param File $file      The log file object.
+				 * @param int  $timestamp The expiration threshold.
+				 */
+				$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
+
+				return boolval( $delete );
+			}
+		);
+
+		if ( count( $files ) < 1 ) {
 			return 0;
 		}
 
