@@ -213,9 +213,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			)
 		).toBeVisible();
 		await expect(
-			checkoutPageObject.page.getByText(
-				'Please select a valid how wide is your road?'
-			)
+			checkoutPageObject.page.getByText( 'Please select a valid option' )
 		).toBeVisible();
 	} );
 
