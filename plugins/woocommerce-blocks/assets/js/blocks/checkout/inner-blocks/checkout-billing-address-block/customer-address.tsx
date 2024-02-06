@@ -94,7 +94,7 @@ const CustomerAddress = ( {
 			<>
 				<AddressForm
 					id="billing"
-					type="billing"
+					addressType="billing"
 					onChange={ onChangeAddress }
 					values={ billingAddress }
 					fields={ ADDRESS_FIELDS_KEYS }
