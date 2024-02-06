@@ -3,8 +3,8 @@
  */
 import { DesignWithoutAIStateMachineContext } from './types';
 
-export const hasFontLibraryInstalled = (
+export const isFontLibraryAvailable = (
 	context: DesignWithoutAIStateMachineContext
 ) => {
-	return context.isFontLibraryInstalled;
+	return context.isFontLibraryAvailable;
 };

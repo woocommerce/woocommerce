@@ -33,7 +33,7 @@ export const DesignWithNoAiController = ( {
 		devTools: process.env.NODE_ENV === 'development',
 		context: {
 			...designWithNoAiStateMachineDefinition.context,
-			isFontLibraryInstalled:
+			isFontLibraryAvailable:
 				parentContext?.isFontLibraryAvailable ?? false,
 		},
 	} );

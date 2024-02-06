@@ -14,7 +14,7 @@ import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { services } from './services';
 import { actions } from './actions';
-import { hasFontLibraryInstalled } from './guards';
+import { isFontLibraryAvailable } from './guards';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -56,7 +56,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
-			isFontLibraryInstalled: false,
+			isFontLibraryAvailable: false,
 		},
 		initial: 'navigate',
 		states: {
@@ -147,7 +147,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 										always: [
 											{
 												cond: {
-													type: 'hasFontLibraryInstalled',
+													type: 'isFontLibraryAvailable',
 												},
 												target: 'pending',
 											},
@@ -195,7 +195,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
-			hasFontLibraryInstalled,
+			isFontLibraryAvailable,
 		},
 	}
 );
