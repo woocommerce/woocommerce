@@ -2550,6 +2550,9 @@ FROM $order_meta_table
 		}
 
 		$this->persist_order_to_db( $order );
+
+		$this->update_order_meta( $order );
+
 		$order->save_meta_data();
 
 		if ( $backfill ) {

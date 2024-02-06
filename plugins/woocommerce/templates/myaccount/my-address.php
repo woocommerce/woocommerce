@@ -12,7 +12,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 2.6.0
+ * @version 8.7.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -65,6 +65,14 @@ $col    = 1;
 		<address>
 			<?php
 				echo $address ? wp_kses_post( $address ) : esc_html_e( 'You have not set up this type of address yet.', 'woocommerce' );
+
+				/**
+				 * Used to output content after core address fields.
+				 *
+				 * @param string $name Address type.
+				 * @since 8.7.0
+				 */
+				do_action( 'woocommerce_my_account_after_my_address', $name );
 			?>
 		</address>
 	</div>

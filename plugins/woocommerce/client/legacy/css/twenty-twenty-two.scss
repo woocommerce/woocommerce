@@ -1002,7 +1002,8 @@ ul.wc-tabs {
 	}
 
 	.woocommerce-thankyou-order-received,
-	h2.woocommerce-column__title {
+	.woocommerce-column__title,
+	.woocommerce-customer-details h2 {
 		font-family: var(--wp--preset--font-family--source-serif-pro);
 	}
 

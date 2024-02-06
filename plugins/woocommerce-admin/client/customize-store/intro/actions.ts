@@ -15,6 +15,7 @@ import {
 	RecommendThemesAPIResponse,
 } from '../types';
 import { events } from './';
+import { isIframe } from '~/customize-store/utils';
 
 export const assignThemeData = assign<
 	customizeStoreStateMachineContext,
@@ -55,19 +56,6 @@ export const recordTracksThemeSelected = (
 export const recordTracksBrowseAllThemesClicked = () => {
 	recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
 };
-
-export const assignActiveThemeHasMods = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
->( {
-	intro: ( context, event ) => {
-		const activeThemeHasMods = (
-			event as DoneInvokeEvent< { activeThemeHasMods: boolean } >
-		 ).data.activeThemeHasMods;
-		// type coercion workaround for now
-		return { ...context.intro, activeThemeHasMods };
-	},
-} );
 
 export const assignCustomizeStoreCompleted = assign<
 	customizeStoreStateMachineContext,
@@ -153,5 +141,39 @@ export const assignNoAIFlowError = assign<
 >( {
 	intro: ( context ) => {
 		return { ...context.intro, hasErrors: true };
+	},
+} );
+
+export const assignIsFontLibraryAvailable = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	isFontLibraryAvailable: ( context, event: unknown ) => {
+		return (
+			event as {
+				payload: boolean;
+			}
+		 ).payload;
+	},
+} );
+
+export const assignFlags = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	activeThemeHasMods: () => {
+		if ( ! isIframe( window ) ) {
+			return window.__wcCustomizeStore.activeThemeHasMods;
+		}
+
+		return window.parent.__wcCustomizeStore.activeThemeHasMods;
+	},
+	isFontLibraryAvailable: ( context ) => {
+		if ( ! isIframe( window ) ) {
+			return context.isFontLibraryAvailable;
+		}
+		const isFontLibraryAvailable =
+			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
+		return isFontLibraryAvailable;
 	},
 } );
