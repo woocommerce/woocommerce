@@ -162,7 +162,7 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
-		await this.page.evaluate( () => {
+		await this.page.waitForFunction( () => {
 			return (
 				! window.wp.data
 					.select( 'wc/store/checkout' )
