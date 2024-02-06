@@ -435,11 +435,13 @@ class Checkout extends AbstractCartRoute {
 			}
 		}
 
-		// Persist additional fields to session.
-		if ( ! empty( $request['additional_fields'] ) ) {
-			foreach ( $request['additional_fields'] as $key => $value ) {
-				if ( $this->additional_fields_controller->is_field( $key ) ) {
-					$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );
+		// Persist contact fields to session.
+		$contact_fields = $this->additional_fields_controller->get_contact_fields_keys();
+
+		if ( ! empty( $contact_fields ) ) {
+			foreach ( $contact_fields as $key ) {
+				if ( isset( $request['additional_fields'], $request['additional_fields'][ $key ] ) ) {
+					$this->additional_fields_controller->persist_field_for_customer( $key, $request['additional_fields'][ $key ], $customer );
 				}
 			}
 		}
