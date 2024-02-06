@@ -59,7 +59,7 @@ export const customer = {
 };
 
 // source: plugins/woocommerce-blocks/tests/e2e/bin/scripts/parallel/reviews.sh
-export const reviews = [
+export const hoodieReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
@@ -72,6 +72,15 @@ export const reviews = [
 		review: 'Not bad.',
 		rating: 4,
 	},
+];
+
+export const capReviews = [
+	{
+		name: `${ customer.first_name } ${ customer.last_name }`,
+		email: customer.email,
+		review: 'Bad!',
+		rating: 2,
+	},
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
@@ -79,6 +88,8 @@ export const reviews = [
 		rating: 1,
 	},
 ];
+
+export const allReviews = hoodieReviews.concat( capReviews );
 
 export const storeDetails = {
 	us: {
