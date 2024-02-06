@@ -19,6 +19,14 @@
       "category_title": "Building a Woo Store",
       "posts": [
         {
+          "post_title": "Working with Webhooks in WooCommerce",
+          "menu_title": "Using Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/webhooks.md",
+          "hash": "102727c5217162eb5a363f95664f0c1554dce96c58e4b506cd350d50800a5381",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/webhooks.md",
+          "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
+        },
+        {
           "post_title": "How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
@@ -315,14 +323,6 @@
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
         },
         {
-          "post_title": "Webhooks",
-          "menu_title": "Webhooks",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/webhooks.md",
-          "hash": "eae79157749e2ada34570654d0392974da81f29321663fc86c0db973fee0762e",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/webhooks.md",
-          "id": "5c1dee19b2a23240ee20f1fde448e1a8f9f58ffe"
-        },
-        {
           "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
           "menu_title": "Custom attributes in menus",
           "tags": "how-to",
@@ -407,9 +407,15 @@
           "post_title": "WooCommerce extension development best practices",
           "menu_title": "Best Practices",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/extension-development-best-practices.md",
-          "hash": "86442bed88a67c95a805d3bd36b71b0f6cbb2a48edf8c4ac54c348f9f7ec94ff",
+          "hash": "11a9e5f380426b3e05e68ba2ef87b59a33ab3be70c0cff83ffc0fa13d6bcee3f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/extension-development-best-practices.md",
-          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12"
+          "id": "83050f0142b6de00b73b3638d46ddddc5a2f8b12",
+          "links": {
+            "./check-if-woo-is-active.md": "2c2e89013ad76ff2596680224047723163512bc2",
+            "./data-storage.md": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102",
+            "../security/prevent-data-leaks.md": "91b86abe2953e1cd4e9d6d407238093245346cf9",
+            "./example-plugin-header-comment.md": "2fb49dc6ccad894e02f123940a9db98c7724dddc"
+          }
         },
         {
           "post_title": "Example WordPress plugin header comment for WooCommerce extensions",
@@ -443,7 +449,7 @@
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
-          "hash": "47cb6a0f60dad691e3dfd1f26e00b5582d51ec23e7de3f800126701b5967f557",
+          "hash": "dca930ebe334bb3bb276ec912d050830b784ec9f755be491d41c3c32f5b65637",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
           "id": "2c2e89013ad76ff2596680224047723163512bc2"
         },
@@ -1178,9 +1184,12 @@
           "menu_title": "Using WooCommerce CLI",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/using-wc-cli.md",
-          "hash": "693d457ca0156408c16e4f24edf90f3838a38706dacc840031e21ab38190a629",
+          "hash": "f25bbfa7c85f05878b5f569414f46bb11974d1e9cacf3a6f5d708c6141edf0cd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/using-wc-cli.md",
-          "id": "cfdf72385ec51c15ad9c57aa7a6d83f699416849"
+          "id": "cfdf72385ec51c15ad9c57aa7a6d83f699416849",
+          "links": {
+            "./wc-cli-commands.md": "73d6bc6468d23a9e93d16d574399105b143e43af"
+          }
         },
         {
           "post_title": "WooCommerce CLI Frequently Asked Questions",
@@ -1195,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "e2bbd4e0e56fce0c7c10aa8fba780d2a5beb24f1399a5ed82af9d117439b0d89"
+  "hash": "a138874d270595236e1db122206be746424ea22f376a8799473e5505486c4b11"
 }
