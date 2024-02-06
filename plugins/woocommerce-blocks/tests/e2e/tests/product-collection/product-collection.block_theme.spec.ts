@@ -22,7 +22,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			editorUtils,
 		} );
 		await pageObject.createNewPostAndInsertBlock();
-		await editorUtils.closeWelcomeGuideModal();
 		await use( pageObject );
 	},
 } );
@@ -807,17 +806,20 @@ test.describe( 'Product Collection', () => {
 			await editorUtils.insertBlockUsingGlobalInserter(
 				'Product Collection (Beta)'
 			);
+
+			const verifyPromise = verifyProductId( page, productSlug );
+
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 
-			await verifyProductId( page, productSlug );
+			await verifyPromise;
 		} );
 		test( 'in Single Product block in specific Product template', async ( {
 			page,
 			editorUtils,
 			pageObject,
 		} ) => {
-			const productName = 'Single';
-			const productSlug = 'single';
+			const productName = 'Belt';
+			const productSlug = 'belt';
 
 			await editorUtils.openSpecificProductTemplate(
 				productName,
@@ -825,9 +827,12 @@ test.describe( 'Product Collection', () => {
 			);
 
 			await pageObject.insertProductCollectionInSingleProductBlock();
+
+			const verifyPromise = verifyProductId( page, productSlug );
+
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 
-			await verifyProductId( page, productSlug );
+			await verifyPromise;
 		} );
 		test( 'in Single Product template', async ( {} ) => {} );
 		test( 'in specific Category template', async ( {} ) => {} );
