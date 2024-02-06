@@ -25,7 +25,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Product Collection', () => {
-	test.beforeAll( async ( { pageObject } ) => {
+	test.beforeEach( async ( { pageObject } ) => {
 		await pageObject.createNewPostAndInsertBlock();
 	} );
 
@@ -395,7 +395,7 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Toolbar settings', () => {
-		test.beforeAll( async ( { pageObject } ) => {
+		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 		} );
 
@@ -429,7 +429,7 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Responsive', () => {
-		test.beforeAll( async ( { pageObject } ) => {
+		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 		} );
 		test( 'Block with shrink columns ENABLED correctly displays as grid', async ( {
