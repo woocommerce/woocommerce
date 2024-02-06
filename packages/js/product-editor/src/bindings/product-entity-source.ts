@@ -63,7 +63,9 @@ export default {
 			[ contextPostType ]
 		);
 
-		const [ entityPropValue ] = useEntityProp(
+		// console.log( 'entityPropName: ', entityPropName );
+
+		const [ entityPropValue, setEntityPropValue ] = useEntityProp(
 			'postType',
 			postType,
 			entityPropName
@@ -75,11 +77,16 @@ export default {
 		 * (remove-when-block-binding-api-available).
 		 * @see https://github.com/WordPress/gutenberg/blob/f38eb429b8ba5153c50fabad3367f94c3289746d/packages/block-editor/src/hooks/use-bindings-attributes.js#L51
 		 */
-		const setEntityPropValue = () => {};
+		// const setEntityPropValue = () => {};
 
 		return {
-			placeholder: entityPropName,
-			useValue: [ entityPropValue, setEntityPropValue ],
+			placeholder: null,
+			useValue: [
+				entityPropValue,
+				( newValue: string ) => {
+					setEntityPropValue( newValue );
+				},
+			],
 		};
 	},
 	lockAttributesEditing: false,

@@ -6,7 +6,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import productMeta from './product-entity';
+import productEntitySource from './product-entity-source';
 
 const registerBlockBindingsSource =
 	// @ts-expect-error There are no types for this.
@@ -30,5 +30,5 @@ export default function registerCoreParagraphBindingSource() {
 	if ( ! isBlockBindingAPIAvailable() ) {
 		return;
 	}
-	registerBlockBindingsSource( productMeta );
+	registerBlockBindingsSource( productEntitySource );
 }
