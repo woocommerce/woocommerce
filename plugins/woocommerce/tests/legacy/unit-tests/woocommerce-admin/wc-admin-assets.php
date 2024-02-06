@@ -23,8 +23,8 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 		$parts           = explode( '/', $result );
 		$final_file_name = array_pop( $parts );
 
-		// Since this can vary depending on the env the tests are running in, we will make this assertion based upon the SCRIPT_DEBUG value.
-		$expected_value = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? 'flavortown.js' : 'flavortown.min.js';
+		// There should be no difference between SCRIPT_DEBUG being on or off.
+		$expected_value = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? 'flavortown.js' : 'flavortown.js';
 
 		$this->assertEquals(
 			$expected_value,
