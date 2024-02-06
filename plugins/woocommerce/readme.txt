@@ -322,6 +322,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Make OSA fields extendable [#41690](https://github.com/woocommerce/woocommerce/pull/41690)
 * Tweak - The previously uploaded file should re-appear when the product changes from downloadable to not and then back again [#44008](https://github.com/woocommerce/woocommerce/pull/44008)
 * Tweak - Update admin gutenberg_version setting to more accurately retrieve the Gutenberg version. [#43835](https://github.com/woocommerce/woocommerce/pull/43835)
+* Performance - Remove customer order count from order attribution checkout data. [#44359](https://github.com/woocommerce/woocommerce/pull/44359)
 * Performance - Improves the performance of the `is_new_install` check by eliminating expensive post counts where possible. [#43767](https://github.com/woocommerce/woocommerce/pull/43767)
 * Performance - Load the gtag script used by Google Analytics asynchronously in WooCommerce Blocks. [#43040](https://github.com/woocommerce/woocommerce/pull/43040)
 * Enhancement - Added the minimal block style for the Product Details block and set it as the default style [#42965](https://github.com/woocommerce/woocommerce/pull/42965)
