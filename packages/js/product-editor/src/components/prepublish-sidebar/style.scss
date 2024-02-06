@@ -3,7 +3,6 @@
 	right: 0;
 	left: 0;
 	overflow: auto;
-	padding: 0 $grid-unit-20;
 
 	@include break-medium() {
 		left: auto;
@@ -22,13 +21,13 @@
 		}
 	}
 
-	&__header {
+	&__actions {
 		background: $white;
 		height: $header-height + $border-width;
 		display: flex;
 		align-items: center;
 		gap: 8px;
-
+		padding: 0 $grid-unit-20;
 
 		> button {
 			flex: 1;
@@ -40,7 +39,8 @@
 		}
 	}
 
-	&__content {
+	&__title {
+		padding: 0 $grid-unit-20;
 		h4 {
 			font-size: 14px;
 			line-height: 20px;

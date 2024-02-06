@@ -36,7 +36,7 @@ export function PrepublishSidebar( {
 
 	return (
 		<div className="woocommerce-product-publish-panel">
-			<div className="woocommerce-product-publish-panel__header">
+			<div className="woocommerce-product-publish-panel__actions">
 				<PublishButton
 					productType={ productType }
 					productStatus={ lastPersistedProduct?.status }
@@ -54,13 +54,9 @@ export function PrepublishSidebar( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 			</div>
-			<div className="woocommerce-product-publish-panel__content">
-				<div className="woocommerce-product-publish-panel__header-title">
-					<h4>{ title }</h4>
-				</div>
-				<div className="woocommerce-product-publish-panel__header-description">
-					<span>{ description }</span>
-				</div>
+			<div className="woocommerce-product-publish-panel__title">
+				<h4>{ title }</h4>
+				<span>{ description }</span>
 			</div>
 		</div>
 	);
