@@ -189,7 +189,7 @@ class FilterClausesGenerator implements ClausesGeneratorInterface {
 				{$in_stock_clause}
 				AND term_id in {$term_ids_to_filter_by_list}
 				GROUP BY product_or_parent_id
-				HAVING COUNT(product_or_parent_id)>={$count}
+				HAVING COUNT(DISTINCT term_id)={$count}
 			)";
 		}
 
