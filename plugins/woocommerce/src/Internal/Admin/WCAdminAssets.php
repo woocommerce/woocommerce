@@ -63,22 +63,6 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Determines if a minified JS file should be served.
-	 *
-	 * @param  boolean $script_debug Only serve unminified files if script debug is on.
-	 * @return boolean If js asset should use minified version.
-	 */
-	public static function should_use_minified_js_file( $script_debug ) {
-		// minified files are only shipped in non-core versions of wc-admin, return false if minified files are not available.
-		if ( ! Features::exists( 'minified-js' ) ) {
-			return false;
-		}
-
-		// Otherwise we will serve un-minified files if SCRIPT_DEBUG is on, or if anything truthy is passed in-lieu of SCRIPT_DEBUG.
-		return ! $script_debug;
-	}
-
-	/**
 	 * Gets the URL to an asset file.
 	 *
 	 * @param  string $file File name (without extension).
@@ -86,15 +70,7 @@ class WCAdminAssets {
 	 * @return string URL to asset.
 	 */
 	public static function get_url( $file, $ext ) {
-		$suffix = '';
-
-		// Potentially enqueue minified JavaScript.
-		if ( $ext === 'js' ) {
-			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
-		}
-
-		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
+		return plugins_url( self::get_path( $ext ) . $file . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
 	}
 
 	/**
@@ -120,17 +96,11 @@ class WCAdminAssets {
 	 * @throws \Exception Throws an exception when a readable asset registry file cannot be found.
 	 */
 	public static function get_script_asset_filename( $script_path_name, $file ) {
-		$minification_supported = Features::exists( 'minified-js' );
-		$script_min_filename    = $file . '.min.asset.php';
-		$script_nonmin_filename = $file . '.asset.php';
-		$script_asset_path      = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/';
+		$script_filename   = $file . '.asset.php';
+		$script_asset_path = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $script_path_name . '/';
 
-		// Check minification is supported first, to avoid multiple is_readable checks when minification is
-		// not supported.
-		if ( $minification_supported && is_readable( $script_asset_path . $script_min_filename ) ) {
-			return $script_min_filename;
-		} elseif ( is_readable( $script_asset_path . $script_nonmin_filename ) ) {
-			return $script_nonmin_filename;
+		if ( is_readable( $script_asset_path . $script_filename ) ) {
+			return $script_filename;
 		} else {
 			// could not find an asset file, throw an error.
 			throw new \Exception( 'Could not find asset registry for ' . $script_path_name );

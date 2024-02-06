@@ -13,7 +13,6 @@ declare global {
 			'customer-effort-score-tracks': boolean;
 			homescreen: boolean;
 			marketing: boolean;
-			'minified-js': boolean;
 			'mobile-app-banner': boolean;
 			navigation: boolean;
 			'new-product-management-experience': boolean;

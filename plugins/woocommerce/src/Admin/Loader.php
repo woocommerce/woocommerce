@@ -78,12 +78,9 @@ class Loader extends DeprecatedClassFacade {
 	 * @return boolean If js asset should use minified version.
 	 *
 	 * @deprecated since 6.3.0, use WCAdminAssets::should_use_minified_js_file( $script_debug )
+	 * @deprecated since 8.7.0 there are no longer minified WCAdmin assets.
 	 */
 	public static function should_use_minified_js_file( $script_debug ) {
-		// Bail if WC isn't initialized (This can be called from WCAdmin's entrypoint).
-		if ( ! defined( 'WC_ABSPATH' ) ) {
-			return;
-		}
-		return WCAdminAssets::should_use_minified_js_file( $script_debug );
+		return false;
 	}
 }

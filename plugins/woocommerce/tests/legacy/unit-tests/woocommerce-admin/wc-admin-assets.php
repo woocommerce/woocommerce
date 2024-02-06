@@ -14,29 +14,6 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  */
 class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	/**
-	 * Setup
-	 */
-	public function setUp(): void {
-		add_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20, 1 );
-	}
-
-	/**
-	 * Tear Down
-	 */
-	public function tearDown(): void {
-		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20 );
-	}
-
-	/**
-	 * Filter to enable unminified-js feature.
-	 *
-	 * @param  array $features Array of active features.
-	 */
-	public static function turn_on_unminified_js_feature( $features ) {
-		return array_merge( $features, array( 'unminified-js' ) );
-	}
-
-	/**
 	 * Test get_url()
 	 */
 	public function test_get_url() {
@@ -53,26 +30,6 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 			$expected_value,
 			$final_file_name,
 			'the anticipated js file name should use .min when SCRIPT_DEBUG is off, and have no .min when SCRIPT_DEBUG is on.'
-		);
-	}
-
-	/**
-	 * Tests for should_use_minified_js_file
-	 */
-	public function test_should_use_minified_js_file() {
-		// We will simulate a call with SCRIPT_DEBUG on.
-		$script_debug = true;
-
-		$this->assertFalse(
-			WCAdminAssets::should_use_minified_js_file( $script_debug ),
-			'Since unminifed js feature is TRUE/on, and script_debug is true, should_use_minified_js_file should return false'
-		);
-
-		// Now we will simulate SCRIPT_DEBUG off/false.
-		$script_debug = false;
-		$this->assertTrue(
-			WCAdminAssets::should_use_minified_js_file( $script_debug ),
-			'Since unminifed js feature is TRUE/on, and script_debug is false, should_use_minified_js_file should return true'
 		);
 	}
 }
