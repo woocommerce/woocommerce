@@ -457,6 +457,11 @@ class WC_Install {
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
 
+		// Force a flush of rewrite rules even if the corresponding hook isn't initialized yet.
+		if ( ! has_action( 'woocommerce_flush_rewrite_rules' ) ) {
+			flush_rewrite_rules();
+		}
+
 		/**
 		 * Flush the rewrite rules after install or update.
 		 *
@@ -558,7 +563,7 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
-        TransientFilesEngine::add_endpoint();
+		TransientFilesEngine::add_endpoint();
 	}
 
 	/**
