@@ -466,7 +466,7 @@ abstract class AbstractBlock {
 		/**
 		 * Gives opportunity to return routes without invoking the compute intensive REST API.
 		 *
-		 * @since 8.6.0
+		 * @since 8.7.0
 		 * @param array  $routes    Array of routes.
 		 * @param string $namespace Namespace for routes.
 		 * @param string $context   Context, can be edit or view.
