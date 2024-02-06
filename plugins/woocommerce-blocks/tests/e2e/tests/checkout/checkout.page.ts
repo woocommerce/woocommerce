@@ -156,12 +156,9 @@ export class CheckoutPage {
 	}
 
 	/**
-	 * Place order and wait for redirect to order received page.
-	 *
-	 * @param waitForRedirect If false, then the method will not wait for the redirect to order received page. Useful
-	 *                        when testing for errors on the checkout page.
+	 * Blurs the current input and waits for the checkout to finish any loading or calculating.
 	 */
-	async placeOrder( waitForRedirect = true ) {
+	async waitForCheckoutToFinishUpdating() {
 		await this.page.evaluate( 'document.activeElement.blur()' );
 		await this.page.waitForFunction( () => {
 			return (
@@ -176,6 +173,16 @@ export class CheckoutPage {
 					.isCustomerDataUpdating()
 			);
 		} );
+	}
+
+	/**
+	 * Place order and wait for redirect to order received page.
+	 *
+	 * @param waitForRedirect If false, then the method will not wait for the redirect to order received page. Useful
+	 *                        when testing for errors on the checkout page.
+	 */
+	async placeOrder( waitForRedirect = true ) {
+		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
