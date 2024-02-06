@@ -35,12 +35,27 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		return __( 'Template for the simple product form', 'woocommerce' );
 	}
 
-	public function get_post_types() {
-
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Array of compatible product types.
+	 */
+	public function get_compatible_product_types(): array {
+		return array(
+			'simple',
+			'variable'
+		);
 	}
 
-	public function get_product_data() {
-
+	/**
+	 * Get the default product data.
+	 *
+	 * @return array Default produc data.
+	 */
+	public function get_default_product_data(): array {
+		return array(
+			'type' => 'simple'
+		);
 	}
 
 }

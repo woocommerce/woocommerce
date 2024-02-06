@@ -8,8 +8,36 @@ class ProductFormTemplatesController {
      * Init
      */
     public function init() {
-		add_filter( 'default_wp_template_part_areas', array( $this, 'register_product_form_template_part_area' ), 10, 1 );
+		add_filter( 'default_wp_template_part_areas', [ $this, 'register_product_form_template_part_area' ], 10, 1 );
         add_action( 'get_block_templates', [ $this, 'add_block_templates' ], 10, 3 );
+        add_action( 'rest_api_init', [ $this, 'add_product_form_template_additional_data' ] );
+    }
+
+    /**
+     * Add the additional data around templates to the REST response.
+     */
+    public function add_product_form_template_additional_data() {
+        register_rest_field(
+            'wp_template_part', 
+            'additional_data',
+            array(
+                'get_callback'    => [ $this, 'get_additional_data' ], // custom function name 
+                'update_callback' => null,
+                'schema'          => null,
+            )
+        );
+    }
+
+    /**
+     * Get additional data for the templates in the REST response.
+     */
+    public function get_additional_data( $object, $field_name, $request ) {
+        if ( $object['area'] === BlockTemplateUtils::AREA ) {
+            $block_template_utils = new BlockTemplateUtils();
+            return $block_template_utils->get_block_template_additional_data( $object['slug'] );
+        }
+
+        return array();
     }
 
     /**

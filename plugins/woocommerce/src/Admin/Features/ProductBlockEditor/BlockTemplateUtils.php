@@ -179,4 +179,22 @@ class BlockTemplateUtils {
         return '';
     }
 
+    /**
+     * Get additional data related to the template.
+     */
+    public function get_block_template_additional_data( $template_slug ) {
+        $layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+        $product_templates        = $layout_template_registry->instantiate_layout_templates();
+        $product_template         = $product_templates[ $template_slug ] ?? null;
+        
+        if ( ! $product_template ) {
+            return array();
+        }
+
+        return array(
+            'product_types'        => $product_template->get_compatible_product_types(),
+            'default_product_data' => $product_template->get_default_product_data()
+        );
+    }
+
 }

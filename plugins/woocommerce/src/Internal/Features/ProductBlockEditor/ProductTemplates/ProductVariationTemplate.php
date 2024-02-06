@@ -15,8 +15,22 @@ use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTem
 class ProductVariationTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
 	use DownloadableProductTrait;
 
+	/**
+	 * Get the template slug.
+	 *
+	 * @return string Template slug.
+	 */
 	public function get_slug(): string {
 		return 'product-form-variation';
+	}
+
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Compatible product types.
+	 */
+	public function get_compatible_product_types(): array {
+		return 'product_variation';
 	}
 
 	/**

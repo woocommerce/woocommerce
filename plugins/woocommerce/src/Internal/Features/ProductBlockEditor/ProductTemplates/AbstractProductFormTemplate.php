@@ -72,4 +72,20 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}
+
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Array of compatible product types.
+	 */
+	abstract public function get_compatible_product_types(): array;
+
+	/**
+	 * Get the default product data.
+	 */
+	public function get_default_product_data(): array {
+		return array(
+			'type' => 'simple'
+		);
+	}
 }
