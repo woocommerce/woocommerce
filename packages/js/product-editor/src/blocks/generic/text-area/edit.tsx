@@ -19,6 +19,7 @@ import type {
 } from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
+import { Label } from '../../../components/label/label';
 
 export function TextAreaBlockEdit( {
 	attributes,
@@ -31,6 +32,8 @@ export function TextAreaBlockEdit( {
 		placeholder,
 		help,
 		required,
+		note,
+		tooltip,
 		disabled,
 		align,
 		allowedFormats,
@@ -91,7 +94,14 @@ export function TextAreaBlockEdit( {
 
 			<BaseControl
 				id={ contentId.toString() }
-				label={ label }
+				label={
+					<Label
+						label={ label || '' }
+						required={ required }
+						note={ note }
+						tooltip={ tooltip }
+					/>
+				}
 				help={ help }
 			>
 				{ isRichTextMode && (
