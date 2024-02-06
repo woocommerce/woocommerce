@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * External dependencies
  */
@@ -21,6 +20,11 @@ import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import { withProduct } from '@woocommerce/block-hocs';
 import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import './editor.scss';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
