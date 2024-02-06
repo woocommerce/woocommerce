@@ -815,7 +815,20 @@ test.describe( 'Product Collection', () => {
 			page,
 			editorUtils,
 			pageObject,
-		} ) => {} );
+		} ) => {
+			const productName = 'Single';
+			const productSlug = 'single';
+
+			await editorUtils.openSpecificProductTemplate(
+				productName,
+				productSlug
+			);
+
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+
+			await verifyProductId( page, productSlug );
+		} );
 		test( 'in Single Product template', async ( {} ) => {} );
 		test( 'in specific Category template', async ( {} ) => {} );
 		test( 'in specific Tag template', async ( {} ) => {} );
@@ -830,4 +843,5 @@ test.describe( 'Product Collection', () => {
 		test( 'as product in Single Product block in Products by Attribute template', async ( {} ) => {} );
 		test( 'as generic in post', async ( {} ) => {} );
 		test( 'as generic in Product Catalog', async ( {} ) => {} );
+	} );
 } );
