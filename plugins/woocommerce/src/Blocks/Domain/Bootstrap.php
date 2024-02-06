@@ -142,7 +142,6 @@ class Bootstrap {
 			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
-			$this->container->get( CheckoutFields::class )->init();
 			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
 		}
 
