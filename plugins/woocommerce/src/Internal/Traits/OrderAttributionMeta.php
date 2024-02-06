@@ -3,8 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Vendor\Detection\MobileDetect;
-use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Exception;
 use WC_Meta_Data;
 use WC_Order;
@@ -380,15 +380,20 @@ trait OrderAttributionMeta {
 	/**
 	 * Get the order history for the customer (data matches Customers report).
 	 *
-	 * @param int $customer_report_id The customer ID (not necessarily User ID).
+	 * @param int $customer_report_id The reports customer ID (not necessarily User ID).
 	 *
 	 * @return array|null Order count, total spend, and average spend per order.
 	 */
 	private function get_customer_history( $customer_report_id ): ?array {
-		$matching_customers = wc()->api->get_endpoint_data(
-			'/wc-analytics/reports/customers',
-			array( 'customers' => $customer_report_id )
+
+		$args = array(
+			'customers'   => array( $customer_report_id ),
+			// This defaults to a week ago for some reason.
+			'order_after' => null,
 		);
-		return $matching_customers[0] ?? null;
+
+		$customers_query = new CustomersQuery( $args );
+		$customer_data   = $customers_query->get_data();
+		return $customer_data->data[0] ?? null;
 	}
 }
