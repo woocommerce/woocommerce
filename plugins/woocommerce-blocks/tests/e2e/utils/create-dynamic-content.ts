@@ -3,16 +3,14 @@
  */
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
-import { exec } from 'child_process';
+import {
+	CreatePostPayload,
+	Post,
+} from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
-/**
- * Internal dependencies
- */
-import { cli } from './cli';
-
-export type GeneratedPost = {
-	url: string;
-	id: string;
+export type TestingPost = {
+	post: Post;
 	deletePost: () => Promise< void >;
 };
 
@@ -29,54 +27,47 @@ Handlebars.registerHelper( 'stringify', function ( context ) {
 	return JSON.stringify( context );
 } );
 
-const deletePost = async ( id: string ) => {
-	await cli(
-		`npm run wp-env run tests-cli -- wp post delete ${ id } --force`
-	);
-};
-
-// Creates a post as user 1.
-const createPost = async (
-	title: string,
-	templateContent: string
-): Promise< GeneratedPost > => {
-	return new Promise( ( resolve, reject ) => {
-		const command = `npm run wp-env run tests-cli -- wp post create --porcelain --post_status=publish --post_author=1 --post_title="${ title }" -`;
-
-		const childProcess = exec( command, ( error, stdout ) => {
-			// stderr is not empty when the command succeeds, so the best we can do is check if stdout contains the id.
-			// stdout also contains cruft from passing the command to wp-env, so we have to extract the ID from the output.
-			const outputLines = stdout.trim().split( '\n' );
-			const postId = outputLines.find( ( line ) =>
-				line.match( /^\d+$/ )
-			);
-
-			if ( ! postId ) {
-				reject( new Error( `Could not create post: ${ stdout }` ) );
-			} else {
-				resolve( {
-					id: postId,
-					url: `/${ title.toLowerCase().replace( /\s+/g, '-' ) }/`,
-					deletePost: () => deletePost( postId ),
-				} );
-			}
-		} );
-
-		if ( childProcess.stdin ) {
-			childProcess.stdin.write( templateContent );
-			childProcess.stdin.end();
-		} else {
-			reject( new Error( 'Could not create post: stdin not available' ) );
-		}
+const deletePost = async ( requestUtils: RequestUtils, id: number ) => {
+	return requestUtils.rest( {
+		method: 'DELETE',
+		path: `/wp/v2/posts/${ id }`,
+		params: {
+			force: true,
+		},
 	} );
 };
 
+const createPost = async (
+	requestUtils: RequestUtils,
+	payload: CreatePostPayload
+) => {
+	const post = await requestUtils.createPost( payload );
+
+	return {
+		post,
+		deletePost: () => {
+			return deletePost( requestUtils, post.id );
+		},
+	};
+};
+
+type PostPayload = Partial< CreatePostPayload >;
+
 export const createPostFromTemplate = async (
-	title: string,
+	requestUtils: RequestUtils,
+	post: PostPayload,
 	templatePath: string,
 	data: unknown
 ) => {
 	const templateContent = await readFile( templatePath, 'utf8' );
 	const content = Handlebars.compile( templateContent )( data );
-	return createPost( title, content );
+
+	const payload: CreatePostPayload = {
+		status: 'publish',
+		date_gmt: new Date().toISOString(),
+		content,
+		...post,
+	};
+
+	return createPost( requestUtils, payload );
 };
