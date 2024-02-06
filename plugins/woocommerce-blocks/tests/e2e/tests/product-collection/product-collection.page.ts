@@ -111,6 +111,8 @@ class ProductCollectionPage {
 		await this.admin.page
 			.getByRole( 'button', { name: buttonName } )
 			.click();
+
+		await this.refreshLocators( 'editor' );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -122,6 +124,8 @@ class ProductCollectionPage {
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByRole( 'button', { name: buttonName } )
 			.click();
+
+		await this.refreshLocators( 'editor' );
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
@@ -485,6 +489,25 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
+	async insertProductCollectionInSingleProductBlock() {
+		this.insertSingleProductBlock();
+
+		const siblingBlock = await this.editorUtils.getBlockByName(
+			'woocommerce/product-price'
+		);
+		const clientId =
+			( await siblingBlock.getAttribute( 'data-block' ) ) ?? '';
+		const parentClientId =
+			( await this.editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+
+		await this.editor.selectBlocks( siblingBlock );
+		await this.editorUtils.insertBlock(
+			{ name: 'woocommerce/product-collection' },
+			undefined,
+			parentClientId
+		);
+	}
+
 	/**
 	 * Locators
 	 */
@@ -505,6 +528,23 @@ class ProductCollectionPage {
 	/**
 	 * Private methods to be used by the class.
 	 */
+	private async insertSingleProductBlock() {
+		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
+		await this.page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wc/store/v1/products' ) &&
+				response.status() === 200
+		);
+		const singleProductBlock = await this.editorUtils.getBlockByName(
+			'woocommerce/single-product'
+		);
+		await singleProductBlock
+			.locator( 'input[type="radio"]' )
+			.nth( 0 )
+			.click();
+		await singleProductBlock.getByText( 'Done' ).click();
+	}
+
 	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
 		await this.waitForProductsToLoad();
 
