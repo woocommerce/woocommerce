@@ -30,8 +30,8 @@ class Init {
 		}
 
 		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'possibly_register_pre_install_wc_pay_promotion_gateway' ) );
-		add_filter( 'option_woocommerce_gateway_order', [ __CLASS__, 'set_gateway_top_of_list' ] );
-		add_filter( 'default_option_woocommerce_gateway_order', [ __CLASS__, 'set_gateway_top_of_list' ] );
+		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
+		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
 
 		$rtl = is_rtl() ? '.rtl' : '';
 
@@ -122,17 +122,22 @@ class Init {
 	 * Go through the specs and run them.
 	 */
 	public static function get_promotions() {
-		$suggestions = array();
-		$specs       = self::get_specs();
+		$specs = self::get_specs();
 
+		$suggestions = array();
+		$has_error   = false;
 		foreach ( $specs as $spec ) {
 			try {
 				$suggestion    = EvaluateSuggestion::evaluate( $spec );
 				$suggestions[] = $suggestion;
 				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			} catch ( \Throwable $e ) {
-				// Ignore errors.
+				$has_error = true;
 			}
+		}
+
+		if ( $has_error ) {
+			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array(), 3 * HOUR_IN_SECONDS );
 		}
 
 		return array_values(

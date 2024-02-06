@@ -41,16 +41,23 @@ class Init {
 				continue;
 			}
 
+			$has_error = false;
 			foreach ( $spec->plugins as $plugin ) {
 				try {
 					$extension = EvaluateExtension::evaluate( (object) $plugin );
 					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
 						$bundle['plugins'][] = $extension;
 					}
-					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 				} catch ( \Throwable $e ) {
-					// Ignore errors.
+					$has_error = true;
 				}
+			}
+
+			if ( $has_error ) {
+				RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient(
+					DefaultFreeExtensions::get_all(),
+					3 * HOUR_IN_SECONDS
+				);
 			}
 
 			$bundles[] = $bundle;

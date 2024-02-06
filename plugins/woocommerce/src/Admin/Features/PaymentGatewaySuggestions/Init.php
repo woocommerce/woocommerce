@@ -35,19 +35,27 @@ class Init {
 	 * @return array
 	 */
 	public static function get_suggestions( array $specs = null ) {
-		$suggestions = array();
 		if ( null === $specs ) {
 			$specs = self::get_specs();
 		}
 
+		$suggestions = array();
+		$has_error   = false;
 		foreach ( $specs as $spec ) {
 			try {
 				$suggestion    = EvaluateSuggestion::evaluate( $spec );
 				$suggestions[] = $suggestion;
 				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			} catch ( \Throwable $e ) {
-				// Ignore errors.
+				$has_error = true;
 			}
+		}
+
+		if ( $has_error ) {
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient(
+				DefaultPaymentGateways::get_all(),
+				3 * HOUR_IN_SECONDS
+			);
 		}
 
 		return array_values(
