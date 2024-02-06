@@ -449,7 +449,7 @@
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
-          "hash": "47cb6a0f60dad691e3dfd1f26e00b5582d51ec23e7de3f800126701b5967f557",
+          "hash": "dca930ebe334bb3bb276ec912d050830b784ec9f755be491d41c3c32f5b65637",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
           "id": "2c2e89013ad76ff2596680224047723163512bc2"
         },
@@ -1204,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "19fff439ddbee80f3f6c932d45314d0831a0130c4b9940c40fe8b5f8c581346a"
+  "hash": "a138874d270595236e1db122206be746424ea22f376a8799473e5505486c4b11"
 }

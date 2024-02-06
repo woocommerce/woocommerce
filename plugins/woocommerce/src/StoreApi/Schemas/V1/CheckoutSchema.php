@@ -260,7 +260,10 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields   = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$fields   = wp_parse_args(
+			$this->additional_fields_controller->get_all_fields_from_order( $order ),
+			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer )
+		);
 		$response = [];
 
 		foreach ( $fields as $key => $value ) {
