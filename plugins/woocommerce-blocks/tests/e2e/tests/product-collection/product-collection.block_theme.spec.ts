@@ -20,12 +20,15 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			templateApiUtils,
 			editorUtils,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
 	},
 } );
 
 test.describe( 'Product Collection', () => {
+	test.beforeAll( async ( { pageObject } ) => {
+		await pageObject.createNewPostAndInsertBlock();
+	} );
+
 	test( 'Renders product collection block correctly with 9 items', async ( {
 		pageObject,
 	} ) => {
@@ -392,6 +395,10 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Toolbar settings', () => {
+		test.beforeAll( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
+
 		test( 'Toolbar -> Items per page, offset & max page to show', async ( {
 			pageObject,
 		} ) => {
@@ -422,6 +429,9 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Responsive', () => {
+		test.beforeAll( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
 		test( 'Block with shrink columns ENABLED correctly displays as grid', async ( {
 			pageObject,
 		} ) => {
