@@ -29,6 +29,11 @@ class ProductQueryFiltersServiceProvider extends AbstractInterfaceServiceProvide
 	public function register() {
 		$this->share( FilterClausesGenerator::class );
 		$this->share_with_implements_tags( MainQueryFilters::class )->addArgument( FilterClausesGenerator::class );
+		/**
+		 * We allow changing the clauses generator at run time, so we use `add`
+		 * here to return a new instance with a known default clause generator
+		 * when retrieving the data provider from the container.
+		 */
 		$this->add( FilterDataProvider::class )->addArgument( FilterClausesGenerator::class );
 	}
 }
