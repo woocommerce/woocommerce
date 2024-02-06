@@ -23,6 +23,7 @@ export type DesignWithoutAiComponentMeta = {
 };
 
 export const DesignWithNoAiController = ( {
+	parentMachine,
 	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
@@ -31,6 +32,7 @@ export const DesignWithNoAiController = ( {
 } ) => {
 	const [ , , service ] = useMachine( designWithNoAiStateMachineDefinition, {
 		devTools: process.env.NODE_ENV === 'development',
+		parent: parentMachine,
 		context: {
 			...designWithNoAiStateMachineDefinition.context,
 			isFontLibraryAvailable:
