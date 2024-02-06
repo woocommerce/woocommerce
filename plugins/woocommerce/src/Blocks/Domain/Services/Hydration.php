@@ -55,6 +55,8 @@ class Hydration {
 		 */
 		$this->disable_nonce_check();
 
+		$this->cache_store_notices();
+
 		if ( null !== $controller_class ) {
 			$request           = new \WP_REST_Request( 'GET', $path );
 			$schema_controller = StoreApi::container()->get( SchemaController::class );
@@ -69,8 +71,6 @@ class Hydration {
 				'headers' => $response->get_headers(),
 			);
 		}
-
-		$this->cache_store_notices();
 
 		// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
 		$preloaded_requests = rest_preload_api_request( [], $path );
