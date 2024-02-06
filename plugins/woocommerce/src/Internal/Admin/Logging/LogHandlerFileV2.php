@@ -246,6 +246,8 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				 * @param bool $delete    True to delete the file.
 				 * @param File $file      The log file object.
 				 * @param int  $timestamp The expiration threshold.
+				 *
+				 * @since 8.7.0
 				 */
 				$delete = apply_filters( 'woocommerce_logger_delete_expired_file', true, $file, $timestamp );
 
