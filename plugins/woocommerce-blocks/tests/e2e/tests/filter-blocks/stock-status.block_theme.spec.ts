@@ -76,9 +76,8 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 		await page.waitForURL( /.*filter_stock_status=outofstock.*/ );
 
 		const products = page.locator( '.wc-block-product' );
-		const productCount = await products.count();
 
-		expect( productCount ).toBe( 1 );
+		await expect( products ).toHaveCount( 1 );
 	} );
 
 	test( 'When displayStyle is dropdown, a dropdown is displayed with the available stock statuses', async ( {
