@@ -11,14 +11,19 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { PublishButton } from '../publish-button';
-import { PrepublishModalProps } from './types';
+import { PrepublishSidebarProps } from './types';
 import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../../constants';
 
-export function PrePublishModal( {
+export function PrepublishSidebar( {
 	productId,
 	productType = 'product',
-}: PrepublishModalProps ) {
+	title = __( 'Are you ready to add this product?', 'woocommerce' ),
+	description = __(
+		'Double-check your settings before sharing this product with customers.',
+		'woocommerce'
+	),
+}: PrepublishSidebarProps ) {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
@@ -32,34 +37,30 @@ export function PrePublishModal( {
 	return (
 		<div className="woocommerce-product-publish-panel">
 			<div className="woocommerce-product-publish-panel__header">
-				<div className="woocommerce-product-publish-panel__header-publish-button">
-					<PublishButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct?.status }
-						onSuccess={ closePrepublishSidebar }
-					/>
-				</div>
-				<div className="woocommerce-product-publish-panel__header-cancel-button">
-					<Button
-						variant={ 'secondary' }
-						onClick={ () => {
-							recordEvent( 'product_prepublish_cancel', {
-								source: TRACKS_SOURCE,
-							} );
-							closePrepublishSidebar();
-						} }
-					>
-						{ __( 'Cancel', 'woocommerce' ) }
-					</Button>
-				</div>
+				<PublishButton
+					productType={ productType }
+					productStatus={ lastPersistedProduct?.status }
+					onSuccess={ closePrepublishSidebar }
+				/>
+				<Button
+					variant={ 'secondary' }
+					onClick={ () => {
+						recordEvent( 'product_prepublish_cancel', {
+							source: TRACKS_SOURCE,
+						} );
+						closePrepublishSidebar();
+					} }
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</Button>
 			</div>
 			<div className="woocommerce-product-publish-panel__content">
 				<div className="woocommerce-product-publish-panel__header-title">
-					<div>Title</div>
+					<h4>{ title }</h4>
 				</div>
-			</div>
-			<div className="woocommerce-product-publish-panel__footer">
-				<div>footer</div>
+				<div className="woocommerce-product-publish-panel__header-description">
+					<span>{ description }</span>
+				</div>
 			</div>
 		</div>
 	);

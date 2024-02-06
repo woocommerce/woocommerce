@@ -1,6 +1,8 @@
-export type PrepublishModalProps = {
+export type PrepublishSidebarProps = {
 	productId: number;
 	productType: string;
+	title?: string;
+	description?: string;
 };
 
 export type PrepublishButtonProps = {

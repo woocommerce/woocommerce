@@ -34,7 +34,7 @@ import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
 import { EditorProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { PrePublishModal } from '../header/prepublish-sidebar/prepublish-sidebar';
+import { PrepublishSidebar } from '../header/prepublish-sidebar/prepublish-sidebar';
 
 export function Editor( {
 	product,
@@ -83,7 +83,7 @@ export function Editor( {
 								}
 								sidebar={
 									isPrepublishSidebarOpen && (
-										<PrePublishModal
+										<PrepublishSidebar
 											productType={ productType }
 											productId={ product.id }
 										/>
