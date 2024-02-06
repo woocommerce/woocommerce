@@ -215,6 +215,16 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'name'      => 'Product name',
 					'autoFocus' => true,
+					'metadata' => array(
+						'bindings' => array(
+							'name' => array(
+								'source' => 'woo/product-entity',
+								'args'   => array(
+									'prop' => 'name'
+								),
+							),
+						),
+					),
 				),
 			)
 		);
@@ -233,7 +243,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'placeholder' => __( 'Add a short summary of the product', 'woocommerce' ),
 					'property'    => 'short_description',
 				),
-			)
+			),
 		);
 
 		// This is needed until hide conditions can be applied to core blocks.

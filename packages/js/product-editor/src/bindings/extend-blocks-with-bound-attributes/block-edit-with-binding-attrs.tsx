@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { BLOCK_BINDINGS_ALLOWED_BLOCKS, isBlockAllowed } from './';
+import { BLOCK_BINDINGS_ALLOWED_BLOCKS, isBlockAllowed } from '../';
 import productEntitySource, {
 	type CoreBlockEditProps,
 } from '../product-entity-source/index';
