@@ -77,7 +77,7 @@ class ProductGallery extends AbstractBlock {
 
 		$gallery_dialog = strtr(
 			'
-		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!context.isDialogOpen" data-wc-watch="callbacks.keyboardAccess" data-wc-watch--check-dialog-visibility="callbacks.checkDialogVisibility">
+		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!context.isDialogOpen" data-wc-watch="callbacks.keyboardAccess">
 			<dialog data-wc-bind--open="context.isDialogOpen" role="dialog" aria-modal="true" aria-label="{{dialog_aria_label}}">
 				<div class="wc-block-product-gallery-dialog__header">
 				<div class="wc-block-product-galler-dialog__header-right">
