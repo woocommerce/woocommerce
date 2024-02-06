@@ -1,19 +1,44 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+
 /**
  * CheckoutTemplate class.
  *
  * @internal
  */
 class CheckoutTemplate extends AbstractPageTemplate {
+
 	/**
-	 * Template slug.
+	 * The slug of the template.
 	 *
-	 * @return string
+	 * @var string
 	 */
-	public static function get_slug() {
-		return 'page-checkout';
+	const SLUG = 'page-checkout';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		$this->template_title       = _x( 'Page: Checkout', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
+		BlockTemplatesRegistry::register_template( $this );
 	}
 
 	/**
@@ -48,7 +73,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, $this->get_slug() );
+			array_unshift( $templates, self::SLUG );
 			array_unshift( $templates, 'checkout' );
 		}
 		return $templates;

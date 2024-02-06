@@ -10,7 +10,7 @@ class BlockTemplatesRegistry {
 	private static $templates = array();
 
 	public static function register_template( $template ) {
-		self::$templates[ $template->slug ] = $template;
+		self::$templates[ $template::SLUG ] = $template;
 	}
 
 	public static function get_templates() {

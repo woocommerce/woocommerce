@@ -1,19 +1,43 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+
 /**
  * CartTemplate class.
  *
  * @internal
  */
 class CartTemplate extends AbstractPageTemplate {
+
 	/**
-	 * Template slug.
+	 * The slug of the template.
 	 *
-	 * @return string
+	 * @var string
 	 */
-	public static function get_slug() {
-		return 'page-cart';
+	const SLUG = 'page-cart';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		$this->template_title       = _x( 'Page: Cart', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
+		BlockTemplatesRegistry::register_template( $this );
 	}
 
 	/**
@@ -48,7 +72,7 @@ class CartTemplate extends AbstractPageTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, $this->get_slug() );
+			array_unshift( $templates, self::SLUG );
 			array_unshift( $templates, 'cart' );
 		}
 		return $templates;

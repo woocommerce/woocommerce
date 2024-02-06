@@ -2,20 +2,23 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * CheckoutHeader Template class.
+ * AbstractTemplatePart class.
+ *
+ * Shared logic for templates parts.
  *
  * @internal
  */
-class CheckoutHeaderTemplate extends AbstractTemplatePart {
+abstract class AbstractTemplatePart {
 
 	/**
 	 * The slug of the template.
 	 *
 	 * @var string
 	 */
-	const SLUG = 'checkout-header';
+	public static $slug;
 
 	/**
 	 * The title of the template.
@@ -36,15 +39,14 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	public $template_area = 'header';
+	public $template_area;
 
 	/**
-	 * Class constructor.
+	 * Template part functionality is only initialized when using a theme that supports template parts.
 	 */
-	public function __construct() {
-		$this->template_title       = _x( 'Checkout Header', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Template used to display the simplified Checkout header.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
+	protected function __construct() {
+		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
+			BlockTemplatesRegistry::register_template( $this );
+		}
 	}
-
 }

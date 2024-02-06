@@ -1,19 +1,43 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+
 /**
  * OrderConfirmationTemplate class.
  *
  * @internal
  */
 class OrderConfirmationTemplate extends AbstractPageTemplate {
+
 	/**
-	 * Template slug.
+	 * The slug of the template.
 	 *
-	 * @return string
+	 * @var string
 	 */
-	public static function get_slug() {
-		return 'order-confirmation';
+	const SLUG = 'order-confirmation';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		$this->template_title       = _x( 'Order Confirmation', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
+		BlockTemplatesRegistry::register_template( $this );
 	}
 
 	/**
