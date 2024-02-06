@@ -525,6 +525,9 @@ class ProductCollectionPage {
 		return this.page.getByRole( 'heading' );
 	}
 
+	/**
+	 * Private methods to be used by the class.
+	 */
 	private async insertSingleProductBlock() {
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
 		await this.page.waitForResponse(
@@ -542,9 +545,6 @@ class ProductCollectionPage {
 		await singleProductBlock.getByText( 'Done' ).click();
 	}
 
-	/**
-	 * Private methods to be used by the class.
-	 */
 	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
 		await this.waitForProductsToLoad();
 
