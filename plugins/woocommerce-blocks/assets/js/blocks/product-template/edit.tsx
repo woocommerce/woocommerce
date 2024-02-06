@@ -7,6 +7,7 @@ import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockContextProvider,
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__experimentalUseBlockPreview as useBlockPreview,
 	useBlockProps,
 	useInnerBlocksProps,
