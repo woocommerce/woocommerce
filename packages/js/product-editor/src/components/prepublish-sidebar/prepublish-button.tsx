@@ -11,10 +11,10 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { PrepublishButtonProps } from './types';
-import { useValidations } from '../../../contexts/validation-context';
-import { TRACKS_SOURCE } from '../../../constants';
+import { useValidations } from '../../contexts/validation-context';
+import { TRACKS_SOURCE } from '../../constants';
 
 export function PrepublishButton( {
 	productId,

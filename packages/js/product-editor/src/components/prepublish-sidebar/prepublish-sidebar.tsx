@@ -10,10 +10,10 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { PublishButton } from '../publish-button';
+import { PublishButton } from '../header/publish-button';
 import { PrepublishSidebarProps } from './types';
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
-import { TRACKS_SOURCE } from '../../../constants';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { TRACKS_SOURCE } from '../../constants';
 
 export function PrepublishSidebar( {
 	productId,
