@@ -188,9 +188,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				{ type: 'updateQueryStep', step: 'intro' },
 			],
 		},
-		IS_FONT_LIBRARY_AVAILABLE: {
-			actions: [ 'assignIsFontLibraryAvailable' ],
-		},
 	},
 	states: {
 		setFlags: {
