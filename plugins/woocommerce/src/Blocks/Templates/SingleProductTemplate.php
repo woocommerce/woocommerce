@@ -10,18 +10,45 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class SingleProductTemplate {
+class SingleProductTemplate extends AbstractTemplate {
 
-	public $slug = 'single-product';
+	/**
+	 * The slug of the template.
+	 *
+	 * @var string
+	 */
+	const SLUG = 'single-product';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
 	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
 	public $template_description;
 
+	/**
+	 * Class constructor.
+	 */
 	public function __construct() {
-		$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Displays a single product.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
+
+		if ( wc_current_theme_is_fse_theme() ) {
+			$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
+			$this->template_description = __( 'Displays a single product.', 'woocommerce' );
+			BlockTemplatesRegistry::register_template( $this );
+			$this->init();
+		}
 	}
 
+	/**
+	 * Initialization method.
+	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
@@ -65,7 +92,7 @@ class SingleProductTemplate {
 	public function update_single_product_content( $query_result, $query, $template_type ) {
 		$query_result = array_map(
 			function( $template ) {
-				if ( str_contains( $template->slug, $this->slug ) ) {
+				if ( str_contains( $template->slug, self::SLUG ) ) {
 					// We don't want to add the compatibility layer on the Editor Side.
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
 					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.

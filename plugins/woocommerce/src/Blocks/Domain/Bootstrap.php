@@ -35,6 +35,9 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
@@ -155,8 +158,11 @@ class Bootstrap {
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( BlockTemplatesController::class );
-			$this->container->get( ProductSearchResultsTemplate::class );
+			$this->container->get( ProductCatalogTemplate::class );
+			$this->container->get( ProductCategoryTemplate::class );
+			$this->container->get( ProductTagTemplate::class );
 			$this->container->get( ProductAttributeTemplate::class );
+			$this->container->get( ProductSearchResultsTemplate::class );
 			$this->container->get( MiniCartTemplate::class );
 			$this->container->get( CartTemplate::class );
 			$this->container->get( CheckoutTemplate::class );
@@ -274,15 +280,33 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			ProductSearchResultsTemplate::class,
-			function () {
-				return new ProductSearchResultsTemplate();
-			}
-		);
-		$this->container->register(
 			ProductAttributeTemplate::class,
 			function () {
 				return new ProductAttributeTemplate();
+			}
+		);
+		$this->container->register(
+			ProductCatalogTemplate::class,
+			function () {
+				return new ProductCatalogTemplate();
+			}
+		);
+		$this->container->register(
+			ProductCategoryTemplate::class,
+			function () {
+				return new ProductCategoryTemplate();
+			}
+		);
+		$this->container->register(
+			ProductTagTemplate::class,
+			function () {
+				return new ProductTagTemplate();
+			}
+		);
+		$this->container->register(
+			ProductSearchResultsTemplate::class,
+			function () {
+				return new ProductSearchResultsTemplate();
 			}
 		);
 		$this->container->register(

@@ -8,13 +8,39 @@ use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
  *
  * @internal
  */
-class MiniCartTemplate {
+class MiniCartTemplate extends AbstractTemplatePart {
 
-	public $slug = 'mini-cart';
+	/**
+	 * The slug of the template.
+	 *
+	 * @var string
+	 */
+	const SLUG = 'mini-cart';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
 	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
 	public $template_description;
+
+	/**
+	 * The template part area where the template part belongs.
+	 *
+	 * @var string
+	 */
 	public $template_area = 'mini-cart';
 
+	/**
+	 * Class constructor.
+	 */
 	public function __construct() {
 		$this->template_title       = _x( 'Mini-Cart', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
@@ -22,6 +48,9 @@ class MiniCartTemplate {
 		$this->init();
 	}
 
+	/**
+	 * Initialization method.
+	 */
 	public function init() {
 		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
 	}

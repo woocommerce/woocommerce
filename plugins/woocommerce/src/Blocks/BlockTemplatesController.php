@@ -40,7 +40,6 @@ class BlockTemplatesController {
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
-		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
 
 		if ( wc_current_theme_is_fse_theme() ) {
@@ -644,12 +643,12 @@ class BlockTemplatesController {
 			}
 		} elseif (
 			is_cart() &&
-			! BlockTemplateUtils::theme_has_template( CartTemplate::get_slug() ) && $this->block_template_is_available( CartTemplate::get_slug() )
+			! BlockTemplateUtils::theme_has_template( CartTemplate::SLUG ) && $this->block_template_is_available( CartTemplate::SLUG )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} elseif (
 			is_checkout() &&
-			! BlockTemplateUtils::theme_has_template( CheckoutTemplate::get_slug() ) && $this->block_template_is_available( CheckoutTemplate::get_slug() )
+			! BlockTemplateUtils::theme_has_template( CheckoutTemplate::SLUG ) && $this->block_template_is_available( CheckoutTemplate::SLUG )
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		} else {
@@ -697,25 +696,5 @@ class BlockTemplatesController {
 		}
 
 		return $is_support;
-	}
-
-	/**
-	 * Update the product archive title to "Shop".
-	 *
-	 * @param string $post_type_name Post type 'name' label.
-	 * @param string $post_type      Post type.
-	 *
-	 * @return string
-	 */
-	public function update_product_archive_title( $post_type_name, $post_type ) {
-		if (
-			function_exists( 'is_shop' ) &&
-			is_shop() &&
-			'product' === $post_type
-		) {
-			return __( 'Shop', 'woocommerce' );
-		}
-
-		return $post_type_name;
 	}
 }

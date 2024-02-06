@@ -1,20 +1,53 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+
 /**
  * ProductSearchResultsTemplate class.
  *
  * @internal
  */
-class ProductSearchResultsTemplate {
+class ProductSearchResultsTemplate extends AbstractTemplate {
 
+	/**
+	 * The slug of the template.
+	 *
+	 * @var string
+	 */
 	const SLUG = 'product-search-results';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+	/**
+	 * The template used as a fallback if that one is customized.
+	 *
+	 * @var string
+	 */
+	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->init();
+		if ( wc_current_theme_is_fse_theme() ) {
+			$this->template_title       = _x( 'Product Search Results', 'Template name', 'woocommerce' );
+			$this->template_description = __( 'Displays search results for your store.', 'woocommerce' );
+			BlockTemplatesRegistry::register_template( $this );
+			$this->init();
+		}
 	}
 
 	/**
