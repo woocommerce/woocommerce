@@ -14,6 +14,7 @@ import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { services } from './services';
 import { actions } from './actions';
+import { hasFontLibraryInstalled } from './guards';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -138,6 +139,39 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							installFontFamilies: {
+								initial: 'checkFontLibrary',
+								states: {
+									checkFontLibrary: {
+										always: [
+											{
+												cond: {
+													type: 'hasFontLibraryInstalled',
+												},
+												target: 'pending',
+											},
+											{ target: 'success' },
+										],
+									},
+									pending: {
+										invoke: {
+											src: 'installFontFamilies',
+											onDone: {
+												target: 'success',
+											},
+											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
+											// onError: {
+											// 	actions: [
+											// 		'assignAPICallLoaderError',
+											// 	],
+											// },
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 						},
 						onDone: {
 							target: '#designWithoutAI.showAssembleHub',
@@ -160,6 +194,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
+			hasFontLibraryInstalled,
 		},
 	}
 );

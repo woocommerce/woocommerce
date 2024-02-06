@@ -9,6 +9,7 @@ import { join } from 'path';
  * Internal dependencies
  */
 import { getFilepathFromPackageName } from './validate';
+import { MONOREPO_ROOT } from './const';
 
 /**
  * Call changelogger's next version function to get the version for the next release.
@@ -18,12 +19,17 @@ import { getFilepathFromPackageName } from './validate';
  */
 export const getNextVersion = ( name: string ) => {
 	try {
-		const cwd = getFilepathFromPackageName( name );
-		execSync( 'composer install', { cwd, encoding: 'utf-8' } );
-		return execSync( './vendor/bin/changelogger version next', {
-			cwd,
-			encoding: 'utf-8',
-		} ).trim();
+		// Match the last version number in the string.
+		const semverPattern = /\d+(\.\d+){2}$/;
+		const str = execSync(
+			`pnpm --filter="${ name }" --silent changelog version next`,
+			{
+				cwd: MONOREPO_ROOT,
+				encoding: 'utf-8',
+			}
+		).trim();
+		const match = str.match( semverPattern );
+		return match ? match[ 0 ] : null;
 	} catch ( e ) {
 		if ( e instanceof Error ) {
 			return null;
@@ -39,9 +45,8 @@ export const getNextVersion = ( name: string ) => {
  */
 export const validateChangelogEntries = ( name: string ) => {
 	try {
-		const cwd = getFilepathFromPackageName( name );
-		return execSync( './vendor/bin/changelogger validate', {
-			cwd,
+		return execSync( `pnpm --filter="${ name }" changelog validate`, {
+			cwd: MONOREPO_ROOT,
 			encoding: 'utf-8',
 		} );
 	} catch ( e ) {
@@ -60,13 +65,12 @@ export const validateChangelogEntries = ( name: string ) => {
  */
 export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
-		const cwd = getFilepathFromPackageName( name );
 		execSync(
-			`./vendor/bin/changelogger write --add-pr-num ${
+			`pnpm --filter="${ name }" changelog write --add-pr-num ${
 				nextVersion ? '--use-version ' + nextVersion : ''
 			}`,
 			{
-				cwd,
+				cwd: MONOREPO_ROOT,
 				encoding: 'utf-8',
 			}
 		);

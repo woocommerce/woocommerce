@@ -526,7 +526,7 @@ class ProductCollectionPage {
 		this.productTitles = this.productTemplate
 			.locator( SELECTORS.productTitle )
 			.locator( 'visible=true' );
-		this.productPrices = this.page
+		this.productPrices = this.productTemplate
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
 		this.addToCartButtons = this.page
