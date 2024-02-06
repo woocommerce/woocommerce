@@ -160,6 +160,7 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 		$product->set_sku( 'test-sku' );
 		$product->set_catalog_visibility( 'hidden' );
 		$product->save();
+		$product_id = $product->get_id();
 		wp_trash_post( $product_id );
 
 		$product_page = WC_Shortcodes::product_page(
