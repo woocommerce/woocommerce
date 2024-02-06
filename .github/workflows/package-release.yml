@@ -18,20 +18,22 @@ jobs:
         name: Run packages release script
         runs-on: ubuntu-20.04
         permissions:
-          contents: read
+            contents: read
         steps:
             - uses: actions/checkout@v3
-            
+
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: true
-                build: './tools/package-release'
+                  install: true
+                  build: './tools/package-release'
 
             - name: Clean working directory
               run: git checkout pnpm-lock.yaml # in case for whatever reason the lockfile is out of sync, there won't be interference with npm publish.
 
             - name: Execute script
-              run: ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
+              run: |
+                  npm config set '//registry.npmjs.org/:_authToken' "${NODE_AUTH_TOKEN}"
+                  ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

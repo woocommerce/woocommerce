@@ -146,7 +146,7 @@ test.describe( 'Cart page', () => {
 
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.is-info' ) ).toContainText(
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
 			'Your cart is currently empty.'
 		);
 	} );
@@ -197,7 +197,7 @@ test.describe( 'Cart page', () => {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
-				page.locator( '.wc-block-components-notice-banner__content' )
+				page.locator( '.woocommerce-message' )
 			).toContainText(
 				`“${ productName }” has been added to your cart.`
 			);
@@ -206,9 +206,7 @@ test.describe( 'Cart page', () => {
 		// add the same product the third time
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
-		await expect(
-			page.locator( '.wc-block-components-notice-banner__content' )
-		).toContainText(
+		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
 			'You cannot add that amount to the cart — we have 2 in stock and you already have 2 in your cart.'
 		);
 		await page.goto( '/cart/' );
@@ -245,14 +243,14 @@ test.describe( 'Cart page', () => {
 			.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
 			.click();
 		await expect(
-			page.locator( '.wc-block-components-notice-banner__content' )
+			page.locator( '.woocommerce-message' )
 		).toContainText( `“${ productName } cross-sell 1” removed.` );
 		await page
 			.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
 			.click();
 		await expect(
 			page
-				.locator( '.wc-block-components-notice-banner__content' )
+				.locator( '.woocommerce-message' )
 				.first()
 		).toContainText( `“${ productName } cross-sell 2” removed.` );
 

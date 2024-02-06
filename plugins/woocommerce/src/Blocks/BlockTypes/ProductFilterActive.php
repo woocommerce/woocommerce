@@ -55,7 +55,6 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'               => 'wc-block-active-filters',
 				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
 				'data-wc-context'     => wp_json_encode( $context ),
 				'data-has-filter'     => empty( $active_filters ) ? 'no' : 'yes',
@@ -67,17 +66,17 @@ final class ProductFilterActive extends AbstractBlock {
 
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( ! empty( $active_filters ) ) : ?>
-				<ul class="wc-block-active-filters__list %3$s">
+				<ul class="filter-list">
 					<?php foreach ( $active_filters as $filter ) : ?>
 					<li>
-						<span class="wc-block-active-filters__list-item-type"><?php echo esc_html( $filter['type'] ); ?>: </span>
+						<span class="list-item-type"><?php echo esc_html( $filter['type'] ); ?>: </span>
 						<ul>
 							<?php $this->render_items( $filter['items'], $attributes['displayStyle'] ); ?>
 						</ul>
 					</li>
 					<?php endforeach; ?>
 				</ul>
-				<button class="wc-block-active-filters__clear-all" data-wc-on--click="actions.clearAll">
+				<button class="clear-all" data-wc-on--click="actions.clearAll">
 					<span aria-hidden="true"><?php echo esc_html__( 'Clear All', 'woocommerce' ); ?></span>
 					<span class="screen-reader-text"><?php echo esc_html__( 'Clear All Filters', 'woocommerce' ); ?></span>
 				</button>
@@ -125,10 +124,10 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$remove_label = sprintf( 'Remove %s filter', wp_strip_all_tags( $title ) );
 		?>
-		<li class="wc-block-active-filters__list-item">
-			<span class="wc-block-active-filters__list-item-name">
+		<li class="list-item">
+			<span class="list-item-name">
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<button class="wc-block-active-filters__list-item-remove"  <?php echo $this->get_html_attributes( $attributes ); ?>>
+				<button class="list-item-remove"  <?php echo $this->get_html_attributes( $attributes ); ?>>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" class="wc-block-components-chip__remove-icon" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"></path></svg>
 					<span class="screen-reader-text"><?php echo esc_html( $remove_label ); ?></span>
 				</button>
@@ -159,7 +158,7 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$remove_label = sprintf( 'Remove %s filter', wp_strip_all_tags( $title ) );
 		?>
-		<li class="wc-block-active-filters__list-item">
+		<li class="list-item">
 			<span class="is-removable wc-block-components-chip wc-block-components-chip--radius-large">
 				<span aria-hidden="false" class="wc-block-components-chip__text"><?php echo wp_kses_post( $title ); ?></span>
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

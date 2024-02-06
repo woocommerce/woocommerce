@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Refactor E2E test for the Product Gallery Thumbnails block to remove unnecessary waitForTimeout statement
-
-

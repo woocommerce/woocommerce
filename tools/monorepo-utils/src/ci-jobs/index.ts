@@ -17,34 +17,32 @@ const program = new Command( 'ci-jobs' )
 	.description(
 		'Generates CI workflow jobs based on the changes since the base ref.'
 	)
-	.argument(
-		'<base-ref>',
-		'Base ref to compare the current ref against for change detection.'
-	)
 	.option(
-		'-f --force',
-		'Forces all projects to be marked as changed.',
-		false
+		'-r --base-ref <baseRef>',
+		'Base ref to compare the current ref against for change detection. If not specified, all projects will be considered changed.',
+		''
 	)
-	.action( async ( baseRef: string, options ) => {
+	.action( async ( options ) => {
 		Logger.startTask( 'Parsing Project Graph', true );
 		const projectGraph = buildProjectGraph();
 		Logger.endTask( true );
 
 		let fileChanges;
-		if ( options.force ) {
-			Logger.warn( 'Forcing all projects to be marked as changed.' );
+		if ( options.baseRef === '' ) {
+			Logger.warn(
+				'No base ref was specified, forcing all projects to be marked as changed.'
+			);
 			fileChanges = true;
 		} else {
 			Logger.startTask( 'Pulling File Changes', true );
-			fileChanges = getFileChanges( projectGraph, baseRef );
+			fileChanges = getFileChanges( projectGraph, options.baseRef );
 			Logger.endTask( true );
 		}
 
 		Logger.startTask( 'Creating Jobs', true );
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
 			commandVars: {
-				baseRef,
+				baseRef: options.baseRef,
 			},
 		} );
 		Logger.endTask( true );

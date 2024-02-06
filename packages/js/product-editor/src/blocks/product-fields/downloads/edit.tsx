@@ -52,11 +52,6 @@ export function DownloadBlockEdit( {
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
-		'postType',
-		postType,
-		'downloadable'
-	);
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
 		postType,
@@ -122,10 +117,6 @@ export function DownloadBlockEdit( {
 		}
 
 		if ( newFiles.length ) {
-			if ( ! downloads.length ) {
-				setDownloadable( true );
-			}
-
 			const uploadedFiles = newFiles.map( ( file ) => ( {
 				id: stringifyId( file.id ),
 				file: file.url,
@@ -151,10 +142,6 @@ export function DownloadBlockEdit( {
 			files[ 0 ]?.id === undefined
 		) {
 			return;
-		}
-
-		if ( ! downloads.length ) {
-			setDownloadable( true );
 		}
 
 		const uploadedFile = {
@@ -190,10 +177,6 @@ export function DownloadBlockEdit( {
 			},
 			[]
 		);
-
-		if ( ! otherDownloads.length ) {
-			setDownloadable( false );
-		}
 
 		setDownloads( otherDownloads );
 	}

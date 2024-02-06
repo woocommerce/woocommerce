@@ -14,7 +14,9 @@ const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {
-		await page.getByText( 'Skip' ).nth( 3 ).click( { timeout: 5000 } );
+		await page
+			.getByRole( 'button', { name: 'Skip' } )
+			.click( { timeout: 10000 } );
 	} catch ( error ) {}
 }
 
