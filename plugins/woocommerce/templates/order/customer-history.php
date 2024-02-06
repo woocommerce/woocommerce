@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory
  * @package WooCommerce\Templates
- * @version 8.5.2
+ * @version 8.7.0
  */
 
 declare( strict_types=1 );
