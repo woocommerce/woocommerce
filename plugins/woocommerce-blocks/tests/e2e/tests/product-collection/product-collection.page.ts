@@ -111,8 +111,6 @@ class ProductCollectionPage {
 		await this.admin.page
 			.getByRole( 'button', { name: buttonName } )
 			.click();
-
-		await this.refreshLocators( 'editor' );
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
@@ -124,8 +122,6 @@ class ProductCollectionPage {
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.getByRole( 'button', { name: buttonName } )
 			.click();
-
-		await this.refreshLocators( 'editor' );
 	}
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
