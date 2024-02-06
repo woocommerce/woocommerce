@@ -19,11 +19,13 @@ const AddressCard = ( {
 	onEdit,
 	target,
 	fieldConfig,
+	isAddressReadOnly,
 }: {
 	address: CartShippingAddress | CartBillingAddress;
 	onEdit: () => void;
 	target: string;
 	fieldConfig: FormFieldsConfig;
+	isAddressReadOnly: boolean;
 } ): JSX.Element | null => {
 	return (
 		<div className="wc-block-components-address-card">
@@ -58,7 +60,7 @@ const AddressCard = ( {
 					''
 				) }
 			</address>
-			{ onEdit && (
+			{ onEdit && ! isAddressReadOnly && (
 				<a
 					role="button"
 					href={ '#' + target }

@@ -11,6 +11,7 @@ import {
 import { useCallback } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
  * Internal dependencies
@@ -33,6 +34,8 @@ interface CheckoutAddress {
 	useBillingAsShipping: boolean;
 	needsShipping: boolean;
 	showShippingMethods: boolean;
+	isBillingAddressReadOnly: boolean;
+	isShippingAddressReadOnly: boolean;
 }
 
 /**
@@ -64,6 +67,15 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 		[ setBillingAddress ]
 	);
 
+	const isBillingAddressReadOnly = applyCheckoutFilter( {
+		filterName: 'isBillingAddressReadOnly',
+		defaultValue: false,
+	} );
+	const isShippingAddressReadOnly = applyCheckoutFilter( {
+		filterName: 'isShippingAddressReadOnly',
+		defaultValue: false,
+	} );
+
 	const forcedBillingAddress: boolean = getSetting(
 		'forcedBillingAddress',
 		false
@@ -85,5 +97,7 @@ export const useCheckoutAddress = (): CheckoutAddress => {
 			! needsShipping || ! useShippingAsBilling || !! prefersCollection,
 		forcedBillingAddress,
 		useBillingAsShipping: forcedBillingAddress || !! prefersCollection,
+		isBillingAddressReadOnly,
+		isShippingAddressReadOnly,
 	};
 };

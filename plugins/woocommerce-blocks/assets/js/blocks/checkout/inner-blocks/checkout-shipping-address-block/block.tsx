@@ -41,6 +41,7 @@ const Block = ( {
 		shippingAddress,
 		useShippingAsBilling,
 		setUseShippingAsBilling,
+		isBillingAddressReadOnly,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
 
@@ -121,17 +122,22 @@ const Block = ( {
 					/>
 				) : null }
 			</WrapperComponent>
-			<CheckboxControl
-				className="wc-block-checkout__use-address-for-billing"
-				label={ __( 'Use same address for billing', 'woocommerce' ) }
-				checked={ useShippingAsBilling }
-				onChange={ ( checked: boolean ) => {
-					setUseShippingAsBilling( checked );
-					if ( checked ) {
-						syncBillingWithShipping();
-					}
-				} }
-			/>
+			{ ! isBillingAddressReadOnly && (
+				<CheckboxControl
+					className="wc-block-checkout__use-address-for-billing"
+					label={ __(
+						'Use same address for billing',
+						'woocommerce'
+					) }
+					checked={ useShippingAsBilling }
+					onChange={ ( checked: boolean ) => {
+						setUseShippingAsBilling( checked );
+						if ( checked ) {
+							syncBillingWithShipping();
+						}
+					} }
+				/>
+			) }
 		</>
 	);
 };

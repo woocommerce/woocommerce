@@ -30,6 +30,7 @@ const CustomerAddress = ( {
 		setShippingAddress,
 		setBillingAddress,
 		useShippingAsBilling,
+		isShippingAddressReadOnly,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const [ editing, setEditing ] = useState( defaultEditing );
@@ -81,10 +82,11 @@ const CustomerAddress = ( {
 				onEdit={ () => {
 					setEditing( true );
 				} }
+				isAddressReadOnly={ isShippingAddressReadOnly }
 				fieldConfig={ addressFieldsConfig }
 			/>
 		),
-		[ shippingAddress, addressFieldsConfig ]
+		[ shippingAddress, isShippingAddressReadOnly, addressFieldsConfig ]
 	);
 
 	const renderAddressFormComponent = useCallback(
@@ -106,6 +108,7 @@ const CustomerAddress = ( {
 			isEditing={ editing }
 			addressCard={ renderAddressCardComponent }
 			addressForm={ renderAddressFormComponent }
+			hideAddressForm={ isShippingAddressReadOnly }
 		/>
 	);
 };
