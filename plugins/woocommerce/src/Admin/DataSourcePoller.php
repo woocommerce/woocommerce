@@ -155,7 +155,21 @@ abstract class DataSourcePoller {
 	}
 
 	/**
-	 * Read a single data source and return the read specs
+	 * Set the specs transient.
+	 *
+	 * @param array $specs The specs to set in the transient.
+	 * @param int   $expiration The expiration time for the transient.
+	 */
+	public function set_specs_transient( $specs, $expiration = 0 ) {
+		set_transient(
+			$this->args['transient_name'],
+			$specs,
+			$expiration,
+		);
+	}
+
+	/**
+	 *  Read a single data source and return the read specs
 	 *
 	 * @param string $url The URL to read the specs from.
 	 *
@@ -183,7 +197,7 @@ abstract class DataSourcePoller {
 			// phpcs:ignore
 			$logger->error( print_r( $response, true ), $logger_context );
 
-			return [];
+			return array();
 		}
 
 		$body  = $response['body'];
@@ -195,7 +209,7 @@ abstract class DataSourcePoller {
 				$logger_context
 			);
 
-			return [];
+			return array();
 		}
 
 		if ( ! is_array( $specs ) ) {
@@ -204,7 +218,7 @@ abstract class DataSourcePoller {
 				$logger_context
 			);
 
-			return [];
+			return array();
 		}
 
 		return $specs;
