@@ -361,7 +361,7 @@ jobs:
                   path: artifacts/api
 
             - name: Download E2E test report artifact
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ env.E2E_ARTIFACT }}
                   path: artifacts/e2e
