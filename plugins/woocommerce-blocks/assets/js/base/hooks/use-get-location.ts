@@ -67,7 +67,7 @@ type ContextProperties = {
 	postId?: string;
 };
 
-export const useGetLocation = < T, >(
+export const useGetLocation = < T >(
 	context: Context< T & ContextProperties >,
 	clientId: string
 ) => {

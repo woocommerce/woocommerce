@@ -24,7 +24,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useGetLocation } from './utils';
+import { useGetLocation } from '@woocommerce/base-hooks';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
