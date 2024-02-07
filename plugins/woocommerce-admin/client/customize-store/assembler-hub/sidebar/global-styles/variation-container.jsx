@@ -50,17 +50,14 @@ export const VariationContainer = ( { variation, children } ) => {
 				}
 			}
 		}
-
+		console.log( 'variation', user.settings, variation.settings );
 		setUserConfig( () => {
 			return {
 				settings: mergeBaseAndUserConfigs(
 					user.settings,
 					variation.settings
 				),
-				styles: mergeBaseAndUserConfigs(
-					user.styles,
-					variation.styles
-				),
+				styles: variation.styles,
 			};
 		} );
 	};
