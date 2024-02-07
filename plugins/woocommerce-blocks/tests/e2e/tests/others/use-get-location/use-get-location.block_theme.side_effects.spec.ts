@@ -40,9 +40,7 @@ test.describe( 'useGetLocation hook', () => {
 				productSlug
 			);
 
-			await editorUtils.insertBlockUsingGlobalInserter(
-				'Test useGetLocation hook'
-			);
+			await editorUtils.insertBlock( { name: 'test/useGetLocation' } );
 
 			const locationType = page.getByText( 'Location type: product' );
 
@@ -58,6 +56,8 @@ test.describe( 'useGetLocation hook', () => {
 				productName,
 				productSlug
 			);
+
+			await editorUtils.insertBlock( { name: 'test/useGetLocation' } );
 		} );
 		test( 'in Single Product template', async ( {} ) => {} );
 		test( 'in specific Category template', async ( {} ) => {} );
