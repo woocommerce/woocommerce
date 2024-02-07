@@ -268,7 +268,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "3bcfb5ac1ad271b34f4f13db409b1f5e50c6ed6e310f474bcc3ccc2f4b0448b1",
+          "hash": "75e3aa0a30e9fe86c807e2765aec963a0a9636c530a49bd1e8e0d03f69d65515",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -1204,5 +1204,6 @@
       "categories": []
     }
   ],
-  "hash": "a138874d270595236e1db122206be746424ea22f376a8799473e5505486c4b11"
+  "version": "8.7.0-dev",
+  "hash": "7274252384a49eca83c82305358cb65d982ed8d671d59accd784cd77174993f5"
 }
