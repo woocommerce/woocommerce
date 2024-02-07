@@ -3,6 +3,7 @@
 	"description": "Remote inbox notification testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
+	"version": "0.1.0",
 	"autoload": {
 		"psr-4": {
 			"Woocommerce\\WoocommerceRemoteInboxNotificationTesting\\": "src/"
