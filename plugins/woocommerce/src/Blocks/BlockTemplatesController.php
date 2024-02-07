@@ -58,6 +58,7 @@ class BlockTemplatesController {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
+		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 1 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
@@ -347,6 +348,25 @@ class BlockTemplatesController {
 	}
 
 	/**
+	 * Add the template title and description to WooCommerce templates.
+	 *
+	 * @param WP_Block_Template|null $block_template The found block template, or null if there isn't one.
+	 * @return WP_Block_Template|null
+	 */
+	public function add_block_template_details( $block_template ) {
+		if ( ! $block_template ) {
+			return $block_template;
+		}
+		if ( ! BlockTemplateUtils::template_has_title( $block_template ) ) {
+			$block_template->title = BlockTemplateUtils::get_block_template_title( $block_template->slug );
+		}
+		if ( ! $block_template->description ) {
+			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
+		}
+		return $block_template;
+	}
+
+	/**
 	 * Add the block template objects to be used.
 	 *
 	 * @param array  $query_result Array of template objects.
@@ -389,9 +409,7 @@ class BlockTemplatesController {
 			if ( 'custom' !== $template_file->source ) {
 				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 			} else {
-				$template_file->title       = BlockTemplateUtils::get_block_template_title( $template_file->slug );
-				$template_file->description = BlockTemplateUtils::get_block_template_description( $template_file->slug );
-				$query_result[]             = $template_file;
+				$query_result[] = $template_file;
 				continue;
 			}
 
@@ -456,15 +474,13 @@ class BlockTemplatesController {
 					}
 				}
 
-				if ( 'theme' === $template->origin && BlockTemplateUtils::template_has_title( $template ) ) {
-					return $template;
-				}
-				if ( $template->title === $template->slug ) {
+				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
+
 				return $template;
 			},
 			$query_result

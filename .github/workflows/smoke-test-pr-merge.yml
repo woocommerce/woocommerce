@@ -3,6 +3,10 @@ on:
     pull_request:
         types:
             - closed
+        paths-ignore:
+            - '**/changelog/**'
+            - 'docs/**'
+            - '**.md'
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true

@@ -160,7 +160,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: '$125.00 (includes $25.00 Nasty Tax)',
+						name: '$125.00 (includes $25.00 Tax)',
 					} )
 				).toBeVisible();
 			} );
@@ -182,7 +182,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
-						name: 'Total $125.00 (includes $25.00 Nasty Tax)',
+						name: 'Total $125.00 (includes $25.00 Tax)',
 					} )
 				).toBeVisible();
 			} );

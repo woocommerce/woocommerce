@@ -3,6 +3,7 @@ on:
   pull_request:
     paths-ignore:
       - '**/changelog/**'
+      - 'docs/**'
       - '**.md'
   workflow_dispatch:
 

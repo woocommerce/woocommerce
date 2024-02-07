@@ -34,6 +34,11 @@ wp post meta update $beanie_product_id _crosssell_ids "$cap_product_id"
 tshirt_with_logo_product_id=$(wp post list --post_type=product --field=ID --name="T-Shirt with Logo" --format=ids)
 wp wc product update $tshirt_with_logo_product_id --in_stock=false --user=1
 
+# Make a product visible only with password.
+sunglasses_product_id=$(wp post list --post_type=product --field=ID --name="Sunglasses" --format=ids)
+wp post update $sunglasses_product_id --post_password="password" --user=1
+
+
 # Enable attribute archives.
 attribute_ids=$(wp wc product_attribute list --fields=id --format=ids --user=1)
 if [ -n "$attribute_ids" ]; then

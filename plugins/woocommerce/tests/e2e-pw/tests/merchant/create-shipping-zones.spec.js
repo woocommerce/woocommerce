@@ -294,6 +294,13 @@ test.describe( 'WooCommerce Shipping Settings - Add new shipping zone', () => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-settings&tab=shipping'
 			);
+
+			try {
+				await page
+					.getByLabel( 'Close Tour' )
+					.click( { timeout: 5000 } ); // close the tour if visible
+			} catch ( e ) {}
+
 			await page.reload(); // Playwright runs so fast, the location shows up as "Everywhere" at first
 		}
 		await expect( page.locator( '.wc-shipping-zones' ) ).toHaveText(

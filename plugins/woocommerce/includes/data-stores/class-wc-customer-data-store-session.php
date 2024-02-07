@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC Customer Data Store which stores the data in session.
  *
+ * Used by the WC_Customer class to store customer data to the session.
+ *
  * @version  3.0.0
  */
 class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Customer_Data_Store_Interface, WC_Object_Data_Store_Interface {
@@ -24,35 +26,36 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	protected $session_keys = array(
 		'id',
 		'date_modified',
-		'billing_postcode',
-		'billing_city',
-		'billing_address_1',
-		'billing_address',
-		'billing_address_2',
-		'billing_state',
-		'billing_country',
-		'shipping_postcode',
-		'shipping_city',
-		'shipping_address_1',
-		'shipping_address',
-		'shipping_address_2',
-		'shipping_state',
-		'shipping_country',
-		'is_vat_exempt',
-		'calculated_shipping',
 		'billing_first_name',
 		'billing_last_name',
 		'billing_company',
 		'billing_phone',
 		'billing_email',
+		'billing_address',
+		'billing_address_1',
+		'billing_address_2',
+		'billing_city',
+		'billing_state',
+		'billing_postcode',
+		'billing_country',
 		'shipping_first_name',
 		'shipping_last_name',
 		'shipping_company',
 		'shipping_phone',
+		'shipping_address',
+		'shipping_address_1',
+		'shipping_address_2',
+		'shipping_city',
+		'shipping_state',
+		'shipping_postcode',
+		'shipping_country',
+		'is_vat_exempt',
+		'calculated_shipping',
+		'meta_data',
 	);
 
 	/**
-	 * Simply update the session.
+	 * Update the session. Note, this does not persist the data to the DB.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
@@ -61,7 +64,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Simply update the session.
+	 * Update the session. Note, this does not persist the data to the DB.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
@@ -81,14 +84,36 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 				$session_key = str_replace( 'billing_', '', $session_key );
 			}
-			$data[ $session_key ] = (string) $customer->{"get_$function_key"}( 'edit' );
+			if ( 'meta_data' === $session_key ) {
+				/**
+				 * Filter the allowed session meta data keys.
+				 *
+				 * If the customer object contains any meta data with these keys, it will be stored within the WooCommerce session.
+				 *
+				 * @since 8.7.0
+				 * @param array $allowed_keys The allowed meta data keys.
+				 * @param WC_Customer $customer The customer object.
+				 */
+				$allowed_keys  = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
+				$session_value = wp_json_encode(
+					array_filter(
+						$customer->get_meta_data(),
+						function( $meta_data ) use ( $allowed_keys ) {
+							return in_array( $meta_data->key, $allowed_keys, true );
+						}
+					)
+				);
+			} else {
+				$session_value = $customer->{"get_$function_key"}( 'edit' );
+			}
+			$data[ $session_key ] = (string) $session_value;
 		}
 		WC()->session->set( 'customer', $data );
 	}
 
 	/**
-	 * Read customer data from the session unless the user has logged in, in
-	 * which case the stored ID will differ from the actual ID.
+	 * Read customer data from the session unless the user has logged in, in which case the stored ID will differ from
+	 * the actual ID.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer Customer object.
@@ -110,8 +135,20 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
 					$session_key = str_replace( 'billing_', '', $session_key );
 				}
-				if ( isset( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
-					$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
+				if ( ! empty( $data[ $session_key ] ) && is_callable( array( $customer, "set_{$function_key}" ) ) ) {
+					if ( 'meta_data' === $session_key ) {
+						$meta_data_values = json_decode( wp_unslash( $data[ $session_key ] ), true );
+						if ( $meta_data_values ) {
+							foreach ( $meta_data_values as $meta_data_value ) {
+								if ( ! isset( $meta_data_value['key'], $meta_data_value['value'] ) ) {
+									continue;
+								}
+								$customer->add_meta_data( $meta_data_value['key'], $meta_data_value['value'], true );
+							}
+						}
+					} else {
+						$customer->{"set_{$function_key}"}( wp_unslash( $data[ $session_key ] ) );
+					}
 				}
 			}
 		}
@@ -120,13 +157,13 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Load default values if props are unset.
+	 * Set default values for the customer object if props are unset.
 	 *
 	 * @param WC_Customer $customer Customer object.
 	 */
 	protected function set_defaults( &$customer ) {
 		try {
-			$default = wc_get_customer_default_location();
+			$default              = wc_get_customer_default_location();
 			$has_shipping_address = $customer->has_shipping_address();
 
 			if ( ! $customer->get_billing_country() ) {
@@ -154,7 +191,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	}
 
 	/**
-	 * Deletes a customer from the database.
+	 * Deletes the customer session.
 	 *
 	 * @since 3.0.0
 	 * @param WC_Customer $customer Customer object.
