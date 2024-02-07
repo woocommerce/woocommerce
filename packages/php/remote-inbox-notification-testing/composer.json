@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce/woocommerce-remote-inbox-notification-testing",
+	"name": "woocommerce/remote-inbox-notification-testing",
 	"description": "Remote inbox notification testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
