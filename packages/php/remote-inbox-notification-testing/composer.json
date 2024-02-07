@@ -25,7 +25,6 @@
 				"performance": "Address performance issues",
 				"enhancement": "Improve existing functionality"
 			},
-			"versioning": "wordpress",
 			"changelog": "changelog.md"
 		}
 	}
