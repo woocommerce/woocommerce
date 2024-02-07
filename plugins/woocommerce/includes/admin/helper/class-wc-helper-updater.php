@@ -26,6 +26,7 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
+		add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 	}
 
 	/**
@@ -115,6 +116,45 @@ class WC_Helper_Updater {
 		}
 
 		return $transient;
+	}
+
+	/**
+	 * Runs on load-plugins.php, adds a hook to show a custom plugin update message for Woo.com hosted plugins.
+	 *
+	 * @return void.
+	 */
+	public static function setup_update_plugins_messages() {
+		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
+			$filename = $plugin['_filename'];
+			add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message to install the Woo Marketplace plugin, on plugin update notification,
+	 * if the Woo Marketplace plugin isn't already installed.
+	 *
+	 * @param object $plugin_data TAn array of plugin metadata.
+	 * @param object $response  An object of metadata about the available plugin update.
+	 *
+	 * @return void.
+	 */
+	public static function add_install_marketplace_plugin_message( $plugin_data, $response ) {
+		if ( ! empty( $response->package ) ) {
+			return;
+		}
+		printf(
+		/* translators: 1: Marketplace plugin install URL. */
+			wp_kses(
+				' <a href="%1$s">Install</a> the Woo Marketplace plugin to enable auto-updates.',
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
+			esc_url( admin_url( 'admin.php?page=wc-admin&path=/extensions&tab=my-subscriptions' ) ),
+		);
 	}
 
 	/**
