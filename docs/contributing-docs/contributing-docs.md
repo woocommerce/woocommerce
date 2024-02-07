@@ -15,7 +15,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 
 ## Getting Setup
 
-> This guide presumes that you're familar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
+> This guide presumes that you're familiar with basic Git and GitHub functionality, that you're signed into a GitHub account, and that you have Git setup locally. If you're new to GitHub, we recommend reading their [quickstart](https://docs.github.com/en/get-started/quickstart/hello-world) and [working with forks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) guides before getting started.
 
 ### Initial Setup
 
@@ -33,7 +33,7 @@ Inside each subfolder you'll find various markdown files. When imported into the
 6. [Open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) that merges your branch with the WooCommerce monorepo's trunk branch.
     * To do this, when creating the pull request, set the `base repository` to `woocommerce/woocommerce`, the `base` to `trunk`, the `head repository` to `yourgithubusername/woocommerce` and the `compare` to the branch you created (eg: `docs/improve-extension-performance`).
     * When creating the pull request, set a descriptive title. Additionally, ensure you fill out the template provided in the description. For purely docs changes, your testing instructions should reference any major changes you think should be checked.
-7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as neccesary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
+7. The WooCommerce Developer Advocacy team will review your pull request and provide feedback via the comments as necessary. Once the content is ready, we'll merge it into `trunk` and it'll appear on the Woo Developer Docs site!
 
 ## Creating New Pages
 
@@ -59,6 +59,7 @@ Optionally, you can set additional metadata. The following fields are supported:
 post_title: Your Post Title Goes Here
 menu_title: Short Title Goes Here
 tags: tag1, tag2, tag3
+version: 9.9.0
 ---
 ```
 
@@ -111,10 +112,8 @@ The WooCommerce Developer Docs site pulls content from the monorepo using the [D
 If you make any of the following changes, you must regenerate the docs manifest:
 
 * You create, delete or move a file in the `docs/` folder
-* You modify a page's Front Matter (eg: its title or tags)
+* You modify a page's Front Matter (eg: its title or tags) or its content
 * You create, rename or delete a category
-
-You don't need to regenerate the manifest if you only make changes to a page's content.
 
 ### How to regenerate the manifest
 
