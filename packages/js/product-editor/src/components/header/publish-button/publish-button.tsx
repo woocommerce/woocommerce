@@ -21,7 +21,6 @@ import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 export function PublishButton( {
 	productStatus,
 	productType = 'product',
-	onSuccess = () => {},
 	...props
 }: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
@@ -64,8 +63,6 @@ export function PublishButton( {
 			createSuccessNotice( noticeContent, noticeOptions );
 
 			maybeShowFeedbackBar();
-
-			onSuccess( savedProduct );
 
 			if ( productStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );

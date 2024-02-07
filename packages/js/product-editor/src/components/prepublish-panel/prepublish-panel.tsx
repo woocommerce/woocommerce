@@ -40,7 +40,6 @@ export function PrepublishPanel( {
 				<PublishButton
 					productType={ productType }
 					productStatus={ lastPersistedProduct?.status }
-					onSuccess={ closePrepublishPanel }
 				/>
 				<Button
 					variant={ 'secondary' }
