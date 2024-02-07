@@ -12,6 +12,7 @@ import type {
 	CartShippingRate,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
@@ -437,14 +438,26 @@ export const selectShippingRate =
  */
 export const setBillingAddress = (
 	billingAddress: Partial< BillingAddress >
-) => ( { type: types.SET_BILLING_ADDRESS, billingAddress } as const );
+) => {
+	const address = applyCheckoutFilter( {
+		filterName: 'setFixedBillingAddress',
+		defaultValue: billingAddress,
+	} );
+	return { type: types.SET_BILLING_ADDRESS, address };
+};
 
 /**
  * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
  */
 export const setShippingAddress = (
 	shippingAddress: Partial< ShippingAddress >
-) => ( { type: types.SET_SHIPPING_ADDRESS, shippingAddress } as const );
+) => {
+	const address = applyCheckoutFilter( {
+		filterName: 'setFixedShippingAddress',
+		defaultValue: shippingAddress,
+	} );
+	return { type: types.SET_SHIPPING_ADDRESS, address };
+};
 
 /**
  * Updates the shipping and/or billing address for the customer and returns an updated cart.
