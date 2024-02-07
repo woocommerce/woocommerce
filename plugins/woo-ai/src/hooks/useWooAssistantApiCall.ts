@@ -54,7 +54,7 @@ const useWooAssistantApiCall = ( {
 
 			try {
 				const { token } = await requestJetpackToken();
-				const formData = prepareFormData( userQuery, token );
+				const formData = prepareFormData( userQuery, token, threadID );
 				const response = ( await apiFetch( {
 					url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard',
 					method: 'POST',
