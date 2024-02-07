@@ -10,6 +10,7 @@ Defines action types for the UI state:
 -   `ACTION_MODAL_EDITOR_CLOSE`
 -   `ACTION_PANEL_PREPUBLISH_OPEN`
 -   `ACTION_PANEL_PREPUBLISH_CLOSE`
+-   `ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD`
 
 ### Actions
 
@@ -17,6 +18,7 @@ Defines action types for the UI state:
 -   `closeModalEditor`
 -   `openPrepublishPanel`
 -   `closePrepublishPanel`
+-   `requirePassword`
 
 ### Selectors
 
@@ -24,6 +26,7 @@ Selector function:
 
 -   `isModalEditorOpen`
 -   `isPrepublishPanelOpen`
+-   `isPasswordRequired`
 
 ### Store
 

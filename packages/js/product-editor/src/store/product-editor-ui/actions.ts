@@ -13,6 +13,7 @@ import {
 	ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
 	ACTION_PANEL_PREPUBLISH_OPEN,
 	ACTION_PANEL_PREPUBLISH_CLOSE,
+	ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD,
 } from './constants';
 
 const modalEditorActions = {
@@ -42,6 +43,10 @@ const prepublishPanelActions = {
 
 	closePrepublishPanel: () => ( {
 		type: ACTION_PANEL_PREPUBLISH_CLOSE,
+	} ),
+	requirePassword: ( isPasswordRequired: boolean ) => ( {
+		type: ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD,
+		isPasswordRequired,
 	} ),
 };
 

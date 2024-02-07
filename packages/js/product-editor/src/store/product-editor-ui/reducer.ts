@@ -8,6 +8,7 @@ import {
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
 	ACTION_PANEL_PREPUBLISH_CLOSE,
 	ACTION_PANEL_PREPUBLISH_OPEN,
+	ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD,
 } from './constants';
 import type {
 	ProductEditorModalEditorAction,
@@ -26,6 +27,7 @@ const INITIAL_STATE: ProductEditorUIStateProps = {
 	},
 	prepublishPanel: {
 		isOpen: false,
+		isPasswordRequired: false,
 	},
 };
 
@@ -82,7 +84,17 @@ export default function reducer(
 			return {
 				...state,
 				prepublishPanel: {
+					...state.prepublishPanel,
 					isOpen: false,
+				},
+			};
+
+		case ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD:
+			return {
+				...state,
+				prepublishPanel: {
+					...state.prepublishPanel,
+					isPasswordRequired: action.isPasswordRequired,
 				},
 			};
 	}
