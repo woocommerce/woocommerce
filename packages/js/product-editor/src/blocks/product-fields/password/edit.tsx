@@ -3,9 +3,10 @@
  */
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement, useState } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { useDispatch, useSelect } from '@wordpress/data';
 import {
 	BaseControl,
 	CheckboxControl,
@@ -19,6 +20,7 @@ import {
 
 import { RequirePasswordBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 
 export function Edit( {
 	attributes,
@@ -32,26 +34,31 @@ export function Edit( {
 		'post_password'
 	);
 
-	const [ checked, setChecked ] = useState( Boolean( postPassword ) );
 	const postPasswordId = useInstanceId(
 		BaseControl,
 		'post_password'
 	) as string;
 
+	const { requirePassword } = useDispatch( productEditorUiStore );
+
+	const isPasswordRequired: boolean = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPasswordRequired();
+	}, [] );
+
 	return (
 		<div { ...blockProps }>
 			<CheckboxControl
 				label={ label }
-				checked={ checked }
+				checked={ isPasswordRequired }
 				className="wp-block-woocommerce-product-password-fields__field"
 				onChange={ ( selected ) => {
-					setChecked( selected );
+					requirePassword( selected );
 					if ( ! selected ) {
 						setPostPassword( '' );
 					}
 				} }
 			/>
-			{ checked && (
+			{ isPasswordRequired && (
 				<BaseControl
 					id={ postPasswordId }
 					label={ __( 'Password', 'woocommerce' ) }
