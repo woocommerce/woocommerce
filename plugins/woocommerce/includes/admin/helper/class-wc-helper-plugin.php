@@ -23,7 +23,7 @@ class WC_Helper_Plugin {
 	 *
 	 * @return bool
 	 */
-	public function is_plugin_active(): bool {
+	public static function is_plugin_active(): bool {
 		return is_plugin_active_for_network( self::WOO_MARKETPLACE_PLUGIN_MAIN_FILE ) || is_plugin_active( self::WOO_MARKETPLACE_PLUGIN_MAIN_FILE );
 	}
 }

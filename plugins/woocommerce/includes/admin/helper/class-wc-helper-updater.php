@@ -26,7 +26,9 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-		add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
+		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
+			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
+		}
 	}
 
 	/**
