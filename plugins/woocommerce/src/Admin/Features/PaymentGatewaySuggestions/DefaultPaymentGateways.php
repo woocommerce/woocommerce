@@ -96,6 +96,19 @@ class DefaultPaymentGateways {
 				),
 			),
 			array(
+				'id'                  => 'airwallex_main',
+				'title'               => __( 'Airwallex Payments', 'woocommerce' ),
+				'content'             => __( 'Boost international sales and save on FX fees. Accept 60+ local payment methods including Apple Pay and Google Pay.', 'woocommerce' ),
+				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/airwallex.png',
+				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/airwallex.png',
+				'plugins'             => array( 'airwallex-online-payments-gateway' ),
+				'is_visible'          => array(
+					self::get_rules_for_countries( array( 'GB', 'AT', 'BE', 'EE', 'FR', 'DE', 'GR', 'IE', 'IT', 'NL', 'PL', 'PT', 'AU', 'NZ', 'HK', 'SG', 'CN' ) ),
+				),
+				'category_other'      => array( 'GB', 'AT', 'BE', 'EE', 'FR', 'DE', 'GR', 'IE', 'IT', 'NL', 'PL', 'PT', 'AU', 'NZ', 'HK', 'SG', 'CN' ),
+				'category_additional' => array(),
+			),
+			array(
 				'id'                  => 'amazon_payments_advanced',
 				'title'               => __( 'Amazon Pay', 'woocommerce' ),
 				'content'             => __( 'Enable a familiar, fast checkout for hundreds of millions of active Amazon customers globally.', 'woocommerce' ),
@@ -177,23 +190,8 @@ class DefaultPaymentGateways {
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/eway.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/eway.png',
 				'plugins'             => array( 'woocommerce-gateway-eway' ),
-				'is_visible'          => array(
-					self::get_rules_for_countries(
-						array(
-							'NZ',
-							'HK',
-							'SG',
-							'AU',
-						)
-					),
-					self::get_rules_for_cbd( false ),
-				),
-				'category_other'      => array(
-					'NZ',
-					'HK',
-					'SG',
-					'AU',
-				),
+				'is_visible'          => false,
+				'category_other'      => array(),
 				'category_additional' => array(),
 			),
 			array(
@@ -778,12 +776,12 @@ class DefaultPaymentGateways {
 						'operands' => (object) array(
 							(object) array(
 								'type'    => 'not',
-								'operand' => [
+								'operand' => array(
 									(object) array(
 										'type'    => 'plugins_activated',
-										'plugins' => [ 'woocommerce-admin' ],
+										'plugins' => array( 'woocommerce-admin' ),
 									),
-								],
+								),
 							),
 							(object) array(
 								'type'     => 'plugin_version',
@@ -871,21 +869,9 @@ class DefaultPaymentGateways {
 				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/zipco.png',
 				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/zipco.png',
 				'plugins'             => array( 'zipmoney-payments-woocommerce' ),
-				'is_visible'          => array(
-					self::get_rules_for_countries(
-						array(
-							'US',
-							'NZ',
-							'AU',
-						)
-					),
-				),
+				'is_visible'          => false,
 				'category_other'      => array(),
-				'category_additional' => array(
-					'US',
-					'NZ',
-					'AU',
-				),
+				'category_additional' => array(),
 			),
 		);
 
@@ -980,9 +966,9 @@ class DefaultPaymentGateways {
 				),
 			),
 			'option_name'  => 'woocommerce_onboarding_profile',
-			'operation'    => 'contains',
-			'value'        => 'no_im_selling_offline',
-			'default'      => array(),
+			'operation'    => 'in',
+			'value'        => array( 'no_im_selling_offline', 'im_selling_both_online_and_offline' ),
+			'default'      => '',
 		);
 	}
 
@@ -1026,7 +1012,7 @@ class DefaultPaymentGateways {
 	 */
 	private static function get_recommendation_priority( $gateway_id, $country_code ) {
 		$recommendation_priority_map = array(
-			'US' => [
+			'US' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1035,9 +1021,8 @@ class DefaultPaymentGateways {
 				'affirm',
 				'afterpay',
 				'klarna_payments',
-				'zipmoney',
-			],
-			'CA' => [
+			),
+			'CA' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1045,42 +1030,44 @@ class DefaultPaymentGateways {
 				'affirm',
 				'afterpay',
 				'klarna_payments',
-			],
-			'AT' => [
+			),
+			'AT' => array(
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'airwallex_main',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			),
+			'BE' => array(
+				'woocommerce_payments',
+				'stripe',
+				'ppcp-gateway',
+				'airwallex_main',
+				'mollie_wc_gateway_banktransfer',
+				'klarna_payments',
+				'amazon_payments_advanced',
+			),
+			'BG' => array( 'stripe', 'ppcp-gateway' ),
+			'HR' => array( 'ppcp-gateway' ),
+			'CH' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
-				'amazon_payments_advanced',
-			],
-			'BE' => [
-				'woocommerce_payments',
-				'stripe',
-				'ppcp-gateway',
-				'mollie_wc_gateway_banktransfer',
-				'klarna_payments',
-				'amazon_payments_advanced',
-			],
-			'BG' => [ 'stripe', 'ppcp-gateway' ],
-			'HR' => [ 'ppcp-gateway' ],
-			'CH' => [
-				'woocommerce_payments',
-				'stripe',
-				'ppcp-gateway',
-				'mollie_wc_gateway_banktransfer',
-				'klarna_payments',
-			],
-			'CY' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
-			'CZ' => [ 'stripe', 'ppcp-gateway' ],
-			'DK' => [
+			),
+			'CY' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'CZ' => array( 'stripe', 'ppcp-gateway' ),
+			'DK' => array(
 				'stripe',
 				'ppcp-gateway',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'EE' => [ 'stripe', 'ppcp-gateway' ],
-			'ES' => [
+			),
+			'EE' => array( 'stripe', 'ppcp-gateway', 'airwallex_main' ),
+			'ES' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
@@ -1088,153 +1075,158 @@ class DefaultPaymentGateways {
 				'square_credit_card',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'FI' => [
+			),
+			'FI' => array(
 				'stripe',
 				'ppcp-gateway',
 				'mollie_wc_gateway_banktransfer',
 				'kco',
 				'klarna_payments',
-			],
-			'FR' => [
+			),
+			'FR' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'square_credit_card',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'DE' => [
+			),
+			'DE' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'GB' => [
+			),
+			'GB' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'square_credit_card',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'GR' => [ 'stripe', 'ppcp-gateway' ],
-			'HU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
-			'IE' => [
+			),
+			'GR' => array( 'stripe', 'ppcp-gateway' ),
+			'HU' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'IE' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'square_credit_card',
 				'amazon_payments_advanced',
-			],
-			'IT' => [
+			),
+			'IT' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'LV' => [ 'stripe', 'ppcp-gateway' ],
-			'LT' => [ 'stripe', 'ppcp-gateway' ],
-			'LU' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
-			'MT' => [ 'stripe', 'ppcp-gateway' ],
-			'NL' => [
+			),
+			'LV' => array( 'stripe', 'ppcp-gateway' ),
+			'LT' => array( 'stripe', 'ppcp-gateway' ),
+			'LU' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'MT' => array( 'stripe', 'ppcp-gateway' ),
+			'NL' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'NO' => [ 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ],
-			'PL' => [
+			),
+			'NO' => array( 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ),
+			'PL' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
-			],
-			'PT' => [
+			),
+			'PT' => array(
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'amazon_payments_advanced',
-			],
-			'RO' => [ 'stripe', 'ppcp-gateway' ],
-			'SK' => [ 'stripe', 'ppcp-gateway' ],
-			'SL' => [ 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ],
-			'SE' => [
+			),
+			'RO' => array( 'stripe', 'ppcp-gateway' ),
+			'SK' => array( 'stripe', 'ppcp-gateway' ),
+			'SL' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'SE' => array(
 				'stripe',
 				'ppcp-gateway',
 				'kco',
 				'klarna_payments',
 				'amazon_payments_advanced',
-			],
-			'MX' => [
+			),
+			'MX' => array(
 				'stripe',
 				'woo-mercado-pago-custom',
 				'ppcp-gateway',
 				'klarna_payments',
-			],
-			'BR' => [ 'stripe', 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'AR' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'BO' => [],
-			'CL' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'CO' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'EC' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'FK' => [],
-			'GF' => [],
-			'GY' => [],
-			'PY' => [],
-			'PE' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'SR' => [],
-			'UY' => [ 'woo-mercado-pago-custom', 'ppcp-gateway' ],
-			'VE' => [ 'ppcp-gateway' ],
-			'AU' => [
+			),
+			'BR' => array( 'stripe', 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'AR' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'BO' => array(),
+			'CL' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'CO' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'EC' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'FK' => array(),
+			'GF' => array(),
+			'GY' => array(),
+			'PY' => array(),
+			'PE' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'SR' => array(),
+			'UY' => array( 'woo-mercado-pago-custom', 'ppcp-gateway' ),
+			'VE' => array( 'ppcp-gateway' ),
+			'AU' => array(
 				'woocommerce_payments',
 				'stripe',
+				'airwallex_main',
 				'ppcp-gateway',
 				'square_credit_card',
-				'eway',
 				'afterpay',
 				'klarna_payments',
-				'zipmoney',
-			],
-			'NZ' => [
+			),
+			'NZ' => array(
 				'woocommerce_payments',
 				'stripe',
+				'airwallex_main',
 				'ppcp-gateway',
-				'eway',
 				'klarna_payments',
-				'zipmoney',
-			],
-			'HK' => [
+			),
+			'HK' => array(
 				'woocommerce_payments',
 				'stripe',
+				'airwallex_main',
 				'ppcp-gateway',
-				'eway',
 				'payoneer-checkout',
-			],
-			'JP' => [
+			),
+			'JP' => array(
 				'stripe',
 				'ppcp-gateway',
 				'square_credit_card',
 				'amazon_payments_advanced',
-			],
-			'SG' => [ 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'eway' ],
-			'CN' => [ 'ppcp-gateway', 'payoneer-checkout' ],
-			'FJ' => [],
-			'GU' => [],
-			'ID' => [ 'stripe', 'ppcp-gateway' ],
-			'IN' => [ 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ],
-			'ZA' => [ 'payfast', 'paystack' ],
-			'NG' => [ 'paystack' ],
-			'GH' => [ 'paystack' ],
+			),
+			'SG' => array( 'woocommerce_payments', 'stripe', 'airwallex_main', 'ppcp-gateway' ),
+			'CN' => array( 'airwallex_main', 'ppcp-gateway', 'payoneer-checkout' ),
+			'FJ' => array(),
+			'GU' => array(),
+			'ID' => array( 'stripe', 'ppcp-gateway' ),
+			'IN' => array( 'stripe', 'razorpay', 'payubiz', 'ppcp-gateway' ),
+			'ZA' => array( 'payfast', 'paystack' ),
+			'NG' => array( 'paystack' ),
+			'GH' => array( 'paystack' ),
 		);
 
 		// If the country code is not in the list, return default priority.

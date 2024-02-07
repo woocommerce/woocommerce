@@ -1,4 +1,4 @@
-export * from './address-form';
+export * from './form';
 export { default as CartLineItemsTable } from './cart-line-items-table';
 export { default as OrderSummary } from './order-summary';
 export { default as PlaceOrderButton } from './place-order-button';
@@ -17,4 +17,5 @@ export { default as ShippingRatesControl } from './shipping-rates-control';
 export { default as ShippingRatesControlPackage } from './shipping-rates-control-package';
 export { default as PaymentMethodIcons } from './payment-method-icons';
 export { default as PaymentMethodLabel } from './payment-method-label';
+export { default as AdditionalFieldsPlaceholder } from './additional-fields-placeholder';
 export * from './totals';

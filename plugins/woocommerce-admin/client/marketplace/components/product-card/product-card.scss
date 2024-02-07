@@ -15,8 +15,8 @@
 			}
 
 			&.woocommerce-marketplace__product-card--extension .woocommerce-marketplace__product-card__title,
-			.woocommerce-marketplace__product-card__description,
-			.woocommerce-marketplace__product-card__price {
+			.woocommerce-marketplace__product-card__description
+			.woocommerce-marketplace__product-card__footer {
 				width: 100vw;
 			}
 
@@ -49,7 +49,7 @@
 				width: 8em;
 			}
 
-			&.woocommerce-marketplace__product-card--theme .woocommerce-marketplace__product-card__price {
+			&.woocommerce-marketplace__product-card--theme .woocommerce-marketplace__product-card__footer {
 				margin-top: 22px;
 			}
 
@@ -63,6 +63,8 @@
 			padding: $medium-gap;
 
 			.woocommerce-marketplace__product-card__description,
+			.woocommerce-marketplace__product-card__add-to-store,
+			.woocommerce-marketplace__product-card__rating,
 			.woocommerce-marketplace__product-card__price {
 				display: none;
 			}
@@ -81,17 +83,21 @@
 			}
 		}
 
+		&__footer {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
 		&:hover {
 			outline: 1.5px solid var(--wp-admin-theme-color);
 		}
 
 		&__content {
 			display: grid;
-			align-items: flex-start;
 			gap: $medium-gap;
-			justify-content: space-between;
 			height: 100%;
-			grid-template-rows: auto 1fr 20px;
+			grid-template-rows: auto 1fr 36px;
 		}
 
 		&__header {
@@ -154,6 +160,11 @@
 			}
 		}
 
+		/* Allow the "add to store" button to "punch through" the "whole card clickable" trick: */
+		&__add-to-store {
+			position: relative;
+		}
+
 		&__vendor {
 			display: flex;
 			gap: $grid-unit-05;
@@ -180,9 +191,9 @@
 		}
 
 		&__price {
+			display: flex;
 			align-items: flex-end;
 			gap: $grid-unit-05;
-			align-self: stretch;
 			text-decoration: none !important;
 			color: $gray-900 !important;
 			font-style: normal;
@@ -198,17 +209,34 @@
 			line-height: $medium-gap;
 		}
 
+		&__rating {
+			display: flex;
+			gap: 2px;
+		}
+
+		&__rating-icon {
+			color: #deb100;
+		}
+
+		&__rating-average {
+			font-weight: 600;
+		}
+
+		&__rating-count {
+			color: $gray-600;
+			font-weight: 400;
+		}
+
 		&.woocommerce-marketplace__product-card--theme {
-			padding: 0;
+			padding: 0 0 $medium-gap;
 			overflow: hidden;
 
 			.woocommerce-marketplace__product-card__content {
 				grid-template-rows: auto 1fr auto;
-				grid-template-columns: 2fr 1fr;
+				grid-template-columns: 1fr;
 			}
 			.woocommerce-marketplace__product-card__image {
 				border-bottom: 1px solid $gray-200;
-				grid-column-start: span 2;
 				overflow: hidden;
 				padding-top: 75%;
 				position: relative;
@@ -223,6 +251,9 @@
 			}
 			.woocommerce-marketplace__product-card__header {
 				padding-left: $medium-gap;
+			}
+			.woocommerce-marketplace__product-card__footer {
+				padding: 0 $medium-gap;
 			}
 			.woocommerce-marketplace__product-card__price {
 				margin-right: $medium-gap;

@@ -53,7 +53,9 @@ test.describe( 'General tab', () => {
 			await clickOnTab( 'General', page );
 			await page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' ).isVisible();
 
-			expect( page.locator( '.block-editor-warning' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.block-editor-warning' ) ).toHaveCount(
+				0
+			);
 		} );
 	} );
 
@@ -88,56 +90,54 @@ test.describe( 'General tab', () => {
 			}
 		} );
 
-test( 'can create a simple product', async ( { page } ) => {
-	await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-	await clickOnTab( 'General', page );
-	await page
-		.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
-		.fill( productData.name );
-	await page
-		.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
-		.last()
-		.fill( productData.summary );
-	await page
-		.locator(
-			'[id^="wp-block-woocommerce-product-regular-price-field"]'
-		)
-		.first()
-		.fill( productData.productPrice );
-	await page
-		.locator(
-			'[id^="wp-block-woocommerce-product-sale-price-field"]'
-		)
-		.first()
-		.fill( productData.salePrice );
+		test( 'can create a simple product', async ( { page } ) => {
+			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			await clickOnTab( 'General', page );
+			await page
+				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
+				.fill( productData.name );
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
+			await page
+				.locator(
+					'[id^="wp-block-woocommerce-product-regular-price-field"]'
+				)
+				.first()
+				.fill( productData.productPrice );
+			await page
+				.locator(
+					'[id^="wp-block-woocommerce-product-sale-price-field"]'
+				)
+				.first()
+				.fill( productData.salePrice );
 
-	await page
-		.locator( '.woocommerce-product-header__actions' )
-		.getByRole( 'button', {
-			name: 'Add',
-		} )
-		.click();
+			await page
+				.locator( '.woocommerce-product-header__actions' )
+				.getByRole( 'button', {
+					name: 'Add',
+				} )
+				.click();
 
-	const element = await page.locator(
-		'div.components-snackbar__content'
-	);
-	const textContent = await element.innerText();
+			const element = page.locator( 'div.components-snackbar__content' );
+			const textContent = await element.innerText();
 
-	await expect( textContent ).toMatch( /Product added/ );
+			await expect( textContent ).toMatch( /Product added/ );
 
-	const title = await page.locator(
-		'.woocommerce-product-header__title'
-	);
+			const title = page.locator( '.woocommerce-product-header__title' );
 
-	// Save product ID
-	const productIdRegex = /product%2F(\d+)/;
-	const url = await page.url();
-	const productIdMatch = productIdRegex.exec( url );
-	productId = productIdMatch ? productIdMatch[ 1 ] : null;
+			// Save product ID
+			const productIdRegex = /product%2F(\d+)/;
+			const url = page.url();
+			const productIdMatch = productIdRegex.exec( url );
+			productId = productIdMatch ? productIdMatch[ 1 ] : null;
 
-	await expect( productId ).toBeDefined();
-	await expect( title ).toHaveText( productData.name );
-} );
+			await expect( productId ).toBeDefined();
+			await expect( title ).toHaveText( productData.name );
+		} );
 		test( 'can not create a product with duplicated SKU', async ( {
 			page,
 		} ) => {
@@ -147,7 +147,9 @@ test( 'can create a simple product', async ( { page } ) => {
 				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
 				.fill( productData.name );
 			await page
-				.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
 				.fill( productData.summary );
 			await page
 				.locator(
@@ -162,9 +164,7 @@ test( 'can create a simple product', async ( { page } ) => {
 				} )
 				.click();
 
-			const element = await page.locator(
-				'div.components-snackbar__content'
-			);
+			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
 			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
@@ -175,7 +175,9 @@ test( 'can create a simple product', async ( { page } ) => {
 			await page.goto( `/?post_type=product&p=${ productId }`, {
 				waitUntil: 'networkidle',
 			} );
-			await expect( page.getByRole( 'heading', { name: productData.name } ) ).toBeVisible();
+			await expect(
+				page.getByRole( 'heading', { name: productData.name } )
+			).toBeVisible();
 			const productPriceElements = await page
 				.locator( '.summary .woocommerce-Price-amount' )
 				.all();
@@ -204,7 +206,7 @@ test( 'can create a simple product', async ( { page } ) => {
 			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page.locator( `a.remove[data-product_id='${ productId }']` )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );

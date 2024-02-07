@@ -71,9 +71,11 @@ test.describe( 'Add product attributes', () => {
 						.click();
 
 					await expect(
-						page.getByRole( 'heading', {
-							name: 'New attribute',
-						} ).first()
+						page
+							.getByRole( 'heading', {
+								name: 'New attribute',
+							} )
+							.first()
 					).toBeVisible();
 				} );
 			}
@@ -116,7 +118,7 @@ test.describe( 'Add product attributes', () => {
 				await test.step( `Wait for the loading overlay to disappear.`, async () => {
 					await expect(
 						page.locator( '.blockOverlay' )
-					).not.toBeVisible();
+					).toBeHidden();
 				} );
 			} );
 		}
@@ -145,9 +147,11 @@ test.describe( 'Add product attributes', () => {
 			const attributeValues = attribute.options.join( ' | ' );
 
 			await test.step( `Expect "${ attributeName }" to appear on the list of saved attributes, and expand it.`, async () => {
-				const heading_attributeName = page.getByRole( 'heading', {
-					name: attributeName,
-				} ).last();
+				const heading_attributeName = page
+					.getByRole( 'heading', {
+						name: attributeName,
+					} )
+					.last();
 
 				await expect( heading_attributeName ).toBeVisible();
 				await heading_attributeName.click();

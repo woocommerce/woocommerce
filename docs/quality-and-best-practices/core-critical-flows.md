@@ -1,5 +1,7 @@
 ---
 post_title: WooCommerce core critical flows
+menu_title: Core critical flows
+tags: reference
 ---
 
 We have identified what we consider to be our most critical user flows within WooCommerce Core. These flows will help us focus and prioritize our testing efforts. They will also help us consider the impact of changes and priority of issues.
@@ -8,29 +10,29 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 ## Shopper critical flow areas
 
--   🛒 [Shopper > Shop](#shopper---shop)
--   🛒 [Shopper > Product](#shopper---product)
--   🛒 [Shopper > Cart](#shopper---cart)
--   🛒 [Shopper > Checkout](#shopper---checkout)
--   🛒 [Shopper > Email](#shopper---email)
--   🛒 [Shopper > My Account](#shopper---my-account)
+- [Shopper > Shop](#shopper---shop)
+- [Shopper > Product](#shopper---product)
+- [Shopper > Cart](#shopper---cart)
+- [Shopper > Checkout](#shopper---checkout)
+- [Shopper > Email](#shopper---email)
+- [Shopper > My Account](#shopper---my-account)
 
 ## Merchant critical flow areas
 
--   💳 [Merchant > Onboarding](#merchant---onboarding)
--   💳 [Merchant > Dashboard](#merchant---dashboard)
--   💳 [Merchant > Settings](#merchant---settings)
--   💳 [Merchant > Coupons](#merchant---coupons)
--   💳 [Merchant > Marketing](#merchant---marketing)
--   💳 [Merchant > Analytics](#merchant---analytics)
--   💳 [Merchant > Products](#merchant---products)
--   💳 [Merchant > Orders](#merchant---orders)
--   💳 [Merchant > Customers](#merchant---customers)
--   💳 [Merchant > Email](#merchant---email)
--   💳 [Merchant > Plugins](#merchant---plugins)
--   💳 [Merchant > My Subscriptions](#merchant---my-subscriptions)
--   💳 [Merchant > Pages](#merchant---pages)
--   💳 [Merchant > Posts](#merchant---posts)
+- [Merchant > Onboarding](#merchant---onboarding)
+- [Merchant > Dashboard](#merchant---dashboard)
+- [Merchant > Settings](#merchant---settings)
+- [Merchant > Coupons](#merchant---coupons)
+- [Merchant > Marketing](#merchant---marketing)
+- [Merchant > Analytics](#merchant---analytics)
+- [Merchant > Products](#merchant---products)
+- [Merchant > Orders](#merchant---orders)
+- [Merchant > Customers](#merchant---customers)
+- [Merchant > Email](#merchant---email)
+- [Merchant > Plugins](#merchant---plugins)
+- [Merchant > My Subscriptions](#merchant---my-subscriptions)
+- [Merchant > Pages](#merchant---pages)
+- [Merchant > Posts](#merchant---posts)
 
 ### Shopper - Shop
 
@@ -189,21 +191,21 @@ These flows will continually evolve as the platform evolves with flows updated, 
 ### Merchant - Products
 
 | User Type | Flow Area      | Flow Name                      | Test File                                                              |
-| --------- | -------------- | ------------------------------ | ---------------------------------------------------------------------- |
+|-----------|----------------|--------------------------------|------------------------------------------------------------------------|
 | Merchant  | Products       | View all products              |                                                                        |
 | Merchant  | Products       | Search products                | merchant/product-search.spec.js                                        |
-| Merchant  | Products       | Add simple product             | merchant/create-simple-product.spec.js                                 |
+| Merchant  | Products       | Add simple product             | merchant/product-create-simple.spec.js                                 |
 | Merchant  | Products       | Add variable product           | merchant/products/add-variable-product/create-variable-product.spec.js |
 | Merchant  | Products       | Edit product details           | merchant/product-edit.spec.js                                          |
-| Merchant  | Products       | Add virtual product            | merchant/create-simple-product.spec.js                                 |
+| Merchant  | Products       | Add virtual product            | merchant/product-create-simple.spec.js                                 |
 | Merchant  | Products       | Import products CSV            | merchant/product-import-csv.spec.js                                    |
-| Merchant  | Products       | Add downloadable product       |                                                                        |
+| Merchant  | Products       | Add downloadable product       | merchant/product-create-simple.spec.js                                 |
 | Merchant  | Products       | View product reviews list      |                                                                        |
 | Merchant  | Products       | View all products reviews list |                                                                        |
 | Merchant  | Products       | Edit product review            |                                                                        |
 | Merchant  | Products       | Trash product review           |                                                                        |
 | Merchant  | Products       | Bulk edit products             |                                                                        |
-| Merchant  | Products       | Remove products                |                                                                        |
+| Merchant  | Products       | Remove products                | merchant/product-delete.spec.js                                        |
 | Merchant  | Products       | Manage product images          |                                                                        |
 | Merchant  | Products       | Manage product inventory       |                                                                        |
 | Merchant  | Products       | Manage product attributes      |                                                                        |

@@ -50,6 +50,9 @@ import { CustomizeStoreContext } from './';
 import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
+import { FlowType } from '../types';
+import { isOfflineAIFlow } from '../guards';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -62,16 +65,17 @@ export const Layout = () => {
 		CustomizeStoreContext
 	);
 
-	const aiOnline = context.aiOnline;
 	const { customizing } = useQuery();
 
 	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
-		! aiOnline && customizing !== 'true'
+		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
 	);
 
 	useEffect( () => {
-		setShowAiOfflineModal( ! aiOnline && customizing !== 'true' );
-	}, [ aiOnline, customizing ] );
+		setShowAiOfflineModal(
+			isOfflineAIFlow( context.flowType ) && customizing !== 'true'
+		);
+	}, [ context.flowType, customizing ] );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
@@ -125,12 +129,13 @@ export const Layout = () => {
 					<Transitional
 						sendEvent={ sendEvent }
 						editor={ editor }
+						isWooExpress={ isWooExpress() }
 						isSurveyOpen={ isSurveyOpen }
 						setSurveyOpen={ setSurveyOpen }
 						hasCompleteSurvey={
 							!! context?.transitionalScreen?.hasCompleteSurvey
 						}
-						aiOnline={ !! context?.aiOnline }
+						aiOnline={ context?.flowType === FlowType.AIOnline }
 					/>
 				</EntityProvider>
 			</EntityProvider>
@@ -242,11 +247,13 @@ export const Layout = () => {
 						</div>
 						{ ! isEditorLoading &&
 							shouldTourBeShown &&
-							! showAiOfflineModal && (
+							( FlowType.AIOnline === context.flowType ||
+								FlowType.noAI === context.flowType ) && (
 								<OnboardingTour
 									skipTour={ skipTour }
 									takeTour={ takeTour }
 									onClose={ onClose }
+									flowType={ context.flowType }
 									{ ...onboardingTourProps }
 								/>
 							) }

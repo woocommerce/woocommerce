@@ -83,7 +83,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 
 		const products = await allProductsBlock.getByRole( 'listitem' ).all();
 
-		expect( products ).toHaveLength( 1 );
+		expect( products ).toHaveLength( 2 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);

@@ -243,6 +243,9 @@ class BlockPatterns {
 				for each page load. This way we only do it once on registration.
 				For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
 			*/
+
+			$content = array();
+			$images  = array();
 			if ( ! is_null( $pattern_data_from_dictionary ) ) {
 				$content = $pattern_data_from_dictionary['content'];
 				$images  = $pattern_data_from_dictionary['images'] ?? array();
@@ -391,7 +394,7 @@ class BlockPatterns {
 	 */
 	private function get_pattern_from_dictionary( $dictionary, $slug ) {
 		foreach ( $dictionary as $pattern_dictionary ) {
-			if ( $pattern_dictionary['slug'] === $slug ) {
+			if ( isset( $pattern_dictionary['slug'] ) && $pattern_dictionary['slug'] === $slug ) {
 				return $pattern_dictionary;
 			}
 		}

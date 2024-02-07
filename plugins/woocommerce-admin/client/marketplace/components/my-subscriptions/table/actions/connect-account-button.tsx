@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '../../../../../utils/admin-settings';
+import { connectUrl } from '../../../../utils/functions';
 
 interface RenewProps {
 	variant?: Button.ButtonVariant;
@@ -15,9 +15,7 @@ interface RenewProps {
 }
 
 export default function ConnectAccountButton( props: RenewProps ) {
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-
-	const url = new URL( wccomSettings?.connectURL ?? '' );
+	const url = new URL( connectUrl() );
 	if ( props.install ) {
 		url.searchParams.set( 'install', props.install );
 	}

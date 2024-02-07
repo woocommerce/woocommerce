@@ -37,7 +37,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.6.0';
+	public $version = '8.7.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -298,13 +298,32 @@ final class WooCommerce {
 	public function log_errors() {
 		$error = error_get_last();
 		if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
+			$error_copy = $error;
+			$message    = $error_copy['message'];
+			unset( $error_copy['message'] );
+
+			$context = array(
+				'source' => 'fatal-errors',
+				'error'  => $error_copy,
+			);
+
+			if ( false !== strpos( $message, 'Stack trace:' ) ) {
+				$segments  = explode( 'Stack trace:', $message );
+				$message   = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
+				$backtrace = array_map(
+					'trim',
+					explode( PHP_EOL, $segments[1] )
+				);
+
+				$context['backtrace'] = $backtrace;
+			} else {
+				$context['backtrace'] = true;
+			}
+
 			$logger = wc_get_logger();
 			$logger->critical(
-				/* translators: 1: error message 2: file name and path 3: line number */
-				sprintf( __( '%1$s in %2$s on line %3$s', 'woocommerce' ), $error['message'], $error['file'], $error['line'] ) . PHP_EOL,
-				array(
-					'source' => 'fatal-errors',
-				)
+				$message,
+				$context
 			);
 
 			/**
@@ -891,14 +910,15 @@ final class WooCommerce {
 	/**
 	 * Initialize the customer and cart objects and setup customer saving on shutdown.
 	 *
+	 * Note, wc()->customer is session based. Changes to customer data via this property are not persisted to the database automatically.
+	 *
 	 * @since 3.6.4
 	 * @return void
 	 */
 	public function initialize_cart() {
-		// Cart needs customer info.
 		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
 			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Customer should be saved during shutdown.
+			// Customer session should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
 		}
 		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {

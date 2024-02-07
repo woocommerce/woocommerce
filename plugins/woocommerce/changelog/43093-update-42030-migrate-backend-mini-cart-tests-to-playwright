@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Migrate backend mini-cart tests from Puppeteer to Playwright.

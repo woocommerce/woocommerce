@@ -40,6 +40,7 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 		grid-gap: $gap-small;
 		margin: $gap-large auto;
 		max-width: 1000px;
+		width: 100%;
 	}
 
 	.wc-blocks-product-collection__collection-button {

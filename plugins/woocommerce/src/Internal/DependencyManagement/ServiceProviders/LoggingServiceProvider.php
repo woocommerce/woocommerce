@@ -2,8 +2,8 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\Admin\Logging\PageController;
-use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ FileController, ListTable };
+use Automattic\WooCommerce\Internal\Admin\Logging\{ PageController, Settings };
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 
 /**
@@ -18,6 +18,7 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 	protected $provides = array(
 		FileController::class,
 		PageController::class,
+		Settings::class,
 	);
 
 	/**
@@ -31,7 +32,10 @@ class LoggingServiceProvider extends AbstractServiceProvider {
 		$this->share( PageController::class )->addArguments(
 			array(
 				FileController::class,
+				Settings::class,
 			)
 		);
+
+		$this->share( Settings::class );
 	}
 }

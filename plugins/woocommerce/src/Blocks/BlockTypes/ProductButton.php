@@ -52,8 +52,6 @@ class ProductButton extends AbstractBlock {
 				'wp_enqueue_scripts',
 				array( $this, 'dequeue_add_to_cart_scripts' )
 			);
-		} else {
-			$this->dequeue_add_to_cart_scripts();
 		}
 	}
 
@@ -216,7 +214,7 @@ class ProductButton extends AbstractBlock {
 						'{custom_classes}'         => esc_attr( $classname . ' ' . $custom_width_classes . ' ' . $custom_align_classes ),
 						'{html_element}'           => $html_element,
 						'{add_to_cart_url}'        => esc_url( $product->add_to_cart_url() ),
-						'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] ) : '',
+						'{button_classes}'         => isset( $args['class'] ) ? esc_attr( $args['class'] . ' wc-interactive' ) : 'wc-interactive',
 						'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 						'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
 						'{add_to_cart_text}'       => esc_html( $initial_product_text ),

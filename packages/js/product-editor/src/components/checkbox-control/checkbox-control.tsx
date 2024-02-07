@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { CheckboxControl, Tooltip } from '@wordpress/components';
+import { CheckboxControl } from '@wordpress/components';
+import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { Icon, help } from '@wordpress/icons';
 
 /**
@@ -65,12 +66,9 @@ export const Checkbox: React.FC< CheckboxProps > = ( {
 							></span>
 						}
 						position="top center"
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore Incorrect types.
 						className={
 							'woocommerce-product-form__checkbox-tooltip'
 						}
-						delay={ 0 }
 					>
 						<span className="woocommerce-product-form__checkbox-tooltip-icon">
 							<Icon icon={ help } size={ 21.94 } fill="#949494" />

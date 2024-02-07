@@ -21,6 +21,7 @@ import { useValidation } from '../../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
 import { SalePriceBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
@@ -28,7 +29,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help } = attributes;
+	const { label, help, tooltip } = attributes;
 	const [ regularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -94,7 +95,13 @@ export function Edit( {
 					id={ salePriceId }
 					name={ 'sale_price' }
 					ref={ salePriceRef }
-					label={ label }
+					label={
+						tooltip ? (
+							<Label label={ label } tooltip={ tooltip } />
+						) : (
+							label
+						)
+					}
 					onBlur={ validateSalePrice }
 				/>
 			</BaseControl>

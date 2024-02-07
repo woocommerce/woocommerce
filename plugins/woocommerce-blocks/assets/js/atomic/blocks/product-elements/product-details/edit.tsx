@@ -10,6 +10,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
  */
 import Block from './block';
 import { Attributes } from './types';
+import './editor.scss';
 
 const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
 	const { className } = attributes;

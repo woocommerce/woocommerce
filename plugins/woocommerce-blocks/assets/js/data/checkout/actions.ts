@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { AdditionalValues } from '@woocommerce/settings';
+
+/**
  * Internal dependencies
  */
 import { ACTION_TYPES as types } from './action-types';
@@ -116,6 +121,12 @@ export const __internalSetShouldCreateAccount = (
 } );
 
 /**
+ * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
+ */
+export const setAdditionalFields = ( additionalFields: AdditionalValues ) =>
+	( { type: types.SET_ADDITIONAL_FIELDS, additionalFields } as const );
+
+/**
  * Set the notes for the order
  *
  * @param orderNotes String that represents a note for the order
@@ -164,5 +175,6 @@ export type CheckoutAction =
 			| typeof __internalSetOrderNotes
 			| typeof setPrefersCollection
 			| typeof __internalSetExtensionData
+			| typeof setAdditionalFields
 	  >
 	| Record< string, never >;

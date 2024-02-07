@@ -18,6 +18,9 @@
 		"isRequired": {
 			"type": "boolean",
 			"default": false
+		},
+		"tooltip": {
+			"type": "string"
 		}
 	},
 	"supports": {

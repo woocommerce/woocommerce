@@ -53,7 +53,9 @@
 		}
 
 		.wp-block-woocommerce-product-section {
-			margin-top: 0;
+			&:first-child {
+				margin-top: 0;
+			}
 			padding-bottom: 0;
 			border-bottom: none;
 		}
@@ -63,4 +65,32 @@
 		margin: 0;
 		max-width: 300px;
 	}
+
+	// <ActionSections /> slot.
+	&__actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: $grid-unit;
+
+		/*
+		 * Core removes the "loading" animation styles
+		 * from the button when it's disabled, so we
+		 * let's add them back.
+		 */
+		.components-button.is-tertiary.is-busy:disabled {
+			background-image: linear-gradient(
+				-45deg,
+				#fafafa 33%,
+				#e0e0e0 0,
+				#e0e0e0 70%,
+				#fafafa 0
+			);
+			background-size: 100px 100%;
+			opacity: 1;
+		}
+	}
+}
+
+.woocommerce-tooltip > .wp-block-woocommerce-product-section__heading-tooltip {
+	margin-left: $gap-small;
 }

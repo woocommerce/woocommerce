@@ -1,5 +1,7 @@
 ---
-post_title: Building blocks for low code builders
+post_title: Tools for low-code development
+menu_title: Low-code tools
+tags: reference
 ---
 
 ## Introduction

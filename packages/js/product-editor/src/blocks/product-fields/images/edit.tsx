@@ -26,6 +26,7 @@ import { useEntityProp } from '@wordpress/core-data';
  */
 import { ProductEditorBlockEditProps } from '../../../types';
 import { PlaceHolder } from './place-holder';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 type UploadImage = {
 	id?: number;
@@ -48,7 +49,7 @@ function mapUploadImageToImage( upload: UploadImage ): Image | null {
 	};
 }
 
-export function Edit( {
+export function ImageBlockEdit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
@@ -218,27 +219,36 @@ export function Edit( {
 						/>
 					</div>
 				) : (
-					<MediaUploader
-						value={
-							Array.isArray( propertyValue )
-								? propertyValue.map( ( { id } ) => id )
-								: propertyValue?.id ?? undefined
-						}
-						multipleSelect={ multiple ? 'add' : false }
-						onError={ () => null }
-						onFileUploadChange={ uploadHandler(
-							'product_images_add_via_file_upload_area'
-						) }
-						onMediaGalleryOpen={ () => {
-							recordEvent( 'product_images_media_gallery_open' );
-						} }
-						onSelect={ handleSelect }
-						onUpload={ uploadHandler(
-							'product_images_add_via_drag_and_drop_upload'
-						) }
-						label={ '' }
-						buttonText={ __( 'Choose an image', 'woocommerce' ) }
-					/>
+					<SectionActions>
+						<div className="woocommerce-product-form__media-uploader">
+							<MediaUploader
+								value={
+									Array.isArray( propertyValue )
+										? propertyValue.map( ( { id } ) => id )
+										: propertyValue?.id ?? undefined
+								}
+								multipleSelect={ multiple ? 'add' : false }
+								onError={ () => null }
+								onFileUploadChange={ uploadHandler(
+									'product_images_add_via_file_upload_area'
+								) }
+								onMediaGalleryOpen={ () => {
+									recordEvent(
+										'product_images_media_gallery_open'
+									);
+								} }
+								onSelect={ handleSelect }
+								onUpload={ uploadHandler(
+									'product_images_add_via_drag_and_drop_upload'
+								) }
+								label={ '' }
+								buttonText={ __(
+									'Choose an image',
+									'woocommerce'
+								) }
+							/>
+						</div>
+					</SectionActions>
 				) }
 			</div>
 			{ isImageGalleryVisible ? (

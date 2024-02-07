@@ -10,6 +10,7 @@ import './style.scss';
 
 export type DropdownContext = {
 	selectType: 'multiple' | 'single';
+	defaultPlaceholder: string;
 	item: {
 		label: string;
 		value: string;
@@ -41,18 +42,18 @@ type DropdownStore = {
 store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 	state: {
 		get placeholderText(): string {
-			const { selectType, selectedItems } =
+			const { selectType, selectedItems, defaultPlaceholder } =
 				getContext< DropdownContext >();
 
 			if ( selectType === 'single' ) {
 				return selectedItems?.length && selectedItems[ 0 ].label
 					? selectedItems[ 0 ]?.label
-					: 'Select an option';
+					: defaultPlaceholder;
 			} else if (
 				selectType === 'multiple' &&
 				selectedItems.length === 0
 			) {
-				return 'Select options';
+				return defaultPlaceholder;
 			}
 
 			return '';
@@ -69,7 +70,6 @@ store< DropdownStore >( 'woocommerce/interactivity-dropdown', {
 	actions: {
 		toggleIsOpen: () => {
 			const context = getContext< DropdownContext >();
-
 			context.isOpen = ! context.isOpen;
 		},
 		unselectDropdownItem: ( event: MouseEvent ) => {

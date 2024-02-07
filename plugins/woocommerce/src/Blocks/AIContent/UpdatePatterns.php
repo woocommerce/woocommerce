@@ -308,7 +308,7 @@ class UpdatePatterns {
 								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
 							}
 
-							$patterns[ $i ]['content']['titles'][ $j ]['default'] = $ai_response_content[ $counter ];
+							$patterns[ $i ]['content']['titles'][ $j ]['default'] = $this->sanitize_string( $ai_response_content[ $counter ] );
 
 							$counter ++;
 						}
@@ -320,7 +320,7 @@ class UpdatePatterns {
 								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
 							}
 
-							$patterns[ $i ]['content']['descriptions'][ $k ]['default'] = $ai_response_content[ $counter ];
+							$patterns[ $i ]['content']['descriptions'][ $k ]['default'] = $this->sanitize_string( $ai_response_content[ $counter ] );
 
 							$counter ++;
 						}
@@ -332,7 +332,7 @@ class UpdatePatterns {
 								$ai_response_content[ $counter ] = $ai_response_content[ $counter - 1 ] ?? '';
 							}
 
-							$patterns[ $i ]['content']['buttons'][ $l ]['default'] = $ai_response_content[ $counter ];
+							$patterns[ $i ]['content']['buttons'][ $l ]['default'] = $this->sanitize_string( $ai_response_content[ $counter ] );
 
 							$counter ++;
 						}
@@ -342,6 +342,18 @@ class UpdatePatterns {
 		}
 
 		return $patterns;
+	}
+
+	/**
+	 * Sanitize the string from the AI generated content. It removes double quotes that can cause issues when
+	 * decoding the patterns JSON.
+	 *
+	 * @param string $string The string to be sanitized.
+	 *
+	 * @return string The sanitized string.
+	 */
+	private function sanitize_string( $string ) {
+		return str_replace( '"', '', $string );
 	}
 
 	/**

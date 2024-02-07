@@ -17,6 +17,7 @@ import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
+
 /**
  * Internal dependencies
  */
@@ -28,6 +29,8 @@ import {
 	actions as introActions,
 } from './intro';
 import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
+import { DesignWithoutAi } from './design-without-ai';
+
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
 import {
 	events as transitionalEvents,
@@ -39,11 +42,13 @@ import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
+	FlowType,
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
 import { navigateOrParent, attachParentListeners } from './utils';
 import useBodyClass from './hooks/use-body-class';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -51,7 +56,9 @@ export type customizeStoreStateMachineEvents =
 	| assemblerHubEvents
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
-	| { type: 'EXTERNAL_URL_UPDATE' };
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
 const updateQueryStep = (
 	_context: unknown,
@@ -131,7 +138,7 @@ export const customizeStoreStateMachineServices = {
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
-	initial: 'navigate',
+	initial: 'setFlags',
 	predictableActionArguments: true,
 	preserveActionOrder: true,
 	schema: {
@@ -153,14 +160,15 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			activeTheme: '',
-			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
 		transitionalScreen: {
 			hasCompleteSurvey: false,
 		},
-		aiOnline: true,
+		flowType: FlowType.noAI,
+		isFontLibraryAvailable: null,
+		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
@@ -173,8 +181,24 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			target: 'intro',
 			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 		},
+		NO_AI_FLOW_ERROR: {
+			target: 'intro',
+			actions: [
+				{ type: 'assignNoAIFlowError' },
+				{ type: 'updateQueryStep', step: 'intro' },
+			],
+		},
 	},
 	states: {
+		setFlags: {
+			invoke: {
+				src: 'setFlags',
+				onDone: {
+					actions: 'assignFlags',
+					target: 'navigate',
+				},
+			},
+		},
 		navigate: {
 			always: [
 				{
@@ -189,6 +213,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					cond: {
 						type: 'hasStepInUrl',
 						step: 'design-with-ai',
+					},
+				},
+				{
+					target: 'designWithoutAi',
+					cond: {
+						type: 'hasStepInUrl',
+						step: 'design',
 					},
 				},
 				{
@@ -212,55 +243,62 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'preIntro',
+			initial: 'flowType',
 			states: {
-				preIntro: {
-					type: 'parallel',
+				flowType: {
+					always: [
+						{
+							target: 'fetchIntroData',
+							cond: 'isNotWooExpress',
+							actions: 'assignNoAI',
+						},
+						{
+							target: 'checkAiStatus',
+							cond: 'isWooExpress',
+						},
+					],
+				},
+				checkAiStatus: {
+					initial: 'pending',
 					states: {
-						checkAiStatus: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchAiStatus',
-										onDone: {
-											actions: 'assignAiStatus',
-											target: 'success',
-										},
-										onError: {
-											actions: 'assignAiOffline',
-											target: 'success',
-										},
-									},
+						pending: {
+							invoke: {
+								src: 'fetchAiStatus',
+								onDone: {
+									actions: 'assignAiStatus',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onError: {
+									actions: 'assignAiOffline',
+									target: 'success',
+								},
 							},
 						},
-						fetchIntroData: {
-							initial: 'pending',
-							states: {
-								pending: {
-									invoke: {
-										src: 'fetchIntroData',
-										onError: {
-											actions:
-												'assignFetchIntroDataError',
-											target: 'success',
-										},
-										onDone: {
-											target: 'success',
-											actions: [
-												'assignThemeData',
-												'assignActiveThemeHasMods',
-												'assignCustomizeStoreCompleted',
-												'assignCurrentThemeIsAiGenerated',
-											],
-										},
-									},
+						success: { type: 'final' },
+					},
+					onDone: 'fetchIntroData',
+				},
+				fetchIntroData: {
+					initial: 'pending',
+					states: {
+						pending: {
+							invoke: {
+								src: 'fetchIntroData',
+								onError: {
+									actions: 'assignFetchIntroDataError',
+									target: 'success',
 								},
-								success: { type: 'final' },
+								onDone: {
+									target: 'success',
+									actions: [
+										'assignThemeData',
+										'assignCustomizeStoreCompleted',
+										'assignCurrentThemeIsAiGenerated',
+									],
+								},
 							},
 						},
+						success: { type: 'final' },
 					},
 					onDone: 'intro',
 				},
@@ -278,6 +316,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
 					target: 'designWithAi',
 				},
+				DESIGN_WITHOUT_AI: {
+					actions: [ 'recordTracksDesignWithAIClicked' ],
+					target: 'designWithoutAi',
+				},
 				SELECTED_NEW_THEME: {
 					actions: [ 'recordTracksThemeSelected' ],
 					target: 'appearanceTask',
@@ -291,6 +333,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						'recordTracksBrowseAllThemesClicked',
 						'redirectToThemes',
 					],
+				},
+			},
+		},
+		designWithoutAi: {
+			initial: 'preDesignWithoutAi',
+			states: {
+				preDesignWithoutAi: {
+					always: {
+						target: 'designWithoutAi',
+					},
+				},
+				designWithoutAi: {
+					entry: [ { type: 'updateQueryStep', step: 'design' } ],
+					meta: {
+						component: DesignWithoutAi,
+					},
 				},
 			},
 		},
@@ -318,8 +376,34 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'checkAiStatus',
+			initial: 'checkActiveThemeHasMods',
 			states: {
+				checkActiveThemeHasMods: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'activeThemeHasNoMods',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'activeThemeHasMods',
+							target: 'preCheckAiStatus',
+						},
+					],
+				},
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
+					],
+				},
 				checkAiStatus: {
 					invoke: {
 						src: 'fetchAiStatus',
@@ -364,6 +448,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				GO_BACK_TO_DESIGN_WITH_AI: {
 					target: 'designWithAi',
 				},
+				GO_BACK_TO_DESIGN_WITHOUT_AI: {
+					target: 'intro',
+				},
 			},
 		},
 		transitionalScreen: {
@@ -376,11 +463,33 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'transitional', // leave it as initialised default on error
+							target: 'preCheckAiStatus', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'transitional',
+							target: 'preCheckAiStatus',
 							actions: [ 'assignHasCompleteSurvey' ],
+						},
+					},
+				},
+				preCheckAiStatus: {
+					always: [
+						{
+							cond: 'isWooExpress',
+							target: 'checkAiStatus',
+						},
+						{ cond: 'isNotWooExpress', target: 'transitional' },
+					],
+				},
+				checkAiStatus: {
+					invoke: {
+						src: 'fetchAiStatus',
+						onDone: {
+							actions: 'assignAiStatus',
+							target: 'transitional',
+						},
+						onError: {
+							actions: 'assignAiOffline',
+							target: 'transitional',
 						},
 					},
 				},
@@ -405,6 +514,15 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		appearanceTask: {},
 	},
 } );
+
+declare global {
+	interface Window {
+		__wcCustomizeStore: {
+			isFontLibraryAvailable: boolean | null;
+			activeThemeHasMods: boolean | undefined;
+		};
+	}
+}
 
 export const CustomizeStoreController = ( {
 	actionOverrides,
@@ -435,10 +553,18 @@ export const CustomizeStoreController = ( {
 					);
 				},
 				isAiOnline: ( _ctx ) => {
-					return _ctx.aiOnline;
+					return _ctx.flowType === FlowType.AIOnline;
 				},
 				isAiOffline: ( _ctx ) => {
-					return ! _ctx.aiOnline;
+					return _ctx.flowType === FlowType.AIOffline;
+				},
+				isWooExpress: () => isWooExpress(),
+				isNotWooExpress: () => ! isWooExpress(),
+				activeThemeHasMods: ( _ctx ) => {
+					return !! _ctx.activeThemeHasMods;
+				},
+				activeThemeHasNoMods: ( _ctx ) => {
+					return ! _ctx.activeThemeHasMods;
 				},
 			},
 		} );
@@ -447,6 +573,7 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
+
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< CustomizeStoreComponentMeta >(

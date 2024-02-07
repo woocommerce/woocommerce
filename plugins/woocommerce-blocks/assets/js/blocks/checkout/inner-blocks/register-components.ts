@@ -110,6 +110,16 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
+	metadata: metadata.CHECKOUT_ADDITIONAL_INFORMATION,
+	component: lazy(
+		() =>
+			import(
+				/* webpackChunkName: "checkout-blocks/additional-information" */ './checkout-additional-information-block/frontend'
+			)
+	),
+} );
+
+registerCheckoutBlock( {
 	metadata: metadata.CHECKOUT_ORDER_NOTE,
 	component: lazy(
 		() =>

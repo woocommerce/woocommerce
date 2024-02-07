@@ -272,27 +272,52 @@ final class WC_Cart_Session {
 	 * Remove duplicate cookies from the response.
 	 */
 	private function dedupe_cookies() {
+		$all_cookies    = array_filter(
+			headers_list(),
+			function( $header ) {
+				return stripos( $header, 'Set-Cookie:' ) !== false;
+			}
+		);
 		$final_cookies  = array();
 		$update_cookies = false;
+		foreach ( $all_cookies as $cookie ) {
 
-		foreach ( headers_list() as $header ) {
-			if ( stripos( $header, 'Set-Cookie:' ) === false ) {
-				continue;
-			}
-			list(, $cookie_value)             = explode( ':', $header, 2 );
+			list(, $cookie_value)             = explode( ':', $cookie, 2 );
 			list($cookie_name, $cookie_value) = explode( '=', trim( $cookie_value ), 2 );
-			if ( array_key_exists( $cookie_name, $final_cookies ) ) {
-				$update_cookies = true;
+
+			if ( stripos( $cookie_name, 'woocommerce_' ) !== false ) {
+				$key = $this->find_cookie_by_name( $cookie_name, $final_cookies );
+				if ( false !== $key ) {
+					$update_cookies = true;
+					unset( $final_cookies[ $key ] );
+				}
 			}
-			$final_cookies[ $cookie_name ] = $cookie_value;
+			$final_cookies[] = $cookie;
 		}
+
 		if ( $update_cookies ) {
 			header_remove( 'Set-Cookie' );
-			foreach ( $final_cookies as $cookie_name => $cookie_value ) {
+			foreach ( $final_cookies as $cookie ) {
 				// Using header here preserves previous cookie args.
-				header( "Set-Cookie: {$cookie_name}={$cookie_value}", false );
+				header( $cookie, false );
 			}
 		}
+	}
+
+	/**
+	 * Find a cookie by name in an array of cookies.
+	 *
+	 * @param  string $cookie_name Name of the cookie to find.
+	 * @param  array  $cookies     Array of cookies to search.
+	 * @return mixed               Key of the cookie if found, false if not.
+	 */
+	private function find_cookie_by_name( $cookie_name, $cookies ) {
+		foreach ( $cookies as $key => $cookie ) {
+			if ( strpos( $cookie, $cookie_name ) !== false ) {
+				return $key;
+			}
+		}
+		return false;
 	}
 
 	/**

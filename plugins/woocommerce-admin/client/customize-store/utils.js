@@ -101,3 +101,43 @@ export const setLogoWidth = ( content, width = DEFAULT_LOGO_WIDTH ) => {
 		return `<!-- wp:site-logo {"width":${ width }} /-->`;
 	} );
 };
+
+/**
+ * Create augmented steps for animation
+ *
+ * @param {Array}  steps
+ * @param {number} numOfDupes
+ * @return {Array} augmentedSteps
+ *
+ */
+export const createAugmentedSteps = ( steps, numOfDupes ) => {
+	// Duplicate each step, so we can animate each one
+	// (e.g. each step will be duplicated 3 times, and each duplicate will
+	// have different progress)
+	const augmentedSteps = steps
+		.map( ( item, index, array ) => {
+			// Get the next item in the array
+			const nextItem = array[ index + 1 ];
+			// If there is no next item, we're at the end of the array
+			// so just return the current item
+			if ( ! nextItem ) return [ item ];
+
+			// If there is a next item, we're not at the end of the array
+			// so return the current item, plus duplicates
+			const duplicates = [ item ];
+			const progressIncreaseBy =
+				( nextItem.progress - item.progress ) / numOfDupes;
+
+			for ( let i = 0; i < numOfDupes; i++ ) {
+				duplicates.push( {
+					...item,
+					progress: item.progress + ( i + 1 ) * progressIncreaseBy,
+				} );
+			}
+
+			return duplicates;
+		} )
+		.flat();
+
+	return augmentedSteps;
+};

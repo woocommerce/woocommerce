@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import registerProductEditorUiStore from './store/product-editor-ui';
+import registerProductEditorHooks from './wp-hooks';
 
 export * from './components';
 export {
@@ -36,3 +37,5 @@ export * from './contexts/validation-context/types';
 
 // Init the store
 registerProductEditorUiStore();
+
+registerProductEditorHooks();

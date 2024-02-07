@@ -143,7 +143,7 @@ MESSAGE;
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content   = file_get_contents( reset( $paths ) );
-		$expected_content = gmdate( 'c', $time ) . ' DEBUG How to win 1. Bake cookies 2. ??? 3. Profit' . "\n";
+		$expected_content = gmdate( 'c', $time ) . ' DEBUG ' . $message . "\n";
 
 		$this->assertEquals( $expected_content, $actual_content );
 	}
@@ -252,7 +252,34 @@ MESSAGE;
 	/**
 	 * @testdox Check that the delete_logs_before_timestamp method deletes files based on their created date.
 	 */
-	public function test_delete_logs() {
+	public function test_clear() {
+		$this->sut->handle( time(), 'debug', 'duck', array( 'source' => 'duck' ) );
+		$this->sut->handle( strtotime( '-2 days' ), 'debug', 'duck', array( 'source' => 'duck' ) );
+		$this->sut->handle( strtotime( '-4 days' ), 'debug', 'duck', array( 'source' => 'duck' ) );
+		$this->sut->handle( time(), 'debug', 'goose', array( 'source' => 'goose' ) );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 4, $paths );
+
+		$result = $this->sut->clear( 'duck' );
+		$this->assertEquals( 3, $result );
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$this->assertCount( 2, $paths ); // New log gets created when old logs are deleted!
+
+		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'wc_logger*.log' );
+		$this->assertCount( 1, $paths );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$actual_content  = file_get_contents( reset( $paths ) );
+		$expected_string = '3 log files from source <code>duck</code> were deleted.';
+		$this->assertStringContainsString( $expected_string, $actual_content );
+	}
+
+	/**
+	 * @testdox Check that the delete_logs_before_timestamp method deletes files based on their created date.
+	 */
+	public function test_delete_logs_before_timestamp() {
 		$current_time = time();
 		$past_time    = strtotime( '-5 days' );
 

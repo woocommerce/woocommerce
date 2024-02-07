@@ -32,6 +32,7 @@ import {
 } from '../../../components/manage-download-limits-modal';
 import { EditDownloadsModal } from './edit-downloads-modal';
 import { UploadImage } from './upload-image';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -46,16 +47,11 @@ function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
 	return { ...entity, id: stringifyId( entity.id ) };
 }
 
-export function Edit( {
+export function DownloadBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
-		'postType',
-		postType,
-		'downloadable'
-	);
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
 		postType,
@@ -121,10 +117,6 @@ export function Edit( {
 		}
 
 		if ( newFiles.length ) {
-			if ( ! downloads.length ) {
-				setDownloadable( true );
-			}
-
 			const uploadedFiles = newFiles.map( ( file ) => ( {
 				id: stringifyId( file.id ),
 				file: file.url,
@@ -150,10 +142,6 @@ export function Edit( {
 			files[ 0 ]?.id === undefined
 		) {
 			return;
-		}
-
-		if ( ! downloads.length ) {
-			setDownloadable( true );
 		}
 
 		const uploadedFile = {
@@ -189,10 +177,6 @@ export function Edit( {
 			},
 			[]
 		);
-
-		if ( ! otherDownloads.length ) {
-			setDownloadable( false );
-		}
 
 		setDownloads( otherDownloads );
 	}
@@ -232,7 +216,7 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-downloads-field__header">
+			<SectionActions>
 				{ Boolean( downloads.length ) && (
 					<Button
 						variant="tertiary"
@@ -247,7 +231,7 @@ export function Edit( {
 					onUploadSuccess={ handleFileUpload }
 					onUploadError={ handleUploadError }
 				/>
-			</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
 				<MediaUploader

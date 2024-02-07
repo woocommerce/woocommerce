@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow providing recently updated data for the validate function in the useValidation hook

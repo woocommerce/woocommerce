@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
+import { select } from '@wordpress/data';
 import {
+	// @ts-expect-error Type definition is missing
+	store as blocksStore,
 	type BlockVariation,
 	registerBlockVariation,
 	BlockAttributes,
@@ -49,7 +52,15 @@ export const getCollectionByName = ( collectionName?: CollectionName ) => {
 		return null;
 	}
 
-	return collections.find( ( { name } ) => name === collectionName );
+	// @ts-expect-error Type definitions are missing
+	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
+	const variations = select( blocksStore ).getBlockVariations(
+		blockJson.name
+	);
+
+	// @ts-expect-error Type definitions are missing
+	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
+	return variations.find( ( { name } ) => name === collectionName );
 };
 
 export default registerCollections;

@@ -3,36 +3,15 @@
 	flex-direction: column;
 	gap: $grid-unit-30;
 
-	&__header {
-		display: flex;
-		align-items: center;
-		justify-content: end;
-		gap: $gap-smaller;
-	}
-
-	&__empty-state {
-		min-height: 28 * $grid-unit;
-		border-radius: 2px;
-		border: 1px dashed $gray-400;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: $grid-unit-60;
-		gap: $grid-unit-30;
-
-		&-illustration {
-			display: flex;
-			align-items: center;
-			justify-content: center;
+	&__body {
+		.woocommerce-advice-card {
+			padding: $grid-unit-60;
 			gap: $grid-unit-40;
-			max-width: 100%;
-		}
+			min-height: 233px; // min height to cover the min rows rendered in the table on its back
 
-		&-tip {
-			text-align: center;
-			margin: 0;
-			color: $gray-700;
+			&__body {
+				gap: $grid-unit-40;
+			}
 		}
 	}
 

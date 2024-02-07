@@ -56,7 +56,7 @@
 		"@wordpress/browserslist-config": "wp-6.0",
 		"eslint": "^8.55.0",
 		"eslint-plugin-jest": "23.20.0",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
 		"@woocommerce/api": "^0.2.0",
@@ -64,5 +64,13 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,ts,tsx}"
+			}
+		}
 	}
 }

@@ -45,9 +45,9 @@ const Combobox = ( {
 	options,
 	value,
 	required = false,
-	errorMessage = __( 'Please select a value.', 'woocommerce' ),
 	errorId: incomingErrorId,
 	autoComplete = 'off',
+	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
 }: ComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
@@ -56,9 +56,13 @@ const Combobox = ( {
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
-	const error = useSelect( ( select ) => {
+
+	const { error, validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
-		return store.getValidationError( errorId );
+		return {
+			error: store.getValidationError( errorId ),
+			validationErrorId: store.getValidationErrorId( errorId ),
+		};
 	} );
 
 	useEffect( () => {
@@ -146,7 +150,9 @@ const Combobox = ( {
 				value={ value || '' }
 				allowReset={ false }
 				autoComplete={ autoComplete }
+				// Note these aria properties are ignored by ComboboxControl. When we replace ComboboxControl we should support them.
 				aria-invalid={ error?.message && ! error?.hidden }
+				aria-errormessage={ validationErrorId }
 			/>
 			<ValidationInputError propertyName={ errorId } />
 		</div>

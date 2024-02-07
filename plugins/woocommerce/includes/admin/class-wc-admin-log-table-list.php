@@ -43,40 +43,19 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 * @global wpdb $wpdb
 	 */
 	public function level_dropdown() {
+		$labels = WC_Log_Levels::get_all_level_labels();
 
-		$levels = array(
-			array(
-				'value' => WC_Log_Levels::EMERGENCY,
-				'label' => __( 'Emergency', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::ALERT,
-				'label' => __( 'Alert', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::CRITICAL,
-				'label' => __( 'Critical', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::ERROR,
-				'label' => __( 'Error', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::WARNING,
-				'label' => __( 'Warning', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::NOTICE,
-				'label' => __( 'Notice', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::INFO,
-				'label' => __( 'Info', 'woocommerce' ),
-			),
-			array(
-				'value' => WC_Log_Levels::DEBUG,
-				'label' => __( 'Debug', 'woocommerce' ),
-			),
+		$levels = array_reduce(
+			array_keys( $labels ),
+			function( $carry, $item ) use ( $labels ) {
+				$carry[] = array(
+					'value' => $item,
+					'label' => $labels[ $item ],
+				);
+
+				return $carry;
+			},
+			array()
 		);
 
 		$selected_level = isset( $_REQUEST['level'] ) ? $_REQUEST['level'] : '';
@@ -181,16 +160,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 	 */
 	public function column_level( $log ) {
 		$level_key = WC_Log_Levels::get_severity_level( $log['level'] );
-		$levels    = array(
-			'emergency' => __( 'Emergency', 'woocommerce' ),
-			'alert'     => __( 'Alert', 'woocommerce' ),
-			'critical'  => __( 'Critical', 'woocommerce' ),
-			'error'     => __( 'Error', 'woocommerce' ),
-			'warning'   => __( 'Warning', 'woocommerce' ),
-			'notice'    => __( 'Notice', 'woocommerce' ),
-			'info'      => __( 'Info', 'woocommerce' ),
-			'debug'     => __( 'Debug', 'woocommerce' ),
-		);
+		$levels    = WC_Log_Levels::get_all_level_labels();
 
 		if ( ! isset( $levels[ $level_key ] ) ) {
 			return '';

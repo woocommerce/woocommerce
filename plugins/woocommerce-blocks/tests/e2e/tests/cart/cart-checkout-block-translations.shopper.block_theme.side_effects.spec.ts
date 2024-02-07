@@ -7,7 +7,6 @@ import { cli } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
@@ -19,9 +18,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-// Skipping translation tests until we fix the missing translations issues after we changed the domain to "woocommerce"
-// eslint-disable-next-line playwright/no-skipped-test
-test.describe.skip( 'Shopper → Translations', () => {
+test.describe( 'Shopper → Translations', () => {
 	test.beforeAll( async () => {
 		await cli(
 			`npm run wp-env run tests-cli -- wp language core activate nl_NL`
@@ -39,7 +36,7 @@ test.describe.skip( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
 		await frontendUtils.goToCart();
 
 		const totalsHeader = page
@@ -47,20 +44,19 @@ test.describe.skip( 'Shopper → Translations', () => {
 			.locator( 'span' );
 		await expect( totalsHeader ).toBeVisible();
 
-		const removeLink = page.getByLabel( 'Verwijder Polo uit winkelwagen' );
-		await expect( removeLink ).toBeVisible();
-		await expect( removeLink ).toHaveText( 'Verwijder item' );
+		await expect(
+			page.getByLabel( 'Verwijder Beanie uit winkelwagen' )
+		).toBeVisible();
 
-		const sidebarHeader = page.getByText( 'Totaal winkelwagen' );
-		await expect( sidebarHeader ).toBeVisible();
+		await expect( page.getByText( 'Totalen winkelwagen' ) ).toBeVisible();
 
-		const couponLink = page.getByLabel( 'Een waardebon toevoegen' );
-		await expect( couponLink ).toBeVisible();
+		await expect(
+			page.getByLabel( 'Een waardebon toevoegen' )
+		).toBeVisible();
 
-		const submitButton = page.getByRole( 'link', {
-			name: 'Ga naar afrekenen',
-		} );
-		await expect( submitButton ).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Doorgaan naar afrekenen' } )
+		).toBeVisible();
 	} );
 
 	test( 'User can view translated Checkout block', async ( {
@@ -68,52 +64,49 @@ test.describe.skip( 'Shopper → Translations', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await frontendUtils.goToCart();
+		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
 		await frontendUtils.goToCheckout();
 
-		const contactHeading = page
-			.getByRole( 'group', { name: 'Contactgegevens' } )
-			.locator( 'h2' );
-		await expect( contactHeading ).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Contactgegevens' } )
+				.locator( 'h2' )
+		).toBeVisible();
 
-		const shippingHeading = page
-			.getByRole( 'group', { name: 'Verzendadres' } )
-			.locator( 'h2' );
-		await expect( shippingHeading ).toBeVisible();
+		await expect(
+			page.getByRole( 'group', { name: 'Verzendadres' } ).locator( 'h2' )
+		).toBeVisible();
 
-		const shippingOptionsHeading = page
-			.getByRole( 'group', { name: 'Verzendopties' } )
-			.locator( 'h2' );
-		await expect( shippingOptionsHeading ).toBeVisible();
+		await expect(
+			page.getByRole( 'group', { name: 'Verzendopties' } ).locator( 'h2' )
+		).toBeVisible();
 
-		const paymentMethodHeading = page
-			.getByRole( 'group', { name: 'Betaalopties' } )
-			.locator( 'h2' );
-		await expect( paymentMethodHeading ).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'group', { name: 'Betalingsopties' } )
+				.locator( 'h2' )
+		).toBeVisible();
 
-		const returnToCart = page.getByRole( 'link', {
-			name: 'Ga terug naar winkelwagen',
-		} );
-		await expect( returnToCart ).toBeVisible();
+		await expect(
+			page.getByRole( 'link', { name: 'Terug naar winkelwagen' } )
+		).toBeVisible();
 
-		const submitButton = page.getByRole( 'button', {
-			name: 'Plaats bestelling',
-		} );
-		await expect( submitButton ).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Bestel en betaal' } )
+		).toBeVisible();
 
-		const orderSummaryHeader = page.getByRole( 'button', {
-			name: 'Besteloverzicht',
-		} );
-		await expect( orderSummaryHeader ).toBeVisible();
+		await expect(
+			page.getByRole( 'button', {
+				name: 'Besteloverzicht',
+			} )
+		).toBeVisible();
 
-		const subtotalLabel = page.getByText( 'Subtotaal' );
-		await expect( subtotalLabel ).toBeVisible();
+		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
 
-		const shippingLabel = page.getByText( 'Verzending' );
-		await expect( shippingLabel ).toBeVisible();
+		await expect( page.getByText( 'Verzendmethoden' ) ).toBeVisible();
 
-		const totalLabel = page.getByText( 'Totaal', { exact: true } );
-		await expect( totalLabel ).toBeVisible();
+		await expect(
+			page.getByText( 'Totaal', { exact: true } )
+		).toBeVisible();
 	} );
 } );

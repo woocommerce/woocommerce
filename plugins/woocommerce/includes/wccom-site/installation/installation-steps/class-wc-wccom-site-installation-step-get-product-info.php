@@ -114,7 +114,7 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 		$updates = WC_Helper_Updater::get_update_data();
 
 		if ( empty( $updates[ $product_id ]['package'] ) ) {
-			return new Installer_Error( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_PACKAGE );
+			throw new Installer_Error( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_PACKAGE );
 		}
 
 		return $updates[ $product_id ]['package'];

@@ -39,13 +39,23 @@ class WC_Helper_Admin {
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
+		// Get the all installed themes and plugins. Knowing this will help us decide to show Add to Store button on product cards.
+		$installed_products = array_merge( WC_Helper::get_local_plugins(), WC_Helper::get_local_themes() );
+		$installed_products = array_map(
+			function ( $product ) {
+				return $product['slug'];
+			},
+			$installed_products
+		);
+
 		$settings['wccomHelper'] = array(
-			'isConnected' => WC_Helper::is_site_connected(),
-			'connectURL'  => self::get_connection_url(),
-			'userEmail'   => $auth_user_email,
-			'userAvatar'  => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry' => wc_get_base_location()['country'],
+			'isConnected'            => WC_Helper::is_site_connected(),
+			'connectURL'             => self::get_connection_url(),
+			'userEmail'              => $auth_user_email,
+			'userAvatar'             => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'           => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'      => $installed_products,
 		);
 
 		return $settings;
@@ -72,10 +82,6 @@ class WC_Helper_Admin {
 		} else {
 			$connect_url_args['wc-helper-connect'] = 1;
 			$connect_url_args['wc-helper-nonce']   = wp_create_nonce( 'connect' );
-		}
-
-		if ( isset( $current_screen->id ) && 'woocommerce_page_wc-admin' === $current_screen->id ) {
-			$connect_url_args['redirect-to-wc-admin'] = 1;
 		}
 
 		return add_query_arg(

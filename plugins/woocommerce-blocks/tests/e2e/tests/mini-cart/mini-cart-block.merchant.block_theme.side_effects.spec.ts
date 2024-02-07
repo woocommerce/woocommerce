@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { BlockData } from '@woocommerce/e2e-types';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -21,6 +21,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 				'woocommerce/woocommerce//single-product'
 			);
 		} );
+
 		test( 'can be inserted in FSE area', async ( {
 			editorUtils,
 			editor,

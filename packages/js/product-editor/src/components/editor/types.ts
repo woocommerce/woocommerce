@@ -8,6 +8,11 @@ import {
 } from '@wordpress/block-editor';
 import { Template } from '@wordpress/blocks';
 
+/**
+ * Internal dependencies
+ */
+import { ProductTemplate } from '../../types';
+
 export type LayoutTemplate = {
 	id: string;
 	title: string;
@@ -16,20 +21,9 @@ export type LayoutTemplate = {
 	blockTemplates: Template[];
 };
 
-export type ProductTemplate = {
-	id: string;
-	title: string;
-	description: string | null;
-	icon: string | null;
-	order: number;
-	layoutTemplateId: string;
-	productData: Partial< Product >;
-};
-
 export type ProductEditorSettings = Partial<
 	EditorSettings & EditorBlockListSettings
 > & {
-	layoutTemplates: LayoutTemplate[];
 	productTemplates: ProductTemplate[];
 	productTemplate?: ProductTemplate;
 };

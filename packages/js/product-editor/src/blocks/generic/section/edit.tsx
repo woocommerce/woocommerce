@@ -21,7 +21,6 @@ import { ProductEditorBlockEditProps } from '../../../types';
 
 export function SectionBlockEdit( {
 	attributes,
-	clientId,
 }: ProductEditorBlockEditProps< SectionBlockAttributes > ) {
 	const { description, title, blockGap } = attributes;
 
@@ -37,7 +36,7 @@ export function SectionBlockEdit( {
 	);
 	const SectionTagName = title ? 'fieldset' : 'div';
 	const HeadingTagName = SectionTagName === 'fieldset' ? 'legend' : 'div';
-	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip-${ clientId }`;
+	const tooltipClassName = `wp-block-woocommerce-product-section__heading-tooltip`;
 
 	return (
 		<SectionTagName { ...blockProps }>
@@ -66,16 +65,12 @@ export function SectionBlockEdit( {
 							) }
 						</h2>
 
-						<BlockSlot
-							name="section-actions"
-							clientId={ clientId }
-						/>
+						<div className="wp-block-woocommerce-product-section__actions">
+							<BlockSlot name="section-actions" />
+						</div>
 					</div>
 
-					<BlockSlot
-						name="section-description"
-						clientId={ clientId }
-					/>
+					<BlockSlot name="section-description" />
 				</HeadingTagName>
 			) }
 

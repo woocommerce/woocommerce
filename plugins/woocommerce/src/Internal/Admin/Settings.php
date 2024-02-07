@@ -240,7 +240,19 @@ class Settings {
 
 		$settings['isWooPayEligible'] = WCPayPromotionInit::is_woopay_eligible();
 
-		$settings['gutenberg_version'] = defined( 'GUTENBERG_VERSION' ) ? constant( 'GUTENBERG_VERSION' ) : 0;
+		$has_gutenberg     = is_plugin_active( 'gutenberg/gutenberg.php' );
+		$gutenberg_version = '';
+		if ( $has_gutenberg ) {
+			if ( defined( 'GUTENBERG_VERSION' ) ) {
+				$gutenberg_version = GUTENBERG_VERSION;
+			}
+
+			if ( ! $gutenberg_version ) {
+				$gutenberg_data    = get_plugin_data( WP_PLUGIN_DIR . '/gutenberg/gutenberg.php' );
+				$gutenberg_version = $gutenberg_data['Version'];
+			}
+		}
+		$settings['gutenberg_version'] = $has_gutenberg ? $gutenberg_version : 0;
 
 		return $settings;
 	}

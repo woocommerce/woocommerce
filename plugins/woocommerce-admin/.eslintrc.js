@@ -3,7 +3,7 @@ module.exports = {
 		'plugin:@woocommerce/eslint-plugin/recommended',
 		'plugin:xstate/all',
 	],
-	plugins: [ 'xstate' ],
+	plugins: [ 'xstate', 'import' ],
 	root: true,
 	overrides: [
 		{
@@ -13,4 +13,11 @@ module.exports = {
 			},
 		},
 	],
+	settings: {
+		'import/resolver': {
+			typescript: {
+				project: [ 'plugins/woocommerce-admin/tsconfig.json' ],
+			},
+		},
+	},
 };

@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { chartBar } from '@wordpress/icons';
+import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -34,21 +35,24 @@ const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
 const WooCommerceAnalyticsCommands = () => {
 	const { editedPostType } = useEditedPostType();
 	const origin = editedPostType ? editedPostType + '-editor' : null;
-	if (
-		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
-		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
-		Array.isArray( window.wcCommandPaletteAnalytics.reports )
-	) {
-		const analyticsReports = window.wcCommandPaletteAnalytics.reports;
 
-		analyticsReports.forEach( ( analyticsReport ) => {
-			registerWooCommerceAnalyticsCommand( {
-				label: analyticsReport.title,
-				path: analyticsReport.path,
-				origin,
+	useEffect( () => {
+		if (
+			window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
+			window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
+			Array.isArray( window.wcCommandPaletteAnalytics.reports )
+		) {
+			const analyticsReports = window.wcCommandPaletteAnalytics.reports;
+
+			analyticsReports.forEach( ( analyticsReport ) => {
+				registerWooCommerceAnalyticsCommand( {
+					label: analyticsReport.title,
+					path: analyticsReport.path,
+					origin,
+				} );
 			} );
-		} );
-	}
+		}
+	}, [ origin ] );
 
 	return null;
 };

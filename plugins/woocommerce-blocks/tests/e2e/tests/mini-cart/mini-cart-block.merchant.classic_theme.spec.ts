@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import { BlockData } from '@woocommerce/e2e-types';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',

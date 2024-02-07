@@ -98,10 +98,10 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 */
 	public function test_remove() {
 		$handler  = new WC_Log_Handler_File();
-		$log_name = '_test_remove';
+		$log_name = 'test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'source' => $log_name ) );
-		$handler->remove( wc_get_log_file_name( $log_name ) );
-		$this->assertFileDoesNotExist( WC_Log_Handler_File::get_log_file_path( $log_name ) );
+		$handler->remove( $handler::get_log_file_name( $log_name ) );
+		$this->assertFileDoesNotExist( $handler::get_log_file_path( $log_name ) );
 	}
 
 	/**

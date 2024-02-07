@@ -12,6 +12,7 @@ import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
+import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -31,19 +32,36 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
-	useEntityProp,
 } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
+import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
+import { useProductTemplate } from '../../hooks/use-product-template';
 import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
+import { ProductTemplate } from '../../types';
 
+function getLayoutTemplateId(
+	productTemplate: ProductTemplate | undefined,
+	postType: string
+) {
+	if ( productTemplate?.layoutTemplateId ) {
+		return productTemplate.layoutTemplateId;
+	}
+
+	if ( postType === 'product_variation' ) {
+		return 'product-variation';
+	}
+
+	// Fallback to simple product if no layout template is set.
+	return 'simple-product';
+}
 export function BlockEditor( {
 	context,
 	settings: _settings,
@@ -98,15 +116,22 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	const [ productType ] = useEntityProp< Product[ 'type' ] >(
-		'postType',
+	const [ productType ] = useProductEntityProp< Product[ 'type' ] >( 'type', {
 		postType,
-		'type'
+	} );
+
+	const [ productTemplateId ] = useProductEntityProp< string >(
+		'meta_data._product_template_id',
+		{ postType }
 	);
-	const [ productMetaData ] = useEntityProp< Product[ 'meta_data' ] >(
-		'postType',
-		postType,
-		'meta_data'
+
+	const { productTemplate } = useProductTemplate(
+		productTemplateId,
+		productType
+	);
+
+	const { layoutTemplate } = useLayoutTemplate(
+		getLayoutTemplateId( productTemplate, postType )
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -118,42 +143,6 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		// Loads the product template id from the product's meta data.
-		const productTemplateMetaData = productMetaData.find(
-			( metaData ) => metaData.key === '_product_template_id'
-		);
-
-		const productTemplates = settings?.productTemplates ?? [];
-		const productTemplate = productTemplates.find( ( template ) => {
-			if (
-				productTemplateMetaData?.value &&
-				productTemplateMetaData.value === template.id
-			) {
-				return true;
-			}
-
-			if ( ! productType ) {
-				return false;
-			}
-
-			// Fallback to the product type if the product does not have any product
-			// template associated to itself.
-			return template.productData.type === productType;
-		} );
-
-		const layoutTemplates = settings?.layoutTemplates ?? [];
-
-		let layoutTemplateId = productTemplate?.layoutTemplateId;
-		// A product variation is not a product type so we can not use it to
-		// fallback to a default layout template. We use a post type instead.
-		if ( ! layoutTemplateId && postType === 'product_variation' ) {
-			layoutTemplateId = 'product-variation';
-		}
-
-		const layoutTemplate = layoutTemplates.find(
-			( template ) => template.id === layoutTemplateId
-		);
-
 		if ( ! layoutTemplate ) {
 			return;
 		}
@@ -169,7 +158,16 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
-	}, [ settings, postType, productMetaData, productType ] );
+
+		// We don't need to include onChange or updateEditorSettings in the dependencies,
+		// since we get new instances of them on every render, which would cause an infinite loop.
+		//
+		// We include productId in the dependencies to make sure that the effect is run when the
+		// product is changed, since we need to synchronize the blocks with the template and update
+		// the blocks by calling onChange.
+		//
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ layoutTemplate, settings, productTemplate, productId ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {

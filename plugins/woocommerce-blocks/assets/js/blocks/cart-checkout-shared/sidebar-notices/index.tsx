@@ -132,6 +132,7 @@ const withSidebarNotices = createHigherOrderComponent(
 					{ isIncompatibleExtensionsNoticeDismissed ? (
 						<CartCheckoutSidebarCompatibilityNotice
 							block={ isCheckout ? 'checkout' : 'cart' }
+							clientId={ parentId }
 						/>
 					) : null }
 

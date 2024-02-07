@@ -8,7 +8,7 @@ import type {
 	CartShippingAddress,
 	CartBillingAddress,
 } from '@woocommerce/types';
-import { AddressField, defaultFields } from '@woocommerce/settings';
+import { FormField, defaultFields } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -38,9 +38,8 @@ export interface CartState {
 	errors: ApiErrorResponse[];
 }
 
-const shippingAddress: Partial<
-	CartShippingAddress & { email: AddressField }
-> = {};
+const shippingAddress: Partial< CartShippingAddress & { email: FormField } > =
+	{};
 Object.keys( defaultFields ).forEach( ( key ) => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore the default fields contain keys for each field.
@@ -48,8 +47,7 @@ Object.keys( defaultFields ).forEach( ( key ) => {
 } );
 delete shippingAddress.email;
 
-const billingAddress: Partial< CartBillingAddress & { email: AddressField } > =
-	{};
+const billingAddress: Partial< CartBillingAddress & { email: FormField } > = {};
 Object.keys( defaultFields ).forEach( ( key ) => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore the default fields contain keys for each field.

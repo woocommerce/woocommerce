@@ -47,4 +47,5 @@ export interface ButtonWithDropdownMenuProps {
 
 	popoverProps?: popoverProps;
 	onButtonClick?: () => void;
+	className?: string;
 }

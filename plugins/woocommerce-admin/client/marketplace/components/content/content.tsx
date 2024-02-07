@@ -21,6 +21,7 @@ import {
 	recordMarketplaceView,
 	recordLegacyTabView,
 } from '../../utils/tracking';
+import InstallNewProductModal from '../install-flow/install-new-product-modal';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -133,6 +134,7 @@ export default function Content(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__content">
+			<InstallNewProductModal products={ products } />
 			{ renderContent() }
 		</div>
 	);

@@ -24,6 +24,17 @@ test.describe( `${ blockData.name } Block`, () => {
 			blockData.selectors.frontend.productsToDisplay
 		);
 	} );
+
+	test( 'should not enqueue add-to-cart-script', async ( { page } ) => {
+		let isScriptEnqueued = false;
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'add-to-cart.min.js' ) )
+				isScriptEnqueued = true;
+		} );
+		await page.reload();
+		expect( isScriptEnqueued ).toBe( false );
+	} );
+
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,
@@ -50,7 +61,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await block.click();
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
-		await expect( block.getByRole( 'link' ) ).toBeVisible();
+		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 
 		await frontendUtils.goToCheckout();
 		const productElement = page.getByText( productName, {

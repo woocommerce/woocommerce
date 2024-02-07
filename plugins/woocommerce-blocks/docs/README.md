@@ -2,14 +2,14 @@
 
 ## Table of Contents <!-- omit in toc -->
 
--   [Contributors](#contributors)
--   [Internal developers](#internal-developers)
--   [Third-party developers](#third-party-developers)
--   [Designers](#designers)
--   [Developer Resources](#developer-resources)
-    -   [Tools](#tools)
-    -   [Articles](#articles)
-    -   [Tutorials](#tutorials)
+- [Contributors](#contributors)
+- [Internal developers](#internal-developers)
+- [Third-party developers](#third-party-developers)
+- [Designers](#designers)
+- [Developer Resources](#developer-resources)
+	- [Tools](#tools)
+	- [Articles](#articles)
+	- [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
@@ -48,7 +48,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Tag](../assets/js/editor-components/tag/README.md)
     -   [TextToolbarButton](../assets/js/editor-components/text-toolbar-button/README.md)
 -   [Icons](../assets/js/icons/README.md)
--   [Store API (REST API)](../src/StoreApi/README.md)
+-   [Store API (REST API)](../../woocommerce/src/StoreApi/README.md)
 -   [Storybook](../storybook/README.md)
 -   [Templates](internal-developers/templates/README.md)
     -   [BlockTemplateController.php](internal-developers/templates/block-template-controller.md)

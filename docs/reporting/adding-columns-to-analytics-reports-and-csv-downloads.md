@@ -1,5 +1,7 @@
 ---
-post_title: Adding columns to analytics reports and CSV downloads
+post_title: How to add columns to analytics reports and CSV downloads
+menu_title: Add columns to analytics reports
+tags: how-to
 ---
 
 Adding columns to analytics reports are a really interesting way to add functionality to WooCommerce. New data can be consumed in the table view of the user interface and in your user's favourite spreadsheet or third party application by generating a CSV.

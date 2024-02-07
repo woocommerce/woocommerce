@@ -48,5 +48,6 @@ Default.args = {
 			title: 'Second Menu Item Label',
 		},
 	],
+	className: 'my-custom-classname',
 	onButtonClick: console.log, // eslint-disable-line no-console
 };

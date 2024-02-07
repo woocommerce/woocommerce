@@ -136,71 +136,74 @@ const WooCommerceCommands = () => {
 		wasCommandPaletteOpen.current = isCommandPaletteOpen;
 	}, [ isCommandPaletteOpen, origin ] );
 
-	registerCommandWithTracking( {
-		name: 'woocommerce/add-new-product',
-		label: __( 'Add new product', 'woocommerce' ),
-		icon: plus,
-		callback: () => {
-			document.location = addQueryArgs( 'post-new.php', {
-				post_type: 'product',
-			} );
-		},
-		origin,
-	} );
-	registerCommandWithTracking( {
-		name: 'woocommerce/add-new-order',
-		label: __( 'Add new order', 'woocommerce' ),
-		icon: plus,
-		callback: () => {
-			document.location = addQueryArgs( 'admin.php', {
-				page: 'wc-orders',
-				action: 'new',
-			} );
-		},
-		origin,
-	} );
-	registerCommandWithTracking( {
-		name: 'woocommerce/view-products',
-		label: __( 'Products', 'woocommerce' ),
-		icon: box,
-		callback: () => {
-			document.location = addQueryArgs( 'edit.php', {
-				post_type: 'product',
-			} );
-		},
-		origin,
-	} );
-	registerCommandWithTracking( {
-		name: 'woocommerce/view-orders',
-		label: __( 'Orders', 'woocommerce' ),
-		icon: box,
-		callback: () => {
-			document.location = addQueryArgs( 'admin.php', {
-				page: 'wc-orders',
-			} );
-		},
-		origin,
-	} );
-	dispatch( commandsStore ).registerCommandLoader( {
-		name: 'woocommerce/product',
-		hook: useProductCommandLoader,
-	} );
-
-	if (
-		window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
-		window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
-		Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
-	) {
-		const settingsCommands = window.wcCommandPaletteSettings.settingsTabs;
-
-		settingsCommands.forEach( ( settingsCommand ) => {
-			registerWooCommerceSettingsCommand( {
-				label: settingsCommand.label,
-				tab: settingsCommand.key,
-				origin,
-			} );
+	useEffect( () => {
+		registerCommandWithTracking( {
+			name: 'woocommerce/add-new-product',
+			label: __( 'Add new product', 'woocommerce' ),
+			icon: plus,
+			callback: () => {
+				document.location = addQueryArgs( 'post-new.php', {
+					post_type: 'product',
+				} );
+			},
+			origin,
 		} );
-	}
+		registerCommandWithTracking( {
+			name: 'woocommerce/add-new-order',
+			label: __( 'Add new order', 'woocommerce' ),
+			icon: plus,
+			callback: () => {
+				document.location = addQueryArgs( 'admin.php', {
+					page: 'wc-orders',
+					action: 'new',
+				} );
+			},
+			origin,
+		} );
+		registerCommandWithTracking( {
+			name: 'woocommerce/view-products',
+			label: __( 'Products', 'woocommerce' ),
+			icon: box,
+			callback: () => {
+				document.location = addQueryArgs( 'edit.php', {
+					post_type: 'product',
+				} );
+			},
+			origin,
+		} );
+		registerCommandWithTracking( {
+			name: 'woocommerce/view-orders',
+			label: __( 'Orders', 'woocommerce' ),
+			icon: box,
+			callback: () => {
+				document.location = addQueryArgs( 'admin.php', {
+					page: 'wc-orders',
+				} );
+			},
+			origin,
+		} );
+		dispatch( commandsStore ).registerCommandLoader( {
+			name: 'woocommerce/product',
+			hook: useProductCommandLoader,
+		} );
+
+		if (
+			window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
+			window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
+			Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
+		) {
+			const settingsCommands =
+				window.wcCommandPaletteSettings.settingsTabs;
+
+			settingsCommands.forEach( ( settingsCommand ) => {
+				registerWooCommerceSettingsCommand( {
+					label: settingsCommand.label,
+					tab: settingsCommand.key,
+					origin,
+				} );
+			} );
+		}
+	}, [ origin ] );
 
 	return null;
 };

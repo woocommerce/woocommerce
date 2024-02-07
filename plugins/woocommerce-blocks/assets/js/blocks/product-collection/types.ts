@@ -5,6 +5,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
 export interface ProductCollectionAttributes {
+	id: string;
 	query: ProductCollectionQuery;
 	queryId: number;
 	queryContext: [

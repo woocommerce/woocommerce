@@ -35,6 +35,8 @@ export default function ProductListContent( props: {
 					key={ product.id }
 					type={ props.type }
 					product={ {
+						id: product.id,
+						slug: product.slug,
 						title: product.title,
 						image: product.image,
 						type: product.type,
@@ -58,7 +60,10 @@ export default function ProductListContent( props: {
 									: {} ),
 							} )
 						),
+						averageRating: product.averageRating,
+						reviewsCount: product.reviewsCount,
 						description: product.description,
+						isInstallable: product.isInstallable,
 					} }
 					tracksData={ {
 						position: index + 1,

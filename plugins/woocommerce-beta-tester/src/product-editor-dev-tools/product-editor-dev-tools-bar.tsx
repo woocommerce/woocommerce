@@ -24,6 +24,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { BlockInspectorTabPanel } from './block-inspector-tab-panel';
 import { HelpTabPanel } from './help-tab-panel';
 import { ProductTabPanel } from './product-tab-panel';
+import { UserPreferencesTabPanel } from './user-preferences-panel';
 
 function TabButton( {
 	name,
@@ -111,6 +112,15 @@ export function ProductEditorDevToolsBar( {
 							>
 								{ __( 'Product', 'woocommerce' ) }
 							</TabButton>
+
+							<TabButton
+								name="user-preferences"
+								selectedTab={ selectedTab }
+								onClick={ handleTabClick }
+							>
+								{ __( 'User Preferences', 'woocommerce' ) }
+							</TabButton>
+
 							<TabButton
 								name="help"
 								selectedTab={ selectedTab }
@@ -136,6 +146,9 @@ export function ProductEditorDevToolsBar( {
 					<ProductTabPanel
 						evaluationContext={ evaluationContext }
 						isSelected={ selectedTab === 'product' }
+					/>
+					<UserPreferencesTabPanel
+						isSelected={ selectedTab === 'user-preferences' }
 					/>
 					<HelpTabPanel isSelected={ selectedTab === 'help' } />
 				</div>

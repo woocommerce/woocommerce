@@ -75,7 +75,7 @@ export const ProductGalleryBlockSettings = ( {
 					}
 				/>
 				<ToggleControl
-					label={ __( 'Full-screen when clicked', 'woocommerce' ) }
+					label={ __( 'Open pop-up when clicked', 'woocommerce' ) }
 					help={ __(
 						'Clicking on the large image will open a full-screen gallery experience.',
 						'woocommerce'

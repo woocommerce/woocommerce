@@ -78,8 +78,12 @@ test.describe( 'Product Collection', () => {
 
 			await pageObject.publishAndGoToFrontend();
 
+			const frontendTitles =
+				await pageObject.productTitles.allInnerTexts();
 			expect(
-				await pageObject.productTitles.allInnerTexts()
+				frontendTitles.map( ( title ) =>
+					title.replace( 'Protected: ', '' )
+				)
 			).toStrictEqual( expectedTitles );
 		} );
 
@@ -181,9 +185,31 @@ test.describe( 'Product Collection', () => {
 			);
 
 			await pageObject.publishAndGoToFrontend();
+
+			const frontendAccessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Protected: Sunglasses',
+			];
 			await expect( pageObject.productTitles ).toHaveText(
-				accessoriesProductNames
+				frontendAccessoriesProductNames
 			);
+		} );
+
+		test( 'Products can be filtered based on tags.', async ( {
+			pageObject,
+		} ) => {
+			const filterName = 'Product tags';
+			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.setFilterComboboxValue( filterName, [
+				'Recommended',
+			] );
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+
+			await pageObject.publishAndGoToFrontend();
+			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
 		} );
 
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
@@ -203,20 +229,97 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 1 );
 		} );
 
-		// TODO There are no products with stock status 'Out of stock' in test data.
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
+		test( 'Products can be filtered based on stock status (in stock, out of stock, or backorder).', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.setFilterComboboxValue( 'Stock status', [
 				'Out of stock',
 			] );
 
-			await expect( pageObject.products ).toHaveCount( 1 );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
 
 			await pageObject.publishAndGoToFrontend();
 
+			await expect( pageObject.productTitles ).toHaveText( [
+				'T-Shirt with Logo',
+			] );
+		} );
+
+		test( 'Products can be filtered based on featured status.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Featured' );
+			await pageObject.setShowOnlyFeaturedProducts( {
+				featured: true,
+			} );
+
+			// In test data we have only 4 featured products.
+			await expect( pageObject.products ).toHaveCount( 4 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+		} );
+
+		test( 'Products can be filtered based on created date.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Created' );
+			await pageObject.setCreatedFilter( {
+				operator: 'within',
+				range: 'last3months',
+			} );
+
+			// Products are created with the fixed publish date back in 2019
+			// so there's no products published in last 3 months.
+			await expect( pageObject.products ).toHaveCount( 0 );
+
+			await pageObject.setCreatedFilter( {
+				operator: 'before',
+				range: 'last3months',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 9 );
+		} );
+
+		test( 'Products can be filtered based on price range.', async ( {
+			pageObject,
+		} ) => {
+			await expect( pageObject.products ).toHaveCount( 9 );
+
+			await pageObject.addFilter( 'Price Range' );
+			await pageObject.setPriceRange( {
+				min: '18.33',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 7 );
+
+			await pageObject.setPriceRange( {
+				min: '15.28',
+				max: '17.21',
+			} );
+
 			await expect( pageObject.products ).toHaveCount( 1 );
+
+			await pageObject.setPriceRange( {
+				max: '17.29',
+			} );
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+
+			await pageObject.publishAndGoToFrontend();
+
+			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
 		test.describe( 'Inherit query from template', () => {
@@ -581,6 +684,42 @@ test.describe( 'Product Collection', () => {
 
 				await expect( input ).toBeHidden();
 			} );
+		} );
+	} );
+
+	test.describe( 'With other blocks', () => {
+		test( 'In Single Product block', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await editorUtils.closeWelcomeGuideModal();
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			await pageObject.chooseCollectionInPost( 'featured' );
+
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
+			const featuredProductsPrices = [
+				'Previous price:$18.00Discounted price:$16.00',
+				'$45.00',
+				'$90.00',
+				'Price between $15.00 and $20.00$15.00 — $20.00',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+			// This verifies if Core's block context is provided
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
+			// This verifies if Blocks's product context is provided
+			await expect( pageObject.productPrices ).toHaveText(
+				featuredProductsPrices
+			);
 		} );
 	} );
 } );
