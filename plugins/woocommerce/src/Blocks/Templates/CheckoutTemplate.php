@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * CheckoutTemplate class.
  *
@@ -37,6 +39,20 @@ class CheckoutTemplate extends AbstractPageTemplate {
 		$this->template_description = __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
 
 		parent::init();
+
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		if (
+			! is_embed() && is_checkout() &&
+			! BlockTemplateUtils::theme_has_template( self::SLUG )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		}
 	}
 
 	/**

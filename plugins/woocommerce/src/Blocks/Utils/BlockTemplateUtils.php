@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
 
 /**
  * Utility methods used for serving block templates from WooCommerce Blocks.

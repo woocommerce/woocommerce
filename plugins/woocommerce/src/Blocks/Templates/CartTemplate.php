@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * CartTemplate class.
@@ -38,9 +38,21 @@ class CartTemplate extends AbstractPageTemplate {
 		$this->template_title       = _x( 'Page: Cart', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
 
-		BlockTemplatesRegistry::register_template( $this );
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 
 		parent::init();
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		if (
+			! is_embed() && is_cart() &&
+			! BlockTemplateUtils::theme_has_template( self::SLUG )
+		) {
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		}
 	}
 
 	/**
