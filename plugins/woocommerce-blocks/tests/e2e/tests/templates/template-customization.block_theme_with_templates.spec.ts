@@ -15,6 +15,8 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	}
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
+	const templateTypeName =
+		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
@@ -35,6 +37,13 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				attributes: { content: userText },
 			} );
 			await editorUtils.saveTemplate();
+			// Verify template name didn't change.
+			// See: https://github.com/woocommerce/woocommerce/issues/42221
+			await expect(
+				page.getByRole( 'heading', {
+					name: `Editing ${ templateTypeName }: ${ testData.templateName }`,
+				} )
+			).toBeVisible();
 
 			// Verify the template is the one modified by the user.
 			await testData.visitPage( { frontendUtils, page } );

@@ -37,7 +37,6 @@ describe( 'Intro Banners', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
@@ -46,6 +45,8 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -75,7 +76,6 @@ describe( 'Intro Banners', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
@@ -84,6 +84,8 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -119,7 +121,6 @@ describe( 'Intro Banners', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: true,
 					},
@@ -128,6 +129,8 @@ describe( 'Intro Banners', () => {
 						hasCompleteSurvey: false,
 					},
 					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

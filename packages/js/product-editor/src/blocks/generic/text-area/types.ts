@@ -28,6 +28,7 @@ export type TextAreaBlockEditAttributes = ProductEditorBlockAttributes & {
 	align?: 'left' | 'center' | 'right' | 'justify';
 	allowedFormats?: AllowedFormat[];
 	direction?: 'ltr' | 'rtl';
+	mode: 'plain-text' | 'rich-text';
 };
 
 export type TextAreaBlockEditProps =
