@@ -62,16 +62,9 @@ export const useProductCollectionQueryContext = ( {
 			return null;
 		}
 
-		/**
-		 * Initialize the query context object with collection and id attributes as
-		 * they should always be included in the query context.
-		 */
 		const queryContext: {
 			[ key: string ]: unknown;
-		} = {
-			collection: productCollectionBlockAttributes?.collection,
-			id: productCollectionBlockAttributes?.id,
-		};
+		} = {};
 
 		if ( queryContextIncludes?.length ) {
 			queryContextIncludes.forEach( ( attribute: string ) => {

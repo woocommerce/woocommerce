@@ -27,6 +27,8 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  */
 import { useProductCollectionQueryContext } from './utils';
 
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
+
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
 		{ className: 'wc-block-product' },
@@ -162,6 +164,13 @@ const ProductTemplateEdit = ( {
 		12,
 		isNumber
 	);
+
+	// Add default query context attributes to queryContextIncludes
+	queryContextIncludes = [
+		...new Set(
+			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
+		),
+	];
 
 	const productCollectionQueryContext = useProductCollectionQueryContext( {
 		clientId,
