@@ -34,12 +34,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	public function __construct() {
 		$this->add_group_blocks();
 		$this->add_general_group_blocks();
-		$this->add_organization_group_blocks();
-		$this->add_pricing_group_blocks();
-		$this->add_inventory_group_blocks();
-		$this->add_shipping_group_blocks();
-		$this->add_variation_group_blocks();
-		$this->add_linked_products_group_blocks();
+		// $this->add_organization_group_blocks();
+		// $this->add_pricing_group_blocks();
+		// $this->add_inventory_group_blocks();
+		// $this->add_shipping_group_blocks();
+		// $this->add_variation_group_blocks();
+		// $this->add_linked_products_group_blocks();
 	}
 
 	/**
@@ -288,6 +288,22 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'label' => __( 'List price', 'woocommerce' ),
 					/* translators: PricingTab: This is a link tag to the pricing tab. */
 					'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
+					'metadata' => array(
+						'bindings' => array(
+							'regularPrice' => array(
+								'source' => 'woo/product-entity',
+								'args'   => array(
+									'prop' => 'regular_price'
+								),
+							),
+							'salePrice' => array(
+								'source' => 'woo/product-entity',
+								'args'   => array(
+									'prop' => 'sale_price'
+								),
+							),
+						),
+					),
 				),
 			)
 		);

@@ -22,6 +22,10 @@ export const BLOCK_BINDINGS_ALLOWED_BLOCKS: BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE =
 		'core/button': [ 'url', 'text', 'linkTarget' ],
 		'woocommerce/product-text-area-field': [ 'content', 'placeholder' ],
 		'woocommerce/product-name-field': [ 'name' ],
+		'woocommerce/product-regular-price-field': [
+			'regularPrice',
+			'salePrice',
+		],
 	};
 
 export function isBlockAllowed( blockName: string ): boolean {

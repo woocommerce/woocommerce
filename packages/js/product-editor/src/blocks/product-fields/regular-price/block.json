@@ -21,6 +21,14 @@
 		},
 		"tooltip": {
 			"type": "string"
+		},
+		"regularPrice": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"salePrice": {
+			"type": "string",
+			"__experimentalRole": "content"
 		}
 	},
 	"supports": {
