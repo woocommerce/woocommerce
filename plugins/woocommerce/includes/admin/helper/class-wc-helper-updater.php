@@ -60,6 +60,17 @@ class WC_Helper_Updater {
 				'upgrade_notice' => $data['upgrade_notice'],
 			);
 
+			/**
+			 * Filters the Woo plugin data before saving it in transient used for updates.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param array $item Plugin item to modify.
+			 * @param array $data Subscription data fetched from Helper API for the plugin.
+			 * @param int   $product_id Woo product id assigned to the plugin.
+			 */
+			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $plugin['_product_id'] );
+
 			if ( isset( $data['requires_php'] ) ) {
 				$item['requires_php'] = $data['requires_php'];
 			}
@@ -108,6 +119,17 @@ class WC_Helper_Updater {
 				'url'         => $data['url'],
 				'package'     => '',
 			);
+
+			/**
+			 * Filters the Woo plugin data before saving it in transient used for updates.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param array $item Plugin item to modify.
+			 * @param array $data Subscription data fetched from Helper API for the plugin.
+			 * @param int   $product_id Woo product id assigned to the plugin.
+			 */
+			$item = apply_filters( 'update_woo_com_subscription_details', $item, $data, $theme['_product_id'] );
 
 			if ( version_compare( $theme['Version'], $data['version'], '<' ) ) {
 				$transient->response[ $slug ] = $item;
@@ -276,6 +298,11 @@ class WC_Helper_Updater {
 		$active_for_translations = array_filter(
 			$active_woo_plugins,
 			function( $plugin ) use ( $plugins ) {
+				/**
+				 * Filters the plugins that are subscribed to the automatic translations updates.
+				 *
+				 * @since 3.7.0
+				 */
 				return apply_filters( 'woocommerce_translations_updates_for_' . $plugins[ $plugin ]['slug'], false );
 			}
 		);
@@ -409,7 +436,7 @@ class WC_Helper_Updater {
 	 *
 	 * @return bool True if active subscription found.
 	 */
-	private static function _has_active_subscription( $product_id ) {
+	public static function has_active_subscription( $product_id ) {
 		if ( ! isset( $auth ) ) {
 			$auth = WC_Helper_Options::get( 'auth' );
 		}
