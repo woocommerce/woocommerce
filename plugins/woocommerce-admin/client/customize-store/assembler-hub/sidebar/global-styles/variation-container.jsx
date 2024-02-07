@@ -50,7 +50,7 @@ export const VariationContainer = ( { variation, children } ) => {
 				}
 			}
 		}
-		console.log( 'variation', user.settings, variation.settings );
+
 		setUserConfig( () => {
 			return {
 				settings: mergeBaseAndUserConfigs(
