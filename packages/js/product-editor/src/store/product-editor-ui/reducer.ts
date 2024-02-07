@@ -6,12 +6,12 @@ import {
 	ACTION_MODAL_EDITOR_CLOSE,
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
-	ACTION_SIDEBAR_PREPUBLISH_CLOSE,
-	ACTION_SIDEBAR_PREPUBLISH_OPEN,
+	ACTION_PANEL_PREPUBLISH_CLOSE,
+	ACTION_PANEL_PREPUBLISH_OPEN,
 } from './constants';
 import type {
 	ProductEditorModalEditorAction,
-	ProductEditorPrepublishSidebarAction,
+	ProductEditorPrepublishPanelAction,
 	ProductEditorUIStateProps,
 } from './types';
 
@@ -24,16 +24,14 @@ const INITIAL_STATE: ProductEditorUIStateProps = {
 		blocks: [],
 		hasChanged: false,
 	},
-	prepublishSidebar: {
+	prepublishPanel: {
 		isOpen: false,
 	},
 };
 
 export default function reducer(
 	state = INITIAL_STATE,
-	action:
-		| ProductEditorModalEditorAction
-		| ProductEditorPrepublishSidebarAction
+	action: ProductEditorModalEditorAction | ProductEditorPrepublishPanelAction
 ) {
 	switch ( action.type ) {
 		case ACTION_MODAL_EDITOR_OPEN:
@@ -72,18 +70,18 @@ export default function reducer(
 				},
 			};
 
-		case ACTION_SIDEBAR_PREPUBLISH_OPEN:
+		case ACTION_PANEL_PREPUBLISH_OPEN:
 			return {
 				...state,
-				prepublishSidebar: {
+				prepublishPanel: {
 					isOpen: true,
 				},
 			};
 
-		case ACTION_SIDEBAR_PREPUBLISH_CLOSE:
+		case ACTION_PANEL_PREPUBLISH_CLOSE:
 			return {
 				...state,
-				prepublishSidebar: {
+				prepublishPanel: {
 					isOpen: false,
 				},
 			};

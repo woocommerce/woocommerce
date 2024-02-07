@@ -34,7 +34,7 @@ import { BlockEditor } from '../block-editor';
 import { ValidationProvider } from '../../contexts/validation-context';
 import { EditorProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { PrepublishSidebar } from '../prepublish-sidebar/prepublish-sidebar';
+import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
 export function Editor( {
 	product,
@@ -46,8 +46,8 @@ export function Editor( {
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
 
 	// Check if the prepublish sidebar is open from the store.
-	const isPrepublishSidebarOpen = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isPrepublishSidebarOpen();
+	const isPrepublishPanelOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPrepublishPanelOpen();
 	}, [] );
 
 	return (
@@ -82,8 +82,8 @@ export function Editor( {
 									</>
 								}
 								sidebar={
-									isPrepublishSidebarOpen && (
-										<PrepublishSidebar
+									isPrepublishPanelOpen && (
+										<PrepublishPanel
 											productType={ productType }
 											productId={ product.id }
 										/>

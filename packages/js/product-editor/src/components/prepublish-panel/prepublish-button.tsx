@@ -20,7 +20,7 @@ export function PrepublishButton( {
 	productId,
 	productType = 'product',
 }: PrepublishButtonProps ) {
-	const { openPrepublishSidebar } = useDispatch( productEditorUiStore );
+	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 	const { isValidating } = useValidations< Product >();
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
@@ -54,7 +54,7 @@ export function PrepublishButton( {
 		<Button
 			onClick={ () => {
 				recordEvent( 'product_prepublish', { source: TRACKS_SOURCE } );
-				openPrepublishSidebar();
+				openPrepublishPanel();
 			} }
 			isBusy={ isBusy }
 			aria-disabled={ isDisabled }

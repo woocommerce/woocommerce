@@ -11,11 +11,11 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { PublishButton } from '../header/publish-button';
-import { PrepublishSidebarProps } from './types';
+import { PrepublishPanelProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 
-export function PrepublishSidebar( {
+export function PrepublishPanel( {
 	productId,
 	productType = 'product',
 	title = __( 'Are you ready to add this product?', 'woocommerce' ),
@@ -23,7 +23,7 @@ export function PrepublishSidebar( {
 		'Double-check your settings before sharing this product with customers.',
 		'woocommerce'
 	),
-}: PrepublishSidebarProps ) {
+}: PrepublishPanelProps ) {
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
@@ -32,7 +32,7 @@ export function PrepublishSidebar( {
 		[ productType, productId ]
 	);
 
-	const { closePrepublishSidebar } = useDispatch( productEditorUiStore );
+	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
 	return (
 		<div className="woocommerce-product-publish-panel">
@@ -40,7 +40,7 @@ export function PrepublishSidebar( {
 				<PublishButton
 					productType={ productType }
 					productStatus={ lastPersistedProduct?.status }
-					onSuccess={ closePrepublishSidebar }
+					onSuccess={ closePrepublishPanel }
 				/>
 				<Button
 					variant={ 'secondary' }
@@ -48,7 +48,7 @@ export function PrepublishSidebar( {
 						recordEvent( 'product_prepublish_cancel', {
 							source: TRACKS_SOURCE,
 						} );
-						closePrepublishSidebar();
+						closePrepublishPanel();
 					} }
 				>
 					{ __( 'Cancel', 'woocommerce' ) }

@@ -1,4 +1,4 @@
-export type PrepublishSidebarProps = {
+export type PrepublishPanelProps = {
 	productId: number;
 	productType: string;
 	title?: string;

@@ -8,22 +8,22 @@ Defines action types for the UI state:
 
 -   `ACTION_MODAL_EDITOR_OPEN`
 -   `ACTION_MODAL_EDITOR_CLOSE`
--   `ACTION_PREPUBLISH_SIDEBAR_OPEN`
--   `ACTION_PREPUBLISH_SIDEBAR_CLOSE`
+-   `ACTION_PANEL_PREPUBLISH_OPEN`
+-   `ACTION_PANEL_PREPUBLISH_CLOSE`
 
 ### Actions
 
 -   `openModalEditor`
 -   `closeModalEditor`
--   `openPrepublishSidebar`
--   `closePrepublishSidebar`
+-   `openPrepublishPanel`
+-   `closePrepublishPanel`
 
 ### Selectors
 
 Selector function:
 
 -   `isModalEditorOpen`
--   `isPrepublishSidebarOpen`
+-   `isPrepublishPanelOpen`
 
 ### Store
 

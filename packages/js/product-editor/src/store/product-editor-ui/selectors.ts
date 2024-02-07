@@ -26,9 +26,9 @@ export default {
 	): boolean {
 		return !! state.modalEditor?.hasChanged;
 	},
-	isPrepublishSidebarOpen: function isPrepublishSidebarOpen(
+	isPrepublishPanelOpen: function isPrepublishPanelOpen(
 		state: ProductEditorUIStateProps
 	) {
-		return state.prepublishSidebar?.isOpen;
+		return state.prepublishPanel?.isOpen;
 	},
 };
