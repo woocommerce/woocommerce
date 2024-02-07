@@ -3,11 +3,6 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-/**
- * Internal dependencies
- */
-import { utilsLocalPickup as utils } from './utils.local-pickup';
-
 test.describe( 'Merchant → Local Pickup Settings', () => {
 	test.beforeEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.deleteLocations();

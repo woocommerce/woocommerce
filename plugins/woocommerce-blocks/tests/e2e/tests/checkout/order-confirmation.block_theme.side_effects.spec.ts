@@ -14,7 +14,6 @@ import {
 	SIMPLE_VIRTUAL_PRODUCT_NAME,
 } from './constants';
 import { CheckoutPage } from './checkout.page';
-import { utilsLocalPickup as utils } from '../local-pickup/utils.local-pickup';
 
 const testData = {
 	firstname: 'John',

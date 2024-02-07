@@ -78,8 +78,12 @@ test.describe( 'Product Collection', () => {
 
 			await pageObject.publishAndGoToFrontend();
 
+			const frontendTitles =
+				await pageObject.productTitles.allInnerTexts();
 			expect(
-				await pageObject.productTitles.allInnerTexts()
+				frontendTitles.map( ( title ) =>
+					title.replace( 'Protected: ', '' )
+				)
 			).toStrictEqual( expectedTitles );
 		} );
 
@@ -181,8 +185,16 @@ test.describe( 'Product Collection', () => {
 			);
 
 			await pageObject.publishAndGoToFrontend();
+
+			const frontendAccessoriesProductNames = [
+				'Beanie',
+				'Beanie with Logo',
+				'Belt',
+				'Cap',
+				'Protected: Sunglasses',
+			];
 			await expect( pageObject.productTitles ).toHaveText(
-				accessoriesProductNames
+				frontendAccessoriesProductNames
 			);
 		} );
 
@@ -672,6 +684,42 @@ test.describe( 'Product Collection', () => {
 
 				await expect( input ).toBeHidden();
 			} );
+		} );
+	} );
+
+	test.describe( 'With other blocks', () => {
+		test( 'In Single Product block', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+		} ) => {
+			await admin.createNewPost();
+			await editorUtils.closeWelcomeGuideModal();
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			await pageObject.chooseCollectionInPost( 'featured' );
+
+			const featuredProducts = [
+				'Cap',
+				'Hoodie with Zipper',
+				'Sunglasses',
+				'V-Neck T-Shirt',
+			];
+			const featuredProductsPrices = [
+				'Previous price:$18.00Discounted price:$16.00',
+				'$45.00',
+				'$90.00',
+				'Price between $15.00 and $20.00$15.00 — $20.00',
+			];
+
+			await expect( pageObject.products ).toHaveCount( 4 );
+			// This verifies if Core's block context is provided
+			await expect( pageObject.productTitles ).toHaveText(
+				featuredProducts
+			);
+			// This verifies if Blocks's product context is provided
+			await expect( pageObject.productPrices ).toHaveText(
+				featuredProductsPrices
+			);
 		} );
 	} );
 } );
