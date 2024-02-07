@@ -138,8 +138,7 @@ abstract class DataSourcePoller {
 		$locale                 = get_user_locale();
 		$specs_group[ $locale ] = $specs;
 		// Persist the specs as a transient.
-		set_transient(
-			$this->args['transient_name'],
+		$this->set_specs_transient(
 			$specs_group,
 			$this->args['transient_expiry']
 		);
