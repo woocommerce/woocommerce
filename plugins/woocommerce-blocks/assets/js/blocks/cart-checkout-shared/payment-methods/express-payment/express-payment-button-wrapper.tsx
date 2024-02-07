@@ -6,7 +6,7 @@ const ExpressPaymentButtonWrapper = ( {
 	const defaultStyle = {
 		width: '100px',
 		maxWidth: '100%',
-		borderRadius: '10px !important',
+		borderRadius: '10px',
 		color: 'red',
 	};
 
