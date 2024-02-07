@@ -46,7 +46,7 @@ test.describe( 'useGetLocation hook', () => {
 
 			const locationType = page.getByText( 'Location type: product' );
 
-			expect( locationType ).toBeVisible();
+			await expect( locationType ).toBeVisible();
 		} );
 		test( 'in Single Product block in specific Product template', async ( {
 			editorUtils,
