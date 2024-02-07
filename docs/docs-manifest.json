@@ -14,7 +14,7 @@
   ],
   "categories": [
     {
-      "content": "\nDiscover tutorials and guides for creating custom WooCommerce stores. This section is your toolkit for building advanced, modern online shops that meet the needs of merchants and customers alike.\n",
+      "content": "\nTutorials and guides for creating custom WooCommerce stores.\nThis section is your toolkit for building advanced,\nmodern online shops that meet the needs of merchants and customers alike. \n",
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
       "posts": [
@@ -1192,7 +1192,7 @@
           }
         },
         {
-          "post_title": "WooCommerce CLI Frequently Asked Questions - ",
+          "post_title": "WooCommerce CLI Frequently Asked Questions",
           "menu_title": "Frequently Asked Questions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/cli-faq.md",
@@ -1204,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "a138874d270595236e1db122206be746424ea22f376a8799473e5505486c4b11"
+  "hash": "0d1286e58129415d8a3aa612666cf1a3333ac56550197b164798130df49e3297"
 }
