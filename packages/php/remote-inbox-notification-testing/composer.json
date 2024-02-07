@@ -26,7 +26,7 @@
 				"enhancement": "Improve existing functionality"
 			},
 			"versioning": "wordpress",
-			"changelog": "NEXT_CHANGELOG.md"
+			"changelog": "changelog.md"
 		}
 	}
 }
