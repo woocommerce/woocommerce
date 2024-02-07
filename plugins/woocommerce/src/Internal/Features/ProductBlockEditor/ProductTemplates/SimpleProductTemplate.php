@@ -324,6 +324,22 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 10,
 				'attributes' => array(
 					'label' => __( 'Sale price', 'woocommerce' ),
+					'metadata' => array(
+						'bindings' => array(
+							'regularPrice' => array(
+								'source' => 'woo/product-entity',
+								'args'   => array(
+									'prop' => 'regular_price'
+								),
+							),
+							'salePrice' => array(
+								'source' => 'woo/product-entity',
+								'args'   => array(
+									'prop' => 'sale_price'
+								),
+							),
+						),
+					),
 				),
 			)
 		);
@@ -648,69 +664,69 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$pricing_column_1->add_block(
-			array(
-				'id'         => 'product-pricing-regular-price',
-				'blockName'  => 'woocommerce/product-regular-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
-				),
-			)
-		);
-		$pricing_column_2 = $pricing_columns->add_block(
-			array(
-				'id'         => 'product-pricing-group-pricing-column-2',
-				'blockName'  => 'core/column',
-				'order'      => 20,
-				'attributes' => array(
-					'templateLock' => 'all',
-				),
-			)
-		);
-		$pricing_column_2->add_block(
-			array(
-				'id'         => 'product-pricing-sale-price',
-				'blockName'  => 'woocommerce/product-sale-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'label' => __( 'Sale price', 'woocommerce' ),
-				),
-			)
-		);
-		$product_pricing_section->add_block(
-			array(
-				'id'        => 'product-pricing-schedule-sale-fields',
-				'blockName' => 'woocommerce/product-schedule-sale-fields',
-				'order'     => 20,
-			)
-		);
-		$product_pricing_section->add_block(
-			array(
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => array(
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => array(
-						array(
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						),
-						array(
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						),
-						array(
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						),
-					),
-				),
-			)
-		);
+		// $pricing_column_1->add_block(
+		// 	array(
+		// 		'id'         => 'product-pricing-regular-price',
+		// 		'blockName'  => 'woocommerce/product-regular-price-field',
+		// 		'order'      => 10,
+		// 		'attributes' => array(
+		// 			'name'  => 'regular_price',
+		// 			'label' => __( 'List price', 'woocommerce' ),
+		// 		),
+		// 	)
+		// );
+		// $pricing_column_2 = $pricing_columns->add_block(
+		// 	array(
+		// 		'id'         => 'product-pricing-group-pricing-column-2',
+		// 		'blockName'  => 'core/column',
+		// 		'order'      => 20,
+		// 		'attributes' => array(
+		// 			'templateLock' => 'all',
+		// 		),
+		// 	)
+		// );
+		// $pricing_column_2->add_block(
+		// 	array(
+		// 		'id'         => 'product-pricing-sale-price',
+		// 		'blockName'  => 'woocommerce/product-sale-price-field',
+		// 		'order'      => 10,
+		// 		'attributes' => array(
+		// 			'label' => __( 'Sale price', 'woocommerce' ),
+		// 		),
+		// 	)
+		// );
+		// $product_pricing_section->add_block(
+		// 	array(
+		// 		'id'        => 'product-pricing-schedule-sale-fields',
+		// 		'blockName' => 'woocommerce/product-schedule-sale-fields',
+		// 		'order'     => 20,
+		// 	)
+		// );
+		// $product_pricing_section->add_block(
+		// 	array(
+		// 		'id'         => 'product-sale-tax',
+		// 		'blockName'  => 'woocommerce/product-radio-field',
+		// 		'order'      => 30,
+		// 		'attributes' => array(
+		// 			'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+		// 			'property' => 'tax_status',
+		// 			'options'  => array(
+		// 				array(
+		// 					'label' => __( 'Product and shipping', 'woocommerce' ),
+		// 					'value' => 'taxable',
+		// 				),
+		// 				array(
+		// 					'label' => __( 'Only shipping', 'woocommerce' ),
+		// 					'value' => 'shipping',
+		// 				),
+		// 				array(
+		// 					'label' => __( "Don't charge tax", 'woocommerce' ),
+		// 					'value' => 'none',
+		// 				),
+		// 			),
+		// 		),
+		// 	)
+		// );
 		$pricing_advanced_block = $product_pricing_section->add_block(
 			array(
 				'id'         => 'product-pricing-advanced',

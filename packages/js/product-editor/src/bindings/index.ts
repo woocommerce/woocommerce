@@ -26,6 +26,7 @@ export const BLOCK_BINDINGS_ALLOWED_BLOCKS: BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE =
 			'regularPrice',
 			'salePrice',
 		],
+		'woocommerce/product-sale-price-field': [ 'regularPrice', 'salePrice' ],
 	};
 
 export function isBlockAllowed( blockName: string ): boolean {
