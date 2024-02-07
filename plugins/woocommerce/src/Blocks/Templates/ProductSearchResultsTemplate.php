@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * ProductSearchResultsTemplate class.
@@ -45,7 +45,25 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 		$this->template_title       = _x( 'Product Search Results', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'Displays search results for your store.', 'woocommerce' );
 
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'search_template_hierarchy', array( $this, 'update_search_template_hierarchy' ), 10, 3 );
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {
+			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
+
+			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			}
+
+			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
+				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+			}
+		}
 	}
 
 	/**

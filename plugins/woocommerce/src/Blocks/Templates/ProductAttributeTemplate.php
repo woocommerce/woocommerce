@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * ProductAttributeTemplate class.
@@ -46,7 +46,30 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		$this->template_title       = _x( 'Products by Attribute', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'Displays products filtered by an attribute.', 'woocommerce' );
 
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		$queried_object = get_queried_object();
+		if ( is_null( $queried_object ) ) {
+			return;
+		}
+
+		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
+			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
+
+			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			}
+
+			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
+				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+			}
+		}
 	}
 
 	/**

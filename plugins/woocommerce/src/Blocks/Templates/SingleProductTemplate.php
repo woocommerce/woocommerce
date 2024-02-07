@@ -48,14 +48,10 @@ class SingleProductTemplate extends AbstractTemplate {
 	 * Renders the default block template from Woo Blocks if no theme templates exist.
 	 */
 	public function render_block_template() {
-		if ( is_embed() ) {
-			return;
-		}
-
-		if ( is_singular( 'product' ) ) {
+		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$valid_slugs = [ 'single-product' ];
+			$valid_slugs = [ self::SLUG ];
 			if ( 'product' === $post->post_type && $post->post_name ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}
@@ -65,7 +61,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( 'single-product' ) ) {
+			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
 				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 			}
 		}
