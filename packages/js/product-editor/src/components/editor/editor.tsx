@@ -81,7 +81,7 @@ export function Editor( {
 										/>
 									</>
 								}
-								sidebar={
+								actions={
 									isPrepublishPanelOpen && (
 										<PrepublishPanel
 											productType={ productType }
