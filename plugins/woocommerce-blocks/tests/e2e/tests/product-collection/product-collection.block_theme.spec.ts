@@ -25,13 +25,10 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Product Collection', () => {
-	test.beforeEach( async ( { pageObject } ) => {
-		await pageObject.createNewPostAndInsertBlock();
-	} );
-
 	test( 'Renders product collection block correctly with 9 items', async ( {
 		pageObject,
 	} ) => {
+		await pageObject.createNewPostAndInsertBlock();
 		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
@@ -50,6 +47,10 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
+
 		test( 'Reflects the correct number of columns according to sidebar settings', async ( {
 			pageObject,
 		} ) => {
@@ -462,7 +463,6 @@ test.describe( 'Product Collection', () => {
 		test( 'Block with shrink columns DISABLED collapses to single column on small screens', async ( {
 			pageObject,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock();
 			await pageObject.setShrinkColumnsToFit( false );
 			await pageObject.publishAndGoToFrontend();
 
