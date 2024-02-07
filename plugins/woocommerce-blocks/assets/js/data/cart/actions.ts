@@ -12,7 +12,6 @@ import type {
 	CartShippingRate,
 } from '@woocommerce/types';
 import { BillingAddress, ShippingAddress } from '@woocommerce/settings';
-import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import {
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
@@ -27,6 +26,7 @@ import { apiFetchWithHeaders } from '../shared-controls';
 import { ReturnOrGeneratorYieldUnion } from '../mapped-types';
 import { CartDispatchFromMap, CartSelectFromMap } from './index';
 import type { Thunks } from './thunks';
+import { applyCheckoutFilter } from '../../../../packages/checkout/filter-registry';
 
 // Thunks are functions that can be dispatched, similar to actions creators
 // @todo Many of the functions that return promises in this file need to be moved to thunks.ts.
@@ -38,9 +38,24 @@ export * from './thunks';
  * @param cart the parsed cart object. (Parsed into camelCase).
  */
 export const setCartData = ( cart: Cart ): { type: string; response: Cart } => {
+	const shippingAddress = applyCheckoutFilter( {
+		filterName: 'setFixedShippingAddress',
+		defaultValue: cart.shippingAddress,
+	} );
+	console.log( 'setCartData', shippingAddress );
+	const billingAddress = applyCheckoutFilter( {
+		filterName: 'setFixedBillingAddress',
+		defaultValue: cart.billingAddress,
+	} );
+	console.log( 'setCartData', billingAddress );
+	const cartWithUpdatedAddresses = {
+		...cart,
+		shippingAddress,
+		billingAddress,
+	};
 	return {
 		type: types.SET_CART_DATA,
-		response: cart,
+		response: cartWithUpdatedAddresses,
 	};
 };
 
@@ -443,6 +458,7 @@ export const setBillingAddress = (
 		filterName: 'setFixedBillingAddress',
 		defaultValue: billingAddress,
 	} );
+	console.log( 'setBillingAddress', address );
 	return { type: types.SET_BILLING_ADDRESS, address };
 };
 
@@ -456,6 +472,7 @@ export const setShippingAddress = (
 		filterName: 'setFixedShippingAddress',
 		defaultValue: shippingAddress,
 	} );
+	console.log( 'setShippingAddress', address );
 	return { type: types.SET_SHIPPING_ADDRESS, address };
 };
 
