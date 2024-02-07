@@ -42,7 +42,7 @@ class CheckoutFieldsFrontend {
 		add_filter( 'woocommerce_edit_account_form_fields', array( $this, 'edit_account_form_fields' ), 10, 1 );
 		add_action( 'woocommerce_save_account_details', array( $this, 'save_account_form_fields' ), 10, 1 );
 		add_filter( 'woocommerce_address_to_edit', array( $this, 'edit_address_fields' ), 10, 2 );
-		add_action( 'woocommerce_after_save_address_validation', array( $this, 'save_address_fields' ), 10, 2 );
+		add_action( 'woocommerce_after_save_address_validation', array( $this, 'save_address_fields' ), 10, 4 );
 	}
 
 	/**
@@ -177,6 +177,8 @@ class CheckoutFieldsFrontend {
 	/**
 	 * Validates and saves additional address fields to the customer object on the My Account page.
 	 *
+	 * Customer is not provided by this hook so we handle save here.
+	 *
 	 * @param integer $user_id User ID.
 	 */
 	public function save_account_form_fields( $user_id ) {
@@ -191,6 +193,7 @@ class CheckoutFieldsFrontend {
 			$this->checkout_fields_controller->persist_field_for_customer( $field_key, wc_clean( wp_unslash( $_POST[ $field_key ] ) ), $customer );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		$customer->save();
 	}
 
 	/**
@@ -225,12 +228,13 @@ class CheckoutFieldsFrontend {
 	/**
 	 * Validates and saves additional address fields to the customer object on the My Account page.
 	 *
-	 * @param integer $user_id User ID.
-	 * @param string  $address_type Type of address (billing or shipping).
+	 * @param integer     $user_id User ID.
+	 * @param string      $address_type Type of address (billing or shipping).
+	 * @param array       $address Address fields.
+	 * @param WC_Customer $customer Customer object.
 	 */
-	public function save_address_fields( $user_id, $address_type ) {
-		$customer = new WC_Customer( $user_id );
-		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
+	public function save_address_fields( $user_id, $address_type, $address, $customer ) {
+		$fields = $this->checkout_fields_controller->get_fields_for_location( 'address' );
 
 		// Nonces are checked before the action is fired that this function hooks into.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
