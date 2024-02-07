@@ -45,8 +45,9 @@ export function PrepublishPanel( {
 				<Button
 					variant={ 'secondary' }
 					onClick={ () => {
-						recordEvent( 'product_prepublish_cancel', {
+						recordEvent( 'product_prepublish_panel', {
 							source: TRACKS_SOURCE,
+							action: 'cancel',
 						} );
 						closePrepublishPanel();
 					} }

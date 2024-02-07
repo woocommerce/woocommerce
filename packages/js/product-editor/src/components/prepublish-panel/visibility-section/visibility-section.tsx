@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import { createElement, useState, useEffect } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Product, ProductCatalogVisibility } from '@woocommerce/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	BaseControl,
 	CheckboxControl,
@@ -18,6 +20,8 @@ import {
  * Internal dependencies
  */
 import { VisibilitySectionProps } from './types';
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
+import { TRACKS_SOURCE } from '../../../constants';
 
 export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
@@ -34,24 +38,16 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		'post_password'
 	);
 
-	const [ requiredPasswordChecked, setRequiredPasswordChecked ] = useState(
-		Boolean( postPassword )
-	);
+	const { requirePassword } = useDispatch( productEditorUiStore );
 
-	useEffect( () => {
-		if ( postPassword !== '' ) {
-			setRequiredPasswordChecked( true );
-		}
-	}, [ postPassword ] );
+	const isPasswordRequired: boolean = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPasswordRequired();
+	}, [] );
 
 	const postPasswordId = useInstanceId(
 		BaseControl,
 		'post_password'
 	) as string;
-
-	console.log( 'requiredPasswordChecked:', requiredPasswordChecked );
-	console.log( 'postPassword:', postPassword );
-	console.log( 'reviewsAllowed:', reviewsAllowed );
 
 	function handleVisibilityChange(
 		selected: boolean,
@@ -60,6 +56,11 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		if ( selected ) {
 			if ( catalogVisibility === 'visible' ) {
 				setCatalogVisibility( visibility );
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'catalog_visibility',
+					visibility: catalogVisibility,
+				} );
 				return;
 			}
 			setCatalogVisibility( 'hidden' );
@@ -67,15 +68,30 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 			if ( catalogVisibility === 'hidden' ) {
 				if ( visibility === 'catalog' ) {
 					setCatalogVisibility( 'search' );
+					recordEvent( 'product_prepublish_panel', {
+						source: TRACKS_SOURCE,
+						action: 'catalog_visibility',
+						visibility: catalogVisibility,
+					} );
 					return;
 				}
 				if ( visibility === 'search' ) {
 					setCatalogVisibility( 'catalog' );
+					recordEvent( 'product_prepublish_panel', {
+						source: TRACKS_SOURCE,
+						action: 'catalog_visibility',
+						visibility: catalogVisibility,
+					} );
 					return;
 				}
 				return;
 			}
 			setCatalogVisibility( 'visible' );
+			recordEvent( 'product_prepublish_panel', {
+				source: TRACKS_SOURCE,
+				action: 'catalog_visibility',
+				visibility: catalogVisibility,
+			} );
 		}
 	}
 
@@ -127,14 +143,31 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 					<CheckboxControl
 						label={ __( 'Enable product reviews', 'woocommerce' ) }
 						checked={ reviewsAllowed }
-						onChange={ setReviewsAllowed }
+						onChange={ ( selected: boolean ) => {
+							setReviewsAllowed( selected );
+							recordEvent( 'product_prepublish_panel', {
+								source: TRACKS_SOURCE,
+								action: 'enable_product_reviews',
+								value: selected,
+							} );
+						} }
 					/>
 					<CheckboxControl
 						label={ __( 'Require a password', 'woocommerce' ) }
-						checked={ requiredPasswordChecked }
-						onChange={ setRequiredPasswordChecked }
+						checked={ isPasswordRequired }
+						onChange={ ( selected ) => {
+							requirePassword( selected );
+							if ( ! selected ) {
+								setPostPassword( '' );
+							}
+							recordEvent( 'product_prepublish_panel', {
+								source: TRACKS_SOURCE,
+								action: 'require_password',
+								value: selected,
+							} );
+						} }
 					/>
-					{ requiredPasswordChecked && (
+					{ isPasswordRequired && (
 						<BaseControl
 							id={ postPasswordId }
 							label={ __( 'Password', 'woocommerce' ) }
