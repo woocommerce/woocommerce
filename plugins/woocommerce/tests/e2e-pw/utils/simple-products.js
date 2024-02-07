@@ -63,8 +63,8 @@ async function clickAddNewMenuItem( page ) {
  */
 async function expectOldProductEditor( page ) {
 	await expect(
-		page.locator( '#woocommerce-product-data h2' )
-	).toContainText( 'Product data' );
+		page.getByRole( 'heading', { name: 'Product data' } )
+	).toBeVisible();
 }
 
 /**
