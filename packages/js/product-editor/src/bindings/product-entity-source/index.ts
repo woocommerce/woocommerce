@@ -20,7 +20,7 @@ type SourceArgs = {
 	prop: string;
 };
 
-type UseSourceReturn = {
+type UseSourceProps = {
 	/*
 	 * The placeholder value for the source.
 	 */
@@ -31,10 +31,19 @@ type UseSourceReturn = {
 	useValue: [ string, ( newValue: string ) => void ];
 };
 
+type BlockProps = CoreBlockEditProps< BlockAttributes >;
+
+/**
+ * React custom hook to bind a source to a block.
+ *
+ * @param {BlockProps} blockProps - The block props.
+ * @param {SourceArgs} sourceArgs - The source args.
+ * @return {UseSourceProps} The source value and setter.
+ */
 const useSource = (
 	blockProps: CoreBlockEditProps< BlockAttributes >,
 	sourceArgs: SourceArgs
-): UseSourceReturn => {
+): UseSourceProps => {
 	const { context } = blockProps;
 	const { postType: contextPostType } = context;
 	const { prop: entityPropName } = sourceArgs;
@@ -47,9 +56,6 @@ const useSource = (
 		},
 		[ contextPostType ]
 	);
-
-	// console.log( { postType } );
-	// console.log( { entityPropName } );
 
 	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
 		'postType',
@@ -68,6 +74,13 @@ const useSource = (
 	};
 };
 
+/**
+ * Helper function to get the source property value.
+ *
+ * @param {CoreBlockEditProps< BlockAttributes >} blockProps - The block props.
+ * @param {SourceArgs}                            sourceArgs - The source args.
+ * @return {Object} The source property value.
+ */
 function getSourcePropValue(
 	blockProps: CoreBlockEditProps< BlockAttributes >,
 	sourceArgs: SourceArgs
@@ -114,8 +127,8 @@ function getSourcePropValue(
  * Given a blockProps and sourceArgs, return a function that
  * updates the source property.
  *
- * @param {CoreBlockEditProps<BlockAttributes>} blockProps - The block props.
- * @param {SourceArgs}                          sourceArgs - The source args.
+ * @param {BlockProps} blockProps - The block props.
+ * @param {SourceArgs} sourceArgs - The source args.
  * @return {Function} The function that updates the source property.
  */
 function updateSourcePropHandler(
