@@ -249,6 +249,61 @@ const productGallery = {
 			return () =>
 				document.removeEventListener( 'keydown', handleKeyEvents );
 		},
+		dialogFocusTrap: () => {
+			const dialogOverlay = document.querySelector(
+				'.wc-block-product-gallery-dialog__overlay'
+			) as HTMLElement | null;
+
+			if ( ! dialogOverlay ) {
+				return;
+			}
+
+			const handleKeyEvents = ( event: KeyboardEvent ) => {
+				if ( event.code === 'Tab' ) {
+					if ( ! dialogOverlay ) {
+						return;
+					}
+
+					const focusableElementsSelectors =
+						'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+					const focusableElements = dialogOverlay.querySelectorAll(
+						focusableElementsSelectors
+					);
+
+					if ( ! focusableElements.length ) {
+						return;
+					}
+
+					const firstFocusableElement =
+						focusableElements[ 0 ] as HTMLElement;
+					const lastFocusableElement = focusableElements[
+						focusableElements.length - 1
+					] as HTMLElement;
+
+					if (
+						! event.shiftKey &&
+						event.target === lastFocusableElement
+					) {
+						event.preventDefault();
+						firstFocusableElement.focus();
+					}
+
+					if (
+						event.shiftKey &&
+						event.target === firstFocusableElement
+					) {
+						event.preventDefault();
+						lastFocusableElement.focus();
+					}
+				}
+			};
+
+			dialogOverlay.addEventListener( 'keydown', handleKeyEvents );
+
+			return () =>
+				dialogOverlay.removeEventListener( 'keydown', handleKeyEvents );
+		},
 	},
 };
 
