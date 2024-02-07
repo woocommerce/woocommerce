@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add read-only support for billing and shipping addresses in Checkout block.
