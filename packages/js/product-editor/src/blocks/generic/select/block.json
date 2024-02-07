@@ -27,10 +27,6 @@
 					}
 				}
 			}
-		},
-		"disabled": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {

@@ -18,7 +18,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< SelectBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	const { label, property, options, disabled } = attributes;
+	const { label, property, options } = attributes;
 
 	const [ value, setValue ] = useProductEntityProp< [] >( property, {
 		postType,
@@ -32,8 +32,8 @@ export function Edit( {
 				// @ts-ignore wrong types; false ok
 				multiple={ false }
 				value={ value }
-				options={ options }
-				disabled={ disabled }
+				options={ options || [ { label: 'Loading...', value: '' } ] }
+				disabled={ ! options }
 				onChange={ setValue }
 			/>
 		</div>

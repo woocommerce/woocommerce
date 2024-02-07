@@ -28,7 +28,7 @@ const bindingSources = {
 			];
 
 			return {
-				placeholder: [ { label: 'Loading...', value: '' } ],
+				placeholder: null,
 				useValue: [ options ],
 			};
 		},
@@ -52,7 +52,7 @@ const bindingSources = {
 			}, [ sourceAttributes ] );
 
 			return {
-				placeholder: [ { label: 'Loading (5s)...', value: '' } ],
+				placeholder: null,
 				useValue: [ options ],
 			};
 		},
@@ -85,7 +85,7 @@ const bindingSources = {
 			}
 
 			return {
-				placeholder: [ { label: 'Loading...', value: '' } ],
+				placeholder: null,
 				useValue: [ options ],
 			};
 		},
