@@ -44,9 +44,15 @@ abstract class AbstractTemplatePart {
 	/**
 	 * Template part functionality is only initialized when using a theme that supports template parts.
 	 */
-	protected function __construct() {
+	public function __construct() {
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			BlockTemplatesRegistry::register_template( $this );
+			$this->init();
 		}
 	}
+
+	/**
+	 * Initialization method.
+	 */
+	abstract public function init();
 }

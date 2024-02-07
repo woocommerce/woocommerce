@@ -32,12 +32,15 @@ class CartTemplate extends AbstractPageTemplate {
 	public $template_description;
 
 	/**
-	 * Class constructor.
+	 * Initialization method.
 	 */
-	public function __construct() {
+	public function init() {
 		$this->template_title       = _x( 'Page: Cart', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
+
 		BlockTemplatesRegistry::register_template( $this );
+
+		parent::init();
 	}
 
 	/**

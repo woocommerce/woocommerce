@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-
 /**
  * MiniCartTemplate class.
  *
@@ -39,19 +37,12 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	public $template_area = 'mini-cart';
 
 	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->template_title       = _x( 'Mini-Cart', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
-		$this->init();
-	}
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
+		$this->template_title       = _x( 'Mini-Cart', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
+
 		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
 	}
 

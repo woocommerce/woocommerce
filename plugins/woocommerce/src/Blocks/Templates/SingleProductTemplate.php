@@ -34,22 +34,12 @@ class SingleProductTemplate extends AbstractTemplate {
 	public $template_description;
 
 	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
-			$this->template_description = __( 'Displays a single product.', 'woocommerce' );
-			BlockTemplatesRegistry::register_template( $this );
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
+		$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Displays a single product.', 'woocommerce' );
+
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
 	}

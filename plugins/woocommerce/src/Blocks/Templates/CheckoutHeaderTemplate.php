@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-
 /**
  * CheckoutHeader Template class.
  *
@@ -41,10 +39,8 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	/**
 	 * Class constructor.
 	 */
-	public function __construct() {
+	public function init() {
 		$this->template_title       = _x( 'Checkout Header', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'Template used to display the simplified Checkout header.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
 	}
-
 }

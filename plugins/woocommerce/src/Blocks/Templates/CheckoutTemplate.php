@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-
 /**
  * CheckoutTemplate class.
  *
@@ -31,14 +29,14 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 */
 	public $template_description;
 
-
 	/**
-	 * Class constructor.
+	 * Initialization method.
 	 */
-	public function __construct() {
+	public function init() {
 		$this->template_title       = _x( 'Page: Checkout', 'Template name', 'woocommerce' );
 		$this->template_description = __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
+
+		parent::init();
 	}
 
 	/**
