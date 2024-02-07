@@ -36,7 +36,7 @@ export function PrepublishPanel( {
 
 	return (
 		<div className="woocommerce-product-publish-panel">
-			<div className="woocommerce-product-publish-panel__actions">
+			<div className="woocommerce-product-publish-panel__header">
 				<PublishButton
 					productType={ productType }
 					productStatus={ lastPersistedProduct?.status }
