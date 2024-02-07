@@ -404,52 +404,6 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Process customer address fields.
-	 *
-	 * @param \WC_Customer     $customer Customer object.
-	 * @param \WP_REST_Request $request Full details about the request.
-	 */
-	private function update_customer_address_data_from_request( $customer, $request ) {
-		$posted_billing  = $request['billing_address'];
-		$posted_shipping = $request['shipping_address'] ?? $request['billing_address'];
-
-		foreach ( $posted_billing as $key => $value ) {
-			$callback = "set_billing_$key";
-			if ( is_callable( [ $customer, $callback ] ) ) {
-				$customer->$callback( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
-			}
-		}
-
-		foreach ( $posted_shipping as $key => $value ) {
-			$callback = "set_shipping_$key";
-			if ( is_callable( [ $customer, $callback ] ) ) {
-				$customer->$callback( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
-			}
-		}
-	}
-
-	/**
-	 * Process customer additional fields.
-	 *
-	 * @param \WC_Customer     $customer Customer object.
-	 * @param \WP_REST_Request $request Full details about the request.
-	 */
-	private function update_customer_additional_fields_from_request( $customer, $request ) {
-		// Persist contact fields.
-		$contact_field_keys = array_filter( (array) $this->additional_fields_controller->get_contact_fields_keys() );
-
-		foreach ( $contact_field_keys as $key ) {
-			if ( isset( $request['additional_fields'], $request['additional_fields'][ $key ] ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( $key, $request['additional_fields'][ $key ], $customer );
-			}
-		}
-	}
-
-	/**
 	 * Updates the current customer session using data from the request (e.g. address data).
 	 *
 	 * Address session data is synced to the order itself later on by OrderController::update_order_from_cart()
@@ -459,8 +413,38 @@ class Checkout extends AbstractCartRoute {
 	private function update_customer_from_request( \WP_REST_Request $request ) {
 		$customer = wc()->customer;
 
-		$this->update_customer_address_data_from_request( $customer, $request );
-		$this->update_customer_additional_fields_from_request( $customer, $request );
+		// Billing address is a required field.
+		foreach ( $request['billing_address'] as $key => $value ) {
+			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
+				$customer->{"set_billing_$key"}( $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
+			}
+		}
+
+		// If shipping address (optional field) was not provided, set it to the given billing address (required field).
+		$shipping_address_values = $request['shipping_address'] ?? $request['billing_address'];
+
+		foreach ( $shipping_address_values as $key => $value ) {
+			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
+				$customer->{"set_shipping_$key"}( $value );
+			} elseif ( 'phone' === $key ) {
+				$customer->update_meta_data( 'shipping_phone', $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
+				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
+			}
+		}
+
+		// Persist contact fields to session.
+		$contact_fields = $this->additional_fields_controller->get_contact_fields_keys();
+
+		if ( ! empty( $contact_fields ) ) {
+			foreach ( $contact_fields as $key ) {
+				if ( isset( $request['additional_fields'], $request['additional_fields'][ $key ] ) ) {
+					$this->additional_fields_controller->persist_field_for_customer( $key, $request['additional_fields'][ $key ], $customer );
+				}
+			}
+		}
 
 		/**
 		 * Fires when the Checkout Block/Store API updates a customer from the API request data.
