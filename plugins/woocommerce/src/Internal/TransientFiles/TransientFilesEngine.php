@@ -176,7 +176,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return string|null The full physical path of the file, or null if the files doesn't exist.
 	 */
 	public function get_transient_file_path( string $filename ): ?string {
-		$expiration_date = $this->get_expiration_date( $filename );
+		$expiration_date = self::get_expiration_date( $filename );
 		if ( is_null( $expiration_date ) ) {
 			return null;
 		}

@@ -29,6 +29,12 @@ class ReceiptRenderingEngine {
 
 	private const ICON_WIDTH = self::ICON_HEIGHT * ( 4 / 3 );
 
+	private const MARGIN = 16;
+
+	private const TITLE_FONT_SIZE = 24;
+
+	private const FOOTER_FONT_SIZE = 10;
+
 	/**
 	 * This array must contain all the names of the files in the CardIcons directory (without extension),
 	 * except 'unknown'.
@@ -247,9 +253,9 @@ class ReceiptRenderingEngine {
 		return array(
 			'constants'        => array(
 				'font_size'        => self::FONT_SIZE,
-				'margin'           => 16,
-				'title_font_size'  => 24,
-				'footer_font_size' => 10,
+				'margin'           => self::MARGIN,
+				'title_font_size'  => self::TITLE_FONT_SIZE,
+				'footer_font_size' => self::FOOTER_FONT_SIZE,
 				'line_height'      => self::LINE_HEIGHT,
 				'icon_height'      => self::ICON_HEIGHT,
 				'icon_width'       => self::ICON_WIDTH,

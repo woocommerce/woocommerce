@@ -40,7 +40,6 @@ class Server {
 		$container = wc_get_container();
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] = new $controller_class();
 				$this->controllers[ $namespace ][ $controller_name ] =
 					0 === strpos( $controller_class, 'WC_REST_' ) ?
 						new $controller_class() :
