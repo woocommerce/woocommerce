@@ -298,115 +298,153 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'allows guest customer to place an order', async ( { page } ) => {
-		await addProductsToCart( page, simpleProductName, '2' );
+		await test.step( 'Add 2 products to the cart', async () => {
+			await addProductsToCart( page, simpleProductName, '2' );
+		} );
 
-		await page.goto( '/checkout/' );
-		await expect( page.locator( 'strong.product-quantity' ) ).toContainText(
-			'2'
-		);
-		let totalPrice = await page
-			.getByRole( 'row', { name: 'Total' } )
-			.last()
-			.locator( 'td' )
-			.textContent();
-		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( twoProductPrice )
-		);
+		await test.step( 'Go to checkout and confirm that products and totals are as expected', async () => {
+			await page.goto( '/checkout/' );
+			await expect(
+				page.locator( 'strong.product-quantity' )
+			).toContainText( '2' );
+			let totalPrice = await page
+				.getByRole( 'row', { name: 'Total' } )
+				.last()
+				.locator( 'td' )
+				.textContent();
+			totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
+			await expect( totalPrice ).toBeGreaterThanOrEqual(
+				Number( twoProductPrice )
+			); // account for taxes or shipping that may be present
+		} );
 
-		await page.locator( '#billing_first_name' ).fill( 'Lisa' );
-		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
-		await page
-			.locator( '#billing_address_1' )
-			.fill( '123 Evergreen Terrace' );
-		await page.locator( '#billing_city' ).fill( 'Springfield' );
-		await page.locator( '#billing_state' ).selectOption( 'OR' );
-		await page.locator( '#billing_postcode' ).fill( '97403' );
-		await page.locator( '#billing_phone' ).fill( '555 555-5555' );
-		await page.locator( '#billing_email' ).fill( guestEmail );
+		await test.step( 'Complete the checkout form', async () => {
+			await page
+				.getByRole( 'textbox', { name: 'First name *' } )
+				.fill( 'Lisa' );
+			await page
+				.getByRole( 'textbox', { name: 'Last name *' } )
+				.fill( 'Simpson' );
+			await page
+				.getByRole( 'textbox', { name: 'Street address *' } )
+				.fill( '123 Evergreen Terrace' );
+			await page
+				.getByRole( 'textbox', { name: 'Town / City *' } )
+				.fill( 'Springfield' );
+			await page.locator( '#billing_state' ).selectOption( 'OR' );
+			await page
+				.getByRole( 'textbox', { name: 'ZIP Code *' } )
+				.fill( '97403' );
+			await page.getByLabel( 'Phone *' ).fill( '555 555-5555' );
+			await page.getByLabel( 'Email address *' ).fill( guestEmail );
 
-		await page.locator( 'text=Cash on delivery' ).click();
-		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
+			await page.getByText( 'Cash on delivery' ).click();
 
-		await page.locator( 'text=Place order' ).click();
+			await page.getByRole( 'button', { name: 'Place order' } ).click();
+		} );
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
-		).toBeVisible();
+		await test.step( 'Load the order confirmation page, extract order number', async () => {
+			await expect(
+				page.getByRole( 'heading', { name: 'Order received' } )
+			).toBeVisible();
 
-		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		guestOrderId = await orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+			// get order ID from the page
+			const orderReceivedText = await page
+				.locator( '.woocommerce-order-overview__order.order' )
+				.textContent();
+			guestOrderId = await orderReceivedText
+				.split( /(\s+)/ )[ 6 ]
+				.toString();
+		} );
 
-		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
-		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
-		// grace period following initial order placement, the 'order received' page should still be rendered.
-		await page.context().clearCookies();
-		await page.reload();
-		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
-		).toBeVisible();
+		await test.step( 'Simulate cookies cleared, but within 10 minute grace period', async () => {
+			// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
+			// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
+			// grace period following initial order placement, the 'order received' page should still be rendered.
+			await page.context().clearCookies();
+			await page.reload();
+			await expect(
+				page.getByRole( 'heading', { name: 'Order received' } )
+			).toBeVisible();
+		} );
 
-		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
-		// be presented with a request to verify their email address.
-		await setFilterValue(
-			page,
-			'woocommerce_order_email_verification_grace_period',
-			0
-		);
-		await page.reload();
-		await expect(
-			page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
-		).toContainText( /verify the email address associated with the order/ );
+		await test.step( 'Simulate cookies cleared, outside 10 minute window', async () => {
+			// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
+			// be presented with a request to verify their email address.
+			await setFilterValue(
+				page,
+				'woocommerce_order_email_verification_grace_period',
+				0
+			);
+			await page.waitForTimeout( 2000 ); // needs some time before reload for change to take effect.
+			await page.reload( { waitForLoadState: 'networkidle' } );
+			await expect(
+				page.getByRole( 'button', { name: 'Verify' } )
+			).toBeVisible();
+			await expect( page.getByLabel( 'Email address *' ) ).toBeVisible();
+			await expect(
+				page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
+			).toContainText(
+				/verify the email address associated with the order/
+			);
+		} );
 
-		// Supplying an email address other than the actual order billing email address will take them back to the same
-		// page with an error message.
-		await page.fill( '#email', 'incorrect@email.address' );
-		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect(
-			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
-		).toContainText( /verify the email address associated with the order/ );
-		await expect( page.locator( '.is-error' ) ).toContainText(
-			/We were unable to verify the email address you provided/
-		);
+		await test.step( 'Supply incorrect email address for the order, error', async () => {
+			// Supplying an email address other than the actual order billing email address will take them back to the same
+			// page with an error message.
+			await page
+				.getByLabel( 'Email address *' )
+				.fill( 'incorrect@email.address' );
+			await page.getByRole( 'button', { name: 'Verify' } ).click();
+			await expect(
+				page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
+			).toContainText(
+				/verify the email address associated with the order/
+			);
+			await expect( page.getByRole( 'alert' ) ).toContainText(
+				/We were unable to verify the email address you provided/
+			);
+		} );
 
-		// However if they supply the *correct* billing email address, they should see the order received page again.
-		await page.fill( '#email', guestEmail );
-		await page.locator( 'form.woocommerce-verify-email button' ).click();
-		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
-		).toBeVisible();
+		await test.step( 'Supply the correct email address for the order, display order confirmation', async () => {
+			// However if they supply the *correct* billing email address, they should see the order received page again.
+			await page.getByLabel( 'Email address *' ).fill( guestEmail );
+			await page.getByRole( 'button', { name: 'Verify' } ).click();
+			await expect(
+				page.getByRole( 'heading', { name: 'Order received' } )
+			).toBeVisible();
+		} );
 
-		await page.goto( 'wp-login.php' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
+		await test.step( 'Confirm order details on the backend (as a merchant)', async () => {
+			await page.goto( 'wp-login.php' );
+			await page.locator( 'input[name="log"]' ).fill( admin.username );
+			await page.locator( 'input[name="pwd"]' ).fill( admin.password );
+			await page.locator( 'text=Log In' ).click();
 
-		// load the order placed as a guest
-		await page.goto(
-			`wp-admin/post.php?post=${ guestOrderId }&action=edit`
-		);
+			// load the order placed as a guest
+			await page.goto(
+				`wp-admin/post.php?post=${ guestOrderId }&action=edit`
+			);
 
-		await expect(
-			page.getByRole( 'heading', {
-				name: `Order #${ guestOrderId } details`,
-			} )
-		).toBeVisible();
-		await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
-			simpleProductName
-		);
-		await expect( page.locator( 'td.quantity >> nth=0' ) ).toContainText(
-			'2'
-		);
-		await expect( page.locator( 'td.item_cost >> nth=0' ) ).toContainText(
-			singleProductPrice
-		);
-		await expect( page.locator( 'td.line_cost >> nth=0' ) ).toContainText(
-			twoProductPrice
-		);
-		await clearFilters( page );
+			await expect(
+				page.getByRole( 'heading', {
+					name: `Order #${ guestOrderId } details`,
+				} )
+			).toBeVisible();
+			await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
+				simpleProductName
+			);
+			await expect(
+				page.locator( 'td.quantity >> nth=0' )
+			).toContainText( '2' );
+			await expect(
+				page.locator( 'td.item_cost >> nth=0' )
+			).toContainText( singleProductPrice );
+			await expect(
+				page.locator( 'td.line_cost >> nth=0' )
+			).toContainText( twoProductPrice );
+			await clearFilters( page );
+		} );
 	} );
 
 	test( 'allows existing customer to place order', async ( { page } ) => {
