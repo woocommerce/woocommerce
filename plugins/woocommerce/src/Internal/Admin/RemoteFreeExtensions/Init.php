@@ -29,41 +29,29 @@ class Init {
 	 * @return array
 	 */
 	public static function get_extensions( $allowed_bundles = array() ) {
-		$bundles = array();
+		$locale = get_user_locale();
+
 		$specs   = self::get_specs();
+		$results = EvaluateExtension::evaluate_bundles( $specs, $allowed_bundles );
 
-		foreach ( $specs as $spec ) {
-			$spec              = (object) $spec;
-			$bundle            = (array) $spec;
-			$bundle['plugins'] = array();
-
-			if ( ! empty( $allowed_bundles ) && ! in_array( $spec->key, $allowed_bundles, true ) ) {
-				continue;
+		$plugins = array_filter(
+			$results['bundles'],
+			function( $bundle ) {
+				return count( $bundle['plugins'] ) > 0;
 			}
+		);
 
-			$has_error = false;
-			foreach ( $spec->plugins as $plugin ) {
-				try {
-					$extension = EvaluateExtension::evaluate( (object) $plugin );
-					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
-						$bundle['plugins'][] = $extension;
-					}
-				} catch ( \Throwable $e ) {
-					$has_error = true;
-				}
+		if ( count( $results['errors'] ) > 0 ) {
+			$specs = empty( $plugins ) ? DefaultFreeExtensions::get_all() : $specs;
+			// Set the specs transient with expired time to 3 hours.
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+
+			if ( empty( $plugins ) ) {
+				return EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all() )['bundles'];
 			}
-
-			if ( $has_error ) {
-				RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient(
-					DefaultFreeExtensions::get_all(),
-					3 * HOUR_IN_SECONDS
-				);
-			}
-
-			$bundles[] = $bundle;
 		}
 
-		return $bundles;
+		return $results['bundles'];
 	}
 
 	/**

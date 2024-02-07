@@ -35,38 +35,22 @@ class Init {
 	 * @return array
 	 */
 	public static function get_suggestions( array $specs = null ) {
-		if ( null === $specs ) {
-			$specs = self::get_specs();
-		}
+		$locale = get_user_locale();
 
-		$suggestions = array();
-		$has_error   = false;
-		foreach ( $specs as $spec ) {
-			try {
-				$suggestion    = EvaluateSuggestion::evaluate( $spec );
-				$suggestions[] = $suggestion;
-				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			} catch ( \Throwable $e ) {
-				$has_error = true;
+		$specs   = is_array( $specs ) ? $specs : self::get_specs();
+		$results = EvaluateSuggestion::evaluate_specs( $specs );
+
+		if ( count( $results['errors'] ) > 0 ) {
+			$specs = empty( $plugins ) ? DefaultPaymentGateways::get_all() : $specs;
+			// Set the specs transient with expired time to 3 hours.
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+
+			if ( empty( $plugins ) ) {
+				return EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
 			}
 		}
 
-		if ( $has_error ) {
-			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient(
-				DefaultPaymentGateways::get_all(),
-				3 * HOUR_IN_SECONDS
-			);
-		}
-
-		return array_values(
-			array_filter(
-				$suggestions,
-				function( $suggestion ) {
-					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
-				}
-			)
-		);
-
+		return $results['suggestions'];
 	}
 
 	/**

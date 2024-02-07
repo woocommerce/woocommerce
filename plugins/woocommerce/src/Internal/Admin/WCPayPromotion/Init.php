@@ -122,33 +122,18 @@ class Init {
 	 * Go through the specs and run them.
 	 */
 	public static function get_promotions() {
-		$specs = self::get_specs();
+		$locale = get_user_locale();
 
-		$suggestions = array();
-		$has_error   = false;
-		foreach ( $specs as $spec ) {
-			try {
-				$suggestion    = EvaluateSuggestion::evaluate( $spec );
-				$suggestions[] = $suggestion;
-				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			} catch ( \Throwable $e ) {
-				$has_error = true;
-			}
+		$specs   = self::get_specs();
+		$results = EvaluateSuggestion::evaluate_specs( $specs );
+
+		if ( count( $results['errors'] ) > 0 ) {
+			// Unlike payment gateway suggestions, we don't have a non-empty default set of promotions to fall back to.
+			// So just set the specs transient with expired time to 3 hours.
+			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
 		}
 
-		if ( $has_error ) {
-			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array(), 3 * HOUR_IN_SECONDS );
-		}
-
-		return array_values(
-			array_filter(
-				$suggestions,
-				function( $suggestion ) {
-					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
-				}
-			)
-		);
-
+		return $results['suggestions'];
 	}
 
 	/**
