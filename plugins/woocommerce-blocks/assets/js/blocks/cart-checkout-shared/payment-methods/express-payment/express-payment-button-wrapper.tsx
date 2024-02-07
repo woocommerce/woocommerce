@@ -8,8 +8,14 @@ const ExpressPaymentButtonWrapper = ( {
 		maxWidth: '100%',
 		borderRadius: '10px',
 		color: 'red',
+		overflow: 'hidden',
 	};
 
-	return <div style={ defaultStyle }>{ children }</div>;
+	return (
+		<>
+			<div style={ defaultStyle }>{ children }</div>
+			<div style={ defaultStyle }>{ children }</div>
+		</>
+	);
 };
 export default ExpressPaymentButtonWrapper;
