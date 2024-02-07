@@ -1,0 +1,10 @@
+.woocommerce-publish-panel-visibility {
+	&__fieldset {
+		legend {
+			padding-bottom: $gap-large;
+		}
+		> div {
+			padding-bottom: $gap-smaller;
+		}
+	}
+}

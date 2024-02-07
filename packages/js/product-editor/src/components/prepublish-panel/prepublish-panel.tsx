@@ -14,6 +14,7 @@ import { PublishButton } from '../header/publish-button';
 import { PrepublishPanelProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
+import { VisibilitySection } from './visibility-section';
 
 export function PrepublishPanel( {
 	productId,
@@ -57,6 +58,7 @@ export function PrepublishPanel( {
 				<h4>{ title }</h4>
 				<span>{ description }</span>
 			</div>
+			<VisibilitySection productType={ productType } />
 		</div>
 	);
 }
