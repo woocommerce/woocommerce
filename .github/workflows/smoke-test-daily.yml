@@ -241,7 +241,6 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: read
-        needs: [api-tests]
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
@@ -398,7 +397,7 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
+                    - plugin: 'WooPayments'
                       slug: woocommerce-payments
                     - plugin: 'WooCommerce PayPal Payments'
                       slug: woocommerce-paypal-payments
