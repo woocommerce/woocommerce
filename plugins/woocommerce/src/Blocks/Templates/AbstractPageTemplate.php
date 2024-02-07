@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * AbstractPageTemplate class.
  *
@@ -12,18 +10,9 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  */
 abstract class AbstractPageTemplate extends AbstractTemplate {
 	/**
-	 * Page Template functionality is only initialized when using a block theme.
-	 */
-	public function __construct() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
+	public function init() {
 		add_filter( 'page_template_hierarchy', array( $this, 'page_template_hierarchy' ), 1 );
 		add_filter( 'pre_get_document_title', array( $this, 'page_template_title' ) );
 	}
@@ -62,7 +51,7 @@ abstract class AbstractPageTemplate extends AbstractTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, self::SLUG );
+			array_unshift( $templates, $this::SLUG );
 		}
 		return $templates;
 	}

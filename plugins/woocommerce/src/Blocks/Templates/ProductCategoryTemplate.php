@@ -40,13 +40,10 @@ class ProductCategoryTemplate extends AbstractTemplate {
 	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
-	 * Constructor.
+	 * Initialization method.
 	 */
-	public function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->template_title       = _x( 'Products by Category', 'Template name', 'woocommerce' );
-			$this->template_description = __( 'Displays products filtered by a category.', 'woocommerce' );
-			BlockTemplatesRegistry::register_template( $this );
-		}
+	public function init() {
+		$this->template_title       = _x( 'Products by Category', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Displays products filtered by a category.', 'woocommerce' );
 	}
 }

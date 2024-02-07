@@ -33,21 +33,12 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	public $template_description;
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->template_title       = _x( 'Product Catalog', 'Template name', 'woocommerce' );
-			$this->template_description = __( 'Displays your products.', 'woocommerce' );
-			BlockTemplatesRegistry::register_template( $this );
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
+	public function init() {
+		$this->template_title       = _x( 'Product Catalog', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Displays your products.', 'woocommerce' );
+
 		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 	}
 

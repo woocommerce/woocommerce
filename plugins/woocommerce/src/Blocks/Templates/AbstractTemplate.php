@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * AbstractTemplate class.
@@ -36,9 +37,15 @@ abstract class AbstractTemplate {
 	/**
 	 * Template functionality is only initialized when using a block theme.
 	 */
-	protected function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
+	public function __construct() {
+		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
 			BlockTemplatesRegistry::register_template( $this );
+			$this->init();
 		}
 	}
+
+	/**
+	 * Initialization method.
+	 */
+	abstract public function init();
 }

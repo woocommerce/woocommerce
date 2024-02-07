@@ -32,20 +32,15 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	public $template_description;
 
 	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->template_title       = _x( 'Order Confirmation', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
-		BlockTemplatesRegistry::register_template( $this );
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
-		parent::init();
+	public function init() {
+		$this->template_title       = _x( 'Order Confirmation', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
+
 		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
+
+		parent::init();
 	}
 
 	/**

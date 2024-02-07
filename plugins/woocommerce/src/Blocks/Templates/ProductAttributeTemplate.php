@@ -40,21 +40,12 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->template_title       = _x( 'Products by Attribute', 'Template name', 'woocommerce' );
-			$this->template_description = __( 'Displays products filtered by an attribute.', 'woocommerce' );
-			BlockTemplatesRegistry::register_template( $this );
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
+	public function init() {
+		$this->template_title       = _x( 'Products by Attribute', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Displays products filtered by an attribute.', 'woocommerce' );
+
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
 	}
 

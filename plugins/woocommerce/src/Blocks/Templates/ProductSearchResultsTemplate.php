@@ -39,21 +39,12 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			$this->template_title       = _x( 'Product Search Results', 'Template name', 'woocommerce' );
-			$this->template_description = __( 'Displays search results for your store.', 'woocommerce' );
-			BlockTemplatesRegistry::register_template( $this );
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
+	public function init() {
+		$this->template_title       = _x( 'Product Search Results', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'Displays search results for your store.', 'woocommerce' );
+
 		add_filter( 'search_template_hierarchy', array( $this, 'update_search_template_hierarchy' ), 10, 3 );
 	}
 
