@@ -1,6 +1,6 @@
 {
-	"name": "@woocommerce/remote-inbox-notification-testing",
-	"description": "Remote inbox notification testing suite",
+	"name": "@woocommerce/remote-specs-validation",
+	"description": "Remote specs testing suite",
 	"main": "index.js",
 	"scripts": {
 		"changelog": "composer install && composer exec -- changelogger"

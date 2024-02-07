@@ -1,11 +1,11 @@
 {
-	"name": "woocommerce/remote-inbox-notification-testing",
-	"description": "Remote inbox notification testing suite",
+	"name": "woocommerce/remote-specs-validation",
+	"description": "Remote specs testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
-			"Woocommerce\\WoocommerceRemoteInboxNotificationTesting\\": "src/"
+			"Automattic\\WooCommerce\\Tests\\RemoteSpecValidation\\": "src/"
 		}
 	},
 	"require-dev": {
