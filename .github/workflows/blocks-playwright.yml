@@ -54,7 +54,7 @@ jobs:
 
           - name: Run Playwright tests
             working-directory: plugins/woocommerce-blocks
-            run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.shard }}/${{ matrix.config.shards }}
+            run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.config.shard }}/${{ matrix.config.shards }}
 
           - uses: actions/upload-artifact@v3
             if: ${{ failure() }}
