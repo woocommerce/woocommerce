@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Store default specs into transient when spec rules fails
+Improved Transient Handling and Error Management for PaymentGateways, Free Extensions, and WCPayPromotion
