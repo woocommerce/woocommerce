@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure country field options in the Checkout block are correct when shipping is disabled.
