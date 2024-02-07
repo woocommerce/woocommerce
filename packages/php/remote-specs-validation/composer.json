@@ -1,11 +1,11 @@
 {
-	"name": "woocommerce/remote-spec-validation",
+	"name": "woocommerce/remote-specs-validation",
 	"description": "Remote specs testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
-			"Automattic\\WooCommerce\\Tests\\RemoteSpecValidation\\": "src/"
+			"Automattic\\WooCommerce\\Tests\\RemoteSpecsValidation\\": "src/"
 		}
 	},
 	"require-dev": {

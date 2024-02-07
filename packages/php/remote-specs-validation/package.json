@@ -1,5 +1,5 @@
 {
-	"name": "@woocommerce/remote-spec-validation",
+	"name": "@woocommerce/remote-specs-validation",
 	"description": "Remote specs testing suite",
 	"main": "index.js",
 	"scripts": {
