@@ -1,0 +1,9 @@
+{
+	"name": "@woocommerce/remote-inbox-notification-testing",
+	"description": "Remote inbox notification testing suite",
+	"main": "index.js",
+	"scripts": {
+		"changelog": "composer install && composer exec -- changelogger"
+	},
+	"license": "GPL-3.0-or-later"
+}
