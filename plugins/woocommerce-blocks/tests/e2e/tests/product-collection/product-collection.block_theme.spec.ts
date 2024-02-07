@@ -705,8 +705,9 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await editorUtils.closeWelcomeGuideModal();
-			await pageObject.insertProductCollectionInSingleProductBlock();
-			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.insertProductCollectionInSingleProductBlock(
+				'featured'
+			);
 
 			const featuredProducts = [
 				'Cap',
