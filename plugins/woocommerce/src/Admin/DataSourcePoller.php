@@ -170,7 +170,7 @@ abstract class DataSourcePoller {
 	}
 
 	/**
-	 *  Read a single data source and return the read specs
+	 * Read a single data source and return the read specs
 	 *
 	 * @param string $url The URL to read the specs from.
 	 *
