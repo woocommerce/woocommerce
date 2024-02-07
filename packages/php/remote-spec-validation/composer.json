@@ -1,5 +1,5 @@
 {
-	"name": "woocommerce/remote-specs-validation",
+	"name": "woocommerce/remote-spec-validation",
 	"description": "Remote specs testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
