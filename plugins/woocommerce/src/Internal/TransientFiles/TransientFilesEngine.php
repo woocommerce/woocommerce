@@ -109,6 +109,14 @@ class TransientFilesEngine implements RegisterHooksInterface {
 				if ( ! $this->legacy_proxy->call_function( 'wp_mkdir_p', $transient_files_directory ) ) {
 					throw new Exception( "Can't create directory: $transient_files_directory" );
 				}
+
+				// Create infrastructure to prevent listing the contents of the transient files directory.
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				\WP_Filesystem();
+				$wp_filesystem = $this->legacy_proxy->get_global( 'wp_filesystem' );
+				$wp_filesystem->put_contents( $transient_files_directory . '/.htaccess', 'deny from all' );
+				$wp_filesystem->put_contents( $transient_files_directory . '/index.html', '' );
+
 				$realpathed_transient_files_directory = $this->legacy_proxy->call_function( 'realpath', $transient_files_directory );
 			} else {
 				throw new Exception( "The base transient files directory doesn't exist: $transient_files_directory" );

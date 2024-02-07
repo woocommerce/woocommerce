@@ -258,8 +258,31 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		// phpcs:disable Squiz.Commenting
+		$fake_wp_filesystem = new class() {
+			public $created_files = array();
+
+			public function put_contents( string $file, string $contents, $mode = false ): bool {
+				$this->created_files[ $file ] = $contents;
+				return strlen( $contents );
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$this->register_legacy_proxy_global_mocks(
+			array(
+				'wp_filesystem' => $fake_wp_filesystem,
+			)
+		);
+
 		$this->sut->get_transient_files_directory();
 		$this->assertEquals( '/wordpress/uploads/woocommerce_transient_files', $created_dir );
+
+		$expected_created_files = array(
+			'/wordpress/uploads/woocommerce_transient_files/.htaccess' => 'deny from all',
+			'/wordpress/uploads/woocommerce_transient_files/index.html' => '',
+		);
+		$this->assertEquals( $expected_created_files, $fake_wp_filesystem->created_files );
 	}
 
 	/**

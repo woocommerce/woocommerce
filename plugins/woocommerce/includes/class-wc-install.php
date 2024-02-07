@@ -244,6 +244,9 @@ class WC_Install {
 		'8.6.0' => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',
 		),
+		'8.7.0' => array(
+			'wc_update_870_prevent_listing_of_transient_files_directory',
+		),
 	);
 
 	/**
