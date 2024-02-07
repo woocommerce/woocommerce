@@ -152,6 +152,7 @@ const ExpressPaymentMethods = () => {
 								onError: onExpressPaymentError,
 								setExpressPaymentError:
 									deprecatedSetExpressPaymentError,
+									iconOnly: false;
 							} ) }
 						</ExpressPaymentButtonWrapper>
 					</li>
