@@ -24,18 +24,19 @@ jobs:
                   - name: Normal
                     file: playwright.config.ts
                     resultPath: test-results
+                    shards: 5
                   - name: Classic
                     file: playwright.classic-theme.config.ts
                     resultPath: test-results-classic-theme
+                    shards: 5
                   - name: SideEffects
                     file: playwright.side-effects.config.ts
                     resultPath: test-results-side-effects
+                    shards: 5
                   - name: BlockThemeWithTemplates
                     file: playwright.block-theme-with-templates.config.ts
                     resultPath: test-results-block-theme-with-templates
-                shard:
-                  - desired: 5
-                    key: ${{ github.run_number }}
+                    shards: 5
         steps:
           - uses: actions/checkout@v3
 
