@@ -365,7 +365,7 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	public function validate_additional_fields( $fields, $request ) {
 		$errors     = new \WP_Error();
-		$fields     = $this->sanitize_additional_fields( $fields, $request );
+		$fields     = $this->sanitize_additional_fields( $fields );
 		$properties = $this->get_additional_fields_schema();
 
 		foreach ( array_keys( $properties ) as $key ) {
