@@ -1108,7 +1108,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * 0: Id
 	 * 1: Code
 	 * 2: Type, null is equivalent to 'fixed_cart'
-	 * 3: Amount
+	 * 3: Nominal amount (either a fixed amount or a percent, depending on the coupon type)
 	 * 4: The coupon grants free shipping? (present only if true)
 	 *
 	 * @return string A JSON string with information that allows the coupon to be reapplied to an existing order.
