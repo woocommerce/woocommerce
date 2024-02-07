@@ -57,7 +57,7 @@ class EvaluateExtension {
 	 * @param array $allowed_bundles Optional array of allowed bundles to be returned.
 	 * @return array The bundles and errors.
 	 */
-	public static function evaluate_bundles( $specs, $allowed_bundles ) {
+	public static function evaluate_bundles( $specs, $allowed_bundles = array() ) {
 		$bundles = array();
 
 		foreach ( $specs as $spec ) {

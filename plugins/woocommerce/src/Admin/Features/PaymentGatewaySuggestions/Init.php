@@ -40,14 +40,16 @@ class Init {
 		$specs   = is_array( $specs ) ? $specs : self::get_specs();
 		$results = EvaluateSuggestion::evaluate_specs( $specs );
 
-		if ( count( $results['errors'] ) > 0 ) {
-			$specs = empty( $plugins ) ? DefaultPaymentGateways::get_all() : $specs;
-			// Set the specs transient with expired time to 3 hours.
-			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+		// When suggestions is empty, replace it with defaults and save for 3 hours.
+		if ( empty( $results['suggestions'] ) ) {
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultPaymentGateways::get_all() ), 3 * HOUR_IN_SECONDS );
 
-			if ( empty( $plugins ) ) {
-				return EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
-			}
+			return EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
+		}
+
+		// When suggestions is not empty but has errors, save it for 3 hours.
+		if ( count( $results['errors'] ) > 0 ) {
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
 		}
 
 		return $results['suggestions'];

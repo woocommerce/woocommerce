@@ -41,14 +41,16 @@ class Init {
 			}
 		);
 
-		if ( count( $results['errors'] ) > 0 ) {
-			$specs = empty( $plugins ) ? DefaultFreeExtensions::get_all() : $specs;
-			// Set the specs transient with expired time to 3 hours.
-			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+		// When no plugins are visible, replace it with defaults and save for 3 hours.
+		if ( empty( $plugins ) ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultFreeExtensions::get_all() ), 3 * HOUR_IN_SECONDS );
 
-			if ( empty( $plugins ) ) {
-				return EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all() )['bundles'];
-			}
+			return EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all(), $allowed_bundles )['bundles'];
+		}
+
+		// When plugins is not empty but has errors, save it for 3 hours.
+		if ( count( $results['errors'] ) > 0 ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
 		}
 
 		return $results['bundles'];
