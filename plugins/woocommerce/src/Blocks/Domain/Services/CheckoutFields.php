@@ -555,7 +555,7 @@ class CheckoutFields {
 				'address_type' => null,
 				// The customer object interacting with checkout or forms.
 				'customer'     => wc()->customer,
-				// A list of sibling fields being updated during the same request.
+				// A list of fields (key value pairs) being updated during the same request.
 				'fields'       => array(),
 			)
 		);
