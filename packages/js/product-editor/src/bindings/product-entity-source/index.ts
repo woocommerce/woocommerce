@@ -77,14 +77,12 @@ function getSourcePropValue(
 	const { getEntityRecord, getEditedEntityRecord } = select( 'core' );
 
 	const { prop: propertyName } = sourceArgs;
-	// console.log( 'propertyName: ', propertyName );
 
 	// Post type
 	let postType = context?.postType
 		? context.postType
 		: select( 'core/editor' ).getCurrentPostType();
 	postType = postType || 'product';
-	// console.log( 'Post type: ', postType );
 
 	// Post ID
 	const postId = Number(
@@ -93,14 +91,10 @@ function getSourcePropValue(
 			: select( 'core/editor' ).getCurrentPostId()
 	);
 
-	// console.log( 'Post ID: ', postId );
-
 	// Pick the entity record.
 	const editedRecord = getEditedEntityRecord( 'postType', postType, postId );
-	// console.log( 'editedRecord: ', editedRecord );
 
 	const record = getEntityRecord( 'postType', postType, postId );
-	// console.log( 'record: ', record );
 
 	const propertyValue =
 		record && editedRecord

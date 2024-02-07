@@ -147,6 +147,9 @@ const blockEditWithBoundAttribute =
 								}
 							}
 						}
+
+						// Update the block attributes
+						setAttributes( nextAttributes );
 					},
 					[ bindings, boundAttributes, name, props, setAttributes ]
 				);

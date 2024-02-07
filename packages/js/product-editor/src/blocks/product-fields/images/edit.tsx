@@ -16,10 +16,6 @@ import {
 	ImageGalleryItem,
 } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -51,12 +47,13 @@ function mapUploadImageToImage( upload: UploadImage ): Image | null {
 
 export function ImageBlockEdit( {
 	attributes,
-	context,
+	setAttributes,
 }: ProductEditorBlockEditProps< BlockAttributes > ) {
-	const { property, multiple } = attributes;
-	const [ propertyValue, setPropertyValue ] = useEntityProp<
-		Image | Image[] | null
-	>( 'postType', context.postType, property );
+	const { multiple, images } = attributes;
+	const setImages = ( newValue: Image | Image[] | null ) => {
+		setAttributes( { images: newValue } );
+	};
+
 	const [ isRemovingZoneVisible, setIsRemovingZoneVisible ] =
 		useState< boolean >( false );
 	const [ isRemoving, setIsRemoving ] = useState< boolean >( false );
@@ -66,15 +63,15 @@ export function ImageBlockEdit( {
 
 	const blockProps = useWooBlockProps( attributes, {
 		className: classnames( {
-			'has-images': Array.isArray( propertyValue )
-				? propertyValue.length > 0
-				: Boolean( propertyValue ),
+			'has-images': Array.isArray( images )
+				? images.length > 0
+				: Boolean( images ),
 		} ),
 	} );
 
 	function orderImages( newOrder: JSX.Element[] ) {
-		if ( Array.isArray( propertyValue ) ) {
-			const memoIds = propertyValue.reduce< Record< string, Image > >(
+		if ( Array.isArray( images ) ) {
+			const memoIds = images.reduce< Record< string, Image > >(
 				( current, item ) => ( {
 					...current,
 					[ `${ item.id }` ]: item,
@@ -88,7 +85,7 @@ export function ImageBlockEdit( {
 			recordEvent(
 				'product_images_change_image_order_via_image_gallery'
 			);
-			setPropertyValue( orderedImages );
+			setImages( orderedImages );
 		}
 	}
 
@@ -97,7 +94,7 @@ export function ImageBlockEdit( {
 			recordEvent( eventName );
 
 			if ( Array.isArray( upload ) ) {
-				const images: Image[] = upload
+				const uploadedImages: Image[] = upload
 					.filter( ( image ) => image.id )
 					.map( ( image ) => ( {
 						id: image.id,
@@ -106,13 +103,13 @@ export function ImageBlockEdit( {
 						alt: image.alt,
 					} ) );
 				if ( upload[ 0 ]?.id ) {
-					setPropertyValue( [
-						...( propertyValue as Image[] ),
-						...images,
+					setImages( [
+						...( images as Image[] ),
+						...uploadedImages,
 					] );
 				}
 			} else if ( upload.id ) {
-				setPropertyValue( mapUploadImageToImage( upload ) );
+				setImages( mapUploadImageToImage( upload ) );
 			}
 		};
 	}
@@ -121,35 +118,35 @@ export function ImageBlockEdit( {
 		recordEvent( 'product_images_add_via_media_library' );
 
 		if ( Array.isArray( selection ) ) {
-			const images = selection
+			const selectedImages = selection
 				.map( mapUploadImageToImage )
 				.filter( ( image ) => image !== null );
 
-			setPropertyValue( images as Image[] );
+			setImages( selectedImages as Image[] );
 		} else {
-			setPropertyValue( mapUploadImageToImage( selection ) );
+			setImages( mapUploadImageToImage( selection ) );
 		}
 	}
 
 	function handleDragStart( event: DragEvent< HTMLDivElement > ) {
-		if ( Array.isArray( propertyValue ) ) {
+		if ( Array.isArray( images ) ) {
 			const { id: imageId, dataset } = event.target as HTMLElement;
 			if ( imageId ) {
 				setDraggedImageId( parseInt( imageId, 10 ) );
 			} else if ( dataset?.index ) {
 				const index = parseInt( dataset.index, 10 );
-				setDraggedImageId( propertyValue[ index ]?.id ?? null );
+				setDraggedImageId( images[ index ]?.id ?? null );
 			}
 			setIsRemovingZoneVisible( ( current ) => ! current );
 		}
 	}
 
 	function handleDragEnd() {
-		if ( Array.isArray( propertyValue ) ) {
+		if ( Array.isArray( images ) ) {
 			if ( isRemoving && draggedImageId ) {
 				recordEvent( 'product_images_remove_image_button_click' );
-				setPropertyValue(
-					propertyValue.filter( ( img ) => img.id !== draggedImageId )
+				setImages(
+					images.filter( ( img ) => img.id !== draggedImageId )
 				);
 				setIsRemoving( false );
 				setDraggedImageId( null );
@@ -168,36 +165,35 @@ export function ImageBlockEdit( {
 		recordEvent( 'product_images_replace_image_button_click' );
 
 		if (
-			Array.isArray( propertyValue ) &&
-			! propertyValue.some( ( img ) => media.id === img.id )
+			Array.isArray( images ) &&
+			! images.some( ( img ) => media.id === img.id )
 		) {
 			const image = mapUploadImageToImage( media );
 			if ( image ) {
-				const newImages = [ ...propertyValue ];
+				const newImages = [ ...images ];
 				newImages[ replaceIndex ] = image;
-				setPropertyValue( newImages );
+				setImages( newImages );
 			}
 		} else {
-			setPropertyValue( mapUploadImageToImage( media ) );
+			setImages( mapUploadImageToImage( media ) );
 		}
 	}
 
 	function handleRemove( { removedItem }: { removedItem: JSX.Element } ) {
 		recordEvent( 'product_images_remove_image_button_click' );
 
-		if ( Array.isArray( propertyValue ) ) {
-			const remainingImages = propertyValue.filter(
+		if ( Array.isArray( images ) ) {
+			const remainingImages = images.filter(
 				( image ) => image.id === removedItem.props.id
 			);
-			setPropertyValue( remainingImages );
+			setImages( remainingImages );
 		} else {
-			setPropertyValue( null );
+			setImages( null );
 		}
 	}
 
 	const isImageGalleryVisible =
-		propertyValue !== null &&
-		( ! Array.isArray( propertyValue ) || propertyValue.length > 0 );
+		images !== null && ( ! Array.isArray( images ) || images.length > 0 );
 
 	return (
 		<div { ...blockProps }>
@@ -223,9 +219,9 @@ export function ImageBlockEdit( {
 						<div className="woocommerce-product-form__media-uploader">
 							<MediaUploader
 								value={
-									Array.isArray( propertyValue )
-										? propertyValue.map( ( { id } ) => id )
-										: propertyValue?.id ?? undefined
+									Array.isArray( images )
+										? images.map( ( { id } ) => id )
+										: images?.id ?? undefined
 								}
 								multipleSelect={ multiple ? 'add' : false }
 								onError={ () => null }
@@ -265,18 +261,17 @@ export function ImageBlockEdit( {
 						)
 					}
 				>
-					{ ( Array.isArray( propertyValue )
-						? propertyValue
-						: [ propertyValue ]
-					).map( ( image, index ) => (
-						<ImageGalleryItem
-							key={ image.id }
-							alt={ image.alt }
-							src={ image.src }
-							id={ `${ image.id }` }
-							isCover={ multiple && index === 0 }
-						/>
-					) ) }
+					{ ( Array.isArray( images ) ? images : [ images ] ).map(
+						( image, index ) => (
+							<ImageGalleryItem
+								key={ image.id }
+								alt={ image.alt }
+								src={ image.src }
+								id={ `${ image.id }` }
+								isCover={ multiple && index === 0 }
+							/>
+						)
+					) }
 				</ImageGallery>
 			) : (
 				<PlaceHolder />
