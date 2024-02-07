@@ -537,43 +537,40 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Validate an additional field against any custom validation rules. The result should be a WP_Error or true.
+	 * Validate an additional field against any custom validation rules.
 	 *
-	 * @param string           $key          The key of the field.
-	 * @param mixed            $field_value  The value of the field.
-	 * @param \WP_REST_Request $request      The current API Request.
-	 * @param string|null      $address_type The type of address (billing, shipping, or null if the field is a contact/additional field).
-	 *
+	 * @param string $key          The key of the field.
+	 * @param mixed  $field_value  The value of the field.
+	 * @param array  $context      Context for the field being validated that gets passed to hooks.
 	 * @since 8.6.0
+	 *
+	 * @return \WP_Error
 	 */
-	public function validate_field( $key, $field_value, $request, $address_type = null ) {
-
-		$error = new \WP_Error();
+	public function validate_field( $key, $field_value, $context = array() ) {
+		$error   = new \WP_Error();
+		$context = wp_parse_args(
+			$context,
+			array(
+				// The address type (billing or shipping), or null if not applicable.
+				'address_type' => null,
+				// The customer object interacting with checkout or forms.
+				'customer'     => wc()->customer,
+				// A list of sibling fields being updated during the same request.
+				'fields'       => array(),
+			)
+		);
 		try {
 			/**
-			 * Filter the result of validating an additional field.
+			 * Pass an error object to allow validation of an additional field.
 			 *
-			 * @param \WP_Error        $error        A WP_Error that extensions may add errors to.
-			 * @param mixed            $field_value  The value of the field.
-			 * @param \WP_REST_Request $request      The current API Request.
-			 * @param string|null      $address_type The type of address (billing, shipping, or null if the field is a contact/additional field).
+			 * @param \WP_Error        $error        A WP_Error object that extensions may add errors to.
+			 * @param mixed            $field_value  The value of the field being validated.
+			 * @param array  $context      Context for the field being validated.
 			 *
 			 * @since 8.6.0
 			 */
-			$filtered_result = apply_filters( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $request, $address_type );
+			do_action( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $context );
 
-			if ( $error !== $filtered_result ) {
-
-				// Different WP_Error was returned. This would remove errors from other filters. Skip filtering and allow the order to place without validating this field.
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-				trigger_error(
-					sprintf(
-						'The filter %s encountered an error. One of the filters returned a new WP_Error. Filters should use the same WP_Error passed to the filter and use the WP_Error->add function to add errors.						The field will not have any custom validation applied to it.',
-						'woocommerce_blocks_validate_additional_field_' . esc_html( $key ),
-					),
-					E_USER_WARNING
-				);
-			}
 		} catch ( \Throwable $e ) {
 
 			// One of the filters errored so skip them and validate the field. This allows the checkout process to continue.
@@ -590,20 +587,7 @@ class CheckoutFields {
 			return new \WP_Error();
 		}
 
-		if ( is_wp_error( $filtered_result ) ) {
-			return $filtered_result;
-		}
-
-		// If the filters didn't return a valid value, ignore them and return an empty WP_Error. This allows the checkout process to continue.
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-		trigger_error(
-			sprintf(
-				'The filter %s did not return a valid value. The field will not have any custom validation applied to it.',
-				'woocommerce_blocks_validate_additional_field_' . esc_html( $key )
-			),
-			E_USER_WARNING
-		);
-		return new \WP_Error();
+		return $error;
 	}
 
 	/**
