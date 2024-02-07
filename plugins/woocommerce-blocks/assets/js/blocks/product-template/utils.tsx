@@ -62,8 +62,13 @@ const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
 	sourceData,
 } );
 
+type ContextProperties = {
+	templateSlug: string;
+	postId?: string;
+};
+
 export const useGetLocation = < T, >(
-	context: Context< T >,
+	context: Context< T & ContextProperties >,
 	clientId: string
 ) => {
 	const templateSlug = context.templateSlug || '';
