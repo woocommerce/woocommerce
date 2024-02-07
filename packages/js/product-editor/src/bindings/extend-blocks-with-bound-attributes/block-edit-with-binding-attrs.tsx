@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { BLOCK_BINDINGS_ALLOWED_BLOCKS, isBlockAllowed } from '../';
+import { isBlockAllowed } from '../';
 import productEntitySource, {
 	type CoreBlockEditProps,
 } from '../product-entity-source/index';
@@ -40,6 +40,13 @@ type BoundAttributesProps = {
 	};
 };
 
+type BoundAttributesValuesProps = {
+	[ attributeName: string ]: {
+		value: string;
+		fullValue: string;
+	};
+};
+
 const blockEditWithBoundAttribute =
 	createHigherOrderComponent< BoundBlockEditComponent >(
 		( BlockEdit: BoundBlockEditComponent ) => {
@@ -49,10 +56,7 @@ const blockEditWithBoundAttribute =
 				}
 
 				const { name, attributes, setAttributes, ...restProps } = props;
-
-				/*
-				 * Create an object to organize the source attributes handlers.
-				 */
+				const { bindings } = attributes?.metadata || {};
 				const sourceAttributesHandlers: BoundAttributesProps = {};
 
 				if ( attributes?.metadata?.bindings ) {
@@ -69,71 +73,89 @@ const blockEditWithBoundAttribute =
 					);
 				}
 
-				const attributesWithBindings = useMemo( () => {
+				/*
+				 * Populate the block attributes
+				 * with the source values
+				 */
+				const boundAttributes = useMemo( () => {
+					const values: BoundAttributesValuesProps = {};
+
+					// Do not populate if the block is not allowed
+					if ( ! isBlockAllowed( name ) ) {
+						return {};
+					}
+
+					if ( bindings ) {
+						Object.entries( bindings ).forEach( ( source ) => {
+							const [ boundAttributeName, binding ] = source;
+
+							// Get the source value bound to the block attribute
+							const boundAttributeValue =
+								productEntitySource.getSourcePropValue(
+									props,
+									binding.args
+								);
+
+							values[ boundAttributeName ] =
+								boundAttributeValue.value;
+						} );
+					}
+
 					return {
-						...attributes,
-						...Object.fromEntries(
-							BLOCK_BINDINGS_ALLOWED_BLOCKS[ name ].map(
-								( attributeName ) => {
-									if (
-										sourceAttributesHandlers[
-											attributeName
-										]
-									) {
-										const {
-											// placeholder,
-											useValue: [
-												sourceValue = null,
-											] = [],
-										} =
-											sourceAttributesHandlers[
-												attributeName
-											];
-
-										if ( sourceValue ) {
-											return [
-												attributeName,
-												sourceValue,
-											];
-										}
-									}
-
-									return [
-										attributeName,
-										attributes[ attributeName ],
-									];
-								}
-							)
-						),
+						...values,
 					};
-				}, [ attributes, sourceAttributesHandlers, name ] );
+				}, [ name, bindings, props ] );
 
-				const updatedSetAttributes = useCallback(
+				// Merge the block attributes with the source values.
+				const fullAttributes = useMemo(
+					() => ( {
+						...attributes,
+						...boundAttributes,
+					} ),
+					[ attributes, boundAttributes ]
+				);
+
+				const setAttributesWithBindings = useCallback(
 					( nextAttributes: BoundBlockAttributes ) => {
-						Object.entries( nextAttributes ?? {} )
-							.filter(
-								( [ attribute ] ) =>
-									attribute in sourceAttributesHandlers
-							)
-							.forEach( ( [ attribute, value ] ) => {
-								const {
-									useValue: [ , setSourceValue = null ] = [],
-								} = sourceAttributesHandlers[ attribute ];
+						/*
+						 * Do not modify the setting attributes handler
+						 * if the block is not allowed
+						 */
+						if ( ! isBlockAllowed( name ) ) {
+							setAttributes( nextAttributes );
+							return;
+						}
 
-								if ( setSourceValue ) {
-									setSourceValue( value );
+						for ( const attributeName of Object.keys(
+							nextAttributes
+						) ) {
+							const attributeNextValue =
+								nextAttributes[ attributeName ];
+
+							// Check if the attribute is bound to a source
+							if ( boundAttributes[ attributeName ] ) {
+								const updatePropValueHandler =
+									productEntitySource.updateSourcePropHandler(
+										props,
+										bindings[ attributeName ].args
+									);
+
+								if ( updatePropValueHandler ) {
+									updatePropValueHandler(
+										attributeNextValue
+									);
 								}
-							} );
-						setAttributes( nextAttributes );
+							}
+						}
 					},
-					[ setAttributes, sourceAttributesHandlers ]
+					[ bindings, boundAttributes, name, props, setAttributes ]
 				);
 
 				return (
 					<BlockEdit
 						name={ name }
-						attributes={ attributesWithBindings }
-						setAttributes={ updatedSetAttributes }
+						attributes={ fullAttributes }
+						setAttributes={ setAttributesWithBindings }
 						{ ...restProps }
 					/>
 				);
