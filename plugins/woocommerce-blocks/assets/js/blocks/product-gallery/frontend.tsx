@@ -18,7 +18,7 @@ const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
 type Store = typeof productGallery & StorePart< ProductGallery >;
-const { state } = store< Store >( 'woocommerce/product-gallery' );
+const { state, actions } = store< Store >( 'woocommerce/product-gallery' );
 
 const selectImage = (
 	context: ProductGalleryContext,
@@ -55,6 +55,9 @@ const productGallery = {
 		get pagerButtonPressed(): boolean {
 			return state.isSelected ? true : false;
 		},
+		get thumbnailTabIndex(): string {
+			return state.isSelected ? '0' : '-1';
+		},
 	},
 	actions: {
 		closeDialog: () => {
@@ -67,6 +70,25 @@ const productGallery = {
 			document.body.classList.add(
 				'wc-block-product-gallery-modal-open'
 			);
+			const dialogOverlay = document.querySelector(
+				'.wc-block-product-gallery-dialog__overlay'
+			);
+			if ( ! dialogOverlay ) {
+				return;
+			}
+			( dialogOverlay as HTMLElement ).focus();
+
+			const dialogPreviousButton = dialogOverlay.querySelectorAll(
+				'.wc-block-product-gallery-large-image-next-previous--button'
+			)[ 0 ];
+
+			if ( ! dialogPreviousButton ) {
+				return;
+			}
+
+			setTimeout( () => {
+				( dialogPreviousButton as HTMLButtonElement ).focus();
+			}, 100 );
 		},
 		selectImage: () => {
 			const context = getContext();
@@ -81,6 +103,43 @@ const productGallery = {
 			event.stopPropagation();
 			const context = getContext();
 			selectImage( context, 'previous' );
+		},
+		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
+			const context = getContext();
+			if (
+				event.code === 'Enter' ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
+				context.selectedImage = context.imageId;
+			}
+		},
+		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
+			if (
+				( state.isSelected && event.code === 'Enter' ) ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
+				actions.openDialog();
+			}
+		},
+		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
+			if (
+				event.code === 'Enter' ||
+				event.code === 'Space' ||
+				event.code === 'NumpadEnter'
+			) {
+				if ( event.code === 'Space' ) {
+					event.preventDefault();
+				}
+				actions.openDialog();
+			}
 		},
 	},
 	callbacks: {

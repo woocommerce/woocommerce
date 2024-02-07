@@ -910,14 +910,15 @@ final class WooCommerce {
 	/**
 	 * Initialize the customer and cart objects and setup customer saving on shutdown.
 	 *
+	 * Note, wc()->customer is session based. Changes to customer data via this property are not persisted to the database automatically.
+	 *
 	 * @since 3.6.4
 	 * @return void
 	 */
 	public function initialize_cart() {
-		// Cart needs customer info.
 		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
 			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Customer should be saved during shutdown.
+			// Customer session should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
 		}
 		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {

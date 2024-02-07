@@ -693,7 +693,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Levels', () => {
 		await page
 			.getByRole( 'button', { name: 'Update', exact: true } )
 			.click();
-		await expect( page.locator( '.is-info' ) ).toContainText(
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
 			'Shipping costs updated.'
 		);
 

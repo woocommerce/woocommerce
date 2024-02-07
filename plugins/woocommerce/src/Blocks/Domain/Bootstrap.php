@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\GoogleAnalytics;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Migration;
@@ -132,7 +133,7 @@ class Bootstrap {
 		$this->container->get( CreateAccount::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( TasksController::class )->init();
-		$this->container->get( CheckoutFields::class );
+		$this->container->get( CheckoutFields::class )->init();
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -141,8 +142,7 @@ class Bootstrap {
 			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
-			$this->container->get( CheckoutFields::class )->init();
-			$this->container->get( CheckoutFieldsAdmin::class )->init();
+			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
 		}
 
 		// Load assets unless this is a request specifically for the store API.
@@ -360,6 +360,13 @@ class Bootstrap {
 			function( Container $container ) {
 				$checkout_fields_controller = $container->get( CheckoutFields::class );
 				return new CheckoutFieldsAdmin( $checkout_fields_controller );
+			}
+		);
+		$this->container->register(
+			CheckoutFieldsFrontend::class,
+			function( Container $container ) {
+				$checkout_fields_controller = $container->get( CheckoutFields::class );
+				return new CheckoutFieldsFrontend( $checkout_fields_controller );
 			}
 		);
 		$this->container->register(
