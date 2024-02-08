@@ -9,6 +9,7 @@ This is the documentation for the new E2E testing setup based on Playwright and 
     -   [Running tests for the first time](#running-tests-for-the-first-time)
     -   [To run the test again, re-create the environment to start with a fresh state](#to-run-the-test-again-re-create-the-environment-to-start-with-a-fresh-state)
     -   [Other ways of running tests](#other-ways-of-running-tests)
+    -   [Troubleshooting](#troubleshooting)
 
 ## Pre-requisites
 
@@ -42,6 +43,12 @@ Now change directory to `plugins/woocommerce-blocks/`:
 cd plugins/woocommerce-blocks/
 ```
 
+Ensure necessary browsers are installed:
+
+```sh
+npx playwright install
+```
+
 ```sh
 pnpm run env:start
 ```
@@ -49,6 +56,8 @@ pnpm run env:start
 ```sh
 pnpm run test:e2e
 ```
+
+ℹ️ If you have any problems running the tests, check out the [Troubleshooting](#troubleshooting) section for help.
 
 ### To run the test again, re-create the environment to start with a fresh state
 
@@ -142,3 +151,14 @@ To see all options, run the following command:
 ```sh
 npx playwright test --help
 ```
+
+### Troubleshooting
+
+If you run into problems the first time you try to run the tests, please run the following command before starting the test suite:
+
+```sh
+pnpm wp-env:config
+```
+
+This helps set up your environment correctly and can prevent some of the usual
+issues from happening.
