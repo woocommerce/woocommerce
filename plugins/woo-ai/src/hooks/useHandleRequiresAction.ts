@@ -95,7 +95,6 @@ const useHandleRequiresAction = ( {
 					formData.append( 'run_id', runID );
 					formData.append( 'tool_call_id', functionID );
 					formData.append( 'output', message );
-					formData.append( 'thread_id', tempthreadID );
 
 					await apiFetch( {
 						url: 'https://public-api.wordpress.com/wpcom/v2/woo-wizard/submit-tool-output',
@@ -130,7 +129,8 @@ const useHandleRequiresAction = ( {
 
 					const summaryFormData = prepareFormData(
 						summaryPrompt,
-						token
+						token,
+						tempthreadID
 					);
 
 					const summaryResponse = ( await apiFetch( {
