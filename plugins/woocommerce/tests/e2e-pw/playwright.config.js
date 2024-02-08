@@ -26,14 +26,6 @@ const config = {
 	reporter: [
 		[ 'list' ],
 		[
-			'blob',
-			{
-				outputFolder:
-					ALLURE_RESULTS_DIR ??
-					'./tests/e2e-pw/test-results/allure-results',
-			},
-		],
-		[
 			'html',
 			{
 				outputFolder:
