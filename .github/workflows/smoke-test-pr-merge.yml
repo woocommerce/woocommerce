@@ -4,9 +4,15 @@ on:
         types:
             - closed
         paths-ignore:
-            - '**/changelog/**'
-            - 'docs/**'
             - '**.md'
+            - '**/changelog/**'
+            - '**/.wireit'
+            - 'docs/**'
+            - 'plugins/woo-ai'
+            - 'plugins/woocommerce/.wordpress-org'
+            - 'plugins/woocommerce/i18n'
+            - 'plugins/woocommerce-beta-tester'
+            - 'tools'
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true

@@ -2,9 +2,15 @@ name: Run tests against PR in an environment with HPOS disabled
 on:
   pull_request:
     paths-ignore:
-      - '**/changelog/**'
-      - 'docs/**'
-      - '**.md'
+        - '**.md'
+        - '**/changelog/**'
+        - '**/.wireit'
+        - 'docs/**'
+        - 'plugins/woo-ai'
+        - 'plugins/woocommerce/.wordpress-org'
+        - 'plugins/woocommerce/i18n'
+        - 'plugins/woocommerce-beta-tester'
+        - 'tools'
   workflow_dispatch:
 
 concurrency:
