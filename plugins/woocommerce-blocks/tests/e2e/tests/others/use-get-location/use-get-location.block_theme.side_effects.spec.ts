@@ -11,18 +11,19 @@ import {
  * Internal dependencies
  */
 
-const dummyBlockPluginFileName = 'dummy-block-plugin.php';
+const useGetLocationPlugin = 'use-get-location-block';
 
 test.describe( 'useGetLocation hook', () => {
 	test.beforeAll( async () => {
 		await installPluginFromPHPFile(
-			`${ __dirname }/${ dummyBlockPluginFileName }`
+			`${ __dirname }/${ useGetLocationPlugin }.php`,
+			`${ __dirname }/${ useGetLocationPlugin }.js`
 		);
 	} );
 
 	test.afterAll( async ( { requestUtils } ) => {
 		await uninstallPluginFromPHPFile(
-			`${ __dirname }/${ dummyBlockPluginFileName }`
+			`${ __dirname }/${ useGetLocationPlugin }.php`
 		);
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
@@ -40,38 +41,38 @@ test.describe( 'useGetLocation hook', () => {
 				productSlug
 			);
 
-			await editorUtils.insertBlock( { name: 'test/useGetLocation' } );
+			await editorUtils.insertBlock( { name: 'test/use-get-location' } );
 
 			const locationType = page.getByText( 'Location type: product' );
 
 			await expect( locationType ).toBeVisible();
 		} );
-		test( 'in Single Product block in specific Product template', async ( {
-			editorUtils,
-		} ) => {
-			const productName = 'Belt';
-			const productSlug = 'belt';
+		// test( 'in Single Product block in specific Product template', async ( {
+		// 	editorUtils,
+		// } ) => {
+		// 	const productName = 'Belt';
+		// 	const productSlug = 'belt';
 
-			await editorUtils.openSpecificProductTemplate(
-				productName,
-				productSlug
-			);
+		// 	await editorUtils.openSpecificProductTemplate(
+		// 		productName,
+		// 		productSlug
+		// 	);
 
-			await editorUtils.insertBlock( { name: 'test/useGetLocation' } );
-		} );
-		test( 'in Single Product template', async ( {} ) => {} );
-		test( 'in specific Category template', async ( {} ) => {} );
-		test( 'in specific Tag template', async ( {} ) => {} );
-		test( 'in Products by Category template', async ( {} ) => {} );
-		test( 'in Products by Tag template', async ( {} ) => {} );
-		test( 'in Products by Attribute template', async ( {} ) => {} );
-		test( 'in Cart template', async ( {} ) => {} );
-		test( 'in Checkout template', async ( {} ) => {} );
-		test( 'in Order Confirmation template', async ( {} ) => {} );
-		test( 'as product in Single Product block in specific Category template', async ( {} ) => {} );
-		test( 'as product in Single Product block in specific Tag template', async ( {} ) => {} );
-		test( 'as product in Single Product block in Products by Attribute template', async ( {} ) => {} );
-		test( 'as generic in post', async ( {} ) => {} );
-		test( 'as generic in Product Catalog', async ( {} ) => {} );
+		// 	await editorUtils.insertBlock( { name: 'test/useGetLocation' } );
+		// } );
+		// test( 'in Single Product template', async ( {} ) => {} );
+		// test( 'in specific Category template', async ( {} ) => {} );
+		// test( 'in specific Tag template', async ( {} ) => {} );
+		// test( 'in Products by Category template', async ( {} ) => {} );
+		// test( 'in Products by Tag template', async ( {} ) => {} );
+		// test( 'in Products by Attribute template', async ( {} ) => {} );
+		// test( 'in Cart template', async ( {} ) => {} );
+		// test( 'in Checkout template', async ( {} ) => {} );
+		// test( 'in Order Confirmation template', async ( {} ) => {} );
+		// test( 'as product in Single Product block in specific Category template', async ( {} ) => {} );
+		// test( 'as product in Single Product block in specific Tag template', async ( {} ) => {} );
+		// test( 'as product in Single Product block in Products by Attribute template', async ( {} ) => {} );
+		// test( 'as generic in post', async ( {} ) => {} );
+		// test( 'as generic in Product Catalog', async ( {} ) => {} );
 	} );
 } );

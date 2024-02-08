@@ -1,8 +1,8 @@
-( function () {
-	const useGetLocation = require( '@woocommerce/base-hooks' ).useGetLocation;
+import { useGetLocation } from '@woocommerce/base-hooks';
 
-	const { createElement: el, Fragment } = window.wp.element;
-	const { registerBlockType } = window.wp.blocks;
+( function () {
+	const { createElement: el, Fragment } = wp.element;
+	const { registerBlockType } = wp.blocks;
 
 	const baseBlock = {
 		icon: 'cart',
@@ -23,7 +23,7 @@
 	};
 
 	registerBlockType(
-		'test/useGetLocation',
+		'test/use-get-location',
 		Object.assign(
 			{
 				title: 'Test useGetLocation hook',

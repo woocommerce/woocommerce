@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Dummy block with useGetLocation
+ * Plugin Name: Test useGetLocation hook
  * Description: Registers custom dummy block that uses useGetLocation hook and displays the result in Editor
  * @package     WordPress
  */
@@ -11,14 +11,14 @@
 function enqueue_dummy_block_plugin_script() {
 	wp_enqueue_script(
 		'woocommerce-test-use-get-location',
-		plugins_url( 'dummy-block-plugin.js', __FILE__ ),
+		plugins_url( 'use-get-location-block.js', __FILE__ ),
 		array(
 			'wp-blocks',
 			'wp-element',
 			'wp-block-editor',
-			'wp-i18n',
+			'@woocommerce/base-hooks',
 		),
-		filemtime( plugin_dir_path( __FILE__ ) . 'dummy-block-plugin.js' ),
+		filemtime( plugin_dir_path( __FILE__ ) . 'use-get-location-block.js' ),
 		true
 	);
 }
