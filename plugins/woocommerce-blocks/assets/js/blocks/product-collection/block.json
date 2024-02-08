@@ -44,7 +44,8 @@
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
-		"queryContextIncludes": "queryContextIncludes"
+		"queryContextIncludes": "queryContextIncludes",
+		"collection": "collection"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],

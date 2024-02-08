@@ -14,7 +14,8 @@
 		"queryContext",
 		"displayLayout",
 		"templateSlug",
-		"queryContextIncludes"
+		"queryContextIncludes",
+		"collection"
 	],
 	"supports": {
 		"inserter": false,
