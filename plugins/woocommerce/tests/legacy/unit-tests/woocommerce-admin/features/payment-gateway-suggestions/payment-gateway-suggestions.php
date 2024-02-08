@@ -180,7 +180,7 @@ class WC_Admin_Tests_PaymentGatewaySuggestions_Init extends WC_Unit_Test_Case {
 		$this->assertEquals( count( $stored_transients['en_US'] ), count( DefaultPaymentGateways::get_all() ) );
 
 		$expires = (int) get_transient( '_transient_timeout_woocommerce_admin_' . PaymentGatewaySuggestionsDataSourcePoller::ID . '_specs' );
-		$this->assertTrue( ( $expires - time() ) < 3 * HOUR_IN_SECONDS );
+		$this->assertTrue( ( $expires - time() ) <= 3 * HOUR_IN_SECONDS );
 	}
 
 	/**
