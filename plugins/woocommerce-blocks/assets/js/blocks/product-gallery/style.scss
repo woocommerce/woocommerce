@@ -31,7 +31,7 @@ $admin-bar-mobile-height: 46px;
 		z-index: 9999;
 		padding: $dialog-padding;
 		height: 100vh;
-		width: calc(100vw - 2*($dialog-padding));
+		width: calc(100vw - 2 * ($dialog-padding));
 
 		.admin-bar & {
 			margin-top: $admin-bar-desktop-height;
