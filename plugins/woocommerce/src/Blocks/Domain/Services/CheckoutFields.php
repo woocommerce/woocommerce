@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use WC_Customer;
 use WC_Order;
+use WP_Error;
 
 /**
  * Service class managing checkout fields and its related extensibility points.
@@ -253,7 +254,7 @@ class CheckoutFields {
 	 *
 	 * @param array $options The field options.
 	 *
-	 * @return \WP_Error|void True if the field was registered, a WP_Error otherwise.
+	 * @return WP_Error|void True if the field was registered, a WP_Error otherwise.
 	 */
 	public function register_checkout_field( $options ) {
 		// Check the options and show warnings if they're not supplied. Return early if an error that would prevent registration is encountered.
@@ -537,39 +538,65 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Sanitize an additional field against any custom sanitization rules.
+	 *
+	 * @since 8.7.0
+
+	 * @param string $field_key   The key of the field.
+	 * @param mixed  $field_value The value of the field.
+	 * @return mixed
+	 */
+	public function sanitize_field( $field_key, $field_value ) {
+		try {
+			/**
+			 * Allow custom sanitization of an additional field.
+			 *
+			 * @param mixed  $field_value The value of the field being sanitized.
+			 * @param string $field_key   Key of the field being sanitized.
+			 *
+			 * @since 8.7.0
+			 */
+			return apply_filters( 'woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
+
+		} catch ( \Throwable $e ) {
+			// One of the filters errored so skip it. This allows the checkout process to continue.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error(
+				sprintf(
+					'The filter %s encountered an error. The field %s will not have any custom sanitization applied to it. %s',
+					'woocommerce_blocks_sanitize_additional_field',
+					esc_html( $field_key ),
+					esc_html( $e->getMessage() )
+				),
+				E_USER_WARNING
+			);
+		}
+
+		return $field_value;
+	}
+
+	/**
 	 * Validate an additional field against any custom validation rules.
 	 *
-	 * @param string $key          The key of the field.
-	 * @param mixed  $field_value  The value of the field.
-	 * @param array  $context      Context for the field being validated that gets passed to hooks.
 	 * @since 8.6.0
 	 *
-	 * @return \WP_Error
+	 * @param string $field_key    The key of the field.
+	 * @param mixed  $field_value  The value of the field.
+	 * @return WP_Error
 	 */
-	public function validate_field( $key, $field_value, $context = array() ) {
-		$error   = new \WP_Error();
-		$context = wp_parse_args(
-			$context,
-			array(
-				// The address type (billing or shipping), or null if not applicable.
-				'address_type' => null,
-				// The customer object interacting with checkout or forms.
-				'customer'     => wc()->customer,
-				// A list of fields (key value pairs) being updated during the same request.
-				'fields'       => array(),
-			)
-		);
+	public function validate_field( $field_key, $field_value ) {
+		$errors = new WP_Error();
 		try {
 			/**
 			 * Pass an error object to allow validation of an additional field.
 			 *
-			 * @param \WP_Error        $error        A WP_Error object that extensions may add errors to.
-			 * @param mixed            $field_value  The value of the field being validated.
-			 * @param array  $context      Context for the field being validated.
+			 * @param WP_Error $errors      A WP_Error object that extensions may add errors to.
+			 * @param mixed    $field_value The value of the field being validated.
+			 * @param string   $field_key   Key of the field being sanitized.
 			 *
-			 * @since 8.6.0
+			 * @since 8.7.0
 			 */
-			do_action( 'woocommerce_blocks_validate_additional_field_' . $key, $error, $field_value, $context );
+			do_action( 'woocommerce_blocks_validate_additional_field', $errors, $field_value, $field_key );
 
 		} catch ( \Throwable $e ) {
 
@@ -577,17 +604,18 @@ class CheckoutFields {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error(
 				sprintf(
-					'The filter %s encountered an error. The field will not have any custom validation applied to it. %s',
-					'woocommerce_blocks_validate_additional_field_' . esc_html( $key ),
+					'The action %s encountered an error. The field %s will not have any custom validation applied to it. %s',
+					'woocommerce_blocks_validate_additional_field',
+					esc_html( $field_key ),
 					esc_html( $e->getMessage() )
 				),
 				E_USER_WARNING
 			);
 
-			return new \WP_Error();
+			return new WP_Error();
 		}
 
-		return $error;
+		return $errors;
 	}
 
 	/**
@@ -672,17 +700,62 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Validates a field value for a given group.
+	 * Validates a set of fields for a given location against custom validation rules.
+	 *
+	 * @param array  $fields Array of key value pairs of field values to validate.
+	 * @param string $location The location being validated (address|contact|additional).
+	 * @param string $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @return WP_Error
+	 */
+	public function validate_fields_for_location( $fields, $location, $group = '' ) {
+		$errors = new WP_Error();
+
+		try {
+			/**
+			 * Pass an error object to allow validation of an additional field.
+			 *
+			 * @param WP_Error $errors      A WP_Error object that extensions may add errors to.
+			 * @param mixed    $field_value The value of the field being validated.
+			 * @param string   $field_key   Key of the field being sanitized.
+			 *
+			 * @since 8.7.0
+			 */
+			do_action( 'woocommerce_blocks_validate_' . $location . '_fields', $errors, $fields, $group );
+
+		} catch ( \Throwable $e ) {
+
+			// One of the filters errored so skip them. This allows the checkout process to continue.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error(
+				sprintf(
+					'The action %s encountered an error. The field location %s will not have any custom validation applied to it. %s',
+					esc_html( 'woocommerce_blocks_validate_' . $location . '_fields' ),
+					esc_html( $location ),
+					esc_html( $e->getMessage() )
+				),
+				E_USER_WARNING
+			);
+
+			return new WP_Error();
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Validates a field to check it belongs to the given location and is valid according to its registration.
+	 *
+	 * This does not apply any custom validation rules on the value.
 	 *
 	 * @param string $key The field key.
 	 * @param mixed  $value The field value.
 	 * @param string $location The location to validate the field for (address|contact|additional).
 	 *
-	 * @return true|\WP_Error True if the field is valid, a WP_Error otherwise.
+	 * @return true|WP_Error True if the field is valid, a WP_Error otherwise.
 	 */
 	public function validate_field_for_location( $key, $value, $location ) {
 		if ( ! $this->is_field( $key ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_blocks_checkout_field_invalid',
 				\sprintf(
 					// translators: % is field key.
@@ -693,7 +766,7 @@ class CheckoutFields {
 		}
 
 		if ( ! in_array( $key, $this->fields_locations[ $location ], true ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_blocks_checkout_field_invalid_location',
 				\sprintf(
 					// translators: %1$s is field key, %2$s location.
@@ -706,7 +779,7 @@ class CheckoutFields {
 
 		$field = $this->additional_fields[ $key ];
 		if ( ! empty( $field['required'] ) && empty( $value ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_blocks_checkout_field_required',
 				\sprintf(
 					// translators: %s is field key.
