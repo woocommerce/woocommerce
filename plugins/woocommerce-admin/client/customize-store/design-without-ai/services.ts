@@ -28,10 +28,7 @@ import {
 	FontCollectionsResponse,
 } from './fonts';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
-import {
-	FONT_PAIRINGS,
-	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
-} from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 
 const assembleSite = async () => {
 	await updateTemplate( {
