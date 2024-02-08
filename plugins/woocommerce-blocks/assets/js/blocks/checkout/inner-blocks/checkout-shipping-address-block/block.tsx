@@ -15,6 +15,7 @@ import {
 } from '@woocommerce/blocks-components';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
+import { getSetting } from '@woocommerce/settings';
 import { useSelect, dispatch } from '@wordpress/data';
 import { CART_STORE_KEY, processErrorResponse } from '@woocommerce/block-data';
 import {
@@ -49,6 +50,7 @@ const Block = ( {
 		setUseShippingAsBilling,
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
+	const isGuest = getSetting( 'currentUserId' ) === 0;
 
 	// Syncs the billing address with the shipping address.
 	const syncBillingWithShipping = () => {
@@ -86,7 +88,9 @@ const Block = ( {
 	};
 
 	const clearBillingAddress = ( address: BillingAddress ) => {
-		if ( ! address ) {
+		// If the address is empty or the user is not a guest,
+		// we don't need to clear the address.
+		if ( ! address || ! isGuest ) {
 			return;
 		}
 		const emptyAddress = emptyAddressFields(
