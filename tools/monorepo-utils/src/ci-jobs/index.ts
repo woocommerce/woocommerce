@@ -15,7 +15,7 @@ import { isGithubCI } from '../core/environment';
 
 const program = new Command( 'ci-jobs' )
 	.description(
-		'Generates CI workflow jobs based on the changes since the base ref.'
+		'Generates CI workflow jobs based on the changes since the base ref'
 	)
 	.option(
 		'-r --base-ref <baseRef>',
