@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
+
 /**
  * AddressSchema class.
  *
@@ -247,19 +248,18 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
 			// Skip additional validation if the schema validation failed.
 			if ( true === $result && in_array( $key, $additional_keys, true ) ) {
-				$result = $this->additional_fields_controller->validate_field(
-					$key,
-					$address[ $key ],
-					array(
-						'address_type' => 'shipping_address' === $this->title ? 'shipping' : 'billing',
-						'fields'       => $address,
-					)
-				);
+				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ] );
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );
 			}
+		}
+
+		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', $this->title === 'billing_address' ? 'billing' : 'shipping' );
+
+		if ( is_wp_error( $result ) && $result->has_errors() ) {
+			$errors->merge_from( $result );
 		}
 
 		return $errors->has_errors( $errors ) ? $errors : true;
