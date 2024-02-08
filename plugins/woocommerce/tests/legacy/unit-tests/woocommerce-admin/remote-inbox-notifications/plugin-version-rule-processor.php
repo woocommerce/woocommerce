@@ -61,6 +61,38 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends
 	}
 
 	/**
+	 * Test that the processor does not pass if plugin version does not exist.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_does_not_pass_if_plugin_version_does_not_exist() {
+		$mock_plugins_provider = new MockPluginsProvider(
+			array(
+				'jetpack',
+			),
+			array(
+				'jetpack/jetpack.php' => array(
+					'name' => 'jetpack',
+				),
+			)
+		);
+		$processor             = new PluginVersionRuleProcessor( $mock_plugins_provider );
+		$rule                  = json_decode(
+			'{
+				"type": "plugin_version",
+				"plugin": "jetpack",
+				"version": "1.2.3",
+				"operator": "="
+			}'
+		);
+
+		$result = $processor->process( $rule, new stdClass() );
+
+		$this->assertEquals( false, $result );
+	}
+
+
+	/**
 	 * Test that the processor does not pass if the installed version is less
 	 * than the required version.
 	 *
