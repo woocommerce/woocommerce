@@ -108,7 +108,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		const reviewerName = testData.review.reviewer;
 
 		//Hover over the product review to have 'Edit' displayed
-		await page.hover( '.comment-text' );
+		await page.hover( `#comment-${ testData.review.id }` );
 
 		// Select Trash action, check confirmation prompt and undo
 		await page.getByRole( 'button', { name: 'Trash' } ).click();
