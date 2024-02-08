@@ -227,10 +227,6 @@ abstract class WC_Data {
 			return $this->get_id();
 		}
 
-		if ( ! $this->has_unsaved_changes() ) {
-			return $this->get_id();
-		}
-
 		/**
 		 * Trigger action before saving to the DB. Allows you to adjust object props before save.
 		 *
@@ -240,6 +236,9 @@ abstract class WC_Data {
 		do_action( 'woocommerce_before_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		if ( $this->get_id() ) {
+			if ( ! $this->has_unsaved_changes() ) {
+				return $this->get_id();
+			}
 			$this->data_store->update( $this );
 		} else {
 			$this->data_store->create( $this );
