@@ -504,7 +504,7 @@ class ProductCollectionPage {
 			undefined,
 			parentClientId
 		);
-		await this.chooseCollectionInTemplate( collection );
+		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
 	}
 
