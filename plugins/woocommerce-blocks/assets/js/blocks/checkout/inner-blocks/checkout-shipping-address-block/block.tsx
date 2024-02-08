@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, Fragment, useRef } from '@wordpress/element';
+import { useMemo, Fragment } from '@wordpress/element';
 import { useEffectOnce } from 'usehooks-ts';
 import {
 	useCheckoutAddress,
@@ -21,6 +21,7 @@ import {
 	emptyAddressFields,
 	removeNoticesWithContext,
 } from '@woocommerce/base-utils';
+import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -49,8 +50,6 @@ const Block = ( {
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
 
-	const previousBillingAddressRef = useRef< BillingAddress | null >( null );
-
 	// Syncs the billing address with the shipping address.
 	const syncBillingWithShipping = () => {
 		const syncValues: Partial< BillingAddress > = {
@@ -65,7 +64,6 @@ const Block = ( {
 			delete syncValues.company;
 		}
 
-		previousBillingAddressRef.current = billingAddress;
 		setBillingAddress( syncValues );
 	};
 
@@ -87,17 +85,15 @@ const Block = ( {
 			} );
 	};
 
-	const deSyncBillingWithShipping = () => {
-		// If we have a previous billing address, use that.
-		// Otherwise, create an empty address.
-		if ( previousBillingAddressRef.current ) {
-			setBillingAddress( previousBillingAddressRef.current );
-			syncBillingAddress( previousBillingAddressRef.current );
-		} else {
-			const emptyAddress = emptyAddressFields( billingAddress );
-			setBillingAddress( emptyAddress );
-			syncBillingAddress( emptyAddress );
+	const clearBillingAddress = ( address: BillingAddress ) => {
+		if ( ! address ) {
+			return;
 		}
+		const emptyAddress = emptyAddressFields(
+			address as CartResponseBillingAddress
+		);
+		setBillingAddress( emptyAddress );
+		syncBillingAddress( emptyAddress );
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
@@ -169,7 +165,7 @@ const Block = ( {
 					if ( checked ) {
 						syncBillingWithShipping();
 					} else {
-						deSyncBillingWithShipping();
+						clearBillingAddress( billingAddress );
 					}
 				} }
 			/>
