@@ -31,7 +31,6 @@ class EvaluateSuggestion {
 		return $suggestion;
 	}
 
-
 	/**
 	 * Evaluates the specs and returns the visible suggestions.
 	 *
