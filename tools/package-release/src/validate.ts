@@ -11,25 +11,6 @@ import { gt as greaterVersionThan } from 'semver';
 import { MONOREPO_ROOT, excludedPackages } from './const';
 
 /**
- * Determine if package is JS.
- *
- * @param {string} name package name.
- * @return {undefined|string} Package type js or php.
- */
-export const getPackageType = ( name: string ) => {
-	const packageData = getPackageData( name );
-	if ( ! packageData ) {
-		return;
-	}
-	if ( packageData.path.includes( 'packages/js' ) ) {
-		return 'js';
-	}
-	if ( packageData.path.includes( 'packages/php' ) ) {
-		return 'php';
-	}
-};
-
-/**
  * Get pnpm's package data.
  *
  * @param {string} name package name.
@@ -55,6 +36,25 @@ const getPackageData = ( name?: string ) => {
 			console.log( e );
 			throw e;
 		}
+	}
+};
+
+/**
+ * Determine if package is JS.
+ *
+ * @param {string} name package name.
+ * @return {undefined|string} Package type js or php.
+ */
+export const getPackageType = ( name: string ) => {
+	const packageData = getPackageData( name );
+	if ( ! packageData ) {
+		return;
+	}
+	if ( packageData.path.includes( 'packages/js' ) ) {
+		return 'js';
+	}
+	if ( packageData.path.includes( 'packages/php' ) ) {
+		return 'php';
 	}
 };
 

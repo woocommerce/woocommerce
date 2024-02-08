@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 /**
  * Internal dependencies

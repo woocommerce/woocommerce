@@ -130,7 +130,7 @@ export default class PackageRelease extends Command {
 					const cwd = getFilepathFromPackageName( name );
 					if ( cwd.includes( 'packages/php' ) ) {
 						this.error(
-							'PHP packages are not supported just yet.'
+							'Publishing PHP packages is not supported just yet.'
 						);
 					}
 					execSync(
