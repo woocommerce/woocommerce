@@ -40,7 +40,7 @@ const getPackageData = ( name?: string ) => {
 };
 
 /**
- * Determine if package is JS.
+ * Determine if package is JS or PHP.
  *
  * @param {string} name package name.
  * @return {undefined|string} Package type js or php.
