@@ -87,7 +87,10 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 
 		// Create new review, Quick Edit it and save
 		const updatedReview = `(edited ${ Date.now() })`;
-		await page.getByRole( 'button', { name: 'Quick Edit' } ).click();
+		await page
+			.locator( `#comment-${ testData.review.id }` )
+			.getByRole( 'button', { name: 'Quick Edit' } )
+			.click();
 		await page.locator( '.wp-editor-area' ).first().fill( updatedReview );
 		await page.getByRole( 'button', { name: 'Update Comment' } ).click();
 
