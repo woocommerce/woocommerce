@@ -1,24 +1,12 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../../../fixtures' );
 const {
 	toggleBlockProductEditor,
 } = require( '../../../../utils/simple-products' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 baseTest.describe( 'Products > Edit Product', () => {
 	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
 	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-
-			await use( api );
-		},
-
 		product: async ( { page, api }, use ) => {
 			let product;
 
