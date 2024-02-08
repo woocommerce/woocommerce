@@ -16,6 +16,23 @@ import { isEqual, noop } from 'lodash';
 
 const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
+// Removes the typography settings from the styles when the user is changing
+// to a new typography variation. Otherwise, some of the user's old
+// typography settings will persist making new typography settings
+// depend on old ones
+const resetTypographySettings = ( variation, userStyles ) => {
+	if ( variation.settings.typography ) {
+		delete userStyles.typography;
+		for ( const elementKey in userStyles.elements ) {
+			if ( userStyles.elements[ elementKey ].typography ) {
+				delete userStyles.elements[ elementKey ].typography;
+			}
+		}
+	}
+
+	return userStyles;
+};
+
 export const VariationContainer = ( { variation, children } ) => {
 	const { base, user, setUserConfig } = useContext( GlobalStylesContext );
 	const context = useMemo( () => {
@@ -58,7 +75,7 @@ export const VariationContainer = ( { variation, children } ) => {
 					variation.settings
 				),
 				styles: mergeBaseAndUserConfigs(
-					user.styles,
+					resetTypographySettings( variation, user.styles ),
 					variation.styles
 				),
 			};
