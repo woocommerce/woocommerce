@@ -24,19 +24,21 @@ jobs:
                   - name: Normal
                     file: playwright.config.ts
                     resultPath: test-results
-                    shards: 5
                   - name: Classic
                     file: playwright.classic-theme.config.ts
                     resultPath: test-results-classic-theme
-                    shards: 5
                   - name: SideEffects
                     file: playwright.side-effects.config.ts
                     resultPath: test-results-side-effects
-                    shards: 5
                   - name: BlockThemeWithTemplates
                     file: playwright.block-theme-with-templates.config.ts
                     resultPath: test-results-block-theme-with-templates
-                    shards: 5
+                shards:
+                  - name: 1/5
+                  - name: 2/5
+                  - name: 3/5
+                  - name: 4/5
+                  - name: 5/5
         steps:
           - uses: actions/checkout@v3
 
@@ -54,7 +56,7 @@ jobs:
 
           - name: Run Playwright tests
             working-directory: plugins/woocommerce-blocks
-            run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.shard }}/${{ matrix.config.shards }}
+            run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.shards.name }}
 
           - uses: actions/upload-artifact@v3
             if: ${{ failure() }}
