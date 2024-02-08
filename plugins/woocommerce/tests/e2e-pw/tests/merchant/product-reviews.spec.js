@@ -83,7 +83,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		).toBeVisible();
 
 		//Hover over the product review to have 'Edit' displayed
-		await page.hover( '.comment-text' );
+		await page.hover( `#comment-${ testData.review.id }` );
 
 		// Create new review, Quick Edit it and save
 		const updatedReview = `(edited ${ Date.now() })`;
