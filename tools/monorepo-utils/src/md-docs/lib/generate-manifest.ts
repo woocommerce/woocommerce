@@ -61,7 +61,7 @@ function getManifestVersion() {
 	const versionData = fs.readFileSync( versionFile, 'utf-8' );
 	const versions = versionData.match( /Version: ([0-9]+\.[0-9]+\.[0-9]+.*)/ );
 	if ( versions.length > 1 ) {
-		versionString = versions[1];
+		versionString = versions[ 1 ];
 	}
 
 	return versionString;
