@@ -22,7 +22,6 @@ const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const { clientId, attributes, setAttributes } = props;
-	const { queryId } = attributes;
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -30,24 +29,6 @@ const ProductCollectionContent = (
 	} );
 
 	const instanceId = useInstanceId( ProductCollectionContent );
-
-	// We need this for multi-query block pagination.
-	// Query parameters for each block are scoped to their ID.
-	useEffect( () => {
-		if ( ! Number.isFinite( queryId ) ) {
-			setAttributes( { queryId: Number( instanceId ) } );
-		}
-	}, [ queryId, instanceId, setAttributes ] );
-
-	/**
-	 * We need to set a unique ID for each instance of this block.
-	 * This will help us uniquely identify each block.
-	 */
-	useEffect( () => {
-		if ( ! attributes?.id ) {
-			setAttributes( { id: clientId } );
-		}
-	}, [ attributes, setAttributes ] );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
@@ -61,11 +42,24 @@ const ProductCollectionContent = (
 				inherit: getDefaultValueOfInheritQueryFromTemplate(),
 			},
 			...( attributes as Partial< ProductCollectionAttributes > ),
+			...{
+				// We need a reliable way to identify unique instances of this block regardless of
+				// where it might exist. While the clientId is not stable across page loads, it is
+				// a uuid and we can rely on it for uniqueness without needing to geenrate a new
+				// unique ID and pull in a dependency.
+				id: attributes?.id || clientId,
+				// Each instance of the block needs to have a unique queryId so that pagination works
+				// when multiple instances of this block are present. `instanceId` is the index of
+				// the block on the page and is stable across saves with automatic handling for
+				// re-indexing when these blocks are added, removed, or moved. Depending on
+				// what it's set to it might be changed during block editing but that won't
+				// negatively impact the functionality and pagination will still work.
+				queryId: instanceId as number,
+			},
 		} );
-		// We don't wanna add attributes as a dependency here.
-		// Because we want this to run only once.
+		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ setAttributes ] );
+	}, [] );
 
 	/**
 	 * If inherit is not a boolean, then we haven't set default attributes yet.
