@@ -128,7 +128,10 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		).toBeVisible();
 
 		// Select Trash action and delete it permanently
-		await page.getByRole( 'button', { name: 'Trash' } ).click();
+		await page
+			.locator( `#comment-${ testData.review.id }` )
+			.getByRole( 'button', { name: 'Trash' } )
+			.click();
 		await expect(
 			page.getByText(
 				`Comment by ${ reviewerName } moved to the Trash`
