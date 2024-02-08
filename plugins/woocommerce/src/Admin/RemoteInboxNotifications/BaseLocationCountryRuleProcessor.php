@@ -25,7 +25,11 @@ class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function process( $rule, $stored_state ) {
 		$base_location = wc_get_base_location();
-		if ( ! $base_location ) {
+		if (
+			! is_array( $base_location ) ||
+			! array_key_exists( $base_location['country'] ) ||
+			! array_key_exists( $base_location['state'] )
+		) {
 			return false;
 		}
 
