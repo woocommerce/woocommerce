@@ -373,8 +373,11 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCreation( templateName: string ) {
-		const templateRow = this.page.getByRole( 'row', {
-			name: templateName,
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
 		} );
 		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
 		await this.page
@@ -394,8 +397,11 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCustomizations( templateName: string ) {
-		const templateRow = this.page.getByRole( 'row', {
-			name: templateName,
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
 		} );
 		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
 		await this.page
