@@ -118,7 +118,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: 'Publish',
 				} )
 				.click();
 
@@ -160,7 +160,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: 'Publish',
 				} )
 				.click();
 
