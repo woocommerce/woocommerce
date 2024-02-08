@@ -81,7 +81,7 @@ class Features {
 	 * @return array
 	 */
 	public static function get_optional_feature_options() {
-		$features = [];
+		$features = array();
 
 		foreach ( array_keys( self::$optional_features ) as $optional_feature_key ) {
 			$feature_class = self::get_feature_class( $optional_feature_key );
@@ -148,7 +148,7 @@ class Features {
 	public static function get_available_features() {
 		$features                      = self::get_features();
 		$optional_feature_keys         = array_keys( self::$optional_features );
-		$optional_features_unavailable = [];
+		$optional_features_unavailable = array();
 
 		/**
 		 * Filter allowing WooCommerce Admin optional features to be disabled.
