@@ -56,9 +56,10 @@ class PublishAfterTimeRuleProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
-		$publish_after_date = \DateTime::createFromFormat( 'Y-m-d H:i:s', $rule->publish_after );
-		if ( false === $publish_after_date ) {
-			return false; // Invalid date/time format.
+		try {
+			new \DateTime( $rule->publish_after );
+		} catch ( \Exception $e ) {
+			return false;
 		}
 
 		return true;

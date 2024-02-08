@@ -76,4 +76,23 @@ class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor ext
 
 		$this->assertEquals( false, $result );
 	}
+
+	/**
+	 * Tests that the rule validation fails if the publish_before time is not a valid date time format.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_fails_for_invalid_date_time_format() {
+		$processor = new PublishBeforeTimeRuleProcessor();
+
+		$rules  = json_decode(
+			'{
+				"type": "publish_before_time",
+				"publish_before": "wrong-format"
+			}'
+		);
+		$result = $processor->validate( $rules );
+
+		$this->assertEquals( false, $result );
+	}
 }
