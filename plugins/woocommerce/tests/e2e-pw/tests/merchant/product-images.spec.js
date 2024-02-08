@@ -91,7 +91,7 @@ baseTest.describe( 'Products > Product Images', () => {
 			);
 		} );
 
-		await test.step( 'set product image', async () => {
+		await test.step( 'Set product image', async () => {
 			await page
 				.getByRole( 'link', { name: 'Set product image' } )
 				.click();
