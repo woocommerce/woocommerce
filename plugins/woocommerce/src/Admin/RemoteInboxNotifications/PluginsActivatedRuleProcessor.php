@@ -48,6 +48,16 @@ class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
 		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
 
 		foreach ( $rule->plugins as $plugin_slug ) {
+			if ( ! is_string( $plugin_slug ) ) {
+				$logger->warning(
+					sprintf(
+						'Plugin slug "%s" is not a string.',
+						$plugin_slug
+					),
+				);
+				return false;
+			}
+
 			if ( ! in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
 				return false;
 			}
