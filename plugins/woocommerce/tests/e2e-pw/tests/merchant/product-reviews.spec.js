@@ -111,7 +111,10 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		await page.hover( `#comment-${ testData.review.id }` );
 
 		// Select Trash action, check confirmation prompt and undo
-		await page.getByRole( 'button', { name: 'Trash' } ).click();
+		await page
+			.locator( `#comment-${ testData.review.id }` )
+			.getByRole( 'button', { name: 'Trash' } )
+			.click();
 		await expect(
 			page.getByText(
 				`Comment by ${ reviewerName } moved to the Trash`
