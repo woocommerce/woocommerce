@@ -148,6 +148,7 @@ class ProductGallery extends AbstractBlock {
 						'dialogVisibleImagesIds'          => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, false ),
 						'mouseIsOverPreviousOrNextButton' => false,
 						'productId'                       => $product_id,
+						'elementThatTriggeredDialogOpening' => null,
 					)
 				)
 			);
