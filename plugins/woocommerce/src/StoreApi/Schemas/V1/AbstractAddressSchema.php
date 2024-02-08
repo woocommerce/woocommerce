@@ -133,10 +133,10 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
-						$carry[ $key ]  = $rest_sanitized;
+						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
 						break;
 				}
+				$carry[ $key ] = $this->additional_fields_controller->sanitize_field( $key, $carry[ $key ] );
 				return $carry;
 			},
 			[]
@@ -256,7 +256,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			}
 		}
 
-		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', $this->title === 'billing_address' ? 'billing' : 'shipping' );
+		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', 'billing_address' === $this->title ? 'billing' : 'shipping' );
 
 		if ( is_wp_error( $result ) && $result->has_errors() ) {
 			$errors->merge_from( $result );

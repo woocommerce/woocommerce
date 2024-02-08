@@ -661,24 +661,6 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of fields definitions only meant for order.
-	 *
-	 * @return array An array of fields definitions.
-	 */
-	public function get_order_only_fields() {
-		// For now, all contact fields are order only fields, along with additional fields.
-		$order_fields_keys = array_merge( $this->get_contact_fields_keys(), $this->get_additional_fields_keys() );
-
-		return array_filter(
-			$this->get_additional_fields(),
-			function( $key ) use ( $order_fields_keys ) {
-				return in_array( $key, $order_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-	}
-
-	/**
 	 * Returns an array of fields for a given group.
 	 *
 	 * @param string $location The location to get fields for (address|contact|additional).
@@ -1038,6 +1020,28 @@ class CheckoutFields {
 					$key = str_replace( '/shipping/', '', $key );
 				}
 				return in_array( $key, $customer_fields_keys, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * From a set of fields, returns only the ones for a given location.
+	 *
+	 * @param array  $fields The fields to filter.
+	 * @param string $location The location to validate the field for (address|contact|additional).
+	 * @return array The filtered fields.
+	 */
+	public function filter_fields_for_location( $fields, $location ) {
+		return array_filter(
+			$fields,
+			function( $key ) use ( $location ) {
+				if ( 0 === strpos( $key, '/billing/' ) ) {
+					$key = str_replace( '/billing/', '', $key );
+				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
+					$key = str_replace( '/shipping/', '', $key );
+				}
+				return $this->is_field( $key ) && $this->get_field_location( $key ) === $location;
 			},
 			ARRAY_FILTER_USE_KEY
 		);
