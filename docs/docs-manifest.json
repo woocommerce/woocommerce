@@ -27,11 +27,12 @@
           "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
         },
         {
-          "post_title": "How to configure caching plugins for WooCommerce",
+          "post_title": "Updated - How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
+          "version": "8.6.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
-          "hash": "5f0d999813ace7d5a9b2ae830d67b50c05806d87d1ba1cbb2d2c88a69aec1328",
+          "hash": "76c201f46f7bae3d638b719b6e90d5c257d55dee01457a51ba34ea3cb4e9580b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
@@ -1206,5 +1207,5 @@
     }
   ],
   "version": "8.7.0-dev",
-  "hash": "730d7aec24f39894b3ee6d3e6e30de824885fe668783e6e9635111446b8f001b"
+  "hash": "934f66f797937b8bdfbefb9880991da9d67df212cc4b542b3a866c89b52b82ae"
 }
