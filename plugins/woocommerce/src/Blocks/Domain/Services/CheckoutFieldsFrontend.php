@@ -193,20 +193,13 @@ class CheckoutFieldsFrontend {
 			if ( ! isset( $_POST[ $key ] ) ) {
 				continue;
 			}
-			$value                = wc_clean( wp_unslash( $_POST[ $key ] ) );
-			$field_values[ $key ] = $value;
+			$sanitized_value      = $this->checkout_fields_controller->sanitize_field( $key, wc_clean( wp_unslash( $_POST[ $key ] ) ) );
+			$field_values[ $key ] = $sanitized_value;
 		}
 
-		// Validate and persist additional fields.
+		// Validate and persist individual additional fields.
 		foreach ( $field_values as $key => $value ) {
-			$validation_result = $this->checkout_fields_controller->validate_field(
-				$key,
-				$value,
-				array(
-					'customer' => $customer,
-					'fields'   => $field_values,
-				)
-			);
+			$validation_result = $this->checkout_fields_controller->validate_field( $key, $value );
 
 			if ( is_wp_error( $validation_result ) && $validation_result->has_errors() ) {
 				wc_add_notice( $validation_result->get_error_message(), 'error' );
@@ -214,6 +207,13 @@ class CheckoutFieldsFrontend {
 			}
 
 			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer );
+		}
+
+		// Validate all fields for this location.
+		$validation_result = $this->checkout_fields_controller->validate_fields_for_location( $field_values, 'contact' );
+
+		if ( is_wp_error( $validation_result ) && $validation_result->has_errors() ) {
+			wc_add_notice( $validation_result->get_error_message(), 'error' );
 		}
 
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
@@ -272,21 +272,13 @@ class CheckoutFieldsFrontend {
 				continue;
 			}
 
-			$value                = wc_clean( wp_unslash( $_POST[ $post_key ] ) );
-			$field_values[ $key ] = $value;
+			$sanitized_value      = $this->checkout_fields_controller->sanitize_field( $key, wc_clean( wp_unslash( $_POST[ $post_key ] ) ) );
+			$field_values[ $key ] = $sanitized_value;
 		}
 
-		// Validate and persist additional fields.
+		// Validate and persist individual additional fields.
 		foreach ( $field_values as $key => $value ) {
-			$validation_result = $this->checkout_fields_controller->validate_field(
-				$key,
-				$value,
-				array(
-					'customer'     => $customer,
-					'address_type' => $address_type,
-					'fields'       => $field_values,
-				)
-			);
+			$validation_result = $this->checkout_fields_controller->validate_field( $key, $value );
 
 			if ( is_wp_error( $validation_result ) && $validation_result->has_errors() ) {
 				wc_add_notice( $validation_result->get_error_message(), 'error' );
@@ -294,6 +286,13 @@ class CheckoutFieldsFrontend {
 			}
 
 			$this->checkout_fields_controller->persist_field_for_customer( "/{$address_type}/{$key}", $value, $customer );
+		}
+
+		// Validate all fields for this location.
+		$validation_result = $this->checkout_fields_controller->validate_fields_for_location( array_merge( $address, $field_values ), 'address', $address_type );
+
+		if ( is_wp_error( $validation_result ) && $validation_result->has_errors() ) {
+			wc_add_notice( $validation_result->get_error_message(), 'error' );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
