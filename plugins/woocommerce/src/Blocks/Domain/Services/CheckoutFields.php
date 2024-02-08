@@ -604,15 +604,13 @@ class CheckoutFields {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error(
 				sprintf(
-					'The action %s encountered an error. The field %s will not have any custom validation applied to it. %s',
+					'The action %s encountered an error. The field %s may not have any custom validation applied to it. %s',
 					'woocommerce_blocks_validate_additional_field',
 					esc_html( $field_key ),
 					esc_html( $e->getMessage() )
 				),
 				E_USER_WARNING
 			);
-
-			return new WP_Error();
 		}
 
 		return $errors;
@@ -696,9 +694,9 @@ class CheckoutFields {
 			/**
 			 * Pass an error object to allow validation of an additional field.
 			 *
-			 * @param WP_Error $errors      A WP_Error object that extensions may add errors to.
-			 * @param mixed    $field_value The value of the field being validated.
-			 * @param string   $field_key   Key of the field being sanitized.
+			 * @param WP_Error $errors  A WP_Error object that extensions may add errors to.
+			 * @param mixed    $fields  List of fields (key value pairs) in this location.
+			 * @param string   $group   The group of this location (shipping|billing|'').
 			 *
 			 * @since 8.7.0
 			 */
@@ -710,15 +708,13 @@ class CheckoutFields {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error(
 				sprintf(
-					'The action %s encountered an error. The field location %s will not have any custom validation applied to it. %s',
+					'The action %s encountered an error. The field location %s may not have any custom validation applied to it. %s',
 					esc_html( 'woocommerce_blocks_validate_' . $location . '_fields' ),
 					esc_html( $location ),
 					esc_html( $e->getMessage() )
 				),
 				E_USER_WARNING
 			);
-
-			return new WP_Error();
 		}
 
 		return $errors;
