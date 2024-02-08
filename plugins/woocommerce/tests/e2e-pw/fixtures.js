@@ -8,6 +8,12 @@ exports.test = base.test.extend( {
 			consumerKey: process.env.CONSUMER_KEY,
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
+			axiosConfig: {
+				// allow 404s, so we can check if a resource was deleted without try/catch
+				validateStatus( status ) {
+					return ( status >= 200 && status < 300 ) || status === 404;
+				},
+			},
 		} );
 
 		await use( api );
