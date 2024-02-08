@@ -95,10 +95,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		await page.getByRole( 'button', { name: 'Update Comment' } ).click();
 
 		// Verify that the edited comment is there
-		const commentText = page.locator( '.comment-text' );
-		await commentText.waitFor( { state: 'visible' } );
-		const updatedComment = await commentText.innerText();
-		await expect( updatedComment ).toBe( updatedReview );
+		await expect( page.getByText( updatedReview ) ).toBeVisible();
 	} );
 
 	test( 'can delete product review', async ( { page, testData } ) => {
