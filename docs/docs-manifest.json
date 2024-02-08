@@ -36,11 +36,12 @@
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
-          "post_title": "How to add a custom field to simple and variable products",
+          "post_title": "Updated - How to add a custom field to simple and variable products",
           "menu_title": "Add custom fields to products",
           "tags": "how-to",
+          "version": "8.7.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "3f9ca41cf853de77b48bb8c2e762129f7dbeef8b7680471d2d55fe0c7b32a5cb",
+          "hash": "c5c2d73483324e44af8a686bd1477c72ed0689fd8052fe4e7dc54f9537994a0b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -1205,5 +1206,5 @@
     }
   ],
   "version": "8.7.0-dev",
-  "hash": "7274252384a49eca83c82305358cb65d982ed8d671d59accd784cd77174993f5"
+  "hash": "730d7aec24f39894b3ee6d3e6e30de824885fe668783e6e9635111446b8f001b"
 }
