@@ -5,6 +5,7 @@
 	"keywords": [ "Handpicked Products", "WooCommerce" ],
 	"description": "Display a selection of hand-picked products in a grid.",
 	"supports": {
+		"inserter": false,
 		"align": [ "wide", "full" ],
 		"html": false
 	},

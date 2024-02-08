@@ -22,8 +22,8 @@ const collection = {
 		'Recommend products with the highest review ratings.',
 		'woocommerce'
 	),
-	keywords: [ 'product collection' ],
-	scope: [],
+	keywords: [ 'product collection', 'products' ],
+	scope: [ 'inserter' ],
 };
 
 const attributes = {
