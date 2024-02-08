@@ -4,7 +4,6 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
-import { v4 as uuidV4 } from 'uuid';
 
 /**
  * Internal dependencies
@@ -22,7 +21,7 @@ import ToolbarControls from './toolbar-controls';
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
-	const { attributes, setAttributes } = props;
+	const { clientId, attributes, setAttributes } = props;
 	const { queryId } = attributes;
 
 	const blockProps = useBlockProps();
@@ -46,7 +45,7 @@ const ProductCollectionContent = (
 	 */
 	useEffect( () => {
 		if ( ! attributes?.id ) {
-			setAttributes( { id: uuidV4() } );
+			setAttributes( { id: clientId } );
 		}
 	}, [ attributes, setAttributes ] );
 
