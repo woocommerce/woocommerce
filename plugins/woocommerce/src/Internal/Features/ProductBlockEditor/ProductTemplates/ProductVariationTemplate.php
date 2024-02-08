@@ -16,6 +16,24 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	use DownloadableProductTrait;
 
 	/**
+	 * Get the template slug.
+	 *
+	 * @return string Template slug.
+	 */
+	public function get_slug(): string {
+		return 'product-form-variation';
+	}
+
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Compatible product types.
+	 */
+	public function get_compatible_product_types(): array {
+		return 'product_variation';
+	}
+
+	/**
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(

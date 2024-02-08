@@ -112,11 +112,11 @@ final class LayoutTemplateRegistry {
 		foreach ( $layout_templates_info as $layout_template_info ) {
 			$layout_template = $this->get_layout_template_instance( $layout_template_info );
 
-			$layout_template_id = $layout_template->get_id();
+			$layout_template_slug = $layout_template->get_slug();
 
-			$layout_templates[ $layout_template_id ] = $layout_template;
+			$layout_templates[ $layout_template_slug ] = $layout_template;
 
-			$logger->log_template_events_to_file( $layout_template_id );
+			$logger->log_template_events_to_file( $layout_template_slug );
 		}
 
 		return $layout_templates;

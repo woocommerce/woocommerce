@@ -62,6 +62,8 @@ class Init {
 		}
 
 		$this->redirection_controller = new RedirectionController();
+		$product_form_template_controller = new ProductFormTemplatesController();
+		$product_form_template_controller->init();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
@@ -340,6 +342,9 @@ class Init {
 	 */
 	public function register_layout_templates() {
 		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+
+		// $simple = new SimpleProductTemplate();
+		// $simple->insert_template();
 
 		if ( ! $layout_template_registry->is_registered( 'simple-product' ) ) {
 			$layout_template_registry->register(

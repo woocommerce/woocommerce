@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -12,8 +12,12 @@ import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
+// @ts-expect-error -- No types for this exist yet.
 import { useLayoutTemplate } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -73,6 +77,18 @@ export function BlockEditor( {
 	const canUserCreateMedia = useSelect( ( select: typeof WPSelect ) => {
 		const { canUser } = select( 'core' );
 		return canUser( 'create', 'media', '' ) !== false;
+	}, [] );
+
+	const productFormTemplates = useSelect( ( select ) => {
+		// @ts-expect-error No types for this exist yet.
+		return select( coreStore ).getEntityRecords(
+			'postType',
+			'wp_template_part',
+			{
+				area: 'product-form',
+				post_type: 'wp_template_part',
+			}
+		) || [];
 	}, [] );
 
 	/**
@@ -143,16 +159,12 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	useLayoutEffect( () => {
-		if ( ! layoutTemplate ) {
+		if ( ! productFormTemplates.length ) {
 			return;
 		}
 
-		const blockInstances = synchronizeBlocksWithTemplate(
-			[],
-			layoutTemplate.blockTemplates
-		);
-
-		onChange( blockInstances, {} );
+		const parsed = parse( productFormTemplates[ 0 ].content.raw );
+		onChange( parsed, {} );
 
 		updateEditorSettings( {
 			...settings,
@@ -167,7 +179,7 @@ export function BlockEditor( {
 		// the blocks by calling onChange.
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ layoutTemplate, settings, productTemplate, productId ] );
+	}, [ layoutTemplate, settings, productTemplate, productId, productFormTemplates ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {

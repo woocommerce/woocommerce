@@ -41,4 +41,18 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	 * @return BlockInterface|null
 	 */
 	public function get_block_by_id( string $block_id ): ?BlockInterface;
+
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Array of compatible product types.
+	 */
+	public function get_compatible_product_types(): array;
+
+	/**
+	 * Get the default product data.
+	 *
+	 * @return array Associative array of product data.
+	 */
+	public function get_default_product_data(): array;
 }

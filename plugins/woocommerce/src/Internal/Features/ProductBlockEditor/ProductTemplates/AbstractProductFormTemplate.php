@@ -7,11 +7,18 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\Gr
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SectionInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Block template class.
  */
 abstract class AbstractProductFormTemplate extends AbstractBlockTemplate implements ProductFormTemplateInterface {
+
+	/**
+	 * Get the template slug.
+	 */
+	abstract public function get_slug(): string;
+
 	/**
 	 * Get the template area.
 	 */
@@ -64,5 +71,21 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 	public function add_group( array $block_config ): GroupInterface {
 		$block = new Group( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
+	}
+
+	/**
+	 * Get the compatible product types.
+	 *
+	 * @return array Array of compatible product types.
+	 */
+	abstract public function get_compatible_product_types(): array;
+
+	/**
+	 * Get the default product data.
+	 */
+	public function get_default_product_data(): array {
+		return array(
+			'type' => 'simple'
+		);
 	}
 }
