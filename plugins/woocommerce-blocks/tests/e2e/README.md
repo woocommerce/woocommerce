@@ -71,25 +71,19 @@ pnpm run test:e2e
 
 ### Adding posts for testing block content
 
-During test setup posts are automatically created from all the html files contained in `./bin/posts`.
-All posts are given a title like `File Name Block` which generates a url like `file-name-block`.
+During test setup posts are automatically created from all the html files contained in `./bin/posts`. All posts are given a title like `File Name Block` which generates a url like `file-name-block`.
 
-e.g. `my-test.html` will generate a post with the title `My Test Block` and permalink `my-test-block`.
-You'll be able to navigate to that page in your test like:
+e.g. `my-test.html` will generate a post with the title `My Test Block` and permalink `my-test-block`. You'll be able to navigate to that page in your test like:
 
 ```ts
 await page.goto( '/my-test-block/' );
 ```
 
-Please also note that the posts are generated during initial environment setup, so if you
-add or edit a post file you'll need to restart the environment to see the changes.
+Please also note that the posts are generated during initial environment setup, so if you add or edit a post file you'll need to restart the environment to see the changes.
 
 ### Tests with side effects
 
-We call tests that affect other tests (ones that modify the site settings, using
-custom plugins) are tests with side effects and we
-[split](https://github.com/woocommerce/woocommerce-blocks/pull/10508) those
-tests to a separate test suite:
+We call tests that affect other tests (ones that modify the site settings, using custom plugins) are tests with side effects and we [split](https://github.com/woocommerce/woocommerce-blocks/pull/10508) those tests to a separate test suite:
 
 ```sh
 pnpm run test:e2e:side-effects
@@ -100,9 +94,7 @@ _Note: All command parameters of `test:e2e` can be used for
 
 ### Tests with a classic theme and a block theme with custom templates
 
-By default, e2e tests run in a non-customized block theme. However, we also have
-some e2e tests which run specifically in a classic theme and in a block theme
-with custom templates. They can be run like this:
+By default, e2e tests run in a non-customized block theme. However, we also have some e2e tests which run specifically in a classic theme and in a block theme with custom templates. They can be run like this:
 
 ```sh
 pnpm run test:e2e:classic-theme
