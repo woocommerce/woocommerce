@@ -12,6 +12,13 @@ test.describe( 'Single Product template', async () => {
 		await expect(
 			page.getByText( 'This content is password protected.' ).first()
 		).toBeVisible();
+
+		// Verify after introducing the password, the page is visible.
+		await page.getByLabel( 'Password:' ).fill( 'password' );
+		await page.getByRole( 'button', { name: 'Enter' } ).click();
+		await expect(
+			page.getByRole( 'link', { name: 'Description' } )
+		).toBeVisible();
 	} );
 
 	test( 'loads the Single Product template for a specific product', async ( {
