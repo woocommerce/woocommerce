@@ -474,3 +474,37 @@ test.describe( 'Checkout Form Errors', () => {
 		).toBeVisible();
 	} );
 } );
+
+test.describe( 'Billing Address Form', () => {
+	test.use( { storageState: guestFile } );
+	const shippingTestData = {
+		firstname: 'Jane',
+		lastname: 'Doe',
+		company: 'WooCommerce',
+		addressfirstline: '123 Main Avenue',
+		addresssecondline: 'Unit 42',
+		city: 'Los Angeles',
+		phone: '987654321',
+		country: 'Albania',
+		state: 'Berat',
+		postcode: '1234',
+	};
+	test( 'Guest user wil get empty billing address form', async ( {
+		frontendUtils,
+		page,
+		checkoutPageObject,
+	} ) => {
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		await checkoutPageObject.fillShippingDetails( shippingTestData );
+		await page.getByLabel( 'Use same address for billing' ).uncheck();
+		await expect( page.locator( '#billing-first_name' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-last_name' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-address_1' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-address_2' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-city' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-postcode' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-phone' ) ).toHaveValue( '' );
+	} );
+} );
