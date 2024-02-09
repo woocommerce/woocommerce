@@ -125,7 +125,7 @@ test.describe( 'General tab', () => {
 			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
-			await expect( textContent ).toMatch( /Product added/ );
+			await expect( textContent ).toMatch( /Product published/ );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
