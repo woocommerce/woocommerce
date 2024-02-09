@@ -78,8 +78,6 @@ export function useVariations( { productId }: UseVariationsProps ) {
 				requestParams
 			);
 
-			console.log( 'getCurrentVariationsPage', { data, total } );
-
 			setVariations( data );
 			setTotalCount( total );
 			setIsLoading( false );
