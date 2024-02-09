@@ -74,6 +74,33 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		).toBeVisible();
 	} );
 
+	test( 'can quick edit product review', async ( { page, testData } ) => {
+		await page.goto(
+			`wp-admin/edit.php?post_type=product&page=product-reviews`
+		);
+		await expect(
+			page.getByRole( 'cell', { name: testData.review.review } )
+		).toBeVisible();
+
+		//Hover over the product review to have 'Quick Edit' displayed
+		await page.hover( `#comment-${ testData.review.id }` );
+		await page
+			.locator( `#comment-${ testData.review.id }` )
+			.getByRole( 'button', { name: 'Quick Edit' } )
+			.click();
+
+		// Create new review, Quick Edit it and save
+		const updatedQuickReview = `(quickly edited ${ Date.now() })`;
+		await page
+			.locator( '.wp-editor-area' )
+			.first()
+			.fill( updatedQuickReview );
+		await page.getByRole( 'button', { name: 'Update Comment' } ).click();
+
+		// Verify that the edited comment is there
+		await expect( page.getByText( updatedQuickReview ) ).toBeVisible();
+	} );
+
 	test( 'can edit product review', async ( { page, testData } ) => {
 		await page.goto(
 			`wp-admin/edit.php?post_type=product&page=product-reviews`
@@ -82,20 +109,44 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 			page.getByRole( 'cell', { name: testData.review.review } )
 		).toBeVisible();
 
-		//Hover over the product review to have 'Edit' displayed
-		await page.hover( `#comment-${ testData.review.id }` );
+		//Go to the Edit page of the review
+		await page.goto(
+			`wp-admin/comment.php?action=editcomment&c=${ testData.review.id }`
+		);
+		await expect( page.getByText( 'Edit Review' ) ).toBeVisible();
 
-		// Create new review, Quick Edit it and save
+		// Create new comment and edit the review with it
 		const updatedReview = `(edited ${ Date.now() })`;
-		await page
-			.locator( `#comment-${ testData.review.id }` )
-			.getByRole( 'button', { name: 'Quick Edit' } )
-			.click();
 		await page.locator( '.wp-editor-area' ).first().fill( updatedReview );
-		await page.getByRole( 'button', { name: 'Update Comment' } ).click();
 
-		// Verify that the edited comment is there
-		await expect( page.getByText( updatedReview ) ).toBeVisible();
+		// Generate another random rating and edit the review with it
+		await page.click( '#rating' );
+		const updatedRating = ( Math.random() * ( 5 - 1 ) + 1 ).toFixed( 0 );
+		await page.selectOption( '#rating', {
+			value: updatedRating.toString(),
+		} );
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+
+		// Verify that the edited comment is in the product reviews list
+		await page.goto(
+			`wp-admin/edit.php?post_type=product&page=product-reviews`
+		);
+		await expect(
+			page.getByRole( 'cell', { name: updatedReview } )
+		).toBeVisible();
+		await expect(
+			page.getByLabel( `${ updatedRating } out of 5` )
+		).toBeVisible();
+
+		// Verify that the edited comment is in the shop's product page
+		await page.locator( 'a.comments-view-item-link' ).click();
+		await page.click( '#tab-reviews' );
+		await expect(
+			page.locator( '.comment_container' ).first()
+		).toContainText( updatedReview );
+		await expect(
+			page.getByLabel( `${ updatedRating } out of 5` )
+		).toBeVisible();
 	} );
 
 	test( 'can delete product review', async ( { page, testData } ) => {
@@ -116,9 +167,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 			.getByRole( 'button', { name: 'Trash' } )
 			.click();
 		await expect(
-			page.getByText(
-				`Comment by ${ reviewerName } moved to the Trash`
-			)
+			page.getByText( `Comment by ${ reviewerName } moved to the Trash` )
 		).toBeVisible();
 		await page.getByRole( 'button', { name: 'Undo' } ).click();
 
@@ -133,15 +182,23 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 			.getByRole( 'button', { name: 'Trash' } )
 			.click();
 		await expect(
+			page.getByText( `Comment by ${ reviewerName } moved to the Trash` )
+		).toBeVisible();
+
+		// Verify that the review in the trash
+		await page.click( 'a[href*="comment_status=trash"]' );
+		await expect(
+			page.getByRole( 'cell', { name: testData.review.review } )
+		).toBeVisible();
+
+		// Check that the review is in the trash via URL
+		await page.goto(
+			`wp-admin/comment.php?action=editcomment&c=${ testData.review.id }`
+		);
+		await expect(
 			page.getByText(
-				`Comment by ${ reviewerName } moved to the Trash`
+				`This comment is in the Trash. Please move it out of the Trash if you want to edit it.`
 			)
 		).toBeVisible();
-		await page.reload();
-		await page.waitForSelector( 'tr.no-items' );
-
-		// Assert that the message is present, indicating an empty comment list
-		const noReviewsFound = await page.$( 'tr.no-items' );
-		expect( noReviewsFound ).not.toBeNull();
 	} );
 } );
