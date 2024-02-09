@@ -146,7 +146,7 @@ const ProductTemplateEdit = ( {
 			columns: 3,
 			shrinkColumns: false,
 		},
-		queryContextIncludes,
+		queryContextIncludes = [],
 	},
 	__unstableLayoutClassNames,
 }: BlockEditProps< {
@@ -166,7 +166,7 @@ const ProductTemplateEdit = ( {
 	);
 
 	// Add default query context attributes to queryContextIncludes
-	queryContextIncludes = [
+	const queryContextIncludesWithDefaults = [
 		...new Set(
 			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
 		),
@@ -174,7 +174,7 @@ const ProductTemplateEdit = ( {
 
 	const productCollectionQueryContext = useProductCollectionQueryContext( {
 		clientId,
-		queryContextIncludes,
+		queryContextIncludes: queryContextIncludesWithDefaults,
 	} );
 
 	const { products, blocks } = useSelect(
