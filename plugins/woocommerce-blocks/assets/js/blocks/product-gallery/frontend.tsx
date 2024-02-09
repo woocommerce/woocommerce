@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { store, getContext as getContextFn } from '@woocommerce/interactivity';
+import {
+	store,
+	getContext as getContextFn,
+	getElement,
+} from '@woocommerce/interactivity';
 import { StorePart } from '@woocommerce/utils';
 
 export interface ProductGalleryContext {
@@ -12,6 +16,7 @@ export interface ProductGalleryContext {
 	dialogVisibleImagesIds: string[];
 	isDialogOpen: boolean;
 	productId: string;
+	elementThatTriggeredDialogOpening: HTMLElement | null;
 }
 
 const getContext = ( ns?: string ) =>
@@ -41,6 +46,11 @@ const closeDialog = ( context: ProductGalleryContext ) => {
 	// Reset the main image.
 	context.selectedImage = context.firstMainImageId;
 	document.body.classList.remove( 'wc-block-product-gallery-modal-open' );
+
+	if ( context.elementThatTriggeredDialogOpening ) {
+		context.elementThatTriggeredDialogOpening?.focus();
+		context.elementThatTriggeredDialogOpening = null;
+	}
 };
 
 const productGallery = {
@@ -127,6 +137,9 @@ const productGallery = {
 					event.preventDefault();
 				}
 				actions.openDialog();
+				const largeImageElement = getElement()?.ref as HTMLElement;
+				const context = getContext();
+				context.elementThatTriggeredDialogOpening = largeImageElement;
 			}
 		},
 		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
@@ -139,6 +152,10 @@ const productGallery = {
 					event.preventDefault();
 				}
 				actions.openDialog();
+				const viewAllImagesElement = getElement()?.ref as HTMLElement;
+				const context = getContext();
+				context.elementThatTriggeredDialogOpening =
+					viewAllImagesElement;
 			}
 		},
 	},
