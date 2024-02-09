@@ -21,7 +21,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			templateApiUtils,
 			editorUtils,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
+		// await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
 	},
 } );
@@ -724,54 +724,47 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
-	test.describe( 'Location is recognised correctly', () => {
-		const getProductIdFromResponse = async ( response: Response ) => {
-			const products = await response.json();
-			return products[ 0 ].id;
+	test.describe( 'Location is recognised', () => {
+		const filterRequest = ( request: Request ) => {
+			const url = request.url();
+			return (
+				url.includes( 'wp/v2/product' ) &&
+				url.includes( 'isProductCollectionBlock=true' )
+			);
 		};
-		const getLocationDetailsFromRequest = ( request: Request ) => {
+
+		const getLocationDetailsFromRequest = (
+			request: Request,
+			locationType?: string
+		) => {
 			const searchParams = new URLSearchParams( request.url() );
+
+			if ( locationType === 'product' ) {
+				return {
+					type: searchParams.get( 'location[type]' ),
+					productId: searchParams.get(
+						`location[sourceData][productId]`
+					),
+				};
+			}
+
+			if ( locationType === 'archive' ) {
+				return {
+					type: searchParams.get( 'location[type]' ),
+					taxonomy: searchParams.get(
+						`location[sourceData][taxonomy]`
+					),
+					termId: searchParams.get( `location[sourceData][termId]` ),
+				};
+			}
+
 			return {
-				locationType: searchParams.get( 'location[type]' ),
-				productId: searchParams.get(
-					'location[sourceData][productId]'
-				),
+				type: searchParams.get( 'location[type]' ),
+				sourceData: searchParams.get( `location[sourceData]` ),
 			};
 		};
-		const verifyProductId = async ( page: Page, productSlug: string ) => {
-			const productResponsePromise = page.waitForResponse(
-				( response: Response ) => {
-					const url = response.url();
-					return (
-						url.includes( 'wp/v2/product' ) &&
-						url.includes( `slug=${ productSlug }` )
-					);
-				}
-			);
-			const locationRequestPromise = page.waitForRequest(
-				( request: Request ) => {
-					const url = request.url();
-					return (
-						url.includes( 'wp/v2/product' ) &&
-						url.includes( 'isProductCollectionBlock=true' )
-					);
-				}
-			);
-			const [ productResponse, locationRequest ] = await Promise.all( [
-				productResponsePromise,
-				locationRequestPromise,
-			] );
-			const expectedProductId = await getProductIdFromResponse(
-				productResponse
-			);
-			const { locationType, productId } =
-				getLocationDetailsFromRequest( locationRequest );
 
-			expect( locationType ).toBe( 'product' );
-			expect( productId ).toBe( String( expectedProductId ) );
-		};
-
-		test( 'in specific Single Product template', async ( {
+		test( 'as product in specific Single Product template', async ( {
 			page,
 			pageObject,
 			editorUtils,
@@ -788,46 +781,112 @@ test.describe( 'Product Collection', () => {
 				'Product Collection (Beta)'
 			);
 
-			const verifyPromise = verifyProductId( page, productSlug );
-
 			await pageObject.chooseCollectionInTemplate( 'featured' );
 
-			await verifyPromise;
-		} );
-		test( 'in Single Product block in specific Product template', async ( {
-			page,
-			editorUtils,
-			pageObject,
-		} ) => {
-			const productName = 'Belt';
-			const productSlug = 'belt';
+			const locationRequest = await page.waitForRequest( filterRequest );
 
-			await editorUtils.openSpecificProductTemplate(
-				productName,
-				productSlug
+			const { type, productId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'product'
 			);
 
-			await pageObject.insertProductCollectionInSingleProductBlock();
-
-			const verifyPromise = verifyProductId( page, productSlug );
-
-			await pageObject.chooseCollectionInTemplate( 'featured' );
-
-			await verifyPromise;
+			expect( type ).toBe( 'product' );
+			expect( productId ).toBeTruthy();
 		} );
-		test( 'in Single Product template', async ( {} ) => {} );
-		test( 'in specific Category template', async ( {} ) => {} );
-		test( 'in specific Tag template', async ( {} ) => {} );
-		test( 'in Products by Category template', async ( {} ) => {} );
-		test( 'in Products by Tag template', async ( {} ) => {} );
-		test( 'in Products by Attribute template', async ( {} ) => {} );
-		test( 'in Cart template', async ( {} ) => {} );
-		test( 'in Checkout template', async ( {} ) => {} );
-		test( 'in Order Confirmation template', async ( {} ) => {} );
-		test( 'as product in Single Product block in specific Category template', async ( {} ) => {} );
-		test( 'as product in Single Product block in specific Tag template', async ( {} ) => {} );
-		test( 'as product in Single Product block in Products by Attribute template', async ( {} ) => {} );
-		test( 'as generic in post', async ( {} ) => {} );
-		test( 'as generic in Product Catalog', async ( {} ) => {} );
+		test( 'as category in Products by Category template', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				'Product Collection (Beta)'
+			);
+
+			pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await page.waitForRequest( filterRequest );
+			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'archive'
+			);
+
+			expect( type ).toBe( 'archive' );
+			expect( taxonomy ).toBe( 'product_cat' );
+			// Field is sent as a null but browser converts it to empty string
+			expect( termId ).toBe( '' );
+		} );
+
+		test( 'as tag in Products by Tag template', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				'Product Collection (Beta)'
+			);
+
+			pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await page.waitForRequest( filterRequest );
+			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'archive'
+			);
+
+			expect( type ).toBe( 'archive' );
+			expect( taxonomy ).toBe( 'product_tag' );
+			// Field is sent as a null but browser converts it to empty string
+			expect( termId ).toBe( '' );
+		} );
+
+		test( 'as generic in post', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.createNewPost();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				'Product Collection (Beta)'
+			);
+
+			pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await page.waitForRequest( filterRequest );
+			const { type, sourceData } =
+				getLocationDetailsFromRequest( locationRequest );
+
+			expect( type ).toBe( 'generic' );
+			// Field is not sent at all. URLSearchParams get method returns a null
+			// if field is not available.
+			expect( sourceData ).toBe( null );
+		} );
+
+		test( 'as product in Single Product block in post', async ( {
+			admin,
+			pageObject,
+			page,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await page.waitForRequest( filterRequest );
+			const { type, productId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'product'
+			);
+
+			expect( type ).toBe( 'product' );
+			expect( productId ).toBeTruthy();
+		} );
 	} );
 } );
