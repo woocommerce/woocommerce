@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Product, ProductCatalogVisibility } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CheckboxControl, PanelBody } from '@wordpress/components';
@@ -14,6 +14,7 @@ import { CheckboxControl, PanelBody } from '@wordpress/components';
 import { VisibilitySectionProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 import { RequirePassword } from '../../require-password';
+import { CatalogVisibility } from '../../catalog-visibility';
 
 export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
@@ -29,52 +30,6 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		productType,
 		'post_password'
 	);
-
-	function handleVisibilityChange(
-		selected: boolean,
-		visibility: ProductCatalogVisibility
-	) {
-		if ( selected ) {
-			if ( catalogVisibility === 'visible' ) {
-				setCatalogVisibility( visibility );
-				recordEvent( 'product_prepublish_panel', {
-					source: TRACKS_SOURCE,
-					action: 'catalog_visibility',
-					visibility: catalogVisibility,
-				} );
-				return;
-			}
-			setCatalogVisibility( 'hidden' );
-		} else {
-			if ( catalogVisibility === 'hidden' ) {
-				if ( visibility === 'catalog' ) {
-					setCatalogVisibility( 'search' );
-					recordEvent( 'product_prepublish_panel', {
-						source: TRACKS_SOURCE,
-						action: 'catalog_visibility',
-						visibility: catalogVisibility,
-					} );
-					return;
-				}
-				if ( visibility === 'search' ) {
-					setCatalogVisibility( 'catalog' );
-					recordEvent( 'product_prepublish_panel', {
-						source: TRACKS_SOURCE,
-						action: 'catalog_visibility',
-						visibility: catalogVisibility,
-					} );
-					return;
-				}
-				return;
-			}
-			setCatalogVisibility( 'visible' );
-			recordEvent( 'product_prepublish_panel', {
-				source: TRACKS_SOURCE,
-				action: 'catalog_visibility',
-				visibility: catalogVisibility,
-			} );
-		}
-	}
 
 	return (
 		<PanelBody
@@ -98,28 +53,9 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 							'woocommerce'
 						) }
 					</legend>
-					<CheckboxControl
-						label={ __( 'Hide in product catalog', 'woocommerce' ) }
-						checked={
-							catalogVisibility === 'search' ||
-							catalogVisibility === 'hidden'
-						}
-						onChange={ ( selected ) =>
-							handleVisibilityChange( selected, 'search' )
-						}
-					/>
-					<CheckboxControl
-						label={ __(
-							'Hide from search results',
-							'woocommerce'
-						) }
-						checked={
-							catalogVisibility === 'catalog' ||
-							catalogVisibility === 'hidden'
-						}
-						onChange={ ( selected ) =>
-							handleVisibilityChange( selected, 'catalog' )
-						}
+					<CatalogVisibility
+						catalogVisibility={ catalogVisibility }
+						onCheckboxChange={ setCatalogVisibility }
 					/>
 					<CheckboxControl
 						label={ __( 'Enable product reviews', 'woocommerce' ) }
