@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Font;
 
+// IMPORTANT: We have to switch to the WordPress API to create the FontFamily post type when they will be implemented: https://github.com/WordPress/gutenberg/issues/58670!
+
 /**
  * Helper class for font family related functionality.
  *
@@ -46,13 +48,13 @@ class FontFamily {
 	 * @param array $font_family_settings The font family settings.
 	 */
 	public static function insert_font_family( array $font_family_settings ) {
-		$settings = $font_family_settings;
+		$font_family = $font_family_settings;
 		// Check that the font family slug is unique.
 		$query = new \WP_Query(
 			array(
 				'post_type'              => self::POST_TYPE,
 				'posts_per_page'         => 1,
-				'name'                   => $settings['slug'],
+				'name'                   => $font_family['slug'],
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 			)
@@ -62,25 +64,25 @@ class FontFamily {
 			return new \WP_Error(
 				'duplicate_font_family',
 				/* translators: %s: Font family slug. */
-				sprintf( __( 'A font family with slug "%s" already exists.', 'woocommerce' ), $settings['slug'] )
+				sprintf( __( 'A font family with slug "%s" already exists.', 'woocommerce' ), $font_family['slug'] )
 			);
 		}
 
 		// Validate the font family settings.
-		$validation_error = self::validate_font_family( $settings );
+		$validation_error = self::validate_font_family( $font_family );
 		if ( is_wp_error( $validation_error ) ) {
 			return $validation_error;
 		}
 
-		$post['fontFamily'] = addslashes( \WP_Font_Utils::sanitize_font_family( $settings['fontFamily'] ) );
-		$post['preview']    = $settings['preview'];
+		$post['fontFamily'] = addslashes( \WP_Font_Utils::sanitize_font_family( $font_family['fontFamily'] ) );
+		$post['preview']    = $font_family['preview'];
 
 		// Insert the font family.
 		return wp_insert_post(
 			array(
 				'post_type'    => self::POST_TYPE,
-				'post_title'   => $settings['name'],
-				'name'         => $settings['slug'],
+				'post_title'   => $font_family['name'],
+				'name'         => $font_family['slug'],
 				'post_content' => json_encode( $post ),
 				'post_status'  => 'publish',
 			)

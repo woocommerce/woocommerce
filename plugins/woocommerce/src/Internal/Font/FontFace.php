@@ -1,9 +1,11 @@
 <?php
 /**
- * FontFamily class file
+ * FontFace class file
  */
 
 namespace Automattic\WooCommerce\Internal\Font;
+
+// IMPORTANT: We have to switch to the WordPress API to create the FontFace post type when they will be implemented: https://github.com/WordPress/gutenberg/issues/58670!
 
 /**
  * Helper class for font face related functionality.
@@ -45,7 +47,7 @@ class FontFace {
 	 *
 	 * @return string Sanitized value.
 	 */
-	protected static function sanitize_src( $value ) {
+	private static function sanitize_src( $value ) {
 		$value = ltrim( $value );
 		return false === wp_http_validate_url( $value ) ? (string) $value : sanitize_url( $value );
 	}
@@ -53,7 +55,7 @@ class FontFace {
 	/**
 	 * Handles file upload error.
 	 *
-	 * @since 6.5.0
+	 * Copied from Gutenberg: https://github.com/WordPress/gutenberg/blob/b283c47dba96d74dd7589a823d8ab84c9e5a4765/lib/compat/wordpress-6.5/fonts/class-wp-rest-font-faces-controller.php/#L859-L883
 	 *
 	 * @param array  $file    File upload data.
 	 * @param string $message Error message from wp_handle_upload().
@@ -74,7 +76,7 @@ class FontFace {
 	/**
 	 * Handles the upload of a font file using wp_handle_upload().
 	 *
-	 * @since 6.5.0
+	 * Copied from Gutenberg: https://github.com/WordPress/gutenberg/blob/b283c47dba96d74dd7589a823d8ab84c9e5a4765/lib/compat/wordpress-6.5/fonts/class-wp-rest-font-faces-controller.php/#L859-L883
 	 *
 	 * @param array $file Single file item from $_FILES.
 	 * @return array Array containing uploaded file attributes on success, or error on failure.
@@ -105,6 +107,11 @@ class FontFace {
 		return $uploaded_file;
 	}
 
+	/**
+	 * Downloads a file from a URL.
+	 *
+	 * @param string $file_url The file URL.
+	 **/
 	private static function download_file( $file_url ) {
 		if ( ! function_exists( 'download_url' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -127,22 +134,12 @@ class FontFace {
 	/**
 	 * Inserts a font face.
 	 *
-	 * @param array $settings The font face settings.
+	 * @param array $font_face The font face settings.
 	 * @param int   $parent_font_family_id The parent font family ID.
 	 * @return \WP_Error|\WP_Post The inserted font face post or an error if the font face already exists.
 	 */
-	public static function insert_font_face( array $settings, int $parent_font_family_id ) {
-		$parsed_font_face['fontFamily'] = addslashes( \WP_Font_Utils::sanitize_font_family( $settings['fontFamily'] ) );
-		$parsed_font_face['fontStyle']  = sanitize_text_field( $settings['fontStyle'] );
-		$parsed_font_face['fontWeight'] = sanitize_text_field( $settings['fontWeight'] );
-		$file                           = self::download_file( $settings['src'] );
-
-		$uploaded_file = self::handle_font_file_upload( $file );
-
-		$parsed_font_face['src']     = self::sanitize_src( $uploaded_file['url'] );
-		$parsed_font_face['preview'] = sanitize_url( $settings['preview'] );
-
-		$slug = \WP_Font_Utils::get_font_face_slug( $settings );
+	public static function insert_font_face( array $font_face, int $parent_font_family_id ) {
+		$slug = \WP_Font_Utils::get_font_face_slug( $font_face );
 
 		// Check that the font face slug is unique.
 		$query = new \WP_Query(
@@ -163,6 +160,23 @@ class FontFace {
 			);
 		}
 
+		// Validate the font face settings.
+
+		$validation_error = self::validate_font_face( $font_face );
+		if ( is_wp_error( $validation_error ) ) {
+			return $validation_error;
+		}
+
+		$parsed_font_face['fontFamily'] = addslashes( \WP_Font_Utils::sanitize_font_family( $font_face['fontFamily'] ) );
+		$parsed_font_face['fontStyle']  = sanitize_text_field( $font_face['fontStyle'] );
+		$parsed_font_face['fontWeight'] = sanitize_text_field( $font_face['fontWeight'] );
+		$file                           = self::download_file( $font_face['src'] );
+
+		$uploaded_file = self::handle_font_file_upload( $file );
+
+		$parsed_font_face['src']     = self::sanitize_src( $uploaded_file['url'] );
+		$parsed_font_face['preview'] = sanitize_url( $font_face['preview'] );
+
 		// Insert the font face.
 		wp_insert_post(
 			array(
@@ -175,4 +189,46 @@ class FontFace {
 			)
 		);
 	}
+
+
+	/**
+	 * Validates a font face.
+	 *
+	 * @param array $font_face The font face settings.
+	 * @return \WP_Error|null The error if the font family is invalid, null otherwise.
+	 */
+	private static function validate_font_face( $font_face ) {
+		// Validate the font face family name.
+		if ( empty( $font_face['fontFamily'] ) ) {
+			return new \WP_Error(
+				'invalid_font_face_font_family',
+				__( 'The font face family name is required.', 'woocommerce' ),
+			);
+		}
+
+		// Validate the font face font style.
+		if ( empty( $font_face['fontStyle'] ) ) {
+			return new \WP_Error(
+				'invalid_font_face_font_style',
+				__( 'The font face font style is required.', 'woocommerce' ),
+			);
+		}
+
+		// Validate the font face weight.
+		if ( empty( $font_face['fontWeight'] ) ) {
+			return new \WP_Error(
+				'invalid_font_face_font_weight',
+				__( 'The font face weight is required.', 'woocommerce' ),
+			);
+		}
+
+		// Validate the font face src.
+		if ( empty( $font_face['src'] ) ) {
+			return new \WP_Error(
+				'invalid_font_face_src',
+				__( 'The font face src is required.', 'woocommerce' ),
+			);
+		}
+	}
+
 }
