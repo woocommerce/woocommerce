@@ -1,5 +1,6 @@
 packages:
     - 'packages/js/*'
+    - 'packages/php/*'
     - 'plugins/*'
     - 'plugins/woocommerce/client/legacy'
     - 'tools/monorepo-merge'
