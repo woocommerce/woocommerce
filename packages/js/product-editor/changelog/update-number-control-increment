@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Use different delays for initial click and hold when incrementing number on NumberControl
