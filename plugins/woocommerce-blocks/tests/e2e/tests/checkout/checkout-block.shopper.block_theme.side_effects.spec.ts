@@ -489,7 +489,7 @@ test.describe( 'Billing Address Form', () => {
 		state: 'Berat',
 		postcode: '1234',
 	};
-	test( 'Guest user wil get empty billing address form', async ( {
+	test( 'Guest user will get empty billing address form', async ( {
 		frontendUtils,
 		page,
 		checkoutPageObject,
