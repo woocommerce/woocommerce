@@ -509,9 +509,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_catalog_section->add_block(
 			array(
-				'id'         => 'product-catalog-search-visibility',
-				'blockName'  => 'woocommerce/product-catalog-visibility-fields',
-				'order'      => 20,
+				'id'        => 'product-catalog-search-visibility',
+				'blockName' => 'woocommerce/product-catalog-visibility-fields',
+				'order'     => 20,
 			)
 		);
 		$product_catalog_section->add_block(
