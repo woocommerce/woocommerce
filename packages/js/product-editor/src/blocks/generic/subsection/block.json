@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-subsection",
+	"title": "Product subsection",
+	"category": "woocommerce",
+	"description": "The product subsection.",
+	"keywords": [ "products", "subsection", "group" ],
+	"textdomain": "default",
+	"attributes": {
+		"title": {
+			"type": "string"
+		},
+		"description": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
+		"blockGap": {
+			"type": "string",
+			"enum": [ "unit-30", "unit-40" ],
+			"default": "unit-30"
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": false
+	},
+	"editorStyle": "file:./editor.css"
+}

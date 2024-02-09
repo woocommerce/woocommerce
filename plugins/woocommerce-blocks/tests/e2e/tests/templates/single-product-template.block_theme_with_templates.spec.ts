@@ -6,7 +6,7 @@ import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 const testData = {
 	permalink: '/product/belt',
-	templateName: 'Product: Belt',
+	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
 	templateType: 'wp_template',
 };
