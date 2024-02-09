@@ -232,17 +232,17 @@ class CheckoutFieldsFrontend {
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
 
 		foreach ( $fields as $key => $field ) {
-			$post_key                      = "/{$address_type}/{$key}";
-			$address[ $post_key ]          = $field;
-			$address[ $post_key ]['value'] = $this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type );
+			$field_key                      = "/{$address_type}/{$key}";
+			$address[ $field_key ]          = $field;
+			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type );
 
 			if ( 'select' === $field['type'] ) {
-				$address[ $post_key ]['options'] = array_column( $field['options'], 'label', 'value' );
+				$address[ $field_key ]['options'] = array_column( $field['options'], 'label', 'value' );
 			}
 
 			if ( 'checkbox' === $field['type'] ) {
-				$address[ $post_key ]['checked_value']   = '1';
-				$address[ $post_key ]['unchecked_value'] = '0';
+				$address[ $field_key ]['checked_value']   = '1';
+				$address[ $field_key ]['unchecked_value'] = '0';
 			}
 		}
 
