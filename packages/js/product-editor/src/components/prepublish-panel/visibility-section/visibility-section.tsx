@@ -4,24 +4,16 @@
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Product, ProductCatalogVisibility } from '@woocommerce/data';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { useInstanceId } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	BaseControl,
-	CheckboxControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-	PanelBody,
-} from '@wordpress/components';
+import { CheckboxControl, PanelBody } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { VisibilitySectionProps } from './types';
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../../constants';
+import { RequirePassword } from '../../require-password';
 
 export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
@@ -37,17 +29,6 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		productType,
 		'post_password'
 	);
-
-	const { requirePassword } = useDispatch( productEditorUiStore );
-
-	const isPasswordRequired: boolean = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isPasswordRequired();
-	}, [] );
-
-	const postPasswordId = useInstanceId(
-		BaseControl,
-		'post_password'
-	) as string;
 
 	function handleVisibilityChange(
 		selected: boolean,
@@ -152,33 +133,11 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 							} );
 						} }
 					/>
-					<CheckboxControl
+					<RequirePassword
 						label={ __( 'Require a password', 'woocommerce' ) }
-						checked={ isPasswordRequired }
-						onChange={ ( selected ) => {
-							requirePassword( selected );
-							if ( ! selected ) {
-								setPostPassword( '' );
-							}
-							recordEvent( 'product_prepublish_panel', {
-								source: TRACKS_SOURCE,
-								action: 'require_password',
-								value: selected,
-							} );
-						} }
+						postPassword={ postPassword }
+						onInputChange={ setPostPassword }
 					/>
-					{ isPasswordRequired && (
-						<BaseControl
-							id={ postPasswordId }
-							label={ __( 'Password', 'woocommerce' ) }
-						>
-							<InputControl
-								id={ postPasswordId }
-								value={ postPassword }
-								onChange={ setPostPassword }
-							/>
-						</BaseControl>
-					) }
 				</fieldset>
 			</div>
 		</PanelBody>
