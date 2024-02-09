@@ -45,6 +45,10 @@ foreach ( $tools as $action_name => $tool ) {
 					</p>
 				</th>
 				<td class="run-tool">
+					<?php if ( ! empty( $tool['status_text'] ) ) : ?>
+					<span class="run-tool-status"><?php echo wp_kses_post( $tool['status_text'] ); ?></span>
+					<?php endif; ?>
+
 					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<input <?php echo ArrayUtil::is_truthy( $tool, 'disabled' ) ? 'disabled' : ''; ?> type="submit" form="<?php echo 'form_' . $action_name; ?>" class="button button-large" value="<?php echo esc_attr( $tool['button'] ); ?>" />
 				</td>

@@ -115,7 +115,8 @@ test.describe( 'shopper → Local pickup', () => {
 	test.beforeEach( async ( { admin } ) => {
 		// Enable local pickup.
 		await admin.visitAdminPage(
-			'admin.php?page=wc-settings&tab=shipping&section=pickup_location'
+			'admin.php',
+			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 		await admin.page.getByLabel( 'Enable local pickup' ).check();
 		await admin.page
@@ -137,7 +138,8 @@ test.describe( 'shopper → Local pickup', () => {
 	test.afterEach( async ( { admin } ) => {
 		// Enable local pickup.
 		await admin.visitAdminPage(
-			'admin.php?page=wc-settings&tab=shipping&section=pickup_location'
+			'admin.php',
+			'page=wc-settings&tab=shipping&section=pickup_location'
 		);
 		await admin.page.getByRole( 'button', { name: 'Edit' } ).last().click();
 		await admin.page

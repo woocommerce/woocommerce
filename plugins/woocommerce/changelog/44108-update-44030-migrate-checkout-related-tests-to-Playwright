@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Migrate coupon- and shipping-related tests to Playwright.
+

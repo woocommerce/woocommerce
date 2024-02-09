@@ -695,10 +695,8 @@ class WC_Checkout {
 				)
 			);
 
-			// Avoid storing used_by - it's not needed and can get large.
-			$coupon_data = $coupon->get_data();
-			unset( $coupon_data['used_by'] );
-			$item->add_meta_data( 'coupon_data', $coupon_data );
+			$coupon_info = $coupon->get_short_info();
+			$item->add_meta_data( 'coupon_info', $coupon_info );
 
 			/**
 			 * Action hook to adjust item before save.
@@ -783,6 +781,9 @@ class WC_Checkout {
 							$value = wc_sanitize_textarea( $value );
 							break;
 						case 'password':
+							if ( $data['createaccount'] && 'account_password' === $key ) {
+								$value = wp_slash( $value ); // Passwords are encrypted with slashes on account creation, so we need to slash here too.
+							}
 							break;
 						default:
 							$value = wc_clean( $value );

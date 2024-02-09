@@ -47,7 +47,7 @@ export class EditorUtils {
 
 	// todo: Make a PR to @wordpress/e2e-test-utils-playwright to add this method.
 	/**
-	 * Inserts a block after a given client ID.
+	 * Inserts a block inside a given client ID.
 	 *
 	 */
 	async insertBlock(
@@ -372,9 +372,36 @@ export class EditorUtils {
 			.waitFor();
 	}
 
+	async revertTemplateCreation( templateName: string ) {
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
+		} );
+		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
+		await this.page
+			.getByRole( 'menuitem', {
+				name: 'Delete',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', {
+				name: 'Delete',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.getByText( `"${ templateName }" deleted.` )
+			.waitFor();
+	}
+
 	async revertTemplateCustomizations( templateName: string ) {
-		const templateRow = this.page.getByRole( 'row', {
-			name: templateName,
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
 		} );
 		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
 		await this.page
