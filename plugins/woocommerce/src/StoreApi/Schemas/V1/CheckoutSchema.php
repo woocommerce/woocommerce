@@ -74,10 +74,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_properties() {
-		$additional_field_schema = $this->get_additional_fields_schema(
-			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
-			$this->additional_fields_controller->get_fields_for_location( 'additional' )
-		);
+		$additional_field_schema = $this->get_additional_fields_schema();
 		return [
 			'order_id'          => [
 				'description' => __( 'The order ID to process during checkout.', 'woocommerce' ),
@@ -283,10 +280,22 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Get the schema for additional fields.
 	 *
+	 * @return array
+	 */
+	protected function get_additional_fields_schema() {
+		return $this->generate_additional_fields_schema(
+			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
+			$this->additional_fields_controller->get_fields_for_location( 'additional' )
+		);
+	}
+
+	/**
+	 * Generate the schema for additional fields.
+	 *
 	 * @param array[] ...$args One or more arrays of additional fields.
 	 * @return array
 	 */
-	protected function get_additional_fields_schema( ...$args ) {
+	protected function generate_additional_fields_schema( ...$args ) {
 		$additional_fields = array_merge( ...$args );
 		$schema            = [];
 		foreach ( $additional_fields as $key => $field ) {
@@ -338,10 +347,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_additional_fields( $fields ) {
-		$properties         = $this->get_additional_fields_schema(
-			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
-			$this->additional_fields_controller->get_fields_for_location( 'additional' )
-		);
+		$properties         = $this->get_additional_fields_schema();
 		$sanitization_utils = new SanitizationUtils();
 		$fields             = $sanitization_utils->wp_kses_array(
 			array_reduce(
@@ -373,22 +379,16 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return true|\WP_Error
 	 */
 	public function validate_additional_fields( $fields, $request ) {
-		$errors = new \WP_Error();
-		$fields = $this->sanitize_additional_fields( $fields );
+		$errors                  = new \WP_Error();
+		$fields                  = $this->sanitize_additional_fields( $fields );
+		$additional_field_schema = $this->get_additional_fields_schema();
 
-		// Get these separately so we can validate each location.
-		$contact_properties    = $this->get_additional_fields_schema( $this->additional_fields_controller->get_fields_for_location( 'contact' ) );
-		$additional_properties = $this->get_additional_fields_schema( $this->additional_fields_controller->get_fields_for_location( 'additional' ) );
-		$all_properties        = array_merge( $contact_properties, $additional_properties );
-
-		// Validate all individual properties first.
-		foreach ( array_keys( $all_properties ) as $key ) {
-			if ( ! isset( $fields[ $key ] ) && false === $all_properties[ $key ]['required'] ) {
+		// Validate individual properties first.
+		foreach ( $fields as $key => $field_value ) {
+			if ( ! isset( $additional_field_schema[ $key ] ) ) {
 				continue;
 			}
-
-			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
-			$result      = rest_validate_value_from_schema( $field_value, $all_properties[ $key ], $key );
+			$result = rest_validate_value_from_schema( $field_value, $additional_field_schema[ $key ], $key );
 
 			// Only allow custom validation on fields that pass the schema validation.
 			if ( true === $result ) {
@@ -399,10 +399,10 @@ class CheckoutSchema extends AbstractSchema {
 				$location = $this->additional_fields_controller->get_field_location( $key );
 				foreach ( $result->get_error_codes() as $code ) {
 					$result->add_data(
-						[
+						array(
 							'location' => $location,
 							'key'      => $key,
-						],
+						),
 						$code
 					);
 				}
@@ -410,19 +410,17 @@ class CheckoutSchema extends AbstractSchema {
 			}
 		}
 
-		// Now validate by location so the groups of fields can be validated together.
-		$errors->merge_from(
-			$this->additional_fields_controller->validate_fields_for_location(
-				$this->additional_fields_controller->filter_fields_for_location( $fields, 'contact' ),
-				'contact'
-			)
-		);
-		$errors->merge_from(
-			$this->additional_fields_controller->validate_fields_for_location(
-				$this->additional_fields_controller->filter_fields_for_location( $fields, 'additional' ),
-				'additional'
-			)
-		);
+		// Validate groups of properties per registered location.
+		$locations = array( 'contact', 'additional' );
+
+		foreach ( $locations as $location ) {
+			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
+			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location );
+
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
+				$errors->merge_from( $result );
+			}
+		}
 
 		return $errors->has_errors( $errors ) ? $errors : true;
 	}
