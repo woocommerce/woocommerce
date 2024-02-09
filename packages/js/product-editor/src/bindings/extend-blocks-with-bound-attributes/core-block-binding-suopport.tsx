@@ -49,7 +49,7 @@ type BoundAttributePlugProps = {
 };
 
 /**
- * Conponent to bind an attribute to a prop.
+ * Conponent to plug an attribute to a prop.
  *
  * @param {BoundAttributePlugProps} props - The component props.
  * @return {null} The component.
@@ -68,20 +68,24 @@ const BlockBindingConnector = ( {
 		/*
 		 * When the prop value changes, update the attribute value.
 		 */
-		if ( propValue !== lastPropValue.current ) {
-			lastPropValue.current = propValue;
-			onAttributeChange( propValue );
+		if ( propValue === lastPropValue.current ) {
+			return;
 		}
+
+		lastPropValue.current = propValue;
+		onAttributeChange( propValue );
 	}, [ onAttributeChange, propValue ] );
 
 	useEffect( () => {
 		/*
 		 * When the attribute value changes, update the prop value.
 		 */
-		if ( attrValue !== lastAttrValue.current ) {
-			lastAttrValue.current = attrValue;
-			onPropValueChange( attrValue );
+		if ( attrValue === lastAttrValue.current ) {
+			return;
 		}
+
+		lastAttrValue.current = attrValue;
+		onPropValueChange( attrValue );
 	}, [ onPropValueChange, attrValue ] );
 
 	return null;
@@ -93,11 +97,8 @@ const withBlockBindingSupport =
 			( props: BoundBlockEditInstance ) => {
 				const { attributes, setAttributes } = props;
 
-				// // @ts-expect-error There are no types for this.
-				// const { getBlockBindingsSource } =
-				// 	useSelect( blockEditorStore );
 				const bindings = attributes?.metadata?.bindings;
-				const Bridges: JSX.Element[] = [];
+				const BindingConnectorInstances: JSX.Element[] = [];
 
 				if ( bindings ) {
 					Object.entries( bindings ).forEach(
@@ -123,7 +124,7 @@ const withBlockBindingSupport =
 									'-'
 								) }-${ attrName }`;
 
-								Bridges.push(
+								BindingConnectorInstances.push(
 									<BlockBindingConnector
 										key={ key }
 										attrValue={ attrValue }
@@ -151,7 +152,7 @@ const withBlockBindingSupport =
 
 				return (
 					<>
-						{ Bridges }
+						{ BindingConnectorInstances }
 						<BlockEdit { ...props } />
 					</>
 				);
