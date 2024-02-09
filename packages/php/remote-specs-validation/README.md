@@ -10,7 +10,7 @@
 | wc-pay-promotions.json | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/payment-method/promotions.json> |
 | shipping-partner-suggestions.json | <https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json> |
 
-# Working with Schema
+## Working with Schema
 
 If it's your first time working with JSON Schema, we highly recommend reading <https://json-schema.org/learn/getting-started-step-by-step> first. 
 
