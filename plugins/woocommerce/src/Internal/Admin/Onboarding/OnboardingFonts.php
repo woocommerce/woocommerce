@@ -106,7 +106,7 @@ class OnboardingFonts {
 	 * @return string
 	 */
 	public static function start_install_fonts_async_job( $old_value, $value ) {
-		if ( 'yes' !== $value ) {
+		if ( 'yes' !== $value || ! class_exists( 'WP_Font_Library' ) ) {
 			return;
 		}
 		WC()->call_function(
