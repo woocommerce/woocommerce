@@ -1,28 +1,24 @@
 <?php
-/**
- * REST API Onboarding Themes Controller
- *
- * Handles requests to install and activate themes.
- */
 
 namespace Automattic\WooCommerce\Internal\Admin\Onboarding;
 
 use Automattic\WooCommerce\Internal\Font\FontFace;
 use Automattic\WooCommerce\Internal\Font\FontFamily;
 
-defined( 'ABSPATH' ) || exit;
 
 /**
- * Class to install and activate fonts for the Assembler.
+ * Class to install fonts for the Assembler.
  *
  * @internal
  */
 class OnboardingFonts {
 
 	/**
-	 * Constructor
+	 * Initialize the class.
+	 *
+	 * @internal This method is for internal purposes only.
 	 */
-	public static function init() {
+	final public static function init() {
 		add_action( 'woocommerce_install_assembler_fonts', array( __CLASS__, 'install_fonts' ) );
 		add_filter( 'update_option_woocommerce_allow_tracking', array( self::class, 'start_install_fonts_async_job' ), 10, 2 );
 	}
