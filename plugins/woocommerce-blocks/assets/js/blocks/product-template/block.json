@@ -14,7 +14,8 @@
 		"queryContext",
 		"displayLayout",
 		"templateSlug",
-		"postId"
+		"postId",
+		"collection"
 	],
 	"supports": {
 		"inserter": false,

@@ -35,7 +35,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: true,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
@@ -45,6 +44,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					activeThemeHasMods: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -91,7 +91,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: true,
 					},
@@ -101,6 +100,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -145,7 +145,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: false,
 					},
@@ -155,6 +154,7 @@ describe( 'Intro Modals', () => {
 					},
 					flowType: FlowType.AIOnline,
 					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

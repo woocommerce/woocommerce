@@ -70,8 +70,8 @@ final class QueryFilters {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -136,8 +136,8 @@ final class QueryFilters {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );

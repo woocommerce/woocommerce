@@ -25,6 +25,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { useGetLocation } from './utils';
+import './editor.scss';
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(

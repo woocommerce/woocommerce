@@ -136,12 +136,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-variation-note',
-				'blockName'  => 'woocommerce/product-summary-field',
+				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
 					'property' => 'description',
-					'label'    => __( 'Note <optional />', 'woocommerce' ),
-					'helpText' => 'Enter an optional note displayed on the product page when customers select this variation.',
+					'label'    => __( 'Note', 'woocommerce' ),
+					'help'     => 'Enter an optional note displayed on the product page when customers select this variation.',
 				),
 			)
 		);
@@ -355,7 +355,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				),
 			)
 		);
-		$product_inventory_inner_section = $product_inventory_section->add_section(
+		$product_inventory_inner_section = $product_inventory_section->add_subsection(
 			array(
 				'id'    => 'product-variation-inventory-inner-section',
 				'order' => 10,
