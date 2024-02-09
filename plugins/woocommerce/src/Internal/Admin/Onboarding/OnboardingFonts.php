@@ -217,13 +217,13 @@ class OnboardingFonts {
 		}
 	}
 
-		/**
-		 * Get font faces data from font collection.
-		 *
-		 * @param array $slug_font_families_to_install Font families to install.
-		 * @param array $font_collection Font collection.
-		 * @return array
-		 */
+	/**
+	 * Get font faces data from font collection.
+	 *
+	 * @param array $slug_font_families_to_install Font families to install.
+	 * @param array $font_collection Font collection.
+	 * @return array
+	 */
 	private static function get_font_faces_data_from_font_collection( $slug_font_families_to_install, $font_collection ) {
 		return array_reduce(
 			$slug_font_families_to_install,
