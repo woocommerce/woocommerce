@@ -79,7 +79,6 @@ const BlockBindingConnector = ( {
 		 * When the attribute value changes, update the prop value.
 		 */
 		if ( attrValue !== lastAttrValue.current ) {
-			console.count( '(attr change) sync Attr to Prop' ); // eslint-disable-line no-console
 			lastAttrValue.current = attrValue;
 			onPropValueChange( attrValue );
 		}
