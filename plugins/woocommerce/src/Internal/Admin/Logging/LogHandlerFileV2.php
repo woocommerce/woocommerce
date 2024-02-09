@@ -272,31 +272,16 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 				time(),
 				'info',
 				sprintf(
-					'%s %s',
-					sprintf(
-						esc_html(
-							// translators: %s is a number of log files.
-							_n(
-								'%s expired log file was deleted.',
-								'%s expired log files were deleted.',
-								$deleted,
-								'woocommerce'
-							)
-						),
-						number_format_i18n( $deleted )
+					esc_html(
+						// translators: %s is a number of log files.
+						_n(
+							'%s expired log file was deleted.',
+							'%s expired log files were deleted.',
+							$deleted,
+							'woocommerce'
+						)
 					),
-					sprintf(
-						esc_html(
-							// translators: %s is a number of days.
-							_n(
-								'The retention period for log files is %s day.',
-								'The retention period for log files is %s days.',
-								$retention_days,
-								'woocommerce'
-							)
-						),
-						number_format_i18n( $retention_days )
-					)
+					number_format_i18n( $deleted )
 				),
 				array(
 					'source' => 'wc_logger',
