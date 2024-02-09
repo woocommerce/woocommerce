@@ -127,7 +127,7 @@ class OnboardingFonts {
 
 		if ( ! empty( $installed_font_families ) ) {
 			$font_faces_from_collection = self::get_font_faces_data_from_font_collection( $slug_font_families_to_install, $font_collection );
-			self::install_font_face( $slug_font_families_to_install, $installed_font_families, $font_faces_from_collection );
+			self::install_font_faces( $slug_font_families_to_install, $installed_font_families, $font_faces_from_collection );
 		}
 
 	}
@@ -184,7 +184,7 @@ class OnboardingFonts {
 	 * @param array $installed_font_families Installed font families.
 	 * @param array $font_faces_from_collection Font faces from collection.
 	 */
-	private static function install_font_face( $slug_font_families_to_install, $installed_font_families, $font_faces_from_collection ) {
+	private static function install_font_faces( $slug_font_families_to_install, $installed_font_families, $font_faces_from_collection ) {
 		foreach ( $slug_font_families_to_install as $slug ) {
 			$font_family           = $installed_font_families[ $slug ];
 			$font_faces            = $font_faces_from_collection[ $slug ];
