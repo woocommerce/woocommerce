@@ -255,8 +255,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return Boolean( filters.length );
 	}
 
-	function clearFilters() {
+	async function clearFilters() {
 		setFilters( [] );
+
+		return getCurrentVariationsPage( {
+			product_id: productId,
+		} );
 	}
 
 	// Updating
@@ -485,7 +489,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	useEffect( () => {
 		if ( isGenerating ) {
-			clearFilters();
+			setFilters( [] );
 			onClearSelection();
 		}
 
