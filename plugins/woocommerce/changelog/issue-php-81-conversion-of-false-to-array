@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add defensive check to DataSourcePoller, since we cannot guarantee a transient will return the expected type.

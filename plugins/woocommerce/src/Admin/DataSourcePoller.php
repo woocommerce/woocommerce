@@ -134,7 +134,7 @@ abstract class DataSourcePoller {
 		}
 
 		$specs_group = get_transient( $this->args['transient_name'] );
-		if ( false === $specs_group ) {
+		if ( ! is_array( $specs_group ) ) {
 			$specs_group = array();
 		}
 		$locale                 = get_user_locale();
