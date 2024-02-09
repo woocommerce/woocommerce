@@ -260,10 +260,6 @@ const productGallery = {
 
 			const handleKeyEvents = ( event: KeyboardEvent ) => {
 				if ( event.code === 'Tab' ) {
-					if ( ! dialogOverlay ) {
-						return;
-					}
-
 					const focusableElementsSelectors =
 						'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
