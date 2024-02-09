@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
-import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,6 +20,7 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
+import { getUniqueBlockId } from '../../../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
 
@@ -29,12 +35,26 @@ const ProductCollectionContent = (
 	} );
 
 	const instanceId = useInstanceId( ProductCollectionContent );
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore These selectors aren't getting their types loaded for some reason.
+	const { getBlock, getBlocks } = useSelect( blockEditorStore );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
 	 */
 	useEffect( () => {
+		const blockInstance = getBlock( clientId );
+		if ( ! blockInstance ) {
+			throw new Error( 'Block instance not found' );
+		}
+		const allBlocks = getBlocks();
+		const uniqueId = getUniqueBlockId< ProductCollectionAttributes >(
+			blockInstance,
+			'id',
+			allBlocks
+		);
+
 		setAttributes( {
 			...DEFAULT_ATTRIBUTES,
 			query: {
@@ -44,10 +64,8 @@ const ProductCollectionContent = (
 			...( attributes as Partial< ProductCollectionAttributes > ),
 			...{
 				// We need a reliable way to identify unique instances of this block regardless of
-				// where it might exist. While the clientId is not stable across page loads, it is
-				// a uuid and we can rely on it for uniqueness without needing to geenrate a new
-				// unique ID and pull in a dependency.
-				id: attributes?.id || clientId,
+				// where it might exist.
+				id: uniqueId,
 				// Each instance of the block needs to have a unique queryId so that pagination works
 				// when multiple instances of this block are present. `instanceId` is the index of
 				// the block on the page and is stable across saves with automatic handling for
