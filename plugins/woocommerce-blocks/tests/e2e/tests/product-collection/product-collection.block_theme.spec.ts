@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Response, Request, Page } from '@playwright/test';
+import type { Request } from '@playwright/test';
 
 /**
  * Internal dependencies
