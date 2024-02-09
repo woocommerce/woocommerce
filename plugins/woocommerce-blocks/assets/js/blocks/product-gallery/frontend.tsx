@@ -80,15 +80,15 @@ const productGallery = {
 			document.body.classList.add(
 				'wc-block-product-gallery-modal-open'
 			);
-			const dialogOverlay = document.querySelector(
-				'.wc-block-product-gallery-dialog__overlay'
+			const dialogPopUp = document.querySelector(
+				'dialog[aria-label="Product gallery"]'
 			);
-			if ( ! dialogOverlay ) {
+			if ( ! dialogPopUp ) {
 				return;
 			}
-			( dialogOverlay as HTMLElement ).focus();
+			( dialogPopUp as HTMLElement ).focus();
 
-			const dialogPreviousButton = dialogOverlay.querySelectorAll(
+			const dialogPreviousButton = dialogPopUp.querySelectorAll(
 				'.wc-block-product-gallery-large-image-next-previous--button'
 			)[ 0 ];
 
@@ -250,11 +250,11 @@ const productGallery = {
 				document.removeEventListener( 'keydown', handleKeyEvents );
 		},
 		dialogFocusTrap: () => {
-			const dialogOverlay = document.querySelector(
-				'.wc-block-product-gallery-dialog__overlay'
+			const dialogPopUp = document.querySelector(
+				'dialog[aria-label="Product gallery"]'
 			) as HTMLElement | null;
 
-			if ( ! dialogOverlay ) {
+			if ( ! dialogPopUp ) {
 				return;
 			}
 
@@ -263,7 +263,7 @@ const productGallery = {
 					const focusableElementsSelectors =
 						'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-					const focusableElements = dialogOverlay.querySelectorAll(
+					const focusableElements = dialogPopUp.querySelectorAll(
 						focusableElementsSelectors
 					);
 
@@ -295,10 +295,10 @@ const productGallery = {
 				}
 			};
 
-			dialogOverlay.addEventListener( 'keydown', handleKeyEvents );
+			dialogPopUp.addEventListener( 'keydown', handleKeyEvents );
 
 			return () =>
-				dialogOverlay.removeEventListener( 'keydown', handleKeyEvents );
+				dialogPopUp.removeEventListener( 'keydown', handleKeyEvents );
 		},
 	},
 };
