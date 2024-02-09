@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use WC_Order;
 
 /**
@@ -11,8 +11,6 @@ use WC_Order;
  * @since 8.5.0
  */
 class CustomerHistory {
-
-	use OrderAttributionMeta;
 
 	/**
 	 * Output the customer history template for the order.
@@ -38,6 +36,26 @@ class CustomerHistory {
 		}
 
 		wc_get_template( 'order/customer-history.php', $customer_history );
+	}
+
+	/**
+	 * Get the order history for the customer (data matches Customers report).
+	 *
+	 * @param int $customer_report_id The reports customer ID (not necessarily User ID).
+	 *
+	 * @return array|null Order count, total spend, and average spend per order.
+	 */
+	private function get_customer_history( $customer_report_id ): ?array {
+
+		$args = array(
+			'customers'   => array( $customer_report_id ),
+			// This defaults to a week ago for some reason.
+			'order_after' => null,
+		);
+
+		$customers_query = new CustomersQuery( $args );
+		$customer_data   = $customers_query->get_data();
+		return $customer_data->data[0] ?? null;
 	}
 
 }
