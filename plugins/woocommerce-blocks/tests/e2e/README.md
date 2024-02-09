@@ -160,5 +160,4 @@ If you run into problems the first time you try to run the tests, please run the
 pnpm wp-env:config
 ```
 
-This helps set up your environment correctly and can prevent some of the usual
-issues from happening.
+This helps set up your environment correctly and can prevent some of the usual issues from happening.
