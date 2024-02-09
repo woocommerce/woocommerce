@@ -58,7 +58,7 @@ export function PrepublishButton( {
 			} }
 			isBusy={ isBusy }
 			aria-disabled={ isDisabled }
-			children={ __( 'Add', 'woocommerce' ) }
+			children={ __( 'Publish', 'woocommerce' ) }
 			variant={ 'primary' }
 		/>
 	);
