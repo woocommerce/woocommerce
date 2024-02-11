@@ -28,6 +28,7 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-radio-field' ), 'Radio field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-pricing-field' ), 'Pricing field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-section' ), 'Section component not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-subsection' ), 'Subsection component not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-tab' ), 'Tab component not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-toggle-field' ), 'Toggle field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-taxonomy-field' ), 'Taxonomy field not registered.' );

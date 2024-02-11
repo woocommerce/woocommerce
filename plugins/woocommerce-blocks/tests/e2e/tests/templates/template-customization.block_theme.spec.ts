@@ -11,6 +11,8 @@ import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
+	const templateTypeName =
+		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
 	test.describe( `${ testData.templateName } template`, async () => {
 		test( 'can be modified and reverted', async ( {
@@ -31,6 +33,14 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				attributes: { content: userText },
 			} );
 			await editorUtils.saveTemplate();
+			// Verify template name didn't change.
+			// See: https://github.com/woocommerce/woocommerce/issues/42221
+			await expect(
+				page.getByRole( 'heading', {
+					name: `Editing ${ templateTypeName }: ${ testData.templateName }`,
+				} )
+			).toBeVisible();
+
 			await testData.visitPage( { frontendUtils, page } );
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
@@ -53,7 +63,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				editorUtils,
 				page,
 			} ) => {
-				// Edit default template and verify changes are visible.
+				// Edit fallback template and verify changes are visible.
 				await admin.visitSiteEditor( {
 					postId: `${ WC_TEMPLATES_SLUG }//${
 						testData.fallbackTemplate?.templatePath || ''

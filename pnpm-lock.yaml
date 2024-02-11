@@ -2837,6 +2837,8 @@ importers:
         specifier: 0.14.3
         version: 0.14.3
 
+  packages/php/remote-specs-validation: {}
+
   plugins/woo-ai:
     dependencies:
       '@automattic/tour-kit':
@@ -4605,22 +4607,6 @@ importers:
       simple-git:
         specifier: 3.5.0
         version: 3.5.0
-
-  tools/create-extension:
-    dependencies:
-      chalk:
-        specifier: ^4.1.2
-        version: 4.1.2
-      fs-extra:
-        specifier: 10.1.0
-        version: 10.1.0
-      promptly:
-        specifier: ^3.2.0
-        version: 3.2.0
-    devDependencies:
-      wireit:
-        specifier: 0.14.3
-        version: 0.14.3
 
   tools/monorepo-merge:
     dependencies:

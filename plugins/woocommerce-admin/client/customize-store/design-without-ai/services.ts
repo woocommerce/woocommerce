@@ -4,7 +4,13 @@
 import { Sender } from 'xstate';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, dispatch } from '@wordpress/data';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
+// @ts-expect-error -- No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -21,6 +27,8 @@ import {
 	getFontFamiliesAndFontFaceToInstall,
 	FontCollectionsResponse,
 } from './fonts';
+import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
+import { FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -143,10 +151,50 @@ const createProducts = async () => {
 	}
 };
 
+const updateGlobalStylesWithDefaultValues = async () => {
+	// We are using the first color palette and font pairing that are displayed on the color/font picker on the sidebar.
+	const colorPalette = COLOR_PALETTES[ 0 ];
+	const fontPairing = FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ];
+
+	// @ts-expect-error No types for this exist yet.
+	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );
+	invalidateResolutionForStoreSelector(
+		'__experimentalGetCurrentGlobalStylesId'
+	);
+
+	const globalStylesId = await resolveSelect(
+		coreStore
+		// @ts-expect-error No types for this exist yet.
+	).__experimentalGetCurrentGlobalStylesId();
+
+	// @ts-expect-error No types for this exist yet.
+	const { saveEntityRecord } = dispatch( coreStore );
+
+	await saveEntityRecord(
+		'root',
+		'globalStyles',
+		{
+			id: globalStylesId,
+			styles: mergeBaseAndUserConfigs(
+				colorPalette?.styles || {},
+				fontPairing?.styles || {}
+			),
+			settings: mergeBaseAndUserConfigs(
+				colorPalette?.settings || {},
+				fontPairing?.settings || {}
+			),
+		},
+		{
+			throwOnError: true,
+		}
+	);
+};
+
 export const services = {
 	assembleSite,
 	browserPopstateHandler,
 	installAndActivateTheme,
 	createProducts,
 	installFontFamilies,
+	updateGlobalStylesWithDefaultValues,
 };

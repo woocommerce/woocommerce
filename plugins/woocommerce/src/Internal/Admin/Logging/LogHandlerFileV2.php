@@ -123,6 +123,10 @@ class LogHandlerFileV2 extends WC_Log_Handler {
 		$backtrace = static::get_backtrace();
 
 		foreach ( $backtrace as $frame ) {
+			if ( ! isset( $frame['file'] ) ) {
+				continue;
+			}
+
 			foreach ( $source_roots as $type => $path ) {
 				if ( 0 === strpos( $frame['file'], $path ) ) {
 					$relative_path = trim( substr( $frame['file'], strlen( $path ) ), DIRECTORY_SEPARATOR );
