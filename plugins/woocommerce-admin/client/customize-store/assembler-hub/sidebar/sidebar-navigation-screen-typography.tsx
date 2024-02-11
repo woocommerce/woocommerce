@@ -4,11 +4,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { Button, Modal, CheckboxControl } from '@wordpress/components';
+import interpolateComponents from '@automattic/interpolate-components';
 
 /**
  * Internal dependencies
@@ -58,6 +64,26 @@ export const SidebarNavigationScreenTypography = () => {
 	} else {
 		upgradeNotice = '';
 	}
+
+	const OptIn = () => {
+		recordEvent(
+			'customize_your_store_assembler_hub_opt_in_usage_tracking'
+		);
+	};
+
+	const skipOptIn = () => {
+		recordEvent(
+			'customize_your_store_assembler_hub_skip_opt_in_usage_tracking'
+		);
+	};
+
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	const openModal = () => setIsModalOpen( true );
+	const closeModal = () => setIsModalOpen( false );
+
+	const [ iOptInDataSharing, setIsOptInDataSharing ] =
+		useState< boolean >( true );
 
 	return (
 		<SidebarNavigationScreen
@@ -130,23 +156,68 @@ export const SidebarNavigationScreenTypography = () => {
 									OptInModal: (
 										<Link
 											onClick={ () => {
-												recordEvent(
-													'customize_your_store_assembler_hub_opt_in_modal_click',
-													{
-														source: 'typography',
-													}
-												);
+												openModal();
 											} }
-											href=""
-										>
-											{ __(
-												'usage tracking',
-												'woocommerce'
-											) }
-										</Link>
+											href={ '' }
+										/>
 									),
 								} ) }
 							</p>
+							{ isModalOpen && (
+								<Modal
+									className={
+										'woocommerce-customize-store__opt-in-usage-tracking-modal'
+									}
+									title={ __(
+										'Opt in to usage tracking',
+										'woocommerce'
+									) }
+									onRequestClose={ closeModal }
+									shouldCloseOnClickOutside={ false }
+								>
+									<CheckboxControl
+										className="core-profiler__checkbox"
+										label={ interpolateComponents( {
+											mixedString: __(
+												'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+												'woocommerce'
+											),
+											components: {
+												link: (
+													<Link
+														href="https://woo.com/usage-tracking?utm_medium=product"
+														target="_blank"
+														type="external"
+													/>
+												),
+											},
+										} ) }
+										checked={ iOptInDataSharing }
+										onChange={ setIsOptInDataSharing }
+									/>
+									<div className="woocommerce-customize-store__design-change-warning-modal-footer">
+										<Button
+											onClick={ () => {
+												skipOptIn();
+												closeModal();
+											} }
+											variant="link"
+										>
+											{ __( 'Cancel', 'woocommerce' ) }
+										</Button>
+										<Button
+											onClick={ () => {
+												setIsOptInDataSharing( true );
+												OptIn();
+												closeModal();
+											} }
+											variant="primary"
+										>
+											{ __( 'Opt in', 'woocommerce' ) }
+										</Button>
+									</div>
+								</Modal>
+							) }
 						</div>
 					) }
 				</div>
