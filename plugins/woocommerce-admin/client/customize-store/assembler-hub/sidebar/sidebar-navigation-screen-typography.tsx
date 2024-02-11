@@ -38,21 +38,21 @@ export const SidebarNavigationScreenTypography = () => {
 		select( OPTIONS_STORE_NAME ).getOption( 'woocommerce_allow_tracking' )
 	);
 
+	const isTrackingDisallowed = trackingAllowed === 'no' || ! trackingAllowed;
 	let upgradeNotice;
-
-	if ( ! trackingAllowed && ! isFontLibraryAvailable ) {
+	if ( isTrackingDisallowed && ! isFontLibraryAvailable ) {
 		upgradeNotice = __(
-			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> and opt in to usage tracking to get access to more fonts.',
+			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> and <OptInModal>opt in to usage tracking</OptInModal> to get access to more fonts.',
 			'woocommerce'
 		);
-	} else if ( ! trackingAllowed && isFontLibraryAvailable ) {
+	} else if ( isTrackingDisallowed && isFontLibraryAvailable ) {
 		upgradeNotice = __(
 			'Opt in to <OptInModal>usage tracking</OptInModal> to get access to more fonts.',
 			'woocommerce'
 		);
 	} else if ( trackingAllowed && ! isFontLibraryAvailable ) {
 		upgradeNotice = __(
-			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> or install <GutenbergLink>Gutenberg</GutenbergLink> to get access to more fonts.',
+			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> or <GutenbergLink>install Gutenberg</GutenbergLink> to get access to more fonts.',
 			'woocommerce'
 		);
 	} else {
@@ -104,39 +104,50 @@ export const SidebarNavigationScreenTypography = () => {
 				<div className="woocommerce-customize-store_sidebar-typography-content">
 					<FontPairing />
 					{ upgradeNotice && (
-						<p className="woocommerce-customize-store_sidebar-typography-upgrade-notice">
-							{ createInterpolateElement( upgradeNotice, {
-								WordPressLink: (
-									<Link
-										href="https://wordpress.org/download/"
-										target="_blank"
-										type="external"
-									/>
-								),
-								GutenbergLink: (
-									<Link
-										href="https://wordpress.org/plugins/gutenberg/"
-										target="_blank"
-										type="external"
-									/>
-								),
-								OptInModal: (
-									<Link
-										onClick={ () => {
-											recordEvent(
-												'customize_your_store_assembler_hub_opt_in_modal_click',
-												{
-													source: 'typography',
-												}
-											);
-										} }
-										href=""
-									>
-										{ __( 'usage tracking' ) }
-									</Link>
-								),
-							} ) }
-						</p>
+						<div className="woocommerce-customize-store_sidebar-typography-upgrade-notice">
+							<h4>
+								{ __(
+									'Want more font pairings?',
+									'woocommerce'
+								) }
+							</h4>
+							<p>
+								{ createInterpolateElement( upgradeNotice, {
+									WordPressLink: (
+										<Link
+											href="https://wordpress.org/download/"
+											target="_blank"
+											type="external"
+										/>
+									),
+									GutenbergLink: (
+										<Link
+											href="https://wordpress.org/plugins/gutenberg/"
+											target="_blank"
+											type="external"
+										/>
+									),
+									OptInModal: (
+										<Link
+											onClick={ () => {
+												recordEvent(
+													'customize_your_store_assembler_hub_opt_in_modal_click',
+													{
+														source: 'typography',
+													}
+												);
+											} }
+											href=""
+										>
+											{ __(
+												'usage tracking',
+												'woocommerce'
+											) }
+										</Link>
+									),
+								} ) }
+							</p>
+						</div>
 					) }
 				</div>
 			}
