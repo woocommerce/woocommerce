@@ -24,8 +24,13 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
+import { IntroOptInEvent } from '~/core-profiler';
 
-export const SidebarNavigationScreenTypography = () => {
+export const SidebarNavigationScreenTypography = ( {
+	sendEvent,
+}: {
+	sendEvent: ( event: IntroOptInEvent ) => void;
+} ) => {
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -82,7 +87,7 @@ export const SidebarNavigationScreenTypography = () => {
 	const openModal = () => setIsModalOpen( true );
 	const closeModal = () => setIsModalOpen( false );
 
-	const [ iOptInDataSharing, setIsOptInDataSharing ] =
+	const [ OptInDataSharing, setIsOptInDataSharing ] =
 		useState< boolean >( true );
 
 	return (
@@ -192,7 +197,7 @@ export const SidebarNavigationScreenTypography = () => {
 												),
 											},
 										} ) }
-										checked={ iOptInDataSharing }
+										checked={ OptInDataSharing }
 										onChange={ setIsOptInDataSharing }
 									/>
 									<div className="woocommerce-customize-store__design-change-warning-modal-footer">
@@ -207,7 +212,13 @@ export const SidebarNavigationScreenTypography = () => {
 										</Button>
 										<Button
 											onClick={ () => {
-												setIsOptInDataSharing( true );
+												sendEvent( {
+													type: 'INTRO_COMPLETED',
+													payload: {
+														optInDataSharing:
+															iOptInDataSharing,
+													},
+												} );
 												OptIn();
 												closeModal();
 											} }
