@@ -134,6 +134,32 @@ class ProductCollectionPage {
 		await this.editor.openDocumentSettingsSidebar();
 	}
 
+	async setupAndFetchQueryContextURL( {
+		collection,
+	}: {
+		collection: Collections;
+	} ) {
+		await this.admin.createNewPost();
+		await this.editorUtils.closeWelcomeGuideModal();
+		await this.editor.insertBlock( {
+			name: this.BLOCK_NAME,
+		} );
+		await this.chooseCollectionInPost( collection );
+
+		// Wait for response with productCollectionQueryContext query parameter.
+		const WP_PRODUCT_ENDPOINT = '/wp/v2/product';
+		const QUERY_CONTEXT_PARAM = 'productCollectionQueryContext';
+		const response = await this.page.waitForResponse(
+			( currentResponse ) =>
+				currentResponse.url().includes( WP_PRODUCT_ENDPOINT ) &&
+				currentResponse.url().includes( QUERY_CONTEXT_PARAM ) &&
+				currentResponse.status() === 200
+		);
+
+		const url = new URL( response.url() );
+		return url;
+	}
+
 	async publishAndGoToFrontend() {
 		await this.editor.publishPost();
 		const url = new URL( this.page.url() );
@@ -155,7 +181,7 @@ class ProductCollectionPage {
 		await this.editorUtils.enterEditMode();
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
-			'woocommerce/product-collection'
+			this.BLOCK_NAME
 		);
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.saveSiteEditorEntities();
@@ -485,6 +511,29 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
+	async insertProductCollectionInSingleProductBlock(
+		collection: Collections
+	) {
+		this.insertSingleProductBlock();
+
+		const siblingBlock = await this.editorUtils.getBlockByName(
+			'woocommerce/product-price'
+		);
+		const clientId =
+			( await siblingBlock.getAttribute( 'data-block' ) ) ?? '';
+		const parentClientId =
+			( await this.editorUtils.getBlockRootClientId( clientId ) ) ?? '';
+
+		await this.editor.selectBlocks( siblingBlock );
+		await this.editorUtils.insertBlock(
+			{ name: this.BLOCK_NAME },
+			undefined,
+			parentClientId
+		);
+		await this.chooseCollectionInPost( collection );
+		await this.refreshLocators( 'editor' );
+	}
+
 	/**
 	 * Locators
 	 */
@@ -505,7 +554,24 @@ class ProductCollectionPage {
 	/**
 	 * Private methods to be used by the class.
 	 */
-	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
+	private async insertSingleProductBlock() {
+		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
+		await this.page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wc/store/v1/products' ) &&
+				response.status() === 200
+		);
+		const singleProductBlock = await this.editorUtils.getBlockByName(
+			'woocommerce/single-product'
+		);
+		await singleProductBlock
+			.locator( 'input[type="radio"]' )
+			.nth( 0 )
+			.click();
+		await singleProductBlock.getByText( 'Done' ).click();
+	}
+
+	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
 		await this.waitForProductsToLoad();
 
 		if ( currentUI === 'editor' ) {
@@ -526,7 +592,7 @@ class ProductCollectionPage {
 		this.productTitles = this.productTemplate
 			.locator( SELECTORS.productTitle )
 			.locator( 'visible=true' );
-		this.productPrices = this.page
+		this.productPrices = this.productTemplate
 			.locator( SELECTORS.productPrice.inEditor )
 			.locator( 'visible=true' );
 		this.addToCartButtons = this.page

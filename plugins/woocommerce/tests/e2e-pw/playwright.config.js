@@ -22,17 +22,9 @@ const config = {
 	testDir: 'tests',
 	retries: CI ? 2 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
-	workers: CI ? 1 : 4,
+	workers: 1,
 	reporter: [
 		[ 'list' ],
-		[
-			'blob',
-			{
-				outputFolder:
-					ALLURE_RESULTS_DIR ??
-					'./tests/e2e-pw/test-results/allure-results',
-			},
-		],
 		[
 			'html',
 			{
