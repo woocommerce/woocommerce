@@ -5,6 +5,12 @@ namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 use WP_UnitTestCase;
 
 /**
@@ -13,10 +19,24 @@ use WP_UnitTestCase;
 class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 	/**
+	 * Holds an instance of the dependency injection container.
+	 *
+	 * @var Container
+	 */
+	private $container;
+
+	/**
 	 * Setup test environment.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		// Switch to a block theme and register templates.
+		$this->container = Package::container();
+		switch_theme( 'twentytwentytwo' );
+		$this->register_block_templates();
+
+		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 		delete_option( Options::WC_BLOCK_VERSION );
 	}
@@ -31,6 +51,27 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			array( 'taxonomy-product_attribute', true ),
 			array( 'single-product', false ),
 		);
+	}
+
+	/**
+	 * Constructs template classes. Needed so template are registered after
+	 * switching to a block theme.
+	 *
+	 * @return void
+	 */
+	public function register_block_templates(): void {
+		$templates = [
+			ProductCatalogTemplate::class,
+			ProductCategoryTemplate::class,
+			ProductTagTemplate::class,
+			ProductAttributeTemplate::class,
+			SingleProductTemplate::class,
+		];
+
+		foreach ( $templates as $template_class ) {
+			$template = $this->container->get( $template_class );
+			$template->__construct();
+		}
 	}
 
 	/**
