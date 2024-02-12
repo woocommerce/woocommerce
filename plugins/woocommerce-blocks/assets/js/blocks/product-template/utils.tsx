@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { resolveSelect, useSelect } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { useMemo } from '@wordpress/element';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
 type Context< T > = T & {

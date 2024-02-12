@@ -25,8 +25,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useGetLocation } from './utils';
-import { useProductCollectionQueryContext } from './utils';
+import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
