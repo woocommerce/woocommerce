@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,6 +30,13 @@ class LegacyDataHandler {
 	private DataSynchronizer $data_synchronizer;
 
 	/**
+	 * Instance of the PostsToOrdersMigrationController.
+	 *
+	 * @var PostsToOrdersMigrationController
+	 */
+	private PostsToOrdersMigrationController $posts_to_cot_migrator;
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
 	 * @param OrdersTableDataStore $data_store HPOS datastore instance to use.
@@ -36,9 +44,10 @@ class LegacyDataHandler {
 	 *
 	 * @internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer ) {
-		$this->data_store        = $data_store;
-		$this->data_synchronizer = $data_synchronizer;
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
+		$this->data_store            = $data_store;
+		$this->data_synchronizer     = $data_synchronizer;
+		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
 	}
 
 	/**
