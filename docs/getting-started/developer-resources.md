@@ -14,7 +14,11 @@ There are a few different ways you might want to get started utilizing WooCommer
 
 If you're brand new to Woo, this guide will show you How to build an online store on WooCommerce. This is where you can learn the ins and outs of how WooCommerce works before you start developing.
 
-### [Building your first extension](../extension-development/building-your-first-extension.md)
+### [Extension Development Quick Start](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension)
+
+This no-configuration quick-start package will scaffold a local copy of an extension template for you. Just open up your terminal and follow the steps in GitHub. 
+
+### [Building your first extension](/extension-development/building-your-first-extension.md)
 
 This guide will have you building your first extension with best practices and helpful tips.
 
@@ -26,11 +30,11 @@ Are you hoping to sell your extension in the [Woo Marketplace](https://woo.com/m
 
 If you've ever wanted to contribute to the WooCommerce platform as a developer please read our guidelines for contribution first.
 
-### [Development Environment Set-Up](./development-environment.md)
+### [Contribution Environment Set-Up](https://github.com/woocommerce/woocommerce/tree/trunk)
 
-Learn the first steps to set your development environment.
+Visit the WooCommerce home repository on GitHub to learn the first steps to environment set up and platform contribution expectations.
 
-### [Developer tools](./developer-tools.md)
+### [Developer tools](docs/getting-started/developer-tools.md)
 
 Check out our guide to learn more about developer tools, libraries, and utilities. 
 
@@ -41,7 +45,7 @@ Check out our guide to learn more about developer tools, libraries, and utilitie
 
 The resources below contain low-level documentation about features, libraries, extensions, and other pieces of WooCommerce architecture. Use them as a reference when building extensions or integrating with WooCommerce.
 
-### [REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+## [REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 The WooCommerce REST API lets you create, read, update, and delete WooCommerce data using HTTP requests, so you can integrate external applications with WooCommerce and build extensions that make use of asynchronous UI frameworks such as React.
 
@@ -49,11 +53,11 @@ The WooCommerce REST API lets you create, read, update, and delete WooCommerce d
 
 The WooCommerce Core API code reference contains information about packages and classes that make up WooCommerce's core functionality.
 
-### [Store API](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/StoreApi/README.md#woocommerce-store-api-)
+### [Store API](https://github.com/woocommerce/woocommerce-blocks/tree/trunk/src/StoreApi)
 
 The Store API provides public Rest API endpoints for the development of customer-facing cart, checkout, and product functionality. It follows many of the patterns used in the [WordPress REST API](https://developer.wordpress.org/rest-api/key-concepts/).
 
-### [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks/docs#woocommerce-blocks-handbook-)
+### [WooCommerce Blocks](https://github.com/woocommerce/woocommerce-gutenberg-products-block/#documentation)
 
 WooCommerce Blocks give you the ability to integrate WooCommerce with Gutenberg. Use the documentation and resources here as a starting point for developing new block types for WooCommerce.
 
