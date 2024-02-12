@@ -1,20 +1,8 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Product Reviews > Edit Product Review', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-
-			await use( api );
-		},
+		storageState: process.env.ADMINSTATE,
 		testData: async ( { api }, use ) => {
 			const timestamp = Date.now().toString();
 			let product = {};
