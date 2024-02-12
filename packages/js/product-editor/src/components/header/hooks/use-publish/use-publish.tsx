@@ -5,6 +5,7 @@ import type { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { isInTheFuture } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
@@ -34,6 +35,11 @@ export function usePublish( {
 		productType,
 		'id'
 	);
+	const [ editedDateCreated, _, dateCreated ] = useEntityProp< string >(
+		'postType',
+		productType,
+		'date_created'
+	);
 
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
@@ -42,8 +48,6 @@ export function usePublish( {
 				isSavingEntityRecord,
 				// @ts-expect-error There are no types for this.
 				hasEditsForEntityRecord,
-				// @ts-expect-error There are no types for this.
-				getRawEntityRecord,
 			} = select( 'core' );
 
 			return {
@@ -53,11 +57,6 @@ export function usePublish( {
 					productId
 				),
 				isDirty: hasEditsForEntityRecord(
-					'postType',
-					productType,
-					productId
-				),
-				currentPost: getRawEntityRecord< boolean >(
 					'postType',
 					productType,
 					productId
@@ -146,10 +145,21 @@ export function usePublish( {
 		}
 	}
 
-	return {
-		children: isPublished
+	function getButtonText() {
+		const isScheduled =
+			dateCreated !== editedDateCreated &&
+			isInTheFuture( editedDateCreated );
+		if ( isScheduled ) {
+			return __( 'Schedule', 'woocommerce' );
+		}
+
+		return isPublished
 			? __( 'Update', 'woocommerce' )
-			: __( 'Publish', 'woocommerce' ),
+			: __( 'Publish', 'woocommerce' );
+	}
+
+	return {
+		children: getButtonText(),
 		...props,
 		isBusy,
 		'aria-disabled': isDisabled,
