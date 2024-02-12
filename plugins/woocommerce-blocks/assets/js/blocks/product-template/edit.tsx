@@ -26,7 +26,10 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { useGetLocation } from './utils';
+import { useProductCollectionQueryContext } from './utils';
 import './editor.scss';
+
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -153,6 +156,7 @@ const ProductTemplateEdit = (
 				columns: 3,
 				shrinkColumns: false,
 			},
+			queryContextIncludes = [],
 		},
 		__unstableLayoutClassNames,
 	} = props;
@@ -167,6 +171,19 @@ const ProductTemplateEdit = (
 		12,
 		isNumber
 	);
+
+	// Add default query context attributes to queryContextIncludes
+	const queryContextIncludesWithDefaults = [
+		...new Set(
+			queryContextIncludes.concat( DEFAULT_QUERY_CONTEXT_ATTRIBUTES )
+		),
+	];
+
+	const productCollectionQueryContext = useProductCollectionQueryContext( {
+		clientId,
+		queryContextIncludes: queryContextIncludesWithDefaults,
+	} );
+
 	const { products, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getTaxonomies } = select( coreStore );
@@ -232,6 +249,7 @@ const ProductTemplateEdit = (
 					...query,
 					...restQueryArgs,
 					location,
+					productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
 			};
@@ -251,6 +269,8 @@ const ProductTemplateEdit = (
 			taxQuery,
 			restQueryArgs,
 			location,
+			productCollectionQueryContext,
+			loopShopPerPage,
 		]
 	);
 	const blockContexts = useMemo(

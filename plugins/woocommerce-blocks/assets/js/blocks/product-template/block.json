@@ -15,6 +15,7 @@
 		"displayLayout",
 		"templateSlug",
 		"postId",
+		"queryContextIncludes",
 		"collection"
 	],
 	"supports": {
