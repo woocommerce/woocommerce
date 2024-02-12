@@ -7,7 +7,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
 	const test = baseTest.extend( {
-		product: async ( { page, api }, use ) => {
+		product: async ( { api }, use ) => {
 			let product;
 
 			await api
@@ -23,14 +23,17 @@ baseTest.describe( 'Products > Edit Product', () => {
 					product = response.data;
 				} );
 
-			await test.step( 'ensure block product editor is enabled', async () => {
-				await toggleBlockProductEditor( 'enable', page );
-			} );
-
 			await use( product );
 
 			// Cleanup
 			await api.delete( `products/${ product.id }`, { force: true } );
+		},
+		page: async ( { page }, use ) => {
+			await test.step( 'ensure block product editor is enabled', async () => {
+				await toggleBlockProductEditor( 'enable', page );
+			} );
+
+			await use( page );
 		},
 	} );
 
