@@ -21,7 +21,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
  */
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
-import ExpressPaymentButtonWrapper from './express-payment/express-payment-button-wrapper';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
