@@ -1,7 +1,5 @@
-const { test: baseTest, expect } = require( '../../../../fixtures' );
-const {
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
+const { test: baseTest } = require( './block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures' );
 
 async function selectImagesInLibrary( page, imagesNames ) {
 	const dataIds = [];
@@ -27,7 +25,6 @@ async function selectImagesInLibrary( page, imagesNames ) {
 
 baseTest.describe( 'Products > Edit Product', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product;
 
@@ -69,13 +66,6 @@ baseTest.describe( 'Products > Edit Product', () => {
 				} );
 
 			await use( productWithGallery );
-		},
-		page: async ( { page }, use ) => {
-			await test.step( 'ensure block product editor is enabled', async () => {
-				await toggleBlockProductEditor( 'enable', page );
-			} );
-
-			await use( page );
 		},
 	} );
 

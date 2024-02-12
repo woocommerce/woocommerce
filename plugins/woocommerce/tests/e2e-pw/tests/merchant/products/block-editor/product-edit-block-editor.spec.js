@@ -1,11 +1,7 @@
-const { test: baseTest, expect } = require( '../../../../fixtures' );
-const {
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
-
+const { test: baseTest } = require( './block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures' );
 baseTest.describe( 'Products > Edit Product', () => {
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product;
 
@@ -27,12 +23,22 @@ baseTest.describe( 'Products > Edit Product', () => {
 			// Cleanup
 			await api.delete( `products/${ product.id }`, { force: true } );
 		},
-		page: async ( { page }, use ) => {
-			await test.step( 'ensure block product editor is enabled', async () => {
-				await toggleBlockProductEditor( 'enable', page );
-			} );
+		page: async ( { page, api }, use ) => {
+			await api.put(
+				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
+				{
+					value: 'yes',
+				}
+			);
 
 			await use( page );
+
+			await api.put(
+				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
+				{
+					value: 'no',
+				}
+			);
 		},
 	} );
 
