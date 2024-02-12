@@ -38,7 +38,9 @@ export function RequirePassword( {
 	);
 
 	useEffect( () => {
-		setPasswordRequired( postPassword !== '' );
+		if ( ! isPasswordRequired && postPassword !== '' ) {
+			setPasswordRequired( true );
+		}
 	}, [ postPassword ] );
 
 	return (
