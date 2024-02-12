@@ -142,6 +142,13 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	public $pay_button_id = '';
 
 	/**
+	 * Normalized gateway ID.
+	 *
+	 * @var Gateway_ID_Constants
+	 */
+	public $standardized_gateway_id;
+
+	/**
 	 * Contains a users saved tokens for this gateway.
 	 *
 	 * @var array
@@ -173,6 +180,10 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 */
 	public function get_method_title() {
 		return apply_filters( 'woocommerce_gateway_method_title', $this->method_title, $this );
+	}
+
+	public function get_normalized_gateway_id() {
+		return $this->standardized_gateway_id;
 	}
 
 	/**
