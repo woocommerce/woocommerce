@@ -1,8 +1,6 @@
 const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Products > Add Simple Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const productData = {
 		virtual: {
 			name: `Virtual product ${ Date.now() }`,
@@ -39,6 +37,7 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 	};
 
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			const product = {};
 			await use( product );
