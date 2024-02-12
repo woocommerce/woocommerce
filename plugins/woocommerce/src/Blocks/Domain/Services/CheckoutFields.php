@@ -591,12 +591,12 @@ class CheckoutFields {
 			 * Pass an error object to allow validation of an additional field.
 			 *
 			 * @param WP_Error $errors      A WP_Error object that extensions may add errors to.
-			 * @param mixed    $field_value The value of the field being validated.
 			 * @param string   $field_key   Key of the field being sanitized.
+			 * @param mixed    $field_value The value of the field being validated.
 			 *
 			 * @since 8.7.0
 			 */
-			do_action( 'woocommerce_blocks_validate_additional_field', $errors, $field_value, $field_key );
+			do_action( 'woocommerce_blocks_validate_additional_field', $errors, $field_key, $field_value );
 
 		} catch ( \Throwable $e ) {
 
