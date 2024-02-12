@@ -290,9 +290,9 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns template titles.
+	 * Returns template title.
 	 *
-	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Human friendly title.
 	 */
 	public static function get_block_template_title( $template_slug ) {
@@ -306,9 +306,9 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns template descriptions.
+	 * Returns template description.
 	 *
-	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Template description.
 	 */
 	public static function get_block_template_description( $template_slug ) {
@@ -322,9 +322,9 @@ class BlockTemplateUtils {
 	/**
 	 * Returns area for template parts.
 	 *
-	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @param string $template_slug The template part slug (e.g. mini-cart).
 	 * @param string $template_type Either `wp_template` or `wp_template_part`.
-	 * @return string Template description.
+	 * @return string Template part area.
 	 */
 	public static function get_block_template_area( $template_slug, $template_type ) {
 		if ( 'wp_template_part' === $template_type ) {
@@ -334,26 +334,6 @@ class BlockTemplateUtils {
 			}
 		}
 		return 'uncategorized';
-	}
-
-	/**
-	 * Returns a filtered list of plugin template types, containing their
-	 * localized titles and descriptions.
-	 *
-	 * @return array The plugin template types.
-	 */
-	public static function get_plugin_block_template_types() {
-		wc_deprecated_function( 'BlockTemplateUtils::get_plugin_block_template_types()', '8.8', 'BlockTemplatesRegistry::get_templates()' );
-		$templates      = BlockTemplatesRegistry::get_templates();
-		$templates_data = [];
-
-		foreach ( $templates as $template ) {
-			$templates_data[ $template->slug ] = array(
-				'title'       => $template->template_title,
-				'description' => $template->template_description,
-			);
-		}
-		return $templates_data;
 	}
 
 	/**

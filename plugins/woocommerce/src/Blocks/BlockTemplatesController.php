@@ -33,7 +33,6 @@ class BlockTemplatesController {
 	 * Initialization method.
 	 */
 	protected function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
@@ -414,7 +413,6 @@ class BlockTemplatesController {
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
 				}
-
 				if ( ! $template->area || 'uncategorized' === $template->area ) {
 					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
 				}
@@ -567,13 +565,6 @@ class BlockTemplatesController {
 		return is_readable(
 			$directory
 		) || $this->get_block_templates( array( $template_name ), $template_type );
-	}
-
-	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
-	 */
-	public function render_block_template() {
-		// @todo deprecate
 	}
 
 	/**
