@@ -14,6 +14,7 @@
 	@include break-medium() {
 		left: 72%;
 		width: 27%;
+		@include reduce-motion("animation");
 
 		body.is-fullscreen-mode & {
 			top: 0;
@@ -28,30 +29,11 @@
 	@include break-large() {
 		left: auto;
 		width: 25%;
-
-		body.is-fullscreen-mode & {
-			top: 0;
-		}
-
-		// Keep it open on focus to avoid conflict with navigate-regions animation.
-		[role="region"]:focus & {
-			transform: translateX(0%);
-		}
 	}
 
 	@include break-xlarge() {
 		left: auto;
 		width: $sidebar-width + $border-width + 4px;
-		@include reduce-motion("animation");
-
-		body.is-fullscreen-mode & {
-			top: 0;
-		}
-
-		// Keep it open on focus to avoid conflict with navigate-regions animation.
-		[role="region"]:focus & {
-			transform: translateX(0%);
-		}
 	}
 
 	&__header {
