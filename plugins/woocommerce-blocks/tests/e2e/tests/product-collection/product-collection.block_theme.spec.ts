@@ -733,4 +733,42 @@ test.describe( 'Product Collection', () => {
 			);
 		} );
 	} );
+
+	test.describe( 'Query Context in Editor', () => {
+		test( 'Product Catalog: Sends only ID in Query Context', async ( {
+			pageObject,
+		} ) => {
+			const url = await pageObject.setupAndFetchQueryContextURL( {
+				collection: 'productCatalog',
+			} );
+
+			await expect(
+				url.searchParams.has( 'productCollectionQueryContext[id]' )
+			).toBeTruthy();
+
+			// There shouldn't be collection in the query context
+			// Because Product Catalog isn't a collection
+			await expect(
+				url.searchParams.has(
+					'productCollectionQueryContext[collection]'
+				)
+			).toBeFalsy();
+		} );
+
+		test( 'Collections: collection should be present in query context', async ( {
+			pageObject,
+		} ) => {
+			const url = await pageObject.setupAndFetchQueryContextURL( {
+				collection: 'onSale',
+			} );
+
+			const collectionName = url.searchParams.get(
+				'productCollectionQueryContext[collection]'
+			);
+			await expect( collectionName ).toBeTruthy();
+			await expect( collectionName ).toBe(
+				'woocommerce/product-collection/on-sale'
+			);
+		} );
+	} );
 } );
