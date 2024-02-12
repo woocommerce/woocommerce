@@ -172,7 +172,7 @@ const ExpressPaymentMethods = () => {
 							buttonAttributes: {
 								height: '48px',
 								theme: 'light',
-								label: true,
+								label: 'buy',
 							},
 						} ) }
 					</li>
