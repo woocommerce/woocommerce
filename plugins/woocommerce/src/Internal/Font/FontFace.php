@@ -49,7 +49,7 @@ class FontFace {
 	 */
 	private static function sanitize_src( $value ) {
 		$value = ltrim( $value );
-		return false === wp_http_validate_url( $value ) ? (string) $value : sanitize_url( $value );
+		return false === wp_http_validate_url( $value ) ? (string) $value : esc_url_raw( $value );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class FontFace {
 		$status = 500;
 		$code   = 'rest_font_upload_unknown_error';
 
-		if ( __( 'Sorry, you are not allowed to upload this file type.' ) === $message ) {
+		if ( __( 'Sorry, you are not allowed to upload this file type.', 'woocommerce' ) === $message ) {
 			$status = 400;
 			$code   = 'rest_font_upload_invalid_file_type';
 		}
@@ -175,7 +175,7 @@ class FontFace {
 		$uploaded_file = self::handle_font_file_upload( $file );
 
 		$parsed_font_face['src']     = self::sanitize_src( $uploaded_file['url'] );
-		$parsed_font_face['preview'] = sanitize_url( $font_face['preview'] );
+		$parsed_font_face['preview'] = esc_url_raw( $font_face['preview'] );
 
 		// Insert the font face.
 		wp_insert_post(
