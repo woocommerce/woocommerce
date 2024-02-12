@@ -41,7 +41,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 	baseTest.use( { storageState: process.env.ADMINSTATE } );
 
 	const test = baseTest.extend( {
-		product: async ( { page, api }, use ) => {
+		product: async ( { api }, use ) => {
 			let product;
 
 			await api
@@ -55,10 +55,6 @@ baseTest.describe( 'Products > Edit Product', () => {
 				.then( ( response ) => {
 					product = response.data;
 				} );
-
-			await test.step( 'ensure block product editor is enabled', async () => {
-				await toggleBlockProductEditor( 'enable', page );
-			} );
 
 			await use( product );
 
@@ -86,6 +82,13 @@ baseTest.describe( 'Products > Edit Product', () => {
 				} );
 
 			await use( productWithGallery );
+		},
+		page: async ( { page }, use ) => {
+			await test.step( 'ensure block product editor is enabled', async () => {
+				await toggleBlockProductEditor( 'enable', page );
+			} );
+
+			await use( page );
 		},
 	} );
 
@@ -134,6 +137,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 	} );
 
 	test( 'can replace an image', async ( { page, productWithGallery } ) => {
+		const initialImagesCount = productWithGallery.images.length;
 		const newImageName = 'image-01';
 		const replacedImgLocator = page
 			.getByLabel( 'Block: Product images' )
@@ -171,6 +175,9 @@ baseTest.describe( 'Products > Edit Product', () => {
 
 		await test.step( 'verify product image was set', async () => {
 			await expect( replacedImgLocator ).toHaveId( dataIds[ 0 ] );
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount );
 
 			// Verify image in store frontend
 			await page.goto( productWithGallery.permalink );
@@ -178,42 +185,91 @@ baseTest.describe( 'Products > Edit Product', () => {
 		} );
 	} );
 
-	// test( 'can update the gallery', async ( {
-	// 	page,
-	// 	productWithGallery,
-	// } ) => {
-	// 	const images = [ 'image-01', 'image-02' ];
-	//
-	// 	await test.step( 'navigate to product edit page', async () => {
-	// 		await page.goto(
-	// 			`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
-	// 		);
-	// 	} );
-	//
-	// 	await test.step( 'update the images', async () => {
-	// 		await page.getByText( 'Choose an image' ).click();
-	// 		const dataIds = await selectImagesInLibrary( page, images );
-	//
-	// 		for ( const dataId of dataIds ) {
-	// 			await expect(
-	// 				page
-	// 					.getByLabel( 'Block: Product images' )
-	// 					.locator( `img[id="${ dataId }"]` )
-	// 			).toBeVisible();
-	// 		}
-	//
-	// 		await page.getByRole( 'button', { name: 'Update' } ).click();
-	// 	} );
-	//
-	// 	await test.step( 'Verify product image was set', async () => {
-	// 		// Verify product was updated
-	// 		await expect(
-	// 			page.getByLabel( 'Dismiss this notice' )
-	// 		).toContainText( 'Product updated' );
-	//
-	// 		// Verify image in store frontend
-	// 		await page.goto( productWithGallery.permalink );
-	// 		await expect( page.getByTitle( `image-01` ) ).toBeVisible();
-	// 	} );
-	// } );
+	test( 'can remove an image', async ( { page, productWithGallery } ) => {
+		const initialImagesCount = productWithGallery.images.length;
+		const removedImgLocator = page
+			.getByLabel( 'Block: Product images' )
+			.locator( 'img' )
+			.nth( 1 );
+
+		await test.step( 'navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
+			);
+		} );
+
+		await test.step( 'remove an image', async () => {
+			await removedImgLocator.click();
+			await page
+				.getByRole( 'toolbar', { name: 'Options' } )
+				.getByLabel( 'Options' )
+				.click();
+			await page.getByRole( 'menuitem', { name: 'Remove' } ).click();
+
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount - 1 );
+		} );
+
+		await test.step( 'update the product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Verify product was updated
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product updated' );
+		} );
+
+		await test.step( 'verify product image was set', async () => {
+			await expect(
+				page.getByLabel( 'Block: Product images' ).locator( 'img' )
+			).toHaveCount( initialImagesCount - 1 );
+
+			// Verify image in store frontend
+			await page.goto( productWithGallery.permalink );
+			await expect(
+				page.locator( `#product-${ productWithGallery.id } ol img` )
+			).toHaveCount( initialImagesCount - 1 );
+		} );
+	} );
+
+	test( 'can set an image as cover', async ( {
+		page,
+		productWithGallery,
+	} ) => {
+		const newCoverImgLocator = page
+			.getByLabel( 'Block: Product images' )
+			.locator( 'img' )
+			.nth( 1 );
+
+		await test.step( 'navigate to product edit page', async () => {
+			await page.goto(
+				`wp-admin/post.php?post=${ productWithGallery.id }&action=edit`
+			);
+		} );
+
+		const newCoverImgId = await newCoverImgLocator.getAttribute( 'id' );
+
+		await test.step( 'remove an image', async () => {
+			await newCoverImgLocator.click();
+			await page.getByLabel( 'Set as cover' ).click();
+
+			await expect(
+				page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
+			).toHaveId( newCoverImgId );
+		} );
+
+		await test.step( 'update the product', async () => {
+			await page.getByRole( 'button', { name: 'Update' } ).click();
+			// Verify product was updated
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product updated' );
+		} );
+
+		await test.step( 'verify product image was set', async () => {
+			await expect(
+				page.getByRole( 'button', { name: 'Cover' } ).locator( 'img' )
+			).toHaveId( newCoverImgId );
+		} );
+	} );
 } );
