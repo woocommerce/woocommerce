@@ -33,6 +33,7 @@ import {
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';
+import EnhancedPaginationNotice from './enhanced-pagination-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
 import OrderByControl from './order-by-control';
@@ -55,6 +56,7 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
+	const { clientId } = props;
 	const { query, collection, hideControls } = props.attributes;
 	const inherit = query?.inherit;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
@@ -84,6 +86,7 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			<EnhancedPaginationNotice clientId={ clientId } />
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
