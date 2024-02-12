@@ -783,7 +783,7 @@ test.describe( 'Product Collection', () => {
 			);
 
 			await editorUtils.insertBlockUsingGlobalInserter(
-				'Product Collection (Beta)'
+				pageObject.BLOCK_NAME
 			);
 
 			await pageObject.chooseCollectionInTemplate( 'featured' );
@@ -810,7 +810,7 @@ test.describe( 'Product Collection', () => {
 			} );
 			await editorUtils.enterEditMode();
 			await editorUtils.insertBlockUsingGlobalInserter(
-				'Product Collection (Beta)'
+				pageObject.BLOCK_NAME
 			);
 
 			pageObject.chooseCollectionInTemplate( 'featured' );
@@ -838,7 +838,7 @@ test.describe( 'Product Collection', () => {
 			} );
 			await editorUtils.enterEditMode();
 			await editorUtils.insertBlockUsingGlobalInserter(
-				'Product Collection (Beta)'
+				pageObject.BLOCK_NAME
 			);
 
 			pageObject.chooseCollectionInTemplate( 'featured' );
@@ -862,7 +862,7 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await editorUtils.insertBlockUsingGlobalInserter(
-				'Product Collection (Beta)'
+				pageObject.BLOCK_NAME
 			);
 
 			pageObject.chooseCollectionInPost( 'featured' );

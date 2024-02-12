@@ -75,6 +75,7 @@ class ProductCollectionPage {
 	private editor: Editor;
 	private templateApiUtils: TemplateApiUtils;
 	private editorUtils: EditorUtils;
+	BLOCK_NAME = 'Product Collection (Beta)';
 	productTemplate!: Locator;
 	products!: Locator;
 	productImages!: Locator;
