@@ -128,30 +128,16 @@ final class Experimental_Abtest {
 			return 'control';
 		}
 
-		$variation = $this->fetch_variation( $test_name, $this->is_development_or_testing_env() );
+		$variation = $this->fetch_variation( $test_name );
 
 		// If there was an error retrieving a variation, conceal the error for the consumer.
-		if ( is_wp_error( $variation ) && !$this->is_development_or_testing_env() ) {
+		if ( is_wp_error( $variation ) && 'production' === wp_get_environment_type() ) {
 			return 'control';
 		}
 
 		return $variation;
 	}
 
-	/**
-	 * Determine if the current environment is development or testing.
-	 *
-	 * @return bool True if the environment is development or testing, false otherwise.
-	 */
-	private function is_development_or_testing_env() {
-		if ( defined( 'WP_ENV' ) && in_array( WP_ENV, array( 'development', 'staging', 'test' ), true ) ) {
-			return true;
-		}
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 * Perform the request for a experiment assignment of a provided A/B test from WP.com.
