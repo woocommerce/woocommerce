@@ -118,14 +118,14 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: 'Publish',
 				} )
 				.click();
 
 			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
-			await expect( textContent ).toMatch( /Product added/ );
+			await expect( textContent ).toMatch( /Product published/ );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
@@ -160,7 +160,7 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: 'Publish',
 				} )
 				.click();
 

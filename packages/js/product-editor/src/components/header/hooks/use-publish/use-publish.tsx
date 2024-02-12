@@ -149,7 +149,7 @@ export function usePublish( {
 	return {
 		children: isPublished
 			? __( 'Update', 'woocommerce' )
-			: __( 'Add', 'woocommerce' ),
+			: __( 'Publish', 'woocommerce' ),
 		...props,
 		isBusy,
 		'aria-disabled': isDisabled,
