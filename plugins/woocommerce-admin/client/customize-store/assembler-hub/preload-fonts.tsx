@@ -70,8 +70,6 @@ export const PreloadFonts = () => {
 		};
 	} );
 
-	console.log( 'installedFontFamilies', installedFontFamilies );
-
 	const parsedInstalledFontFamilies = useMemo( () => {
 		return (
 			( installedFontFamilies || [] ).map( ( fontFamilyPost ) => {
@@ -120,10 +118,6 @@ export const PreloadFonts = () => {
 			},
 			[] as Array< FontFamily >
 		);
-
-		console.log( 'fontFamiliesToEnable', fontFamiliesToEnable );
-
-		console.log( 'enabledFontFamilies', enabledFontFamilies );
 
 		setFontFamilies( {
 			...enabledFontFamilies,
