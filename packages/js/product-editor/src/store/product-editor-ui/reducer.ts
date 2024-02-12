@@ -82,7 +82,6 @@ export default function reducer(
 			return {
 				...state,
 				prepublishPanel: {
-					...state.prepublishPanel,
 					isOpen: false,
 				},
 			};

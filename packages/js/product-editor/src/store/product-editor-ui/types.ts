@@ -22,7 +22,7 @@ export type ProductEditorUIStateProps = {
 		hasChanged?: boolean;
 	};
 	prepublishPanel?: {
-		isOpen?: boolean;
+		isOpen: boolean;
 	};
 };
 
