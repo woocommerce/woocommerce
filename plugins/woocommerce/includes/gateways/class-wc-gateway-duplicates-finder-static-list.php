@@ -2,7 +2,7 @@
 
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+exit;
 }
 
 /**
@@ -41,14 +41,14 @@ class WC_Gateway_Duplicates_Finder_Static_List implements WC_Gateway_Duplicates_
 	
 					// If more than one occurrence, add to duplicates
 					if ($counter[$keyword] > 1) {
-						$duplicated_payment_methods[$gateway->id] = true; // Use keys to prevent duplicates
+						$duplicated_payment_methods[] = $gateway->title; // Use keys to prevent duplicates
 					}
 					break; // Stop searching once a match is found for this gateway
 				}
 			}
 		}
-	
-		// Return array keys to get unique IDs
-        return array_keys($duplicated_payment_methods);
+
+        // Return duplicated gateway titles
+        return array_values($duplicated_payment_methods); 
     }
 }

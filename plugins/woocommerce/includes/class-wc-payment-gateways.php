@@ -358,12 +358,7 @@ All at %6$s
 		
 		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Gateway_Duplicates_Finder_Static_List() );
 		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
-
-		$titles = array_map(function($duplicated_gateway_id) use ($enabled_gateways) {
-			return $enabled_gateways[$duplicated_gateway_id]->title;
-		}, $duplicates);
-
-		return $titles;
+		return $duplicates;
 	}
 	
 	/**
