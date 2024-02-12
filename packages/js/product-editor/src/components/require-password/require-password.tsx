@@ -2,9 +2,13 @@
  * External dependencies
  */
 import { useInstanceId } from '@wordpress/compose';
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	BaseControl,
@@ -18,7 +22,6 @@ import {
  */
 
 import { RequirePasswordProps } from './types';
-import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 
 export function RequirePassword( {
@@ -31,11 +34,17 @@ export function RequirePassword( {
 		'post_password'
 	) as string;
 
-	const { requirePassword } = useDispatch( productEditorUiStore );
+	const [ isPasswordRequired, setPasswordRequired ] = useState(
+		Boolean( postPassword )
+	);
 
-	const isPasswordRequired: boolean = useSelect( ( select ) => {
-		return select( productEditorUiStore ).isPasswordRequired();
-	}, [] );
+	useEffect( () => {
+		if ( postPassword ) {
+			setPasswordRequired( true );
+		} else {
+			setPasswordRequired( false );
+		}
+	}, [ postPassword ] );
 
 	return (
 		<>
@@ -48,7 +57,7 @@ export function RequirePassword( {
 						source: TRACKS_SOURCE,
 						value: selected,
 					} );
-					requirePassword( selected );
+					setPasswordRequired( selected );
 					if ( ! selected ) {
 						onInputChange( '' );
 					}
