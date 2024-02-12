@@ -8,18 +8,6 @@ async function selectImagesInLibrary( page, imagesNames ) {
 
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 
-	// Deselect all images
-	// await page.waitForTimeout( 2000 );
-	// for ( const checkbox of await page
-	// 	.getByRole( 'checkbox', { checked: true } )
-	// 	.all() ) {
-	// 	await checkbox.getByRole( 'button' ).click();
-	//
-	// 	expect(
-	// 		await page.getByRole( 'checkbox', { checked: true } ).count()
-	// 	).toBe( 0 );
-	// }
-
 	// Select the given images
 	for ( const imageName of imagesNames ) {
 		await page
