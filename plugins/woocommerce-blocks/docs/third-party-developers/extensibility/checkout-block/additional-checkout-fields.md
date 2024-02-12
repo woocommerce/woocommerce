@@ -287,51 +287,151 @@ This results in the additional information section being rendered like so:
 
 If it is undesirable to force the shopper to select a value, providing a value such as "None of the above" may help.
 
-## Validation
+## Validation and sanitization
 
-It is possible to add custom validation to any registered additional checkout field as long as you know its namespace and ID.
+It is possible to add custom validation and sanitization for additional checkout fields using WordPress action hooks.
 
-To do so, use the `woocommerce_blocks_validate_additional_field_{id}` filter.
+These actions happen in two places:
 
-For example to apply validation to the example text field above use the `woocommerce_blocks_validate_additional_field_namespace/gov-id` filter.
+1. Updating and submitting the form during the checkout process and,
+2. Updating address/contact information in the "My account" area.
 
-This filter receives the following arguments, in order.
+### Sanitization
 
+Sanitization is used to ensure the value of a field is in a specific format. An example is when taking a government ID, you may want to format it so that all letters are capitalized and there are no spaces. At this point, the value should **not** be checked for _validity_. That will come later. This step is only intended to set the field up for validation.
 
-| Argument        | Type                          | Description                                                                                                                                                                                                                                                     |
-|-----------------|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `$error`        | `WP_Error`                    | A `WP_Error` object. Initially it is empty. This filter should add errors to it using the [`add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method. The returned value of this filter must be the _same_ WP_Error that was passed to it. |
-| `$field_value`  | `mixed`                       | The current value of the field, i.e. what the user entered in the checkout form.                                                                                                                                                                                |
-| `$request`      | `WP_Rest_Request`             | The current request made to the checkout endpoint.                                                                                                                                                                                                              |
-| `$address_type` | `'billing' \| 'shipping' \| null` | The address type the field belongs to. If it was registered with the `address` location then it will be one of `billing` or `shipping`. If it was registered in the `contact` or `additional` locations it will be `null`.                                       |
+#### Using the `woocommerce_blocks_sanitize_additional_field` filter
 
-### Example
+To run a custom sanitization function for a field use the `woocommerce_blocks_sanitize_additional_field` action.
 
-The below example will show how it is possible to apply custom validation to the `namespace/gov-id` text field from above.
+| Argument     | Type              | Description                                                             |
+|--------------|-------------------|-------------------------------------------------------------------------|
+| `$field_value` | `boolean\|string` | The value of the field.                                                 |
+| `$field_key`   | `string` | The ID of the field. This is the same ID the field was registered with. |
 
-The custom validation rules in this example could be done with a pattern but it might also be a good idea to check this again during submission since front-end validation can be bypassed.
+##### Example
 
-As a reminder, the `pattern` used above is `[A-Z0-9]{5}` (any 5-character string containing capital letters and numbers).
+This example shows how to remove whitespace and capitalize all letters in the example Government ID field we added above.
 
 ```php
-add_filter('woocommerce_blocks_validate_additional_field_namespace/gov-id', function ( \WP_Error $error, $value, $request, $address_type ) {
-	$match = preg_match( '/[A-Z0-9]{5}/', $value );
-	if ( 0 === $match || false === $match ) {
-		$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
-	}
-	return $error;
-}, 10, 4);
+add_action(
+	'woocommerce_blocks_sanitize_additional_field',
+	function ( $field_value, $field_key ) {
+		if ( 'namespace/gov-id' === $field_key ) {
+			$field_value = str_replace( ' ', '', $field_key );
+			$field_value = strtoupper( $field_value );
+		}
+		return $field_value;
+	},
+	10,
+	2
+);
 ```
 
-It is important to note that the filter must always return the _same_ `WP_Error` object it receives. Returning a different `WP_Error` or any other type will cause validation for this field to be skipped _completely_, even skipping other filters for this field.
+### Validation
 
-If no validation errors are encountered, the original `WP_Error` (which starts off with no errors inside it) should be returned.
+There are two phases of validation in the additional checkout fields system. The first is validating a single field based on its key and value.
+
+#### Single field validation
+
+##### Using the `woocommerce_blocks_validate_additional_field` action
+
+When the `woocommerce_blocks_validate_additional_field` action is fired  the callback receives the field's key, the field's value, and a `WP_Error` object.
+
+To add validation errors to the response, use the [`WP_Error::add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method.
+
+| Argument     | Type              | Description                                                                                                                                                                           |
+|--------------|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$errors`      | `WP_Error`        | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
+| `$field_key`   | `string`          | The id of the field. This is the ID the field was registered with.                                                                                                                    |
+| `$field_value` | `boolean\|string` | The value of the field                                                                                                                                                                |
+
+###### The `WP_Error` object
+
+When adding your error to the `WP_Error` object, it should have a unique error code. You may want to prefix the error code with the plugin namespace to reduce the chance of collision. Using codes that are already in use across other plugins may result in the error message being overwritten or showing in a different location.
+
+###### Example
+
+The below example shows how to apply custom validation to the `namespace/gov-id` text field from above. The code here ensures the field is made up of 5 characters, either upper-case letters or numbers. The sanitization function from the example above ensures that all whitespace is removed and all letters are capitalized, so this check is an extra safety net to ensure the input matches the pattern.
+
+```php
+add_action(
+'woocommerce_blocks_validate_additional_field',
+	function ( WP_Error $errors, $field_key, $field_value ) {
+		if ( 'namespace/gov-id' === $field_key ) {
+			$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
+			if ( 0 === $match || false === $match ) {
+				$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+			}
+		}
+		return $error;
+	},
+	10,
+	4
+);
+```
+
+It is important to note that this action must _add_ errors to the `WP_Error` object it receives. Returning a different `WP_Error` object or any other value will result in the errors not showing.
+
+If no validation errors are encountered the function can just return void.
+
+#### Multiple field validation
+
+There are cases where the validity of a field depends on the value of another field, for example validating the format of a government ID based on what country the shopper is in. In this case, validating only single fields (as above) is not sufficient as the country may be unknown during the `woocommerce_blocks_validate_additional_field` action.
+
+To solve this, it is possible to validate a field in the context of the location it renders in. The other fields in that location will be passed to this action.
+
+##### Using the `woocommerce_blocks_validate_location_{location}_fields` action
+
+This action will be fired for each location that additional fields can render in (`address`, `contact`, and `additional`). For `address` it fires twice, once for the billing address and once for the shipping address.
+
+The callback receives the keys and values of the other additional fields in the same location.
+
+It is important to note that any fields rendered in other locations will not be passed to this action, however it might be possible to get those values by accessing the customer or order object, however this is not supported and there are no guarantees regarding backward compatibility in future versions.
+
+| Argument | Type                        | Description                                                                                                                                                                           |
+|----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$errors`  | `WP_Error`                  | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
+| `$fields`  | `array`                     | The fields rendered in this locations.                                                                                                                                                |
+| `$group`   | `'billing'\|'shipping'\|''` | If the action is for the address location, the type of address will be set here. If it is for contact or addiotional, this will be an empty string.                                   |
+
+There are several places where these hooks are fired.
+
+- When checking out using the Checkout block or Store API.
+  - `woocommerce_blocks_validate_location_address_fields` (x2)
+  - `woocommerce_blocks_validate_location_contact_fields`
+  - `woocommerce_blocks_validate_location_additional_fields`
+- When updating addresses in the "My account" area
+  - `woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
+- When updating the "Account details" section in the "My account" area
+  - `woocommerce_blocks_validate_location_contact_fields`
+
+##### Example
+
+In this example, assume there is another field registered alongside the `namespace/gov-id` called `namespace/confirm-gov-id`. This field will be a confirmation for the Government ID field.
+
+The example below illustrates how to verify that the value of the confirmation field matches the value of the main field.
+
+```php
+add_action(
+	'woocommerce_blocks_validate_location_address_fields',
+	function ( \WP_Error $errors, $fields, $group ) {
+		if ( $fields['namespace/gov-id'] !== $fields['namespace/confirm-gov-id'] ) {
+			$errors->add( 'gov_id_mismatch', 'Please ensure your government ID matches the confirmation.' );
+		}
+	},
+	10,
+	3
+);
+```
+
+If these fields were rendered in the "contact" location instead, the code would be the same except the hook used would be: `woocommerce_blocks_validate_location_contact_fields`.
 
 ## A full example
 
-In this full example we will register the Government ID text field and verify that it conforms to a single pattern.
+In this full example we will register the Government ID text field and verify that it conforms to a specific pattern.
 
-This example is just a full version of the examples shared above.
+This example is just a combined version of the examples shared above.
 
 ```php
 add_action(
@@ -341,7 +441,6 @@ add_action(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
-				'optionalLabel' => 'Government ID (optional)',
 				'location'      => 'address',
 				'required'      => true,
 				'attributes'    => array(
@@ -351,23 +450,63 @@ add_action(
 				),
 			),
 		);
+		woocommerce_blocks_register_checkout_field(
+			array(
+				'id'            => 'namespace/confirm-gov-id',
+				'label'         => 'Confirm government ID',
+				'location'      => 'address',
+				'required'      => true,
+				'attributes'    => array(
+					'autocomplete' => 'government-id',
+					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
+					'title'        => 'Confirm your 5-digit Government ID',
+				),
+			),
+		);
 
-		add_filter(
-			'woocommerce_blocks_validate_additional_field_namespace/gov-id',
-			function ( \WP_Error $error, $value, $request, $address_type ) {
-				$match = preg_match( '/[A-Z0-9]{5}/', $value );
-				if ( 0 === $match || false === $match ) {
-					$error->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+		add_action(
+			'woocommerce_blocks_sanitize_additional_field',
+			function ( $field_value, $field_key ) {
+				if ( 'namespace/gov-id' === $field_key || 'namespace/confirm-gov-id' === $field_key ) {
+					$field_value = str_replace( ' ', '', $field_key );
+					$field_value = strtoupper( $field_value );
+				}
+				return $field_value;
+			},
+			10,
+			2
+		);
+
+		add_action(
+		'woocommerce_blocks_validate_additional_field',
+			function ( WP_Error $errors, $field_key, $field_value ) {
+				if ( 'namespace/gov-id' === $field_key ) {
+					$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
+					if ( 0 === $match || false === $match ) {
+						$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+					}
 				}
 				return $error;
-			}
+			},
+			10,
+			4
 		);
 	},
 	10,
 	4
 );
-```
 
+add_action(
+	'woocommerce_blocks_validate_location_address_fields',
+	function ( \WP_Error $errors, $fields, $group ) {
+		if ( $fields['namespace/gov-id'] !== $fields['namespace/confirm-gov-id'] ) {
+			$errors->add( 'gov_id_mismatch', 'Please ensure your government ID matches the confirmation.' );
+		}
+	},
+	10,
+	3
+);
+```
 
 <!-- FEEDBACK -->
 
