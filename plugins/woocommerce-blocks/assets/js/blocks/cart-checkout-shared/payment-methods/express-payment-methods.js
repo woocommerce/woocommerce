@@ -169,6 +169,11 @@ const ExpressPaymentMethods = () => {
 							onError: onExpressPaymentError,
 							setExpressPaymentError:
 								deprecatedSetExpressPaymentError,
+							buttonAttributes: {
+								height: '48px',
+								theme: 'light',
+								label: 'donate',
+							},
 						} ) }
 					</li>
 				) : null;
