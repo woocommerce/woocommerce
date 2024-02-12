@@ -485,7 +485,9 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
-	async insertProductCollectionInSingleProductBlock() {
+	async insertProductCollectionInSingleProductBlock(
+		collection: Collections
+	) {
 		this.insertSingleProductBlock();
 
 		const siblingBlock = await this.editorUtils.getBlockByName(
@@ -502,6 +504,8 @@ class ProductCollectionPage {
 			undefined,
 			parentClientId
 		);
+		await this.chooseCollectionInPost( collection );
+		await this.refreshLocators( 'editor' );
 	}
 
 	/**
@@ -541,7 +545,7 @@ class ProductCollectionPage {
 		await singleProductBlock.getByText( 'Done' ).click();
 	}
 
-	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
+	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
 		await this.waitForProductsToLoad();
 
 		if ( currentUI === 'editor' ) {
