@@ -305,6 +305,38 @@ class LegacyDataHandler {
 	}
 
 	/**
+	 * Backfills an order from/to the CPT or HPOS datastore.
+	 *
+	 * @since 8.7.0
+	 *
+	 * @param int    $order_id               Order ID.
+	 * @param string $source_data_store      Datastore to use as source. Should be either 'hpos' or 'posts'.
+	 * @param string $destination_data_store Datastore to use as destination. Should be either 'hpos' or 'posts'.
+	 * @return void
+	 * @throws \Exception When an error occurs.
+	 */
+	public function backfill_order_to_datastore( int $order_id, string $source_data_store, string $destination_data_store ) {
+		$valid_data_stores = array( 'posts', 'hpos' );
+
+		if ( ! in_array( $source_data_store, $valid_data_stores, true ) || ! in_array( $destination_data_store, $valid_data_stores, true ) || $destination_data_store === $source_data_store ) {
+			throw new \Exception( sprintf( 'Invalid datastore arguments: %1$s -> %2$s.', $source_data_store, $destination_data_store ) );
+		}
+
+		$order = $this->get_order_from_datastore( $order_id, $source_data_store );
+
+		switch ( $destination_data_store ) {
+			case 'posts':
+				$order->get_data_store()->backfill_post_record( $order );
+				break;
+			case 'hpos':
+				$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
+				break;
+			default:
+				break;
+		}
+	}
+
+	/**
 	 * Returns all metadata in an order object as an array.
 	 *
 	 * @param \WC_Order $order Order instance.

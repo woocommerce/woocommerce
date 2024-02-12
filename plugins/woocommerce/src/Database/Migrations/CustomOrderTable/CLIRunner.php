@@ -1088,23 +1088,36 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
 		$hpos_enabled = $this->synchronizer->custom_orders_table_is_authoritative();
-		$from         = $assoc_args['source'] ?? ( $hpos_enabled ? 'hpos' : 'posts' );
-		$to           = $assoc_args['destination'] ?? ( $hpos_enabled ? 'posts' : 'hpos' );
+		$from         = strtolower( trim( $assoc_args['from'] ?? ( $hpos_enabled ? 'hpos' : 'posts' ) ) );
+		$to           = strtolower( trim( $assoc_args['to'] ?? ( $hpos_enabled ? 'posts' : 'hpos' ) ) );
 		$order_id     = absint( $args[0] );
 
 		if ( ! $order_id ) {
 			WP_CLI::error( __( 'Please provide a valid order ID.', 'woocommerce' ) );
 		}
 
-		try {
-			$order = $legacy_handler->get_order_from_datastore( $order_id, $from );
-
-			if ( 'posts' === $to ) {
-				$order->get_data_store()->backfill_post_record( $order );
-			} elseif ( 'hpos' === $to ) {
-				$this->post_to_cot_migrator->migrate_orders( array( $order_id ) );
+		foreach ( array( 'from', 'to' ) as $datastore ) {
+			if ( ! in_array( ${"$datastore"}, array( 'posts', 'hpos' ), true ) ) {
+				WP_CLI::error( sprintf( __( '\'%s\' is not a valid datastore.', 'woocommerce' ), ${"$datastore"} ) );
 			}
+		}
+
+		if ( $from === $to ) {
+			WP_CLI::error( __( 'Please use different source (--from) and destination (--to) datastores.', 'woocommerce' ) );
+		}
+
+		try {
+			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to );
 		} catch ( \Exception $e ) {
+			WP_CLI::error(
+				sprintf(
+					__( 'An error occurred while backfilling order %1$d from %2$s to %3$s: %4$s', 'woocommerce' ),
+					$order_id,
+					$from,
+					$to,
+					$e->getMessage()
+				)
+			);
 		}
 
 		WP_CLI::success(
