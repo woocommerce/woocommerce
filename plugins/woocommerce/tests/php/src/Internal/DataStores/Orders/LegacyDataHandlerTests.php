@@ -122,4 +122,72 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 		$this->assertCount( 10, $this->sut->get_orders_for_cleanup( array( $interval, '0-' . min( $slice ) ) ) );
 	}
 
+	/**
+	 * Checks that `get_order_from_datastore()` correctly fetches an order from either the HPOS or CPT datastore.
+	 */
+	public function test_get_order_from_datastore() {
+		// Test order.
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->update_meta_data( 'meta_key', 'hpos' );
+		$order->save();
+		$this->disable_cot_sync();
+
+		// The order, obtained from either datastore should contain 'meta_key' = 'hpos'.
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), 'hpos' );
+
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertEquals( $order_cpt->get_meta( 'meta_key' ), 'hpos' );
+
+		// Update the CPT version outside of WC.
+		update_post_meta( $order->get_id(), 'meta_key', 'posts' );
+
+		// Confirm that the HPOS order still has the meta value set to 'hpos' while the CPT version has been set to 'posts'.
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), 'hpos' );
+
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), 'posts' );
+		$this->assertEquals( $order_cpt->get_meta( 'meta_key' ), 'posts' );
+	}
+
+	/**
+	 * Tests that `backfill_order_to_datastore()` correctly backfills from/to either datastore.
+	 *
+	 * @testWith ["hpos"]
+	 *           ["posts"]
+	 *
+	 * @param string $source_data_store Datastore to use as source for the backfill.
+	 * @return void
+	 */
+	public function test_datastore_manual_backfill( $source_data_store = 'hpos' ) {
+		// Test order.
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->save();
+		$this->disable_cot_sync();
+
+		$destination_data_store = 'hpos' === $source_data_store ? 'posts' : 'hpos';
+
+		// Make some changes to the HPOS version.
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), $source_data_store );
+		$order_hpos->set_billing_first_name( 'Mr. HPOS' );
+		$order_hpos->update_meta_data( 'meta_key', 'hpos' );
+		$order_hpos->save();
+
+
+		// Fetch the posts version and make sure it's different.
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
+		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertNotEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key') );
+
+		// Backfill to posts.
+		$this->sut->backfill_order_to_datastore( $order->get_id(), $source_data_store, $destination_data_store );
+
+		// Confirm data is now the same.
+		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
+		$this->assertEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
+		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key') );
+	}
+
 }
