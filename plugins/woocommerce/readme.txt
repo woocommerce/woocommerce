@@ -317,6 +317,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Type check $available_methods before using it [#43237](https://github.com/woocommerce/woocommerce/pull/43237)
 * Dev - [Experimental] Rename experimental "Collection Filters" to "Product Filters" [#43363](https://github.com/woocommerce/woocommerce/pull/43363)
 * Dev - [Experimental] Use CheckboxList component in interactivity attribute filter [#43217](https://github.com/woocommerce/woocommerce/pull/43217)
+* Tweak - Update Marketing Suggestions setting description. [#44494](https://github.com/woocommerce/woocommerce/pull/44494)
 * Tweak - Move the guest should verify email logic to the user utils [#43834](https://github.com/woocommerce/woocommerce/pull/43834)
 * Tweak - Add hook 'woocommerce_hpos_sync_ignored_order_props' to allow keys to be ignored during HPOS sync/verification. [#43123](https://github.com/woocommerce/woocommerce/pull/43123)
 * Tweak - Change the way errors are reported when incorrectly registering custom checkout fields. [#43283](https://github.com/woocommerce/woocommerce/pull/43283)
