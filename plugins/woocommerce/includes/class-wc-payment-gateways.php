@@ -330,9 +330,42 @@ All at %6$s
 			}
 		}
 
+		// DEMO
+		$new = new WC_Payment_Gateway_CC();
+		$new->id = 'woocommerce_payments_bancontact';
+		$new->title = 'Bancontact';
+		$new2 = new WC_Payment_Gateway_CC();
+		$new2->id = 'woocommerce_payments_ideal';
+		$new2->title = 'iDEAL';
+		
+		$_available_gateways[$new->id] = $new; 
+		$_available_gateways[$new2->id] = $new2;
+
+		$duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
+
 		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
 	}
 
+	/**
+	 * Find duplicates across all enabled gateways.
+	 *
+	 * @param array $enabled_gateways Array of enabled gateways.
+	 * @return array Array of duplicate gateway names.
+	 */
+	public function find_duplicate_enabled_gateways( array $enabled_gateways ) {	
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-detector.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
+		
+		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Gateway_Duplicates_Finder_Static_List() );
+		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
+
+		$titles = array_map(function($duplicated_gateway_id) use ($enabled_gateways) {
+			return $enabled_gateways[$duplicated_gateway_id]->title;
+		}, $duplicates);
+
+		return $titles;
+	}
+	
 	/**
 	 * Callback for array filter. Returns true if gateway is of correct type.
 	 *
