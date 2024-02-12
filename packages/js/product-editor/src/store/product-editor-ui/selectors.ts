@@ -31,9 +31,4 @@ export default {
 	) {
 		return state.prepublishPanel?.isOpen;
 	},
-	isPasswordRequired: function isPasswordRequired(
-		state: ProductEditorUIStateProps
-	) {
-		return state.prepublishPanel?.isPasswordRequired || false;
-	},
 };

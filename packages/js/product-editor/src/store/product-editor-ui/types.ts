@@ -13,7 +13,6 @@ import {
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
 	ACTION_PANEL_PREPUBLISH_CLOSE,
 	ACTION_PANEL_PREPUBLISH_OPEN,
-	ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD,
 } from './constants';
 
 export type ProductEditorUIStateProps = {
@@ -24,7 +23,6 @@ export type ProductEditorUIStateProps = {
 	};
 	prepublishPanel?: {
 		isOpen?: boolean;
-		isPasswordRequired?: boolean;
 	};
 };
 
@@ -43,8 +41,5 @@ export type ProductEditorModalEditorAction = {
 export type ProductEditorPrepublishPanelAction = {
 	type:
 		| typeof ACTION_PANEL_PREPUBLISH_CLOSE
-		| typeof ACTION_PANEL_PREPUBLISH_OPEN
-		| typeof ACTION_PANEL_PREPUBLISH_REQUIRE_PASSWORD;
-
-	isPasswordRequired?: boolean;
+		| typeof ACTION_PANEL_PREPUBLISH_OPEN;
 };
