@@ -92,7 +92,7 @@ const CustomerAddress = ( {
 		() => (
 			<AddressForm
 				id="shipping"
-				addressType="shipping"
+				type="shipping"
 				onChange={ onChangeAddress }
 				values={ shippingAddress }
 				fields={ ADDRESS_FIELDS_KEYS }
