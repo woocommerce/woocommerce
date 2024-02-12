@@ -345,7 +345,7 @@ All at %6$s
 		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
 
 		// DEMO for normalized version
-		require WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
 
 		$cc = new WC_Payment_Gateway_CC();
 		$cc->standardized_gateway_id = Gateway_ID_Constants::CREDIT_CARD;
