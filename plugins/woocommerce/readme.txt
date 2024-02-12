@@ -24,13 +24,7 @@ Whether you’re launching a business, taking brick-and-mortar retail online, or
 - Showcase physical and digital goods, product variations, custom configurations, instant downloads, and affiliate items.
 - Sell [subscriptions](https://woo.com/products/woocommerce-subscriptions/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), [bookings](https://woo.com/products/woocommerce-bookings/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), or [memberships](https://woo.com/products/woocommerce-memberships/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), with our developer-vetted extensions.
 - **Rise to the top of search results** by leveraging [WordPress’ SEO advantage](https://www.searchenginejournal.com/wordpress-best-cms-seo/).
-- **Build on a platform that scales.** Get flexible eCommerce for [high-volume stores](https://woo.com/high-volume-stores/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). 
-
-= THE EASIEST WAY TO TRY WOOCOMMERCE =
-
-Thinking of trying WooCommerce? Woo Express is a simple, all-in-one package that includes fully managed hosting from WordPress.com, popular extensions, and world-class support from Woo — all for one monthly price.
-
-[Try Woo Express free for 14 days](https://woo.com/express/?utm_source=wordpress.org&utm_medium=referral&utm_campaign=wp_org_repo_listing), then get your first 3 months for just $1. 
+- **Build on a platform that scales.** Get flexible ecommerce for [high-volume stores](https://woo.com/high-volume-stores/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).  
 
 = ALL THE TOOLS YOU NEED TO SELL =
 
@@ -56,7 +50,7 @@ With [WooCommerce](https://woo.com/woocommerce/), your data belongs to you. Alwa
 
 If you opt to share [usage data](https://woo.com/usage-tracking/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) with us, you can feel confident knowing that it’s anonymized and kept secure. Choose to opt-out at any time without impacting your store. 
 
-Unlike hosted eCommerce solutions, WooCommerce store data is future-proof; you’re free to export all your content and take your site to any platform you choose. No restrictions.
+Unlike hosted ecommerce solutions, WooCommerce store data is future-proof; you’re free to export all your content and take your site to any platform you choose. No restrictions.
 
 = Why developers choose (and love) WooCommerce =
 
