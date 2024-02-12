@@ -238,13 +238,13 @@ class OnboardingFonts {
 		);
 	}
 
-		/**
-		 * Get font family by slug from font collection.
-		 *
-		 * @param string $slug Font slug.
-		 * @param array  $font_families_collection Font families collection.
-		 * @return array|null
-		 */
+	/**
+	 * Get font family by slug from font collection.
+	 *
+	 * @param string $slug Font slug.
+	 * @param array  $font_families_collection Font families collection.
+	 * @return array|null
+	 */
 	private static function get_font_family_by_slug_from_font_collection( $slug, $font_families_collection ) {
 		$font_family = null;
 
