@@ -700,7 +700,7 @@ class CheckoutFields {
 			 *
 			 * @since 8.7.0
 			 */
-			do_action( 'woocommerce_blocks_validate_' . $location . '_fields', $errors, $fields, $group );
+			do_action( 'woocommerce_blocks_validate_location_' . $location . '_fields', $errors, $fields, $group );
 
 		} catch ( \Throwable $e ) {
 
