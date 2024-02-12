@@ -15,9 +15,25 @@ import type {
 
 export type ProductEntitySourceArgs = {
 	/*
+	 * The kind of entity to bind.
+	 * Default is `postType`.
+	 */
+	kind?: string;
+
+	/*
+	 * The name of the entity to bind.
+	 */
+	name?: string;
+
+	/*
 	 * The name of the entity property to bind.
 	 */
 	prop: string;
+
+	/*
+	 * The ID of the entity to bind.
+	 */
+	id?: string;
 };
 
 /**
@@ -31,33 +47,55 @@ const useSource = (
 	blockProps: BlockProps,
 	sourceArgs: ProductEntitySourceArgs
 ): BindingUseSourceProps => {
+	if ( typeof sourceArgs === 'undefined' ) {
+		throw new Error( 'The "args" argument is required.' );
+	}
+
+	if ( ! sourceArgs?.prop ) {
+		throw new Error( 'The "prop" argument is required.' );
+	}
+
 	const { context } = blockProps;
-	const { postType: contextPostType } = context;
-	const { prop: entityPropName } = sourceArgs;
+	const { kind = 'postType', name: nameFromArgs, prop, id } = sourceArgs;
 
-	const postType = useSelect(
-		( privateSelect ) => {
-			return contextPostType
-				? contextPostType
-				: privateSelect( 'core/editor' ).getCurrentPostType();
+	const { postType: nameFromContext } = context;
+
+	/*
+	 * Entity prop name:
+	 * - If `name` is provided in the source args, use it.
+	 * - If `name` is not provided in the source args, use the `postType` from the context.
+	 * - Otherwise, try to get the current post type from the editor store.
+	 */
+	const name = useSelect(
+		( select ) => {
+			if ( nameFromArgs ) {
+				return nameFromArgs;
+			}
+
+			if ( nameFromContext ) {
+				return nameFromContext;
+			}
+
+			return select( 'core/editor' ).getCurrentPostType();
 		},
-		[ contextPostType ]
+		[ nameFromContext, nameFromArgs ]
 	);
 
-	const [ entityPropValue, setEntityPropValue ] = useEntityProp< string >(
-		'postType',
-		postType,
-		entityPropName
-	);
+	const [ value, updateValue ] = useEntityProp( kind, name, prop, id );
+
+	function updateValueHandler( nextEntityPropValue: string ) {
+		// Ensure the value is a string.
+		if ( typeof nextEntityPropValue !== 'string' ) {
+			return;
+		}
+
+		updateValue( nextEntityPropValue );
+	}
 
 	return {
 		placeholder: null,
-		useValue: [
-			entityPropValue,
-			( newValue: string ) => {
-				setEntityPropValue( newValue );
-			},
-		],
+		value,
+		updateValue: updateValueHandler,
 	};
 };
 
@@ -84,7 +122,7 @@ const useSource = (
  * ```
  */
 export default {
-	name: 'woo/product-entity',
+	name: 'woo/entity',
 	label: __( 'Product Entity', 'woocommerce' ),
 	useSource,
 	lockAttributesEditing: false,

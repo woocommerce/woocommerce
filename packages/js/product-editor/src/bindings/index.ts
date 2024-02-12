@@ -11,7 +11,7 @@ import extendBlockWithBoundAttributes from './extend-blocks-with-bound-attribute
 import type { BindingSourceHandlerProps } from './types';
 import productEntitySource, {
 	ProductEntitySourceArgs,
-} from './sources/product-entity-source';
+} from './sources/entity-source';
 
 type BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE = {
 	[ key: string ]: string[];
@@ -64,7 +64,7 @@ export function isBlockBindingAPIAvailable(): boolean {
 	return isAvailable;
 }
 
-export default function registerCoreParagraphBindingSource() {
+export default function bindEditorBlocks() {
 	if ( ! isBlockBindingAPIAvailable() ) {
 		/*
 		 * Fallback to extending blocks with bound attributes.

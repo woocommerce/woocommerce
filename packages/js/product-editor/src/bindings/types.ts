@@ -36,7 +36,11 @@ export type BindingUseSourceProps = {
 	/*
 	 * The value of the source.
 	 */
-	useValue: [ string, ( newValue: string ) => void ];
+	value: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+	/*
+	 * Callback function to set the source value.
+	 */
+	updateValue: ( newValue: any ) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 export interface BindingSourceHandlerProps< T > {
