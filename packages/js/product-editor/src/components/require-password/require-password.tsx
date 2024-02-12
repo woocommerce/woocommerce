@@ -20,7 +20,6 @@ import {
 /**
  * Internal dependencies
  */
-
 import { RequirePasswordProps } from './types';
 import { TRACKS_SOURCE } from '../../constants';
 
