@@ -211,7 +211,7 @@ class LegacyDataHandler {
 		$diff = array();
 
 		$hpos_order = $this->get_order_from_datastore( $order_id, 'hpos' );
-		$cpt_order  = $this->get_order_from_datastore( $order_id, 'cpt' );
+		$cpt_order  = $this->get_order_from_datastore( $order_id, 'posts' );
 
 		if ( $hpos_order->get_type() !== $cpt_order->get_type() ) {
 			$diff['type'] = array( $hpos_order->get_type(), $cpt_order->get_type() );
@@ -255,7 +255,7 @@ class LegacyDataHandler {
 	 * @since 8.6.0
 	 *
 	 * @param int    $order_id      Order ID.
-	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'cpt'. Defaults to 'hpos'.
+	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'posts'. Defaults to 'hpos'.
 	 * @return \WC_Order Order instance.
 	 */
 	public function get_order_from_datastore( int $order_id, string $data_store_id = 'hpos' ) {
