@@ -4,6 +4,8 @@
 import { MouseEvent } from 'react';
 
 export type TableEmptyOrErrorStateProps = {
-	onActionClick( event: MouseEvent< HTMLButtonElement > ): void;
+	message?: string;
+	actionText?: string;
 	isError: boolean;
+	onActionClick( event: MouseEvent< HTMLButtonElement > ): void;
 };
