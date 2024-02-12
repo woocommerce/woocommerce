@@ -104,3 +104,21 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		);
 	}
 }
+	/**
+	 * Test fetch_variation with valid experiment name.
+	 */
+	public function test_fetch_variation_with_valid_name() {
+		$exp = new Experimental_Abtest( 'anon', 'platform', true );
+		$variation = $exp->fetch_variation( 'valid_experiment_name_1,2' );
+		$this->assertNotInstanceOf( 'WP_Error', $variation );
+	}
+
+	/**
+	 * Test fetch_variation with invalid experiment name.
+	 */
+	public function test_fetch_variation_with_invalid_name() {
+		$exp = new Experimental_Abtest( 'anon', 'platform', true );
+		$variation = $exp->fetch_variation( 'Invalid-Experiment-Name!' );
+		$this->assertInstanceOf( 'WP_Error', $variation );
+		$this->assertEquals( 'invalid_test_name', $variation->get_error_code() );
+	}
