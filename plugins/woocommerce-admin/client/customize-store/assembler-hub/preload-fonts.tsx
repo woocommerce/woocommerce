@@ -94,11 +94,10 @@ export const PreloadFonts = () => {
 			return;
 		}
 
-		const { custom, theme } = enabledFontFamilies;
+		const { custom } = enabledFontFamilies;
 
 		const enabledFontSlugs = [
 			...( custom ? custom.map( ( font ) => font.slug ) : [] ),
-			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
 		const fontFamiliesToEnable = parsedInstalledFontFamilies.reduce(
