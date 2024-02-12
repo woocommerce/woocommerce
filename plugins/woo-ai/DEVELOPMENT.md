@@ -45,7 +45,7 @@ pnpm install
 pnpm build:zip
 ```
 
-See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
+See [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scripts) for more usage information.
 
 ## License
 

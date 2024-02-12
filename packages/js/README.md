@@ -22,11 +22,12 @@ Currently we have a set of public-facing packages that can be dowloaded from [np
 
 ## Creating a new package
 
-Most of this is pulled [from the Gutenberg workflow](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#creating-new-package).
+Most of this is pulled [from the Gutenberg workflow](https://github.com/WordPress/gutenberg/blob/trunk/CONTRIBUTING.md#creating-new-package).
 
 To create a new package, add a new folder to `/packages`, containing…
 
 1. `package.json` based on the template:
+
     ```json
     {
     	"name": "@woocommerce/package-name",
@@ -51,10 +52,13 @@ To create a new package, add a new folder to `/packages`, containing…
     	}
     }
     ```
+
 2. `.npmrc` file which disables creating `package-lock.json` file for the package:
+
     ```
     package-lock=false
     ```
+
 3. `README.md` file containing at least:
     - Package name
     - Package description
