@@ -83,7 +83,7 @@ class FontFamily {
 				'post_type'    => self::POST_TYPE,
 				'post_title'   => $font_family['name'],
 				'name'         => $font_family['slug'],
-				'post_content' => json_encode( $post ),
+				'post_content' => wp_json_encode( $post ),
 				'post_status'  => 'publish',
 			)
 		);
