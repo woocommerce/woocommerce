@@ -175,11 +175,10 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 		$order_hpos->update_meta_data( 'meta_key', 'hpos' );
 		$order_hpos->save();
 
-
 		// Fetch the posts version and make sure it's different.
 		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
 		$this->assertNotEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
-		$this->assertNotEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key') );
+		$this->assertNotEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key' ) );
 
 		// Backfill to posts.
 		$this->sut->backfill_order_to_datastore( $order->get_id(), $source_data_store, $destination_data_store );
@@ -187,7 +186,7 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 		// Confirm data is now the same.
 		$order_cpt = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
 		$this->assertEquals( $order_hpos->get_billing_first_name(), $order_cpt->get_billing_first_name() );
-		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key') );
+		$this->assertEquals( $order_hpos->get_meta( 'meta_key' ), $order_cpt->get_meta( 'meta_key' ) );
 	}
 
 }

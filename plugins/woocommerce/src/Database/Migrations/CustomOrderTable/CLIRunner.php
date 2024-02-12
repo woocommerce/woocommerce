@@ -1098,6 +1098,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		foreach ( array( 'from', 'to' ) as $datastore ) {
 			if ( ! in_array( ${"$datastore"}, array( 'posts', 'hpos' ), true ) ) {
+				// translators: %s is a shell argument representing a datastore name.
 				WP_CLI::error( sprintf( __( '\'%s\' is not a valid datastore.', 'woocommerce' ), ${"$datastore"} ) );
 			}
 		}
@@ -1111,6 +1112,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		} catch ( \Exception $e ) {
 			WP_CLI::error(
 				sprintf(
+					// translators: %1$d is an order ID, %2$s and %3$s are datastore names, %4$s is an error message.
 					__( 'An error occurred while backfilling order %1$d from %2$s to %3$s: %4$s', 'woocommerce' ),
 					$order_id,
 					$from,
@@ -1122,7 +1124,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		WP_CLI::success(
 			sprintf(
-				__( 'Order %d backfilled from %s to %s.', 'woocommerce' ),
+				// translators: %1$d is an order ID, %2$s and %3$s are datastore names ("hpos" or "posts" for example).
+				__( 'Order %1$d backfilled from %2$s to %3$s.', 'woocommerce' ),
 				$order_id,
 				$from,
 				$to

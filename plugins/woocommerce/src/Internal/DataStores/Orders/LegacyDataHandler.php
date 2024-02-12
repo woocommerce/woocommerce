@@ -39,8 +39,9 @@ class LegacyDataHandler {
 	/**
 	 * Class initialization, invoked by the DI container.
 	 *
-	 * @param OrdersTableDataStore $data_store HPOS datastore instance to use.
-	 * @param DataSynchronizer     $data_synchronizer DataSynchronizer instance to use.
+	 * @param OrdersTableDataStore             $data_store            HPOS datastore instance to use.
+	 * @param DataSynchronizer                 $data_synchronizer     DataSynchronizer instance to use.
+	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator Posts to HPOS migration controller instance to use.
 	 *
 	 * @internal
 	 */
