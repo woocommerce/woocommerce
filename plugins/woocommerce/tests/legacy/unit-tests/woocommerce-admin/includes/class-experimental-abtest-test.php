@@ -103,7 +103,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 			true
 		);
 	}
-}
+
 	/**
 	 * Test fetch_variation with valid experiment name.
 	 */
@@ -122,3 +122,4 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( 'WP_Error', $variation );
 		$this->assertEquals( 'invalid_test_name', $variation->get_error_code() );
 	}
+}
