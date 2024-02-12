@@ -309,7 +309,7 @@ To run a custom sanitization function for a field use the `woocommerce_blocks_sa
 | `$field_value` | `boolean\|string` | The value of the field.                                                 |
 | `$field_key`   | `string` | The ID of the field. This is the same ID the field was registered with. |
 
-##### Example
+##### Example of sanitization
 
 This example shows how to remove whitespace and capitalize all letters in the example Government ID field we added above.
 
@@ -350,7 +350,7 @@ To add validation errors to the response, use the [`WP_Error::add`](https://deve
 
 When adding your error to the `WP_Error` object, it should have a unique error code. You may want to prefix the error code with the plugin namespace to reduce the chance of collision. Using codes that are already in use across other plugins may result in the error message being overwritten or showing in a different location.
 
-###### Example
+###### Example of single-field validation
 
 The below example shows how to apply custom validation to the `namespace/gov-id` text field from above. The code here ensures the field is made up of 5 characters, either upper-case letters or numbers. The sanitization function from the example above ensures that all whitespace is removed and all letters are capitalized, so this check is an extra safety net to ensure the input matches the pattern.
 
@@ -398,15 +398,15 @@ It is important to note that any fields rendered in other locations will not be 
 There are several places where these hooks are fired.
 
 - When checking out using the Checkout block or Store API.
-  - `woocommerce_blocks_validate_location_address_fields` (x2)
-  - `woocommerce_blocks_validate_location_contact_fields`
-  - `woocommerce_blocks_validate_location_additional_fields`
+    - `woocommerce_blocks_validate_location_address_fields` (x2)
+    - `woocommerce_blocks_validate_location_contact_fields`
+    - `woocommerce_blocks_validate_location_additional_fields`
 - When updating addresses in the "My account" area
-  - `woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
+    - `woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
 - When updating the "Account details" section in the "My account" area
-  - `woocommerce_blocks_validate_location_contact_fields`
+    - `woocommerce_blocks_validate_location_contact_fields`
 
-##### Example
+##### Example of location validation
 
 In this example, assume there is another field registered alongside the `namespace/gov-id` called `namespace/confirm-gov-id`. This field will be a confirmation for the Government ID field.
 
