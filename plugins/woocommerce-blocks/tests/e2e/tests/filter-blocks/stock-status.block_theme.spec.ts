@@ -1,97 +1,86 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 
 /**
  * Internal dependencies
  */
-import {
-	TestingPost,
-	createPostFromTemplate,
-} from '../../utils/create-dynamic-content';
-
 const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
 
-const test = base.extend< {
-	dropdownBlockPostPage: TestingPost;
-	defaultBlockPostPage: TestingPost;
-} >( {
-	defaultBlockPostPage: async ( { requestUtils }, use ) => {
-		const testingPost = await createPostFromTemplate(
-			requestUtils,
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{}
-		);
-
-		await use( testingPost );
-		await testingPost.deletePost();
-	},
-
-	dropdownBlockPostPage: async ( { requestUtils }, use ) => {
-		const testingPost = await createPostFromTemplate(
-			requestUtils,
-			{ title: 'Product Filter Stock Status Block' },
-			TEMPLATE_PATH,
-			{
-				attributes: {
-					displayStyle: 'dropdown',
-				},
-			}
-		);
-
-		await use( testingPost );
-		await testingPost.deletePost();
-	},
-} );
-
 test.describe( 'Product Filter: Stock Status Block', async () => {
-	test( 'By default it renders a checkbox list with the available stock statuses', async ( {
-		page,
-		defaultBlockPostPage,
-	} ) => {
-		await page.goto( defaultBlockPostPage.post.link );
+	test.describe( 'with default settings', () => {
+		test.use( {
+			page: async ( { page, requestUtils }, use ) => {
+				const { link } = await requestUtils.createPostFromTemplate(
+					{ title: 'Product Filter Stock Status Block' },
+					TEMPLATE_PATH,
+					{}
+				);
 
-		const stockStatuses = page.locator(
-			'.wc-block-components-checkbox__label'
-		);
+				await page.goto( link );
+				await use( page );
+			},
+		} );
 
-		await expect( stockStatuses ).toHaveCount( 2 );
-		await expect( stockStatuses.nth( 0 ) ).toHaveText( 'In stock' );
-		await expect( stockStatuses.nth( 1 ) ).toHaveText( 'Out of stock' );
+		test( 'renders a checkbox list with the available stock statuses', async ( {
+			page,
+		} ) => {
+			const stockStatuses = page.locator(
+				'.wc-block-components-checkbox__label'
+			);
+
+			await expect( stockStatuses ).toHaveCount( 2 );
+			await expect( stockStatuses.nth( 0 ) ).toHaveText( 'In stock' );
+			await expect( stockStatuses.nth( 1 ) ).toHaveText( 'Out of stock' );
+		} );
+
+		test( 'filters the list of products by selecting a stock status', async ( {
+			page,
+		} ) => {
+			const outOfStockCheckbox = page.getByLabel( 'Out of stock' );
+			await outOfStockCheckbox.click();
+
+			// wait for navigation
+			await page.waitForURL( /.*filter_stock_status=outofstock.*/ );
+
+			const products = page.locator( '.wc-block-product' );
+
+			await expect( products ).toHaveCount( 1 );
+		} );
 	} );
 
-	test( 'Selecting a stock status filters the list of products', async ( {
-		page,
-		defaultBlockPostPage,
-	} ) => {
-		await page.goto( defaultBlockPostPage.post.link );
+	test.describe( 'with displayStyle set to dropdown', () => {
+		test.use( {
+			page: async ( { page, requestUtils }, use ) => {
+				const { link } = await requestUtils.createPostFromTemplate(
+					{ title: 'Product Filter Stock Status Block' },
+					TEMPLATE_PATH,
+					{ displayStyle: 'dropdown' }
+				);
 
-		const outOfStockCheckbox = page.getByLabel( 'Out of stock' );
-		await outOfStockCheckbox.click();
+				await page.goto( link );
+				await use( page );
+			},
+		} );
 
-		// wait for navigation
-		await page.waitForURL( /.*filter_stock_status=outofstock.*/ );
+		test( 'a dropdown is displayed with the available stock statuses', async ( {
+			page,
+		} ) => {
+			const dropdownLocator = page.locator(
+				'.wc-interactivity-dropdown'
+			);
 
-		const products = page.locator( '.wc-block-product' );
+			await expect( dropdownLocator ).toBeVisible();
+			await dropdownLocator.click();
 
-		await expect( products ).toHaveCount( 1 );
+			await expect( page.getByText( 'In stock' ) ).toBeVisible();
+			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+		} );
 	} );
 
-	test( 'When displayStyle is dropdown, a dropdown is displayed with the available stock statuses', async ( {
-		page,
-		dropdownBlockPostPage,
-	} ) => {
-		await page.goto( dropdownBlockPostPage.post.link );
-
-		const dropdownLocator = page.locator( '.wc-interactivity-dropdown' );
-
-		await expect( dropdownLocator ).toBeVisible();
-		await dropdownLocator.click();
-
-		await expect( page.getByText( 'In stock' ) ).toBeVisible();
-		await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+	test.afterAll( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplatePosts();
 	} );
 } );

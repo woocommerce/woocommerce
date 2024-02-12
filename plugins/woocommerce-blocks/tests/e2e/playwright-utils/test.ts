@@ -10,7 +10,6 @@ import {
 	PageUtils,
 	RequestUtils,
 } from '@wordpress/e2e-test-utils-playwright';
-
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
@@ -23,6 +22,16 @@ import {
 	MiniCartUtils,
 	WPCLIUtils,
 } from '@woocommerce/e2e-utils';
+import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+
+/**
+ * Internal dependencies
+ */
+import {
+	PostPayload,
+	createPostFromTemplate,
+	deleteAllTemplatePosts,
+} from '../utils/create-dynamic-content';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -42,7 +51,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	const type = message.type();
 	if (
 		! OBSERVED_CONSOLE_MESSAGE_TYPES.includes(
-			type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ]
+			type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ]
 		)
 	) {
 		return;
@@ -95,8 +104,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 		return;
 	}
 
-	const logFunction =
-		type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ];
+	const logFunction = type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ];
 
 	// Disable reason: We intentionally bubble up the console message
 	// which, unless the test explicitly anticipates the logging via
@@ -124,7 +132,14 @@ const test = base.extend<
 		wpCliUtils: WPCLIUtils;
 	},
 	{
-		requestUtils: RequestUtils;
+		requestUtils: RequestUtils & {
+			createPostFromTemplate: (
+				post: PostPayload,
+				templatePath: string,
+				data: unknown
+			) => Promise< Post >;
+			deleteAllTemplatePosts: () => Promise< void >;
+		};
 	}
 >( {
 	admin: async ( { page, pageUtils }, use ) => {
@@ -181,7 +196,26 @@ const test = base.extend<
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			await use( requestUtils );
+			const utilCreatePostFromTemplate = (
+				post: Partial< PostPayload >,
+				templatePath: string,
+				data: unknown
+			) =>
+				createPostFromTemplate(
+					requestUtils,
+					post,
+					templatePath,
+					data
+				);
+
+			const utilDeleteAllTemplatePosts = () =>
+				deleteAllTemplatePosts( requestUtils );
+
+			await use( {
+				...requestUtils,
+				createPostFromTemplate: utilCreatePostFromTemplate,
+				deleteAllTemplatePosts: utilDeleteAllTemplatePosts,
+			} );
 		},
 		{ scope: 'worker', auto: true },
 	],
