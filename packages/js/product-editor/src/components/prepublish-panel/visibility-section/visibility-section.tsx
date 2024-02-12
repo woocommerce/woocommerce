@@ -55,6 +55,17 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 					</legend>
 					<CatalogVisibility
 						catalogVisibility={ catalogVisibility }
+						label={ __( 'Hide in product catalog', 'woocommerce' ) }
+						visibility={ 'search' }
+						onCheckboxChange={ setCatalogVisibility }
+					/>
+					<CatalogVisibility
+						catalogVisibility={ catalogVisibility }
+						label={ __(
+							'Hide from search results',
+							'woocommerce'
+						) }
+						visibility={ 'catalog' }
 						onCheckboxChange={ setCatalogVisibility }
 					/>
 					<CheckboxControl

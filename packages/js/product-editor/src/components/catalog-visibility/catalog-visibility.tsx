@@ -5,7 +5,6 @@ import { createElement, Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { CheckboxControl } from '@wordpress/components';
-import { ProductCatalogVisibility } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -15,12 +14,11 @@ import { TRACKS_SOURCE } from '../../constants';
 
 export function CatalogVisibility( {
 	catalogVisibility,
+	label,
+	visibility,
 	onCheckboxChange,
 }: CatalogVisibilityProps ) {
-	function handleVisibilityChange(
-		selected: boolean,
-		visibility: ProductCatalogVisibility
-	) {
+	function handleVisibilityChange( selected: boolean ) {
 		if ( selected ) {
 			if ( catalogVisibility === 'visible' ) {
 				onCheckboxChange( visibility );
@@ -62,24 +60,12 @@ export function CatalogVisibility( {
 	return (
 		<>
 			<CheckboxControl
-				label={ __( 'Hide in product catalog', 'woocommerce' ) }
+				label={ label }
 				checked={
-					catalogVisibility === 'search' ||
+					catalogVisibility === visibility ||
 					catalogVisibility === 'hidden'
 				}
-				onChange={ ( selected ) =>
-					handleVisibilityChange( selected, 'search' )
-				}
-			/>
-			<CheckboxControl
-				label={ __( 'Hide from search results', 'woocommerce' ) }
-				checked={
-					catalogVisibility === 'catalog' ||
-					catalogVisibility === 'hidden'
-				}
-				onChange={ ( selected ) =>
-					handleVisibilityChange( selected, 'catalog' )
-				}
+				onChange={ ( selected ) => handleVisibilityChange( selected ) }
 			/>
 		</>
 	);

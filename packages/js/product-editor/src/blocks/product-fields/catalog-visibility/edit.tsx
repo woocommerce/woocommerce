@@ -16,6 +16,8 @@ import { CatalogVisibility } from '../../../components/catalog-visibility';
 export function Edit( {
 	attributes,
 }: ProductEditorBlockEditProps< CatalogVisibilityBlockAttributes > ) {
+	const { label, visibility } = attributes;
+
 	const blockProps = useWooBlockProps( attributes );
 
 	const [ catalogVisibility, setCatalogVisibility ] = useEntityProp<
@@ -26,6 +28,8 @@ export function Edit( {
 		<div { ...blockProps }>
 			<CatalogVisibility
 				catalogVisibility={ catalogVisibility }
+				label={ label }
+				visibility={ visibility }
 				onCheckboxChange={ setCatalogVisibility }
 			/>
 		</div>
