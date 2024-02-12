@@ -63,6 +63,11 @@ const installAndActivateTheme = async () => {
 };
 
 const installFontFamilies = async () => {
+	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
+	if ( ! isTrackingEnabled ) {
+		return;
+	}
+
 	try {
 		const installedFontFamily = ( await resolveSelect(
 			'core'
