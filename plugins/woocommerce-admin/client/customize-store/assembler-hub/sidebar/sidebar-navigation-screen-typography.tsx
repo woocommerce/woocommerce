@@ -216,7 +216,7 @@ export const SidebarNavigationScreenTypography = ( {
 													type: 'INTRO_COMPLETED',
 													payload: {
 														optInDataSharing:
-															iOptInDataSharing,
+															OptInDataSharing,
 													},
 												} );
 												OptIn();
