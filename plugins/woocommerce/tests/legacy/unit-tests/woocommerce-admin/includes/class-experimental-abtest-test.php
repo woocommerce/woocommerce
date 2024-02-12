@@ -118,8 +118,8 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_fetch_variation_with_invalid_name() {
 		$exp = new Experimental_Abtest( 'anon', 'platform', true );
-		$variation = $exp->get_variation( 'Invalid-Experiment-Name!' );
-		$this->assertInstanceOf( 'WP_Error', $variation );
-		$this->assertEquals( 'invalid_test_name', $variation->get_error_code() );
+		$this->expectException( 'Exception' );
+		$this->expectExceptionMessage( 'Invalid A/B test name.' );
+		$exp->get_variation( 'Invalid-Experiment-Name!' );
 	}
 }

@@ -131,7 +131,11 @@ final class Experimental_Abtest {
 		$variation = $this->fetch_variation( $test_name );
 
 		// If there was an error retrieving a variation, conceal the error for the consumer.
-		if ( is_wp_error( $variation ) && 'production' === wp_get_environment_type() ) {
+		// If there was an error retrieving a variation, throw an exception in non-production environments.
+		if ( is_wp_error( $variation ) ) {
+			if ( 'production' !== wp_get_environment_type() ) {
+				throw new \Exception( $variation->get_error_message() );
+			}
 			return 'control';
 		}
 
