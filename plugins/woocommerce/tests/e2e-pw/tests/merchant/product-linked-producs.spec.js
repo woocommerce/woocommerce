@@ -1,9 +1,8 @@
 const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Products > Related products', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		products: async ( { api }, use ) => {
 			const keys = [ 'main', 'linked1', 'linked2' ];
 			const products = {};

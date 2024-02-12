@@ -38,9 +38,8 @@ async function selectImagesInLibrary( page, imagesNames ) {
 }
 
 baseTest.describe( 'Products > Edit Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product;
 

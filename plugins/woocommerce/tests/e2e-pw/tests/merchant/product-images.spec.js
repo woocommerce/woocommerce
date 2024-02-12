@@ -12,9 +12,8 @@ async function addImageFromLibrary( page, imageName, actionButtonName ) {
 }
 
 baseTest.describe( 'Products > Product Images', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,

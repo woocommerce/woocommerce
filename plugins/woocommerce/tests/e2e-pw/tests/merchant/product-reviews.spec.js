@@ -1,9 +1,8 @@
 const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Product Reviews > Edit Product Review', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		testData: async ( { api }, use ) => {
 			const timestamp = Date.now().toString();
 			let product = {};

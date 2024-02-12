@@ -1,9 +1,8 @@
 const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Products > Delete Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,
