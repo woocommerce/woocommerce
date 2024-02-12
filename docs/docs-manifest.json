@@ -535,14 +535,9 @@
           "menu_title": "Developer resources",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "a5ed7439daec1649b12c401c24da9f2f69582ffbfd912f6e42a2bbb53f87516e",
+          "hash": "ec2c30bd0d73eb26e636da9d9d3468eb3bc453213099edcc73468a74407e600c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
-          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e",
-          "links": {
-            "../extension-development/building-your-first-extension.md": "278c2822fe06f1ab72499a757ef0c4981cfbffb5",
-            "./development-environment.md": "9080572a3904349c44c565ca7e1bef1212c58757",
-            "./developer-tools.md": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
-          }
+          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
         {
           "post_title": "Resources for debugging",
@@ -1209,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "17da77f57a418280494f8538f8a23705b84422819266cac8369c19262c474ad1"
+  "hash": "9245f73e02b7d3277ecb22e92a2d85ecff55754f11407dc2782814df4ba1bce0"
 }
