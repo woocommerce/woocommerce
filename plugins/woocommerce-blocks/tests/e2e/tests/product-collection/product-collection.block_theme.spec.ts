@@ -739,6 +739,17 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
+		const filterProductRequest = ( request: Request ) => {
+			const url = request.url();
+			const searchParams = new URLSearchParams( request.url() );
+
+			return (
+				url.includes( 'wp/v2/product' ) &&
+				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
+				!! searchParams.get( `location[sourceData][productId]` )
+			);
+		};
+
 		const getLocationDetailsFromRequest = (
 			request: Request,
 			locationType?: string
@@ -787,9 +798,10 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
+			const locationReuqestPromise =
+				page.waitForRequest( filterProductRequest );
 			await pageObject.chooseCollectionInTemplate( 'featured' );
-
-			const locationRequest = await page.waitForRequest( filterRequest );
+			const locationRequest = await locationReuqestPromise;
 
 			const { type, productId } = getLocationDetailsFromRequest(
 				locationRequest,
@@ -814,8 +826,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await page.waitForRequest( filterRequest );
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await locationReuqestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'archive'
@@ -842,8 +855,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			pageObject.chooseCollectionInTemplate( 'featured' );
-			const locationRequest = await page.waitForRequest( filterRequest );
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await locationReuqestPromise;
 			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'archive'
@@ -866,8 +880,9 @@ test.describe( 'Product Collection', () => {
 				pageObject.BLOCK_NAME
 			);
 
-			pageObject.chooseCollectionInPost( 'featured' );
-			const locationRequest = await page.waitForRequest( filterRequest );
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await locationReuqestPromise;
 			const { type, sourceData } =
 				getLocationDetailsFromRequest( locationRequest );
 
@@ -884,8 +899,10 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollectionInSingleProductBlock();
-			pageObject.chooseCollectionInPost( 'featured' );
-			const locationRequest = await page.waitForRequest( filterRequest );
+			const locationReuqestPromise =
+				page.waitForRequest( filterProductRequest );
+			await pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await locationReuqestPromise;
 			const { type, productId } = getLocationDetailsFromRequest(
 				locationRequest,
 				'product'
