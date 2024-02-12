@@ -20,7 +20,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			templateApiUtils,
 			editorUtils,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
 	},
 } );
@@ -29,6 +28,7 @@ test.describe( 'Product Collection', () => {
 	test( 'Renders product collection block correctly with 9 items', async ( {
 		pageObject,
 	} ) => {
+		await pageObject.createNewPostAndInsertBlock();
 		expect( pageObject.productTemplate ).not.toBeNull();
 		await expect( pageObject.products ).toHaveCount( 9 );
 		await expect( pageObject.productImages ).toHaveCount( 9 );
@@ -47,6 +47,10 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
+
 		test( 'Reflects the correct number of columns according to sidebar settings', async ( {
 			pageObject,
 		} ) => {
@@ -392,6 +396,10 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Toolbar settings', () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
+
 		test( 'Toolbar -> Items per page, offset & max page to show', async ( {
 			pageObject,
 		} ) => {
@@ -422,6 +430,9 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Responsive', () => {
+		test.beforeEach( async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+		} );
 		test( 'Block with shrink columns ENABLED correctly displays as grid', async ( {
 			pageObject,
 		} ) => {
@@ -452,7 +463,6 @@ test.describe( 'Product Collection', () => {
 		test( 'Block with shrink columns DISABLED collapses to single column on small screens', async ( {
 			pageObject,
 		} ) => {
-			await pageObject.createNewPostAndInsertBlock();
 			await pageObject.setShrinkColumnsToFit( false );
 			await pageObject.publishAndGoToFrontend();
 
@@ -695,8 +705,9 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await admin.createNewPost();
 			await editorUtils.closeWelcomeGuideModal();
-			await pageObject.insertProductCollectionInSingleProductBlock();
-			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.insertProductCollectionInSingleProductBlock(
+				'featured'
+			);
 
 			const featuredProducts = [
 				'Cap',
@@ -719,6 +730,44 @@ test.describe( 'Product Collection', () => {
 			// This verifies if Blocks's product context is provided
 			await expect( pageObject.productPrices ).toHaveText(
 				featuredProductsPrices
+			);
+		} );
+	} );
+
+	test.describe( 'Query Context in Editor', () => {
+		test( 'Product Catalog: Sends only ID in Query Context', async ( {
+			pageObject,
+		} ) => {
+			const url = await pageObject.setupAndFetchQueryContextURL( {
+				collection: 'productCatalog',
+			} );
+
+			await expect(
+				url.searchParams.has( 'productCollectionQueryContext[id]' )
+			).toBeTruthy();
+
+			// There shouldn't be collection in the query context
+			// Because Product Catalog isn't a collection
+			await expect(
+				url.searchParams.has(
+					'productCollectionQueryContext[collection]'
+				)
+			).toBeFalsy();
+		} );
+
+		test( 'Collections: collection should be present in query context', async ( {
+			pageObject,
+		} ) => {
+			const url = await pageObject.setupAndFetchQueryContextURL( {
+				collection: 'onSale',
+			} );
+
+			const collectionName = url.searchParams.get(
+				'productCollectionQueryContext[collection]'
+			);
+			await expect( collectionName ).toBeTruthy();
+			await expect( collectionName ).toBe(
+				'woocommerce/product-collection/on-sale'
 			);
 		} );
 	} );

@@ -134,6 +134,32 @@ class ProductCollectionPage {
 		await this.editor.openDocumentSettingsSidebar();
 	}
 
+	async setupAndFetchQueryContextURL( {
+		collection,
+	}: {
+		collection: Collections;
+	} ) {
+		await this.admin.createNewPost();
+		await this.editorUtils.closeWelcomeGuideModal();
+		await this.editor.insertBlock( {
+			name: this.BLOCK_NAME,
+		} );
+		await this.chooseCollectionInPost( collection );
+
+		// Wait for response with productCollectionQueryContext query parameter.
+		const WP_PRODUCT_ENDPOINT = '/wp/v2/product';
+		const QUERY_CONTEXT_PARAM = 'productCollectionQueryContext';
+		const response = await this.page.waitForResponse(
+			( currentResponse ) =>
+				currentResponse.url().includes( WP_PRODUCT_ENDPOINT ) &&
+				currentResponse.url().includes( QUERY_CONTEXT_PARAM ) &&
+				currentResponse.status() === 200
+		);
+
+		const url = new URL( response.url() );
+		return url;
+	}
+
 	async publishAndGoToFrontend() {
 		await this.editor.publishPost();
 		const url = new URL( this.page.url() );
@@ -155,7 +181,7 @@ class ProductCollectionPage {
 		await this.editorUtils.enterEditMode();
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
-			'woocommerce/product-collection'
+			this.BLOCK_NAME
 		);
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.saveSiteEditorEntities();
@@ -485,7 +511,9 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
-	async insertProductCollectionInSingleProductBlock() {
+	async insertProductCollectionInSingleProductBlock(
+		collection: Collections
+	) {
 		this.insertSingleProductBlock();
 
 		const siblingBlock = await this.editorUtils.getBlockByName(
@@ -498,10 +526,12 @@ class ProductCollectionPage {
 
 		await this.editor.selectBlocks( siblingBlock );
 		await this.editorUtils.insertBlock(
-			{ name: 'woocommerce/product-collection' },
+			{ name: this.BLOCK_NAME },
 			undefined,
 			parentClientId
 		);
+		await this.chooseCollectionInPost( collection );
+		await this.refreshLocators( 'editor' );
 	}
 
 	/**
@@ -541,7 +571,7 @@ class ProductCollectionPage {
 		await singleProductBlock.getByText( 'Done' ).click();
 	}
 
-	private async refreshLocators( currentUI: 'editor' | 'frontend' ) {
+	async refreshLocators( currentUI: 'editor' | 'frontend' ) {
 		await this.waitForProductsToLoad();
 
 		if ( currentUI === 'editor' ) {
