@@ -35,7 +35,7 @@ export function usePublish( {
 		productType,
 		'id'
 	);
-	const [ editedDateCreated, _, dateCreated ] = useEntityProp< string >(
+	const [ editedDateCreated, , dateCreated ] = useEntityProp< string >(
 		'postType',
 		productType,
 		'date_created'

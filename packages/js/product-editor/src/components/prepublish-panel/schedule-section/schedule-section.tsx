@@ -1,10 +1,6 @@
 /**
  * External dependencies
  */
-import {
-	// @ts-expect-error no exported member
-	__experimentalPublishDateTimePicker as PublishDateTimePicker,
-} from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import {
 	DateSettings,
@@ -14,6 +10,10 @@ import {
 } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 import { __, _x, isRTL, sprintf } from '@wordpress/i18n';
+import {
+	// @ts-expect-error no exported member
+	__experimentalPublishDateTimePicker as PublishDateTimePicker,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -106,8 +106,10 @@ export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
 	return getFormattedDateTime( dateAttribute );
 }
 
-export function ScheduleSection( {}: ScheduleSectionProps ) {
-	const [ date, setDate ] = useProductEntityProp< string >( 'date_created' );
+export function ScheduleSection( { postType }: ScheduleSectionProps ) {
+	const [ date, setDate ] = useProductEntityProp< string >( 'date_created', {
+		postType,
+	} );
 
 	function handlePublishDateTimePickerChange( value: string ) {
 		setDate( value );

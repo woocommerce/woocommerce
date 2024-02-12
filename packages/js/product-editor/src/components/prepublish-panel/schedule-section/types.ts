@@ -1,1 +1,3 @@
-export type ScheduleSectionProps = {};
+export type ScheduleSectionProps = {
+	postType: string;
+};

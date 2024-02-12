@@ -62,7 +62,7 @@ export function PrepublishPanel( {
 			</div>
 			<VisibilitySection productType={ productType } />
 
-			<ScheduleSection />
+			<ScheduleSection postType={ productType } />
 		</div>
 	);
 }
