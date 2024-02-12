@@ -25,7 +25,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useProductCollectionQueryContext } from './utils';
+import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
@@ -125,37 +125,42 @@ const ProductContent = withProduct(
 	}
 );
 
-const ProductTemplateEdit = ( {
-	clientId,
-	context: {
-		query: {
-			perPage,
-			offset = 0,
-			order,
-			orderBy,
-			search,
-			exclude,
-			inherit,
-			taxQuery,
-			pages,
-			...restQueryArgs
+const ProductTemplateEdit = (
+	props: BlockEditProps< {
+		clientId: string;
+	} > & {
+		context: ProductCollectionAttributes;
+		__unstableLayoutClassNames: string;
+	}
+) => {
+	const {
+		clientId,
+		context: {
+			query: {
+				perPage,
+				offset = 0,
+				order,
+				orderBy,
+				search,
+				exclude,
+				inherit,
+				taxQuery,
+				pages,
+				...restQueryArgs
+			},
+			queryContext = [ { page: 1 } ],
+			templateSlug,
+			displayLayout: { type: layoutType, columns, shrinkColumns } = {
+				type: 'flex',
+				columns: 3,
+				shrinkColumns: false,
+			},
+			queryContextIncludes = [],
 		},
-		queryContext = [ { page: 1 } ],
-		templateSlug,
-		displayLayout: { type: layoutType, columns, shrinkColumns } = {
-			type: 'flex',
-			columns: 3,
-			shrinkColumns: false,
-		},
-		queryContextIncludes = [],
-	},
-	__unstableLayoutClassNames,
-}: BlockEditProps< {
-	clientId: string;
-} > & {
-	context: ProductCollectionAttributes;
-	__unstableLayoutClassNames: string;
-} ) => {
+		__unstableLayoutClassNames,
+	} = props;
+	const location = useGetLocation( props.context, props.clientId );
+
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] =
 		useState< string >();
@@ -242,6 +247,7 @@ const ProductTemplateEdit = ( {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					location,
 					productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
@@ -261,6 +267,7 @@ const ProductTemplateEdit = ( {
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
+			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
 		]
