@@ -703,6 +703,7 @@ test.describe( 'Product Collection', () => {
 			await admin.createNewPost();
 			await pageObject.insertProductCollectionInSingleProductBlock();
 			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.refreshLocators( 'editor' );
 
 			const featuredProducts = [
 				'Cap',
