@@ -188,7 +188,6 @@ function wc_clear_cart_after_payment() {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			/** If the order has not failed, or is not pending, the order must have gone through. */
 			$pre_payment_statuses = apply_filters( 'woocommerce_before_payment_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
 
 			if ( ! $order->has_status( $pre_payment_statuses ) ) {
