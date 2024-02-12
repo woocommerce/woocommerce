@@ -330,6 +330,19 @@ All at %6$s
 				}
 			}
 		}
+		require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
+
+		$ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
+		$ideal_from_stripe_gateway->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		$ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
+		$ideal_from_stripe_gateway->id = 'stripe_ideal';
+		$_available_gateways[ $ideal_from_stripe_gateway->id ] = $ideal_from_stripe_gateway;
+
+		$ideal_from_woopayments = new WC_Payment_Gateway_CC();
+		$ideal_from_woopayments->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		$ideal_from_woopayments->title = 'iDEAL (WooPayments)';
+		$ideal_from_woopayments->id = 'woopayments_ideal';
+		$_available_gateways[ $ideal_from_woopayments->id ] = $ideal_from_woopayments;
 
 		// // DEMO
 		// $new = new WC_Payment_Gateway_CC();
@@ -345,36 +358,36 @@ All at %6$s
 		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
 
 		// DEMO for normalized version
-		require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
+		// require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
 
-		$cc = new WC_Payment_Gateway_CC();
-		$cc->standardized_gateway_id = Gateway_ID_Constants::CREDIT_CARD;
-		$cc->title = 'Credit Card';
-		$cc->id = 'woocommerce_payments_credit_card';
+		// $cc = new WC_Payment_Gateway_CC();
+		// $cc->standardized_gateway_id = Gateway_ID_Constants::CREDIT_CARD;
+		// $cc->title = 'Credit Card';
+		// $cc->id = 'woocommerce_payments_credit_card';
 
-		$bancontact = new WC_Payment_Gateway_CC();
-		$bancontact->standardized_gateway_id = Gateway_ID_Constants::BANCONTACT;
-		$bancontact->title = 'Bancontact';
-		$bancontact->id = 'woocommerce_payments_bancontact';
+		// $bancontact = new WC_Payment_Gateway_CC();
+		// $bancontact->standardized_gateway_id = Gateway_ID_Constants::BANCONTACT;
+		// $bancontact->title = 'Bancontact';
+		// $bancontact->id = 'woocommerce_payments_bancontact';
 
-		$ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
-		$ideal_from_stripe_gateway->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
-		$ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
-		$ideal_from_stripe_gateway->id = 'stripe_ideal';
+		// $ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
+		// $ideal_from_stripe_gateway->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		// $ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
+		// $ideal_from_stripe_gateway->id = 'stripe_ideal';
 
-		$ideal_from_woopayments = new WC_Payment_Gateway_CC();
-		$ideal_from_woopayments->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
-		$ideal_from_woopayments->title = 'iDEAL (WooPayments)';
-		$ideal_from_woopayments->id = 'woopayments_ideal';
+		// $ideal_from_woopayments = new WC_Payment_Gateway_CC();
+		// $ideal_from_woopayments->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		// $ideal_from_woopayments->title = 'iDEAL (WooPayments)';
+		// $ideal_from_woopayments->id = 'woopayments_ideal';
 
-		$gateways = [];
-		$gateways[$cc->id] = $cc;
-		$gateways[$bancontact->id] = $bancontact;
-		$gateways[$ideal_from_stripe_gateway->id] = $ideal_from_stripe_gateway;
-		$gateways[$ideal_from_woopayments->id] = $ideal_from_woopayments;
+		// $gateways = [];
+		// $gateways[$cc->id] = $cc;
+		// $gateways[$bancontact->id] = $bancontact;
+		// $gateways[$ideal_from_stripe_gateway->id] = $ideal_from_stripe_gateway;
+		// $gateways[$ideal_from_woopayments->id] = $ideal_from_woopayments;
 		
 
-		$duplicated_titles = $this->find_duplicate_enabled_gateways( $gateways );
+		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $gateways );
 
 		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
 	}
@@ -385,7 +398,8 @@ All at %6$s
 	 * @param array $enabled_gateways Array of enabled gateways.
 	 * @return array Array of duplicate gateway names.
 	 */
-	public function find_duplicate_enabled_gateways( array $enabled_gateways ) {	
+	public function find_duplicate_enabled_gateways( ) {	
+		$enabled_gateways = $this->get_available_payment_gateways();
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-detector.php';
 		// require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-standardized-finder.php';
