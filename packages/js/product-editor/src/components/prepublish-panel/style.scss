@@ -43,6 +43,14 @@
 			margin: 8px 0;
 		}
 	}
+
+	&__footer {
+		padding: 0 $grid-unit-20;
+		position: absolute;
+		bottom: $gap-largest;
+		left: 0;
+		width: 100%;
+	}
 }
 
 @keyframes product-publish-panel__slide-in-animation {
