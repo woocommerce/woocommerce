@@ -5,17 +5,15 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
 ## Table of contents
 
 - [WooCommerce Tests](#woocommerce-tests)
-  - [Table of contents](#table-of-contents)
-  - [Initial Setup](#initial-setup)
-    - [MySQL database](#mysql-database)
-    - [Setup instructions](#setup-instructions)
-  - [Running Unit Tests](#running-unit-tests)
-    - [Troubleshooting](#troubleshooting)
-    - [Running tests in PHP 8](#running-tests-in-php-8)
-  - [Guide for Writing Unit Tests](#guide-for-writing-unit-tests)
-  - [Automated Tests](#automated-tests)
-  - [Code Coverage](#code-coverage)
-
+    - [Table of contents](#table-of-contents)
+    - [Initial Setup](#initial-setup)
+        - [MySQL database](#mysql-database)
+        - [Setup instructions](#setup-instructions)
+    - [Running Unit Tests](#running-unit-tests)
+        - [Troubleshooting](#troubleshooting)
+    - [Guide for Writing Unit Tests](#guide-for-writing-unit-tests)
+    - [Automated Tests](#automated-tests)
+    - [Code Coverage](#code-coverage)
 
 ## Initial Setup
 
@@ -32,23 +30,22 @@ To run the tests, you need to create a test database. You can:
 
 Once you have database, from the WooCommerce root directory "cd" into `plugins/woocommerce` directory and run the following:
 
-1. Install [PHPUnit](http://phpunit.de/) via Composer by running:
-    ```
-    $ composer install
-    ```
-
+1. Install [PHPUnit](http://phpunit.de/) via Composer by running: `composer install`
 2. Install WordPress and the WP Unit Test lib using the `install.sh` script:
-    ```
-    $ tests/bin/install.sh <db-name> <db-user> <db-password> [db-host]
-    ```
+
+```sh
+tests/bin/install.sh <db-name> <db-user> <db-password> [db-host]
+```
 
 You may need to quote strings with backslashes to prevent them from being processed by the shell or other programs.
 
 Example:
 
-    $ tests/bin/install.sh woocommerce_tests root root
+```sh
+tests/bin/install.sh woocommerce_tests root root
 
-    #  woocommerce_tests is the database name and root is both the MySQL user and its password.
+# woocommerce_tests is the database name and root is both the MySQL user and its password.
+```
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
 
@@ -56,44 +53,56 @@ Example:
 
 Change to the plugin root directory and type:
 
-    $ vendor/bin/phpunit
+```sh
+vendor/bin/phpunit
+```
 
 The tests will execute and you'll be presented with a summary.
 
 You can run specific tests by providing the path and filename to the test class:
 
-    $ vendor/bin/phpunit tests/legacy/unit-tests/importer/product.php
+```sh
+vendor/bin/phpunit tests/legacy/unit-tests/importer/product.php
+```
 
 A text code coverage summary can be displayed using the `--coverage-text` option:
 
-    $ vendor/bin/phpunit --coverage-text
+```sh
+vendor/bin/phpunit --coverage-text
+```
 
 ### Troubleshooting
 
 In case you're unable to run the unit tests, you might see an error message similar to:
 
-```
+```sh
 Fatal error: require_once(): Failed opening required '/var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib/includes/functions.php' (include_path='.:/usr/local/Cellar/php@7.4/7.4.23/share/php@7.4/pear') in /Users/nielslange/Plugins/woocommerce/tests/legacy/bootstrap.php on line 59
 ```
 
-If you run into this problem, simply delete the WordPress test directory and run the installer again. In this particular case, you'd run the following command:
+If you run into this problem, simply delete the WordPress test directory and run the installer again. In this particular case, you'd run the following commands:
 
+```sh
+rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
 ```
-$ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress-tests-lib
-$ tests/bin/install.sh woocommerce_tests_1 root root
+
+```sh
+tests/bin/install.sh woocommerce_tests_1 root root
 ```
 
 Or if you run into this error:
 
-```
+```sh
 PHP Fatal error:  require_once(): Failed opening required '/var/folders/n_/ksp7kpt9475byx0vs665j6gc0000gn/T/wordpress//wp-includes/PHPMailer/PHPMailer.php' (include_path='.:/usr/local/Cellar/php@7.4/7.4.26_1/share/php@7.4/pear') in /private/var/folders/n_/ksp7kpt9475byx0vs665j6gc0000gn/T/wordpress-tests-lib/includes/mock-mailer.php on line 2]
 ```
 
 You will want to delete the wordpress folder
 
+```sh
+rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress
 ```
-$ rm -rf /var/folders/qr/3cnz_5_j3j1cljph_246ty1h0000gn/T/wordpress
-$ tests/bin/install.sh woocommerce_tests_1 root root
+
+```sh
+tests/bin/install.sh woocommerce_tests_1 root root
 ```
 
 Note that `woocommerce_tests` changed to `woocommerce_tests_1` as the `woocommerce_tests` database already exists due to the prior command.
