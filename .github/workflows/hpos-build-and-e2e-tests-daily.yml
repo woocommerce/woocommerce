@@ -1,4 +1,4 @@
-name: Run daily tests in an environment with HPOS enabled
+name: Run daily tests in an environment with HPOS disabled
 on:
     schedule:
         - cron: '30 2 * * *'
@@ -31,7 +31,7 @@ jobs:
             - name: Load docker images and start containers with HPOS enabled.
               working-directory: plugins/woocommerce
               env:
-                  ENABLE_HPOS: 1
+                  ENABLE_HPOS: 0
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test:cot
 
             - name: Download and install Chromium browser.
