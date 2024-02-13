@@ -2,6 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\StoreApi\RoutesController;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Service class that handles hydration of API data for blocks.
@@ -38,8 +41,36 @@ class Hydration {
 	 * @return array Response data.
 	 */
 	public function get_rest_api_response_data( $path = '' ) {
-		$this->cache_store_notices();
+		if ( ! str_starts_with( $path, '/wc/store' ) ) {
+			return [];
+		}
+
+		$available_routes = StoreApi::container()->get( RoutesController::class )->get_all_routes( 'v1', true );
+		$controller_class = $this->match_route_to_handler( $path, $available_routes );
+
+		/**
+		 * We disable nonce check to support endpoints such as checkout. The caveat here is that we need to be careful to only support GET requests. No other request type should be processed without nonce check. Additionally, no GET request can modify data as part of hydration request, for example adding items to cart.
+		 *
+		 * Long term, we should consider validating nonce here, instead of disabling it temporarily.
+		 */
 		$this->disable_nonce_check();
+
+		$this->cache_store_notices();
+
+		if ( null !== $controller_class ) {
+			$request           = new \WP_REST_Request( 'GET', $path );
+			$schema_controller = StoreApi::container()->get( SchemaController::class );
+			$controller        = new $controller_class(
+				$schema_controller,
+				$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
+			);
+
+			$response = $controller->get_response( $request );
+			return array(
+				'body'    => $response->get_data(),
+				'headers' => $response->get_headers(),
+			);
+		}
 
 		// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
 		$preloaded_requests = rest_preload_api_request( [], $path );
@@ -49,6 +80,27 @@ class Hydration {
 
 		// Returns just the single preloaded request, or an empty array if it doesn't exist.
 		return $preloaded_requests[ $path ] ?? [];
+	}
+
+	/**
+	 * Inspired from WP core's `match_request_to_handler`, this matches a given path from available route regexes.
+	 * However, unlike WP core, this does not check against query params, request method etc.
+	 *
+	 * @param string $path The path to match.
+	 * @param array  $available_routes Available routes in { $regex1 => $contoller_class1, ... } format.
+	 *
+	 * @return string|null
+	 */
+	private function match_route_to_handler( $path, $available_routes ) {
+		$matched_route = null;
+		foreach ( $available_routes as $route_path => $controller ) {
+			$match = preg_match( '@^' . $route_path . '$@i', $path );
+			if ( $match ) {
+				$matched_route = $controller;
+				break;
+			}
+		}
+		return $matched_route;
 	}
 
 	/**

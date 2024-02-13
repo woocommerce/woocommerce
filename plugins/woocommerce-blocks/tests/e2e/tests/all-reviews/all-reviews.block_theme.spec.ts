@@ -6,7 +6,7 @@ import { expect, test } from '@woocommerce/e2e-playwright-utils';
 /**
  * Internal dependencies
  */
-import { reviews } from '../../test-data/data/data';
+import { allReviews } from '../../test-data/data/data';
 
 const blockData = {
 	name: 'woocommerce/all-reviews',
@@ -28,11 +28,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.name } );
 
-		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
+		await expect( page.getByText( allReviews[ 0 ].review ) ).toBeVisible();
 
 		await editorUtils.publishAndVisitPost();
 
-		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
+		await expect( page.getByText( allReviews[ 0 ].review ) ).toBeVisible();
 	} );
 
 	test( 'can change sort order in the frontend', async ( {
@@ -44,12 +44,19 @@ test.describe( `${ blockData.name } Block`, () => {
 		const block = await frontendUtils.getBlockByName( blockData.name );
 		let firstReview;
 		firstReview = block.locator( blockData.selectors.frontend.firstReview );
-		await expect( firstReview ).toHaveText( reviews[ 1 ].review );
+
+		// The most recent review should be at top, TODO: this assertion could be improved.
+		await expect( firstReview ).toHaveText( allReviews[ 2 ].review );
 
 		const select = page.getByLabel( 'Order by' );
 		select.selectOption( 'Highest rating' );
 
 		firstReview = block.locator( blockData.selectors.frontend.firstReview );
-		await expect( firstReview ).toHaveText( reviews[ 0 ].review );
+
+		const highestRating = allReviews.sort(
+			( a, b ) => b.rating - a.rating
+		)[ 0 ];
+
+		await expect( firstReview ).toHaveText( highestRating.review );
 	} );
 } );
