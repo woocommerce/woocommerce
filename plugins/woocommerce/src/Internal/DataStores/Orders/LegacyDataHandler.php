@@ -278,8 +278,15 @@ class LegacyDataHandler {
 			$data_store->prime_caches_for_orders( array( $order_id ), array() );
 		}
 
-		$classname = wc_get_order_type( $data_store->get_order_type( $order_id ) )['class_name'];
-		$order     = new $classname();
+		$order_type = wc_get_order_type( $data_store->get_order_type( $order_id ) );
+
+		if ( ! $order_type ) {
+			// translators: %d is an order ID.
+			throw new \Exception( sprintf( __( '%d is not an order or has an invalid order type.', 'woocommerce' ), $order_id ) );
+		}
+
+		$classname  = $order_type['class_name'];
+		$order      = new $classname();
 		$order->set_id( $order_id );
 
 		// Switch datastore if necessary.
