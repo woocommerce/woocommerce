@@ -25,11 +25,16 @@
 		width: 280px;
 	}
 	.interface-interface-skeleton__actions {
-		top: 0;
+		top: $admin-bar-height-big;
 		border-left: 1px solid $gray-200;
-		position: relative !important;
 		background-color: $white;
-		z-index: 90;
+		height: 100%;
+		z-index: 9999;
+		width: 100%;
+		@include break-medium() {
+			top: $admin-bar-height;
+			width: $sidebar-width;
+		}
 	}
 
 	.interface-interface-skeleton__header,
