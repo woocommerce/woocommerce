@@ -78,6 +78,7 @@ class Init {
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+			add_action( 'pre_traverse_and_serialize_block', array( BlockTemplateUtils::class, 'add_block_product_trait_compatibility' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -384,4 +385,5 @@ class Init {
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
 	}
+
 }
