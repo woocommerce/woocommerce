@@ -45,7 +45,7 @@ const isInProductArchive = () => {
 
 	const currentTemplateId = select(
 		'core/edit-site'
-	).getEditedPostId() as string;
+	)?.getEditedPostId() as string;
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
