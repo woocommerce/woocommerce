@@ -94,7 +94,7 @@ There are plans to expand this list, but for now these are the types available.
 
 ## Using the API
 
-To register additional checkout fields you must use the `woocommerce_blocks_register_checkout_field` function.
+To register additional checkout fields you must use the `__experimental_woocommerce_blocks_register_checkout_field` function.
 
 It is recommended to run this function after the `woocommerce_loaded` action.
 
@@ -188,7 +188,7 @@ This example demonstrates rendering a text field in the address section:
 add_action(
 	'woocommerce_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -231,7 +231,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 add_action(
 	'woocommerce_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'namespace/marketing-opt-in',
 				'label'    => 'Do you want to subscribe to our newsletter?',
@@ -257,7 +257,7 @@ This example demonstrates rendering a select field in the additional information
 add_action(
 	'woocommerce_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'namespace/how-did-you-hear-about-us',
 				'label'    => 'How did you hear about us?',
@@ -449,7 +449,7 @@ This example is just a combined version of the examples shared above.
 add_action(
 	'woocommerce_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -462,7 +462,7 @@ add_action(
 				),
 			),
 		);
-		woocommerce_blocks_register_checkout_field(
+		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'            => 'namespace/confirm-gov-id',
 				'label'         => 'Confirm government ID',
