@@ -127,9 +127,7 @@ class ProductCollectionPage {
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost( { legacyCanvas: true } );
-		await this.editor.insertBlock( {
-			name: this.BLOCK_SLUG,
-		} );
+		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
@@ -142,9 +140,7 @@ class ProductCollectionPage {
 	} ) {
 		await this.admin.createNewPost();
 		await this.editorUtils.closeWelcomeGuideModal();
-		await this.editor.insertBlock( {
-			name: this.BLOCK_SLUG,
-		} );
+		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 
 		// Wait for response with productCollectionQueryContext query parameter.
@@ -192,6 +188,10 @@ class ProductCollectionPage {
 		await this.page.goto( `/shop` );
 	}
 
+	async insertProductCollection() {
+		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+	}
+
 	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
 		await this.templateApiUtils.revertTemplate(
 			'woocommerce/woocommerce//archive-product'
@@ -203,7 +203,7 @@ class ProductCollectionPage {
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
 		await this.editor.canvas.click( 'body' );
-		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.openDocumentSettingsSidebar();
 		await this.editor.saveSiteEditorEntities();
