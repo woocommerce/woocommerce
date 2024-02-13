@@ -19,31 +19,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Product_Trait {
 
 	/**
+	 * The product.
+	 *
+	 * @var WC_Product
+	 */
+	protected $product;
+
+	/**
 	 * Constructor
 	 */
-	public function __construct() {}
+	public function __construct( $product ) {
+		$this->product = $product;
+	}
 
 	/**
 	 * Get product name.
 	 *
 	 * @return string
 	 */
-	abstract public function get_name();
+	abstract public static function get_name();
 
 	/**
 	 * Get product trait slug.
 	 *
 	 * @return string
 	 */
-	abstract public function get_slug();
+	abstract public static function get_slug();
 
 	/**
 	 * Get compatible traits.
 	 *
 	 * @return array
 	 */
-	public function get_compatible_traits() {
-		return WC()->product_traits()->get_all_traits();
+	public static function get_compatible_traits() {
+		return WC()->product_traits()->get_simple_product_traits();
 	}
 
 	/**
@@ -51,10 +60,10 @@ abstract class WC_Product_Trait {
 	 *
 	 * @return array
 	 */
-	public function get_incompatible_traits() {
+	public static function get_incompatible_traits() {
 		return array_diff(
 			array_keys( WC()->product_traits()->get_all_traits() ),
-			$this->get_compatible_traits(),
+			self::get_compatible_traits(),
 		);
 	}
 

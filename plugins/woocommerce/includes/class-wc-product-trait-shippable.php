@@ -17,7 +17,7 @@ class WC_Product_Trait_Shippable extends WC_Product_Trait {
 	 *
 	 * @return string
 	 */
-	public function get_name() {
+	public static function get_name() {
 		return 'Shippable';
 	}
 
@@ -26,14 +26,14 @@ class WC_Product_Trait_Shippable extends WC_Product_Trait {
 	 *
 	 * @return string
 	 */
-	public function get_slug() {
+	public static function get_slug() {
 		return 'shippable';
 	}
 
 	/**
 	 * Get compatible traits.
 	 */
-	public function get_compatible_traits() {
+	public static function get_compatible_traits() {
 		return array_diff(
 			array_keys( WC()->product_traits()->get_all_traits() ),
 			array( 'virtual' )

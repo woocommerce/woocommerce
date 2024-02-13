@@ -334,7 +334,7 @@ class BlockTemplateUtils {
 			$trait      = WC()->product_traits()->get_trait( $trait_slug );
 
 			if ( $trait ) {
-				$incompatible_traits = $trait->get_incompatible_traits();
+				$incompatible_traits = $trait::get_incompatible_traits();
 				$block['attrs']['_templateBlockHideConditions'] = $block['attrs']['_templateBlockHideConditions'] ?? [];
 				foreach ( $incompatible_traits as $incompatible_trait ) {
 					$block['attrs']['_templateBlockHideConditions'][] = array(

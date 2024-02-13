@@ -17,7 +17,7 @@ class WC_Product_Trait_Virtual extends WC_Product_Trait {
 	 *
 	 * @return string
 	 */
-	public function get_name() {
+	public static function get_name() {
 		return 'Virtual';
 	}
 
@@ -26,7 +26,7 @@ class WC_Product_Trait_Virtual extends WC_Product_Trait {
 	 *
 	 * @return string
 	 */
-	public function get_slug() {
+	public static function get_slug() {
 		return 'virtual';
 	}
 

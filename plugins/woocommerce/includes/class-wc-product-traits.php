@@ -53,14 +53,13 @@ class WC_Product_Traits {
 	 *
 	 * @var array
 	 */
-	public function get_default_traits() {
+	public function get_simple_product_traits() {
         return apply_filters(
-            'woocommerce_default_product_traits',
+            'woocommerce_simple_product_traits',
             array(
-                'downloadable',
-                'virtual',
-                'images',
-                'shippable',
+                WC_Product_Trait_Downloadable::get_slug(),
+                WC_Product_Trait_Shippable::get_slug(),
+                WC_Product_Trait_Virtual::get_slug(),
             )
         );
     }
@@ -79,12 +78,17 @@ class WC_Product_Traits {
 
 		foreach ( $product_traits as $trait ) {
 			if ( is_string( $trait ) && class_exists( $trait ) ) {
-				$trait = new $trait();
-				$this->product_traits[ $trait->get_slug() ] = $trait;
+				$this->product_traits[ $trait::get_slug() ] = $trait;
 			}
         }
 	}
 
+    /**
+     * Get a trait by slug.
+     *
+     * @param string $slug Trait slug.
+     * @return WC_Product_Trait
+     */
     public function get_trait( $slug ) {
         if ( isset( $this->product_traits[ $slug ] ) ) {
             return $this->product_traits[ $slug ];
