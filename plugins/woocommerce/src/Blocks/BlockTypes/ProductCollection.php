@@ -159,6 +159,10 @@ class ProductCollection extends AbstractBlock {
 	 * @return string The updated block content.
 	 */
 	private function process_pagination_links( $block_content ) {
+		if ( ! $block_content ) {
+			return $block_content;
+		}
+
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
 
