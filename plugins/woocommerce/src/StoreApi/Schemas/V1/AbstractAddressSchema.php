@@ -136,7 +136,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
 						break;
 				}
-				$carry[ $key ] = $this->additional_fields_controller->sanitize_field( $key, $carry[ $key ] );
+				if ( $this->additional_fields_controller->is_field( $key ) ) {
+					$carry[ $key ] = $this->additional_fields_controller->sanitize_field( $key, $carry[ $key ] );
+				}
 				return $carry;
 			},
 			[]

@@ -250,6 +250,37 @@ class CheckoutFields {
 	}
 
 	/**
+	 * If a field does not declare a sanitization callback, this is the default sanitization callback.
+	 *
+	 * @param mixed $value Value to sanitize.
+	 * @param array $field Field data.
+	 * @return mixed
+	 */
+	public function default_sanitize_callback( $value, $field ) {
+		return wc_clean( $value );
+	}
+
+	/**
+	 * If a field does not declare a validation callback, this is the default validation callback.
+	 *
+	 * @param mixed $value Value to sanitize.
+	 * @param array $field Field data.
+	 * @return WP_Error|void If there is a validation error, return an WP_Error object.
+	 */
+	public function default_validate_callback( $value, $field ) {
+		if ( ! empty( $field['required'] ) && empty( $value ) ) {
+			return new WP_Error(
+				'woocommerce_blocks_checkout_field_required',
+				sprintf(
+					// translators: %s is field key.
+					__( 'The field %s is required.', 'woocommerce' ),
+					$field['id']
+				)
+			);
+		}
+	}
+
+	/**
 	 * Registers an additional field for Checkout.
 	 *
 	 * @param array $options The field options.
@@ -279,6 +310,8 @@ class CheckoutFields {
 				'required'                   => false,
 				'attributes'                 => array(),
 				'show_in_order_confirmation' => true,
+				'sanitize_callback'          => array( $this, 'default_sanitize_callback' ),
+				'validate_callback'          => array( $this, 'default_validate_callback' ),
 			)
 		);
 
@@ -366,6 +399,18 @@ class CheckoutFields {
 				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 				return false;
 			}
+		}
+
+		if ( ! empty( $options['sanitize_callback'] ) && ! is_callable( $options['sanitize_callback'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The sanitize_callback must be a valid callback.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
+		}
+
+		if ( ! empty( $options['validate_callback'] ) && ! is_callable( $options['validate_callback'] ) ) {
+			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The validate_callback must be a valid callback.' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			return false;
 		}
 
 		return true;
@@ -547,6 +592,12 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function sanitize_field( $field_key, $field_value ) {
+		$field = $this->additional_fields[ $field_key ];
+
+		if ( $field ) {
+			$field_value = call_user_func( $field['sanitize_callback'], $field_value, $field );
+		}
+
 		try {
 			/**
 			 * Allow custom sanitization of an additional field.
@@ -586,6 +637,16 @@ class CheckoutFields {
 	 */
 	public function validate_field( $field_key, $field_value ) {
 		$errors = new WP_Error();
+		$field  = $this->additional_fields[ $field_key ];
+
+		if ( $field ) {
+			$validation = call_user_func( $field['validate_callback'], $field_value, $field );
+
+			if ( is_wp_error( $validation ) ) {
+				$errors->merge_from( $validation );
+			}
+		}
+
 		try {
 			/**
 			 * Pass an error object to allow validation of an additional field.
