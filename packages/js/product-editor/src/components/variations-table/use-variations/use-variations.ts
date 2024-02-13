@@ -255,8 +255,12 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		return Boolean( filters.length );
 	}
 
-	function clearFilters() {
+	async function clearFilters() {
 		setFilters( [] );
+
+		return getCurrentVariationsPage( {
+			product_id: productId,
+		} );
 	}
 
 	// Updating
@@ -340,6 +344,9 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
 
+		selectedVariationsRef.current = {};
+		setSelectedCount( 0 );
+
 		let currentPage = 1;
 		const offset = 50;
 
@@ -371,14 +378,18 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			currentPage++;
 
-			result.push( ...( response?.update ?? [] ) );
+			const updatedVariations = response?.update ?? [];
+			result.push( ...updatedVariations );
 
-			for ( const variation of subset ) {
+			for ( const variation of updatedVariations ) {
 				await coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
 					variation.id,
 				] );
+
+				selectedVariationsRef.current[ variation.id ] = variation;
+				setSelectedCount( ( current ) => current + 1 );
 			}
 		}
 
@@ -400,6 +411,9 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 		const { batchUpdateProductVariations, invalidateResolutionForStore } =
 			dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME );
+
+		selectedVariationsRef.current = {};
+		setSelectedCount( 0 );
 
 		let currentPage = 1;
 		const offset = 50;
@@ -432,16 +446,18 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 			currentPage++;
 
+			const deletedVariations = response?.delete ?? [];
 			result.push( ...( response?.delete ?? [] ) );
 
-			for ( const variation of subset ) {
+			for ( const variation of deletedVariations ) {
 				await coreInvalidateResolution( 'getEntityRecord', [
 					'postType',
 					'product_variation',
 					variation.id,
 				] );
 
-				onSelect( variation as never )( false );
+				delete selectedVariationsRef.current[ variation.id ];
+				setSelectedCount( ( current ) => current - 1 );
 			}
 		}
 
@@ -473,7 +489,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	useEffect( () => {
 		if ( isGenerating ) {
-			clearFilters();
+			setFilters( [] );
 			onClearSelection();
 		}
 

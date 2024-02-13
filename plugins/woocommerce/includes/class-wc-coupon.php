@@ -82,12 +82,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
-	 * Sort
+	 * Sorting.
+	 *
+	 * Used by `get_coupons_from_cart` to sort coupons.
 	 *
 	 * @var int
 	 */
-
-	public $sort;
+	public $sort = 0;
 
 	/**
 	 * Coupon constructor. Loads coupon data.

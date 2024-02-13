@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce
  * Plugin URI: https://woo.com/
- * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
+ * Description: An ecommerce toolkit that helps you sell anything. Beautifully.
  * Version: 8.7.0-dev
  * Author: Automattic
  * Author URI: https://woo.com
