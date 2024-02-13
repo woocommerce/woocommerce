@@ -1,29 +1,8 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures' );
 
 baseTest.describe( 'Products > Delete Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-				axiosConfig: {
-					// allow 404s, so we can check if the product was deleted without try/catch
-					validateStatus( status ) {
-						return (
-							( status >= 200 && status < 300 ) || status === 404
-						);
-					},
-				},
-			} );
-
-			await use( api );
-		},
-
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,

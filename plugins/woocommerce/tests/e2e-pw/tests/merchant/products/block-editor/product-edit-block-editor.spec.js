@@ -1,25 +1,8 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
-const {
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
+const { test: baseTest } = require( './block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures' );
 baseTest.describe( 'Products > Edit Product', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-
-			await use( api );
-		},
-
-		product: async ( { page, api }, use ) => {
+		product: async ( { api }, use ) => {
 			let product;
 
 			await api
@@ -35,14 +18,27 @@ baseTest.describe( 'Products > Edit Product', () => {
 					product = response.data;
 				} );
 
-			await test.step( 'ensure block product editor is enabled', async () => {
-				await toggleBlockProductEditor( 'enable', page );
-			} );
-
 			await use( product );
 
 			// Cleanup
 			await api.delete( `products/${ product.id }`, { force: true } );
+		},
+		page: async ( { page, api }, use ) => {
+			await api.put(
+				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
+				{
+					value: 'yes',
+				}
+			);
+
+			await use( page );
+
+			await api.put(
+				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
+				{
+					value: 'no',
+				}
+			);
 		},
 	} );
 
