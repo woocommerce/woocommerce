@@ -592,13 +592,13 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function sanitize_field( $field_key, $field_value ) {
-		$field = $this->additional_fields[ $field_key ];
-
-		if ( $field ) {
-			$field_value = call_user_func( $field['sanitize_callback'], $field_value, $field );
-		}
-
 		try {
+			$field = $this->additional_fields[ $field_key ] ?? null;
+
+			if ( $field ) {
+				$field_value = call_user_func( $field['sanitize_callback'], $field_value, $field );
+			}
+
 			/**
 			 * Allow custom sanitization of an additional field.
 			 *
@@ -614,8 +614,7 @@ class CheckoutFields {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error(
 				sprintf(
-					'The filter %s encountered an error. The field %s will not have any custom sanitization applied to it. %s',
-					'woocommerce_blocks_sanitize_additional_field',
+					'Field sanitization for %s encountered an error. %s',
 					esc_html( $field_key ),
 					esc_html( $e->getMessage() )
 				),
@@ -637,17 +636,18 @@ class CheckoutFields {
 	 */
 	public function validate_field( $field_key, $field_value ) {
 		$errors = new WP_Error();
-		$field  = $this->additional_fields[ $field_key ];
-
-		if ( $field ) {
-			$validation = call_user_func( $field['validate_callback'], $field_value, $field );
-
-			if ( is_wp_error( $validation ) ) {
-				$errors->merge_from( $validation );
-			}
-		}
 
 		try {
+			$field = $this->additional_fields[ $field_key ] ?? null;
+
+			if ( $field ) {
+				$validation = call_user_func( $field['validate_callback'], $field_value, $field );
+
+				if ( is_wp_error( $validation ) ) {
+					$errors->merge_from( $validation );
+				}
+			}
+
 			/**
 			 * Pass an error object to allow validation of an additional field.
 			 *
@@ -665,8 +665,7 @@ class CheckoutFields {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error(
 				sprintf(
-					'The action %s encountered an error. The field %s may not have any custom validation applied to it. %s',
-					'woocommerce_blocks_validate_additional_field',
+					'Field validation for %s encountered an error. %s',
 					esc_html( $field_key ),
 					esc_html( $e->getMessage() )
 				),
