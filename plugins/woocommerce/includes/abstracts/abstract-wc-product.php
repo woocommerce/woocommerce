@@ -139,6 +139,27 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 	}
 
+	public function __call( $name, $arguments ) {
+		$traits = WC()->product_traits()->get_all_traits();
+		foreach ( $traits as $trait ) {
+			$trait_instance = new $trait( $this );
+
+			if ( ! method_exists( $trait_instance, $name ) ) {
+				continue;
+			}
+
+			return call_user_func_array(
+				array(
+					$trait_instance,
+					$name
+				),
+				$arguments
+			);
+		}
+    }
+
+
+
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 *
@@ -616,50 +637,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_shipping_class_id( $context = 'view' ) {
 		return $this->get_prop( 'shipping_class_id', $context );
-	}
-
-	/**
-	 * Get downloads.
-	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return array
-	 */
-	public function get_downloads( $context = 'view' ) {
-		return $this->get_prop( 'downloads', $context );
-	}
-
-	/**
-	 * Get download expiry.
-	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int
-	 */
-	public function get_download_expiry( $context = 'view' ) {
-		return $this->get_prop( 'download_expiry', $context );
-	}
-
-	/**
-	 * Get downloadable.
-	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return bool
-	 */
-	public function get_downloadable( $context = 'view' ) {
-		return $this->get_prop( 'downloadable', $context );
-	}
-
-	/**
-	 * Get download limit.
-	 *
-	 * @since  3.0.0
-	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return int
-	 */
-	public function get_download_limit( $context = 'view' ) {
-		return $this->get_prop( 'download_limit', $context );
 	}
 
 	/**
@@ -1202,126 +1179,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
-	 * Set if the product is downloadable.
-	 *
-	 * @since 3.0.0
-	 * @param bool|string $downloadable Whether product is downloadable or not.
-	 */
-	public function set_downloadable( $downloadable ) {
-		$this->set_prop( 'downloadable', wc_string_to_bool( $downloadable ) );
-	}
-
-	/**
-	 * Set downloads.
-	 *
-	 * @throws WC_Data_Exception If an error relating to one of the downloads is encountered.
-	 *
-	 * @param array $downloads_array Array of WC_Product_Download objects or arrays.
-	 *
-	 * @since 3.0.0
-	 */
-	public function set_downloads( $downloads_array ) {
-		// When the object is first hydrated, only the previously persisted downloads will be passed in.
-		$existing_downloads = $this->get_object_read() ? (array) $this->get_prop( 'downloads' ) : $downloads_array;
-		$downloads          = array();
-		$errors             = array();
-
-		$downloads_array    = $this->build_downloads_map( $downloads_array );
-		$existing_downloads = $this->build_downloads_map( $existing_downloads );
-
-		foreach ( $downloads_array as $download ) {
-			$download_id = $download->get_id();
-			$is_new      = ! isset( $existing_downloads[ $download_id ] );
-			$has_changed = ! $is_new && $existing_downloads[ $download_id ]->get_file() !== $downloads_array[ $download_id ]->get_file();
-
-			try {
-				$download->check_is_valid( $this->get_object_read() );
-				$downloads[ $download_id ] = $download;
-			} catch ( Exception $e ) {
-				// We only add error messages for newly added downloads (let's not overwhelm the user if there are
-				// multiple existing files which are problematic).
-				if ( $is_new || $has_changed ) {
-					$errors[] = $e->getMessage();
-				}
-
-				// If the problem is with an existing download, disable it.
-				if ( ! $is_new ) {
-					$download->set_enabled( false );
-					$downloads[ $download_id ] = $download;
-				}
-			}
-		}
-
-		$this->set_prop( 'downloads', $downloads );
-
-		if ( $errors && $this->get_object_read() ) {
-			$this->error( 'product_invalid_download', $errors[0] );
-		}
-	}
-
-	/**
-	 * Takes an array of downloadable file representations and converts it into an array of
-	 * WC_Product_Download objects, indexed by download ID.
-	 *
-	 * @param array[]|WC_Product_Download[] $downloads Download data to be re-mapped.
-	 *
-	 * @return WC_Product_Download[]
-	 */
-	private function build_downloads_map( array $downloads ): array {
-		$downloads_map = array();
-
-		foreach ( $downloads as $download_data ) {
-			// If the item is already a WC_Product_Download we can add it to the map and move on.
-			if ( is_a( $download_data, 'WC_Product_Download' ) ) {
-				$downloads_map[ $download_data->get_id() ] = $download_data;
-				continue;
-			}
-
-			// If the item is not an array, there is nothing else we can do (bad data).
-			if ( ! is_array( $download_data ) ) {
-				continue;
-			}
-
-			// Otherwise, transform the array to a WC_Product_Download and add to the map.
-			$download_object = new WC_Product_Download();
-
-			// If we don't have a previous hash, generate UUID for download.
-			if ( empty( $download_data['download_id'] ) ) {
-				$download_data['download_id'] = wp_generate_uuid4();
-			}
-
-			$download_object->set_id( $download_data['download_id'] );
-			$download_object->set_name( $download_data['name'] );
-			$download_object->set_file( $download_data['file'] );
-			$download_object->set_enabled( isset( $download_data['enabled'] ) ? $download_data['enabled'] : true );
-
-			$downloads_map[ $download_object->get_id() ] = $download_object;
-		}
-
-		return $downloads_map;
-	}
-
-	/**
-	 * Set download limit.
-	 *
-	 * @since 3.0.0
-	 * @param int|string $download_limit Product download limit.
-	 */
-	public function set_download_limit( $download_limit ) {
-		$this->set_prop( 'download_limit', -1 === (int) $download_limit || '' === $download_limit ? -1 : absint( $download_limit ) );
-	}
-
-	/**
-	 * Set download expiry.
-	 *
-	 * @since 3.0.0
-	 * @param int|string $download_expiry Product download expiry.
-	 */
-	public function set_download_expiry( $download_expiry ) {
-		$this->set_prop( 'download_expiry', -1 === (int) $download_expiry || '' === $download_expiry ? -1 : absint( $download_expiry ) );
-	}
-
-	/**
 	 * Set gallery attachment ids.
 	 *
 	 * @since 3.0.0
@@ -1538,15 +1395,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function is_type( $type ) {
 		return ( $this->get_type() === $type || ( is_array( $type ) && in_array( $this->get_type(), $type, true ) ) );
-	}
-
-	/**
-	 * Checks if a product is downloadable.
-	 *
-	 * @return bool
-	 */
-	public function is_downloadable() {
-		return apply_filters( 'woocommerce_is_downloadable', true === $this->get_downloadable(), $this );
 	}
 
 	/**
@@ -1780,6 +1628,40 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get this products traits.
+	 *
+	 * @return array
+	 */
+	public function get_traits() {
+		$all_traits = WC()->product_traits()->get_product_traits();
+		$traits     = array();
+
+		foreach ( $all_traits as $trait ) {
+			if ( $this->has_trait( $trait->get_slug() ) ) {
+				$traits[] = $trait->get_slug();
+			}
+		}
+
+		return $traits;
+	}
+
+	/**
+	 * Check if the product has a trait.
+	 *
+	 * @param string  $trait_slug Trait slug.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 */
+	public function has_trait( $trait_slug, $context = 'view' ) {
+		$trait = WC()->product_traits()->get_trait( $trait_slug );
+
+		if ( ! $trait ) {
+			return false;
+		}
+		
+		return $this->get_prop( $trait::get_product_property(), $context );
+	}
+
+	/**
 	 * Does a child have dimensions?
 	 *
 	 * @since  3.0.0
@@ -1797,18 +1679,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function child_has_weight() {
 		return false;
-	}
-
-	/**
-	 * Check if downloadable product has a file attached.
-	 *
-	 * @since 1.6.2
-	 *
-	 * @param  string $download_id file identifier.
-	 * @return bool Whether downloadable product has a file attached.
-	 */
-	public function has_file( $download_id = '' ) {
-		return $this->is_downloadable() && $this->get_file( $download_id );
 	}
 
 	/**
@@ -2052,40 +1922,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} else {
 			return 0;
 		}
-	}
-
-	/**
-	 * Get a file by $download_id.
-	 *
-	 * @param  string $download_id file identifier.
-	 * @return array|false if not found
-	 */
-	public function get_file( $download_id = '' ) {
-		$files = $this->get_downloads();
-
-		if ( '' === $download_id ) {
-			$file = count( $files ) ? current( $files ) : false;
-		} elseif ( isset( $files[ $download_id ] ) ) {
-			$file = $files[ $download_id ];
-		} else {
-			$file = false;
-		}
-
-		return apply_filters( 'woocommerce_product_file', $file, $this, $download_id );
-	}
-
-	/**
-	 * Get file download path identified by $download_id.
-	 *
-	 * @param  string $download_id file identifier.
-	 * @return string
-	 */
-	public function get_file_download_path( $download_id ) {
-		$files     = $this->get_downloads();
-		$file_path = isset( $files[ $download_id ] ) ? $files[ $download_id ]->get_file() : '';
-
-		// allow overriding based on the particular file being requested.
-		return apply_filters( 'woocommerce_product_file_download_path', $file_path, $this, $download_id );
 	}
 
 	/**
