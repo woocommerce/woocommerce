@@ -57,7 +57,7 @@ export const PreloadFonts = () => {
 			installedFontFamilies: getEntityRecords(
 				'postType',
 				'wp_font_family',
-				{ _embed: true }
+				{ _embed: true, per_page: -1 }
 			) as Array< {
 				id: number;
 				font_family_settings: FontFamily;
@@ -94,11 +94,10 @@ export const PreloadFonts = () => {
 			return;
 		}
 
-		const { custom, theme } = enabledFontFamilies;
+		const { custom } = enabledFontFamilies;
 
 		const enabledFontSlugs = [
 			...( custom ? custom.map( ( font ) => font.slug ) : [] ),
-			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
 		const fontFamiliesToEnable = parsedInstalledFontFamilies.reduce(

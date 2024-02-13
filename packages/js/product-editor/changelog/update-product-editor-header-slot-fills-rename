@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Export __experimentalVariationQUickUpdateMenuItem, __experimentalPluginHeaderItemModal, __experimentalPluginHeaderItemPopover

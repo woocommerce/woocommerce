@@ -115,7 +115,7 @@ export const fetchIntroData = async () => {
 const fetchIsFontLibraryAvailable = async () => {
 	try {
 		await apiFetch( {
-			path: '/wp/v2/font-collections',
+			path: '/wp/v2/font-collections?_fields=slug',
 			method: 'GET',
 		} );
 

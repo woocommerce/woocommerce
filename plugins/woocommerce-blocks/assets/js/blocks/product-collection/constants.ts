@@ -71,6 +71,7 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		columns: 3,
 		shrinkColumns: true,
 	},
+	queryContextIncludes: [ 'collection', 'id' ],
 };
 
 export const getDefaultQuery = (
