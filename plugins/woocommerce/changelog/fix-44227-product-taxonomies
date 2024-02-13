@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure proper handling of product-related taxonomies in the Product Collection block
