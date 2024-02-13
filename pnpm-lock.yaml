@@ -2837,6 +2837,8 @@ importers:
         specifier: 0.14.3
         version: 0.14.3
 
+  packages/php/remote-specs-validation: {}
+
   plugins/woo-ai:
     dependencies:
       '@automattic/tour-kit':
