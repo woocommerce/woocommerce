@@ -994,7 +994,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>
+	 * <order_id>
 	 * :The ID of the order.
 	 *
 	 * [--format=<format>]
@@ -1070,8 +1070,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>
-	 * :The ID of the order.
+	 * <order_id>
+	 * : The ID of the order.
 	 *
 	 * [--from=<hpos|posts>]
 	 * : Source datastore. Defaults to the currently active datastore.
