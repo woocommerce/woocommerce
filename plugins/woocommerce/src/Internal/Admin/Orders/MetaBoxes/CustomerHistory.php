@@ -47,19 +47,9 @@ class CustomerHistory {
 	 */
 	private function get_customer_history( $customer_report_id ): ?array {
 
-		/*
-		 * The customers argument is the only one necessary to find the customer history.
-		 * But for some reason, the order_before and order_after arguments have defaults that change the results.
-		 * The other arguments are necessary to match the cache key in Reports\Customers\DataStore::get_data().
-		 */
 		$args = array(
-			'match'        => 'all',
-			'searchby'     => 'name',
 			'customers'    => array( $customer_report_id ),
-
-			'per_page'     => 25,
-			'order'        => 'desc',
-			'orderby'      => 'orders_count',
+			// If unset, these params have default values that affect the results.
 			'order_after'  => null,
 			'order_before' => null,
 		);
