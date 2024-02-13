@@ -4,6 +4,8 @@
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { useCallback } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
@@ -83,14 +85,17 @@ const useSource = (
 
 	const [ value, updateValue ] = useEntityProp( kind, name, prop, id );
 
-	function updateValueHandler( nextEntityPropValue: string ) {
-		// Ensure the value is a string.
-		if ( typeof nextEntityPropValue !== 'string' ) {
-			return;
-		}
+	const updateValueHandler = useCallback(
+		( nextEntityPropValue: string ) => {
+			// Ensure the value is a string.
+			if ( typeof nextEntityPropValue !== 'string' ) {
+				return;
+			}
 
-		updateValue( nextEntityPropValue );
-	}
+			updateValue( nextEntityPropValue );
+		},
+		[ updateValue ]
+	);
 
 	return {
 		placeholder: null,

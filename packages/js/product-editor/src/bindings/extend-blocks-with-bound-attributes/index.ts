@@ -6,7 +6,7 @@ import type { BlockConfiguration } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { isBlockAllowed } from '..';
-import withBlockBindingSupport from './core-block-binding-suopport';
+import withBlockBindingSupport from './core-block-binding-support';
 
 /**
  * Extend the block settings with the bound attributes.
