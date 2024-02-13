@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add empty state when filtering variations by attribute terms and the response is empty

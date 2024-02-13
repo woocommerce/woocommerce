@@ -65,4 +65,4 @@ To delete a product (e.g., product ID 123):
 wp wc product delete 123 --force
 ```
 
-For a complete list of WC-CLI commands, check out our [WC-CLI commands](./docs/wc-cli-commands) documentation
+For a complete list of WC-CLI commands, check out our [WC-CLI commands](./wc-cli-commands.md) documentation

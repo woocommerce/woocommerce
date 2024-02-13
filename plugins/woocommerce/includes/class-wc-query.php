@@ -554,7 +554,7 @@ class WC_Query {
 	 */
 	private function product_query_post_clauses( $args, $wp_query ) {
 		$args = $this->price_filter_post_clauses( $args, $wp_query );
-		$args = $this->filterer->filter_by_attribute_post_clauses( $args, $wp_query, $this->get_layered_nav_chosen_attributes() );
+		$args = $this->filterer->filter_by_attribute_post_clauses( $args, $wp_query, self::get_layered_nav_chosen_attributes() );
 
 		return $args;
 	}
@@ -790,7 +790,7 @@ class WC_Query {
 
 		if ( $main_query && ! $this->filterer->filtering_via_lookup_table_is_active() ) {
 			// Layered nav filters on terms.
-			foreach ( $this->get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
+			foreach ( self::get_layered_nav_chosen_attributes() as $taxonomy => $data ) {
 				$tax_query[] = array(
 					'taxonomy'         => $taxonomy,
 					'field'            => 'slug',

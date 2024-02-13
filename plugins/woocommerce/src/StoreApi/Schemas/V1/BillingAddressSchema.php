@@ -70,7 +70,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 */
 	public function validate_callback( $address, $request, $param ) {
 		$errors  = parent::validate_callback( $address, $request, $param );
-		$address = $this->sanitize_callback( $address, $request, $param );
+		$address = (array) $address;
 		$errors  = is_wp_error( $errors ) ? $errors : new \WP_Error();
 
 		if ( ! empty( $address['email'] ) && ! is_email( $address['email'] ) ) {

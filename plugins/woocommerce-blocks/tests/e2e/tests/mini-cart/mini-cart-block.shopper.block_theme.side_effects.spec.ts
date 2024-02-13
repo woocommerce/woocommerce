@@ -7,7 +7,6 @@ import { cli } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
-import { openMiniCart } from './utils';
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
 test.describe( 'Shopper → Translations', () => {
