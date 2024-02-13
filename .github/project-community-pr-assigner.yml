@@ -95,9 +95,3 @@
 
 "tools/**/*":
   - team: vortex
-
-'**/composer.json':
-  - team: vortex
-
-'**/package.json':
-  - team: vortex
