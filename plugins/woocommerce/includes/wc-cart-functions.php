@@ -190,9 +190,9 @@ function wc_clear_cart_after_payment() {
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
 			/**
 			 * Allows the list of order statuses that are considered pre-payment and therefore don't trigger the emptying of the cart to be filtered.
-			 * 
+			 *
 			 * Useful for appropriately handling custom order statuses.
-			 * 
+			 *
 			 * @since 8.6.1
 			 * @param array $statuses A list of order statuses that are considered pre-payment.
 			 * @return array The filtered list of ordered statuses.
