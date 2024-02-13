@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
+import { store as editSiteStore } from '@wordpress/edit-site';
 import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
@@ -42,8 +43,9 @@ export function getDefaultValueOfInheritQueryFromTemplate(): boolean {
 		'woocommerce/woocommerce//product-search-results',
 	];
 
-	const editSiteStore = select( 'core/edit-site' );
-	const currentTemplateId = editSiteStore?.getEditedPostId() as string;
+	const currentTemplateId = select(
+		editSiteStore
+	).getEditedPostId() as string;
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
