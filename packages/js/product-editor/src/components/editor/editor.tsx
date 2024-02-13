@@ -95,7 +95,7 @@ export function Editor( {
 										isPrepublishPanelOpen && (
 											<PrepublishPanel
 												productType={ productType }
-												productId={ product.id }
+												productId={ productId }
 											/>
 										)
 									}

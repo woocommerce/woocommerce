@@ -79,20 +79,6 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
-	const sidebarWidth = useAdminSidebarWidth();
-
-	useEffect( () => {
-		document
-			.querySelectorAll( '.interface-interface-skeleton__header' )
-			.forEach( ( el ) => {
-				if ( ( el as HTMLElement ).style ) {
-					( el as HTMLElement ).style.width =
-						'calc(100% - ' + sidebarWidth + 'px)';
-					( el as HTMLElement ).style.left = sidebarWidth + 'px';
-				}
-			} );
-	}, [ sidebarWidth ] );
-
 	if ( isEditorLoading ) {
 		return <LoadingState />;
 	}
