@@ -11,13 +11,7 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { useResizeObserver, useViewportMatch } from '@wordpress/compose';
-import {
-	useCallback,
-	useContext,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useContext, useMemo, useRef, useState } from '@wordpress/element';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
