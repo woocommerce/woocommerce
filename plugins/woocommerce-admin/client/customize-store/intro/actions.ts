@@ -168,9 +168,9 @@ export const assignFlags = assign<
 
 		return window.parent.__wcCustomizeStore.activeThemeHasMods;
 	},
-	isFontLibraryAvailable: ( context ) => {
+	isFontLibraryAvailable: () => {
 		if ( ! isIframe( window ) ) {
-			return context.isFontLibraryAvailable;
+			return window.__wcCustomizeStore.isFontLibraryAvailable;
 		}
 		const isFontLibraryAvailable =
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;

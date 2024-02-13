@@ -1,7 +1,16 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
-".github/*":
+"*":
   - team: vortex
+
+".github/**/*":
+  - team: vortex
+
+"bin/*":
+  - team: vortex
+
+"docs/**/*":
+  - team: developer-advocacy
 
 "packages/js/api/**/*":
   - team: solaris
@@ -82,4 +91,13 @@
   - team: ghidorah
 
 "plugins/woocommerce-beta-tester/**/*":
+  - team: vortex
+
+"tools/**/*":
+  - team: vortex
+
+"**/composer.json":
+  - team: vortex
+
+"**/package.json":
   - team: vortex

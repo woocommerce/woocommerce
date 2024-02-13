@@ -1903,7 +1903,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Display suggestions within WooCommerce',
 						type: 'checkbox',
 						default: 'yes',
-						tip: 'Leave this box unchecked if you do not want to see suggested extensions.',
+						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.',
 						value: 'yes',
 					} ),
 				] )
