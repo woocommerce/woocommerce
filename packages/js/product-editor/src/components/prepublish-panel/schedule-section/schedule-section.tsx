@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { PanelBody } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import {
 	DateSettings,
 	dateI18n,
@@ -18,7 +19,6 @@ import {
 /**
  * Internal dependencies
  */
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ScheduleSectionProps } from './types';
 import {
 	getSiteSettingsTimezoneAbbreviation,
@@ -107,9 +107,11 @@ export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
 }
 
 export function ScheduleSection( { postType }: ScheduleSectionProps ) {
-	const [ date, setDate ] = useProductEntityProp< string >( 'date_created', {
+	const [ editedDate, setDate, date ] = useEntityProp< string >(
+		'postType',
 		postType,
-	} );
+		'date_created'
+	);
 
 	function handlePublishDateTimePickerChange( value: string ) {
 		setDate( value );
@@ -122,12 +124,14 @@ export function ScheduleSection( { postType }: ScheduleSectionProps ) {
 			title={ [
 				__( 'Add:', 'woocommerce' ),
 				<span className="editor-post-publish-panel__link" key="label">
-					{ getScheduleLabel( date ) }
+					{ getScheduleLabel(
+						editedDate === date ? undefined : editedDate
+					) }
 				</span>,
 			] }
 		>
 			<PublishDateTimePicker
-				currentDate={ date }
+				currentDate={ editedDate }
 				onChange={ handlePublishDateTimePickerChange }
 				is12Hour={ isSiteSettingsTime12HourFormatted() }
 			/>

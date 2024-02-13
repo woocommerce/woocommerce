@@ -5,7 +5,6 @@ import type { Product } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { isInTheFuture } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 import { MouseEvent } from 'react';
 
@@ -15,6 +14,7 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
+import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 
 export function usePublish( {
 	productType = 'product',
@@ -35,11 +35,8 @@ export function usePublish( {
 		productType,
 		'id'
 	);
-	const [ editedDateCreated, , dateCreated ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'date_created'
-	);
+
+	const isScheduled = useProductScheduled( productType );
 
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
@@ -146,9 +143,6 @@ export function usePublish( {
 	}
 
 	function getButtonText() {
-		const isScheduled =
-			dateCreated !== editedDateCreated &&
-			isInTheFuture( editedDateCreated );
 		if ( isScheduled ) {
 			return __( 'Schedule', 'woocommerce' );
 		}
