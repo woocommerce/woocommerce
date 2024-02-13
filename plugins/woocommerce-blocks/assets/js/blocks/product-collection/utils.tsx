@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
-import { BlockEditProps } from '@wordpress/blocks';
-import { store as editSiteStore } from '@wordpress/edit-site';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
+import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import type { Block } from '@wordpress/blocks';
 
 /**
@@ -44,7 +44,7 @@ const isInProductArchive = () => {
 	];
 
 	const currentTemplateId = select(
-		editSiteStore
+		'core/edit-site'
 	).getEditedPostId() as string;
 
 	/**
@@ -57,18 +57,19 @@ const isInProductArchive = () => {
 		: false;
 };
 
-const isFirstThatSyncsWithQuery = () => {
-	return true;
+const isFirstBlockThatSyncsWithQuery = () => {
+	const blocks = select( blockEditorStore ).getBlocks() as BlockInstance[];
+	const blockAlreadySyncedWithQuery = blocks.find(
+		( block ) =>
+			block.name === 'woocommerce/product-collection' &&
+			block.attributes?.query?.inherit
+	);
+
+	return ! blockAlreadySyncedWithQuery;
 };
 
-export function getDefaultValueOfInheritQueryFromTemplate(): boolean {
-	const inProductArchive = isInProductArchive();
-
-	if ( inProductArchive ) {
-		return isFirstThatSyncsWithQuery();
-	}
-
-	return false;
+export function getDefaultValueOfInheritQueryFromTemplate() {
+	return isInProductArchive() ? isFirstBlockThatSyncsWithQuery() : false;
 }
 
 /**
