@@ -188,12 +188,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @since 8.5.0
 	 */
 	private function maybe_set_admin_source( WC_Order $order ) {
-		// If ajax request but not from admin, bail.
-		if (
-			wp_doing_ajax() &&
-			isset( $_SERVER['HTTP_REFERER'] ) &&
-			strpos( esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) ), get_admin_url() ) !== 0
-		) {
+
+		// For ajax requests, bail if the referer is not an admin page.
+		$http_referer     = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
+		$referer_is_admin = 0 === strpos( $http_referer, get_admin_url() );
+		if ( ! $referer_is_admin && wp_doing_ajax() ) {
 			return;
 		}
 
