@@ -146,7 +146,10 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const isEditorLoading =
-		! layoutTemplate || ! productTemplate || productId === -1;
+		! layoutTemplate ||
+		// variations don't have a product template
+		( postType !== 'product_variation' && ! productTemplate ) ||
+		productId === -1;
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {
