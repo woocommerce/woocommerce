@@ -607,7 +607,7 @@ class CheckoutFields {
 			 *
 			 * @since 8.7.0
 			 */
-			return apply_filters( 'woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
+			return apply_filters( '__experimental_woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
 
 		} catch ( \Throwable $e ) {
 			// One of the filters errored so skip it. This allows the checkout process to continue.
@@ -657,7 +657,7 @@ class CheckoutFields {
 			 *
 			 * @since 8.7.0
 			 */
-			do_action( 'woocommerce_blocks_validate_additional_field', $errors, $field_key, $field_value );
+			do_action( '__experimental_woocommerce_blocks_validate_additional_field', $errors, $field_key, $field_value );
 
 		} catch ( \Throwable $e ) {
 
@@ -760,7 +760,7 @@ class CheckoutFields {
 			 *
 			 * @since 8.7.0
 			 */
-			do_action( 'woocommerce_blocks_validate_location_' . $location . '_fields', $errors, $fields, $group );
+			do_action( '__experimental_woocommerce_blocks_validate_location_' . $location . '_fields', $errors, $fields, $group );
 
 		} catch ( \Throwable $e ) {
 
