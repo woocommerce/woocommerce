@@ -10,9 +10,10 @@ import {
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
+	EditorLoadingContext,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { useEffect } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
@@ -35,18 +36,42 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
-		registerPlugin( 'wc-admin-more-menu', {
+		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
-			render: () => (
-				<>
-					<WooProductMoreMenuItem>
-						{ ( { onClose }: { onClose: () => void } ) => (
-							<MoreMenuFill onClose={ onClose } />
-						) }
-					</WooProductMoreMenuItem>
-				</>
-			),
+			render: () => {
+				// eslint-disable-next-line react-hooks/rules-of-hooks
+				const isEditorLoading = useContext( EditorLoadingContext );
+
+				if ( isEditorLoading ) {
+					return null;
+				}
+
+				return (
+					<>
+						<WooProductMoreMenuItem>
+							{ ( { onClose }: { onClose: () => void } ) => (
+								<MoreMenuFill onClose={ onClose } />
+							) }
+						</WooProductMoreMenuItem>
+
+						<WooFooterItem>
+							<>
+								<FeedbackBar productType="product" />
+								<ProductMVPFeedbackModalContainer
+									productId={
+										productId
+											? parseInt( productId, 10 )
+											: undefined
+									}
+								/>
+							</>
+						</WooFooterItem>
+
+						<BlockEditorTourWrapper />
+					</>
+				);
+			},
 		} );
 
 		const unregisterBlocks = initBlocks();
@@ -55,7 +80,7 @@ export default function ProductPage() {
 			unregisterPlugin( 'wc-admin-more-menu' );
 			unregisterBlocks();
 		};
-	}, [] );
+	}, [ productId ] );
 
 	useEffect(
 		function trackViewEvents() {
@@ -79,15 +104,6 @@ export default function ProductPage() {
 				product={ product }
 				settings={ productBlockEditorSettings || {} }
 			/>
-			<WooFooterItem>
-				<>
-					<FeedbackBar productType="product" />
-					<ProductMVPFeedbackModalContainer
-						productId={ product?.id }
-					/>
-				</>
-			</WooFooterItem>
-			<BlockEditorTourWrapper />
 		</>
 	);
 }
