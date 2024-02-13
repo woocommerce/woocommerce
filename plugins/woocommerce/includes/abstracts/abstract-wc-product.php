@@ -1780,6 +1780,28 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Get this products traits.
+	 *
+	 * @return array
+	 */
+	public function get_traits() {
+		$all_traits = WC()->product_traits()->get_product_traits();
+		$traits     = array();
+
+		foreach ( $all_traits as $trait ) {
+			if ( $this->has_trait( $trait->get_slug() ) ) {
+				$traits[] = $trait->get_slug();
+			}
+		}
+
+		return $traits;
+	}
+
+	public function has_trait( $trait_slug, $context = 'view' ) {
+		return $this->get_prop( $trait_slug, $context );
+	}
+
+	/**
 	 * Does a child have dimensions?
 	 *
 	 * @since  3.0.0

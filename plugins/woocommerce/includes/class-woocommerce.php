@@ -500,6 +500,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php';
+		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-product-trait.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php';
 		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php';
@@ -1002,6 +1003,15 @@ final class WooCommerce {
 	 */
 	public function payment_gateways() {
 		return WC_Payment_Gateways::instance();
+	}
+
+	/**
+	 * Get traits class.
+	 *
+	 * @return WC_Product_Traits
+	 */
+	public function product_traits() {
+		return WC_Product_Traits::instance();
 	}
 
 	/**
