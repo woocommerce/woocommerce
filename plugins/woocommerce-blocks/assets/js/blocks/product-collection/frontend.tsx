@@ -9,8 +9,14 @@ import {
 	getContext,
 } from '@woocommerce/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 export type ProductCollectionStoreContext = {
 	isPrefetchNextOrPreviousLink: boolean;
+	animation: 'start' | 'finish';
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -63,6 +69,20 @@ function scrollToFirstProductIfNotVisible( wcNavigationId?: string ) {
 }
 
 const productCollectionStore = {
+	state: {
+		get startAnimation() {
+			return (
+				getContext< ProductCollectionStoreContext >().animation ===
+				'start'
+			);
+		},
+		get finishAnimation() {
+			return (
+				getContext< ProductCollectionStoreContext >().animation ===
+				'finish'
+			);
+		},
+	},
 	actions: {
 		*navigate( event: MouseEvent ) {
 			const ctx = getContext< ProductCollectionStoreContext >();
@@ -73,8 +93,18 @@ const productCollectionStore = {
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
+
+				// Don't start animation if it doesn't take long to navigate.
+				const timeout = setTimeout( () => {
+					ctx.animation = 'start';
+				}, 400 );
+
 				yield navigate( ref.href );
 
+				// Clear the timeout if the navigation is fast.
+				clearTimeout( timeout );
+
+				ctx.animation = 'finish';
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
 
 				scrollToFirstProductIfNotVisible( wcNavigationId );
