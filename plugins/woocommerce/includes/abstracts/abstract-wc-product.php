@@ -156,8 +156,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$arguments
 			);
 		}
-
-		throw new BadMethodCallException( "No such method exists: $name" );
     }
 
 
@@ -1647,8 +1645,20 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		return $traits;
 	}
 
+	/**
+	 * Check if the product has a trait.
+	 *
+	 * @param string  $trait_slug Trait slug.
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 */
 	public function has_trait( $trait_slug, $context = 'view' ) {
-		return $this->get_prop( $trait_slug, $context );
+		$trait = WC()->product_traits()->get_trait( $trait_slug );
+
+		if ( ! $trait ) {
+			return false;
+		}
+		
+		return $this->get_prop( $trait::get_product_property(), $context );
 	}
 
 	/**

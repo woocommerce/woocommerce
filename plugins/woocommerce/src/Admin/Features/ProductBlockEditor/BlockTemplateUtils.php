@@ -336,9 +336,12 @@ class BlockTemplateUtils {
 			if ( $trait ) {
 				$incompatible_traits = $trait::get_incompatible_traits();
 				$block['attrs']['_templateBlockHideConditions'] = $block['attrs']['_templateBlockHideConditions'] ?? [];
-				foreach ( $incompatible_traits as $incompatible_trait ) {
+				foreach ( $incompatible_traits as $incompatible_trait_slug ) {
+                    $incompatible_trait = WC()->product_traits()->get_trait( $incompatible_trait_slug );
+                    $property           = $incompatible_trait::get_product_property();
+                    $value              = $incompatible_trait::get_product_property_enabled_value();
 					$block['attrs']['_templateBlockHideConditions'][] = array(
-						'expression' => "editedProduct.{$incompatible_trait} === 'yes'",
+						'expression' => "editedProduct.{$property} === '{$value}'",
 					);
 				}
 			}
