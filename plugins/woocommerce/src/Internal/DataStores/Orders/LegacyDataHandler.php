@@ -267,6 +267,7 @@ class LegacyDataHandler {
 	 * @param int    $order_id      Order ID.
 	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'posts'. Defaults to 'hpos'.
 	 * @return \WC_Order Order instance.
+	 * @throws \Exception When an error occurs.
 	 */
 	public function get_order_from_datastore( int $order_id, string $data_store_id = 'hpos' ) {
 		$data_store = ( 'hpos' === $data_store_id ) ? $this->data_store : $this->data_store->get_cpt_data_store_instance();
@@ -285,8 +286,8 @@ class LegacyDataHandler {
 			throw new \Exception( sprintf( __( '%d is not an order or has an invalid order type.', 'woocommerce' ), $order_id ) );
 		}
 
-		$classname  = $order_type['class_name'];
-		$order      = new $classname();
+		$classname = $order_type['class_name'];
+		$order     = new $classname();
 		$order->set_id( $order_id );
 
 		// Switch datastore if necessary.

@@ -1097,9 +1097,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	public function backfill( array $args = array(), array $assoc_args = array() ) {
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
-		$from         = $assoc_args['from'] ?? '';
-		$to           = $assoc_args['to'] ?? '';
-		$order_id     = absint( $args[0] );
+		$from     = $assoc_args['from'] ?? '';
+		$to       = $assoc_args['to'] ?? '';
+		$order_id = absint( $args[0] );
 
 		if ( ! $order_id ) {
 			WP_CLI::error( __( 'Please provide a valid order ID.', 'woocommerce' ) );
