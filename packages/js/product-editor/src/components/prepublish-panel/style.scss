@@ -1,19 +1,19 @@
-@import './visibility-section/style.scss';
+@import "./visibility-section/style.scss";
 
 .woocommerce-product-publish-panel {
 	bottom: 0;
 	right: 0;
-	left: 0;
 	top: $admin-bar-height-big;
 	overflow: auto;
 	position: fixed;
 	background: $white;
 	transform: translateX(+100%);
 	animation: product-publish-panel__slide-in-animation 0.1s forwards;
+	width: 100%;
 
 	@include break-medium() {
-		left: 72%;
-		width: 27%;
+		left: auto;
+		width: $sidebar-width + $border-width + 6px;
 		@include reduce-motion("animation");
 
 		body.is-fullscreen-mode & {
@@ -24,16 +24,6 @@
 		[role="region"]:focus & {
 			transform: translateX(0%);
 		}
-	}
-
-	@include break-large() {
-		left: auto;
-		width: 25%;
-	}
-
-	@include break-xlarge() {
-		left: auto;
-		width: $sidebar-width + $border-width + 4px;
 	}
 
 	&__header {
