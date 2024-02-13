@@ -200,7 +200,7 @@ class BlockTemplateUtils {
 		$template->content = self::inject_theme_attribute_in_content( $template_content );
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
-		if ( 'archive-product' === $template_file->slug ) {
+		if ( ProductCatalogTemplate::SLUG === $template_file->slug ) {
 			$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
 		}
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
@@ -468,7 +468,7 @@ class BlockTemplateUtils {
 		$array_filter = array_filter(
 			$db_templates,
 			function ( $template ) use ( $template_slug ) {
-				return 'archive-product' === $template->slug;
+				return ProductCatalogTemplate::SLUG === $template->slug;
 			}
 		);
 
@@ -489,7 +489,7 @@ class BlockTemplateUtils {
 		}
 
 		foreach ( $db_templates as $template ) {
-			if ( 'archive-product' === $template->slug ) {
+			if ( ProductCatalogTemplate::SLUG === $template->slug ) {
 				return $template;
 			}
 		}
@@ -509,7 +509,7 @@ class BlockTemplateUtils {
 	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
 		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( 'archive-product' );
+			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
 	}
 
 	/**
