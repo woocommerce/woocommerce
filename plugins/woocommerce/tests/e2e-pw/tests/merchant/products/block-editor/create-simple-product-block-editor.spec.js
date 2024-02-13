@@ -1,15 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
+const { test } = require( './block-editor-fixtures' );
+const { expect } = require( '@playwright/test' );
 
-const {
-	clickOnTab,
-	isBlockProductEditorEnabled,
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
-
-let isNewProductEditorEnabled = false;
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
@@ -24,30 +19,6 @@ test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'General tab', () => {
 	test.describe( 'Simple product form', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
-		test.beforeEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
-		} );
-
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
-		} );
-
 		test( 'renders each block without error', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 			await clickOnTab( 'General', page );
@@ -61,34 +32,11 @@ test.describe( 'General tab', () => {
 
 	test.describe( 'Create product', () => {
 		let productId;
-		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.skip(
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
 		);
-
-		test.beforeEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
-		} );
-
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
-		} );
 
 		test( 'can create a simple product', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -172,9 +120,7 @@ test.describe( 'General tab', () => {
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
-			await page.goto( `/?post_type=product&p=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
+			await page.goto( `/?post_type=product&p=${ productId }` );
 			await expect(
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
@@ -203,7 +149,6 @@ test.describe( 'General tab', () => {
 			await page
 				.locator( `a.remove[data-product_id='${ productId }']` )
 				.click();
-			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page.locator( `a.remove[data-product_id='${ productId }']` )
 			).toBeHidden();

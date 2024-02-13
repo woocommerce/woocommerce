@@ -72,6 +72,12 @@ export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 				const loadedFace = await newFont.load();
 
 				document.fonts.add( loadedFace );
+				const iframeDocument = document.querySelector(
+					'iframe[name="editor-canvas"]'
+				) as HTMLObjectElement | null;
+				if ( iframeDocument ) {
+					iframeDocument.contentDocument?.fonts.add( loadedFace );
+				}
 				if ( onLoad ) {
 					onLoad();
 				}
