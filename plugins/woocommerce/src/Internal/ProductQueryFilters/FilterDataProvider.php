@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
 
+use WC_Cache_Helper;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -55,6 +57,13 @@ class FilterDataProvider {
 			return $pre_filter_data;
 		}
 
+		$transient_key = $this->get_transient_key( $query_vars, 'price' );
+		$cached_data   = $this->get_cache( $transient_key );
+
+		if ( ! empty( $cached_data ) ) {
+			return $cached_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -64,8 +73,9 @@ class FilterDataProvider {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -76,7 +86,11 @@ class FilterDataProvider {
 		WHERE product_id IN ( {$product_query_sql} )
 		";
 
-		return $wpdb->get_row( $price_filter_sql ); // phpcs:ignore
+		$results = $wpdb->get_row( $price_filter_sql ); // phpcs:ignore
+
+		$this->set_cache( $transient_key, $results );
+
+		return $results;
 	}
 
 	/**
@@ -92,6 +106,13 @@ class FilterDataProvider {
 			return $pre_filter_data;
 		}
 
+		$transient_key = $this->get_transient_key( $query_vars, 'stock' );
+		$cached_data   = $this->get_cache( $transient_key );
+
+		if ( ! empty( $cached_data ) ) {
+			return $cached_data;
+		}
+
 		global $wpdb;
 		$stock_status_options = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 
@@ -102,8 +123,9 @@ class FilterDataProvider {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -116,6 +138,8 @@ class FilterDataProvider {
 			$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
 			$stock_status_counts[ $status ] = $result->status_count;
 		}
+
+		$this->set_cache( $transient_key, $stock_status_counts );
 
 		return $stock_status_counts;
 	}
@@ -133,6 +157,13 @@ class FilterDataProvider {
 			return $pre_filter_data;
 		}
 
+		$transient_key = $this->get_transient_key( $query_vars, 'rating' );
+		$cached_data   = $this->get_cache( $transient_key );
+
+		if ( ! empty( $cached_data ) ) {
+			return $cached_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -142,8 +173,9 @@ class FilterDataProvider {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -158,8 +190,11 @@ class FilterDataProvider {
 		";
 
 		$results = $wpdb->get_results( $rating_count_sql ); // phpcs:ignore
+		$results = array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
 
-		return array_map( 'absint', wp_list_pluck( $results, 'product_count', 'rounded_average_rating' ) );
+		$this->set_cache( $transient_key, $results );
+
+		return $results;
 	}
 
 	/**
@@ -176,6 +211,13 @@ class FilterDataProvider {
 			return $pre_filter_data;
 		}
 
+		$transient_key = $this->get_transient_key( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
+		$cached_data   = $this->get_cache( $transient_key );
+
+		if ( ! empty( $cached_data ) ) {
+			return $cached_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -185,8 +227,9 @@ class FilterDataProvider {
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
 		$query                        = new \WP_Query();
-		$result                       = $query->query( $query_vars );
-		$product_query_sql            = $query->request;
+
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
 
 		remove_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
@@ -204,8 +247,11 @@ class FilterDataProvider {
 		";
 
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 
-		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+		$this->set_cache( $transient_key, $results );
+
+		return $results;
 	}
 
 	/**
@@ -252,5 +298,61 @@ class FilterDataProvider {
 		 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
 		 */
 		return apply_filters( 'woocommerce_pre_filter_data', array(), $query_vars, $filter_type, $extra );
+	}
+
+	/**
+	 * Get filter data transient key.
+	 *
+	 * @param array $query_vars   The query arguments to calculate the filter data.
+	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
+	 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
+	 */
+	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
+		return sprintf(
+			'wc_%s_%s',
+			Controller::TRANSIENT_GROUP,
+			md5(
+				wp_json_encode(
+					array(
+						'query_vars'  => $query_vars,
+						'extra'       => $extra,
+						'filter_type' => $filter_type,
+					)
+				)
+			)
+		);
+	}
+
+	/**
+	 * Get cached filter data.
+	 *
+	 * @param string $key Transient key.
+	 */
+	private function get_cache( $key ) {
+		$cache = get_transient( $key );
+
+		if ( empty( $cache['version'] ) || empty( $cache['value'] ) ) {
+			return null;
+		}
+
+		return $cache['value'];
+	}
+
+	/**
+	 * Set the cache with transient version to invalidate all at once when needed.
+	 *
+	 * @param string $key   Transient key.
+	 * @param mix    $value Value to set.
+	 */
+	private function set_cache( $key, $value ) {
+		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
+		$transient_value   = array(
+			'version' => $transient_version,
+			'value'   => $value,
+		);
+
+		$result = set_transient( $key, $transient_value );
+
+		return $result;
 	}
 }

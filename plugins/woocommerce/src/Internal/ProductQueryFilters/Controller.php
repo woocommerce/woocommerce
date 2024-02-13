@@ -7,14 +7,17 @@ namespace Automattic\WooCommerce\Internal\ProductQueryFilters;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use WC_Cache_Helper;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * MainQueryFilters class.
  */
-class MainQueryFilters implements RegisterHooksInterface {
+class Controller implements RegisterHooksInterface {
 	use AccessiblePrivateMethods;
+
+	const TRANSIENT_GROUP = 'filter_data';
 
 	/**
 	 * Instance of FilterClausesGenerator.
@@ -41,6 +44,7 @@ class MainQueryFilters implements RegisterHooksInterface {
 	 */
 	public function register() {
 		self::add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
+		self::add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
 	}
 
 	/**
@@ -67,5 +71,12 @@ class MainQueryFilters implements RegisterHooksInterface {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Invalidate all cache under filter data group.
+	 */
+	private function clear_filter_data_cache() {
+		WC_Cache_Helper::get_transient_version( self::TRANSIENT_GROUP, true );
 	}
 }
