@@ -34,7 +34,7 @@ export function setQueryAttribute(
 	} );
 }
 
-export function getDefaultValueOfInheritQueryFromTemplate(): boolean {
+const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
 		'woocommerce/woocommerce//archive-product',
 		'woocommerce/woocommerce//taxonomy-product_cat',
@@ -52,11 +52,23 @@ export function getDefaultValueOfInheritQueryFromTemplate(): boolean {
 	 * We want inherit value to be true when block is added to ARCHIVE_PRODUCT_TEMPLATES
 	 * and false when added to somewhere else.
 	 */
-	const initialValue = currentTemplateId
+	return currentTemplateId
 		? ARCHIVE_PRODUCT_TEMPLATES.includes( currentTemplateId )
 		: false;
+};
 
-	return initialValue;
+const isFirstThatSyncsWithQuery = () => {
+	return true;
+};
+
+export function getDefaultValueOfInheritQueryFromTemplate(): boolean {
+	const inProductArchive = isInProductArchive();
+
+	if ( inProductArchive ) {
+		return isFirstThatSyncsWithQuery();
+	}
+
+	return false;
 }
 
 /**
