@@ -454,4 +454,45 @@ export class EditorUtils {
 			.first()
 			.click();
 	}
+
+	/**
+	 * Opens a specific Single Product template.
+	 */
+	async openSpecificProductTemplate(
+		productName: string,
+		productSlug: string,
+		createIfDoesntExist = true
+	) {
+		await this.page.goto( '/wp-admin/site-editor.php' );
+		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
+
+		const templateButton = this.page.getByRole( 'button', {
+			name: `Product: ${ productName }`,
+		} );
+
+		// Template can be created only once. Go to template if exists,
+		// otherwise create one.
+		if ( await templateButton.isVisible() ) {
+			await templateButton.click();
+			await this.enterEditMode();
+		} else if ( createIfDoesntExist ) {
+			await this.page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await this.page
+				.getByRole( 'button', { name: 'Single Item: Product' } )
+				.click();
+			await this.page
+				.getByRole( 'option', {
+					name: `${ productName } http://localhost:8889/product/${ productSlug }/`,
+				} )
+				.click();
+			await this.page
+				.getByRole( 'button', {
+					name: 'Skip',
+				} )
+				.click();
+		}
+		await this.closeWelcomeGuideModal();
+	}
 }
