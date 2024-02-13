@@ -49,6 +49,12 @@ class FilterDataProvider {
 	 * @return object
 	 */
 	public function get_filtered_price( $query_vars ) {
+		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'price' );
+
+		if ( ! empty( $pre_filter_data ) ) {
+			return $pre_filter_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -80,6 +86,12 @@ class FilterDataProvider {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( $query_vars ) {
+		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'stock' );
+
+		if ( ! empty( $pre_filter_data ) ) {
+			return $pre_filter_data;
+		}
+
 		global $wpdb;
 		$stock_status_options = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
 
@@ -115,6 +127,12 @@ class FilterDataProvider {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( $query_vars ) {
+		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'rating' );
+
+		if ( ! empty( $pre_filter_data ) ) {
+			return $pre_filter_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -152,6 +170,12 @@ class FilterDataProvider {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( $query_vars, $attribute_to_count ) {
+		$pre_filter_data = $this->pre_get_filter_data( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
+
+		if ( ! empty( $pre_filter_data ) ) {
+			return $pre_filter_data;
+		}
+
 		global $wpdb;
 
 		add_filter( 'posts_clauses', array( $this->filter_clauses_generator, 'add_query_clauses' ), 10, 2 );
@@ -207,5 +231,26 @@ class FilterDataProvider {
             AND postmeta.meta_value = '{$status}'
 			WHERE posts.ID IN ( {$product_query_sql} )
 		";
+	}
+
+	/**
+	 * Get the offload filter data.
+	 *
+	 * @param array $query_vars   The query arguments to calculate the filter data.
+	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
+	 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
+	 */
+	private function pre_get_filter_data( $query_vars, $filter_type, $extra = array() ) {
+		/**
+		 * Allows offloading the filter data.
+		 *
+		 * @hook woocommerce_pre_filter_data
+		 *
+		 * @param array $results      The results for current query.
+		 * @param array $query_vars   The query arguments to calculate the filter data.
+		 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
+		 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
+		 */
+		return apply_filters( 'woocommerce_pre_filter_data', array(), $query_vars, $filter_type, $extra );
 	}
 }
