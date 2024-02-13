@@ -5,8 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
-import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
-import type { Block } from '@wordpress/blocks';
+import type { BlockEditProps, BlockInstance, Block } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
