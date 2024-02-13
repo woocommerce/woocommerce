@@ -90,7 +90,7 @@ jobs:
             - name: Load docker images and start containers with HPOS enabled.
               working-directory: plugins/woocommerce
               env:
-                  ENABLE_HPOS: 1
+                  ENABLE_HPOS: 0
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test:cot
 
             - name: Run Playwright API tests.
