@@ -143,14 +143,10 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	 * @testdox Test attribute count without filter.
 	 */
 	public function test_get_attribute_counts_with_default_query() {
-		$wp_query                = new \WP_Query( array( 'post_type' => 'product' ) );
-		$query_vars              = array_filter( $wp_query->query_vars );
-		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
-
-		$expected_attribute_counts = array();
-		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
-			$expected_attribute_counts[ $term->term_id ] = $term->count;
-		}
+		$wp_query                  = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars                = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts   = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+		$expected_attribute_counts = $this->get_expected_attribute_counts( 'pa_color' );
 
 		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
 	}
@@ -161,17 +157,147 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	public function test_get_attribute_counts_with_max_price() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 		$wp_query->set( 'max_price', 55 );
-		$query_vars              = array_filter( $wp_query->query_vars );
-		$actual_attribute_counts = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
 
-		$expected_attribute_counts = array();
-		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
-			if ( in_array( $term->name, array( 'red', 'green' ), true ) ) {
-				$expected_attribute_counts[ $term->term_id ] = 1;
+		$query_vars                = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts   = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+		$expected_attribute_counts = $this->get_expected_attribute_counts(
+			'pa_color',
+			function( $product_data ) {
+				if ( isset( $product_data['regular_price'] ) && $product_data['regular_price'] <= 55 ) {
+					return true;
+				}
+
+				if ( isset( $product_data['variations'] ) ) {
+					foreach( $product_data['variations'] as $variation_data ) {
+						if ( isset( $variation_data['props']['regular_price'] ) && $variation_data['props']['regular_price'] <= 55 ) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	/**
+	 * @testdox Test attribute count with query_type set to `and`.
+	 */
+	public function test_get_attribute_counts_with_query_type_and() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'filter_color', 'blue-slug,green-slug' );
+		$wp_query->set( 'query_type_color', 'and' );
+
+		$query_vars                = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts   = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+		$expected_attribute_counts = $this->get_expected_attribute_counts(
+			'pa_color',
+			function( $product_data ) {
+				$has_green = false;
+				$has_blue  = false;
+
+				if ( isset( $product_data['variations'] ) ) {
+					foreach( $product_data['variations'] as $variation_data ) {
+						if ( empty( $variation_data['attributes']['pa_color'] ) ) {
+							return false;
+						}
+
+						if ( 'blue' === $variation_data['attributes']['pa_color'] ) {
+							$has_blue = true;
+						}
+
+						if ( 'green' === $variation_data['attributes']['pa_color'] ) {
+							$has_green = true;
+						}
+					}
+				}
+
+				return $has_blue && $has_green;
+			}
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	/**
+	 * @testdox Test attribute count with query_type set to `or`.
+	 */
+	public function test_get_attribute_counts_with_query_type_or() {
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'query_type_color', 'or' );
+
+		/**
+		 * For query type `or`, the selected attributes are unset from
+		 * $query_vars before passed to get_attribute_counts, so we don't set
+		 * them here.
+		 *
+		 * $wp_query->set( 'filter_color', 'blue-slug,green-slug' );
+		 */
+
+		$query_vars                = array_filter( $wp_query->query_vars );
+		$actual_attribute_counts   = (array) $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+		$expected_attribute_counts = $this->get_expected_attribute_counts(
+			'pa_color',
+			function( $product_data ) {
+				if ( isset( $product_data['variations'] ) ) {
+					foreach( $product_data['variations'] as $variation_data ) {
+						if ( empty( $variation_data['attributes']['pa_color'] ) ) {
+							return false;
+						}
+
+						if ( 'blue' === $variation_data['attributes']['pa_color'] ||
+							'green' === $variation_data['attributes']['pa_color']
+						) {
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+	}
+
+	/**
+	 * Get expected attribute count from product data and map them with actual term IDs.
+	 *
+	 * @param string    $attribute_name  WP_Query instance.
+	 * @param callable  $filter_callback Callback passed to filter test products.
+	 */
+	private function get_expected_attribute_counts( $attribute_name, $filter_callback = null ) {
+		$attribute_counts  = array();
+		$_attribute_counts = array();
+
+		if ( $filter_callback ) {
+			$filtered_products_data = array_filter(
+				$this->products_data,
+				$filter_callback
+			);
+		} else {
+			$filtered_products_data = $this->products_data;
+		}
+
+		foreach ( $filtered_products_data as $product_data ) {
+			if ( empty( $product_data['variations'] ) ) {
+				continue;
+			}
+
+			foreach ( $product_data['variations'] as $variation_data ) {
+				$_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] += 1;
 			}
 		}
 
-		$this->assertEqualsCanonicalizing( $expected_attribute_counts, $actual_attribute_counts );
+		foreach ( get_terms( array( 'taxonomy' => 'pa_color' ) ) as $term ) {
+			if ( isset( $_attribute_counts[ $term->name ] ) ) {
+				$attribute_counts[ $term->term_id ] = $_attribute_counts[ $term->name ];
+			}
+		}
+
+		return $attribute_counts;
 	}
 
 	/**

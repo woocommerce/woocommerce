@@ -82,7 +82,6 @@ abstract class AbstractProductQueryFiltersTest extends \WC_Unit_Test_Case {
 				'regular_price' => 40,
 				'stock_status'  => 'instock',
 			),
-			// To keep our test simple, we set the same price for all variations of a product.
 			array(
 				'name'         => 'Product 5',
 				'stock_status' => 'instock',
