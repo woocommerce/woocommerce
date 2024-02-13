@@ -1073,11 +1073,21 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * <order_id>
 	 * : The ID of the order.
 	 *
-	 * [--from=<hpos|posts>]
-	 * : Source datastore. Defaults to the currently active datastore.
+	 * --from=<datastore>
+	 * : Source datastore. Either 'hpos' or 'posts'.
+	 * ---
+	 * options:
+	 *   - hpos
+	 *   - posts
+	 * ---
 	 *
-	 * [--to=<hpos|posts>]
-	 * : Destination datastore. Defaults to the current backup datastore.
+	 * --to=<datastore>
+	 * : Destination datastore. Either 'hpos' or 'posts'.
+	 * ---
+	 * options:
+	 *   - hpos
+	 *   - posts
+	 * ---
 	 *
 	 * @since 8.6.0
 	 *
@@ -1087,9 +1097,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	public function backfill( array $args = array(), array $assoc_args = array() ) {
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
-		$hpos_enabled = $this->synchronizer->custom_orders_table_is_authoritative();
-		$from         = strtolower( trim( $assoc_args['from'] ?? ( $hpos_enabled ? 'hpos' : 'posts' ) ) );
-		$to           = strtolower( trim( $assoc_args['to'] ?? ( $hpos_enabled ? 'posts' : 'hpos' ) ) );
+		$from         = $assoc_args['from'] ?? '';
+		$to           = $assoc_args['to'] ?? '';
 		$order_id     = absint( $args[0] );
 
 		if ( ! $order_id ) {
