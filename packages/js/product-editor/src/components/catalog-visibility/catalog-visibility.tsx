@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, Fragment } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { CheckboxControl } from '@wordpress/components';
 
