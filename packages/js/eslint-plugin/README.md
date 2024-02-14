@@ -6,17 +6,17 @@ This is an [ESLint](https://eslint.org/) plugin including configurations and cus
 
 However, this ruleset does implement the following (which do not conflict with WordPress standards):
 
--   Using typescript eslint parser to allow for eslint Import ([see issue](https://github.com/gajus/eslint-plugin-jsdoc/issues/604#issuecomment-653962767))
--   prettier formatting (using `wp-prettier`)
--   Dependency grouping (External and Internal) for dependencies in JavaScript files
--   No yoda conditionals
--   Radix argument required for `parseInt`.
+- Using typescript eslint parser to allow for eslint Import ([see issue](https://github.com/gajus/eslint-plugin-jsdoc/issues/604#issuecomment-653962767))
+- prettier formatting (using `wp-prettier`)
+- Dependency grouping (External and Internal) for dependencies in JavaScript files
+- No yoda conditionals
+- Radix argument required for `parseInt`.
 
 ## Installation
 
 Install the module
 
-```
+```bash
 pnpm install @woocommerce/eslint-plugin --save-dev
 ```
 

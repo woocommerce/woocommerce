@@ -1,5 +1,4 @@
-Search
-===
+# Search
 
 A search box which autocompletes results while typing, allowing for the user to select an existing object
 (product, order, customer, etc). Currently only products are supported.
@@ -8,10 +7,10 @@ A search box which autocompletes results while typing, allowing for the user to 
 
 ```jsx
 <Search
-	type="products"
-	placeholder="Search for a product"
-	selected={ selected }
-	onChange={ items => setState( { selected: items } ) }
+ type="products"
+ placeholder="Search for a product"
+ selected={ selected }
+ onChange={ items => setState( { selected: items } ) }
 />
 ```
 

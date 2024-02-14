@@ -6,7 +6,7 @@ Extends Wordpress [Dependency Extraction Webpack Plugin](https://github.com/Word
 
 Install the module
 
-```
+```bash
 pnpm install @woocommerce/dependency-extraction-webpack-plugin --save-dev
 ```
 
@@ -19,8 +19,8 @@ Use this as you would [Dependency Extraction Webpack Plugin](https://github.com/
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 
 module.exports = {
-	// …snip
-	plugins: [ new WooCommerceDependencyExtractionWebpackPlugin() ],
+ // …snip
+ plugins: [ new WooCommerceDependencyExtractionWebpackPlugin() ],
 };
 ```
 
@@ -35,24 +35,24 @@ Additional module requests on top of Wordpress [Dependency Extraction Webpack Pl
 | `@woocommerce/settings`        | `wc['wcSettings']`       | `wc-settings`          | |
 | `@woocommerce/*`               | `wc['*']`                | `wc-*`                 | |
 
-#### Options
+### Options
 
 An object can be passed to the constructor to customize the behavior, for example:
 
 ```js
 module.exports = {
-	plugins: [
-		new WooCommerceDependencyExtractionWebpackPlugin( {
-			bundledPackages: [ '@woocommerce/components' ],
-		} ),
-	],
+ plugins: [
+  new WooCommerceDependencyExtractionWebpackPlugin( {
+   bundledPackages: [ '@woocommerce/components' ],
+  } ),
+ ],
 };
 ```
 
-##### `bundledPackages`
+#### `bundledPackages`
 
--   Type: array
--   Default: []
+- Type: array
+- Default: []
 
 A list of potential WooCommerce excluded packages, this will include the excluded package within the bundle (example above).
 
