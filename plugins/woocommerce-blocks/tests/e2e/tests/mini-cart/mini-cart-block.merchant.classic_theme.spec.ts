@@ -16,7 +16,10 @@ const blockData: BlockData = {
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in widget editor', () => {
-		test( 'can be inserted in a widget area', async ( { editorUtils } ) => {
+		test( 'can be inserted in a widget area', async ( {
+			editorUtils,
+			page,
+		} ) => {
 			await editorUtils.openWidgetEditor();
 			await editorUtils.openGlobalBlockInserter();
 
@@ -34,7 +37,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await miniCartButton.click();
 
 			await expect(
-				await editorUtils.getBlockByName( blockData.slug )
+				page.locator( `[data-type="${ blockData.slug }"]` )
 			).toBeVisible();
 		} );
 		test( 'can only be inserted once', async ( { editorUtils } ) => {
