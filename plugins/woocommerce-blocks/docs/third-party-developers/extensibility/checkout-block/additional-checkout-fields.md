@@ -117,7 +117,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
-##### &ast; Example of `sanitize_callback`. This function will remove spaces from the value.
+##### &ast; Example of `sanitize_callback`. This function will remove spaces from the value
 
 ```php
 'sanitize_callback' => function( $field_value ) {
@@ -125,7 +125,7 @@ These options apply to all field types (except in a few circumstances which are 
 },
 ```
 
-##### &ast; Example of `validate_callback`. This function will check if the value is an email.
+##### &ast; Example of `validate_callback`. This function will check if the value is an email
 
 ```php
 'validate_callback' => function( $field_value ) {
@@ -154,7 +154,7 @@ Select fields can also be marked as required. If they are not (i.e. they are opt
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | &ast;see below | No default - this must be provided. |
 | `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
 
-##### &ast;Example of `options` value:
+##### &ast;Example of `options` value
 
 ```php
 [
