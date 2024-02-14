@@ -42,7 +42,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	const type = message.type();
 	if (
 		! OBSERVED_CONSOLE_MESSAGE_TYPES.includes(
-			type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ]
+			type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ]
 		)
 	) {
 		return;
@@ -95,8 +95,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 		return;
 	}
 
-	const logFunction =
-		type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ];
+	const logFunction = type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ];
 
 	// Disable reason: We intentionally bubble up the console message
 	// which, unless the test explicitly anticipates the logging via
@@ -127,8 +126,8 @@ const test = base.extend<
 		requestUtils: RequestUtils;
 	}
 >( {
-	admin: async ( { page, pageUtils }, use ) => {
-		await use( new Admin( { page, pageUtils } ) );
+	admin: async ( { page, pageUtils, editor }, use ) => {
+		await use( new Admin( { page, pageUtils, editor } ) );
 	},
 	editor: async ( { page }, use ) => {
 		await use( new Editor( { page } ) );
