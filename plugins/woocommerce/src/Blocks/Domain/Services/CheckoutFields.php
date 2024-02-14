@@ -464,7 +464,7 @@ class CheckoutFields {
 		$field_data['options'] = $cleaned_options;
 
 		// If the field is not required, inject an empty option at the start.
-		if ( isset( $options['required'] ) && false === $options['required'] && ! in_array( '', $added_values, true ) ) {
+		if ( isset( $field_data['required'] ) && false === $field_data['required'] && ! in_array( '', $added_values, true ) ) {
 			$field_data['options'] = array_merge(
 				array(
 					array(
