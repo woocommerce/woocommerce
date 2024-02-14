@@ -83,5 +83,5 @@
   - .github/**/*
   - bin/**/*
   - tools/**/*
-  - **/composer.json
-  - **/package.json
+  - '**/composer.json'
+  - '**/package.json'

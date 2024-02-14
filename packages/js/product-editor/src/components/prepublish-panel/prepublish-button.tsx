@@ -53,7 +53,10 @@ export function PrepublishButton( {
 	return (
 		<Button
 			onClick={ () => {
-				recordEvent( 'product_prepublish', { source: TRACKS_SOURCE } );
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'view',
+				} );
 				openPrepublishPanel();
 			} }
 			isBusy={ isBusy }
