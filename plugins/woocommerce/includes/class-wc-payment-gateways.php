@@ -346,6 +346,8 @@ All at %6$s
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-payment-method-type-duplicates-finder.php';
 
+		// Currently using the improved version to detect duplicates based on the payment method type from the gateway class.
+		// Feel free to inject WC_Gateway_Duplicates_Finder_Static_List instead to test the static list implementation.
 		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Payment_Method_Type_Duplicates_Finder() );
 		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
 		return $duplicates;
