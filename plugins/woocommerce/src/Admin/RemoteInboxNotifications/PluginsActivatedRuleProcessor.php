@@ -51,11 +51,7 @@ class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
 			if ( ! is_string( $plugin_slug ) ) {
 				$logger = wc_get_logger();
 				$logger->warning(
-					sprintf(
-						// translators: %1$s is the plugin slug.
-						__( 'Plugin slug %1 is not a string.', 'woocommerce' ),
-						$plugin_slug
-					),
+					__( 'Invalid plugin slug provided in the plugins activated rule.', 'woocommerce' ),
 				);
 				return false;
 			}
