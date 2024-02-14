@@ -407,11 +407,13 @@ export class EditorUtils {
 			} ),
 		} );
 		await templateRow.getByRole( 'button', { name: 'Reset' } ).click();
-		await this.page.waitForResponse( ( response ) =>
-			response
-				.url()
-				.includes( '?_wp-find-template' || 'wp/v2/template-part' )
-		);
+		await this.page.waitForResponse( ( response ) => {
+			const responseUrl = response.url();
+			return (
+				responseUrl.includes( 'wp-json/wp/v2/templates' ) ||
+				responseUrl.includes( '?_wp-find-template' )
+			);
+		} );
 	}
 
 	async updatePost() {
