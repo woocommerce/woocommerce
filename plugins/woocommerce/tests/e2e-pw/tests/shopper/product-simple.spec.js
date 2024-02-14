@@ -1,21 +1,31 @@
+/* eslint-disable playwright/no-networkidle */
+/* eslint-disable jest/valid-expect */
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
+const simpleProductSlug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 
 let simpleProductId,
-	simpleProduct1Id,
-	simpleProduct2Id,
+	crossSellProductId,
+	upSellProductId,
 	productCategory1Id,
 	productCategory2Id;
 
 test.describe( 'Single Product Page', () => {
-	const simpleProduct1 = simpleProductName + ' Related';
-	const simpleProduct2 = simpleProductName + ' Upsell';
+	const crossSellProduct = simpleProductName + ' Related';
+	const upSellProduct = simpleProductName + ' Upsell';
 	const productCategoryName1 = 'Hoodies';
 	const productCategoryName2 = 'Jumpers';
-	const productDescription = 'Lorem ipsum dolor sit amet.';
+	const productDescription =
+		'<h2>Custom Heading</h2>' +
+		'<p>This is sample text.</p> </br>' +
+		'<b>This should be bolded</b> </br>' +
+		'<em>This should be italic</em> </br>' +
+		'<blockquote>This should be quoted</blockquote>' +
+		'<ul><li>Test bulletted item</li></ul>' +
+		'<ol><li>Test numbered item</li></ol>';
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -44,7 +54,7 @@ test.describe( 'Single Product Page', () => {
 		// add products
 		await api
 			.post( 'products', {
-				name: simpleProduct1,
+				name: crossSellProduct,
 				type: 'simple',
 				categories: [
 					{
@@ -55,11 +65,11 @@ test.describe( 'Single Product Page', () => {
 				regular_price: productPrice,
 			} )
 			.then( ( response ) => {
-				simpleProduct1Id = response.data.id;
+				crossSellProductId = response.data.id;
 			} );
 		await api
 			.post( 'products', {
-				name: simpleProduct2,
+				name: upSellProduct,
 				type: 'simple',
 				categories: [
 					{
@@ -70,7 +80,7 @@ test.describe( 'Single Product Page', () => {
 				regular_price: productPrice,
 			} )
 			.then( ( response ) => {
-				simpleProduct2Id = response.data.id;
+				upSellProductId = response.data.id;
 			} );
 		await api
 			.post( 'products', {
@@ -83,9 +93,20 @@ test.describe( 'Single Product Page', () => {
 						name: productCategoryName1,
 					},
 				],
+				images: [
+					{
+						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_front.jpg',
+					},
+					{
+						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_2_back.jpg',
+					},
+					{
+						src: 'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_3_front.jpg',
+					},
+				],
 				regular_price: productPrice,
-				related_ids: simpleProduct1Id,
-				upsell_ids: simpleProduct2Id,
+				related_ids: crossSellProductId,
+				upsell_ids: upSellProductId,
 			} )
 			.then( ( response ) => {
 				simpleProductId = response.data.id;
@@ -104,14 +125,8 @@ test.describe( 'Single Product Page', () => {
 			consumerSecret: process.env.CONSUMER_SECRET,
 			version: 'wc/v3',
 		} );
-		await api.delete( `products/${ simpleProductId }`, {
-			force: true,
-		} );
-		await api.delete( `products/${ simpleProduct1Id }`, {
-			force: true,
-		} );
-		await api.delete( `products/${ simpleProduct2Id }`, {
-			force: true,
+		await api.post( 'products/batch', {
+			delete: [ simpleProductId, crossSellProductId, upSellProductId ],
 		} );
 		await api.post( 'products/categories/batch', {
 			delete: [ productCategory1Id, productCategory2Id ],
@@ -121,8 +136,7 @@ test.describe( 'Single Product Page', () => {
 	test( 'should be able to see upsell and related products', async ( {
 		page,
 	} ) => {
-		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-		await page.goto( `product/${ slug }` );
+		await page.goto( `product/${ simpleProductSlug }` );
 
 		await expect( page.locator( '.upsells > h2' ) ).toContainText(
 			'You may also like…'
@@ -134,12 +148,12 @@ test.describe( 'Single Product Page', () => {
 			page.locator(
 				'.upsells > .products > li > a > .woocommerce-loop-product__title'
 			)
-		).toContainText( simpleProduct2 );
+		).toContainText( upSellProduct );
 		await expect(
 			page.locator(
 				'.related > .products > li > a > .woocommerce-loop-product__title'
 			)
-		).toContainText( simpleProduct1 );
+		).toContainText( crossSellProduct );
 	} );
 
 	test( 'should be able to post a review and see it after', async ( {
@@ -150,8 +164,7 @@ test.describe( 'Single Product Page', () => {
 		await page.locator( '#password' ).fill( 'password' );
 		await page.locator( 'text=Log in' ).click();
 
-		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-		await page.goto( `product/${ slug }` );
+		await page.goto( `product/${ simpleProductSlug }` );
 
 		await expect( page.locator( '.reviews_tab' ) ).toContainText(
 			'Reviews (0)'
@@ -171,24 +184,58 @@ test.describe( 'Single Product Page', () => {
 	test( 'should be able to see product description and image', async ( {
 		page,
 	} ) => {
-		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-		await page.goto( `product/${ slug }` );
+		const images = [ 'image-02', 'image-03' ];
 
-		await expect( page.locator( '#tab-description > p' ) ).toContainText(
-			productDescription
-		);
+		await page.goto( `product/${ simpleProductSlug }` );
+		await page.getByRole( 'tab', { name: 'Description' } ).click();
+
 		await expect(
-			page.locator(
-				'.woocommerce-product-gallery__image--placeholder > .wp-post-image'
-			)
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'heading', { name: 'Custom Heading' } )
 		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'paragraph', { name: 'This is sample text.' } )
+		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'strong', { name: 'This should be bolded' } )
+		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'emphasis', { name: 'This should be italic' } )
+		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'blockquote', { name: 'This should be quoted' } )
+		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'listitem', { name: 'Test bulletted item' } )
+		).toBeVisible();
+		await expect(
+			page
+				.getByRole( 'tabpanel' )
+				.filter( 'listitem', { name: 'Test numbered item' } )
+		).toBeVisible();
+		await expect(
+			page
+				.locator( `#product-${ simpleProductId } ol img` )
+				.nth( images.length ),
+			'all gallery images should be visible'
+		).toBeVisible(); // +1 for the featured image
 	} );
 
 	test( 'should be able to add simple products to the cart', async ( {
 		page,
 	} ) => {
-		const slug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
-		await page.goto( `product/${ slug }` );
+		await page.goto( `product/${ simpleProductSlug }` );
 
 		await page.locator( 'input.qty' ).fill( '5' );
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();

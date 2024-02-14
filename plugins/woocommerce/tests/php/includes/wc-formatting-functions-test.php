@@ -16,6 +16,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_sanitize_coupon_code() {
 		$this->assertEquals( 'DUMMYCOUPON', wc_sanitize_coupon_code( 'DUMMYCOUPON' ) );
 		$this->assertEquals( 'a&amp;a', wc_sanitize_coupon_code( 'a&a' ) );
+		$this->assertEquals( "test's", wc_sanitize_coupon_code( "test's" ) );
 	}
 
 	/**

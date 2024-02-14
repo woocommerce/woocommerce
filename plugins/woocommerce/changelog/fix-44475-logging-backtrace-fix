@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure that no undefined index warnings are thrown while parsing the backtrace to determine a log's source

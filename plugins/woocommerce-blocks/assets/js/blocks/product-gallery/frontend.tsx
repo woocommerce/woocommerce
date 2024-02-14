@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { store, getContext as getContextFn } from '@woocommerce/interactivity';
+import {
+	store,
+	getContext as getContextFn,
+	getElement,
+} from '@woocommerce/interactivity';
 import { StorePart } from '@woocommerce/utils';
 
 export interface ProductGalleryContext {
@@ -12,6 +16,7 @@ export interface ProductGalleryContext {
 	dialogVisibleImagesIds: string[];
 	isDialogOpen: boolean;
 	productId: string;
+	elementThatTriggeredDialogOpening: HTMLElement | null;
 }
 
 const getContext = ( ns?: string ) =>
@@ -41,6 +46,11 @@ const closeDialog = ( context: ProductGalleryContext ) => {
 	// Reset the main image.
 	context.selectedImage = context.firstMainImageId;
 	document.body.classList.remove( 'wc-block-product-gallery-modal-open' );
+
+	if ( context.elementThatTriggeredDialogOpening ) {
+		context.elementThatTriggeredDialogOpening?.focus();
+		context.elementThatTriggeredDialogOpening = null;
+	}
 };
 
 const productGallery = {
@@ -70,15 +80,15 @@ const productGallery = {
 			document.body.classList.add(
 				'wc-block-product-gallery-modal-open'
 			);
-			const dialogOverlay = document.querySelector(
-				'.wc-block-product-gallery-dialog__overlay'
+			const dialogPopUp = document.querySelector(
+				'dialog[aria-label="Product gallery"]'
 			);
-			if ( ! dialogOverlay ) {
+			if ( ! dialogPopUp ) {
 				return;
 			}
-			( dialogOverlay as HTMLElement ).focus();
+			( dialogPopUp as HTMLElement ).focus();
 
-			const dialogPreviousButton = dialogOverlay.querySelectorAll(
+			const dialogPreviousButton = dialogPopUp.querySelectorAll(
 				'.wc-block-product-gallery-large-image-next-previous--button'
 			)[ 0 ];
 
@@ -127,6 +137,9 @@ const productGallery = {
 					event.preventDefault();
 				}
 				actions.openDialog();
+				const largeImageElement = getElement()?.ref as HTMLElement;
+				const context = getContext();
+				context.elementThatTriggeredDialogOpening = largeImageElement;
 			}
 		},
 		onViewAllImagesKeyDown: ( event: KeyboardEvent ) => {
@@ -139,6 +152,10 @@ const productGallery = {
 					event.preventDefault();
 				}
 				actions.openDialog();
+				const viewAllImagesElement = getElement()?.ref as HTMLElement;
+				const context = getContext();
+				context.elementThatTriggeredDialogOpening =
+					viewAllImagesElement;
 			}
 		},
 	},
@@ -231,6 +248,57 @@ const productGallery = {
 
 			return () =>
 				document.removeEventListener( 'keydown', handleKeyEvents );
+		},
+		dialogFocusTrap: () => {
+			const dialogPopUp = document.querySelector(
+				'dialog[aria-label="Product gallery"]'
+			) as HTMLElement | null;
+
+			if ( ! dialogPopUp ) {
+				return;
+			}
+
+			const handleKeyEvents = ( event: KeyboardEvent ) => {
+				if ( event.code === 'Tab' ) {
+					const focusableElementsSelectors =
+						'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+					const focusableElements = dialogPopUp.querySelectorAll(
+						focusableElementsSelectors
+					);
+
+					if ( ! focusableElements.length ) {
+						return;
+					}
+
+					const firstFocusableElement =
+						focusableElements[ 0 ] as HTMLElement;
+					const lastFocusableElement = focusableElements[
+						focusableElements.length - 1
+					] as HTMLElement;
+
+					if (
+						! event.shiftKey &&
+						event.target === lastFocusableElement
+					) {
+						event.preventDefault();
+						firstFocusableElement.focus();
+					}
+
+					if (
+						event.shiftKey &&
+						event.target === firstFocusableElement
+					) {
+						event.preventDefault();
+						lastFocusableElement.focus();
+					}
+				}
+			};
+
+			dialogPopUp.addEventListener( 'keydown', handleKeyEvents );
+
+			return () =>
+				dialogPopUp.removeEventListener( 'keydown', handleKeyEvents );
 		},
 	},
 };
