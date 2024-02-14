@@ -257,7 +257,7 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function default_sanitize_callback( $value, $field ) {
-		return wc_clean( $value );
+		return $value;
 	}
 
 	/**
@@ -433,13 +433,6 @@ class CheckoutFields {
 			return false;
 		}
 
-		// Select fields are always required. Log a warning if it's set explicitly as false.
-		$field_data['required'] = true;
-		if ( isset( $options['required'] ) && false === $options['required'] ) {
-			$message = sprintf( 'Registering select fields as optional is not supported. "%s" will be registered as required.', $id );
-			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-		}
-
 		$cleaned_options = array();
 		$added_values    = array();
 
@@ -469,6 +462,20 @@ class CheckoutFields {
 		}
 
 		$field_data['options'] = $cleaned_options;
+
+		// If the field is not required, inject an empty option at the start.
+		if ( isset( $field_data['required'] ) && false === $field_data['required'] && ! in_array( '', $added_values, true ) ) {
+			$field_data['options'] = array_merge(
+				array(
+					array(
+						'value' => '',
+						'label' => '',
+					),
+				),
+				$field_data['options']
+			);
+		}
+
 		return $field_data;
 	}
 
