@@ -114,6 +114,24 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 
 	await page.context().storageState( { path: adminFile } );
 
+	await page.evaluate( () => {
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-site', 'welcomeGuide', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-site', 'welcomeGuideStyles', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-site', 'welcomeGuidePage', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-site', 'welcomeGuideTemplate', false );
+	} );
+
 	await context.close();
 	await browser.close();
 };
