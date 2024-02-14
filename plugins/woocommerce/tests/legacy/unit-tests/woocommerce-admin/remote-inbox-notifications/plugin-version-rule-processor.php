@@ -61,8 +61,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends
 	}
 
 	/**
-	 * Test that the processor does not pass if plugin version does not exist.
-	 *
+	 * Test that the processor does not pass if plugin version does not exist in the data.
 	 * @group fast
 	 */
 	public function test_spec_does_not_pass_if_plugin_version_does_not_exist() {
@@ -87,7 +86,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends
 		);
 
 		$result = $processor->process( $rule, new stdClass() );
-
 		$this->assertEquals( false, $result );
 	}
 

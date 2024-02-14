@@ -16,7 +16,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 	 */
 	public static function setUpBeforeClass(): void {
 		/**
-		 * Create a fake global function wc_calypso_bridge_is_woo_express_plan
+		 * Fake function wc_calypso_bridge_is_woo_express_plan so that we can test the processor.
 		 */
 		function wc_calypso_bridge_is_woo_express_plan() {
 			return apply_filters( 'test_wc_calypso_bridge_is_woo_express_plan', true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -32,16 +32,16 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 	}
 
 	/**
-	 * Get the publish_before rule.
+	 * Get the is_woo_express rule.
 	 *
 	 * @return object The rule.
 	 */
 	private function get_rule() {
 		return json_decode(
 			'{
-          "type": "is_woo_express",
-          "value": true
-        }'
+					"type": "is_woo_express",
+					"value": true
+			}'
 		);
 	}
 
@@ -54,8 +54,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 		add_filter( 'test_wc_calypso_bridge_is_woo_express_plan', '__return_true' );
 
 		$processor = new IsWooExpressRuleProcessor();
-
-		$result = $processor->process( $this->get_rule(), new stdClass() );
+		$result    = $processor->process( $this->get_rule(), new stdClass() );
 
 		$this->assertEquals( true, $result );
 	}
@@ -69,8 +68,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 		add_filter( 'test_wc_calypso_bridge_is_woo_express_plan', '__return_false' );
 
 		$processor = new IsWooExpressRuleProcessor();
-
-		$result = $processor->process( $this->get_rule(), new stdClass() );
+		$result    = $processor->process( $this->get_rule(), new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -80,15 +78,15 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 	 * @group fast
 	 */
 	public function test_invalid_plan_name() {
-		$processor = new IsWooExpressRuleProcessor();
-
 		$rule = (object) array(
 			'type'  => 'is_woo_express',
 			'value' => true,
 			'plan'  => 'invalid_plan',
 		);
 
-		$result = $processor->process( $rule, new stdClass() );
+		$processor = new IsWooExpressRuleProcessor();
+		$result    = $processor->process( $rule, new stdClass() );
+
 		$this->assertEquals( false, $result );
 	}
 

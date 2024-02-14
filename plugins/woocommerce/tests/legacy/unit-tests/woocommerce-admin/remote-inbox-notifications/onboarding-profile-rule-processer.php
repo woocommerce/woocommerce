@@ -20,11 +20,11 @@ class WC_Admin_Tests_RemoteInboxNotifications_OnboardingProfileRuleProcessor ext
 	private function get_rule() {
 		return json_decode(
 			'{
-          "type": "onboarding_profile",
-          "index": "business_choice",
-          "operation": "=",
-          "value": "im_already_selling"
-      }'
+				"type": "onboarding_profile",
+				"index": "business_choice",
+				"operation": "=",
+				"value": "im_already_selling"
+			}'
 		);
 	}
 
@@ -43,8 +43,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_OnboardingProfileRuleProcessor ext
 	 */
 	public function test_spec_fails_if_on_boarding_profile_is_empty() {
 		$processor = new OnboardingProfileRuleProcessor();
-
-		$result = $processor->process( $this->get_rule(), new stdClass() );
+		$result    = $processor->process( $this->get_rule(), new stdClass() );
 
 		$this->assertEquals( false, $result );
 	}
@@ -61,5 +60,19 @@ class WC_Admin_Tests_RemoteInboxNotifications_OnboardingProfileRuleProcessor ext
 		$result    = $processor->process( $this->get_rule(), new stdClass() );
 
 		$this->assertEquals( false, $result );
+	}
+
+	/**
+	 * Tests that the processor returns false if the criteria is not met.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_passes_if_criteria_is_met() {
+		update_option( OnboardingProfile::DATA_OPTION, array( 'business_choice' => 'im_already_selling' ) );
+
+		$processor = new OnboardingProfileRuleProcessor();
+		$result    = $processor->process( $this->get_rule(), new stdClass() );
+
+		$this->assertEquals( true, $result );
 	}
 }

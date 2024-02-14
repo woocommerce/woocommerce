@@ -28,8 +28,8 @@ class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function __construct( $wcadmin_active_for_provider = null ) {
 		$this->wcadmin_active_for_provider = null === $wcadmin_active_for_provider
-		? new WCAdminActiveForProvider()
-		: $wcadmin_active_for_provider;
+			? new WCAdminActiveForProvider()
+			: $wcadmin_active_for_provider;
 	}
 
 	/**

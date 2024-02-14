@@ -12,18 +12,19 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
  * class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationStateRuleProcessor
  */
 class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationStateRuleProcessor extends WC_Unit_Test_Case {
+
 	/**
-	 * Get the publish_before rule.
+	 * Get the base_location_state rule.
 	 *
 	 * @return object The rule.
 	 */
 	private function get_rule() {
 		return json_decode(
 			'{
-          "type": "base_location_state",
-          "operation": "=",
-          "value": "CA"
-      }'
+				"type": "base_location_state",
+				"operation": "=",
+				"value": "CA"
+			}'
 		);
 	}
 
@@ -51,11 +52,11 @@ class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationStateRuleProcessor ext
 		$this->assertEquals( false, $result );
 	}
 	/**
-	 * Tests that the processor returns true if state is the same.
+	 * Tests that the processor returns true if location is the same.
 	 *
 	 * @group fast
 	 */
-	public function test_spec_succeeds() {
+	public function test_spec_passes_if_location_is_the_same() {
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
 		$processor = new BaseLocationStateRuleProcessor();
