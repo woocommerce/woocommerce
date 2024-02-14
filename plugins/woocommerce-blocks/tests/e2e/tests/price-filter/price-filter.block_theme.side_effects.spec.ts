@@ -110,7 +110,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editor.canvas.click( 'body' );
+		await editor.canvas.locator( 'body' ).click();
+		( 'body' );
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
