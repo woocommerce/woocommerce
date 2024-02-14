@@ -223,6 +223,7 @@ export const SidebarNavigationScreenTypography = ( {
 												closeModal();
 											} }
 											variant="primary"
+											disabled={ ! OptInDataSharing }
 										>
 											{ __( 'Opt in', 'woocommerce' ) }
 										</Button>
