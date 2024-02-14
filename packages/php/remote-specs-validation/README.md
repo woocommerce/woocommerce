@@ -1,5 +1,11 @@
 # Remote Specification Validation
 
+## Installation
+
+```
+composer require woocommerce/remote-specs-validation
+```
+
 ## Available Schemas
 
 | Filename  | Endpoint |
@@ -18,4 +24,21 @@ If it's your first time working with JSON Schema, we highly recommend reading <h
 2. Make changes.
 3. Run `./bin/build schemas/:name-of-schema-file`
 4. Bundled schema file will be saved in `bundles` directory.
+
+## Validation Examples
+
+```php
+use Automattic\WooCommerce\Tests\RemoteSpecsValidation\RemoteSpecValidator;
+$validator = RemoteSpecValidator::create_from_bundle( 'remote-inbox-notification' );
+
+$spec = json_decode( file_get_contents(":your-remote-inbox-noficiation-json") );
+
+$result = $validator->validate( $spec );
+
+if ( !$result->is_valid() ) {
+	var_dump( $result->get_errors() );
+} elese {
+	var_dump('everyting looks good!');
+}
+```
 
