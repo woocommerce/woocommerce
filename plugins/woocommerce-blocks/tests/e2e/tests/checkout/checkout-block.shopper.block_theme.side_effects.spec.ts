@@ -479,33 +479,35 @@ test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
-	test.beforeAll( async ( { editor, frontendUtils, admin, editorUtils } ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
-			postType: 'wp_template',
-		} );
-		await editorUtils.enterEditMode();
-		await editor.openDocumentSettingsSidebar();
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				'  [data-type="woocommerce/checkout-shipping-address-block"]'
-		);
+	test.beforeEach(
+		async ( { editor, frontendUtils, admin, editorUtils } ) => {
+			await admin.visitSiteEditor( {
+				postId: 'woocommerce/woocommerce//page-checkout',
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editor.openDocumentSettingsSidebar();
+			await editor.selectBlocks(
+				blockSelectorInEditor +
+					'  [data-type="woocommerce/checkout-shipping-address-block"]'
+			);
 
-		const checkbox = editor.page.getByRole( 'checkbox', {
-			name: 'Company',
-			exact: true,
-		} );
-		await checkbox.check();
-		await expect( checkbox ).toBeChecked();
-		await expect(
-			editor.canvas.locator(
-				'div.wc-block-components-address-form__company'
-			)
-		).toBeVisible();
-		await editorUtils.saveSiteEditorEntities();
-		await frontendUtils.logout();
-		await frontendUtils.emptyCart();
-	} );
+			const checkbox = editor.page.getByRole( 'checkbox', {
+				name: 'Company',
+				exact: true,
+			} );
+			await checkbox.check();
+			await expect( checkbox ).toBeChecked();
+			await expect(
+				editor.canvas.locator(
+					'div.wc-block-components-address-form__company'
+				)
+			).toBeVisible();
+			await editorUtils.saveSiteEditorEntities();
+			await frontendUtils.logout();
+			await frontendUtils.emptyCart();
+		}
+	);
 
 	const shippingTestData = {
 		firstname: 'John',
