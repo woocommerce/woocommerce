@@ -22,7 +22,7 @@
     - [The select input when focused](#the-select-input-when-focused)
 - [Validation and sanitization](#validation-and-sanitization)
     - [Sanitization](#sanitization)
-        - [Using the `_experimental_woocommerce_blocks_validate_additional_field` filter](#using-the-_experimental_woocommerce_blocks_validate_additional_field-filter)
+        - [Using the `_experimental_woocommerce_blocks_sanitize_additional_field` filter](#using-the-_experimental_woocommerce_blocks_sanitize_additional_field-filter)
             - [Example of sanitization](#example-of-sanitization)
     - [Validation](#validation)
         - [Single field validation](#single-field-validation)
@@ -312,9 +312,9 @@ These actions happen in two places:
 
 Sanitization is used to ensure the value of a field is in a specific format. An example is when taking a government ID, you may want to format it so that all letters are capitalized and there are no spaces. At this point, the value should **not** be checked for _validity_. That will come later. This step is only intended to set the field up for validation.
 
-#### Using the `_experimental_woocommerce_blocks_validate_additional_field` filter
+#### Using the `_experimental_woocommerce_blocks_sanitize_additional_field` filter
 
-To run a custom sanitization function for a field use the `_experimental_woocommerce_blocks_validate_additional_field` action.
+To run a custom sanitization function for a field use the `_experimental_woocommerce_blocks_sanitize_additional_field` action.
 
 | Argument     | Type              | Description                                                             |
 |--------------|-------------------|-------------------------------------------------------------------------|
@@ -327,7 +327,7 @@ This example shows how to remove whitespace and capitalize all letters in the ex
 
 ```php
 add_action(
-	'_experimental_woocommerce_blocks_validate_additional_field',
+	'_experimental_woocommerce_blocks_sanitize_additional_field',
 	function ( $field_value, $field_key ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$field_value = str_replace( ' ', '', $field_key );
@@ -477,7 +477,7 @@ add_action(
 		);
 
 		add_action(
-			'_experimental_woocommerce_blocks_validate_additional_field',
+			'_experimental_woocommerce_blocks_sanitize_additional_field',
 			function ( $field_value, $field_key ) {
 				if ( 'namespace/gov-id' === $field_key || 'namespace/confirm-gov-id' === $field_key ) {
 					$field_value = str_replace( ' ', '', $field_key );
