@@ -11,7 +11,7 @@
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
-use WooCommerce\Gateways\WC_Gateway_Duplicates_Standardized_Finder;
+use WooCommerce\Gateways\WC_Payment_Method_Type_Duplicates_Finder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -330,16 +330,17 @@ All at %6$s
 				}
 			}
 		}
-		require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-payment-method.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-payment-method-types.php';
 
 		$ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
-		$ideal_from_stripe_gateway->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		$ideal_from_stripe_gateway->payment_method = new Payment_Method( Payment_Method_Types::IDEAL );
 		$ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
 		$ideal_from_stripe_gateway->id = 'stripe_ideal';
 		$_available_gateways[ $ideal_from_stripe_gateway->id ] = $ideal_from_stripe_gateway;
 
 		$ideal_from_woopayments = new WC_Payment_Gateway_CC();
-		$ideal_from_woopayments->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
+		$ideal_from_woopayments->payment_method = new Payment_Method( Payment_Method_Types::IDEAL );
 		$ideal_from_woopayments->title = 'iDEAL (WooPayments)';
 		$ideal_from_woopayments->id = 'woopayments_ideal';
 		$_available_gateways[ $ideal_from_woopayments->id ] = $ideal_from_woopayments;
@@ -355,7 +356,7 @@ All at %6$s
 		// $_available_gateways[$new->id] = $new; 
 		// $_available_gateways[$new2->id] = $new2;
 
-		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
+		$duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
 
 		// DEMO for normalized version
 		// require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
@@ -385,7 +386,6 @@ All at %6$s
 		// $gateways[$bancontact->id] = $bancontact;
 		// $gateways[$ideal_from_stripe_gateway->id] = $ideal_from_stripe_gateway;
 		// $gateways[$ideal_from_woopayments->id] = $ideal_from_woopayments;
-		
 
 		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $gateways );
 
@@ -398,13 +398,14 @@ All at %6$s
 	 * @param array $enabled_gateways Array of enabled gateways.
 	 * @return array Array of duplicate gateway names.
 	 */
-	public function find_duplicate_enabled_gateways( ) {	
-		$enabled_gateways = $this->get_available_payment_gateways();
+	public function find_duplicate_enabled_gateways($enabled_gateways ) {	
+		// $enabled_gateways = $this->get_available_payment_gateways();
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-detector.php';
 		// require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
-		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-standardized-finder.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-payment-method-type-duplicates-finder.php';
+		update_option( 'woocommerce_duplicate_gateways_detection', 'yes');
 		
-		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Gateway_Duplicates_Standardized_Finder() );
+		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Payment_Method_Type_Duplicates_Finder() );
 		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
 		return $duplicates;
 	}

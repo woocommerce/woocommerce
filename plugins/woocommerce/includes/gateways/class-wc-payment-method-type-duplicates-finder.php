@@ -20,13 +20,17 @@ if ( ! class_exists( 'WC_Importer_Interface', false ) ) {
  *
  * Description of the class goes here.
  */
-class WC_Gateway_Duplicates_Standardized_Finder implements WC_Gateway_Duplicates_Finder {
+class WC_Payment_Method_Type_Duplicates_Finder implements WC_Gateway_Duplicates_Finder {
 
-    public function find_duplicates($gateways) {
-        @$occurrences_array = array_count_values(array_column($gateways, 'standardized_gateway_id'));
-        $duplicates = array_keys(array_filter($occurrences_array, function($value) {
+    public function find_duplicates( $gateways ) {
+        $types = array_map( function( $gateway ) {
+            return isset( $gateway->payment_method ) ? $gateway->payment_method->get_type() : null;
+        }, $gateways );
+
+        $duplicates = array_keys( array_filter( array_count_values( $types ), function( $value ) {
             return $value > 1;
-        }));
+        } ) );
+
         return $duplicates;
     }
 
