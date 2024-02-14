@@ -41,16 +41,6 @@ const ProductCollectionContent = (
 	}, [ queryId, instanceId, setAttributes ] );
 
 	/**
-	 * We need to set a unique ID for each instance of this block.
-	 * This will help us uniquely identify each block.
-	 */
-	useEffect( () => {
-		if ( ! attributes?.id ) {
-			setAttributes( { id: uuidV4() } );
-		}
-	}, [ attributes, setAttributes ] );
-
-	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
 	 */
