@@ -86,7 +86,12 @@ class WC_Admin_Addons {
 		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
 		if ( false === $featured ) {
-			$raw_featured = self::fetch_with_locale( $url );
+			$fetch_options = array(
+				'auth'    => true,
+				'locale'  => true,
+				'country' => true,
+			);
+			$raw_featured = self::fetch( $url, $fetch_options );
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
@@ -1548,11 +1553,14 @@ class WC_Admin_Addons {
 	public static function get_marketplace_promotions() {
 		$transient_name = 'wc_addons_marketplace_promotions';
 		$url = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
-		$locale   = get_user_locale();
-		$promotions = self::get_locale_data_from_transient( $transient_name, $locale );
+		$promotions = get_transient( $transient_name );
 
 		if ( false === $promotions ) {
-			$raw_promotions = self::fetch_with_locale( $url );
+			$fetch_options = array(
+				'auth' => true,
+				'country' => true,
+			);
+			$raw_promotions = self::fetch( $url, $fetch_options );
 
 			if ( is_wp_error( $raw_promotions ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_promotions->get_error_message() );
@@ -1569,7 +1577,7 @@ class WC_Admin_Addons {
 			}
 
 			if ( $promotions ) {
-				self::set_locale_data_in_transient( $transient_name, $promotions, $locale, DAY_IN_SECONDS );
+				set_transient( $transient_name, $promotions, DAY_IN_SECONDS );
 			}
 		}
 
@@ -1580,21 +1588,43 @@ class WC_Admin_Addons {
 	 * Pass locale and country in wp_safe_remote_get request to Woo.com endpoint.
 	 *
 	 * @param string $url
+	 * @param ?array $options     Options for the request. For example, to pass auth token,
+	 *                            locale and country:
+	 *                            array(
+	 *                            'auth' => true,
+	 *                            'locale' => true,
+	 *                            'country' => true,
+	 *                            )
 	 *
 	 * @return array|WP_Error
 	 */
-	private static function fetch_with_locale( $url ) {
+	private static function fetch( $url, $options = array() ) {
 		$headers = array();
-		$auth    = WC_Helper_Options::get( 'auth' );
 
-		if ( ! empty( $auth['access_token'] ) ) {
-			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+		if ( $options['auth'] ) {
+			$auth = WC_Helper_Options::get( 'auth' );
+
+			if ( ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
 		}
 
-		$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
-		$country          = WC()->countries->get_base_country();
-		if ( ! empty( $country ) ) {
-			$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
+		$parameters = array();
+		$parameter_string = '';
+
+		if ( $options['locale'] ) {
+			$parameters[] = http_build_query( array( 'locale' => get_user_locale() ) );
+		}
+
+		if ( $options['country'] ) {
+			$country = WC()->countries->get_base_country();
+			if ( ! empty( $country ) ) {
+				$parameters[] = http_build_query( array( 'country' => $country ) );
+			}
+		}
+
+		if ( ! empty( $parameters ) ) {
+			$parameter_string = '?' . implode( '&', $parameters );
 		}
 
 		return wp_safe_remote_get( $url . $parameter_string,
