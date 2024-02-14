@@ -137,19 +137,13 @@ These options apply to all field types (except in a few circumstances which are 
 
 #### Options for `text` fields
 
-As well as the options above, text fields also support a `required` option. If this is `true` then the shopper _must_ provide a value for this field during the checkout process.
-
-| Option name     | Description                                                                                                                         | Required? | Example                                      | Default value |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------|----------------------------------------------|---|
-| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
+Text fields do not have any additional options, however it is possible to pass `required` in the `attributes` array.  If this is `true` then the shopper _must_ provide a value for this field during the checkout process. It default to false, and it is not required during registration.
 
 #### Options for `select` fields
 
 As well as the options above, select fields must also be registered with an  `options` option. This is used to specify what options the shopper can select.
 
-Select fields are always required.
-
-The `optionalLabel` option will never be shown as select fields are _always_ required.
+If the select field is not marked as required, a blank entry will be added to the options. This is so the shopper can de-select their choice.
 
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
@@ -177,7 +171,7 @@ The `optionalLabel` option will never be shown as select fields are _always_ req
 
 #### Options for `checkbox` fields
 
-The checkbox field type does not have any specific options, however `required` will always be `false` for a checkbox field. Making a checkbox field required is not supported.
+The checkbox field type does not have any specific options, however the `required` attribute will always be `false` for a checkbox field. Making a checkbox field required is not supported for now.
 
 ### Attributes
 
@@ -195,6 +189,7 @@ The supported attributes are:
 - `title`
 - `maxLength` (equivalent to `maxlength` HTML attribute)
 - `readOnly` (equivalent to `readonly` HTML attribute)
+- `required`
 
 `maxLength` and `readOnly` are in camelCase because the attributes are rendered on a React element which must receive them in this format.
 
@@ -216,9 +211,9 @@ add_action(
 				'label'         => 'Government ID',
 				'optionalLabel' => 'Government ID (optional)',
 				'location'      => 'address',
-				'required'      => true,
 				'attributes'    => array(
 					'autocomplete'     => 'government-id',
+					'required'         => true,
 					'aria-describedby' => 'some-element',
 					'aria-label'       => 'custom aria label',
 					'pattern'          => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
@@ -476,9 +471,9 @@ add_action(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
 				'location'      => 'address',
-				'required'      => true,
 				'attributes'    => array(
 					'autocomplete' => 'government-id',
+					'required'     => true,
 					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
 					'title'        => 'Your 5-digit Government ID',
 				),
@@ -489,9 +484,9 @@ add_action(
 				'id'            => 'namespace/confirm-gov-id',
 				'label'         => 'Confirm government ID',
 				'location'      => 'address',
-				'required'      => true,
 				'attributes'    => array(
 					'autocomplete' => 'government-id',
+					'required'     => true,
 					'pattern'      => '[A-Z0-9]{5}', // A 5-character string of capital letters and numbers.
 					'title'        => 'Confirm your 5-digit Government ID',
 				),
