@@ -435,7 +435,12 @@ class OrderAttributionController implements RegisterHooksInterface {
 			'customer_registered' => $order->get_customer_id() ? 'yes' : 'no',
 		);
 
-		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
+		$this->proxy->call_static(
+			WC_Tracks::class,
+			'record_event',
+			'order_attribution',
+			$tracks_data
+		);
 	}
 
 	/**
