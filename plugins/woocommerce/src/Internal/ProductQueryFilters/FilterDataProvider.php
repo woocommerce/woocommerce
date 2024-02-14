@@ -331,9 +331,13 @@ class FilterDataProvider {
 	 * @param string $key Transient key.
 	 */
 	private function get_cache( $key ) {
-		$cache = get_transient( $key );
+		$cache             = get_transient( $key );
+		$transient_version = WC_Cache_Helper::get_transient_version( Controller::TRANSIENT_GROUP );
 
-		if ( empty( $cache['version'] ) || empty( $cache['value'] ) ) {
+		if ( empty( $cache['version'] ) ||
+			empty( $cache['value'] ) ||
+			$transient_version !== $cache['version']
+		) {
 			return null;
 		}
 
