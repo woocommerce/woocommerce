@@ -343,9 +343,10 @@ class TaskList {
 		$completed_lists[] = $this->get_list_id();
 		update_option( self::COMPLETED_OPTION, $completed_lists );
 		$this->maybe_set_default_layout( $completed_lists );
-		$this->record_tracks_event( 'tasks_completed',
+		$this->record_tracks_event(
+			'tasks_completed',
 			array(
-				'tasklist_id' => $this->id
+				'tasklist_id' => $this->id,
 			)
 		);
 	}
