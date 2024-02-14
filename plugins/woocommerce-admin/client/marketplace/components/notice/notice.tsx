@@ -1,0 +1,104 @@
+/**
+ * External dependencies
+ */
+import classNames from 'classnames';
+import { useState } from '@wordpress/element';
+import { Icon, check, closeSmall, info, percent } from '@wordpress/icons'; // See: https://wordpress.github.io/gutenberg/?path=/docs/icons-icon--docs
+
+/**
+ * Internal dependencies
+ */
+import './notice.scss';
+
+export interface NoticeProps {
+	id: string;
+	children?: JSX.Element;
+	description: string;
+	icon?: string;
+	isDismisible: boolean;
+	variant: string;
+}
+
+type IconKey = keyof typeof iconMap;
+
+// Map the icon name (string) to the actual icon component
+const iconMap = {
+	info,
+	check,
+	percent,
+};
+
+export default function Notice( props: NoticeProps ): JSX.Element {
+	const {
+		id,
+		description,
+		children,
+		icon,
+		isDismisible = true,
+		variant = 'info',
+	} = props;
+	const [ isVisible, setIsVisible ] = useState(
+		localStorage.getItem( `wc-noticeClosed-${ id }` ) !== 'true'
+	);
+
+	const handleClose = () => {
+		setIsVisible( false );
+		localStorage.setItem( `wc-noticeClosed-${ id }`, 'true' );
+	};
+
+	if ( ! isVisible ) return <></>;
+
+	const classes = classNames( 'woocommerce-marketplace__notice', {
+		'woocommerce-marketplace__notice-variant-warning':
+			variant === 'warning',
+		'woocommerce-marketplace__notice-variant-info':
+			variant === 'info' || variant === 'info' || variant === 'error',
+		'woocommerce-marketplace__notice-variant-error': variant === 'error',
+		'woocommerce-marketplace__notice-variant-success':
+			variant === 'success',
+	} );
+
+	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];
+
+	// Add a class for the icon color based on the variant for consistency.
+	const iconClass = classNames( 'woocommerce-marketplace__notice-icon', {
+		'icon-color-info': variant === 'info',
+		'icon-color-error': variant === 'error',
+		'icon-color-warning': variant === 'warning',
+		'icon-color-success': variant === 'success',
+	} );
+
+	const createMarkup = ( htmlString: string ) => {
+		return { __html: htmlString };
+	};
+
+	return (
+		<div className={ classes }>
+			{ icon && (
+				<span className={ iconClass }>
+					<Icon icon={ iconElement } />
+				</span>
+			) }
+			<div className="woocommerce-marketplace__notice-content">
+				<p
+					className="woocommerce-marketplace__notice-description"
+					dangerouslySetInnerHTML={ createMarkup( description ) }
+				/>
+				{ children && (
+					<div className="woocommerce-marketplace__notice-children">
+						{ children }
+					</div>
+				) }
+			</div>
+			{ isDismisible && (
+				<button
+					className="woocommerce-marketplace__notice-close"
+					aria-label="Close"
+					onClick={ handleClose }
+				>
+					<Icon icon={ closeSmall } />
+				</button>
+			) }
+		</div>
+	);
+}
