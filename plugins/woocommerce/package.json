@@ -182,7 +182,7 @@
 					"command": "test:e2e-pw",
 					"changes": [],
 					"testEnv": {
-						"start": "env:test && pnpm exec playwright install chromium",
+						"start": "env:test && pnpm playwright install chromium",
 						"config": {}
 					}
 				}
