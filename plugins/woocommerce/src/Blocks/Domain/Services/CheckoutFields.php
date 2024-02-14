@@ -257,7 +257,7 @@ class CheckoutFields {
 	 * @return mixed
 	 */
 	public function default_sanitize_callback( $value, $field ) {
-		return wc_clean( $value );
+		return $value;
 	}
 
 	/**
