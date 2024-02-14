@@ -331,7 +331,7 @@ Sanitization is used to ensure the value of a field is in a specific format. An 
 
 #### Using the `_experimental_woocommerce_blocks_sanitize_additional_field` filter
 
-To run a custom sanitization function for a field use the `_experimental_woocommerce_blocks_sanitize_additional_field` action.
+To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `__experimental_woocommerce_blocks_sanitize_additional_field` filter.
 
 | Argument     | Type              | Description                                                             |
 |--------------|-------------------|-------------------------------------------------------------------------|
@@ -393,14 +393,13 @@ add_action(
 				$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
 			}
 		}
-		return $error;
 	},
 	10,
 	4
 );
 ```
 
-It is important to note that this action must _add_ errors to the `WP_Error` object it receives. Returning a different `WP_Error` object or any other value will result in the errors not showing.
+It is important to note that this action must _add_ errors to the `WP_Error` object it receives. Returning a new `WP_Error` object or any other value will result in the errors not showing.
 
 If no validation errors are encountered the function can just return void.
 
