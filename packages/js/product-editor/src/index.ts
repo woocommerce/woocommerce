@@ -37,7 +37,7 @@ export * from './contexts/validation-context/types';
 /**
  * Contexts
  */
-export { EditorLoadingContext } from './contexts/editor-loading-context';
+export { EditorLoadingContext as __experimentalEditorLoadingContext } from './contexts/editor-loading-context';
 export { PostTypeContext } from './contexts/post-type-context';
 
 // Init the store

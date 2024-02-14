@@ -10,7 +10,7 @@ import {
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	EditorLoadingContext,
+	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { useContext, useEffect } from '@wordpress/element';
