@@ -176,6 +176,15 @@
 							"wpVersion": "latest-2"
 						}
 					}
+				},
+				{
+					"name": "E2E core",
+					"command": "test:e2e-pw",
+					"changes": [],
+					"testEnv": {
+						"start": "env:start",
+						"config": {}
+					}
 				}
 			]
 		}
