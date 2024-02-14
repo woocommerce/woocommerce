@@ -157,15 +157,9 @@ export class EditorUtils {
 	async toggleGlobalBlockInserter() {
 		// "Add block" selector is required to make sure performance comparison
 		// doesn't fail on older branches where we still had "Add block" as label.
-		await this.page.click(
-			'.edit-post-header [aria-label="Add block"],' +
-				'.edit-site-header [aria-label="Add block"],' +
-				'.edit-post-header [aria-label="Toggle block inserter"],' +
-				'.edit-site-header [aria-label="Toggle block inserter"],' +
-				'.edit-widgets-header [aria-label="Add block"],' +
-				'.edit-widgets-header [aria-label="Toggle block inserter"],' +
-				'.edit-site-header-edit-mode__inserter-toggle'
-		);
+		await this.page
+			.getByRole( 'button', { name: 'Toggle block inserter' } )
+			.click();
 	}
 
 	/**
@@ -174,20 +168,11 @@ export class EditorUtils {
 	 * @return {Promise<boolean>} Whether the inserter is open or not.
 	 */
 	async isGlobalInserterOpen() {
-		return await this.page.evaluate( () => {
-			// "Add block" selector is required to make sure performance comparison
-			// doesn't fail on older branches where we still had "Add block" as
-			// label.
-			return !! document.querySelector(
-				'.edit-post-header [aria-label="Add block"].is-pressed,' +
-					'.edit-site-header-edit-mode [aria-label="Add block"].is-pressed,' +
-					'.edit-post-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-site-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-widgets-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-widgets-header [aria-label="Add block"].is-pressed,' +
-					'.edit-site-header-edit-mode__inserter-toggle.is-pressed'
-			);
+		const button = this.page.getByRole( 'button', {
+			name: 'Toggle block inserter',
 		} );
+
+		return ( await button.getAttribute( 'aria-pressed' ) ) === 'true';
 	}
 
 	/**
@@ -409,7 +394,9 @@ export class EditorUtils {
 		} );
 		await templateRow.getByRole( 'button', { name: 'Reset' } ).click();
 		await this.page.waitForResponse( ( response ) =>
-			response.url().includes( '?_wp-find-template' )
+			response
+				.url()
+				.includes( '?_wp-find-template' || 'wp/v2/template-part' )
 		);
 	}
 

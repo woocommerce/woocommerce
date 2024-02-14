@@ -53,6 +53,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await editorUtils.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
+
 			const miniCartButton = editorUtils.page.getByRole( 'option', {
 				name: blockData.name,
 				exact: true,
