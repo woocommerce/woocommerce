@@ -18,7 +18,6 @@ test.describe( 'Test the checkout template', async () => {
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
@@ -42,7 +41,6 @@ test.describe( 'Test the checkout template', async () => {
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
@@ -90,7 +88,6 @@ test.describe( 'Test editing the checkout template', async () => {
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);

@@ -141,7 +141,6 @@ class ProductCollectionPage {
 		collection: Collections;
 	} ) {
 		await this.admin.createNewPost();
-		await this.editorUtils.closeWelcomeGuideModal();
 		await this.editor.insertBlock( {
 			name: this.BLOCK_SLUG,
 		} );

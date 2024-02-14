@@ -48,7 +48,6 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
 	} );
 

@@ -207,6 +207,10 @@ export class EditorUtils {
 				exact: true,
 			} )
 			.click();
+
+		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
+			state: 'hidden',
+		} );
 	}
 
 	async isBlockEarlierThan< T >(
@@ -398,21 +402,15 @@ export class EditorUtils {
 
 	async revertTemplateCustomizations( templateName: string ) {
 		const templateRow = this.page.getByRole( 'row' ).filter( {
-			has: this.page.getByRole( 'heading', {
+			has: this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
 			} ),
 		} );
-		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-		await this.page
-			.getByRole( 'menuitem', {
-				name: 'Clear customizations',
-			} )
-			.click();
-		await this.page
-			.getByRole( 'button', { name: 'Dismiss this notice' } )
-			.getByText( `"${ templateName }" reverted.` )
-			.waitFor();
+		await templateRow.getByRole( 'button', { name: 'Reset' } ).click();
+		await this.page.waitForResponse( ( response ) =>
+			response.url().includes( '?_wp-find-template' )
+		);
 	}
 
 	async updatePost() {

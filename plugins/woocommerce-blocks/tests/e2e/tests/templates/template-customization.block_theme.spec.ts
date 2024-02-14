@@ -27,7 +27,6 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
@@ -71,7 +70,6 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 					postType: testData.templateType,
 				} );
 				await editorUtils.enterEditMode();
-				await editorUtils.closeWelcomeGuideModal();
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {

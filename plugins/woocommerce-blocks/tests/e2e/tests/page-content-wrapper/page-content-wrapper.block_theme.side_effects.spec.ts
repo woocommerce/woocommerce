@@ -44,7 +44,6 @@ test.describe( 'Page Content Wrapper', async () => {
 		} ) => {
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
 			page.getByLabel( `“${ template.title }” (Edit)` ).click();
-			await editorUtils.closeWelcomeGuideModal();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();
@@ -62,7 +61,6 @@ test.describe( 'Page Content Wrapper', async () => {
 			// Clean up the paragraph block added before.
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
 			page.getByLabel( `“${ template.title }” (Edit)` ).click();
-			await editorUtils.closeWelcomeGuideModal();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();

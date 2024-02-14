@@ -50,7 +50,6 @@ test.describe( 'Single Product template', async () => {
 		await page
 			.getByRole( 'option', { name: testData.productName } )
 			.click();
-		await editorUtils.closeWelcomeGuideModal();
 		await page.getByLabel( 'Fallback content' ).click();
 
 		// Edit the template.
