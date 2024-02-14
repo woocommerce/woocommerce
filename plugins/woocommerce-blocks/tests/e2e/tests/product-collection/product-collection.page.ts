@@ -69,12 +69,13 @@ const collectionToButtonNameMap = {
 };
 
 class ProductCollectionPage {
-	private BLOCK_NAME = 'woocommerce/product-collection';
+	private BLOCK_SLUG = 'woocommerce/product-collection';
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
 	private templateApiUtils: TemplateApiUtils;
 	private editorUtils: EditorUtils;
+	BLOCK_NAME = 'Product Collection (Beta)';
 	productTemplate!: Locator;
 	products!: Locator;
 	productImages!: Locator;
@@ -127,7 +128,7 @@ class ProductCollectionPage {
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost( { legacyCanvas: true } );
 		await this.editor.insertBlock( {
-			name: this.BLOCK_NAME,
+			name: this.BLOCK_SLUG,
 		} );
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
@@ -142,7 +143,7 @@ class ProductCollectionPage {
 		await this.admin.createNewPost();
 		await this.editorUtils.closeWelcomeGuideModal();
 		await this.editor.insertBlock( {
-			name: this.BLOCK_NAME,
+			name: this.BLOCK_SLUG,
 		} );
 		await this.chooseCollectionInPost( collection );
 
@@ -181,7 +182,7 @@ class ProductCollectionPage {
 		await this.editorUtils.enterEditMode();
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
-			this.BLOCK_NAME
+			this.BLOCK_SLUG
 		);
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.saveSiteEditorEntities();
@@ -202,7 +203,7 @@ class ProductCollectionPage {
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
 		await this.editor.canvas.click( 'body' );
-		await this.editor.insertBlock( { name: this.BLOCK_NAME } );
+		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.openDocumentSettingsSidebar();
 		await this.editor.saveSiteEditorEntities();
@@ -407,7 +408,7 @@ class ProductCollectionPage {
 	async clickDisplaySettings() {
 		// Select the block, so that toolbar is visible.
 		const block = this.page
-			.locator( `[data-type="${ this.BLOCK_NAME }"]` )
+			.locator( `[data-type="${ this.BLOCK_SLUG }"]` )
 			.first();
 		await this.editor.selectBlocks( block );
 
@@ -511,9 +512,7 @@ class ProductCollectionPage {
 		await this.page.setViewportSize( { width, height } );
 	}
 
-	async insertProductCollectionInSingleProductBlock(
-		collection: Collections
-	) {
+	async insertProductCollectionInSingleProductBlock() {
 		this.insertSingleProductBlock();
 
 		const siblingBlock = await this.editorUtils.getBlockByName(
@@ -526,12 +525,10 @@ class ProductCollectionPage {
 
 		await this.editor.selectBlocks( siblingBlock );
 		await this.editorUtils.insertBlock(
-			{ name: this.BLOCK_NAME },
+			{ name: this.BLOCK_SLUG },
 			undefined,
 			parentClientId
 		);
-		await this.chooseCollectionInPost( collection );
-		await this.refreshLocators( 'editor' );
 	}
 
 	/**

@@ -53,7 +53,7 @@ const config = {
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
-		video: 'on-first-retry',
+		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
 	},
 	projects: [

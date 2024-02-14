@@ -288,6 +288,8 @@ class WCAdminAssets {
 			'wc-components',
 			'wc-customer-effort-score',
 			'wc-experimental',
+			'wc-navigation',
+			'wc-product-editor',
 			WC_ADMIN_APP,
 		);
 
