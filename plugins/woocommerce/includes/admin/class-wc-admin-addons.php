@@ -1582,6 +1582,8 @@ class WC_Admin_Addons {
 			}
 		}
 
+		do_action( 'woocommerce_addons_promotions_fetched', $promotions );
+
 		return $promotions;
 	}
 
