@@ -64,11 +64,10 @@ export function PrepublishPanel( {
 				<h4>{ title }</h4>
 				<span>{ description }</span>
 			</div>
-
-			<VisibilitySection productType={ productType } />
-
-			<ScheduleSection postType={ productType } />
-
+			<div className="woocommerce-product-publish-panel__content">
+				<VisibilitySection productType={ productType } />
+				<ScheduleSection postType={ productType } />
+			</div>
 			<div className="woocommerce-product-publish-panel__footer">
 				<ShowPrepublishChecksSection />
 			</div>
