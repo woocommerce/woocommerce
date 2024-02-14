@@ -106,14 +106,34 @@ The registration function takes an array of options describing your field. Some 
 
 These options apply to all field types (except in a few circumstances which are noted inline).
 
-| Option name     | Description                                                                                                                            | Required? | Example                                      | Default value                                                              |
-|---------------|----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|-----------|----------------------------------------------------------------------------|
-| `id`            | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`.    | Yes       | `plugin-namespace/how-did-you-hear`          | No default - this must be provided.                                        |
-| `label`         | The label shown on your field. This will be the placeholder too.                                                                       | Yes       | `How did you hear about us?`                 | No default - this must be provided.                                        |
-| `optionalLabel` | The label shown on your field if it is optional. This will be the placeholder too.                                                     | No        | `How did you hear about us? (Optional)`      | The default value will be the value of `label` with `(optional)` appended. |
-| `location`      | The location to render your field.                                                                                                     | Yes       | `contact`, `address`, or `additional`        | No default - this must be provided.                                        |
-| `type`          | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                             | No        | `text`, `select`, or `checkbox`              | `text`                                                                     |
-| `attributes`    | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.                 | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                       |
+| Option name         | Description                                                                                                                         | Required? | Example                                      | Default value                                                                                                                                               |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`. | Yes       | `plugin-namespace/how-did-you-hear`          | No default - this must be provided.                                                                                                                         |
+| `label`             | The label shown on your field. This will be the placeholder too.                                                                    | Yes       | `How did you hear about us?`                 | No default - this must be provided.                                                                                                                         |
+| `optionalLabel`     | The label shown on your field if it is optional. This will be the placeholder too.                                                  | No        | `How did you hear about us? (Optional)`      | The default value will be the value of `label` with `(optional)` appended.                                                                                  |
+| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `additional`        | No default - this must be provided.                                                                                                                         |
+| `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                      |
+| `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                        |
+| `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default [`wc_clean`](https://github.com/woocommerce/woocommerce/blob/trunk/docs/code-snippets/useful-functions.md#wc_clean) is run on the field's value. |
+| `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281)  |
+
+##### &ast; Example of `sanitize_callback`. This function will remove spaces from the value.
+
+```php
+'sanitize_callback' => function( $field_value ) {
+	return str_replace( ' ', '', $field_value );
+},
+```
+
+##### &ast; Example of `validate_callback`. This function will check if the value is an email.
+
+```php
+'validate_callback' => function( $field_value ) {
+	if ( ! is_email( $field_value ) ) {
+		return new WP_Error( 'invalid_alt_email', 'Please ensure your alternative email matches the correct format.' );
+	}
+},
+```
 
 #### Options for `text` fields
 
@@ -135,7 +155,7 @@ The `optionalLabel` option will never be shown as select fields are _always_ req
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | &ast;see below | No default - this must be provided. |
 
-&ast;Example of `options` value:
+##### &ast;Example of `options` value:
 
 ```php
 [
