@@ -1557,8 +1557,9 @@ class WC_Admin_Addons {
 
 		if ( false === $promotions ) {
 			$fetch_options = array(
-				'auth' => true,
+				'auth'    => true,
 				'country' => true,
+				'locale'  => true,
 			);
 			$raw_promotions = self::fetch( $url, $fetch_options );
 
