@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
  * @param array $options Field arguments. See CheckoutFields::register_checkout_field() for details.
  * @throws \Exception If field registration fails.
  */
-function __experimental_woocommerce_blocks_register_checkout_field( $options ) {
+function __experimental_woocommerce_blocks_register_checkout_field( $options ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore,PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.FunctionDoubleUnderscore
 
 	// Check if `woocommerce_blocks_loaded` ran. If not then the CheckoutFields class will not be available yet.
 	// In that case, re-hook `woocommerce_blocks_loaded` and try running this again.
