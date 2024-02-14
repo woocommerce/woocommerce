@@ -330,64 +330,6 @@ All at %6$s
 				}
 			}
 		}
-		require_once WC_ABSPATH . 'includes/gateways/class-payment-method.php';
-		require_once WC_ABSPATH . 'includes/gateways/class-payment-method-types.php';
-
-		$ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
-		$ideal_from_stripe_gateway->payment_method = new Payment_Method( Payment_Method_Types::IDEAL );
-		$ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
-		$ideal_from_stripe_gateway->id = 'stripe_ideal';
-		$_available_gateways[ $ideal_from_stripe_gateway->id ] = $ideal_from_stripe_gateway;
-
-		$ideal_from_woopayments = new WC_Payment_Gateway_CC();
-		$ideal_from_woopayments->payment_method = new Payment_Method( Payment_Method_Types::IDEAL );
-		$ideal_from_woopayments->title = 'iDEAL (WooPayments)';
-		$ideal_from_woopayments->id = 'woopayments_ideal';
-		$_available_gateways[ $ideal_from_woopayments->id ] = $ideal_from_woopayments;
-
-		// // DEMO
-		// $new = new WC_Payment_Gateway_CC();
-		// $new->id = 'woocommerce_payments_bancontact';
-		// $new->title = 'Bancontact';
-		// $new2 = new WC_Payment_Gateway_CC();
-		// $new2->id = 'woocommerce_payments_ideal';
-		// $new2->title = 'iDEAL';
-		
-		// $_available_gateways[$new->id] = $new; 
-		// $_available_gateways[$new2->id] = $new2;
-
-		$duplicated_titles = $this->find_duplicate_enabled_gateways( $_available_gateways );
-
-		// DEMO for normalized version
-		// require_once WC_ABSPATH . 'includes/gateways/class-gateway-id-constants.php';
-
-		// $cc = new WC_Payment_Gateway_CC();
-		// $cc->standardized_gateway_id = Gateway_ID_Constants::CREDIT_CARD;
-		// $cc->title = 'Credit Card';
-		// $cc->id = 'woocommerce_payments_credit_card';
-
-		// $bancontact = new WC_Payment_Gateway_CC();
-		// $bancontact->standardized_gateway_id = Gateway_ID_Constants::BANCONTACT;
-		// $bancontact->title = 'Bancontact';
-		// $bancontact->id = 'woocommerce_payments_bancontact';
-
-		// $ideal_from_stripe_gateway = new WC_Payment_Gateway_CC();
-		// $ideal_from_stripe_gateway->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
-		// $ideal_from_stripe_gateway->title = 'iDEAL (Stripe)';
-		// $ideal_from_stripe_gateway->id = 'stripe_ideal';
-
-		// $ideal_from_woopayments = new WC_Payment_Gateway_CC();
-		// $ideal_from_woopayments->standardized_gateway_id = Gateway_ID_Constants::IDEAL;
-		// $ideal_from_woopayments->title = 'iDEAL (WooPayments)';
-		// $ideal_from_woopayments->id = 'woopayments_ideal';
-
-		// $gateways = [];
-		// $gateways[$cc->id] = $cc;
-		// $gateways[$bancontact->id] = $bancontact;
-		// $gateways[$ideal_from_stripe_gateway->id] = $ideal_from_stripe_gateway;
-		// $gateways[$ideal_from_woopayments->id] = $ideal_from_woopayments;
-
-		// $duplicated_titles = $this->find_duplicate_enabled_gateways( $gateways );
 
 		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
 	}
@@ -395,16 +337,15 @@ All at %6$s
 	/**
 	 * Find duplicates across all enabled gateways.
 	 *
-	 * @param array $enabled_gateways Array of enabled gateways.
 	 * @return array Array of duplicate gateway names.
 	 */
-	public function find_duplicate_enabled_gateways($enabled_gateways ) {	
-		// $enabled_gateways = $this->get_available_payment_gateways();
+	public function find_duplicate_enabled_gateways() {	
+		$enabled_gateways = $this->get_available_payment_gateways();
+
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-detector.php';
-		// require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
 		require_once WC_ABSPATH . 'includes/gateways/class-wc-payment-method-type-duplicates-finder.php';
-		update_option( 'woocommerce_duplicate_gateways_detection', 'yes');
-		
+
 		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Payment_Method_Type_Duplicates_Finder() );
 		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
 		return $duplicates;
