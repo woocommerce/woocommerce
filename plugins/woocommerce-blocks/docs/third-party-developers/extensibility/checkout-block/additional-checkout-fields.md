@@ -207,7 +207,7 @@ This example demonstrates rendering a text field in the address section:
 
 ```php
 add_action(
-	'woocommerce_loaded',
+	'woocommerce_blocks_loaded',
 	function() {
 		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
@@ -250,7 +250,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 
 ```php
 add_action(
-	'woocommerce_loaded',
+	'woocommerce_blocks_loaded',
 	function() {
 		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
@@ -276,7 +276,7 @@ This example demonstrates rendering a select field in the additional information
 
 ```php
 add_action(
-	'woocommerce_loaded',
+	'woocommerce_blocks_loaded',
 	function() {
 		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
@@ -467,7 +467,7 @@ This example is just a combined version of the examples shared above.
 
 ```php
 add_action(
-	'woocommerce_loaded',
+	'woocommerce_blocks_loaded',
 	function() {
 		__experimental_woocommerce_blocks_register_checkout_field(
 			array(
