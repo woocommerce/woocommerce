@@ -44,7 +44,7 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		},
 	} );
 
-	test( 'can view product review', async ( { page, testData } ) => {
+	test( 'can view products reviews list', async ( { page, testData } ) => {
 		await page.goto(
 			`wp-admin/edit.php?post_type=product&page=product-reviews`
 		);
