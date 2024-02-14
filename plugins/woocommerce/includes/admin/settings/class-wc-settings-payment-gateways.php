@@ -146,19 +146,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					<tbody>
 						<?php
 						$payment_gateways = WC()->payment_gateways->payment_gateways();
-						$duplicates = WC()->payment_gateways()->find_duplicate_enabled_gateways();
-						$a = 0; 
-						?>
-						<div id="warning" class="notice notice-warning">
-							<a class="woocommerce-warning-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'no_secure_connection' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
-
-							<p>
-							<?php
-								echo __('Your store has multiple payment methods of the same type enabled: ', 'woocommerce') . implode(', ', array_values($duplicates));
-							?>
-							</p>
-						</div>
-						<?php
 						foreach ( $payment_gateways as $gateway ) {
 
 							echo '<tr data-gateway_id="' . esc_attr( $gateway->id ) . '">';
