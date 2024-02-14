@@ -58,7 +58,7 @@ Fields rendered here will be saved to the shopper's account. They will be visibl
 
 ### Address
 
-The address section currently contains a form for the shipping address and the billing address. Additional checkout fields can be registered here and they will appear within that form.
+The "Address" section currently contains a form for the shipping address and the billing address. Additional checkout fields can be registered to appear within these forms.
 
 ![The shipping address form showing the additional checkout field at the bottom](https://github.com/woocommerce/woocommerce/assets/5656702/746d280f-3354-4d37-a78a-a2518eb0e5de)
 
