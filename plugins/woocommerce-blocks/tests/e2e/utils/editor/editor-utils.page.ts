@@ -411,7 +411,7 @@ export class EditorUtils {
 			const responseUrl = response.url();
 			return (
 				responseUrl.includes( 'wp-json/wp/v2/templates' ) ||
-				responseUrl.includes( '?_wp-find-template' )
+				responseUrl.includes( 'wp-json/wp/v2/template-parts' )
 			);
 		} );
 	}
