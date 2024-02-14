@@ -1,3 +1,10 @@
+/**
+ * Internal dependencies
+ */
+import { isWooExpress } from '~/utils/is-woo-express';
+
+const introPatternWooExpress = 'woocommerce-blocks/just-arrived-full-hero';
+
 export const HOMEPAGE_TEMPLATES = {
 	template1: {
 		blocks: [
@@ -5,7 +12,9 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/header-centered-menu',
 
 			// Body
-			'woocommerce-blocks/hero-product-split',
+			isWooExpress()
+				? introPatternWooExpress
+				: 'woocommerce-blocks/just-arrived-full-hero',
 			'woocommerce-blocks/product-collection-5-columns',
 			'woocommerce-blocks/hero-product-3-split',
 			'woocommerce-blocks/product-collection-3-columns',
@@ -36,7 +45,9 @@ export const HOMEPAGE_TEMPLATES = {
 			'woocommerce-blocks/header-essential',
 
 			// Body
-			'woocommerce-blocks/hero-product-split',
+			isWooExpress()
+				? introPatternWooExpress
+				: 'woocommerce-blocks/featured-category-cover-image',
 			'woocommerce-blocks/product-collection-4-columns',
 			'woocommerce-blocks/hero-product-chessboard',
 			'woocommerce-blocks/product-collection-5-columns',
