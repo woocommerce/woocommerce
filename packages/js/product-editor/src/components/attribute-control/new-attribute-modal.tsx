@@ -51,6 +51,7 @@ type NewAttributeModalProps = {
 	disabledAttributeMessage?: string;
 	termsAutoSelection?: 'first' | 'all';
 	defaultVisibility?: boolean;
+	defaultSearch?: string;
 };
 
 type AttributeForm = {
@@ -84,6 +85,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	),
 	termsAutoSelection,
 	defaultVisibility = false,
+	defaultSearch,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -202,11 +204,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		return () => clearTimeout( timeoutId );
 	}, [] );
 
+	const initialAttribute = {
+		name: defaultSearch,
+	} as EnhancedProductAttribute;
+
 	return (
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [ null ],
+					attributes: [ defaultSearch ? initialAttribute : null ],
 				} }
 			>
 				{ ( {

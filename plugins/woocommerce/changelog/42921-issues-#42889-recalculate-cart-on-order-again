@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure cart totals are correctly calculated when using "Order again"

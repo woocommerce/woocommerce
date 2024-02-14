@@ -7,21 +7,25 @@ namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\Prod
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\DownloadableProductTrait;
 
 /**
  * Simple Product Template.
  */
 class SimpleProductTemplate extends AbstractProductFormTemplate implements ProductFormTemplateInterface {
+	use DownloadableProductTrait;
+
 	/**
 	 * The context name used to identify the editor.
 	 */
 	const GROUP_IDS = array(
-		'GENERAL'      => 'general',
-		'ORGANIZATION' => 'organization',
-		'PRICING'      => 'pricing',
-		'INVENTORY'    => 'inventory',
-		'SHIPPING'     => 'shipping',
-		'VARIATIONS'   => 'variations',
+		'GENERAL'         => 'general',
+		'ORGANIZATION'    => 'organization',
+		'PRICING'         => 'pricing',
+		'INVENTORY'       => 'inventory',
+		'SHIPPING'        => 'shipping',
+		'VARIATIONS'      => 'variations',
+		'LINKED_PRODUCTS' => 'linked-products',
 	);
 
 	/**
@@ -35,6 +39,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_inventory_group_blocks();
 		$this->add_shipping_group_blocks();
 		$this->add_variation_group_blocks();
+		$this->add_linked_products_group_blocks();
 	}
 
 	/**
@@ -71,10 +76,37 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
+		// Variations tab.
+		if ( Features::is_enabled( 'product-variation-management' ) ) {
+			$variations_hide_conditions = array();
+			if ( Features::is_enabled( 'product-grouped' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "grouped"',
+				);
+			}
+			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+				$variations_hide_conditions[] = array(
+					'expression' => 'editedProduct.type === "external"',
+				);
+			}
+
+			$this->add_group(
+				array(
+					'id'             => $this::GROUP_IDS['VARIATIONS'],
+					'order'          => 20,
+					'attributes'     => array(
+						'title' => __( 'Variations', 'woocommerce' ),
+					),
+					'hideConditions' => $variations_hide_conditions,
+				)
+			);
+		}
+
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['ORGANIZATION'],
-				'order'      => 15,
+				'order'      => 30,
 				'attributes' => array(
 					'title' => __( 'Organization', 'woocommerce' ),
 				),
@@ -83,7 +115,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'             => $this::GROUP_IDS['PRICING'],
-				'order'          => 20,
+				'order'          => 40,
 				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
@@ -97,7 +129,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['INVENTORY'],
-				'order'      => 30,
+				'order'      => 50,
 				'attributes' => array(
 					'title' => __( 'Inventory', 'woocommerce' ),
 				),
@@ -118,34 +150,23 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$this->add_group(
 			array(
 				'id'             => $this::GROUP_IDS['SHIPPING'],
-				'order'          => 40,
+				'order'          => 60,
 				'attributes'     => array(
 					'title' => __( 'Shipping', 'woocommerce' ),
 				),
 				'hideConditions' => $shipping_hide_conditions,
 			)
 		);
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			$variations_hide_conditions = array();
-			if ( Features::is_enabled( 'product-grouped' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "grouped"',
-				);
-			}
-			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "external"',
-				);
-			}
 
+		// Linked Products tab.
+		if ( Features::is_enabled( 'product-linked' ) ) {
 			$this->add_group(
 				array(
-					'id'             => $this::GROUP_IDS['VARIATIONS'],
-					'order'          => 50,
-					'attributes'     => array(
-						'title' => __( 'Variations', 'woocommerce' ),
+					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+					'order'      => 70,
+					'attributes' => array(
+						'title' => __( 'Linked products', 'woocommerce' ),
 					),
-					'hideConditions' => $variations_hide_conditions,
 				)
 			);
 		}
@@ -181,6 +202,13 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$basic_details->add_block(
 			array(
+				'id'        => 'product-details-section-description',
+				'blockName' => 'woocommerce/product-details-section-description',
+				'order'     => 10,
+			)
+		);
+		$basic_details->add_block(
+			array(
 				'id'         => 'product-name',
 				'blockName'  => 'woocommerce/product-name-field',
 				'order'      => 10,
@@ -190,12 +218,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
 		$basic_details->add_block(
 			array(
 				'id'         => 'product-summary',
-				'blockName'  => 'woocommerce/product-summary-field',
+				'blockName'  => 'woocommerce/product-text-area-field',
 				'order'      => 20,
 				'attributes' => array(
+					'label'    => __( 'Summary', 'woocommerce' ),
+					'help'     => __(
+						"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
+						'woocommerce'
+					),
 					'property' => 'short_description',
 				),
 			)
@@ -332,7 +366,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 							'value'   => 'url',
 							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
 						),
-						'required'    => __( 'Link to the external product is required.', 'woocommerce' ),
 					),
 				)
 			);
@@ -429,35 +462,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
 		// Downloads section.
-		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$general_group->add_section(
-				array(
-					'id'             => 'product-downloads-section',
-					'order'          => 50,
-					'attributes'     => array(
-						'title'       => __( 'Downloads', 'woocommerce' ),
-						'description' => sprintf(
-							/* translators: %1$s: Downloads settings link opening tag. %2$s: Downloads settings link closing tag. */
-							__( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info. Store-wide updates can be managed in your %1$sproduct settings%2$s.', 'woocommerce' ),
-							'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=downloadable' ) . '" target="_blank" rel="noreferrer">',
-							'</a>'
-						),
-					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "simple"',
-						),
-					),
-				)
-			)->add_block(
-				array(
-					'id'        => 'product-downloads',
-					'blockName' => 'woocommerce/product-downloads-field',
-					'order'     => 10,
-				)
-			);
-		}
+		$this->add_downloadable_product_blocks( $general_group );
 	}
 
 	/**
@@ -756,7 +763,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_inventory_inner_section = $product_inventory_section->add_section(
+		$product_inventory_inner_section = $product_inventory_section->add_subsection(
 			array(
 				'id'    => 'product-inventory-inner-section',
 				'order' => 10,
@@ -1026,55 +1033,119 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( ! $variation_group ) {
 			return;
 		}
-		$variation_fields          = $variation_group->add_block(
-			array(
-				'id'         => 'product_variation-field-group',
-				'blockName'  => 'woocommerce/product-variations-fields',
-				'order'      => 10,
-				'attributes' => array(
-					'description' => sprintf(
-					/* translators: %1$s: Sell your product in multiple variations like size or color. strong opening tag. %2$s: Sell your product in multiple variations like size or color. strong closing tag.*/
-						__( '%1$sSell your product in multiple variations like size or color.%2$s Get started by adding options for the buyers to choose on the product page.', 'woocommerce' ),
-						'<strong>',
-						'</strong>'
-					),
-				),
-			)
-		);
-		$variation_options_section = $variation_fields->add_block(
+
+		$variation_group->add_section(
 			array(
 				'id'         => 'product-variation-options-section',
-				'blockName'  => 'woocommerce/product-section',
 				'order'      => 10,
 				'attributes' => array(
 					'title'       => __( 'Variation options', 'woocommerce' ),
 					'description' => __( 'Add and manage attributes used for product options, such as size and color.', 'woocommerce' ),
 				),
 			)
-		);
-		$variation_options_section->add_block(
+		)->add_block(
 			array(
 				'id'        => 'product-variation-options',
 				'blockName' => 'woocommerce/product-variations-options-field',
+				'order'     => 10,
 			)
 		);
-		$variation_section = $variation_fields->add_block(
+
+		$variation_group->add_section(
 			array(
 				'id'         => 'product-variation-section',
-				'blockName'  => 'woocommerce/product-section',
 				'order'      => 20,
 				'attributes' => array(
 					'title'       => __( 'Variations', 'woocommerce' ),
 					'description' => __( 'Manage individual product combinations created from options.', 'woocommerce' ),
 				),
 			)
-		);
-
-		$variation_section->add_block(
+		)->add_block(
 			array(
 				'id'        => 'product-variation-items',
 				'blockName' => 'woocommerce/product-variation-items-field',
 				'order'     => 10,
+			)
+		);
+	}
+
+	/**
+	 * Adds the linked products group blocks to the template.
+	 */
+	private function add_linked_products_group_blocks() {
+		$linked_products_group = $this->get_group_by_id( $this::GROUP_IDS['LINKED_PRODUCTS'] );
+		if ( ! isset( $linked_products_group ) ) {
+			return;
+		}
+
+		$linked_products_group->add_section(
+			array(
+				'id'         => 'product-linked-upsells-section',
+				'order'      => 10,
+				'attributes' => array(
+					'title'       => __( 'Upsells', 'woocommerce' ),
+					'description' => sprintf(
+						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
+						__( 'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
+						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-upsells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'   => 'upsell_ids',
+					'emptyState' => array(
+						'image'         => 'ShoppingBags',
+						'tip'           => __(
+							'Tip: Upsells are products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
+				),
+			)
+		);
+
+		$linked_products_group->add_section(
+			array(
+				'id'             => 'product-linked-cross-sells-section',
+				'order'          => 20,
+				'attributes'     => array(
+					'title'       => __( 'Cross-sells', 'woocommerce' ),
+					'description' => sprintf(
+						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products.*/
+						__( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value. %1$sLearn more about linked products.%2$s', 'woocommerce' ),
+						'<br /><a href="https://woo.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
+					),
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-linked-cross-sells',
+				'blockName'  => 'woocommerce/product-linked-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'   => 'cross_sell_ids',
+					'emptyState' => array(
+						'image'         => 'CashRegister',
+						'tip'           => __(
+							'Tip: By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value.',
+							'woocommerce'
+						),
+						'isDismissible' => true,
+					),
+				),
 			)
 		);
 	}

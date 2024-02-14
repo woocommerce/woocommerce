@@ -154,11 +154,21 @@ const recordFailedPluginInstallations = (
 	_context: unknown,
 	_event: PluginsInstallationCompletedWithErrorsEvent
 ) => {
+	const failedExtensions = _event.payload.errors.map(
+		( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
+	);
+
 	recordEvent( 'coreprofiler_store_extensions_installed_and_activated', {
 		success: false,
-		failed_extensions: _event.payload.errors.map(
-			( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
-		),
+		failed_extensions: failedExtensions,
+	} );
+
+	_event.payload.errors.forEach( ( error: PluginInstallError ) => {
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: false,
+			extension: getPluginTrackKey( error.plugin ),
+			error_message: error.error,
+		} );
 	} );
 };
 
@@ -184,9 +194,15 @@ const recordSuccessfulPluginInstallation = (
 	};
 
 	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-		trackData[
-			'install_time_' + getPluginTrackKey( installedPlugin.plugin )
-		] = getTimeFrame( installedPlugin.installTime );
+		const pluginKey = getPluginTrackKey( installedPlugin.plugin );
+		const installTime = getTimeFrame( installedPlugin.installTime );
+		trackData[ 'install_time_' + pluginKey ] = installTime;
+
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: true,
+			extension: pluginKey,
+			install_time: installTime,
+		} );
 	}
 
 	recordEvent(

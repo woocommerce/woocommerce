@@ -15,6 +15,7 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 export default function ProductListContent( props: {
 	products: Product[];
 	group?: string;
+	productGroup?: string;
 	type: ProductType;
 	className?: string;
 	searchTerm?: string;
@@ -34,6 +35,8 @@ export default function ProductListContent( props: {
 					key={ product.id }
 					type={ props.type }
 					product={ {
+						id: product.id,
+						slug: product.slug,
 						title: product.title,
 						image: product.image,
 						type: product.type,
@@ -50,11 +53,17 @@ export default function ProductListContent( props: {
 						price: product.price,
 						url: appendURLParams(
 							product.url,
-							Object.entries(
-								wccomHelperSettings.inAppPurchaseURLParams
-							)
+							Object.entries( {
+								...wccomHelperSettings.inAppPurchaseURLParams,
+								...( props.productGroup !== undefined
+									? { utm_group: props.productGroup }
+									: {} ),
+							} )
 						),
+						averageRating: product.averageRating,
+						reviewsCount: product.reviewsCount,
 						description: product.description,
+						isInstallable: product.isInstallable,
 					} }
 					tracksData={ {
 						position: index + 1,

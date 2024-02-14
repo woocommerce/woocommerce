@@ -96,37 +96,6 @@ function delete_terms_page() {
 }
 
 /**
- * Define URL endpoint for setting up cross-sells products.
- */
-function woocommerce_setup_cross_sells_products() {
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_GET['setup_cross_sells'] ) ) {
-		setup_cross_sells();
-		exit( 'Cross-Sells products set up.' );
-	}
-}
-add_action( 'init', 'woocommerce_setup_cross_sells_products' );
-
-/**
- * Set up Cross-Sells products.
- */
-function setup_cross_sells() {
-	global $wpdb;
-
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$select      = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '128GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
-	$id_products = $wpdb->get_results( $select );
-
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$select         = "SELECT * FROM {$wpdb->prefix}posts WHERE post_title = '32GB USB Stick' AND post_status = 'publish' AND post_type = 'product'";
-	$id_cross_sells = $wpdb->get_results( $select );
-
-	foreach ( $id_products as $id_product ) {
-		update_post_meta( $id_product->ID, '_crosssell_ids', wp_list_pluck( $id_cross_sells, 'ID' ) );
-	}
-}
-
-/**
  * Registers a third party local pickup method, this will have a different ID to the ones we add in the WC Settings.
  */
 function register_third_party_local_pickup_method() {

@@ -1,80 +1,87 @@
 'package: @woocommerce/api':
-- packages/js/api/**/*
+  - packages/js/api/**/*
 
 'package: @woocommerce/e2e-utils':
-- packages/js/e2e-utils/**/*
+  - packages/js/e2e-utils/**/*
 
 'package: @woocommerce/e2e-environment':
-- packages/js/e2e-environment/**/*
+  - packages/js/e2e-environment/**/*
 
 'package: @woocommerce/api-core-tests':
-- packages/js/api-core-tests/**/*
+  - packages/js/api-core-tests/**/*
 
 'package: @woocommerce/e2e-core-tests':
-- packages/js/e2e-core-tests/**/*
+  - packages/js/e2e-core-tests/**/*
 
 'package: @woocommerce/admin-e2e-tests':
-- packages/js/admin-e2e-tests/**/*
+  - packages/js/admin-e2e-tests/**/*
 
 'package: @woocommerce/components':
-- packages/js/components/**/*
+  - packages/js/components/**/*
 
 'package: @woocommerce/csv-export':
-- packages/js/csv-export/**/*
+  - packages/js/csv-export/**/*
 
 'package: @woocommerce/currency':
-- packages/js/currency/**/*
+  - packages/js/currency/**/*
 
 'package: @woocommerce/customer-effort-score':
-- packages/js/customer-effort-score/**/*
+  - packages/js/customer-effort-score/**/*
 
 'package: @woocommerce/data':
-- packages/js/data/**/*
+  - packages/js/data/**/*
 
 'package: @woocommerce/date':
-- packages/js/date/**/*
+  - packages/js/date/**/*
 
 'package: dependency-extraction-webpack-plugin':
-- packages/js/dependency-extraction-webpack-plugin/**/*
+  - packages/js/dependency-extraction-webpack-plugin/**/*
 
 'package: @woocommerce/eslint-plugin':
-- packages/js/eslint-plugin/**/*
+  - packages/js/eslint-plugin/**/*
 
 'package: @woocommerce/experimental':
-- packages/js/experimental/**/*
+  - packages/js/experimental/**/*
 
 'package: @woocommerce/explat':
-- packages/js/explat/**/*
+  - packages/js/explat/**/*
 
 'package: @woocommerce/navigation':
-- packages/js/navigation/**/*
+  - packages/js/navigation/**/*
 
 'package: @woocommerce/number':
-- packages/js/number/**/*
+  - packages/js/number/**/*
 
 'package: @woocommerce/onboarding':
-- packages/js/onboarding/**/*
+  - packages/js/onboarding/**/*
 
 'package: @woocommerce/tracks':
-- packages/js/tracks/**/*
+  - packages/js/tracks/**/*
 
 'plugin: woocommerce':
-- plugins/woocommerce/**/*
+  - plugins/woocommerce/**/*
 
 'plugin: woocommerce beta tester':
-- plugins/woocommerce-beta-tester/**/*
+  - plugins/woocommerce-beta-tester/**/*
 
 'plugin: woo-ai':
-- plugins/woo-ai/**/*
-
-'plugin: woocommerce docs':
-- plugins/woocommerce-docs/**/*
+  - plugins/woo-ai/**/*
 
 'focus: performance tests':
-- plugins/woocommerce/tests/performance/**/*
+  - plugins/woocommerce/tests/performance/**/*
 
 'focus: api tests':
-- plugins/woocommerce/tests/api-core-tests/**/*
+  - plugins/woocommerce/tests/api-core-tests/**/*
 
 'focus: e2e tests':
-- plugins/woocommerce/tests/e2e-pw/**/*
+  - plugins/woocommerce/tests/e2e-pw/**/*
+
+'focus: documentation':
+  - docs/**/*
+
+'tool: monorepo infrastructure':
+  - .github/**/*
+  - bin/**/*
+  - tools/**/*
+  - '**/composer.json'
+  - '**/package.json'

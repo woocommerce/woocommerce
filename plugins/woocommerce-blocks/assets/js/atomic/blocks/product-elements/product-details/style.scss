@@ -1,37 +1,82 @@
-.wp-block-woocommerce-product-details {
-	ul.wc-tabs {
-		list-style: none;
-		padding: 0 0 0 1em;
-		margin: 0 0 1.618em;
-		overflow: hidden;
-		position: relative;
-		border-bottom: 1px solid $gray-200;
+/*
+ * Minimal style.
+ *
+ * We need this selector to work in both the editor and the front-end context, and
+ * to be specific enough to override core's rules being at specificity (0,4,3) `.woocommerce div.product .woocommerce-tabs ul.tabs li`.
+ *
+ * This is why we use the `html body` selector which set the specificity to (0,4,4).
+ */
+html body .wp-block-woocommerce-product-details.is-style-minimal {
+	ul.tabs.wc-tabs {
+		padding: 0;
+		border-bottom-width: 0;
+		border-bottom-color: inherit; /* Backward compatibility for TT3, TT2. */
+
+		&::after,
+		&::before {
+			display: none;
+		}
 
 		li {
-			border: 1px solid $gray-200;
-			display: inline-block;
-			position: relative;
-			z-index: 0;
-			border-radius: $universal-border-radius $universal-border-radius 0 0;
+			color: inherit;
+			background: transparent;
+			border-color: transparent;
+			border-style: solid;
+			border-width: 0;
+			border-bottom-width: 2px;
+			border-radius: 0;
 			margin: 0;
-			padding: 0.5em 1em;
+			padding: 0 1em;
+			display: inline-block;
+			float: none; /* Backward compatibility for TT3, TT2. */
+			font-weight: bold;
+			opacity: 0.65;
 
 			a {
-				display: inline-block;
-				font-weight: 700;
+				padding: 0.5em 0;
+				color: inherit;
+				border: none;
+				text-shadow: none;
 				text-decoration: none;
+				display: inline-block;
+			}
 
-				&:hover {
+			&:hover {
+				opacity: 1;
+
+				a {
+					color: inherit;
+					border: none;
 					text-decoration: none;
 				}
 			}
 
 			&.active {
-				z-index: 2;
+				color: inherit;
+				background: inherit;
+				border-color: inherit;
+				opacity: 1;
 
 				a {
-					text-shadow: inherit;
+					color: inherit;
+					border: none;
+					text-decoration: none;
 				}
+			}
+
+			@media only screen and ( max-width: 768px ) {
+				display: block;
+				border-left-width: 2px;
+				border-bottom-width: 0;
+			}
+
+			&:first-child {
+				margin-left: 0; /* Backward compatibility for TT3, TT2. */
+			}
+
+			&::after,
+			&::before {
+				display: none;
 			}
 		}
 	}

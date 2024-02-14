@@ -79,6 +79,6 @@ class OrderAttribution {
 			// Only show more details toggle if there is more than just the origin.
 			'has_more_details' => array( 'origin' ) !== array_keys( $meta ),
 		);
-		wc_get_template( 'order/attribution-data-fields.php', $template_data );
+		wc_get_template( 'order/attribution-details.php', $template_data );
 	}
 }

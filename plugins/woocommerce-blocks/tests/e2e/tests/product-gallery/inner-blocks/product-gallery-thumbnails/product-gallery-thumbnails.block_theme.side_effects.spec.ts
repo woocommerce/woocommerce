@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { Locator, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -24,6 +25,15 @@ const blockData = {
 	},
 	slug: 'single-product',
 	productPage: '/product/v-neck-t-shirt/',
+};
+
+const changeNumberOfThumbnailsInputValue = async (
+	page: Page,
+	numberOfThumbnailInput: Locator,
+	value: string
+) => {
+	await numberOfThumbnailInput.fill( value );
+	await page.keyboard.press( 'Enter' );
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
@@ -64,10 +74,6 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 
 		await expect( thumbnailsBlock ).toBeVisible();
-
-		// We should refactor this.
-		// eslint-disable-next-line playwright/no-wait-for-timeout
-		await page.waitForTimeout( 500 );
 
 		// Test the default (left) position of thumbnails by cross-checking:
 		// - The Gallery block has the classes "is-layout-flex" and "is-nowrap".
@@ -448,6 +454,49 @@ test.describe( `${ blockData.name }`, () => {
 				);
 
 			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );
+		} );
+
+		test( 'Ensure entered Number of Thumbnails rounds to integer', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			await editor.insertBlock( {
+				name: 'woocommerce/product-gallery',
+			} );
+
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'editor',
+			} );
+
+			await editor.openDocumentSettingsSidebar();
+			const numberOfThumbnailInput = page.getByRole( 'spinbutton', {
+				name: 'Number of Thumbnails',
+			} );
+
+			await changeNumberOfThumbnailsInputValue(
+				page,
+				numberOfThumbnailInput,
+				'4.2'
+			);
+
+			let numberOfThumbnailsOnScreen = await thumbnailsBlock
+				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
+				.all();
+
+			expect( numberOfThumbnailsOnScreen ).toHaveLength( 4 );
+
+			await changeNumberOfThumbnailsInputValue(
+				page,
+				numberOfThumbnailInput,
+				'4.7'
+			);
+
+			numberOfThumbnailsOnScreen = await thumbnailsBlock
+				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
+				.all();
+
+			expect( numberOfThumbnailsOnScreen ).toHaveLength( 5 );
 		} );
 	} );
 } );

@@ -63,7 +63,7 @@ function YOUR_PREFIX_remove_block( BlockInterface $sale_price_block ) {
   $sale_price_block->remove();
 }
 
-add_action( 'woocommerce_block_template_area_product-form_after_remove_block_sale-price', 'YOUR_PREFIX_remove_block' );
+add_action( 'woocommerce_block_template_area_product-form_after_remove_block_product-sale-price', 'YOUR_PREFIX_remove_block' );
 ```
 
 ### Conditionally hiding a block in product editor templates
@@ -76,7 +76,7 @@ function YOUR_PREFIX_hide_block( BlockInterface $sale_price_block ) {
   $sale_price_block->add_hide_condition( 'editedProduct.regular_price < 10' );
 }
 
-add_action( 'woocommerce_block_template_area_product-form_after_add_block_sale-price', 'YOUR_PREFIX_hide_block' );
+add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-sale-price', 'YOUR_PREFIX_hide_block' );
 ```
 
 ### Conditionally disabling a block in product editor templates
@@ -89,10 +89,8 @@ function YOUR_PREFIX_hide_block( BlockInterface $sale_price_block ) {
   $sale_price_block->add_disable_condition( '!editedProduct.regular_price' );
 }
 
-add_action( 'woocommerce_block_template_area_product-form_after_add_block_sale-price', 'YOUR_PREFIX_hide_block' );
+add_action( 'woocommerce_block_template_area_product-form_after_add_block_product-sale-price', 'YOUR_PREFIX_hide_block' );
 ```
-
-
 
 ## Interfaces
 
@@ -102,13 +100,13 @@ Groups are the top-level organizational structure for product editor templates.
 They typically contain one or more sections, though they can also contain
 blocks directly.
 
-#### Methods
+#### GroupInterface Methods
 
-##### `add_section( array $block_config ): SectionInterface`
+-   `add_section( array $block_config ): SectionInterface`
 
 Add a new section to the group.
 
-##### `add_block( array $block_config ): BlockInterface`
+-   `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the group.
 
@@ -118,15 +116,26 @@ Sections are the second-level organizational structure for product editor templa
 They typically contain one or more blocks, though they can also contain sub-sections
 if further organization is needed.
 
-#### Methods
+#### SectionInterface Methods
 
-##### `add_section( array $block_config ): SectionInterface`
+-   `add_subsection( array $block_config ): SubsectionInterface`
 
 Add a new sub-section to the section.
 
-##### `add_block( array $block_config ): BlockInterface`
+-   `add_block( array $block_config ): BlockInterface`
 
 Add a new block to the section.
+
+### SubsectionInterface
+
+Subsections are the third-level organizational structure for product editor templates.
+They typically contain one or more blocks.
+
+#### SubsectionInterface Methods
+
+-   `add_block( array $block_config ): BlockInterface`
+
+Add a new block to the subsection.
 
 ### ProductFormTemplateInterface
 
@@ -134,20 +143,24 @@ All product form templates implement this interface.
 Product form templates are used to define the structure of the product editor form.
 They contain groups as their top-level organizational structure.
 
-#### Methods
+#### ProductFormTemplateInterface Methods
 
-##### `add_group( array $block_config ): GroupInterface`
+-   `add_group( array $block_config ): GroupInterface`
 
 Add a new group to the template.
 
-##### `get_group_by_id( string $group_id ): ?GroupInterface`
+-   `get_group_by_id( string $group_id ): ?GroupInterface`
 
 Gets a group by ID. Returns null if the group does not exist.
 
-##### `get_section_by_id( string $section_id ): ?SectionInterface`
+-   `get_section_by_id( string $section_id ): ?SectionInterface`
 
 Gets a section by ID. Returns null if the section does not exist.
 
-##### `get_block_by_id( string $block_id ): ?BlockInterface`
+-   `get_subsection_by_id( string $subsection_id ): ?SubsectionInterface`
+
+Gets a subsection by ID. Returns null if the subsection does not exist.
+
+-   `get_block_by_id( string $block_id ): ?BlockInterface`
 
 Gets a block by ID. Returns null if the block does not exist.

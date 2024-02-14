@@ -86,7 +86,7 @@ class FileController {
 	 * Class FileController
 	 */
 	public function __construct() {
-		$this->log_directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
+		$this->log_directory = trailingslashit( Constants::get_constant( 'WC_LOG_DIR' ) );
 	}
 
 	/**
@@ -662,6 +662,26 @@ class FileController {
 		}
 
 		return array_slice( $matched_lines, $args['offset'], $args['per_page'] );
+	}
+
+	/**
+	 * Calculate the size, in bytes, of the log directory.
+	 *
+	 * @return int
+	 */
+	public function get_log_directory_size(): int {
+		$bytes = 0;
+		$path  = realpath( $this->log_directory );
+
+		if ( wp_is_writable( $path ) ) {
+			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ) );
+
+			foreach ( $iterator as $file ) {
+				$bytes += $file->getSize();
+			}
+		}
+
+		return $bytes;
 	}
 
 	/**

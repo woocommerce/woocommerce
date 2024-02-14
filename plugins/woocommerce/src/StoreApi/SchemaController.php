@@ -60,6 +60,7 @@ class SchemaController {
 				Schemas\V1\AI\ProductSchema::IDENTIFIER    => Schemas\V1\AI\ProductSchema::class,
 				Schemas\V1\AI\ProductsSchema::IDENTIFIER   => Schemas\V1\AI\ProductsSchema::class,
 				Schemas\V1\AI\BusinessDescriptionSchema::IDENTIFIER => Schemas\V1\AI\BusinessDescriptionSchema::class,
+				Schemas\V1\AI\StoreInfoSchema::IDENTIFIER  => Schemas\V1\AI\StoreInfoSchema::class,
 			],
 		];
 	}

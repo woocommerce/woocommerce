@@ -167,7 +167,7 @@ export function Edit( {
 								dateOnSaleFromGmtValidationError && 'has-error'
 							}
 							help={ dateOnSaleFromGmtValidationError as string }
-							onBlur={ validateDateOnSaleFromGmt }
+							onBlur={ () => validateDateOnSaleFromGmt() }
 						/>
 					</div>
 
@@ -190,7 +190,7 @@ export function Edit( {
 										.toISOString()
 								)
 							}
-							onBlur={ validateDateOnSaleToGmt }
+							onBlur={ () => validateDateOnSaleToGmt() }
 							className={
 								dateOnSaleToGmtValidationError && 'has-error'
 							}

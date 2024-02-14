@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid duplicate templates appearing on the Site Editor when the WooCommerce template and the theme template have been customized by the user

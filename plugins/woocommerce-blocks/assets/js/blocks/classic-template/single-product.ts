@@ -6,16 +6,11 @@ import { isWpVersion } from '@woocommerce/settings';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-title';
 import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-summary';
-import { isExperimentalBuild } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { OnClickCallbackParameter } from './types';
-
-const galleryBlock = isExperimentalBuild()
-	? 'woocommerce/product-gallery'
-	: 'woocommerce/product-image-gallery';
 
 const getBlockifiedTemplate = () =>
 	[
@@ -34,7 +29,7 @@ const getBlockifiedTemplate = () =>
 						justifyContent: 'right',
 						width: '512px',
 					},
-					[ createBlock( galleryBlock ) ]
+					[ createBlock( 'woocommerce/product-image-gallery' ) ]
 				),
 				createBlock( 'core/column', {}, [
 					createBlock( 'core/post-title', {
@@ -55,6 +50,7 @@ const getBlockifiedTemplate = () =>
 		),
 		createBlock( 'woocommerce/product-details', {
 			align: 'wide',
+			className: 'is-style-minimal',
 		} ),
 		createBlock( 'woocommerce/related-products', {
 			align: 'wide',

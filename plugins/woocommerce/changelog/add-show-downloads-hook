@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Adds new hook `woocommerce_order_downloads_table_show_downloads` to control rendering of the downloads table (classic templates only).

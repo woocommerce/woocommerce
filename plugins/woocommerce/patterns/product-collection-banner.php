@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/beach-landscape-sea-coast-nature-person.jpg' );
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix product variation sale_price_dates_to not being set to 23:59:59 when it's set via the variation bulk actions

@@ -16,6 +16,14 @@ class WPConsentAPI {
 
 	use ScriptDebug;
 
+
+	/**
+	 * Identifier of the consent category used for order attribution.
+	 *
+	 * @var string
+	 */
+	public static $consent_category = 'marketing';
+
 	/**
 	 * Register the consent API.
 	 *
@@ -59,7 +67,7 @@ class WPConsentAPI {
 		add_filter(
 			'wc_order_attribution_allow_tracking',
 			function() {
-				return function_exists( 'wp_has_consent' ) && wp_has_consent( 'marketing' );
+				return function_exists( 'wp_has_consent' ) && wp_has_consent( self::$consent_category );
 			}
 		);
 	}
@@ -80,14 +88,25 @@ class WPConsentAPI {
 	 */
 	private function enqueue_consent_api_scripts() {
 		wp_enqueue_script(
-			'wp-consent-api-integration-js',
+			'wp-consent-api-integration',
 			plugins_url(
 				"assets/js/frontend/wp-consent-api-integration{$this->get_script_suffix()}.js",
 				WC_PLUGIN_FILE
 			),
-			array( 'jquery', 'wp-consent-api' ),
+			array( 'wp-consent-api', 'wc-order-attribution' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
+		);
+
+		// Add data for the script above. `wp_enqueue_script` API does not allow data attributes,
+		// so we need a separate script tag and pollute the global scope.
+		wp_add_inline_script(
+			'wp-consent-api-integration',
+			sprintf(
+				'window.wc_order_attribution.params.consentCategory = %s;',
+				wp_json_encode( self::$consent_category )
+			),
+			'before'
 		);
 	}
 }

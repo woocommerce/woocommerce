@@ -446,4 +446,133 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$this->assertCount( 0, $query->orders );
 	}
 
+	/**
+	 * Set up some dummy orders, to help test the search filter.
+	 *
+	 * @return array Order IDs
+	 */
+	private function setup_dummy_orders_for_search_filter() {
+		$customer_order = new \WC_Order();
+		$customer_order->set_billing_first_name( 'Customer name' );
+		$customer_order->set_billing_email( 'customer@woo.test' );
+		$customer_order->set_status( 'completed' );
+		$customer_order->save();
+
+		$test_product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Product name' ) );
+		$test_product->save();
+		$product_order = new WC_Order();
+		$product_order->add_product( $test_product );
+		$product_order->set_status( 'completed' );
+		$product_order->save();
+
+		return array( $customer_order->get_id(), $product_order->get_id() );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with a 'customer' param passed in.
+	 */
+	public function test_query_s_filters_customers() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customers';
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with a 'product' param passed in.
+	 */
+	public function test_query_s_filters_products() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'products';
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'all' param passed in.
+	 */
+	public function test_query_s_filters_all() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => '',
+			'return' => 'ids',
+		);
+
+		// Default search filter is all, so we don't need to set it explicitly.
+
+		$query_args['s'] = 'Product';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+
+		$query_args['s'] = 'Customer';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = 'name';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( $orders, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'order_id' param passed in.
+	 */
+	public function test_query_s_filters_order_id() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => $orders[0],
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'order_id';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = $orders[1];
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'customer_email' param passed in.
+	 */
+	public function test_query_s_filters_customer_email() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => 'customer@woo.t',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customer_email';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+	}
 }

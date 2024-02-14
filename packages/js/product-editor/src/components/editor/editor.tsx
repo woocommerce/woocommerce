@@ -11,13 +11,8 @@ import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
-import {
-	EditorSettings,
-	EditorBlockListSettings,
-} from '@wordpress/block-editor';
-import { Template } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import { Popover } from '@wordpress/components';
-import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -36,28 +31,28 @@ import { InterfaceSkeleton } from '@wordpress/interface';
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { ValidationProvider } from '../../contexts/validation-context';
-
-export type ProductEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
-> & {
-	templates: Record< string, Template[] >;
-};
-
-type EditorProps = {
-	product: Pick< Product, 'id' | 'type' >;
-	productType?: string;
-	settings: ProductEditorSettings | undefined;
-};
+import { EditorProps } from './types';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
 export function Editor( {
 	product,
 	productType = 'product',
 	settings,
 }: EditorProps ) {
+	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+
+	const productId = product?.id || -1;
+
+	// Check if the prepublish sidebar is open from the store.
+	const isPrepublishPanelOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPrepublishPanelOpen();
+	}, [] );
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
@@ -65,32 +60,47 @@ export function Editor( {
 				<EntityProvider
 					kind="postType"
 					type={ productType }
-					id={ product.id }
+					id={ productId }
 				>
 					<ShortcutProvider>
 						<ValidationProvider initialValue={ product }>
-							<InterfaceSkeleton
-								header={
-									<Header
-										onTabSelect={ setSelectedTab }
-										productType={ productType }
-									/>
-								}
-								content={
-									<>
-										<BlockEditor
-											settings={ settings }
+							<EditorLoadingContext.Provider
+								value={ isEditorLoading }
+							>
+								<InterfaceSkeleton
+									header={
+										<Header
+											onTabSelect={ setSelectedTab }
 											productType={ productType }
-											productId={ product.id }
-											context={ {
-												selectedTab,
-												postType: productType,
-												postId: product.id,
-											} }
 										/>
-									</>
-								}
-							/>
+									}
+									content={
+										<>
+											<BlockEditor
+												settings={ settings }
+												postType={ productType }
+												productId={ productId }
+												context={ {
+													selectedTab,
+													postType: productType,
+													postId: productId,
+												} }
+												setIsEditorLoading={
+													setIsEditorLoading
+												}
+											/>
+										</>
+									}
+									actions={
+										isPrepublishPanelOpen && (
+											<PrepublishPanel
+												productType={ productType }
+												productId={ productId }
+											/>
+										)
+									}
+								/>
+							</EditorLoadingContext.Provider>
 							<Popover.Slot />
 						</ValidationProvider>
 					</ShortcutProvider>

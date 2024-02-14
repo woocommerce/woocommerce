@@ -4,9 +4,9 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\Images\Pexels;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-use Automattic\WooCommerce\Blocks\Patterns\PatternUpdater;
-use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
+use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 
 /**
  * Registers patterns under the `./patterns/` directory and updates their content.
@@ -243,6 +243,9 @@ class BlockPatterns {
 				for each page load. This way we only do it once on registration.
 				For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
 			*/
+
+			$content = array();
+			$images  = array();
 			if ( ! is_null( $pattern_data_from_dictionary ) ) {
 				$content = $pattern_data_from_dictionary['content'];
 				$images  = $pattern_data_from_dictionary['images'] ?? array();
@@ -366,13 +369,13 @@ class BlockPatterns {
 			return $images->get_error_message();
 		}
 
-		$populate_patterns = ( new PatternUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
+		$populate_patterns = ( new UpdatePatterns() )->generate_content( $ai_connection, $token, $images, $business_description );
 
 		if ( is_wp_error( $populate_patterns ) ) {
 			return $populate_patterns->get_error_message();
 		}
 
-		$populate_products = ( new ProductUpdater() )->generate_content( $ai_connection, $token, $images, $business_description );
+		$populate_products = ( new UpdateProducts() )->generate_content( $ai_connection, $token, $images, $business_description );
 
 		if ( is_wp_error( $populate_products ) ) {
 			return $populate_products->get_error_message();
@@ -391,7 +394,7 @@ class BlockPatterns {
 	 */
 	private function get_pattern_from_dictionary( $dictionary, $slug ) {
 		foreach ( $dictionary as $pattern_dictionary ) {
-			if ( $pattern_dictionary['slug'] === $slug ) {
+			if ( isset( $pattern_dictionary['slug'] ) && $pattern_dictionary['slug'] === $slug ) {
 				return $pattern_dictionary;
 			}
 		}

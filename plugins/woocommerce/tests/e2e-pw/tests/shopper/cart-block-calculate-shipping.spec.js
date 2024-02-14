@@ -8,12 +8,13 @@ const firstProductPrice = '10.00';
 const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
-const doubleFirstProductWithFlatRate = +firstProductPrice * 2 + 5;
 const twoProductsTotal = +firstProductPrice + +secondProductPrice;
 const twoProductsWithFlatRate = twoProductsTotal + 5;
 
-const pageTitle = 'Cart Block';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageSlug = cartBlockPageTitle
+	.replace( / /gi, '-' )
+	.toLowerCase();
 
 const shippingZoneNameES = 'Netherlands Free Shipping';
 const shippingCountryNL = 'NL';
@@ -89,7 +90,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			method_id: 'free_shipping',
 			settings: {
 				title: 'Free shipping',
-			}
+			},
 		} );
 		await api.post( `shipping/zones/${ shippingZonePTId }/methods`, {
 			method_id: 'flat_rate',
@@ -102,7 +103,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			method_id: 'local_pickup',
 			settings: {
 				title: 'Local pickup',
-			}
+			},
 		} );
 
 		// confirm that we allow shipping to any country
@@ -150,7 +151,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( cartBlockPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -166,14 +167,14 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ cartBlockPageTitle } is now live.` )
 		).toBeVisible();
 	} );
 
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
 		page,
 	} ) => {
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Netherlands
 		await page
@@ -205,7 +206,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 		page,
 	} ) => {
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
 		await page
@@ -243,7 +244,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			)
 		).toContainText( '$0.00' );
 		let totalPrice = await page
-			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
 			.last()
 			.textContent();
 		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
@@ -258,7 +261,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'should show correct total cart block price after updating quantity', async ( {
 		page,
 	} ) => {
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
 		await page
@@ -277,7 +280,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			.filter( { hasText: '＋', exact: true } )
 			.click();
 		let totalPrice = await page
-			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
 			.last()
 			.textContent();
 		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
@@ -295,7 +300,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
 		await page.waitForLoadState( 'networkidle' );
 
-		await page.goto( pageSlug );
+		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
 		await page
@@ -318,7 +323,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			)
 		).toContainText( '$5.00' );
 		let totalPrice = await page
-			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
 			.last()
 			.textContent();
 		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
@@ -339,7 +346,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			)
 		).toContainText( '$0.00' );
 		totalPrice = await page
-			.locator( '.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value' )
+			.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
 			.last()
 			.textContent();
 		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );

@@ -47,7 +47,7 @@ export const createChangelog = async (
 		const changelogContents = `*** WooCommerce ***
 
 ${ date } - Version ${ version }
-* Update - Deploy of WOoCommerce ${ version }
+* Update - Deploy of WooCommerce ${ version }
 `;
 
 		await writeFile( filePath, changelogContents );

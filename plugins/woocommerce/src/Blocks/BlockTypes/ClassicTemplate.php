@@ -28,15 +28,12 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 */
 	protected $api_version = '2';
 
-	const FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM = 'filter_stock_status';
-
 	/**
 	 * Initialize this block.
 	 */
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
-		add_filter( 'woocommerce_product_query_meta_query', array( $this, 'filter_products_by_stock' ) );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
 	}
 
@@ -375,47 +372,6 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		// If there is a tag, and it has a class already, add the class attribute.
 		$pattern_get_class = '/(?<=class=\"|\')[^"|\']+(?=\"|\')/';
 		return preg_replace( $pattern_get_class, '$0 ' . $align_class_and_style['class'], $content, 1 );
-	}
-
-
-	/**
-	 * Filter products by stock status when as query param there is "filter_stock_status"
-	 *
-	 * @param array $meta_query Meta query.
-	 * @return array
-	 */
-	public function filter_products_by_stock( $meta_query ) {
-		global $wp_query;
-
-		if (
-			is_admin() ||
-			! $wp_query->is_main_query() ||
-			! isset( $_GET[ self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		) {
-			return $meta_query;
-		}
-
-		$stock_status = array_keys( wc_get_product_stock_status_options() );
-		$values       = sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PRODUCTS_BY_STOCK_QUERY_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		$values_to_array = explode( ',', $values );
-
-		$filtered_values = array_filter(
-			$values_to_array,
-			function( $value ) use ( $stock_status ) {
-				return in_array( $value, $stock_status, true );
-			}
-		);
-
-		if ( ! empty( $filtered_values ) ) {
-
-			$meta_query[] = array(
-				'key'     => '_stock_status',
-				'value'   => $filtered_values,
-				'compare' => 'IN',
-			);
-		}
-		return $meta_query;
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Adds a search field to the log files list table screen that will do a partial match string search on the contents of all the files currently shown in the list table

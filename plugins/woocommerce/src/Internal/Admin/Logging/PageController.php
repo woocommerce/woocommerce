@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController, FileListTable, SearchListTable };
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Status;
@@ -27,6 +27,13 @@ class PageController {
 	private $file_controller;
 
 	/**
+	 * Instance of Settings.
+	 *
+	 * @var Settings
+	 */
+	private $settings;
+
+	/**
 	 * Instance of FileListTable or SearchListTable.
 	 *
 	 * @var FileListTable|SearchListTable
@@ -39,13 +46,16 @@ class PageController {
 	 * @internal
 	 *
 	 * @param FileController $file_controller Instance of FileController.
+	 * @param Settings       $settings        Instance of Settings.
 	 *
 	 * @return void
 	 */
 	final public function init(
-		FileController $file_controller
+		FileController $file_controller,
+		Settings $settings
 	): void {
 		$this->file_controller = $file_controller;
+		$this->settings        = $settings;
 
 		$this->init_hooks();
 	}
@@ -56,8 +66,61 @@ class PageController {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'setup_screen_options' ) );
-		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'handle_list_table_bulk_actions' ) );
+		self::add_action( 'load-woocommerce_page_wc-status', array( $this, 'maybe_do_logs_tab_action' ), 2 );
+
+		self::add_action( 'wc_logs_load_tab', array( $this, 'setup_screen_options' ) );
+		self::add_action( 'wc_logs_load_tab', array( $this, 'handle_list_table_bulk_actions' ) );
+		self::add_action( 'wc_logs_load_tab', array( $this, 'notices' ) );
+	}
+
+	/**
+	 * Determine if the current tab on the Status page is Logs, and if so, fire an action.
+	 *
+	 * @return void
+	 */
+	private function maybe_do_logs_tab_action(): void {
+		$is_logs_tab = 'logs' === filter_input( INPUT_GET, 'tab' );
+
+		if ( $is_logs_tab ) {
+			$params = $this->get_query_params( array( 'view' ) );
+
+			/**
+			 * Action fires when the Logs tab starts loading.
+			 *
+			 * @param string $view The current view within the Logs tab.
+			 *
+			 * @since 8.6.0
+			 */
+			do_action( 'wc_logs_load_tab', $params['view'] );
+		}
+	}
+
+	/**
+	 * Notices to display on Logs screens.
+	 *
+	 * @return void
+	 */
+	private function notices() {
+		if ( ! $this->settings->logging_is_enabled() ) {
+			add_action(
+				'admin_notices',
+				function() {
+					?>
+					<div class="notice notice-warning">
+						<p>
+							<?php
+							printf(
+								// translators: %s is a URL to another admin screen.
+								wp_kses_post( __( 'Logging is disabled. It can be enabled in <a href="%s">Logs Settings</a>.', 'woocommerce' ) ),
+								esc_url( add_query_arg( 'view', 'settings', $this->get_logs_tab_url() ) )
+							);
+							?>
+						</p>
+					</div>
+					<?php
+				}
+			);
+		}
 	}
 
 	/**
@@ -76,39 +139,82 @@ class PageController {
 	}
 
 	/**
-	 * Determine the default log handler.
-	 *
-	 * @return string
-	 */
-	public function get_default_handler(): string {
-		$handler = Constants::get_constant( 'WC_LOG_HANDLER' );
-
-		if ( is_null( $handler ) || ! class_exists( $handler ) ) {
-			$handler = WC_Log_Handler_File::class;
-		}
-
-		return $handler;
-	}
-
-	/**
 	 * Render the "Logs" tab, depending on the current default log handler.
 	 *
 	 * @return void
 	 */
 	public function render(): void {
-		$handler = $this->get_default_handler();
+		$handler = $this->settings->get_default_handler();
+		$params  = $this->get_query_params( array( 'view' ) );
+
+		$this->render_section_nav();
+
+		if ( 'settings' === $params['view'] ) {
+			$this->settings->render_form();
+
+			return;
+		}
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
 				$this->render_filev2();
-				break;
-			case 'WC_Log_Handler_DB':
+				return;
+			case WC_Log_Handler_DB::class:
 				WC_Admin_Status::status_logs_db();
-				break;
-			default:
+				return;
+			case WC_Log_Handler_File::class:
 				WC_Admin_Status::status_logs_file();
-				break;
+				return;
 		}
+
+		/**
+		 * Action fires only if there is not a built-in rendering method for the current default log handler.
+		 *
+		 * This is intended as a way for extensions to render log views for custom handlers.
+		 *
+		 * @param string $handler
+		 *
+		 * @since 8.6.0
+		 */
+		do_action( 'wc_logs_render_page', $handler );
+	}
+
+	/**
+	 * Render navigation to switch between logs browsing and settings.
+	 *
+	 * @return void
+	 */
+	private function render_section_nav(): void {
+		$params       = $this->get_query_params( array( 'view' ) );
+		$browse_url   = $this->get_logs_tab_url();
+		$settings_url = add_query_arg( 'view', 'settings', $this->get_logs_tab_url() );
+
+		?>
+		<ul class="subsubsub">
+			<li>
+				<?php
+				printf(
+					'<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( $browse_url ),
+					'settings' !== $params['view'] ? ' class="current"' : '',
+					esc_html__( 'Browse', 'woocommerce' )
+				);
+				?>
+				|
+			</li>
+			<li>
+				<?php
+				printf(
+					'<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( $settings_url ),
+					'settings' === $params['view'] ? ' class="current"' : '',
+					esc_html__( 'Settings', 'woocommerce' )
+				);
+				?>
+			</li>
+		</ul>
+		<br class="clear">
+		<?php
 	}
 
 	/**
@@ -294,6 +400,17 @@ class PageController {
 				?>
 			<?php endwhile; ?>
 		</section>
+		<script>
+			// Clear the line number hash and highlight with a click.
+			document.documentElement.addEventListener( 'click', ( event ) => {
+				if ( window.location.hash && ! event.target.classList.contains( 'line-anchor' ) ) {
+					let scrollPos = document.documentElement.scrollTop;
+					window.location.hash = '';
+					document.documentElement.scrollTop = scrollPos;
+					history.replaceState( null, '', window.location.pathname + window.location.search );
+				}
+			} );
+		</script>
 		<?php
 	}
 
@@ -303,7 +420,7 @@ class PageController {
 	 * @return void
 	 */
 	private function render_search_results_view(): void {
-		$params     = $this->get_query_params( array( 'order', 'orderby', 'search', 'source', 'view' ) );
+		$params     = $this->get_query_params( array( 'view' ) );
 		$list_table = $this->get_list_table( $params['view'] );
 
 		$list_table->prepare_items();
@@ -380,7 +497,7 @@ class PageController {
 				'view'    => array(
 					'filter'  => FILTER_VALIDATE_REGEXP,
 					'options' => array(
-						'regexp'  => '/^(list_files|single_file|search_results)$/',
+						'regexp'  => '/^(list_files|single_file|search_results|settings)$/',
 						'default' => $defaults['view'],
 					),
 				),
@@ -423,17 +540,18 @@ class PageController {
 	/**
 	 * Register screen options for the logging views.
 	 *
+	 * @param string $view The current view within the Logs tab.
+	 *
 	 * @return void
 	 */
-	private function setup_screen_options(): void {
-		$params     = $this->get_query_params( array( 'view' ) );
-		$handler    = $this->get_default_handler();
+	private function setup_screen_options( string $view ): void {
+		$handler    = $this->settings->get_default_handler();
 		$list_table = null;
 
 		switch ( $handler ) {
 			case LogHandlerFileV2::class:
-				if ( in_array( $params['view'], array( 'list_files', 'search_results' ), true ) ) {
-					$list_table = $this->get_list_table( $params['view'] );
+				if ( in_array( $view, array( 'list_files', 'search_results' ), true ) ) {
+					$list_table = $this->get_list_table( $view );
 				}
 				break;
 			case 'WC_Log_Handler_DB':
@@ -458,22 +576,24 @@ class PageController {
 	/**
 	 * Process bulk actions initiated from the log file list table.
 	 *
+	 * @param string $view The current view within the Logs tab.
+	 *
 	 * @return void
 	 */
-	private function handle_list_table_bulk_actions(): void {
+	private function handle_list_table_bulk_actions( string $view ): void {
 		// Bail if we're not using the file handler.
-		if ( LogHandlerFileV2::class !== $this->get_default_handler() ) {
+		if ( LogHandlerFileV2::class !== $this->settings->get_default_handler() ) {
 			return;
 		}
 
-		$params = $this->get_query_params( array( 'file_id', 'view' ) );
+		$params = $this->get_query_params( array( 'file_id' ) );
 
 		// Bail if this is not the list table view.
-		if ( 'list_files' !== $params['view'] ) {
+		if ( 'list_files' !== $view ) {
 			return;
 		}
 
-		$action = $this->get_list_table( $params['view'] )->current_action();
+		$action = $this->get_list_table( $view )->current_action();
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : $this->get_logs_tab_url();
@@ -562,10 +682,9 @@ class PageController {
 	 * @return string
 	 */
 	private function format_line( string $line, int $line_number ): string {
-		$severity_levels = WC_Log_Levels::get_all_severity_levels();
-		$classes         = array( 'line' );
+		$classes = array( 'line' );
 
-		$line = esc_html( trim( $line ) );
+		$line = esc_html( $line );
 		if ( empty( $line ) ) {
 			$line = '&nbsp;';
 		}
@@ -583,11 +702,11 @@ class PageController {
 			$has_timestamp = true;
 		}
 
-		if ( isset( $segments[1] ) && in_array( strtolower( $segments[1] ), $severity_levels, true ) ) {
+		if ( isset( $segments[1] ) && WC_Log_Levels::is_valid_level( strtolower( $segments[1] ) ) ) {
 			$segments[1] = sprintf(
 				'<span class="%1$s">%2$s</span>',
 				esc_attr( 'log-level log-level--' . strtolower( $segments[1] ) ),
-				esc_html( $segments[1] )
+				esc_html( WC_Log_Levels::get_level_label( strtolower( $segments[1] ) ) )
 			);
 			$has_level   = true;
 		}
@@ -600,7 +719,7 @@ class PageController {
 					$context    = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
 
 					$message_chunks[1] = sprintf(
-						'<details><summary>%1$s</summary><pre>%2$s</pre></details>',
+						'<details><summary>%1$s</summary>%2$s</details>',
 						esc_html__( 'Additional context', 'woocommerce' ),
 						wp_json_encode( $context, JSON_PRETTY_PRINT )
 					);

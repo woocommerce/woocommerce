@@ -1,15 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
+const { test } = require( './block-editor-fixtures' );
+const { expect } = require( '@playwright/test' );
 
-const {
-	clickOnTab,
-	isBlockProductEditorEnabled,
-	toggleBlockProductEditor,
-} = require( '../../../../utils/simple-products' );
+const { clickOnTab } = require( '../../../../utils/simple-products' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
-
-let isNewProductEditorEnabled = false;
 
 const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
 
@@ -24,120 +19,73 @@ test.describe.configure( { mode: 'serial' } );
 
 test.describe( 'General tab', () => {
 	test.describe( 'Simple product form', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-
-		test.beforeEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
-		} );
-
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
-		} );
-
 		test( 'renders each block without error', async ( { page } ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
 			await clickOnTab( 'General', page );
 			await page.getByPlaceholder( 'e.g. 12 oz Coffee Mug' ).isVisible();
 
-			expect( page.locator( '.block-editor-warning' ) ).toHaveCount( 0 );
+			await expect( page.locator( '.block-editor-warning' ) ).toHaveCount(
+				0
+			);
 		} );
 	} );
 
 	test.describe( 'Create product', () => {
 		let productId;
-		test.use( { storageState: process.env.ADMINSTATE } );
 
 		test.skip(
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
 		);
 
-		test.beforeEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
+		test( 'can create a simple product', async ( { page } ) => {
+			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			await clickOnTab( 'General', page );
+			await page
+				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
+				.fill( productData.name );
+			await page
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
+				.last()
+				.fill( productData.summary );
+			await page
+				.locator(
+					'[id^="wp-block-woocommerce-product-regular-price-field"]'
+				)
+				.first()
+				.fill( productData.productPrice );
+			await page
+				.locator(
+					'[id^="wp-block-woocommerce-product-sale-price-field"]'
+				)
+				.first()
+				.fill( productData.salePrice );
+
+			await page
+				.locator( '.woocommerce-product-header__actions' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
+
+			const element = page.locator( 'div.components-snackbar__content' );
+			const textContent = await element.innerText();
+
+			await expect( textContent ).toMatch( /Product published/ );
+
+			const title = page.locator( '.woocommerce-product-header__title' );
+
+			// Save product ID
+			const productIdRegex = /product%2F(\d+)/;
+			const url = page.url();
+			const productIdMatch = productIdRegex.exec( url );
+			productId = productIdMatch ? productIdMatch[ 1 ] : null;
+
+			await expect( productId ).toBeDefined();
+			await expect( title ).toHaveText( productData.name );
 		} );
-
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
-			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
-		} );
-
-test( 'can create a simple product', async ( { page } ) => {
-	await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
-	await clickOnTab( 'General', page );
-	await page
-		.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
-		.fill( productData.name );
-	await page
-		.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
-		.last()
-		.fill( productData.summary );
-	await page
-		.locator(
-			'[id^="wp-block-woocommerce-product-regular-price-field"]'
-		)
-		.first()
-		.fill( productData.productPrice );
-	await page
-		.locator(
-			'[id^="wp-block-woocommerce-product-sale-price-field"]'
-		)
-		.first()
-		.fill( productData.salePrice );
-
-	await page
-		.locator( '.woocommerce-product-header__actions' )
-		.getByRole( 'button', {
-			name: 'Add',
-		} )
-		.click();
-
-	const element = await page.locator(
-		'div.components-snackbar__content'
-	);
-	const textContent = await element.innerText();
-
-	await expect( textContent ).toMatch( /Product added/ );
-
-	const title = await page.locator(
-		'.woocommerce-product-header__title'
-	);
-
-	// Save product ID
-	const productIdRegex = /product%2F(\d+)/;
-	const url = await page.url();
-	const productIdMatch = productIdRegex.exec( url );
-	productId = productIdMatch ? productIdMatch[ 1 ] : null;
-
-	await expect( productId ).toBeDefined();
-	await expect( title ).toHaveText( productData.name );
-} );
 		test( 'can not create a product with duplicated SKU', async ( {
 			page,
 		} ) => {
@@ -147,7 +95,9 @@ test( 'can create a simple product', async ( { page } ) => {
 				.locator( '//input[@placeholder="e.g. 12 oz Coffee Mug"]' )
 				.fill( productData.name );
 			await page
-				.locator( '[data-template-block-id="basic-details"] .components-summary-control' )
+				.locator(
+					'[data-template-block-id="basic-details"] .components-summary-control'
+				)
 				.fill( productData.summary );
 			await page
 				.locator(
@@ -158,13 +108,11 @@ test( 'can create a simple product', async ( { page } ) => {
 			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
-					name: 'Add',
+					name: 'Publish',
 				} )
 				.click();
 
-			const element = await page.locator(
-				'div.components-snackbar__content'
-			);
+			const element = page.locator( 'div.components-snackbar__content' );
 			const textContent = await element.innerText();
 
 			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
@@ -172,10 +120,10 @@ test( 'can create a simple product', async ( { page } ) => {
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
-			await page.goto( `/?post_type=product&p=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
-			await expect( page.getByRole( 'heading', { name: productData.name } ) ).toBeVisible();
+			await page.goto( `/?post_type=product&p=${ productId }` );
+			await expect(
+				page.getByRole( 'heading', { name: productData.name } )
+			).toBeVisible();
 			const productPriceElements = await page
 				.locator( '.summary .woocommerce-Price-amount' )
 				.all();
@@ -201,10 +149,9 @@ test( 'can create a simple product', async ( { page } ) => {
 			await page
 				.locator( `a.remove[data-product_id='${ productId }']` )
 				.click();
-			await page.waitForLoadState( 'networkidle' );
 			await expect(
 				page.locator( `a.remove[data-product_id='${ productId }']` )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );

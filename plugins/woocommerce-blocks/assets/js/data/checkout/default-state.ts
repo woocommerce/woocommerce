@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { isSameAddress } from '@woocommerce/base-utils';
+import { AdditionalValues } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -31,11 +32,13 @@ export type CheckoutState = {
 	prefersCollection?: boolean | undefined;
 	// Custom checkout data passed to the store API on processing.
 	extensionData: Record< string, Record< string, unknown > >;
+	// Additional fields values that are collected on Checkout.
+	additionalFields: AdditionalValues;
 };
 
 export const defaultState: CheckoutState = {
 	redirectUrl: '',
-	status: STATUS.PRISTINE,
+	status: STATUS.IDLE,
 	hasError: false,
 	orderId: checkoutData.order_id,
 	customerId: checkoutData.customer_id,
@@ -48,4 +51,5 @@ export const defaultState: CheckoutState = {
 	shouldCreateAccount: false,
 	prefersCollection: undefined,
 	extensionData: {},
+	additionalFields: checkoutData.additional_fields || {},
 };

@@ -6,8 +6,6 @@
  * Block Types: core/query/woocommerce/product-query
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-
 $first_title  = $content['titles'][0]['default'] ?? '';
 $first_button = $content['buttons'][0]['default'] ?? '';
 ?>

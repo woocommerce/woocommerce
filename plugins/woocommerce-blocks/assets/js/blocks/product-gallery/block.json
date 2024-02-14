@@ -3,7 +3,7 @@
 	"apiVersion": 2,
 	"name": "woocommerce/product-gallery",
 	"version": "1.0.0",
-	"title": "Product Gallery",
+	"title": "Product Gallery (Beta)",
 	"description": "Showcase your products relevant images and media.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],

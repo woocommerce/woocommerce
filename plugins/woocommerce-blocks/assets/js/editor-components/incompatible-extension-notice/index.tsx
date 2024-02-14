@@ -59,7 +59,7 @@ export function IncompatibleExtensionsNotice( {
 						),
 						{
 							a: (
-								<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-support-status/" />
+								<ExternalLink href="https://woo.com/document/cart-checkout-blocks-status/" />
 							),
 						}
 				  )
@@ -75,7 +75,7 @@ export function IncompatibleExtensionsNotice( {
 						{
 							strong: <strong />,
 							a: (
-								<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-support-status/" />
+								<ExternalLink href="https://woo.com/document/cart-checkout-blocks-status/" />
 							),
 						}
 				  ) }
@@ -144,6 +144,7 @@ export function IncompatibleExtensionsNotice( {
 					<SwitchToClassicShortcodeButton
 						block={ block }
 						clientId={ clientId }
+						type={ 'incompatible' }
 					/>
 				</div>
 			</div>

@@ -160,7 +160,7 @@ export const getVersionCommand = new Command( 'get-version' )
 			setOutput( 'monthlyMilestone', monthlyDevelopment.version );
 			setOutput(
 				'acceleratedReleaseDate',
-				acceleratedDevelopment.release.toISODate()
+				acceleratedRelease.release.toISODate()
 			);
 		}
 

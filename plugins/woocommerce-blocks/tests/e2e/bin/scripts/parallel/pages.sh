@@ -14,29 +14,29 @@ wp option update woocommerce_shop_page_id $post_id
 
 post_id=$(wp post create \
 	--porcelain \
-	--menu_order=1 \
+	--menu_order=2 \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
-	--post_title='Cart block' \
+	--post_title='Cart' \
 	${script_dir}/cart.html
 )
 wp option update woocommerce_cart_page_id $post_id
 
 post_id=$(wp post create \
 	--porcelain \
-	--menu_order=2 \
+	--menu_order=3 \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
-	--post_title='Checkout block' \
+	--post_title='Checkout' \
 	${script_dir}/checkout.html
 )
 wp option update woocommerce_checkout_page_id $post_id
 
 post_id=$(wp post create \
 	--porcelain \
-	--menu_order=3 \
+	--menu_order=4 \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
@@ -47,7 +47,7 @@ wp option update woocommerce_myaccount_page_id $post_id
 
 post_id=$(wp post create \
 	--porcelain \
-	--menu_order=4 \
+	--menu_order=5 \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
@@ -56,13 +56,23 @@ wp option update woocommerce_terms_page_id $post_id
 
 post_id=$(wp post create \
 	--porcelain \
-	--menu_order=5 \
+	--menu_order=6 \
 	--post_type=page \
 	--post_status=publish \
 	--post_author=1 \
 	--post_title='Privacy'
 )
 wp option update wp_page_for_privacy_policy $post_id
+
+post_id=$(wp post create \
+	--porcelain \
+	--menu_order=7 \
+	--post_type=page \
+	--post_status=publish \
+	--post_author=1 \
+	--post_title='Mini Cart' \
+	${script_dir}/mini-cart.html
+)
 
 # Create renaming WooCommerce pages using tool
 wp wc tool run install_pages --user=1

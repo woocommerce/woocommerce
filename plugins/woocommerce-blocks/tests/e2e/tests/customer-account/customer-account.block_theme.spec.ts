@@ -17,13 +17,6 @@ const blockData = {
 	},
 };
 
-const publishAndVisitPost = async ( { page, editor } ) => {
-	await editor.publishPost();
-	const url = new URL( page.url() );
-	const postId = url.searchParams.get( 'post' );
-	await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
-};
-
 const selectTextOnlyOption = async ( { page } ) => {
 	await page
 		.locator( blockData.selectors.editor.iconOptions )
@@ -54,13 +47,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
+		editorUtils,
 	} ) => {
 		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectTextOnlyOption( { page } );
 
-		await publishAndVisitPost( { page, editor } );
+		await editorUtils.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -77,13 +71,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
+		editorUtils,
 	} ) => {
 		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconOnlyOption( { page } );
 
-		await publishAndVisitPost( { page, editor } );
+		await editorUtils.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -100,13 +95,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		page,
 		frontendUtils,
+		editorUtils,
 	} ) => {
 		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: blockData.name } );
 
 		await selectIconAndTextOption( { page } );
 
-		await publishAndVisitPost( { page, editor } );
+		await editorUtils.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( blockData.name );
 

@@ -59,6 +59,7 @@ const CheckoutProcessor = () => {
 		shouldCreateAccount,
 		extensionData,
 		customerId,
+		additionalFields,
 	} = useSelect( ( select ) => {
 		const store = select( CHECKOUT_STORE_KEY );
 		return {
@@ -71,6 +72,7 @@ const CheckoutProcessor = () => {
 			shouldCreateAccount: store.getShouldCreateAccount(),
 			extensionData: store.getExtensionData(),
 			customerId: store.getCustomerId(),
+			additionalFields: store.getAdditionalFields(),
 		};
 	} );
 
@@ -252,6 +254,7 @@ const CheckoutProcessor = () => {
 			billing_address: emptyHiddenAddressFields(
 				currentBillingAddress.current
 			),
+			additional_fields: additionalFields,
 			customer_note: orderNotes,
 			create_account: shouldCreateAccount,
 			...paymentData,
@@ -325,6 +328,7 @@ const CheckoutProcessor = () => {
 		orderNotes,
 		shouldCreateAccount,
 		extensionData,
+		additionalFields,
 		cartNeedsShipping,
 		receiveCartContents,
 		__internalSetHasError,

@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\AI;
 
-use Automattic\WooCommerce\Blocks\Patterns\ProductUpdater;
+use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 
 /**
@@ -31,6 +31,15 @@ class Product extends AbstractRoute {
 	 * @return string
 	 */
 	public function get_path() {
+		return self::get_path_regex();
+	}
+
+	/**
+	 * Get the path of this rest route.
+	 *
+	 * @return string
+	 */
+	public static function get_path_regex() {
 		return '/ai/product';
 	}
 
@@ -69,7 +78,7 @@ class Product extends AbstractRoute {
 	 * @return bool|string|\WP_Error|\WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$product_updater     = new ProductUpdater();
+		$product_updater     = new UpdateProducts();
 		$product_information = $request['products_information'] ?? array();
 
 		if ( empty( $product_information ) ) {

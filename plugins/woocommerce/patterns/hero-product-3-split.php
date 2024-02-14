@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $main_title   = $content['titles'][3]['default'] ?? '';
 $first_title  = $content['titles'][0]['default'] ?? '';

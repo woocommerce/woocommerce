@@ -35,6 +35,10 @@ export const ColorPanel = () => {
 				'core/button': {
 					color: {},
 				},
+				// Reset the "core/heading" color that may have been set via predefined color palette to ensure it uses the custom heading color.
+				'core/heading': {
+					color: {},
+				},
 			},
 		} );
 		setUserConfig( ( currentConfig ) => ( {

@@ -817,23 +817,24 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Add extra package data to array.
-		if ( count( $packages ) ) {
-			$packages = array_map(
-				function( $key, $package, $index ) {
-					$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-					$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-					return $package;
-				},
-				array_keys( $packages ),
-				$packages,
-				range( 1, count( $packages ) )
-			);
+		// Return early if invalid object supplied by the filter or no packages.
+		if ( ! is_array( $packages ) || empty( $packages ) ) {
+			return [];
 		}
 
-		$packages = $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
+		// Add extra package data to array.
+		$packages = array_map(
+			function( $key, $package, $index ) {
+				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
+				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
+				return $package;
+			},
+			array_keys( $packages ),
+			$packages,
+			range( 1, count( $packages ) )
+		);
 
-		return $packages;
+		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
 	}
 
 	/**
@@ -877,6 +878,9 @@ class CartController {
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
+		if ( ! is_string( $rate_id ) ) {
+			return;
+		}
 		$cart                        = $this->get_cart_instance();
 		$session_data                = wc()->session->get( 'chosen_shipping_methods' ) ? wc()->session->get( 'chosen_shipping_methods' ) : [];
 		$session_data[ $package_id ] = $rate_id;

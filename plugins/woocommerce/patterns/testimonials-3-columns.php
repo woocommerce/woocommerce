@@ -5,8 +5,6 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
-
 $main_header        = $content['titles'][3]['default'] ?? '';
 $first_review       = $content['titles'][0]['default'] ?? '';
 $second_review      = $content['titles'][1]['default'] ?? '';

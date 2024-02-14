@@ -20,7 +20,48 @@ import { ProductCollectionQuery } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
-const label = __( 'Inherit query from template', 'woocommerce' );
+const label = __( 'Sync with current query', 'woocommerce' );
+
+const productArchiveHelpText = __(
+	'Enable to adjust the displayed products based on the current template and any applied filters.',
+	'woocommerce'
+);
+
+const productsByCategoryHelpText = __(
+	'Enable to adjust the displayed products based on the current category and any applied filters.',
+	'woocommerce'
+);
+
+const productsByTagHelpText = __(
+	'Enable to adjust the displayed products based on the current tag and any applied filters.',
+	'woocommerce'
+);
+
+const productsByAttributeHelpText = __(
+	'Enable to adjust the displayed products based on the current attribute and any applied filters.',
+	'woocommerce'
+);
+
+const searchResultsHelpText = __(
+	'Enable to adjust the displayed products based on the current search and any applied filters.',
+	'woocommerce'
+);
+
+const getHelpTextForTemplate = ( templateId: string ): string => {
+	if ( templateId.includes( '//taxonomy-product_cat' ) ) {
+		return productsByCategoryHelpText;
+	}
+	if ( templateId.includes( '//taxonomy-product_tag' ) ) {
+		return productsByTagHelpText;
+	}
+	if ( templateId.includes( '//taxonomy-product_attribute' ) ) {
+		return productsByAttributeHelpText;
+	}
+	if ( templateId.includes( '//product-search-results' ) ) {
+		return searchResultsHelpText;
+	}
+	return productArchiveHelpText;
+};
 
 interface InheritQueryControlProps {
 	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
@@ -52,6 +93,9 @@ const InheritQueryControl = ( {
 		return null;
 	}
 
+	const currentTemplateId = editSiteStore.getEditedPostId() as string;
+	const helpText = getHelpTextForTemplate( currentTemplateId );
+
 	return (
 		<ToolsPanelItem
 			label={ label }
@@ -66,10 +110,7 @@ const InheritQueryControl = ( {
 			<ToggleControl
 				className="wc-block-product-collection__inherit-query-control"
 				label={ label }
-				help={ __(
-					'Toggle to use the global query context that is set with the current template, such as an archive or search. Disable to customize the settings independently.',
-					'woocommerce'
-				) }
+				help={ helpText }
 				checked={ !! inherit }
 				onChange={ ( newInherit ) => {
 					if ( newInherit ) {

@@ -47,7 +47,7 @@ export class EditorUtils {
 
 	// todo: Make a PR to @wordpress/e2e-test-utils-playwright to add this method.
 	/**
-	 * Inserts a block after a given client ID.
+	 * Inserts a block inside a given client ID.
 	 *
 	 */
 	async insertBlock(
@@ -81,6 +81,27 @@ export class EditorUtils {
 					.insertBlock( block, _index, _rootClientId );
 			},
 			{ blockRepresentation, index, rootClientId }
+		);
+	}
+
+	async removeBlocks( { name }: { name: string } ) {
+		await this.page.evaluate(
+			( { name: _name } ) => {
+				const blocks = window.wp.data
+					.select( 'core/block-editor' )
+					.getBlocks() as ( BlockRepresentation & {
+					clientId: string;
+				} )[];
+				const matchingBlocksClientIds = blocks
+					.filter( ( block ) => {
+						return block && block.name === _name;
+					} )
+					.map( ( block ) => block?.clientId );
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( matchingBlocksClientIds );
+			},
+			{ name }
 		);
 	}
 
@@ -232,6 +253,17 @@ export class EditorUtils {
 		return firstBlockIndex < secondBlockIndex;
 	}
 
+	async waitForSiteEditorFinishLoading() {
+		await this.page
+			.frameLocator( 'iframe[title="Editor canvas"i]' )
+			.locator( 'body > *' )
+			.first()
+			.waitFor();
+		await this.page
+			.locator( '.edit-site-canvas-loader' )
+			.waitFor( { state: 'hidden' } );
+	}
+
 	async setLayoutOption(
 		option:
 			| 'Align Top'
@@ -338,5 +370,129 @@ export class EditorUtils {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( 'Site updated.' )
 			.waitFor();
+	}
+
+	async revertTemplateCreation( templateName: string ) {
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
+		} );
+		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
+		await this.page
+			.getByRole( 'menuitem', {
+				name: 'Delete',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', {
+				name: 'Delete',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.getByText( `"${ templateName }" deleted.` )
+			.waitFor();
+	}
+
+	async revertTemplateCustomizations( templateName: string ) {
+		const templateRow = this.page.getByRole( 'row' ).filter( {
+			has: this.page.getByRole( 'heading', {
+				name: templateName,
+				exact: true,
+			} ),
+		} );
+		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
+		await this.page
+			.getByRole( 'menuitem', {
+				name: 'Clear customizations',
+			} )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.getByText( `"${ templateName }" reverted.` )
+			.waitFor();
+	}
+
+	async updatePost() {
+		await this.page.click( 'role=button[name="Update"i]' );
+
+		await this.page
+			.getByRole( 'button', { name: 'Dismiss this notice' } )
+			.filter( { hasText: 'updated' } )
+			.waitFor();
+	}
+
+	async publishAndVisitPost() {
+		await this.editor.publishPost();
+		const url = new URL( this.page.url() );
+		const postId = url.searchParams.get( 'post' );
+		await this.page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+	}
+
+	async openWidgetEditor() {
+		await this.page.goto( '/wp-admin/widgets.php' );
+		await this.closeModalByName( 'Welcome to block Widgets' );
+	}
+
+	/**
+	 * Unlike the `insertBlock` method, which manipulates the block tree
+	 * directly, this method simulates real user behavior when inserting a
+	 * block to the editor by searching for block name then clicking on the
+	 * first matching result.
+	 *
+	 * Besides, some blocks that manipulate their attributes after insertion
+	 * aren't work probably with `insertBlock` as that method requires
+	 * attributes object and uses that data to creat the block object.
+	 */
+	async insertBlockUsingGlobalInserter( blockTitle: string ) {
+		await this.openGlobalBlockInserter();
+		await this.page.getByPlaceholder( 'Search' ).fill( blockTitle );
+		await this.page
+			.getByRole( 'option', { name: blockTitle, exact: true } )
+			.first()
+			.click();
+	}
+
+	/**
+	 * Opens a specific Single Product template.
+	 */
+	async openSpecificProductTemplate(
+		productName: string,
+		productSlug: string,
+		createIfDoesntExist = true
+	) {
+		await this.page.goto( '/wp-admin/site-editor.php' );
+		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
+
+		const templateButton = this.page.getByRole( 'button', {
+			name: `Product: ${ productName }`,
+		} );
+
+		// Template can be created only once. Go to template if exists,
+		// otherwise create one.
+		if ( await templateButton.isVisible() ) {
+			await templateButton.click();
+			await this.enterEditMode();
+		} else if ( createIfDoesntExist ) {
+			await this.page
+				.getByRole( 'button', { name: 'Add New Template' } )
+				.click();
+			await this.page
+				.getByRole( 'button', { name: 'Single Item: Product' } )
+				.click();
+			await this.page
+				.getByRole( 'option', {
+					name: `${ productName } http://localhost:8889/product/${ productSlug }/`,
+				} )
+				.click();
+			await this.page
+				.getByRole( 'button', {
+					name: 'Skip',
+				} )
+				.click();
+		}
+		await this.closeWelcomeGuideModal();
 	}
 }

@@ -2,11 +2,109 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.3.0) - 2024-02-09 
+
+-   Patch - Corrected build configuration for packages that weren't outputting minified code.
+-   Patch - Export __experimentalVariationQUickUpdateMenuItem, __experimentalPluginHeaderItemModal, __experimentalPluginHeaderItemPopover
+-   Minor - Fix header toolbar in iframe modal editor to have block toolbar render correctly with latest Gutenberg and WP version.
+-   Minor - Fix issue when generating variations for the first time in the new editor.
+-   Patch - Fix performance issue when modifying product metadata
+-   Patch - Fix product editor UI misbehaving in custom adminmenu widths (e.g. Calypso)
+-   Patch - Fix typo that broke the CI pipeline and the build process.
+-   Patch - Hide the product type selector dropdown when click outside
+-   Minor - Revert "Show feedback bar only once (#41787)" #43178
+-   Minor - Variation quick actions update properly when variation inherits sku of parent; slot fills always deal with arrays
+-   Patch - [Product Block Editor]: fix e2e test that happens in the text-area block
+-   Patch - [Product Block Editor]: fix the top area for the dashboard
+-   Minor - Add a featured product button
+-   Minor - Add empty state to the linked product list block
+-   Minor - Add HOC to hide inventory collapsible block when nothing is inside it
+-   Minor - Add prepublish panel #44331
+-   Minor - Add slotFills for header items #43687
+-   Minor - Add step buttons for Number block and component
+-   Minor - Add tooltip attribute to Pricing field #43144
+-   Minor - Allow providing recently updated data for the validate function in the useValidation hook
+-   Minor - Always fallback to the standard product template in case the given product type is variable
+-   Minor - Create attribute control custom empty state
+-   Minor - Create linked product list block
+-   Minor - Create variation empty state when no variable attributes are asigned to the product
+-   Minor - Expose metadata as object from useProductMetadata hook
+-   Minor - Fix margin top for none first child nested sections
+-   Minor - Introduce a product type selection within the new experience
+-   Minor - Load/save the product template from/to the product meta data
+-   Minor - Product Editor: Subsection block #43725
+-   Minor - Set the product template id also for unsupported product templates
+-   Minor - track Linked Products feature events
+-   Minor - Unlink downloads and downloadable product props so they can be managed separately
+-   Patch - [Product Block Editor]: add CashRegister image component
+-   Patch - [Product Block Editor]: Add Linked Product sections
+-   Patch - [Product Block Editor]: add loading for the `Choose products for me` button
+-   Patch - [Product Block Editor]: add plain and rich text mode to the Textarea field block
+-   Patch - [Product Block Editor]: add Upsell advice
+-   Patch - [Product Block Editor]: always show "loading" state when choosing suggested products
+-   Patch - [Product Block Editor]: exclude the current product from the suggested ones to use in the Linked Product tab
+-   Patch - [Product Block Editor]: implement `Choose products for me` button
+-   Patch - [Product Block Editor]: Introduce AdviceCard component
+-   Patch - [Product Block Editor]: Introduce ButtonWithDropdownMenuProps component
+-   Patch - [Product Block Editor]: introduce note attribute to Label component
+-   Patch - [Product Block Editor]: introduce ShoppingBags component
+-   Patch - [Product Block Editor]: introduce TextArea field block
+-   Patch - [Product Block Editor]: introduce `<SectionActions />` slot
+-   Patch - [Product Block Editor]: render empty state for the Cross-sells section
+-   Patch - [Product Block Editor]: use Label component to render Textarea field block label
+-   Patch - [Product Block Editor]: use text-area block to handle the variation description field
+-   Minor - Add isLoading to useProductMetadata hook
+-   Patch - bump php version in packages/js/*/composer.json
+-   Minor - Load layout templates via the REST API. Note that layout template modifications must now be hooked up in an action that is called when REST API endpoints are handled, such as `rest_api_init`.
+-   Minor - Use different delays for initial click and hold when incrementing number on NumberControl
+-   Minor - Use woocommerce's Tooltip component for Label and checkbox instead of wordpress Tooltip
+-   Patch - [Product Block Editor]: dismiss AdviceCard by clicking close button
+-   Patch - [Product Block Editor]: fallback with random products when there isn't related products in the Linked Products tab
+-   Patch - [Product Block Editor]: improve getting suggested products from linked product section
+-   Patch - [Product Block Editor]: redefine the app dashboard size
+-   Patch - [Product Block Editor]: tweak section actions of some blocks #43555
+-   Patch - [Product Block Editor]: update advice card instances
+-   Minor - Add slotFill for variation menus #43441
+-   Minor - Modify feedback modal actions #43005
+-   Patch - [Product Block Editor]: add className prop to ButtonWithDropdownMenu component
+-   Patch - [Product Block Editor]: improve and tweak AdviceCard component
+-   Patch - [Product Block Editor]: show three products by default in the Linked Products tab
+-   Patch - [Product Block Editor]: tweak styles and layout of AdviceCard component
+
+## [1.2.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.2.0) - 2023-12-20 
+
+-   Patch - Fix menu not being pinned correctly with certain screen widths [#42791]
+-   Patch - [Product Block Editor]: fix Input control issue in Manage download limit form [#41796]
+-   Patch - [Product Block Editor]: add story for Label component [#42953]
+-   Patch - [Product Block Editor]: introduce UI state [#41859]
+-   Patch - [Product Block Editor]: expose Label component [#42959]
+-   Patch - [Product Block Editor]: move modal editor out of the description block edit component [#41878]
+-   Patch - [Product Block Editor]: propagate content from description inner blocks to Modal editor [#42768]
+-   Patch - [Product Block Editor]: replace custom preview component by BlockPreview core [#42019]
+-   Patch - [Product Block Editor]: replace description button by editable block [#41862]
+-   Patch - [Product Block Editor]: minor Summary block enhancements [#41839]
+-   Patch - [Product Block editor]: rename component edit function [#41741]
+-   Minor - Add ordering support to the product list [#41709]
+-   Minor - Add product list block [#41653]
+-   Minor - Add step prop to NumberControl [#42928]
+-   Minor - Add useProductMetadata hook to perform update in multiple meta entries at same time [#42961]
+-   Minor - Allow uploading downloadable products by drag & drop and without the Media Library component [#42702]
+-   Minor - Create section description block [#41929]
+-   Minor - Move action button ( reorder and add products ) inline with the section header [#42929]
+-   Minor - Support HTML in checkbox-control tooltip and Label tooltip [#42926]
+-   Minor - Use DisplayState as a direct wrapper of the woocommerce/conditional block [#42909]
+-   Minor - Expose Taxonomy and TaxonomyMetadata types [#42962]
+-   Minor - Remove deprecated use of position for Dropdown component, using popoverProps.placement instead. [#41845]
+-   Minor - Update products list field to add re-order option. [#42766]
+-   Minor - Add empty state when no attributes #41679 [#41679]
+-   Minor - Add max-width to tooltip #41797 [#41797]
+-   Minor - Show feedback bar only once #41787 [#41787]
+
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.1.0) - 2023-11-28 
 
 -   Patch - Update internal dependency.
--   Minor - Remove downloads list fixed height #41744 [#41744]
 -   Patch - [Product Block Editor]: remove unused block attributes [#41674]
+-   Minor - Remove downloads list fixed height #41744 [#41744]
 
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.0.0) - 2023-11-27 
 

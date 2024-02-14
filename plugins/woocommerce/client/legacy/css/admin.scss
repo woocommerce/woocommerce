@@ -1237,6 +1237,17 @@ table.wc_status_table {
 
 		&.run-tool {
 			text-align: right;
+
+			.run-tool-status {
+				font-size: 90%;
+				margin-right: 0.5em;
+				display: inline-block;
+				opacity: 80%;
+
+				.dashicons.spin {
+					animation: rotation 2s infinite linear;
+				}
+			}
 		}
 
 		strong.name {
@@ -1391,8 +1402,8 @@ table.wc_status_table--tools {
 	.line {
 		display: block;
 		width: 100%;
-		scroll-margin-top: 6em;
 		position: relative;
+		white-space: pre-wrap;
 
 		&:before {
 			counter-increment: line;
@@ -1407,6 +1418,7 @@ table.wc_status_table--tools {
 		&:target {
 			box-shadow: 0 0.16em 0.16em -0.16em #c3c4c7, 0 -0.16em 0.16em -0.16em #c3c4c7;
 			z-index: 1;
+			scroll-margin-top: 50vh;
 
 			.line-content {
 				background: #fff8c5;
@@ -1422,8 +1434,7 @@ table.wc_status_table--tools {
 				cursor: pointer;
 			}
 
-			pre {
-				margin-top: 0;
+			details {
 				white-space: pre-wrap;
 			}
 		}
@@ -1490,6 +1501,14 @@ table.wc_status_table--tools {
 		padding: 0.46em 0;
 		border: 1px dashed #c3c4c7;
 		line-height: 2.3;
+	}
+}
+
+.wc-logs-settings {
+	.wc-settings-row-logs-retention-period-days {
+		td {
+			line-height: 2;
+		}
 	}
 }
 
@@ -1913,7 +1932,7 @@ ul.wc_coupon_list_block {
 				padding: 0 0 3px;
 			}
 
-			input,
+			input:not(.checkbox),
 			textarea {
 				width: 100%;
 			}
@@ -1925,15 +1944,6 @@ ul.wc_coupon_list_block {
 
 			.select2-container {
 				width: 100% !important;
-			}
-
-			.date-picker {
-				width: 50%;
-			}
-
-			.hour,
-			.minute {
-				width: 3.5em;
 			}
 
 			small {
@@ -1964,13 +1974,20 @@ ul.wc_coupon_list_block {
 			width: 100%;
 			clear: both;
 
-			input,
+			input:not(.checkbox),
 			textarea,
 			select,
 			.wc-enhanced-select,
 			.wc-category-search,
 			.wc-customer-search {
 				width: 100%;
+			}
+			input.date-picker {
+				width: 50%;
+			}
+			input.hour,
+			input.minute {
+				width: 3.5em;
 			}
 		}
 
@@ -2936,6 +2953,11 @@ ul.wc_coupon_list_block {
 .post-type-shop_order {
 	.tablenav .one-page .displaying-num {
 		display: none;
+	}
+
+	select.search-filter {
+		margin-right: 4px;
+		margin-bottom: 3px;
 	}
 
 	.tablenav {
@@ -4370,7 +4392,7 @@ table.wc_shipping {
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
-	
+
 	#btn-next.is-busy {
 		background-image: linear-gradient(-45deg, #fafafa 33%, #e0e0e0 33%, #e0e0e0 70%, #fafafa 70%);
 		animation-duration: 2.5s;

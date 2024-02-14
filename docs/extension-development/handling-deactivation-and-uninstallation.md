@@ -1,14 +1,16 @@
 ---
-post_title: Handling deactivation and uninstallation
+post_title: Managing extension deactivation and uninstallation
+menu_title: Manage deactivation and uninstallation
+tags: how-to
 ---
 
 ## Introduction
 
-There are a number of cleanup tasks you’ll need to handle when a merchant deactivates or uninstalls your extension. This guide provides a brief overview of WooCommerce-specific items you’ll want to make sure you account for when defining your extension’s deactivation and uninstallation logic.
+There are a number of cleanup tasks you'll need to handle when a merchant deactivates or uninstalls your extension. This guide provides a brief overview of WooCommerce-specific items you'll want to make sure you account for when defining your extension's deactivation and uninstallation logic.
 
 ## Removing Scheduled Actions
 
-If your extension uses Action Scheduler to queue any background jobs, it’s important to unschedule those actions when your extension is uninstalled or deactivated.
+If your extension uses Action Scheduler to queue any background jobs, it's important to unschedule those actions when your extension is uninstalled or deactivated.
 
 `as_unschedule_all_actions( $hook, $args, $group );`
 
@@ -41,11 +43,11 @@ function my_extension_deactivate_task() {
 register_deactivation_hook( __FILE__, 'my_extension_deactivate_task' );
 ```
 
-Keep in mind that merchant tasks are managed via a hybrid approach that involves both PHP and JavaScript, so the client-side registration only happens when your extension’s JavaScript runs.
+Keep in mind that merchant tasks are managed via a hybrid approach that involves both PHP and JavaScript, so the client-side registration only happens when your extension's JavaScript runs.
 
 ## Unregistering navigation
 
-When your extension deactivates and uninstalls, any registration you’ve done with the WooCommerce Navigation will be handled automatically.
+When your extension deactivates and uninstalls, any registration you've done with the WooCommerce Navigation will be handled automatically.
 
 ## WordPress cleanup tasks
 

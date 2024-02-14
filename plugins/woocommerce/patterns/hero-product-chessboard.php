@@ -5,7 +5,7 @@
  * Categories: WooCommerce
  */
 
-use Automattic\WooCommerce\Blocks\Patterns\PatternsHelper;
+use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 $image1 = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/plant-white-leaf-flower-vase-green.jpg' );
 $image2 = PatternsHelper::get_image_url( $images, 1, 'assets/images/pattern-placeholders/table-wood-house-chair-floor-window.jpg' );
@@ -31,7 +31,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<div class="wp-block-cover is-light">
 				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 1 out of 2.', 'woocommerce' ); ?>" src="<?php echo esc_url( $image1 ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
 				<div class="wp-block-cover__inner-container">
-					<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+					<!-- wp:paragraph {"align":"center","placeholder":" ","fontSize":"large"} -->
 						<p class="has-text-align-center has-large-font-size"> </p>
 					<!-- /wp:paragraph -->
 				</div>
@@ -74,7 +74,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 		<div class="wp-block-column is-vertically-aligned-center" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 			<!-- wp:group {"style":{"spacing":{"padding":{"right":"50px","left":"50px","top":"50px","bottom":"50px"},"blockGap":"32px"}},"layout":{"type":"constrained"}} -->
 			<div class="wp-block-group" style="padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px">
-				<!-- wp:group {"style":{"spacing":{"blockGap":"16px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
+				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group">
 					<!-- wp:heading {"level":6,"style":{"typography":{"textTransform":"capitalize"}}} -->
 					<h6 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $first_title ); ?></strong></h6>
@@ -86,7 +86,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 				</div>
 				<!-- /wp:group -->
 
-				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"spacing":{"blockGap":"16px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
+				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group">
 					<!-- wp:heading {"level":6,"style":{"typography":{"textTransform":"capitalize"}}} -->
 					<h6 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $second_title ); ?></strong></h6>
@@ -108,7 +108,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<div class="wp-block-cover">
 				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 2 out of 2.', 'woocommerce' ); ?>" src="<?php echo esc_url( $image2 ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
 				<div class="wp-block-cover__inner-container">
-					<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
+					<!-- wp:paragraph {"align":"center","placeholder":" ","fontSize":"large"} -->
 						<p class="has-text-align-center has-large-font-size"> </p>
 					<!-- /wp:paragraph -->
 				</div>

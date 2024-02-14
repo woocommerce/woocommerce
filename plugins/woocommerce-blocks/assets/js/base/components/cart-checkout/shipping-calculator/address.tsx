@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import Button from '@woocommerce/base-components/button';
 import { useState } from '@wordpress/element';
 import isShallowEqual from '@wordpress/is-shallow-equal';
-import type { ShippingAddress, AddressFields } from '@woocommerce/settings';
+import type { ShippingAddress, FormFields } from '@woocommerce/settings';
 import { VALIDATION_STORE_KEY, CART_STORE_KEY } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -13,13 +13,13 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
-import { AddressForm } from '../address-form';
+import { Form } from '../form';
 
 interface ShippingCalculatorAddressProps {
 	address: ShippingAddress;
 	onUpdate: ( address: ShippingAddress ) => void;
 	onCancel: () => void;
-	addressFields: Partial< keyof AddressFields >[];
+	addressFields: Partial< keyof FormFields >[];
 }
 const ShippingCalculatorAddress = ( {
 	address: initialAddress,
@@ -48,7 +48,7 @@ const ShippingCalculatorAddress = ( {
 
 	return (
 		<form className="wc-block-components-shipping-calculator-address">
-			<AddressForm
+			<Form
 				fields={ addressFields }
 				onChange={ setAddress }
 				values={ address }

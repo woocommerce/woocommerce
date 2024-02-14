@@ -47,6 +47,13 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	private $mocked_globals = array();
 
 	/**
+	 * The currently registered callback for the "exit" construct, or null if none has been registered.
+	 *
+	 * @var callable|null
+	 */
+	private $mocked_exit = null;
+
+	/**
 	 * Reset the instance to its initial state by removing all the mocks.
 	 */
 	public function reset() {
@@ -54,6 +61,7 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 		$this->mocked_functions = array();
 		$this->mocked_statics   = array();
 		$this->mocked_globals   = array();
+		$this->mocked_exit      = null;
 	}
 
 	/**
@@ -141,6 +149,15 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 	}
 
 	/**
+	 * Register a callback to be executed when the "exit" method is invoked.
+	 *
+	 * @param callable|null $mock The callback to be registered, or null to unregister it.
+	 */
+	public function register_exit_mock( ?callable $mock ) {
+		$this->mocked_exit = $mock;
+	}
+
+	/**
 	 * Call a user function. This should be used to execute any non-idempotent function, especially
 	 * those in the `includes` directory or provided by WordPress.
 	 *
@@ -222,5 +239,21 @@ class MockableLegacyProxy extends \Automattic\WooCommerce\Proxies\LegacyProxy {
 		}
 
 		return parent::get_global( $global_name );
+	}
+
+	/**
+	 * Terminates execution of the script.
+	 *
+	 * If a mock callback has been defined for the exit construct, it will be executed instead.
+	 *
+	 * @param int|string $status An error code to be returned, or an error message to be shown.
+	 */
+	public function exit( $status = 0 ) {
+		if ( $this->mocked_exit ) {
+			( $this->mocked_exit )( $status );
+		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			exit( $status );
+		}
 	}
 }

@@ -2460,7 +2460,7 @@ function wc_update_700_remove_download_log_fk() {
  * Remove the transient data for recommended marketing extensions.
  */
 function wc_update_700_remove_recommended_marketing_plugins_transient() {
-	delete_transient( MarketingSpecs::RECOMMENDED_PLUGINS_TRANSIENT );
+	delete_transient( 'wc_marketing_recommended_plugins' );
 }
 
 /**
@@ -2638,4 +2638,14 @@ LIMIT 250
 	$has_pending = $wpdb->query( "$select_query LIMIT 1;" );
 
 	return ! empty( $has_pending );
+}
+
+/**
+ * Remove the transient data for recommended marketing extensions.
+ *
+ * This is removed because it is not used anymore.
+ * It is replaced by `woocommerce_admin_marketing_recommendations_specs` transient that is created by `MarketingRecommendationsDataSourcePoller`.
+ */
+function wc_update_860_remove_recommended_marketing_plugins_transient() {
+	delete_transient( 'wc_marketing_recommended_plugins' );
 }

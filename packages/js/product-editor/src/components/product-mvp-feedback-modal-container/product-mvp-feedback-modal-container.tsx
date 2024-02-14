@@ -58,9 +58,18 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 
 	const onCloseModal = () => {
 		recordEvent( 'product_mvp_feedback', {
-			action: 'disable',
+			action: 'cancel',
 			checked: '',
 			comments: '',
+		} );
+		hideProductMVPFeedbackModal();
+	};
+
+	const onSkipFeedback = () => {
+		recordEvent( 'product_mvp_feedback', {
+			action: 'disable',
+			checked: '',
+			comments: 'Feedback skipped',
 		} );
 		hideProductMVPFeedbackModal();
 		window.location.href = classicEditorUrl;
@@ -74,6 +83,7 @@ export const ProductMVPFeedbackModalContainer: React.FC< {
 		<ProductMVPFeedbackModal
 			recordScoreCallback={ recordScore }
 			onCloseModal={ onCloseModal }
+			onSkipFeedback={ onSkipFeedback }
 		/>
 	);
 };

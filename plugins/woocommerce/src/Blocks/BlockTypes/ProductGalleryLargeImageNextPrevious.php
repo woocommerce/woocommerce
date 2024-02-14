@@ -89,6 +89,10 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				'data-wc-on--click',
 				'actions.selectPreviousImage'
 			);
+			$p->set_attribute(
+				'aria-label',
+				__( 'Previous image', 'woocommerce' )
+			);
 			$prev_button = $p->get_updated_html();
 		}
 
@@ -99,6 +103,10 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			$p->set_attribute(
 				'data-wc-on--click',
 				'actions.selectNextImage'
+			);
+			$p->set_attribute(
+				'aria-label',
+				__( 'Next image', 'woocommerce' )
 			);
 			$next_button = $p->get_updated_html();
 		}
@@ -191,8 +199,8 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 	 * @return string The HTML for the button element.
 	 */
 	protected function get_outside_button( $button_type, $context ) {
-		$next_button_icon_path     = 'M4.56666 0L0.766663 3.16667L15.3333 19L0.766663 34.8333L4.56666 38L21.6667 19L4.56666 0Z';
-		$previous_button_icon_path = 'M17.7 0L21.5 3.16667L6.93334 19L21.5 34.8333L17.7 38L0.600002 19L17.7 0Z';
+		$next_button_icon_path     = 'M1 1.28516L8 8.28516L1 15.2852';
+		$previous_button_icon_path = 'M9 1.28516L2 8.28516L9 15.2852';
 		$icon_path                 = $previous_button_icon_path;
 		$button_side_class         = 'left';
 
@@ -204,15 +212,16 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 		return sprintf(
 			'<button class="wc-block-product-gallery-large-image-next-previous--button wc-block-product-gallery-large-image-next-previous-%1$s--%2$s">
 				<svg
-					width="22"
-					height="38"
-					viewBox="0 0 22 38"
+					width="10"
+					height="16"
+					viewBox="0 0 10 16"
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
 				>
 					<path
 						d="%3$s"
-						fill="black"
+						stroke="black"
+						stroke-width="1.5"
 					/>
 				</svg>
 			</button>',

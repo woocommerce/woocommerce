@@ -65,6 +65,8 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
 		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
+		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
+		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 	}
 
 	/**
@@ -583,11 +585,7 @@ class CLIRunner {
 	 * @return array Failed IDs with meta details.
 	 */
 	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
-		$meta_keys_to_ignore = array(
-			'_paid_date', // This has been deprecated and replaced by '_date_paid' in the CPT datastore.
-			'_completed_date', // This has been deprecated and replaced by '_date_completed' in the CPT datastore.
-			'_edit_lock',
-		);
+		$meta_keys_to_ignore = $this->synchronizer->get_ignored_order_props();
 
 		global $wpdb;
 		if ( ! count( $order_ids ) ) {
@@ -959,4 +957,110 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		);
 	}
 
+	/**
+	 * Displays a summary of HPOS situation on this site.
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function status( array $args = array(), array $assoc_args = array() ) {
+		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
+
+		// translators: %s is either 'yes' or 'no'.
+		WP_CLI::log( sprintf( __( 'HPOS enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->controller->custom_orders_table_usage_is_enabled() ) ) );
+
+		// translators: %s is either 'yes' or 'no'.
+		WP_CLI::log( sprintf( __( 'Compatibility mode enabled?: %s', 'woocommerce' ), wc_bool_to_string( $this->synchronizer->data_sync_is_enabled() ) ) );
+
+		// translators: %d is an order count.
+		WP_CLI::log( sprintf( __( 'Unsynced orders: %d', 'woocommerce' ), $this->synchronizer->get_current_orders_pending_sync_count() ) );
+
+		WP_CLI::log(
+			sprintf(
+				/* translators: %d is an order count. */
+				__( 'Orders subject to cleanup: %d', 'woocommerce' ),
+				( $this->synchronizer->custom_orders_table_is_authoritative() && ! $this->synchronizer->data_sync_is_enabled() )
+				? $legacy_handler->count_orders_for_cleanup()
+				: 0
+			)
+		);
+	}
+
+	/**
+	 * Displays differences for an order between the HPOS and post datastore.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * :The ID of the order.
+	 *
+	 * [--format=<format>]
+	 * : Render output in a particular format.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - csv
+	 *   - json
+	 *   - yaml
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *    # Find differences between datastores for order 123.
+	 *    $ wp wc hpos diff 123
+	 *
+	 *    # Find differences for order 123 and display as CSV.
+	 *    $ wp wc hpos diff 123 --format=csv
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function diff( array $args = array(), array $assoc_args = array() ) {
+		$id = absint( $args[0] );
+
+		try {
+			$diff = wc_get_container()->get( LegacyDataHandler::class )->get_diff_for_order( $id );
+		} catch ( \Exception $e ) {
+			// translators: %1$d is an order ID, %2$s is an error message.
+			WP_CLI::error( sprintf( __( 'An error occurred while computing a diff for order %1$d: %2$s', 'woocommerce' ), $id, $e->getMessage() ) );
+		}
+
+		if ( ! $diff ) {
+			WP_CLI::success( __( 'No differences found.', 'woocommerce' ) );
+			return;
+		}
+
+		// Format the diff array.
+		$diff = array_map(
+			function( $key, $hpos_value, $cpt_value ) {
+				// Format for dates.
+				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
+				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
+
+				return array(
+					'property' => $key,
+					'hpos'     => $hpos_value,
+					'post'     => $cpt_value,
+				);
+			},
+			array_keys( $diff ),
+			array_column( $diff, 0 ),
+			array_column( $diff, 1 ),
+		);
+
+		WP_CLI::warning(
+			// translators: %d is an order ID.
+			sprintf( __( 'Differences found for order %d:', 'woocommerce' ), $id )
+		);
+		WP_CLI\Utils\format_items(
+			$assoc_args['format'] ?? 'table',
+			$diff,
+			array( 'property', 'hpos', 'post' )
+		);
+	}
 }

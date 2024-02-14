@@ -1435,8 +1435,8 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	 * Get the product thumbnail, or the placeholder if not set.
 	 *
 	 * @param string $size (default: 'woocommerce_thumbnail').
-	 * @param  array $attr Image attributes.
-	 * @param  bool  $placeholder True to return $placeholder if no image is found, or false to return an empty string.
+	 * @param  array  $attr Image attributes.
+	 * @param  bool   $placeholder True to return $placeholder if no image is found, or false to return an empty string.
 	 * @return string
 	 */
 	function woocommerce_get_product_thumbnail( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
@@ -2830,6 +2830,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'default'           => '',
 			'autofocus'         => '',
 			'priority'          => '',
+			'unchecked_value'   => null,
+			'checked_value'     => '1',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -2956,8 +2958,24 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'checkbox':
-				$field = '<label class="checkbox ' . implode( ' ', $args['label_class'] ) . '" ' . implode( ' ', $custom_attributes ) . '>
-						<input type="' . esc_attr( $args['type'] ) . '" class="input-checkbox ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="1" ' . checked( $value, 1, false ) . ' /> ' . $args['label'] . $required . '</label>';
+				$field = '<label class="checkbox ' . esc_attr( implode( ' ', $args['label_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . '>';
+
+				// Output a hidden field so a value is POSTed if the box is not checked.
+				if ( ! is_null( $args['unchecked_value'] ) ) {
+					$field .= sprintf( '<input type="hidden" name="%1$s" value="%2$s" />', esc_attr( $key ), esc_attr( $args['unchecked_value'] ) );
+				}
+
+				$field .= sprintf(
+					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s /> %6$s',
+					esc_attr( $key ),
+					esc_attr( $args['id'] ),
+					esc_attr( $args['checked_value'] ),
+					esc_attr( 'input-checkbox ' . implode( ' ', $args['input_class'] ) ),
+					checked( $value, $args['checked_value'], false ),
+					wp_kses_post( $args['label'] )
+				);
+
+				$field .= $required . '</label>';
 
 				break;
 			case 'text':
@@ -3487,7 +3505,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 
 		$downloads = is_object( $item ) && $item->is_type( 'line_item' ) ? $item->get_item_downloads() : array();
 
-		if ( $downloads ) {
+		if ( ! empty( $downloads ) ) {
 			$i = 0;
 			foreach ( $downloads as $file ) {
 				$i ++;
@@ -3836,30 +3854,32 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 	// Filter item data to allow 3rd parties to add more to the array.
 	$item_data = apply_filters( 'woocommerce_get_item_data', $item_data, $cart_item );
 
-	// Format item data ready to display.
-	foreach ( $item_data as $key => $data ) {
-		// Set hidden to true to not display meta on cart.
-		if ( ! empty( $data['hidden'] ) ) {
-			unset( $item_data[ $key ] );
-			continue;
-		}
-		$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
-		$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
-	}
-
-	// Output flat or in list format.
-	if ( count( $item_data ) > 0 ) {
-		ob_start();
-
-		if ( $flat ) {
-			foreach ( $item_data as $data ) {
-				echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+	if ( is_array( $item_data ) ) {
+		// Format item data ready to display.
+		foreach ( $item_data as $key => $data ) {
+			// Set hidden to true to not display meta on cart.
+			if ( ! empty( $data['hidden'] ) ) {
+				unset( $item_data[ $key ] );
+				continue;
 			}
-		} else {
-			wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+			$item_data[ $key ]['key']     = ! empty( $data['key'] ) ? $data['key'] : $data['name'];
+			$item_data[ $key ]['display'] = ! empty( $data['display'] ) ? $data['display'] : $data['value'];
 		}
 
-		return ob_get_clean();
+		// Output flat or in list format.
+		if ( count( $item_data ) > 0 ) {
+			ob_start();
+
+			if ( $flat ) {
+				foreach ( $item_data as $data ) {
+					echo esc_html( $data['key'] ) . ': ' . wp_kses_post( $data['display'] ) . "\n";
+				}
+			} else {
+				wc_get_template( 'cart/cart-item-data.php', array( 'item_data' => $item_data ) );
+			}
+
+			return ob_get_clean();
+		}
 	}
 
 	return '';

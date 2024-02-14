@@ -6,12 +6,13 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
+use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
+
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
 use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
-use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplateRegistry\BlockTemplateRegistry;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\Block;
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
+
 use WP_Block_Editor_Context;
 
 /**
@@ -24,11 +25,18 @@ class Init {
 	const EDITOR_CONTEXT_NAME = 'woocommerce/edit-product';
 
 	/**
-	 * Supported post types.
+	 * Supported product types.
 	 *
 	 * @var array
 	 */
-	private $supported_post_types = array( 'simple' );
+	private $supported_product_types = array( 'simple' );
+
+	/**
+	 * Registered product templates.
+	 *
+	 * @var array
+	 */
+	private $product_templates = array();
 
 	/**
 	 * Redirection controller.
@@ -42,18 +50,18 @@ class Init {
 	 */
 	public function __construct() {
 		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push( $this->supported_post_types, 'variable' );
+			array_push( $this->supported_product_types, 'variable' );
 		}
 
 		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			array_push( $this->supported_post_types, 'external' );
+			array_push( $this->supported_product_types, 'external' );
 		}
 
 		if ( Features::is_enabled( 'product-grouped' ) ) {
-			array_push( $this->supported_post_types, 'grouped' );
+			array_push( $this->supported_product_types, 'grouped' );
 		}
 
-		$this->redirection_controller = new RedirectionController( $this->supported_post_types );
+		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
@@ -67,14 +75,15 @@ class Init {
 
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
+			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
 			$tracks = new Tracks();
 			$tracks->init();
 
-			// Make sure the block template logger is initialized before any templates are created.
-			BlockTemplateLogger::get_instance();
+			$this->register_product_templates();
 		}
 	}
 
@@ -86,7 +95,6 @@ class Init {
 			return;
 		}
 
-		$this->register_product_editor_templates();
 		$editor_settings = $this->get_product_editor_settings();
 
 		$script_handle = 'wc-admin-edit-product';
@@ -181,6 +189,7 @@ class Init {
 				'variable_product_block_tour_shown',
 				'local_attributes_notice_dismissed_ids',
 				'variable_items_without_price_notice_dismissed',
+				'product_advice_card_dismissed',
 			)
 		);
 	}
@@ -210,22 +219,11 @@ class Init {
 	 * Get the product editor settings.
 	 */
 	private function get_product_editor_settings() {
-		$editor_settings = array();
-
-		$template_registry     = wc_get_container()->get( BlockTemplateRegistry::class );
-		$block_template_logger = BlockTemplateLogger::get_instance();
-
-		$block_template_logger->log_template_events_to_file( 'simple-product' );
-		$block_template_logger->log_template_events_to_file( 'product-variation' );
-
-		$editor_settings['templates'] = array(
-			'product'           => $template_registry->get_registered( 'simple-product' )->get_formatted_template(),
-			'product_variation' => $template_registry->get_registered( 'product-variation' )->get_formatted_template(),
-		);
-
-		$editor_settings['templateEvents'] = array(
-			'product'           => $block_template_logger->get_formatted_template_events( 'simple-product' ),
-			'product_variation' => $block_template_logger->get_formatted_template_events( 'product-variation' ),
+		$editor_settings['productTemplates'] = array_map(
+			function ( $product_template ) {
+				return $product_template->to_json();
+			},
+			$this->product_templates
 		);
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
@@ -234,12 +232,151 @@ class Init {
 	}
 
 	/**
-	 * Register product editor templates.
+	 * Get default product templates.
+	 *
+	 * @return array The default templates.
 	 */
-	private function register_product_editor_templates() {
-		$template_registry = wc_get_container()->get( BlockTemplateRegistry::class );
+	private function get_default_product_templates() {
+		$templates   = array();
+		$templates[] = new ProductTemplate(
+			array(
+				'id'                 => 'standard-product-template',
+				'title'              => __( 'Standard product', 'woocommerce' ),
+				'description'        => __( 'A single physical or virtual product, e.g. a t-shirt or an eBook.', 'woocommerce' ),
+				'order'              => 10,
+				'icon'               => 'shipping',
+				'layout_template_id' => 'simple-product',
+				'product_data'       => array(
+					'type' => 'simple',
+				),
+			)
+		);
+		$templates[] = new ProductTemplate(
+			array(
+				'id'                 => 'grouped-product-template',
+				'title'              => __( 'Grouped product', 'woocommerce' ),
+				'description'        => __( 'A set of products that go well together, e.g. camera kit.', 'woocommerce' ),
+				'order'              => 20,
+				'icon'               => 'group',
+				'layout_template_id' => 'simple-product',
+				'product_data'       => array(
+					'type' => 'grouped',
+				),
+			)
+		);
+		$templates[] = new ProductTemplate(
+			array(
+				'id'                 => 'affiliate-product-template',
+				'title'              => __( 'Affiliate product', 'woocommerce' ),
+				'description'        => __( 'A link to a product sold on a different website, e.g. brand collab.', 'woocommerce' ),
+				'order'              => 30,
+				'icon'               => 'link',
+				'layout_template_id' => 'simple-product',
+				'product_data'       => array(
+					'type' => 'external',
+				),
+			)
+		);
 
-		$template_registry->register( new SimpleProductTemplate() );
-		$template_registry->register( new ProductVariationTemplate() );
+		return $templates;
+	}
+
+	/**
+	 * Create default product template by custom product type if it does not have a
+	 * template associated yet.
+	 *
+	 * @param array $templates The registered product templates.
+	 * @return array The new templates.
+	 */
+	private function create_default_product_template_by_custom_product_type( array $templates ) {
+		// Getting the product types registered via the classic editor.
+		$registered_product_types = wc_get_product_types();
+
+		$custom_product_types = array_filter(
+			$registered_product_types,
+			function ( $product_type ) {
+				return ! in_array( $product_type, $this->supported_product_types, true );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		$templates_with_product_type = array_filter(
+			$templates,
+			function ( $template ) {
+				$product_data = $template->get_product_data();
+				return ! is_null( $product_data ) && array_key_exists( 'type', $product_data );
+			}
+		);
+
+		$custom_product_types_on_templates = array_map(
+			function ( $template ) {
+				$product_data = $template->get_product_data();
+				return $product_data['type'];
+			},
+			$templates_with_product_type
+		);
+
+		foreach ( $custom_product_types as $product_type => $title ) {
+			if ( in_array( $product_type, $custom_product_types_on_templates, true ) ) {
+				continue;
+			}
+
+			$templates[] = new ProductTemplate(
+				array(
+					'id'           => $product_type . '-product-template',
+					'title'        => $title,
+					'product_data' => array(
+						'type' => $product_type,
+					),
+				)
+			);
+		}
+
+		return $templates;
+	}
+
+	/**
+	 * Register layout templates.
+	 */
+	public function register_layout_templates() {
+		$layout_template_registry = wc_get_container()->get( LayoutTemplateRegistry::class );
+
+		if ( ! $layout_template_registry->is_registered( 'simple-product' ) ) {
+			$layout_template_registry->register(
+				'simple-product',
+				'product-form',
+				SimpleProductTemplate::class
+			);
+		}
+
+		if ( ! $layout_template_registry->is_registered( 'product-variation' ) ) {
+			$layout_template_registry->register(
+				'product-variation',
+				'product-form',
+				ProductVariationTemplate::class
+			);
+		}
+	}
+
+	/**
+	 * Register product templates.
+	 */
+	public function register_product_templates() {
+		/**
+		 * Allows for new product template registration.
+		 *
+		 * @since 8.5.0
+		 */
+		$this->product_templates = apply_filters( 'woocommerce_product_editor_product_templates', $this->get_default_product_templates() );
+		$this->product_templates = $this->create_default_product_template_by_custom_product_type( $this->product_templates );
+
+		usort(
+			$this->product_templates,
+			function ( $a, $b ) {
+				return $a->get_order() - $b->get_order();
+			}
+		);
+
+		$this->redirection_controller->set_product_templates( $this->product_templates );
 	}
 }

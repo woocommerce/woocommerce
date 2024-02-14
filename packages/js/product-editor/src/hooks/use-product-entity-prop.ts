@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
+import { useCallback, useMemo } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
@@ -17,43 +19,57 @@ function useProductEntityProp< T >(
 	config?: UseProductEntityPropConfig< T >
 ): [ T | undefined, ( value: T ) => void ] {
 	const isMeta = property.startsWith( 'meta_data.' );
-	const metaPropertyKey = property.replace( 'meta_data.', '' );
+	const metaKey = property.replace( 'meta_data.', '' );
 
 	const [ entityPropValue, setEntityPropValue ] = useEntityProp< T >(
 		'postType',
 		config?.postType || 'product',
 		property
 	);
+
 	const [ metadata, setMetadata ] = useEntityProp< Metadata< T >[] >(
 		'postType',
 		config?.postType || 'product',
 		'meta_data'
 	);
 
-	const value = isMeta
-		? metadata.find( ( item ) => item.key === metaPropertyKey )?.value ||
-		  config?.fallbackValue
-		: entityPropValue;
-	const setValue = isMeta
-		? ( newValue: T ) => {
-				const existingEntry = metadata.find(
-					( item ) => item.key === metaPropertyKey
-				);
-				const entry = existingEntry
-					? { ...existingEntry, value: newValue }
-					: {
-							key: metaPropertyKey,
-							value: newValue,
-					  };
+	const metadataItem = useMemo(
+		() =>
+			metadata ? metadata.find( ( item ) => item.key === metaKey ) : null,
+		[ metadata, metaKey ]
+	);
+
+	const setMetaValue = useCallback(
+		( newValue: T ) => {
+			if ( ! metadataItem ) {
 				setMetadata( [
-					...metadata.filter(
-						( item ) => item.key !== metaPropertyKey
-					),
-					entry,
+					...metadata,
+					{
+						key: metaKey,
+						value: newValue,
+					},
 				] );
-		  }
-		: setEntityPropValue;
-	return [ value, setValue ];
+				return;
+			}
+
+			setMetadata(
+				metadata.map( ( item ) => {
+					if ( item.key === metaKey ) {
+						return { ...item, value: newValue };
+					}
+					return item;
+				} )
+			);
+		},
+		[ metadata, metaKey, metadataItem ]
+	);
+
+	if ( isMeta ) {
+		const metaValue = metadataItem?.value ?? config?.fallbackValue;
+		return [ metaValue, setMetaValue ];
+	}
+
+	return [ entityPropValue, setEntityPropValue ];
 }
 
 export default useProductEntityProp;

@@ -40,6 +40,10 @@ export const getShouldCreateAccount = ( state: CheckoutState ) => {
 	return state.shouldCreateAccount;
 };
 
+export const getAdditionalFields = ( state: CheckoutState ) => {
+	return state.additionalFields;
+};
+
 export const getCheckoutStatus = ( state: CheckoutState ) => {
 	return state.status;
 };

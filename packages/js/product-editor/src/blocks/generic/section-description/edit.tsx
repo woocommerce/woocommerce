@@ -13,7 +13,6 @@ import { SectionDescriptionBlockAttributes } from './types';
 
 export function SectionDescriptionBlockEdit( {
 	attributes,
-	clientId,
 }: ProductEditorBlockEditProps< SectionDescriptionBlockAttributes > ) {
 	const { content } = attributes;
 	const blockProps = useWooBlockProps( attributes );
@@ -22,7 +21,6 @@ export function SectionDescriptionBlockEdit( {
 		<BlockFill
 			{ ...blockProps }
 			name="section-description"
-			clientId={ clientId }
 			slotContainerBlockName="woocommerce/product-section"
 		>
 			<div>{ content }</div>

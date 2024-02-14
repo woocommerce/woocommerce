@@ -71,6 +71,15 @@ abstract class AbstractBlock {
 	}
 
 	/**
+	 * Get the interactivity namespace. Only used when utilizing the interactivity API.
+
+	 * @return string The interactivity namespace, used to namespace interactivity API actions and state.
+	 */
+	protected function get_full_block_name() {
+		return $this->namespace . '/' . $this->block_name;
+	}
+
+	/**
 	 * The default render_callback for all blocks. This will ensure assets are enqueued just in time, then render
 	 * the block (if applicable).
 	 *
@@ -454,6 +463,25 @@ abstract class AbstractBlock {
 	 * @return array
 	 */
 	protected function get_routes_from_namespace( $namespace ) {
+		/**
+		 * Gives opportunity to return routes without invoking the compute intensive REST API.
+		 *
+		 * @since 8.7.0
+		 * @param array  $routes    Array of routes.
+		 * @param string $namespace Namespace for routes.
+		 * @param string $context   Context, can be edit or view.
+		 */
+		$routes = apply_filters(
+			'woocommerce_blocks_pre_get_routes_from_namespace',
+			[],
+			$namespace,
+			'view'
+		);
+
+		if ( ! empty( $routes ) ) {
+			return $routes;
+		}
+
 		$rest_server     = rest_get_server();
 		$namespace_index = $rest_server->get_namespace_index(
 			[

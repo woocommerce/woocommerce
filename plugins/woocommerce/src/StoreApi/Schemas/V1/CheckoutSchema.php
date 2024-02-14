@@ -6,6 +6,7 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 
 /**
  * CheckoutSchema class.
@@ -73,6 +74,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_properties() {
+		$additional_field_schema = $this->get_additional_fields_schema();
 		return [
 			'order_id'          => [
 				'description' => __( 'The order ID to process during checkout.', 'woocommerce' ),
@@ -181,7 +183,12 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => $this->get_additional_fields_schema(),
+				'properties'  => $additional_field_schema,
+				'arg_options' => [
+					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
+					'validate_callback' => [ $this, 'validate_additional_fields' ],
+				],
+				'required'    => $this->schema_has_required_property( $additional_field_schema ),
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -254,7 +261,10 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields   = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$fields   = wp_parse_args(
+			$this->additional_fields_controller->get_all_fields_from_order( $order ),
+			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer )
+		);
 		$response = [];
 
 		foreach ( $fields as $key => $value ) {
@@ -273,27 +283,145 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_schema() {
-		$additional_fields_keys = $this->additional_fields_controller->get_additional_fields_keys();
-
-		$fields = $this->additional_fields_controller->get_additional_fields();
-
-		$additional_fields = array_filter(
-			$fields,
-			function( $key ) use ( $additional_fields_keys ) {
-				return in_array( $key, $additional_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
+		return $this->generate_additional_fields_schema(
+			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
+			$this->additional_fields_controller->get_fields_for_location( 'additional' )
 		);
+	}
 
-		$schema = [];
+	/**
+	 * Generate the schema for additional fields.
+	 *
+	 * @param array[] ...$args One or more arrays of additional fields.
+	 * @return array
+	 */
+	protected function generate_additional_fields_schema( ...$args ) {
+		$additional_fields = array_merge( ...$args );
+		$schema            = [];
 		foreach ( $additional_fields as $key => $field ) {
-			$schema[ $key ] = [
+			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'required'    => true,
+				'required'    => $field['required'],
 			];
+
+			if ( 'select' === $field['type'] ) {
+				$field_schema['enum'] = array_map(
+					function( $option ) {
+						return $option['value'];
+					},
+					$field['options']
+				);
+			}
+
+			if ( 'checkbox' === $field['type'] ) {
+				$field_schema['type'] = 'boolean';
+			}
+
+			$schema[ $key ] = $field_schema;
 		}
 		return $schema;
+	}
+
+	/**
+	 * Check if any additional field is required, so that the parent item is required as well.
+	 *
+	 * @param array $additional_fields_schema Additional fields schema.
+	 * @return bool
+	 */
+	protected function schema_has_required_property( $additional_fields_schema ) {
+		return array_reduce(
+			array_keys( $additional_fields_schema ),
+			function( $carry, $key ) use ( $additional_fields_schema ) {
+				return $carry || $additional_fields_schema[ $key ]['required'];
+			},
+			false
+		);
+	}
+
+	/**
+	 * Sanitize and format additional fields object.
+	 *
+	 * @param array $fields Values being sanitized.
+	 * @return array
+	 */
+	public function sanitize_additional_fields( $fields ) {
+		$properties         = $this->get_additional_fields_schema();
+		$sanitization_utils = new SanitizationUtils();
+		$fields             = $sanitization_utils->wp_kses_array(
+			array_reduce(
+				array_keys( $fields ),
+				function( $carry, $key ) use ( $fields, $properties ) {
+					if ( ! isset( $properties[ $key ] ) ) {
+						return $carry;
+					}
+					$field_schema   = $properties[ $key ];
+					$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+					$rest_sanitized = $this->additional_fields_controller->sanitize_field( $key, $rest_sanitized );
+					$carry[ $key ]  = $rest_sanitized;
+					return $carry;
+				},
+				[]
+			)
+		);
+
+		return $sanitization_utils->wp_kses_array( $fields );
+	}
+
+	/**
+	 * Validate additional fields object.
+	 *
+	 * @see rest_validate_value_from_schema
+	 *
+	 * @param array            $fields Value being sanitized.
+	 * @param \WP_REST_Request $request The Request.
+	 * @return true|\WP_Error
+	 */
+	public function validate_additional_fields( $fields, $request ) {
+		$errors                  = new \WP_Error();
+		$fields                  = $this->sanitize_additional_fields( $fields );
+		$additional_field_schema = $this->get_additional_fields_schema();
+
+		// Validate individual properties first.
+		foreach ( $fields as $key => $field_value ) {
+			if ( ! isset( $additional_field_schema[ $key ] ) ) {
+				continue;
+			}
+			$result = rest_validate_value_from_schema( $field_value, $additional_field_schema[ $key ], $key );
+
+			// Only allow custom validation on fields that pass the schema validation.
+			if ( true === $result ) {
+				$result = $this->additional_fields_controller->validate_field( $key, $field_value );
+			}
+
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
+				$location = $this->additional_fields_controller->get_field_location( $key );
+				foreach ( $result->get_error_codes() as $code ) {
+					$result->add_data(
+						array(
+							'location' => $location,
+							'key'      => $key,
+						),
+						$code
+					);
+				}
+				$errors->merge_from( $result );
+			}
+		}
+
+		// Validate groups of properties per registered location.
+		$locations = array( 'contact', 'additional' );
+
+		foreach ( $locations as $location ) {
+			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
+			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location );
+
+			if ( is_wp_error( $result ) && $result->has_errors() ) {
+				$errors->merge_from( $result );
+			}
+		}
+
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 }

@@ -276,7 +276,7 @@ class WC_API_Server {
 
 		// Normalise the endpoints
 		foreach ( $endpoints as $route => &$handlers ) {
-			if ( count( $handlers ) <= 2 && isset( $handlers[1] ) && ! is_array( $handlers[1] ) ) {
+			if ( is_array( $handlers ) && count( $handlers ) <= 2 && isset( $handlers[1] ) && ! is_array( $handlers[1] ) ) {
 				$handlers = array( $handlers );
 			}
 		}

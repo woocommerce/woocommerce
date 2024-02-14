@@ -2,7 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * FilledCartBlock class.
+ * FilterWrapper class.
  */
 class FilterWrapper extends AbstractBlock {
 	/**

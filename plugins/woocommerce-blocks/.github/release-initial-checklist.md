@@ -71,7 +71,7 @@ After testing:
 -   [ ] After the wp.org workflow completes, confirm the following
     -   [ ] Confirm svn tag is correct, e.g. [{{version}}](https://plugins.svn.wordpress.org/woo-gutenberg-products-block/tags/{{version}}/)
     -   [ ] Changelog, Version, and Last Updated on [WP.org plugin page](https://wordpress.org/plugins/woo-gutenberg-products-block/) is correct.
-    -   [ ] Confirm [WooCommerce.com plugin page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/) is updated. Note: this can take several hours, feel free to check it the following day.
+    -   [ ] Confirm [Woo.com plugin page](https://woo.com/customize/) is updated. Note: this can take several hours, feel free to check it the following day.
     -   [ ] Download zip and smoke test.
     -   [ ] Test updating plugin from previous version.
 
@@ -116,7 +116,7 @@ If this is a monthly release, you'll need to do the following steps as well:
 
 ## Publish posts
 
--   [ ] Post release announcement on [WooCommerce Developer Blog](https://developer.woocommerce.com/category/release-post/woocommerce-blocks-release-notes/).
+-   [ ] Post release announcement on [WooCommerce Developer Blog](https://developer.woo.com/category/release-post/woocommerce-blocks-release-notes/).
     -   Ping porters from each team to know which changelog entries need to be highlighted. Ask them to write a short text and optionally provide a screenshot. They can use previous posts for inspiration, we usually try to highlight new features or API changes.
     -   Ensure the release notes are included in the post verbatim.
     -   Don't forget to use category `WooCommerce Blocks Release Notes` for the post.
@@ -134,7 +134,7 @@ If this is a monthly release, you'll need to do the following steps as well:
     -   Are there any new blocks in this release? Ensure they have adequate user documentation.
     -   Ensure any major improvements or changes are documented.
 -   [ ] Update minimum supported versions (WordPress, WooCommerce Core) and other requirements where necessary, including:
-    -   [WCCOM product page](https://woocommerce.com/products/woocommerce-gutenberg-products-block/)
-    -   [WooCommerce blocks main documentation page](https://docs.woocommerce.com/document/woocommerce-blocks/)
+    -   [WCCOM product page](https://woo.com/customize/)
+    -   [WooCommerce blocks main documentation page](https://woo.com/document/woocommerce-blocks/)
 -   [ ] Go through the description of the release pull request and edit it to update all the sections and checklist instructions there.
 -   [ ] Close this PR.

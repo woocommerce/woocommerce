@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
-import { AttributeMetadata } from '@woocommerce/types';
+import type { BlockEditProps } from '@wordpress/blocks';
+import { type AttributeMetadata } from '@woocommerce/types';
 
 export interface ProductCollectionAttributes {
+	id: string;
 	query: ProductCollectionQuery;
 	queryId: number;
 	queryContext: [
@@ -15,6 +17,12 @@ export interface ProductCollectionAttributes {
 	displayLayout: ProductCollectionDisplayLayout;
 	tagName: string;
 	convertedFromProducts: boolean;
+	collection?: string;
+	hideControls: FilterName[];
+	/**
+	 * Contain the list of attributes that should be included in the queryContext
+	 */
+	queryContextIncludes: string[];
 }
 
 export enum LayoutOptions {
@@ -36,6 +44,11 @@ export enum ETimeFrameOperator {
 export interface TimeFrame {
 	operator?: ETimeFrameOperator;
 	value?: string;
+}
+
+export interface PriceRange {
+	min?: number | undefined;
+	max?: number | undefined;
 }
 
 export interface ProductCollectionQuery {
@@ -72,7 +85,13 @@ export interface ProductCollectionQuery {
 	woocommerceAttributes?: AttributeMetadata[];
 	isProductCollectionBlock?: boolean;
 	woocommerceHandPickedProducts?: string[];
+	priceRange?: undefined | PriceRange;
 }
+
+export type ProductCollectionEditComponentProps =
+	BlockEditProps< ProductCollectionAttributes > & {
+		openCollectionSelectionModal: () => void;
+	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
@@ -81,7 +100,7 @@ export type TProductCollectionOrderBy =
 	| 'popularity'
 	| 'rating';
 
-export type DisplayLayoutToolbarProps = {
+export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
 	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
 };
@@ -89,3 +108,29 @@ export type QueryControlProps = {
 	query: ProductCollectionQuery;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
+
+export enum CoreCollectionNames {
+	PRODUCT_CATALOG = 'woocommerce/product-collection/product-catalog',
+	CUSTOM = 'woocommerce/product-collection/custom',
+	BEST_SELLERS = 'woocommerce/product-collection/best-sellers',
+	FEATURED = 'woocommerce/product-collection/featured',
+	NEW_ARRIVALS = 'woocommerce/product-collection/new-arrivals',
+	ON_SALE = 'woocommerce/product-collection/on-sale',
+	TOP_RATED = 'woocommerce/product-collection/top-rated',
+}
+
+export enum CoreFilterNames {
+	ATTRIBUTES = 'attributes',
+	CREATED = 'created',
+	FEATURED = 'featured',
+	HAND_PICKED = 'hand-picked',
+	INHERIT = 'inherit',
+	KEYWORD = 'keyword',
+	ON_SALE = 'on-sale',
+	ORDER = 'order',
+	STOCK_STATUS = 'stock-status',
+	TAXONOMY = 'taxonomy',
+}
+
+export type CollectionName = CoreCollectionNames | string;
+export type FilterName = CoreFilterNames | string;

@@ -19,7 +19,7 @@ type Scenario = {
 	amount: number;
 };
 
-const singleOccurranceScenarios: Scenario[] = [
+const singleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Main Content',
 		dataTestId: 'woocommerce_before_main_content',
@@ -46,7 +46,7 @@ const singleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const multipleOccurranceScenarios: Scenario[] = [
+const multipleOccurrenceScenarios: Scenario[] = [
 	{
 		title: 'Before Shop Loop Item Title',
 		dataTestId: 'woocommerce_before_shop_loop_item_title',
@@ -79,7 +79,7 @@ const multipleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const compatiblityPluginFileName = 'compatibility-plugin.php';
+const compatibilityPluginFileName = 'compatibility-plugin.php';
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async (
 		{ page, admin, editor, templateApiUtils, editorUtils },
@@ -92,7 +92,6 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			templateApiUtils,
 			editorUtils,
 		} );
-		await pageObject.createNewPostAndInsertBlock();
 		await use( pageObject );
 	},
 } );
@@ -100,7 +99,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 test.describe( 'Compatibility Layer with Product Collection block', () => {
 	test.beforeAll( async () => {
 		await installPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+			`${ __dirname }/${ compatibilityPluginFileName }`
 		);
 	} );
 
@@ -112,7 +111,7 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			await pageObject.goToProductCatalogFrontend();
 		} );
 
-		for ( const scenario of singleOccurranceScenarios ) {
+		for ( const scenario of singleOccurrenceScenarios ) {
 			test( `${ scenario.title } is attached to the page`, async ( {
 				pageObject,
 			} ) => {
@@ -123,7 +122,7 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			} );
 		}
 
-		for ( const scenario of multipleOccurranceScenarios ) {
+		for ( const scenario of multipleOccurrenceScenarios ) {
 			test( `${ scenario.title } is attached to the page`, async ( {
 				pageObject,
 			} ) => {
@@ -137,7 +136,7 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 
 	test.afterAll( async ( { requestUtils } ) => {
 		await uninstallPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+			`${ __dirname }/${ compatibilityPluginFileName }`
 		);
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );

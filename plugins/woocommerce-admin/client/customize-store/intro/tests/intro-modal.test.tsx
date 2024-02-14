@@ -9,6 +9,7 @@ import { AnyInterpreter } from 'xstate';
  * Internal dependencies
  */
 import { Intro } from '../';
+import { FlowType } from '~/customize-store/types';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	SiteHub: jest.fn( () => null ),
@@ -34,7 +35,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: true,
 						customizeStoreTaskCompleted: false,
 						currentThemeIsAiGenerated: false,
 					},
@@ -42,7 +42,9 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: true,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -89,7 +91,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: true,
 					},
@@ -97,7 +98,9 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }
@@ -142,7 +145,6 @@ describe( 'Intro Modals', () => {
 								},
 							},
 						},
-						activeThemeHasMods: false,
 						customizeStoreTaskCompleted: true,
 						currentThemeIsAiGenerated: false,
 					},
@@ -150,7 +152,9 @@ describe( 'Intro Modals', () => {
 					transitionalScreen: {
 						hasCompleteSurvey: false,
 					},
-					aiOnline: true,
+					flowType: FlowType.AIOnline,
+					isFontLibraryAvailable: false,
+					activeThemeHasMods: false,
 				} }
 				currentState={ 'intro' }
 				parentMachine={ null as unknown as AnyInterpreter }

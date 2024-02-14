@@ -27364,10 +27364,10 @@ index 9260fad5df..3ef0c998da 100644
 +		).toContainText( '35.99' );
  	} );
  } );
-diff --git a/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js b/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
+diff --git a/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js b/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
 index 607de7df93..58fde16c6d 100644
---- a/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
-+++ b/plugins/woocommerce/e2e/tests/merchant/create-simple-product.spec.js
+--- a/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
++++ b/plugins/woocommerce/e2e/tests/merchant/product-create-simple.spec.js
 @@ -20,10 +20,13 @@ test.describe( 'Add New Simple Product Page', () => {
  		// and the flat rate shipping method to that zone
  		await api

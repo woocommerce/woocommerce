@@ -60,6 +60,7 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	woocommerceAttributes: [],
 	woocommerceHandPickedProducts: [],
 	timeFrame: undefined,
+	priceRange: undefined,
 };
 
 export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
@@ -70,6 +71,7 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		columns: 3,
 		shrinkColumns: true,
 	},
+	queryContextIncludes: [ 'collection', 'id' ],
 };
 
 export const getDefaultQuery = (
@@ -99,6 +101,7 @@ export const DEFAULT_FILTERS: Partial< ProductCollectionQuery > = {
 	woocommerceHandPickedProducts: [],
 	featured: DEFAULT_QUERY.featured,
 	timeFrame: undefined,
+	priceRange: undefined,
 };
 
 /**
@@ -150,8 +153,9 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 	],
 ];
 
+export const coreQueryPaginationBlockName = 'core/query-pagination';
 export const INNER_BLOCKS_PAGINATION_TEMPLATE: InnerBlockTemplate = [
-	'core/query-pagination',
+	coreQueryPaginationBlockName,
 	{
 		layout: {
 			type: 'flex',

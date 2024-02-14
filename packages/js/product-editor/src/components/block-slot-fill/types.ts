@@ -4,8 +4,11 @@
 import { Fill, Slot } from '@wordpress/components';
 
 export type BlockSlotFillProps = {
-	clientId: string;
-	name: string;
+	name:
+		| 'section-actions'
+		| 'section-description'
+		| 'subsection-actions'
+		| 'subsection-description';
 };
 
 export type BlockSlotProps = BlockSlotFillProps & Slot.Props;

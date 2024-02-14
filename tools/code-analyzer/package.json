@@ -35,10 +35,29 @@
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
 		"typescript": "^5.3.3",
-		"wireit": "0.14.1"
+		"wireit": "0.14.3"
 	},
 	"engines": {
 		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.ts"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.js",
+						"tsconfig.json",
+						"src/**/*.ts"
+					]
+				}
+			]
+		}
 	}
 }

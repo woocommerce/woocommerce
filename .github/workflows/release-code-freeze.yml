@@ -1,7 +1,7 @@
 name: 'Release: Code freeze'
 on:
     schedule:
-        - cron: '0 0 * * 4' # Run at start of day UTC on Thursdays.
+        - cron: '0 0 * * 4' # Run at start of day UTC on Thursdays. i.e. ~Wednesdays EOD 23:59:59 UTC
     workflow_dispatch:
         inputs:
             timeOverride:

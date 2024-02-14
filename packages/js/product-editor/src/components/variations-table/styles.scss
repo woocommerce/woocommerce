@@ -1,4 +1,4 @@
-@import "./variations-actions-menu/styles.scss";
+@import "./variation-actions-menus/styles.scss";
 @import "./downloads-menu-item/styles.scss";
 @import "./pagination/styles.scss";
 @import "./table-empty-or-error-state/styles.scss";
@@ -14,15 +14,14 @@
 		&-header {
 			.woocommerce-product-variations__table-row {
 				min-height: auto;
-
-				&:last-child {
-					text-transform: uppercase;
-					color: $gray-700;
-					font-weight: 500;
-					font-size: 11px;
-					line-height: $grid-unit-20;
-					border-bottom: 1px solid $gray-200;
-				}
+			}
+			.woocommerce-product-variations__table-rowheader {
+				text-transform: uppercase;
+				color: $gray-700;
+				font-weight: 500;
+				font-size: 11px;
+				line-height: $grid-unit-20;
+				border-bottom: 1px solid $gray-200;
 			}
 		}
 		&-body {
