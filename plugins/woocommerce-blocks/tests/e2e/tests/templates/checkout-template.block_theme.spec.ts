@@ -91,9 +91,9 @@ test.describe( 'Test editing the checkout template', async () => {
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);
-		await editor.canvas.waitForSelector(
-			'.wp-block-woocommerce-classic-shortcode'
-		);
+		await editor.canvas
+			.locator( '.wp-block-woocommerce-classic-shortcode' )
+			.waitFor();
 		await editor.canvas
 			.getByRole( 'button', { name: 'Transform into blocks' } )
 			.click();

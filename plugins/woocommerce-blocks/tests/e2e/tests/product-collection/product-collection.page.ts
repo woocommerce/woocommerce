@@ -201,7 +201,7 @@ class ProductCollectionPage {
 			postType: 'wp_template',
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
-		await this.editor.canvas.click( 'body' );
+		await this.editor.canvas.locator( 'body' ).click();
 		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.openDocumentSettingsSidebar();

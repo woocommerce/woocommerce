@@ -38,8 +38,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await editorUtils.enterEditMode();
 
-		await editor.insertBlock( { name: blockData.slug } );
-
 		editor.insertBlock( { name: blockData.slug } ).catch( ( e ) => {
 			expect( e.message ).toContain( 'is not registered' );
 		} );

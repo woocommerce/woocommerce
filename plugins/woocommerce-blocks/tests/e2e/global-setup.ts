@@ -120,6 +120,7 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 		return window.wp.data !== undefined;
 	} );
 
+	// Disable the welcome guide for the site editor.
 	await page.evaluate( () => {
 		window.wp.data
 			.dispatch( 'core/preferences' )
