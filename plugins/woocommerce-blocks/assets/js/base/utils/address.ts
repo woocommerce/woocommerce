@@ -124,7 +124,8 @@ export const emptyAddressFields = <
 	const newAddress = Object.assign( {}, address ) as T;
 
 	addressForm.forEach( ( { key = '' } ) => {
-		if ( isValidAddressKey( key, address ) ) {
+		// Clear address fields except country to keep consistency with shortcode Checkout.
+		if ( key !== 'country' && isValidAddressKey( key, address ) ) {
 			newAddress[ key ] = '';
 		}
 	} );

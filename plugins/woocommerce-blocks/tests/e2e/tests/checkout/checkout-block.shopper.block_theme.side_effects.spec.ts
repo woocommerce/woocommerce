@@ -532,30 +532,20 @@ test.describe( 'Billing Address Form', () => {
 		await frontendUtils.goToCheckout();
 		await checkoutPageObject.fillShippingDetails( shippingTestData );
 		await page.getByLabel( 'Use same address for billing' ).uncheck();
-		const billingForm = page.getByRole( 'group', {
-			name: 'Billing address',
-		} );
 
-		const firstName = billingForm.getByLabel( 'First name' );
-		const lastName = billingForm.getByLabel( 'Last name' );
-		const company = billingForm.getByLabel( 'Company' );
-		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
-		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
-		const country = billingForm.getByLabel( 'Country/Region' );
-		const city = billingForm.getByLabel( 'City' );
-		const state = billingForm.getByLabel( 'State' );
-		const postcode = billingForm.getByLabel( 'Postal code' );
-		const phone = billingForm.getByLabel( 'Phone' );
-
-		await expect( firstName ).toHaveValue( '' );
-		await expect( lastName ).toHaveValue( '' );
-		await expect( company ).toHaveValue( '' );
-		await expect( address1 ).toHaveValue( '' );
-		await expect( address2 ).toHaveValue( '' );
-		await expect( country ).toHaveText( '' );
-		await expect( city ).toHaveValue( '' );
-		await expect( state ).toHaveText( '' );
-		await expect( postcode ).toHaveValue( '' );
-		await expect( phone ).toHaveValue( '' );
+		await expect( page.locator( '#billing-first_name' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-last_name' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-company' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-address_1' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-address_2' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-country input' ) ).toHaveValue(
+			'United States (US)'
+		);
+		await expect( page.locator( '#billing-city' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-state input' ) ).toHaveValue(
+			''
+		);
+		await expect( page.locator( '#billing-postcode' ) ).toHaveValue( '' );
+		await expect( page.locator( '#billing-phone' ) ).toHaveValue( '' );
 	} );
 } );
