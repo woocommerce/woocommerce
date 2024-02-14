@@ -108,7 +108,7 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 	 * Test get_variation with valid experiment name.
 	 */
 	public function test_fetch_variation_with_valid_name() {
-		$exp = new Experimental_Abtest( 'anon', 'platform', true );
+		$exp       = new Experimental_Abtest( 'anon', 'platform', true );
 		$variation = $exp->get_variation( 'valid_experiment_name_2' );
 		$this->assertNotInstanceOf( 'WP_Error', $variation );
 	}
@@ -122,5 +122,4 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'Invalid A/B test name.' );
 		$exp->get_variation( 'Invalid-Experiment-Name!' );
 	}
-}
 }
