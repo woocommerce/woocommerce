@@ -249,6 +249,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - [Product Block Editor]: add Upsell advice [#43116](https://github.com/woocommerce/woocommerce/pull/43116)
 * Add - [Product Block Editor]: add `Linked products` tab [#43009](https://github.com/woocommerce/woocommerce/pull/43009)
 * Add - [Product Block Editor]: render empty state for the Cross-sells section [#43143](https://github.com/woocommerce/woocommerce/pull/43143)
+* Update - Use existing data for customer order history if available or hide the metabox. [#44318](https://github.com/woocommerce/woocommerce/pull/44318)
 * Update - Abstract the Block Hooks logic from the Mini Cart class to its own trait class so other blocks can benefit. [#43250](https://github.com/woocommerce/woocommerce/pull/43250)
 * Update - Add "No AI" banner image and center banner content [#43547](https://github.com/woocommerce/woocommerce/pull/43547)
 * Update - Add Square to recommended payment gateway when user selects "Im selling offline and online" [#43816](https://github.com/woocommerce/woocommerce/pull/43816)
