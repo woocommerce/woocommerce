@@ -121,6 +121,7 @@ final class Experimental_Abtest {
 	 *
 	 * @param string $test_name Name of the A/B test.
 	 * @return mixed|null A/B test variation, or null on failure.
+	 * @throws \Exception If there is an error retrieving the variation and the environment is not production.
 	 */
 	public function get_variation( $test_name ) {
 		// Default to the control variation when users haven't consented to tracking.

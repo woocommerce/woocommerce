@@ -123,3 +123,4 @@ class Experimental_Abtest_Test extends WC_Unit_Test_Case {
 		$exp->get_variation( 'Invalid-Experiment-Name!' );
 	}
 }
+}
