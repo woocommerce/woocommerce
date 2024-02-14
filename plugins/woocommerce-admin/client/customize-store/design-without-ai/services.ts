@@ -25,7 +25,6 @@ import {
 	installFontFace,
 	installFontFamily,
 	getFontFamiliesAndFontFaceToInstall,
-	FontCollectionsResponse,
 } from './fonts';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
 import { FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
@@ -63,6 +62,11 @@ const installAndActivateTheme = async () => {
 };
 
 const installFontFamilies = async () => {
+	const isTrackingEnabled = window.wcTracks?.isEnabled || false;
+	if ( ! isTrackingEnabled ) {
+		return;
+	}
+
 	try {
 		const installedFontFamily = ( await resolveSelect(
 			'core'
@@ -88,13 +92,8 @@ const installFontFamilies = async () => {
 			} )
 		);
 
-		const fontCollections = await apiFetch< FontCollectionsResponse >( {
-			path: '/wp/v2/font-collections?_fields=slug,name,description,id',
-			method: 'GET',
-		} );
-
 		const fontCollection = await apiFetch< FontCollectionResponse >( {
-			path: `/wp/v2/font-collections/${ fontCollections[ 0 ].slug }`,
+			path: `/wp/v2/font-collections/google-fonts`,
 			method: 'GET',
 		} );
 

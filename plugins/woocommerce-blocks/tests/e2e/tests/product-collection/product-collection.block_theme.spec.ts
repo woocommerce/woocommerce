@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import type { Request } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -698,16 +699,11 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'With other blocks', () => {
-		test( 'In Single Product block', async ( {
-			admin,
-			editorUtils,
-			pageObject,
-		} ) => {
+		test( 'In Single Product block', async ( { admin, pageObject } ) => {
 			await admin.createNewPost();
-			await editorUtils.closeWelcomeGuideModal();
-			await pageObject.insertProductCollectionInSingleProductBlock(
-				'featured'
-			);
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			await pageObject.chooseCollectionInPost( 'featured' );
+			await pageObject.refreshLocators( 'editor' );
 
 			const featuredProducts = [
 				'Cap',
@@ -731,6 +727,189 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.productPrices ).toHaveText(
 				featuredProductsPrices
 			);
+		} );
+	} );
+
+	test.describe( 'Location is recognised', () => {
+		const filterRequest = ( request: Request ) => {
+			const url = request.url();
+			return (
+				url.includes( 'wp/v2/product' ) &&
+				url.includes( 'isProductCollectionBlock=true' )
+			);
+		};
+
+		const filterProductRequest = ( request: Request ) => {
+			const url = request.url();
+			const searchParams = new URLSearchParams( request.url() );
+
+			return (
+				url.includes( 'wp/v2/product' ) &&
+				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
+				!! searchParams.get( `location[sourceData][productId]` )
+			);
+		};
+
+		const getLocationDetailsFromRequest = (
+			request: Request,
+			locationType?: string
+		) => {
+			const searchParams = new URLSearchParams( request.url() );
+
+			if ( locationType === 'product' ) {
+				return {
+					type: searchParams.get( 'location[type]' ),
+					productId: searchParams.get(
+						`location[sourceData][productId]`
+					),
+				};
+			}
+
+			if ( locationType === 'archive' ) {
+				return {
+					type: searchParams.get( 'location[type]' ),
+					taxonomy: searchParams.get(
+						`location[sourceData][taxonomy]`
+					),
+					termId: searchParams.get( `location[sourceData][termId]` ),
+				};
+			}
+
+			return {
+				type: searchParams.get( 'location[type]' ),
+				sourceData: searchParams.get( `location[sourceData]` ),
+			};
+		};
+
+		test( 'as product in specific Single Product template', async ( {
+			page,
+			pageObject,
+			editorUtils,
+		} ) => {
+			const productName = 'Cap';
+			const productSlug = 'cap';
+
+			await editorUtils.openSpecificProductTemplate(
+				productName,
+				productSlug
+			);
+
+			await editorUtils.insertBlockUsingGlobalInserter(
+				pageObject.BLOCK_NAME
+			);
+
+			const locationReuqestPromise =
+				page.waitForRequest( filterProductRequest );
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await locationReuqestPromise;
+
+			const { type, productId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'product'
+			);
+
+			expect( type ).toBe( 'product' );
+			expect( productId ).toBeTruthy();
+		} );
+		test( 'as category in Products by Category template', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				pageObject.BLOCK_NAME
+			);
+
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await locationReuqestPromise;
+			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'archive'
+			);
+
+			expect( type ).toBe( 'archive' );
+			expect( taxonomy ).toBe( 'product_cat' );
+			// Field is sent as a null but browser converts it to empty string
+			expect( termId ).toBe( '' );
+		} );
+
+		test( 'as tag in Products by Tag template', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				pageObject.BLOCK_NAME
+			);
+
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const locationRequest = await locationReuqestPromise;
+			const { type, taxonomy, termId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'archive'
+			);
+
+			expect( type ).toBe( 'archive' );
+			expect( taxonomy ).toBe( 'product_tag' );
+			// Field is sent as a null but browser converts it to empty string
+			expect( termId ).toBe( '' );
+		} );
+
+		test( 'as generic in post', async ( {
+			admin,
+			editorUtils,
+			pageObject,
+			page,
+		} ) => {
+			await admin.createNewPost();
+			await editorUtils.insertBlockUsingGlobalInserter(
+				pageObject.BLOCK_NAME
+			);
+
+			const locationReuqestPromise = page.waitForRequest( filterRequest );
+			await pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await locationReuqestPromise;
+			const { type, sourceData } =
+				getLocationDetailsFromRequest( locationRequest );
+
+			expect( type ).toBe( 'generic' );
+			// Field is not sent at all. URLSearchParams get method returns a null
+			// if field is not available.
+			expect( sourceData ).toBe( null );
+		} );
+
+		test( 'as product in Single Product block in post', async ( {
+			admin,
+			pageObject,
+			page,
+		} ) => {
+			await admin.createNewPost();
+			await pageObject.insertProductCollectionInSingleProductBlock();
+			const locationReuqestPromise =
+				page.waitForRequest( filterProductRequest );
+			await pageObject.chooseCollectionInPost( 'featured' );
+			const locationRequest = await locationReuqestPromise;
+			const { type, productId } = getLocationDetailsFromRequest(
+				locationRequest,
+				'product'
+			);
+
+			expect( type ).toBe( 'product' );
+			expect( productId ).toBeTruthy();
 		} );
 	} );
 

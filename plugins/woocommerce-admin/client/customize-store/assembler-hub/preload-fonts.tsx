@@ -145,6 +145,12 @@ export const PreloadFonts = () => {
 		( fontPair ) => fontPair?.settings?.typography?.fontFamilies?.theme
 	);
 
+	const iframeInstance = useMemo( () => {
+		return document.querySelector(
+			'.block-editor-block-preview__content iframe'
+		) as HTMLObjectElement | null;
+	}, [] );
+
 	const fontFamilies = allFontChoices.map( ( fontPair ) => {
 		return [
 			...fontPair.map( ( font ) => {
@@ -171,6 +177,7 @@ export const PreloadFonts = () => {
 			{ isNoAIFlow( context.flowType ) && (
 				<FontFamiliesLoader
 					fontFamilies={ enabledFontFamilies.custom }
+					iframeInstance={ iframeInstance }
 				/>
 			) }
 		</>
