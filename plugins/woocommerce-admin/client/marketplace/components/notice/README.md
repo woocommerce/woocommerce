@@ -3,7 +3,7 @@
 The `Notice` component is a versatile notification UI element designed for use within WooCommerce Admin environments.
 It leverages the `@wordpress/icons` for displaying various icons and provides customizable options for content, appearance, and behavior.
 
-### Usage
+## Usage
 To use the Notice component, import it into your React component file and include it in your component's render method. Here is a basic example:
 
 ```jsx
@@ -26,7 +26,7 @@ function MyComponent() {
 export default MyComponent;
 ```
 
-### Props
+## Props
 
 The Notice component accepts the following props for customization:
 
@@ -37,7 +37,7 @@ The Notice component accepts the following props for customization:
 - `isDismisible`` (boolean): Optional. If true, displays a close button that hides the notice. Defaults to true.
 - `variant`` (string): Determines the style of the notice. Options are info, warning, error, success.
 
-### Styling
+## Styling
 
 The notice component can be styled using the following CSS classes, based on the variant prop:
 
@@ -48,11 +48,11 @@ The notice component can be styled using the following CSS classes, based on the
 
 Icons within the notice adopt the variant prop to determine their color, aligning with the overall style of the notice.
 
-### Dismissal Behavior
+## Dismissal Behavior
 
 Notices can be dismissed if `isDismisible` is set to `true`. The dismissal state is persisted in the browser's localStorage, preventing the notice from reappearing on future visits.
 
-### Examples
+## Examples
 
 Here are more detailed examples:
 
