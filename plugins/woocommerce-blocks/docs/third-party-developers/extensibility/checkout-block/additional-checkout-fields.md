@@ -147,13 +147,12 @@ As well as the options above, text fields also support a `required` option. If t
 
 As well as the options above, select fields must also be registered with an  `options` option. This is used to specify what options the shopper can select.
 
-Select fields are always required.
-
-The `optionalLabel` option will never be shown as select fields are _always_ required.
+Select fields can also be marked as required. If they are not (i.e. they are optional), then an empty entry will be added to allow the shopper to unset the field.
 
 | Option name | Description | Required? | Example        | Default value |
 |-----|-----|-----|----------------|--------------|
 | `options` | An array of options to show in the select input. Each options must be an array containing a `label` and `value` property. Each entry must have a unique `value`. Any duplicate options will be removed. The `value` is what gets submitted to the server during checkout and the `label` is simply a user-friendly representation of this value. It is not transmitted to the server in any way. | Yes | &ast;see below | No default - this must be provided. |
+| `required` | If this is `true` then the shopper _must_ provide a value for this field during the checkout process. | No | `true` | `false` |
 
 ##### &ast;Example of `options` value:
 
