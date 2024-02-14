@@ -79,31 +79,14 @@ class WC_Admin_Addons {
 	 * @return array|WP_Error
 	 */
 	public static function fetch_featured() {
+		$transient_name = 'wc_addons_featured';
+		// Important: WCCOM Extensions API v2.0 is used.
+		$url = 'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
 		$locale   = get_user_locale();
-		$featured = self::get_locale_data_from_transient( 'wc_addons_featured', $locale );
+		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
 		if ( false === $featured ) {
-			$headers = array();
-			$auth    = WC_Helper_Options::get( 'auth' );
-
-			if ( ! empty( $auth['access_token'] ) ) {
-				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
-			}
-
-			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
-			$country          = WC()->countries->get_base_country();
-			if ( ! empty( $country ) ) {
-				$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
-			}
-
-			// Important: WCCOM Extensions API v2.0 is used.
-			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
-				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				)
-			);
+			$raw_featured = self::fetch_with_locale( $url );
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
@@ -143,7 +126,7 @@ class WC_Admin_Addons {
 			}
 
 			if ( $featured ) {
-				self::set_locale_data_in_transient( 'wc_addons_featured', $featured, $locale, DAY_IN_SECONDS );
+				self::set_locale_data_in_transient( $transient_name, $featured, $locale, DAY_IN_SECONDS );
 			}
 		}
 
@@ -1555,5 +1538,69 @@ class WC_Admin_Addons {
 		$transient_value            = is_array( $transient_value ) ? $transient_value : array();
 		$transient_value[ $locale ] = $value;
 		return set_transient( $transient, $transient_value, $expiration );
+	}
+
+	/**
+	 * Get promotions to show in the marketplace.
+	 *
+	 * @return array|false|mixed
+	 */
+	public static function get_marketplace_promotions() {
+		$transient_name = 'wc_addons_marketplace_promotions';
+		$url = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
+		$locale   = get_user_locale();
+		$promotions = self::get_locale_data_from_transient( $transient_name, $locale );
+
+		if ( false === $promotions ) {
+			$raw_promotions = self::fetch_with_locale( $url );
+
+			if ( is_wp_error( $raw_promotions ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_promotions->get_error_message() );
+			}
+
+			$response_code = (int) wp_remote_retrieve_response_code( $raw_promotions );
+			if ( 200 !== $response_code ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
+			}
+
+			$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ) );
+			if ( empty( $promotions ) || ! is_array( $promotions ) ) {
+				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
+			}
+
+			if ( $promotions ) {
+				self::set_locale_data_in_transient( $transient_name, $promotions, $locale, DAY_IN_SECONDS );
+			}
+		}
+
+		return $promotions;
+	}
+
+	/**
+	 * Pass locale and country in wp_safe_remote_get request to Woo.com endpoint.
+	 *
+	 * @param string $url
+	 *
+	 * @return array|WP_Error
+	 */
+	private static function fetch_with_locale( $url ) {
+		$headers = array();
+		$auth    = WC_Helper_Options::get( 'auth' );
+
+		if ( ! empty( $auth['access_token'] ) ) {
+			$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+		}
+
+		$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
+		$country          = WC()->countries->get_base_country();
+		if ( ! empty( $country ) ) {
+			$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
+		}
+
+		return wp_safe_remote_get( $url . $parameter_string,
+			array(
+				'headers'    => $headers,
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+			) );
 	}
 }

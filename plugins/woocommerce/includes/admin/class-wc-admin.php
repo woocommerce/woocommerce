@@ -39,6 +39,8 @@ class WC_Admin {
 		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
+
+		add_action( 'woocommerce_init', array( 'WC_Admin_Addons', 'get_marketplace_promotions' ), 100 );
 	}
 
 	/**
