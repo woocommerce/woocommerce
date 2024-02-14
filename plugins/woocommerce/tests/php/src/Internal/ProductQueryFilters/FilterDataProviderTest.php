@@ -288,6 +288,9 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 			}
 
 			foreach ( $product_data['variations'] as $variation_data ) {
+				if ( ! isset( $_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] ) ) {
+					$_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] = 0;
+				}
 				$_attribute_counts[ $variation_data['attributes'][ $attribute_name ] ] += 1;
 			}
 		}
