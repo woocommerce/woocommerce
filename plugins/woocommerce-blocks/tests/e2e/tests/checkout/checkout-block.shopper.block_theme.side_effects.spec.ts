@@ -476,19 +476,50 @@ test.describe( 'Checkout Form Errors', () => {
 } );
 
 test.describe( 'Billing Address Form', () => {
-	test.use( { storageState: guestFile } );
+	const blockSelectorInEditor = blockData.selectors.editor.block as string;
+
+	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
+	test.beforeAll( async ( { editor, frontendUtils, admin, editorUtils } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
+
+		const checkbox = editor.page.getByRole( 'checkbox', {
+			name: 'Company',
+			exact: true,
+		} );
+		await checkbox.check();
+		await expect( checkbox ).toBeChecked();
+		await expect(
+			editor.canvas.locator(
+				'div.wc-block-components-address-form__company'
+			)
+		).toBeVisible();
+		await editorUtils.saveSiteEditorEntities();
+		await frontendUtils.logout();
+		await frontendUtils.emptyCart();
+	} );
+
 	const shippingTestData = {
-		firstname: 'Jane',
+		firstname: 'John',
 		lastname: 'Doe',
-		company: 'WooCommerce',
-		addressfirstline: '123 Main Avenue',
-		addresssecondline: 'Unit 42',
-		city: 'Los Angeles',
-		phone: '987654321',
-		country: 'Albania',
-		state: 'Berat',
-		postcode: '1234',
+		company: 'Automattic',
+		addressfirstline: '123 Easy Street',
+		addresssecondline: 'Testville',
+		country: 'United States (US)',
+		city: 'New York',
+		state: 'New York',
+		postcode: '90210',
+		phone: '01234567890',
 	};
+
 	test( 'Guest user will get empty billing address form', async ( {
 		frontendUtils,
 		page,
@@ -499,12 +530,30 @@ test.describe( 'Billing Address Form', () => {
 		await frontendUtils.goToCheckout();
 		await checkoutPageObject.fillShippingDetails( shippingTestData );
 		await page.getByLabel( 'Use same address for billing' ).uncheck();
-		await expect( page.locator( '#billing-first_name' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-last_name' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-address_1' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-address_2' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-city' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-postcode' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-phone' ) ).toHaveValue( '' );
+		const billingForm = page.getByRole( 'group', {
+			name: 'Billing address',
+		} );
+
+		const firstName = billingForm.getByLabel( 'First name' );
+		const lastName = billingForm.getByLabel( 'Last name' );
+		const company = billingForm.getByLabel( 'Company' );
+		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
+		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
+		const country = billingForm.getByLabel( 'Country/Region' );
+		const city = billingForm.getByLabel( 'City' );
+		const state = billingForm.getByLabel( 'State' );
+		const postcode = billingForm.getByLabel( 'Postal code' );
+		const phone = billingForm.getByLabel( 'Phone' );
+
+		await expect( firstName ).toHaveValue( '' );
+		await expect( lastName ).toHaveValue( '' );
+		await expect( company ).toHaveValue( '' );
+		await expect( address1 ).toHaveValue( '' );
+		await expect( address2 ).toHaveValue( '' );
+		await expect( country ).toHaveText( '' );
+		await expect( city ).toHaveValue( '' );
+		await expect( state ).toHaveText( '' );
+		await expect( postcode ).toHaveValue( '' );
+		await expect( phone ).toHaveValue( '' );
 	} );
 } );
