@@ -178,6 +178,8 @@ The supported attributes are:
 
 `maxLength` and `readOnly` are in camelCase because the attributes are rendered on a React element which must receive them in this format.
 
+Certain attributes are not passed through to the field intentionally, these are `autofocus` and `disabled`. We are welcome to hear feedback and adjust this behaviour if valid use cases are provided.
+
 ## Usage examples
 
 ### Rendering a text field
