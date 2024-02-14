@@ -20,7 +20,6 @@ import type {
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
-import { getUniqueBlockId } from '../../../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
 
@@ -37,23 +36,35 @@ const ProductCollectionContent = (
 	const instanceId = useInstanceId( ProductCollectionContent );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore These selectors aren't getting their types loaded for some reason.
-	const { getBlock, getBlocks } = useSelect( blockEditorStore );
+	const { getBlock, getBlockParents } = useSelect( blockEditorStore );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
 	 */
 	useEffect( () => {
-		const blockInstance = getBlock( clientId );
-		if ( ! blockInstance ) {
-			throw new Error( 'Block instance not found' );
+		// In order to properly support pagination this block has a queryId attribute that
+		// is initialized to a unique value when the block is first added to the editor.
+		// We use the `instanceId` for this purpose. It is stable across saves as long
+		// as the order of instances of these blocks in the editor does not change.
+		// The block will be re-indexed in that case, however, this won't cause
+		// any problems since the queryid only has to be stable across client
+		// renders.
+		let queryId = instanceId as number;
+
+		// We DO need to be careful to not change the queryId if the block is part of a
+		// sync pattern. When multiple instances of the same pattern are placed on a
+		// page, updates to one will cause the others to be re-inserted. This will
+		// increment the ID again and trigger a re-insertion of another instance
+		// that updates the ID again, and so on until the browser hangs.
+		const blockParents = getBlockParents( clientId );
+		for ( const parentClientId of blockParents ) {
+			const parent = getBlock( parentClientId );
+			if ( parent && parent.name === 'core/block' ) {
+				queryId = attributes.queryId;
+				break;
+			}
 		}
-		const allBlocks = getBlocks();
-		const uniqueId = getUniqueBlockId< ProductCollectionAttributes >(
-			blockInstance,
-			'id',
-			allBlocks
-		);
 
 		setAttributes( {
 			...DEFAULT_ATTRIBUTES,
@@ -63,16 +74,7 @@ const ProductCollectionContent = (
 			},
 			...( attributes as Partial< ProductCollectionAttributes > ),
 			...{
-				// We need a reliable way to identify unique instances of this block regardless of
-				// where it might exist.
-				id: uniqueId,
-				// Each instance of the block needs to have a unique queryId so that pagination works
-				// when multiple instances of this block are present. `instanceId` is the index of
-				// the block on the page and is stable across saves with automatic handling for
-				// re-indexing when these blocks are added, removed, or moved. Depending on
-				// what it's set to it might be changed during block editing but that won't
-				// negatively impact the functionality and pagination will still work.
-				queryId: instanceId as number,
+				queryId,
 			},
 		} );
 		// This hook is only needed on initialization and sets default attributes.
