@@ -54,7 +54,7 @@ The contact information section currently renders at the top of the form. It con
 
 ![Showing the contact information section with two fields rendered, email and an additional checkout field (optional)](https://github.com/woocommerce/woocommerce/assets/5656702/097c2596-c629-4eab-9604-577ee7a14cfe)
 
-Fields rendered here will be saved to the _order_ (i.e. they will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled).
+Fields rendered here will be saved to the shopper's account. They will be visible and editable render in the shopper's "Account details" section.
 
 ### Address
 
