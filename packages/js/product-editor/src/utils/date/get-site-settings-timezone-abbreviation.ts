@@ -16,5 +16,5 @@ export function getSiteSettingsTimezoneAbbreviation() {
 	}
 
 	const symbol = Number( timezone.offset ) < 0 ? '' : '+';
-	return `UTC${ symbol }${ timezone.offsetFormatted }`;
+	return `UTC${ symbol }${ timezone.offsetFormatted ?? timezone.offset }`;
 }
