@@ -114,6 +114,12 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 
 	await page.context().storageState( { path: adminFile } );
 
+	await page.goto( baseURL + '/wp-admin/post-new.php' );
+
+	await page.waitForFunction( () => {
+		return window.wp.data !== undefined;
+	} );
+
 	await page.evaluate( () => {
 		window.wp.data
 			.dispatch( 'core/preferences' )
