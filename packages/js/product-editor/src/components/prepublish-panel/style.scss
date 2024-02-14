@@ -47,7 +47,7 @@
 	&__footer {
 		padding: 0 $grid-unit-20;
 		position: absolute;
-		bottom: $gap-largest;
+		bottom: $gap-largest + $gap-large;
 		left: 0;
 		width: 100%;
 	}
