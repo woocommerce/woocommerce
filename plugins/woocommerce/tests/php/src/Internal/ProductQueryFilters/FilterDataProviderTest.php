@@ -168,7 +168,7 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 				}
 
 				if ( isset( $product_data['variations'] ) ) {
-					foreach( $product_data['variations'] as $variation_data ) {
+					foreach ( $product_data['variations'] as $variation_data ) {
 						if ( isset( $variation_data['props']['regular_price'] ) && $variation_data['props']['regular_price'] <= 55 ) {
 							return true;
 						}
@@ -200,7 +200,7 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 				$has_blue  = false;
 
 				if ( isset( $product_data['variations'] ) ) {
-					foreach( $product_data['variations'] as $variation_data ) {
+					foreach ( $product_data['variations'] as $variation_data ) {
 						if ( empty( $variation_data['attributes']['pa_color'] ) ) {
 							return false;
 						}
@@ -243,7 +243,7 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 			'pa_color',
 			function( $product_data ) {
 				if ( isset( $product_data['variations'] ) ) {
-					foreach( $product_data['variations'] as $variation_data ) {
+					foreach ( $product_data['variations'] as $variation_data ) {
 						if ( empty( $variation_data['attributes']['pa_color'] ) ) {
 							return false;
 						}
@@ -266,8 +266,8 @@ class FilterDataProviderTest extends AbstractProductQueryFiltersTest {
 	/**
 	 * Get expected attribute count from product data and map them with actual term IDs.
 	 *
-	 * @param string    $attribute_name  WP_Query instance.
-	 * @param callable  $filter_callback Callback passed to filter test products.
+	 * @param string   $attribute_name  WP_Query instance.
+	 * @param callable $filter_callback Callback passed to filter test products.
 	 */
 	private function get_expected_attribute_counts( $attribute_name, $filter_callback = null ) {
 		$attribute_counts  = array();

@@ -282,15 +282,17 @@ class FilterDataProvider {
 	/**
 	 * Get the offload filter data.
 	 *
-	 * @param array $query_vars   The query arguments to calculate the filter data.
+	 * @param array  $query_vars   The query arguments to calculate the filter data.
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
+	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
 	 */
 	private function pre_get_filter_data( $query_vars, $filter_type, $extra = array() ) {
 		/**
 		 * Allows offloading the filter data.
 		 *
 		 * @hook woocommerce_pre_filter_data
+		 *
+		 * @since 8.7.0
 		 *
 		 * @param array $results      The results for current query.
 		 * @param array $query_vars   The query arguments to calculate the filter data.
@@ -303,9 +305,9 @@ class FilterDataProvider {
 	/**
 	 * Get filter data transient key.
 	 *
-	 * @param array $query_vars   The query arguments to calculate the filter data.
+	 * @param array  $query_vars   The query arguments to calculate the filter data.
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array $extra        Some filter types require extra arguments for calculation, like attribute.
+	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
 	 */
 	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
 		return sprintf(
