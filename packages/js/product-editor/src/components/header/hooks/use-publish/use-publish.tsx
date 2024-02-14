@@ -14,6 +14,7 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
+import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 
 export function usePublish( {
 	productType = 'product',
@@ -35,6 +36,8 @@ export function usePublish( {
 		'id'
 	);
 
+	const isScheduled = useProductScheduled( productType );
+
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
 			const {
@@ -42,8 +45,6 @@ export function usePublish( {
 				isSavingEntityRecord,
 				// @ts-expect-error There are no types for this.
 				hasEditsForEntityRecord,
-				// @ts-expect-error There are no types for this.
-				getRawEntityRecord,
 			} = select( 'core' );
 
 			return {
@@ -53,11 +54,6 @@ export function usePublish( {
 					productId
 				),
 				isDirty: hasEditsForEntityRecord(
-					'postType',
-					productType,
-					productId
-				),
-				currentPost: getRawEntityRecord< boolean >(
 					'postType',
 					productType,
 					productId
@@ -146,10 +142,18 @@ export function usePublish( {
 		}
 	}
 
-	return {
-		children: isPublished
+	function getButtonText() {
+		if ( isScheduled ) {
+			return __( 'Schedule', 'woocommerce' );
+		}
+
+		return isPublished
 			? __( 'Update', 'woocommerce' )
-			: __( 'Publish', 'woocommerce' ),
+			: __( 'Publish', 'woocommerce' );
+	}
+
+	return {
+		children: getButtonText(),
 		...props,
 		isBusy,
 		'aria-disabled': isDisabled,

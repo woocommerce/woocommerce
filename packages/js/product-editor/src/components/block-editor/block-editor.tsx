@@ -46,6 +46,7 @@ import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
+import { LoadingState } from './loading-state';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -62,11 +63,13 @@ function getLayoutTemplateId(
 	// Fallback to simple product if no layout template is set.
 	return 'simple-product';
 }
+
 export function BlockEditor( {
 	context,
 	settings: _settings,
 	postType,
 	productId,
+	setIsEditorLoading,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
 
@@ -142,8 +145,14 @@ export function BlockEditor( {
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
+	const isEditorLoading =
+		! layoutTemplate ||
+		// variations don't have a product template
+		( postType !== 'product_variation' && ! productTemplate ) ||
+		productId === -1;
+
 	useLayoutEffect( () => {
-		if ( ! layoutTemplate ) {
+		if ( isEditorLoading ) {
 			return;
 		}
 
@@ -158,6 +167,8 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
+
+		setIsEditorLoading( isEditorLoading );
 
 		// We don't need to include onChange or updateEditorSettings in the dependencies,
 		// since we get new instances of them on every render, which would cause an infinite loop.
@@ -175,10 +186,6 @@ export function BlockEditor( {
 	}, [] );
 
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
-
-	if ( ! blocks ) {
-		return null;
-	}
 
 	if ( isModalEditorOpen ) {
 		return (
@@ -204,7 +211,11 @@ export function BlockEditor( {
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>
-							<BlockList className="woocommerce-product-block-editor__block-list" />
+							{ isEditorLoading ? (
+								<LoadingState />
+							) : (
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							) }
 						</ObserveTyping>
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
