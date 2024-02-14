@@ -8,13 +8,13 @@ composer require woocommerce/remote-specs-validation
 
 ## Available Schemas
 
-| Filename  | Endpoint |
-| ------------- | ------------- |
-| remote-inbox-notification.json  | <https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json>  |
-| payment-gateway-suggestions.json  | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json>  |
-| obw-free-extensions.json | <https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json> |
-| wc-pay-promotions.json | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/payment-method/promotions.json> |
-| shipping-partner-suggestions.json | <https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json> |
+| Filename  | Endpoint | Bundle |
+| ------------- | ------------- | ----------- |
+| remote-inbox-notification.json  | <https://woocommerce.com/wp-json/wccom/inbox-notifications/1.0/notifications.json>  | remote-inbox-notification |
+| payment-gateway-suggestions.json  | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json>  | payment-gateway-suggestions |
+| obw-free-extensions.json | <https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json> | obw-free-extensions |
+| wc-pay-promotions.json | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/payment-method/promotions.json> | wc-pay-promotions |
+| shipping-partner-suggestions.json | <https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json> | shipping-partner-suggestions |
 
 ## Working with Schema
 
