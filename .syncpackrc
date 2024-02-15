@@ -24,7 +24,7 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^16.14.1",
+			"pinVersion": "^18.12.1",
 			"packages": [
 				"**"
 			]
