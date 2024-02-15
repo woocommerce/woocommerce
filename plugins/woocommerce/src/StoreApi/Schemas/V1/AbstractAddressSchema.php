@@ -1,11 +1,13 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
+
 /**
  * AddressSchema class.
  *
@@ -113,11 +115,13 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function sanitize_callback( $address, $request, $param ) {
-		$validation_util = new ValidationUtils();
-		$address         = (array) $address;
-		$address         = array_reduce(
+		$validation_util   = new ValidationUtils();
+		$sanitization_util = new SanitizationUtils();
+		$address           = (array) $address;
+		$field_schema      = $this->get_properties();
+		$address           = array_reduce(
 			array_keys( $address ),
-			function( $carry, $key ) use ( $address, $validation_util ) {
+			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -129,15 +133,18 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 						$carry[ $key ] = $address['postcode'] ? wc_format_postcode( sanitize_text_field( wp_unslash( $address['postcode'] ) ), $address['country'] ) : '';
 						break;
 					default:
-						$carry[ $key ] = $address[ $key ];
+						$carry[ $key ] = rest_sanitize_value_from_schema( wp_unslash( $address[ $key ] ), $field_schema[ $key ], $key );
 						break;
+				}
+				if ( $this->additional_fields_controller->is_field( $key ) ) {
+					$carry[ $key ] = $this->additional_fields_controller->sanitize_field( $key, $carry[ $key ] );
 				}
 				return $carry;
 			},
 			[]
 		);
 
-		return $address;
+		return $sanitization_util->wp_kses_array( $address );
 	}
 
 	/**
@@ -152,8 +159,34 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 	 */
 	public function validate_callback( $address, $request, $param ) {
 		$errors          = new \WP_Error();
-		$address         = $this->sanitize_callback( $address, $request, $param );
+		$address         = (array) $address;
 		$validation_util = new ValidationUtils();
+		$schema          = $this->get_properties();
+
+		// The flow is Validate -> Sanitize -> Re-Validate
+		// First validation step is to ensure fields match their schema, then we sanitize to put them in the
+		// correct format, and finally the second validation step is to ensure the correctly-formatted values
+		// match what we expect (postcode etc.).
+		foreach ( $address as $key => $value ) {
+			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
+				$errors->add(
+					'invalid_' . $key,
+					sprintf(
+						/* translators: %s: field name */
+						__( 'Invalid %s provided.', 'woocommerce' ),
+						$key
+					)
+				);
+			}
+		}
+
+		// This condition will be true if any validation errors were encountered, e.g. wrong type supplied or invalid
+		// option in enum fields.
+		if ( $errors->has_errors() ) {
+			return $errors;
+		}
+
+		$address = $this->sanitize_callback( $address, $request, $param );
 
 		if ( ! empty( $address['country'] ) && ! in_array( $address['country'], array_keys( wc()->countries->get_countries() ), true ) ) {
 			$errors->add(
@@ -217,13 +250,18 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			// Check if a field is in the list of additional fields then validate the value against the custom validation rules defined for it.
 			// Skip additional validation if the schema validation failed.
 			if ( true === $result && in_array( $key, $additional_keys, true ) ) {
-				$address_type = 'shipping_address' === $this->title ? 'shipping' : 'billing';
-				$result       = $this->additional_fields_controller->validate_field( $key, $address[ $key ], $request, $address_type );
+				$result = $this->additional_fields_controller->validate_field( $key, $address[ $key ] );
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );
 			}
+		}
+
+		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', 'billing_address' === $this->title ? 'billing' : 'shipping' );
+
+		if ( is_wp_error( $result ) && $result->has_errors() ) {
+			$errors->merge_from( $result );
 		}
 
 		return $errors->has_errors( $errors ) ? $errors : true;

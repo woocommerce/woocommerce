@@ -29,8 +29,8 @@ const webpackConfig = {
 		[ extension ]: extensionPath,
 	},
 	output: {
-		filename: '[name]/dist/index.js',
-		path: path.resolve( __dirname ),
+		filename: 'index.js',
+		path: path.resolve( __dirname, `../../../../${ extension }/dist` ),
 		libraryTarget: 'window',
 	},
 	externals: woocommerceAdminConfig.externals,
@@ -103,6 +103,9 @@ const webpackConfig = {
 		} ),
 		new WooCommerceDependencyExtractionWebpackPlugin(),
 	],
+	watchOptions: {
+		ignored: [ '**/dist', '**/node_modules' ],
+	},
 };
 
 webpackConfig.devtool = 'source-map';

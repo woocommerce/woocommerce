@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Add e2e tests to verify block templates can be customized if the theme has its own custom templates.
-

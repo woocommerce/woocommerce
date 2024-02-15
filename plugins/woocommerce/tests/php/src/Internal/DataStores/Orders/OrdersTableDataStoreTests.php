@@ -3315,4 +3315,76 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertNotEquals( $date_modified, $order->get_date_modified() );
 	}
 
+	/**
+	 * Tests that unserializing meta that contains a non-existent class doesn't cause a fatal error.
+	 */
+	public function test_unserialize_meta_with_nonexistent_class() {
+		global $wpdb;
+		$meta_key   = 'test_unserialize_meta_with_nonexistent_class';
+		$meta_value = 'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.833300000000001;s:9:"longitude";d:4.3333000000000004;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}}';
+
+		// Create a fake logger to capture log entries.
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warnings = array();
+
+			public function warning( $message, $data = array() ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		$order_meta_table = $this->sut::get_meta_table_name();
+
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$order_id = $order->get_id();
+
+		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$order->set_date_modified( time() + 1 );
+		$order->save();
+
+		// Test fetching an order with meta data containing an object of a non-existent class.
+		$fetched_order = wc_get_order( $order->get_id() );
+		$meta          = $fetched_order->get_meta( $meta_key );
+
+		$this->assertNotEmpty( $meta );
+		$this->assertEquals( 'object', gettype( $meta ) );
+		$this->assertEquals( '__PHP_Incomplete_Class', get_class( $meta ) );
+
+		$meta_object_vars = get_object_vars( $meta );
+		$this->assertEquals( 'geoiprecord', $meta_object_vars['__PHP_Incomplete_Class_Name'] );
+		$this->assertEquals( 'Belgium', $meta_object_vars['country_name'] );
+		$this->assertEquals( 'Brussels', $meta_object_vars['city'] );
+		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
+
+		// Check that the log entry was created.
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+
+		// Test deleting meta data containing an object of a non-existent class.
+		$meta_data = $this->sut->read_meta( $order );
+		foreach ( $meta_data as $meta ) {
+			$this->sut->delete_meta( $order, (object) array( 'id' => $meta->meta_id ) );
+		}
+		$fetched_order = wc_get_order( $order->get_id() );
+
+		$this->assertEmpty( $fetched_order->get_meta_data() );
+		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
+
+		// Check that the log entry was created.
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+	}
+
 }

@@ -18,6 +18,7 @@
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../woocommerce/bin/generate-feature-config.php",
 		"changelog": "composer install && composer exec -- changelogger",
+		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:css": "stylelint '**/*.scss' --fix --ip 'storybook/wordpress'",
@@ -40,8 +41,8 @@
 	},
 	"dependencies": {
 		"@automattic/components": "^2.0.1",
-		"@automattic/explat-client": "^0.0.3",
-		"@automattic/explat-client-react-helpers": "^0.0.4",
+		"@automattic/explat-client": "^0.0.5",
+		"@automattic/explat-client-react-helpers": "^0.0.6",
 		"@automattic/interpolate-components": "^1.2.1",
 		"@react-spring/web": "^9.7.3",
 		"@types/wordpress__blocks": "11.0.7",
@@ -241,7 +242,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "client/**/*{js,ts,tsx,scss}"
+				"changes": "client/**/*.{js,ts,tsx,scss}"
 			},
 			"tests": [
 				{

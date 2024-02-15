@@ -47,7 +47,7 @@ $shipping   = $order->get_formatted_shipping_address();
 				 * @param bool $sent_to_admin If this email is being sent to the admin or not.
 				 * @param bool $plain_text If this email is plain text or not.
 				 */
-				do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, $plain_text );
+				do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, false );
 				?>
 			</address>
 		</td>
@@ -71,7 +71,7 @@ $shipping   = $order->get_formatted_shipping_address();
 					 * @param bool $sent_to_admin If this email is being sent to the admin or not.
 					 * @param bool $plain_text If this email is plain text or not.
 					 */
-					do_action( 'woocommerce_email_customer_address_section', 'shipping', $order, $sent_to_admin, $plain_text );
+					do_action( 'woocommerce_email_customer_address_section', 'shipping', $order, $sent_to_admin, false );
 					?>
 				</address>
 			</td>

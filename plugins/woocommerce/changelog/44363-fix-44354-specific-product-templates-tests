@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+Comment: Add automated tests to verify specific product block templates are rendered
+
