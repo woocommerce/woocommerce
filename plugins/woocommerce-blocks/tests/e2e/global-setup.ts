@@ -137,6 +137,22 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 		window.wp.data
 			.dispatch( 'core/preferences' )
 			.set( 'core/edit-site', 'welcomeGuideTemplate', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-post', 'welcomeGuide', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-post', 'welcomeGuideStyles', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-post', 'welcomeGuidePage', false );
+
+		window.wp.data
+			.dispatch( 'core/preferences' )
+			.set( 'core/edit-post', 'welcomeGuideTemplate', false );
 	} );
 
 	await context.close();
