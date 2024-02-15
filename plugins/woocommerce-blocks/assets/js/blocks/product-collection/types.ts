@@ -28,7 +28,7 @@ export interface ProductCollectionAttributes {
 		sourceData:
 			| { productId: number }
 			| { taxonomy: string; termId: number }
-			| {};
+			| object;
 	};
 }
 
