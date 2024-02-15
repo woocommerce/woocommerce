@@ -3,7 +3,7 @@
  */
 import { isWooExpress } from '~/utils/is-woo-express';
 
-const introPatternWooExpress = 'woocommerce-blocks/just-arrived-full-hero';
+const introPatternWooExpress = 'woocommerce-blocks/hero-product-split';
 
 export const HOMEPAGE_TEMPLATES = {
 	template1: {
