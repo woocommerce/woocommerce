@@ -197,7 +197,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		}
 
 		// Fallback to default methods if they don't exist in traits.
-		if ( is_callable( array( $this, '_' . $name ) ) ) {
+		if ( method_exists( $this, '_' . $name ) ) {
 			return call_user_func_array(
 				array(
 					$this,
@@ -205,6 +205,11 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				),
 				$arguments
 			);
+		}
+
+		// Allow traits to call `get_prop` on product.
+		if ( 'get_prop' === $name ) {
+			return $this->get_prop( ...$arguments );
 		}
 
 		throw new BadMethodCallException("No such method exists: $name");
