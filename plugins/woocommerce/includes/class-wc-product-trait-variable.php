@@ -66,11 +66,11 @@ class WC_Product_Trait_Variable extends WC_Product_Trait {
 	protected $variation_attributes = null;
 
     /**
-	 * Get the name.
+	 * Get the deprecated product type.
 	 *
 	 * @return string
 	 */
-	public static function _get_type() {
+	public static function get_deprecated_product_type() {
 		return 'variable';
 	}
 

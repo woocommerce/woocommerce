@@ -201,7 +201,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @since  3.0.0
 	 * @return string
 	 */
-	private function _get_type() {
+	public function get_type() {
+		// @todo Add deprecation notice here.
+		// Add backwards compatibility for traits that were previously types.
+		$traits = $this->get_traits();
+		foreach ( $traits as $trait ) {
+			if ( method_exists( $trait, 'get_deprecated_product_type' ) ) {
+				return $trait::get_deprecated_product_type();
+			}
+		}
+
 		return isset( $this->product_type ) ? $this->product_type : 'simple';
 	}
 
@@ -1671,7 +1680,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 		foreach ( $all_traits as $slug => $trait ) {
 			if ( $this->has_trait( $slug ) ) {
-				$traits[] = $slug;
+				$traits[ $slug ] = $trait;
 			}
 		}
 
