@@ -731,15 +731,28 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Location is recognised', () => {
+		const getLocationType = ( searchParams: URLSearchParams ) =>
+			searchParams.get( 'productCollectionQueryContext[location][type]' );
+		const getProductId = ( searchParams: URLSearchParams ) =>
+			searchParams.get(
+				'productCollectionQueryContext[location][sourceData][productId]'
+			);
+		const getTaxonomy = ( searchParams: URLSearchParams ) =>
+			searchParams.get( 'productCollectionQueryContext[location][type]' );
+		const getTermId = ( searchParams: URLSearchParams ) =>
+			searchParams.get( 'productCollectionQueryContext[location][type]' );
+		const getSourceData = ( searchParams: URLSearchParams ) =>
+			searchParams.get(
+				'productCollectionQueryContext[location][sourceData]'
+			);
+
 		const filterRequest = ( request: Request ) => {
 			const url = request.url();
 			const searchParams = new URLSearchParams( request.url() );
 			return (
 				url.includes( 'wp/v2/product' ) &&
 				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
-				!! searchParams.get(
-					`productCollectionQueryContext[location][type]`
-				)
+				!! getLocationType( searchParams )
 			);
 		};
 
@@ -750,9 +763,7 @@ test.describe( 'Product Collection', () => {
 			return (
 				url.includes( 'wp/v2/product' ) &&
 				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
-				!! searchParams.get(
-					`productCollectionQueryContext[location][sourceData][productId]`
-				)
+				!! getProductId( searchParams )
 			);
 		};
 
@@ -764,36 +775,22 @@ test.describe( 'Product Collection', () => {
 
 			if ( locationType === 'product' ) {
 				return {
-					type: searchParams.get(
-						'productCollectionQueryContext[location][type]'
-					),
-					productId: searchParams.get(
-						`productCollectionQueryContext[location][sourceData][productId]`
-					),
+					type: getLocationType( searchParams ),
+					productId: getProductId( searchParams ),
 				};
 			}
 
 			if ( locationType === 'archive' ) {
 				return {
-					type: searchParams.get(
-						'productCollectionQueryContext[location][type]'
-					),
-					taxonomy: searchParams.get(
-						`productCollectionQueryContext[location][sourceData][taxonomy]`
-					),
-					termId: searchParams.get(
-						`productCollectionQueryContext[location][sourceData][termId]`
-					),
+					type: getLocationType( searchParams ),
+					taxonomy: getTaxonomy( searchParams ),
+					termId: getTermId( searchParams ),
 				};
 			}
 
 			return {
-				type: searchParams.get(
-					'productCollectionQueryContext[location][type]'
-				),
-				sourceData: searchParams.get(
-					`productCollectionQueryContext[location][sourceData]`
-				),
+				type: getLocationType( searchParams ),
+				sourceData: getSourceData( searchParams ),
 			};
 		};
 
