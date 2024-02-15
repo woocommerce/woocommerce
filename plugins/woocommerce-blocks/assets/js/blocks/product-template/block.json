@@ -14,7 +14,6 @@
 		"queryContext",
 		"displayLayout",
 		"templateSlug",
-		"postId",
 		"queryContextIncludes",
 		"collection"
 	],
