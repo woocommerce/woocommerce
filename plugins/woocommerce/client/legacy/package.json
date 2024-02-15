@@ -13,7 +13,8 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:assets": "wireit",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
-		"watch:build:project": "pnpm build:project --watch"
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:assets": "pnpm build:project --watch"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.68",

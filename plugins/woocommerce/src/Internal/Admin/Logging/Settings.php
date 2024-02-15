@@ -154,15 +154,25 @@ class Settings {
 			'step' => 1,
 		);
 
+		$desc = array();
+
 		$hardcoded = has_filter( 'woocommerce_logger_days_to_retain_logs' );
-		$desc      = '';
 		if ( $hardcoded ) {
 			$custom_attributes['disabled'] = 'true';
 
-			$desc = sprintf(
+			$desc[] = sprintf(
 				// translators: %s is the name of a filter hook.
 				__( 'This setting cannot be changed here because it is being set by a filter on the %s hook.', 'woocommerce' ),
 				'<code>woocommerce_logger_days_to_retain_logs</code>'
+			);
+		}
+
+		$file_delete_has_filter = LogHandlerFileV2::class === $this->get_default_handler() && has_filter( 'woocommerce_logger_delete_expired_file' );
+		if ( $file_delete_has_filter ) {
+			$desc[] = sprintf(
+				// translators: %s is the name of a filter hook.
+				__( 'The %s hook has a filter set, so some log files may have different retention settings.', 'woocommerce' ),
+				'<code>woocommerce_logger_delete_expired_file</code>'
 			);
 		}
 
@@ -181,7 +191,7 @@ class Settings {
 				' %s',
 				__( 'days', 'woocommerce' ),
 			),
-			'desc'              => $desc,
+			'desc'              => implode( '<br><br>', $desc ),
 		);
 	}
 
