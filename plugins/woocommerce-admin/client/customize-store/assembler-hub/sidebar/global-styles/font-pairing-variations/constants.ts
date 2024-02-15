@@ -464,6 +464,44 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 	},
 ];
 
+export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
+	{
+		title: 'Cardo Font + System Sans-serif',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Cardo',
+							slug: 'cardo',
+						},
+						{
+							fontFamily: 'System Sans-serif',
+							slug: 'system-sans-serif',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--cardo)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--system-sans-serif)',
+			},
+		},
+	},
+];
+
 export const FONT_PAIRINGS = [
 	{
 		title: 'Commissioner + Crimson Pro',
@@ -922,4 +960,5 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	...FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	...FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 ];

@@ -7,12 +7,16 @@
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
-import { useContext, useMemo } from '@wordpress/element';
+import { useCallback, useContext, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { FONT_PAIRINGS, FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from './constants';
+import {
+	FONT_PAIRINGS,
+	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
+} from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
 import { Look } from '~/customize-store/design-with-ai/types';
@@ -35,16 +39,35 @@ export const FontPairing = () => {
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
-
-	const fontPairings = useMemo(
-		() =>
-			aiOnline && aiSuggestions?.lookAndFeel
-				? FONT_PAIRINGS.filter( ( font ) =>
-						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
-				  )
-				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
-		[ aiOnline, aiSuggestions?.lookAndFeel ]
+	const trackingAllowed = useSelect(
+		( select ) =>
+			select( OPTIONS_STORE_NAME ).getOption(
+				'woocommerce_allow_tracking'
+			) === 'yes'
 	);
+
+	const filterFontsByLookAndFeel = useCallback(
+		( lookAndFeel ) =>
+			FONT_PAIRINGS.filter( ( font ) =>
+				font.lookAndFeel.includes( lookAndFeel )
+			),
+		[]
+	);
+
+	const fontPairings = useMemo( () => {
+		if ( aiOnline && aiSuggestions?.lookAndFeel ) {
+			return filterFontsByLookAndFeel( aiSuggestions.lookAndFeel );
+		} else if ( ! trackingAllowed ) {
+			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING;
+		}
+
+		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+	}, [
+		aiOnline,
+		aiSuggestions?.lookAndFeel,
+		trackingAllowed,
+		filterFontsByLookAndFeel,
+	] );
 
 	if ( isLoading ) {
 		return (
