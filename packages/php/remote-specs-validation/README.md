@@ -37,7 +37,7 @@ $result = $validator->validate( $spec );
 
 if ( !$result->is_valid() ) {
 	var_dump( $result->get_errors() );
-} elese {
+} else {
 	var_dump('everyting looks good!');
 }
 ```
