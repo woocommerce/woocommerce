@@ -6,7 +6,7 @@ use Automattic\WooCommerce\RemoteSpecsValidation\RemoteSpecValidator;
 
 class RemoteSpecValidatorTest extends TestCase {
 	public function test_it_throws_invalid_argument_exception_with_invalid_bundle() {
-		$this->expectException( \InvalidArgumentException::class);
+		$this->expectException( \InvalidArgumentException::class );
 		RemoteSpecValidator::create_from_bundle( 'invalid-bundle' );
 	}
 
