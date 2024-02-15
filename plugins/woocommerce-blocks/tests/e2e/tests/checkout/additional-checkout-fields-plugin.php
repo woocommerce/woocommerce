@@ -51,11 +51,20 @@ class Additional_Checkout_Fields_Test_Helper {
 		// Address fields, checkbox, textbox, select
 		woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'first-plugin-namespace/government-ID',
-				'label'    => 'Government ID',
-				'location' => 'address',
-				'type'     => 'text',
-				'required' => true,
+				'id'                => 'first-plugin-namespace/government-ID',
+				'label'             => 'Government ID',
+				'location'          => 'address',
+				'type'              => 'text',
+				'required'          => true,
+				'sanitize_callback' => function( $field_value ) {
+					return str_replace( ' ', '', $field_value );
+				},
+				'validate_callback' => function( $field_value ) {
+					$match = preg_match( '/^[0-9]{5}$/', $field_value );
+					if ( 0 === $match || false === $match ) {
+						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
+					}
+				},
 			),
 		);
 		woocommerce_blocks_register_checkout_field(
@@ -65,6 +74,15 @@ class Additional_Checkout_Fields_Test_Helper {
 				'location' => 'address',
 				'type'     => 'text',
 				'required' => true,
+				'sanitize_callback' => function( $field_value ) {
+					return str_replace( ' ', '', $field_value );
+				},
+				'validate_callback' => function( $field_value ) {
+					$match = preg_match( '/^[0-9]{5}$/', $field_value );
+					if ( 0 === $match || false === $match ) {
+						return new \WP_Error( 'invalid_government_id', 'Invalid government ID.' );
+					}
+				},
 			),
 		);
 		woocommerce_blocks_register_checkout_field(
