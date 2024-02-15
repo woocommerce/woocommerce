@@ -58,11 +58,15 @@ baseTest.describe( 'Coupon management', () => {
 				await page
 					.getByPlaceholder( '0' )
 					.fill( couponData[ couponType ].amount );
+
+				// set expiry date if it was provided
 				if ( couponData[ couponType ].expiryDate ) {
 					await page
 						.getByPlaceholder( 'yyyy-mm-dd' )
 						.fill( couponData[ couponType ].expiryDate );
 				}
+
+				// be explicit about whether free shipping is allowed
 				if ( couponData[ couponType ].freeShipping ) {
 					await page.getByLabel( 'Allow free shipping' ).check();
 				} else {
@@ -70,6 +74,7 @@ baseTest.describe( 'Coupon management', () => {
 				}
 			} );
 
+			// publish the coupon and retrieve the id
 			await test.step( 'publish the coupon', async () => {
 				await page
 					.getByRole( 'button', { name: 'Publish', exact: true } )
@@ -81,6 +86,7 @@ baseTest.describe( 'Coupon management', () => {
 				expect( coupon.id ).toBeDefined();
 			} );
 
+			// verify the creation of the coupon and details
 			await test.step( 'verify coupon creation', async () => {
 				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
 				await expect(
@@ -101,6 +107,7 @@ baseTest.describe( 'Coupon management', () => {
 				).toBeVisible();
 			} );
 
+			// check expiry date if it was set
 			if ( couponData[ couponType ].expiryDate ) {
 				await test.step( 'verify coupon expiry date', async () => {
 					await page
@@ -113,6 +120,7 @@ baseTest.describe( 'Coupon management', () => {
 				} );
 			}
 
+			// if it was a free shipping coupon check that
 			if ( couponData[ couponType ].freeShipping ) {
 				await test.step( 'verify free shipping', async () => {
 					await page
