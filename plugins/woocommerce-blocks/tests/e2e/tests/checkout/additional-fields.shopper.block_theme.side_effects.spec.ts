@@ -349,7 +349,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			);
 
 			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
-			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+			// fields until we recreate the Combobox component. This is because the aria-label includes the value so getting
 			// by label alone is not reliable unless we know the value.
 			await checkoutPageObject.page
 				.getByRole( 'group', {
