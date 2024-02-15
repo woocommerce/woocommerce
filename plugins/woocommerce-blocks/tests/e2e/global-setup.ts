@@ -116,6 +116,10 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 	).toBeVisible();
 	await page.goto( baseURL + '/wp-admin/post-new.php' );
 
+	await page.waitForFunction( () => {
+		return window.wp.data !== undefined;
+	} );
+
 	// Disable the welcome guide for the site editor.
 	await page.evaluate( () => {
 		return Promise.all( [
@@ -148,10 +152,6 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 	} );
 
 	await page.context().storageState( { path: STORAGE_STATE_PATH } );
-
-	await page.waitForFunction( () => {
-		return window.wp.data !== undefined;
-	} );
 
 	await browser.close();
 };

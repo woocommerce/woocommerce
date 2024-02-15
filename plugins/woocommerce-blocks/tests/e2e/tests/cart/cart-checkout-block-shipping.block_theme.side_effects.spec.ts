@@ -48,7 +48,9 @@ test.describe( 'Shopper → Shipping', () => {
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		frontendUtils,
 		page,
+		shippingUtils,
 	} ) => {
+		await shippingUtils.enableShippingCostsRequireAddress();
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
