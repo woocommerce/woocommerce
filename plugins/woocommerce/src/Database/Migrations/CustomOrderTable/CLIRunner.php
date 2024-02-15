@@ -67,6 +67,7 @@ class CLIRunner {
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
+		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
 	}
 
 	/**
@@ -262,7 +263,7 @@ class CLIRunner {
 	 * ## EXAMPLES
 	 *
 	 *     # Copy all order data into the post meta table, 500 posts at a time.
-	 *     wp wc cot backfill --batch-size=500
+	 *     wp wc cot migrate --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -993,7 +994,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>
+	 * <order_id>
 	 * :The ID of the order.
 	 *
 	 * [--format=<format>]
@@ -1063,4 +1064,82 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			array( 'property', 'hpos', 'post' )
 		);
 	}
+
+	/**
+	 * Backfills an order from either the HPOS or the posts datastore.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <order_id>
+	 * : The ID of the order.
+	 *
+	 * --from=<datastore>
+	 * : Source datastore. Either 'hpos' or 'posts'.
+	 * ---
+	 * options:
+	 *   - hpos
+	 *   - posts
+	 * ---
+	 *
+	 * --to=<datastore>
+	 * : Destination datastore. Either 'hpos' or 'posts'.
+	 * ---
+	 * options:
+	 *   - hpos
+	 *   - posts
+	 * ---
+	 *
+	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
+	 */
+	public function backfill( array $args = array(), array $assoc_args = array() ) {
+		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
+
+		$from     = $assoc_args['from'] ?? '';
+		$to       = $assoc_args['to'] ?? '';
+		$order_id = absint( $args[0] );
+
+		if ( ! $order_id ) {
+			WP_CLI::error( __( 'Please provide a valid order ID.', 'woocommerce' ) );
+		}
+
+		foreach ( array( 'from', 'to' ) as $datastore ) {
+			if ( ! in_array( ${"$datastore"}, array( 'posts', 'hpos' ), true ) ) {
+				// translators: %s is a shell argument representing a datastore name.
+				WP_CLI::error( sprintf( __( '\'%s\' is not a valid datastore.', 'woocommerce' ), ${"$datastore"} ) );
+			}
+		}
+
+		if ( $from === $to ) {
+			WP_CLI::error( __( 'Please use different source (--from) and destination (--to) datastores.', 'woocommerce' ) );
+		}
+
+		try {
+			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to );
+		} catch ( \Exception $e ) {
+			WP_CLI::error(
+				sprintf(
+					// translators: %1$d is an order ID, %2$s and %3$s are datastore names, %4$s is an error message.
+					__( 'An error occurred while backfilling order %1$d from %2$s to %3$s: %4$s', 'woocommerce' ),
+					$order_id,
+					$from,
+					$to,
+					$e->getMessage()
+				)
+			);
+		}
+
+		WP_CLI::success(
+			sprintf(
+				// translators: %1$d is an order ID, %2$s and %3$s are datastore names ("hpos" or "posts" for example).
+				__( 'Order %1$d backfilled from %2$s to %3$s.', 'woocommerce' ),
+				$order_id,
+				$from,
+				$to
+			)
+		);
+	}
+
 }
