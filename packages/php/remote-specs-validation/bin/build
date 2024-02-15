@@ -37,7 +37,7 @@ function bundle( indexJson ) {
 				if (
 					'missing' in v &&
 					v.missing === true &&
-					( v.type == 'relative' || v.type === 'remote' )
+					( v.type === 'relative' || v.type === 'remote' )
 				)
 					resErrors[ k ] = v.error;
 			}
