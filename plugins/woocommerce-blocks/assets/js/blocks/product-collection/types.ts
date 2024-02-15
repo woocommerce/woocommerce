@@ -25,10 +25,11 @@ export interface ProductCollectionAttributes {
 	queryContextIncludes: string[];
 	location: {
 		type: 'product' | 'archive' | 'cart' | 'order' | 'generic';
-		sourceData:
-			| { productId: number }
-			| { taxonomy: string; termId: number }
-			| object;
+		sourceData: {
+			productId?: number | null;
+			taxonomy?: string;
+			termId?: number | null;
+		};
 	};
 }
 

@@ -43,12 +43,13 @@ const ProductCollectionContent = (
 	}, [ queryId, instanceId, setAttributes ] );
 
 	useEffect( () => {
+		console.log( 'USE EFFECT', location );
 		setAttributes( { location } );
 	}, [
 		location.type,
-		location.sourceData?.productId,
-		location.sourceData?.taxonomy,
-		location.sourceData?.termId,
+		location.sourceData.productId,
+		location.sourceData.taxonomy,
+		location.sourceData.termId,
 		setAttributes,
 	] );
 

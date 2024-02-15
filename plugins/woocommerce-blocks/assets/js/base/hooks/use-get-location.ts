@@ -17,9 +17,11 @@ type SetEntityId = (
 	slug: string,
 	stateSetter: ( entityId: number | null ) => void
 ) => void;
-type SourceData =
-	| { productId?: number }
-	| { taxonomy?: string; termId?: number };
+type SourceData = {
+	taxonomy?: string;
+	termId?: number | null;
+	productId?: number | null;
+};
 
 const templateSlugs = {
 	singleProduct: 'single-product',
