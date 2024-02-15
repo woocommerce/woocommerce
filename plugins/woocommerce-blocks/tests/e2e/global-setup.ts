@@ -8,7 +8,6 @@ import { expect } from '@woocommerce/e2e-playwright-utils';
 import fs from 'fs';
 import {
 	cli,
-	adminFile,
 	customerFile,
 	guestFile,
 	STORAGE_STATE_PATH,

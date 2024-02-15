@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { adminFile, guestFile } from '@woocommerce/e2e-utils';
+import { guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -38,8 +38,6 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
-	test.use( { storageState: adminFile } );
-
 	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
@@ -163,8 +161,6 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
-	test.use( { storageState: adminFile } );
-
 	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
 		pageObject,
 		frontendUtils,
@@ -212,8 +208,6 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation → Downloadable Products', () => {
-	test.use( { storageState: adminFile } );
-
 	let confirmationPageUrl: string;
 
 	test.beforeEach( async ( { frontendUtils, pageObject } ) => {
