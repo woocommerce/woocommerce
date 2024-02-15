@@ -1,7 +1,6 @@
 {
 	"name": "@woocommerce/remote-specs-validation",
 	"description": "Remote specs testing suite",
-	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
 		"changelog": "composer install && composer exec -- changelogger"

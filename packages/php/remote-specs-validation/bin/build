@@ -4,7 +4,6 @@ const JsonRefs = require( 'json-refs' );
 const fs = require( 'fs' );
 const yaml = require( 'js-yaml' );
 const commander = require( 'commander' );
-const version = require( '../package.json' ).version;
 const path = require( 'path' );
 
 let indexJsonValue;
@@ -78,7 +77,7 @@ function build( indexJson ) {
 }
 
 commander
-	.version( version )
+	.version( '1.0' )
 	.arguments( '<indexJson>' )
 	.action( function ( indexJson ) {
 		indexJsonValue = indexJson;
