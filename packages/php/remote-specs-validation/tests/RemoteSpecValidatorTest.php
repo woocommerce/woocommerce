@@ -15,6 +15,6 @@ class RemoteSpecValidatorTest extends TestCase {
 		$result = $validator->validate( '{}' );
 		$errors = $result->get_errors();
 		$this->assertIsArray( $errors );
-		$this->assertEquals("/", array_keys( $errors )[0] );
+		$this->assertEquals( '/', array_keys( $errors )[0] );
 	}
 }
