@@ -5,6 +5,7 @@ import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
 import { v4 as uuidV4 } from 'uuid';
+import { useGetLocation } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
-import { useGetLocation } from '../../product-template/utils';
 
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
