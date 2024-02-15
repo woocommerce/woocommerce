@@ -18,9 +18,8 @@ type SetEntityId = (
 	stateSetter: ( entityId: number | null ) => void
 ) => void;
 type SourceData =
-	| { productId: number }
-	| { taxonomy: string; termId: number }
-	| {};
+	| { productId?: number }
+	| { taxonomy?: string; termId?: number };
 
 const templateSlugs = {
 	singleProduct: 'single-product',
