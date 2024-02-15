@@ -76,17 +76,13 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		}
 	} );
 
-	test( 'can filter the reviews by product', async ( {
-		page,
-		reviews,
-	} ) => {
+	test( 'can filter the reviews by product', async ( { page, reviews } ) => {
 		await page.goto(
 			`wp-admin/edit.php?post_type=product&page=product-reviews`
 		);
 
 		const review = reviews[ 0 ];
 
-		await page.pause();
 		await page.getByText( 'Search for a product' ).click();
 		await page.locator( '.select2-search__field' ).click();
 		await page
