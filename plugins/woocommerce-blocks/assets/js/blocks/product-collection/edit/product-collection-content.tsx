@@ -43,9 +43,7 @@ const ProductCollectionContent = (
 		}
 	}, [ queryId, instanceId, setAttributes ] );
 
-	console.log( 'render' );
 	useEffect( () => {
-		console.log( 'useeffect' );
 		if ( ! fastDeepEqual( location, attributes.location ) ) {
 			setAttributes( { location } );
 		}
