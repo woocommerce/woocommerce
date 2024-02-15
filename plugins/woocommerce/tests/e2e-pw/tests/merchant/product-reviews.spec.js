@@ -76,6 +76,39 @@ baseTest.describe( 'Product Reviews > Edit Product Review', () => {
 		}
 	} );
 
+	test( 'can filter the reviews by product', async ( {
+		page,
+		reviews,
+	} ) => {
+		await page.goto(
+			`wp-admin/edit.php?post_type=product&page=product-reviews`
+		);
+
+		const review = reviews[ 0 ];
+
+		await page.pause();
+		await page.getByText( 'Search for a product' ).click();
+		await page.locator( '.select2-search__field' ).click();
+		await page
+			.locator( '.select2-search__field' )
+			.fill( review.product_name );
+		await page.getByRole( 'option', { name: review.product_name } ).click();
+		await page.getByRole( 'button', { name: 'Filter' } ).click();
+
+		// Flakiness warning: if the filtering is too slow, some other reviews might still be displayed
+		// We need to find something to assess filtering is ready
+		const rows = await page.locator( '#the-comment-list tr' ).all();
+
+		for ( const reviewRow of rows ) {
+			await expect(
+				reviewRow
+					.locator( '[data-colname="Product"]' )
+					.getByRole( 'link' )
+					.first()
+			).toContainText( review.product_name );
+		}
+	} );
+
 	test( 'can quick edit a product review', async ( { page, reviews } ) => {
 		const review = reviews[ 0 ];
 
