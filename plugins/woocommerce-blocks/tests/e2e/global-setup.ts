@@ -205,8 +205,10 @@ const visitAsGuest = async ( config: FullConfig ) => {
 		page.getByLabel( 'Username or email address' )
 	).toBeVisible();
 
-	await page.context().storageState( { path: guestFile } );
-
+	fs.writeFileSync(
+		guestFile,
+		JSON.stringify( { cookies: [], origins: [] } )
+	);
 	await context.close();
 	await browser.close();
 };
