@@ -43,6 +43,10 @@ class DotNotation implements TransformerInterface {
 	 * @return mixed|null
 	 */
 	public function get( $array, $path, $default = null ) {
+		if ( ! is_array( $array ) ) {
+			return $default;
+		}
+
 		if ( isset( $array[ $path ] ) ) {
 			return $array[ $path ];
 		}

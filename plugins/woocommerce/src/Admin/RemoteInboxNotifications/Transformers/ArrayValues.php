@@ -21,6 +21,10 @@ class ArrayValues implements TransformerInterface {
 	 * @return mixed
 	 */
 	public function transform( $value, stdClass $arguments = null, $default = null ) {
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
 		return array_values( $value );
 	}
 

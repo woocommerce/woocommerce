@@ -36,6 +36,17 @@ class WC_Admin_Tests_RemoteInboxNotifications_Transformers_DotNotation extends W
 	}
 
 	/**
+	 * Test it returns default value when value is not an array or Countable.
+	 */
+	public function test_it_returns_default_value_when_value_is_not_an_array() {
+		$default    = 'default value';
+		$array_keys = new DotNotation();
+
+		$result = $array_keys->transform( 'invalid value', null, $default );
+		$this->assertEquals( $default, $result );
+	}
+
+	/**
 	 * Test it get getvalue by dot notation.
 	 */
 	public function test_it_can_get_value_by_dot_notation() {
