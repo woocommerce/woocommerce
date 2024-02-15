@@ -746,7 +746,9 @@ test.describe( 'Product Collection', () => {
 			return (
 				url.includes( 'wp/v2/product' ) &&
 				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
-				!! searchParams.get( `location[sourceData][productId]` )
+				!! searchParams.get(
+					`productCollectionQueryContext[location][sourceData][productId]`
+				)
 			);
 		};
 
@@ -758,26 +760,36 @@ test.describe( 'Product Collection', () => {
 
 			if ( locationType === 'product' ) {
 				return {
-					type: searchParams.get( 'location[type]' ),
+					type: searchParams.get(
+						'productCollectionQueryContext[location][type]'
+					),
 					productId: searchParams.get(
-						`location[sourceData][productId]`
+						`productCollectionQueryContext[location][sourceData][productId]`
 					),
 				};
 			}
 
 			if ( locationType === 'archive' ) {
 				return {
-					type: searchParams.get( 'location[type]' ),
-					taxonomy: searchParams.get(
-						`location[sourceData][taxonomy]`
+					type: searchParams.get(
+						'productCollectionQueryContext[location][type]'
 					),
-					termId: searchParams.get( `location[sourceData][termId]` ),
+					taxonomy: searchParams.get(
+						`productCollectionQueryContext[location][sourceData][taxonomy]`
+					),
+					termId: searchParams.get(
+						`productCollectionQueryContext[location][sourceData][termId]`
+					),
 				};
 			}
 
 			return {
-				type: searchParams.get( 'location[type]' ),
-				sourceData: searchParams.get( `location[sourceData]` ),
+				type: searchParams.get(
+					'productCollectionQueryContext[location][type]'
+				),
+				sourceData: searchParams.get(
+					`productCollectionQueryContext[location][sourceData]`
+				),
 			};
 		};
 
