@@ -45,6 +45,10 @@ table.wc-block-cart-items {
 			width: 100%;
 			margin: 0;
 		}
+		.wc-block-cart-item__prices {
+			line-height: 1.2;
+		}
+
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button();
@@ -58,11 +62,12 @@ table.wc-block-cart-items {
 		.wc-block-components-product-name {
 			display: block;
 			max-width: max-content;
+			line-height: 1.4;
 		}
 		.wc-block-cart-item__total {
 			@include font-size( regular );
 			text-align: right;
-			line-height: inherit;
+			line-height: 1.8;
 		}
 
 		&.is-disabled {

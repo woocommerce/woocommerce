@@ -188,8 +188,6 @@
 	.wc-block-components-radio-control__option:first-child,
 	.wc-block-components-radio-control__option:last-child {
 		margin: 0;
-		padding-bottom: em($gap);
-		padding-top: em($gap);
 	}
 
 	.wc-block-components-radio-control__option-checked {
@@ -210,6 +208,10 @@
 	.wc-block-components-radio-control-accordion-option
 	.wc-block-components-radio-control__option {
 		border-width: 0;
+	}
+	.wc-block-components-radio-control-accordion-option {
+		padding-bottom: em($gap);
+		padding-top: em($gap);
 	}
 
 	.wc-block-components-radio-control-accordion-option:first-child::after {
@@ -261,9 +263,8 @@
 	}
 
 }
-
 .wc-block-components-radio-control-accordion-content {
-	padding: 0 $gap em($gap) $gap;
+	padding: em($gap-smaller) em($gap);
 
 	&:empty {
 		display: none;
