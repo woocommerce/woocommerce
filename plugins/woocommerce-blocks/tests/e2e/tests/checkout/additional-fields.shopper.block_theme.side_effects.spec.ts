@@ -506,6 +506,225 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBeVisible();
 		} );
 
+		test( 'Shopper can input unsanitized values that become sanitized after checkout', async ( {
+			checkoutPageObject,
+			frontendUtils,
+		} ) => {
+			await checkoutPageObject.editShippingDetails();
+			await checkoutPageObject.unsyncBillingWithShipping();
+			await checkoutPageObject.editBillingDetails();
+			await checkoutPageObject.fillInCheckoutWithTestData(
+				{},
+				{
+					contact: {
+						'Enter a gift message to include in the package':
+							'This is for you!',
+						'Is this a personal purchase or a business purchase?':
+							'business',
+					},
+					address: {
+						shipping: {
+							'Government ID': ' 1 2 3 4 5 ',
+							'Confirm government ID': '1      2345',
+						},
+						billing: {
+							'Government ID': ' 5 4 3 2 1 ',
+							'Confirm government ID': '543 21',
+						},
+					},
+					additional: {
+						'How did you hear about us?': 'Other',
+						'What is your favourite colour?': 'Blue',
+					},
+				}
+			);
+
+			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
+			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
+			// by label alone is not reliable unless we know the value.
+			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Shipping address',
+				} )
+				.getByLabel( 'How wide is your road?' )
+				.fill( 'wide' );
+			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Billing address',
+				} )
+				.getByLabel( 'How wide is your road?' )
+				.fill( 'narrow' );
+
+			await checkoutPageObject.page.evaluate(
+				'document.activeElement.blur()'
+			);
+
+			await checkoutPageObject.page
+				.getByLabel( 'Would you like a free gift with your order?' )
+				.check();
+			await checkoutPageObject.page
+				.getByLabel( 'Do you want to subscribe to our newsletter?' )
+				.check();
+			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Shipping address',
+				} )
+				.getByLabel( 'Can a truck fit down your road?' )
+				.check();
+
+			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Billing address',
+				} )
+				.getByLabel( 'Can a truck fit down your road?' )
+				.uncheck();
+
+			await checkoutPageObject.placeOrder();
+
+			await expect(
+				checkoutPageObject.page.getByText( 'Government ID12345' )
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText( 'Government ID54321' )
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'What is your favourite colour?Blue'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Enter a gift message to include in the packageThis is for you!'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Do you want to subscribe to our newsletter?Yes'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Would you like a free gift with your order?Yes'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Can a truck fit down your road?Yes'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Can a truck fit down your road?No'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'How wide is your road?Wide'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'How wide is your road?Narrow'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Is this a personal purchase or a business purchase?business'
+				)
+			).toBeVisible();
+
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
+			await checkoutPageObject.editShippingDetails();
+			await checkoutPageObject.editBillingDetails();
+
+			// Now check all the fields previously filled are still filled on a fresh checkout.
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Contact information',
+					} )
+					.getByLabel(
+						'Enter a gift message to include in the package'
+					)
+			).toHaveValue( 'This is for you!' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Contact information',
+					} )
+					.getByLabel(
+						'Is this a personal purchase or a business purchase?'
+					)
+			).toHaveValue( 'Business' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Contact information',
+					} )
+					.getByLabel( 'Do you want to subscribe to our newsletter?' )
+			).toBeChecked();
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Shipping address',
+					} )
+					.getByLabel( 'Government ID', { exact: true } )
+			).toHaveValue( '12345' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Shipping address',
+					} )
+					.getByLabel( 'Confirm Government ID' )
+			).toHaveValue( '12345' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Shipping address',
+					} )
+					.getByLabel( 'Can a truck fit down your road?' )
+			).toBeChecked();
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Shipping address',
+					} )
+					.getByLabel( 'How wide is your road?' )
+			).toHaveValue( 'Wide' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Billing address',
+					} )
+					.getByLabel( 'Government ID', { exact: true } )
+			).toHaveValue( '54321' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Billing address',
+					} )
+					.getByLabel( 'Confirm Government ID' )
+			).toHaveValue( '54321' );
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Billing address',
+					} )
+					.getByLabel( 'Can a truck fit down your road?' )
+			).not.toBeChecked();
+			await expect(
+				checkoutPageObject.page
+					.getByRole( 'group', {
+						name: 'Billing address',
+					} )
+					.getByLabel( 'How wide is your road?' )
+			).toHaveValue( 'Narrow' );
+		} );
+
 		test( 'Shopper can see server-side validation errors', async ( {
 			checkoutPageObject,
 		} ) => {
