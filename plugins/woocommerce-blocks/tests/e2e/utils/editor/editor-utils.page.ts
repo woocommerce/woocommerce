@@ -401,13 +401,12 @@ export class EditorUtils {
 				exact: true,
 			} ),
 		} );
-		await templateRow.getByRole( 'button', { name: 'Reset' } ).click();
-		await this.page.waitForResponse( ( response ) => {
-			const responseUrl = response.url();
-			return (
-				responseUrl.includes( 'wp-json/wp/v2/templates' ) ||
-				responseUrl.includes( 'wp-json/wp/v2/template-parts' )
-			);
+		const resetButton = templateRow.getByRole( 'button', {
+			name: 'Reset',
+		} );
+		await resetButton.click();
+		await resetButton.waitFor( {
+			state: 'hidden',
 		} );
 	}
 
