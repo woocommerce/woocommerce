@@ -29,7 +29,7 @@ export function ShowPrepublishChecksSection() {
 					togglePrepublishChecks();
 					recordEvent( 'product_prepublish_panel', {
 						source: TRACKS_SOURCE,
-						action: 'enable_prepublish_checks',
+						action: 'toggle_prepublish_checks',
 						value: selected,
 					} );
 				} }
