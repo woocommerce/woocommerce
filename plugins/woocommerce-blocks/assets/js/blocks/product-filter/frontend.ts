@@ -6,7 +6,10 @@ import { getSetting } from '@woocommerce/settings';
 
 const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
 const isProductArchive = getSetting< boolean >( 'isProductArchive' );
-const needsRefresh = getSetting< boolean >( 'needsRefresh' );
+const needsRefresh = getSetting< boolean >(
+	'needsRefreshForInteractivityAPI',
+	false
+);
 
 export function navigate( href: string, options = {} ) {
 	if ( needsRefresh || ( ! isBlockTheme && isProductArchive ) ) {

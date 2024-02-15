@@ -180,6 +180,12 @@ class ProductQuery extends AbstractBlock {
 		$this->parsed_block = $parsed_block;
 
 		if ( self::is_woocommerce_variation( $parsed_block ) ) {
+			// Indicate to interactivity powered components that this block is on the page
+			// and needs refresh to update data.
+			$this->asset_data_registry->add(
+				'needsRefreshForInteractivityAPI',
+				true
+			);
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
 			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
