@@ -20,8 +20,12 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 	 *
 	 * @since 2.2
 	 * @see WC_Unit_Test_Case::setUp()
+	 * @throws Exception The Legacy REST API plugin is not installed.
 	 */
 	public function setUp(): void {
+		if ( is_null( wc()->api ) ) {
+			throw new Exception( 'The Legacy REST API plugin is not installed' );
+		}
 
 		parent::setUp();
 

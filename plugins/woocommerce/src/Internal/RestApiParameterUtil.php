@@ -6,13 +6,13 @@
 namespace Automattic\WooCommerce\Internal;
 
 /**
- * Helper methos for the REST API.
+ * Helper methods for the REST API.
  *
  * Class ApiUtil
  *
  * @package Automattic\WooCommerce\Internal
  */
-class RestApiUtil {
+class RestApiParameterUtil {
 
 	/**
 	 * Converts a create refund request from the public API format:

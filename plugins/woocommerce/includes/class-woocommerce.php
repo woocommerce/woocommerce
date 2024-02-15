@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -31,6 +32,8 @@ use Automattic\WooCommerce\Utilities\TimeUtil;
  * @class WooCommerce
  */
 final class WooCommerce {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * WooCommerce version.
@@ -250,6 +253,7 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+		self::add_action( 'woocommerce_init', array( $this, 'register_wp_admin_settings' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -585,8 +589,6 @@ final class WooCommerce {
 		/**
 		 * REST API.
 		 */
-		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
-		include_once WC_ABSPATH . 'includes/class-wc-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
 		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
@@ -632,8 +634,8 @@ final class WooCommerce {
 
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
-		$this->api   = new WC_API();
-		$this->api->init();
+
+		$this->setup_legacy_rest_api_stub();
 	}
 
 	/**
@@ -1136,5 +1138,157 @@ final class WooCommerce {
 	 */
 	public function get_global( string $global_name ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_global( $global_name );
+	}
+
+	/**
+	 * Set up the Legacy REST API stub.
+	 *
+	 * The Legacy REST API was removed in WooCommerce 9.0 and is now available as a dedicated extension.
+	 * A stub is kept in WooCommerce core that just returns a "The WooCommerce API is disabled on this site"
+	 * error if the extension is not installed or is inactive. See:
+	 * https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/
+	 */
+	private function setup_legacy_rest_api_stub() {
+		self::add_action( 'init', array( $this, 'add_rewrite_rules_for_legacy_rest_api_stub' ), 0 );
+		self::add_action( 'query_vars', array( $this, 'add_query_vars_for_legacy_rest_api_stub' ), 0 );
+		self::add_action( 'parse_request', array( $this, 'parse_legacy_rest_api_request' ), 0 );
+	}
+
+	/**
+	 * Add the necessary rewrite rules for the Legacy REST API
+	 * (either the dedicated extension if it's installed, or the stub otherwise).
+	 */
+	private function add_rewrite_rules_for_legacy_rest_api_stub() {
+		add_rewrite_rule( '^wc-api/v([1-3]{1})/?$', 'index.php?wc-api-version=$matches[1]&wc-api-route=/', 'top' );
+		add_rewrite_rule( '^wc-api/v([1-3]{1})(.*)?', 'index.php?wc-api-version=$matches[1]&wc-api-route=$matches[2]', 'top' );
+		add_rewrite_endpoint( 'wc-api', EP_ALL );
+	}
+
+	/**
+	 * Add the necessary request query variables for the Legacy REST API
+	 * (either the dedicated extension if it's installed, or the stub otherwise).
+	 *
+	 * @param array $vars The query variables array to extend.
+	 * @return array The extended query variables array.
+	 */
+	private function add_query_vars_for_legacy_rest_api_stub( $vars ) {
+		$vars[] = 'wc-api-version';
+		$vars[] = 'wc-api-route';
+		$vars[] = 'wc-api';
+		return $vars;
+	}
+
+	/**
+	 * Process an incoming request for the Legacy REST API.
+	 *
+	 * If the dedicated Legacy REST API extension is installed and active, this method does nothing.
+	 * Otherwise it returns a "The WooCommerce API is disabled on this site" error,
+	 * unless the request contains a "wc-api" variable and the appropriate
+	 * "woocommerce_api_*" hook is set.
+	 */
+	private function parse_legacy_rest_api_request() {
+		global $wp;
+
+		// The WC_API class existing means that the Legacy REST API extension is installed and active.
+		if ( class_exists( 'WC_API' ) ) {
+			return;
+		}
+
+		$this->maybe_process_wc_api_query_var();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! empty( $_GET['wc-api-version'] ) ) {
+			$wp->query_vars['wc-api-version'] = $_GET['wc-api-version'];
+		}
+
+		if ( ! empty( $_GET['wc-api-route'] ) ) {
+			$wp->query_vars['wc-api-route'] = $_GET['wc-api-route'];
+		}
+
+		if ( ! empty( $wp->query_vars['wc-api-version'] ) && ! empty( $wp->query_vars['wc-api-route'] ) ) {
+			header(
+				sprintf(
+					'Content-Type: %s; charset=%s',
+					isset( $_GET['_jsonp'] ) ? 'application/javascript' : 'application/json',
+					get_option( 'blog_charset' )
+				)
+			);
+			status_header( 404 );
+			echo wp_json_encode(
+				array(
+					'errors' => array(
+						'code'    => 'woocommerce_api_disabled',
+						'message' => 'The WooCommerce API is disabled on this site',
+					),
+				)
+			);
+			exit;
+		}
+
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Process a "wc-api" variable if present in the query, by triggering the appropriate hooks.
+	 */
+	private function maybe_process_wc_api_query_var() {
+		global $wp;
+
+		if ( ! empty( $_GET['wc-api'] ) ) { // WPCS: input var okay, CSRF ok.
+			$wp->query_vars['wc-api'] = sanitize_key( wp_unslash( $_GET['wc-api'] ) ); // WPCS: input var okay, CSRF ok.
+		}
+
+		// wc-api endpoint requests.
+		if ( ! empty( $wp->query_vars['wc-api'] ) ) {
+
+			// Buffer, we won't want any output here.
+			ob_start();
+
+			// No cache headers.
+			wc_nocache_headers();
+
+			// Clean the API request.
+			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
+
+			// Make sure gateways are available for request.
+			WC()->payment_gateways();
+
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+			// Trigger generic action before request hook.
+			do_action( 'woocommerce_api_request', $api_request );
+
+			// Is there actually something hooked into this API request? If not trigger 400 - Bad request.
+			status_header( has_action( 'woocommerce_api_' . $api_request ) ? 200 : 400 );
+
+			// Trigger an action which plugins can hook into to fulfill the request.
+			do_action( 'woocommerce_api_' . $api_request );
+
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+
+			// Done, clear buffer and exit.
+			ob_end_clean();
+			die( '-1' );
+		}
+	}
+
+	/**
+	 * Register WC settings from WP-API to the REST API.
+	 *
+	 * This method used to be part of the now removed Legacy REST API.
+	 *
+	 * @since 9.0.0
+	 */
+	private function register_wp_admin_settings() {
+		$pages = WC_Admin_Settings::get_settings_pages();
+		foreach ( $pages as $page ) {
+			new WC_Register_WP_Admin_Settings( $page, 'page' );
+		}
+
+		$emails = WC_Emails::instance();
+		foreach ( $emails->get_emails() as $email ) {
+			new WC_Register_WP_Admin_Settings( $email, 'email' );
+		}
 	}
 }
