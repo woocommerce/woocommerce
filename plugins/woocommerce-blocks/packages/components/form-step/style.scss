@@ -34,7 +34,9 @@
 .wc-block-components-checkout-step--with-step-number .wc-block-components-checkout-step__content > :last-child {
 	margin-bottom: 0;
 }
-
+.wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading  {
+	margin-top: em($gap-smaller);
+}
 .wc-block-components-checkout-step__heading {
 	margin: em($gap-larger) 0 em($gap-smaller);
 	position: relative;
@@ -42,6 +44,7 @@
 	.wc-block-components-express-payment-continue-rule + .wc-block-components-checkout-step & {
 		margin-top: 0;
 	}
+
 }
 
 .wc-block-components-checkout-step:first-child .wc-block-components-checkout-step__heading {

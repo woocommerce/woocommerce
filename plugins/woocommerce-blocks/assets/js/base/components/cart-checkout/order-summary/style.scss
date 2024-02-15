@@ -53,6 +53,7 @@
 	.wc-block-components-order-summary-item__image {
 		width: #{$gap-large * 2};
 		padding-bottom: $gap;
+		margin-top: 10px;
 		position: relative;
 
 		> img {
