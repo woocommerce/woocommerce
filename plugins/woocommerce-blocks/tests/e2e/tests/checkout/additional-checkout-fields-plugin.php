@@ -157,6 +157,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				'id'       => 'second-plugin-namespace/type-of-purchase',
 				'label'    => 'Is this a personal purchase or a business purchase?',
 				'location' => 'contact',
+				'required' => true,
 				'type'     => 'select',
 				'options'  => [
 					[
