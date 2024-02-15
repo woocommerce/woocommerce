@@ -70,8 +70,6 @@ This method will return `WP_Block_Template` or `null`.
 
 This method is applied to the filter `template_redirect` and executed before WordPress determines which template to load.
 
-This allows us to hook into WooCommerce core through the filter `woocommerce_has_block_template` where we can determine if a specific block template exists and should be loaded.
-
 **Typically executed when:**
 
 -   A user loads a page on the front-end.
@@ -79,7 +77,6 @@ This allows us to hook into WooCommerce core through the filter `woocommerce_has
 **This method is responsible for:**
 
 -   Determining if the current page has an appropriate WooCommerce block template available to render.
--   Checking if the currently loaded page is from WooCommerce. It then checks if the theme has an appropriate template to use: if it does not, then it finally checks if WooCommerce has a default block template available. If so, we override the value through `woocommerce_has_block_template` to resolve `true`.
 
 ### Return value
 

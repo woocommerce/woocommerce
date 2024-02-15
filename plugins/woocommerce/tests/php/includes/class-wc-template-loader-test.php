@@ -20,9 +20,6 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 
 		$this->initialize_template_loader();
 
-		// forcing has_block_template to be false
-		add_filter( 'woocommerce_has_block_template', '__return_false', 10, 2 );
-
 		// Check Single Product
 		$this->load_product_in_query();
 		$this->assertDefaultTemplateFileName( 'single-product' );
@@ -54,9 +51,6 @@ class WC_Template_Loader_Test extends \WC_Unit_Test_Case {
 		global $wp_taxonomies;
 
 		$this->initialize_template_loader();
-
-		// forcing has_block_template to be false
-		add_filter( 'woocommerce_has_block_template', '__return_true', 10, 2 );
 
 		// Check Single Product
 		$this->load_product_in_query();

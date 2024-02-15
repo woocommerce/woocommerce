@@ -101,57 +101,6 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * Checks whether a WooCommerce block template for a given taxonomy exists.
-	 *
-	 * @param object $taxonomy Object taxonomy to check.
-	 * @return boolean
-	 */
-	private static function taxonomy_has_block_template( $taxonomy ) : bool {
-		if ( taxonomy_is_product_attribute( $taxonomy->taxonomy ) ) {
-			$template_name = 'taxonomy-product_attribute';
-		} else {
-			$template_name = 'taxonomy-' . $taxonomy->taxonomy;
-		}
-
-		return self::has_block_template( $template_name );
-	}
-
-	/**
-	 * Checks whether the template matches a WooCommerce block template.
-	 *
-	 * @since  5.5.0
-	 * @param string $template_name Template to check.
-	 * @return boolean
-	 */
-	private static function has_block_template( $template_name ) {
-		if ( ! $template_name ) {
-			return false;
-		}
-
-		$woocommerce_templates = array(
-			'archive-product',
-			'product-search-results',
-			'single-product',
-			'taxonomy-product_attribute',
-			'taxonomy-product_cat',
-			'taxonomy-product_tag',
-		);
-		if ( wc_current_theme_is_fse_theme() && in_array( $template_name, $woocommerce_templates ) ) {
-			return (bool) apply_filters( 'woocommerce_has_block_template', true, $template_name );
-		}
-
-		/**
-		 * Filters the value of the result of the block template check.
-		 *
-		 * @since x.x.x
-		 *
-		 * @param boolean $has_template value to be filtered.
-		 * @param string $template_name The name of the template.
-		 */
-		return (bool) apply_filters( 'woocommerce_has_block_template', false, $template_name );
-	}
-
-	/**
 	 * Get the default filename for a template except if a block template with
 	 * the same name exists.
 	 *
@@ -162,30 +111,25 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
+		if ( wc_current_theme_is_fse_theme() ) {
+			return '';
+		}
 		if (
-			is_singular( 'product' ) &&
-			! self::has_block_template( 'single-product' )
+			is_singular( 'product' )
 		) {
 			$default_file = 'single-product.php';
 		} elseif ( is_product_taxonomy() ) {
 			$object = get_queried_object();
 
-			if ( self::taxonomy_has_block_template( $object ) ) {
-				$default_file = '';
+			if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
+				$default_file = 'taxonomy-product-attribute.php';
+			} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
+				$default_file = 'taxonomy-' . $object->taxonomy . '.php';
 			} else {
-				if ( taxonomy_is_product_attribute( $object->taxonomy ) ) {
-					$default_file = 'taxonomy-product-attribute.php';
-				} elseif ( is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) {
-					$default_file = 'taxonomy-' . $object->taxonomy . '.php';
-				} elseif ( ! self::has_block_template( 'archive-product' ) ) {
-					$default_file = 'archive-product.php';
-				} else {
-					$default_file = '';
-				}
+				$default_file = 'archive-product.php';
 			}
 		} elseif (
-			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) &&
-			! self::has_block_template( 'archive-product' )
+			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) )
 		) {
 			$default_file = self::$theme_support ? 'archive-product.php' : '';
 		} else {
