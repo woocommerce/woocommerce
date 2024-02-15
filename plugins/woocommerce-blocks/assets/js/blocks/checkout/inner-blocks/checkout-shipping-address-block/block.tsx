@@ -16,12 +16,9 @@ import {
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress, FormFieldsConfig } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
-import { useSelect, dispatch } from '@wordpress/data';
-import { CART_STORE_KEY, processErrorResponse } from '@woocommerce/block-data';
-import {
-	emptyAddressFields,
-	removeNoticesWithContext,
-} from '@woocommerce/base-utils';
+import { useSelect } from '@wordpress/data';
+import { CART_STORE_KEY } from '@woocommerce/block-data';
+import { emptyAddressFields } from '@woocommerce/base-utils';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
