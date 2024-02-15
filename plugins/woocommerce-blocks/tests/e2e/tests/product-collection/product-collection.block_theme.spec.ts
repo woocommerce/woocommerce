@@ -733,10 +733,13 @@ test.describe( 'Product Collection', () => {
 	test.describe( 'Location is recognised', () => {
 		const filterRequest = ( request: Request ) => {
 			const url = request.url();
+			const searchParams = new URLSearchParams( request.url() );
 			return (
 				url.includes( 'wp/v2/product' ) &&
-				url.includes( 'isProductCollectionBlock=true' ) &&
-				url.includes( 'productCollectionQueryContext[location]' )
+				searchParams.get( 'isProductCollectionBlock' ) === 'true' &&
+				!! searchParams.get(
+					`productCollectionQueryContext[location][type]`
+				)
 			);
 		};
 
