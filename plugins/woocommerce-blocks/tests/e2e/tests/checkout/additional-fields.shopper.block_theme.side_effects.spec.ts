@@ -263,59 +263,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toHaveValue( 'Narrow' );
 		} );
 
-		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
-			checkoutPageObject,
-		} ) => {
-			await checkoutPageObject.editShippingDetails();
-			await checkoutPageObject.unsyncBillingWithShipping();
-			await checkoutPageObject.editBillingDetails();
-			await checkoutPageObject.fillInCheckoutWithTestData(
-				{},
-				{
-					contact: {
-						'Enter a gift message to include in the package':
-							'This is for you!',
-						'Is this a personal purchase or a business purchase?':
-							'business',
-					},
-					address: {
-						shipping: {
-							'Government ID': '',
-							'Confirm government ID': '',
-						},
-						billing: {
-							'Government ID': '54321',
-							'Confirm government ID': '54321',
-						},
-					},
-					additional: {
-						'How did you hear about us?': 'Other',
-						'What is your favourite colour?': 'Blue',
-					},
-				}
-			);
-
-			// Use the data store to specifically unset the field value - this is because it might be saved in the user-state.
-			await checkoutPageObject.page.evaluate( () => {
-				window.wp.data.dispatch( 'wc/store/cart' ).setShippingAddress( {
-					'first-plugin-namespace/road-size': '',
-				} );
-			} );
-
-			await checkoutPageObject.placeOrder( false );
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please enter a valid government id'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Please select a valid option'
-				)
-			).toBeVisible();
-		} );
-
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 			checkoutPageObject,
 		} ) => {
@@ -440,11 +387,22 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 						},
 					},
 					additional: {
-						'How did you hear about us?': 'Facebook',
 						'What is your favourite colour?': 'Red',
 					},
 				}
 			);
+			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Additional order information',
+				} )
+				.getByLabel( 'How did you hear about us?' )
+				.fill( '' );
+			await checkoutPageObject.page
+				.locator(
+					'ul.components-form-token-field__suggestions-list > li'
+				)
+				.first()
+				.click();
 
 			await checkoutPageObject.placeOrder();
 
@@ -455,11 +413,14 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page.getByText( 'Government ID43210' )
 			).toBeVisible();
+
+			// This optional select field was unset, so it should not be visible on the confirmation.
 			await expect(
 				checkoutPageObject.page.getByText(
-					'How did you hear about us?Facebook'
+					'How did you hear about us?'
 				)
-			).toBeVisible();
+			).toBeHidden();
+
 			await expect(
 				checkoutPageObject.page.getByText(
 					'Do you want to subscribe to our newsletter?No'
@@ -1105,6 +1066,57 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
+		} );
+
+		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
+			checkoutPageObject,
+		} ) => {
+			await checkoutPageObject.editShippingDetails();
+			await checkoutPageObject.unsyncBillingWithShipping();
+			await checkoutPageObject.editBillingDetails();
+			await checkoutPageObject.fillInCheckoutWithTestData(
+				{},
+				{
+					contact: {
+						'Enter a gift message to include in the package':
+							'This is for you!',
+					},
+					address: {
+						shipping: {
+							'Government ID': '',
+							'Confirm government ID': '',
+						},
+						billing: {
+							'Government ID': '54321',
+							'Confirm government ID': '54321',
+						},
+					},
+					additional: {
+						'How did you hear about us?': 'Other',
+						'What is your favourite colour?': 'Blue',
+					},
+				}
+			);
+
+			// Use the data store to specifically unset the field value - this is because it might be saved in the user-state.
+			await checkoutPageObject.page.evaluate( () => {
+				window.wp.data.dispatch( 'wc/store/cart' ).setShippingAddress( {
+					'first-plugin-namespace/road-size': '',
+				} );
+			} );
+
+			await checkoutPageObject.placeOrder( false );
+
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please enter a valid government id'
+				)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please select a valid option'
+				)
+			).toBeVisible();
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
