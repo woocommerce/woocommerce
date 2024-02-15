@@ -6,12 +6,12 @@
 	"license": "GPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
-			"Automattic\\WooCommerce\\Tests\\RemoteSpecsValidation\\": "src/"
+			"Automattic\\WooCommerce\\RemoteSpecsValidation\\": "src/"
 		}
 	},
   	"autoload-dev": {
 	  	"psr-4": {
-		  	"Automattic\\WooCommerce\\Tests\\RemoteSpecsValidation\\Tests\\": "tests/"
+		  	"Automattic\\WooCommerce\\RemoteSpecsValidation\\Tests\\": "tests/"
 		}
 	},
 	"require-dev": {

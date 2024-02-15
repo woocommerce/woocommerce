@@ -1,8 +1,8 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\RemoteSpecsValidation\Tests;
+namespace Automattic\WooCommerce\RemoteSpecsValidation\Tests;
 
-use Automattic\WooCommerce\Tests\RemoteSpecsValidation\RemoteSpecValidator;
+use Automattic\WooCommerce\RemoteSpecsValidation\RemoteSpecValidator;
 
 class RemoteSpecValidatorTest extends TestCase {
 	public function test_it_throws_invalid_argument_exception_with_invalid_bundle() {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Tests\RemoteSpecsValidation;
+namespace Automattic\WooCommerce\RemoteSpecsValidation;
 
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\ValidationResult;
