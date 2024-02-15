@@ -25,10 +25,10 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { useGetLocation, useProductCollectionQueryContext } from './utils';
+import { useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id', 'location' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -159,7 +159,6 @@ const ProductTemplateEdit = (
 		},
 		__unstableLayoutClassNames,
 	} = props;
-	const location = useGetLocation( props.context, props.clientId );
 
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] =
@@ -247,7 +246,6 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					location,
 					productCollectionQueryContext,
 				} ),
 				blocks: getBlocks( clientId ),
@@ -267,7 +265,6 @@ const ProductTemplateEdit = (
 			templateSlug,
 			taxQuery,
 			restQueryArgs,
-			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
 		]
