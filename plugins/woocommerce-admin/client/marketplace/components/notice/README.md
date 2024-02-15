@@ -4,6 +4,7 @@ The `Notice` component is a versatile notification UI element designed for use w
 It leverages the `@wordpress/icons` for displaying various icons and provides customizable options for content, appearance, and behavior.
 
 ## Usage
+
 To use the Notice component, import it into your React component file and include it in your component's render method. Here is a basic example:
 
 ```jsx
