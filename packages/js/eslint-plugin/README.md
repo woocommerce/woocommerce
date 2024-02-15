@@ -44,4 +44,4 @@ module.exports = require("@wordpress/prettier-config");
 
 | Rule                                                                       | Description                               | Recommended |
 | -------------------------------------------------------------------------- | ----------------------------------------- | ----------- |
-| [dependency-group](/packages/eslint-plugin/docs/rules/dependency-group.md) | Enforce dependencies docblocks formatting | ✓           |
+| [dependency-group](/packages/js/eslint-plugin/docs/rules/dependency-group.md) | Enforce dependencies docblocks formatting | ✓           |
