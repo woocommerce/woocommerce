@@ -1854,11 +1854,11 @@ importers:
   packages/js/explat:
     dependencies:
       '@automattic/explat-client':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.5
+        version: 0.0.5
       '@automattic/explat-client-react-helpers':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.6
+        version: 0.0.6
       '@wordpress/api-fetch':
         specifier: wp-6.0
         version: 6.3.1
@@ -3147,11 +3147,11 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
       '@automattic/explat-client':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.5
+        version: 0.0.5
       '@automattic/explat-client-react-helpers':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.6
+        version: 0.0.6
       '@automattic/interpolate-components':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@17.0.71)(react@17.0.2)
@@ -5173,16 +5173,16 @@ packages:
     resolution: {integrity: sha512-g+6cYJCi0m9OHU+E4146og8piMY/gtB7iTzQu1NsOkcLzeLjdAdIk0w+jNf+DE6XYnbgUOSnnoTw/iDbYNKwZw==}
     dev: false
 
-  /@automattic/explat-client-react-helpers@0.0.4:
-    resolution: {integrity: sha512-rS9cVNvWa54oZijIONk0pO/6/xdBBzDtETnRDDAyBQwbVNKlgQ1Ueu7bfGWPq9MXcR0pJ/dfSSlMcNIgR06Hnw==}
+  /@automattic/explat-client-react-helpers@0.0.6:
+    resolution: {integrity: sha512-rYVVi1C2SG/SYnQaESIwdBkou2tkS4aqk4rWx3H6JiTzXa3pyRPEcNG0u+Y/J56AQ8AUUKIGcBon6Rv5lhh3lw==}
     dependencies:
-      '@automattic/explat-client': 0.0.3
+      '@automattic/explat-client': 0.0.5
       react: 17.0.2
       tslib: 2.6.2
     dev: false
 
-  /@automattic/explat-client@0.0.3:
-    resolution: {integrity: sha512-N2/H9l3JZLZLSIyZJMnHKUWZWFjeakU40vm3k3EHdCHdKh8pu2Mz/BrMbtWImYBzaEJnbUZrHM/fAuhFy4sORg==}
+  /@automattic/explat-client@0.0.5:
+    resolution: {integrity: sha512-ql/d7qQ9q2J7K5g9LGd6mDOw8BOhdb05cajWU71Y6KJpvRD8h/zTNGNb+mN9JulNufT+7LxxxF2Kpzui4CFJqw==}
     dependencies:
       tslib: 2.6.2
     dev: false
