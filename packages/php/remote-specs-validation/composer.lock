@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b4c61364d1b6c62898d7148087db7787",
+    "content-hash": "e3d6a4264968a9e3f49605ca90640271",
     "packages": [
         {
             "name": "opis/json-schema",
@@ -200,16 +200,16 @@
     "packages-dev": [
         {
             "name": "automattic/jetpack-changelogger",
-            "version": "v3.3.11",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-changelogger.git",
-                "reference": "1b5300887b0dbe8bccc054aa439cd6db6e2d8fb9"
+                "reference": "8f63c829b8d1b0d7b1d5de93510d78523ed18959"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/1b5300887b0dbe8bccc054aa439cd6db6e2d8fb9",
-                "reference": "1b5300887b0dbe8bccc054aa439cd6db6e2d8fb9",
+                "url": "https://api.github.com/repos/Automattic/jetpack-changelogger/zipball/8f63c829b8d1b0d7b1d5de93510d78523ed18959",
+                "reference": "8f63c829b8d1b0d7b1d5de93510d78523ed18959",
                 "shasum": ""
             },
             "require": {
@@ -220,7 +220,7 @@
             },
             "require-dev": {
                 "wikimedia/testing-access-wrapper": "^1.0 || ^2.0",
-                "yoast/phpunit-polyfills": "1.1.0"
+                "yoast/phpunit-polyfills": "1.0.4"
             },
             "bin": [
                 "bin/changelogger"
@@ -250,16 +250,10 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Jetpack Changelogger tool. Allows for managing changelogs by dropping change files into a changelog directory with each PR.",
-            "keywords": [
-                "changelog",
-                "cli",
-                "dev",
-                "keepachangelog"
-            ],
             "support": {
-                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.3.11"
+                "source": "https://github.com/Automattic/jetpack-changelogger/tree/v3.3.0"
             },
-            "time": "2023-09-28T18:32:29+00:00"
+            "time": "2022-12-26T13:49:01+00:00"
         },
         {
             "name": "doctrine/instantiator",

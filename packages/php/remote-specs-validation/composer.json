@@ -15,7 +15,7 @@
 		}
 	},
 	"require-dev": {
-		"automattic/jetpack-changelogger": "^3.3.0",
+		"automattic/jetpack-changelogger": "3.3.0",
 		"phpunit/phpunit": "^9"
 	},
 	"extra": {
