@@ -116,7 +116,20 @@ class Additional_Checkout_Fields_Test_Helper {
 			)
 		);
 
+		// Fake sanitization function that removes full stops from the Government ID string.
 		add_filter(
+			'__experimental_woocommerce_blocks_sanitize_additional_field',
+			function ( $field_value, $field_key ) {
+				if ( 'first-plugin-namespace/government-ID' === $field_key ) {
+					$field_value = str_replace( '.', '', $field_value );
+				}
+				return $field_value;
+			},
+			10,
+			2
+		);
+
+		add_action(
 			'woocommerce_blocks_validate_additional_field_first-plugin-namespace/government-ID',
 			function( $error, $value, $request, $address_type ) {
 				$match = preg_match( '/^[0-9]{5}$/', $value );

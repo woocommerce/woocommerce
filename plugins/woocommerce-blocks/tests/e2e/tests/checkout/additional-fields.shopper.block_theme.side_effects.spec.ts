@@ -524,11 +524,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					},
 					address: {
 						shipping: {
-							'Government ID': ' 1 2 3 4 5 ',
+							'Government ID': ' 1. 2 3 4 5 ',
 							'Confirm government ID': '1      2345',
 						},
 						billing: {
-							'Government ID': ' 5 4 3 2 1 ',
+							'Government ID': ' 5. 4 3 2 1 ',
 							'Confirm government ID': '543 21',
 						},
 					},
