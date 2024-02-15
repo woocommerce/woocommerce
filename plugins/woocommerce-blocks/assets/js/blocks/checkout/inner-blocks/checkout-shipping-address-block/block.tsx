@@ -69,24 +69,6 @@ const Block = ( {
 		setBillingAddress( syncValues );
 	};
 
-	// Syncs the billing address on the server with the new address.
-	const syncBillingAddress = ( newAddress: BillingAddress ) => {
-		const noticeContext = 'wc/checkout/billing-address';
-		dispatch( CART_STORE_KEY )
-			.updateCustomerData(
-				{
-					billing_address: newAddress,
-				},
-				false
-			)
-			.then( () => {
-				removeNoticesWithContext( noticeContext );
-			} )
-			.catch( ( response ) => {
-				processErrorResponse( response, noticeContext );
-			} );
-	};
-
 	const clearBillingAddress = ( address: BillingAddress ) => {
 		// If the address is empty or the user is not a guest,
 		// we don't need to clear the address.
@@ -97,7 +79,6 @@ const Block = ( {
 			address as CartResponseBillingAddress
 		);
 		setBillingAddress( emptyAddress );
-		syncBillingAddress( emptyAddress );
 	};
 
 	// Run this on first render to ensure addresses sync if needed (this is not re-ran when toggling the checkbox).
