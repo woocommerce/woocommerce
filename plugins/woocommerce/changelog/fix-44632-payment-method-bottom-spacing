@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Remove bottom spacing below last payment method in Checkout block.
