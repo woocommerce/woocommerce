@@ -10,7 +10,6 @@ use Opis\JsonSchema\Validator;
  * Validates a remote spec against a JSON schema.
  */
 class RemoteSpecValidator {
-
 	/**
 	 * Decoded JSON schema.
 	 * @var string
