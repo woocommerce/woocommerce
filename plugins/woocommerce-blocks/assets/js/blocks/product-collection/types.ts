@@ -23,6 +23,13 @@ export interface ProductCollectionAttributes {
 	 * Contain the list of attributes that should be included in the queryContext
 	 */
 	queryContextIncludes: string[];
+	location: {
+		type: 'product' | 'archive' | 'cart' | 'order' | 'generic';
+		sourceData:
+			| { productId: number }
+			| { taxonomy: string; termId: number }
+			| {};
+	};
 }
 
 export enum LayoutOptions {
@@ -91,6 +98,10 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		context: {
+			postId: number;
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
