@@ -88,11 +88,15 @@ const reducer: Reducer< PaymentState > = (
 			break;
 
 		case ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD:
-			const { [ action.name ]: _, ...updatedExpressPaymentMethods } =
-				state.availableExpressPaymentMethods;
+			const previousAvailableExpressPaymentMethods = {
+				...state.availablePaymentMethods,
+			};
+			delete previousAvailableExpressPaymentMethods[ action.name ];
 			newState = {
 				...state,
-				availableExpressPaymentMethods: updatedExpressPaymentMethods,
+				availableExpressPaymentMethods: {
+					...previousAvailableExpressPaymentMethods,
+				},
 			};
 			break;
 
