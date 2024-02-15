@@ -39,6 +39,7 @@ export const FontPairing = () => {
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
+	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 	const trackingAllowed = useSelect(
 		( select ) =>
 			select( OPTIONS_STORE_NAME ).getOption(
@@ -57,7 +58,7 @@ export const FontPairing = () => {
 	const fontPairings = useMemo( () => {
 		if ( aiOnline && aiSuggestions?.lookAndFeel ) {
 			return filterFontsByLookAndFeel( aiSuggestions.lookAndFeel );
-		} else if ( ! trackingAllowed ) {
+		} else if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
 			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING;
 		}
 
