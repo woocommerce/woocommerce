@@ -2,7 +2,7 @@
 
 ## Installation
 
-```
+```php
 composer require woocommerce/remote-specs-validation
 ```
 
