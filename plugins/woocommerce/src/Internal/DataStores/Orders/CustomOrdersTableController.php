@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use ActionScheduler;
+use WC_Admin_Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -326,9 +327,16 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
-			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		if ( ! filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			return;
 		}
+
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'hpos-sync-now' ) ) {
+			WC_Admin_Settings::add_error( esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' ) );
+			return;
+		}
+
+		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 	}
 
 	/**
@@ -506,11 +514,14 @@ class CustomOrdersTableController {
 					$orders_pending_sync_count
 				);
 			} elseif ( $sync_is_pending ) {
-				$sync_now_url = add_query_arg(
-					array(
-						self::SYNC_QUERY_ARG => true,
+				$sync_now_url = wp_nonce_url(
+					add_query_arg(
+						array(
+							self::SYNC_QUERY_ARG => true,
+						),
+						wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 					),
-					wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+					'hpos-sync-now'
 				);
 
 				if ( ! $is_dangerous ) {
