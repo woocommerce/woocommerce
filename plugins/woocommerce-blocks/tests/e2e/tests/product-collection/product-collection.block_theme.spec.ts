@@ -731,20 +731,30 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Location is recognised', () => {
+		const getFromLocation = (
+			searchParams: URLSearchParams,
+			key: string
+		) =>
+			searchParams.get(
+				`productCollectionQueryContext[location][${ key }]`
+			);
+		const getFromSourceData = (
+			searchParams: URLSearchParams,
+			key: string
+		) =>
+			searchParams.get(
+				`productCollectionQueryContext[location][sourceData][${ key }]`
+			);
 		const getLocationType = ( searchParams: URLSearchParams ) =>
-			searchParams.get( 'productCollectionQueryContext[location][type]' );
-		const getProductId = ( searchParams: URLSearchParams ) =>
-			searchParams.get(
-				'productCollectionQueryContext[location][sourceData][productId]'
-			);
-		const getTaxonomy = ( searchParams: URLSearchParams ) =>
-			searchParams.get( 'productCollectionQueryContext[location][type]' );
-		const getTermId = ( searchParams: URLSearchParams ) =>
-			searchParams.get( 'productCollectionQueryContext[location][type]' );
+			getFromLocation( searchParams, 'type' );
 		const getSourceData = ( searchParams: URLSearchParams ) =>
-			searchParams.get(
-				'productCollectionQueryContext[location][sourceData]'
-			);
+			getFromLocation( searchParams, 'sourceData' );
+		const getProductId = ( searchParams: URLSearchParams ) =>
+			getFromSourceData( searchParams, 'productId' );
+		const getTaxonomy = ( searchParams: URLSearchParams ) =>
+			getFromSourceData( searchParams, 'taxonomy' );
+		const getTermId = ( searchParams: URLSearchParams ) =>
+			getFromSourceData( searchParams, 'termId' );
 
 		const filterRequest = ( request: Request ) => {
 			const url = request.url();
