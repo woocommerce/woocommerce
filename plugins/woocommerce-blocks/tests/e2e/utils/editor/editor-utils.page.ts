@@ -377,17 +377,12 @@ export class EditorUtils {
 
 	async revertTemplateCreation( templateName: string ) {
 		const templateRow = this.page.getByRole( 'row' ).filter( {
-			has: this.page.getByRole( 'heading', {
+			has: this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
 			} ),
 		} );
-		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-		await this.page
-			.getByRole( 'menuitem', {
-				name: 'Delete',
-			} )
-			.click();
+		await templateRow.getByRole( 'button', { name: 'Delete' } ).click();
 		await this.page
 			.getByRole( 'button', {
 				name: 'Delete',
@@ -417,7 +412,7 @@ export class EditorUtils {
 	}
 
 	async updatePost() {
-		await this.page.click( 'role=button[name="Update"i]' );
+		await this.page.getByRole( 'button', { name: 'Update' } ).click();
 
 		await this.page
 			.getByRole( 'button', { name: 'Dismiss this notice' } )

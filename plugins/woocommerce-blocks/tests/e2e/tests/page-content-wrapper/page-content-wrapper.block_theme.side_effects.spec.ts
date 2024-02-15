@@ -34,8 +34,8 @@ const templates = [
 ];
 const userText = 'Hello World in the page';
 
-test.describe( 'Page Content Wrapper', async () => {
-	templates.forEach( async ( template ) => {
+templates.forEach( async ( template ) => {
+	test.describe( 'Page Content Wrapper', async () => {
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
 			admin,
 			page,
