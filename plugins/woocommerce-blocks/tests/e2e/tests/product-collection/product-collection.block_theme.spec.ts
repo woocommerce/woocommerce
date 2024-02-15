@@ -735,7 +735,8 @@ test.describe( 'Product Collection', () => {
 			const url = request.url();
 			return (
 				url.includes( 'wp/v2/product' ) &&
-				url.includes( 'isProductCollectionBlock=true' )
+				url.includes( 'isProductCollectionBlock=true' ) &&
+				url.includes( 'productCollectionQueryContext[location]' )
 			);
 		};
 
