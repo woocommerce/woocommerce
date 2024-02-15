@@ -71,6 +71,7 @@ class WC_Product_Traits {
 		$product_traits = array(
 			'WC_Product_Trait_Downloadable',
 			'WC_Product_Trait_Shippable',
+            'WC_Product_Trait_Variable',
 			'WC_Product_Trait_Virtual',
 		);
 
