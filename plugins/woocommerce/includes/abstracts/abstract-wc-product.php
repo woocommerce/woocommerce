@@ -105,17 +105,34 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'rating_counts'      => array(),
 		'average_rating'     => 0,
 		'review_count'       => 0,
-		'variable'           => 'no',
+		'traits'             => array(), // @todo Maybe add default traits here.
 	);
 
 	/**
-	 * Set product name.
+	 * Enable a trait by slug.
 	 *
-	 * @since 3.0.0
-	 * @param string $name Product name.
+	 * @param string $trait_slug Trait slug.
 	 */
-	public function _set_variable( $value ) {
-		$this->set_prop( 'variable', $value );
+	public function enable_trait( $trait_slug ) {
+		$traits       = $this->get_prop( 'traits' );
+		$trait_exists = (bool) WC()->product_traits()->get_trait( $trait_slug );
+
+		// @todo Could optionally do some compatibility checking here and throw warnings or disable other traits.
+		if ( $trait_exists && ! in_array( $trait_slug, $traits ) ) {
+			$traits[] = $trait_slug;
+		}
+
+		$this->set_prop( 'traits', $traits );
+	}
+
+	/**
+	 * Disable a trait by slug.
+	 *
+	 * @param string $trait_slug Trait slug.
+	 */
+	public function disable_trait( $trait_slug ) {
+		$traits       = $this->get_prop( 'traits' );
+		$this->set_prop( 'traits', array_diff( $traits, array( $trait_slug ) ) );
 	}
 
 	/**
@@ -1700,7 +1717,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			return false;
 		}
 
-		return $this->get_prop( $trait::get_product_property(), $context ) === $trait::get_product_property_enabled_value();
+		$traits = $this->get_prop( 'traits', $context );
+		return in_array( $trait_slug, $traits );
 	}
 
 	/**
