@@ -151,7 +151,6 @@
 * Tweak - Enable shipping suggestions API consumption [#42810](https://github.com/woocommerce/woocommerce/pull/42810)
 * Tweak - Make the `useCampaigns` hook support being used with multiple instances. [#41211](https://github.com/woocommerce/woocommerce/pull/41211)
 * Performance - Prevent second query used to determine real post count from running if paging isn't being used. [#40092](https://github.com/woocommerce/woocommerce/pull/40092)
-* Enhancement - Add ability to register Checkbox fields in Checkout Block [#42780](https://github.com/woocommerce/woocommerce/pull/42780)
 * Enhancement - Call to the store title endpoint to update the store title with an AI generated one [#41632](https://github.com/woocommerce/woocommerce/pull/41632)
 * Enhancement - CYS - Reset products and pattern when the site doesn't have AI generated content. [#42970](https://github.com/woocommerce/woocommerce/pull/42970)
 * Enhancement - CYS - select the right font with AI offline [#42973](https://github.com/woocommerce/woocommerce/pull/42973)
