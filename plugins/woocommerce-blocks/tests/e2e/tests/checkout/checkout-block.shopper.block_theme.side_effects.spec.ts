@@ -479,35 +479,31 @@ test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
-	test.beforeEach(
-		async ( { editor, frontendUtils, admin, editorUtils } ) => {
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
+	test.beforeEach( async ( { editor, admin, editorUtils } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
 
-			const checkbox = editor.page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.check();
-			await expect( checkbox ).toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'div.wc-block-components-address-form__company'
-				)
-			).toBeVisible();
-			await editorUtils.saveSiteEditorEntities();
-			await frontendUtils.logout();
-			await frontendUtils.emptyCart();
-		}
-	);
+		const checkbox = editor.page.getByRole( 'checkbox', {
+			name: 'Company',
+			exact: true,
+		} );
+		await checkbox.check();
+		await expect( checkbox ).toBeChecked();
+		await expect(
+			editor.canvas.locator(
+				'div.wc-block-components-address-form__company'
+			)
+		).toBeVisible();
+		await editorUtils.saveSiteEditorEntities();
+	} );
 
 	const shippingTestData = {
 		firstname: 'John',
@@ -522,11 +518,13 @@ test.describe( 'Billing Address Form', () => {
 		phone: '01234567890',
 	};
 
-	test( 'Guest user will get empty billing address form', async ( {
+	test( 'Ensure billing is empty and shipping address is filled for guest user', async ( {
 		frontendUtils,
 		page,
 		checkoutPageObject,
 	} ) => {
+		await frontendUtils.logout();
+		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -547,5 +545,36 @@ test.describe( 'Billing Address Form', () => {
 		);
 		await expect( page.locator( '#billing-postcode' ) ).toHaveValue( '' );
 		await expect( page.locator( '#billing-phone' ) ).toHaveValue( '' );
+
+		await expect( page.locator( '#shipping-first_name' ) ).toHaveValue(
+			'John'
+		);
+		await expect( page.locator( '#shipping-last_name' ) ).toHaveValue(
+			'Doe'
+		);
+		await expect( page.locator( '#shipping-company' ) ).toHaveValue(
+			'Automattic'
+		);
+		await expect( page.locator( '#shipping-address_1' ) ).toHaveValue(
+			'123 Easy Street'
+		);
+		await expect( page.locator( '#shipping-address_2' ) ).toHaveValue(
+			'Testville'
+		);
+		await expect( page.locator( '#shipping-country input' ) ).toHaveValue(
+			'United States (US)'
+		);
+		await expect( page.locator( '#shipping-city' ) ).toHaveValue(
+			'New York'
+		);
+		await expect( page.locator( '#shipping-state input' ) ).toHaveValue(
+			'New York'
+		);
+		await expect( page.locator( '#shipping-postcode' ) ).toHaveValue(
+			'90210'
+		);
+		await expect( page.locator( '#shipping-phone' ) ).toHaveValue(
+			'01234567890'
+		);
 	} );
 } );
