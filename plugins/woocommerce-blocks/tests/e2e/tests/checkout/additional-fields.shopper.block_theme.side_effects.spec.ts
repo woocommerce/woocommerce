@@ -726,6 +726,13 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				checkoutPageObject.page
 					.locator( '#billing-fields' )
 					.getByText(
+						'Please ensure your government ID matches the correct format.'
+					)
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page
+					.locator( '#billing-fields' )
+					.getByText(
 						'Please ensure your government ID matches the confirmation.'
 					)
 			).toBeVisible();
@@ -734,6 +741,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.locator( '#shipping-fields' )
 					.getByText( 'Invalid government ID.' )
 			).toBeVisible();
+
+			await checkoutPageObject.page.evaluate( () => {
+				window.wp.data.dispatch( 'core/notices' ).removeAllNotices();
+			} );
 
 			await checkoutPageObject.fillInCheckoutWithTestData(
 				{},
@@ -786,7 +797,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			).toBeVisible();
 		} );
 
-		test( 'Shopper can see and edit submitted fields in my account area', async ( {
+		test( 'Shopper can see and edit submitted fields in my account area. Values are also sanitized and validated in my account area.', async ( {
 			checkoutPageObject,
 		} ) => {
 			await checkoutPageObject.editShippingDetails();
@@ -943,10 +954,22 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			// Change the values and save.
 			await govIdInput.fill( '444444' );
-			await confirmGovIdInput.fill( '444444' );
+			await confirmGovIdInput.fill( '44444' );
 			await truckFittingCheckbox.check();
 			await roadSizeSelect.selectOption( 'Super wide' );
 
+			await checkoutPageObject.page.getByText( 'Save address' ).click();
+
+			await expect(
+				checkoutPageObject.page.getByText( 'Invalid Government ID.' )
+			).toBeVisible();
+			await expect(
+				checkoutPageObject.page.getByText(
+					'Please ensure your government ID matches the confirmation.'
+				)
+			).toBeVisible();
+
+			await govIdInput.fill( '4444 4' );
 			await checkoutPageObject.page.getByText( 'Save address' ).click();
 
 			const shippingTitle =
