@@ -18,11 +18,12 @@ import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
+import { useGetLocation } from '../../product-template/utils';
 
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
-	const { attributes, setAttributes } = props;
+	const { context, clientId, attributes, setAttributes } = props;
 	const { queryId } = attributes;
 
 	const blockProps = useBlockProps();
@@ -31,6 +32,7 @@ const ProductCollectionContent = (
 	} );
 
 	const instanceId = useInstanceId( ProductCollectionContent );
+	const location = useGetLocation( context, clientId );
 
 	// We need this for multi-query block pagination.
 	// Query parameters for each block are scoped to their ID.
@@ -39,6 +41,16 @@ const ProductCollectionContent = (
 			setAttributes( { queryId: Number( instanceId ) } );
 		}
 	}, [ queryId, instanceId, setAttributes ] );
+
+	useEffect( () => {
+		setAttributes( { location } );
+	}, [
+		location.type,
+		location.sourceData?.productId,
+		location.sourceData?.taxonomy,
+		location.sourceData?.termId,
+		setAttributes,
+	] );
 
 	/**
 	 * We need to set a unique ID for each instance of this block.
