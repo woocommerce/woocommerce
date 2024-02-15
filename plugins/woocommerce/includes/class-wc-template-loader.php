@@ -56,7 +56,7 @@ class WC_Template_Loader {
 	}
 
 	/**
-	 * Load a template.
+	 * Load a template in classic themes.
 	 *
 	 * Handles template usage so that we can use our own templates instead of the theme's.
 	 *
@@ -71,7 +71,7 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	public static function template_loader( $template ) {
-		if ( is_embed() ) {
+		if ( is_embed() || wc_current_theme_is_fse_theme() ) {
 			return $template;
 		}
 
@@ -111,9 +111,6 @@ class WC_Template_Loader {
 	 * @return string
 	 */
 	private static function get_template_loader_default_file() {
-		if ( wc_current_theme_is_fse_theme() ) {
-			return '';
-		}
 		if (
 			is_singular( 'product' )
 		) {
