@@ -130,22 +130,28 @@ class Additional_Checkout_Fields_Test_Helper {
 		);
 
 		add_action(
-			'woocommerce_blocks_validate_additional_field_first-plugin-namespace/government-ID',
-			function( $error, $value, $request, $address_type ) {
-				$match = preg_match( '/^[0-9]{5}$/', $value );
-				if ( 0 === $match || false === $match ) {
-					$error->add( 'first-plugin-namespace/government-ID_invalid_value', 'Invalid government ID.' );
+			'__experimental_woocommerce_blocks_validate_additional_field',
+			function ( WP_Error $errors, $field_key, $field_value ) {
+				if ( 'first-plugin-namespace/government-ID' === $field_key || 'first-plugin-namespace/confirm-government-ID' === $field_key ) {
+					$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
+					if ( 0 === $match || false === $match ) {
+						$errors->add( 'invalid_gov_id', 'Please ensure your government ID matches the correct format.' );
+					}
 				}
-
-				$address_key  = 'shipping' === $address_type ? 'shipping_address' : 'billing_address';
-				$confirmation = $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'];
-				if ( ! empty( $confirmation ) && $value !== $request->get_params()[ $address_key ]['first-plugin-namespace/confirm-government-ID'] ) {
-					$error->add( 'first-plugin-namespace/government-ID_mismatch', 'Please ensure your government ID matches the confirmation.' );
-				}
-				return $error;
 			},
 			10,
 			4
+		);
+
+		add_action(
+			'__experimental_woocommerce_blocks_validate_location_address_fields',
+			function ( \WP_Error $errors, $fields, $group ) {
+				if ( $fields['first-plugin-namespace/government-ID'] !== $fields['first-plugin-namespace/confirm-government-ID'] ) {
+					$errors->add( 'gov_id_mismatch', 'Please ensure your government ID matches the confirmation.' );
+				}
+			},
+			10,
+			3
 		);
 
 		// Contact fields, one checkbox, select, and text input.
