@@ -595,6 +595,7 @@ add_action( 'template_redirect', 'wc_track_product_view', 20 );
  * @return array
  */
 function wc_get_product_types() {
+	// @todo Add deprecation notices here.
 	return (array) apply_filters(
 		'product_type_selector',
 		array(

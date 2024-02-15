@@ -58,6 +58,7 @@ class WC_Product_Factory {
 	 * @return string
 	 */
 	public static function get_product_classname( $product_id, $product_type ) {
+		// @todo Add deprecation notices here.
 		$classname = apply_filters( 'woocommerce_product_class', self::get_classname_from_product_type( $product_type ), $product_type, 'variation' === $product_type ? 'product_variation' : 'product', $product_id );
 
 		if ( ! $classname || ! class_exists( $classname ) ) {
