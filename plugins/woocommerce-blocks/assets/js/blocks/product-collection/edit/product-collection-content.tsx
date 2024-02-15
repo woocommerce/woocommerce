@@ -6,6 +6,7 @@ import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
 import { v4 as uuidV4 } from 'uuid';
 import { useGetLocation } from '@woocommerce/base-hooks';
+import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
  * Internal dependencies
@@ -42,15 +43,13 @@ const ProductCollectionContent = (
 		}
 	}, [ queryId, instanceId, setAttributes ] );
 
+	console.log( 'render' );
 	useEffect( () => {
-		setAttributes( { location } );
-	}, [
-		location.type,
-		location.sourceData.productId,
-		location.sourceData.taxonomy,
-		location.sourceData.termId,
-		setAttributes,
-	] );
+		console.log( 'useeffect' );
+		if ( ! fastDeepEqual( location, attributes.location ) ) {
+			setAttributes( { location } );
+		}
+	}, [ attributes.location, location, setAttributes ] );
 
 	/**
 	 * We need to set a unique ID for each instance of this block.
