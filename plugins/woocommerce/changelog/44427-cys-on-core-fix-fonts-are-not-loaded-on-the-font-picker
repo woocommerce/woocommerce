@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Core - CYS: fix fonts not loaded on the font picker iframes
