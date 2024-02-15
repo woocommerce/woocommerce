@@ -43,7 +43,7 @@ templates.forEach( async ( template ) => {
 			frontendUtils,
 		} ) => {
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
-			page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();
@@ -52,6 +52,7 @@ templates.forEach( async ( template ) => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
+
 			await editorUtils.updatePost();
 
 			// Verify edits are in the template when viewed from the frontend.
@@ -60,7 +61,7 @@ templates.forEach( async ( template ) => {
 
 			// Clean up the paragraph block added before.
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
-			page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();

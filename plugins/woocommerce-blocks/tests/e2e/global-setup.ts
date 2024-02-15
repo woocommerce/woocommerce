@@ -11,6 +11,7 @@ import {
 	adminFile,
 	customerFile,
 	guestFile,
+	STORAGE_STATE_PATH,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -88,6 +89,8 @@ const loginAsCustomer = async ( config: FullConfig ) => {
 const authenticateAsAdmin = async ( config: FullConfig ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
 
+	fs.unlinkSync( STORAGE_STATE_PATH );
+
 	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
 	const contextOptions = { baseURL, userAgent };
 	// Create browser, browserContext, and page for admin users
@@ -111,51 +114,45 @@ const authenticateAsAdmin = async ( config: FullConfig ) => {
 			} )
 			.getByRole( 'link', { name: 'Log out' } )
 	).toBeVisible();
-
-	await page.context().storageState( { path: adminFile } );
-
 	await page.goto( baseURL + '/wp-admin/post-new.php' );
+
+	// Disable the welcome guide for the site editor.
+	await page.evaluate( () => {
+		return Promise.all( [
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuide', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuideStyles', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuidePage', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-post', 'welcomeGuide', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-post', 'welcomeGuideStyles', false ),
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-post', 'welcomeGuidePage', false ),
+
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
+		] );
+	} );
+
+	await page.context().storageState( { path: STORAGE_STATE_PATH } );
 
 	await page.waitForFunction( () => {
 		return window.wp.data !== undefined;
 	} );
 
-	// Disable the welcome guide for the site editor.
-	await page.evaluate( () => {
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-site', 'welcomeGuide', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-site', 'welcomeGuideStyles', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-site', 'welcomeGuidePage', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-site', 'welcomeGuideTemplate', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-post', 'welcomeGuide', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-post', 'welcomeGuideStyles', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-post', 'welcomeGuidePage', false );
-
-		window.wp.data
-			.dispatch( 'core/preferences' )
-			.set( 'core/edit-post', 'welcomeGuideTemplate', false );
-	} );
-
-	await context.close();
 	await browser.close();
 };
 

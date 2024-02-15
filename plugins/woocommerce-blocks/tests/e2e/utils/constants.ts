@@ -12,7 +12,7 @@ export const CLASSIC_THEME_NAME = 'Storefront';
 export const BASE_URL = 'http://localhost:8889';
 export const STORAGE_STATE_PATH = path.join(
 	process.cwd(),
-	'artifacts/storage-states/admin.json'
+	'e2e/test-results/storage/adminState.json'
 );
 
 // User roles file paths
