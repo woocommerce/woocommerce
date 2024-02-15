@@ -7,7 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
-type Context< T > = T & {
+type Context = {
 	templateSlug?: string;
 	postId?: number;
 };
@@ -17,6 +17,10 @@ type SetEntityId = (
 	slug: string,
 	stateSetter: ( entityId: number | null ) => void
 ) => void;
+type SourceData =
+	| { productId: number }
+	| { taxonomy: string; termId: number }
+	| {};
 
 const templateSlugs = {
 	singleProduct: 'single-product',
@@ -57,20 +61,15 @@ const prepareIsInGenericTemplate =
 	( entitySlug: string ): boolean =>
 		templateSlug === entitySlug;
 
-const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
+const createLocationObject = (
+	type: LocationType,
+	sourceData: SourceData = {}
+) => ( {
 	type,
 	sourceData,
 } );
 
-type ContextProperties = {
-	templateSlug: string;
-	postId?: string;
-};
-
-export const useGetLocation = < T, >(
-	context: Context< T & ContextProperties >,
-	clientId: string
-) => {
+export const useGetLocation = ( context: Context, clientId: string ) => {
 	const templateSlug = context.templateSlug || '';
 	const postId = context.postId || null;
 
