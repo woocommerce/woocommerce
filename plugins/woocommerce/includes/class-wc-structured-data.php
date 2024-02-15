@@ -249,7 +249,7 @@ class WC_Structured_Data {
 				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 				$children         = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
 				$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
-	
+
 				foreach ( $children as $child ) {
 					if ( '' !== $child->get_price() ) {
 						$child_prices[] = $price_function( $child );
@@ -260,7 +260,7 @@ class WC_Structured_Data {
 				} else {
 					$min_price = min( $child_prices );
 				}
-	
+
 				$markup_offer = array(
 					'@type'              => 'Offer',
 					'price'              => wc_format_decimal( $min_price, wc_get_price_decimals() ),
