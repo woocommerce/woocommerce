@@ -11,29 +11,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-abstract class AbstractTemplatePart {
-
-	/**
-	 * The slug of the template.
-	 *
-	 * @var string
-	 */
-	public static $slug;
-
-	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
+abstract class AbstractTemplatePart extends AbstractTemplate {
 	/**
 	 * The template part area where the template part belongs.
 	 *
@@ -50,9 +28,4 @@ abstract class AbstractTemplatePart {
 			$this->init();
 		}
 	}
-
-	/**
-	 * Initialization method.
-	 */
-	abstract public function init();
 }
