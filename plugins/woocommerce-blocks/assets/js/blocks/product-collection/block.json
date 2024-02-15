@@ -37,13 +37,18 @@
 		},
 		"queryContextIncludes": {
 			"type": "array"
+		},
+		"location": {
+			"type": "object"
 		}
 	},
+	"usesContext": [ "postId", "templateSlug" ],
 	"providesContext": {
 		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
 		"displayLayout": "displayLayout",
+		"location": "location",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection"
 	},
