@@ -85,6 +85,30 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure the `product_page` shortcode renders a published product correctly even with status set to `any`.
+	 */
+	public function test_product_page_shortcode_published_product_status_any() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+		$product_id = $product->get_id();
+		wp_set_current_user( 0 );
+		$this->disable_deprecation_notice();
+
+		$product_page = WC_Shortcodes::product_page(
+			array(
+				'id'     => $product_id,
+				'status' => 'any',
+			)
+		);
+
+		$this->enable_deprecation_notice();
+
+		$this->assertNotEmpty( $product->get_name() );
+		$this->assertStringContainsString( $product->get_name(), $product_page );
+	}
+
+	/**
 	 * Ensure the `product_page` shortcode renders a published product correctly when given an SKU.
 	 */
 	public function test_product_page_shortcode_published_product_by_sku() {
