@@ -81,23 +81,31 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		private function get_top_seller() {
 			global $wpdb;
 
+			$hpos_enabled         = OrderUtil::custom_orders_table_usage_is_enabled();
+			$orders_table         = OrderUtil::get_table_for_orders();
+			$orders_column_id     = $hpos_enabled ? 'id' : 'ID';
+			$orders_column_type   = $hpos_enabled ? 'type' : 'post_type';
+			$orders_column_status = $hpos_enabled ? 'status' : 'post_status';
+			$orders_column_date   = $hpos_enabled ? 'date_created_gmt' : 'post_date_gmt';
+
 			$query            = array();
-			$query['fields']  = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id
-			FROM {$wpdb->posts} as posts";
-			$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON posts.ID = order_id ";
+			$query['fields']  = "SELECT SUM( order_item_meta.meta_value ) as qty, order_item_meta_2.meta_value as product_id FROM {$orders_table} AS orders";
+			$query['join']    = "INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON orders.{$orders_column_id} = order_id ";
 			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id ";
 			$query['join']   .= "INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS order_item_meta_2 ON order_items.order_item_id = order_item_meta_2.order_item_id ";
-			$query['where']   = "WHERE posts.post_type IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
-			$query['where']  .= "AND posts.post_status IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
+			$query['where']   = "WHERE orders.{$orders_column_type} IN ( '" . implode( "','", wc_get_order_types( 'order-count' ) ) . "' ) ";
+			$query['where']  .= "AND orders.{$orders_column_status} IN ( 'wc-" . implode( "','wc-", apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) ) ) . "' ) ";
 			$query['where']  .= "AND order_item_meta.meta_key = '_qty' ";
 			$query['where']  .= "AND order_item_meta_2.meta_key = '_product_id' ";
-			$query['where']  .= "AND posts.post_date >= '" . gmdate( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
-			$query['where']  .= "AND posts.post_date <= '" . gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
+			$query['where']  .= "AND orders.{$orders_column_date} >= '" . gmdate( 'Y-m-01', current_time( 'timestamp' ) ) . "' ";
+			$query['where']  .= "AND orders.{$orders_column_date} <= '" . gmdate( 'Y-m-d H:i:s', current_time( 'timestamp' ) ) . "' ";
 			$query['groupby'] = 'GROUP BY product_id';
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
-			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$sql = implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+			return $wpdb->get_row( $sql );
 		}
 
 		/**
