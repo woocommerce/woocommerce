@@ -25,7 +25,6 @@
 		&.is-variation {
 			display: flex;
 			align-items: center;
-			gap: 0;
 		}
 
 		@include breakpoint("<960px") {
@@ -99,12 +98,8 @@
 		width: fit-content;
 	}
 
-	&__variable-product-name {
-		margin-left: 10px;
-	}
-
 	&__variable-product-id {
-		margin-left: 10px;
+		margin-left: $gap-small;
 		color: $gray-700;
 	}
 }

@@ -181,9 +181,7 @@ export function Header( {
 					<h1 className="woocommerce-product-header__title">
 						{ isVariation ? (
 							<>
-								<span className="woocommerce-product-header__variable-product-name">
-									{ lastPersistedProduct?.name }
-								</span>
+								{ lastPersistedProduct?.name }
 								<span className="woocommerce-product-header__variable-product-id">
 									# { lastPersistedProduct?.id }
 								</span>
