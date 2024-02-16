@@ -89,7 +89,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends
 		$this->assertEquals( false, $result );
 	}
 
-
 	/**
 	 * Test that the processor does not pass if the installed version is less
 	 * than the required version.
