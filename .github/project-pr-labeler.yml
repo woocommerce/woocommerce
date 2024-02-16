@@ -79,9 +79,9 @@
 'focus: documentation':
   - docs/**/*
 
-'tools: monorepo infrastructure':
+'tool: monorepo infrastructure':
   - .github/**/*
   - bin/**/*
   - tools/**/*
-  - **/composer.json
-  - **/package.json
+  - '**/composer.json'
+  - '**/package.json'
