@@ -1,11 +1,13 @@
 .wp-block-woocommerce-checkout {
 	margin: 0;
+	padding-top: $gap-large;
 
 	.with-scroll-to-top__scroll-point {
 		top: -96px;
 	}
 	.wc-block-components-shipping-rates-control__package {
 		border-bottom: 0;
+		margin: 0 0 1em;
 	}
 }
 
