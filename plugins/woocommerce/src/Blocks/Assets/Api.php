@@ -18,7 +18,7 @@ class Api {
 	 *
 	 * @var string
 	 */
-	private $wc_version;
+	public $wc_version;
 
 	/**
 	 * Stores inline scripts already enqueued.
