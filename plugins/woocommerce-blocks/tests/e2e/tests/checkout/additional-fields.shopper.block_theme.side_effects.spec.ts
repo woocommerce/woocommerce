@@ -770,9 +770,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
-			await checkoutPageObject.page.waitForResponse( ( response ) => {
-				return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-			} );
 
 			// Fill select fields manually. (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
 			// fields until we recreate th Combobox component. This is because the aria-label includes the value so getting
