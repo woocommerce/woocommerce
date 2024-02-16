@@ -45,6 +45,20 @@ class Settings {
 	}
 
 	/**
+	 * Get the directory for storing log files.
+	 *
+	 * The `wp_upload_dir` function takes into account the possibility of multisite, and handles changing
+	 * the directory if the context is switched to a different site in the network mid-request.
+	 *
+	 * @return string The full directory path, with trailing slash.
+	 */
+	public static function get_log_directory(): string {
+		$upload_dir = wp_upload_dir( null, false );
+
+		return $upload_dir['basedir'] . '/wc-logs/';
+	}
+
+	/**
 	 * The definitions used by WC_Admin_Settings to render and save settings controls.
 	 *
 	 * @return array
