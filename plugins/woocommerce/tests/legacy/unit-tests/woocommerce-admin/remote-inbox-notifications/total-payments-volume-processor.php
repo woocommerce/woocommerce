@@ -45,8 +45,8 @@ class WC_Admin_Tests_RemoteInboxNotifications_TotalPaymentsVolumeProcessor exten
 			'{
 				"type": "total_payments_value",
 				"operation": "<",
-        "timeframe": "last_month",
-        "value": 1000
+				"timeframe": "last_month",
+				"value": 1000
 			}'
 		);
 
