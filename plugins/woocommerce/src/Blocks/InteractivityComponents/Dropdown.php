@@ -98,7 +98,13 @@ class Dropdown {
 							</svg>
 						</span>
 					</div>
-					<div data-wc-bind--hidden="!context.isOpen" class="wc-interactivity-dropdown__dropdown-list" aria-labelledby="options-dropdown" role="listbox">
+					<div
+						class="wc-interactivity-dropdown__dropdown-list"
+						aria-labelledby="options-dropdown"
+						role="listbox"
+						data-wc-bind--hidden="!context.isOpen"
+						<?php echo esc_attr( $dropdown_context['isOpen'] ? '' : 'hidden' ); ?>
+					>
 						<?php
 						foreach ( $items as $item ) :
 							$context = array( 'item' => $item );
