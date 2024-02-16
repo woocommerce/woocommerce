@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -210,9 +211,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$processing_count = 0;
 
 			foreach ( wc_get_order_types( 'order-count' ) as $type ) {
-				$counts            = (array) wp_count_posts( $type );
-				$on_hold_count    += isset( $counts['wc-on-hold'] ) ? $counts['wc-on-hold'] : 0;
-				$processing_count += isset( $counts['wc-processing'] ) ? $counts['wc-processing'] : 0;
+				$counts            = OrderUtil::get_count_for_type( $type );
+				$on_hold_count    += $counts['wc-on-hold'];
+				$processing_count += $counts['wc-processing'];
 			}
 			?>
 			<li class="processing-orders">
