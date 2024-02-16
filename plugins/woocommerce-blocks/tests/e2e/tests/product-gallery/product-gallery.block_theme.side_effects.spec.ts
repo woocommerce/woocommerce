@@ -381,12 +381,12 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			largeImageBlock.click();
 
-			const productGalleryPopUp = page.locator(
-				'.wc-block-product-gallery-dialog__overlay'
+			const productGalleryPopUpContent = page.locator(
+				'.wc-block-product-gallery-dialog__body'
 			);
 
 			const popUpSelectedImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
@@ -445,17 +445,17 @@ test.describe( `${ blockData.name }`, () => {
 
 			largeImageBlock.click();
 
-			const productGalleryPopUp = page.locator(
-				'.wc-block-product-gallery-dialog__overlay'
+			const productGalleryPopUpContent = page.locator(
+				'.wc-block-product-gallery-dialog__body'
 			);
 
 			const popUpInitialSelectedImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
 
-			const popUpNextButton = productGalleryPopUp
+			const popUpNextButton = productGalleryPopUpContent
 				.locator(
 					'.wc-block-product-gallery-large-image-next-previous--button'
 				)
@@ -463,23 +463,24 @@ test.describe( `${ blockData.name }`, () => {
 			await popUpNextButton.click();
 
 			const popUpNextImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
 
 			expect( popUpInitialSelectedImageId ).not.toBe( popUpNextImageId );
 
-			const closePopUpButton = productGalleryPopUp.locator(
+			const productGalleryPopUpHeader = page.locator(
+				'.wc-block-product-gallery-dialog__header'
+			);
+			const closePopUpButton = productGalleryPopUpHeader.locator(
 				'.wc-block-product-gallery-dialog__close'
 			);
 			closePopUpButton.click();
 
 			await page.waitForFunction( () => {
 				const isPopUpOpen = document
-					.querySelector(
-						'.wc-block-product-gallery-dialog__overlay'
-					)
+					.querySelector( '[aria-label="Product gallery"]' )
 					?.checkVisibility();
 
 				return isPopUpOpen === false;
