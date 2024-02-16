@@ -30,7 +30,7 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
 import {
 	PostPayload,
 	createPostFromTemplate,
-	deleteAllTemplatePosts,
+	deletePost,
 } from '../utils/create-dynamic-content';
 
 /**
@@ -138,7 +138,7 @@ const test = base.extend<
 				templatePath: string,
 				data: unknown
 			) => Promise< Post >;
-			deleteAllTemplatePosts: () => Promise< void >;
+			deletePost: ( id: number ) => Promise< void >;
 		};
 	}
 >( {
@@ -208,13 +208,13 @@ const test = base.extend<
 					data
 				);
 
-			const utilDeleteAllTemplatePosts = () =>
-				deleteAllTemplatePosts( requestUtils );
+			const utilDeletePost = ( id: number ) =>
+				deletePost( requestUtils, id );
 
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
-				deleteAllTemplatePosts: utilDeleteAllTemplatePosts,
+				deletePost: utilDeletePost,
 			} );
 		},
 		{ scope: 'worker', auto: true },
