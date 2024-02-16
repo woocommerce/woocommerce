@@ -31,17 +31,25 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		'post_password'
 	);
 
+	function getVisibilityLabel() {
+		if ( postPassword !== '' ) {
+			return __( 'Password protected', 'woocommerce' );
+		}
+		if ( catalogVisibility === 'visible' ) {
+			return __( 'Public', 'woocommerce' );
+		}
+		return __( 'Hidden', 'woocommerce' );
+	}
+
 	return (
 		<PanelBody
 			initialOpen={ false }
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore We need to send an Element.
 			title={ [
-				__( 'Visibility:', 'woocommerce' ),
+				__( 'Visibility: ', 'woocommerce' ),
 				<span className="editor-post-publish-panel__link" key="label">
-					{ catalogVisibility === 'visible'
-						? __( 'Public', 'woocommerce' )
-						: __( 'Hidden', 'woocommerce' ) }
+					{ getVisibilityLabel() }
 				</span>,
 			] }
 		>

@@ -45,14 +45,6 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
 
 	/**
 	 * Initialize this block type.
@@ -85,21 +77,24 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
 		// Interactivity API: Add navigation directives to the product collection block.
-		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'add_navigation_id_directive' ), 10, 3 );
+		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 	}
 
 	/**
-	 * Mark the Product Collection as an interactive region so it can be updated
-	 * during client-side navigation.
+	 * Enhances the Product Collection block with client-side pagination.
 	 *
-	 * @param string    $block_content The block content.
-	 * @param array     $block         The full block, including name and attributes.
-	 * @param \WP_Block $instance      The block instance.
+	 * This function identifies Product Collection blocks and adds necessary data attributes
+	 * to enable client-side navigation and animation effects. It also enqueues the Interactivity API runtime.
+	 *
+	 * @param string $block_content The HTML content of the block.
+	 * @param array  $block         Block details, including its attributes.
+	 *
+	 * @return string Updated block content with added interactivity attributes.
 	 */
-	public function add_navigation_id_directive( $block_content, $block, $instance ) {
+	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
 		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		if ( $is_product_collection_block ) {
 			// Enqueue the Interactivity API runtime.
@@ -107,7 +102,7 @@ class ProductCollection extends AbstractBlock {
 
 			$p = new \WP_HTML_Tag_Processor( $block_content );
 
-			// Add `data-wc-navigation-id to the query block.
+			// Add `data-wc-navigation-id to the product collection block.
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-collection' ) ) ) {
 				$p->set_attribute(
 					'data-wc-navigation-id',
@@ -125,6 +120,20 @@ class ProductCollection extends AbstractBlock {
 				);
 				$block_content = $p->get_updated_html();
 			}
+
+			// Add animation div to the block content.
+			$last_tag_position = strripos( $block_content, '</div>' );
+			$block_content     = substr_replace(
+				$block_content,
+				'<div
+					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
+					class="wc-block-product-collection__pagination-animation"
+					data-wc-class--start-animation="state.startAnimation"
+					data-wc-class--finish-animation="state.finishAnimation">
+				</div>',
+				$last_tag_position,
+				0
+			);
 		}
 
 		return $block_content;
@@ -159,6 +168,10 @@ class ProductCollection extends AbstractBlock {
 	 * @return string The updated block content.
 	 */
 	private function process_pagination_links( $block_content ) {
+		if ( ! $block_content ) {
+			return $block_content;
+		}
+
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
 

@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
@@ -252,6 +253,10 @@ class Edit {
 
 		// Add customer history meta box if analytics is enabled.
 		if ( 'yes' !== get_option( 'woocommerce_analytics_enabled' ) ) {
+			return;
+		}
+
+		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
 
