@@ -154,7 +154,6 @@ describe( 'paymentMethodDataReducer', () => {
 			availableExpressPaymentMethods: {
 				'my-new-method': {
 					name: 'My New Method',
-					description: 'A new way to pay quickly.',
 				},
 			},
 			paymentMethodData: {},
@@ -207,11 +206,9 @@ describe( 'paymentMethodDataReducer', () => {
 			availableExpressPaymentMethods: {
 				'my-new-method': {
 					name: 'My New Method',
-					description: 'A new way to pay quickly.',
 				},
 				'my-other-method': {
 					name: 'My Other Method',
-					description: 'Another payment option for convenience.',
 				},
 			},
 			paymentMethodData: {},
@@ -245,7 +242,6 @@ describe( 'paymentMethodDataReducer', () => {
 			availableExpressPaymentMethods: {
 				'my-other-method': {
 					name: 'My Other Method',
-					description: 'Another payment option for convenience.',
 				},
 			},
 			paymentMethodData: {},
