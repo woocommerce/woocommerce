@@ -54,6 +54,14 @@
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
+			display: flex;
+			align-items: center;
+    		gap: $gap-small;
+
+			.woocommerce-tag__text {
+				background-color: #DCDCDE; // $gray-5
+				border-radius: $gap-smallest;
+			}
 
 			@include breakpoint( '<960px' ) {
 				display: none;

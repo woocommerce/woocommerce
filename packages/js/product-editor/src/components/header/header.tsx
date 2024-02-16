@@ -16,6 +16,8 @@ import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
+import { Tag } from '@woocommerce/components';
+import { Product } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -69,6 +71,10 @@ export function Header( {
 
 	const { showPrepublishChecks } = useShowPrepublishChecks();
 
+	const [ catalogVisibility ] = useEntityProp<
+		Product[ 'catalog_visibility' ]
+	>( 'postType', productType, 'catalog_visibility' );
+
 	const sidebarWidth = useAdminSidebarWidth();
 
 	useEffect( () => {
@@ -95,6 +101,16 @@ export function Header( {
 		return <LoadingState />;
 	}
 
+	const isDraft =
+		productType === 'product'
+			? lastPersistedProduct?.status === 'draft'
+			: true;
+
+	const isScheduled =
+		productType === 'product'
+			? lastPersistedProduct?.status === 'future'
+			: true;
+
 	const isHeaderImageVisible =
 		( ! isVariation &&
 			Array.isArray( selectedImage ) &&
@@ -109,6 +125,27 @@ export function Header( {
 			return image[ 0 ][ prop ] || '';
 		}
 		return image[ prop ] || '';
+	}
+
+	function getVisibilityTags() {
+		const tags = [];
+		if ( isDraft ) {
+			tags.push(
+				<Tag
+					key={ 'draft-tag' }
+					label={ __( 'Draft', 'woocommerce' ) }
+				/>
+			);
+		}
+		if ( ! isScheduled && catalogVisibility !== 'visible' ) {
+			tags.push(
+				<Tag
+					key={ 'hidden-tag' }
+					label={ __( 'Hidden', 'woocommerce' ) }
+				/>
+			);
+		}
+		return tags;
 	}
 
 	return (
@@ -192,6 +229,9 @@ export function Header( {
 								lastPersistedProduct?.name
 							)
 						) }
+						<div className="woocommerce-product-header__visibility-tags">
+							{ getVisibilityTags() }
+						</div>
 					</h1>
 				</div>
 
