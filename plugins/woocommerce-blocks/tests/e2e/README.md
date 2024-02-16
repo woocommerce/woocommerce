@@ -174,7 +174,7 @@ const test = base.extend< {
 	defaultBlockPostPage: TestingPost;
 } >( {
 	defaultBlockPostPage: async ( { requestUtils }, use ) => {
-		const testingPost = await createPostFromTemplate(
+		const testingPost = await requestUtils.createPostFromTemplate(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,
@@ -182,11 +182,11 @@ const test = base.extend< {
 		);
 
 		await use( testingPost );
-		await testingPost.deletePost();
+		await requestUtils.deletePost( post.id );
 	},
 
 	dropdownBlockPostPage: async ( { requestUtils }, use ) => {
-		const testingPost = await createPostFromTemplate(
+		const testingPost = await requestUtils.createPostFromTemplate(
 			requestUtils,
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,
@@ -198,7 +198,7 @@ const test = base.extend< {
 		);
 
 		await use( testingPost );
-		await testingPost.deletePost();
+		await requestUtils.deletePost( post.id );
 	},
 } );
 ```
@@ -208,7 +208,7 @@ the fixture will take care of that for you.
 
 ```js
 test( 'Test the block', async ( { page, defaultBlockPostPage } ) => {
-	await page.goto( defaultBlockPostPage.post.link );
+	await page.goto( defaultBlockPostPage.link );
 	// do your tests here
 } );
 ```
