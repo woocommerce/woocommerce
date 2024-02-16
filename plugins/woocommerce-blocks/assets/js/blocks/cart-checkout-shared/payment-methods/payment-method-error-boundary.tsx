@@ -19,7 +19,6 @@ interface PaymentMethodErrorBoundaryProps {
 
 class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryProps > {
 	state = { errorMessage: '', hasError: false };
-
 	static getDerivedStateFromError( error: ReactError ): DerivedStateReturn {
 		return {
 			errorMessage: error.message,
