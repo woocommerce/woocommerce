@@ -553,11 +553,6 @@ class ProductCollectionPage {
 	 */
 	private async insertSingleProductBlock() {
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
-		await this.page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wc/store/v1/products' ) &&
-				response.status() === 200
-		);
 		const singleProductBlock = await this.editorUtils.getBlockByName(
 			'woocommerce/single-product'
 		);
