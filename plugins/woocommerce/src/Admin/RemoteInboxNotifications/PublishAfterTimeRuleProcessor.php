@@ -56,6 +56,12 @@ class PublishAfterTimeRuleProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
+		try {
+			new \DateTime( $rule->publish_after );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+
 		return true;
 	}
 }

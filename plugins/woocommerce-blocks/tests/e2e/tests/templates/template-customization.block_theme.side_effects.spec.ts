@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
 import {
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
@@ -22,8 +21,8 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async () => {
-			await deleteAllTemplates( 'wp_template' );
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
 
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {

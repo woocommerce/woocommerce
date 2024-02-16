@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add checks and unit tests to rule processors

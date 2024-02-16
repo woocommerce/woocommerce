@@ -10,7 +10,6 @@ import {
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
 	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	ProductPageSkeleton,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
@@ -80,10 +79,6 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	if ( ! variation?.id ) {
-		return <ProductPageSkeleton />;
-	}
-
 	return (
 		<>
 			<Editor
@@ -94,12 +89,12 @@ export default function ProductPage() {
 			<WooFooterItem order={ 0 }>
 				<>
 					<VariationSwitcherFooter
-						parentId={ variation.parent_id }
-						variationId={ variation.id }
+						parentId={ variation?.parent_id }
+						variationId={ variation?.id }
 					/>
 
 					<ProductMVPFeedbackModalContainer
-						productId={ variation.parent_id }
+						productId={ variation?.parent_id }
 					/>
 				</>
 			</WooFooterItem>

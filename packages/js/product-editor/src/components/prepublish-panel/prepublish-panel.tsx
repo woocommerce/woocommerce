@@ -6,6 +6,7 @@ import { createElement } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useEntityProp } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -15,16 +16,23 @@ import { PrepublishPanelProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 import { VisibilitySection } from './visibility-section';
+import { ScheduleSection } from './schedule-section';
 
 export function PrepublishPanel( {
 	productId,
 	productType = 'product',
-	title = __( 'Are you ready to add this product?', 'woocommerce' ),
+	title = __( 'Are you ready to publish this product?', 'woocommerce' ),
 	description = __(
 		'Double-check your settings before sharing this product with customers.',
 		'woocommerce'
 	),
 }: PrepublishPanelProps ) {
+	const [ editedDate, , date ] = useEntityProp< string >(
+		'postType',
+		productType,
+		'date_created'
+	);
+
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
@@ -34,6 +42,14 @@ export function PrepublishPanel( {
 	);
 
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
+
+	if ( editedDate !== date ) {
+		title = __( 'Are you ready to schedule this product?', 'woocommerce' );
+		description = __(
+			'Your product will be published at the specified date and time.',
+			'woocommerce'
+		);
+	}
 
 	return (
 		<div className="woocommerce-product-publish-panel">
@@ -60,6 +76,8 @@ export function PrepublishPanel( {
 				<span>{ description }</span>
 			</div>
 			<VisibilitySection productType={ productType } />
+
+			<ScheduleSection postType={ productType } />
 		</div>
 	);
 }
