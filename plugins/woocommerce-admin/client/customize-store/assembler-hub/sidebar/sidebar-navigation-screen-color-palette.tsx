@@ -60,20 +60,24 @@ export const SidebarNavigationScreenColorPalette = () => {
 		context: { flowType },
 	} = useContext( CustomizeStoreContext );
 
-	const description =
-		flowType === FlowType.AIOnline
-			? __(
-					'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
-					'woocommerce'
-			  )
-			: __(
-					'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
-					'woocommerce'
-			  );
+	const aiOnline = flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change the color palette', 'woocommerce' )
+		: __( 'Choose your color palette', 'woocommerce' );
+	const description = aiOnline
+		? __(
+				'Based on the info you shared, our AI tool recommends using this color palette. Want to change it? You can select or add new colors below, or update them later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  )
+		: __(
+				'Choose the color palette that best suits your brand. Want to change it? Create your custom color palette below, or update it later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.',
+				'woocommerce'
+		  );
 
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change the color palette', 'woocommerce' ) }
+			title={ title }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link

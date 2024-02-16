@@ -27,6 +27,8 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu',
@@ -93,9 +95,16 @@ export const SidebarNavigationScreenFooter = () => {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change your footer', 'woocommerce' )
+		: __( 'Choose your footer', 'woocommerce' );
+
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your footer', 'woocommerce' ) }
+			title={ title }
 			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
