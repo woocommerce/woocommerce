@@ -63,7 +63,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_OnboardingProfileRuleProcessor ext
 	}
 
 	/**
-	 * Tests that the processor returns false if the criteria is not met.
+	 * Tests that the processor returns true if the criteria is not met.
 	 *
 	 * @group fast
 	 */
