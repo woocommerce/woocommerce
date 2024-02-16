@@ -194,12 +194,18 @@ export class CheckoutPage {
 	 */
 	async verifyAdditionalFieldsDetails( values: [ string, string ][] ) {
 		for ( const [ label, value ] of values ) {
-			await expect(
-				this.page.getByText(
+			const visible = await this.page
+				.getByText(
 					`${ label }${ value }` // No space between these due to the way the markup is output on the confirmation page.
 				)
-			).toBeVisible();
+				.isVisible();
+
+			if ( ! visible ) {
+				return false;
+			}
 		}
+		// If one of the fields above is false the function would have returned early.
+		return true;
 	}
 
 	async verifyAddressDetails(
