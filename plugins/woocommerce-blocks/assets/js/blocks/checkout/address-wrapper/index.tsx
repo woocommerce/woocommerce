@@ -16,10 +16,12 @@ export const AddressWrapper = ( {
 	isEditing = false,
 	addressCard,
 	addressForm,
+	hideAddressForm = false,
 }: {
 	isEditing: boolean;
 	addressCard: () => JSX.Element;
 	addressForm: () => JSX.Element;
+	hideAddressForm: boolean;
 } ): JSX.Element | null => {
 	const wrapperClasses = classnames(
 		'wc-block-components-address-address-wrapper',
@@ -33,9 +35,11 @@ export const AddressWrapper = ( {
 			<div className="wc-block-components-address-card-wrapper">
 				{ addressCard() }
 			</div>
-			<div className="wc-block-components-address-form-wrapper">
-				{ addressForm() }
-			</div>
+			{ ! hideAddressForm && (
+				<div className="wc-block-components-address-form-wrapper">
+					{ addressForm() }
+				</div>
+			) }
 		</div>
 	);
 };
