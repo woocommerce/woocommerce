@@ -51,6 +51,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationStateRuleProcessor ext
 
 		$this->assertEquals( false, $result );
 	}
+
 	/**
 	 * Tests that the processor returns true if location is the same.
 	 *
