@@ -394,7 +394,7 @@ test.describe( 'Product Collection', () => {
 				).toBeChecked();
 			} );
 
-			test( 'is enlabled by default in 1st Product Collection and disabled in 2nd+', async ( {
+			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
 				pageObject,
 			} ) => {
 				// First Product Catalog
