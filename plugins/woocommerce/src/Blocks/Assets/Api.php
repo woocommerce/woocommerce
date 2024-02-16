@@ -15,6 +15,8 @@ class Api {
 
 	/**
 	 * Stores the prefixed WC version. Used because the WC Blocks version has not been updated since the monorepo merge.
+	 *
+	 * @var string
 	 */
 	private $wc_version;
 
