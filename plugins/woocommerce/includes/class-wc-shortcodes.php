@@ -572,7 +572,12 @@ class WC_Shortcodes {
 
 		$single_product = new WP_Query( $args );
 
-		if ( ! isset( $force_rendering ) && 'publish' !== $single_product->post->post_status && ! current_user_can( 'read_product', $product_id ) ) {
+		if (
+			! isset( $force_rendering ) &&
+			$single_product->have_posts() &&
+			'publish' !== $single_product->post->post_status &&
+			! current_user_can( 'read_product', $single_product->post->ID )
+		) {
 			return '';
 		}
 
