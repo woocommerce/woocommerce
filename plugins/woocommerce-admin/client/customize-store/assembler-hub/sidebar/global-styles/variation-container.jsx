@@ -33,10 +33,10 @@ const resetTypographySettings = ( variation, userStyles ) => {
 	return userStyles;
 };
 
-// BmergeBaseAndUserConfigs is just a wrapper around deepmerge library: https://github.com/WordPress/gutenberg/blob/237865fad0864c209a7c3e771e23fe66f4fbca25/packages/edit-site/src/components/global-styles/global-styles-provider.js/#L24-L31
+// mergeBaseAndUserConfigs is just a wrapper around deepmerge library: https://github.com/WordPress/gutenberg/blob/237865fad0864c209a7c3e771e23fe66f4fbca25/packages/edit-site/src/components/global-styles/global-styles-provider.js/#L24-L31
 // Deepmerge library merges two objects x and y deeply, returning a new merged object with the elements from both x and y.
 // In the case of the variation.title === 'New - Neutral', the core/button is an empty object, because we don't want that the classes for the core/button are created.
-// To avoid that, deepmerge merge the userStyles.blocks[ 'core/button' ] with the variation.styles.blocks[ 'core/button' ] and the result is an object with values that doesn't match with the variation. For this reason it is necessary remove the userStyles.blocks[ 'core/button' ].
+// Deepmerge merges the userStyles.blocks[ 'core/button' ] with the variation.styles.blocks[ 'core/button' ] and the result is an object with values that doesn't match with the variation. For this reason it is necessary remove the userStyles.blocks[ 'core/button' ].
 const resetStyleSettings = ( variation, userStyles ) => {
 	if ( variation.title === 'New - Neutral' ) {
 		delete userStyles.blocks[ 'core/button' ];
