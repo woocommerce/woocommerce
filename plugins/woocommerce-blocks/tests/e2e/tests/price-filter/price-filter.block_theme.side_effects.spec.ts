@@ -71,7 +71,9 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 				disabled: true,
 			} )
 			.waitFor( { timeout: 3000 } )
-			.catch(); // Do not throw in case Playwright doesn't make it in time.
+			// Do not throw in case Playwright doesn't make it in time for the
+			// initial (pre-request) render.
+			.catch();
 
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
