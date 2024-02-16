@@ -4,7 +4,12 @@
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement, useContext, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useContext,
+	useEffect,
+	Fragment,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { box, chevronLeft, group, Icon } from '@wordpress/icons';
@@ -175,14 +180,14 @@ export function Header( {
 					</div>
 					<h1 className="woocommerce-product-header__title">
 						{ isVariation ? (
-							<div className="woocommerce-product-header__variable-product-title">
+							<>
 								<span className="woocommerce-product-header__variable-product-name">
 									{ lastPersistedProduct?.name }
 								</span>
 								<span className="woocommerce-product-header__variable-product-id">
 									# { lastPersistedProduct?.id }
 								</span>
-							</div>
+							</>
 						) : (
 							getHeaderTitle(
 								editedProductName,

@@ -23,6 +23,8 @@
 		gap: $gap-small;
 
 		&.is-variation {
+			display: flex;
+			align-items: center;
 			gap: 0;
 		}
 
@@ -95,14 +97,6 @@
 
 	&__back-tooltip-wrapper {
 		width: fit-content;
-	}
-
-	&__variable-product-title {
-		display: flex;
-		align-items: center;
-		svg {
-			fill: $gray-600;
-		}
 	}
 
 	&__variable-product-name {
