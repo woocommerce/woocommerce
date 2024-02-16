@@ -514,7 +514,6 @@ class WC_Shortcodes {
 			$product_id = wc_get_product_id_by_sku( $atts['sku'] );
 		}
 
-		unset( $atts['status'] );
 		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
 		/**
 		 * Filters the list of invalid statuses for the `product_page` shortcode.
