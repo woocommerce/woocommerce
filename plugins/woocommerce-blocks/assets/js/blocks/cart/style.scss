@@ -1,4 +1,6 @@
 .wc-block-cart {
+	padding-top: $gap-large;
+
 	.wc-block-components-shipping-calculator {
 		white-space: nowrap;
 	}
@@ -89,6 +91,10 @@
 	}
 }
 
+.wc-block-components-sidebar-layout.wc-block-cart {
+	padding-top: 0;
+}
+
 .is-small,
 .is-mobile {
 	.wc-block-cart-item__total {
@@ -98,6 +104,9 @@
 	}
 	table.wc-block-cart-items {
 		margin: 0;
+	}
+	.wc-block-components-shipping-rates-control .wc-block-components-radio-control__option {
+		padding: 0 0 0 em($gap-huge);
 	}
 }
 
