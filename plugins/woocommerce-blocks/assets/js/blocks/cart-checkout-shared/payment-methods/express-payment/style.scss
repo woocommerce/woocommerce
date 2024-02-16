@@ -36,6 +36,10 @@ $border-width: 1px;
 		@include breakpoint("<782px") {
 			grid-template-columns: 1fr;
 		}
+
+		.wc-block-store-notice.wc-block-components-notice-banner.is-error {
+			margin-top:0;
+		}
 	}
 
 	.wc-block-components-express-payment__title-container {
