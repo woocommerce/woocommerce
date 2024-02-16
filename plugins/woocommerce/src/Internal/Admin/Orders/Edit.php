@@ -5,12 +5,12 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
-use Automattic\WooCommerce\Admin\Overrides\Order;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
@@ -82,6 +82,7 @@ class Edit {
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
+		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
 	/**
@@ -218,7 +219,7 @@ class Edit {
 	 *
 	 * @return void
 	 */
-	private function maybe_register_order_attribution( string $screen_id, string $title ) {
+	private static function maybe_register_order_attribution( string $screen_id, string $title ) {
 		/**
 		 * Features controller.
 		 *
@@ -226,11 +227,6 @@ class Edit {
 		 */
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $feature_controller->feature_is_enabled( 'order_attribution' ) ) {
-			return;
-		}
-
-		// Automattic\WooCommerce\Admin\Overrides\Order provides necessary methods to render this metabox.
-		if ( ! $this->order instanceof Order ) {
 			return;
 		}
 
@@ -258,6 +254,10 @@ class Edit {
 
 		// Add customer history meta box if analytics is enabled.
 		if ( 'yes' !== get_option( 'woocommerce_analytics_enabled' ) ) {
+			return;
+		}
+
+		if( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
 
