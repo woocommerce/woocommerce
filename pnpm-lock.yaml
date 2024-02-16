@@ -4326,6 +4326,9 @@ importers:
       glob-promise:
         specifier: 4.2.2
         version: 4.2.2(glob@7.2.3)
+      handlebars:
+        specifier: ^4.7.8
+        version: 4.7.8
       husky:
         specifier: 8.0.3
         version: 8.0.3

@@ -25,8 +25,11 @@ class EvaluateExtension {
 		$rule_evaluator = new RuleEvaluator();
 
 		if ( isset( $extension->is_visible ) ) {
-			$is_visible            = $rule_evaluator->evaluate( $extension->is_visible );
-			$extension->is_visible = $is_visible;
+			try {
+				$is_visible            = $rule_evaluator->evaluate( $extension->is_visible );
+				$extension->is_visible = $is_visible;
+			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			}
 		} else {
 			$extension->is_visible = true;
 		}

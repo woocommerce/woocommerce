@@ -509,10 +509,44 @@ class WC_Shortcodes {
 			return '';
 		}
 
+		$product_id = isset( $atts['id'] ) ? absint( $atts['id'] ) : 0;
+		if ( ! $product_id && isset( $atts['sku'] ) ) {
+			$product_id = wc_get_product_id_by_sku( $atts['sku'] );
+		}
+
+		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
+		/**
+		 * Filters the list of invalid statuses for the `product_page` shortcode.
+		 *
+		 * @since 8.6.0
+		 * @param array $invalid_statuses List of invalid statuses.
+		 * @param int   $product_id       Product ID.
+		 * @return array
+		 */
+		$invalid_statuses = apply_filters( 'woocommerce_shortcode_product_page_invalid_statuses', array( 'trash' ), $product_id );
+		if ( in_array( $product_status, $invalid_statuses, true ) ) {
+			return '';
+		}
+		/**
+		 * Filters whether to override read permissions for unpublished products.
+		 *
+		 * @since 8.6.0
+		 * @param bool   $force_rendering Whether to override read permissions for unpublished products. `true` to force rendering the product page, `false` to block rendering, or `null` to use the default behavior.
+		 * @param int    $product_id                Product ID.
+		 * @return bool
+		 */
+		$force_rendering = apply_filters( 'woocommerce_shortcode_product_page_force_rendering', null, $product_id );
+		if ( isset( $force_rendering ) && ! $force_rendering ) {
+			return '';
+		}
+		if ( ! isset( $force_rendering ) && 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
+			return '';
+		}
+
 		$args = array(
 			'posts_per_page'      => 1,
 			'post_type'           => 'product',
-			'post_status'         => ( ! empty( $atts['status'] ) ) ? $atts['status'] : 'publish',
+			'post_status'         => $product_status,
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
 		);

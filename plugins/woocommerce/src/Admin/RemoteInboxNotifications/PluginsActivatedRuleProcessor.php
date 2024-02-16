@@ -48,6 +48,14 @@ class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
 		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
 
 		foreach ( $rule->plugins as $plugin_slug ) {
+			if ( ! is_string( $plugin_slug ) ) {
+				$logger = wc_get_logger();
+				$logger->warning(
+					__( 'Invalid plugin slug provided in the plugins activated rule.', 'woocommerce' )
+				);
+				return false;
+			}
+
 			if ( ! in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
 				return false;
 			}
