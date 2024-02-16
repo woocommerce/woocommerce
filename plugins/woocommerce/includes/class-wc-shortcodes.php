@@ -514,6 +514,7 @@ class WC_Shortcodes {
 			$product_id = wc_get_product_id_by_sku( $atts['sku'] );
 		}
 
+		unset( $atts['status'] );
 		$product_status = empty( $atts['status'] ) ? 'publish' : $atts['status'];
 		/**
 		 * Filters the list of invalid statuses for the `product_page` shortcode.
@@ -537,9 +538,6 @@ class WC_Shortcodes {
 		 */
 		$force_rendering = apply_filters( 'woocommerce_shortcode_product_page_force_rendering', null, $product_id );
 		if ( isset( $force_rendering ) && ! $force_rendering ) {
-			return '';
-		}
-		if ( ! isset( $force_rendering ) && 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
 			return '';
 		}
 
@@ -574,6 +572,10 @@ class WC_Shortcodes {
 		add_filter( 'woocommerce_add_to_cart_form_action', '__return_empty_string' );
 
 		$single_product = new WP_Query( $args );
+
+		if ( ! isset( $force_rendering ) && 'publish' !== $single_product->post->post_status && ! current_user_can( 'read_product', $product_id ) ) {
+			return '';
+		}
 
 		$preselected_id = '0';
 
