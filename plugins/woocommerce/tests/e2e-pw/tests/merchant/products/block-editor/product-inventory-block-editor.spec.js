@@ -86,7 +86,7 @@ test( 'can update stock status', async ( { page, product } ) => {
 	} );
 } );
 
-test.only( 'can track stock quantity', async ( { page, product } ) => {
+test( 'can track stock quantity', async ( { page, product } ) => {
 	await test.step( 'enable track stock quantity', async () => {
 		await page.getByLabel( 'Track stock quantity for this' ).check();
 		await page.getByRole( 'button', { name: 'Advanced' } ).click();
@@ -150,5 +150,58 @@ test.only( 'can track stock quantity', async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+	} );
+} );
+
+test( 'can limit purchases', async ( { page, product } ) => {
+	await test.step( 'ensure limit purchases is disabled', async () => {
+		await page.getByRole( 'button', { name: 'Advanced' } ).click();
+		await expect(
+			page.getByLabel( 'Limit purchases to 1 item per order' )
+		).not.toBeChecked();
+	} );
+
+	await test.step( 'add 2 items to cart', async () => {
+		// Verify image in store frontend
+		await page.goto( product.permalink );
+
+		await page.getByLabel( 'Product quantity' ).fill( '2' );
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await expect(
+			page.getByText(
+				`2 × “${ product.name }” have been added to your cart.`
+			)
+		).toBeVisible();
+	} );
+
+	await test.step( 'return to product editor', async () => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page.getByRole( 'button', { name: 'Inventory' } ).click();
+	} );
+
+	await test.step( 'enable limit purchases', async () => {
+		await page.getByRole( 'button', { name: 'Advanced' } ).click();
+		await page.getByLabel( 'Limit purchases to 1 item per order' ).check();
+	} );
+
+	await test.step( 'update the product', async () => {
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+		// Verify product was updated
+		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+			'Product updated'
+		);
+	} );
+
+	await test.step( 'verify you cannot order more than 1 item', async () => {
+		// Verify image in store frontend
+		await page.goto( product.permalink );
+
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await expect(
+			page.getByText(
+				`You cannot add another "${ product.name }" to your cart.		`
+			)
+		).toBeVisible();
 	} );
 } );
