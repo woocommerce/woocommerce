@@ -297,6 +297,12 @@ trait OrderAttributionMeta {
 					__( 'Direct', 'woocommerce' )
 					: 'Direct';
 				break;
+			case 'mobile_app':
+				$label  = '';
+				$source = $translated ?
+					__( 'Mobile app', 'woocommerce' )
+					: 'Mobile app';
+				break;
 			case 'admin':
 				$label  = '';
 				$source = $translated ?

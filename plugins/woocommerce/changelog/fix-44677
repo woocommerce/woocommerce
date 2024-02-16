@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't render attribution metabox for other order types.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds `wp wc hpos backfill` tool to backfill from/to either order datastore.
