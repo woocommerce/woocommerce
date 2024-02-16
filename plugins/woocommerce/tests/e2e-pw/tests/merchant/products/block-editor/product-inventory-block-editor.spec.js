@@ -85,3 +85,70 @@ test( 'can update stock status', async ( { page, product } ) => {
 		await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
 	} );
 } );
+
+test.only( 'can track stock quantity', async ( { page, product } ) => {
+	await test.step( 'enable track stock quantity', async () => {
+		await page.getByLabel( 'Track stock quantity for this' ).check();
+		await page.getByRole( 'button', { name: 'Advanced' } ).click();
+		await page.getByLabel( "Don't allow purchases" ).check();
+	} );
+
+	const quantity = '1';
+
+	await test.step( 'update available quantity', async () => {
+		await page.locator( '[name="stock_quantity"]' ).fill( quantity );
+	} );
+
+	await test.step( 'update the product', async () => {
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+		// Verify product was updated
+		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+			'Product updated'
+		);
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
+		await expect( page.locator( '[name="stock_quantity"]' ) ).toHaveValue(
+			quantity
+		);
+	} );
+
+	await test.step( 'verify the changes in the store frontend', async () => {
+		// Verify image in store frontend
+		await page.goto( product.permalink );
+
+		await expect(
+			page.getByText( `${ quantity } in stock` )
+		).toBeVisible();
+	} );
+
+	await test.step( 'return to product editor', async () => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page.getByRole( 'button', { name: 'Inventory' } ).click();
+	} );
+
+	await test.step( 'update available quantity', async () => {
+		await page.locator( '[name="stock_quantity"]' ).fill( '0' );
+	} );
+
+	await test.step( 'update the product', async () => {
+		await page.getByRole( 'button', { name: 'Update' } ).click();
+		// Verify product was updated
+		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+			'Product updated'
+		);
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
+		await expect( page.locator( '[name="stock_quantity"]' ) ).toHaveValue(
+			'0'
+		);
+	} );
+
+	await test.step( 'verify the changes in the store frontend', async () => {
+		// Verify image in store frontend
+		await page.goto( product.permalink );
+
+		await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+	} );
+} );
