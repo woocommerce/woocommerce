@@ -75,6 +75,12 @@ export function Header( {
 		Product[ 'catalog_visibility' ]
 	>( 'postType', productType, 'catalog_visibility' );
 
+	const [ productStatus ] = useEntityProp< string >(
+		'postType',
+		productType,
+		'status'
+	);
+
 	const sidebarWidth = useAdminSidebarWidth();
 
 	useEffect( () => {
@@ -104,12 +110,12 @@ export function Header( {
 	const isDraft =
 		productType === 'product'
 			? lastPersistedProduct?.status === 'draft'
-			: true;
+			: false;
 
 	const isScheduled =
 		productType === 'product'
 			? lastPersistedProduct?.status === 'future'
-			: true;
+			: false;
 
 	const isHeaderImageVisible =
 		( ! isVariation &&
@@ -137,7 +143,13 @@ export function Header( {
 				/>
 			);
 		}
-		if ( ! isScheduled && catalogVisibility !== 'visible' ) {
+		if (
+			( productType === 'product' &&
+				! isScheduled &&
+				catalogVisibility !== 'visible' ) ||
+			( productType === 'product_variation' &&
+				productStatus === 'private' )
+		) {
 			tags.push(
 				<Tag
 					key={ 'hidden-tag' }

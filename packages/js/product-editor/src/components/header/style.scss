@@ -25,6 +25,7 @@
 		&.is-variation {
 			display: flex;
 			align-items: center;
+			background-color: $white;
 		}
 
 		@include breakpoint("<960px") {
