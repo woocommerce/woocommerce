@@ -405,9 +405,7 @@ export class EditorUtils {
 			name: 'Reset',
 		} );
 		await resetButton.click();
-		await resetButton.waitFor( {
-			state: 'hidden',
-		} );
+		await this.page.getByText( `"${ templateName }" reverted.` ).waitFor();
 	}
 
 	async updatePost() {
