@@ -500,6 +500,41 @@ export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
 			},
 		},
 	},
+	{
+		title: 'Jost + Instrument Sans',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Jost',
+							slug: 'jost',
+						},
+						{
+							fontFamily: 'Instrument Sans',
+							slug: 'instrument-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--jost)',
+						fontStyle: 'normal',
+						fontWeight: '100 900',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--instrument-sans)',
+			},
+		},
+	},
 ];
 
 export const FONT_PAIRINGS = [
