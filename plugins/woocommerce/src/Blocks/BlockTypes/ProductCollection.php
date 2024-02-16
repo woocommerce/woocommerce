@@ -134,11 +134,13 @@ class ProductCollection extends AbstractBlock {
 			$last_tag_position                = strripos( $block_content, '</div>' );
 			$accessibility_and_animation_html = '
 				<div
+					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="wc-block-product-collection__pagination-animation"
 					data-wc-class--start-animation="state.startAnimation"
 					data-wc-class--finish-animation="state.finishAnimation">
 				</div>
 				<div
+					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="screen-reader-text"
 					aria-live="polite"
 					data-wc-text="context.accessibilityMessage">
@@ -184,6 +186,10 @@ class ProductCollection extends AbstractBlock {
 	 * @return string The updated block content.
 	 */
 	private function process_pagination_links( $block_content ) {
+		if ( ! $block_content ) {
+			return $block_content;
+		}
+
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
 
