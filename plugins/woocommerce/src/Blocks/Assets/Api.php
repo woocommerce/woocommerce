@@ -68,7 +68,8 @@ class Api {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		$this->wc_version    = Constants::get_constant( 'WC_VERSION' );
+		// Use wc- prefix here to prevent collisions when WC Core version catches up to a version previously used by the WC Blocks feature plugin.
+		$this->wc_version    = 'wc-' . Constants::get_constant( 'WC_VERSION' );
 		$this->package       = $package;
 		$this->disable_cache = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! $this->package->feature()->is_production_environment();
 
