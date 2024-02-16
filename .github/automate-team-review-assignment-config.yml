@@ -15,3 +15,11 @@ when:
     assign:
       teams:
         - woo-fse
+  - author:
+      teamIs:
+        - vortex
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - vortex

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Core: install fonts only when the tracking is enabled

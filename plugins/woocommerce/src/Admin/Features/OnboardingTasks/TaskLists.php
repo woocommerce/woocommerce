@@ -407,7 +407,7 @@ class TaskLists {
 	public static function setup_tasks_remaining() {
 		$setup_list = self::get_list( 'setup' );
 
-		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->is_complete() ) {
+		if ( ! $setup_list || $setup_list->is_hidden() || $setup_list->has_previously_completed() || $setup_list->is_complete() ) {
 			return;
 		}
 

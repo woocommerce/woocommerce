@@ -339,6 +339,7 @@ class OrderController {
 
 		$errors_by_code = array();
 		$error_codes    = $errors->get_error_codes();
+
 		foreach ( $error_codes as $code ) {
 			$errors_by_code[ $code ] = $errors->get_error_messages( $code );
 		}
@@ -415,6 +416,16 @@ class OrderController {
 			if ( empty( $address[ $address_field_key ] ) && $address_field['required'] ) {
 				/* translators: %s Field label. */
 				$errors->add( $address_type, sprintf( __( '%s is required', 'woocommerce' ), $address_field['label'] ), $address_field_key );
+			}
+		}
+
+		// Validate additional fields.
+		$result = $this->additional_fields_controller->validate_fields_for_location( $address, 'address', $address_type );
+
+		if ( $result->has_errors() ) {
+			// Add errors to main error object but ensure they maintain the billing/shipping error code.
+			foreach ( $result->get_error_codes() as $code ) {
+				$errors->add( $address_type, $result->get_error_message( $code ), $code );
 			}
 		}
 	}

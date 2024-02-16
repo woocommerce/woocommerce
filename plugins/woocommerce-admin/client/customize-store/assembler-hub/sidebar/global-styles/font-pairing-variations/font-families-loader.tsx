@@ -14,6 +14,7 @@ import { FontFamily } from '~/customize-store/types/font';
 
 type Props = {
 	fontFamilies: Array< FontFamily >;
+	iframeInstance: HTMLObjectElement | null;
 	onLoad?: () => void;
 	preload?: boolean;
 };
@@ -40,7 +41,11 @@ const getDisplaySrcFromFontFace = ( input: string, urlPrefix: string ) => {
 
 	return ! isUrlEncoded( input ) ? encodeURI( input ) : input;
 };
-export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
+export const FontFamiliesLoader = ( {
+	fontFamilies,
+	iframeInstance,
+	onLoad,
+}: Props ) => {
 	const { site, currentTheme } = useSelect( ( select ) => {
 		return {
 			// @ts-expect-error No types for this exist yet.
@@ -72,12 +77,15 @@ export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 				const loadedFace = await newFont.load();
 
 				document.fonts.add( loadedFace );
+				if ( iframeInstance ) {
+					iframeInstance.contentDocument?.fonts.add( loadedFace );
+				}
 				if ( onLoad ) {
 					onLoad();
 				}
 			} );
 		} );
-	}, [ fontFamilies, onLoad, themeUrl ] );
+	}, [ fontFamilies, iframeInstance, onLoad, themeUrl ] );
 
 	return <></>;
 };

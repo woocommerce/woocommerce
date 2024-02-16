@@ -257,8 +257,7 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 			elements: {
 				button: {
 					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
+						fontFamily: 'var(--wp--preset--font-family--arvo)',
 						fontStyle: 'normal',
 						fontWeight: '500',
 					},
@@ -563,7 +562,7 @@ export const FONT_PAIRINGS = [
 				button: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--commissioner)',
+							'var(--wp--preset--font-family--crimson-pro)',
 						fontWeight: '400',
 						lineHeight: '1',
 					},
