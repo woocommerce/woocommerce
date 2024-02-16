@@ -141,10 +141,9 @@ const ExpressPaymentMethods = () => {
 				const expressPaymentMethod = isEditor
 					? paymentMethod.edit
 					: paymentMethod.content;
-				const expressPaymentMethodId = paymentMethod.name;
 				return isValidElement( expressPaymentMethod ) ? (
 					<PaymentMethodErrorBoundary
-						expressPaymentMethodId={ expressPaymentMethodId }
+						key={ id }
 						isEditor={ isEditor }
 					>
 						<li key={ id } id={ `express-payment-method-${ id }` }>
