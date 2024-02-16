@@ -200,7 +200,7 @@ test( 'can limit purchases', async ( { page, product } ) => {
 		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 		await expect(
 			page.getByText(
-				`You cannot add another "${ product.name }" to your cart.		`
+				`You cannot add another "${ product.name }" to your cart.`
 			)
 		).toBeVisible();
 	} );
