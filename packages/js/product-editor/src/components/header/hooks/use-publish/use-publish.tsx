@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import type { Product } from '@woocommerce/data';
+import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { MouseEvent } from 'react';
+import type { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,7 +14,6 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
-import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 
 export function usePublish( {
 	productType = 'product',
@@ -35,8 +34,6 @@ export function usePublish( {
 		productType,
 		'id'
 	);
-
-	const isScheduled = useProductScheduled( productType );
 
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
@@ -67,7 +64,7 @@ export function usePublish( {
 	const isDisabled = disabled || isBusy || ! isDirty;
 
 	const isPublished =
-		productType === 'product' ? productStatus === 'publish' : true;
+		productStatus === 'publish' || productStatus === 'future';
 
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
@@ -143,13 +140,14 @@ export function usePublish( {
 	}
 
 	function getButtonText() {
-		if ( isScheduled ) {
-			return __( 'Schedule', 'woocommerce' );
+		switch ( productStatus ) {
+			case 'future':
+				return __( 'Schedule', 'woocommerce' );
+			case 'publish':
+				return __( 'Update', 'woocommerce' );
+			default:
+				return __( 'Publish', 'woocommerce' );
 		}
-
-		return isPublished
-			? __( 'Update', 'woocommerce' )
-			: __( 'Publish', 'woocommerce' );
 	}
 
 	return {

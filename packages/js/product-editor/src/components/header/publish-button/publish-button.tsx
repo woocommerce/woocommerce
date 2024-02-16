@@ -1,40 +1,46 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { MouseEvent } from 'react';
-import { Product } from '@woocommerce/data';
+import { Button } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { type Product } from '@woocommerce/data';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
-import { usePublish } from '../hooks/use-publish';
-import { PublishButtonProps } from './types';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
+import { usePublish } from '../hooks/use-publish';
+import { TRACKS_SOURCE } from '../../../constants';
+import { PublishButtonProps } from './types';
 
 export function PublishButton( {
 	productStatus,
 	productType = 'product',
+	prePublish,
 	...props
 }: PublishButtonProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
 
 	const { maybeShowFeedbackBar } = useFeedbackBar();
+	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
-	const publishButtonProps = usePublish( {
+	const { ...publishButtonProps } = usePublish( {
 		productType,
 		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
 			const isPublished =
-				productType === 'product' ? productStatus === 'publish' : true;
+				savedProduct.status === 'publish' ||
+				savedProduct.status === 'future';
 
 			if ( isPublished ) {
 				recordProductEvent( 'product_update', savedProduct );
@@ -74,6 +80,29 @@ export function PublishButton( {
 			createErrorNotice( message );
 		},
 	} );
+
+	if ( window.wcAdminFeatures[ 'product-pre-publish-modal' ] ) {
+		if (
+			prePublish &&
+			productStatus !== 'publish' &&
+			productStatus !== 'future'
+		) {
+			function handlePrePublishButtonClick() {
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'view',
+				} );
+				openPrepublishPanel();
+			}
+
+			return (
+				<Button
+					{ ...publishButtonProps }
+					onClick={ handlePrePublishButtonClick }
+				/>
+			);
+		}
+	}
 
 	return <Button { ...publishButtonProps } />;
 }
