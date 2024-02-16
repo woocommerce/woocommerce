@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix the removal of the express payment method from the state.
