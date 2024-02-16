@@ -158,10 +158,10 @@ class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor exte
 			array(
 				json_decode(
 					'{
-					"type": "wcadmin_active_for",
-					"operation": ">",
-					"days": "wrong type"
-				}'
+						"type": "wcadmin_active_for",
+						"operation": ">",
+						"days": "wrong type"
+					}'
 				),
 			),
 		);
