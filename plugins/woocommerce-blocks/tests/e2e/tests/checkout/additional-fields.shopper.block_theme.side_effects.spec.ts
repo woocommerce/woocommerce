@@ -374,42 +374,31 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			// Check the order was placed successfully.
-			await expect(
-				checkoutPageObject.page.getByText( 'Government ID98765' )
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText( 'Government ID43210' )
-			).toBeVisible();
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '98765' ],
+				[ 'Government ID', '43210' ],
+				[ 'What is your favourite colour?', 'Red' ],
+				[ 'Would you like a free gift with your order?', 'No' ],
+				// One checkbox is checked, the other is unchecked.
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				// Different values in different address types.
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Super wide' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is for you, from me!',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'No' ],
+			] );
 
-			// This optional select field was unset, so it should not be visible on the confirmation.
+			// This optional select field was unset, so it should not be visible on the confirmation. Can't check this
+			// with the above function so we will check it "manually".
 			await expect(
 				checkoutPageObject.page.getByText(
 					'How did you hear about us?'
 				)
 			).toBeHidden();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Do you want to subscribe to our newsletter?No'
-				)
-			).toBeVisible();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'What is your favourite colour?Red'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Enter a gift message to include in the packageThis is for you, from me!'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Would you like a free gift with your order?No'
-				)
-			).toBeVisible();
 
 			// Checking that one of the boxes is checked, and one is unchecked
 			await expect(
@@ -420,17 +409,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await expect(
 				checkoutPageObject.page.getByText(
 					'Can a truck fit down your road?Yes'
-				)
-			).toBeVisible();
-
-			await expect(
-				checkoutPageObject.page.getByText(
-					'How wide is your road?Wide'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'How wide is your road?Super wide'
 				)
 			).toBeVisible();
 		} );
