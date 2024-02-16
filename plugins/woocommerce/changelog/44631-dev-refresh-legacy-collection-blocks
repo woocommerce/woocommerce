@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+[Experimental] Add a flag that will force page refresh when combining interactivity filters with classic template or products (beta) blocks.
