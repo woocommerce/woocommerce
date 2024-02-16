@@ -45,7 +45,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 		);
 	}
 
-
 	/**
 	 * Test that the processor returns true if the site is on a Woo Express plan.
 	 * @group fast
