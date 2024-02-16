@@ -87,11 +87,6 @@ const useSource = (
 
 	const updateValueHandler = useCallback(
 		( nextEntityPropValue: string ) => {
-			// Ensure the value is a string.
-			if ( typeof nextEntityPropValue !== 'string' ) {
-				return;
-			}
-
 			updateValue( nextEntityPropValue );
 		},
 		[ updateValue ]
@@ -130,5 +125,5 @@ export default {
 	name: 'woo/entity',
 	label: __( 'Product Entity', 'woocommerce' ),
 	useSource,
-	lockAttributesEditing: false,
+	lockAttributesEditing: true,
 } as BindingSourceHandlerProps< ProductEntitySourceArgs >;
