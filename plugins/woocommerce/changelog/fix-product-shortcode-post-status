@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the product_page shortcode not working if "status" is passed in as "any".
