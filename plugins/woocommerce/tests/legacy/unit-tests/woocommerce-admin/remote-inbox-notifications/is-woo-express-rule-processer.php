@@ -59,7 +59,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_IsWooExpressRuleProcessor extends 
 		$this->assertEquals( true, $result );
 	}
 
-
 	/**
 	 * Test that the processor returns false if the site is not on a Woo Express plan.
 	 * @group fast
