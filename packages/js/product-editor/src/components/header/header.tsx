@@ -7,9 +7,10 @@ import { useSelect } from '@wordpress/data';
 import { createElement, useContext, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
-import { chevronLeft, group, Icon } from '@wordpress/icons';
+import { box, chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import classNames from 'classnames';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -28,11 +29,7 @@ import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
-
-export type HeaderProps = {
-	onTabSelect: ( tabId: string | null ) => void;
-	productType?: string;
-};
+import { HeaderProps, Image } from './types';
 
 const RETURN_TO_MAIN_PRODUCT = __(
 	'Return to the main product',
@@ -81,11 +78,33 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
+	const isVariation = lastPersistedProduct?.parent_id > 0;
+
+	const [ selectedImage ] = useEntityProp< Image | Image[] | null >(
+		'postType',
+		productType,
+		isVariation ? 'image' : 'images'
+	);
+
 	if ( isEditorLoading ) {
 		return <LoadingState />;
 	}
 
-	const isVariation = lastPersistedProduct?.parent_id > 0;
+	const isHeaderImageVisible =
+		( ! isVariation &&
+			Array.isArray( selectedImage ) &&
+			selectedImage.length > 0 ) ||
+		( isVariation && selectedImage );
+
+	function getImagePropertyValue(
+		image: Image | Image[],
+		prop: 'alt' | 'src'
+	): string {
+		if ( Array.isArray( image ) ) {
+			return image[ 0 ][ prop ] || '';
+		}
+		return image[ prop ] || '';
+	}
 
 	return (
 		<div
@@ -129,24 +148,49 @@ export function Header( {
 					<div />
 				) }
 
-				<h1 className="woocommerce-product-header__title">
-					{ isVariation ? (
-						<div className="woocommerce-product-header__variable-product-title">
-							<Icon icon={ group } />
-							<span className="woocommerce-product-header__variable-product-name">
-								{ lastPersistedProduct?.name }
-							</span>
-							<span className="woocommerce-product-header__variable-product-id">
-								# { lastPersistedProduct?.id }
-							</span>
-						</div>
-					) : (
-						getHeaderTitle(
-							editedProductName,
-							lastPersistedProduct?.name
-						)
+				<div
+					className={ classNames(
+						'woocommerce-product-header-title-bar',
+						{
+							'is-variation': isVariation,
+						}
 					) }
-				</h1>
+				>
+					<div className="woocommerce-product-header-title-bar__image">
+						{ isHeaderImageVisible ? (
+							<img
+								alt={ getImagePropertyValue(
+									selectedImage,
+									'alt'
+								) }
+								src={ getImagePropertyValue(
+									selectedImage,
+									'src'
+								) }
+								className="woocommerce-product-header-title-bar__product-image"
+							/>
+						) : (
+							<Icon icon={ isVariation ? group : box } />
+						) }
+					</div>
+					<h1 className="woocommerce-product-header__title">
+						{ isVariation ? (
+							<div className="woocommerce-product-header__variable-product-title">
+								<span className="woocommerce-product-header__variable-product-name">
+									{ lastPersistedProduct?.name }
+								</span>
+								<span className="woocommerce-product-header__variable-product-id">
+									# { lastPersistedProduct?.id }
+								</span>
+							</div>
+						) : (
+							getHeaderTitle(
+								editedProductName,
+								lastPersistedProduct?.name
+							)
+						) }
+					</h1>
+				</div>
 
 				<div className="woocommerce-product-header__actions">
 					{ ! isVariation && (
