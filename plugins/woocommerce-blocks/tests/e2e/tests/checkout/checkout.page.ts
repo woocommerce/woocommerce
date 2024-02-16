@@ -189,6 +189,19 @@ export class CheckoutPage {
 		}
 	}
 
+	/**
+	 * Verifies that the additional field values are visible on the confirmation page.
+	 */
+	async verifyAdditionalFieldsDetails( values: [ string, string ][] ) {
+		for ( const [ label, value ] of values ) {
+			await expect(
+				this.page.getByText(
+					`${ label }${ value }` // No space between these due to the way the markup is output on the confirmation page.
+				)
+			).toBeVisible();
+		}
+	}
+
 	async verifyAddressDetails(
 		shippingOrBilling: 'shipping' | 'billing',
 		overrideAddressDetails = {}
