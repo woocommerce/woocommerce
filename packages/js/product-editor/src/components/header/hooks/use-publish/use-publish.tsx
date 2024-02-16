@@ -70,6 +70,11 @@ export function usePublish( {
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( isDisabled ) {
+			event.preventDefault();
+			return;
+		}
+
 		if ( onClick ) {
 			onClick( event );
 		}

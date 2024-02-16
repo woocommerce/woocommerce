@@ -87,7 +87,14 @@ export function PublishButton( {
 			productStatus !== 'publish' &&
 			productStatus !== 'future'
 		) {
-			function handlePrePublishButtonClick() {
+			function handlePrePublishButtonClick(
+				event: MouseEvent< HTMLButtonElement >
+			) {
+				if ( publishButtonProps[ 'aria-disabled' ] ) {
+					event.preventDefault();
+					return;
+				}
+
 				recordEvent( 'product_prepublish_panel', {
 					source: TRACKS_SOURCE,
 					action: 'view',
