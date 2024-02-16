@@ -58,7 +58,7 @@ class PublishBeforeTimeRuleProcessor implements RuleProcessorInterface {
 
 		try {
 			new \DateTime( $rule->publish_before );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return false;
 		}
 
