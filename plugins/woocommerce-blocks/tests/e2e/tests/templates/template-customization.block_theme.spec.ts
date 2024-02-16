@@ -15,6 +15,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
 	test.describe( `${ testData.templateName } template`, async () => {
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( testData.templateType );
+		} );
+
 		test( 'can be modified and reverted', async ( {
 			admin,
 			frontendUtils,
@@ -63,7 +67,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				editorUtils,
 				page,
 			} ) => {
-				// Edit default template and verify changes are visible.
+				// Edit fallback template and verify changes are visible.
 				await admin.visitSiteEditor( {
 					postId: `${ WC_TEMPLATES_SLUG }//${
 						testData.fallbackTemplate?.templatePath || ''

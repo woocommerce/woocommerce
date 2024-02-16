@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adds e2e tests for user account email flows

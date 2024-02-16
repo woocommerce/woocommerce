@@ -15,6 +15,7 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { PrepublishButtonProps } from './types';
 import { useValidations } from '../../contexts/validation-context';
 import { TRACKS_SOURCE } from '../../constants';
+import { useProductScheduled } from '../../hooks/use-product-scheduled';
 
 export function PrepublishButton( {
 	productId,
@@ -49,16 +50,24 @@ export function PrepublishButton( {
 
 	const isBusy = isSaving || isValidating;
 	const isDisabled = isBusy || ! isDirty;
+	const isScheduled = useProductScheduled( productType );
 
 	return (
 		<Button
 			onClick={ () => {
-				recordEvent( 'product_prepublish', { source: TRACKS_SOURCE } );
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'view',
+				} );
 				openPrepublishPanel();
 			} }
 			isBusy={ isBusy }
 			aria-disabled={ isDisabled }
-			children={ __( 'Add', 'woocommerce' ) }
+			children={
+				isScheduled
+					? __( 'Schedule', 'woocommerce' )
+					: __( 'Publish', 'woocommerce' )
+			}
 			variant={ 'primary' }
 		/>
 	);
