@@ -45,6 +45,7 @@ class Controller implements RegisterHooksInterface {
 	public function register() {
 		self::add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
 		self::add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
+		self::add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
 	}
 
 	/**
