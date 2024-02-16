@@ -257,7 +257,7 @@ class Edit {
 			return;
 		}
 
-		if( ! OrderUtil::is_order_edit_screen() ) {
+		if ( ! OrderUtil::is_order_edit_screen() ) {
 			return;
 		}
 
