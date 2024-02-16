@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure WooCommerce Blocks scripts are uncached following a plugin update
