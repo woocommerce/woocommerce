@@ -159,6 +159,10 @@ class ProductCollection extends AbstractBlock {
 	 * @return string The updated block content.
 	 */
 	private function process_pagination_links( $block_content ) {
+		if ( ! $block_content ) {
+			return $block_content;
+		}
+
 		$p = new \WP_HTML_Tag_Processor( $block_content );
 		$p->next_tag( array( 'class_name' => 'wp-block-query-pagination' ) );
 
@@ -788,7 +792,7 @@ class ProductCollection extends AbstractBlock {
 		 * Get an array of taxonomy names associated with the "product" post type because
 		 * we also want to include custom taxonomies associated with the "product" post type.
 		 */
-		$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' );
+		$product_taxonomies = array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_visibility', 'product_shipping_class' ) );
 		$result             = array_filter(
 			$tax_query,
 			function ( $item ) use ( $product_taxonomies ) {

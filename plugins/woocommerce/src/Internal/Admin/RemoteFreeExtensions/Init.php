@@ -29,34 +29,31 @@ class Init {
 	 * @return array
 	 */
 	public static function get_extensions( $allowed_bundles = array() ) {
-		$bundles = array();
+		$locale = get_user_locale();
+
 		$specs   = self::get_specs();
+		$results = EvaluateExtension::evaluate_bundles( $specs, $allowed_bundles );
 
-		foreach ( $specs as $spec ) {
-			$spec              = (object) $spec;
-			$bundle            = (array) $spec;
-			$bundle['plugins'] = array();
-
-			if ( ! empty( $allowed_bundles ) && ! in_array( $spec->key, $allowed_bundles, true ) ) {
-				continue;
+		$plugins = array_filter(
+			$results['bundles'],
+			function( $bundle ) {
+				return count( $bundle['plugins'] ) > 0;
 			}
+		);
 
-			foreach ( $spec->plugins as $plugin ) {
-				try {
-					$extension = EvaluateExtension::evaluate( (object) $plugin );
-					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
-						$bundle['plugins'][] = $extension;
-					}
-					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-				} catch ( \Throwable $e ) {
-					// Ignore errors.
-				}
-			}
+		// When no plugins are visible, replace it with defaults and save for 3 hours.
+		if ( empty( $plugins ) ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultFreeExtensions::get_all() ), 3 * HOUR_IN_SECONDS );
 
-			$bundles[] = $bundle;
+			return EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all(), $allowed_bundles )['bundles'];
 		}
 
-		return $bundles;
+		// When plugins is not empty but has errors, save it for 3 hours.
+		if ( count( $results['errors'] ) > 0 ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+		}
+
+		return $results['bundles'];
 	}
 
 	/**

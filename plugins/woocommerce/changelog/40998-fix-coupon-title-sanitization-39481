@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed coupon errors with coupon codes containing apostrophes.
