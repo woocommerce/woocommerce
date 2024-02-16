@@ -55,7 +55,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor exte
 		$this->assertEquals( false, $result );
 	}
 
-
 	/**
 	 * Invalid value returns false
 	 *
