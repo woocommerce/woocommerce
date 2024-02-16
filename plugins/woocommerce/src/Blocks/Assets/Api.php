@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Exception;
+use Automattic\Jetpack\Constants;
 /**
  * The Api class provides an interface to various asset registration helpers.
  *
@@ -123,7 +124,8 @@ class Api {
 	 * @return string The generated hash.
 	 */
 	private function get_script_data_hash() {
-		return md5( get_option( 'siteurl', '' ) . $this->package->get_version() . $this->package->get_path() );
+		// wc- added here in 8.6.0 to avoid collisions when WC core version becomes the same as a version previously used by WC Blocks.
+		return md5( 'wc-' . get_option( 'siteurl', '' ) . Constants::get_constant( 'WC_VERSION' ); . $this->package->get_path() );
 	}
 
 	/**
