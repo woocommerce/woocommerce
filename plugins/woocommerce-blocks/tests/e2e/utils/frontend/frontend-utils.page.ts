@@ -68,6 +68,15 @@ export class FrontendUtils {
 		} );
 	}
 
+	async logout() {
+		await this.page.goto( '/my-account', {
+			waitUntil: 'domcontentloaded',
+		} );
+		await this.page.click(
+			'.woocommerce-MyAccount-navigation-link--customer-logout a'
+		);
+	}
+
 	async emptyCart() {
 		const cartResponse = await this.requestUtils.request.get(
 			'/wp-json/wc/store/cart'

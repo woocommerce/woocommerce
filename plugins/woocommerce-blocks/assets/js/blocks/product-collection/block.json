@@ -34,18 +34,24 @@
 		"hideControls": {
 			"default": [],
 			"type": "array"
+		},
+		"queryContextIncludes": {
+			"type": "array"
 		}
 	},
 	"providesContext": {
 		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
-		"displayLayout": "displayLayout"
+		"displayLayout": "displayLayout",
+		"queryContextIncludes": "queryContextIncludes",
+		"collection": "collection"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
-		"__experimentalLayout": true
+		"__experimentalLayout": true,
+		"interactivity": true
 	}
 }

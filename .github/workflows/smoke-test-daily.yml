@@ -19,7 +19,7 @@ permissions: {}
 jobs:
     api-tests:
         name: API tests on nightly build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         outputs:
@@ -39,7 +39,7 @@ jobs:
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
               env:
-                  ENABLE_HPOS: 0
+                  ENABLE_HPOS: 1
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
 
             - name: Run API tests
@@ -79,12 +79,23 @@ jobs:
 
     e2e-tests:
         name: E2E tests on nightly build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        strategy:
+            fail-fast: false
+            matrix:
+                shard:
+                    [
+                        { number: 1, name: 1/5 },
+                        { number: 2, name: 2/5 },
+                        { number: 3, name: 3/5 },
+                        { number: 4, name: 4/5 },
+                        { number: 5, name: 5/5 },
+                    ]
         permissions:
             contents: read
         outputs:
             test-result: ${{ steps.run_playwright_e2e_tests.outputs.result }}
-        #  needs: [api-tests]
         env:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
@@ -101,6 +112,7 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   WP_ENV_PHP_VERSION: 7.4
+                  ENABLE_HPOS: 1
               run: pnpm env:test
 
             - name: Download and install Chromium browser.
@@ -117,22 +129,59 @@ jobs:
                   ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
                   ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js
+              run: pnpm exec playwright test --config=tests/e2e-pw/playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Upload reports to GitHub Actions Artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: all-blob-reports-${{ matrix.shard.number }}
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
+                  retention-days: 1
+                  compression-level: 9
+
+    merge-reports:
+        name: Merge e2e test reports
+        if: always()
+        needs: e2e-tests
+
+        runs-on: ubuntu-latest
+        env:
+            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
+            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
+        steps:
+            - uses: actions/checkout@v3
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
+
+            - name: Download blob reports from GitHub Actions Artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: ${{ env.ALLURE_RESULTS_DIR }}
+                  pattern: all-blob-reports-*
+                  run-id: e2e-tests-run
+                  merge-multiple: true
 
             - name: Generate Test report.
-              if: success() || ( failure() && steps.run_playwright_e2e_tests.conclusion == 'failure' )
+              id: generate_e2e_report
               working-directory: plugins/woocommerce
               run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
-            - name: Archive test report
-              if: success() || ( failure() && steps.run_playwright_e2e_tests.conclusion == 'failure' )
-              uses: actions/upload-artifact@v3
+            - name: Archive Playwright E2E test report
+              if: |
+                  always() &&
+                  steps.generate_e2e_report.conclusion == 'success'
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ env.E2E_ARTIFACT }}
                   path: |
                       ${{ env.ALLURE_RESULTS_DIR }}
                       ${{ env.ALLURE_REPORT_DIR }}
-                  retention-days: 20
+                  if-no-files-found: ignore
+                  retention-days: 5
 
     k6-tests:
         name: k6 tests on nightly build
@@ -189,10 +238,9 @@ jobs:
 
     test-plugins:
         name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
-        needs: [api-tests]
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
@@ -305,7 +353,7 @@ jobs:
                   path: artifacts/api
 
             - name: Download E2E test report artifact
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ env.E2E_ARTIFACT }}
                   path: artifacts/e2e
@@ -349,7 +397,7 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
+                    - plugin: 'WooPayments'
                       slug: woocommerce-payments
                     - plugin: 'WooCommerce PayPal Payments'
                       slug: woocommerce-paypal-payments

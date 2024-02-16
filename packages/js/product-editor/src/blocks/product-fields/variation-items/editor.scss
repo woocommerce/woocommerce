@@ -1,3 +1,5 @@
+@import "empty-state/style.scss";
+
 .wp-block-woocommerce-product-variation-items-field {
 	@media ( min-width: #{ ($break-medium) } ) {
 		min-height: 420px;

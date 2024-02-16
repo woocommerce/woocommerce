@@ -75,10 +75,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
 			themeData,
-			activeThemeHasMods,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
 		},
+		activeThemeHasMods,
 	} = context;
 
 	const isJetpackOffline = false;
@@ -142,7 +142,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const sidebarMessage =
 		context.flowType === FlowType.AIOnline
 			? __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
 					'woocommerce'
 			  )
 			: __(

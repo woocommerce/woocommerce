@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\PluginUtil;
-use ActionScheduler;
+use WC_Admin_Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -68,6 +68,13 @@ class CustomOrdersTableController {
 	private $data_synchronizer;
 
 	/**
+	 * The data cleanup instance to use.
+	 *
+	 * @var LegacyDataCleanup
+	 */
+	private $data_cleanup;
+
+	/**
 	 * The batch processing controller to use.
 	 *
 	 * @var BatchProcessingController
@@ -115,7 +122,7 @@ class CustomOrdersTableController {
 	private function init_hooks() {
 		self::add_filter( 'woocommerce_order_data_store', array( $this, 'get_orders_data_store' ), 999, 1 );
 		self::add_filter( 'woocommerce_order-refund_data_store', array( $this, 'get_refunds_data_store' ), 999, 1 );
-		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_initiate_regeneration_entry_to_tools_array' ), 999, 1 );
+		self::add_filter( 'woocommerce_debug_tools', array( $this, 'add_hpos_tools' ), 999 );
 		self::add_filter( 'updated_option', array( $this, 'process_updated_option' ), 999, 3 );
 		self::add_filter( 'pre_update_option', array( $this, 'process_pre_update_option' ), 999, 3 );
 		self::add_action( 'woocommerce_after_register_post_type', array( $this, 'register_post_type_for_order_placeholders' ), 10, 0 );
@@ -130,6 +137,7 @@ class CustomOrdersTableController {
 	 * @internal
 	 * @param OrdersTableDataStore       $data_store The data store to use.
 	 * @param DataSynchronizer           $data_synchronizer The data synchronizer to use.
+	 * @param LegacyDataCleanup          $data_cleanup The legacy data cleanup instance to use.
 	 * @param OrdersTableRefundDataStore $refund_data_store The refund data store to use.
 	 * @param BatchProcessingController  $batch_processing_controller The batch processing controller to use.
 	 * @param FeaturesController         $features_controller The features controller instance to use.
@@ -140,6 +148,7 @@ class CustomOrdersTableController {
 	final public function init(
 		OrdersTableDataStore $data_store,
 		DataSynchronizer $data_synchronizer,
+		LegacyDataCleanup $data_cleanup,
 		OrdersTableRefundDataStore $refund_data_store,
 		BatchProcessingController $batch_processing_controller,
 		FeaturesController $features_controller,
@@ -149,6 +158,7 @@ class CustomOrdersTableController {
 	) {
 		$this->data_store                  = $data_store;
 		$this->data_synchronizer           = $data_synchronizer;
+		$this->data_cleanup                = $data_cleanup;
 		$this->batch_processing_controller = $batch_processing_controller;
 		$this->refund_data_store           = $refund_data_store;
 		$this->features_controller         = $features_controller;
@@ -217,11 +227,15 @@ class CustomOrdersTableController {
 	 * @param array $tools_array The array of tools to add the tool to.
 	 * @return array The updated array of tools-
 	 */
-	private function add_initiate_regeneration_entry_to_tools_array( array $tools_array ): array {
+	private function add_hpos_tools( array $tools_array ): array {
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
 			return $tools_array;
 		}
 
+		// Cleanup tool.
+		$tools_array = array_merge( $tools_array, $this->data_cleanup->get_tools_entries() );
+
+		// Delete HPOS tables tool.
 		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
 			$disabled = true;
 			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
@@ -326,9 +340,17 @@ class CustomOrdersTableController {
 			return;
 		}
 
-		if ( filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
-			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
+		if ( ! filter_input( INPUT_GET, self::SYNC_QUERY_ARG, FILTER_VALIDATE_BOOLEAN ) ) {
+			return;
 		}
+
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'hpos-sync-now' ) ) {
+			WC_Admin_Settings::add_error( esc_html__( 'Unable to start synchronization. The link you followed may have expired.', 'woocommerce' ) );
+			return;
+		}
+
+		$this->data_cleanup->toggle_flag( false );
+		$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 	}
 
 	/**
@@ -506,11 +528,14 @@ class CustomOrdersTableController {
 					$orders_pending_sync_count
 				);
 			} elseif ( $sync_is_pending ) {
-				$sync_now_url = add_query_arg(
-					array(
-						self::SYNC_QUERY_ARG => true,
+				$sync_now_url = wp_nonce_url(
+					add_query_arg(
+						array(
+							self::SYNC_QUERY_ARG => true,
+						),
+						wc_get_container()->get( FeaturesController::class )->get_features_page_url()
 					),
-					wc_get_container()->get( FeaturesController::class )->get_features_page_url()
+					'hpos-sync-now'
 				);
 
 				if ( ! $is_dangerous ) {

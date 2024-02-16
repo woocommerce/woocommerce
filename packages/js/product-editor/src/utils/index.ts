@@ -23,6 +23,7 @@ import { hasAttributesUsedForVariations } from './has-attributes-used-for-variat
 import { isValidEmail } from './validate-email';
 
 export * from './create-ordered-children';
+export * from './date';
 export * from './sort-fills-by-order';
 export * from './register-product-editor-block-type';
 export * from './init-block';

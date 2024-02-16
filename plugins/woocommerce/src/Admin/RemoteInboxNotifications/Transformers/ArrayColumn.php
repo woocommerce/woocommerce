@@ -23,7 +23,11 @@ class ArrayColumn implements TransformerInterface {
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
+	public function transform( $value, stdClass $arguments = null, $default = array() ) {
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
 		return array_column( $value, $arguments->key );
 	}
 
@@ -36,6 +40,14 @@ class ArrayColumn implements TransformerInterface {
 	 */
 	public function validate( stdClass $arguments = null ) {
 		if ( ! isset( $arguments->key ) ) {
+			return false;
+		}
+
+		if (
+			null !== $arguments->key &&
+			! is_string( $arguments->key ) &&
+			! is_int( $arguments->key )
+		) {
 			return false;
 		}
 

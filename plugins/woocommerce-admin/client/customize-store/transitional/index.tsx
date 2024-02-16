@@ -37,6 +37,7 @@ export const Transitional = ( {
 	editor,
 	sendEvent,
 	hasCompleteSurvey,
+	isWooExpress,
 	isSurveyOpen,
 	setSurveyOpen,
 	aiOnline,
@@ -44,6 +45,7 @@ export const Transitional = ( {
 	editor: React.ReactNode;
 	sendEvent: ( event: events ) => void;
 	hasCompleteSurvey: boolean;
+	isWooExpress: boolean;
 	isSurveyOpen: boolean;
 	setSurveyOpen: ( isOpen: boolean ) => void;
 	aiOnline: boolean;
@@ -54,9 +56,12 @@ export const Transitional = ( {
 		setSurveyOpen( false );
 	};
 
+	const showSurveyButton = ! hasCompleteSurvey;
+	const showAISurvey = isWooExpress && aiOnline;
+
 	return (
 		<div className="woocommerce-customize-store__transitional">
-			{ isSurveyOpen && aiOnline && (
+			{ isSurveyOpen && (
 				<Modal
 					title={ __( 'Share feedback', 'woocommerce' ) }
 					onRequestClose={ () => closeSurvey() }
@@ -64,6 +69,7 @@ export const Transitional = ( {
 					className="woocommerce-ai-survey-modal"
 				>
 					<SurveyForm
+						showAISurvey={ showAISurvey }
 						onSend={ () => {
 							sendEvent( {
 								type: 'COMPLETE_SURVEY',
@@ -97,13 +103,15 @@ export const Transitional = ( {
 				<div className="woocommerce-customize-store__transitional-main-actions">
 					<WooCYSSecondaryButtonSlot />
 
-					{ ! hasCompleteSurvey && aiOnline && (
+					{ showSurveyButton && (
 						<Button
 							className="woocommerce-customize-store__transitional-preview-button"
 							variant="secondary"
 							onClick={ () => {
 								recordEvent(
-									'customize_your_store_transitional_survey_click'
+									isWooExpress
+										? 'customize_your_store_transitional_survey_click'
+										: 'customize_your_store_on_core_transitional_survey_click'
 								);
 								setSurveyOpen( true );
 							} }

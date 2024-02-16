@@ -45,7 +45,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return array Active filters param keys.
 	 */
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$price_param_keys = array_filter(
+		$rating_param_keys = array_filter(
 			$url_param_keys,
 			function( $param ) {
 				return self::RATING_FILTER_QUERY_VAR === $param;
@@ -54,7 +54,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		return array_merge(
 			$filter_param_keys,
-			$price_param_keys
+			$rating_param_keys
 		);
 	}
 
@@ -128,7 +128,6 @@ final class ProductFilterRating extends AbstractBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wc-interactive' => $this->get_full_block_name(),
-				'class'               => 'wc-block-rating-filter',
 				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
 			)
 		);
@@ -155,11 +154,8 @@ final class ProductFilterRating extends AbstractBlock {
 		return sprintf(
 			'<div %1$s>
 				%2$s
-				<div class="wc-block-rating-filter__controls">%3$s</div>
-				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
-			$content,
 			$input
 		);
 	}
@@ -212,11 +208,18 @@ final class ProductFilterRating extends AbstractBlock {
 				$count       = $rating['count'];
 				$count_label = $show_counts ? "($count)" : '';
 
+				$aria_label = sprintf(
+					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
+					__( 'Rated %s out of 5', 'woocommerce' ),
+					$rating_str,
+				);
+
 				return array(
-					'id'      => 'rating-' . $rating_str,
-					'checked' => in_array( $rating_str, $ratings_array, true ),
-					'label'   => $this->render_rating_label( (int) $rating_str, $count_label ),
-					'value'   => $rating_str,
+					'id'         => 'rating-' . $rating_str,
+					'checked'    => in_array( $rating_str, $ratings_array, true ),
+					'label'      => $this->render_rating_label( (int) $rating_str, $count_label ),
+					'aria_label' => $aria_label,
+					'value'      => $rating_str,
 				);
 			},
 			$rating_counts

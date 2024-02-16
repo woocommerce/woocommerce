@@ -42,7 +42,7 @@ export function PublishButton( {
 
 			const noticeContent = isPublished
 				? __( 'Product updated.', 'woocommerce' )
-				: __( 'Product added.', 'woocommerce' );
+				: __( 'Product published.', 'woocommerce' );
 			const noticeOptions = {
 				icon: '🎉',
 				actions: [

@@ -20,8 +20,22 @@
 		position: static;
 	}
 
-	.interface-interface-skeleton__sidebar {
+	.interface-interface-skeleton__sidebar,
+	.interface-interface-skeleton__actions {
 		width: 280px;
+	}
+	.interface-interface-skeleton__actions {
+		top: $admin-bar-height-big;
+		border-left: 1px solid $gray-200;
+		background-color: $white;
+		height: 100%;
+		z-index: 9999;
+		width: 100%;
+		overflow: auto;
+		@include break-medium() {
+			top: $admin-bar-height;
+			width: $sidebar-width;
+		}
 	}
 
 	.interface-interface-skeleton__header,

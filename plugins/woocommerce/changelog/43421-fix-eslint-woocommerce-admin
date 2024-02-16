@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix ESLint configuration regarding import path aliases.
