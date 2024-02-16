@@ -74,10 +74,10 @@ class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor exte
 		$processor = new WCAdminActiveForRuleProcessor( $mocked );
 		$rule      = json_decode(
 			'{
-            "type": "wcadmin_active_for",
-            "operation": ">",
-            "days": 12
-        }'
+				"type": "wcadmin_active_for",
+				"operation": ">",
+				"days": 12
+			}'
 		);
 
 		$result = $processor->process( $rule, new stdClass() );
