@@ -76,6 +76,9 @@ baseTest.describe( 'Coupon management', () => {
 
 			// publish the coupon and retrieve the id
 			await test.step( 'publish the coupon', async () => {
+				await expect(
+					page.getByRole( 'link', { name: 'Move to Trash' } )
+				).toBeVisible();
 				await page
 					.getByRole( 'button', { name: 'Publish', exact: true } )
 					.click();
