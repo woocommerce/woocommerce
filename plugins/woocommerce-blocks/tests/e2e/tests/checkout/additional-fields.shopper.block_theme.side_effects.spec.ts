@@ -119,57 +119,25 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 			await checkoutPageObject.placeOrder();
 
-			await expect(
-				checkoutPageObject.page.getByText( 'Government ID12345' )
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText( 'Government ID54321' )
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'What is your favourite colour?Blue'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Enter a gift message to include in the packageThis is for you!'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Do you want to subscribe to our newsletter?Yes'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Would you like a free gift with your order?Yes'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Can a truck fit down your road?Yes'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Can a truck fit down your road?No'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'How wide is your road?Wide'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'How wide is your road?Narrow'
-				)
-			).toBeVisible();
-			await expect(
-				checkoutPageObject.page.getByText(
-					'Is this a personal purchase or a business purchase?business'
-				)
-			).toBeVisible();
+			await checkoutPageObject.verifyAdditionalFieldsDetails( [
+				[ 'Government ID', '12345' ],
+				[ 'Government ID', '54321' ],
+				[ 'What is your favourite colour?', 'Blue' ],
+				[
+					'Enter a gift message to include in the package',
+					'This is for you!',
+				],
+				[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
+				[ 'Would you like a free gift with your order?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'Yes' ],
+				[ 'Can a truck fit down your road?', 'No' ],
+				[ 'How wide is your road?', 'Wide' ],
+				[ 'How wide is your road?', 'Narrow' ],
+				[
+					'Is this a personal purchase or a business purchase?',
+					'business',
+				],
+			] );
 
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
