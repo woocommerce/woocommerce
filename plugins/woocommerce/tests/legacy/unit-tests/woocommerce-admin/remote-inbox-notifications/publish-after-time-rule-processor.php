@@ -78,7 +78,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor exte
 	}
 
 	/**
-	 * Tests that the rule validation fails if the publish_after time is not a valid date time format.
+	 * Tests that the rule validation fails if publish_after_time is not in a valid date time format.
 	 *
 	 * @group fast
 	 */
