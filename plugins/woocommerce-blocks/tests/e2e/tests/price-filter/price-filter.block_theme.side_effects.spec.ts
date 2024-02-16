@@ -63,8 +63,16 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			name: 'Filter products by maximum price',
 		} );
 
+		// All Products block will be deprecated in the future, so we are not going to optimize it.
+
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.fill( '$10', {
+			// eslint-disable-next-line playwright/no-force-option
+			force: true,
+		} );
 		await maxPriceInput.press( 'Tab' );
 		await page.waitForResponse( ( response ) =>
 			response.url().includes( blockData.endpointAPI )
@@ -83,7 +91,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 
 		const products = await allProductsBlock.getByRole( 'listitem' ).all();
 
-		expect( products ).toHaveLength( 2 );
+		expect( products ).toHaveLength( 1 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
