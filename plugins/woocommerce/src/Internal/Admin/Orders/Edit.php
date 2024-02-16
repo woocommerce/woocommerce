@@ -152,7 +152,6 @@ class Edit {
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
 		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
-		$this->maybe_register_order_attribution( $this->screen_id, __( 'Order', 'woocommerce' ) );
 		$this->add_order_specific_meta_box();
 		$this->add_order_taxonomies_meta_box();
 
