@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add default values for 'woocommerce_admin_billing_fields' and 'woocommerce_admin_shipping_fields' filters
