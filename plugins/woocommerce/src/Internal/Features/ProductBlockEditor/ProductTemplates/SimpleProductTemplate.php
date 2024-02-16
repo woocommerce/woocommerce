@@ -214,10 +214,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 10,
 				'attributes' => array(
 					'autoFocus' => true,
-					'metadata' => array(
+					'metadata'  => array(
 						'bindings' => array(
 							'name' => array(
-								'source' => 'woo/product-entity',
+								'source' => 'woo/entity',
 								'args'   => array(
 									'prop' => 'name'
 								),
