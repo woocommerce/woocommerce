@@ -35,7 +35,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await editor.publishPost();
 		const url = new URL( page.url() );
 		const postId = url.searchParams.get( 'post' );
-		await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+		await page.goto( `/?p=${ postId }` );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
