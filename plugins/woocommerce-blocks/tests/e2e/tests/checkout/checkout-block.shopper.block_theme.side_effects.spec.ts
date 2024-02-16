@@ -517,6 +517,18 @@ test.describe( 'Billing Address Form', () => {
 		postcode: '90210',
 		phone: '01234567890',
 	};
+	const billingTestData = {
+		first_name: '',
+		last_name: '',
+		company: '',
+		address_1: '',
+		address_2: '',
+		country: 'United States (US)',
+		city: '',
+		state: 'New York',
+		postcode: '',
+		phone: '',
+	};
 
 	test( 'Ensure billing is empty and shipping address is filled for guest user', async ( {
 		frontendUtils,
@@ -531,50 +543,66 @@ test.describe( 'Billing Address Form', () => {
 		await checkoutPageObject.fillShippingDetails( shippingTestData );
 		await page.getByLabel( 'Use same address for billing' ).uncheck();
 
-		await expect( page.locator( '#billing-first_name' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-last_name' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-company' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-address_1' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-address_2' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-country input' ) ).toHaveValue(
-			'United States (US)'
-		);
-		await expect( page.locator( '#billing-city' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-state input' ) ).toHaveValue(
-			''
-		);
-		await expect( page.locator( '#billing-postcode' ) ).toHaveValue( '' );
-		await expect( page.locator( '#billing-phone' ) ).toHaveValue( '' );
+		// Check shipping fields are filled.
+		for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			switch ( key ) {
+				case 'firstname':
+					await expect(
+						page.locator( '#shipping-first_name' )
+					).toHaveValue( value );
+					break;
+				case 'lastname':
+					await expect(
+						page.locator( '#shipping-last_name' )
+					).toHaveValue( value );
+					break;
+				case 'country':
+					await expect(
+						page.locator( '#shipping-country input' )
+					).toHaveValue( value );
+					break;
+				case 'addressfirstline':
+					await expect(
+						page.locator( '#shipping-address_1' )
+					).toHaveValue( value );
+					break;
+				case 'addresssecondline':
+					await expect(
+						page.locator( '#shipping-address_2' )
+					).toHaveValue( value );
+					break;
+				case 'state':
+					await expect(
+						page.locator( '#shipping-state input' )
+					).toHaveValue( value );
+					break;
+				default:
+					await expect(
+						page.locator( `#shipping-${ key }` )
+					).toHaveValue( value );
+			}
+		}
 
-		await expect( page.locator( '#shipping-first_name' ) ).toHaveValue(
-			'John'
-		);
-		await expect( page.locator( '#shipping-last_name' ) ).toHaveValue(
-			'Doe'
-		);
-		await expect( page.locator( '#shipping-company' ) ).toHaveValue(
-			'Automattic'
-		);
-		await expect( page.locator( '#shipping-address_1' ) ).toHaveValue(
-			'123 Easy Street'
-		);
-		await expect( page.locator( '#shipping-address_2' ) ).toHaveValue(
-			'Testville'
-		);
-		await expect( page.locator( '#shipping-country input' ) ).toHaveValue(
-			'United States (US)'
-		);
-		await expect( page.locator( '#shipping-city' ) ).toHaveValue(
-			'New York'
-		);
-		await expect( page.locator( '#shipping-state input' ) ).toHaveValue(
-			'New York'
-		);
-		await expect( page.locator( '#shipping-postcode' ) ).toHaveValue(
-			'90210'
-		);
-		await expect( page.locator( '#shipping-phone' ) ).toHaveValue(
-			'01234567890'
-		);
+		// Check billing fields are empty.
+		for ( const [ key, value ] of Object.entries( billingTestData ) ) {
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			switch ( key ) {
+				case 'country':
+					await expect(
+						page.locator( '#billing-country input' )
+					).toHaveValue( value );
+					break;
+				case 'state':
+					await expect(
+						page.locator( '#billing-state input' )
+					).toHaveValue( value );
+					break;
+				default:
+					await expect(
+						page.locator( `#billing-${ key }` )
+					).toHaveValue( value );
+			}
+		}
 	} );
 } );
