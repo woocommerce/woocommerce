@@ -40,6 +40,10 @@ export const COLOR_PALETTES = [
 			blocks: {
 				'core/button': {},
 			},
+			color: {
+				background: 'var(--wp--preset--color--background)',
+				text: 'var(--wp--preset--color--foreground)',
+			},
 			elements: {
 				button: {
 					color: {
@@ -51,6 +55,11 @@ export const COLOR_PALETTES = [
 							background: 'var(--wp--preset--color--secondary)',
 							text: 'var(--wp--preset--color--background)',
 						},
+					},
+				},
+				link: {
+					color: {
+						text: 'var(--wp--preset--color--foreground)',
 					},
 				},
 			},
