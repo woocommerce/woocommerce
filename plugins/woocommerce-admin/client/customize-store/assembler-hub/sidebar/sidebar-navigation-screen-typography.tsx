@@ -63,7 +63,7 @@ export const SidebarNavigationScreenTypography = ( {
 		);
 	} else if ( trackingAllowed && ! isFontLibraryAvailable ) {
 		upgradeNotice = __(
-			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> or <GutenbergLink>install Gutenberg</GutenbergLink> to get access to more fonts.',
+			'Upgrade to the <WordPressLink>latest version of WordPress</WordPressLink> to get access to more fonts.',
 			'woocommerce'
 		);
 	} else {
@@ -147,13 +147,6 @@ export const SidebarNavigationScreenTypography = ( {
 									WordPressLink: (
 										<Link
 											href="https://wordpress.org/download/"
-											target="_blank"
-											type="external"
-										/>
-									),
-									GutenbergLink: (
-										<Link
-											href="https://wordpress.org/plugins/gutenberg/"
 											target="_blank"
 											type="external"
 										/>

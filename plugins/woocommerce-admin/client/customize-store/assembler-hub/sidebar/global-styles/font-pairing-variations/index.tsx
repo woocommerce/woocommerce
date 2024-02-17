@@ -80,6 +80,7 @@ export const FontPairing = () => {
 		aiOnline,
 		aiSuggestions?.lookAndFeel,
 		trackingAllowed,
+		isFontLibraryAvailable,
 		filterFontsByLookAndFeel,
 	] );
 
