@@ -92,7 +92,6 @@ class CustomMetaBox {
 	 * Compute keys to display in autofill when adding new meta key entry in custom meta box.
 	 * Currently, returns empty keys, will be implemented after caching is merged.
 	 *
-	 * @param array|null         $keys Keys to display in autofill.
 	 * @param \WP_Post|\WC_Order $order Order object.
 	 *
 	 * @return array|mixed Array of keys to display in autofill.
@@ -118,7 +117,16 @@ class CustomMetaBox {
 
 		if ( null === $keys ) {
 			$meta_data_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
-			$keys            = $meta_data_store->get_meta_keys( apply_filters( 'postmeta_form_limit', 30 ) );
+
+			/**
+			 * Compatibility filter for 'postmeta_form_limit', which filters the number of custom fields to retrieve
+			 * for the drop-down in the Custom Fields meta box.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param int $limit Number of custom fields to retrieve. Default 30.
+			 */
+			$keys = $meta_data_store->get_meta_keys( apply_filters( 'postmeta_form_limit', 30 ) );
 		}
 
 		if ( $keys ) {

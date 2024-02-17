@@ -260,7 +260,7 @@ abstract class CustomMetaDataStore {
 			$query .= $wpdb->prepare( 'LIMIT %d ', $limit );
 		}
 
-		return $wpdb->get_col( $query );
+		return $wpdb->get_col( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared.
 	}
 
 }
