@@ -5,8 +5,8 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use WC_Data_Store;
-use WC_Meta_Data;
+use Automattic\WooCommerce\Internal\DataStores\CustomMetaDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
 use WC_Order;
 use WP_Ajax_Response;
 
@@ -97,9 +97,36 @@ class CustomMetaBox {
 	 *
 	 * @return array|mixed Array of keys to display in autofill.
 	 */
-	public function order_meta_keys_autofill( $keys, $order ) {
-		if ( is_a( $order, \WC_Order::class ) ) {
+	public function order_meta_keys_autofill( $order ) {
+		if ( ! is_a( $order, \WC_Order::class ) ) {
 			return array();
+		}
+
+		/**
+		 * Filters values for the meta key dropdown in the Custom Fields meta box.
+		 *
+		 * Compatibility filter for `postmeta_form_keys` filter.
+		 *
+		 * @since 6.9.0
+		 *
+		 * @param array|null $keys Pre-defined meta keys to be used in place of a postmeta query. Default null.
+		 * @param \WC_Order  $order The current post object.
+		 */
+		$keys = apply_filters( 'postmeta_form_keys', null, $order );
+
+		$limit = 0;
+
+		if ( null === $keys ) {
+			$meta_data_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
+			$keys            = $meta_data_store->get_meta_keys( apply_filters( 'postmeta_form_limit', 30 ) );
+		}
+
+		if ( $keys ) {
+			natcasesort( $keys );
+		}
+
+		if ( $limit ) {
+			$keys = array_slice( $keys, 0, absint( $limit ) );
 		}
 
 		return $keys;
@@ -115,18 +142,7 @@ class CustomMetaBox {
 	public function render_meta_form( \WC_Order $order ) : void {
 		$meta_key_input_id = 'metakeyselect';
 
-		$keys = $this->order_meta_keys_autofill( null, $order );
-		/**
-		 * Filters values for the meta key dropdown in the Custom Fields meta box.
-		 *
-		 * Compatibility filter for `postmeta_form_keys` filter.
-		 *
-		 * @since 6.9.0
-		 *
-		 * @param array|null $keys Pre-defined meta keys to be used in place of a postmeta query. Default null.
-		 * @param \WC_Order  $order The current post object.
-		 */
-		$keys = apply_filters( 'postmeta_form_keys', $keys, $order );
+		$keys = $this->order_meta_keys_autofill( $order );
 		?>
 		<p><strong><?php esc_html_e( 'Add New Custom Field:', 'woocommerce' ); ?></strong></p>
 		<table id="newmeta">
