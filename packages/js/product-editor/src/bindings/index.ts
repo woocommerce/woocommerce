@@ -9,9 +9,8 @@ import { addFilter } from '@wordpress/hooks';
  */
 import extendBlockWithBoundAttributes from './extend-blocks-with-bound-attributes';
 import type { BindingSourceHandlerProps } from './types';
-import productEntitySource, {
-	ProductEntitySourceArgs,
-} from './sources/entity-source';
+import wooEntitySource from '../bindings-sources/entity-source';
+import { type WooEntitySourceArgs } from '../bindings-sources/entity-source/types';
 
 type BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE = {
 	[ key: string ]: string[];
@@ -23,26 +22,45 @@ export const BLOCK_BINDINGS_ALLOWED_BLOCKS: BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE =
 		'core/heading': [ 'content' ],
 		'core/image': [ 'url', 'title', 'alt' ],
 		'core/button': [ 'url', 'text', 'linkTarget' ],
-		'woocommerce/product-text-area-field': [ 'content', 'placeholder' ],
-		'woocommerce/product-name-field': [ 'name' ],
-		'woocommerce/product-regular-price-field': [
-			'regularPrice',
-			'salePrice',
-		],
-		'woocommerce/product-sale-price-field': [ 'regularPrice', 'salePrice' ],
+		'woocommerce/product-text-field': [ 'value' ],
 	};
 
-export function isBlockAllowed( blockName: string ): boolean {
+/**
+ * Based on the given block name,
+ * check if it is possible to bind the block.
+ *
+ * @param {string} blockName - The block name.
+ * @return {boolean} Whether it is possible to bind the block.
+ */
+export function isItPossibleToBindBlock( blockName: string ): boolean {
 	return blockName in BLOCK_BINDINGS_ALLOWED_BLOCKS;
 }
 
+/**
+ * Based on the given block name and attribute name,
+ * check if it is possible to bind the block.
+ *
+ * @param {string} blockName     - The block name.
+ * @param {string} attributeName - The attribute name.
+ * @return {boolean} Whether it is possible to bind the block.
+ */
+export function hasPossibleBlockBinding(
+	blockName: string,
+	attributeName: string
+): boolean {
+	return (
+		isItPossibleToBindBlock( blockName ) &&
+		BLOCK_BINDINGS_ALLOWED_BLOCKS[ blockName ].includes( attributeName )
+	);
+}
+
 const sourceHandlers = {
-	[ productEntitySource.name ]: productEntitySource,
+	[ wooEntitySource.name ]: wooEntitySource,
 };
 
 export function getBlockBindingsSource(
 	source: string
-): BindingSourceHandlerProps< ProductEntitySourceArgs > {
+): BindingSourceHandlerProps< WooEntitySourceArgs > {
 	return sourceHandlers[ source ];
 }
 

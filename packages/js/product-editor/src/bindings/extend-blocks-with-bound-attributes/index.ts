@@ -5,7 +5,7 @@ import type { BlockConfiguration } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { isBlockAllowed } from '..';
+import { isItPossibleToBindBlock } from '..';
 import withBlockBindingSupport from './core-block-binding-support';
 
 /**
@@ -19,7 +19,7 @@ export default function extendBlockWithBoundAttributes(
 	settings: BlockConfiguration,
 	name: string
 ): BlockConfiguration {
-	if ( ! isBlockAllowed( name ) ) {
+	if ( ! isItPossibleToBindBlock( name ) ) {
 		return settings;
 	}
 

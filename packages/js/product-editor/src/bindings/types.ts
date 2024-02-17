@@ -10,14 +10,16 @@ import {
  * Internal dependencies
  */
 
-export type AttrbuteBindingProps = {
+export type AttributeBindingProps = {
 	source: string;
 	args: { prop: string };
 };
 
+export type MetadataBindingsProps = Record< string, AttributeBindingProps >;
+
 export type BoundBlockAttributes = BlockAttributes & {
 	metadata?: {
-		bindings: Record< string, AttrbuteBindingProps >;
+		bindings: MetadataBindingsProps;
 	};
 	// attribute?: string;
 };
