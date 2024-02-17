@@ -1291,14 +1291,25 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
 	
-	$price = '<del>
-			<span class="screen-reader-text">' . esc_html__('Original price was:', 'woocommerce') . '</span> ' 
-			. ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . 
-		'</del> 
-		<ins>
-			<span class="screen-reader-text">' . esc_html__('Current price is:', 'woocommerce') . '</span> ' 
-			. ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . 
-		'</ins>';
+	// format the prices 
+	$formatted_regular_price = is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price;
+	$formatted_sale_price = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
+
+	// strike through pricing
+	$price = '<del aria-hidden="true">' . $formatted_regular_price . '</del> ';
+
+	// for accessibility (a11y) we'll also display that information to screen readers
+	$price .= '<span class="screen-reader-text">';
+	$price .= sprintf( esc_html__( 'Original price was: %s.', 'woocommerce' ), $formatted_regular_price );
+	$price .= '</span>';
+
+	// add the sale price
+	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
+
+	// for accessibility (a11y) we'll also display that information to screen readers
+	$price .= '<span class="screen-reader-text">';
+	$price .= sprintf( esc_html__( 'Current price is: %s.', 'woocommerce' ), $formatted_sale_price );
+	$price .= '</span>';
 
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
