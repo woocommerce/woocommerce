@@ -1,0 +1,56 @@
+{
+	"name": "automattic/woocommerce-analytics",
+	"description": "Enhanced analytics for WooCommerce users.",
+	"type": "jetpack-library",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.0"
+	},
+	"require-dev": {
+		"yoast/phpunit-polyfills": "1.1.0",
+		"automattic/jetpack-changelogger": "@dev"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"scripts": {
+		"phpunit": [
+			"./vendor/phpunit/phpunit/phpunit --colors=always"
+		],
+		"test-php": [
+			"@composer phpunit"
+		],
+		"build-production": "echo 'Add your build step to composer.json, please!'",
+		"build-development": "echo 'Add your build step to composer.json, please!'"
+	},
+	"repositories": [
+		{
+			"type": "path",
+			"url": "../../packages/*",
+			"options": {
+				"monorepo": true
+			}
+		}
+	],
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"extra": {
+		"mirror-repo": "Automattic/woocommerce-analytics",
+		"changelogger": {
+			"link-template": "https://github.com/Automattic/woocommerce-analytics/compare/v${old}...v${new}"
+		},
+		"autotagger": true,
+		"branch-alias": {
+			"dev-trunk": "0.1.x-dev"
+		},
+		"textdomain": "woocommerce-analytics",
+		"version-constants": {
+			"::PACKAGE_VERSION": "src/class-woocommerce-analytics.php"
+		}
+	},
+	"suggest": {
+		"automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+	}
+}
