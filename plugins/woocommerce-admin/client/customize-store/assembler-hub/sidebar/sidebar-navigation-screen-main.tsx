@@ -177,7 +177,7 @@ export const SidebarNavigationScreenMain = () => {
 						>
 							{ aiOnline
 								? __( 'Change your homepage', 'woocommerce' )
-								: __( 'Design your homepage' ) }
+								: __( 'Design your homepage', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
