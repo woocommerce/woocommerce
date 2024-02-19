@@ -4,7 +4,7 @@
 /**
  * External dependencies
  */
-import { memo, useRef, useEffect, useContext } from '@wordpress/element';
+import { memo, useRef, useEffect } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalNavigatorProvider as NavigatorProvider,
@@ -33,8 +33,6 @@ import {
 	updateQueryString,
 	useQuery,
 } from '@woocommerce/navigation';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { isNoAIFlow } from '~/customize-store/guards';
 
 function isSubset(
 	subset: {
