@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-In block-theme.setup.ts, verify the theme is active without opening the browser.
+Setup E2E block theme without opening browser and remove obsolete CLI call.
