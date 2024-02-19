@@ -19,6 +19,7 @@ setup( 'Sets up the block theme', async () => {
 			`Could not install and/or activate ${ BLOCK_THEME_SLUG }`
 		).toContain( 'Success' );
 
+		// Enable permalinks.
 		await cli(
 			`npm run wp-env run tests-cli -- wp rewrite structure /%postname%/ --hard`
 		);
