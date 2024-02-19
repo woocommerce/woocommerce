@@ -125,7 +125,7 @@ export function ScheduleSection( { postType }: ScheduleSectionProps ) {
 		if ( isInTheFuture( valueAsDate.toISOString() ) ) {
 			setStatus( 'future' );
 		} else {
-			setStatus( status );
+			setStatus( status === 'future' ? 'publish' : status );
 		}
 	}
 
