@@ -68,7 +68,6 @@ const useShowShippingTour = () => {
 		};
 	} );
 
-	console.log( 'isLoading', isLoading, businessCountry );
 	return {
 		isLoading,
 		show:
