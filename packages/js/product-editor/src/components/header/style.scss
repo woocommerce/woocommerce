@@ -26,6 +26,12 @@
 			display: flex;
 			align-items: center;
 			background-color: $white;
+
+			.woocommerce-product-header__title {
+				font-size: 16px;
+				font-weight: 600;
+				align-items: center;
+			}
 		}
 
 		@include breakpoint("<960px") {
@@ -108,7 +114,6 @@
 	}
 
 	&__variable-product-id {
-		margin-left: $gap-small;
 		color: $gray-700;
 	}
 }
