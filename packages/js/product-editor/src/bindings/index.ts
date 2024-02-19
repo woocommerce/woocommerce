@@ -4,6 +4,7 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { dispatch } from '@wordpress/data';
 import { addFilter } from '@wordpress/hooks';
+
 /**
  * Internal dependencies
  */
