@@ -10,11 +10,33 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import type {
+	AttributeBindingProps,
 	BindingSourceHandlerProps,
 	BindingUseSourceProps,
 	BlockProps,
+	BoundBlockAttributes,
 } from '../../bindings/types';
 import { WooEntitySourceArgs } from './types';
+
+/**
+ * Giving the block attributes,
+ * return the list of source props
+ *
+ * @param {BoundBlockAttributes} attributes - The block attributes.
+ * @return {string[]} The list of source props.
+ */
+export function getBlockBoundSourePropsList(
+	attributes: BoundBlockAttributes
+): string[] {
+	const bindings = attributes?.metadata?.bindings;
+	if ( ! bindings ) {
+		return [];
+	}
+
+	return Object.values( bindings ).map(
+		( binding: AttributeBindingProps ) => binding.args?.prop
+	);
+}
 
 /**
  * React custom hook to bind a source to a block.
