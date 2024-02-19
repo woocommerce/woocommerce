@@ -2,14 +2,18 @@
  * External dependencies
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
 import ChatInputForm from './chat-input-form';
 
-jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@wordpress/api-fetch', () => ( {
+	__esModule: true,
+	default: jest.fn( () => Promise.resolve( {} ) ), // Default mock behavior
+} ) );
 const mockHandleError = jest.fn();
 
 describe( 'ChatInputForm', () => {
@@ -17,7 +21,7 @@ describe( 'ChatInputForm', () => {
 		jest.clearAllMocks();
 		apiFetch.mockReset();
 	} );
-	it( 'does not call handleSubmit when input is empty', () => {
+	it( 'does not call handleSubmit when input is empty', async () => {
 		const mockOnSubmit = jest.fn();
 		render(
 			<ChatInputForm
@@ -27,12 +31,13 @@ describe( 'ChatInputForm', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByText( 'Send' ) );
+		await userEvent.click( screen.getByText( 'Send' ) );
 		expect( mockOnSubmit ).not.toHaveBeenCalled();
 	} );
 
-	it( 'calls handleSubmit with correct arguments for non-empty input', () => {
+	it( 'calls handleSubmit with correct arguments for non-empty input', async () => {
 		const mockOnSubmit = jest.fn();
+		const textToType = 'Example question.';
 		render(
 			<ChatInputForm
 				onSubmit={ mockOnSubmit }
@@ -40,30 +45,16 @@ describe( 'ChatInputForm', () => {
 				handleError={ mockHandleError }
 			/>
 		);
-
-		fireEvent.change( screen.getByPlaceholderText( /Type your message/ ), {
-			target: { value: 'Example question' },
-		} );
-		fireEvent.click( screen.getByText( 'Send' ) );
-		expect( mockOnSubmit ).toHaveBeenCalledWith( 'Example question' );
+		const textInput = screen.getByPlaceholderText( /Type your message/i );
+		await userEvent.type( textInput, textToType );
+		expect( textInput ).toHaveValue( textToType );
+		// Test submission via enter key press.
+		await userEvent.type( textInput, '{Enter}' );
+		expect( mockOnSubmit ).toHaveBeenCalledWith( textToType );
+		// Test that the input field is cleared after submission.
+		expect( textInput ).toHaveValue( '' );
 	} );
-	it( 'clears input after handleSubmit is called', () => {
-		const mockOnSubmit = jest.fn();
-		render(
-			<ChatInputForm
-				onSubmit={ mockOnSubmit }
-				isLoading={ false }
-				handleError={ mockHandleError }
-			/>
-		);
-		const input = screen.getByPlaceholderText( /Type your message/ );
 
-		fireEvent.change( input, {
-			target: { value: 'Example question' },
-		} );
-		fireEvent.click( screen.getByText( 'Send' ) );
-		expect( input ).toHaveValue( '' );
-	} );
 	it( 'displays an error if microphone access fails', async () => {
 		navigator.mediaDevices.getUserMedia.mockRejectedValue(
 			new Error( 'Access Denied' )
@@ -82,7 +73,7 @@ describe( 'ChatInputForm', () => {
 		await waitFor( () => {
 			expect( button ).toBeInTheDocument();
 		} );
-		fireEvent.click( button );
+		await userEvent.click( button );
 
 		await waitFor( () => {
 			expect( mockHandleError ).toHaveBeenCalledWith(
@@ -92,9 +83,12 @@ describe( 'ChatInputForm', () => {
 	} );
 	it( 'fetches transcription when recording is complete', async () => {
 		const mockOnSubmit = jest.fn();
-
 		const mockTranscriptionResponse = 'test transcription';
-		apiFetch.mockResolvedValueOnce( { mockTranscriptionResponse } );
+		jest.mock( '@wordpress/api-fetch', () =>
+			jest.fn(
+				() => Promise.resolve( mockTranscriptionResponse ) // Directly return the expected string
+			)
+		);
 
 		render(
 			<ChatInputForm
@@ -103,15 +97,20 @@ describe( 'ChatInputForm', () => {
 				handleError={ mockHandleError }
 			/>
 		);
+		const textInput = screen.getByPlaceholderText( /Type your message/i );
+		const startRecordingButton = await screen.findByLabelText(
+			/start recording/i
+		);
+		expect( startRecordingButton ).toBeInTheDocument();
 
-		fireEvent.click( screen.getByLabelText( /start recording/i ) );
+		await userEvent.click( startRecordingButton );
+
+		const stopRecordingButton = await screen.findByLabelText(
+			/stop recording/i
+		);
 		// wait for state to update before clicking stop
-		await waitFor( () => {
-			expect(
-				screen.getByLabelText( /stop recording/i )
-			).toBeInTheDocument();
-		} );
-		fireEvent.click( screen.getByLabelText( /stop recording/i ) );
+		expect( stopRecordingButton ).toBeInTheDocument();
+		await userEvent.click( stopRecordingButton );
 
 		await waitFor(
 			() => {
@@ -128,11 +127,9 @@ describe( 'ChatInputForm', () => {
 			{ timeout: 1000 }
 		);
 
-		await waitFor( () => {
-			expect(
-				screen.getByDisplayValue( mockTranscriptionResponse )
-			).toBeInTheDocument();
-		} );
+		await waitFor( () =>
+			expect( textInput.value ).toBe( mockTranscriptionResponse )
+		);
 	} );
 	it( 'does not fetch transcription if audioBlob is empty', async () => {
 		const mockOnSubmit = jest.fn();
@@ -170,14 +167,14 @@ describe( 'ChatInputForm', () => {
 			/>
 		);
 
-		fireEvent.click( screen.getByLabelText( /start recording/i ) );
+		await userEvent.click( screen.getByLabelText( /start recording/i ) );
 		// wait for state to update before clicking stop
 		await waitFor( () => {
 			expect(
 				screen.getByLabelText( /stop recording/i )
 			).toBeInTheDocument();
 		} );
-		fireEvent.click( screen.getByLabelText( /stop recording/i ) );
+		await userEvent.click( screen.getByLabelText( /stop recording/i ) );
 
 		await waitFor( () => {
 			expect( apiFetch ).not.toHaveBeenCalled();

@@ -50,16 +50,27 @@ const ChatInputForm = ( {
 		}
 	};
 
+	const handleKeyDown = (
+		event: React.KeyboardEvent< HTMLTextAreaElement >
+	) => {
+		if ( event.key === 'Enter' && ! event.shiftKey && input.trim() ) {
+			event.preventDefault(); // Still necessary to call preventDefault to avoid form submission
+			onSubmit( input );
+			setInput( '' );
+		}
+	};
+
 	useEffect( () => {
 		if ( transcription && ! input && transcription.length > 0 ) {
 			setInput( transcription );
 			clearTranscription();
 		}
-	}, [ input, setInput, transcription ] );
+	}, [ clearTranscription, input, setInput, transcription ] );
 
 	return (
 		<form onSubmit={ handleSubmit } className="chat-form">
 			<TextareaControl
+				onKeyDown={ handleKeyDown }
 				value={ input }
 				onChange={ setInput }
 				placeholder="Type your message..."
