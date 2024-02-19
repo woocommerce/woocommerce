@@ -5,7 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
-import type { BlockEditProps, BlockInstance, Block } from '@wordpress/blocks';
+import type { BlockEditProps, Block } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -61,6 +61,7 @@ const isFirstBlockThatSyncsWithQuery = () => {
 	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
 	// available in WordPress 6.5.
 	// Created issue for that: https://github.com/woocommerce/woocommerce/issues/44768.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
 	const { __experimentalGetGlobalBlocksByName, getBlock } =
 		select( blockEditorStore );
