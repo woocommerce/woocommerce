@@ -55,6 +55,7 @@ const config = {
 		trace: 'retain-on-failure',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
+		actionTimeout: 10 * 1000,
 	},
 	projects: [
 		{
