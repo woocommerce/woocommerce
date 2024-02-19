@@ -60,7 +60,8 @@ const isFirstBlockThatSyncsWithQuery = () => {
 	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
 	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
 	// available in WordPress 6.5.
-	// @ts-ignore No types for this exist yet, natively
+	// Created issue for that: https://github.com/woocommerce/woocommerce/issues/44768.
+	// @ts-ignore No types for this exist yet, natively.
 	const { __experimentalGetGlobalBlocksByName, getBlock } =
 		select( blockEditorStore );
 	const productCollectionBlockIDs = __experimentalGetGlobalBlocksByName(
