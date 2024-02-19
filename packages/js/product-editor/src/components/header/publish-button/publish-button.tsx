@@ -89,7 +89,8 @@ export function PublishButton( {
 		},
 	} );
 
-	const { isScheduled, editDate, date } = useProductScheduled( productType );
+	const { isScheduled, editDate, date, formattedDate } =
+		useProductScheduled( productType );
 	const [ showScheduleModal, setShowScheduleModal ] = useState( false );
 
 	if ( window.wcAdminFeatures[ 'product-pre-publish-modal' ] && prePublish ) {
@@ -105,7 +106,17 @@ export function PublishButton( {
 								},
 							},
 							{
-								title: __( 'Edit schedule', 'woocommerce' ),
+								title: (
+									<div className="woocommerce-product-header__actions-edit-schedule">
+										<div>
+											{ __(
+												'Edit schedule',
+												'woocommerce'
+											) }
+										</div>
+										<div>{ formattedDate }</div>
+									</div>
+								),
 								onClick() {
 									setShowScheduleModal( true );
 								},
