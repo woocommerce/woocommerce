@@ -9,13 +9,14 @@ import { Icon, check, closeSmall, info, percent } from '@wordpress/icons'; // Se
  * Internal dependencies
  */
 import './notice.scss';
+import sanitizeHTML from '../../../lib/sanitize-html';
 
 export interface NoticeProps {
 	id: string;
 	children?: JSX.Element;
 	description: string;
 	icon?: string;
-	isDismisible: boolean;
+	isDismissible: boolean;
 	variant: string;
 }
 
@@ -34,28 +35,26 @@ export default function Notice( props: NoticeProps ): JSX.Element {
 		description,
 		children,
 		icon,
-		isDismisible = true,
+		isDismissible = true,
 		variant = 'info',
 	} = props;
 	const [ isVisible, setIsVisible ] = useState(
-		localStorage.getItem( `wc-noticeClosed-${ id }` ) !== 'true'
+		localStorage.getItem( `wc-marketplaceNoticeClosed-${ id }` ) !== 'true'
 	);
 
 	const handleClose = () => {
 		setIsVisible( false );
-		localStorage.setItem( `wc-noticeClosed-${ id }`, 'true' );
+		localStorage.setItem( `wc-marketplaceNoticeClosed-${ id }`, 'true' );
 	};
 
 	if ( ! isVisible ) return <></>;
 
 	const classes = classNames( 'woocommerce-marketplace__notice', {
-		'woocommerce-marketplace__notice-variant-warning':
-			variant === 'warning',
-		'woocommerce-marketplace__notice-variant-info':
+		'woocommerce-marketplace__notice-warning': variant === 'warning',
+		'woocommerce-marketplace__notice-info':
 			variant === 'info' || variant === 'info' || variant === 'error',
-		'woocommerce-marketplace__notice-variant-error': variant === 'error',
-		'woocommerce-marketplace__notice-variant-success':
-			variant === 'success',
+		'woocommerce-marketplace__notice-error': variant === 'error',
+		'woocommerce-marketplace__notice-success': variant === 'success',
 	} );
 
 	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];
@@ -68,10 +67,6 @@ export default function Notice( props: NoticeProps ): JSX.Element {
 		'icon-color-success': variant === 'success',
 	} );
 
-	const createMarkup = ( htmlString: string ) => {
-		return { __html: htmlString };
-	};
-
 	return (
 		<div className={ classes }>
 			{ icon && (
@@ -82,7 +77,7 @@ export default function Notice( props: NoticeProps ): JSX.Element {
 			<div className="woocommerce-marketplace__notice-content">
 				<p
 					className="woocommerce-marketplace__notice-description"
-					dangerouslySetInnerHTML={ createMarkup( description ) }
+					dangerouslySetInnerHTML={ sanitizeHTML( description ) }
 				/>
 				{ children && (
 					<div className="woocommerce-marketplace__notice-children">
@@ -90,7 +85,7 @@ export default function Notice( props: NoticeProps ): JSX.Element {
 					</div>
 				) }
 			</div>
-			{ isDismisible && (
+			{ isDismissible && (
 				<button
 					className="woocommerce-marketplace__notice-close"
 					aria-label="Close"

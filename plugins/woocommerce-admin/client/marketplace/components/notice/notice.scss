@@ -12,19 +12,19 @@
 		padding: 12px;
 		transition: opacity 1s ease-out;
 
-		&-variant-info {
+		&-info {
 			border-left: 4px solid var(--wp-admin-theme-color, #007cba);
 		}
 
-		&-variant-error {
+		&-error {
 			border-left: 4px solid $alert-red;
 		}
 
-		&-variant-warning {
+		&-warning {
 			border-left: 4px solid $alert-yellow;
 		}
 
-		&-variant-success {
+		&-success {
 			border-left: 4px solid $valid-green;
 		}
 
