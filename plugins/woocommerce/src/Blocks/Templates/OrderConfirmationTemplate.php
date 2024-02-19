@@ -13,7 +13,21 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'order-confirmation';
+	public $slug = 'order-confirmation';
+
+	/**
+	 * The title of the template.
+	 *
+	 * @var string
+	 */
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
 
 	/**
 	 * Initialization method.

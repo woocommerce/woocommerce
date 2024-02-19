@@ -508,9 +508,9 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		$registered_template = self::get_template( $template_slug );
+		$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
+			return 'archive-product' === $registered_template->fallback_template;
 		}
 		return false;
 	}
@@ -718,6 +718,41 @@ class BlockTemplateUtils {
 	 */
 	public static function template_has_legacy_template_block( $template ) {
 		return has_block( 'woocommerce/legacy-template', $template->content );
+	}
+
+	/**
+	 * Returns whether the passed `$template` has the legacy template block.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 * @param string            $template_type wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template
+	 */
+	public static function update_template_data( $template, $template_type ) {
+		if ( ! $template ) {
+			return $template;
+		}
+		// Enforce our titles and descriptions for WooCommerce templates. They are more user-friendly.
+		// For example, instead of:
+		// * Title: `Tag (product_tag)`
+		// * Description: `Displays taxonomy: Tag.`
+		// we display:
+		// * Title: `Products by Tag`
+		// * Description: `Displays products filtered by a tag.`.
+		$formatted_title       = self::get_block_template_title( $template->slug );
+		$formatted_description = self::get_block_template_description( $template->slug );
+		$formatted_area        = self::get_block_template_area( $template->slug, $template_type );
+		if ( $formatted_title ) {
+			$template->title = $formatted_title;
+		}
+		if ( $formatted_description ) {
+			$template->description = $formatted_description;
+		}
+		if ( $formatted_area ) {
+			$template->area = $formatted_area;
+		}
+
+		return $template;
 	}
 
 	/**

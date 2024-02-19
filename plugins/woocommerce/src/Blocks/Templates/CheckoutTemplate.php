@@ -31,26 +31,39 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public function get_template_title() {
-		return _x( 'Page: Checkout', 'Template name', 'woocommerce' );
-	}
+	public $slug = 'page-checkout';
 
 	/**
-	 * Returns the description of the template.
+	 * The title of the template.
 	 *
-	 * @return string
+	 * @var string
 	 */
-	public function get_template_description() {
-		return __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+	/**
+	 * Initialization method.
+	 */
+	public function init() {
+		$this->template_title       = _x( 'Page: Checkout', 'Template name', 'woocommerce' );
+		$this->template_description = __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
+
+		parent::init();
+
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 	}
 
 	/**
 	 * Renders the default block template from Woo Blocks if no theme templates exist.
 	 */
 	public function render_block_template() {
-		if (
-			! is_embed() && is_checkout()
-		) {
+		if ( ! is_embed() && is_checkout() ) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}

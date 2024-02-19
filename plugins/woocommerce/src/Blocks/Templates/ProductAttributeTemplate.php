@@ -16,14 +16,28 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'taxonomy-product_attribute';
+	public $slug = 'taxonomy-product_attribute';
 
 	/**
 	 * The template used as a fallback if that one is customized.
 	 *
 	 * @var string
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	public $template_title;
+
+	/**
+	 * The description of the template.
+	 *
+	 * @var string
+	 */
+	public $template_description;
+
+	/**
+	 * The template used as a fallback if that one is customized.
+	 *
+	 * @var string
+	 */
+	public $fallback_template = 'archive-product';
 
 	/**
 	 * Initialization method.
@@ -31,24 +45,6 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
-	}
-
-	/**
-	 * Returns the title of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_title() {
-		return _x( 'Products by Attribute', 'Template name', 'woocommerce' );
-	}
-
-	/**
-	 * Returns the description of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_description() {
-		return __( 'Displays products filtered by an attribute.', 'woocommerce' );
 	}
 
 	/**
@@ -61,7 +57,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		}
 
 		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
+			$templates = get_block_templates( array( 'slug__in' => array( $this->slug ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
@@ -79,7 +75,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	public function update_taxonomy_template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
 		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wc_current_theme_is_fse_theme() ) {
-			array_splice( $templates, count( $templates ) - 1, 0, self::SLUG );
+			array_splice( $templates, count( $templates ) - 1, 0, $this->slug );
 		}
 
 		return $templates;
