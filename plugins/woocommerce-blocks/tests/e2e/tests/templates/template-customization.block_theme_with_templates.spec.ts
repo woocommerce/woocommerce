@@ -9,7 +9,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
-	if ( ! testData.canBeOverridenByThemes ) {
+	if ( ! testData.canBeOverriddenByThemes ) {
 		return;
 	}
 	const userText = `Hello World in the ${ testData.templateName } template`;
