@@ -70,6 +70,8 @@ const ChatInputForm = ( {
 	return (
 		<form onSubmit={ handleSubmit } className="chat-form">
 			<TextareaControl
+				// eslint-disable-next-line jsx-a11y/no-autofocus
+				autoFocus
 				onKeyDown={ handleKeyDown }
 				value={ input }
 				onChange={ setInput }

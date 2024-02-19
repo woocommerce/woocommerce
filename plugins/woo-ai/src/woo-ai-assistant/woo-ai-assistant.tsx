@@ -12,7 +12,7 @@ const WooAIAssistant = () => {
 	const [ isModalOpen, setModalOpen ] = useState( false );
 
 	const handleKeyDown = useCallback( ( event ) => {
-		if ( event.altKey && event.shiftKey && event.code === 'KeyA' ) {
+		if ( event.ctrlKey && event.shiftKey && event.code === 'KeyA' ) {
 			setModalOpen( ( currentIsModalOpen ) => ! currentIsModalOpen );
 		}
 	}, [] );
