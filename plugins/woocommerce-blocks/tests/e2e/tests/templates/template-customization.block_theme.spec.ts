@@ -67,7 +67,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			} ) => {
 				// Edit fallback template and verify changes are visible.
 				await editorUtils.visitTemplateEditor(
-					testData.templateName,
+					testData.fallbackTemplate?.templateName || '',
 					testData.templateType
 				);
 				await editorUtils.editor.insertBlock( {

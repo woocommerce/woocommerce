@@ -2,17 +2,15 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
-	admin: Admin;
-	constructor( editor: Editor, page: Page, admin: Admin ) {
+	constructor( editor: Editor, page: Page ) {
 		this.editor = editor;
 		this.page = page;
-		this.admin = admin;
 	}
 
 	/**

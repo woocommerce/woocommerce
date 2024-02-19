@@ -79,7 +79,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
 				await editorUtils.visitTemplateEditor(
-					testData.templateName,
+					testData.fallbackTemplate?.templateName || '',
 					testData.templateType
 				);
 				await editorUtils.editor.insertBlock( {
