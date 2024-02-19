@@ -46,11 +46,15 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
 			);
 
-			// Edit the theme template.
-			await editorUtils.visitTemplateEditor(
-				testData.templateName,
-				testData.templateType
-			);
+			// Edit the theme template. The theme template is not
+			// directly available from the UI, because the customized
+			// one takes priority, so we go directly to its URL.
+			await admin.visitSiteEditor( {
+				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
+				postType: testData.templateType,
+			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.closeWelcomeGuideModal();
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },

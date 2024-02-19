@@ -376,15 +376,38 @@ export class EditorUtils {
 		templateName: string,
 		templateType: 'wp_template' | 'wp_template_part'
 	) {
-		await this.page.goto(
-			`/wp-admin/site-editor.php?path=/${ templateType }/all`
-		);
-		const templateLink = this.page.getByRole( 'link', {
-			name: templateName,
-			exact: true,
-		} );
-		templateLink.click();
+		if ( templateType === 'wp_template_part' ) {
+			await this.page.goto(
+				`/wp-admin/site-editor.php?path=/${ templateType }/all`
+			);
+			const templateLink = this.page.getByRole( 'link', {
+				name: templateName,
+				exact: true,
+			} );
+			await templateLink.click();
+		} else {
+			await this.page.goto(
+				`/wp-admin/site-editor.php?path=/${ templateType }`
+			);
+			const templateButton = this.page.getByRole( 'button', {
+				name: templateName,
+				exact: true,
+			} );
+			await templateButton.click();
+		}
+
+		await this.enterEditMode();
 		await this.closeWelcomeGuideModal();
+		await this.waitForSiteEditorFinishLoading();
+
+		// Verify we are editing the correct template and it has the correct title.
+		const templateTypeName =
+			templateType === 'wp_template' ? 'template' : 'template part';
+		await this.page
+			.getByRole( 'heading', {
+				name: `Editing ${ templateTypeName }: ${ templateName }`,
+			} )
+			.waitFor();
 	}
 
 	async revertTemplateCreation( templateName: string ) {
