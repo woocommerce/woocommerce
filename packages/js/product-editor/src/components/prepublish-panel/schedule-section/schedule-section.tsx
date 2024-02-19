@@ -7,10 +7,13 @@ import {
 	DateSettings,
 	dateI18n,
 	getDate,
+	date as formatDate,
 	__experimentalGetSettings as getSettings,
+	isInTheFuture,
 } from '@wordpress/date';
 import { createElement } from '@wordpress/element';
 import { __, _x, isRTL, sprintf } from '@wordpress/i18n';
+import { type ProductStatus } from '@woocommerce/data';
 import {
 	// @ts-expect-error no exported member
 	__experimentalPublishDateTimePicker as PublishDateTimePicker,
@@ -27,22 +30,16 @@ import {
 	isSiteSettingsTimezoneSameAsDateTimezone,
 } from '../../../utils';
 
-export function getFormattedDateTime( value: string ) {
+export function getFormattedDateTime( value: string | Date, format?: string ) {
 	const { formats } = getSettings() as DateSettings;
 
-	return dateI18n(
-		sprintf(
-			// translators: %s: Time of day the product is scheduled for.
-			_x(
-				'F j, Y %s',
-				'product schedule full date format',
-				'woocommerce'
-			),
-			formats.time
-		),
-		value,
-		undefined
+	const dateTimeFormat = sprintf(
+		// translators: %s: Time of day the product is scheduled for.
+		_x( 'F j, Y %s', 'product schedule full date format', 'woocommerce' ),
+		formats.time
 	);
+
+	return dateI18n( format ?? dateTimeFormat, value, undefined );
 }
 
 export function getFullScheduleLabel( dateAttribute: string ) {
@@ -54,8 +51,11 @@ export function getFullScheduleLabel( dateAttribute: string ) {
 		: `${ formattedDate } ${ timezoneAbbreviation }`;
 }
 
-export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
-	if ( ! dateAttribute ) {
+export function getScheduleLabel( dateAttribute: string, now = new Date() ) {
+	const { formats } = getSettings() as DateSettings;
+	const date = getDate( dateAttribute );
+
+	if ( isSameDay( date, now ) && ! isInTheFuture( dateAttribute ) ) {
 		return __( 'Immediately', 'woocommerce' );
 	}
 
@@ -65,14 +65,11 @@ export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
 		return getFullScheduleLabel( dateAttribute );
 	}
 
-	const { formats } = getSettings() as DateSettings;
-	const date = getDate( dateAttribute );
-
 	if ( isSameDay( date, now ) ) {
 		return sprintf(
 			// translators: %s: Time of day the product is scheduled for.
 			__( 'Today at %s', 'woocommerce' ),
-			dateI18n( formats.time, dateAttribute, undefined )
+			getFormattedDateTime( dateAttribute, formats.time )
 		);
 	}
 
@@ -83,12 +80,13 @@ export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
 		return sprintf(
 			// translators: %s: Time of day the product is scheduled for.
 			__( 'Tomorrow at %s', 'woocommerce' ),
-			dateI18n( formats.time, dateAttribute, undefined )
+			getFormattedDateTime( dateAttribute, formats.time )
 		);
 	}
 
 	if ( date.getFullYear() === now.getFullYear() ) {
-		return dateI18n(
+		return getFormattedDateTime(
+			date,
 			sprintf(
 				// translators: %s: Time of day the product is scheduled for.
 				_x(
@@ -97,25 +95,43 @@ export function getScheduleLabel( dateAttribute?: string, now = new Date() ) {
 					'woocommerce'
 				),
 				formats.time
-			),
-			date,
-			undefined
+			)
 		);
 	}
 
 	return getFormattedDateTime( dateAttribute );
 }
 
+export const TIMEZONELESS_FORMAT = 'Y-m-d\\TH:i:s';
+
 export function ScheduleSection( { postType }: ScheduleSectionProps ) {
-	const [ editedDate, setDate, date ] = useEntityProp< string >(
+	const [ date, setDate ] = useEntityProp< string >(
 		'postType',
 		postType,
-		'date_created'
+		'date_created_gmt'
 	);
 
-	function handlePublishDateTimePickerChange( value: string ) {
-		setDate( value );
+	const [ , setStatus, status ] = useEntityProp< ProductStatus >(
+		'postType',
+		postType,
+		'status'
+	);
+
+	function handlePublishDateTimePickerChange( value: string | null ) {
+		const valueAsDate = value ? getDate( value ) : new Date();
+		const newValue = formatDate( TIMEZONELESS_FORMAT, valueAsDate, 'GMT' );
+
+		setDate( newValue );
+		if ( isInTheFuture( valueAsDate.toISOString() ) ) {
+			setStatus( 'future' );
+		} else {
+			setStatus( status );
+		}
 	}
+
+	const gmtDate = `${ date }+00:00`;
+
+	const currentDate = formatDate( TIMEZONELESS_FORMAT, gmtDate, undefined );
 
 	return (
 		<PanelBody
@@ -124,14 +140,12 @@ export function ScheduleSection( { postType }: ScheduleSectionProps ) {
 			title={ [
 				__( 'Publish:', 'woocommerce' ),
 				<span className="editor-post-publish-panel__link" key="label">
-					{ getScheduleLabel(
-						editedDate === date ? undefined : editedDate
-					) }
+					{ getScheduleLabel( gmtDate ) }
 				</span>,
 			] }
 		>
 			<PublishDateTimePicker
-				currentDate={ editedDate }
+				currentDate={ currentDate }
 				onChange={ handlePublishDateTimePickerChange }
 				is12Hour={ isSiteSettingsTime12HourFormatted() }
 			/>
