@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -30,12 +29,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			page,
 		} ) => {
 			// Edit the theme template.
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
@@ -81,14 +78,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				page,
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
-				await admin.visitSiteEditor( {
-					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${
-						testData.fallbackTemplate?.templatePath || ''
-					}`,
-					postType: testData.templateType,
-				} );
-				await editorUtils.enterEditMode();
-				await editorUtils.closeWelcomeGuideModal();
+				await editorUtils.visitTemplateEditor(
+					testData.templateName,
+					testData.templateType
+				);
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {

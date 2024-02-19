@@ -11,7 +11,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	if ( ! testData.canBeOverridenByThemes ) {
@@ -32,12 +32,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			page,
 		} ) => {
 			// Edit the WooCommerce default template
-			await admin.visitSiteEditor( {
-				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
@@ -49,12 +47,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			);
 
 			// Edit the theme template.
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },

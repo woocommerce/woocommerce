@@ -2,15 +2,17 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
-	constructor( editor: Editor, page: Page ) {
+	admin: Admin;
+	constructor( editor: Editor, page: Page, admin: Admin ) {
 		this.editor = editor;
 		this.page = page;
+		this.admin = admin;
 	}
 
 	/**
@@ -370,6 +372,21 @@ export class EditorUtils {
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( 'Site updated.' )
 			.waitFor();
+	}
+
+	async visitTemplateEditor(
+		templateName: string,
+		templateType: 'wp_template' | 'wp_template_part'
+	) {
+		await this.page.goto(
+			`/wp-admin/site-editor.php?path=/${ templateType }/all`
+		);
+		const templateLink = this.page.getByRole( 'link', {
+			name: templateName,
+			exact: true,
+		} );
+		templateLink.click();
+		await this.closeWelcomeGuideModal();
 	}
 
 	async revertTemplateCreation( templateName: string ) {
