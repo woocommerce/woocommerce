@@ -413,8 +413,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'blockName'  => 'woocommerce/product-text-field',
 					'order'      => 10,
 					'attributes' => array(
-						'property' => 'button_text',
 						'label'    => __( 'Buy button text', 'woocommerce' ),
+						'metadata' => array(
+							'bindings' => array(
+								'value' => array(
+									'source' => 'woo/entity',
+									'args'   => array(
+										'prop' => 'button_text'
+									),
+								),
+							),
+						),
 					),
 				)
 			);
