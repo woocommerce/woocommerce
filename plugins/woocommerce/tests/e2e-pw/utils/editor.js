@@ -1,9 +1,7 @@
-const closeWelcomeModal = async ( { page } ) => {
+const closeWelcomeModal = async ( { page, timeout = 5000 } ) => {
 	// Close welcome popup if prompted
 	try {
-		await page
-			.getByLabel( 'Close', { exact: true } )
-			.click( { timeout: 5000 } );
+		await page.getByLabel( 'Close', { exact: true } ).click( { timeout } );
 	} catch ( error ) {
 		// Welcome modal wasn't present, skipping action.
 	}

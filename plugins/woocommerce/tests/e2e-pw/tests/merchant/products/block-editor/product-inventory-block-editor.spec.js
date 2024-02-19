@@ -1,5 +1,6 @@
 const { test: baseTest } = require( './block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures' );
+
 const test = baseTest.extend( {
 	product: async ( { api }, use ) => {
 		let product;
@@ -89,6 +90,7 @@ test( 'can update stock status', async ( { page, product } ) => {
 test( 'can track stock quantity', async ( { page, product } ) => {
 	await test.step( 'enable track stock quantity', async () => {
 		await page.getByLabel( 'Track stock quantity for this' ).check();
+		// await closeTourModal( { page, timeout: 2000 } );
 		await page.getByRole( 'button', { name: 'Advanced' } ).click();
 		await page.getByLabel( "Don't allow purchases" ).check();
 	} );
@@ -155,6 +157,7 @@ test( 'can track stock quantity', async ( { page, product } ) => {
 
 test( 'can limit purchases', async ( { page, product } ) => {
 	await test.step( 'ensure limit purchases is disabled', async () => {
+		// await closeTourModal( { page, timeout: 2000 } );
 		await page.getByRole( 'button', { name: 'Advanced' } ).click();
 		await expect(
 			page.getByLabel( 'Limit purchases to 1 item per order' )
