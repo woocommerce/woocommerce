@@ -25,7 +25,6 @@ import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 import { IntroOptInEvent } from '~/core-profiler';
-
 export const SidebarNavigationScreenTypography = ( {
 	sendEvent,
 }: {
@@ -152,11 +151,11 @@ export const SidebarNavigationScreenTypography = ( {
 										/>
 									),
 									OptInModal: (
-										<Link
+										<Button
 											onClick={ () => {
 												openModal();
 											} }
-											href={ '' }
+											variant="link"
 										/>
 									),
 								} ) }
