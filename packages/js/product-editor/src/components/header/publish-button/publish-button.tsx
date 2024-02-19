@@ -3,6 +3,7 @@
  */
 import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -22,7 +23,6 @@ import { TRACKS_SOURCE } from '../../../constants';
 import { PublishButtonProps } from './types';
 
 export function PublishButton( {
-	productStatus,
 	productType = 'product',
 	prePublish,
 	...props
@@ -33,9 +33,14 @@ export function PublishButton( {
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
+	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+		'postType',
+		productType,
+		'status'
+	);
+
 	const { ...publishButtonProps } = usePublish( {
 		productType,
-		productStatus,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
 			const isPublished =
@@ -70,7 +75,7 @@ export function PublishButton( {
 
 			maybeShowFeedbackBar();
 
-			if ( productStatus === 'auto-draft' ) {
+			if ( prevStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
@@ -84,8 +89,8 @@ export function PublishButton( {
 	if ( window.wcAdminFeatures[ 'product-pre-publish-modal' ] ) {
 		if (
 			prePublish &&
-			productStatus !== 'publish' &&
-			productStatus !== 'future'
+			editedStatus !== 'publish' &&
+			editedStatus !== 'future'
 		) {
 			function handlePrePublishButtonClick(
 				event: MouseEvent< HTMLButtonElement >

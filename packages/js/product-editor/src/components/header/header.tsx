@@ -158,11 +158,7 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					<PublishButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct?.status }
-						prePublish
-					/>
+					<PublishButton productType={ productType } prePublish />
 
 					<WooHeaderItem.Slot name="product" />
 					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />

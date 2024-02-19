@@ -17,7 +17,6 @@ import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
 	productType = 'product',
-	productStatus,
 	disabled,
 	onClick,
 	onPublishSuccess,
@@ -33,6 +32,12 @@ export function usePublish( {
 		'postType',
 		productType,
 		'id'
+	);
+
+	const [ status ] = useEntityProp< Product[ 'status' ] >(
+		'postType',
+		productType,
+		'status'
 	);
 
 	const { isSaving, isDirty } = useSelect(
@@ -63,8 +68,7 @@ export function usePublish( {
 	const isBusy = isSaving || isValidating;
 	const isDisabled = disabled || isBusy || ! isDirty;
 
-	const isPublished =
-		productStatus === 'publish' || productStatus === 'future';
+	const isPublished = status === 'publish' || status === 'future';
 
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
@@ -145,7 +149,7 @@ export function usePublish( {
 	}
 
 	function getButtonText() {
-		switch ( productStatus ) {
+		switch ( status ) {
 			case 'future':
 				return __( 'Schedule', 'woocommerce' );
 			case 'publish':
