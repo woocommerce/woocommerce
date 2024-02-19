@@ -8,12 +8,13 @@ namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
  * Remote Payment Methods engine.
  * This goes through the specs and gets eligible payment methods.
  */
-class Init {
+class Init extends RemoteSpecsEngine {
 
 	/**
 	 * Constructor.
@@ -31,8 +32,9 @@ class Init {
 	public static function get_extensions( $allowed_bundles = array() ) {
 		$locale = get_user_locale();
 
-		$specs   = self::get_specs();
-		$results = EvaluateExtension::evaluate_bundles( $specs, $allowed_bundles );
+		$specs           = self::get_specs();
+		$results         = EvaluateExtension::evaluate_bundles( $specs, $allowed_bundles );
+		$specs_to_return = $results['bundles'];
 
 		$plugins = array_filter(
 			$results['bundles'],
@@ -44,16 +46,16 @@ class Init {
 		// When no plugins are visible, replace it with defaults and save for 3 hours.
 		if ( empty( $plugins ) ) {
 			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultFreeExtensions::get_all() ), 3 * HOUR_IN_SECONDS );
-
-			return EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all(), $allowed_bundles )['bundles'];
+			$specs_to_return = EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all(), $allowed_bundles )['bundles'];
 		}
 
 		// When plugins is not empty but has errors, save it for 3 hours.
 		if ( count( $results['errors'] ) > 0 ) {
 			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+			self::log_errors( $results['errors'] );
 		}
 
-		return $results['bundles'];
+		return $specs_to_return;
 	}
 
 	/**

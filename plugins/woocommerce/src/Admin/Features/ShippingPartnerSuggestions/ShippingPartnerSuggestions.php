@@ -3,11 +3,12 @@
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
  * Class ShippingPartnerSuggestions
  */
-class ShippingPartnerSuggestions {
+class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 
 	/**
 	 * Go through the specs and run them.
@@ -18,22 +19,23 @@ class ShippingPartnerSuggestions {
 	public static function get_suggestions( array $specs = null ) {
 		$locale = get_user_locale();
 
-		$specs   = is_array( $specs ) ? $specs : self::get_specs();
-		$results = EvaluateSuggestion::evaluate_specs( $specs );
+		$specs           = is_array( $specs ) ? $specs : self::get_specs();
+		$results         = EvaluateSuggestion::evaluate_specs( $specs );
+		$specs_to_return = $results['suggestions'];
 
 		// When suggestions is empty, replace it with defaults and save for 3 hours.
 		if ( empty( $results['suggestions'] ) ) {
 			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultShippingPartners::get_all() ), 3 * HOUR_IN_SECONDS );
-
-			return EvaluateSuggestion::evaluate_specs( DefaultShippingPartners::get_all() )['suggestions'];
+			$specs_to_return = EvaluateSuggestion::evaluate_specs( DefaultShippingPartners::get_all() )['suggestions'];
 		}
 
 		// When suggestions is not empty but has errors, save it for 3 hours.
 		if ( count( $results['errors'] ) > 0 ) {
 			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+			self::log_errors( $results['errors'] );
 		}
 
-		return $results['suggestions'];
+		return $specs_to_return;
 	}
 
 	/**

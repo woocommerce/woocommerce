@@ -9,12 +9,13 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaysController;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
  * Remote Payment Methods engine.
  * This goes through the specs and gets eligible payment gateways.
  */
-class Init {
+class Init extends RemoteSpecsEngine {
 	/**
 	 * Option name for dismissed payment method suggestions.
 	 */
@@ -37,22 +38,23 @@ class Init {
 	public static function get_suggestions( array $specs = null ) {
 		$locale = get_user_locale();
 
-		$specs   = is_array( $specs ) ? $specs : self::get_specs();
-		$results = EvaluateSuggestion::evaluate_specs( $specs );
+		$specs           = is_array( $specs ) ? $specs : self::get_specs();
+		$results         = EvaluateSuggestion::evaluate_specs( $specs );
+		$specs_to_return = $results['suggestions'];
 
 		// When suggestions is empty, replace it with defaults and save for 3 hours.
-		if ( empty( $results['suggestions'] ) ) {
+		if ( empty( $specs_to_return ) ) {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultPaymentGateways::get_all() ), 3 * HOUR_IN_SECONDS );
-
-			return EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
+			$specs_to_return = EvaluateSuggestion::evaluate_specs( DefaultPaymentGateways::get_all() )['suggestions'];
 		}
 
 		// When suggestions is not empty but has errors, save it for 3 hours.
 		if ( count( $results['errors'] ) > 0 ) {
 			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+			self::log_errors( $results['errors'] );
 		}
 
-		return $results['suggestions'];
+		return $specs_to_return;
 	}
 
 	/**
