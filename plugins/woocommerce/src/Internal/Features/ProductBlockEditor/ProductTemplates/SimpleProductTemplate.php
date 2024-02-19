@@ -219,7 +219,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'e.g. 12 oz Coffee Mug',
 						'woocommerce'
 					),
-					'property'    => 'name',
 					'metadata'    => array(
 						'bindings' => array(
 							'value' => array(
