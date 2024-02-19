@@ -57,11 +57,22 @@ const isInProductArchive = () => {
 };
 
 const isFirstBlockThatSyncsWithQuery = () => {
-	const blocks = select( blockEditorStore ).getBlocks() as BlockInstance[];
-	const blockAlreadySyncedWithQuery = blocks.find(
-		( block ) =>
-			block.name === 'woocommerce/product-collection' &&
-			block.attributes?.query?.inherit
+	// We use experimental selector because it's been graduated as stable (`getBlocksByName`)
+	// in Gutenberg 17.6 (https://github.com/WordPress/gutenberg/pull/58156) and will be
+	// available in WordPress 6.5.
+	// @ts-ignore No types for this exist yet, natively
+	const { __experimentalGetGlobalBlocksByName, getBlock } =
+		select( blockEditorStore );
+	const productCollectionBlockIDs = __experimentalGetGlobalBlocksByName(
+		'woocommerce/product-collection'
+	) as string[];
+
+	const blockAlreadySyncedWithQuery = productCollectionBlockIDs.find(
+		( clientId ) => {
+			const block = getBlock( clientId );
+
+			return block.attributes?.query?.inherit;
+		}
 	);
 
 	return ! blockAlreadySyncedWithQuery;
