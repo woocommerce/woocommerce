@@ -25,7 +25,9 @@ export function usePublish( {
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ): Button.ButtonProps & {
+	publish( product?: Partial< Product > ): Promise< Product >;
+} {
 	const { isValidating, validate } = useValidations< Product >();
 
 	const [ productId ] = useEntityProp< number >(
@@ -73,20 +75,12 @@ export function usePublish( {
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( isDisabled ) {
-			event.preventDefault();
-			return;
-		}
-
-		if ( onClick ) {
-			onClick( event );
-		}
-
+	async function publish( product?: Partial< Product > ) {
 		try {
 			if ( productType === 'product' ) {
 				await validate( {
 					status: 'publish',
+					...product,
 				} );
 				// The publish button click not only change the status of the product
 				// but also save all the pending changes. So even if the status is
@@ -102,7 +96,7 @@ export function usePublish( {
 					);
 				}
 			} else {
-				await validate();
+				await validate( product );
 			}
 
 			const publishedProduct = await saveEditedEntityRecord< Product >(
@@ -117,6 +111,8 @@ export function usePublish( {
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
+
+			return publishedProduct;
 		} catch ( error ) {
 			if ( onPublishError ) {
 				let wpError = error as WPError;
@@ -148,6 +144,19 @@ export function usePublish( {
 		}
 	}
 
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( isDisabled ) {
+			event.preventDefault?.();
+			return;
+		}
+
+		if ( onClick ) {
+			onClick( event );
+		}
+
+		await publish();
+	}
+
 	function getButtonText() {
 		switch ( status ) {
 			case 'future':
@@ -166,5 +175,6 @@ export function usePublish( {
 		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
+		publish,
 	};
 }
