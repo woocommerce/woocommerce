@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-In block-theme.setup.ts, activate the theme via the rest API instead via CLI.
+In block-theme.setup.ts, verify the theme is active without opening the browser.
