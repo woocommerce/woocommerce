@@ -1,5 +1,6 @@
 const { test: baseTest } = require( './block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures' );
+const { updateProduct } = require( '../../../../utils/product-block-editor' );
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -43,7 +44,7 @@ const test = baseTest.extend( {
 
 		await api
 			.post( 'products/attributes', {
-				name: 'Color',
+				name: `Color_${ Date.now() }`,
 				slug: `pa_color_${ Date.now() }`,
 			} )
 			.then( ( response ) => {
@@ -65,13 +66,23 @@ const test = baseTest.extend( {
 				terms = response.data.create;
 			} );
 
-		await use( attribute, terms );
+		await use( { attribute, terms } );
 
 		// Cleanup
 		await api.delete( `products/attributes/${ attribute.id }/terms/batch`, {
 			delete: terms.map( ( term ) => term.id ),
 		} );
 		await api.delete( `products/attributes/${ attribute.id }` );
+	},
+	productWithAttributes: async ( { api, product, attributes }, use ) => {
+		attributes.attribute.options = attributes.terms.map(
+			( term ) => term.name
+		);
+		await api.put( `products/${ product.id }`, {
+			attributes: [ attributes.attribute ],
+		} );
+
+		await use( product );
 	},
 	page: async ( { page, product }, use ) => {
 		await test.step( 'go to product editor, inventory tab', async () => {
@@ -85,7 +96,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-test( 'can create product attributes', async ( { page, product } ) => {
+test( 'can create and add attributes', async ( { page, product } ) => {
 	const newAttributes = [
 		{
 			name: `pa_0_${ Date.now() }`,
@@ -147,11 +158,7 @@ test( 'can create product attributes', async ( { page, product } ) => {
 	} );
 
 	await test.step( 'update the product', async () => {
-		await page.getByRole( 'button', { name: 'Update' } ).click();
-		// Verify product was updated
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Product updated'
-		);
+		await updateProduct( { page, expect } );
 	} );
 
 	await test.step( 'verify the change in product editor', async () => {
@@ -162,6 +169,92 @@ test( 'can create product attributes', async ( { page, product } ) => {
 	await test.step( 'verify the changes in the store frontend', async () => {
 		// Verify attributes in store frontend
 		await page.goto( product.permalink );
+
+		// Verify attributes in store frontend
+		//todo: verify the attributes in the store frontend
+	} );
+} );
+
+test( 'can add existing attributes', async ( {
+	page,
+	product,
+	attributes,
+} ) => {
+	await test.step( 'add an existing attribute', async () => {
+		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		// Add attributes that do not exist
+		await page.getByPlaceholder( 'Search or create attribute' ).click();
+
+		// Unless we wait for the list to be visible, the attribute name will be filled too soon and the test will fail.
+		await waitForAttributeList( page );
+
+		await page
+			.getByPlaceholder( 'Search or create attribute' )
+			.fill( attributes.attribute.name );
+		await page
+			.getByRole( 'option', { name: attributes.attribute.name } )
+			.first()
+			.click();
+
+		await page.getByPlaceholder( 'Search or create value' ).click();
+
+		for ( const term of attributes.terms ) {
+			await page.getByRole( 'option', { name: term.name } ).click();
+		}
+
+		// Add attributes
+		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
+	} );
+
+	await test.step( 'update the product', async () => {
+		await updateProduct( { page, expect } );
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
+		// Verify attributes in product editor
+		//todo: verify the attributes in the product editor
+	} );
+
+	await test.step( 'verify the changes in the store frontend', async () => {
+		// Verify attributes in store frontend
+		await page.goto( product.permalink );
+
+		// Verify attributes in store frontend
+		//todo: verify the attributes in the store frontend
+	} );
+} );
+
+test( 'can update product attributes', async ( {
+	page,
+	productWithAttributes,
+	attributes,
+} ) => {
+	await test.step( "update product's attribute value", async () => {
+		await page.reload();
+
+		await page.getByRole( 'button', { name: 'Edit' } ).click();
+		await page
+			.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
+			.click();
+
+		await page.getByLabel( 'Edit attribute' ).click();
+
+		//todo: verify the attributes in the product editor
+	} );
+
+	await test.step( 'update the product', async () => {
+		await updateProduct( { page, expect } );
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
+		// Verify attributes in product editor
+		//todo: verify the attributes in the product editor
+	} );
+
+	await test.step( 'verify the changes in the store frontend', async () => {
+		// Verify attributes in store frontend
+		await page.goto( productWithAttributes.permalink );
 
 		// Verify attributes in store frontend
 		//todo: verify the attributes in the store frontend
