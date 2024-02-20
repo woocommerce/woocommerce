@@ -103,7 +103,7 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
 	} );
 
-	await test.step( 'add a new attribute', async () => {
+	await test.step( 'add new attributes', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
 
 		// Add attributes that do not exist
@@ -152,13 +152,30 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
 	} );
 
+	await test.step( 'verify attributes in product editor', async () => {
+		// Verify new attributes in product editor
+		for ( const attribute of newAttributes ) {
+			const item = page.getByRole( 'listitem' ).filter( {
+				has: page.getByText( attribute.name, { exact: true } ),
+			} );
+			await expect( item ).toBeVisible();
+			await expect( item ).toContainText( attribute.value );
+		}
+	} );
+
 	await test.step( 'update the product', async () => {
 		await updateProduct( { page, expect } );
 	} );
 
-	await test.step( 'verify the change in product editor', async () => {
+	await test.step( 'verify attributes in product editor after product update', async () => {
 		// Verify attributes in product editor
-		//todo: verify the attributes in the product editor
+		for ( const attribute of newAttributes ) {
+			const item = page.getByRole( 'listitem' ).filter( {
+				has: page.getByText( attribute.name, { exact: true } ),
+			} );
+			await expect( item ).toBeVisible();
+			await expect( item ).toContainText( attribute.value );
+		}
 	} );
 
 	await test.step( 'verify the changes in the store frontend', async () => {
@@ -166,7 +183,13 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		// Verify attributes in store frontend
-		//todo: verify the attributes in the store frontend
+		for ( const attribute of newAttributes ) {
+			const item = page.getByRole( 'row' ).filter( {
+				has: page.getByText( attribute.name, { exact: true } ),
+			} );
+			await expect( item ).toBeVisible();
+			await expect( item ).toContainText( attribute.value );
+		}
 	} );
 } );
 
@@ -225,7 +248,7 @@ test( 'can add existing attributes', async ( {
 	} );
 } );
 
-test.only( 'can update product attributes', async ( {
+test( 'can update product attributes', async ( {
 	page,
 	productWithAttributes,
 	attributes,
