@@ -222,7 +222,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'metadata'    => array(
 						'bindings' => array(
 							'value' => array(
-								'source' => 'woo/entity',
+								'source' => 'woocommerce/entity/product',
 								'args'   => array(
 									'prop' => 'name'
 								),
@@ -382,7 +382,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'metadata'    => array(
 							'bindings' => array(
 								'value' => array(
-									'source' => 'woo/entity',
+									'source' => 'woocommerce/entity/product',
 									'args'   => array(
 										'prop' => 'external_url'
 									),
@@ -417,7 +417,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'metadata' => array(
 							'bindings' => array(
 								'value' => array(
-									'source' => 'woo/entity',
+									'source' => 'woocommerce/entity/product',
 									'args'   => array(
 										'prop' => 'button_text'
 									),
