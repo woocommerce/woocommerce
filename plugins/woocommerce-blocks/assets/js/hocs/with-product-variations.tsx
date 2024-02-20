@@ -1,39 +1,35 @@
 /**
  * External dependencies
  */
-import { Component, ReactNode } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getProductVariations } from '@woocommerce/editor-components/utils';
+import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
+import { ProductResponseVariationsItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { formatError } from '../base/utils/errors';
 
-// Define TypeScript interfaces for props and state
 interface Product {
-	id: string;
-	variations?: Variation[];
+	id: number;
+	variations?: ProductResponseVariationsItem[];
 }
 
-interface Variation {
-	id: string;
-	// Add other properties of variations here
-}
-
-interface Props {
-	selected: string[];
+interface WithProductVariationsProps {
+	selected: number[];
 	showVariations: boolean;
 	products: Product[];
 	isLoading?: boolean;
-	error?: Error; // Assuming error is of type Error, adjust as necessary
+	error?: ErrorObject;
 }
 
 interface State {
-	error: Error | null;
+	error: ErrorObject | null;
 	loading: boolean;
-	variations: { [ key: string ]: Variation[] | null };
+	variations: { [ key: string ]: ProductResponseVariationsItem[] | null };
 }
 
 /**
@@ -42,16 +38,18 @@ interface State {
  * @param OriginalComponent Component being wrapped.
  */
 const withProductVariations = createHigherOrderComponent(
-	( OriginalComponent: React.ComponentType< Props > ) => {
-		class WrappedComponent extends Component< Props, State > {
+	( OriginalComponent ) => {
+		class WrappedComponent extends Component<
+			WithProductVariationsProps,
+			State
+		> {
 			state: State = {
 				error: null,
 				loading: false,
 				variations: {},
 			};
 
-			// Assuming there's a mechanism to store prevSelectedItem
-			private prevSelectedItem?: string;
+			private prevSelectedItem?: number;
 
 			componentDidMount() {
 				const { selected, showVariations } = this.props;
@@ -61,7 +59,7 @@ const withProductVariations = createHigherOrderComponent(
 				}
 			}
 
-			componentDidUpdate( prevProps: Props ) {
+			componentDidUpdate( prevProps: WithProductVariationsProps ) {
 				const { isLoading, selected, showVariations } = this.props;
 
 				if (
@@ -108,7 +106,11 @@ const withProductVariations = createHigherOrderComponent(
 
 				this.setState( { loading: true } );
 
-				getProductVariations( expandedProduct )
+				(
+					getProductVariations( expandedProduct ) as Promise<
+						ProductResponseVariationsItem[]
+					>
+				 )
 					.then( ( expandedProductVariations ) => {
 						const newVariations = expandedProductVariations.map(
 							( variation ) => ( {
@@ -139,12 +141,12 @@ const withProductVariations = createHigherOrderComponent(
 					} );
 			};
 
-			isProductId( itemId: string ): boolean {
+			isProductId( itemId: number ): boolean {
 				const { products } = this.props;
 				return products.some( ( p ) => p.id === itemId );
 			}
 
-			findParentProduct( variationId: string ): string | undefined {
+			findParentProduct( variationId: number ) {
 				const { products } = this.props;
 				const parentProduct = products.find( ( p ) =>
 					p.variations?.some( ( { id } ) => id === variationId )
@@ -152,7 +154,7 @@ const withProductVariations = createHigherOrderComponent(
 				return parentProduct?.id;
 			}
 
-			getExpandedProduct(): string | null {
+			getExpandedProduct() {
 				const { isLoading, selected, showVariations } = this.props;
 
 				if ( ! showVariations ) {
@@ -183,7 +185,7 @@ const withProductVariations = createHigherOrderComponent(
 				return null;
 			}
 
-			render(): ReactNode {
+			render() {
 				const { error: propsError, isLoading } = this.props;
 				const { error, loading, variations } = this.state;
 
