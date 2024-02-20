@@ -102,36 +102,40 @@ export const SidebarNavigationScreenFooter = () => {
 		? __( 'Change your footer', 'woocommerce' )
 		: __( 'Choose your footer', 'woocommerce' );
 
+	const description = aiOnline
+		? __(
+				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+				'woocommerce'
+		  )
+		: __(
+				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
+				'woocommerce'
+		  );
+
 	return (
 		<SidebarNavigationScreen
 			title={ title }
 			onNavigateBackClick={ resetHighlightedBlockIndex }
-			description={ createInterpolateElement(
-				__(
-					"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
-					'woocommerce'
+			description={ createInterpolateElement( description, {
+				EditorLink: (
+					<Link
+						onClick={ () => {
+							recordEvent(
+								'customize_your_store_assembler_hub_editor_link_click',
+								{
+									source: 'footer',
+								}
+							);
+							window.open(
+								`${ ADMIN_URL }site-editor.php`,
+								'_blank'
+							);
+							return false;
+						} }
+						href=""
+					/>
 				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'footer',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
-			) }
+			} ) }
 			content={
 				<>
 					<div className="woocommerce-customize-store__sidebar-footer-content">
