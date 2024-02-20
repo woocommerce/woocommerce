@@ -2064,7 +2064,8 @@ class WC_AJAX {
 
 		$children = get_terms( $taxonomy, "child_of=$id&menu_order=ASC&hide_empty=0" );
 
-		if ( $term && count( $children ) ) {
+		$children_count = is_countable( $children ) ? count( $children ) : 0;
+		if ( $term && $children_count ) {
 			echo 'children';
 			wp_die();
 		}

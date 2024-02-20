@@ -6,18 +6,32 @@ This document discusses unit tests. See [the e2e README](https://github.com/wooc
 
 - [WooCommerce Tests](#woocommerce-tests)
     - [Table of contents](#table-of-contents)
-    - [Initial Setup](#initial-setup)
-        - [MySQL database](#mysql-database)
-        - [Setup instructions](#setup-instructions)
+    - [Set up Test Environment](#set-up-test-environment)
+        - [wp-env (recommended)](#wp-env-recommended)
+        - [Manual setup](#manual-setup)
     - [Running Unit Tests](#running-unit-tests)
         - [Troubleshooting](#troubleshooting)
     - [Guide for Writing Unit Tests](#guide-for-writing-unit-tests)
     - [Automated Tests](#automated-tests)
     - [Code Coverage](#code-coverage)
 
-## Initial Setup
+## Set up Test Environment
 
-### MySQL database
+Before using the tests a test environment is needed to run against.
+
+You can set up the local testing environment by either using `wp-env` or by installing the required software on your machine.
+
+### wp-env (recommended)
+
+Run the following command to set up the environment:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+```
+
+### Manual setup
+
+#### MySQL database
 
 To run the tests, you need to create a test database. You can:
 
@@ -26,7 +40,7 @@ To run the tests, you need to create a test database. You can:
 - Use a solution like VVV - if you are using VVV you might need to `vagrant ssh` first
 - Run a throwaway database in docker with this one-liner: `docker run --rm --name woocommerce_test_db -p 3306:3306 -e MYSQL_ROOT_PASSWORD=woocommerce_test_password -d mysql:8.0.32`. ( Use `tests/bin/install.sh woocommerce_tests root woocommerce_test_password 0.0.0.0` in next step)
 
-### Setup instructions
+#### Setup instructions
 
 Once you have database, from the WooCommerce root directory "cd" into `plugins/woocommerce` directory and run the following:
 
@@ -51,24 +65,50 @@ tests/bin/install.sh woocommerce_tests root root
 
 ## Running Unit Tests
 
-Change to the plugin root directory and type:
+To run the tests, you can use the following command:
 
 ```sh
-vendor/bin/phpunit
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env
+
+# or 
+
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit  # if you are not using wp-env
 ```
 
-The tests will execute and you'll be presented with a summary.
-
-You can run specific tests by providing the path and filename to the test class:
+You can run specific tests by providing the `--filter` option. For example, to run only the tests in a specific class:
 
 ```sh
-vendor/bin/phpunit tests/legacy/unit-tests/importer/product.php
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env -- --filter=TestClassName
+```
+
+For example, to test `WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor` class:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env -- --filter=WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor
 ```
 
 A text code coverage summary can be displayed using the `--coverage-text` option:
 
 ```sh
-vendor/bin/phpunit --coverage-text
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env -- --coverage-text
+```
+
+You can also watch for changes and re-run tests automatically by using the following command:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env:watch
+```
+
+By default, all tests will be run. You can also run specific tests by providing the `--filter` option. For example, to run only the tests in a specific class:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env:watch -- --filter=TestClassName
+```
+
+or you can pass `--list-groups` to list all the available test groups:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env:watch -- --list-groups
 ```
 
 ### Troubleshooting
