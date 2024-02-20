@@ -103,10 +103,9 @@ export async function searchForBlock( searchTerm ) {
  */
 export async function insertBlockDontWaitForInsertClose( searchTerm ) {
 	await searchForBlock( searchTerm );
-	await page.waitForXPath( `//button//span[text()='${ searchTerm }']` );
-	const insertButton = (
-		await page.$x( `//button//span[text()='${ searchTerm }']` )
-	 )[ 0 ];
+	const insertButton = await page.waitForXPath(
+		`//button//span[text()='${ searchTerm }']`
+	);
 	await insertButton.click();
 }
 
