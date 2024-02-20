@@ -43,8 +43,11 @@
 			}
 		}
 	}
-	.components-notice__action.components-button.is-link {
-		margin: 0;
-		padding: 0;
+
+	.components-button {
+		&.is-link {
+			text-decoration: none;
+			padding: 6px 12px;
+		}
 	}
 }

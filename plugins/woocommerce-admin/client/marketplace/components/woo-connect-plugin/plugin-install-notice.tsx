@@ -31,13 +31,13 @@ export default function PluginInstallNotice() {
 						<p>{ message }</p>
 						<br></br>
 						<Button
-							href="https://woo.com/install-woocom-plugin/"
+							href={ 'https://woo.com/woocom-plugin/install/' }
 							variant="secondary"
 						>
 							Install Woo Connect
 						</Button>
 						<Button
-							href={ WP_ADMIN_PLUGIN_LIST_URL }
+							href={ 'https://woo.com/woocom-plugin/download/' }
 							variant="link"
 						>
 							Download
@@ -65,7 +65,7 @@ export default function PluginInstallNotice() {
 						<p>{ message }</p>
 						<br></br>
 						<Button
-							href="/wp-admin/plugins.php"
+							href={ WP_ADMIN_PLUGIN_LIST_URL }
 							variant="secondary"
 						>
 							Activate Woo Connect
