@@ -20,7 +20,7 @@ export function SubsectionDescriptionBlockEdit( {
 	return (
 		<BlockFill
 			{ ...blockProps }
-			name="subsection-description"
+			name="section-description"
 			slotContainerBlockName="woocommerce/product-subsection"
 		>
 			<div>{ content }</div>
