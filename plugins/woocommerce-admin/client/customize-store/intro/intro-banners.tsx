@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Button } from '@wordpress/components';
+import { Button, CheckboxControl, Modal } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -16,6 +16,7 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { useState } from '@wordpress/element';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -220,22 +221,65 @@ export const NoAIBanner = ( {
 }: {
 	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
 } ) => {
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
 	return (
-		<BaseIntroBanner
-			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
-			bannerText={ __(
-				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
-				'woocommerce'
+		<>
+			<BaseIntroBanner
+				bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+				bannerText={ __(
+					'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+					'woocommerce'
+				) }
+				bannerClass="no-ai-banner"
+				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+				bannerButtonOnClick={ () => {
+					setIsModalOpen( true );
+				} }
+				showAIDisclaimer={ false }
+			/>
+			{ isModalOpen && (
+				<Modal
+					className={
+						'woocommerce-customize-store__theme-switch-warning-modal'
+					}
+					title={ __(
+						'Are you sure you want to design a new theme?',
+						'woocommerce'
+					) }
+					onRequestClose={ () => setIsModalOpen( false ) }
+					shouldCloseOnClickOutside={ false }
+				>
+					<p>
+						{ __(
+							'Your active theme will be changed and you can lose any changes you’ve made to it.',
+							'woocommerce'
+						) }
+					</p>
+					<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
+						<Button
+							onClick={ () => {
+								setIsModalOpen( false );
+							} }
+							variant="link"
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							onClick={ () => {
+								sendEvent( {
+									type: 'DESIGN_WITHOUT_AI',
+								} );
+								setIsModalOpen( false );
+							} }
+							variant="primary"
+						>
+							{ __( 'Design a new theme', 'woocommerce' ) }
+						</Button>
+					</div>
+				</Modal>
 			) }
-			bannerClass="no-ai-banner"
-			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
-			bannerButtonOnClick={ () => {
-				sendEvent( {
-					type: 'DESIGN_WITHOUT_AI',
-				} );
-			} }
-			showAIDisclaimer={ false }
-		/>
+		</>
 	);
 };
 
