@@ -56,30 +56,74 @@ class Package {
 	}
 
 	/**
-	 * Returns the version of the plugin.
+	 * Returns the version of WooCommerce Blocks. Since Blocks was merged into
+	 * WooCommerce Core, this method has been deprecated.
 	 *
+	 * @deprecated 8.7.0
 	 * @return string
 	 */
 	public function get_version() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '8.7.0', 'WC_VERSION' );
+		return $this->get_woocommerce_blocks_version();
+	}
+
+	/**
+	 * Returns the version of WooCommerce Blocks for internal usage. Needed for
+	 * tasks like migrations.
+	 * Note that the version of WooCommerce Blocks doesn't update anymore. Use
+	 * `Constants::get_constant( 'WC_VERSION' )` when possible to get the
+	 * WooCommerce Core version.
+	 *
+	 * @internal
+	 * @return string
+	 */
+	public function get_woocommerce_blocks_version() {
 		return $this->version;
 	}
 
 	/**
-	 * Returns the version of the plugin stored in the database.
+	 * Returns the version of WooCommerce stored in the database. Since Blocks
+	 * was merged into WooCommerce Core, this method has been deprecated.
 	 *
+	 * @deprecated 8.7.0
 	 * @return string
 	 */
 	public function get_version_stored_on_db() {
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '8.7.0' );
+		return $this->get_woocommerce_blocks_version_stored_on_db();
+	}
+
+	/**
+	 * Returns the version of WooCommerce Blocks store in the database for
+	 * internal usage. Needed for tasks like migrations.
+	 *
+	 * @internal
+	 * @return string
+	 */
+	public function get_woocommerce_blocks_version_stored_on_db() {
 		return get_option( Options::WC_BLOCK_VERSION, '' );
 	}
 
 	/**
-	 * Set the version of the plugin stored in the database.
+	 * Sets the version of WooCommerce Blocks in the database. Needed for
+	 * tasks like migrations.
 	 * This is useful during the first installation or after the upgrade process.
+	 *
+	 * @deprecated 8.7.0
 	 */
 	public function set_version_stored_on_db() {
-		update_option( Options::WC_BLOCK_VERSION, $this->get_version() );
+		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '8.7.0' );
+		$this->set_woocommerce_blocks_version_stored_on_db();
+	}
 
+	/**
+	 * Sets the version of WooCommerce Blocks in the database. Intended to be
+	 * used only internally.
+	 *
+	 * @internal
+	 */
+	public function set_woocommerce_blocks_version_stored_on_db() {
+		update_option( Options::WC_BLOCK_VERSION, $this->get_woocommerce_blocks_version() );
 	}
 
 	/**
