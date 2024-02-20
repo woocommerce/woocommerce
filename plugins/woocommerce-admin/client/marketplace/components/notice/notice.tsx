@@ -13,7 +13,7 @@ import sanitizeHTML from '../../../lib/sanitize-html';
 
 export interface NoticeProps {
 	id: string;
-	children?: JSX.Element;
+	children?: React.ReactNode;
 	description: string;
 	icon?: string;
 	isDismissible: boolean;
