@@ -18,7 +18,7 @@ WP-CLI is a powerful set of command-line tools for managing WordPress installati
 
 This suite of documentation includes:
 
-- [**How-to Guide**](./using-wc-cli.md): Step-by-step instructions for common WC-CLI tasks.
+- [**How-to Guide**](./wc-cli-commands.md): Step-by-step instructions for common WC-CLI tasks.
 - [**Command Reference**](./wc-cli-commands.md): Detailed information on WC-CLI commands and their options.
 - [**FAQs**](./cli-faq.md): Answers to frequently asked questions about WC-CLI.
 - [**Examples**](./wc-cli-examples.md): Practical examples of WC-CLI commands in use.
