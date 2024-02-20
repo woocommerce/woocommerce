@@ -75,14 +75,20 @@ const test = baseTest.extend( {
 		await api.delete( `products/attributes/${ attribute.id }` );
 	},
 	productWithAttributes: async ( { api, product, attributes }, use ) => {
+		let updatedProduct;
 		attributes.attribute.options = attributes.terms.map(
 			( term ) => term.name
 		);
-		await api.put( `products/${ product.id }`, {
-			attributes: [ attributes.attribute ],
-		} );
+		attributes.attribute.visible = true;
+		await api
+			.put( `products/${ product.id }`, {
+				attributes: [ attributes.attribute ],
+			} )
+			.then( ( response ) => {
+				updatedProduct = response.data;
+			} );
 
-		await use( product );
+		await use( updatedProduct );
 	},
 } );
 
@@ -232,13 +238,14 @@ test( 'can add existing attributes', async ( {
 		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
 	} );
 
+	const attributeRowLocator = page.getByRole( 'listitem' ).filter( {
+		has: page.getByText( attributes.attribute.name, { exact: true } ),
+	} );
+
 	await test.step( 'verify attributes in product editor', async () => {
-		const item = page.getByRole( 'listitem' ).filter( {
-			has: page.getByText( attributes.attribute.name, { exact: true } ),
-		} );
-		await expect( item ).toBeVisible();
+		await expect( attributeRowLocator ).toBeVisible();
 		for ( const term of attributes.terms ) {
-			await expect( item ).toContainText( term.name );
+			await expect( attributeRowLocator ).toContainText( term.name );
 		}
 	} );
 
@@ -247,12 +254,9 @@ test( 'can add existing attributes', async ( {
 	} );
 
 	await test.step( 'verify attributes in product editor after product update', async () => {
-		const item = page.getByRole( 'listitem' ).filter( {
-			has: page.getByText( attributes.attribute.name, { exact: true } ),
-		} );
-		await expect( item ).toBeVisible();
+		await expect( attributeRowLocator ).toBeVisible();
 		for ( const term of attributes.terms ) {
-			await expect( item ).toContainText( term.name );
+			await expect( attributeRowLocator ).toContainText( term.name );
 		}
 	} );
 
@@ -272,8 +276,9 @@ test( 'can add existing attributes', async ( {
 test( 'can update product attributes', async ( {
 	page,
 	productWithAttributes,
-	attributes,
 } ) => {
+	const attribute = productWithAttributes.attributes[ 0 ];
+
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto(
 			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
@@ -286,7 +291,7 @@ test( 'can update product attributes', async ( {
 				await page.reload();
 				await page.getByRole( 'button', { name: 'Edit' } ).click();
 				await expect(
-					page.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
+					page.getByLabel( `Remove ${ attribute.options[ 0 ] }` )
 				).toBeVisible( { timeout: 2000 } );
 			},
 			{
@@ -296,30 +301,66 @@ test( 'can update product attributes', async ( {
 	} );
 
 	await test.step( "update product's attribute terms", async () => {
-		await page
-			.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
-			.click();
+		await page.getByLabel( `Remove ${ attribute.options[ 0 ] }` ).click();
 
 		await page.getByLabel( 'Edit attribute' ).click();
+	} );
 
-		//todo: verify the attributes in the product editor
+	let attributeRowLocator = page.getByRole( 'listitem' ).filter( {
+		has: page.getByText( attribute.name, {
+			exact: true,
+		} ),
+	} );
+
+	await test.step( 'verify attributes in product editor', async () => {
+		await expect(
+			attributeRowLocator,
+			'The attribute item is still displayed'
+		).toBeVisible();
+		await expect(
+			attributeRowLocator,
+			'The remaining term is still displayed'
+		).toContainText( attribute.options[ 1 ] );
+		await expect(
+			attributeRowLocator,
+			'The removed term is not displayed'
+		).not.toContainText( attribute.options[ 0 ] );
 	} );
 
 	await test.step( 'update the product', async () => {
 		await updateProduct( { page, expect } );
 	} );
 
-	await test.step( 'verify the change in product editor', async () => {
-		// Verify attributes in product editor
-		//todo: verify the attributes in the product editor
+	await test.step( 'verify attributes in product editor after product update', async () => {
+		await expect(
+			attributeRowLocator,
+			'The attribute item is still displayed'
+		).toBeVisible();
+		await expect(
+			attributeRowLocator,
+			'The remaining term is still displayed'
+		).toContainText( attribute.options[ 1 ] );
+		await expect(
+			attributeRowLocator,
+			'The removed term is not displayed'
+		).not.toContainText( attribute.options[ 0 ] );
 	} );
 
 	await test.step( 'verify the changes in the store frontend', async () => {
-		// Verify attributes in store frontend
 		await page.goto( productWithAttributes.permalink );
 
-		// Verify attributes in store frontend
-		//todo: verify the attributes in the store frontend
+		attributeRowLocator = page.getByRole( 'row' ).filter( {
+			has: page.getByText( attribute.name, { exact: true } ),
+		} );
+		await expect( attributeRowLocator ).toBeVisible();
+		await expect(
+			attributeRowLocator,
+			'The remaining term is still displayed'
+		).toContainText( attribute.options[ 1 ] );
+		await expect(
+			attributeRowLocator,
+			'The removed term is not displayed'
+		).not.toContainText( attribute.options[ 0 ] );
 	} );
 } );
 
@@ -342,6 +383,9 @@ test( 'can remove product attributes', async ( {
 
 	await test.step( "remove product's attribute", async () => {
 		await attributeItemLocator.getByLabel( 'Remove' ).click();
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
 		await expect( attributeItemLocator ).toBeHidden();
 	} );
 
@@ -349,16 +393,7 @@ test( 'can remove product attributes', async ( {
 		await updateProduct( { page, expect } );
 	} );
 
-	await test.step( 'verify the change in product editor', async () => {
-		// Verify attributes in product editor
+	await test.step( 'verify the change in product editor after update', async () => {
 		await expect( attributeItemLocator ).toBeHidden();
-	} );
-
-	await test.step( 'verify the changes in the store frontend', async () => {
-		// Verify attributes in store frontend
-		await page.goto( productWithAttributes.permalink );
-
-		// Verify attributes in store frontend
-		//todo: verify the attributes in the store frontend
 	} );
 } );
