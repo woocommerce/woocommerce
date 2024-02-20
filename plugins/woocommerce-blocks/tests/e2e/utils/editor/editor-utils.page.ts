@@ -5,6 +5,11 @@ import { Page } from '@playwright/test';
 import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
+/**
+ * Internal dependencies
+ */
+import type { TemplateType } from '../../utils/types';
+
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
@@ -374,7 +379,7 @@ export class EditorUtils {
 
 	async visitTemplateEditor(
 		templateName: string,
-		templateType: 'wp_template' | 'wp_template_part'
+		templateType: TemplateType
 	) {
 		if ( templateType === 'wp_template_part' ) {
 			await this.page.goto(

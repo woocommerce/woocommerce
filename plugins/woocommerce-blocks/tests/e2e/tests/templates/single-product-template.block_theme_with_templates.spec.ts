@@ -3,11 +3,16 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
+/**
+ * Internal dependencies
+ */
+import type { TemplateType } from '../../utils/types';
+
 const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template' as 'wp_template' | 'wp_template_part',
+	templateType: 'wp_template' as TemplateType,
 };
 
 const userText = 'Hello World in the Belt template';
