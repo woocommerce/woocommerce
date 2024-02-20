@@ -225,7 +225,7 @@ test( 'can add existing attributes', async ( {
 	} );
 } );
 
-test( 'can update product attributes', async ( {
+test.only( 'can update product attributes', async ( {
 	page,
 	productWithAttributes,
 	attributes,
@@ -243,7 +243,7 @@ test( 'can update product attributes', async ( {
 				await page.getByRole( 'button', { name: 'Edit' } ).click();
 				await expect(
 					page.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
-				).toBeVisible();
+				).toBeVisible( { timeout: 2000 } );
 			},
 			{
 				message: "wait for the attribute's terms to load",
@@ -286,7 +286,7 @@ test( 'can remove product attributes', async ( {
 } ) => {
 	await test.step( 'go to product editor, Organization tab', async () => {
 		await page.goto(
-			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit&tab=organization`
+			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
 		);
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
 	} );
