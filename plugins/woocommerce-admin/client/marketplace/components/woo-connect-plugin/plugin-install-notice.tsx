@@ -9,6 +9,10 @@ import { __ } from '@wordpress/i18n';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import { WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
 import './woo-connect-plugin.scss';
+import {
+	WOO_CONNECT_PLUGIN_INSTALL_URL,
+	WOO_CONNECT_PLUGIN_DOWNLOAD_URL,
+} from '../constants';
 
 export default function PluginInstallNotice() {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
@@ -31,16 +35,16 @@ export default function PluginInstallNotice() {
 						<p>{ message }</p>
 						<br></br>
 						<Button
-							href={ 'https://woo.com/woocom-plugin/install/' }
+							href={ WOO_CONNECT_PLUGIN_INSTALL_URL }
 							variant="secondary"
 						>
-							Install Woo Connect
+							{ __( 'Install Woo Connect', 'woocommerce' ) }
 						</Button>
 						<Button
-							href={ 'https://woo.com/woocom-plugin/download/' }
+							href={ WOO_CONNECT_PLUGIN_DOWNLOAD_URL }
 							variant="link"
 						>
-							Download
+							{ __( 'Download', 'woocommerce' ) }
 						</Button>
 					</CardBody>
 				</Card>
@@ -68,7 +72,7 @@ export default function PluginInstallNotice() {
 							href={ WP_ADMIN_PLUGIN_LIST_URL }
 							variant="secondary"
 						>
-							Activate Woo Connect
+							{ __( 'Activate Woo Connect', 'woocommerce' ) }
 						</Button>
 					</CardBody>
 				</Card>
