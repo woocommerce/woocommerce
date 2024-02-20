@@ -93,39 +93,28 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		// Products can be filtered based on 'on sale' status.
-		test( 'Products can be filtered based on "on sale" status.', async ( {
+		test( 'Products can be filtered based on "on sale" status', async ( {
 			pageObject,
 		} ) => {
-			// On each page we show 9 products.
-			await expect( pageObject.products ).toHaveCount( 9 );
-			// All products should not be on sale.
-			await expect(
-				pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).not.toHaveCount( 9 );
+			const allProducts = pageObject.products;
+			const salePoducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
-			// In test data we have only 6 products on sale
-			await expect( pageObject.products ).toHaveCount( 6 );
-
-			// Expect all shown products to be on sale.
-			await expect(
-				pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.products ).toHaveCount( 6 );
-			await expect(
-				pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
