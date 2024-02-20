@@ -231,6 +231,15 @@
 				line-height: 16px; /* 123.077% */
 				letter-spacing: -0.078px;
 			}
+
+			.woocommerce-badge {
+				font-size: 0.6875rem;
+				font-weight: 400;
+				border-radius: 4px;
+				padding: 3px 8px 3px 8px;
+				line-height: 16px;
+				height: auto;
+			}
 		}
 
 		.edit-site-sidebar-navigation-item.components-item .edit-site-sidebar-navigation-item__drilldown-indicator {
