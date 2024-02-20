@@ -136,8 +136,7 @@ class WC_Admin_List_Table_Coupons extends WC_Admin_List_Table {
 	 */
 	protected function render_products_column() {
 		$product_ids = $this->object->get_product_ids();
-
-		if ( count( $product_ids ) > 0 ) {
+		if ( is_array( $product_ids ) && count( $product_ids ) > 0 ) {
 			echo esc_html( implode( ', ', $product_ids ) );
 		} else {
 			echo '&ndash;';

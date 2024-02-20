@@ -11,10 +11,10 @@ import {
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
-	if ( ! testData.canBeOverridenByThemes ) {
+	if ( ! testData.canBeOverriddenByThemes ) {
 		return;
 	}
 	const userText = `Hello World in the ${ testData.templateName } template`;
@@ -32,12 +32,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			page,
 		} ) => {
 			// Edit the WooCommerce default template
-			await admin.visitSiteEditor( {
-				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
@@ -48,7 +46,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
 			);
 
-			// Edit the theme template.
+			// Edit the theme template. The theme template is not
+			// directly available from the UI, because the customized
+			// one takes priority, so we go directly to its URL.
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
