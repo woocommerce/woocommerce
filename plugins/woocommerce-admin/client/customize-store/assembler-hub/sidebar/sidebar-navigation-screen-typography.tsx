@@ -208,6 +208,7 @@ export const SidebarNavigationScreenTypography = () => {
 															: 'no',
 												} );
 												OptIn();
+												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
 												closeModal();
 											} }
 											variant="primary"
