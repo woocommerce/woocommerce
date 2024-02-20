@@ -29,7 +29,7 @@ const iconMap = {
 	percent,
 };
 
-export default function Notice( props: NoticeProps ): JSX.Element {
+export default function Notice( props: NoticeProps ): JSX.Element | null {
 	const {
 		id,
 		description,
@@ -47,25 +47,22 @@ export default function Notice( props: NoticeProps ): JSX.Element {
 		localStorage.setItem( `wc-marketplaceNoticeClosed-${ id }`, 'true' );
 	};
 
-	if ( ! isVisible ) return <></>;
+	if ( ! isVisible ) return null;
 
-	const classes = classNames( 'woocommerce-marketplace__notice', {
-		'woocommerce-marketplace__notice-warning': variant === 'warning',
-		'woocommerce-marketplace__notice-info':
-			variant === 'info' || variant === 'info' || variant === 'error',
-		'woocommerce-marketplace__notice-error': variant === 'error',
-		'woocommerce-marketplace__notice-success': variant === 'success',
-	} );
+	const classes = classNames(
+		'woocommerce-marketplace__notice',
+		`woocommerce-marketplace__notice-${ variant }`,
+		{
+			'is-dismissible': isDismissible,
+		}
+	);
 
 	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];
 
-	// Add a class for the icon color based on the variant for consistency.
-	const iconClass = classNames( 'woocommerce-marketplace__notice-icon', {
-		'icon-color-info': variant === 'info',
-		'icon-color-error': variant === 'error',
-		'icon-color-warning': variant === 'warning',
-		'icon-color-success': variant === 'success',
-	} );
+	const iconClass = classNames(
+		'woocommerce-marketplace__notice-icon',
+		`woocommerce-marketplace__notice-icon--${ variant }`
+	);
 
 	return (
 		<div className={ classes }>

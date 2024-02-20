@@ -55,7 +55,7 @@ Notices can be dismissed if `isDismissible` is set to `true`. The dismissal stat
 
 ## Examples
 
-Here are more detailed examples:
+Here are more detailed examples, some require that you import the Button component and/or internationalization functions:
 
 ```jsx
 <Notice
@@ -68,22 +68,20 @@ Here are more detailed examples:
 	icon="percent"
 	isDismissible
 >
-	<>
-		<Button
-			variant="secondary"
-			onClick={ () => {
-				console.log( 'Primary button clicked' );
-			} }
-			text="Label"
-		/>
-		<Button
-			variant="tertiary"
-			onClick={ () => {
-				console.log( 'Secondary button clicked' );
-			} }
-			text="Label"
-		/>
-	</>
+	<Button
+		variant="secondary"
+		onClick={ () => {
+			console.log( 'Primary button clicked' );
+		} }
+		text="Label"
+	/>
+	<Button
+		variant="tertiary"
+		onClick={ () => {
+			console.log( 'Secondary button clicked' );
+		} }
+		text="Label"
+	/>
 </Notice>
 ```
 
@@ -98,22 +96,20 @@ Here are more detailed examples:
 	icon="check"
 	isDismissible
 >
-	<>
-		<Button
-			variant="secondary"
-			onClick={ () => {
-				console.log( 'Primary button clicked' );
-			} }
-			text="Label"
-		/>
-		<Button
-			variant="tertiary"
-			onClick={ () => {
-				console.log( 'Secondary button clicked' );
-			} }
-			text="Label"
-		/>
-	</>
+	<Button
+		variant="secondary"
+		onClick={ () => {
+			console.log( 'Primary button clicked' );
+		} }
+		text="Label"
+	/>
+	<Button
+		variant="tertiary"
+		onClick={ () => {
+			console.log( 'Secondary button clicked' );
+		} }
+		text="Label"
+	/>
 </Notice>
 ```
 
