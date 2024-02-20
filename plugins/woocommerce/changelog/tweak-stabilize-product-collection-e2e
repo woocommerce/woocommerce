@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stabilize the 'Products can be filtered based on "on sale" status' E2E test.
