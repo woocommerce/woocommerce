@@ -16,7 +16,6 @@ export function SectionHeader( {
 	description,
 	sectionTagName,
 	title,
-	type = 'section',
 }: SectionHeaderProps ) {
 	const HeadingTagName = sectionTagName === 'fieldset' ? 'legend' : 'div';
 
@@ -46,10 +45,10 @@ export function SectionHeader( {
 				</h2>
 
 				<div className="wp-block-woocommerce-product-section-header__actions">
-					<BlockSlot name={ `${ type }-actions` } />
+					<BlockSlot name={ `section-actions` } />
 				</div>
 			</div>
-			<BlockSlot name={ `${ type }-description` } />
+			<BlockSlot name={ `section-description` } />
 		</HeadingTagName>
 	);
 }
