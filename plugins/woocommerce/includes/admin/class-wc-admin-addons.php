@@ -1561,7 +1561,7 @@ class WC_Admin_Addons {
 		if ( isset( $options['auth'] ) && $options['auth'] ) {
 			$auth = WC_Helper_Options::get( 'auth' );
 
-			if ( ! empty( $auth['access_token'] ) ) {
+			if ( isset( $auth['access_token'] ) && ! empty( $auth['access_token'] ) ) {
 				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
 			}
 		}
