@@ -32,6 +32,28 @@ import { recordEvent } from '@woocommerce/tracks';
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
+const ComingSoonSideBarNavigationItem = ( {
+	children,
+	...rest
+}: {
+	children: React.ReactNode;
+} ) => {
+	const comingSoonBadge = (
+		<span className="woocommerce-badge">
+			{ __( 'Coming soon', 'woocommerce' ) }
+		</span>
+	);
+	return (
+		<SidebarNavigationItem
+			withChevron={ false }
+			suffix={ comingSoonBadge }
+			{ ...rest }
+		>
+			{ children }
+		</SidebarNavigationItem>
+	);
+};
+
 export const SidebarNavigationScreenMain = () => {
 	return (
 		<SidebarNavigationScreen
@@ -104,9 +126,9 @@ export const SidebarNavigationScreenMain = () => {
 							{ __( 'Change the color palette', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
-							as={ SidebarNavigationItem }
+							as={ ComingSoonSideBarNavigationItem }
+							disabled={ true }
 							path="/customize-store/assembler-hub/typography"
-							withChevron
 							icon={ typography }
 							onClick={ () => {
 								recordEvent(
