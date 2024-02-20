@@ -223,28 +223,49 @@ test( 'can add existing attributes', async ( {
 		await page.getByPlaceholder( 'Search or create value' ).click();
 
 		for ( const term of attributes.terms ) {
-			await page.getByRole( 'option', { name: term.name } ).click();
+			await page.getByLabel( term.name, { exact: true } ).check();
 		}
+
+		await page.keyboard.press( 'Escape' );
 
 		// Add attributes
 		await page.getByRole( 'button', { name: 'Add attributes' } ).click();
+	} );
+
+	await test.step( 'verify attributes in product editor', async () => {
+		const item = page.getByRole( 'listitem' ).filter( {
+			has: page.getByText( attributes.attribute.name, { exact: true } ),
+		} );
+		await expect( item ).toBeVisible();
+		for ( const term of attributes.terms ) {
+			await expect( item ).toContainText( term.name );
+		}
 	} );
 
 	await test.step( 'update the product', async () => {
 		await updateProduct( { page, expect } );
 	} );
 
-	await test.step( 'verify the change in product editor', async () => {
-		// Verify attributes in product editor
-		//todo: verify the attributes in the product editor
+	await test.step( 'verify attributes in product editor after product update', async () => {
+		const item = page.getByRole( 'listitem' ).filter( {
+			has: page.getByText( attributes.attribute.name, { exact: true } ),
+		} );
+		await expect( item ).toBeVisible();
+		for ( const term of attributes.terms ) {
+			await expect( item ).toContainText( term.name );
+		}
 	} );
 
 	await test.step( 'verify the changes in the store frontend', async () => {
-		// Verify attributes in store frontend
 		await page.goto( product.permalink );
 
-		// Verify attributes in store frontend
-		//todo: verify the attributes in the store frontend
+		const item = page.getByRole( 'row' ).filter( {
+			has: page.getByText( attributes.attribute.name, { exact: true } ),
+		} );
+		await expect( item ).toBeVisible();
+		for ( const term of attributes.terms ) {
+			await expect( item ).toContainText( term.name );
+		}
 	} );
 } );
 
