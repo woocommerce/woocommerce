@@ -12,24 +12,25 @@
 		padding: 12px;
 		transition: opacity 1s ease-out;
 
-		&-info {
+		&--info {
 			border-left: 4px solid var(--wp-admin-theme-color, #007cba);
 		}
 
-		&-error {
+		&--error {
 			border-left: 4px solid $alert-red;
 		}
 
-		&-warning {
+		&--warning {
 			border-left: 4px solid $alert-yellow;
 		}
 
-		&-success {
+		&--success {
 			border-left: 4px solid $valid-green;
 		}
 
 		&-icon {
 			align-self: flex-start;
+			height: 24px;
 
 			&--info {
 				fill: var(--wp-admin-theme-color, #007cba);
@@ -82,6 +83,13 @@
 			background: none;
 			border: none;
 			cursor: pointer;
+			height: 24px;
 		}
+	}
+}
+
+@media only screen and (min-width: 600px) {
+	.woocommerce-marketplace__notice {
+		margin-bottom: 40px;
 	}
 }

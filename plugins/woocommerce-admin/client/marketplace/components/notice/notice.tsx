@@ -51,7 +51,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 
 	const classes = classNames(
 		'woocommerce-marketplace__notice',
-		`woocommerce-marketplace__notice-${ variant }`,
+		`woocommerce-marketplace__notice--${ variant }`,
 		{
 			'is-dismissible': isDismissible,
 		}
