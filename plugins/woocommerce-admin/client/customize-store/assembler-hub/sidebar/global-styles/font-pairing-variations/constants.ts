@@ -534,6 +534,41 @@ export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
 			},
 		},
 	},
+	{
+		title: 'Inter + Cardo Font',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Inter',
+							slug: 'inter',
+						},
+						{
+							fontFamily: 'Cardo',
+							slug: 'cardo',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--cardo)',
+			},
+		},
+	},
 ];
 
 export const FONT_PAIRINGS = [
