@@ -15,14 +15,14 @@ import { getBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type {
-	BindingUseSourceProps,
+	BindingSourceHandlerProps,
 	BoundBlockEditComponent,
 	BoundBlockEditInstance,
 	MetadataBindingsProps,
 } from '../types';
 import { getBlockBindingsSource, hasPossibleBlockBinding } from '..';
 
-type BoundAttributePlugProps = {
+type BlockBindingConnectorProp = {
 	/*
 	 * The name of the attribute to bind.
 	 */
@@ -35,17 +35,14 @@ type BoundAttributePlugProps = {
 	attrValue: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	/*
-	 * React custon hook to bind a source to a block.
-	 */
-	useSource: (
-		blockProps: BoundBlockEditInstance,
-		args: any // eslint-disable-line @typescript-eslint/no-explicit-any
-	) => BindingUseSourceProps;
-
-	/*
 	 * The block props with bound attribute.
 	 */
 	blockProps: BoundBlockEditInstance;
+
+	/*
+	 * The source handler.
+	 */
+	source: BindingSourceHandlerProps< any >; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 	/*
 	 * The source args.
@@ -63,7 +60,7 @@ type BoundAttributePlugProps = {
  * The app creates an instance of this component for each
  * pair of block-attribute/source-property.
  *
- * @param {BoundAttributePlugProps} props - The component props.
+ * @param {BlockBindingConnectorProp} props - The component props.
  * @return {null} The component.
  */
 const BlockBindingConnector = ( {
@@ -71,13 +68,13 @@ const BlockBindingConnector = ( {
 	attrName,
 	attrValue,
 	blockProps,
-	useSource,
-}: BoundAttributePlugProps ): null => {
+	source,
+}: BlockBindingConnectorProp ): null => {
 	const {
 		placeholder,
 		value: propValue,
 		updateValue: updatePropValue,
-	} = useSource( blockProps, args );
+	} = source.useSource( blockProps, args );
 
 	const blockName = blockProps.name;
 
@@ -175,39 +172,40 @@ function BlockBindingBridge( {
 	bindings: MetadataBindingsProps;
 	props: BoundBlockEditInstance;
 } ) {
-	if ( ! bindings || Object.keys( bindings ).length === 0 ) {
+	if ( ! bindings ) {
 		return null;
 	}
 
-	const { attributes, name } = props;
+	const { name, attributes } = props;
+
+	// Collect all the binding connectors.
 	const BindingConnectorInstances: JSX.Element[] = [];
 
-	Object.entries( bindings ).forEach( ( [ attrName, settings ], i ) => {
-		// Check if the block attribute can be bound.
-		if ( ! hasPossibleBlockBinding( name, attrName ) ) {
-			return;
+	Object.entries( bindings ).forEach(
+		( [ attrName, boundAttrSettings ], i ) => {
+			// Check if the block attribute can be bound.
+			if ( ! hasPossibleBlockBinding( name, attrName ) ) {
+				return;
+			}
+
+			// Bail early if the block doesn't have a valid source handler.
+			const source = getBlockBindingsSource( boundAttrSettings.source );
+			if ( ! source ) {
+				return;
+			}
+
+			BindingConnectorInstances.push(
+				<BlockBindingConnector
+					key={ `${ boundAttrSettings.source }-${ name }-${ attrName }-${ i }` }
+					attrName={ attrName }
+					attrValue={ attributes[ attrName ] }
+					source={ source }
+					blockProps={ props }
+					args={ boundAttrSettings.args }
+				/>
+			);
 		}
-
-		// Check if the source is available.
-		const source = getBlockBindingsSource( settings.source );
-		if ( ! source ) {
-			return;
-		}
-
-		const { useSource } = source;
-		const attrValue = attributes[ attrName ];
-
-		BindingConnectorInstances.push(
-			<BlockBindingConnector
-				key={ `${ settings.source }-${ name }-${ attrName }-${ i }` }
-				attrName={ attrName }
-				attrValue={ attrValue }
-				useSource={ useSource }
-				blockProps={ props }
-				args={ settings.args }
-			/>
-		);
-	} );
+	);
 
 	return <>{ BindingConnectorInstances }</>;
 }
