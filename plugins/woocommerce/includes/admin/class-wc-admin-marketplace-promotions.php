@@ -15,7 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const TRANSIENT_NAME = 'wc_addons_marketplace_promotions';
+	const TRANSIENT_NAME        = 'woocommerce_marketplace_promotions';
+	const SCHEDULED_ACTION_HOOK = 'woocommerce_marketplace_fetch_promotions';
 	/**
 	 * The user's locale, for example en_US.
 	 *
@@ -24,72 +25,29 @@ class WC_Admin_Marketplace_Promotions {
 	public static string $locale;
 
 	/**
-	 * On selected WooCommerce admin pages, fetch promotions from transient or API.
-	 * On all pages, add menu badge to WooCommerce Extensions item if the
-	 * promotions API requests one.
+	 * On all admin pages, schedule an action to fetch promotions data.
+	 * Add menu badge to WooCommerce Extensions item if the promotions
+	 * API requests one.
 	 *
 	 * @return void
 	 */
 	public static function init_marketplace_promotions() {
-		/**
-		 * Allows promotions to be suppressed.
-		 *
-		 * @since 8.7
-		 */
-		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
-			return;
-		}
-
-		if ( self::is_targeted_page_to_fetch_promotions() ) {
-			self::fetch_marketplace_promotions();
+		// Add the callback for our scheduled action.
+		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
+			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
 		}
 
 		if ( self::is_admin_page() ) {
+			// Schedule the action twice a day, starting now.
+			if ( false === wp_next_scheduled( self::SCHEDULED_ACTION_HOOK ) ) {
+				wp_schedule_event( time(), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
+			}
+
 			self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
-			self::show_bubble_promotions();
-		}
-	}
-
-	/**
-	 * Check if the request is for one of the pages we will run fetch_marketplace_promotions
-	 * on: the pages in the WooCommerce admin menu.
-	 *
-	 * @return bool
-	 */
-	private static function is_targeted_page_to_fetch_promotions(): bool {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if (
-			defined( 'DOING_AJAX' ) && DOING_AJAX
-			|| ! is_admin()
-			|| ! isset( $_GET['page'] )
-		) {
-			return false;
+			self::maybe_show_bubble_promotions();
 		}
 
-		// We also target wc-admin, but that has more variations.
-		$targeted_pages = array(
-			'wc-orders',
-			'wc-reports',
-			'wc-settings',
-			'wc-status',
-		);
-
-		if ( in_array( $_GET['page'], $targeted_pages, true ) ) {
-			return true;
-		}
-
-		$targeted_wc_admin_paths = array(
-			'/customers',
-			'/extensions',
-		);
-
-		if ( 'wc-admin' === $_GET['page'] ) {
-			// WooCommerce home has page param but no path param.
-			return ! isset( $_GET['path'] ) || in_array( $_GET['path'], $targeted_wc_admin_paths, true );
-		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-		return false;
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
 	}
 
 	/**
@@ -118,7 +76,7 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return void
 	 */
-	private static function fetch_marketplace_promotions() {
+	public static function fetch_marketplace_promotions() {
 		$url        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
 		$promotions = get_transient( self::TRANSIENT_NAME );
 
@@ -178,8 +136,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 * @throws Exception  If we are unable to create a DateTime from the date_to_gmt.
 	 */
-	private static function show_bubble_promotions() {
-
+	private static function maybe_show_bubble_promotions() {
 		$promotions = get_transient( self::TRANSIENT_NAME );
 		if ( ! $promotions ) {
 			return;
@@ -319,4 +276,13 @@ class WC_Admin_Marketplace_Promotions {
 		return ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">' . esc_html( $bubble_text ) . '</span>';
 	}
 
+	/**
+	 * When WooCommerce is deactivated, clear the scheduled action.
+	 *
+	 * @return void
+	 */
+	public static function clear_scheduled_event() {
+		$timestamp = wp_next_scheduled( self::SCHEDULED_ACTION_HOOK );
+		wp_unschedule_event( $timestamp, self::SCHEDULED_ACTION_HOOK );
+	}
 }
