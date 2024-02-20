@@ -30,6 +30,7 @@ abstract class RemoteSpecsEngine {
 		$logger->error(
 			'Error while evaluating specs',
 			array(
+				'source' => 'remotespecsengine-errors',
 				'class'  => static::class,
 				'errors' => $error_messages,
 			),
