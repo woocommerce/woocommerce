@@ -5,7 +5,7 @@ TextToolbarButton is used in Toolbar for text buttons which show `isToggled` sta
 Notes:
 
 -   Gutenberg core has `ToolbarGroup` and `ToolbarButton` in progress. When these are available this component may not be needed.
--   Gutenberg [core `html` block uses regular `Button` in toolbar](https://github.com/WordPress/gutenberg/blob/master/packages/block-library/src/html/edit.js), and sets `is-active` class to trigger "active" styling when button is toggled on.
+-   Gutenberg [core `html` block uses regular `Button` in toolbar](https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/html/edit.js), and sets `is-active` class to trigger "active" styling when button is toggled on.
 
 ## Usage
 

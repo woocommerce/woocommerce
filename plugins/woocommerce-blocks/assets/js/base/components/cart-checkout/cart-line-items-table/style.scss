@@ -31,10 +31,24 @@ table.wc-block-cart-items {
 		}
 	}
 	.wc-block-cart-items__row {
+
+		.wc-block-cart-item__wrap > *,
+		.wc-block-components-quantity-selector {
+			margin-bottom: $gap-small;
+		}
+
+		.wc-block-cart-item__wrap > *:last-child {
+			margin-bottom: 0;
+		}
+
 		.wc-block-cart-item__image img {
 			width: 100%;
 			margin: 0;
 		}
+		.wc-block-cart-item__prices {
+			line-height: 1.2;
+		}
+
 		.wc-block-cart-item__quantity {
 			.wc-block-cart-item__remove-link {
 				@include link-button();
@@ -48,14 +62,12 @@ table.wc-block-cart-items {
 		.wc-block-components-product-name {
 			display: block;
 			max-width: max-content;
+			line-height: 1.4;
 		}
 		.wc-block-cart-item__total {
 			@include font-size( regular );
 			text-align: right;
-			line-height: inherit;
-		}
-		.wc-block-components-product-metadata {
-			margin-bottom: 0.75em;
+			line-height: 1.8;
 		}
 
 		&.is-disabled {
@@ -72,6 +84,7 @@ table.wc-block-cart-items {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
+			margin: 0;
 		}
 		.wc-block-cart-items__header {
 			display: none;
@@ -99,7 +112,7 @@ table.wc-block-cart-items {
 				grid-column-end: 4;
 				grid-row-start: 1;
 				justify-self: stretch;
-				padding: 0 $gap $gap 0;
+				padding: 0;
 			}
 			.wc-block-cart-item__quantity {
 				grid-column-start: 1;
@@ -107,7 +120,7 @@ table.wc-block-cart-items {
 				vertical-align: bottom;
 				padding-right: $gap;
 				align-self: end;
-				padding-top: $gap;
+				padding-top: 0;
 			}
 			.wc-block-cart-item__total {
 				grid-row-start: 1;
@@ -128,16 +141,16 @@ table.wc-block-cart-items {
 		border-bottom: 1px solid $universal-border-light;
 
 		th {
-			padding: 0.25rem $gap 0.25rem 0;
+			padding: $gap-smaller $gap $gap-smaller 0;
 			white-space: nowrap;
 		}
 		td {
 			border-top: 1px solid $universal-border-light;
-			padding: $gap 0 $gap $gap;
+			padding: $gap-large 0 $gap-large $gap;
 			vertical-align: top;
 		}
 		th:last-child {
-			padding-right: 0;
+			padding-right: $gap;
 		}
 		td:last-child {
 			padding-right: $gap;

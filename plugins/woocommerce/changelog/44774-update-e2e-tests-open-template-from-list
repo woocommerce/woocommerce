@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+Comment: Open templates from list instead of loading the URL in block templates e2e tests
+

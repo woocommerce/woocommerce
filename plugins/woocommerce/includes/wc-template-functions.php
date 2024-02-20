@@ -2830,6 +2830,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'default'           => '',
 			'autofocus'         => '',
 			'priority'          => '',
+			'unchecked_value'   => null,
+			'checked_value'     => '1',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -2956,8 +2958,24 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'checkbox':
-				$field = '<label class="checkbox ' . implode( ' ', $args['label_class'] ) . '" ' . implode( ' ', $custom_attributes ) . '>
-						<input type="' . esc_attr( $args['type'] ) . '" class="input-checkbox ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="1" ' . checked( $value, 1, false ) . ' /> ' . $args['label'] . $required . '</label>';
+				$field = '<label class="checkbox ' . esc_attr( implode( ' ', $args['label_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . '>';
+
+				// Output a hidden field so a value is POSTed if the box is not checked.
+				if ( ! is_null( $args['unchecked_value'] ) ) {
+					$field .= sprintf( '<input type="hidden" name="%1$s" value="%2$s" />', esc_attr( $key ), esc_attr( $args['unchecked_value'] ) );
+				}
+
+				$field .= sprintf(
+					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s /> %6$s',
+					esc_attr( $key ),
+					esc_attr( $args['id'] ),
+					esc_attr( $args['checked_value'] ),
+					esc_attr( 'input-checkbox ' . implode( ' ', $args['input_class'] ) ),
+					checked( $value, $args['checked_value'], false ),
+					wp_kses_post( $args['label'] )
+				);
+
+				$field .= $required . '</label>';
 
 				break;
 			case 'text':

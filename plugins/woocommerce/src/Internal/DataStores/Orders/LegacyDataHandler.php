@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,16 +30,25 @@ class LegacyDataHandler {
 	private DataSynchronizer $data_synchronizer;
 
 	/**
+	 * Instance of the PostsToOrdersMigrationController.
+	 *
+	 * @var PostsToOrdersMigrationController
+	 */
+	private PostsToOrdersMigrationController $posts_to_cot_migrator;
+
+	/**
 	 * Class initialization, invoked by the DI container.
 	 *
-	 * @param OrdersTableDataStore $data_store HPOS datastore instance to use.
-	 * @param DataSynchronizer     $data_synchronizer DataSynchronizer instance to use.
+	 * @param OrdersTableDataStore             $data_store            HPOS datastore instance to use.
+	 * @param DataSynchronizer                 $data_synchronizer     DataSynchronizer instance to use.
+	 * @param PostsToOrdersMigrationController $posts_to_cot_migrator Posts to HPOS migration controller instance to use.
 	 *
 	 * @internal
 	 */
-	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer ) {
-		$this->data_store        = $data_store;
-		$this->data_synchronizer = $data_synchronizer;
+	final public function init( OrdersTableDataStore $data_store, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_cot_migrator ) {
+		$this->data_store            = $data_store;
+		$this->data_synchronizer     = $data_synchronizer;
+		$this->posts_to_cot_migrator = $posts_to_cot_migrator;
 	}
 
 	/**
@@ -151,10 +161,13 @@ class LegacyDataHandler {
 			throw new \Exception( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) );
 		}
 
-		$meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d", $order->get_id() ) );
-		foreach ( $meta_ids as $meta_id ) {
-			delete_metadata_by_mid( 'post', $meta_id );
-		}
+		// Delete all metadata.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d",
+				$order->get_id()
+			)
+		);
 
 		// wp_update_post() changes the post modified date, so we do this manually.
 		// Also, we suspect using wp_update_post() could lead to integrations mistakenly updating the entity.
@@ -208,7 +221,7 @@ class LegacyDataHandler {
 		$diff = array();
 
 		$hpos_order = $this->get_order_from_datastore( $order_id, 'hpos' );
-		$cpt_order  = $this->get_order_from_datastore( $order_id, 'cpt' );
+		$cpt_order  = $this->get_order_from_datastore( $order_id, 'posts' );
 
 		if ( $hpos_order->get_type() !== $cpt_order->get_type() ) {
 			$diff['type'] = array( $hpos_order->get_type(), $cpt_order->get_type() );
@@ -252,8 +265,9 @@ class LegacyDataHandler {
 	 * @since 8.6.0
 	 *
 	 * @param int    $order_id      Order ID.
-	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'cpt'. Defaults to 'hpos'.
+	 * @param string $data_store_id Datastore to use. Should be either 'hpos' or 'posts'. Defaults to 'hpos'.
 	 * @return \WC_Order Order instance.
+	 * @throws \Exception When an error occurs.
 	 */
 	public function get_order_from_datastore( int $order_id, string $data_store_id = 'hpos' ) {
 		$data_store = ( 'hpos' === $data_store_id ) ? $this->data_store : $this->data_store->get_cpt_data_store_instance();
@@ -265,7 +279,14 @@ class LegacyDataHandler {
 			$data_store->prime_caches_for_orders( array( $order_id ), array() );
 		}
 
-		$classname = wc_get_order_type( $data_store->get_order_type( $order_id ) )['class_name'];
+		$order_type = wc_get_order_type( $data_store->get_order_type( $order_id ) );
+
+		if ( ! $order_type ) {
+			// translators: %d is an order ID.
+			throw new \Exception( sprintf( __( '%d is not an order or has an invalid order type.', 'woocommerce' ), $order_id ) );
+		}
+
+		$classname = $order_type['class_name'];
 		$order     = new $classname();
 		$order->set_id( $order_id );
 
@@ -290,6 +311,38 @@ class LegacyDataHandler {
 		$data_store->read( $order );
 
 		return $order;
+	}
+
+	/**
+	 * Backfills an order from/to the CPT or HPOS datastore.
+	 *
+	 * @since 8.7.0
+	 *
+	 * @param int    $order_id               Order ID.
+	 * @param string $source_data_store      Datastore to use as source. Should be either 'hpos' or 'posts'.
+	 * @param string $destination_data_store Datastore to use as destination. Should be either 'hpos' or 'posts'.
+	 * @return void
+	 * @throws \Exception When an error occurs.
+	 */
+	public function backfill_order_to_datastore( int $order_id, string $source_data_store, string $destination_data_store ) {
+		$valid_data_stores = array( 'posts', 'hpos' );
+
+		if ( ! in_array( $source_data_store, $valid_data_stores, true ) || ! in_array( $destination_data_store, $valid_data_stores, true ) || $destination_data_store === $source_data_store ) {
+			throw new \Exception( sprintf( 'Invalid datastore arguments: %1$s -> %2$s.', $source_data_store, $destination_data_store ) );
+		}
+
+		$order = $this->get_order_from_datastore( $order_id, $source_data_store );
+
+		switch ( $destination_data_store ) {
+			case 'posts':
+				$order->get_data_store()->backfill_post_record( $order );
+				break;
+			case 'hpos':
+				$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
+				break;
+			default:
+				break;
+		}
 	}
 
 	/**

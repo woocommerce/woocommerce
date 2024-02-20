@@ -5,5 +5,6 @@ module.exports = {
 		'no-console': 'off',
 		'jest/no-test-callback': 'off',
 		'jest/no-disabled-tests': 'off',
+		'jest/valid-expect': 'off',
 	},
 };

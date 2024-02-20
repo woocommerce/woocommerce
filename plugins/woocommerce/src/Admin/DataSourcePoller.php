@@ -133,12 +133,12 @@ abstract class DataSourcePoller {
 			$this->merge_specs( $specs_from_data_source, $specs, $url );
 		}
 
-		$specs_group            = get_transient( $this->args['transient_name'] ) ?? array();
+		$specs_group            = get_transient( $this->args['transient_name'] );
+		$specs_group            = is_array( $specs_group ) ? $specs_group : array();
 		$locale                 = get_user_locale();
 		$specs_group[ $locale ] = $specs;
 		// Persist the specs as a transient.
-		set_transient(
-			$this->args['transient_name'],
+		$this->set_specs_transient(
 			$specs_group,
 			$this->args['transient_expiry']
 		);
@@ -152,6 +152,20 @@ abstract class DataSourcePoller {
 	 */
 	public function delete_specs_transient() {
 		return delete_transient( $this->args['transient_name'] );
+	}
+
+	/**
+	 * Set the specs transient.
+	 *
+	 * @param array $specs The specs to set in the transient.
+	 * @param int   $expiration The expiration time for the transient.
+	 */
+	public function set_specs_transient( $specs, $expiration = 0 ) {
+		set_transient(
+			$this->args['transient_name'],
+			$specs,
+			$expiration,
+		);
 	}
 
 	/**
@@ -183,7 +197,7 @@ abstract class DataSourcePoller {
 			// phpcs:ignore
 			$logger->error( print_r( $response, true ), $logger_context );
 
-			return [];
+			return array();
 		}
 
 		$body  = $response['body'];
@@ -195,7 +209,7 @@ abstract class DataSourcePoller {
 				$logger_context
 			);
 
-			return [];
+			return array();
 		}
 
 		if ( ! is_array( $specs ) ) {
@@ -204,7 +218,7 @@ abstract class DataSourcePoller {
 				$logger_context
 			);
 
-			return [];
+			return array();
 		}
 
 		return $specs;

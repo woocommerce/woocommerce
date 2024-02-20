@@ -82,6 +82,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Sorting.
+	 *
+	 * Used by `get_coupons_from_cart` to sort coupons.
+	 *
+	 * @var int
+	 */
+	public $sort = 0;
+
+	/**
 	 * Coupon constructor. Loads coupon data.
 	 *
 	 * @param mixed $data Coupon data, object, ID or code.
@@ -213,7 +222,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_amount( $context = 'view' ) {
 		return wc_format_decimal( $this->get_prop( 'amount', $context ) );
@@ -1096,5 +1105,51 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 		// When using this static method, there is no $this to pass to filter.
 		return apply_filters( 'woocommerce_coupon_error', $err, $err_code, null );
+	}
+
+	/**
+	 * Get the coupon information that is needed to reapply the coupon to an existing order.
+	 * This information is intended to be stored as a meta value in the order line item corresponding to the coupon
+	 * and should NOT be modified or extended (additional/custom data should go in a separate metadata entry).
+	 *
+	 * The information returned is a JSON-encoded string of an array with the following coupon information:
+	 *
+	 * 0: Id
+	 * 1: Code
+	 * 2: Type, null is equivalent to 'fixed_cart'
+	 * 3: Nominal amount (either a fixed amount or a percent, depending on the coupon type)
+	 * 4: The coupon grants free shipping? (present only if true)
+	 *
+	 * @return string A JSON string with information that allows the coupon to be reapplied to an existing order.
+	 */
+	public function get_short_info(): string {
+		$type = $this->get_discount_type();
+		$info = array(
+			$this->get_id(),
+			$this->get_code(),
+			'fixed_cart' === $type ? null : $type,
+			(float) $this->get_prop( 'amount' ),
+		);
+
+		if ( $this->get_free_shipping() ) {
+			$info[] = true;
+		}
+
+		return wp_json_encode( $info );
+	}
+
+	/**
+	 * Sets the coupon parameters from a reapply information set generated with 'get_short_info'.
+	 *
+	 * @param string $info JSON string with reapply information as returned by 'get_short_info'.
+	 */
+	public function set_short_info( string $info ) {
+		$info = json_decode( $info, true );
+
+		$this->set_id( $info[0] ?? 0 );
+		$this->set_code( $info[1] ?? '' );
+		$this->set_discount_type( $info[2] ?? 'fixed_cart' );
+		$this->set_amount( $info[3] ?? 0 );
+		$this->set_free_shipping( $info[4] ?? false );
 	}
 }

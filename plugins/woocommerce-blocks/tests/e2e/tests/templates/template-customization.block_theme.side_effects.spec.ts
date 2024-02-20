@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
 import {
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
@@ -12,18 +11,18 @@ import {
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
-	if ( ! testData.canBeOverridenByThemes ) {
+	if ( ! testData.canBeOverriddenByThemes ) {
 		return;
 	}
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async () => {
-			await deleteAllTemplates( 'wp_template' );
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
 
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
@@ -33,12 +32,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			page,
 		} ) => {
 			// Edit the WooCommerce default template
-			await admin.visitSiteEditor( {
-				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
@@ -49,7 +46,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
 			);
 
-			// Edit the theme template.
+			// Edit the theme template. The theme template is not
+			// directly available from the UI, because the customized
+			// one takes priority, so we go directly to its URL.
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
