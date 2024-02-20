@@ -57,6 +57,8 @@ class Hydration {
 
 		$this->cache_store_notices();
 
+		$preloaded_data = array();
+
 		if ( null !== $controller_class ) {
 			$request           = new \WP_REST_Request( 'GET', $path );
 			$schema_controller = StoreApi::container()->get( SchemaController::class );
