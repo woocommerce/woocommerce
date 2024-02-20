@@ -3,31 +3,39 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import { Disabled } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
-import ErrorPlaceholder from '@woocommerce/editor-components/error-placeholder';
+import ErrorPlaceholder, {
+	ErrorObject,
+} from '@woocommerce/editor-components/error-placeholder';
 import LoadMoreButton from '@woocommerce/base-components/load-more-button';
 import {
 	ReviewList,
 	ReviewSortSelect,
 } from '@woocommerce/base-components/reviews';
+import type { Review } from '@woocommerce/base-components/reviews/types';
 import withReviews from '@woocommerce/base-hocs/with-reviews';
+
+/**
+ * Internal dependencies
+ */
+import { ReviewBlockAttributes } from './attributes';
+
+interface EditorBlockProps {
+	attributes: ReviewBlockAttributes;
+	reviews: Review[];
+	totalReviews: number;
+	error?: ErrorObject;
+	isLoading: boolean;
+	noReviewsPlaceholder: React.ComponentType< {
+		attributes: EditorBlockProps[ 'attributes' ];
+	} >;
+}
 
 /**
  * Block rendered in the editor.
  */
-class EditorBlock extends Component {
-	static propTypes = {
-		/**
-		 * The attributes for this block.
-		 */
-		attributes: PropTypes.object.isRequired,
-		// from withReviews
-		reviews: PropTypes.array,
-		totalReviews: PropTypes.number,
-	};
-
+class EditorBlock extends Component< EditorBlockProps > {
 	render() {
 		const {
 			attributes,
@@ -63,6 +71,7 @@ class EditorBlock extends Component {
 						onChange={ () => null }
 					/>
 				) }
+
 				<ReviewList attributes={ attributes } reviews={ reviews } />
 				{ attributes.showLoadMore && totalReviews > reviews.length && (
 					<LoadMoreButton
@@ -70,6 +79,7 @@ class EditorBlock extends Component {
 							'Load more reviews',
 							'woocommerce'
 						) }
+						onClick={ () => null }
 					/>
 				) }
 			</Disabled>
