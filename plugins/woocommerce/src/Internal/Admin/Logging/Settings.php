@@ -53,12 +53,18 @@ class Settings {
 	 * @return string The full directory path, with trailing slash.
 	 */
 	public static function get_log_directory(): string {
+		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
+			return Constants::get_constant( 'WC_LOG_DIR' );
+		}
+
 		$upload_dir = wp_upload_dir( null, false );
 
 		/**
 		 * Filter to change the directory for storing WooCommerce's log files.
 		 *
 		 * @param string $dir The full directory path, with trailing slash.
+		 *
+		 * @since 8.8.0
 		 */
 		$dir = apply_filters( 'woocommerce_log_directory', $upload_dir['basedir'] . '/wc-logs/' );
 
