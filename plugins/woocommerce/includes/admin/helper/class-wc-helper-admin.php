@@ -56,6 +56,8 @@ class WC_Helper_Admin {
 			'storeCountry'           => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
 			'installedProducts'      => $installed_products,
+			'wooConnectInstalled'    => WC_Helper_Plugin::is_plugin_installed(),
+			'wooConnectActive'       => WC_Helper_Plugin::is_plugin_active(),
 		);
 
 		return $settings;
