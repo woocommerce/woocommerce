@@ -479,7 +479,6 @@
 	.woocommerce-customize-store_sidebar-typography-upgrade-notice {
 		margin-top: 48px;
 		color: #1E1E1E;
-		font-size: 11px;
 		padding: 0;
 		h4 {
 			text-transform: uppercase;
@@ -487,6 +486,11 @@
 		}
 		p {
 			margin: 0;
+		}
+
+		a,
+		button {
+			text-decoration: none;
 		}
 	}
 

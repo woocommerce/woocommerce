@@ -139,9 +139,9 @@ export const SidebarNavigationScreenTypography = () => {
 							<p>
 								{ createInterpolateElement( upgradeNotice, {
 									WordPressLink: (
-										<Link
+										<Button
 											href={ `${ ADMIN_URL }update-core.php` }
-											type="external"
+											variant="link"
 										/>
 									),
 									OptInModal: (

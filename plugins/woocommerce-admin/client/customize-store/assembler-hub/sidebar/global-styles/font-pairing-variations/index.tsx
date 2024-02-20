@@ -7,7 +7,7 @@
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
-import { useCallback, useContext, useMemo } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 import {
 	privateApis as blockEditorPrivateApis,
 	// @ts-ignore no types exist yet.
