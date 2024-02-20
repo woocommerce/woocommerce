@@ -84,16 +84,6 @@ const test = baseTest.extend( {
 
 		await use( product );
 	},
-	page: async ( { page, product }, use ) => {
-		await test.step( 'go to product editor, inventory tab', async () => {
-			await page.goto(
-				`wp-admin/post.php?post=${ product.id }&action=edit`
-			);
-			await page.getByRole( 'button', { name: 'Organization' } ).click();
-		} );
-
-		await use( page );
-	},
 } );
 
 test( 'can create and add attributes', async ( { page, product } ) => {
@@ -107,6 +97,11 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 			value: `value_1_${ Date.now() }`,
 		},
 	];
+
+	await test.step( 'go to product editor, Organization tab', async () => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page.getByRole( 'button', { name: 'Organization' } ).click();
+	} );
 
 	await test.step( 'add a new attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
@@ -180,6 +175,11 @@ test( 'can add existing attributes', async ( {
 	product,
 	attributes,
 } ) => {
+	await test.step( 'go to product editor, Organization tab', async () => {
+		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+		await page.getByRole( 'button', { name: 'Organization' } ).click();
+	} );
+
 	await test.step( 'add an existing attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
 
@@ -230,10 +230,28 @@ test( 'can update product attributes', async ( {
 	productWithAttributes,
 	attributes,
 } ) => {
-	await test.step( "update product's attribute value", async () => {
-		await page.reload();
+	await test.step( 'go to product editor, Organization tab', async () => {
+		await page.goto(
+			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit`
+		);
+		await page.getByRole( 'button', { name: 'Organization' } ).click();
 
-		await page.getByRole( 'button', { name: 'Edit' } ).click();
+		// Sometimes the attribute's terms take a while to load, and we need to reload and retry.
+		await expect(
+			async () => {
+				await page.reload();
+				await page.getByRole( 'button', { name: 'Edit' } ).click();
+				await expect(
+					page.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
+				).toBeVisible();
+			},
+			{
+				message: "wait for the attribute's terms to load",
+			}
+		).toPass();
+	} );
+
+	await test.step( "update product's attribute terms", async () => {
 		await page
 			.getByLabel( `Remove ${ attributes.terms[ 0 ].name }` )
 			.click();
@@ -250,6 +268,46 @@ test( 'can update product attributes', async ( {
 	await test.step( 'verify the change in product editor', async () => {
 		// Verify attributes in product editor
 		//todo: verify the attributes in the product editor
+	} );
+
+	await test.step( 'verify the changes in the store frontend', async () => {
+		// Verify attributes in store frontend
+		await page.goto( productWithAttributes.permalink );
+
+		// Verify attributes in store frontend
+		//todo: verify the attributes in the store frontend
+	} );
+} );
+
+test( 'can remove product attributes', async ( {
+	page,
+	productWithAttributes,
+	attributes,
+} ) => {
+	await test.step( 'go to product editor, Organization tab', async () => {
+		await page.goto(
+			`wp-admin/post.php?post=${ productWithAttributes.id }&action=edit&tab=organization`
+		);
+		await page.getByRole( 'button', { name: 'Organization' } ).click();
+	} );
+
+	const attributeItemLocator = page.getByRole( 'listitem' ).filter( {
+		has: page.getByText( attributes.attribute.name, { exact: true } ),
+	} );
+	page.on( 'dialog', ( dialog ) => dialog.accept() );
+
+	await test.step( "remove product's attribute", async () => {
+		await attributeItemLocator.getByLabel( 'Remove' ).click();
+		await expect( attributeItemLocator ).toBeHidden();
+	} );
+
+	await test.step( 'update the product', async () => {
+		await updateProduct( { page, expect } );
+	} );
+
+	await test.step( 'verify the change in product editor', async () => {
+		// Verify attributes in product editor
+		await expect( attributeItemLocator ).toBeHidden();
 	} );
 
 	await test.step( 'verify the changes in the store frontend', async () => {
