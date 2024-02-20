@@ -16,7 +16,7 @@ import { useValidation } from '../../../contexts/validation-context';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { TextBlockAttributes } from './types';
 import { useProductEdits } from '../../../hooks/use-product-edits';
-import { getBlockBoundSourePropsList } from '../../../bindings-sources/entity-source';
+import { getBlockBoundSourePropsList } from '../../../bindings-sources/entity/product';
 
 export function TextFieldBlockEdit( {
 	attributes,

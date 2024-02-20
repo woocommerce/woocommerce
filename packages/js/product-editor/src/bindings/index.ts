@@ -10,8 +10,8 @@ import { addFilter } from '@wordpress/hooks';
  */
 import extendBlockWithBoundAttributes from './extend-blocks-with-bound-attributes';
 import type { BindingSourceHandlerProps } from './types';
-import wooEntitySource from '../bindings-sources/entity-source';
-import { type WooEntitySourceArgs } from '../bindings-sources/entity-source/types';
+import wooEntitySource from '../bindings-sources/entity/product';
+import { type WooEntitySourceArgs } from '../bindings-sources/entity/product/types';
 
 type BLOCK_BINDINGS_ALLOWED_BLOCKS_TYPE = {
 	[ key: string ]: string[];
