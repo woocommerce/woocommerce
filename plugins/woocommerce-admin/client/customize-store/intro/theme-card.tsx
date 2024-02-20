@@ -50,6 +50,11 @@ export const ThemeCard = ( {
 						{ __( 'Active theme', 'woocommerce' ) }
 					</span>
 				) }
+				{ "Free" !== price && (
+					<span className="theme-card__paid">
+						{ __( 'Paid', 'woocommerce' ) }
+					</span>
+				) }
 				<span className="theme-card__free">{ price }</span>
 			</div>
 		</div>

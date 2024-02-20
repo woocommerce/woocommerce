@@ -238,6 +238,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
+								price={ theme.price }
 								onClick={ () => {
 									if ( theme.is_active ) {
 										sendEvent( {
@@ -251,7 +252,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 										} );
 									}
 								} }
-							 price={ theme.price }/>
+							/>
 						) ) }
 					</div>
 
