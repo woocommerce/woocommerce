@@ -31,11 +31,20 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function init_marketplace_promotions() {
+		/**
+		 * Allows promotions to be suppressed.
+		 *
+		 * @since 8.7
+		 */
+		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
+			return;
+		}
+
 		if ( self::is_targeted_page_to_fetch_promotions() ) {
 			self::fetch_marketplace_promotions();
 		}
 
-		if ( self::is_targeted_page_to_show_bubble_promotions() ) {
+		if ( self::is_admin_page() ) {
 			self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
 			self::show_bubble_promotions();
 		}
@@ -43,7 +52,7 @@ class WC_Admin_Marketplace_Promotions {
 
 	/**
 	 * Check if the request is for one of the pages we will run fetch_marketplace_promotions
-	 * on: the WooCommerce Home and Extensions pages.
+	 * on: the pages in the WooCommerce admin menu.
 	 *
 	 * @return bool
 	 */
@@ -57,12 +66,26 @@ class WC_Admin_Marketplace_Promotions {
 			return false;
 		}
 
-		$targeted_page = 'wc-admin';
-		$targeted_path = '/extensions';
+		// We also target wc-admin, but that has more variations.
+		$targeted_pages = array(
+			'wc-orders',
+			'wc-reports',
+			'wc-settings',
+			'wc-status',
+		);
 
-		if ( $_GET['page'] === $targeted_page ) {
+		if ( in_array( $_GET['page'], $targeted_pages, true ) ) {
+			return true;
+		}
+
+		$targeted_wc_admin_paths = array(
+			'/customers',
+			'/extensions',
+		);
+
+		if ( 'wc-admin' === $_GET['page'] ) {
 			// WooCommerce home has page param but no path param.
-			return ! isset( $_GET['path'] ) || $_GET['path'] === $targeted_path;
+			return ! isset( $_GET['path'] ) || in_array( $_GET['path'], $targeted_wc_admin_paths, true );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
@@ -70,15 +93,14 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	 * Check if the request is for one of the pages we will show menu item bubbles
-	 * on: the pages in the main WooCommerce menu, excluding Analytics and Marketing.
-	 *
-	 * We need to cover all the pages in the WooCommerce menu, because the Extensions item
-	 * is visible on any of these pages, and we want to show the bubble there.
+	 * Check if the request is for an admin page, and not ajax.
+	 * We may want to add a menu bubble to WooCommerce Extensions
+	 * on any admin page, as the user may view the WooCommerce flyout
+	 * menu.
 	 *
 	 * @return bool
 	 */
-	private static function is_targeted_page_to_show_bubble_promotions(): bool {
+	private static function is_admin_page(): bool {
 		if (
 			( defined( 'DOING_AJAX' ) && DOING_AJAX )
 			|| ! is_admin()
@@ -157,15 +179,6 @@ class WC_Admin_Marketplace_Promotions {
 	 * @throws Exception  If we are unable to create a DateTime from the date_to_gmt.
 	 */
 	private static function show_bubble_promotions() {
-
-		/**
-		 * Allows the menu bubble to be suppressed.
-		 *
-		 * @since 8.7
-		 */
-		if ( apply_filters( 'woocommerce_marketplace_suppress_menu_badges', false ) ) {
-			return;
-		}
 
 		$promotions = get_transient( self::TRANSIENT_NAME );
 		if ( ! $promotions ) {
