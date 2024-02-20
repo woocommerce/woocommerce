@@ -29,7 +29,6 @@ import { Look } from '~/customize-store/design-with-ai/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { FontFamily } from './font-families-loader-dot-com';
-import { isAIFlow } from '~/customize-store/guards';
 
 export const FontPairing = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
@@ -46,10 +45,6 @@ export const FontPairing = () => {
 	} );
 
 	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
-
-	const [ custom ] = useGlobalSetting( 'typography.fontFamilies.custom' ) as [
-		Array< FontFamily >
-	];
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
