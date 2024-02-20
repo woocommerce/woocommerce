@@ -251,7 +251,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 										} );
 									}
 								} }
-							/>
+							 price={ theme.price }/>
 						) ) }
 					</div>
 
