@@ -95,10 +95,10 @@ export const VariationContainer = ( { variation, children } ) => {
 		// With the Font Library, the fontFamilies object contains an array of font families installed with the Font Library under the key 'custom'.
 		// We need to compare only the active theme font families, so we compare the theme font families with the current variation.
 		const { theme } = user.settings.typography.fontFamilies;
-
-		return isEqual( variation.settings.typography, {
-			fontFamilies: { theme },
-		} );
+		return variation.settings.typography?.fontFamilies.theme.every(
+			( { slug } ) =>
+				theme.some( ( { slug: themeSlug } ) => themeSlug === slug )
+		);
 	}, [ user, variation ] );
 
 	let label = variation?.title;
