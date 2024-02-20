@@ -60,28 +60,46 @@ export const FontPairing = () => {
 				'woocommerce_allow_tracking'
 			) === 'yes'
 	);
-	const filterFontsByLookAndFeel = useCallback(
-		( lookAndFeel ) =>
-			FONT_PAIRINGS.filter( ( font ) =>
-				font.lookAndFeel.includes( lookAndFeel )
-			),
-		[]
-	);
 
 	const fontPairings = useMemo( () => {
-		if ( aiOnline && aiSuggestions?.lookAndFeel ) {
-			return filterFontsByLookAndFeel( aiSuggestions.lookAndFeel );
-		} else if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
+		if ( isAIFlow( context.flowType ) ) {
+			return aiOnline && aiSuggestions?.lookAndFeel
+				? FONT_PAIRINGS.filter( ( font ) =>
+						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
+				  )
+				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+		}
+
+		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
 			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING;
 		}
 
-		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
+			const fontFamilies = pair.settings.typography.fontFamilies;
+			const fonts = custom.filter( ( customFont ) =>
+				fontFamilies.theme.some(
+					( themeFont ) => themeFont.slug === customFont.slug
+				)
+			);
+
+			return {
+				...pair,
+				settings: {
+					typography: {
+						fontFamilies: {
+							theme: fonts,
+						},
+					},
+				},
+			};
+		}, [] );
 	}, [
 		aiOnline,
 		aiSuggestions?.lookAndFeel,
-		trackingAllowed,
+		context.flowType,
+		custom,
 		isFontLibraryAvailable,
-		filterFontsByLookAndFeel,
+		trackingAllowed,
 	] );
 
 	if ( isLoading ) {
