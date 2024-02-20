@@ -19,6 +19,14 @@
       "category_title": "Building a Woo Store",
       "posts": [
         {
+          "post_title": "Working with Webhooks in WooCommerce",
+          "menu_title": "Using Webhooks",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/webhooks.md",
+          "hash": "102727c5217162eb5a363f95664f0c1554dce96c58e4b506cd350d50800a5381",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/webhooks.md",
+          "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
+        },
+        {
           "post_title": "How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
@@ -315,14 +323,6 @@
           "id": "9c1985429ab05bf7abc3e0a8676fb3d92a2c62eb"
         },
         {
-          "post_title": "Webhooks",
-          "menu_title": "Webhooks",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/webhooks.md",
-          "hash": "eae79157749e2ada34570654d0392974da81f29321663fc86c0db973fee0762e",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/webhooks.md",
-          "id": "5c1dee19b2a23240ee20f1fde448e1a8f9f58ffe"
-        },
-        {
           "post_title": "Managing custom attributes in WooCommerce menus and taxonomy archives",
           "menu_title": "Custom attributes in menus",
           "tags": "how-to",
@@ -350,7 +350,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "ff3ff9f8f0f8f14175482b68d9e16b697089120894e6bd4d8cbf4d55145d9510",
+          "hash": "dbe7c96a7ffd9d8c95fdc07eba211f03840bc47d3c49f8cb0eff8363d4ad826d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -911,6 +911,11 @@
       "categories": []
     },
     {
+      "category_slug": "utilities",
+      "category_title": "Utilities",
+      "categories": []
+    },
+    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woo.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woo.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1195,5 +1200,5 @@
       "categories": []
     }
   ],
-  "hash": "e2bbd4e0e56fce0c7c10aa8fba780d2a5beb24f1399a5ed82af9d117439b0d89"
+  "hash": "383787d7f861905c25f96a7f003f9214f60da39fcdccdd90a61a5bf961346199"
 }
