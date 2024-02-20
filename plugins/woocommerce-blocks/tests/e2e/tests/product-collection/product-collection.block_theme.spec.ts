@@ -56,20 +56,20 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			await pageObject.setNumberOfColumns( 2 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-2' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-2/
+			);
 
 			await pageObject.setNumberOfColumns( 4 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 		} );
 
 		test( 'Order By - sort products by title in descending order correctly', async ( {
