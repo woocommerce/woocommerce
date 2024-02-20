@@ -35,6 +35,7 @@ class Init extends RemoteSpecsEngine {
 		$specs           = self::get_specs();
 		$results         = EvaluateExtension::evaluate_bundles( $specs, $allowed_bundles );
 		$specs_to_return = $results['bundles'];
+		$specs_to_save   = null;
 
 		$plugins = array_filter(
 			$results['bundles'],
@@ -43,16 +44,22 @@ class Init extends RemoteSpecsEngine {
 			}
 		);
 
-		// When no plugins are visible, replace it with defaults and save for 3 hours.
 		if ( empty( $plugins ) ) {
-			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultFreeExtensions::get_all() ), 3 * HOUR_IN_SECONDS );
-			$specs_to_return = EvaluateExtension::evaluate_bundles( DefaultFreeExtensions::get_all(), $allowed_bundles )['bundles'];
+			// When no plugins are visible, replace it with defaults and save for 3 hours.
+			$specs_to_save   = DefaultFreeExtensions::get_all();
+			$specs_to_return = EvaluateExtension::evaluate_bundles( $specs_to_save, $allowed_bundles )['bundles'];
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When suggestions is not empty but has errors, save it for 3 hours.
+			$specs_to_save = $specs;
 		}
 
 		// When plugins is not empty but has errors, save it for 3 hours.
 		if ( count( $results['errors'] ) > 0 ) {
-			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
 			self::log_errors( $results['errors'] );
+		}
+
+		if ( $specs_to_save ) {
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
 		}
 
 		return $specs_to_return;

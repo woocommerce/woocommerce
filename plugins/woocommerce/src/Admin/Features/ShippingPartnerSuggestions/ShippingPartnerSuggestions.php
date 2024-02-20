@@ -22,17 +22,19 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 		$specs           = is_array( $specs ) ? $specs : self::get_specs();
 		$results         = EvaluateSuggestion::evaluate_specs( $specs );
 		$specs_to_return = $results['suggestions'];
+		$specs_to_save   = null;
 
-		// When suggestions is empty, replace it with defaults and save for 3 hours.
-		if ( empty( $results['suggestions'] ) ) {
-			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => DefaultShippingPartners::get_all() ), 3 * HOUR_IN_SECONDS );
-			$specs_to_return = EvaluateSuggestion::evaluate_specs( DefaultShippingPartners::get_all() )['suggestions'];
+		if ( empty( $specs_to_return ) ) {
+			// When suggestions is empty, replace it with defaults and save for 3 hours.
+			$specs_to_save   = DefaultShippingPartners::get_all();
+			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save )['suggestions'];
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When suggestions is not empty but has errors, save it for 3 hours.
+			$specs_to_save = $specs;
 		}
 
-		// When suggestions is not empty but has errors, save it for 3 hours.
-		if ( count( $results['errors'] ) > 0 ) {
-			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
-			self::log_errors( $results['errors'] );
+		if ( $specs_to_save ) {
+			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
 		}
 
 		return $specs_to_return;
