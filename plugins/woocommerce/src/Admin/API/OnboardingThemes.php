@@ -253,7 +253,28 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Twenty Twenty-Four',
 				'price'          => 'Free',
-				'color_palettes' => array(),
+				'color_palettes' => array(
+					array(
+						'title'     => 'Black and white',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+					array(
+						'title'     => 'Brown Sugar',
+						'primary'   => '#EFEBE0',
+						'secondary' => '#AC6239',
+					),
+					array(
+						'title'     => 'Midnight',
+						'primary'   => '#161514',
+						'secondary' => '#AFADA7',
+					),
+					array(
+						'title'     => 'Olive',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+				),
 				'total_palettes' => 0,
 				'slug'           => 'twentytwentyfour',
 				'thumbnail_url'  => 'https://i0.wp.com/themes.svn.wordpress.org/twentytwentyfour/1.0/screenshot.png',
