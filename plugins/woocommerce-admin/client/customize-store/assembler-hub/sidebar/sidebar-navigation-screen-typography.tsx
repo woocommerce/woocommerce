@@ -127,7 +127,7 @@ export const SidebarNavigationScreenTypography = () => {
 			} ) }
 			content={
 				<div className="woocommerce-customize-store_sidebar-typography-content">
-					<FontPairing />
+					{ isFontLibraryAvailable && <FontPairing /> }
 					{ upgradeNotice && (
 						<div className="woocommerce-customize-store_sidebar-typography-upgrade-notice">
 							<h4>
@@ -140,8 +140,7 @@ export const SidebarNavigationScreenTypography = () => {
 								{ createInterpolateElement( upgradeNotice, {
 									WordPressLink: (
 										<Link
-											href="https://wordpress.org/download/"
-											target="_blank"
+											href={ `${ ADMIN_URL }update-core.php` }
 											type="external"
 										/>
 									),
