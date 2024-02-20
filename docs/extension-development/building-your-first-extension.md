@@ -4,11 +4,25 @@ menu_title: Build your first extension
 tags: how-to
 ---
 
-The easiest way to get started building an extension is to use the built-in extension generator that is included alongside WooCommerce Admin. This utility is maintained as part of the codebase for WooCommerce Admin, so it includes up-to-date tools and many preconfigured settings for building modern extensions that take advantage of the [React-powered](https://react.dev/) user experience available in current versions of WordPress and WooCommerce.
+This guide will teach you how to use [create-woo-extension](https://www.npmjs.com/package/@woocommerce/create-woo-extension) to scaffold a WooCommerce extension. There are various benefits to using create-woo-extension over manually creating one from scratch, including:
 
-## Using the extension generator
+There’s less boilerplate code to write, and less dependencies to manually setup
+Modern features such as Blocks are automatically supported 
+Unit testing, linting, and Prettier IDE configuration are ready to use
 
-Browse to your local WooCommerce Admin repository
+Once your extension is set up, we’ll show you how to instantly spin up a development environment using [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
+
+## Requirements
+
+Before getting started, you’ll need the following tools installed on your device:
+
+
+- Node.js with NPM
+- Docker (must be running to use wp-env)
+- Composer
+
+This guide also presumes you’re familiar with working with the command line.
+
 
 ```sh
 cd /your/server/wp-content/plugins/woocommerce-admin
