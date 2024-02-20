@@ -113,7 +113,7 @@ function SidebarScreens() {
 				<SidebarNavigationScreenColorPalette />
 			</NavigatorScreen>
 			<NavigatorScreen path="/customize-store/assembler-hub/typography">
-				<SidebarNavigationScreenTypography sendEvent={ () => {} } />
+				<SidebarNavigationScreenTypography />
 			</NavigatorScreen>
 			<NavigatorScreen path="/customize-store/assembler-hub/header">
 				<SidebarNavigationScreenHeader />

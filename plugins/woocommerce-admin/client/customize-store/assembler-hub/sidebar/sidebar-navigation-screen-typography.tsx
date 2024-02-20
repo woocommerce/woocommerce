@@ -9,7 +9,7 @@ import {
 	useContext,
 	useState,
 } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -24,12 +24,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
-import { IntroOptInEvent } from '~/core-profiler';
-export const SidebarNavigationScreenTypography = ( {
-	sendEvent,
-}: {
-	sendEvent: ( event: IntroOptInEvent ) => void;
-} ) => {
+export const SidebarNavigationScreenTypography = () => {
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -204,12 +199,13 @@ export const SidebarNavigationScreenTypography = ( {
 										</Button>
 										<Button
 											onClick={ () => {
-												sendEvent( {
-													type: 'INTRO_COMPLETED',
-													payload: {
-														optInDataSharing:
-															OptInDataSharing,
-													},
+												dispatch(
+													OPTIONS_STORE_NAME
+												).updateOptions( {
+													woocommerce_allow_tracking:
+														OptInDataSharing
+															? 'yes'
+															: 'no',
 												} );
 												OptIn();
 												closeModal();
