@@ -190,11 +190,12 @@ class Bootstrap {
 			function() {
 				echo '<div class="error"><p>';
 				printf(
-					/* translators: %1$s is the install command, %2$s is the build command, %3$s is the watch command. */
-					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the plugin directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woocommerce' ),
-					'<code>npm install</code>',
-					'<code>npm run build</code>',
-					'<code>npm start</code>'
+					/* translators: %1$s is the node install command, %2$s is the install command, %3$s is the build command, %4$s is the watch command. */
+					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the root directory, run %1$s to ensure your node version is aligned, run %2$s to install dependencies, %3$s to build the files or %4$s to build the files and watch for changes.', 'woocommerce' ),
+					'<code>nvm use</code>',
+					'<code>pnpm install</code>',
+					'<code>pnpm run build</code>',
+					'<code>pnpm run --filter="@woocommerce/plugin-woocommerce" watch:build</code>'
 				);
 				echo '</p></div>';
 			}
