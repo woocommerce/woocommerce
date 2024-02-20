@@ -108,7 +108,7 @@ export const SidebarNavigationScreenFooter = () => {
 			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
-					"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+					"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
 					'woocommerce'
 				),
 				{
