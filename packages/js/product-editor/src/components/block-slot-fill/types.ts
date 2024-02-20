@@ -15,5 +15,5 @@ export type BlockSlotProps = BlockSlotFillProps & Slot.Props;
 
 export type BlockFillProps = BlockSlotFillProps &
 	Fill.Props & {
-		slotContainerBlockName: string;
+		slotContainerBlockName: string | string[];
 	};
