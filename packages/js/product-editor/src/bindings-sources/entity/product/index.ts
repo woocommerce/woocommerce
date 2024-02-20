@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useCallback } from '@wordpress/element';
 
@@ -15,7 +14,7 @@ import type {
 	BindingUseSourceProps,
 	BlockProps,
 	BoundBlockAttributes,
-} from '../../bindings/types';
+} from '../../../bindings/types';
 import { WooEntitySourceArgs } from './types';
 
 /**
@@ -57,33 +56,14 @@ const useSource = (
 		throw new Error( 'The "prop" argument is required.' );
 	}
 
-	const { context } = blockProps;
-	const { kind = 'postType', name: nameFromArgs, prop, id } = sourceArgs;
+	const { prop, id } = sourceArgs;
 
-	const { postType: nameFromContext } = context;
-
-	/*
-	 * Entity prop name:
-	 * - If `name` is provided in the source args, use it.
-	 * - If `name` is not provided in the source args, use the `postType` from the context.
-	 * - Otherwise, try to get the current post type from the editor store.
-	 */
-	const name = useSelect(
-		( select ) => {
-			if ( nameFromArgs ) {
-				return nameFromArgs;
-			}
-
-			if ( nameFromContext ) {
-				return nameFromContext;
-			}
-
-			return select( 'core/editor' ).getCurrentPostType();
-		},
-		[ nameFromContext, nameFromArgs ]
+	const [ value, updateValue ] = useEntityProp(
+		'postType',
+		'product',
+		prop,
+		id
 	);
-
-	const [ value, updateValue ] = useEntityProp( kind, name, prop, id );
 
 	const updateValueHandler = useCallback(
 		( nextEntityPropValue: string ) => {
@@ -103,7 +83,7 @@ const useSource = (
  * Create the product-entity
  * block binding source handler.
  *
- * source ID: `woo/entity`
+ * source ID: `woocommerce/entity/product`
  * args:
  * - prop: The name of the entity property to bind.
  *
@@ -115,7 +95,7 @@ const useSource = (
  * metadata: {
  *   bindings: {
  *     content: {
- *       source: 'woo/entity',
+ *       source: 'woocommerce/entity/product',
  *       args: {
  *         prop: 'short_description',
  *       },
@@ -124,7 +104,7 @@ const useSource = (
  * ```
  */
 export default {
-	name: 'woo/entity',
+	name: 'woocommerce/entity/product',
 	label: __( 'Product Entity', 'woocommerce' ),
 	useSource,
 	lockAttributesEditing: true,
