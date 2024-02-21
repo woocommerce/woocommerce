@@ -56,6 +56,29 @@ class Init extends RemoteSpecsEngine {
 		return $specs;
 	}
 
+	/**
+	 * Process specs.
+	 *
+	 * @param array|null $specs Marketing recommendations spec array.
+	 * @return array
+	 */
+	protected static function evaluate_specs( array $specs = null ) {
+		$suggestions = array();
+		$errors      = array();
+
+		foreach ( $specs as $spec ) {
+			try {
+				$suggestions[] = self::object_to_array( $spec );
+			} catch ( \Throwable $e ) {
+				$errors[] = $e;
+			}
+		}
+
+		return array(
+			'suggestions' => $suggestions,
+			'errors'      => $errors,
+		);
+	}
 
 	/**
 	 * Load recommended plugins from Woo.com
@@ -63,23 +86,30 @@ class Init extends RemoteSpecsEngine {
 	 * @return array
 	 */
 	public static function get_recommended_plugins(): array {
-		$specs  = self::get_specs();
-		$result = array();
-		$errors = array();
+		$specs   = self::get_specs();
+		$results = self::evaluate_specs( $specs );
 
-		foreach ( $specs as $spec ) {
-			try {
-				$result[] = self::object_to_array( $spec );
-			} catch ( \Throwable $e ) {
-				$errors[] = $e;
-			}
+		$specs_to_return = $results['suggestions'];
+		$specs_to_save   = null;
+
+		if ( empty( $specs_to_return ) ) {
+			// When suggestions is empty, replace it with defaults and save for 3 hours.
+			$specs_to_save   = DefaultMarketingRecommendations::get_all();
+			$specs_to_return = self::evaluate_specs( $specs_to_save )['suggestions'];
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When suggestions is not empty but has errors, save it for 3 hours.
+			$specs_to_save = $specs;
+		}
+
+		if ( $specs_to_save ) {
+			MarketingRecommendationsDataSourcePoller::get_instance()->set_specs_transient( $specs_to_save, 3 * HOUR_IN_SECONDS );
 		}
 
 		if ( ! empty( $errors ) ) {
 			self::log_errors( $errors );
 		}
 
-		return $result;
+		return $specs_to_return;
 	}
 
 	/**
