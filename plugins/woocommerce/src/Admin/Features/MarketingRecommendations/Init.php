@@ -104,7 +104,7 @@ class Init extends RemoteSpecsEngine {
 		if ( $specs_to_save ) {
 			MarketingRecommendationsDataSourcePoller::get_instance()->set_specs_transient( $specs_to_save, 3 * HOUR_IN_SECONDS );
 		}
-
+		$errors = $results['errors'];
 		if ( ! empty( $errors ) ) {
 			self::log_errors( $errors );
 		}
