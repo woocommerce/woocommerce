@@ -73,9 +73,7 @@ const ProductCollectionContent = (
 				inherit: getDefaultValueOfInheritQueryFromTemplate(),
 			},
 			...( attributes as Partial< ProductCollectionAttributes > ),
-			...{
-				queryId,
-			},
+			queryId,
 		} );
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
