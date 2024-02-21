@@ -79,6 +79,9 @@ class Init {
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
 
+			$hooked_block_examples = new HookedBlockExamples();
+			$hooked_block_examples->init();
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
