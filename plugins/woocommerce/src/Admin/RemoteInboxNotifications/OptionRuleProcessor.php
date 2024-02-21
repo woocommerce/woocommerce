@@ -20,13 +20,14 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$is_contains   = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
-		$default_value = $is_contains ? array() : false;
-		$default       = isset( $rule->default ) ? $rule->default : $default_value;
-		$option_value  = $this->get_option_value( $rule, $default, $is_contains );
+		$is_contains    = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
+		$default_value  = $is_contains ? array() : false;
+		$is_default_set = property_exists( $rule, 'default' );
+		$default        = $is_default_set ? $rule->default : $default_value;
+		$option_value   = $this->get_option_value( $rule, $default, $is_contains );
 
 		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
-			$option_value = TransformerService::apply( $option_value, $rule->transformers, $default );
+			$option_value = TransformerService::apply( $option_value, $rule->transformers, $is_default_set, $default );
 		}
 
 		return ComparisonOperation::compare(

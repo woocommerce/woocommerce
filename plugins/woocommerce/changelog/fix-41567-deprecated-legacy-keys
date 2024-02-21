@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix deprecation notices for legacy order item keys.

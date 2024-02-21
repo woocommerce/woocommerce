@@ -1410,7 +1410,85 @@ p.demo_store,
 		}
 	}
 
+	.woocommerce-customer-details .addresses,
+	.woocommerce-customer-details .additional-fields {
+		margin-bottom: 2em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.addresses .wc-block-components-additional-fields-list {
+		margin: 0;
+		padding: 0;
+
+		dt {
+			margin: 0;
+			padding: 0;
+			font-style: normal;
+			font-weight: bold;
+			display: inline;
+
+			&::after {
+				content: ": ";
+			}
+
+			&::before {
+				content: "";
+				display: block;
+			}
+		}
+
+		dd {
+			margin: 0;
+			padding: 0;
+			font-style: normal;
+			display: inline;
+		}
+	}
+
+	.wc-block-order-confirmation-additional-fields-wrapper .wc-block-components-additional-fields-list {
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		padding: 0;
+		display: grid;
+		grid-template-columns: 1fr max-content;
+
+		dt {
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			font-style: normal;
+			font-weight: bold;
+			padding: 1rem;
+			box-sizing: border-box;
+			margin: 0 !important;
+
+			&::after {
+				display: none;
+			}
+
+			&:last-of-type {
+				border-bottom: 0;
+			}
+		}
+
+		dd {
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			padding: 1rem;
+			box-sizing: border-box;
+			text-align: right;
+			margin: 0 !important;
+
+			&:last-of-type {
+				border-bottom: 0;
+			}
+		}
+	}
+
 	.woocommerce-customer-details {
+
+		.woocommerce-column__title {
+			margin-top: 0;
+		}
 
 		address {
 			font-style: normal;
@@ -1422,12 +1500,16 @@ p.demo_store,
 			width: 100%;
 			border-radius: 5px;
 			padding: 6px 12px;
+			box-sizing: border-box;
 		}
 
 		.woocommerce-customer-details--phone,
 		.woocommerce-customer-details--email {
-			margin-bottom: 0;
 			padding-left: 1.5em;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
 		}
 
 		.woocommerce-customer-details--phone::before {
@@ -1634,6 +1716,7 @@ p.demo_store,
  */
 .woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
 :where(body:not(.woocommerce-block-theme-has-button-styles)) .woocommerce {
+
 	a.button,
 	button.button,
 	input.button,
@@ -1740,6 +1823,7 @@ p.demo_store,
 	}
 
 	div.product {
+
 		span.price,
 		p.price {
 			color: $highlight;

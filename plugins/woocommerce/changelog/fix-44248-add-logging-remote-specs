@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add base RemoteSpecsEngine class, add logging for errors in all remote specs
