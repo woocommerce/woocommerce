@@ -47,8 +47,10 @@ jobs:
               working-directory: plugins/woocommerce
               env:
                   WP_ENV_PHP_VERSION: 7.4
-              run: pnpm env:test
-
+              run: |
+                    sed -i -e "s/image: 'mariadb'/image: 'mariadb:11.2.2-jammy'/g" node_modules/@wordpress/env/lib/build-docker-compose-config.js
+                    pnpm env:test
+                    
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
