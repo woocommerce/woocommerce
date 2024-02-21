@@ -16,6 +16,6 @@ export const STORAGE_STATE_PATH = path.join(
 );
 
 // User roles file paths
-export const adminFile = '.auth/admin.json';
+export const adminFile = STORAGE_STATE_PATH;
 export const customerFile = '.auth/customer.json';
 export const guestFile = '.auth/guest.json';
