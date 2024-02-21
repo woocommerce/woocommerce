@@ -171,21 +171,26 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function add_install_marketplace_plugin_message( $plugin_data, $response ) {
-		if ( ! empty( $response->package ) ) {
+		if ( ! empty( $response->package ) || WC_Helper_Plugin::is_plugin_active() ) {
 			return;
 		}
-		printf(
-		/* translators: 1: Marketplace plugin install URL. */
-			wp_kses(
-				' <a href="%1$s">Install</a> the Woo Marketplace plugin to enable auto-updates.',
-				array(
-					'a' => array(
-						'href' => array(),
-					),
-				)
-			),
-			esc_url( admin_url( 'admin.php?page=wc-admin&path=/extensions&tab=my-subscriptions' ) ),
-		);
+		if ( ! WC_Helper_Plugin::is_plugin_installed() ) {
+			printf(
+			/* translators: 1: Marketplace plugin install URL 2: Marketplace plugin download URL */
+				wp_kses(
+					' Please <a href="%1$s">install</a> the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also <a href="%2$s">download</a> and install it manually in your stores.',
+					array(
+						'a' => array(
+							'href' => array(),
+						),
+					)
+				),
+				esc_url( 'https://woo.com/woocom-plugin/install/' ),
+				esc_url( 'https://woo.com/woocom-plugin/download/' ),
+			);
+		} elseif ( ! WC_Helper_Plugin::is_plugin_active() ) {
+			printf( ' Please activate the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions.' );
+		}
 	}
 
 	/**
