@@ -3,7 +3,12 @@
 /**
  * External dependencies
  */
-import { FullConfig, chromium, request } from '@playwright/test';
+import {
+	BrowserContextOptions,
+	FullConfig,
+	chromium,
+	request,
+} from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import { cli, customerFile } from '@woocommerce/e2e-utils';
 
@@ -12,12 +17,9 @@ import { cli, customerFile } from '@woocommerce/e2e-utils';
  */
 import { customer, admin } from './test-data/data/data';
 
-const prepareAttributes = async ( requestUtils: RequestUtils ) => {
+const prepareAttributes = async ( contextOptions: BrowserContextOptions ) => {
 	const browser = await chromium.launch();
-	const context = await browser.newContext( {
-		baseURL: requestUtils.baseURL as string,
-		storageState: requestUtils.storageStatePath as string,
-	} );
+	const context = await browser.newContext( contextOptions );
 
 	const page = await context.newPage();
 
@@ -27,9 +29,7 @@ const prepareAttributes = async ( requestUtils: RequestUtils ) => {
 		await dialog.accept();
 	} );
 
-	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools', {
-		waitUntil: 'commit',
-	} );
+	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools' );
 
 	// TODO: This sometimes does not work - the button is disabled and the job
 	// is pending. We need to investigate why this happens.
@@ -85,14 +85,12 @@ async function globalSetup( config: FullConfig ) {
 	} );
 
 	console.time( timers.authentication );
-	await Promise.all( [
-		adminRequestUtils.setupRest(),
-		customerRequestUtils.setupRest(),
-	] );
+	await adminRequestUtils.setupRest();
+	await customerRequestUtils.setupRest();
 	console.timeEnd( timers.authentication );
 
 	console.time( timers.attributes );
-	await prepareAttributes( adminRequestUtils );
+	await prepareAttributes( { baseURL, storageState } );
 	console.timeEnd( timers.attributes );
 
 	await requestContext.dispose();
