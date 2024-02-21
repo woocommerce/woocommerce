@@ -5,7 +5,7 @@
  */
 import { FullConfig, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-import { cli, BASE_URL, adminFile, customerFile } from '@woocommerce/e2e-utils';
+import { cli, customerFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -63,14 +63,21 @@ async function globalSetup( config: FullConfig ) {
 
 	const { storageState, baseURL } = config.projects[ 0 ].use;
 
+	if ( ! storageState || typeof storageState !== 'string' ) {
+		throw new Error( 'Storage state path is required.' );
+	}
+
+	if ( ! baseURL ) {
+		throw new Error( 'Base URL is required.' );
+	}
+
 	const requestContext = await request.newContext( {
-		baseURL: baseURL || BASE_URL,
+		baseURL,
 	} );
 
 	const adminRequestUtils = new RequestUtils( requestContext, {
 		user: admin,
-		storageStatePath:
-			typeof storageState === 'string' ? storageState : adminFile,
+		storageStatePath: storageState,
 	} );
 	const customerRequestUtils = new RequestUtils( requestContext, {
 		user: customer,
