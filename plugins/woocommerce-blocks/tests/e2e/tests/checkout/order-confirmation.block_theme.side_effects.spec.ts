@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { adminFile, guestFile } from '@woocommerce/e2e-utils';
+import { adminFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -128,7 +128,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation (guest user)', () => {
-	test.use( { storageState: guestFile } );
+	test.use( { storageState: undefined } );
 
 	test( 'Place order as guest user', async ( {
 		frontendUtils,

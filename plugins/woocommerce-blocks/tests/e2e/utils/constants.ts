@@ -24,4 +24,3 @@ export const customerFile = path.join(
 	path.dirname( STORAGE_STATE_PATH ),
 	'customer.json'
 );
-export const guestFile = '.auth/guest.json';

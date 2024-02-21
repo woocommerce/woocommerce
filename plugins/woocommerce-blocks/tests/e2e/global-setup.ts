@@ -6,7 +6,7 @@ import { FullConfig, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import { expect } from '@woocommerce/e2e-playwright-utils';
 import fs from 'fs';
-import { cli, customerFile, guestFile } from '@woocommerce/e2e-utils';
+import { cli, customerFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -115,26 +115,6 @@ const authenticateAsCustomer = async ( config: FullConfig ) => {
 	await browser.close();
 };
 
-const visitAsGuest = async ( config: FullConfig ) => {
-	const { baseURL, userAgent } = config.projects[ 0 ].use;
-
-	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
-	const contextOptions = { baseURL, userAgent };
-	// Create browser, browserContext, and page for customer and admin users
-	const browser = await chromium.launch();
-	const context = await browser.newContext( contextOptions );
-	const page = await context.newPage();
-	await page.goto( '/my-account' );
-	await expect(
-		page.getByLabel( 'Username or email address' )
-	).toBeVisible();
-
-	await page.context().storageState( { path: guestFile } );
-
-	await context.close();
-	await browser.close();
-};
-
 const prepareAttributes = async ( config: FullConfig ) => {
 	const { baseURL, userAgent } = config.projects[ 0 ].use;
 
@@ -202,7 +182,6 @@ async function globalSetup( config: FullConfig ) {
 	await prepareAttributes( config );
 	await loginAsCustomer( config );
 	await authenticateAsCustomer( config );
-	await visitAsGuest( config );
 }
 
 export default globalSetup;
