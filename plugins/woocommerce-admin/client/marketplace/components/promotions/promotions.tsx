@@ -47,7 +47,7 @@ const Promotions: React.FC = () => {
 		return null;
 	}
 	const promotions = window.wc?.marketplace?.promotions ?? [];
-	const currentDate = new Date().toISOString();
+	const currentDateUTC = Date.now();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
 
@@ -78,12 +78,11 @@ const Promotions: React.FC = () => {
 					return null;
 				}
 
-				const startDate = new Date( promotion.date_from_gmt );
-				const endDate = new Date( promotion.date_to_gmt );
-				const now = new Date( currentDate );
+				const startDate = new Date( promotion.date_from_gmt ).getTime();
+				const endDate = new Date( promotion.date_to_gmt ).getTime();
 
 				// Promotion is not active
-				if ( now < startDate || now > endDate ) {
+				if ( currentDateUTC < startDate || currentDateUTC > endDate ) {
 					return null;
 				}
 
