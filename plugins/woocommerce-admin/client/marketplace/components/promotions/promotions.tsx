@@ -6,7 +6,11 @@ import Notice from '../notice/notice';
 
 declare global {
 	interface Window {
-		wc: Record< string, string | number | boolean | object | null >;
+		wc: {
+			marketplace?: {
+				promotions: Promotion[];
+			};
+		};
 	}
 }
 
