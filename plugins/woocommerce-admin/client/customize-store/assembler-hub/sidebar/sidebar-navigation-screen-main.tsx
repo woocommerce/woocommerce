@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -31,6 +31,8 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
 
 const ComingSoonSideBarNavigationItem = ( {
 	children,
@@ -55,6 +57,9 @@ const ComingSoonSideBarNavigationItem = ( {
 };
 
 export const SidebarNavigationScreenMain = () => {
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
 	return (
 		<SidebarNavigationScreen
 			isRoot
@@ -126,8 +131,13 @@ export const SidebarNavigationScreenMain = () => {
 							{ __( 'Change the color palette', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
-							as={ ComingSoonSideBarNavigationItem }
-							disabled={ true }
+							as={
+								aiOnline
+									? SidebarNavigationItem
+									: ComingSoonSideBarNavigationItem
+							}
+							disabled={ ! aiOnline }
+							withChevron={ aiOnline }
 							path="/customize-store/assembler-hub/typography"
 							icon={ typography }
 							onClick={ () => {
