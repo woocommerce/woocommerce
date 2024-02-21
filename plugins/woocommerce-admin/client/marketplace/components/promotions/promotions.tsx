@@ -39,11 +39,15 @@ type Page = {
 };
 
 const Promotions: React.FC = () => {
-	const promotions = window.wc?.marketplace?.promotions ?? [];
-
-	const currentDate = new Date().toISOString();
 	const urlParams = new URLSearchParams( window.location.search );
 	const currentPage = urlParams.get( 'page' );
+
+	// Check if the current page is not 'wc-admin'
+	if ( currentPage !== 'wc-admin' ) {
+		return null;
+	}
+	const promotions = window.wc?.marketplace?.promotions ?? [];
+	const currentDate = new Date().toISOString();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
 
