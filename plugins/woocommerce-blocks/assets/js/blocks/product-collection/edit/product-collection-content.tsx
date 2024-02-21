@@ -4,7 +4,6 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
-import { v4 as uuidV4 } from 'uuid';
 
 /**
  * Internal dependencies
