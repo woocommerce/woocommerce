@@ -252,7 +252,7 @@ export const NoAIBanner = ( {
 				>
 					<p>
 						{ __(
-							'Your active theme will be changed and you can lose any changes you’ve made to it.',
+							'Your active theme will be changed and you could lose any changes you’ve made to it.',
 							'woocommerce'
 						) }
 					</p>
