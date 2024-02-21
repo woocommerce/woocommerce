@@ -25,7 +25,11 @@ class CustomerHistory {
 			return;
 		}
 
-		$customer_history = $this->get_customer_history( $order->get_report_customer_id() );
+		$customer_history = null;
+
+		if ( method_exists( $order, 'get_report_customer_id' ) ) {
+			$customer_history = $this->get_customer_history( $order->get_report_customer_id() );
+		}
 
 		if ( ! $customer_history ) {
 			$customer_history = array(
