@@ -296,7 +296,6 @@ class WCAdminAssets {
 			'wc-product-editor',
 			WC_ADMIN_APP,
 		);
-		self::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
 
 		foreach ( $scripts as $script ) {
 			$script_path_name = isset( $scripts_map[ $script ] ) ? $scripts_map[ $script ] : str_replace( 'wc-', '', $script );
@@ -354,10 +353,6 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
-			),
-			array(
 				'handle' => 'wc-admin-layout',
 			),
 			array(
@@ -376,11 +371,11 @@ class WCAdminAssets {
 				'handle' => 'wc-experimental',
 			),
 			array(
-				'handle' => 'wc-onboarding',
+				'handle'       => WC_ADMIN_APP,
+				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wc-product-editor', 'wp-components', 'wc-experimental' ),
 			),
 			array(
-				'handle'       => 'wc-admin-payment-method-promotions',
-				'dependencies' => array( 'wp-components' ),
+				'handle' => 'wc-onboarding',
 			),
 		);
 
