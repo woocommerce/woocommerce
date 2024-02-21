@@ -11,6 +11,7 @@ import {
 	BillingCountryInput,
 	ShippingCountryInput,
 } from '@woocommerce/base-components/country-input';
+import { ShippingPhoneInput } from '@woocommerce/base-components/phone-input';
 import {
 	BillingStateInput,
 	ShippingStateInput,
@@ -203,6 +204,30 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 								onChange( {
 									...values,
 									state: newValue,
+								} )
+							}
+						/>
+					);
+				}
+
+				if (
+					field.key === 'phone' &&
+					objectHasProp( values, 'phone' )
+				) {
+					const Tag =
+						addressType === 'shipping'
+							? ShippingPhoneInput
+							: ShippingPhoneInput; // @todo
+					return (
+						<Tag
+							key={ field.key }
+							{ ...fieldProps }
+							country={ values.country }
+							value={ values.phone }
+							onChange={ ( newValue: string ) =>
+								onChange( {
+									...values,
+									phone: newValue,
 								} )
 							}
 						/>

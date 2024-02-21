@@ -15,6 +15,7 @@ export * from './loading-mask';
 export * from './noninteractive';
 export * from './notice-banner';
 export * from './pagination';
+export * from './phone-input';
 export * from './price-slider';
 export * from './product-list';
 export * from './product-name';
