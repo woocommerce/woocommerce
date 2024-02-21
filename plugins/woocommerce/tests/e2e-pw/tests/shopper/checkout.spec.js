@@ -248,7 +248,7 @@ test.describe( 'Checkout page', () => {
 		await page.locator( '#billing_email' ).fill( customer.email );
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
-		await expect( page.locator( '.is-error ul' ) ).toBeVisible();
+		await expect( page.locator( 'ul.woocommerce-error' ) ).toBeVisible();
 		await expect(
 			page.getByText( 'Shipping First name is a required field.' )
 		).toBeVisible();
@@ -507,7 +507,7 @@ test.describe( 'Checkout page', () => {
 		await page.reload();
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-		await expect( page.locator( '.is-info' ) ).toContainText(
+		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
 			/Please log in to your account to view this order/
 		);
 

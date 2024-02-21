@@ -41,4 +41,15 @@
 			}
 		}
 	}
+	.wc-block-components-address-form {
+		.wc-block-components-checkbox {
+			margin-top: $gap;
+		}
+
+		.wc-block-components-text-input.wc-block-components-address-form__email {
+			&:only-child {
+				margin-top: 0;
+			}
+		}
+	}
 }

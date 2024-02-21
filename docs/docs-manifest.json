@@ -350,7 +350,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "ff3ff9f8f0f8f14175482b68d9e16b697089120894e6bd4d8cbf4d55145d9510",
+          "hash": "dbe7c96a7ffd9d8c95fdc07eba211f03840bc47d3c49f8cb0eff8363d4ad826d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -449,7 +449,7 @@
           "menu_title": "Check if WooCommerce is active",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/check-if-woo-is-active.md",
-          "hash": "47cb6a0f60dad691e3dfd1f26e00b5582d51ec23e7de3f800126701b5967f557",
+          "hash": "dca930ebe334bb3bb276ec912d050830b784ec9f755be491d41c3c32f5b65637",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/check-if-woo-is-active.md",
           "id": "2c2e89013ad76ff2596680224047723163512bc2"
         },
@@ -917,6 +917,11 @@
       "categories": []
     },
     {
+      "category_slug": "utilities",
+      "category_title": "Utilities",
+      "categories": []
+    },
+    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woo.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woo.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1204,5 +1209,5 @@
       "categories": []
     }
   ],
-  "hash": "19fff439ddbee80f3f6c932d45314d0831a0130c4b9940c40fe8b5f8c581346a"
+  "hash": "383787d7f861905c25f96a7f003f9214f60da39fcdccdd90a61a5bf961346199"
 }

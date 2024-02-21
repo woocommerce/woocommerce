@@ -25,6 +25,10 @@ $logging            = $report['logging'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) );
+
+$active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
+$inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
+
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -84,26 +88,6 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
-				}
-				?>
-			</td>
-		</tr>
-		<tr>
-			<td data-export-label="WC Blocks Version"><?php esc_html_e( 'WooCommerce Blocks package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Blocks package running on your site.', 'woocommerce' ) ); ?></td>
-			<td>
-				<?php
-				if ( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) ) {
-					$version = \Automattic\WooCommerce\Blocks\Package::get_version();
-					$path    = \Automattic\WooCommerce\Blocks\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				} else {
-					$version = null;
-				}
-
-				if ( ! is_null( $version ) ) {
-					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
-				} else {
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Blocks package.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -595,7 +579,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo esc_attr( $active_plugins_count ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $active_plugins_count ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -605,7 +589,7 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Inactive Plugins (<?php echo count( $inactive_plugins ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo count( $inactive_plugins ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Inactive Plugins (<?php echo esc_attr( $inactive_plugins_count ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $inactive_plugins_count ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -613,12 +597,13 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Cons
 	</tbody>
 </table>
 <?php
-if ( 0 < count( $dropins_mu_plugins['dropins'] ) ) :
+$dropins_count = is_countable( $dropins_mu_plugins['dropins'] ) ? count( $dropins_mu_plugins['dropins'] ) : 0;
+if ( 0 < $dropins_count ) :
 	?>
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-label="Dropin Plugins (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)</h2></th>
+				<th colspan="3" data-export-label="Dropin Plugins (<?php $dropins_count; ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php $dropins_count; ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -637,12 +622,14 @@ if ( 0 < count( $dropins_mu_plugins['dropins'] ) ) :
 	</table>
 	<?php
 endif;
-if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
+
+$mu_plugins_count = is_countable( $dropins_mu_plugins['mu_plugins'] ) ? count( $dropins_mu_plugins['mu_plugins'] ) : 0;
+if ( 0 < $mu_plugins_count ) :
 	?>
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-label="Must Use Plugins (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)</h2></th>
+				<th colspan="3" data-export-label="Must Use Plugins (<?php echo esc_attr( $mu_plugins_count ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $mu_plugins_count ); ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -979,7 +966,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				<td class="help">&nbsp;</td>
 				<td>
 					<?php
-					$total_overrides = count( $theme['overrides'] );
+					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
 					for ( $i = 0; $i < $total_overrides; $i++ ) {
 						$override = $theme['overrides'][ $i ];
 						if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
@@ -994,7 +981,8 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 						} else {
 							echo esc_html( $override['file'] );
 						}
-						if ( ( count( $theme['overrides'] ) - 1 ) !== $i ) {
+
+						if ( ( $total_overrides - 1 ) !== $i ) {
 							echo ', ';
 						}
 						echo '<br />';
