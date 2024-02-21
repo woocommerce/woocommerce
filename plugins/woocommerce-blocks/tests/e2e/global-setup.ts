@@ -3,14 +3,9 @@
 /**
  * External dependencies
  */
-import {
-	BrowserContextOptions,
-	FullConfig,
-	chromium,
-	request,
-} from '@playwright/test';
+import { BrowserContextOptions, chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-import { cli, customerFile } from '@woocommerce/e2e-utils';
+import { BASE_URL, adminFile, cli, customerFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -53,7 +48,7 @@ const prepareAttributes = async ( contextOptions: BrowserContextOptions ) => {
 	await cli( cronTask );
 };
 
-async function globalSetup( config: FullConfig ) {
+async function globalSetup() {
 	const timers = {
 		total: '└ Total time',
 		authentication: '├ Authentication time',
@@ -63,23 +58,13 @@ async function globalSetup( config: FullConfig ) {
 	console.log( 'Running global setup...' );
 	console.time( timers.total );
 
-	const { storageState, baseURL } = config.projects[ 0 ].use;
-
-	if ( ! storageState || typeof storageState !== 'string' ) {
-		throw new Error( 'Storage state path is required.' );
-	}
-
-	if ( ! baseURL ) {
-		throw new Error( 'Base URL is required.' );
-	}
-
 	const requestContext = await request.newContext( {
-		baseURL,
+		baseURL: BASE_URL,
 	} );
 
 	const adminRequestUtils = new RequestUtils( requestContext, {
 		user: admin,
-		storageStatePath: storageState,
+		storageStatePath: adminFile,
 	} );
 	const customerRequestUtils = new RequestUtils( requestContext, {
 		user: customer,
@@ -92,7 +77,7 @@ async function globalSetup( config: FullConfig ) {
 	console.timeEnd( timers.authentication );
 
 	console.time( timers.attributes );
-	await prepareAttributes( { baseURL, storageState } );
+	await prepareAttributes( { baseURL: BASE_URL, storageState: adminFile } );
 	console.timeEnd( timers.attributes );
 
 	await requestContext.dispose();
