@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
@@ -17,6 +17,8 @@ const productsFilteringPageSlug = productsFilteringPageTitle
 let product1Id, product2Id, product3Id;
 
 test.describe( 'Filter items in the shop by product price', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
+
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -64,16 +66,36 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id, product3Id ],
 		} );
+
+		const base64auth = Buffer.from(
+			`${ admin.username }:${ admin.password }`
+		).toString( 'base64' );
+		const wpApi = await request.newContext( {
+			baseURL: `${ baseURL }/wp-json/wp/v2/`,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ base64auth }`,
+			},
+		} );
+		let response = await wpApi.get( `pages` );
+		const allPages = await response.json();
+		await allPages.forEach( async ( page ) => {
+			if ( page.title.rendered === productsFilteringPageTitle ) {
+				response = await wpApi.delete( `pages/${ page.id }`, {
+					data: {
+						force: true,
+					},
+				} );
+			}
+		} );
 	} );
 
-	test( 'can create a new page with products filter and all products', async ( {
+	test( 'filter products by prices on the created page', async ( {
 		page,
 	} ) => {
+		const sortingProductsDropdown = '.wc-block-sort-select__select';
+
+		// go to create a new page with filtering products by price
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
 		await closeWelcomeModal( { page } );
 
@@ -111,26 +133,30 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await expect(
 			page.getByText( `${ productsFilteringPageTitle } is now live.` )
 		).toBeVisible();
-	} );
 
-	test( 'filter products by prices on the created page', async ( {
-		page,
-	} ) => {
 		// go to the page to test filtering products by price
 		await page.goto( productsFilteringPageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: productsFilteringPageTitle } )
 		).toBeVisible();
+		await page
+			.locator( '.is-loading' )
+			.first()
+			.waitFor( { state: 'hidden' } );
 
 		// filter by maximum $50 and verify the results
 		await page
 			.getByRole( 'textbox', { name: 'Filter products by maximum' } )
 			.fill( '$50' );
+		// click and sort products to allow changes to take effect
+		await page.locator( sortingProductsDropdown ).click();
 		await page
-			.getByRole( 'heading', {
-				name: productsFilteringPageTitle,
-			} )
-			.click();
+			.locator( sortingProductsDropdown )
+			.selectOption( 'Popularity' );
+		await page
+			.locator( '.is-loading' )
+			.first()
+			.waitFor( { state: 'hidden' } );
 
 		await expect(
 			page
@@ -152,14 +178,25 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await page
 			.getByRole( 'textbox', { name: 'Filter products by maximum' } )
 			.fill( '$200' );
+		// click and sort products to allow changes to take effect
+		await page.locator( sortingProductsDropdown ).click();
+		await page
+			.locator( sortingProductsDropdown )
+			.selectOption( 'Default sorting' );
+		await page
+			.locator( '.is-loading' )
+			.first()
+			.waitFor( { state: 'hidden' } );
 		await page
 			.getByRole( 'textbox', { name: 'Filter products by minimum' } )
 			.fill( '$100' );
+		// click and sort products to allow changes to take effect
+		await page.locator( sortingProductsDropdown ).click();
+		await page.locator( sortingProductsDropdown ).selectOption( 'Latest' );
 		await page
-			.getByRole( 'heading', {
-				name: productsFilteringPageTitle,
-			} )
-			.click();
+			.locator( '.is-loading' )
+			.first()
+			.waitFor( { state: 'hidden' } );
 
 		await expect(
 			page
