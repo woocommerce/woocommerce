@@ -1,0 +1,28 @@
+{
+	"name": "woocommerce/single-cart-line-item-block",
+	"version": "1.0.0",
+	"title": "Single Cart Line Item",
+	"description": "Block containing a single line item in Cart.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": false,
+		"lock": false
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": true,
+				"move": true
+			}
+		}
+	},
+	"parent": [ "woocommerce/cart-line-items-block" ],
+	"textdomain": "woocommerce",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2
+}
