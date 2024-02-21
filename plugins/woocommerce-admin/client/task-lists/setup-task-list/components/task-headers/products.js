@@ -17,15 +17,15 @@ const ProductsHeader = ( { task, goToTask } ) => {
 				alt={ __( 'Products illustration', 'woocommerce' ) }
 				src={
 					WC_ASSET_URL +
-					'images/task_list/sales-section-illustration.png'
+					'images/task_list/sales-section-illustration.svg'
 				}
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add products to sell', 'woocommerce' ) }</h1>
+				<h1>{ __( 'List your products', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						'Build your catalog by adding what you want to sell. You can add products manually or import them from a different store.',
+						'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store. ',
 						'woocommerce'
 					) }
 				</p>
