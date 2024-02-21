@@ -285,7 +285,7 @@ final class WooCommerce {
 	 * Add woocommerce_inbox_variant for the Remote Inbox Notification.
 	 *
 	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
-	 * 
+	 *
 	 * This will no longer be used. The more flexible add_woocommerce_remote_variant
 	 * below will be used instead.
 	 */
@@ -295,9 +295,9 @@ final class WooCommerce {
 			update_option( $config_name, wp_rand( 1, 12 ) );
 		}
 	}
-		
+
 	/**
-	 * Add woocommerce_remote_variant_assignment used to determine cohort 
+	 * Add woocommerce_remote_variant_assignment used to determine cohort
 	 * or group assignment for Remote Spec Engines.
 	 */
 	public function add_woocommerce_remote_variant() {
