@@ -311,7 +311,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 
 		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
-		$themes = array(
+		$defaultThemes = array(
 			array(
 				'name'           => 'Tsubaki',
 				'price'          => 'Free',
@@ -392,6 +392,11 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			),
 		);
 
+		$ai_connection_enabled = get_option( 'woocommerce_blocks_allow_ai_connection' );
+
+		// TODO - Remove this once we start returning themes via API.
+		$themes = $ai_connection_enabled ? $defaultThemes : $coreThemes;
+
 		// To be implemented: Filter themes based on industry.
 		if ( $industry ) {
 			$filtered_themes = array_filter(
@@ -403,7 +408,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				}
 			);
 		} else {
-			$filtered_themes = $coreThemes;
+			$filtered_themes = $themes;
 		}
 
 		$response = array(
