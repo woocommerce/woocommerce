@@ -32,6 +32,7 @@
 		align-items: center;
 		gap: 8px;
 		padding: 0 $grid-unit-20;
+		justify-content: right;
 
 		> button {
 			flex: 1;
@@ -40,6 +41,11 @@
 		.components-button {
 			width: 100%;
 			justify-content: center;
+		}
+
+		.woocommerce-publish-panel-close {
+			flex: unset;
+			width: unset;
 		}
 	}
 
@@ -67,6 +73,15 @@
 
 		.components-base-control__field {
 			margin: 0;
+		}
+	}
+}
+
+.is-published {
+	.woocommerce-product-publish-panel {
+		&__header, &__title {
+			border-bottom: $border-width solid $gray-200;
+			font-weight: 500;
 		}
 	}
 }
