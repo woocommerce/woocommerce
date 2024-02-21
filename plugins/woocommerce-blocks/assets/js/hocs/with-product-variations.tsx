@@ -38,6 +38,8 @@ interface State {
  * @param OriginalComponent Component being wrapped.
  */
 const withProductVariations = createHigherOrderComponent(
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
 	( OriginalComponent ) => {
 		class WrappedComponent extends Component<
 			WithProductVariationsProps,
@@ -148,10 +150,12 @@ const withProductVariations = createHigherOrderComponent(
 
 			findParentProduct( variationId: number ) {
 				const { products } = this.props;
-				const parentProduct = products.find( ( p ) =>
-					p.variations?.some( ( { id } ) => id === variationId )
+				const parentProduct = products.filter(
+					( p ) =>
+						p.variations &&
+						p.variations.find( ( { id } ) => id === variationId )
 				);
-				return parentProduct?.id;
+				return parentProduct[ 0 ]?.id;
 			}
 
 			getExpandedProduct() {
@@ -164,7 +168,8 @@ const withProductVariations = createHigherOrderComponent(
 				let selectedItem =
 					selected && selected.length ? selected[ 0 ] : null;
 
-				// If there is no selected item, check if there was one in the past
+				// If there is no selected item, check if there was one in the past, so we
+				// can keep the same product expanded.
 				if ( selectedItem ) {
 					this.prevSelectedItem = selectedItem;
 				} else if (
@@ -176,7 +181,7 @@ const withProductVariations = createHigherOrderComponent(
 					selectedItem = this.prevSelectedItem;
 				}
 
-				if ( selectedItem ) {
+				if ( ! isLoading && selectedItem ) {
 					return this.isProductId( selectedItem )
 						? selectedItem
 						: this.findParentProduct( selectedItem );
@@ -190,6 +195,8 @@ const withProductVariations = createHigherOrderComponent(
 				const { error, loading, variations } = this.state;
 
 				return (
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
 					<OriginalComponent
 						{ ...this.props }
 						error={ error || propsError }
