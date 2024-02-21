@@ -115,6 +115,7 @@ const Edit = ( props: EditProps ) => {
 	const [ isEditing, setIsEditing ] = useState(
 		! attributeId && ! isPreview
 	);
+
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		AttributeTerm[]
 	>( [] );
@@ -240,13 +241,18 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
+	const inspectorProps = {
+		...props,
+		setAttributeId,
+	};
+
 	return (
 		<Wrapper
 			onClickToolbarEdit={ toggleEditing }
 			isEditing={ isEditing }
 			blockProps={ blockProps }
 		>
-			<Inspector { ...props } />
+			<Inspector { ...inspectorProps } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown
