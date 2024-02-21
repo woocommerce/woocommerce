@@ -88,3 +88,5 @@ export {
 	ProductImage as __experimentalProductImage,
 	ProductImageProps,
 } from './product-image';
+
+export { Notice as __experimentalNotice } from './notice';

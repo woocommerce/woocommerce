@@ -2,20 +2,62 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.4.0) - 2024-02-20 
+
+-   Patch - Add empty state when filtering variations by attribute terms and the response is empty [#44505]
+-   Minor - Fix pre-publish modal styles #44562 [#44562]
+-   Patch - Fix toggle visibility on bach update variations [#44508]
+-   Patch - Product Editor loading state now shows until form is displayed. No more blank flash of white. [#43840]
+-   Minor - Add the collapsible Schedule section [#44563]
+-   Minor - Add visibility section to pre-publish panel #44434 [#44434]
+-   Minor - Export Notice component in package [#44812]
+-   Minor - Refactor section and subsection blocks #44502 [#44502]
+-   Minor - [Product editor block]: Change visibility label when a password is set #44623 [#44624]
+-   Minor - [Product editor block]: Modify pre-publish sidebar title after scheduling a product #44651 [#44652]
+-   Minor - [Product editor block]: Rename the Add button to Publish #44461 [#44461]
+
 ## [1.3.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.3.0) - 2024-02-09 
 
 -   Patch - Corrected build configuration for packages that weren't outputting minified code.
 -   Patch - Export __experimentalVariationQUickUpdateMenuItem, __experimentalPluginHeaderItemModal, __experimentalPluginHeaderItemPopover
--   Minor - Fix header toolbar in iframe modal editor to have block toolbar render correctly with latest Gutenberg and WP version.
--   Minor - Fix issue when generating variations for the first time in the new editor.
 -   Patch - Fix performance issue when modifying product metadata
 -   Patch - Fix product editor UI misbehaving in custom adminmenu widths (e.g. Calypso)
 -   Patch - Fix typo that broke the CI pipeline and the build process.
 -   Patch - Hide the product type selector dropdown when click outside
--   Minor - Revert "Show feedback bar only once (#41787)" #43178
--   Minor - Variation quick actions update properly when variation inherits sku of parent; slot fills always deal with arrays
 -   Patch - [Product Block Editor]: fix e2e test that happens in the text-area block
 -   Patch - [Product Block Editor]: fix the top area for the dashboard
+-   Patch - [Product Block Editor]: add CashRegister image component
+-   Patch - [Product Block Editor]: Add Linked Product sections
+-   Patch - [Product Block Editor]: add loading for the `Choose products for me` button
+-   Patch - [Product Block Editor]: add plain and rich text mode to the Textarea field block
+-   Patch - [Product Block Editor]: add Upsell advice
+-   Patch - [Product Block Editor]: always show "loading" state when choosing suggested products
+-   Patch - [Product Block Editor]: exclude the current product from the suggested ones to use in the Linked Product tab
+-   Patch - [Product Block Editor]: implement `Choose products for me` button
+-   Patch - [Product Block Editor]: Introduce AdviceCard component
+-   Patch - [Product Block Editor]: Introduce ButtonWithDropdownMenuProps component
+-   Patch - [Product Block Editor]: introduce note attribute to Label component
+-   Patch - [Product Block Editor]: introduce ShoppingBags component
+-   Patch - [Product Block Editor]: introduce TextArea field block
+-   Patch - [Product Block Editor]: introduce `<SectionActions />` slot
+-   Patch - [Product Block Editor]: render empty state for the Cross-sells section
+-   Patch - [Product Block Editor]: use Label component to render Textarea field block label
+-   Patch - [Product Block Editor]: use text-area block to handle the variation description field
+-   Patch - bump php version in packages/js/*/composer.json
+-   Patch - [Product Block Editor]: dismiss AdviceCard by clicking close button
+-   Patch - [Product Block Editor]: fallback with random products when there isn't related products in the Linked Products tab
+-   Patch - [Product Block Editor]: improve getting suggested products from linked product section
+-   Patch - [Product Block Editor]: redefine the app dashboard size
+-   Patch - [Product Block Editor]: tweak section actions of some blocks #43555
+-   Patch - [Product Block Editor]: update advice card instances
+-   Patch - [Product Block Editor]: add className prop to ButtonWithDropdownMenu component
+-   Patch - [Product Block Editor]: improve and tweak AdviceCard component
+-   Patch - [Product Block Editor]: show three products by default in the Linked Products tab
+-   Patch - [Product Block Editor]: tweak styles and layout of AdviceCard component
+-   Minor - Fix header toolbar in iframe modal editor to have block toolbar render correctly with latest Gutenberg and WP version.
+-   Minor - Fix issue when generating variations for the first time in the new editor.
+-   Minor - Revert "Show feedback bar only once (#41787)" #43178
+-   Minor - Variation quick actions update properly when variation inherits sku of parent; slot fills always deal with arrays
 -   Minor - Add a featured product button
 -   Minor - Add empty state to the linked product list block
 -   Minor - Add HOC to hide inventory collapsible block when nothing is inside it
@@ -36,40 +78,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Set the product template id also for unsupported product templates
 -   Minor - track Linked Products feature events
 -   Minor - Unlink downloads and downloadable product props so they can be managed separately
--   Patch - [Product Block Editor]: add CashRegister image component
--   Patch - [Product Block Editor]: Add Linked Product sections
--   Patch - [Product Block Editor]: add loading for the `Choose products for me` button
--   Patch - [Product Block Editor]: add plain and rich text mode to the Textarea field block
--   Patch - [Product Block Editor]: add Upsell advice
--   Patch - [Product Block Editor]: always show "loading" state when choosing suggested products
--   Patch - [Product Block Editor]: exclude the current product from the suggested ones to use in the Linked Product tab
--   Patch - [Product Block Editor]: implement `Choose products for me` button
--   Patch - [Product Block Editor]: Introduce AdviceCard component
--   Patch - [Product Block Editor]: Introduce ButtonWithDropdownMenuProps component
--   Patch - [Product Block Editor]: introduce note attribute to Label component
--   Patch - [Product Block Editor]: introduce ShoppingBags component
--   Patch - [Product Block Editor]: introduce TextArea field block
--   Patch - [Product Block Editor]: introduce `<SectionActions />` slot
--   Patch - [Product Block Editor]: render empty state for the Cross-sells section
--   Patch - [Product Block Editor]: use Label component to render Textarea field block label
--   Patch - [Product Block Editor]: use text-area block to handle the variation description field
 -   Minor - Add isLoading to useProductMetadata hook
--   Patch - bump php version in packages/js/*/composer.json
 -   Minor - Load layout templates via the REST API. Note that layout template modifications must now be hooked up in an action that is called when REST API endpoints are handled, such as `rest_api_init`.
 -   Minor - Use different delays for initial click and hold when incrementing number on NumberControl
 -   Minor - Use woocommerce's Tooltip component for Label and checkbox instead of wordpress Tooltip
--   Patch - [Product Block Editor]: dismiss AdviceCard by clicking close button
--   Patch - [Product Block Editor]: fallback with random products when there isn't related products in the Linked Products tab
--   Patch - [Product Block Editor]: improve getting suggested products from linked product section
--   Patch - [Product Block Editor]: redefine the app dashboard size
--   Patch - [Product Block Editor]: tweak section actions of some blocks #43555
--   Patch - [Product Block Editor]: update advice card instances
 -   Minor - Add slotFill for variation menus #43441
 -   Minor - Modify feedback modal actions #43005
--   Patch - [Product Block Editor]: add className prop to ButtonWithDropdownMenu component
--   Patch - [Product Block Editor]: improve and tweak AdviceCard component
--   Patch - [Product Block Editor]: show three products by default in the Linked Products tab
--   Patch - [Product Block Editor]: tweak styles and layout of AdviceCard component
 
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/product-editor/v/1.2.0) - 2023-12-20 
 
