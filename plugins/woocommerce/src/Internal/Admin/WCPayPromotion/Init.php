@@ -7,15 +7,14 @@ namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller as PaymentGatewaySuggestionsDataSourcePoller;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
  * WC Pay Promotion engine.
  */
-class Init {
+class Init extends RemoteSpecsEngine {
 	const EXPLAT_VARIATION_PREFIX = 'woocommerce_wc_pay_promotion_payment_methods_table_';
 
 	/**
@@ -131,6 +130,7 @@ class Init {
 			// Unlike payment gateway suggestions, we don't have a non-empty default set of promotions to fall back to.
 			// So just set the specs transient with expired time to 3 hours.
 			WCPayPromotionDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs ), 3 * HOUR_IN_SECONDS );
+			self::log_errors( $results['errors'] );
 		}
 
 		return $results['suggestions'];

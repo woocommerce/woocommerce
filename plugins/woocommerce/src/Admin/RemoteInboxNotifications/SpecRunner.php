@@ -45,7 +45,7 @@ class SpecRunner {
 				new RuleEvaluator()
 			);
 		} catch ( \Throwable $e ) {
-			return;
+			return $e;
 		}
 
 		// If the status is changing, update the created date to now.
