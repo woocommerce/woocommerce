@@ -4606,8 +4606,8 @@ importers:
   tools/compare-perf:
     dependencies:
       '@wordpress/env':
-        specifier: ^8.13.0
-        version: 8.13.0
+        specifier: git+https://github.com/ilyasfoo/wp-env.git
+        version: github.com/ilyasfoo/wp-env/36d7686f10070b11670ff7734816d5410659f5a1
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -19308,7 +19308,7 @@ packages:
   /@types/responselike@1.0.3:
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
     dependencies:
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
 
   /@types/retry@0.12.0:
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
@@ -23111,6 +23111,7 @@ packages:
       yargs: 17.7.2
     transitivePeerDependencies:
       - supports-color
+    dev: true
 
   /@wordpress/env@8.2.0:
     resolution: {integrity: sha512-MGf2TJD6MbBjDn/+feGAcXnh6ct9Y/aCjIZTtbMI+b+pXAPh0RzR7Q5D6KMgKUNcGeL6nNQmEUUSSPuzV2UWfQ==}
@@ -30412,6 +30413,14 @@ packages:
   /docker-compose@0.22.2:
     resolution: {integrity: sha512-iXWb5+LiYmylIMFXvGTYsjI1F+Xyx78Jm/uj1dxwwZLbWkUdH6yOXY5Nr3RjbYX15EgbGJCq78d29CmWQQQMPg==}
     engines: {node: '>= 6.0.0'}
+    dev: true
+
+  /docker-compose@0.24.6:
+    resolution: {integrity: sha512-VidlUyNzXMaVsuM79sjSvwC4nfojkP2VneL+Zfs538M2XFnffZDhx6veqnz/evCNIYGyz5O+1fgL6+g0NLWTBA==}
+    engines: {node: '>= 6.0.0'}
+    dependencies:
+      yaml: 2.3.4
+    dev: false
 
   /doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -52999,6 +53008,28 @@ packages:
       - react-native
       - supports-color
       - utf-8-validate
+    dev: false
+
+  github.com/ilyasfoo/wp-env/36d7686f10070b11670ff7734816d5410659f5a1:
+    resolution: {tarball: https://codeload.github.com/ilyasfoo/wp-env/tar.gz/36d7686f10070b11670ff7734816d5410659f5a1}
+    name: '@wordpress/env'
+    version: 9.3.0
+    hasBin: true
+    dependencies:
+      chalk: 4.1.2
+      copy-dir: 1.3.0
+      docker-compose: 0.24.6
+      extract-zip: 1.7.0
+      got: 11.8.6
+      inquirer: 7.3.3
+      js-yaml: 3.14.1
+      ora: 4.1.1
+      rimraf: 3.0.2
+      simple-git: 3.21.0
+      terminal-link: 2.1.1
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   github.com/woocommerce/sourcebuster-js/411d8dffaa37d7602d678c2ec02baacee93c12d5:

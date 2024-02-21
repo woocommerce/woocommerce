@@ -171,6 +171,13 @@ function getLinkedPackages( packagePath, lockPackage ) {
 	return Object.values( linkedPackages );
 }
 
+function readPackage( package ) {
+	if ( package.dependencies && package.dependencies['@wordpress/env'] ) {
+		package.dependencies['@wordpress/env'] = 'git+https://github.com/ilyasfoo/wp-env.git';
+	}
+	return package;
+}
+
 /**
  * Hooks up all of the dependency outputs as file dependencies for wireit to fingerprint them.
  *
@@ -261,5 +268,6 @@ function afterAllResolved( lockfile, context ) {
 module.exports = {
 	hooks: {
 		afterAllResolved,
+		readPackage,
 	},
 };
