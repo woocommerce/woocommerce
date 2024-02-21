@@ -68,7 +68,7 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
 					{ __(
-						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your Woo.com subscriptions will appear here.',
+						'Connect your store to Woo.com with our Woo Connect plugin to get updates, manage your subscriptions, and get seamless support. Once connected your Woo.com subscriptions will appear here.',
 						'woocommerce'
 					) }
 				</p>
