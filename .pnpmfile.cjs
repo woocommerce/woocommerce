@@ -171,11 +171,11 @@ function getLinkedPackages( packagePath, lockPackage ) {
 	return Object.values( linkedPackages );
 }
 
-function readPackage( package ) {
-	if ( package.dependencies && package.dependencies['@wordpress/env'] ) {
-		package.dependencies['@wordpress/env'] = 'git+https://github.com/ilyasfoo/wp-env.git';
+function readPackage( pkg ) {
+	if ( pkg.dependencies && pkg.dependencies['@wordpress/env'] ) {
+		pkg.dependencies['@wordpress/env'] = 'git+https://github.com/ilyasfoo/wp-env.git';
 	}
-	return package;
+	return pkg;
 }
 
 /**
