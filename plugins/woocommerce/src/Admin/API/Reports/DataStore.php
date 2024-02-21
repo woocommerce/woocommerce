@@ -1391,8 +1391,17 @@ class DataStore extends SqlQuery {
 					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_to_join_on}.order_item_id";
 				}
 
+				// Add subquery for products ordered using attributes not used in variations.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$sql_clauses['where'][] = $wpdb->prepare( "( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s )", $meta_key, $meta_value );
+				$sql_clauses['where'][] = $wpdb->prepare(
+					"
+					( ( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s ) OR (
+						%s {$comparator} ( select term_id from wp_wc_product_attributes_lookup where is_variation_attribute=0 and product_id = {$join_alias}.meta_value and {$join_alias}.meta_key = '_product_id' )
+					) )",
+					$meta_key,
+					$meta_value,
+					$term_id,
+				);
 			}
 		}
 
