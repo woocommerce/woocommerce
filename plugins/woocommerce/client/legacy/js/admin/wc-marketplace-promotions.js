@@ -1,0 +1,1 @@
+/* Will be used for promotions positionning */
