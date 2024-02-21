@@ -178,7 +178,7 @@ class WC_Helper_Updater {
 			printf(
 			/* translators: 1: Marketplace plugin install URL 2: Marketplace plugin download URL */
 				wp_kses(
-					' Please <a href="%1$s">install</a> the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also <a href="%2$s">download</a> and install it manually in your stores.',
+					' <a href="%1$s">Install Woo Connect to Update</a>.',
 					array(
 						'a' => array(
 							'href' => array(),
@@ -189,7 +189,7 @@ class WC_Helper_Updater {
 				esc_url( 'https://woo.com/woocom-plugin/download/' ),
 			);
 		} elseif ( ! WC_Helper_Plugin::is_plugin_active() ) {
-			printf( ' Please activate the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions.' );
+			printf( ' Activate Woo Connect to Update.' );
 		}
 	}
 
