@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Button, CheckboxControl, Modal } from '@wordpress/components';
+import { Button, Modal } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
