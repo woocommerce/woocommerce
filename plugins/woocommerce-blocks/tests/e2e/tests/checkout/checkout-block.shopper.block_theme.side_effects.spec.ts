@@ -413,7 +413,7 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 // We only check if guest user can place an order because we already checked if logged in user can
 // place an order in the previous test
 test.describe( 'Shopper → Checkout block → Place Order', () => {
-	test.use( { storageState: undefined } );
+	test.use( { storageState: { cookies: [], origins: [] } } );
 
 	test( 'Guest user can place order', async ( {
 		checkoutPageObject,
@@ -439,7 +439,7 @@ test.describe( 'Shopper → Checkout block → Place Order', () => {
 } );
 
 test.describe( 'Checkout Form Errors', () => {
-	test.use( { storageState: undefined } );
+	test.use( { storageState: { cookies: [], origins: [] } } );
 
 	test( 'User can see errors when form is incomplete', async ( {
 		frontendUtils,

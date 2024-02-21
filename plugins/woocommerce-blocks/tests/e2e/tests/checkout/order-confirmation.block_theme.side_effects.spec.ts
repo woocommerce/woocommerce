@@ -128,7 +128,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation (guest user)', () => {
-	test.use( { storageState: undefined } );
+	test.use( { storageState: { cookies: [], origins: [] } } );
 
 	test( 'Place order as guest user', async ( {
 		frontendUtils,

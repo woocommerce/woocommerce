@@ -43,7 +43,7 @@ test.describe( 'Merchant → Shipping', () => {
 } );
 
 test.describe( 'Shopper → Shipping', () => {
-	test.use( { storageState: undefined } );
+	test.use( { storageState: { cookies: [], origins: [] } } );
 
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		frontendUtils,
