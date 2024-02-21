@@ -539,9 +539,6 @@ class WC_Shortcodes {
 		if ( isset( $force_rendering ) && ! $force_rendering ) {
 			return '';
 		}
-		if ( ! isset( $force_rendering ) && 'publish' !== $product_status && ! current_user_can( 'read_product', $product_id ) ) {
-			return '';
-		}
 
 		$args = array(
 			'posts_per_page'      => 1,
@@ -574,6 +571,15 @@ class WC_Shortcodes {
 		add_filter( 'woocommerce_add_to_cart_form_action', '__return_empty_string' );
 
 		$single_product = new WP_Query( $args );
+
+		if (
+			! isset( $force_rendering ) &&
+			$single_product->have_posts() &&
+			'publish' !== $single_product->post->post_status &&
+			! current_user_can( 'read_product', $single_product->post->ID )
+		) {
+			return '';
+		}
 
 		$preselected_id = '0';
 
