@@ -67,7 +67,24 @@ class Hydration {
 				$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
 			);
 
-			$response       = $controller->get_response( $request );
+			$response = $controller->get_response( $request );
+			$handler  = is_callable( array( $controller, 'get_args' ) ) ? $controller->get_args() : [];
+
+			/**
+			 * For backward compatibility with WC 8.6 and earlier, we manually call this filter that is otherwise called by WP's REST API. This provides the opportunity for 3PD plugins to hook into and change the response data.
+			 *
+			 * See `rest_request_before_callbacks` filter in WP core's `class-wp-rest-server.php`.
+			 *
+			 * @since 8.7.0
+			 *
+			 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
+			 *                                                                   Usually a WP_REST_Response or WP_Error.
+			 * @param array                                            $handler  Route handler used for the request.
+			 * @param WP_REST_Request                                  $request  Request used to generate the response.
+			 *
+			 */
+			$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
+
 			$preloaded_data = array(
 				'body'    => $response->get_data(),
 				'headers' => $response->get_headers(),
