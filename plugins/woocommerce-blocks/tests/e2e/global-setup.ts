@@ -32,7 +32,9 @@ const prepareAttributes = async ( contextOptions: BrowserContextOptions ) => {
 	await page.goto( '/wp-admin/admin.php?page=wc-status&tab=tools' );
 
 	// TODO: This sometimes does not work - the button is disabled and the job
-	// is pending. We need to investigate why this happens.
+	// is pending. We need to investigate why this happens. Also, it should be
+	// doable via CLI but it's currently not working as expected.
+	// See https://github.com/woocommerce/woocommerce/issues/32831
 	await page
 		.getByRole( 'row', {
 			name: /Regenerate the product attributes lookup table/,
