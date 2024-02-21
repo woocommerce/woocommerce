@@ -98,7 +98,8 @@ class WCAdminAssets {
 	}
 
 	/**
-	 * Gets the file modified time as a cache buster if we're in dev mode, or the plugin version otherwise.
+	 * Gets the file modified time as a cache buster if we're in dev mode,
+	 * or the asset version (file content hash) if exists, or the WooCommerce version.
 	 *
 	 * @param string      $ext File extension.
 	 * @param string|null $asset_version Optional. The version from the asset file.
