@@ -6,9 +6,28 @@ import Notice from '../notice/notice';
 
 declare global {
 	interface Window {
-		wc: Record< string, string | number | boolean | null >;
+		wc: Record< string, string | number | boolean | object | null >;
 	}
 }
+
+type Promotion = {
+	date_from_gmt: string;
+	date_to_gmt: string;
+	format: string;
+	pages: Page[];
+	position: string;
+	content: { [ locale: string ]: string };
+	icon?: string | undefined;
+	is_dismissible?: boolean;
+	menu_item_id?: string;
+	style?: string;
+};
+
+type Page = {
+	page: string;
+	path: string;
+	tab?: string;
+};
 
 const Promotions: () => null | JSX.Element = () => {
 	const urlParams = new URLSearchParams( window.location.search );
@@ -25,26 +44,30 @@ const Promotions: () => null | JSX.Element = () => {
 
 	return (
 		<>
-			{ promotions.map( ( promotion, index ) => {
+			{ promotions.map( ( promotion: Promotion, index: number ) => {
 				// Skip this promotion if pages are not defined
 				if ( ! promotion.pages ) {
 					return null;
 				}
 
 				// Check if the current page, path & tab match the promotion's pages
-				const matchesPagePath = promotion.pages.some( ( page ) => {
-					const normalizedPath = page.path.startsWith( '/' )
-						? page.path
-						: `/${ page.path }`;
-					const normalizedCurrentPath = currentPath.startsWith( '/' )
-						? currentPath
-						: `/${ currentPath }`;
-					return (
-						page.page === currentPage &&
-						normalizedPath === normalizedCurrentPath &&
-						( page.tab ? page.tab === currentTab : true )
-					);
-				} );
+				const matchesPagePath = promotion.pages.some(
+					( page: Page ) => {
+						const normalizedPath = page.path.startsWith( '/' )
+							? page.path
+							: `/${ page.path }`;
+						const normalizedCurrentPath = currentPath.startsWith(
+							'/'
+						)
+							? currentPath
+							: `/${ currentPath }`;
+						return (
+							page.page === currentPage &&
+							normalizedPath === normalizedCurrentPath &&
+							( page.tab ? page.tab === currentTab : true )
+						);
+					}
+				);
 
 				if ( ! matchesPagePath ) {
 					return null;
