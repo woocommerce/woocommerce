@@ -12,6 +12,7 @@
 		"inserter": false,
 		"lock": false
 	},
+	"usesContext": [ "woocommerce/single-cart-line-item" ],
 	"attributes": {
 		"lock": {
 			"type": "object",

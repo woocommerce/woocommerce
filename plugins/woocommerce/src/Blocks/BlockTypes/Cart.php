@@ -301,6 +301,7 @@ class Cart extends AbstractBlock {
 			'CartOrderSummaryShippingBlock',
 			'CartCrossSellsBlock',
 			'CartCrossSellsProductsBlock',
+			'SingleCartLineItemBlock'
 		];
 	}
 }

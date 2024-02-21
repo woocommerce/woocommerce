@@ -19,3 +19,4 @@ import './cart-order-summary-shipping';
 import './cart-order-summary-coupon-form';
 import './cart-order-summary-taxes';
 import './cart-order-summary-heading';
+import './single-cart-line-item-block';
