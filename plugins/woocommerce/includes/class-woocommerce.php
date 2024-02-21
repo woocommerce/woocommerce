@@ -250,6 +250,8 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -283,6 +285,9 @@ final class WooCommerce {
 	 * Add woocommerce_inbox_variant for the Remote Inbox Notification.
 	 *
 	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
+	 *
+	 * This will no longer be used. The more flexible add_woocommerce_remote_variant
+	 * below will be used instead.
 	 */
 	public function add_woocommerce_inbox_variant() {
 		$config_name = 'woocommerce_inbox_variant_assignment';
@@ -290,6 +295,18 @@ final class WooCommerce {
 			update_option( $config_name, wp_rand( 1, 12 ) );
 		}
 	}
+
+	/**
+	 * Add woocommerce_remote_variant_assignment used to determine cohort
+	 * or group assignment for Remote Spec Engines.
+	 */
+	public function add_woocommerce_remote_variant() {
+		$config_name = 'woocommerce_remote_variant_assignment';
+		if ( false === get_option( $config_name, false ) ) {
+			update_option( $config_name, wp_rand( 1, 120 ) );
+		}
+	}
+
 	/**
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
