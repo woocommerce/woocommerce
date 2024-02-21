@@ -1,17 +1,17 @@
 name: 'Release: Code freeze'
-on:
-    schedule:
-        - cron: '0 0 * * 5' # Run at start of day UTC on Friday. i.e. ~Thursday EOD 23:59:59 UTC - this is a temporary update for 8.7
-    workflow_dispatch:
-        inputs:
-            timeOverride:
-                description: "Time Override: The time to use in checking whether the action should run (default: 'now')."
-                default: 'now'
-            skipSlackPing:
-                description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
-                type: boolean
-            slackChannelOverride:
-                description: 'Slack Channel Override: The channel ID to send the Slack ping about the freeze'
+#on:
+#    schedule:
+#        - cron: '0 0 * * 4' # Run at start of day UTC on Thursday. i.e. ~Wednesday EOD 23:59:59 UTC
+#    workflow_dispatch:
+#        inputs:
+#            timeOverride:
+#                description: "Time Override: The time to use in checking whether the action should run (default: 'now')."
+#                default: 'now'
+#            skipSlackPing:
+#                description: 'Skip Slack Ping: If true, the Slack ping will be skipped (useful for testing)'
+#                type: boolean
+#            slackChannelOverride:
+#                description: 'Slack Channel Override: The channel ID to send the Slack ping about the freeze'
 
 env:
     TIME_OVERRIDE: ${{ inputs.timeOverride || 'now' }}
