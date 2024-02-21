@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 /**
  * External dependencies
  */
@@ -50,6 +52,15 @@ const prepareAttributes = async ( requestUtils: RequestUtils ) => {
 };
 
 async function globalSetup( config: FullConfig ) {
+	const timers = {
+		total: '└ Total time',
+		authentication: '├ Authentication time',
+		attributes: '├ Attributes preparation time',
+	};
+
+	console.log( 'Running global setup...' );
+	console.time( timers.total );
+
 	const { storageState, baseURL } = config.projects[ 0 ].use;
 
 	const requestContext = await request.newContext( {
@@ -66,14 +77,19 @@ async function globalSetup( config: FullConfig ) {
 		storageStatePath: customerFile,
 	} );
 
+	console.time( timers.authentication );
 	await Promise.all( [
 		adminRequestUtils.setupRest(),
 		customerRequestUtils.setupRest(),
 	] );
+	console.timeEnd( timers.authentication );
 
+	console.time( timers.attributes );
 	await prepareAttributes( adminRequestUtils );
+	console.timeEnd( timers.attributes );
 
 	await requestContext.dispose();
+	console.timeEnd( timers.total );
 }
 
 export default globalSetup;
