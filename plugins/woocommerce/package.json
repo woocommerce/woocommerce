@@ -21,7 +21,7 @@
 		"e2e": "pnpm exec wc-e2e test:e2e",
 		"e2e:debug": "pnpm exec wc-e2e test:e2e-debug",
 		"e2e:dev": "pnpm exec wc-e2e test:e2e-dev",
-		"env:force-mariadb": "sed -i '' \"s|image: 'mariadb'|image: 'mariadb:11.2'|g\" node_modules/@wordpress/env/lib/build-docker-compose-config.js",
+		"env:force-mariadb": "sed -i.bak \"s|image: 'mariadb'|image: 'mariadb:11.2'|g\" node_modules/@wordpress/env/lib/build-docker-compose-config.js",
 		"env:destroy": "pnpm wp-env destroy",
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
