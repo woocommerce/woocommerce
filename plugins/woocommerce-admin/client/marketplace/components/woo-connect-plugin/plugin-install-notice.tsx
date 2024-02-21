@@ -32,12 +32,11 @@ export default function PluginInstallNotice() {
 			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
 				<Card
 					className={
-						'woocommerce-marketplace__notice--error components-notice is-error'
+						'woocommerce-marketplace__woo-connect-plugin__notice components-notice is-error'
 					}
 				>
-					<CardBody>
+					<CardBody className="components-notice__content">
 						<p>{ message }</p>
-						<br></br>
 						<Button
 							href={ WOO_CONNECT_PLUGIN_INSTALL_URL }
 							variant="secondary"
@@ -66,19 +65,18 @@ export default function PluginInstallNotice() {
 			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
 				<Card
 					className={
-						'woocommerce-marketplace__notice--error components-notice is-error'
+						'woocommerce-marketplace__woo-connect-plugin__notice components-notice is-error'
 					}
 				>
-					<CardBody>
+					<div className="components-notice__content">
 						<p>{ message }</p>
-						<br></br>
 						<Button
 							href={ WP_ADMIN_PLUGIN_LIST_URL }
 							variant="secondary"
 						>
 							{ __( 'Activate Woo Connect', 'woocommerce' ) }
 						</Button>
-					</CardBody>
+					</div>
 				</Card>
 			</section>
 		);

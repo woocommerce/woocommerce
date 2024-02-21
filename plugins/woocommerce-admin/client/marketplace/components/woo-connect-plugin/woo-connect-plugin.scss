@@ -28,19 +28,9 @@
 		}
 
 		.components-notice__content {
-			display: flex;
 			align-items: center;
 			gap: $grid-unit-15;
-		}
-		.components-notice__dismiss.has-icon {
-			width: 24px;
-			min-width: 24px;
-			height: 24px;
-			align-self: center;
-			padding: $grid-unit-05;
-			> svg {
-				fill: $gray-900;
-			}
+			padding: 0px;
 		}
 	}
 
@@ -48,6 +38,20 @@
 		&.is-link {
 			text-decoration: none;
 			padding: 6px 12px;
+		}
+	}
+}
+
+.woocommerce-marketplace__woo-connect-plugin__notice {
+	&:last-child {
+		margin-bottom: $grid-unit-50;
+	}
+}
+
+.woocommerce-marketplace__discover {
+	.woocommerce-marketplace__woo-connect-plugin__notice {
+		&:last-child {
+			margin-bottom: $grid-unit-05;
 		}
 	}
 }
