@@ -1,8 +1,4 @@
 /**
- * External dependencies
- */
-
-/**
  * Internal dependencies
  */
 import { LOCALE } from '../../../utils/admin-settings';
@@ -10,34 +6,11 @@ import Notice from '../notice/notice';
 
 declare global {
 	interface Window {
-		wc: {
-			marketplace: {
-				promotions: Promotion[];
-			};
-		};
+		wc: Record< string, string | number | boolean | null >;
 	}
 }
 
-type Promotion = {
-	date_from_gmt: string;
-	date_to_gmt: string;
-	format: string;
-	pages: Page[];
-	position: string;
-	content: { [ locale: string ]: string };
-	icon?: string;
-	is_dismissible?: boolean;
-	menu_item_id?: string;
-	style?: string;
-};
-
-type Page = {
-	page: string;
-	path: string;
-	tab?: string;
-};
-
-const Promotions: React.FC = () => {
+const Promotions: () => null | JSX.Element = () => {
 	const urlParams = new URLSearchParams( window.location.search );
 	const currentPage = urlParams.get( 'page' );
 
@@ -60,7 +33,7 @@ const Promotions: React.FC = () => {
 
 				// Check if the current page, path & tab match the promotion's pages
 				const matchesPagePath = promotion.pages.some( ( page ) => {
-					const normalizedPagePath = page.path.startsWith( '/' )
+					const normalizedPath = page.path.startsWith( '/' )
 						? page.path
 						: `/${ page.path }`;
 					const normalizedCurrentPath = currentPath.startsWith( '/' )
@@ -68,7 +41,7 @@ const Promotions: React.FC = () => {
 						: `/${ currentPath }`;
 					return (
 						page.page === currentPage &&
-						normalizedPagePath === normalizedCurrentPath &&
+						normalizedPath === normalizedCurrentPath &&
 						( page.tab ? page.tab === currentTab : true )
 					);
 				} );
@@ -87,6 +60,10 @@ const Promotions: React.FC = () => {
 
 				// Promotion is a notice
 				if ( promotion.format === 'notice' ) {
+					if ( ! promotion?.content ) {
+						return null;
+					}
+
 					return (
 						<Notice
 							key={ index }
@@ -100,7 +77,7 @@ const Promotions: React.FC = () => {
 							variant={
 								promotion.style ? promotion.style : 'info'
 							}
-							icon={ promotion.icon }
+							icon={ promotion?.icon }
 							isDismissible={ promotion.is_dismissible || false }
 						/>
 					);
