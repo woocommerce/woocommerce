@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Manually call rest_request_after_callbacks filter for backward compatibility
