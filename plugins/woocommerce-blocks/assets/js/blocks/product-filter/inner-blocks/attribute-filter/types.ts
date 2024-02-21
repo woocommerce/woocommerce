@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { BlockEditProps } from '@wordpress/blocks';
+import { AttributeTerm } from '@woocommerce/types';
 
 export type BlockAttributes = {
 	attributeId: number;
@@ -29,3 +30,8 @@ export function isAttributeCounts(
 		target.every( ( item ) => 'term' in item && 'count' in item )
 	);
 }
+
+export type StyleOption = {
+	label: string;
+	value: string;
+};

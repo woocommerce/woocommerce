@@ -30,6 +30,67 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		add_filter( 'collection_filter_query_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'collection_active_filters_data', array( $this, 'register_active_filters_data' ), 10, 2 );
+		add_filter( 'render_block_context', function( $context, $parsed_block, $parent_block ) {
+		    if ( isset( $parent_block->name ) && "woocommerce/{$this->block_name}" === $parent_block->name ) {
+          		$product_attribute = wc_get_attribute( $parent_block->parsed_block['attrs']['attributeId'] );
+
+                $attribute_counts = $this->get_attribute_counts(
+                    $parent_block,
+                    $product_attribute->slug,
+                    $parent_block->parsed_block['attrs']['queryType'] ?? 'or'
+                );
+
+                $attribute_terms = get_terms(
+         			array(
+        				'taxonomy' => $product_attribute->slug,
+        				'include'  => array_keys( $attribute_counts ),
+         			)
+          		);
+
+          		$selected_terms = array_filter(
+         			explode(
+        				',',
+        				get_query_var( 'filter_' . str_replace( 'pa_', '', $product_attribute->slug ) )
+         			)
+          		);
+
+          		$attribute_options = array_map(
+         			function( $term ) use ( $attribute_counts, $selected_terms ) {
+        				$term             = (array) $term;
+        				$term['count']    = $attribute_counts[ $term['term_id'] ];
+        				$term['selected'] = in_array( $term['slug'], $selected_terms, true );
+        				return $term;
+         			},
+         			$attribute_terms
+          		);
+
+          		$filtered_options = array_filter(
+         			$attribute_options,
+         			function( $option ) {
+            				return $option['count'] > 0;
+         			}
+          		);
+
+                $show_counts = $parent_block->parsed_block['attrs']['showCounts'] ?? false;
+
+                $context['parentBlockName'] = $parent_block->name;
+                $context['filterOptions'] = array_map(
+         			function( $option ) use ( $show_counts ) {
+        				return array(
+           					'id'         => $option['slug'] . '-' . $option['term_id'],
+           					'checked'    => $option['selected'],
+           					'label'      => $option['name'],
+           					'value'      => $option['slug'],
+                            'count'      => $option['count'],
+                            'attrs'      => $option
+        				);
+         			},
+         			$filtered_options
+          		);
+            }
+
+            return $context;
+        }, 10, 3 );
 	}
 
 	/**
@@ -184,10 +245,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		);
 
-		$filter_content = 'dropdown' === $attributes['displayStyle'] ?
-			$this->render_attribute_dropdown( $filtered_options, $attributes ) :
-			$this->render_attribute_checkbox_list( $filtered_options, $attributes );
-
 		$context = array(
 			'attributeSlug' => str_replace( 'pa_', '', $product_attribute->slug ),
 			'queryType'     => $attributes['queryType'],
@@ -195,7 +252,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		return sprintf(
-			'<div %1$s>%2$s%3$s</div>',
+			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes(
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
@@ -203,8 +260,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					'data-has-filter'     => 'yes',
 				)
 			),
-			$content,
-			$filter_content
+			$content
 		);
 	}
 

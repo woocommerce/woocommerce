@@ -3,7 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useState } from '@wordpress/element';
-import { BlockControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	BlockControls,
+	useBlockProps,
+	InnerBlocks,
+	BlockContextProvider,
+} from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 import {
 	useCollection,
@@ -33,9 +38,8 @@ import {
 import { AttributeSelectControls } from './components/attribute-select-controls';
 import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector-controls';
-import { AttributeCheckboxList } from './components/attribute-checkbox-list';
-import { AttributeDropdown } from './components/attribute-dropdown';
 import './style.scss';
+import { FilterOption } from '../../types';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -100,6 +104,19 @@ const AttributeSelectPlaceholder = ( {
 	</AttributesPlaceholder>
 );
 
+function formatFilterOptions(
+	attributeOptions: AttributeTerm[]
+): FilterOption[] {
+	return attributeOptions.map( ( option ) => ( {
+		id: `${ option.slug }-${ option.id }`,
+		label: option.name,
+		value: option.slug,
+		count: option.count,
+		attrs: option,
+		checked: false,
+	} ) );
+}
+
 const Edit = ( props: EditProps ) => {
 	const {
 		attributes: blockAttributes,
@@ -107,8 +124,7 @@ const Edit = ( props: EditProps ) => {
 		debouncedSpeak,
 	} = props;
 
-	const { attributeId, queryType, isPreview, displayStyle, showCounts } =
-		blockAttributes;
+	const { attributeId, queryType, isPreview, displayStyle } = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
 
@@ -166,6 +182,7 @@ const Edit = ( props: EditProps ) => {
 
 	const setAttributeId = useCallback(
 		( id ) => {
+			console.log( 'setAttributeId', id );
 			setAttributes( {
 				attributeId: id,
 			} );
@@ -247,21 +264,17 @@ const Edit = ( props: EditProps ) => {
 			blockProps={ blockProps }
 		>
 			<Inspector { ...props } />
-			<Disabled>
-				{ displayStyle === 'dropdown' ? (
-					<AttributeDropdown
-						label={
-							attributeObject.label ||
-							__( 'attribute', 'woocommerce' )
-						}
-					/>
-				) : (
-					<AttributeCheckboxList
-						showCounts={ showCounts }
-						attributeTerms={ attributeOptions }
-					/>
-				) }{ ' ' }
-			</Disabled>
+			<BlockContextProvider
+				value={ {
+					filterOptions: formatFilterOptions( attributeOptions ),
+					attributeTerms,
+				} }
+			>
+				<InnerBlocks
+					template={ [ [ displayStyle ] ] }
+					renderAppender={ () => null }
+				/>
+			</BlockContextProvider>
 		</Wrapper>
 	);
 };
