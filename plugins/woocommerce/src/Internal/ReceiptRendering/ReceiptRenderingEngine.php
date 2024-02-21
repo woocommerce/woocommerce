@@ -51,14 +51,14 @@ class ReceiptRenderingEngine {
 	 *
 	 * @var TransientFilesEngine
 	 */
-	private TransientFilesEngine $transient_files_engine;
+	private $transient_files_engine;
 
 	/**
 	 * The instance of LegacyProxy to use.
 	 *
 	 * @var LegacyProxy
 	 */
-	private LegacyProxy $legacy_proxy;
+	private $legacy_proxy;
 
 	/**
 	 * Initializes the class.
