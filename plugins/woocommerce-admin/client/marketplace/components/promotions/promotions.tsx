@@ -1,4 +1,3 @@
-/* global userLocale */
 /**
  * External dependencies
  */
