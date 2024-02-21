@@ -18,9 +18,10 @@ export const STORAGE_STATE_PATH =
 	process.env.STORAGE_STATE_PATH ||
 	path.join( WP_ARTIFACTS_PATH, 'storage-states/admin.json' );
 
-// User roles file paths
+// User roles storage states
 export const adminFile = STORAGE_STATE_PATH;
 export const customerFile = path.join(
 	path.dirname( STORAGE_STATE_PATH ),
 	'customer.json'
 );
+export const guestFile = { cookies: [], origins: [] };

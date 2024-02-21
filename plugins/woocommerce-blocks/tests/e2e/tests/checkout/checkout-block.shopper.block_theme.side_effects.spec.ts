@@ -3,7 +3,7 @@
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile } from '@woocommerce/e2e-utils';
+import { customerFile, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -413,7 +413,7 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 // We only check if guest user can place an order because we already checked if logged in user can
 // place an order in the previous test
 test.describe( 'Shopper → Checkout block → Place Order', () => {
-	test.use( { storageState: { cookies: [], origins: [] } } );
+	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can place order', async ( {
 		checkoutPageObject,
@@ -439,7 +439,7 @@ test.describe( 'Shopper → Checkout block → Place Order', () => {
 } );
 
 test.describe( 'Checkout Form Errors', () => {
-	test.use( { storageState: { cookies: [], origins: [] } } );
+	test.use( { storageState: guestFile } );
 
 	test( 'User can see errors when form is incomplete', async ( {
 		frontendUtils,

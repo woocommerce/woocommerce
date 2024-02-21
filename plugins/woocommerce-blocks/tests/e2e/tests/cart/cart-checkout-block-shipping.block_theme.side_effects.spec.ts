@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { adminFile } from '@woocommerce/e2e-utils';
+import { adminFile, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -43,7 +43,7 @@ test.describe( 'Merchant → Shipping', () => {
 } );
 
 test.describe( 'Shopper → Shipping', () => {
-	test.use( { storageState: { cookies: [], origins: [] } } );
+	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can see shipping calculator on cart page', async ( {
 		frontendUtils,
