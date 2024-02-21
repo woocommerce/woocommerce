@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+[Experimental] Fix a bug in new attribute filter where we didn't set the attribute from content panel

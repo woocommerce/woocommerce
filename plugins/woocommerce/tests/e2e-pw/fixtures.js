@@ -18,5 +18,15 @@ exports.test = base.test.extend( {
 
 		await use( api );
 	},
+	wcAdminApi: async ( { baseURL }, use ) => {
+		const wcAdminApi = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc-admin', // Use wc-admin namespace
+		} );
+
+		await use( wcAdminApi );
+	},
 } );
 exports.expect = base.expect;

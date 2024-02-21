@@ -73,6 +73,7 @@ type getSuggestedProductsForOptions = {
 	postId: number;
 	postType?: 'product' | 'post' | 'page';
 	forceRequest?: boolean;
+	exclude?: number[];
 };
 
 /**
@@ -85,6 +86,7 @@ export async function getSuggestedProductsFor( {
 	postId,
 	postType = 'product',
 	forceRequest = false,
+	exclude = [],
 }: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
 	// @ts-expect-error There are no types for this.
 	const { getEditedEntityRecord } = select( 'core' );
@@ -96,6 +98,7 @@ export async function getSuggestedProductsFor( {
 			? data.categories.map( ( cat ) => cat.id )
 			: [],
 		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
+		exclude: exclude?.length ? exclude : [ postId ],
 	};
 
 	if ( forceRequest ) {
