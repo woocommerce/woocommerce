@@ -16,6 +16,10 @@ import {
 
 export default function PluginInstallNotice() {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	if ( ! wccomSettings?.isConnected ) {
+		return null;
+	}
+
 	if (
 		! wccomSettings?.wooConnectActive &&
 		! wccomSettings?.wooConnectInstalled
