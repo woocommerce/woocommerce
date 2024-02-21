@@ -31,17 +31,6 @@ class Init extends RemoteSpecsEngine {
 		add_filter( 'woocommerce_payment_gateways', array( __CLASS__, 'possibly_register_pre_install_wc_pay_promotion_gateway' ) );
 		add_filter( 'option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
 		add_filter( 'default_option_woocommerce_gateway_order', array( __CLASS__, 'set_gateway_top_of_list' ) );
-
-		$rtl = is_rtl() ? '.rtl' : '';
-
-		wp_enqueue_style(
-			'wc-admin-payment-method-promotions',
-			WCAdminAssets::get_url( "payment-method-promotions/style{$rtl}", 'css' ),
-			array( 'wp-components' ),
-			WCAdminAssets::get_file_version( 'css' )
-		);
-
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'payment-method-promotions', true );
 	}
 
 	/**
