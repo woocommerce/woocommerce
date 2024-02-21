@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * External dependencies
  */
@@ -11,27 +10,17 @@ import { cli, BASE_URL, adminFile, customerFile } from '@woocommerce/e2e-utils';
  */
 import { customer, admin } from './test-data/data/data';
 
-const prepareAttributes = async ( config: FullConfig ) => {
-	const { baseURL, userAgent } = config.projects[ 0 ].use;
-
-	// Specify user agent when running against an external test site to avoid getting HTTP 406 NOT ACCEPTABLE errors.
-	const contextOptions = { baseURL, userAgent };
-
-	// Create browser, browserContext, and page for customer and admin users
+const prepareAttributes = async ( requestUtils: RequestUtils ) => {
 	const browser = await chromium.launch();
-	const context = await browser.newContext( contextOptions );
+	const context = await browser.newContext( {
+		baseURL: requestUtils.baseURL as string,
+		storageState: requestUtils.storageStatePath as string,
+	} );
+
 	const page = await context.newPage();
 
-	await page.goto( `/wp-admin`, { waitUntil: 'commit' } );
-	await page.fill( 'input[name="log"]', admin.username );
-	await page.fill( 'input[name="pwd"]', admin.password );
-	await page.click( 'text=Log In' );
-
-	/*
-	 * Intercept the dialog event.
-	 * This is needed because when the regenerate
-	 * button is clicked, a dialog is shown.
-	 */
+	// Intercept the dialog event. This is needed because when the regenerate
+	// button is clicked, a dialog is shown.
 	page.on( 'dialog', async ( dialog ) => {
 		await dialog.accept();
 	} );
@@ -40,23 +29,24 @@ const prepareAttributes = async ( config: FullConfig ) => {
 		waitUntil: 'commit',
 	} );
 
-	await page.click( '.regenerate_product_attributes_lookup_table input' );
+	// TODO: This sometimes does not work - the button is disabled and the job
+	// is pending. We need to investigate why this happens.
+	await page
+		.getByRole( 'row', {
+			name: /Regenerate the product attributes lookup table/,
+		} )
+		.getByRole( 'button' )
+		.click();
 
 	await context.close();
 	await browser.close();
 
-	/*
-	 * Note that the two commands below are intentionally
-	 * duplicated as we need to run the cron task twice as
-	 * we need to process more than 1 batch of items.
-	 */
-	await cli(
-		`npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
-	);
-
-	await cli(
-		`npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`
-	);
+	// Note that the two commands below are intentionally duplicated as we need
+	// to run the cron task twice as we need to process more than 1 batch of
+	// items.
+	const cronTask = `npm run wp-env run tests-cli -- wp action-scheduler run --hooks="woocommerce_run_product_attribute_lookup_regeneration_callback"`;
+	await cli( cronTask );
+	await cli( cronTask );
 };
 
 async function globalSetup( config: FullConfig ) {
@@ -81,9 +71,9 @@ async function globalSetup( config: FullConfig ) {
 		customerRequestUtils.setupRest(),
 	] );
 
-	await requestContext.dispose();
+	await prepareAttributes( adminRequestUtils );
 
-	await prepareAttributes( config );
+	await requestContext.dispose();
 }
 
 export default globalSetup;
