@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -23,6 +24,8 @@ class BlockTemplatesController {
 	 */
 	public function __construct() {
 		$this->init();
+
+		BlockTemplatesRegistry::register_templates();
 	}
 
 	/**

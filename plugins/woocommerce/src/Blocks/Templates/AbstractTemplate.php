@@ -39,7 +39,6 @@ abstract class AbstractTemplate {
 	 */
 	public function __construct() {
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
-			BlockTemplatesRegistry::register_template( $this );
 			$this->init();
 		}
 	}

@@ -6,7 +6,6 @@ use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\CreateAccount;
@@ -28,22 +27,11 @@ use Automattic\WooCommerce\Blocks\Payments\Integrations\Cheque;
 use Automattic\WooCommerce\Blocks\Payments\Integrations\PayPal;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 use Automattic\WooCommerce\Blocks\Registry\Container;
-use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
-use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ClassicTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Domain\Services\OnboardingTasks\TasksController;
@@ -158,19 +146,8 @@ class Bootstrap {
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
 			$this->container->get( BlockTemplatesController::class );
-			$this->container->get( ProductCatalogTemplate::class );
-			$this->container->get( ProductCategoryTemplate::class );
-			$this->container->get( ProductTagTemplate::class );
-			$this->container->get( ProductAttributeTemplate::class );
-			$this->container->get( ProductSearchResultsTemplate::class );
-			$this->container->get( MiniCartTemplate::class );
-			$this->container->get( CartTemplate::class );
-			$this->container->get( CheckoutTemplate::class );
-			$this->container->get( CheckoutHeaderTemplate::class );
-			$this->container->get( OrderConfirmationTemplate::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
-			$this->container->get( SingleProductTemplate::class );
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
 			$this->container->get( Notices::class )->init();
 		}
@@ -274,72 +251,6 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockTemplatesRegistry::class,
-			function () {
-				return new BlockTemplatesRegistry();
-			}
-		);
-		$this->container->register(
-			ProductAttributeTemplate::class,
-			function () {
-				return new ProductAttributeTemplate();
-			}
-		);
-		$this->container->register(
-			ProductCatalogTemplate::class,
-			function () {
-				return new ProductCatalogTemplate();
-			}
-		);
-		$this->container->register(
-			ProductCategoryTemplate::class,
-			function () {
-				return new ProductCategoryTemplate();
-			}
-		);
-		$this->container->register(
-			ProductTagTemplate::class,
-			function () {
-				return new ProductTagTemplate();
-			}
-		);
-		$this->container->register(
-			ProductSearchResultsTemplate::class,
-			function () {
-				return new ProductSearchResultsTemplate();
-			}
-		);
-		$this->container->register(
-			MiniCartTemplate::class,
-			function () {
-				return new MiniCartTemplate();
-			}
-		);
-		$this->container->register(
-			CartTemplate::class,
-			function () {
-				return new CartTemplate();
-			}
-		);
-		$this->container->register(
-			CheckoutTemplate::class,
-			function () {
-				return new CheckoutTemplate();
-			}
-		);
-		$this->container->register(
-			CheckoutHeaderTemplate::class,
-			function () {
-				return new CheckoutHeaderTemplate();
-			}
-		);
-		$this->container->register(
-			OrderConfirmationTemplate::class,
-			function () {
-				return new OrderConfirmationTemplate();
-			}
-		);
-		$this->container->register(
 			ClassicTemplatesCompatibility::class,
 			function ( Container $container ) {
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
@@ -350,12 +261,6 @@ class Bootstrap {
 			ArchiveProductTemplatesCompatibility::class,
 			function () {
 				return new ArchiveProductTemplatesCompatibility();
-			}
-		);
-		$this->container->register(
-			SingleProductTemplate::class,
-			function () {
-				return new SingleProductTemplate();
 			}
 		);
 		$this->container->register(

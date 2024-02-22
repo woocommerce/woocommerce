@@ -24,7 +24,6 @@ abstract class AbstractTemplatePart extends AbstractTemplate {
 	 */
 	public function __construct() {
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
-			BlockTemplatesRegistry::register_template( $this );
 			$this->init();
 		}
 	}
