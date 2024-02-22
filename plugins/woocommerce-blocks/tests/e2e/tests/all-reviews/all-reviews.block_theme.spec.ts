@@ -18,6 +18,10 @@ const blockData = {
 	},
 };
 
+const BLOCK_NAME = 'woocommerce/all-reviews';
+
+const latestReview = allReviews[ allReviews.length - 1 ];
+
 test.describe( `${ blockData.name } Block`, () => {
 	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
 		admin,
@@ -38,25 +42,28 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( 'can change sort order in the frontend', async ( {
 		page,
 		frontendUtils,
+		editorUtils,
+		admin,
+		editor,
 	} ) => {
-		await page.goto( '/all-reviews-block/' );
+		await admin.createNewPost();
+		await editor.insertBlock( { name: blockData.name } );
+		await editorUtils.publishAndVisitPost();
 
 		const block = await frontendUtils.getBlockByName( blockData.name );
-		let firstReview;
-		firstReview = block.locator( blockData.selectors.frontend.firstReview );
+		const reviews = block.locator(
+			'.wc-block-components-review-list-item__text'
+		);
 
-		// The most recent review should be at top, TODO: this assertion could be improved.
-		await expect( firstReview ).toHaveText( allReviews[ 2 ].review );
+		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
 		select.selectOption( 'Highest rating' );
-
-		firstReview = block.locator( blockData.selectors.frontend.firstReview );
 
 		const highestRating = allReviews.sort(
 			( a, b ) => b.rating - a.rating
 		)[ 0 ];
 
-		await expect( firstReview ).toHaveText( highestRating.review );
+		await expect( reviews.nth( 0 ) ).toHaveText( highestRating.review );
 	} );
 } );
