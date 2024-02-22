@@ -28,7 +28,10 @@
 				".",
 				"https://downloads.wordpress.org/plugin/akismet.zip",
 				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
+				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",
+				"https://downloads.wordpress.org/plugin/query-monitor.3.15.0.zip",
+				"./qm-alloptions/",
+				"./qit-qm-summary/"
 			],
 			"themes": [
 				"https://downloads.wordpress.org/theme/twentynineteen.zip"
