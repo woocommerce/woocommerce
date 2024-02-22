@@ -12,7 +12,8 @@ export const CLASSIC_THEME_NAME = 'Storefront';
 export const BASE_URL = 'http://localhost:8889';
 
 export const WP_ARTIFACTS_PATH =
-	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );
+	process.env.WP_ARTIFACTS_PATH ||
+	path.join( process.cwd(), 'tests/e2e/artifacts' );
 
 export const STORAGE_STATE_PATH =
 	process.env.STORAGE_STATE_PATH ||
