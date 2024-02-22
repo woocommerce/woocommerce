@@ -3,22 +3,18 @@
  */
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
-import { isInTheFuture, date as formatDate } from '@wordpress/date';
+import { getDate, isInTheFuture, date as parseDate } from '@wordpress/date';
 import { Product, ProductStatus } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { formatDatetime } from '../../utils';
+import { formatScheduleDatetime, getSiteDatetime } from '../../utils';
+
+export const TIMEZONELESS_FORMAT = 'Y-m-d\\TH:i:s';
 
 export function useProductScheduled( postType: string ) {
-	const [ productId ] = useEntityProp< string >( 'postType', postType, 'id' );
-
-	const [ editedStatus, , prevStatus ] = useEntityProp< ProductStatus >(
-		'postType',
-		postType,
-		'status'
-	);
+	const [ productId ] = useEntityProp< number >( 'postType', postType, 'id' );
 
 	const [ date ] = useEntityProp< string >(
 		'postType',
@@ -26,27 +22,40 @@ export function useProductScheduled( postType: string ) {
 		'date_created_gmt'
 	);
 
+	const [ editedStatus, , prevStatus ] = useEntityProp< ProductStatus >(
+		'postType',
+		postType,
+		'status'
+	);
+
 	const gmtDate = `${ date }+00:00`;
+
+	const siteDate = getSiteDatetime( gmtDate );
 
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord } = useDispatch( 'core' );
 
-	return {
-		isScheduled: editedStatus === 'future' || isInTheFuture( gmtDate ),
-		date: gmtDate,
-		formattedDate: formatDatetime( gmtDate ),
-		async editDate( value: string ) {
-			let status = prevStatus;
-			if ( isInTheFuture( value ) ) {
-				status = 'future';
-			} else if ( prevStatus === 'future' ) {
-				status = 'publish';
-			}
+	async function schedule( value?: string ) {
+		const siteDate = getDate( value ?? null );
+		const newGmtDate = parseDate( TIMEZONELESS_FORMAT, siteDate, 'GMT' );
 
-			await editEntityRecord( 'postType', postType, productId, {
-				status,
-				date_created_gmt: formatDate( 'c', value, 'GMT' ),
-			} satisfies Partial< Product > );
-		},
+		let status = prevStatus;
+		if ( isInTheFuture( siteDate.toISOString() ) ) {
+			status = 'future';
+		} else if ( prevStatus === 'future' ) {
+			status = 'publish';
+		}
+
+		await editEntityRecord( 'postType', postType, productId, {
+			status,
+			date_created_gmt: newGmtDate,
+		} satisfies Partial< Product > );
+	}
+
+	return {
+		isScheduled: editedStatus === 'future' || isInTheFuture( siteDate ),
+		date: siteDate,
+		formattedDate: formatScheduleDatetime( gmtDate ),
+		schedule,
 	};
 }

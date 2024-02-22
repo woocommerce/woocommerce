@@ -4,9 +4,9 @@
 import { MouseEvent, useState } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { useDispatch } from '@wordpress/data';
+import { dispatch, useDispatch } from '@wordpress/data';
 import { createElement, Fragment } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { type Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
@@ -24,15 +24,54 @@ import { usePublish } from '../hooks/use-publish';
 import { PublishButtonProps } from './types';
 import { useProductScheduled } from '../../../hooks/use-product-scheduled';
 import { SchedulePublishModal } from '../../schedule-publish-modal';
+import { formatScheduleDatetime } from '../../../utils';
+
+function getNoticeContent( product: Product ) {
+	switch ( product.status ) {
+		case 'future':
+			const gmtDate = `${ product.date_created_gmt }+00:00`;
+			return sprintf(
+				// translators: %s: The datetime the product is scheduled for.
+				__( 'Product scheduled for %s.', 'woocommerce' ),
+				formatScheduleDatetime( gmtDate )
+			);
+		case 'publish':
+			return __( 'Product updated.', 'woocommerce' );
+		default:
+			return __( 'Product published.', 'woocommerce' );
+	}
+}
+
+function showSuccessNotice( product: Product ) {
+	const { createSuccessNotice } = dispatch( 'core/notices' );
+
+	const noticeContent = getNoticeContent( product );
+	const noticeOptions = {
+		icon: '🎉',
+		actions: [
+			{
+				label: __( 'View in store', 'woocommerce' ),
+				// Leave the url to support a11y.
+				url: product.permalink,
+				onClick( event: MouseEvent< HTMLAnchorElement > ) {
+					event.preventDefault();
+					// Notice actions do not support target anchor prop,
+					// so this forces the page to be opened in a new tab.
+					window.open( product.permalink, '_blank' );
+				},
+			},
+		],
+	};
+
+	createSuccessNotice( noticeContent, noticeOptions );
+}
 
 export function PublishButton( {
 	productType = 'product',
 	prePublish,
 	...props
 }: PublishButtonProps ) {
-	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( 'core/notices' );
-
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
@@ -54,27 +93,7 @@ export function PublishButton( {
 				recordProductEvent( 'product_update', savedProduct );
 			}
 
-			const noticeContent = isPublished
-				? __( 'Product updated.', 'woocommerce' )
-				: __( 'Product published.', 'woocommerce' );
-			const noticeOptions = {
-				icon: '🎉',
-				actions: [
-					{
-						label: __( 'View in store', 'woocommerce' ),
-						// Leave the url to support a11y.
-						url: savedProduct.permalink,
-						onClick( event: MouseEvent< HTMLAnchorElement > ) {
-							event.preventDefault();
-							// Notice actions do not support target anchor prop,
-							// so this forces the page to be opened in a new tab.
-							window.open( savedProduct.permalink, '_blank' );
-						},
-					},
-				],
-			};
-
-			createSuccessNotice( noticeContent, noticeOptions );
+			showSuccessNotice( savedProduct );
 
 			maybeShowFeedbackBar();
 
@@ -89,9 +108,11 @@ export function PublishButton( {
 		},
 	} );
 
-	const { isScheduled, editDate, date, formattedDate } =
+	const { isScheduled, schedule, date, formattedDate } =
 		useProductScheduled( productType );
-	const [ showScheduleModal, setShowScheduleModal ] = useState( false );
+	const [ showScheduleModal, setShowScheduleModal ] = useState<
+		'schedule' | 'edit' | undefined
+	>();
 
 	if ( window.wcAdminFeatures[ 'product-pre-publish-modal' ] && prePublish ) {
 		function getPublishButtonControls() {
@@ -101,7 +122,7 @@ export function PublishButton( {
 							{
 								title: __( 'Publish now', 'woocommerce' ),
 								async onClick() {
-									await editDate( new Date().toISOString() );
+									await schedule();
 									await publish();
 								},
 							},
@@ -118,7 +139,7 @@ export function PublishButton( {
 									</div>
 								),
 								onClick() {
-									setShowScheduleModal( true );
+									setShowScheduleModal( 'edit' );
 								},
 							},
 					  ]
@@ -126,7 +147,7 @@ export function PublishButton( {
 							{
 								title: __( 'Schedule publish', 'woocommerce' ),
 								onClick() {
-									setShowScheduleModal( true );
+									setShowScheduleModal( 'schedule' );
 								},
 							},
 					  ],
@@ -137,12 +158,15 @@ export function PublishButton( {
 			return (
 				showScheduleModal && (
 					<SchedulePublishModal
-						value={ date }
-						onCancel={ () => setShowScheduleModal( false ) }
+						postType={ productType }
+						value={
+							showScheduleModal === 'edit' ? date : undefined
+						}
+						onCancel={ () => setShowScheduleModal( undefined ) }
 						onSchedule={ async ( value ) => {
-							await editDate( value );
+							await schedule( value );
 							await publish();
-							setShowScheduleModal( false );
+							setShowScheduleModal( undefined );
 						} }
 					/>
 				)

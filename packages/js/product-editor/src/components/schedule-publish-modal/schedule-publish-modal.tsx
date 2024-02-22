@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Button, DateTimePicker, Modal } from '@wordpress/components';
-import { getDate } from '@wordpress/date';
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
@@ -10,9 +9,14 @@ import classNames from 'classnames';
 /**
  * Internal dependencies
  */
+import {
+	getSiteDatetime,
+	isSiteSettingsTime12HourFormatted,
+} from '../../utils';
 import { SchedulePublishModalProps } from './types';
 
 export function SchedulePublishModal( {
+	postType,
 	title = __( 'Schedule product', 'woocommerce' ),
 	description = __(
 		'Decide when this product should become visible to customers.',
@@ -24,9 +28,13 @@ export function SchedulePublishModal( {
 	onSchedule,
 	...props
 }: SchedulePublishModalProps ) {
-	const [ date, setDate ] = useState< string >(
-		value ?? getDate( null ).toISOString()
+	const [ date, setDate ] = useState< string | undefined >(
+		() => value ?? getSiteDatetime()
 	);
+
+	function handleDateTimePickerChange( value?: string ) {
+		setDate( value );
+	}
 
 	return (
 		<Modal
@@ -49,14 +57,18 @@ export function SchedulePublishModal( {
 					<Button
 						variant="link"
 						onClick={ () =>
-							setDate( getDate( null ).toISOString() )
+							handleDateTimePickerChange( getSiteDatetime() )
 						}
 					>
 						{ __( 'Now', 'woocommerce' ) }
 					</Button>
 				</div>
 
-				<DateTimePicker currentDate={ date } onChange={ setDate } />
+				<DateTimePicker
+					currentDate={ date }
+					onChange={ handleDateTimePickerChange }
+					is12Hour={ isSiteSettingsTime12HourFormatted() }
+				/>
 			</div>
 
 			<div className="woocommerce-schedule-publish-modal__buttons">
