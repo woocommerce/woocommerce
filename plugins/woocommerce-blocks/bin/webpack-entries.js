@@ -107,10 +107,6 @@ const blocks = {
 		customDir: 'product-filter/view-blocks/checkbox-list',
 		isExperimental: true,
 	},
-	'product-filter-attribute-color': {
-		customDir: 'product-filter/inner-blocks/attribute-filter-color',
-		isExperimental: true,
-	},
 	'product-filter-rating': {
 		customDir: 'product-filter/inner-blocks/rating-filter',
 		isExperimental: true,
