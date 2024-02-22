@@ -21,7 +21,7 @@
 		position: absolute;
 		transform: translateY(em($gap));
 		line-height: 1.25; // =20px when font-size is 16px.
-		left: 75px;
+		left: 99px;
 		top: 0;
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
@@ -53,7 +53,7 @@
 			font-size: inherit;
 			font-family: inherit;
 			outline: 0;
-			padding: em($gap);
+			padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
 			margin: 0;
 			color: $input-text-active;
 			background-color: #fff;
@@ -77,6 +77,7 @@
 			padding: 0 em($gap);
 			line-height: em($gap);
 			color: $input-text-active;
+			width: 90px;
 		}
 
 		&:focus {
@@ -169,7 +170,7 @@
 	--select-search-font: "Inter", sans-serif;
 
 	width: 100%;
-	position: relative;
+	position: absolute;
 	font-family: var(--select-search-font);
 	color: var(--select-search-text);
 	box-sizing: border-box;
@@ -245,7 +246,7 @@
 	padding: 0 em($gap);
 	margin: 0;
 	background: var(--select-search-background);
-	border: 1px solid var(--select-search-border);
+	border: 2px solid rgba(17, 17, 17, 0.8);
 	border-bottom: 0;
 	color: var(--select-search-text);
 	border-radius: $universal-border-radius $universal-border-radius 0 0;
@@ -286,10 +287,10 @@
 	cursor: not-allowed;
 }
 
-.select-search-container:not(.select-search-is-disabled).select-search-has-focus .select-search-input,
-.select-search-container:not(.select-search-is-disabled) .select-search-input:hover {
-	border-color: var(--select-search-selected);
-}
+// .select-search-container:not(.select-search-is-disabled).select-search-has-focus .select-search-input,
+// .select-search-container:not(.select-search-is-disabled) .select-search-input:hover {
+// 	border-color: var(--select-search-selected);
+// }
 
 .select-search-select {
 	background: var(--select-search-background);
@@ -301,13 +302,13 @@
 .select-search-container:not(.select-search-is-multiple) .select-search-select {
 	position: absolute;
 	z-index: 2;
-	top: 54px;
+	top: 48px;
 	right: 0;
 	left: 0;
-	border-radius: 3px;
-	display: block;
-	border: 1px solid var(--select-search-border);
 	border-radius: 0 0 $universal-border-radius $universal-border-radius;
+	display: block;
+	border: 2px solid rgba(17, 17, 17, 0.8);
+	border-top: 0;
 }
 
 .select-search-options {
@@ -349,10 +350,10 @@
 	background: var(--select-search-highlight);
 }
 
-.select-search-is-selected {
-	font-weight: bold;
-	color: var(--select-search-selected);
-}
+// .select-search-is-selected {
+// 	font-weight: bold;
+// 	color: var(--select-search-selected);
+// }
 
 .select-search-group-header {
 	font-size: 12px;
@@ -369,4 +370,9 @@
 
 .select-search-row:not(:last-child) .select-search-group-header {
 	margin-bottom: 10px;
+}
+
+
+.wc-block-components-address-form__phone {
+	position: relative;
 }
