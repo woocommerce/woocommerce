@@ -1,15 +1,20 @@
 /**
  * External dependencies
  */
-import { useRef, useState, useCallback, useEffect } from '@wordpress/element';
-//import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import classnames from 'classnames';
 import { Label } from '@woocommerce/blocks-components';
 import ReactCountryFlag from 'react-country-flag';
 import { getSetting } from '@woocommerce/settings';
 import { useSelect as useSelectSearch } from 'react-select-search';
-import parsePhoneNumber, { AsYouType, CountryCode } from 'libphonenumber-js';
+import parsePhoneNumber, {
+	getCountryCallingCode,
+	isSupportedCountry,
+	isPossiblePhoneNumber,
+	parseIncompletePhoneNumber,
+	formatIncompletePhoneNumber,
+} from 'libphonenumber-js';
 
 /**
  * Internal dependencies
@@ -18,39 +23,29 @@ import './style.scss';
 import type { PhoneInputProps } from './props';
 
 const countries = getSetting< Record< string, string > >( 'countries', {} );
-const formats = {
-	US: {
-		placeholder: '(555) 555-5555',
-		mask: '(999) 999-9999',
-		code: 1,
+const formatOptions = [
+	{
+		value: '',
+		name: 'International',
 	},
-	CA: {
-		placeholder: '(555) 555-5555',
-		mask: '(999) 999-9999',
-		code: 1,
-	},
-	GB: {
-		placeholder: '01234 567890',
-		mask: '99999 999999',
-		code: 44,
-	},
-};
-
-const formatOptions = Object.entries( formats ).map( ( [ format ] ) => ( {
-	value: format,
-	name: countries[ format ] + ' ' + format + ' +' + formats[ format ].code,
-} ) );
-
-const getDialingCodeByCountry = ( countryCode: string | undefined ) => {
-	if ( countryCode !== undefined && formats[ countryCode ] ) {
-		return '+' + formats[ countryCode ].code;
-	}
-};
+	...Object.entries( countries )
+		.map( ( [ countryCode, countryName ] ) => {
+			if ( ! isSupportedCountry( countryCode ) ) {
+				return null;
+			}
+			const code = getCountryCallingCode( countryCode );
+			return {
+				value: countryCode,
+				name: countryName + ' +' + code,
+			};
+		} )
+		.filter( Boolean ),
+];
 
 const DialingCode = ( { countryCode = '' } ) => {
 	return (
 		<span className="country_dialling_code">
-			{ getDialingCodeByCountry( countryCode ) }
+			+{ getCountryCallingCode( countryCode ) }
 		</span>
 	);
 };
@@ -61,17 +56,10 @@ const CountryName = ( { countryCode = '' } ) => {
 	);
 };
 
-const removeDialingCode = ( inputString: string, dialingCode: string ) => {
-	const regex = new RegExp( `\\${ dialingCode }`, 'g' );
-
-	return inputString.replace( regex, '' ).trimStart();
-};
-
 export const PhoneInput = ( {
 	country,
 	className,
 	id,
-	type = 'text',
 	ariaLabel,
 	label,
 	screenReaderLabel,
@@ -86,12 +74,10 @@ export const PhoneInput = ( {
 	feedback,
 	...rest
 }: PhoneInputProps ): JSX.Element => {
-	const inputRef = useRef< HTMLInputElement >( null );
 	const [ isActive, setIsActive ] = useState( false );
-
 	const [ currentCountryCode, setCurrentCountryCode ] = useState( country );
-	const [ phoneNumber, setPhoneNumber ] = useState( () => {
-		const decodedValue = decodeEntities( value );
+	const [ phoneNumber, setPhoneNumber ] = useState< string >( () => {
+		const decodedValue = decodeEntities( value ) as string;
 		const parsedPhoneNumber = parsePhoneNumber( decodedValue, country );
 		setCurrentCountryCode( parsedPhoneNumber?.country || country );
 		return parsedPhoneNumber?.nationalNumber || decodedValue;
@@ -105,9 +91,9 @@ export const PhoneInput = ( {
 		onChange: ( newCountryCode ) => {
 			const phoneFormatter = parsePhoneNumber(
 				phoneNumber,
-				newCountryCode as CountryCode
+				newCountryCode
 			);
-			setCurrentCountryCode( newCountryCode as CountryCode );
+			setCurrentCountryCode( newCountryCode );
 			setPhoneNumber( phoneFormatter?.formatNational() || phoneNumber );
 			onChange( phoneFormatter?.formatInternational() || phoneNumber );
 		},
@@ -139,7 +125,7 @@ export const PhoneInput = ( {
 							<DialingCode countryCode={ currentCountryCode } />
 						</>
 					) : (
-						<>N/A</>
+						<>International</>
 					) }
 				</button>
 				<input
@@ -148,13 +134,29 @@ export const PhoneInput = ( {
 					value={ phoneNumber }
 					autoComplete={ autoComplete }
 					onChange={ ( event ) => {
-						const newValue = event.target.value;
+						const newValue = parseIncompletePhoneNumber(
+							event.target.value
+						);
 						const phoneFormatter = parsePhoneNumber(
 							newValue,
 							currentCountryCode
 						);
 
-						setPhoneNumber( newValue );
+						if (
+							! isPossiblePhoneNumber(
+								newValue,
+								currentCountryCode
+							)
+						) {
+							setPhoneNumber( newValue );
+						} else {
+							setPhoneNumber(
+								formatIncompletePhoneNumber(
+									newValue,
+									currentCountryCode
+								)
+							);
+						}
 
 						if (
 							phoneFormatter?.country &&
@@ -184,7 +186,9 @@ export const PhoneInput = ( {
 					required={ required }
 					{ ...rest }
 				/>
-				<input type="text" ref={ inputRef } value={ value } />
+				{
+					// <input type="text" ref={ inputRef } value={ value } />
+				 }
 			</div>
 			<Label
 				label={ label }
@@ -233,15 +237,21 @@ export const PhoneInput = ( {
 										) }
 										tabIndex={ -1 }
 									>
-										<ReactCountryFlag
-											countryCode={ option.value }
-										/>{ ' ' }
-										<CountryName
-											countryCode={ option.value }
-										/>{ ' ' }
-										<DialingCode
-											countryCode={ option.value }
-										/>
+										{ !! option.value ? (
+											<>
+												<ReactCountryFlag
+													countryCode={ option.value }
+												/>{ ' ' }
+												<CountryName
+													countryCode={ option.value }
+												/>{ ' ' }
+												<DialingCode
+													countryCode={ option.value }
+												/>
+											</>
+										) : (
+											'International'
+										) }
 									</button>
 								</li>
 							) ) }
