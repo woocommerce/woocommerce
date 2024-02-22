@@ -38,9 +38,11 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		if ( self::is_admin_page() ) {
+			wp_schedule_single_event( time(), self::SCHEDULED_ACTION_HOOK );
+
 			// Schedule the action twice a day, starting now.
 			if ( false === wp_next_scheduled( self::SCHEDULED_ACTION_HOOK ) ) {
-				wp_schedule_event( time(), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
+				wp_schedule_event( time() + ( 10 * MINUTE_IN_SECONDS ), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
 			}
 
 			self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
