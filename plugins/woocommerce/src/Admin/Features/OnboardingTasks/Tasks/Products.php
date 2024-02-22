@@ -77,7 +77,7 @@ class Products extends Task {
 	}
 
 	/**
-	 * Addtional data.
+	 * Additional data.
 	 *
 	 * @return array
 	 */
@@ -156,12 +156,34 @@ class Products extends Task {
 	}
 
 	/**
-	 * Check if the store has any published products.
+	 * Check if the store has any user created published products.
 	 *
 	 * @return bool
 	 */
 	public static function has_products() {
-		$counts = wp_count_posts('product');
-		return isset( $counts->publish ) && $counts->publish > 0;
+		return self::count_user_created_products() > 0;
+	}
+
+	/**
+	 * Count the number of user created products.
+	 * Generated products have the _headstart_post meta key.
+	 *
+	 * @return int The number of user created products.
+	 */
+	private static function count_user_created_products() {
+		$args = array(
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				array(
+					'key'     => '_headstart_post',
+					'compare' => 'NOT EXISTS',
+				),
+			),
+		);
+
+		$products_query = new \WP_Query( $args );
+
+		return $products_query->found_posts;
 	}
 }
