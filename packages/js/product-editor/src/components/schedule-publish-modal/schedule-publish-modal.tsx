@@ -32,8 +32,8 @@ export function SchedulePublishModal( {
 		() => value ?? getSiteDatetime()
 	);
 
-	function handleDateTimePickerChange( value?: string ) {
-		setDate( value );
+	function handleDateTimePickerChange( newDate?: string ) {
+		setDate( newDate );
 	}
 
 	return (

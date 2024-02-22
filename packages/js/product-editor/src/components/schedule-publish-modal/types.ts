@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { Modal } from '@wordpress/components';
 
 export type SchedulePublishModalProps = Omit<

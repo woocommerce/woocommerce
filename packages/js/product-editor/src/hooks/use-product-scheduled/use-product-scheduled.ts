@@ -36,11 +36,11 @@ export function useProductScheduled( postType: string ) {
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	async function schedule( value?: string ) {
-		const siteDate = getDate( value ?? null );
-		const newGmtDate = parseDate( TIMEZONELESS_FORMAT, siteDate, 'GMT' );
+		const newSiteDate = getDate( value ?? null );
+		const newGmtDate = parseDate( TIMEZONELESS_FORMAT, newSiteDate, 'GMT' );
 
 		let status = prevStatus;
-		if ( isInTheFuture( siteDate.toISOString() ) ) {
+		if ( isInTheFuture( newSiteDate.toISOString() ) ) {
 			status = 'future';
 		} else if ( prevStatus === 'future' ) {
 			status = 'publish';
