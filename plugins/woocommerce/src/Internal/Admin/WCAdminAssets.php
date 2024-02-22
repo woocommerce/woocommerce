@@ -489,7 +489,7 @@ class WCAdminAssets {
 	 */
 	public static function register_style( $style_path_name, $style_name, $dependencies = array() ) {
 		$style_assets_filename = self::get_script_asset_filename( $style_path_name, $style_name );
-		$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . $style_path_name . '/' . $style_assets_filename;
+		$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . $style_path_name . '/' . $style_assets_filename;
 
 		$handle = 'wc-admin-' . $style_name;
 		wp_enqueue_style(
