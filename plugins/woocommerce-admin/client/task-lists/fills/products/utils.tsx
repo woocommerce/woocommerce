@@ -15,7 +15,6 @@ import {
 	supportedOnboardingProductTypes,
 	defaultSurfacedProductTypes,
 } from './constants';
-import './dummyplugin';
 
 export const getProductTypes = ( {
 	exclude,
