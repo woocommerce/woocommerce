@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Revert a workaround updating the mariadb image tag in wp-env
