@@ -167,8 +167,24 @@ export const Campaigns = () => {
 								</Flex>
 							),
 						},
-						{ display: el.cost },
-						{ display: el.sales },
+						{
+							display: (
+								<div
+									dangerouslySetInnerHTML={ {
+										__html: el.cost,
+									} }
+								></div>
+							),
+						},
+						{
+							display: (
+								<div
+									dangerouslySetInnerHTML={ {
+										__html: el.sales,
+									} }
+								></div>
+							),
+						},
 					];
 				} ) }
 			/>
