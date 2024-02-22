@@ -57,8 +57,6 @@ class Hydration {
 
 		$this->cache_store_notices();
 
-		$preloaded_data = array();
-
 		if ( null !== $controller_class ) {
 			$request           = new \WP_REST_Request( 'GET', $path );
 			$schema_controller = StoreApi::container()->get( SchemaController::class );
@@ -67,22 +65,21 @@ class Hydration {
 				$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
 			);
 
-			$response       = $controller->get_response( $request );
-			$preloaded_data = array(
+			$response = $controller->get_response( $request );
+			return array(
 				'body'    => $response->get_data(),
 				'headers' => $response->get_headers(),
 			);
-		} else {
-			// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
-			$preloaded_requests = rest_preload_api_request( [], $path );
-			$preloaded_data     = $preloaded_requests[ $path ] ?? [];
 		}
+
+		// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
+		$preloaded_requests = rest_preload_api_request( [], $path );
 
 		$this->restore_cached_store_notices();
 		$this->restore_nonce_check();
 
 		// Returns just the single preloaded request, or an empty array if it doesn't exist.
-		return $preloaded_data;
+		return $preloaded_requests[ $path ] ?? [];
 	}
 
 	/**
