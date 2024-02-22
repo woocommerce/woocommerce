@@ -1391,12 +1391,14 @@ class DataStore extends SqlQuery {
 					$sql_clauses['join'][] = "JOIN {$wpdb->prefix}woocommerce_order_itemmeta as {$join_alias} ON {$join_alias}.order_item_id = {$table_to_join_on}.order_item_id";
 				}
 
+				$in_comparator = $comparator === '=' ? 'in' : 'not in';
+
 				// Add subquery for products ordered using attributes not used in variations.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$sql_clauses['where'][] = $wpdb->prepare(
 					"
-					( ( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s ) OR (
-						%s {$comparator} ( select term_id from wp_wc_product_attributes_lookup where is_variation_attribute=0 and product_id = {$join_alias}.meta_value and {$join_alias}.meta_key = '_product_id' )
+					( ( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s ) or (
+						wp_wc_order_product_lookup.variation_id = 0 and wp_wc_order_product_lookup.product_id {$in_comparator} ( select product_id from wp_wc_product_attributes_lookup where is_variation_attribute=0 and term_id = %s )
 					) )",
 					$meta_key,
 					$meta_value,
@@ -1410,7 +1412,7 @@ class DataStore extends SqlQuery {
 		$num_attribute_filters = count( $sql_clauses['join'] );
 
 		for ( $i = 2; $i < $num_attribute_filters; $i++ ) {
-			$join_alias            = 'orderitemmeta' . $i;
+			$join_alias            = 'orderitemmeta' . $i - 1;
 			$sql_clauses['join'][] = "AND orderitemmeta1.order_item_id = {$join_alias}.order_item_id";
 		}
 
