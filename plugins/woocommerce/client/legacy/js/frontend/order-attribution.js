@@ -131,7 +131,7 @@
 	 * To be used with the classic checkout.
 	 */
 	window.customElements.define( 'wc-order-attribution-inputs', class extends HTMLElement {
-		// Our bundler version does not support private class members, so we use a convention od `_` prefix.
+		// Our bundler version does not support private class members, so we use a convention of `_` prefix.
 		// #values
 		// #fieldNames
 		constructor(){
