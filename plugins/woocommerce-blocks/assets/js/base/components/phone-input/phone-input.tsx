@@ -84,7 +84,6 @@ export const PhoneInput = ( {
 	const [ currentCountryCode, setCurrentCountryCode ] = useState( () => {
 		const parsedPhoneNumber = parsePhoneNumber( value );
 
-		console.log( parsedPhoneNumber );
 		return parsedPhoneNumber?.country || country;
 	} );
 
@@ -95,6 +94,13 @@ export const PhoneInput = ( {
 		search: true,
 		onChange: ( newCountryCode ) => {
 			setCurrentCountryCode( newCountryCode );
+
+			const phoneFormatter = new AsYouType( newCountryCode );
+			phoneFormatter.input( value );
+
+			if ( phoneFormatter.getNumber()?.nationalNumber ) {
+				onChange( phoneFormatter.getNumber()?.nationalNumber );
+			}
 		},
 	} );
 
@@ -128,29 +134,39 @@ export const PhoneInput = ( {
 						autoCapitalize={ autoCapitalize }
 						autoComplete={ autoComplete }
 						onChange={ ( event ) => {
-							const phoneFormatter = new AsYouType(
-								currentCountryCode
+							const parsedPhoneNumber = parsePhoneNumber(
+								event.target.value,
+								{
+									defaultCountry: currentCountryCode,
+								}
 							);
-							const format = phoneFormatter.input(
-								event.target.value
-							);
 
-							onChange( format );
+							const hasNumber =
+								parsedPhoneNumber &&
+								parsedPhoneNumber.country &&
+								parsedPhoneNumber.nationalNumber;
 
-							const possibleCountry =
-								phoneFormatter.getNumber()?.country || '';
-							const possibleCode =
-								possibleCountry.countryCallingCode;
-
-							if (
-								possibleCountry &&
-								possibleCountry !== currentCountryCode &&
-								possibleCode !==
-									formats[ currentCountryCode ].code
-							) {
-								setCurrentCountryCode(
-									phoneFormatter.getNumber().country
+							if ( hasNumber ) {
+								const asYouType = new AsYouType(
+									parsedPhoneNumber.country
 								);
+
+								onChange(
+									asYouType.input(
+										parsedPhoneNumber.nationalNumber
+									)
+								);
+
+								if (
+									parsedPhoneNumber.country !==
+									currentCountryCode
+								) {
+									setCurrentCountryCode(
+										parsedPhoneNumber.country
+									);
+								}
+							} else {
+								onChange( event.target.value );
 							}
 						} }
 						onFocus={ () => setIsActive( true ) }
