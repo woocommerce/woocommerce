@@ -65,11 +65,12 @@ const Promotions: () => null | JSX.Element = () => {
 						)
 							? currentPath
 							: `/${ currentPath }`;
-						return (
-							page.page === currentPage &&
+
+						return page.page === currentPage &&
 							normalizedPath === normalizedCurrentPath &&
-							( page.tab ? page.tab === currentTab : true )
-						);
+							page.tab
+							? page.tab === currentTab
+							: ! currentTab;
 					}
 				);
 

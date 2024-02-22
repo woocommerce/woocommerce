@@ -558,7 +558,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			// Marketplace promotions.
 			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
 
-				$promotions = get_transient( 'woocommerce_marketplace_promotions' );
+				$promotions = get_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
 
 				if ( false === $promotions ) {
 					return;
@@ -566,7 +566,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				wp_add_inline_script(
 					'wc-admin-app',
-					'window.wc = window.wc || {}; wc.marketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
+					'(window.wc = window.wc || {}).marketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
 					'before'
 				);
 			}
