@@ -162,7 +162,9 @@ trait Woo_Analytics_Trait {
 			return;
 		}
 
-		$this->cart_checkout_templates_in_use = wp_is_block_theme() && class_exists( 'Automattic\WooCommerce\Blocks\Package' ) && version_compare( Automattic\WooCommerce\Blocks\Package::get_version(), '10.6.0', '>=' );
+		$this->cart_checkout_templates_in_use = wp_is_block_theme()
+			&& class_exists( '\Automattic\WooCommerce\Blocks\Package' )
+			&& version_compare( \Automattic\WooCommerce\Blocks\Package::get_version(), '10.6.0', '>=' );
 
 		// Cart/Checkout *pages* are in use if the templates are not in use. Return their content and do nothing else.
 		if ( ! $this->cart_checkout_templates_in_use ) {
