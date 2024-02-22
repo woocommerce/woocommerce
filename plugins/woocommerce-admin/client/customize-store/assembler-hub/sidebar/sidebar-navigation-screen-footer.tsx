@@ -102,13 +102,6 @@ export const SidebarNavigationScreenFooter = () => {
 		? __( 'Change your footer', 'woocommerce' )
 		: __( 'Choose your footer', 'woocommerce' );
 
-	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
-
-	const title = aiOnline
-		? __( 'Change your footer', 'woocommerce' )
-		: __( 'Choose your footer', 'woocommerce' );
-
 	const description = aiOnline
 		? __(
 				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
