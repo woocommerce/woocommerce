@@ -46,12 +46,16 @@ class BlockTemplatesRegistry {
 				OrderConfirmationTemplate::SLUG    => new OrderConfirmationTemplate(),
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);
+		} else {
+			$templates = array();
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
+		} else {
+			$template_parts = array();
 		}
 		self::$templates = array_merge( $templates, $template_parts );
 	}

@@ -6,11 +6,7 @@ use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use WP_UnitTestCase;
 
 /**
@@ -33,8 +29,8 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 		// Switch to a block theme and register templates.
 		$this->container = Package::container();
+		$this->container->get( BlockTemplatesController::class );
 		switch_theme( 'twentytwentytwo' );
-		$this->register_block_templates();
 
 		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
@@ -51,27 +47,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			array( 'taxonomy-product_attribute', true ),
 			array( 'single-product', false ),
 		);
-	}
-
-	/**
-	 * Constructs template classes. Needed so template are registered after
-	 * switching to a block theme.
-	 *
-	 * @return void
-	 */
-	public function register_block_templates(): void {
-		$templates = [
-			ProductCatalogTemplate::class,
-			ProductCategoryTemplate::class,
-			ProductTagTemplate::class,
-			ProductAttributeTemplate::class,
-			SingleProductTemplate::class,
-		];
-
-		foreach ( $templates as $template_class ) {
-			$template = $this->container->get( $template_class );
-			$template->__construct();
-		}
 	}
 
 	/**

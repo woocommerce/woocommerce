@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 

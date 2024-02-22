@@ -15,11 +15,4 @@ abstract class AbstractTemplatePart extends AbstractTemplate {
 	 * @var string
 	 */
 	public static $template_area;
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->init();
-	}
 }

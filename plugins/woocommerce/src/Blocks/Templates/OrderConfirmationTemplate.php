@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-
 /**
  * OrderConfirmationTemplate class.
  *
