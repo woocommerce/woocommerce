@@ -19,7 +19,7 @@ type Promotion = {
 	pages: Page[];
 	position: string;
 	content: { [ locale: string ]: string };
-	icon?: string | undefined;
+	icon?: string;
 	is_dismissible?: boolean;
 	menu_item_id?: string;
 	style?: string;
@@ -103,7 +103,7 @@ const Promotions: () => null | JSX.Element = () => {
 							variant={
 								promotion.style ? promotion.style : 'info'
 							}
-							icon={ promotion?.icon }
+							icon={ promotion?.icon || '' }
 							isDismissible={ promotion.is_dismissible || false }
 						/>
 					);
