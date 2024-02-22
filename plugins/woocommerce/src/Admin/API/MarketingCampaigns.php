@@ -146,6 +146,10 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
 		$currency_info = $currency_info_all[ $price->get_currency() ][ 'default' ];
 
+		$locale_info_all = include WC()->plugin_path() . '/i18n/locale-info.php';
+		$locale_index = array_search( $price->get_currency(), array_column($locale_info_all, 'currency_code') );
+		$num_decimals = array_values( $locale_info_all )[ $locale_index ]['num_decimals'];
+
 		add_filter(
 			'woocommerce_price_format',
 			function ( $format, $currency_pos ) use ( $currency_info ) {
@@ -177,7 +181,8 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$price_formatted = wc_price( $price_value, array(
 			'currency' => $price->get_currency(),
 			'decimal_separator' => $currency_info['decimal_sep'],
-			'thousand_separator' => $currency_info['thousand_sep']
+			'thousand_separator' => $currency_info['thousand_sep'],
+			'decimals' => $num_decimals,
 		));
 		return $price_formatted;
 
