@@ -21,7 +21,7 @@
 		position: absolute;
 		transform: translateY(em($gap));
 		line-height: 1.25; // =20px when font-size is 16px.
-		left: 84px;
+		left: 75px;
 		top: 0;
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
@@ -173,15 +173,26 @@
 	font-family: var(--select-search-font);
 	color: var(--select-search-text);
 	box-sizing: border-box;
-	border: 1px solid red !important;
 
 	&.select-search-is-focused {
 		height: auto;
-		// outline-width: 2px;
-		// outline-color: var(--select-search-selected);
-		// outline-style: solid;
+		overflow: visible;
+	}
+
+	input {
+		outline: 0;
 	}
 }
+
+.visually-hidden:not(:focus):not(:active) {
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+  }
 
 .select-search-container *,
 .select-search-container *::after,
@@ -238,7 +249,7 @@
 	border-bottom: 0;
 	color: var(--select-search-text);
 	border-radius: $universal-border-radius $universal-border-radius 0 0;
-	outline: 0;
+	outline: 0 !important;
 	font-family: var(--select-search-font);
 	font-size: 16px;
 	text-align: left;

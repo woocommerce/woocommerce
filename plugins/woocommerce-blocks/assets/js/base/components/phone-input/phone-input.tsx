@@ -194,6 +194,7 @@ export const PhoneInput = ( {
 			<div
 				className={ classnames( 'select-search-container', {
 					'select-search-is-focused': snapshot.focus,
+					'visually-hidden': ! snapshot.focus,
 				} ) }
 			>
 				<div className="select-search-value">
