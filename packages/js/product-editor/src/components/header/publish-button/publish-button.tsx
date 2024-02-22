@@ -120,7 +120,11 @@ export function PublishButton( {
 		'schedule' | 'edit' | undefined
 	>();
 
-	if ( window.wcAdminFeatures[ 'product-pre-publish-modal' ] && prePublish ) {
+	if (
+		productType === 'product' &&
+		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+		prePublish
+	) {
 		function getPublishButtonControls() {
 			return [
 				isScheduled
@@ -128,8 +132,7 @@ export function PublishButton( {
 							{
 								title: __( 'Publish now', 'woocommerce' ),
 								async onClick() {
-									await schedule();
-									await publish();
+									await schedule( publish );
 								},
 							},
 							{
@@ -170,8 +173,7 @@ export function PublishButton( {
 						}
 						onCancel={ () => setShowScheduleModal( undefined ) }
 						onSchedule={ async ( value ) => {
-							await schedule( value );
-							await publish();
+							await schedule( publish, value );
 							setShowScheduleModal( undefined );
 						} }
 					/>

@@ -2,9 +2,8 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { useDispatch } from '@wordpress/data';
 import { getDate, isInTheFuture, date as parseDate } from '@wordpress/date';
-import { Product, ProductStatus } from '@woocommerce/data';
+import { Product, ProductStatus, ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,8 +13,6 @@ import { formatScheduleDatetime, getSiteDatetime } from '../../utils';
 export const TIMEZONELESS_FORMAT = 'Y-m-d\\TH:i:s';
 
 export function useProductScheduled( postType: string ) {
-	const [ productId ] = useEntityProp< number >( 'postType', postType, 'id' );
-
 	const [ date ] = useEntityProp< string >(
 		'postType',
 		postType,
@@ -32,10 +29,12 @@ export function useProductScheduled( postType: string ) {
 
 	const siteDate = getSiteDatetime( gmtDate );
 
-	// @ts-expect-error There are no types for this.
-	const { editEntityRecord } = useDispatch( 'core' );
-
-	async function schedule( value?: string ) {
+	async function schedule(
+		publish: (
+			productOrVariation?: Partial< Product | ProductVariation >
+		) => Promise< Product | ProductVariation | undefined >,
+		value?: string
+	) {
 		const newSiteDate = getDate( value ?? null );
 		const newGmtDate = parseDate( TIMEZONELESS_FORMAT, newSiteDate, 'GMT' );
 
@@ -46,10 +45,10 @@ export function useProductScheduled( postType: string ) {
 			status = 'publish';
 		}
 
-		await editEntityRecord( 'postType', postType, productId, {
+		return publish( {
 			status,
 			date_created_gmt: newGmtDate,
-		} satisfies Partial< Product > );
+		} );
 	}
 
 	return {

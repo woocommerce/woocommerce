@@ -6,7 +6,7 @@ import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import type { Product } from '@woocommerce/data';
+import type { Product, ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,7 +26,9 @@ export function usePublish( {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
 } ): Button.ButtonProps & {
-	publish( product?: Partial< Product > ): Promise< Product >;
+	publish(
+		productOrVariation?: Partial< Product | ProductVariation >
+	): Promise< Product | ProductVariation | undefined >;
 } {
 	const { isValidating, validate } = useValidations< Product >();
 
@@ -70,49 +72,37 @@ export function usePublish( {
 	const isBusy = isSaving || isValidating;
 	const isDisabled = disabled || isBusy || ! isDirty;
 
-	const isPublished = status === 'publish' || status === 'future';
-
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function publish( product?: Partial< Product > ) {
-		try {
-			if ( productType === 'product' ) {
-				await validate( {
-					status: 'publish',
-					...product,
-				} );
-				// The publish button click not only change the status of the product
-				// but also save all the pending changes. So even if the status is
-				// publish it's possible to save the product too.
-				if ( ! isPublished ) {
-					await editEntityRecord(
-						'postType',
-						productType,
-						productId,
-						{
-							status: 'publish',
-						}
-					);
-				}
-			} else {
-				await validate( product );
-			}
+	async function publish(
+		productOrVariation: Partial< Product | ProductVariation > = {}
+	) {
+		const isPublished = status === 'publish' || status === 'future';
 
-			const publishedProduct = await saveEditedEntityRecord< Product >(
-				'postType',
-				productType,
-				productId,
-				{
-					throwOnError: true,
-				}
-			);
+		try {
+			// The publish button click not only change the status of the product
+			// but also save all the pending changes. So even if the status is
+			// publish it's possible to save the product too.
+			const data = ! isPublished
+				? { status: 'publish', ...productOrVariation }
+				: productOrVariation;
+
+			await validate( data as Partial< Product > );
+
+			await editEntityRecord( 'postType', productType, productId, data );
+
+			const publishedProduct = await saveEditedEntityRecord<
+				Product | ProductVariation
+			>( 'postType', productType, productId, {
+				throwOnError: true,
+			} );
 
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
 
-			return publishedProduct;
+			return publishedProduct as Product | ProductVariation;
 		} catch ( error ) {
 			if ( onPublishError ) {
 				let wpError = error as WPError;
