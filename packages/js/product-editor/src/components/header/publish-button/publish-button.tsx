@@ -26,26 +26,32 @@ import { useProductScheduled } from '../../../hooks/use-product-scheduled';
 import { SchedulePublishModal } from '../../schedule-publish-modal';
 import { formatScheduleDatetime } from '../../../utils';
 
-function getNoticeContent( product: Product ) {
-	switch ( product.status ) {
-		case 'future':
-			const gmtDate = `${ product.date_created_gmt }+00:00`;
-			return sprintf(
-				// translators: %s: The datetime the product is scheduled for.
-				__( 'Product scheduled for %s.', 'woocommerce' ),
-				formatScheduleDatetime( gmtDate )
-			);
-		case 'publish':
-			return __( 'Product updated.', 'woocommerce' );
-		default:
-			return __( 'Product published.', 'woocommerce' );
+function getNoticeContent( product: Product, prevStatus: Product[ 'status' ] ) {
+	if (
+		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+		product.status === 'future'
+	) {
+		return sprintf(
+			// translators: %s: The datetime the product is scheduled for.
+			__( 'Product scheduled for %s.', 'woocommerce' ),
+			formatScheduleDatetime( product.date_created )
+		);
 	}
+
+	if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+		return __( 'Product updated.', 'woocommerce' );
+	}
+
+	return __( 'Product published.', 'woocommerce' );
 }
 
-function showSuccessNotice( product: Product ) {
+function showSuccessNotice(
+	product: Product,
+	prevStatus: Product[ 'status' ]
+) {
 	const { createSuccessNotice } = dispatch( 'core/notices' );
 
-	const noticeContent = getNoticeContent( product );
+	const noticeContent = getNoticeContent( product, prevStatus );
 	const noticeOptions = {
 		icon: '🎉',
 		actions: [
@@ -93,7 +99,7 @@ export function PublishButton( {
 				recordProductEvent( 'product_update', savedProduct );
 			}
 
-			showSuccessNotice( savedProduct );
+			showSuccessNotice( savedProduct, prevStatus );
 
 			maybeShowFeedbackBar();
 

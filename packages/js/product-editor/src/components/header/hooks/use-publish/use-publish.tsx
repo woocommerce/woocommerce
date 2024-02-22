@@ -36,7 +36,7 @@ export function usePublish( {
 		'id'
 	);
 
-	const [ status ] = useEntityProp< Product[ 'status' ] >(
+	const [ status, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
 		productType,
 		'status'
@@ -158,14 +158,18 @@ export function usePublish( {
 	}
 
 	function getButtonText() {
-		switch ( status ) {
-			case 'future':
-				return __( 'Schedule', 'woocommerce' );
-			case 'publish':
-				return __( 'Update', 'woocommerce' );
-			default:
-				return __( 'Publish', 'woocommerce' );
+		if (
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+			status === 'future'
+		) {
+			return __( 'Schedule', 'woocommerce' );
 		}
+
+		if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+			return __( 'Update', 'woocommerce' );
+		}
+
+		return __( 'Publish', 'woocommerce' );
 	}
 
 	return {
