@@ -9,6 +9,3 @@ wp wc product_attribute create \
 	--name=Size \
 	--slug=pa_size \
 	--user=1
-
-wp wc tool run regenerate_product_attributes_lookup_table \
-	--user=1
