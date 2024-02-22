@@ -1,0 +1,53 @@
+.wp-block-woocommerce-product-filter-attribute-color {
+	.terms {
+		display: flex;
+		gap: 5px;
+		flex-direction: column;
+	}
+
+	label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.color {
+		width: 20px;
+		height: 20px;
+		border-radius: 100%;
+		display: inline-block;
+		margin-right: 5px;
+		border: 1px dashed transparent;
+
+		&:hover {
+			border-color: #ccc;
+		}
+	}
+
+	.selected .color {
+		border-style: groove;
+		border-color: #111;
+	}
+
+	input {
+		display: none;
+	}
+
+	&.style-grid .terms {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+		gap: 20px;
+
+		.name {
+			display: none;
+		}
+
+		.color {
+			width: 30px;
+			height: 30px;
+			display: block;
+			border-width: 2px;
+			margin-right: 0;
+		}
+	}
+}

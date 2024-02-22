@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-checkbox-list",
+	"version": "1.0.0",
+	"title": "Product Filter: Checkbox List",
+	"description": "A block to display filter options in a checkbox list.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 2,
+	"ancestor": [
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-stock-status"
+	],
+	"supports": {
+		"interactivity": true,
+		"inserter": false
+	},
+	"usesContext": [ "filterOptions" ],
+	"attributes": {
+		"showCounts": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}

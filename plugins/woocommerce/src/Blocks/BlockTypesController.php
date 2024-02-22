@@ -305,6 +305,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterActive';
 			$block_types[] = 'ProductFilterAttribute';
 			$block_types[] = 'ProductFilterAttributeColor';
+			$block_types[] = 'ProductFilterCheckboxList';
 		}
 
 		/**

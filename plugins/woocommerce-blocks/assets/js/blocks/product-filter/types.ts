@@ -16,3 +16,12 @@ export type BlockAttributes = {
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;
+
+export type FilterOption = {
+	id: string;
+	label: string;
+	value: unknown;
+	count: number;
+	attrs?: unknown;
+	checked?: boolean;
+};

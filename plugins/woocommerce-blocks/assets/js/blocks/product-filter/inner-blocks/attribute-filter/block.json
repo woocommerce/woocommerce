@@ -36,7 +36,7 @@
 		},
 		"displayStyle": {
 			"type": "string",
-			"default": "woocommerce/product-filter-attribute-color"
+			"default": "woocommerce/product-filter-checkbox-list"
 		},
 		"selectType": {
 			"type": "string",
