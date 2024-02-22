@@ -133,6 +133,30 @@ class MarketingCampaigns extends WC_REST_Controller {
 	}
 
 	/**
+	 * Get formatted price based on Price type.
+	 *
+	 * This uses plugins/woocommerce/i18n/currency-info.php to get option object based on $price.currency.
+	 *
+	 * Example: when $price->currency is 'USD' and $price->value is '100', it should return '$100.00'.
+	 *
+	 * @param Price $price Price object.
+	 * @return String formatted price.
+	 */
+	private function get_formatted_price( $price ) {
+		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
+		$currency_info = $currency_info_all[ $price->get_currency() ][ 'default' ];
+
+		$price_value = wc_format_decimal( $price->get_value() );
+		$price_formatted = wc_price( $price_value, array(
+			'currency' => $price->get_currency(),
+			'decimal_separator' => $currency_info['decimal_sep'],
+			'thousand_separator' => $currency_info['thousand_sep']
+		));
+		return $price_formatted;
+
+	}
+
+	/**
 	 * Prepares the item for the REST response.
 	 *
 	 * @param MarketingCampaign $item    WordPress representation of the item.
@@ -152,6 +176,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 			$data['cost'] = array(
 				'value'    => wc_format_decimal( $item->get_cost()->get_value() ),
 				'currency' => $item->get_cost()->get_currency(),
+				'formatted' => $this->get_formatted_price( $item->get_cost() ),
 			);
 		}
 
@@ -159,6 +184,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 			$data['sales'] = array(
 				'value'    => wc_format_decimal( $item->get_sales()->get_value() ),
 				'currency' => $item->get_sales()->get_currency(),
+				'formatted' => $this->get_formatted_price( $item->get_sales() ),
 			);
 		}
 
