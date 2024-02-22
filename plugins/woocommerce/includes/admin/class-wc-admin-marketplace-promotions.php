@@ -38,9 +38,11 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		if ( self::is_admin_page() ) {
-			wp_schedule_single_event( time(), self::SCHEDULED_ACTION_HOOK );
+			if ( self::is_targeted_page_to_fetch_promotions() ) {
+				wp_schedule_single_event( time(), self::SCHEDULED_ACTION_HOOK );
+			}
 
-			// Schedule the action twice a day, starting now.
+			// Also schedule the action twice a day.
 			if ( false === wp_next_scheduled( self::SCHEDULED_ACTION_HOOK ) ) {
 				wp_schedule_event( time() + ( 10 * MINUTE_IN_SECONDS ), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
 			}
@@ -50,6 +52,50 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+	}
+
+	/**
+	 * Check if the request is for one of the pages we will run fetch_marketplace_promotions
+	 * on: any of the pages in the WooCommerce menu.
+	 *
+	 * @return bool
+	 */
+	private static function is_targeted_page_to_fetch_promotions(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) ) {
+			return false;
+		}
+
+		$targeted_pages = array(
+			'wc-orders',
+			'wc-reports',
+			'wc-settings',
+			'wc-status',
+		);
+
+		if ( in_array( $_GET['page'], $targeted_pages, true ) ) {
+			return true;
+		}
+
+		if ( 'wc-admin' !== $_GET['page'] ) {
+			return false;
+		}
+
+		$targeted_wc_admin_paths = array(
+			'/customers',
+			'/extensions',
+		);
+
+		// WooCommerce home has page param but no path param.
+		if (
+			! isset( $_GET['path'] )
+			|| in_array( $_GET['path'], $targeted_wc_admin_paths, true )
+		) {
+			return true;
+		}
+
+		return false;
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
