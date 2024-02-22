@@ -19,20 +19,6 @@ class ProductTagTemplate extends AbstractTemplate {
 	const SLUG = 'taxonomy-product_tag';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * The template used as a fallback if that one is customized.
 	 *
 	 * @var string
@@ -43,10 +29,25 @@ class ProductTagTemplate extends AbstractTemplate {
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Products by Tag', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Displays products filtered by a tag.', 'woocommerce' );
-
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Products by Tag', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'Displays products filtered by a tag.', 'woocommerce' );
 	}
 
 	/**

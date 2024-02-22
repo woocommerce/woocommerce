@@ -298,7 +298,7 @@ class BlockTemplateUtils {
 	public static function get_block_template_title( $template_slug ) {
 		$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
 		if ( isset( $registered_template ) ) {
-			return $registered_template->template_title;
+			return $registered_template->get_template_title();
 		} else {
 			// Human friendly title converted from the slug.
 			return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
@@ -314,7 +314,7 @@ class BlockTemplateUtils {
 	public static function get_block_template_description( $template_slug ) {
 		$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
 		if ( isset( $registered_template ) ) {
-			return $registered_template->template_description;
+			return $registered_template->get_template_description();
 		}
 		return '';
 	}

@@ -19,28 +19,29 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	const SLUG = 'archive-product';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Product Catalog', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Displays your products.', 'woocommerce' );
-
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Product Catalog', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'Displays your products.', 'woocommerce' );
 	}
 
 	/**

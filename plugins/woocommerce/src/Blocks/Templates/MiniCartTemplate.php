@@ -16,34 +16,35 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	const SLUG = 'mini-cart';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * The template part area where the template part belongs.
 	 *
 	 * @var string
 	 */
-	public $template_area = 'mini-cart';
+	public static $template_area = 'mini-cart';
 
 	/**
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Mini-Cart', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
-
 		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Mini-Cart', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
 	}
 
 	/**

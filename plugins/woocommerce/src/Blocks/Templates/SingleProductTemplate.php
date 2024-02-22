@@ -20,28 +20,29 @@ class SingleProductTemplate extends AbstractTemplate {
 	const SLUG = 'single-product';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Displays a single product.', 'woocommerce' );
-
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Single Product', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'Displays a single product.', 'woocommerce' );
 	}
 
 	/**

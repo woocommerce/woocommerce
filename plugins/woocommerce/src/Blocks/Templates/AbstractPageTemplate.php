@@ -32,15 +32,6 @@ abstract class AbstractPageTemplate extends AbstractTemplate {
 	abstract protected function is_active_template();
 
 	/**
-	 * Should return the title of the page, or an empty string if the page title should not be changed.
-	 *
-	 * @return string
-	 */
-	public static function get_template_title() {
-		return '';
-	}
-
-	/**
 	 * When the page should be displaying the template, add it to the hierarchy.
 	 *
 	 * This places the template name e.g. `cart`, at the beginning of the template hierarchy array. The hook priority

@@ -18,29 +18,30 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	const SLUG = 'order-confirmation';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Order Confirmation', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
-
 		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
 
 		parent::init();
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Order Confirmation', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
 	}
 
 	/**
@@ -69,14 +70,5 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 */
 	protected function is_active_template() {
 		return is_wc_endpoint_url( 'order-received' );
-	}
-
-	/**
-	 * Should return the title of the page.
-	 *
-	 * @return string
-	 */
-	public static function get_template_title() {
-		return __( 'Order Confirmation', 'woocommerce' );
 	}
 }

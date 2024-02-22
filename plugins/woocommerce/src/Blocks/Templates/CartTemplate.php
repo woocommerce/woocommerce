@@ -18,29 +18,32 @@ class CartTemplate extends AbstractPageTemplate {
 	const SLUG = 'page-cart';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Page: Cart', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
-
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 
 		parent::init();
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return _x( 'Page: Cart', 'Template name', 'woocommerce' );
+
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public static function get_template_description() {
+		return __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
+
 	}
 
 	/**

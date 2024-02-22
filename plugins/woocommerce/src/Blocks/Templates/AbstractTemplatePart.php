@@ -1,9 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * AbstractTemplatePart class.
  *
@@ -17,14 +14,12 @@ abstract class AbstractTemplatePart extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $template_area;
+	public static $template_area;
 
 	/**
-	 * Template part functionality is only initialized when using a theme that supports template parts.
+	 * Constructor.
 	 */
 	public function __construct() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
-			$this->init();
-		}
+		$this->init();
 	}
 }

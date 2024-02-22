@@ -1,9 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * AbstractTemplate class.
  *
@@ -21,30 +18,28 @@ abstract class AbstractTemplate {
 	const SLUG = '';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
-	 * Template functionality is only initialized when using a block theme.
+	 * Constructor.
 	 */
 	public function __construct() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
-			$this->init();
-		}
+		$this->init();
 	}
 
 	/**
 	 * Initialization method.
 	 */
 	abstract public function init();
+
+	/**
+	 * Should return the title of the template.
+	 *
+	 * @return string
+	 */
+	abstract public static function get_template_title();
+
+	/**
+	 * Should return the description of the template.
+	 *
+	 * @return string
+	 */
+	abstract public static function get_template_description();
 }
