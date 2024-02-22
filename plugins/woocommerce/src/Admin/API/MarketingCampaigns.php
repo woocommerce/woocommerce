@@ -146,6 +146,33 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
 		$currency_info = $currency_info_all[ $price->get_currency() ][ 'default' ];
 
+		add_filter(
+			'woocommerce_price_format',
+			function ( $format, $currency_pos ) use ( $currency_info ) {
+				$currency_pos = $currency_info['currency_pos'];
+				$format       = '%1$s%2$s';
+
+				switch ( $currency_pos ) {
+					case 'left':
+						$format = '%1$s%2$s';
+						break;
+					case 'right':
+						$format = '%2$s%1$s';
+						break;
+					case 'left_space':
+						$format = '%1$s&nbsp;%2$s';
+						break;
+					case 'right_space':
+						$format = '%2$s&nbsp;%1$s';
+						break;
+				}
+
+				return $format;
+			},
+			999,
+			2
+		);
+
 		$price_value = wc_format_decimal( $price->get_value() );
 		$price_formatted = wc_price( $price_value, array(
 			'currency' => $price->get_currency(),
