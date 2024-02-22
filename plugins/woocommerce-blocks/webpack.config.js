@@ -13,9 +13,13 @@ const {
 	getInteractivityAPIConfig,
 } = require( './bin/webpack-configs.js' );
 
+const isProduction = NODE_ENV === 'production';
+
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
 	mode: NODE_ENV,
+	// https://github.com/pmmmwh/react-refresh-webpack-plugin/blob/main/docs/TROUBLESHOOTING.md#webpack-5-compatibility-issues-with-webpack-dev-server3
+	target: ! isProduction ? 'web' : 'browserslist',
 	performance: {
 		hints: false,
 	},
