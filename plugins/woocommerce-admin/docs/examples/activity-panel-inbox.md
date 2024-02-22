@@ -57,8 +57,10 @@ Here’s a short example plugin that adds a new activity panel inbox note on plu
  * Author: Automattic
  * Author URI: https://woo.com/
  * Text Domain: wapi-example-one
- * Version: 1.0.0
+ * Version: 1.0.1
  */
+
+use Automattic\WooCommerce\Admin\Notes\Note as Note;
 
 class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 	const NOTE_NAME = 'wapi-example-plugin-one';
@@ -67,7 +69,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 	 * Adds a note to the merchant' inbox.
 	 */
 	public static function add_activity_panel_inbox_welcome_note() {
-		if ( ! class_exists( 'Notes' ) ) {
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Notes\Notes' ) ) {
 			return;
 		}
 
