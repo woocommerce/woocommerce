@@ -39,6 +39,7 @@ type MediaUploaderProps = {
 	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
 	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
 	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
+	additionalData?: Record< string, unknown >;
 };
 
 export const MediaUploader = ( {
@@ -56,6 +57,7 @@ export const MediaUploader = ( {
 	onUpload = () => null,
 	onSelect = () => null,
 	uploadMedia = wpUploadMedia,
+	additionalData,
 }: MediaUploaderProps ) => {
 	const multiple = Boolean( multipleSelect );
 
@@ -72,6 +74,7 @@ export const MediaUploader = ( {
 					onFileChange( files ) {
 						onFileUploadChange( multiple ? files : files[ 0 ] );
 					},
+					additionalData,
 				} );
 			} }
 			render={ ( { openFileDialog } ) => (
@@ -133,6 +136,7 @@ export const MediaUploader = ( {
 												multiple ? files : files[ 0 ]
 											);
 										},
+										additionalData,
 									} )
 								}
 							/>

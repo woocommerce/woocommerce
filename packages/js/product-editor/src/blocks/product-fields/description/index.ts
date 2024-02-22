@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import { postContent } from '@wordpress/icons';
+import { addFilter } from '@wordpress/hooks';
+
+/**
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import { Edit } from './edit';
+import { DescriptionBlockEdit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
+import wooDescriptionBlockWithFullEditorButton from './components/with-full-editor-toolbar-button';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -11,7 +18,8 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: Edit,
+	edit: DescriptionBlockEdit,
+	icon: postContent,
 };
 
 export const init = () =>
@@ -20,3 +28,9 @@ export const init = () =>
 		metadata: metadata as never,
 		settings: settings as never,
 	} );
+
+addFilter(
+	'editor.BlockEdit',
+	'woocommerce/summary-block-with-full-editor-button',
+	wooDescriptionBlockWithFullEditorButton
+);

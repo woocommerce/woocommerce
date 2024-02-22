@@ -84,37 +84,63 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Sanitize the cost field.
+	 *
+	 * @since 8.3.0
+	 * @param string $value Unsanitized value.
+	 * @throws Exception Last error triggered.
+	 * @return string
+	 */
+	public function sanitize_cost( $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+
+		$test_value = str_replace( wc_get_price_decimal_separator(), '.', $value );
+		$test_value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $test_value );
+
+		if ( $test_value && ! is_numeric( $test_value ) ) {
+			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Init form fields.
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
 			'title'            => array(
-				'title'       => __( 'Title', 'woocommerce' ),
+				'title'       => __( 'Name', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'description' => __( 'Your customers will see the name of this shipping method during checkout.', 'woocommerce' ),
 				'default'     => $this->method_title,
+				'placeholder' => __( 'e.g. Free shipping', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'requires'         => array(
-				'title'   => __( 'Free shipping requires...', 'woocommerce' ),
+				'title'   => __( 'Free shipping requires', 'woocommerce' ),
 				'type'    => 'select',
 				'class'   => 'wc-enhanced-select',
 				'default' => '',
 				'options' => array(
-					''           => __( 'N/A', 'woocommerce' ),
+					''           => __( 'No requirement', 'woocommerce' ),
 					'coupon'     => __( 'A valid free shipping coupon', 'woocommerce' ),
 					'min_amount' => __( 'A minimum order amount', 'woocommerce' ),
-					'either'     => __( 'A minimum order amount OR a coupon', 'woocommerce' ),
-					'both'       => __( 'A minimum order amount AND a coupon', 'woocommerce' ),
+					'either'     => __( 'A minimum order amount OR coupon', 'woocommerce' ),
+					'both'       => __( 'A minimum order amount AND coupon', 'woocommerce' ),
 				),
 			),
 			'min_amount'       => array(
-				'title'       => __( 'Minimum order amount', 'woocommerce' ),
-				'type'        => 'price',
-				'placeholder' => wc_format_localized_price( 0 ),
-				'description' => __( 'Users will need to spend this amount to get free shipping (if enabled above).', 'woocommerce' ),
-				'default'     => '0',
-				'desc_tip'    => true,
+				'title'             => __( 'Minimum order amount', 'woocommerce' ),
+				'type'              => 'text',
+				'class'             => 'wc-shipping-modal-price',
+				'placeholder'       => wc_format_localized_price( 0 ),
+				'description'       => __( 'Customers will need to spend this amount to get free shipping.', 'woocommerce' ),
+				'default'           => '0',
+				'desc_tip'          => true,
+				'sanitize_callback' => array( $this, 'sanitize_cost' ),
 			),
 			'ignore_discounts' => array(
 				'title'       => __( 'Coupons discounts', 'woocommerce' ),

@@ -120,7 +120,12 @@ const LoaderSequence = ( {
 	interval,
 	shouldLoop = true,
 	children,
-}: { interval: number; shouldLoop?: boolean } & withReactChildren ) => {
+	onChange = () => {},
+}: {
+	interval: number;
+	shouldLoop?: boolean;
+	onChange?: ( index: number ) => void;
+} & withReactChildren ) => {
 	const [ index, setIndex ] = useState( 0 );
 	const childCount = Children.count( children );
 
@@ -130,9 +135,12 @@ const LoaderSequence = ( {
 				const nextIndex = prevIndex + 1;
 
 				if ( shouldLoop ) {
-					return nextIndex % childCount;
+					const updatedIndex = nextIndex % childCount;
+					onChange( updatedIndex );
+					return updatedIndex;
 				}
 				if ( nextIndex < childCount ) {
+					onChange( nextIndex );
 					return nextIndex;
 				}
 				clearInterval( rotateInterval );

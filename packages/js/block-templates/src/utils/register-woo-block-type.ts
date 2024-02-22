@@ -46,31 +46,46 @@ function getEdit<
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore context is added to the block props by the block editor.
 		const { context } = props;
-		const { _templateBlockHideConditions: hideConditions } =
-			props.attributes;
+		const {
+			_templateBlockHideConditions: hideConditions,
+			_templateBlockDisableConditions: disableConditions,
+		} = props.attributes;
 
 		const { getEvaluationContext } = useEvaluationContext( context );
 
-		const shouldHide = useSelect(
+		const { shouldHide, shouldDisable } = useSelect(
 			( select: typeof WPSelect ) => {
-				if ( ! hideConditions || ! Array.isArray( hideConditions ) ) {
-					return false;
-				}
-
 				const evaluationContext = getEvaluationContext( select );
 
-				return hideConditions.some( ( condition ) =>
-					evaluate( condition.expression, evaluationContext )
-				);
+				return {
+					shouldHide:
+						hideConditions &&
+						Array.isArray( hideConditions ) &&
+						hideConditions.some( ( condition ) =>
+							evaluate( condition.expression, evaluationContext )
+						),
+					shouldDisable:
+						disableConditions &&
+						Array.isArray( disableConditions ) &&
+						disableConditions.some( ( condition ) =>
+							evaluate( condition.expression, evaluationContext )
+						),
+				};
 			},
-			[ getEvaluationContext, hideConditions ]
+			[ getEvaluationContext, hideConditions, disableConditions ]
 		);
 
 		if ( ! edit || shouldHide ) {
 			return null;
 		}
 
-		return createElement( edit, props );
+		return createElement( edit, {
+			...props,
+			attributes: {
+				...props.attributes,
+				disabled: props.attributes.disabled || shouldDisable,
+			},
+		} );
 	};
 }
 
@@ -93,6 +108,14 @@ function augmentAttributes<
 			},
 			_templateBlockHideConditions: {
 				type: 'array',
+				__experimentalRole: 'content',
+			},
+			_templateBlockDisableConditions: {
+				type: 'array',
+				__experimentalRole: 'content',
+			},
+			disabled: attributes.disabled || {
+				type: 'boolean',
 				__experimentalRole: 'content',
 			},
 		},

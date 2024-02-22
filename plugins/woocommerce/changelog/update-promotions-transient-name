@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Change promotions transient name to correspond with WC_Admin_Marketplace_Promotions::TRANSIENT_NAME.

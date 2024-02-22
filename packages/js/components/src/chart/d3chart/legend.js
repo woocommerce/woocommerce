@@ -120,6 +120,7 @@ class D3Legend extends Component {
 								title={
 									numberOfRowsVisible >= selectionLimit
 										? sprintf(
+												/* translators: %d: number of items selected */
 												__(
 													'You may select up to %d items.',
 													'woocommerce'

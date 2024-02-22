@@ -1,0 +1,35 @@
+# Basic set up for three package managers
+
+version: 2
+updates:
+    - package-ecosystem: 'github-actions'
+      directory: '/'
+      schedule:
+          interval: 'monthly'
+      open-pull-requests-limit: 10
+      labels:
+        - "skip-changelog"
+        - "type: dependencies"
+        - "github_actions"
+
+      # Maintain dependencies for npm
+    - package-ecosystem: 'npm'
+      directory: '/'
+      schedule:
+          interval: 'weekly'
+      open-pull-requests-limit: 10
+      labels:
+        - "skip-changelog"
+        - "type: dependencies"
+        - "javascript"
+
+      # Maintain dependencies for Composer
+    - package-ecosystem: 'composer'
+      directory: '/'
+      schedule:
+          interval: 'weekly'
+      open-pull-requests-limit: 10
+      labels:
+        - "skip-changelog"
+        - "type: dependencies"
+        - "php"

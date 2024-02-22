@@ -15,12 +15,13 @@ interface BlockRepresentation< T extends Record< string, object > > {
 	settings: Partial< BlockConfiguration< T > >;
 }
 
-function useEvaluationContext( context: Record< string, unknown > ) {
+export function useEvaluationContext( context: Record< string, unknown > ) {
 	const { postType } = context;
 
 	const productId = useEntityId( 'postType', postType );
 
 	const getEvaluationContext = ( select: typeof WPSelect ) => {
+		// @ts-expect-error There are no types for this.
 		const editedProduct = select( 'core' ).getEditedEntityRecord(
 			'postType',
 			postType,

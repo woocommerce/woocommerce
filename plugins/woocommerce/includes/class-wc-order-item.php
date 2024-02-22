@@ -53,6 +53,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	protected $object_type = 'order_item';
 
 	/**
+	 * Legacy package key.
+	 *
+	 * @deprecated 4.4.0 For legacy actions.
+	 * @var string
+	 */
+	public $legacy_package_key;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.

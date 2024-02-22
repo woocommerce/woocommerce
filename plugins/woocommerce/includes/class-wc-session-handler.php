@@ -71,6 +71,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->init_session_cookie();
 
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
+		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
@@ -137,12 +138,24 @@ class WC_Session_Handler extends WC_Session {
 			return false;
 		}
 
-		// Session from a different user is not valid. (Although from a guest user will be valid)
+		// Session from a different user is not valid. (Although from a guest user will be valid).
 		if ( is_user_logged_in() && ! $this->is_customer_guest( $this->_customer_id ) && strval( get_current_user_id() ) !== $this->_customer_id ) {
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Hooks into the wp action to maybe set the session cookie if the user is on a certain page e.g. a checkout endpoint.
+	 *
+	 * Certain gateways may rely on sessions and this ensures a session is present even if the customer does not have a
+	 * cart.
+	 */
+	public function maybe_set_customer_session_cookie() {
+		if ( is_wc_endpoint_url( 'order-pay' ) ) {
+			$this->set_customer_session_cookie( true );
+		}
 	}
 
 	/**
@@ -345,7 +358,8 @@ class WC_Session_Handler extends WC_Session {
 
 			$wpdb->query(
 				$wpdb->prepare(
-					"INSERT INTO {$wpdb->prefix}woocommerce_sessions (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"INSERT INTO $this->_table (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
  					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
 					$this->_customer_id,
 					maybe_serialize( $this->_data ),

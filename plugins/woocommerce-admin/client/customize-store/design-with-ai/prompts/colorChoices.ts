@@ -242,7 +242,7 @@ export const defaultColorPalette = {
 		return `
             You are a WordPress theme expert designing a WooCommerce site. Analyse the following store description, merchant's chosen look and tone, and determine the most appropriate color scheme, along with 8 best alternatives.
 			Do not use any palette names that are not part of the color choices provided below.
-			Respond in the form: "{ default: "palette name", bestColors: [ "palette name 1", "palette name 2", "palette name 3", "palette name 4", "palette name 5", "palette name 6", "palette name 7", "palette name 8" ] }"
+			Respond in the JSON form: "{ "default": "palette name", "bestColors": [ "palette name 1", "palette name 2", "palette name 3", "palette name 4", "palette name 5", "palette name 6", "palette name 7", "palette name 8" ] }"
 			
             Chosen look and tone: ${ look } look, ${ tone } tone.
             Business description: ${ businessDescription }

@@ -12,6 +12,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
+use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -448,6 +449,7 @@ function wc_scheduled_sales() {
 
 				if ( $sale_price ) {
 					$product->set_price( $sale_price );
+					$product->set_date_on_sale_from( '' );
 				} else {
 					$product->set_date_on_sale_to( '' );
 					$product->set_date_on_sale_from( '' );
@@ -685,7 +687,7 @@ function wc_get_product_id_by_sku( $sku ) {
  */
 function wc_get_product_variation_attributes( $variation_id ) {
 	// Build variation data from meta.
-	$all_meta                = get_post_meta( $variation_id );
+	$all_meta                = is_array( get_post_meta( $variation_id ) ) ? get_post_meta( $variation_id ) : array();
 	$parent_id               = wp_get_post_parent_id( $variation_id );
 	$parent_attributes       = array_filter( (array) get_post_meta( $parent_id, '_product_attributes', true ) );
 	$found_parent_attributes = array();
@@ -989,9 +991,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
-	if ( '' === $price ) {
-		return '';
-	} elseif ( empty( $qty ) ) {
+	if ( empty( $qty ) ) {
 		return 0.0;
 	}
 
@@ -1078,9 +1078,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$price = '' !== $args['price'] ? max( 0.0, (float) $args['price'] ) : (float) $product->get_price();
 	$qty   = '' !== $args['qty'] ? max( 0.0, (float) $args['qty'] ) : 1;
 
-	if ( '' === $price ) {
-		return '';
-	} elseif ( empty( $qty ) ) {
+	if ( empty( $qty ) ) {
 		return 0.0;
 	}
 
@@ -1656,3 +1654,45 @@ function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit
 	}
 }
 add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );
+
+/**
+ * Attach product featured image. Use image filename to match a product sku when product is not provided.
+ *
+ * @since 8.5.0
+ * @param int        $attachment_id Media attachment ID.
+ * @param WC_Product $product Optional product object.
+ * @return void
+ */
+function wc_product_attach_featured_image( $attachment_id, $product = null ) {
+	$attachment_post = get_post( $attachment_id );
+	if ( ! $attachment_post ) {
+		return;
+	}
+
+	if ( null === $product && wc_get_container()->get( MatchImageBySKU::class )->is_enabled() ) {
+		// On upload the attachment post title is the uploaded file's filename.
+		$file_name = pathinfo( $attachment_post->post_title, PATHINFO_FILENAME );
+		if ( ! $file_name ) {
+			return;
+		}
+
+		$product_id = wc_get_product_id_by_sku( $file_name );
+		$product    = wc_get_product( $product_id );
+	}
+
+	if ( ! $product ) {
+		return;
+	}
+
+	$product->set_image_id( $attachment_id );
+	$product->save();
+	if ( 0 === $attachment_post->post_parent ) {
+		wp_update_post(
+			array(
+				'ID'          => $attachment_id,
+				'post_parent' => $product->get_id(),
+			)
+		);
+	}
+}
+add_action( 'add_attachment', 'wc_product_attach_featured_image' );

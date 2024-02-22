@@ -44,6 +44,7 @@ export function usePreview( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -68,6 +69,7 @@ export function usePreview( {
 
 	const ariaDisabled = disabled || isDisabled || isValidating;
 
+	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	let previewLink: URL | undefined;

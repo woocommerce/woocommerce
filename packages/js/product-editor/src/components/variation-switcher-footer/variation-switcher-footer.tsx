@@ -6,7 +6,6 @@ import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { arrowLeft, arrowRight, Icon } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
-import { ProductVariation } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -18,8 +17,8 @@ import { useVariationSwitcher } from '../../hooks/use-variation-switcher';
 
 export type VariationSwitcherProps = {
 	parentProductType?: string;
-	variationId: number;
-	parentId: number;
+	variationId?: number;
+	parentId?: number;
 };
 
 export function VariationSwitcherFooter( {
@@ -48,14 +47,14 @@ export function VariationSwitcherFooter( {
 				return {
 					previousVariation:
 						previousVariationId !== null &&
-						getEntityRecord< ProductVariation >(
+						getEntityRecord(
 							'postType',
 							'product_variation',
 							previousVariationId
 						),
 					nextVariation:
 						nextVariationId !== null &&
-						getEntityRecord< ProductVariation >(
+						getEntityRecord(
 							'postType',
 							'product_variation',
 							nextVariationId

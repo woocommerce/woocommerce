@@ -23,6 +23,7 @@ describe( 'getDerivedProductType', () => {
 					position: 0,
 					variation: false,
 					visible: true,
+					slug: 'color',
 				},
 			],
 		} );
@@ -40,6 +41,7 @@ describe( 'getDerivedProductType', () => {
 					position: 0,
 					variation: true,
 					visible: true,
+					slug: 'color',
 				},
 			],
 		} );
@@ -57,6 +59,7 @@ describe( 'getDerivedProductType', () => {
 					position: 0,
 					variation: false,
 					visible: true,
+					slug: 'size',
 				},
 				{
 					id: 0,
@@ -65,6 +68,7 @@ describe( 'getDerivedProductType', () => {
 					position: 1,
 					variation: true,
 					visible: true,
+					slug: 'color',
 				},
 			],
 		} );

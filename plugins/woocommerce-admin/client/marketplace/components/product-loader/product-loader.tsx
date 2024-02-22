@@ -27,7 +27,12 @@ export default function ProductLoader(
 			) }
 			<div className="woocommerce-marketplace__product-list-content">
 				{ [ ...Array( placeholderCount ) ].map( ( element, i ) => (
-					<ProductCard key={ i } isLoading={ true } type={ type } />
+					<ProductCard
+						key={ i }
+						isLoading={ true }
+						type={ type }
+						tracksData={ {} }
+					/>
 				) ) }
 			</div>
 		</div>

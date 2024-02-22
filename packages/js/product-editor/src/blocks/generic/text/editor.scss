@@ -1,0 +1,10 @@
+.wp-block-woocommerce-product-text-field {
+	&__suffix-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: $grid-unit-30;
+		height: $grid-unit-30;
+		fill: $gray-700;
+	}
+}

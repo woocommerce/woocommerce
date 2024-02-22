@@ -56,7 +56,8 @@ export const AttributeListItem: React.FC< AttributeListItemProps > = ( {
 				{ attribute.options.length > 3 && (
 					<Tag
 						label={ sprintf(
-							__( '+ %i more', 'woocommerce' ),
+							/* translators: %i: number of additional attribute values that are hidden */
+							__( '+ %d more', 'woocommerce' ),
 							attribute.options.length - 2
 						) }
 					/>

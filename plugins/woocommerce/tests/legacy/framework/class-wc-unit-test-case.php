@@ -276,6 +276,15 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Register a callback to be executed when the "exit" method is invoked.
+	 *
+	 * @param callable|null $mock The callback to be registered, or null to unregister it.
+	 */
+	public function register_exit_mock( ?callable $mock ) {
+		wc_get_container()->get( LegacyProxy::class )->register_exit_mock( $mock );
+	}
+
+	/**
 	 * Asserts that a certain callable output is equivalent to a given piece of HTML.
 	 *
 	 * "Equivalent" means that the string representations of the HTML pieces are equal

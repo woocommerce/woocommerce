@@ -24,6 +24,8 @@
 	align-items: center;
 	flex-direction: column;
 
+	--color-error: #cc1818; // used by some @automattic/components
+
 	@include breakpoint( '<782px' ) {
 		padding: 0 20px;
 	}
@@ -395,7 +397,6 @@
 }
 
 // Business Info Page
-
 .woocommerce-profiler-business-information {
 	display: flex;
 	flex-direction: column;
@@ -452,6 +453,17 @@
 				border-color: transparent;
 				box-shadow: 0 0 0 2px var(--wp-admin-theme-color, #006088);
 			}
+		}
+
+		.woocommerce-profiler-business-info-email-adddress.is-error {
+			& .components-text-control__input {
+				box-shadow: 0 0 0 1px var(--color-error);
+			}
+		}
+
+		.form-input-validation.is-error span svg {
+			height: 20px;
+			width: 20px;
 		}
 
 		.woocommerce-profiler-select-control__country-spacer + .woocommerce-profiler-business-info-email-adddress {

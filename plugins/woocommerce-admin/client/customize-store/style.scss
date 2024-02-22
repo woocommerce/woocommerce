@@ -155,8 +155,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	font-weight: 400;
 	line-height: 24px;
 	color: $gray-900;
-	margin: 0 0 60px;
-	width: 615px;
 
 	.components-notice__content {
 		margin: 0;
@@ -167,3 +165,103 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		height: initial;
 	}
 }
+
+.cys-fullscreen-iframe {
+	display: block;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+	z-index: 9999;
+	transition: opacity 1.2s linear;
+	opacity: 0;
+}
+
+.woocommerce-customize-store__onboarding-welcome-modal,
+.woocommerce-customize-store__design-change-warning-modal {
+	width: 480px;
+	max-width: 480px;
+
+	.components-modal__header {
+		padding-top: 32px;
+	}
+
+	p {
+		padding: 16px 0 16px 0;
+		margin: 0;
+	}
+
+	a,
+	button {
+		text-decoration: none !important;
+	}
+
+	.components-button {
+		padding: 8px 16px;
+	}
+
+	h1 {
+		line-height: 28px;
+		font-size: 20px;
+		color: #1e1e1e;
+	}
+
+	span {
+		color: #1e1e1e;
+		font-weight: 700;
+	}
+
+	.woocommerce-customize-store__design-change-warning-modal-footer {
+		display: flex;
+		gap: 12px;
+		justify-content: flex-end;
+	}
+}
+
+.woocommerce-onboarding-loader {
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	background-color: #fff;
+
+	.woocommerce-onboarding-loader-wrapper {
+		align-items: flex-start;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		max-width: 520px;
+		min-height: 400px;
+
+		.woocommerce-onboarding-loader-container {
+			text-align: center;
+			min-height: 400px;
+		}
+
+		.loader-hearticon {
+			position: relative;
+			top: 2px;
+			left: 2px;
+		}
+	}
+}
+
+.woocommerce-customize-store__step-designWithAi,
+.woocommerce-customize-store__step-designWithoutAi {
+	.woocommerce-onboarding-loader-wrapper {
+		min-height: auto;
+		.woocommerce-onboarding-loader-container {
+			min-height: auto;
+		}
+	}
+}
+
+.progress-bar.smooth-transition {
+	.woocommerce-onboarding-progress-bar__filler {
+		transition: width linear 2s;
+	}
+}
+

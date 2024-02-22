@@ -469,7 +469,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 							'inserted-block',
 							[
 								'_templateBlockId'    => 'inserted-block-1',
-								'_templateBlockOrder' => 10,
+								'_templateBlockOrder' => 10000,
 							],
 						],
 					],
@@ -627,7 +627,7 @@ class BlockTemplateTest extends WC_Unit_Test_Case {
 							'inserted-block',
 							[
 								'_templateBlockId'    => 'inserted-block-1',
-								'_templateBlockOrder' => 10,
+								'_templateBlockOrder' => 10000,
 							],
 						],
 					],

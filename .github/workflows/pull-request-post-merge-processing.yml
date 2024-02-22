@@ -38,9 +38,7 @@ jobs:
               with:
                   php-version: '7.4'
             - name: 'Run the script to assign a milestone'
-              if: |
-                  !github.event.pull_request.milestone &&
-                  github.event.pull_request.base.ref == 'trunk'
+              if: github.event.pull_request.base.ref == 'trunk'
               run: php assign-milestone-to-merged-pr.php
               env:
                   PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}

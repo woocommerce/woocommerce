@@ -35,7 +35,7 @@ export const TriggerUpdateCallbacks = () => {
 	}
 
 	return (
-		<div className="trigger-cron-job">
+		<div className="select-description">
 			{ ! dbUpdateVersions ? (
 				<p>Loading ...</p>
 			) : (

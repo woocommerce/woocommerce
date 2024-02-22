@@ -3,6 +3,7 @@
 	grid-template-columns: 1fr 1fr 1fr;
 	gap: $gap;
 	width: 100%;
+	user-select: none;
 
 	&__info,
 	&__current-page,

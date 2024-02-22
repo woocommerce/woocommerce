@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer as Order_DataSynchronizer;
-use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil };
+
 /**
  * System status controller class.
  *
@@ -146,6 +147,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'description' => __( 'Site URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_id'                  => array(
+							'description' => __( 'WooCommerce Store Identifier.', 'woocommerce' ),
+							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
@@ -551,7 +558,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'wccom_connected'                => array(
-							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
+							'description' => __( 'Is store connected to Woo.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -626,6 +633,44 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'logging'            => array(
+					'description' => __( 'Logging.', 'woocommerce' ),
+					'type'        => 'object',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'properties'  => array(
+						'logging_enabled'       => array(
+							'description' => __( 'Is logging enabled?', 'woocommerce' ),
+							'type'        => 'boolean',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'default_handler'       => array(
+							'description' => __( 'The logging handler class.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'retention_period_days' => array(
+							'description' => __( 'The number of days log entries are retained.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'level_threshold'       => array(
+							'description' => __( 'Minimum severity level.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'log_directory_size'    => array(
+							'description' => __( 'The size of the log directory.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+					),
+				),
 			),
 		);
 
@@ -640,7 +685,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_mappings() {
 		return array(
-			'environment'        => $this->get_environment_info(),
+			'environment'        => $this->get_environment_info_per_fields( array( 'environment' ) ),
 			'database'           => $this->get_database_info(),
 			'active_plugins'     => $this->get_active_plugins(),
 			'inactive_plugins'   => $this->get_inactive_plugins(),
@@ -650,6 +695,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'security'           => $this->get_security_info(),
 			'pages'              => $this->get_pages(),
 			'post_type_counts'   => $this->get_post_type_counts(),
+			'logging'            => $this->get_logging_info(),
 		);
 	}
 
@@ -697,6 +743,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					break;
 				case 'post_type_counts':
 					$items['post_type_counts'] = $this->get_post_type_counts();
+					break;
+				case 'logging':
+					$items['logging'] = $this->get_logging_info();
 					break;
 			}
 		}
@@ -806,7 +855,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
 				$response = wp_safe_remote_get(
-					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					'https://woo.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 					)
@@ -826,6 +875,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		return array(
 			'home_url'                  => get_option( 'home' ),
 			'site_url'                  => get_option( 'siteurl' ),
+			'store_id'                  => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			'version'                   => WC()->version,
 			'log_directory'             => WC_LOG_DIR,
 			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
@@ -1412,6 +1462,21 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		return $pages_output;
+	}
+
+	/**
+	 * Get info about the logging system.
+	 *
+	 * @return array
+	 */
+	protected function get_logging_info() {
+		return array(
+			'logging_enabled'       => LoggingUtil::logging_is_enabled(),
+			'default_handler'       => LoggingUtil::get_default_handler(),
+			'retention_period_days' => LoggingUtil::get_retention_period(),
+			'level_threshold'       => WC_Log_Levels::get_level_label( strtolower( LoggingUtil::get_level_threshold() ) ),
+			'log_directory_size'    => size_format( LoggingUtil::get_log_directory_size() ),
+		);
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve the existing E2E test shopper simple product to test description and images

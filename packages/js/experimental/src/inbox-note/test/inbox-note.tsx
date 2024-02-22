@@ -30,7 +30,7 @@ describe( 'InboxNoteCard', () => {
 		id: 1,
 		name: 'wc-admin-wc-helper-connection',
 		type: 'info',
-		title: 'Connect to WooCommerce.com',
+		title: 'Connect to Woo.com',
 		content: 'Connect to get important product notifications and updates.',
 		status: 'unactioned',
 		date_created: '2020-05-10T16:57:31',

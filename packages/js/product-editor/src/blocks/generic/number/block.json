@@ -29,6 +29,17 @@
 		},
 		"max": {
 			"type": "number"
+		},
+		"tooltip": {
+			"type": "string"
+		},
+		"required": {
+			"type": "boolean",
+			"default": false
+		},
+		"step": {
+			"type": "number",
+			"default": 1
 		}
 	},
 	"supports": {

@@ -7,15 +7,25 @@
 import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
+import {
+	privateApis as blockEditorPrivateApis,
+	// @ts-ignore no types exist yet.
+} from '@wordpress/block-editor';
+// @ts-expect-error no types exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
  */
-import { FONT_PAIRINGS } from './constants';
+import { FONT_PAIRINGS, FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
 import { Look } from '~/customize-store/design-with-ai/types';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
+import { FontFamily } from './font-families-loader-dot-com';
+import { isAIFlow } from '~/customize-store/guards';
 
 export const FontPairing = () => {
 	const { aiSuggestions, isLoading } = useSelect( ( select ) => {
@@ -31,15 +41,44 @@ export const FontPairing = () => {
 		};
 	} );
 
-	const fontPairings = useMemo(
-		() =>
-			aiSuggestions?.lookAndFeel
+	const { useGlobalSetting } = unlock( blockEditorPrivateApis );
+
+	const [ custom ] = useGlobalSetting( 'typography.fontFamilies.custom' ) as [
+		Array< FontFamily >
+	];
+
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const fontPairings = useMemo( () => {
+		if ( isAIFlow( context.flowType ) ) {
+			return aiOnline && aiSuggestions?.lookAndFeel
 				? FONT_PAIRINGS.filter( ( font ) =>
 						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
 				  )
-				: FONT_PAIRINGS,
-		[ aiSuggestions ]
-	);
+				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+		}
+
+		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
+			const fontFamilies = pair.settings.typography.fontFamilies;
+			const fonts = custom.filter( ( customFont ) =>
+				fontFamilies.theme.some(
+					( themeFont ) => themeFont.slug === customFont.slug
+				)
+			);
+
+			return {
+				...pair,
+				settings: {
+					typography: {
+						fontFamilies: {
+							theme: fonts,
+						},
+					},
+				},
+			};
+		}, [] );
+	}, [ aiOnline, aiSuggestions?.lookAndFeel, context.flowType, custom ] );
 
 	if ( isLoading ) {
 		return (

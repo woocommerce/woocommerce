@@ -82,7 +82,7 @@ export const ShippingRecommendationsList: React.FC = ( { children } ) => (
 		<CardFooter>
 			<Button
 				className="woocommerce-recommended-shipping-extensions__more_options_cta"
-				href="https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
+				href="https://woo.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=shipping_recommendations"
 				target="_blank"
 				isTertiary
 			>

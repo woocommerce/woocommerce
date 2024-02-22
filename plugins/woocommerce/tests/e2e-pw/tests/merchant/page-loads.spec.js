@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { features } = require( '../../utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 // a representation of the menu structure for WC
@@ -25,12 +24,6 @@ const wcPages = [
 				heading: 'Customers',
 				element: '#search-inline-input-0',
 				text: 'Move backward for selected items',
-			},
-			{
-				name: 'Coupons',
-				heading: 'Coupons',
-				element: '.woocommerce-table__empty-item',
-				text: 'No data to display',
 			},
 			{
 				name: 'Reports',
@@ -70,20 +63,20 @@ const wcPages = [
 			{
 				name: 'Categories',
 				heading: 'Product categories',
-				element: '.row-title',
-				text: 'Uncategorized',
+				element: '#submit',
+				text: 'Add new category',
 			},
 			{
 				name: 'Tags',
 				heading: 'Product tags',
-				element: '.no-items > td',
-				text: 'No tags found',
+				element: '#submit',
+				text: 'Add new tag',
 			},
 			{
 				name: 'Attributes',
 				heading: 'Attributes',
-				element: '.alternate > td',
-				text: 'No attributes currently exist.',
+				element: '#submit',
+				text: 'Add attribute',
 			},
 		],
 	},
@@ -204,20 +197,6 @@ for ( const currentPage of wcPages ) {
 			test( `Can load ${ currentPage.subpages[ i ].name }`, async ( {
 				page,
 			} ) => {
-				// deal with cases where the 'Coupons' legacy menu had already been removed.
-				if ( currentPage.subpages[ i ].name === 'Coupons' ) {
-					const couponsMenuVisible = await page
-						.locator(
-							`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`
-						)
-						.isVisible();
-
-					test.skip(
-						! couponsMenuVisible,
-						'Skipping this test because the legacy Coupons menu was not found and may have already been removed.'
-					);
-				}
-
 				await page
 					.locator(
 						`li.wp-menu-open > ul.wp-submenu > li:has-text("${ currentPage.subpages[ i ].name }")`,
@@ -230,8 +209,7 @@ for ( const currentPage of wcPages ) {
 				).toContainText( currentPage.subpages[ i ].heading );
 
 				await expect(
-					page.locator( currentPage.subpages[ i ].element )
-					.first()
+					page.locator( currentPage.subpages[ i ].element ).first()
 				).toBeVisible();
 
 				await expect(

@@ -36,6 +36,7 @@ export function usePagination( {
 			}
 		},
 		setPerPageChange: ( newPerPage: number ) => {
+			setCurrentPage( 1 );
 			setPerPage( newPerPage );
 			if ( onPerPageChange ) {
 				onPerPageChange( newPerPage );

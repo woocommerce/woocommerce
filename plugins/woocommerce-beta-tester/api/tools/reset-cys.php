@@ -44,5 +44,15 @@ function tools_reset_cys() {
 		array( '%s', '%s' )
 	);
 
+	// Reset the patterns AI data.
+	$wpdb->delete(
+		$wpdb->prefix . 'posts',
+		array(
+			'post_type'  => 'patterns_ai_data',
+			'post_title' => 'Patterns AI Data',
+		),
+		array( '%s', '%s' )
+	);
+
 	return true;
 }

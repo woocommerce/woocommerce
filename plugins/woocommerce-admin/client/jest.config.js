@@ -1,6 +1,7 @@
 module.exports = {
-	rootDir: './',
-	preset: '../node_modules/@woocommerce/internal-js-tests/jest-preset.js',
+	rootDir: '../',
+	roots: [ '<rootDir>/client' ],
+	preset: './node_modules/@woocommerce/internal-js-tests/jest-preset.js',
 	globals: {
 		'ts-jest': {
 			diagnostics: {
@@ -11,7 +12,7 @@ module.exports = {
 					18003,
 				],
 			},
-			tsconfig: '<rootDir>/tsconfig.test.json',
+			tsconfig: '<rootDir>/client/tsconfig.test.json',
 		},
 	},
 };

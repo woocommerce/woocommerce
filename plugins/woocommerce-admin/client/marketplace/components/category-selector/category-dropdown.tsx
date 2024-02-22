@@ -6,11 +6,13 @@ import { chevronDown, chevronUp, Icon } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import classNames from 'classnames';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { Category } from './types';
+import { ProductType } from '../product-list/types';
 
 function DropdownContent( props: {
 	readonly categories: Category[];
@@ -71,16 +73,28 @@ type CategoryDropdownProps = {
 	contentClassName?: string;
 	arrowIconSize?: number;
 	selected?: Category;
+	type?: ProductType;
 };
 
 export default function CategoryDropdown(
 	props: CategoryDropdownProps
 ): JSX.Element {
+	function dropDownTracksEvent() {
+		recordEvent( 'marketplace_category_dropdown_opened', {
+			type: props.type,
+		} );
+	}
+
 	return (
 		<Dropdown
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<button
-					onClick={ onToggle }
+					onClick={ () => {
+						if ( ! isOpen ) {
+							dropDownTracksEvent();
+						}
+						onToggle();
+					} }
 					className={ props.buttonClassName }
 					aria-label={ __(
 						'Toggle category dropdown',

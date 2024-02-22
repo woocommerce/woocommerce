@@ -14,7 +14,7 @@ describe( 'getProductTypes', () => {
 			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
 				( p ) => p.key
 			)
-		).toEqual( [ 'physical', 'variable', 'subscription', 'grouped' ] );
+		).toEqual( [ 'physical', 'variable', 'grouped' ] );
 	} );
 } );
 

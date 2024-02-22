@@ -1,4 +1,8 @@
-# Common issues
+---
+post_title: Common issues
+menu_title: Common issues
+tags: reference
+---
 
 This page aims to document a comprehensive list of known issues, commonly encountered problems, and their solutions or workarounds. If you have encountered an issue that is not mentioned here and should be, please don't hesitate to add to the list.
 
@@ -76,7 +80,7 @@ Add this to `wp-config.php`:
 define( 'WCPAY_DEV_MODE', true );
 ```
 
-Also see [this document](https://docs.woocommerce.com/document/payments/testing/dev-mode).
+Also see [this document](https://woo.com/document/payments/testing/dev-mode).
 
 ## WooCommerce Admin install timestamp
 

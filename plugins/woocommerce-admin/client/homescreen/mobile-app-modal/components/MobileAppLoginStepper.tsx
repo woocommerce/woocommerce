@@ -41,7 +41,7 @@ export const MobileAppLoginStepper = ( {
 					key: 'first',
 					label: __( 'Install the mobile app', 'woocommerce' ),
 					description: __(
-						'Scan the code below to download or upgrade the app, or visit woocommerce.com/mobile from your mobile device.',
+						'Scan the code below to download or upgrade the app, or visit woo.com/mobile from your mobile device.',
 						'woocommerce'
 					),
 					content: (

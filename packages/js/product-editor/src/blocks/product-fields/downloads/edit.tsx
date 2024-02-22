@@ -24,7 +24,6 @@ import { useEntityProp } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { UploadsBlockAttributes } from './types';
-import { UploadImage } from './upload-image';
 import { DownloadsMenu } from './downloads-menu';
 import { ProductEditorBlockEditProps } from '../../../types';
 import {
@@ -32,6 +31,8 @@ import {
 	ManageDownloadLimitsModalProps,
 } from '../../../components/manage-download-limits-modal';
 import { EditDownloadsModal } from './edit-downloads-modal';
+import { UploadImage } from './upload-image';
+import { SectionActions } from '../../../components/block-slot-fill';
 
 function getFileName( url?: string ) {
 	const [ name ] = url?.split( '/' ).reverse() ?? [];
@@ -46,16 +47,11 @@ function stringifyEntityId< ID, T extends { id?: ID } >( entity: T ): T {
 	return { ...entity, id: stringifyId( entity.id ) };
 }
 
-export function Edit( {
+export function DownloadBlockEdit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< UploadsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const [ , setDownloadable ] = useEntityProp< Product[ 'downloadable' ] >(
-		'postType',
-		postType,
-		'downloadable'
-	);
 	const [ downloads, setDownloads ] = useEntityProp< Product[ 'downloads' ] >(
 		'postType',
 		postType,
@@ -63,10 +59,10 @@ export function Edit( {
 	);
 	const [ downloadLimit, setDownloadLimit ] = useEntityProp<
 		Product[ 'download_limit' ]
-	>( 'postType', 'product', 'download_limit' );
+	>( 'postType', postType, 'download_limit' );
 	const [ downloadExpiry, setDownloadExpiry ] = useEntityProp<
 		Product[ 'download_expiry' ]
-	>( 'postType', 'product', 'download_expiry' );
+	>( 'postType', postType, 'download_expiry' );
 
 	const [ selectedDownload, setSelectedDownload ] =
 		useState< ProductDownload | null >();
@@ -121,10 +117,6 @@ export function Edit( {
 		}
 
 		if ( newFiles.length ) {
-			if ( ! downloads.length ) {
-				setDownloadable( true );
-			}
-
 			const uploadedFiles = newFiles.map( ( file ) => ( {
 				id: stringifyId( file.id ),
 				file: file.url,
@@ -143,6 +135,35 @@ export function Edit( {
 		}
 	}
 
+	function handleFileReplace( files: MediaItem | MediaItem[] ) {
+		if (
+			! Array.isArray( files ) ||
+			! files?.length ||
+			files[ 0 ]?.id === undefined
+		) {
+			return;
+		}
+
+		const uploadedFile = {
+			id: stringifyId( files[ 0 ].id ),
+			file: files[ 0 ].url,
+			name:
+				files[ 0 ].title ||
+				files[ 0 ].alt ||
+				files[ 0 ].caption ||
+				getFileName( files[ 0 ].url ),
+		};
+		const stringifyIds = downloads.map( ( download ) => {
+			if ( download.file === selectedDownload?.file ) {
+				return stringifyEntityId( uploadedFile );
+			}
+			return stringifyEntityId( download );
+		} );
+
+		setDownloads( stringifyIds );
+		setSelectedDownload( uploadedFile );
+	}
+
 	function removeDownload( download: ProductDownload ) {
 		const otherDownloads = downloads.reduce< ProductDownload[] >(
 			function removeDownloadElement(
@@ -157,10 +178,6 @@ export function Edit( {
 			[]
 		);
 
-		if ( ! otherDownloads.length ) {
-			setDownloadable( false );
-		}
-
 		setDownloads( otherDownloads );
 	}
 
@@ -172,7 +189,7 @@ export function Edit( {
 
 	function editHandler( download: ProductDownload ) {
 		return function handleEditClick() {
-			setSelectedDownload( download );
+			setSelectedDownload( stringifyEntityId( download ) );
 		};
 	}
 
@@ -184,9 +201,22 @@ export function Edit( {
 		);
 	}
 
+	function editDownloadsModalSaveHandler( value: ProductDownload ) {
+		return function handleEditDownloadsModalSave() {
+			const newDownloads = downloads
+				.map( stringifyEntityId )
+				.map( ( obj: ProductDownload ) =>
+					obj.id === value.id ? value : obj
+				);
+
+			setDownloads( newDownloads );
+			setSelectedDownload( null );
+		};
+	}
+
 	return (
 		<div { ...blockProps }>
-			<div className="wp-block-woocommerce-product-downloads-field__header">
+			<SectionActions>
 				{ Boolean( downloads.length ) && (
 					<Button
 						variant="tertiary"
@@ -201,7 +231,7 @@ export function Edit( {
 					onUploadSuccess={ handleFileUpload }
 					onUploadError={ handleUploadError }
 				/>
-			</div>
+			</SectionActions>
 
 			<div className="wp-block-woocommerce-product-downloads-field__body">
 				<MediaUploader
@@ -247,6 +277,9 @@ export function Edit( {
 					onUpload={ handleFileUpload }
 					onFileUploadChange={ handleFileUpload }
 					onError={ handleUploadError }
+					additionalData={ {
+						type: 'downloadable_product',
+					} }
 				/>
 
 				{ Boolean( downloads.length ) && (
@@ -257,7 +290,10 @@ export function Edit( {
 								download.file.startsWith( 'blob' );
 
 							return (
-								<ListItem key={ download.file }>
+								<ListItem
+									key={ download.file }
+									className="wp-block-woocommerce-product-downloads-field__table-row"
+								>
 									<div className="wp-block-woocommerce-product-downloads-field__table-filename">
 										<span>{ download.name }</span>
 										{ download.name !== nameFromUrl && (
@@ -326,16 +362,9 @@ export function Edit( {
 							name: text,
 						} );
 					} }
-					onSave={ () => {
-						const newDownloads = downloads.map(
-							( obj: ProductDownload ) =>
-								obj.id === selectedDownload.id
-									? selectedDownload
-									: obj
-						) as ProductDownload[];
-						setDownloads( newDownloads );
-						setSelectedDownload( null );
-					} }
+					onSave={ editDownloadsModalSaveHandler( selectedDownload ) }
+					onUploadSuccess={ handleFileReplace }
+					onUploadError={ handleUploadError }
 				/>
 			) }
 		</div>

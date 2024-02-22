@@ -4,6 +4,7 @@
 import { Link } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -35,7 +36,16 @@ export default function ProductListHeader(
 			</h2>
 			{ groupURL !== null && (
 				<span className="woocommerce-marketplace__product-list-link">
-					<Link href={ groupURL } target="_blank">
+					<Link
+						href={ groupURL }
+						target="_blank"
+						onClick={ () => {
+							recordEvent( 'marketplace_see_more_clicked', {
+								group_title: title,
+								group_url: groupURL,
+							} );
+						} }
+					>
 						{ __( 'See more', 'woocommerce' ) }
 					</Link>
 				</span>

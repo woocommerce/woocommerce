@@ -66,6 +66,30 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
+	 * Get the downloads for a product variation.
+	 *
+	 * @param WC_Product_Variation $product Product variation instance.
+	 * @param string               $context Context of the request: 'view' or 'edit'.
+	 *
+	 * @return array
+	 */
+	protected function get_downloads( $product, $context = 'view' ) {
+		$downloads = array();
+
+		if ( $product->is_downloadable() || 'edit' === $context ) {
+			foreach ( $product->get_downloads() as $file_id => $file ) {
+				$downloads[] = array(
+					'id'   => $file_id, // MD5 hash.
+					'name' => $file['name'],
+					'file' => $file['file'],
+				);
+			}
+		}
+
+		return $downloads;
+	}
+
+	/**
 	 * Prepare a single variation output for response.
 	 *
 	 * @param  WC_Data         $object  Object data.
@@ -95,7 +119,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'purchasable'           => $object->is_purchasable(),
 			'virtual'               => $object->is_virtual(),
 			'downloadable'          => $object->is_downloadable(),
-			'downloads'             => $this->get_downloads( $object ),
+			'downloads'             => $this->get_downloads( $object, $context ),
 			'download_limit'        => '' !== $object->get_download_limit() ? (int) $object->get_download_limit() : -1,
 			'download_expiry'       => '' !== $object->get_download_expiry() ? (int) $object->get_download_expiry() : -1,
 			'tax_status'            => $object->get_tax_status(),
@@ -857,16 +881,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Filter by attributes.
 		if ( ! empty( $request['attributes'] ) && is_array( $request['attributes'] ) ) {
 			foreach ( $request['attributes'] as $attribute ) {
-				if ( ! isset( $attribute['attribute'] ) || ! isset( $attribute['term'] ) ) {
-					continue;
+				if ( isset( $attribute['attribute'] ) ) {
+					if ( isset( $attribute['term'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'   => 'attribute_' . $attribute['attribute'],
+								'value' => $attribute['term'],
+							)
+						);
+					} elseif ( ! empty( $attribute['terms'] ) && is_array( $attribute['terms'] ) ) {
+						$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+							$args,
+							array(
+								'key'     => 'attribute_' . $attribute['attribute'],
+								'compare' => 'IN',
+								'value'   => $attribute['terms'],
+							),
+						);
+					}
 				}
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					$args,
-					array(
-						'key'   => 'attribute_' . $attribute['attribute'],
-						'value' => $attribute['term'],
-					)
-				);
 			}
 		}
 
@@ -1023,6 +1057,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'type'        => 'string',
 						'description' => __( 'Attribute term.', 'woocommerce' ),
 					),
+					'terms'     => array(
+						'type'        => 'array',
+						'description' => __( 'Attribute terms.', 'woocommerce' ),
+					),
 				),
 			),
 		);
@@ -1077,7 +1115,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 50 );
+		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 99 );
 		wc_set_time_limit( 0 );
 
 		$response          = array();

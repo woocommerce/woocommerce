@@ -19,23 +19,35 @@ class WC_Orders_Tracking {
 	 */
 	public function init() {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'track_order_status_change' ), 10, 3 );
-		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
-		add_action( 'pre_post_update', array( $this, 'track_created_date_change' ), 10 );
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
+
+		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_orders_view' ), 999 ); // HPOS.
+
 		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
-		add_filter( 'woocommerce_shop_order_search_results', array( $this, 'track_order_search' ), 10, 3 );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_add_order_from_edit' ), 999 ); // HPOS.
+
+		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_created_date_change' ), 10 );
+
+		add_action( 'load-edit.php', array( $this, 'track_search_in_orders_list' ) );
+		add_action( 'load-woocommerce_page_wc-orders', array( $this, 'track_search_in_orders_list' ), 999 ); // HPOS.
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_order_tracking_scripts' ) );
 	}
 
 	/**
 	 * Send a track event when on the Order Listing page, and search results are being displayed.
 	 *
+	 * @deprecated 8.6.0
+	 *
 	 * @param array  $order_ids Array of order_ids that are matches for the search.
 	 * @param string $term The string that was used in the search.
 	 * @param array  $search_fields Fields that were used in the original search.
 	 */
 	public function track_order_search( $order_ids, $term, $search_fields ) {
+		wc_deprecated_function( __METHOD__, '8.6.0', 'WC_Orders_Tracking::track_search_in_orders_list' );
+
 		// Since `woocommerce_shop_order_search_results` can run in the front-end context, exit if get_current_screen isn't defined.
 		if ( ! function_exists( 'get_current_screen' ) ) {
 			return $order_ids;
@@ -53,19 +65,33 @@ class WC_Orders_Tracking {
 	}
 
 	/**
+	 * Send a track event when on the Order Listing page, and search results are being displayed.
+	 *
+	 * @since 8.6.0
+	 */
+	public function track_search_in_orders_list() {
+		if ( ! OrderUtil::is_order_list_table_screen() || empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		WC_Tracks::record_event( 'orders_view_search' );
+	}
+
+	/**
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
 	public function track_orders_view() {
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-			// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-			$properties = array(
-				'status' => isset( $_GET['post_status'] ) ? sanitize_text_field( $_GET['post_status'] ) : 'all',
-			);
-			// phpcs:enable
-
-			WC_Tracks::record_event( 'orders_view', $properties );
+		if ( ! OrderUtil::is_order_list_table_screen() ) {
+			return;
 		}
+
+		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$properties = array(
+			'status' => sanitize_text_field( $_GET['post_status'] ?? ( $_GET['status'] ?? 'all' ) ),
+		);
+		// phpcs:enable
+
+		WC_Tracks::record_event( 'orders_view', $properties );
 	}
 
 	/**
@@ -100,15 +126,15 @@ class WC_Orders_Tracking {
 			return;
 		}
 
-		if ( 'auto-draft' === get_post_status( $id ) ) {
+		$order = wc_get_order( $id );
+		if ( ! $order || 'auto-draft' === $order->get_status() ) {
 			return;
 		}
 
-		$order        = wc_get_order( $id );
 		$date_created = $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '';
 		// phpcs:disable WordPress.Security.NonceVerification
 		$new_date = sprintf(
-			'%s %2d:%2d:%2d',
+			'%s %2d:%02d:%02d',
 			isset( $_POST['order_date'] ) ? wc_clean( wp_unslash( $_POST['order_date'] ) ) : '',
 			isset( $_POST['order_date_hour'] ) ? wc_clean( wp_unslash( $_POST['order_date_hour'] ) ) : '',
 			isset( $_POST['order_date_minute'] ) ? wc_clean( wp_unslash( $_POST['order_date_minute'] ) ) : '',
@@ -151,46 +177,50 @@ class WC_Orders_Tracking {
 	 * Track "add order" button on the Edit Order screen.
 	 */
 	public function track_add_order_from_edit() {
-		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) {
-			$referer = wp_get_referer();
+		if ( ! OrderUtil::is_new_order_screen() ) {
+			return;
+		}
 
-			if ( $referer ) {
-				$referring_page = wp_parse_url( $referer );
-				$referring_args = array();
-				$post_edit_page = wp_parse_url( admin_url( 'post.php' ) );
+		$referer = wp_get_referer();
+		if ( ! $referer ) {
+			return;
+		}
 
-				if ( ! empty( $referring_page['query'] ) ) {
-					parse_str( $referring_page['query'], $referring_args );
-				}
+		$referring_page = wp_parse_url( $referer );
 
-				// Determine if we arrived from an Order Edit screen.
-				if (
-					$post_edit_page['path'] === $referring_page['path'] &&
-					isset( $referring_args['action'] ) &&
-					'edit' === $referring_args['action'] &&
-					isset( $referring_args['post'] ) &&
-					'shop_order' === OrderUtil::get_order_type( $referring_args['post'] )
-				) {
-					WC_Tracks::record_event( 'order_edit_add_order' );
-				}
-			}
+		if ( empty( $referring_page['query'] ) ) {
+			// Edit Order screen has query args.
+			return;
+		}
+		parse_str( $referring_page['query'], $referring_args );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$post_edit_page = admin_url( 'admin.php?page=wc-orders' );
+			$order_id       = $referring_args['id'] ?? 0;
+		} else {
+			$post_edit_page = admin_url( 'post.php' );
+			$order_id       = $referring_args['post'] ?? 0;
+		}
+		$post_edit_page = wp_parse_url( $post_edit_page );
+
+		if (
+			( $post_edit_page['path'] === $referring_page['path'] ) &&
+			( ! isset( $post_edit_page['query'] ) || false !== strpos( $referring_page['query'], $post_edit_page['query'] ) ) &&
+			( isset( $referring_args['action'] ) && 'edit' === $referring_args['action'] ) &&
+			'shop_order' === OrderUtil::get_order_type( $order_id )
+		) {
+			WC_Tracks::record_event( 'order_edit_add_order' );
 		}
 	}
 
 	/**
 	 * Adds the tracking scripts for product setting pages.
-	 *
-	 * @param string $hook Page hook.
 	 */
-	public function possibly_add_order_tracking_scripts( $hook ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if (
-			( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) ||
-			( 'post.php' === $hook && isset( $_GET['post'] ) && 'shop_order' === get_post_type( intval( $_GET['post'] ) ) )
-		) {
-			WCAdminAssets::register_script( 'wp-admin-scripts', 'order-tracking', false );
+	public function possibly_add_order_tracking_scripts() {
+		if ( ! OrderUtil::is_new_order_screen() && ! OrderUtil::is_order_edit_screen() && ! OrderUtil::is_order_list_table_screen() ) {
+			return;
 		}
-		// phpcs:enable
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'order-tracking', false );
 	}
 }

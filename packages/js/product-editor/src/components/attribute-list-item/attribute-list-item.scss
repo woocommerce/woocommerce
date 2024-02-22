@@ -1,5 +1,4 @@
-.woocommerce-add-attribute-list-item,
-.woocommerce-attribute-list-item {
+.woocommerce-add-attribute-list-item {
 	min-height: 82px;
 	padding: 0 $gap-large;
 
@@ -10,10 +9,15 @@
 
 .woocommerce-attribute-list-item {
 	display: grid;
-	grid-template-columns: 24px 26% auto 90px;
+	background: none;
+	border: none;
+	padding: 0;
+	grid-template-columns: 1fr 2fr 16 * $grid-unit;
+	min-height: 9 * $grid-unit;
+	padding: $grid-unit + $grid-unit-05 0;
 
-	&:last-child {
-		margin-bottom: -1px;
+	&:not(:last-child) {
+		border-bottom: 1px solid $gray-200;
 	}
 
 	&__actions {

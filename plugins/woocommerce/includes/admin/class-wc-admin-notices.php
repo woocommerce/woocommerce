@@ -147,9 +147,10 @@ class WC_Admin_Notices {
 					),
 					sprintf(
 					// translators: Placeholders are URLs.
-						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. A separate WooCommerce extension will be available to keep it enabled. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						wpautop( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to keep it enabled. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
-						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 					)
 				)
 			);
@@ -166,9 +167,10 @@ class WC_Admin_Notices {
 					),
 					sprintf(
 					// translators: Placeholders are URLs.
-						wpautop( wp_kses_data( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. A separate WooCommerce extension will be available to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target=”_blank” href="%2$s">Learn more about this change.</a></b>', 'woocommerce' ) ) ),
+						wpautop( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
-						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 					)
 				)
 			);
@@ -281,6 +283,19 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Check if a given user has dismissed a given admin notice.
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param string   $name The name of the admin notice to check.
+	 * @param int|null $user_id User id, or null for the current user.
+	 * @return bool True if the user has dismissed the notice.
+	 */
+	public static function user_has_dismissed_notice( string $name, ?int $user_id = null ): bool {
+		return (bool) get_user_meta( $user_id ?? get_current_user_id(), "dismissed_{$name}_notice", true );
+	}
+
+	/**
 	 * Add notices + styles if needed.
 	 */
 	public static function add_notices() {
@@ -289,6 +304,8 @@ class WC_Admin_Notices {
 		if ( empty( $notices ) ) {
 			return;
 		}
+
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 
 		$screen          = get_current_screen();
 		$screen_id       = $screen ? $screen->id : '';

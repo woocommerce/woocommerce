@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement, createInterpolateElement } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useInstanceId } from '@wordpress/compose';
 import classNames from 'classnames';
@@ -15,7 +14,6 @@ import {
 	AlignmentControl,
 	BlockControls,
 	RichText,
-	store as blockEditorStore,
 } from '@wordpress/block-editor';
 
 /**
@@ -26,7 +24,7 @@ import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
 import { ProductEditorBlockEditProps } from '../../../types';
 
-export function Edit( {
+export function SummaryBlockEdit( {
 	attributes,
 	setAttributes,
 	context,
@@ -35,8 +33,9 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes, {
 		style: { direction },
 	} );
+
 	const contentId = useInstanceId(
-		Edit,
+		SummaryBlockEdit,
 		'wp-block-woocommerce-product-summary-field__content'
 	);
 	const [ summary, setSummary ] = useEntityProp< string >(
@@ -44,9 +43,6 @@ export function Edit( {
 		context.postType || 'product',
 		attributes.property
 	);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -54,15 +50,6 @@ export function Edit( {
 
 	function handleDirectionChange( value: SummaryAttributes[ 'direction' ] ) {
 		setAttributes( { direction: value } );
-	}
-
-	function handleBlur( event: React.FocusEvent< 'p', Element > ) {
-		const isToolbar = event.relatedTarget?.closest(
-			'.block-editor-block-contextual-toolbar'
-		);
-		if ( ! isToolbar ) {
-			clearSelectedBlock();
-		}
 	}
 
 	return (
@@ -88,23 +75,30 @@ export function Edit( {
 
 			<BaseControl
 				id={ contentId.toString() }
-				label={ createInterpolateElement(
-					label || __( 'Summary', 'woocommerce' ),
-					{
-						optional: (
-							<span className="woocommerce-product-form__optional-input">
-								{ __( '(OPTIONAL)', 'woocommerce' ) }
-							</span>
-						),
-					}
-				) }
+				label={
+					typeof label === 'undefined'
+						? createInterpolateElement(
+								__( 'Summary', 'woocommerce' ),
+								{
+									optional: (
+										<span className="woocommerce-product-form__optional-input">
+											{ __(
+												'(OPTIONAL)',
+												'woocommerce'
+											) }
+										</span>
+									),
+								}
+						  )
+						: label
+				}
 				help={
-					typeof helpText === 'string'
-						? helpText
-						: __(
+					typeof helpText === 'undefined'
+						? __(
 								"Summarize this product in 1-2 short sentences. We'll show it at the top of the page.",
 								'woocommerce'
 						  )
+						: helpText
 				}
 			>
 				<div { ...blockProps }>
@@ -120,7 +114,6 @@ export function Edit( {
 						} ) }
 						dir={ direction }
 						allowedFormats={ allowedFormats }
-						onBlur={ handleBlur }
 					/>
 				</div>
 			</BaseControl>

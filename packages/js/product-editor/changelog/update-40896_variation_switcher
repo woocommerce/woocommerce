@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Update Variation Switcher to not loop, but hide next/previous buttons if at the end or beginning.

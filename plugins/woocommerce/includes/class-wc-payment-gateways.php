@@ -8,12 +8,18 @@
  * @package WooCommerce\Classes\Payment
  */
 
+use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Payment gateways class.
  */
 class WC_Payment_Gateways {
+
+	use AccessiblePrivateMethods;
 
 	/**
 	 * Payment gateway classes.
@@ -113,6 +119,170 @@ class WC_Payment_Gateways {
 		}
 
 		ksort( $this->payment_gateways );
+
+		self::add_action( 'wc_payment_gateways_initialized', array( $this, 'on_payment_gateways_initialized' ) );
+		/**
+		 * Hook that is called when the payment gateways have been initialized.
+		 *
+		 * @param WC_Payment_Gateways $wc_payment_gateways The payment gateways instance.
+		 * @since 8.5.0
+		 */
+		do_action( 'wc_payment_gateways_initialized', $this );
+	}
+
+	/**
+	 * Hook into payment gateway settings changes.
+	 *
+	 * @param WC_Payment_Gateways $wc_payment_gateways The WC_Payment_Gateways instance.
+	 * @since 8.5.0
+	 */
+	private function on_payment_gateways_initialized( WC_Payment_Gateways $wc_payment_gateways ) {
+		foreach ( $this->payment_gateways as $gateway ) {
+			$option_key = $gateway->get_option_key();
+			self::add_action(
+				'add_option_' . $option_key,
+				function( $option, $value ) use ( $gateway ) {
+					$this->payment_gateway_settings_option_changed( $gateway, $value, $option );
+				},
+				10,
+				2
+			);
+			self::add_action(
+				'update_option_' . $option_key,
+				function( $old_value, $value, $option ) use ( $gateway ) {
+					$this->payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value );
+				},
+				10,
+				3
+			);
+		}
+	}
+
+	/**
+	 * Callback for when a gateway settings option was added or updated.
+	 *
+	 * @param WC_Payment_Gateway $gateway   The gateway for which the option was added or updated.
+	 * @param mixed              $value     New value.
+	 * @param string             $option    Option name.
+	 * @param mixed              $old_value Old value. `null` when called via add_option_ hook.
+	 * @since 8.5.0
+	 */
+	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
+		if ( ! $this->was_gateway_enabled( $value, $old_value ) ) {
+			return;
+		}
+
+		// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
+		// "untitled" shouldn't happen, but just in case.
+		$this->notify_admin_payment_gateway_enabled( $gateway );
+	}
+
+	/**
+	 * Email the site admin when a payment gateway has been enabled.
+	 *
+	 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
+	 * @return bool Whether the email was sent or not.
+	 * @since 8.5.0
+	 */
+	private function notify_admin_payment_gateway_enabled( $gateway ) {
+		$admin_email          = get_option( 'admin_email' );
+		$user                 = get_user_by( 'email', $admin_email );
+		$username             = $user ? $user->user_login : $admin_email;
+		$gateway_title        = $gateway->get_method_title();
+		$gateway_settings_url = esc_url_raw( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
+		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		$site_url             = home_url();
+		/**
+		 * Allows adding to the addresses that receive payment gateway enabled notifications.
+		 *
+		 * @param array              $email_addresses The array of email addresses to notify.
+		 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
+		 * @return array             The augmented array of email addresses to notify.
+		 * @since 8.5.0
+		 */
+		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array(), $gateway );
+		$email_addresses[] = $admin_email;
+		$email_addresses   = array_unique(
+			array_filter(
+				$email_addresses,
+				function( $email_address ) {
+					return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
+				}
+			)
+		);
+
+		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
+
+		$email_text = sprintf(
+			/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
+			__(
+				'Howdy %1$s,
+
+The payment gateway "%2$s" was just enabled on this site:
+%3$s
+
+If this was intentional you can safely ignore and delete this email. 
+
+If you did not enable this payment gateway, please log in to your site and consider disabling it here:
+%4$s
+
+This email has been sent to %5$s
+
+Regards,
+All at %6$s
+%7$s',
+				'woocommerce'
+			),
+			$username,
+			$gateway_title,
+			$site_url,
+			$gateway_settings_url,
+			$admin_email,
+			$site_name,
+			$site_url
+		);
+
+		if ( '' !== get_option( 'blogname' ) ) {
+			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
+		} else {
+			$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
+		}
+
+		return wp_mail(
+			$email_addresses,
+			sprintf(
+				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
+				__( '[%1$s] Payment gateway "%2$s" enabled', 'woocommerce' ),
+				$site_title,
+				$gateway_title
+			),
+			$email_text
+		);
+	}
+
+	/**
+	 * Determines from changes in settings if a gateway was enabled.
+	 *
+	 * @param array $value New value.
+	 * @param array $old_value Old value.
+	 * @return bool Whether the gateway was enabled or not.
+	 */
+	private function was_gateway_enabled( $value, $old_value = null ) {
+		if ( null === $old_value ) {
+			// There was no old value, so this is a new option.
+			if ( ! empty( $value ) && is_array( $value ) && isset( $value['enabled'] ) && 'yes' === $value['enabled'] && isset( $value['title'] ) ) {
+				return true;
+			}
+			return false;
+		}
+		// There was an old value, so this is an update.
+		if (
+			ArrayUtil::get_value_or_default( $value, 'enabled' ) === 'yes' &&
+			ArrayUtil::get_value_or_default( $old_value, 'enabled' ) !== 'yes' ) {
+			return true;
+		}
+		return false;
 	}
 
 	/**

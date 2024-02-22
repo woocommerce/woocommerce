@@ -51,6 +51,7 @@ type NewAttributeModalProps = {
 	disabledAttributeMessage?: string;
 	termsAutoSelection?: 'first' | 'all';
 	defaultVisibility?: boolean;
+	defaultSearch?: string;
 };
 
 type AttributeForm = {
@@ -60,10 +61,7 @@ type AttributeForm = {
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
-	notice = __(
-		'By default, attributes are filterable and visible on the product page. You can change these settings for each attribute separately later.',
-		'woocommerce'
-	),
+	notice,
 	attributeLabel = __( 'Attribute', 'woocommerce' ),
 	valueLabel = __( 'Values', 'woocommerce' ),
 	attributePlaceholder = __( 'Search or create attribute', 'woocommerce' ),
@@ -87,6 +85,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	),
 	termsAutoSelection,
 	defaultVisibility = false,
+	defaultSearch,
 } ) => {
 	const scrollAttributeIntoView = ( index: number ) => {
 		setTimeout( () => {
@@ -205,11 +204,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		return () => clearTimeout( timeoutId );
 	}, [] );
 
+	const initialAttribute = {
+		name: defaultSearch,
+	} as EnhancedProductAttribute;
+
 	return (
 		<>
 			<Form< AttributeForm >
 				initialValues={ {
-					attributes: [ null ],
+					attributes: [ defaultSearch ? initialAttribute : null ],
 				} }
 			>
 				{ ( {

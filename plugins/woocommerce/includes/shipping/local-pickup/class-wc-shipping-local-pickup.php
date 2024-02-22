@@ -80,15 +80,39 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Sanitize the cost field.
+	 *
+	 * @since 8.3.0
+	 * @param string $value Unsanitized value.
+	 * @throws Exception Last error triggered.
+	 * @return string
+	 */
+	public function sanitize_cost( $value ) {
+		$value = is_null( $value ) ? '' : $value;
+		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
+		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
+
+		$test_value = str_replace( wc_get_price_decimal_separator(), '.', $value );
+		$test_value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $test_value );
+
+		if ( $test_value && ! is_numeric( $test_value ) ) {
+			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Init form fields.
 	 */
 	public function init_form_fields() {
 		$this->instance_form_fields = array(
 			'title'      => array(
-				'title'       => __( 'Title', 'woocommerce' ),
+				'title'       => __( 'Name', 'woocommerce' ),
 				'type'        => 'text',
-				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+				'description' => __( 'Your customers will see the name of this shipping method during checkout.', 'woocommerce' ),
 				'default'     => __( 'Local pickup', 'woocommerce' ),
+				'placeholder' => __( 'e.g. Local pickup', 'woocommerce' ),
 				'desc_tip'    => true,
 			),
 			'tax_status' => array(
@@ -102,12 +126,14 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 				),
 			),
 			'cost'       => array(
-				'title'       => __( 'Cost', 'woocommerce' ),
-				'type'        => 'text',
-				'placeholder' => '0',
-				'description' => __( 'Optional cost for local pickup.', 'woocommerce' ),
-				'default'     => '',
-				'desc_tip'    => true,
+				'title'             => __( 'Cost', 'woocommerce' ),
+				'type'              => 'text',
+				'class'             => 'wc-shipping-modal-price',
+				'placeholder'       => wc_format_localized_price( 0 ),
+				'description'       => __( 'Optional cost for local pickup.', 'woocommerce' ),
+				'default'           => '',
+				'desc_tip'          => true,
+				'sanitize_callback' => array( $this, 'sanitize_cost' ),
 			),
 		);
 	}

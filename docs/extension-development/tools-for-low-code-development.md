@@ -1,4 +1,8 @@
-# Building blocks for low code builders
+---
+post_title: Tools for low-code development
+menu_title: Low-code tools
+tags: reference
+---
 
 ## Introduction
 
@@ -15,7 +19,7 @@ To follow this guide, you should have:
 1. A basic understanding of WordPress and WooCommerce.
 2. A WordPress website with WooCommerce installed and activated.
 
-## Step 1 — Using Gutenberg and WooCommerce Store Editing
+## Step 1 - Using Gutenberg and WooCommerce Store Editing
 
 Gutenberg is the default block editor in WordPress that allows you to create and edit pages by adding and customizing blocks. WooCommerce has extended Gutenberg's functionality, enabling you to create and customize WooCommerce-specific elements, such as product pages and shop pages.
 
@@ -26,7 +30,7 @@ To use Gutenberg and WooCommerce Store Editing:
 
 With Gutenberg and WooCommerce Store Editing, you can create and customize your store's pages using a wide variety of blocks, such as text, images, buttons, and WooCommerce-specific blocks like product grids and shopping carts.
 
-## Step 2 — Exploring alternative page builders
+## Step 2 - Exploring alternative page builders
 
 While Gutenberg and WooCommerce Store Editing are powerful options for building low-code WooCommerce stores, you may also consider using other page builders for more advanced features or specific use cases. Some popular page builders compatible with WooCommerce include:
 
@@ -37,7 +41,7 @@ While Gutenberg and WooCommerce Store Editing are powerful options for building 
 
 Choose a page builder that fits your needs and budget, then install and activate it on your WordPress website. These page builders typically offer a library of pre-built components that you can use to create a fully functional WooCommerce store without writing custom code.
 
-## Step 3 — Utilizing pre-built components and templates
+## Step 3 - Utilizing pre-built components and templates
 
 Many page builders, including Gutenberg, offer pre-built components or blocks that can be easily added to your pages. These components can include design elements like buttons, forms, and image galleries, as well as WooCommerce-specific components like product grids and shopping carts.
 

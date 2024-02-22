@@ -2,6 +2,7 @@
 	.components-currency-control {
 		.components-input-control__prefix {
 			color: $gray-700;
+			word-break: normal;
 		}
 
 		.components-input-control__input {

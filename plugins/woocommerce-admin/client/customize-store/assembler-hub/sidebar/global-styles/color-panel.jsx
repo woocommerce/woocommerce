@@ -26,8 +26,21 @@ export const ColorPanel = () => {
 	const [ rawSettings ] = useGlobalSetting( '' );
 	const settings = useSettingsForBlockElement( rawSettings );
 
-	const onChange = ( ...props ) => {
-		setStyle( ...props );
+	const onChange = ( _style ) => {
+		setStyle( {
+			..._style,
+			blocks: {
+				..._style.blocks,
+				// Reset the "core/button" color that may have been set via predefined color palette to ensure it uses the custom button color.
+				'core/button': {
+					color: {},
+				},
+				// Reset the "core/heading" color that may have been set via predefined color palette to ensure it uses the custom heading color.
+				'core/heading': {
+					color: {},
+				},
+			},
+		} );
 		setUserConfig( ( currentConfig ) => ( {
 			...currentConfig,
 			settings: mergeBaseAndUserConfigs( currentConfig.settings, {

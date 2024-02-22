@@ -1,0 +1,61 @@
+@mixin attributeSkeleton {
+	border-radius: $grid-unit-05;
+	min-width: $grid-unit-20;
+	min-height: $grid-unit-20;
+	color: transparent;
+}
+
+.woocommerce-product-page-attribute-skeleton {
+	border: 1px dashed $gray-200;
+	padding: 0 $gap-large 0 $gap-large;
+	&__row {
+		display: grid;
+		grid-template-columns: 45% auto 90px;
+		padding-bottom: $gap-large;
+		padding-top: $gap-large;
+		border-bottom: 1px solid $gray-200;
+	}
+	&__row:last-child {
+		border-bottom: none;
+	}
+	&__last-item {
+		justify-self: end;
+	}
+	&__row0 {
+		background-color: $gray-200;
+	}
+	&__row1 {
+		background-color: #e9e9e9;
+	}
+	&__row2 {
+		background-color: #efefef;
+	}
+	&__name0 {
+		@include attributeSkeleton();
+		width: 40%;
+	}
+	&__value0 {
+		@include attributeSkeleton();
+		width: 40%;
+	}
+	&__name1 {
+		@include attributeSkeleton();
+		width: 30%;
+	}
+	&__value1 {
+		@include attributeSkeleton();
+		width: 30%;
+	}
+	&__name2 {
+		@include attributeSkeleton();
+		width: 35%;
+	}
+	&__value2 {
+		@include attributeSkeleton();
+		width: 35%;
+	}
+	&__buttons {
+		@include attributeSkeleton();
+		width: 50px;
+	}
+}

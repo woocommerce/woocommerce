@@ -7,18 +7,12 @@ import {
 	Fragment,
 	useState,
 } from '@wordpress/element';
-import { PluginArea } from '@wordpress/plugins';
 import {
 	LayoutContextProvider,
 	useExtendLayout,
 } from '@woocommerce/admin-layout';
-import {
-	EditorSettings,
-	EditorBlockListSettings,
-} from '@wordpress/block-editor';
-import { Template } from '@wordpress/blocks';
-import { Popover, SlotFillProvider } from '@wordpress/components';
-import { Product } from '@woocommerce/data';
+import { useSelect } from '@wordpress/data';
+import { Popover } from '@wordpress/components';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -30,35 +24,35 @@ import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { FullscreenMode, InterfaceSkeleton } from '@wordpress/interface';
+import { InterfaceSkeleton } from '@wordpress/interface';
 
 /**
  * Internal dependencies
  */
 import { Header } from '../header';
 import { BlockEditor } from '../block-editor';
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { ValidationProvider } from '../../contexts/validation-context';
-
-export type ProductEditorSettings = Partial<
-	EditorSettings & EditorBlockListSettings
-> & {
-	templates: Record< string, Template[] >;
-};
-
-type EditorProps = {
-	product: Pick< Product, 'id' | 'type' >;
-	productType?: string;
-	settings: ProductEditorSettings | undefined;
-};
+import { EditorProps } from './types';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
 export function Editor( {
 	product,
 	productType = 'product',
 	settings,
 }: EditorProps ) {
+	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+
+	const productId = product?.id || -1;
+
+	// Check if the prepublish sidebar is open from the store.
+	const isPrepublishPanelOpen = useSelect( ( select ) => {
+		return select( productEditorUiStore ).isPrepublishPanelOpen();
+	}, [] );
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
@@ -66,12 +60,13 @@ export function Editor( {
 				<EntityProvider
 					kind="postType"
 					type={ productType }
-					id={ product.id }
+					id={ productId }
 				>
 					<ShortcutProvider>
-						<FullscreenMode isActive={ false } />
-						<SlotFillProvider>
-							<ValidationProvider initialValue={ product }>
+						<ValidationProvider initialValue={ product }>
+							<EditorLoadingContext.Provider
+								value={ isEditorLoading }
+							>
 								<InterfaceSkeleton
 									header={
 										<Header
@@ -83,22 +78,31 @@ export function Editor( {
 										<>
 											<BlockEditor
 												settings={ settings }
-												productType={ productType }
-												productId={ product.id }
+												postType={ productType }
+												productId={ productId }
 												context={ {
 													selectedTab,
 													postType: productType,
-													postId: product.id,
+													postId: productId,
 												} }
+												setIsEditorLoading={
+													setIsEditorLoading
+												}
 											/>
-											{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-											<PluginArea scope="woocommerce-product-block-editor" />
 										</>
 									}
+									actions={
+										isPrepublishPanelOpen && (
+											<PrepublishPanel
+												productType={ productType }
+												productId={ productId }
+											/>
+										)
+									}
 								/>
-								<Popover.Slot />
-							</ValidationProvider>
-						</SlotFillProvider>
+							</EditorLoadingContext.Provider>
+							<Popover.Slot />
+						</ValidationProvider>
 					</ShortcutProvider>
 				</EntityProvider>
 			</StrictMode>

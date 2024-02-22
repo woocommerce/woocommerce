@@ -1,3 +1,5 @@
+$gutenberg-blue: var(--wp-admin-theme-color);
+
 .woocommerce-edit-downloads-modal {
 	&__buttons {
 		display: flex;
@@ -15,7 +17,37 @@
 		padding-bottom: $gap-large;
 	}
 
+	&__preview {
+		margin-bottom: $gap;
+	}
+
 	.components-input-control__suffix {
 		cursor: pointer;
+	}
+
+	.woocommerce-image-gallery,
+	.components-form-file-upload {
+		display: inline-block;
+		vertical-align: middle;
+		padding-right: $gap;
+		p {
+			margin-bottom: $gap-smallest;
+		}
+		button {
+			color: $gutenberg-blue;
+			padding: 0;
+		}
+		button:hover:not(.is-busy) {
+			background: rgba(var(--wp-admin-theme-color--rgb), 0.04);
+		}
+		.woocommerce-image-gallery__item {
+			width: $gap-larger * 2;
+			height: $gap-larger * 2;
+			img {
+				width: $gap-larger * 2;
+				height: $gap-larger * 2;
+				border-color: #fff;
+			}
+		}
 	}
 }

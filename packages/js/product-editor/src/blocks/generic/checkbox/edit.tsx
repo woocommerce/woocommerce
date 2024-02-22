@@ -16,8 +16,15 @@ export function Edit( {
 	attributes,
 	context: { postType },
 }: ProductEditorBlockEditProps< CheckboxBlockAttributes > ) {
-	const { property, title, label, tooltip, checkedValue, uncheckedValue } =
-		attributes;
+	const {
+		property,
+		title,
+		label,
+		tooltip,
+		checkedValue,
+		uncheckedValue,
+		disabled,
+	} = attributes;
 
 	const blockProps = useWooBlockProps( attributes );
 
@@ -32,13 +39,14 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<Checkbox
-				value={ value || null }
+				value={ value || false }
 				onChange={ setValue }
 				label={ label || '' }
 				title={ title }
 				tooltip={ tooltip }
 				checkedValue={ checkedValue }
 				uncheckedValue={ uncheckedValue }
+				disabled={ disabled }
 			/>
 		</div>
 	);

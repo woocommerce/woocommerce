@@ -312,14 +312,7 @@ export const AttributeTermInputField: React.FC<
 													onChange={ () => null }
 													checked={ isSelected }
 													label={
-														<span
-															style={ {
-																fontWeight:
-																	isSelected
-																		? 'bold'
-																		: 'normal',
-															} }
-														>
+														<span>
 															{ item.name }
 														</span>
 													}

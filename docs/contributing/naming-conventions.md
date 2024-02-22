@@ -1,4 +1,8 @@
-# Naming Conventions
+---
+post_title: Naming conventions
+menu_title: Naming conventions
+tags: reference
+---
 
 ## PHP
 

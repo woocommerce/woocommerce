@@ -1,0 +1,57 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "woocommerce/product-collection",
+	"version": "1.0.0",
+	"title": "Product Collection (Beta)",
+	"description": "Display a collection of products from your store.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce", "Products (Beta)" ],
+	"textdomain": "woocommerce",
+	"attributes": {
+		"id": {
+			"type": "string"
+		},
+		"queryId": {
+			"type": "number"
+		},
+		"query": {
+			"type": "object"
+		},
+		"tagName": {
+			"type": "string"
+		},
+		"displayLayout": {
+			"type": "object"
+		},
+		"convertedFromProducts": {
+			"type": "boolean",
+			"default": false
+		},
+		"collection": {
+			"type": "string"
+		},
+		"hideControls": {
+			"default": [],
+			"type": "array"
+		},
+		"queryContextIncludes": {
+			"type": "array"
+		}
+	},
+	"providesContext": {
+		"id": "id",
+		"queryId": "queryId",
+		"query": "query",
+		"displayLayout": "displayLayout",
+		"queryContextIncludes": "queryContextIncludes",
+		"collection": "collection"
+	},
+	"supports": {
+		"align": [ "wide", "full" ],
+		"anchor": true,
+		"html": false,
+		"__experimentalLayout": true,
+		"interactivity": true
+	}
+}
