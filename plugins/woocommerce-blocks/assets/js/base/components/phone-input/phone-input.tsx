@@ -5,11 +5,11 @@ import { useRef, useState } from '@wordpress/element';
 //import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import classnames from 'classnames';
-import InputMask from 'react-input-mask';
 import { Label } from '@woocommerce/blocks-components';
 import ReactCountryFlag from 'react-country-flag';
 import { getSetting } from '@woocommerce/settings';
-import SelectSearch, { useSelect } from 'react-select-search';
+import { useSelect } from 'react-select-search';
+import parsePhoneNumber, { AsYouType } from 'libphonenumber-js';
 
 /**
  * Internal dependencies
@@ -22,29 +22,29 @@ const formats = {
 	US: {
 		placeholder: '(555) 555-5555',
 		mask: '(999) 999-9999',
-		code: '+1',
+		code: 1,
 	},
 	CA: {
 		placeholder: '(555) 555-5555',
 		mask: '(999) 999-9999',
-		code: '+1',
+		code: 1,
 	},
 	GB: {
 		placeholder: '01234 567890',
 		mask: '99999 999999',
-		code: '+44',
+		code: 44,
 	},
 };
 
 const formatOptions = Object.entries( formats ).map( ( [ format ] ) => ( {
 	value: format,
-	name: countries[ format ] + ' ' + format + ' ' + formats[ format ].code,
+	name: countries[ format ] + ' ' + format + ' +' + formats[ format ].code,
 } ) );
 
 const DiallingCode = ( { countryCode = '' } ) => {
 	return (
 		<span className="country_dialling_code">
-			{ formats[ countryCode ]?.code || '' }
+			+{ formats[ countryCode ]?.code || '' }
 		</span>
 	);
 };
@@ -66,7 +66,7 @@ export const PhoneInput = ( {
 	disabled,
 	autoCapitalize = 'off',
 	autoComplete = 'off',
-	value = '',
+	value: inputValue = '',
 	onChange,
 	required = false,
 	onBlur = () => {
@@ -77,13 +77,24 @@ export const PhoneInput = ( {
 }: PhoneInputProps ): JSX.Element => {
 	const inputRef = useRef< HTMLInputElement >( null );
 	const [ isActive, setIsActive ] = useState( false );
-	const [ currentCountryCode, setCurrentCountryCode ] = useState( country );
+
+	// TODO remove hardcoded test data.
+	const value = decodeEntities( inputValue );
+
+	const [ currentCountryCode, setCurrentCountryCode ] = useState( () => {
+		const parsedPhoneNumber = parsePhoneNumber( value );
+
+		console.log( parsedPhoneNumber );
+		return parsedPhoneNumber?.country || country;
+	} );
+
+	// Manages state of the country code dropdown.
 	const [ snapshot, valueProps, optionProps ] = useSelect( {
 		options: formatOptions,
 		value: currentCountryCode,
 		search: true,
-		onChange: ( newValue ) => {
-			setCurrentCountryCode( newValue );
+		onChange: ( newCountryCode ) => {
+			setCurrentCountryCode( newCountryCode );
 		},
 	} );
 
@@ -109,16 +120,38 @@ export const PhoneInput = ( {
 					<DiallingCode countryCode={ currentCountryCode } />
 				</button>
 				{
-					<InputMask
+					<input
 						type="tel"
-						mask={ formats[ currentCountryCode ]?.mask }
 						id={ id }
-						value={ decodeEntities( value ) }
-						inputRef={ inputRef }
+						value={ value }
+						ref={ inputRef }
 						autoCapitalize={ autoCapitalize }
 						autoComplete={ autoComplete }
 						onChange={ ( event ) => {
-							onChange( event.target.value );
+							const phoneFormatter = new AsYouType(
+								currentCountryCode
+							);
+							const format = phoneFormatter.input(
+								event.target.value
+							);
+
+							onChange( format );
+
+							const possibleCountry =
+								phoneFormatter.getNumber()?.country || '';
+							const possibleCode =
+								possibleCountry.countryCallingCode;
+
+							if (
+								possibleCountry &&
+								possibleCountry !== currentCountryCode &&
+								possibleCode !==
+									formats[ currentCountryCode ].code
+							) {
+								setCurrentCountryCode(
+									phoneFormatter.getNumber().country
+								);
+							}
 						} }
 						onFocus={ () => setIsActive( true ) }
 						onBlur={ ( event ) => {
@@ -198,31 +231,4 @@ export const PhoneInput = ( {
 	);
 };
 
-/*
-<ComboboxControl
-				label={ __( 'Phone Number Country', 'woocommerce' ) }
-				hideLabelFromVision={ true }
-				allowReset={ false }
-				onChange={ ( newFormat: string ) => {
-					setFormat( newFormat );
-				} }
-				className={ 'phone-country-combobox' }
-				options={ formatOptions }
-				value={ format }
-				autoComplete={ 'country' }
-				__experimentalRenderItem={ ( { item } ) => {
-					return (
-						<>
-							<ReactCountryFlag countryCode={ item.value } />{ ' ' }
-							<span className="country_name">
-								{ countries[ item.value ] || '' }
-							</span>{ ' ' }
-							<span className="country_dialling_code">
-								{ formats[ item.value ]?.code || '' }
-							</span>
-						</>
-					);
-				} }
-			/>
-			*/
 export default PhoneInput;

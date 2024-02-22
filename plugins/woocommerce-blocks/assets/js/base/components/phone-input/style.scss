@@ -74,14 +74,6 @@
 			padding: 0 em($gap) 0 0;
 			line-height: em($gap);
 			color: $input-text-active;
-
-			&::after {
-				content: "&#8964;";
-				font-size: 1.25em;
-				line-height: 1;
-				margin-left: 0.5em;
-				vertical-align: middle;
-			}
 		}
 
 		&:focus {

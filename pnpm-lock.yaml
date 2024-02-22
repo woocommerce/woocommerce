@@ -3923,6 +3923,9 @@ importers:
       html-react-parser:
         specifier: 3.0.4
         version: 3.0.4(react@17.0.2)
+      libphonenumber-js:
+        specifier: ^1.10.56
+        version: 1.10.56
       postcode-validator:
         specifier: 3.8.15
         version: 3.8.15
@@ -39868,6 +39871,10 @@ packages:
     hasBin: true
     dependencies:
       isomorphic.js: 0.2.5
+
+  /libphonenumber-js@1.10.56:
+    resolution: {integrity: sha512-d0GdKshNnyfl5gM7kZ9rXjGiAbxT/zCXp0k+EAzh8H4zrb2R7GXtMCrULrX7UQxtfx6CLy/vz/lomvW79FAFdA==}
+    dev: false
 
   /liftoff@2.5.0:
     resolution: {integrity: sha512-01zfGFqfORP1CGmZZP2Zn51zsqz4RltDi0RDOhbGoLYdUT5Lw+I2gX6QdwXhPITF6hPOHEOp+At6/L24hIg9WQ==}
