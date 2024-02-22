@@ -31,6 +31,10 @@
 			align-items: center;
 			gap: $grid-unit-15;
 			padding: 0px;
+
+			.components-notice__buttons {
+				margin-top: 12px;
+			}
 		}
 	}
 

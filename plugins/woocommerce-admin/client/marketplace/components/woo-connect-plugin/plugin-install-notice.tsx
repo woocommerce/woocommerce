@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import { Button, Card, CardBody } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '../../../utils/admin-settings';
-import { WP_ADMIN_PLUGIN_LIST_URL } from '../constants';
-import './woo-connect-plugin.scss';
 import {
+	WP_ADMIN_PLUGIN_LIST_URL,
 	WOO_CONNECT_PLUGIN_INSTALL_URL,
 	WOO_CONNECT_PLUGIN_DOWNLOAD_URL,
 } from '../constants';
+import './woo-connect-plugin.scss';
 
 export default function PluginInstallNotice() {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
@@ -30,13 +30,9 @@ export default function PluginInstallNotice() {
 		);
 		return (
 			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
-				<Card
-					className={
-						'woocommerce-marketplace__woo-connect-plugin__notice components-notice is-error'
-					}
-				>
-					<CardBody className="components-notice__content">
-						<p>{ message }</p>
+				<Notice status="error" isDismissible={ false }>
+					{ message }
+					<div className="components-notice__buttons">
 						<Button
 							href={ WOO_CONNECT_PLUGIN_INSTALL_URL }
 							variant="secondary"
@@ -49,8 +45,8 @@ export default function PluginInstallNotice() {
 						>
 							{ __( 'Download', 'woocommerce' ) }
 						</Button>
-					</CardBody>
-				</Card>
+					</div>
+				</Notice>
 			</section>
 		);
 	} else if (
@@ -63,13 +59,9 @@ export default function PluginInstallNotice() {
 		);
 		return (
 			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
-				<Card
-					className={
-						'woocommerce-marketplace__woo-connect-plugin__notice components-notice is-error'
-					}
-				>
-					<div className="components-notice__content">
-						<p>{ message }</p>
+				<Notice status="error" isDismissible={ false }>
+					{ message }
+					<div className="components-notice__buttons">
 						<Button
 							href={ WP_ADMIN_PLUGIN_LIST_URL }
 							variant="secondary"
@@ -77,7 +69,7 @@ export default function PluginInstallNotice() {
 							{ __( 'Activate Woo Connect', 'woocommerce' ) }
 						</Button>
 					</div>
-				</Card>
+				</Notice>
 			</section>
 		);
 	}
