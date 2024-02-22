@@ -47,6 +47,7 @@ tests/cli/vendor
 **/e2e/artifacts/
 /artifacts/
 /playwright-report/
+**/e2e/.auth
 
 # Logs
 /logs
