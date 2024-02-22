@@ -161,7 +161,7 @@ class Products extends Task {
 	 * @return bool
 	 */
 	public static function has_products() {
-		return self::count_user_created_products() > 0;
+		return self::count_user_products() > 0;
 	}
 
 	/**
@@ -170,14 +170,20 @@ class Products extends Task {
 	 *
 	 * @return int The number of user created products.
 	 */
-	private static function count_user_created_products() {
+	private static function count_user_products() {
 		$args = array(
 			'post_type'   => 'product',
 			'post_status' => 'publish',
+			'fields'      => 'ids',
 			'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				'relation' => 'OR',
 				array(
 					'key'     => '_headstart_post',
 					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => '_edit_last',
+					'compare' => 'EXISTS',
 				),
 			),
 		);
