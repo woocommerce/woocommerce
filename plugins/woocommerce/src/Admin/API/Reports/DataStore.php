@@ -1412,7 +1412,7 @@ class DataStore extends SqlQuery {
 		$num_attribute_filters = count( $sql_clauses['join'] );
 
 		for ( $i = 2; $i < $num_attribute_filters; $i++ ) {
-			$join_alias            = 'orderitemmeta' . $i - 1;
+			$join_alias            = 'orderitemmeta' . $i;
 			$sql_clauses['join'][] = "AND orderitemmeta1.order_item_id = {$join_alias}.order_item_id";
 		}
 
