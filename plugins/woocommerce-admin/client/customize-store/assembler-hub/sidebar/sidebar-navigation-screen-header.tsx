@@ -27,6 +27,8 @@ import { HighlightedBlockContext } from '../context/highlighted-block-context';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-essential',
@@ -91,9 +93,16 @@ export const SidebarNavigationScreenHeader = () => {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change your header', 'woocommerce' )
+		: __( 'Choose your header', 'woocommerce' );
+
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your header', 'woocommerce' ) }
+			title={ title }
 			onNavigateBackClick={ resetHighlightedBlockIndex }
 			description={ createInterpolateElement(
 				__(
