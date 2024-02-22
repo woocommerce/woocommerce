@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { BrowserContextOptions, chromium, request } from '@playwright/test';
+import { chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import { BASE_URL, adminFile, cli, customerFile } from '@woocommerce/e2e-utils';
 
@@ -12,9 +12,12 @@ import { BASE_URL, adminFile, cli, customerFile } from '@woocommerce/e2e-utils';
  */
 import { customer, admin } from './test-data/data/data';
 
-const prepareAttributes = async ( contextOptions: BrowserContextOptions ) => {
+const prepareAttributes = async () => {
 	const browser = await chromium.launch();
-	const context = await browser.newContext( contextOptions );
+	const context = await browser.newContext( {
+		baseURL: BASE_URL,
+		storageState: adminFile,
+	} );
 
 	const page = await context.newPage();
 
@@ -62,22 +65,19 @@ async function globalSetup() {
 		baseURL: BASE_URL,
 	} );
 
-	const adminRequestUtils = new RequestUtils( requestContext, {
+	console.time( timers.authentication );
+	await new RequestUtils( requestContext, {
 		user: admin,
 		storageStatePath: adminFile,
-	} );
-	const customerRequestUtils = new RequestUtils( requestContext, {
+	} ).setupRest();
+	await new RequestUtils( requestContext, {
 		user: customer,
 		storageStatePath: customerFile,
-	} );
-
-	console.time( timers.authentication );
-	await adminRequestUtils.setupRest();
-	await customerRequestUtils.setupRest();
+	} ).setupRest();
 	console.timeEnd( timers.authentication );
 
 	console.time( timers.attributes );
-	await prepareAttributes( { baseURL: BASE_URL, storageState: adminFile } );
+	await prepareAttributes();
 	console.timeEnd( timers.attributes );
 
 	await requestContext.dispose();
