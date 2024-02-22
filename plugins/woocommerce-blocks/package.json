@@ -108,7 +108,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "wireit",
-		"postinstall": "sed -i \"s|image: 'mariadb'|image: 'mariadb:11.2'|g\" node_modules/@wordpress/env/lib/build-docker-compose-config.js"
+		"postinstall": "sed -i.bak \"s|image: 'mariadb'|image: 'mariadb:11.2'|g\" node_modules/@wordpress/env/lib/build-docker-compose-config.js"
 	},
 	"devDependencies": {
 		"@actions/core": "1.10.0",

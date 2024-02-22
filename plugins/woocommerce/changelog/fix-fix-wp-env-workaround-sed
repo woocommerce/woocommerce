@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fixed the postinstall command failing on macos

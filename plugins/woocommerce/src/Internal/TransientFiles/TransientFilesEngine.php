@@ -45,7 +45,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 *
 	 * @var LegacyProxy
 	 */
-	private LegacyProxy $legacy_proxy;
+	private $legacy_proxy;
 
 	/**
 	 * Register hooks.
