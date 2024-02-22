@@ -6,7 +6,7 @@ import Notice from '../notice/notice';
 
 declare global {
 	interface Window {
-		wcMarketplace: {
+		wcMarketplace?: {
 			promotions?: Promotion[];
 		};
 	}
@@ -39,7 +39,7 @@ const Promotions: () => null | JSX.Element = () => {
 	if ( currentPage !== 'wc-admin' ) {
 		return null;
 	}
-	const promotions = window.wcMarketplace?.promotions ?? [];
+	const promotions = window?.wcMarketplace?.promotions ?? [];
 	const currentDateUTC = Date.now();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
