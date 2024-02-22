@@ -98,8 +98,8 @@ add_action('init', 'register_custom_task');
 The `TaskList` class represents a task list. It contains properties and methods for managing task list. We currently have three predefined task lists
 
 - `setup`: The default task list
-- `extended`: The “Things to do next” task list
-- `secret_tasklist`: The “Secret” task list that is used for having tasks that are accessed by other means.
+- `extended`: The "Things to do next" task list
+- `secret_tasklist`: The "Secret" task list that is used for having tasks that are accessed by other means.
 
 ### Adding the task using JavaScript
 
@@ -207,7 +207,7 @@ In the example above, we're using the `Card` and `CardBody` components to constr
 
 #### Register the Plugin for Task Content
 
-Next, we register the Task component as a plugin named “add-task-content” using [SlotFills](https://developer.wordpress.org/block-editor/reference-guides/slotfills/). This plugin nests the Task component within a WooOnboardingTask component and passes the necessary properties. We also specify the scope of the plugin as “woocommerce-tasks” to make it effective only within WooCommerce’s task list.
+Next, we register the Task component as a plugin named "add-task-content" using [SlotFills](https://developer.wordpress.org/block-editor/reference-guides/slotfills/). This plugin nests the Task component within a WooOnboardingTask component and passes the necessary properties. We also specify the scope of the plugin as "woocommerce-tasks" to make it effective only within WooCommerce’s task list.
 
 ```js
 registerPlugin( 'add-task-content', {
@@ -227,7 +227,7 @@ registerPlugin( 'add-task-content', {
 
 #### Register the Plugin for Task List Item Customization
 
-Finally, we register another plugin named “my-task-list-item-plugin.” This plugin is used to customize the appearance of task list items. It also targets WooCommerce’s task list and wraps the DefaultTaskItem component within a custom wrapper with additional styling.
+Finally, we register another plugin named "my-task-list-item-plugin." This plugin is used to customize the appearance of task list items. It also targets WooCommerce’s task list and wraps the DefaultTaskItem component within a custom wrapper with additional styling.
 
 ```js
 registerPlugin( 'my-task-list-item-plugin', {
