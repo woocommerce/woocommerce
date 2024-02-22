@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-import { useRef, useState } from '@wordpress/element';
+import { useRef, useState, useCallback, useEffect } from '@wordpress/element';
 //import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import classnames from 'classnames';
 import { Label } from '@woocommerce/blocks-components';
 import ReactCountryFlag from 'react-country-flag';
 import { getSetting } from '@woocommerce/settings';
-import { useSelect } from 'react-select-search';
-import parsePhoneNumber, { AsYouType } from 'libphonenumber-js';
+import { useSelect as useSelectSearch } from 'react-select-search';
+import parsePhoneNumber, { AsYouType, CountryCode } from 'libphonenumber-js';
 
 /**
  * Internal dependencies
@@ -41,10 +41,16 @@ const formatOptions = Object.entries( formats ).map( ( [ format ] ) => ( {
 	name: countries[ format ] + ' ' + format + ' +' + formats[ format ].code,
 } ) );
 
-const DiallingCode = ( { countryCode = '' } ) => {
+const getDialingCodeByCountry = ( countryCode: string | undefined ) => {
+	if ( countryCode !== undefined && formats[ countryCode ] ) {
+		return '+' + formats[ countryCode ].code;
+	}
+};
+
+const DialingCode = ( { countryCode = '' } ) => {
 	return (
 		<span className="country_dialling_code">
-			+{ formats[ countryCode ]?.code || '' }
+			{ getDialingCodeByCountry( countryCode ) }
 		</span>
 	);
 };
@@ -53,6 +59,12 @@ const CountryName = ( { countryCode = '' } ) => {
 	return (
 		<span className="country_name">{ countries[ countryCode ] || '' }</span>
 	);
+};
+
+const removeDialingCode = ( inputString: string, dialingCode: string ) => {
+	const regex = new RegExp( `\\${ dialingCode }`, 'g' );
+
+	return inputString.replace( regex, '' ).trimStart();
 };
 
 export const PhoneInput = ( {
@@ -64,9 +76,8 @@ export const PhoneInput = ( {
 	label,
 	screenReaderLabel,
 	disabled,
-	autoCapitalize = 'off',
 	autoComplete = 'off',
-	value: inputValue = '',
+	value = '',
 	onChange,
 	required = false,
 	onBlur = () => {
@@ -78,29 +89,27 @@ export const PhoneInput = ( {
 	const inputRef = useRef< HTMLInputElement >( null );
 	const [ isActive, setIsActive ] = useState( false );
 
-	// TODO remove hardcoded test data.
-	const value = decodeEntities( inputValue );
-
-	const [ currentCountryCode, setCurrentCountryCode ] = useState( () => {
-		const parsedPhoneNumber = parsePhoneNumber( value );
-
-		return parsedPhoneNumber?.country || country;
+	const [ currentCountryCode, setCurrentCountryCode ] = useState( country );
+	const [ phoneNumber, setPhoneNumber ] = useState( () => {
+		const decodedValue = decodeEntities( value );
+		const parsedPhoneNumber = parsePhoneNumber( decodedValue, country );
+		setCurrentCountryCode( parsedPhoneNumber?.country || country );
+		return parsedPhoneNumber?.nationalNumber || decodedValue;
 	} );
 
 	// Manages state of the country code dropdown.
-	const [ snapshot, valueProps, optionProps ] = useSelect( {
+	const [ snapshot, valueProps, optionProps ] = useSelectSearch( {
 		options: formatOptions,
-		value: currentCountryCode,
+		value: currentCountryCode || '',
 		search: true,
 		onChange: ( newCountryCode ) => {
-			setCurrentCountryCode( newCountryCode );
-
-			const phoneFormatter = new AsYouType( newCountryCode );
-			phoneFormatter.input( value );
-
-			if ( phoneFormatter.getNumber()?.nationalNumber ) {
-				onChange( phoneFormatter.getNumber()?.nationalNumber );
-			}
+			const phoneFormatter = parsePhoneNumber(
+				phoneNumber,
+				newCountryCode as CountryCode
+			);
+			setCurrentCountryCode( newCountryCode as CountryCode );
+			setPhoneNumber( phoneFormatter?.formatNational() || phoneNumber );
+			onChange( phoneFormatter?.formatInternational() || phoneNumber );
 		},
 	} );
 
@@ -122,64 +131,60 @@ export const PhoneInput = ( {
 						valueProps?.ref?.current?.focus();
 					} }
 				>
-					<ReactCountryFlag countryCode={ currentCountryCode } />{ ' ' }
-					<DiallingCode countryCode={ currentCountryCode } />
+					{ !! currentCountryCode ? (
+						<>
+							<ReactCountryFlag
+								countryCode={ currentCountryCode }
+							/>
+							<DialingCode countryCode={ currentCountryCode } />
+						</>
+					) : (
+						<>N/A</>
+					) }
 				</button>
-				{
-					<input
-						type="tel"
-						id={ id }
-						value={ value }
-						ref={ inputRef }
-						autoCapitalize={ autoCapitalize }
-						autoComplete={ autoComplete }
-						onChange={ ( event ) => {
-							const parsedPhoneNumber = parsePhoneNumber(
-								event.target.value,
-								{
-									defaultCountry: currentCountryCode,
-								}
-							);
+				<input
+					type="tel"
+					id={ id }
+					value={ phoneNumber }
+					autoComplete={ autoComplete }
+					onChange={ ( event ) => {
+						const newValue = event.target.value;
+						const phoneFormatter = parsePhoneNumber(
+							newValue,
+							currentCountryCode
+						);
 
-							const hasNumber =
-								parsedPhoneNumber &&
-								parsedPhoneNumber.country &&
-								parsedPhoneNumber.nationalNumber;
+						setPhoneNumber( newValue );
 
-							if ( hasNumber ) {
-								const asYouType = new AsYouType(
-									parsedPhoneNumber.country
-								);
+						if (
+							phoneFormatter?.country &&
+							phoneFormatter?.country !== currentCountryCode
+						) {
+							setCurrentCountryCode( phoneFormatter?.country );
+						}
 
-								onChange(
-									asYouType.input(
-										parsedPhoneNumber.nationalNumber
-									)
-								);
-
-								if (
-									parsedPhoneNumber.country !==
-									currentCountryCode
-								) {
-									setCurrentCountryCode(
-										parsedPhoneNumber.country
-									);
-								}
-							} else {
-								onChange( event.target.value );
-							}
-						} }
-						onFocus={ () => setIsActive( true ) }
-						onBlur={ ( event ) => {
-							onBlur( event.target.value );
-							setIsActive( false );
-						} }
-						aria-label={ ariaLabel || label }
-						disabled={ disabled }
-						required={ required }
-						{ ...rest }
-					/>
-				}
+						onChange(
+							phoneFormatter?.formatInternational() || newValue
+						);
+					} }
+					onFocus={ () => setIsActive( true ) }
+					onBlur={ () => {
+						const phoneFormatter = parsePhoneNumber(
+							value,
+							currentCountryCode
+						);
+						if ( phoneFormatter?.country ) {
+							setPhoneNumber( phoneFormatter?.formatNational() );
+						}
+						onBlur( value );
+						setIsActive( false );
+					} }
+					aria-label={ ariaLabel || label }
+					disabled={ disabled }
+					required={ required }
+					{ ...rest }
+				/>
+				<input type="text" ref={ inputRef } value={ value } />
 			</div>
 			<Label
 				label={ label }
@@ -233,7 +238,7 @@ export const PhoneInput = ( {
 										<CountryName
 											countryCode={ option.value }
 										/>{ ' ' }
-										<DiallingCode
+										<DialingCode
 											countryCode={ option.value }
 										/>
 									</button>
