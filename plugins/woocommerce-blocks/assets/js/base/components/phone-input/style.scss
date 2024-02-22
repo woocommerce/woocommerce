@@ -21,7 +21,7 @@
 		position: absolute;
 		transform: translateY(em($gap));
 		line-height: 1.25; // =20px when font-size is 16px.
-		left: em($gap-smaller + 1px);
+		left: 70px;
 		top: 0;
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
@@ -41,33 +41,36 @@
 	}
 
 	.field-wrapper {
-		@include font-size(regular);
-		padding: em($gap);
-		line-height: em($gap);
 		width: 100%;
-		border-radius: $universal-border-radius;
-		border: 1px solid $universal-border-strong;
-		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
 		min-height: 0;
-		background-color: #fff;
-		color: $input-text-active;
-		display: inline-flex;
+		display: flex;
 
 		input {
-			border: 0;
+			flex: 1;
 			background: none;
 			font-size: inherit;
+			font-family: inherit;
 			outline: 0;
-			padding: 0;
+			padding: em($gap);
 			margin: 0;
+			color: $input-text-active;
+			background-color: #fff;
+			@include font-size(regular);
+			line-height: em($gap);
+			border-radius: 0 $universal-border-radius $universal-border-radius 0;
+			border: 1px solid $universal-border-strong;
+			border-left: 0;
+			flex: 1;
 		}
 
 		.phone-input-country-button {
 			appearance: none;
-			border: 0;
-			background: none;
+			border: 1px solid $universal-border-strong;
+			border-radius: $universal-border-radius 0 0 $universal-border-radius;
+			border-right: 0;
+			background: white;
 			margin: 0;
 			outline: 0;
 			@include font-size(regular);
@@ -96,9 +99,9 @@
 		}
 	}
 
-	&.is-active .field-wrapper {
-		padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
-	}
+	// &.is-active .field-wrapper {
+	// 	padding: em($gap + $gap-smaller) em($gap-smaller) em($gap-smaller);
+	// }
 
 	&.is-active label.field-label,
 	input:-webkit-autofill + label.field-label {
