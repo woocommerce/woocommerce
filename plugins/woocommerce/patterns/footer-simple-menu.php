@@ -31,7 +31,7 @@
 
 	<!-- wp:group {"style":{"spacing":{"blockGap":"5px"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center","orientation":"vertical"}} -->
 	<div class="wp-block-group">
-		<!-- wp:site-title {"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}}} /-->
+		<!-- wp:site-title /-->
 
 		<!-- wp:paragraph {"align":"center"} -->
 		<p class="has-text-align-center">
