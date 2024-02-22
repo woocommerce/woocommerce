@@ -101,7 +101,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		page,
 	} ) => {
 		await page.goto( ASSEMBLER_HUB_URL );
-		await page.click( 'text=Change your header' );
+		await page.click( 'text=Choose your header' );
 
 		const locator = page.locator(
 			'.block-editor-block-patterns-list__list-item'
