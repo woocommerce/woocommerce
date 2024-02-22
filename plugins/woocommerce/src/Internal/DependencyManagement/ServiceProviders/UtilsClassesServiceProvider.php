@@ -36,7 +36,7 @@ class UtilsClassesServiceProvider extends AbstractInterfaceServiceProvider {
 		COTMigrationUtil::class,
 		WebhookUtil::class,
 		TimeUtil::class,
-		PluginInstaller::class
+		PluginInstaller::class,
 	);
 
 	/**
