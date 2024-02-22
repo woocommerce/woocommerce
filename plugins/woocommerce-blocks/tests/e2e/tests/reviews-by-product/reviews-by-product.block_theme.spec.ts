@@ -12,16 +12,6 @@ const BLOCK_NAME = 'woocommerce/reviews-by-product';
 
 const latestReview = allReviews[ allReviews.length - 1 ];
 
-// const blockData = {
-// 	name: 'woocommerce/reviews-by-product',
-// 	selectors: {
-// 		frontend: {
-// 			firstReview:
-// 				'.wc-block-review-list-item__item:first-child .wc-block-review-list-item__text p',
-// 		},
-// 	},
-// };
-
 test.describe( `${ BLOCK_NAME } Block`, () => {
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
