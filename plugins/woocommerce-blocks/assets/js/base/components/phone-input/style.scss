@@ -21,7 +21,7 @@
 		position: absolute;
 		transform: translateY(em($gap));
 		line-height: 1.25; // =20px when font-size is 16px.
-		left: 85px;
+		left: 99px;
 		top: 0;
 		transform-origin: top left;
 		color: $universal-body-low-emphasis;
@@ -77,6 +77,7 @@
 			padding: 0 em($gap);
 			line-height: em($gap);
 			color: $input-text-active;
+			width: 90px;
 		}
 
 		&:focus {
@@ -286,10 +287,10 @@
 	cursor: not-allowed;
 }
 
-.select-search-container:not(.select-search-is-disabled).select-search-has-focus .select-search-input,
-.select-search-container:not(.select-search-is-disabled) .select-search-input:hover {
-	border-color: var(--select-search-selected);
-}
+// .select-search-container:not(.select-search-is-disabled).select-search-has-focus .select-search-input,
+// .select-search-container:not(.select-search-is-disabled) .select-search-input:hover {
+// 	border-color: var(--select-search-selected);
+// }
 
 .select-search-select {
 	background: var(--select-search-background);
@@ -349,10 +350,10 @@
 	background: var(--select-search-highlight);
 }
 
-.select-search-is-selected {
-	font-weight: bold;
-	color: var(--select-search-selected);
-}
+// .select-search-is-selected {
+// 	font-weight: bold;
+// 	color: var(--select-search-selected);
+// }
 
 .select-search-group-header {
 	font-size: 12px;
