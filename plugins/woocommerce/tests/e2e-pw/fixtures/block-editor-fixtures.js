@@ -1,4 +1,4 @@
-const { test } = require( '../../../../fixtures' );
+const { test } = require( './fixtures' );
 
 exports.test = test.extend( {
 	page: async ( { page, api, wcAdminApi }, use ) => {
