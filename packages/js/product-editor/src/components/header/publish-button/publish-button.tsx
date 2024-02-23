@@ -10,6 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { type Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -77,7 +78,8 @@ export function PublishButton( {
 	prePublish,
 	...props
 }: PublishButtonProps ) {
-	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createErrorNotice, createSuccessNotice } =
+		useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
@@ -87,7 +89,7 @@ export function PublishButton( {
 		'status'
 	);
 
-	const { publish, ...publishButtonProps } = usePublish( {
+	const { publish, deleteProduct, ...publishButtonProps } = usePublish( {
 		productType,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
@@ -160,6 +162,39 @@ export function PublishButton( {
 								},
 							},
 					  ],
+				[
+					{
+						title: __( 'Move to trash', 'woocommerce' ),
+						async onClick() {
+							deleteProduct()
+								.then( ( deletedProduct ) => {
+									recordProductEvent(
+										'product_delete',
+										deletedProduct as Product
+									);
+
+									createSuccessNotice(
+										__(
+											'Product successfully deleted',
+											'woocommerce'
+										)
+									);
+
+									const productListUrl = getAdminLink(
+										'edit.php?post_type=product'
+									);
+									navigateTo( {
+										url: productListUrl,
+									} );
+								} )
+								.catch( ( error ) => {
+									const message =
+										getProductErrorMessage( error );
+									createErrorNotice( message );
+								} );
+						},
+					},
+				],
 			];
 		}
 

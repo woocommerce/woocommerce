@@ -29,6 +29,7 @@ export function usePublish( {
 	publish(
 		productOrVariation?: Partial< Product | ProductVariation >
 	): Promise< Product | ProductVariation | undefined >;
+	deleteProduct( force?: boolean ): Promise< Product | ProductVariation >;
 } {
 	const { isValidating, validate } = useValidations< Product >();
 
@@ -73,7 +74,35 @@ export function usePublish( {
 	const isDisabled = disabled || isBusy || ! isDirty;
 
 	// @ts-expect-error There are no types for this.
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
+	const { editEntityRecord, saveEditedEntityRecord, deleteEntityRecord } =
+		useDispatch( 'core' );
+
+	function catchWPError( error: Error ) {
+		const wpError: WPError = {
+			code:
+				status === 'publish' || status === 'future'
+					? 'product_publish_error'
+					: 'product_create_error',
+			message: error.message,
+			data: {},
+		};
+
+		if ( 'variations' in error ) {
+			wpError.code = 'variable_product_no_variation_prices';
+			wpError.message = error.variations as string;
+		} else {
+			const errorMessage = Object.values( error ).find(
+				( value ) => value !== undefined
+			) as string | undefined;
+
+			if ( errorMessage !== undefined ) {
+				wpError.code = 'product_form_field_error';
+				wpError.message = errorMessage;
+			}
+		}
+
+		return wpError;
+	}
 
 	async function publish(
 		productOrVariation: Partial< Product | ProductVariation > = {}
@@ -107,30 +136,36 @@ export function usePublish( {
 			if ( onPublishError ) {
 				let wpError = error as WPError;
 				if ( ! wpError.code ) {
-					wpError = {
-						code: isPublished
-							? 'product_publish_error'
-							: 'product_create_error',
-					} as WPError;
-					if ( ( error as Record< string, string > ).variations ) {
-						wpError.code = 'variable_product_no_variation_prices';
-						wpError.message = (
-							error as Record< string, string >
-						 ).variations;
-					} else {
-						const errorMessage = Object.values(
-							error as Record< string, string >
-						).find( ( value ) => value !== undefined ) as
-							| string
-							| undefined;
-						if ( errorMessage !== undefined ) {
-							wpError.code = 'product_form_field_error';
-							wpError.message = errorMessage;
-						}
-					}
+					wpError = catchWPError( error as Error );
 				}
 				onPublishError( wpError );
 			}
+		}
+	}
+
+	async function deleteProduct( force = false ) {
+		try {
+			await validate();
+
+			await saveEditedEntityRecord< Product | ProductVariation >(
+				'postType',
+				productType,
+				productId,
+				{
+					throwOnError: true,
+				}
+			);
+
+			return deleteEntityRecord( 'postType', productType, productId, {
+				force,
+				throwOnError: true,
+			} );
+		} catch ( error ) {
+			let wpError = error as WPError;
+			if ( ! wpError.code ) {
+				wpError = catchWPError( error as Error );
+			}
+			throw wpError;
 		}
 	}
 
@@ -170,5 +205,6 @@ export function usePublish( {
 		variant: 'primary',
 		onClick: handleClick,
 		publish,
+		deleteProduct,
 	};
 }
