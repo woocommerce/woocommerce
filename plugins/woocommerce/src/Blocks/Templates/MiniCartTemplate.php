@@ -25,7 +25,7 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
 	}
 

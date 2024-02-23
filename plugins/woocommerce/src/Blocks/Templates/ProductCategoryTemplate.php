@@ -28,7 +28,7 @@ class ProductCategoryTemplate extends AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 	}
 

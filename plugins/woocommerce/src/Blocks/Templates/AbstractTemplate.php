@@ -27,7 +27,7 @@ abstract class AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	abstract public function init();
+	abstract protected function init(); // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 
 	/**
 	 * Should return the title of the template.

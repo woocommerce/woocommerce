@@ -12,7 +12,7 @@ abstract class AbstractPageTemplate extends AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
+	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_filter( 'page_template_hierarchy', array( $this, 'page_template_hierarchy' ), 1 );
 		add_filter( 'pre_get_document_title', array( $this, 'page_template_title' ) );
 	}
