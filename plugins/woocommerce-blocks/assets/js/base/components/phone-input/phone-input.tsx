@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import classnames from 'classnames';
-import { Label } from '@woocommerce/blocks-components';
+import { Label, ValidationInputError } from '@woocommerce/blocks-components';
 import IntlTelInput from 'intl-tel-input/react/build/IntlTelInput.esm';
 import utils from 'iti/utils';
 
@@ -32,6 +33,7 @@ export const PhoneInput = ( {
 	...rest
 }: PhoneInputProps ): JSX.Element => {
 	const [ isActive, setIsActive ] = useState( false );
+	const [ validationError, setValidationError ] = useState( '' );
 
 	return (
 		<div
@@ -45,19 +47,39 @@ export const PhoneInput = ( {
 		>
 			<div className="field-wrapper">
 				<IntlTelInput
+					className={ classnames( className, {
+						'has-error': !! validationError,
+					} ) }
 					initialValue={ value }
-					onChangeNumber={ ( newValue: string ) =>
-						onChange( newValue )
-					}
+					onChangeNumber={ ( newValue: string ) => {
+						onChange( newValue );
+					} }
 					initOptions={ {
 						initialCountry: country,
 						showSelectedDialCode: true,
-						utilsScript: utils,
+						utilsScript:
+							'../node_modules/intl-tel-input/build/js/utils.js',
 					} }
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ () => {
 						onBlur( value );
 						setIsActive( false );
+					} }
+					onChangeValidity={ ( isValid: boolean ) => {
+						if ( isValid ) {
+							setValidationError( '' );
+						}
+					} }
+					onChangeErrorCode={ ( errorCode: number ) => {
+						if ( errorCode ) {
+							// Todo handle error code.
+							setValidationError(
+								__(
+									'Please enter a valid phone number',
+									'woocommerce'
+								)
+							);
+						}
 					} }
 				/>
 			</div>
@@ -70,7 +92,9 @@ export const PhoneInput = ( {
 					className: 'field-label',
 				} }
 			/>
-			{ feedback }
+			{ !! validationError && (
+				<ValidationInputError errorMessage={ validationError } />
+			) }
 		</div>
 	);
 };
