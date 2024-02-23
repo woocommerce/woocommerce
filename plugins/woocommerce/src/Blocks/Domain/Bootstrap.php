@@ -194,7 +194,7 @@ class Bootstrap {
 					esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the root directory, run %1$s to ensure your node version is aligned, run %2$s to install dependencies, %3$s to build the files or %4$s to build the files and watch for changes.', 'woocommerce' ),
 					'<code>nvm use</code>',
 					'<code>pnpm install</code>',
-					'<code>pnpm build</code>',
+					'<code>pnpm --filter='@woocommerce/plugin-woocommerce' build</code>',
 					'<code>pnpm --filter="@woocommerce/plugin-woocommerce" watch:build</code>'
 				);
 				echo '</p></div>';
