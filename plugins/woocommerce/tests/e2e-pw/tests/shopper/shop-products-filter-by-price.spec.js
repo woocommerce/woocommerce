@@ -117,10 +117,22 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await expect(
 			page.getByRole( 'heading', { name: productsFilteringPageTitle } )
 		).toBeVisible();
+
+		// The price filter input is initially enabled, but it becomes disabled
+		// for the time it takes to fetch the data. To avoid setting the filter
+		// value before the input is properly initialized, we wait for the input
+		// to be disabled first. This is a safeguard to avoid flakiness which
+		// should be addressed in the code
 		await page
-			.locator( '.is-loading' )
-			.first()
-			.waitFor( { state: 'hidden' } );
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
 
 		// filter by maximum $50 and verify the results
 		await page
@@ -131,10 +143,17 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await page
 			.locator( sortingProductsDropdown )
 			.selectOption( 'Popularity' );
+		// to avoid flakiness
 		await page
-			.locator( '.is-loading' )
-			.first()
-			.waitFor( { state: 'hidden' } );
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
 
 		await expect(
 			page
@@ -161,20 +180,34 @@ test.describe( 'Filter items in the shop by product price', () => {
 		await page
 			.locator( sortingProductsDropdown )
 			.selectOption( 'Default sorting' );
+		// to avoid flakiness
 		await page
-			.locator( '.is-loading' )
-			.first()
-			.waitFor( { state: 'hidden' } );
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
 		await page
 			.getByRole( 'textbox', { name: 'Filter products by minimum' } )
 			.fill( '$100' );
 		// click and sort products to allow changes to take effect
 		await page.locator( sortingProductsDropdown ).click();
 		await page.locator( sortingProductsDropdown ).selectOption( 'Latest' );
+		// to avoid flakiness
 		await page
-			.locator( '.is-loading' )
-			.first()
-			.waitFor( { state: 'hidden' } );
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
 
 		await expect(
 			page
