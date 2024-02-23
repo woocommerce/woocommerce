@@ -242,16 +242,18 @@ class CustomMetaBox {
 		$order_id = (int) $_POST['order_id'] ?? 0;
 		$order    = $this->verify_order_edit_permission_for_ajax( $order_id );
 
-		if ( isset( $_POST['metakeyselect'] ) && '#NONE#' === $_POST['metakeyselect'] && empty( $_POST['metakeyinput'] ) ) {
+		$select_meta_key = sanitize_text_field( wp_unslash( trim( $_POST['metakeyselect'] ?? '' ) ) );
+		$input_meta_key  = sanitize_text_field( wp_unslash( trim( $_POST['metakeyinput'] ?? '' ) ) );
+
+		if ( empty( $_POST['meta'] ) && in_array( $select_meta_key, array( '', '#NONE#' ), true ) && ! $input_meta_key ) {
 			wp_die( 1 );
 		}
 
-		if ( isset( $_POST['metakeyinput'] ) ) { // add meta.
-			$meta_key   = sanitize_text_field( wp_unslash( $_POST['metakeyinput'] ) );
+		if ( $input_meta_key || $select_meta_key ) { // add meta.
 			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
-			$this->handle_add_meta( $order, $meta_key, $meta_value );
-		} else { // update.
-			$meta = wp_unslash( $_POST['meta'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitization done below in array_walk.
+			$this->handle_add_meta(  $order, $input_meta_key ?: $select_meta_key, $meta_value );
+		} elseif ( ! empty( $_POST['meta'] ) ) {
+			$meta = wp_unslash( $_POST['meta'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitization done below in array_walk.
 			$this->handle_update_meta( $order, $meta );
 		}
 	}
