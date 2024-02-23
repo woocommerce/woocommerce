@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { Label } from '@woocommerce/blocks-components';
 import IntlTelInput from 'intl-tel-input/react/build/IntlTelInput.esm';
+import utils from 'iti/utils';
 
 /**
  * Internal dependencies
@@ -50,8 +51,9 @@ export const PhoneInput = ( {
 					}
 					initOptions={ {
 						initialCountry: country,
-						utilsScript:
-							'/intl-tel-input/js/utils.js?1708621744742',
+						showSelectedDialCode: true,
+						utilsScript: utils,
+						hiddenInput: 'full',
 					} }
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ () => {

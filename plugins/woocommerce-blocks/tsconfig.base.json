@@ -71,7 +71,8 @@
 			"@woocommerce/e2e-types": [ "tests/e2e/types" ],
 			"@woocommerce/e2e-playwright-utils": [ "tests/e2e/playwright-utils" ],
 			"@woocommerce/e2e-mocks/*": [ "tests/e2e/mocks/*" ],
-			"@woocommerce/templates/*": [ "assets/js/templates/*" ]
+			"@woocommerce/templates/*": [ "assets/js/templates/*" ],
+			"iti/utils": [ "../node_modules/intl-tel-input/build/js/utils" ],
 		}
 	}
 }

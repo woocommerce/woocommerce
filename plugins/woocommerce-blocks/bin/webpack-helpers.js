@@ -97,6 +97,10 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/templates/`
 		),
+		iti: path.resolve(
+			__dirname,
+			'../node_modules/intl-tel-input/build/js'
+		),
 	};
 };
 
