@@ -1,5 +1,4 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+const { test, expect } = require( '@playwright/test' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -9,7 +8,7 @@ const singleProductPrice3 = '200';
 
 const simpleProductName = 'AAA Filter Products';
 
-const productsFilteringPageTitle = 'Products Filtering';
+const productsFilteringPageTitle = `Products Filtering ${ Date.now() }`;
 const productsFilteringPageSlug = productsFilteringPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -65,27 +64,6 @@ test.describe( 'Filter items in the shop by product price', () => {
 		} );
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id, product3Id ],
-		} );
-
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
-		let response = await wpApi.get( `pages` );
-		const allPages = await response.json();
-		await allPages.forEach( async ( page ) => {
-			if ( page.title.rendered === productsFilteringPageTitle ) {
-				response = await wpApi.delete( `pages/${ page.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
 		} );
 	} );
 
