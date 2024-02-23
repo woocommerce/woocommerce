@@ -169,7 +169,7 @@ class CustomMetaBox {
 							<option value="#NONE#"><?php esc_html_e( '&mdash; Select &mdash;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( $keys as $key ) {
-								if ( is_protected_meta( $key, 'post' ) || ! current_user_can( 'edit_others_shop_order', $order->get_id() ) ) {
+								if ( is_protected_meta( $key, 'post' ) || ! current_user_can( 'edit_others_shop_orders' ) ) {
 									continue;
 								}
 								echo "\n<option value='" . esc_attr( $key ) . "'>" . esc_html( $key ) . '</option>';
