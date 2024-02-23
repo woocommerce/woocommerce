@@ -188,7 +188,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 			)
 		);
 
-		return wp_strip_all_tags( $price_formatted );
+		return html_entity_decode( wp_strip_all_tags( $price_formatted ) );
 	}
 
 	/**

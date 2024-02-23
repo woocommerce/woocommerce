@@ -168,22 +168,10 @@ export const Campaigns = () => {
 							),
 						},
 						{
-							display: (
-								<div
-									dangerouslySetInnerHTML={ {
-										__html: el.cost,
-									} }
-								></div>
-							),
+							display: el.cost,
 						},
 						{
-							display: (
-								<div
-									dangerouslySetInnerHTML={ {
-										__html: el.sales,
-									} }
-								></div>
-							),
+							display: el.sales,
 						},
 					];
 				} ) }
