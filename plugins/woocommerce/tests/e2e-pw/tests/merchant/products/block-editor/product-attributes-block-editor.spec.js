@@ -275,7 +275,9 @@ test( 'can add existing attributes', async ( {
 	} );
 } );
 
-test( 'can update product attributes', async ( {
+// Test skipped because an issue with the options not always loading makes it flaky.
+// See https://github.com/woocommerce/woocommerce/issues/44925
+test.skip( 'can update product attributes', async ( {
 	page,
 	productWithAttributes,
 } ) => {
@@ -288,6 +290,7 @@ test( 'can update product attributes', async ( {
 		await page.getByRole( 'button', { name: 'Organization' } ).click();
 
 		// Sometimes the attribute's terms take a while to load, and we need to reload and retry.
+		// See https://github.com/woocommerce/woocommerce/issues/44925
 		await expect(
 			async () => {
 				await page.reload();
