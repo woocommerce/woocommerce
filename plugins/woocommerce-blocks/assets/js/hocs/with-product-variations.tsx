@@ -71,7 +71,7 @@ const withProductVariations = createHigherOrderComponent(
 				}
 			}
 
-			loadVariations = (): void => {
+			loadVariations = () => {
 				const { products } = this.props;
 				const { loading, variations } = this.state;
 
@@ -141,7 +141,7 @@ const withProductVariations = createHigherOrderComponent(
 					} );
 			};
 
-			isProductId( itemId: number ): boolean {
+			isProductId( itemId: number ) {
 				const { products } = this.props;
 				return products.some( ( p ) => p.id === itemId );
 			}
