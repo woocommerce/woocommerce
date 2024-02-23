@@ -176,10 +176,10 @@ class CustomMetaBox {
 							}
 							?>
 						</select>
-						<input class="hide-if-js" type="text" id="metakeyinput" name="metakeyinput" value="" />
-						<a href="#postcustomstuff" class="hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggle();return false;">
-							<span id="enternew"><?php esc_html_e( 'Enter new', 'woocommerce' ); ?></span>
-							<span id="cancelnew" class="hidden"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></span></a>
+						<input class="hidden" type="text" id="metakeyinput" name="metakeyinput" value="" aria-label="<?php esc_attr_e( 'New custom field name', 'woocommerce' ); ?>" />
+						<button type="button" id="newmeta-button" class="button button-small hide-if-no-js" onclick="jQuery('#metakeyinput, #metakeyselect, #enternew, #cancelnew').toggleClass('hidden');jQuery('#metakeyinput, #metakeyselect').filter(':visible').trigger('focus');">
+						<span id="enternew"><?php esc_html_e( 'Enter new', 'woocommerce' ); ?></span>
+						<span id="cancelnew" class="hidden"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></span>
 					<?php } else { ?>
 						<input type="text" id="metakeyinput" name="metakeyinput" value="" />
 					<?php } ?>
