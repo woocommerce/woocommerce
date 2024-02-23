@@ -174,22 +174,25 @@ class WC_Helper_Updater {
 		if ( ! empty( $response->package ) || WC_Helper_Plugin::is_plugin_active() ) {
 			return;
 		}
+
 		if ( ! WC_Helper_Plugin::is_plugin_installed() ) {
 			printf(
-			/* translators: 1: Marketplace plugin install URL 2: Marketplace plugin download URL */
 				wp_kses(
-					' <a href="%1$s">Install Woo Connect to Update</a>.',
+					/* translators: 1: Marketplace plugin install URL */
+					__( ' <a href="%1$s">Install Woo Connect to Update</a>.', 'woocommerce' ),
 					array(
 						'a' => array(
 							'href' => array(),
 						),
 					)
 				),
-				esc_url( 'https://woo.com/woocom-plugin/install/' ),
-				esc_url( 'https://woo.com/woocom-plugin/download/' ),
+				'https://woo.com/woocom-plugin/install/',
 			);
-		} elseif ( ! WC_Helper_Plugin::is_plugin_active() ) {
-			printf( ' Activate Woo Connect to Update.' );
+			return;
+		}
+
+		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
+			echo esc_html_e( ' Activate Woo Connect to Update.', 'woocommerce' );
 		}
 	}
 
