@@ -65,9 +65,7 @@ export function Header( {
 		'name'
 	);
 
-	const { isResolving, showPrepublishChecks } = useShowPrepublishChecks();
-
-	const isPrepublishButtonVisible = ! isResolving && showPrepublishChecks;
+	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -165,7 +163,7 @@ export function Header( {
 
 					<PublishButton
 						productType={ productType }
-						prePublish={ isPrepublishButtonVisible }
+						prePublish={ showPrepublishChecks }
 					/>
 
 					<WooHeaderItem.Slot name="product" />
