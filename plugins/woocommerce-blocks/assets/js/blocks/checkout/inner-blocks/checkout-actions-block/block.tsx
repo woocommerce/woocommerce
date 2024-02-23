@@ -7,15 +7,13 @@ import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
-import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { Experiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
  */
-import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
 
 const Block = ( {
@@ -29,14 +27,20 @@ const Block = ( {
 	className?: string;
 	placeOrderButtonLabel: string;
 } ): JSX.Element => {
-	const { paymentMethodButtonLabel } = useCheckoutSubmit();
-	const label = applyCheckoutFilter( {
-		filterName: 'placeOrderButtonLabel',
-		defaultValue:
-			paymentMethodButtonLabel ||
-			placeOrderButtonLabel ||
-			defaultPlaceOrderButtonLabel,
-	} );
+
+	const placeOrderButton = (
+		<PlaceOrderButton
+			label='Just pay already!! (default)'
+			fullWidth={ ! showReturnToCart }
+		/>
+	);
+
+	const placeOrderButtonWithExperiment = (
+		<PlaceOrderButton
+			label="Gimme ur monies mate! (experiment)"
+			fullWidth={ ! showReturnToCart }
+		/>
+	);
 
 	return (
 		<div
@@ -51,9 +55,11 @@ const Block = ( {
 						link={ getSetting( 'page-' + cartPageId, false ) }
 					/>
 				) }
-				<PlaceOrderButton
-					label={ label }
-					fullWidth={ ! showReturnToCart }
+				<Experiment
+					name="woocommerce_example_place_order_experiment"
+					defaultExperience={ placeOrderButton }
+					treatmentExperience={ placeOrderButtonWithExperiment }
+					loadingExperience={ <div>⏳</div> }
 				/>
 			</div>
 		</div>
