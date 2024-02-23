@@ -1,37 +1,13 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+const { test, expect } = require( '@playwright/test' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 
-const transformedCartBlockTitle = 'Transformed Cart';
+const transformedCartBlockTitle = `Transformed Cart ${ Date.now() }`;
 const transformedCartBlockSlug = transformedCartBlockTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
 
 test.describe( 'Transform Classic Cart To Cart Block', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
-
-	test.afterAll( async ( { baseURL } ) => {
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
-		let response = await wpApi.get( `pages` );
-		const allPages = await response.json();
-		await allPages.forEach( async ( page ) => {
-			if ( page.title.rendered === transformedCartBlockTitle ) {
-				response = await wpApi.delete( `pages/${ page.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
-		} );
-	} );
 
 	test( 'can transform classic cart to cart block', async ( { page } ) => {
 		// go to create a new page
