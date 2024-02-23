@@ -19,7 +19,7 @@ export const ThemeCard = ( {
 	total_palettes = 0,
 	link_url = '',
 	is_active = false,
-	price = 'free',
+	price = 'Free',
 	onClick,
 }: TypeThemeCard & {
 	onClick: () => void;
@@ -50,7 +50,7 @@ export const ThemeCard = ( {
 						{ __( 'Active theme', 'woocommerce' ) }
 					</span>
 				) }
-				{ "Free" !== price && (
+				{ price !== 'Free' && (
 					<span className="theme-card__paid">
 						{ __( 'Paid', 'woocommerce' ) }
 					</span>
