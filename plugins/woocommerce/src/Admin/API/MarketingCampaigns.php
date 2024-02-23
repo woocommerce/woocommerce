@@ -184,8 +184,8 @@ class MarketingCampaigns extends WC_REST_Controller {
 			'thousand_separator' => $currency_info['thousand_sep'],
 			'decimals' => $num_decimals,
 		));
-		return $price_formatted;
 
+		return wp_strip_all_tags( $price_formatted );
 	}
 
 	/**
