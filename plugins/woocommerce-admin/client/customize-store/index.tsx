@@ -376,8 +376,17 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'checkActiveThemeHasMods',
+			initial: 'fetchActiveThemeHasMods',
 			states: {
+				fetchActiveThemeHasMods: {
+					invoke: {
+						src: 'fetchActiveThemeHasMods',
+						onDone: {
+							actions: 'assignActiveThemeHasMods',
+							target: 'checkActiveThemeHasMods',
+						},
+					},
+				},
 				checkActiveThemeHasMods: {
 					always: [
 						{
