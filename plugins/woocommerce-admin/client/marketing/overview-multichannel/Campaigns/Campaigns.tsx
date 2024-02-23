@@ -167,12 +167,8 @@ export const Campaigns = () => {
 								</Flex>
 							),
 						},
-						{
-							display: el.cost,
-						},
-						{
-							display: el.sales,
-						},
+						{ display: el.cost },
+						{ display: el.sales },
 					];
 				} ) }
 			/>
