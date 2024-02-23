@@ -160,8 +160,6 @@ class HookedBlockExamples {
      * This will fail since block hooks don't run on blocks that were also hooked in.
      */
     public function add_block_first_child( $inserted_blocks, $anchor_block, $position, $context ) {
-        error_log('pos: ' . $position );
-        error_log(print_r($anchor_block,true));
         if ( 
             'woocommerce/product-tab' === $anchor_block['blockName'] &&
             'pricing' === $anchor_block['attrs']['id'] &&
