@@ -1,3 +1,5 @@
+@import "/node_modules/intl-tel-input/build/css/intlTelInput.css";
+
 /*.phone-country-combobox {
 	height: 0;
 	overflow: hidden;
@@ -48,7 +50,6 @@
 		display: flex;
 
 		input {
-			flex: 1;
 			background: none;
 			font-size: inherit;
 			font-family: inherit;
@@ -193,12 +194,12 @@
 	position: absolute;
 	white-space: nowrap;
 	width: 1px;
-  }
+}
 
 .select-search-container *,
 .select-search-container *::after,
 .select-search-container *::before {
-    box-sizing: inherit;
+	box-sizing: inherit;
 }
 
 

@@ -16,6 +16,8 @@ import parsePhoneNumber, {
 	formatIncompletePhoneNumber,
 } from 'libphonenumber-js';
 
+import IntlTelInput from 'intl-tel-input/react/build/IntlTelInput.esm';
+
 /**
  * Internal dependencies
  */
@@ -110,85 +112,13 @@ export const PhoneInput = ( {
 			) }
 		>
 			<div className="field-wrapper">
-				<button
-					type="button"
-					className="phone-input-country-button"
-					onClick={ () => {
-						valueProps?.ref?.current?.focus();
+				<IntlTelInput
+					initialValue={ value }
+					onChangeNumber={ ( newValue ) => onChange( newValue ) }
+					initOptions={ {
+						initialCountry: country,
 					} }
-				>
-					{ !! currentCountryCode ? (
-						<>
-							<ReactCountryFlag
-								countryCode={ currentCountryCode }
-							/>
-							<DialingCode countryCode={ currentCountryCode } />
-						</>
-					) : (
-						<>International</>
-					) }
-				</button>
-				<input
-					type="tel"
-					id={ id }
-					value={ phoneNumber }
-					autoComplete={ autoComplete }
-					onChange={ ( event ) => {
-						const newValue = parseIncompletePhoneNumber(
-							event.target.value
-						);
-						const phoneFormatter = parsePhoneNumber(
-							newValue,
-							currentCountryCode
-						);
-
-						if (
-							! isPossiblePhoneNumber(
-								newValue,
-								currentCountryCode
-							)
-						) {
-							setPhoneNumber( newValue );
-						} else {
-							setPhoneNumber(
-								formatIncompletePhoneNumber(
-									newValue,
-									currentCountryCode
-								)
-							);
-						}
-
-						if (
-							phoneFormatter?.country &&
-							phoneFormatter?.country !== currentCountryCode
-						) {
-							setCurrentCountryCode( phoneFormatter?.country );
-						}
-
-						onChange(
-							phoneFormatter?.formatInternational() || newValue
-						);
-					} }
-					onFocus={ () => setIsActive( true ) }
-					onBlur={ () => {
-						const phoneFormatter = parsePhoneNumber(
-							value,
-							currentCountryCode
-						);
-						if ( phoneFormatter?.country ) {
-							setPhoneNumber( phoneFormatter?.formatNational() );
-						}
-						onBlur( value );
-						setIsActive( false );
-					} }
-					aria-label={ ariaLabel || label }
-					disabled={ disabled }
-					required={ required }
-					{ ...rest }
 				/>
-				{
-					// <input type="text" ref={ inputRef } value={ value } />
-				 }
 			</div>
 			<Label
 				label={ label }
