@@ -1,14 +1,34 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import path from 'path';
+
+const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
+
+const test = base.extend< {
+	defaultBlockPostPage: Post;
+} >( {
+	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+		const testingPost = await requestUtils.createPostFromTemplate(
+			{ title: 'Active Filters Block' },
+			TEMPLATE_PATH,
+			{}
+		);
+
+		await use( testingPost );
+		await requestUtils.deletePost( testingPost.id );
+	},
+} );
 
 test.describe( 'Filter by Attributes Block - with All products Block', () => {
 	test( 'should show correct attrs count (color=blue|query_type_color=or)', async ( {
 		page,
+		defaultBlockPostPage,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or',
+			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or`,
 			{
 				waitUntil: 'commit',
 			}
@@ -31,9 +51,10 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue,gray|query_type_color=or)', async ( {
 		page,
+		defaultBlockPostPage,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue,gray&query_type_color=or',
+			`${ defaultBlockPostPage.link }?filter_color=blue,gray&query_type_color=or`,
 			{
 				waitUntil: 'commit',
 			}
@@ -56,9 +77,10 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue|query_type_color=or|min_price=15|max_price=40)', async ( {
 		page,
+		defaultBlockPostPage,
 	} ) => {
 		await page.goto(
-			'/active-filters-block/?filter_color=blue&query_type_color=or&min_price=15&max_price=40',
+			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`,
 			{
 				waitUntil: 'commit',
 			}
