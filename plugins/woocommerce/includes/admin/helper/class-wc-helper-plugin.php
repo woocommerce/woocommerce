@@ -32,7 +32,7 @@ class WC_Helper_Plugin {
 	 *
 	 * @return bool
 	 */
-	public static function is_plugin_installed() {
+	public static function is_plugin_installed(): bool {
 		return file_exists( WP_PLUGIN_DIR . '/' . self::WOO_MARKETPLACE_PLUGIN_MAIN_FILE );
 	}
 }

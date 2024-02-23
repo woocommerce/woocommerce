@@ -26,13 +26,13 @@ class WC_Helper_Updater {
 		add_action( 'pre_set_site_transient_update_themes', array( __CLASS__, 'transient_update_themes' ), 21, 1 );
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'upgrader_process_complete' ) );
 		add_action( 'upgrader_pre_download', array( __CLASS__, 'block_expired_updates' ), 10, 2 );
-		add_action( 'plugins_loaded', array( __CLASS__, 'on_plugins_loaded' ) );
+		add_action( 'plugins_loaded', array( __CLASS__, 'add_hook_for_modifying_update_notices' ) );
 	}
 
 	/**
-	 * Loads the class, runs on init.
+	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
-	public static function on_plugins_loaded() {
+	public static function add_hook_for_modifying_update_notices() {
 		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
@@ -435,44 +435,6 @@ class WC_Helper_Updater {
 
 		set_transient( $cache_key, $data, 12 * HOUR_IN_SECONDS );
 		return $data['products'];
-	}
-
-	/**
-	 * Check for an active subscription.
-	 *
-	 * Checks a given product id against all subscriptions on
-	 * the current site. Returns true if at least one active
-	 * subscription is found.
-	 *
-	 * @param int $product_id The product id to look for.
-	 *
-	 * @return bool True if active subscription found.
-	 */
-	public static function has_active_subscription( $product_id ) {
-		if ( ! isset( $auth ) ) {
-			$auth = WC_Helper_Options::get( 'auth' );
-		}
-
-		if ( ! isset( $subscriptions ) ) {
-			$subscriptions = WC_Helper::get_subscriptions();
-		}
-
-		if ( empty( $auth['site_id'] ) || empty( $subscriptions ) ) {
-			return false;
-		}
-
-		// Check for an active subscription.
-		foreach ( $subscriptions as $subscription ) {
-			if ( $subscription['product_id'] != $product_id ) {
-				continue;
-			}
-
-			if ( in_array( absint( $auth['site_id'] ), $subscription['connections'] ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

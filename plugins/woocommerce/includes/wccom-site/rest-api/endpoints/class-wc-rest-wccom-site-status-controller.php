@@ -52,7 +52,7 @@ class WC_REST_WCCOM_Site_Status_Controller extends WC_REST_WCCOM_Site_Controller
 	 * @return bool
 	 */
 	public function user_has_permission( $user ) : bool {
-		return user_can( $user, 'manage_woocommerce' );
+		return user_can( $user, 'install_plugins' ) && user_can( $user, 'activate_plugins' );
 	}
 
 	/**
