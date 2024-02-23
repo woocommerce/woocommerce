@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { getAdminLink } from '@woocommerce/settings';
+import type { ProductStatus } from '@woocommerce/data';
 import { navigateTo } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -32,6 +34,11 @@ export function PublishButtonMenu( {
 	const { trash } = useProductManager( postType );
 	const { createErrorNotice, createSuccessNotice } =
 		useDispatch( 'core/notices' );
+	const [ , , prevStatus ] = useEntityProp< ProductStatus >(
+		'postType',
+		postType,
+		'status'
+	);
 
 	function scheduleProduct( dateString?: string ) {
 		schedule( dateString )
@@ -97,40 +104,43 @@ export function PublishButtonMenu( {
 						</MenuItem>
 					) }
 				</MenuGroup>
-				<MenuGroup>
-					<MenuItem
-						isDestructive
-						onClick={ () => {
-							trash()
-								.then( ( deletedProduct ) => {
-									recordProductEvent(
-										'product_delete',
-										deletedProduct
-									);
-									createSuccessNotice(
-										__(
-											'Product successfully deleted',
-											'woocommerce'
-										)
-									);
-									const productListUrl = getAdminLink(
-										'edit.php?post_type=product'
-									);
-									navigateTo( {
-										url: productListUrl,
+
+				{ prevStatus !== 'trash' && (
+					<MenuGroup>
+						<MenuItem
+							isDestructive
+							onClick={ () => {
+								trash()
+									.then( ( deletedProduct ) => {
+										recordProductEvent(
+											'product_delete',
+											deletedProduct
+										);
+										createSuccessNotice(
+											__(
+												'Product successfully deleted',
+												'woocommerce'
+											)
+										);
+										const productListUrl = getAdminLink(
+											'edit.php?post_type=product'
+										);
+										navigateTo( {
+											url: productListUrl,
+										} );
+									} )
+									.catch( ( error ) => {
+										const message =
+											getProductErrorMessage( error );
+										createErrorNotice( message );
 									} );
-								} )
-								.catch( ( error ) => {
-									const message =
-										getProductErrorMessage( error );
-									createErrorNotice( message );
-								} );
-							onClose();
-						} }
-					>
-						{ __( 'Move to trash', 'woocommerce' ) }
-					</MenuItem>
-				</MenuGroup>
+								onClose();
+							} }
+						>
+							{ __( 'Move to trash', 'woocommerce' ) }
+						</MenuItem>
+					</MenuGroup>
+				) }
 			</>
 		);
 	}
