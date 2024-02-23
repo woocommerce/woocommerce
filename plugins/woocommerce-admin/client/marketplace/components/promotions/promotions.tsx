@@ -6,10 +6,8 @@ import Notice from '../notice/notice';
 
 declare global {
 	interface Window {
-		wc: {
-			marketplace?: {
-				promotions: Promotion[];
-			};
+		wcMarketplace?: {
+			promotions?: Promotion[];
 		};
 	}
 }
@@ -21,7 +19,7 @@ type Promotion = {
 	pages: Page[];
 	position: string;
 	content: { [ locale: string ]: string };
-	icon?: string | undefined;
+	icon?: string;
 	is_dismissible?: boolean;
 	menu_item_id?: string;
 	style?: string;
@@ -41,7 +39,7 @@ const Promotions: () => null | JSX.Element = () => {
 	if ( currentPage !== 'wc-admin' ) {
 		return null;
 	}
-	const promotions = window.wc?.marketplace?.promotions ?? [];
+	const promotions = window?.wcMarketplace?.promotions ?? [];
 	const currentDateUTC = Date.now();
 	const currentPath = decodeURIComponent( urlParams.get( 'path' ) || '' );
 	const currentTab = urlParams.get( 'tab' );
@@ -65,11 +63,12 @@ const Promotions: () => null | JSX.Element = () => {
 						)
 							? currentPath
 							: `/${ currentPath }`;
-						return (
-							page.page === currentPage &&
+
+						return page.page === currentPage &&
 							normalizedPath === normalizedCurrentPath &&
-							( page.tab ? page.tab === currentTab : true )
-						);
+							page.tab
+							? page.tab === currentTab
+							: ! currentTab;
 					}
 				);
 
@@ -104,7 +103,7 @@ const Promotions: () => null | JSX.Element = () => {
 							variant={
 								promotion.style ? promotion.style : 'info'
 							}
-							icon={ promotion?.icon }
+							icon={ promotion?.icon || '' }
 							isDismissible={ promotion.is_dismissible || false }
 						/>
 					);
