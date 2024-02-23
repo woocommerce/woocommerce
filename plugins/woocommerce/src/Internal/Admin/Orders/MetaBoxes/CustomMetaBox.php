@@ -249,12 +249,12 @@ class CustomMetaBox {
 			wp_die( 1 );
 		}
 
-		if ( $input_meta_key || $select_meta_key ) { // add meta.
-			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
-			$this->handle_add_meta(  $order, $input_meta_key ?: $select_meta_key, $meta_value );
-		} elseif ( ! empty( $_POST['meta'] ) ) {
+		if ( ! empty( $_POST['meta'] ) ) { // update.
 			$meta = wp_unslash( $_POST['meta'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitization done below in array_walk.
 			$this->handle_update_meta( $order, $meta );
+		} else { // add meta.
+			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
+			$this->handle_add_meta(  $order, $input_meta_key ?: $select_meta_key, $meta_value );
 		}
 	}
 
