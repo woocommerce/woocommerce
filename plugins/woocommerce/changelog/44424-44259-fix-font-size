@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-CYS - Ensure the size of fonts is not affected by a font family change.
