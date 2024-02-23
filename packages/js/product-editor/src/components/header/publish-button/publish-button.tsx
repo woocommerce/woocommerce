@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import { MouseEvent, useState } from 'react';
-import { Button } from '@wordpress/components';
+import type { MouseEvent } from 'react';
+import { Button, Dropdown } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { dispatch, useDispatch } from '@wordpress/data';
-import { createElement, Fragment } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
+import { createElement } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { type Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -20,67 +19,17 @@ import { getProductErrorMessage } from '../../../utils/get-product-error-message
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
 import { TRACKS_SOURCE } from '../../../constants';
-import { ButtonWithDropdownMenu } from '../../button-with-dropdown-menu';
 import { usePublish } from '../hooks/use-publish';
-import { PublishButtonProps } from './types';
-import { useProductScheduled } from '../../../hooks/use-product-scheduled';
-import { SchedulePublishModal } from '../../schedule-publish-modal';
-import { formatScheduleDatetime } from '../../../utils';
-import { useProductManager } from '../../../hooks/use-product-manager';
-
-function getNoticeContent( product: Product, prevStatus: Product[ 'status' ] ) {
-	if (
-		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		product.status === 'future'
-	) {
-		return sprintf(
-			// translators: %s: The datetime the product is scheduled for.
-			__( 'Product scheduled for %s.', 'woocommerce' ),
-			formatScheduleDatetime( `${ product.date_created_gmt }+00:00` )
-		);
-	}
-
-	if ( prevStatus === 'publish' || prevStatus === 'future' ) {
-		return __( 'Product updated.', 'woocommerce' );
-	}
-
-	return __( 'Product published.', 'woocommerce' );
-}
-
-function showSuccessNotice(
-	product: Product,
-	prevStatus: Product[ 'status' ]
-) {
-	const { createSuccessNotice } = dispatch( 'core/notices' );
-
-	const noticeContent = getNoticeContent( product, prevStatus );
-	const noticeOptions = {
-		icon: '🎉',
-		actions: [
-			{
-				label: __( 'View in store', 'woocommerce' ),
-				// Leave the url to support a11y.
-				url: product.permalink,
-				onClick( event: MouseEvent< HTMLAnchorElement > ) {
-					event.preventDefault();
-					// Notice actions do not support target anchor prop,
-					// so this forces the page to be opened in a new tab.
-					window.open( product.permalink, '_blank' );
-				},
-			},
-		],
-	};
-
-	createSuccessNotice( noticeContent, noticeOptions );
-}
+import { PublishButtonMenu } from './publish-button-menu';
+import { showSuccessNotice } from './utils';
+import type { PublishButtonProps } from './types';
 
 export function PublishButton( {
 	productType = 'product',
 	prePublish,
 	...props
 }: PublishButtonProps ) {
-	const { createErrorNotice, createSuccessNotice } =
-		useDispatch( 'core/notices' );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
 	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
@@ -117,128 +66,16 @@ export function PublishButton( {
 		},
 	} );
 
-	const { isScheduled, schedule, date, formattedDate } =
-		useProductScheduled( productType );
-	const [ showScheduleModal, setShowScheduleModal ] = useState<
-		'schedule' | 'edit' | undefined
-	>();
-	const { trash } = useProductManager( productType );
-
 	if (
 		productType === 'product' &&
 		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
 		prePublish
 	) {
-		function getPublishButtonControls() {
-			return [
-				isScheduled
-					? [
-							{
-								title: __( 'Publish now', 'woocommerce' ),
-								onClick() {
-									schedule()
-										.then( ( scheduledProduct ) => {
-											showSuccessNotice(
-												scheduledProduct,
-												prevStatus
-											);
-										} )
-										.catch( ( error ) => {
-											const message =
-												getProductErrorMessage( error );
-											createErrorNotice( message );
-										} );
-								},
-							},
-							{
-								title: (
-									<div className="woocommerce-product-header__actions-edit-schedule">
-										<div>
-											{ __(
-												'Edit schedule',
-												'woocommerce'
-											) }
-										</div>
-										<div>{ formattedDate }</div>
-									</div>
-								),
-								onClick() {
-									setShowScheduleModal( 'edit' );
-								},
-							},
-					  ]
-					: [
-							{
-								title: __( 'Schedule publish', 'woocommerce' ),
-								onClick() {
-									setShowScheduleModal( 'schedule' );
-								},
-							},
-					  ],
-				[
-					{
-						title: __( 'Move to trash', 'woocommerce' ),
-						onClick() {
-							trash()
-								.then( ( deletedProduct ) => {
-									recordProductEvent(
-										'product_delete',
-										deletedProduct as Product
-									);
-
-									createSuccessNotice(
-										__(
-											'Product successfully deleted',
-											'woocommerce'
-										)
-									);
-
-									const productListUrl = getAdminLink(
-										'edit.php?post_type=product'
-									);
-									navigateTo( {
-										url: productListUrl,
-									} );
-								} )
-								.catch( ( error ) => {
-									const message =
-										getProductErrorMessage( error );
-									createErrorNotice( message );
-								} );
-						},
-					},
-				],
-			];
-		}
-
-		function renderSchedulePublishModal() {
+		function renderPublishButtonMenu(
+			menuProps: Dropdown.RenderProps
+		): React.ReactElement {
 			return (
-				showScheduleModal && (
-					<SchedulePublishModal
-						postType={ productType }
-						value={
-							showScheduleModal === 'edit' ? date : undefined
-						}
-						onCancel={ () => setShowScheduleModal( undefined ) }
-						onSchedule={ ( value ) => {
-							schedule( value )
-								.then( ( scheduledProduct ) => {
-									showSuccessNotice(
-										scheduledProduct,
-										prevStatus
-									);
-								} )
-								.catch( ( error ) => {
-									const message =
-										getProductErrorMessage( error );
-									createErrorNotice( message );
-								} )
-								.finally( () => {
-									setShowScheduleModal( undefined );
-								} );
-						} }
-					/>
-				)
+				<PublishButtonMenu { ...menuProps } postType={ productType } />
 			);
 		}
 
@@ -259,27 +96,23 @@ export function PublishButton( {
 			}
 
 			return (
-				<>
-					<ButtonWithDropdownMenu
-						{ ...publishButtonProps }
-						onClick={ handlePrePublishButtonClick }
-						controls={ getPublishButtonControls() }
-					/>
-
-					{ renderSchedulePublishModal() }
-				</>
+				<PublishButtonMenu
+					{ ...publishButtonProps }
+					postType={ productType }
+					controls={ undefined }
+					onClick={ handlePrePublishButtonClick }
+					renderMenu={ renderPublishButtonMenu }
+				/>
 			);
 		}
 
 		return (
-			<>
-				<ButtonWithDropdownMenu
-					{ ...publishButtonProps }
-					controls={ getPublishButtonControls() }
-				/>
-
-				{ renderSchedulePublishModal() }
-			</>
+			<PublishButtonMenu
+				{ ...publishButtonProps }
+				postType={ productType }
+				controls={ undefined }
+				renderMenu={ renderPublishButtonMenu }
+			/>
 		);
 	}
 
