@@ -17,30 +17,30 @@ function errorHandler( error: WPError, productStatus: ProductStatus ) {
 		return error;
 	}
 
-	const wpError: WPError = {
+	if ( 'variations' in error && error.variations ) {
+		return {
+			code: 'variable_product_no_variation_prices',
+			message: error.variations,
+		};
+	}
+
+	const errorMessage = Object.values( error ).find(
+		( value ) => value !== undefined
+	) as string | undefined;
+
+	if ( errorMessage !== undefined ) {
+		return {
+			code: 'product_form_field_error',
+			message: errorMessage,
+		};
+	}
+
+	return {
 		code:
 			productStatus === 'publish' || productStatus === 'future'
 				? 'product_publish_error'
 				: 'product_create_error',
-		message: error.message,
-		data: {},
 	};
-
-	if ( 'variations' in error ) {
-		wpError.code = 'variable_product_no_variation_prices';
-		wpError.message = error.variations as string;
-	} else {
-		const errorMessage = Object.values( error ).find(
-			( value ) => value !== undefined
-		) as string | undefined;
-
-		if ( errorMessage !== undefined ) {
-			wpError.code = 'product_form_field_error';
-			wpError.message = errorMessage;
-		}
-	}
-
-	return wpError;
 }
 
 export function useProductManager< T = Product >( postType: string ) {

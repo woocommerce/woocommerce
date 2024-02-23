@@ -26,6 +26,7 @@ import { PublishButtonProps } from './types';
 import { useProductScheduled } from '../../../hooks/use-product-scheduled';
 import { SchedulePublishModal } from '../../schedule-publish-modal';
 import { formatScheduleDatetime } from '../../../utils';
+import { useProductManager } from '../../../hooks/use-product-manager';
 
 function getNoticeContent( product: Product, prevStatus: Product[ 'status' ] ) {
 	if (
@@ -35,7 +36,7 @@ function getNoticeContent( product: Product, prevStatus: Product[ 'status' ] ) {
 		return sprintf(
 			// translators: %s: The datetime the product is scheduled for.
 			__( 'Product scheduled for %s.', 'woocommerce' ),
-			formatScheduleDatetime( product.date_created )
+			formatScheduleDatetime( `${ product.date_created_gmt }+00:00` )
 		);
 	}
 
@@ -89,7 +90,7 @@ export function PublishButton( {
 		'status'
 	);
 
-	const { publish, deleteProduct, ...publishButtonProps } = usePublish( {
+	const publishButtonProps = usePublish( {
 		productType,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
@@ -121,6 +122,7 @@ export function PublishButton( {
 	const [ showScheduleModal, setShowScheduleModal ] = useState<
 		'schedule' | 'edit' | undefined
 	>();
+	const { trash } = useProductManager( productType );
 
 	if (
 		productType === 'product' &&
@@ -133,8 +135,19 @@ export function PublishButton( {
 					? [
 							{
 								title: __( 'Publish now', 'woocommerce' ),
-								async onClick() {
-									await schedule( publish );
+								onClick() {
+									schedule()
+										.then( ( scheduledProduct ) => {
+											showSuccessNotice(
+												scheduledProduct,
+												prevStatus
+											);
+										} )
+										.catch( ( error ) => {
+											const message =
+												getProductErrorMessage( error );
+											createErrorNotice( message );
+										} );
 								},
 							},
 							{
@@ -165,8 +178,8 @@ export function PublishButton( {
 				[
 					{
 						title: __( 'Move to trash', 'woocommerce' ),
-						async onClick() {
-							deleteProduct()
+						onClick() {
+							trash()
 								.then( ( deletedProduct ) => {
 									recordProductEvent(
 										'product_delete',
@@ -207,9 +220,22 @@ export function PublishButton( {
 							showScheduleModal === 'edit' ? date : undefined
 						}
 						onCancel={ () => setShowScheduleModal( undefined ) }
-						onSchedule={ async ( value ) => {
-							await schedule( publish, value );
-							setShowScheduleModal( undefined );
+						onSchedule={ ( value ) => {
+							schedule( value )
+								.then( ( scheduledProduct ) => {
+									showSuccessNotice(
+										scheduledProduct,
+										prevStatus
+									);
+								} )
+								.catch( ( error ) => {
+									const message =
+										getProductErrorMessage( error );
+									createErrorNotice( message );
+								} )
+								.finally( () => {
+									setShowScheduleModal( undefined );
+								} );
 						} }
 					/>
 				)
