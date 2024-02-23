@@ -1,14 +1,34 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import path from 'path';
+
+const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
+
+const test = base.extend< {
+	defaultBlockPostPage: Post;
+} >( {
+	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+		const testingPost = await requestUtils.createPostFromTemplate(
+			{ title: 'Active Filters Block' },
+			TEMPLATE_PATH,
+			{}
+		);
+
+		await use( testingPost );
+		await requestUtils.deletePost( testingPost.id );
+	},
+} );
 
 test.describe( 'Product Filter: Active Filters Block', async () => {
 	test.describe( 'frontend', () => {
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
+			defaultBlockPostPage,
 		} ) => {
-			await page.goto( '/product-filters-active-block/' );
+			await page.goto( defaultBlockPostPage.link );
 
 			const locator = page.locator(
 				'.wp-block-woocommerce-product-filter'
@@ -23,9 +43,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 
 		test( 'With rating filters applied it shows the correct active filters', async ( {
 			page,
+			defaultBlockPostPage,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?rating_filter=1,2,5'
+				`${ defaultBlockPostPage.link }?rating_filter=1,2,5`
 			);
 
 			const hasTitle =
@@ -46,9 +67,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 
 		test( 'With stock filters applied it shows the correct active filters', async ( {
 			page,
+			defaultBlockPostPage,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?filter_stock_status=instock,onbackorder'
+				`${ defaultBlockPostPage.link }?filter_stock_status=instock,onbackorder`
 			);
 
 			const hasTitle =
@@ -65,9 +87,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 
 		test( 'With attribute filters applied it shows the correct active filters', async ( {
 			page,
+			defaultBlockPostPage,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?filter_color=blue,gray&query_type_color=or'
+				`${ defaultBlockPostPage.link }?filter_color=blue,gray&query_type_color=or`
 			);
 
 			const hasTitle =
@@ -84,9 +107,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 
 		test( 'With price filters applied it shows the correct active filters', async ( {
 			page,
+			defaultBlockPostPage,
 		} ) => {
 			await page.goto(
-				'/product-filters-active-block/?min_price=17&max_price=71'
+				`${ defaultBlockPostPage.link }?min_price=17&max_price=71`
 			);
 
 			const hasTitle =
