@@ -144,11 +144,11 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 */
 	private function get_formatted_price( $price ) {
 		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
-		$currency_info = $currency_info_all[ $price->get_currency() ][ 'default' ];
+		$currency_info     = $currency_info_all[ $price->get_currency() ]['default'];
 
 		$locale_info_all = include WC()->plugin_path() . '/i18n/locale-info.php';
-		$locale_index = array_search( $price->get_currency(), array_column($locale_info_all, 'currency_code') );
-		$num_decimals = array_values( $locale_info_all )[ $locale_index ]['num_decimals'];
+		$locale_index    = array_search( $price->get_currency(), array_column( $locale_info_all, 'currency_code' ), true );
+		$num_decimals    = array_values( $locale_info_all )[ $locale_index ]['num_decimals'];
 
 		add_filter(
 			'woocommerce_price_format',
@@ -177,13 +177,16 @@ class MarketingCampaigns extends WC_REST_Controller {
 			2
 		);
 
-		$price_value = wc_format_decimal( $price->get_value() );
-		$price_formatted = wc_price( $price_value, array(
-			'currency' => $price->get_currency(),
-			'decimal_separator' => $currency_info['decimal_sep'],
-			'thousand_separator' => $currency_info['thousand_sep'],
-			'decimals' => $num_decimals,
-		));
+		$price_value     = wc_format_decimal( $price->get_value() );
+		$price_formatted = wc_price(
+			$price_value,
+			array(
+				'currency'           => $price->get_currency(),
+				'decimal_separator'  => $currency_info['decimal_sep'],
+				'thousand_separator' => $currency_info['thousand_sep'],
+				'decimals'           => $num_decimals,
+			)
+		);
 
 		return wp_strip_all_tags( $price_formatted );
 	}
@@ -206,16 +209,16 @@ class MarketingCampaigns extends WC_REST_Controller {
 
 		if ( $item->get_cost() instanceof Price ) {
 			$data['cost'] = array(
-				'value'    => wc_format_decimal( $item->get_cost()->get_value() ),
-				'currency' => $item->get_cost()->get_currency(),
+				'value'     => wc_format_decimal( $item->get_cost()->get_value() ),
+				'currency'  => $item->get_cost()->get_currency(),
 				'formatted' => $this->get_formatted_price( $item->get_cost() ),
 			);
 		}
 
 		if ( $item->get_sales() instanceof Price ) {
 			$data['sales'] = array(
-				'value'    => wc_format_decimal( $item->get_sales()->get_value() ),
-				'currency' => $item->get_sales()->get_currency(),
+				'value'     => wc_format_decimal( $item->get_sales()->get_value() ),
+				'currency'  => $item->get_sales()->get_currency(),
 				'formatted' => $this->get_formatted_price( $item->get_sales() ),
 			);
 		}
