@@ -1,5 +1,4 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
+const { test, expect } = require( '@playwright/test' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -112,34 +111,13 @@ test.describe( 'Mini Cart block page', () => {
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
 		} );
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
-		let response = await wpApi.get( `pages` );
-		const allPages = await response.json();
-		await allPages.forEach( async ( page ) => {
-			if ( page.title.rendered === miniCartPageTitle ) {
-				response = await wpApi.delete( `pages/${ page.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
-		} );
 	} );
 
-	test.afterEach( async ( { context } ) => {
-		// shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-	} );
-
-	test( 'can create and see empty mini cart', async ( { page } ) => {
+	test( 'can create and see empty mini cart', async ( {
+		page,
+		baseURL,
+		context,
+	} ) => {
 		// create a new page with mini cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
@@ -179,11 +157,7 @@ test.describe( 'Mini Cart block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Shop' } )
 		).toBeVisible();
-	} );
 
-	test( 'can proceed to mini cart, observe it and proceed to the checkout', async ( {
-		page,
-	} ) => {
 		// add product to cart
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 
@@ -242,13 +216,7 @@ test.describe( 'Mini Cart block page', () => {
 			page.getByRole( 'heading', { name: 'Checkout', exact: true } )
 		).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
-	} );
 
-	test( 'can see mini cart total price inclusive with tax', async ( {
-		page,
-		baseURL,
-		context,
-	} ) => {
 		// shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
 

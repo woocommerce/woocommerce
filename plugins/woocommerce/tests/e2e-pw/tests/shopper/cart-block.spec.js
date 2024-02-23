@@ -82,11 +82,6 @@ test.describe( 'Cart Block page', () => {
 		} );
 	} );
 
-	test.afterEach( async ( { context } ) => {
-		// Shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-	} );
-
 	test( 'can create and see empty cart block', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
@@ -129,11 +124,7 @@ test.describe( 'Cart Block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Shop' } )
 		).toBeVisible();
-	} );
 
-	test( 'can add product to cart block, increase quantity, manage cross-sell products and proceed to checkout', async ( {
-		page,
-	} ) => {
 		// add product to cart block
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
 		await page.goto( cartBlockPageSlug );
