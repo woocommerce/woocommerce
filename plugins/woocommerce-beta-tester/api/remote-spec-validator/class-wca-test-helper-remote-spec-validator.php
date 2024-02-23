@@ -24,7 +24,6 @@ register_woocommerce_admin_test_helper_rest_route(
  * @param WP_REST_Request $request The full request data.
  */
 function wca_test_helper_validate_remote_spec( $request ) {
-	global $wpdb;
 	$spec = json_decode( $request->get_param( 'spec' ) );
 	$rule_evaluator = new RuleEvaluator();
 	$result = [
