@@ -180,6 +180,7 @@ class ProductQuery extends AbstractBlock {
 			// and needs refresh to update data.
 			$this->asset_data_registry->add(
 				'needsRefreshForInteractivityAPI',
+				true,
 				true
 			);
 			// Set this so that our product filters can detect if it's a PHP template.

@@ -20,16 +20,13 @@ class EvaluateExtension {
 	 * @param object $extension The extension to evaluate.
 	 * @return object The evaluated extension.
 	 */
-	public static function evaluate( $extension ) {
+	private static function evaluate( $extension ) {
 		global $wp_version;
 		$rule_evaluator = new RuleEvaluator();
 
 		if ( isset( $extension->is_visible ) ) {
-			try {
-				$is_visible            = $rule_evaluator->evaluate( $extension->is_visible );
-				$extension->is_visible = $is_visible;
-			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
-			}
+			$is_visible            = $rule_evaluator->evaluate( $extension->is_visible );
+			$extension->is_visible = $is_visible;
 		} else {
 			$extension->is_visible = true;
 		}
