@@ -107,16 +107,6 @@ export function Header( {
 		return <LoadingState />;
 	}
 
-	const isDraft =
-		productType === 'product'
-			? lastPersistedProduct?.status === 'draft'
-			: false;
-
-	const isScheduled =
-		productType === 'product'
-			? lastPersistedProduct?.status === 'future'
-			: false;
-
 	const isHeaderImageVisible =
 		( ! isVariation &&
 			Array.isArray( selectedImage ) &&
@@ -135,7 +125,7 @@ export function Header( {
 
 	function getVisibilityTags() {
 		const tags = [];
-		if ( isDraft ) {
+		if ( productStatus === 'draft' || productStatus === 'future' ) {
 			tags.push(
 				<Tag
 					key={ 'draft-tag' }
@@ -144,11 +134,8 @@ export function Header( {
 			);
 		}
 		if (
-			( productType === 'product' &&
-				! isScheduled &&
-				catalogVisibility !== 'visible' ) ||
-			( productType === 'product_variation' &&
-				productStatus === 'private' )
+			( productStatus !== 'future' && catalogVisibility === 'hidden' ) ||
+			( isVariation && productStatus === 'private' )
 		) {
 			tags.push(
 				<Tag
