@@ -235,7 +235,7 @@ abstract class CustomMetaDataStore {
 	/**
 	 * Returns distinct meta keys in use.
 	 *
-	 * @since 8.7.0
+	 * @since 8.8.0
 	 *
 	 * @param int    $limit           Maximum number of meta keys to return. Defaults to 100.
 	 * @param string $order           Order to use for the results. Either 'ASC' or 'DESC'. Defaults to 'ASC'.

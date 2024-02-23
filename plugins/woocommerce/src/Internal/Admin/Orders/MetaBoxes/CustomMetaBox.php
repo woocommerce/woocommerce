@@ -122,7 +122,7 @@ class CustomMetaBox {
 			 * Compatibility filter for 'postmeta_form_limit', which filters the number of custom fields to retrieve
 			 * for the drop-down in the Custom Fields meta box.
 			 *
-			 * @since 8.7.0
+			 * @since 8.8.0
 			 *
 			 * @param int $limit Number of custom fields to retrieve. Default 30.
 			 */
