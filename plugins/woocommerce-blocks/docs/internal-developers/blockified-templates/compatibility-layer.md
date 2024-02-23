@@ -4,12 +4,12 @@ The Compatibility Layer ensures that blockified templates work correctly with ex
 
 The Compatibility Layer is disabled when either of classic template blocks are added on the page:
 
-- `WooCommerce Single Product`
+- `WooCommerce Single Product`,
 - `WooCommerce Product Attribute`,
 - `WooCommerce Product Taxonomy`,
 - `WooCommerce Product Tag`,
 - `WooCommerce Product Search Results`,
-- `WooCommerce Product Grid`
+- `WooCommerce Product Grid`.
 
 Please note these blocks represent classic templates. As an example, using Single Product block won't disable Compatibility Layer.
 
