@@ -225,6 +225,22 @@ const getMainConfig = ( options = {} ) => {
 						loader: 'ignore-loader',
 					},
 				},
+				{
+					test: require.resolve( 'intl-tel-input/build/js/utils' ),
+					use: {
+						loader: 'imports-loader',
+						options: {
+							wrapper: {
+								thisArg: 'window',
+								args: {
+									module: false,
+									exports: false,
+									define: false,
+								},
+							},
+						},
+					},
+				},
 			],
 		},
 		optimization: {

@@ -6,7 +6,7 @@ import { useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { Label, ValidationInputError } from '@woocommerce/blocks-components';
 import IntlTelInput from 'intl-tel-input/react/build/IntlTelInput.esm';
-import utils from 'iti/utils';
+import 'intl-tel-input/build/js/utils';
 
 /**
  * Internal dependencies
@@ -34,6 +34,7 @@ export const PhoneInput = ( {
 }: PhoneInputProps ): JSX.Element => {
 	const [ isActive, setIsActive ] = useState( false );
 	const [ validationError, setValidationError ] = useState( '' );
+	const [ showValidationError, setShowValidationError ] = useState( false );
 
 	return (
 		<div
@@ -52,18 +53,23 @@ export const PhoneInput = ( {
 					} ) }
 					initialValue={ value }
 					onChangeNumber={ ( newValue: string ) => {
+						setShowValidationError( false );
 						onChange( newValue );
 					} }
 					initOptions={ {
 						initialCountry: country,
 						showSelectedDialCode: true,
-						utilsScript:
-							'../node_modules/intl-tel-input/build/js/utils.js',
 					} }
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ () => {
 						onBlur( value );
 						setIsActive( false );
+
+						if ( ! value && ! required ) {
+							setValidationError( '' );
+						}
+
+						setShowValidationError( true );
 					} }
 					onChangeValidity={ ( isValid: boolean ) => {
 						if ( isValid ) {
@@ -92,7 +98,7 @@ export const PhoneInput = ( {
 					className: 'field-label',
 				} }
 			/>
-			{ !! validationError && (
+			{ !! validationError && showValidationError && (
 				<ValidationInputError errorMessage={ validationError } />
 			) }
 		</div>
