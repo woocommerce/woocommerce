@@ -3,7 +3,7 @@ const { admin } = require( '../../test-data/data' );
 const { closeWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const miniCartPageTitle = 'Mini Cart';
+const miniCartPageTitle = `Mini Cart ${ Date.now() }`;
 const miniCartPageSlug = miniCartPageTitle.replace( / /gi, '-' ).toLowerCase();
 const miniCartButton = '.wc-block-mini-cart__button';
 const miniCartBadge = '.wc-block-mini-cart__badge';
