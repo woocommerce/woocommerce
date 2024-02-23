@@ -242,8 +242,8 @@ class CustomMetaBox {
 		$order_id = (int) $_POST['order_id'] ?? 0;
 		$order    = $this->verify_order_edit_permission_for_ajax( $order_id );
 
-		$select_meta_key = sanitize_text_field( wp_unslash( trim( $_POST['metakeyselect'] ?? '' ) ) );
-		$input_meta_key  = sanitize_text_field( wp_unslash( trim( $_POST['metakeyinput'] ?? '' ) ) );
+		$select_meta_key = trim( sanitize_text_field( wp_unslash( $_POST['metakeyselect'] ?? '' ) ) );
+		$input_meta_key  = trim( sanitize_text_field( wp_unslash( $_POST['metakeyinput'] ?? '' ) ) );
 
 		if ( empty( $_POST['meta'] ) && in_array( $select_meta_key, array( '', '#NONE#' ), true ) && ! $input_meta_key ) {
 			wp_die( 1 );
@@ -254,7 +254,8 @@ class CustomMetaBox {
 			$this->handle_update_meta( $order, $meta );
 		} else { // add meta.
 			$meta_value = sanitize_text_field( wp_unslash( $_POST['metavalue'] ?? '' ) );
-			$this->handle_add_meta(  $order, $input_meta_key ?: $select_meta_key, $meta_value );
+			$meta_key   = $input_meta_key ? $input_meta_key : $select_meta_key;
+			$this->handle_add_meta( $order, $meta_key, $meta_value );
 		}
 	}
 
