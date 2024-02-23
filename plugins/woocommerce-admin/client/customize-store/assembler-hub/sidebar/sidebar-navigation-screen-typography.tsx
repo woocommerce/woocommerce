@@ -29,6 +29,9 @@ export const SidebarNavigationScreenTypography = () => {
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
+	const title = aiOnline
+		? __( 'Change your font', 'woocommerce' )
+		: __( 'Choose fonts', 'woocommerce' );
 	const label = aiOnline
 		? __(
 				"AI has selected a font pairing that's the best fit for your business. If you'd like to change them, select a new option below now, or later in <EditorLink>Editor</EditorLink> | <StyleLink>Styles</StyleLink>.",
@@ -86,7 +89,7 @@ export const SidebarNavigationScreenTypography = () => {
 
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your font', 'woocommerce' ) }
+			title={ title }
 			description={ createInterpolateElement( label, {
 				EditorLink: (
 					<Link
