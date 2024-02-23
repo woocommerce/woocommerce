@@ -53,7 +53,6 @@ export const PhoneInput = ( {
 						initialCountry: country,
 						showSelectedDialCode: true,
 						utilsScript: utils,
-						hiddenInput: 'full',
 					} }
 					onFocus={ () => setIsActive( true ) }
 					onBlur={ () => {
