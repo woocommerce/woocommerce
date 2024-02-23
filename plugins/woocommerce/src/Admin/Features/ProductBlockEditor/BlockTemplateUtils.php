@@ -133,14 +133,58 @@ class BlockTemplateUtils {
         $after_block_visitor  = null;
         $hooked_blocks        = get_hooked_blocks();
         if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
-            $before_block_visitor = make_before_block_visitor( $hooked_blocks, $template );
-            $after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template );
+            $before_block_visitor = make_before_block_visitor( $hooked_blocks, $template, array( $this, 'insert_blocks' ) );
+            $after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template, array( $this, 'insert_blocks' ) );
         }
         $blocks            = parse_blocks( $template->content );
         $template->content = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
 
 		return $template;
 	}
+
+    /**
+     * Returns the markup for blocks hooked to the given anchor block in a specific relative position.
+     *
+     * @since 6.5.0
+     * @access private
+     *
+     * @param array                   $parsed_anchor_block The anchor block, in parsed block array format.
+     * @param string                  $relative_position   The relative position of the hooked blocks.
+     *                                                     Can be one of 'before', 'after', 'first_child', or 'last_child'.
+     * @param array                   $hooked_blocks       An array of hooked block types, grouped by anchor block and relative position.
+     * @param WP_Block_Template|array $context             The block template, template part, or pattern that the anchor block belongs to.
+     * @return string
+     */
+    public function insert_blocks( &$parsed_anchor_block, $relative_position, $hooked_blocks, $context ) {
+        /**
+         * Filters the list of hooked block types for a given anchor block type and relative position.
+         *
+         * @since 6.4.0
+         *
+         * @param string[]                        $hooked_block_types The list of hooked block types.
+         * @param string                          $relative_position  The relative position of the hooked blocks.
+         *                                                            Can be one of 'before', 'after', 'first_child', or 'last_child'.
+         * @param string                          $anchor_block_type  The anchor block type.
+         * @param WP_Block_Template|WP_Post|array $context            The block template, template part, `wp_navigation` post type,
+         *                                                            or pattern that the anchor block belongs to.
+         */
+        $inserted_blocks = apply_filters( "inserted_blocks", array(), $parsed_anchor_block, $relative_position, $context );
+
+        $markup = '';
+        foreach ( $inserted_blocks as $inserted_block ) {
+            $parsed_inserted_block = array(
+                'blockName'    => $inserted_block['blockName'] ?? '',
+                'attrs'        => $inserted_block['attrs'] ?? array(),
+                'innerBlocks'  => $inserted_block['innerBlocks'] ?? array(),
+                'innerContent' => $inserted_block['innerContent'] ?? array(),
+            );
+
+            // @todo Add before and after inserted block hooks.
+            $markup .= serialize_block( $parsed_inserted_block );
+        }
+
+        return $markup;
+    }
 
     /**
      * Get the block template title.
