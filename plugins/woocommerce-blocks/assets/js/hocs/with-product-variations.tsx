@@ -6,22 +6,20 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getProductVariations } from '@woocommerce/editor-components/utils';
 import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
-import { ProductResponseVariationsItem } from '@woocommerce/types';
+import {
+	ProductResponseItem,
+	ProductResponseVariationsItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { formatError } from '../base/utils/errors';
 
-interface Product {
-	id: number;
-	variations?: ProductResponseVariationsItem[];
-}
-
 interface WithProductVariationsProps {
 	selected: number[];
 	showVariations: boolean;
-	products: Product[];
+	products: ProductResponseItem[];
 	isLoading?: boolean;
 	error?: ErrorObject;
 }
