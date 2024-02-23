@@ -14,6 +14,9 @@ class HookedBlockExamples {
         add_filter( 'inserted_blocks', array( $this, 'add_price_block_1' ), 10, 4 );
         add_filter( 'inserted_blocks', array( $this, 'add_price_block_2' ), 10, 4 );
         add_filter( 'inserted_blocks', array( $this, 'add_block_to_hooked_block' ), 10, 4 );
+        add_filter( 'inserted_blocks', array( $this, 'add_block_first_child' ), 10, 4 );
+        add_filter( 'inserted_blocks', array( $this, 'add_section_block' ), 10, 4 );
+        add_filter( 'inserted_blocks', array( $this, 'add_section_inner_block' ), 10, 4 );
     }
 
     /**
@@ -97,6 +100,9 @@ class HookedBlockExamples {
         ) {
             $inserted_blocks[] = array(
                 'blockName' => 'woocommerce/product-regular-price-field',
+                'attrs'     => array(
+                    'label' => 'Price block 1'
+                )
             );
         }
     
@@ -117,7 +123,7 @@ class HookedBlockExamples {
             $inserted_blocks[] = array(
                 'blockName' => 'woocommerce/product-regular-price-field',
                 'attrs'     => array(
-                    'label' => 'Price block 2',
+                    'label' => 'Price block 2'
                 )
             );
         }
@@ -133,11 +139,89 @@ class HookedBlockExamples {
     public function add_block_to_hooked_block( $inserted_blocks, $anchor_block, $position, $context ) {
         if ( 
             'woocommerce/product-regular-price-field' === $anchor_block['blockName'] &&
+            'Price block 2' === $anchor_block['attrs']['label'] &&
             'after' === $position &&
             'product-form' === $context->area
         ) {
             $inserted_blocks[] = array(
                 'blockName' => 'woocommerce/product-sale-price-field',
+                'attrs'     => array(
+                    'label' => 'This block was added to an inserted block'
+                )
+            );
+        }
+    
+        return $inserted_blocks;
+    }
+
+    /**
+     * Add a block to a previously hooked block.
+     * 
+     * This will fail since block hooks don't run on blocks that were also hooked in.
+     */
+    public function add_block_first_child( $inserted_blocks, $anchor_block, $position, $context ) {
+        error_log('pos: ' . $position );
+        error_log(print_r($anchor_block,true));
+        if ( 
+            'woocommerce/product-tab' === $anchor_block['blockName'] &&
+            'pricing' === $anchor_block['attrs']['id'] &&
+            'first_child' === $position &&
+            'product-form' === $context->area
+        ) {
+            $inserted_blocks[] = array(
+                'blockName'  => 'woocommerce/product-checkbox-field',
+                'attrs' => array(
+                  'property' => 'status',
+                  'label'    => __( 'Hide in product catalog', 'woocommerce' ),
+                  'checkedValue'  => 'private',
+                  'uncheckedValue' => 'publish',
+                ),
+            );
+        }
+    
+        return $inserted_blocks;
+    }
+
+    /**
+     * Add a block to a previously hooked block.
+     * 
+     * This will fail since block hooks don't run on blocks that were also hooked in.
+     */
+    public function add_section_block( $inserted_blocks, $anchor_block, $position, $context ) {
+        if ( 
+            'woocommerce/product-tab' === $anchor_block['blockName'] &&
+            'custom_tab_1' === $anchor_block['attrs']['id'] &&
+            'last_child' === $position &&
+            'product-form' === $context->area
+        ) {
+            $inserted_blocks[] = array(
+                'blockName' => 'woocommerce/product-section',
+                'attrs'     => array(
+                    'title' => 'Custom section'
+                )
+            );
+        }
+    
+        return $inserted_blocks;
+    }
+
+    /**
+     * Add a block to a previously hooked block.
+     * 
+     * This will fail since block hooks don't run on blocks that were also hooked in.
+     */
+    public function add_section_inner_block( $inserted_blocks, $anchor_block, $position, $context ) {
+        if ( 
+            'woocommerce/product-section' === $anchor_block['blockName'] &&
+            'Custom section' === $anchor_block['attrs']['title'] &&
+            'first_child' === $position &&
+            'product-form' === $context->area
+        ) {
+            $inserted_blocks[] = array(
+                'blockName' => 'woocommerce/product-sale-price-field',
+                'attrs'     => array(
+                    'label' => 'This block is a nested block on an inserted block.'
+                )
             );
         }
     

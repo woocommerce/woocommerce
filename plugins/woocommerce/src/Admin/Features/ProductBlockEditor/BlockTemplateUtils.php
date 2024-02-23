@@ -157,16 +157,14 @@ class BlockTemplateUtils {
      */
     public function insert_blocks( &$parsed_anchor_block, $relative_position, $hooked_blocks, $context ) {
         /**
-         * Filters the list of hooked block types for a given anchor block type and relative position.
+         * Filters the list of inserted blocks for a given anchor block type and relative position.
          *
-         * @since 6.4.0
-         *
-         * @param string[]                        $hooked_block_types The list of hooked block types.
-         * @param string                          $relative_position  The relative position of the hooked blocks.
-         *                                                            Can be one of 'before', 'after', 'first_child', or 'last_child'.
-         * @param string                          $anchor_block_type  The anchor block type.
-         * @param WP_Block_Template|WP_Post|array $context            The block template, template part, `wp_navigation` post type,
-         *                                                            or pattern that the anchor block belongs to.
+         * @param array[]                         $inserted_blocks     The list of inserted blocks.
+         * @param string                          $parsed_anchor_block The parsed anchor block.
+         * @param string                          $relative_position   The relative position of the hooked blocks.
+         *                                                             Can be one of 'before', 'after', 'first_child', or 'last_child'.
+         * @param WP_Block_Template|WP_Post|array $context             The block template, template part, `wp_navigation` post type,
+         *                                                             or pattern that the anchor block belongs to.
          */
         $inserted_blocks = apply_filters( "inserted_blocks", array(), $parsed_anchor_block, $relative_position, $context );
 
@@ -179,8 +177,16 @@ class BlockTemplateUtils {
                 'innerContent' => $inserted_block['innerContent'] ?? array(),
             );
 
-            // @todo Add before and after inserted block hooks.
+            // Parse these first so markup is generated from all inner blocks.
+            $first_chunk = $this->insert_blocks( $parsed_inserted_block, 'first_child', $hooked_blocks, $context );
+            $last_chunk  = $this->insert_blocks( $parsed_inserted_block, 'last_child', $hooked_blocks, $context );
+            array_unshift( $parsed_inserted_block['innerContent'], $first_chunk );
+            array_push( $parsed_inserted_block['innerContent'], $last_chunk );
+
+            // Prepend with blocks inserted before, serialize this block, and append with blocks inserted after.
+            $markup .= $this->insert_blocks( $parsed_inserted_block, 'before', $hooked_blocks, $context );
             $markup .= serialize_block( $parsed_inserted_block );
+            $markup .= $this->insert_blocks( $parsed_inserted_block, 'after', $hooked_blocks, $context );
         }
 
         return $markup;
