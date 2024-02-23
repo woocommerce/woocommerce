@@ -200,8 +200,8 @@ export const SidebarNavigationScreenTypography = () => {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ () => {
-												dispatch(
+											onClick={ async () => {
+												await dispatch(
 													OPTIONS_STORE_NAME
 												).updateOptions( {
 													woocommerce_allow_tracking:
@@ -209,9 +209,10 @@ export const SidebarNavigationScreenTypography = () => {
 															? 'yes'
 															: 'no',
 												} );
+
 												OptIn();
-												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
 												closeModal();
+												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
