@@ -256,6 +256,7 @@
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build"
 		],
+		"ext": "js,css,php,json",
 		"ignoreRoot": []
 	},
 	"wireit": {
