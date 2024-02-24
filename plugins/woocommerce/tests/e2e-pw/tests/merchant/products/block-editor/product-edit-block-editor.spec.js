@@ -1,118 +1,100 @@
 const { test: baseTest } = require( './block-editor-fixtures' );
 const { expect } = require( '../../../../fixtures' );
-baseTest.describe( 'Products > Edit Product', () => {
-	const test = baseTest.extend( {
-		product: async ( { api }, use ) => {
-			let product;
 
-			await api
-				.post( 'products', {
-					id: 0,
-					name: `Product ${ Date.now() }`,
-					type: 'simple',
-					description: `This product is a longer description of the awesome product ${ Date.now() }`,
-					short_description: `This product is pretty awesome ${ Date.now() }`,
-					regular_price: '12.99',
-				} )
-				.then( ( response ) => {
-					product = response.data;
-				} );
+const test = baseTest.extend( {
+	product: async ( { api }, use ) => {
+		let product;
 
-			await use( product );
+		await api
+			.post( 'products', {
+				id: 0,
+				name: `Product ${ Date.now() }`,
+				type: 'simple',
+				description: `This product is a longer description of the awesome product ${ Date.now() }`,
+				short_description: `This product is pretty awesome ${ Date.now() }`,
+				regular_price: '12.99',
+			} )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
-			// Cleanup
-			await api.delete( `products/${ product.id }`, { force: true } );
-		},
-		page: async ( { page, api }, use ) => {
-			await api.put(
-				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
-				{
-					value: 'yes',
-				}
-			);
+		await use( product );
 
-			await use( page );
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+} );
 
-			await api.put(
-				'settings/advanced/woocommerce_feature_product_block_editor_enabled',
-				{
-					value: 'no',
-				}
-			);
-		},
+test( 'can update the general information of a product', async ( {
+	page,
+	product,
+} ) => {
+	await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+
+	const updatedProduct = {
+		name: `Product ${ Date.now() }`,
+		description: `Updated description for the awesome product ${ Date.now() }`,
+		short_description: `Updated summary for the awesome product ${ Date.now() }`,
+		regularPrice: '100.05',
+		salePrice: '99.05',
+	};
+
+	const nameTextbox = page.getByLabel( 'Name' ).getByRole( 'textbox' );
+	const summaryTextbox = page
+		.getByLabel( 'Block: Product textarea block' )
+		.getByRole( 'textbox' );
+	const descriptionTextbox = page
+		.getByLabel( 'Block: Product description' )
+		.getByRole( 'textbox' );
+	const listPriceTextbox = page.getByRole( 'textbox', {
+		name: 'List price',
+	} );
+	const salePriceTextbox = page.getByRole( 'textbox', {
+		name: 'Sale price',
 	} );
 
-	test( 'can update the general information of a product', async ( {
-		page,
-		product,
-	} ) => {
-		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+	await test.step( 'edit the product name', async () => {
+		await nameTextbox.fill( updatedProduct.name );
+	} );
 
-		const updatedProduct = {
-			name: `Product ${ Date.now() }`,
-			description: `Updated description for the awesome product ${ Date.now() }`,
-			short_description: `Updated summary for the awesome product ${ Date.now() }`,
-			regularPrice: '100.05',
-			salePrice: '99.05',
-		};
+	await test.step( 'edit the product price', async () => {
+		await listPriceTextbox.fill( updatedProduct.regularPrice );
+		await salePriceTextbox.fill( updatedProduct.salePrice );
+	} );
 
-		const nameTextbox = page.getByLabel( 'Name' ).getByRole( 'textbox' );
-		const summaryTextbox = page
-			.getByLabel( 'Block: Product textarea block' )
-			.getByRole( 'textbox' );
-		const descriptionTextbox = page
-			.getByLabel( 'Block: Product description' )
-			.getByRole( 'textbox' );
-		const listPriceTextbox = page.getByRole( 'textbox', {
-			name: 'List price',
-		} );
-		const salePriceTextbox = page.getByRole( 'textbox', {
-			name: 'Sale price',
-		} );
+	await test.step( 'edit the product description and summary', async () => {
+		// Need to clear the textbox before filling it, otherwise the text will be appended.
+		await descriptionTextbox.clear();
+		await descriptionTextbox.fill( updatedProduct.description );
 
-		await test.step( 'edit the product name', async () => {
-			await nameTextbox.fill( updatedProduct.name );
-		} );
+		await summaryTextbox.clear();
+		await summaryTextbox.fill( updatedProduct.short_description );
+	} );
 
-		await test.step( 'edit the product price', async () => {
-			await listPriceTextbox.fill( updatedProduct.regularPrice );
-			await salePriceTextbox.fill( updatedProduct.salePrice );
-		} );
+	await test.step( 'publish the updated product', async () => {
+		await page.getByRole( 'button', { name: 'Update' } ).click();
 
-		await test.step( 'edit the product description and summary', async () => {
-			// Need to clear the textbox before filling it, otherwise the text will be appended.
-			await descriptionTextbox.clear();
-			await descriptionTextbox.fill( updatedProduct.description );
+		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+			'Product updated'
+		);
+	} );
 
-			await summaryTextbox.clear();
-			await summaryTextbox.fill( updatedProduct.short_description );
-		} );
+	await test.step( 'verify the changes', async () => {
+		await expect.soft( nameTextbox ).toHaveValue( updatedProduct.name );
 
-		await test.step( 'publish the updated product', async () => {
-			await page.getByRole( 'button', { name: 'Update' } ).click();
+		await expect
+			.soft( summaryTextbox )
+			.toHaveText( updatedProduct.short_description );
 
-			await expect(
-				page.getByLabel( 'Dismiss this notice' )
-			).toContainText( 'Product updated' );
-		} );
+		await expect
+			.soft( descriptionTextbox )
+			.toHaveText( updatedProduct.description );
 
-		await test.step( 'verify the changes', async () => {
-			await expect.soft( nameTextbox ).toHaveValue( updatedProduct.name );
-
-			await expect
-				.soft( summaryTextbox )
-				.toHaveText( updatedProduct.short_description );
-
-			await expect
-				.soft( descriptionTextbox )
-				.toHaveText( updatedProduct.description );
-
-			await expect
-				.soft( listPriceTextbox )
-				.toHaveValue( updatedProduct.regularPrice );
-			await expect
-				.soft( salePriceTextbox )
-				.toHaveValue( updatedProduct.salePrice );
-		} );
+		await expect
+			.soft( listPriceTextbox )
+			.toHaveValue( updatedProduct.regularPrice );
+		await expect
+			.soft( salePriceTextbox )
+			.toHaveValue( updatedProduct.salePrice );
 	} );
 } );

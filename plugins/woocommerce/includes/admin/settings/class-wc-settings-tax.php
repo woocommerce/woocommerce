@@ -178,7 +178,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output_tax_rates() {
 		global $current_section;
 
-		$current_class = $this->get_current_tax_class();
+		$current_class = self::get_current_tax_class();
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
@@ -320,7 +320,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- this is called via "do_action('woocommerce_settings_save_'...") in base class, where nonce is verified first.
 		global $wpdb;
 
-		$current_class = sanitize_title( $this->get_current_tax_class() );
+		$current_class = sanitize_title( self::get_current_tax_class() );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Missing
 		$posted_countries = wc_clean( wp_unslash( $_POST['tax_rate_country'] ) );
 

@@ -76,4 +76,23 @@ class WC_Admin_Tests_RemoteInboxNotifications_PublishAfterTimeRuleProcessor exte
 
 		$this->assertEquals( false, $result );
 	}
+
+	/**
+	 * Tests that the rule validation fails if publish_after_time is not in a valid date time format.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_fails_for_invalid_date_time_format() {
+		$processor = new PublishAfterTimeRuleProcessor();
+
+		$rules  = json_decode(
+			'{
+				"type": "publish_after_time",
+				"publish_after": "wrong-format"
+			}'
+		);
+		$result = $processor->validate( $rules );
+
+		$this->assertEquals( false, $result );
+	}
 }

@@ -38,6 +38,21 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	}
 
 	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		// Indicate to interactivity powered components that this block is on the page,
+		// and needs refresh to update data.
+		$this->asset_data_registry->add( 'needsRefreshForInteractivityAPI', true, true );
+	}
+
+	/**
 	 * Enqueue assets used for rendering the block in editor context.
 	 *
 	 * This is needed if a block is not yet within the post content--`render` and `enqueue_assets` may not have ran.

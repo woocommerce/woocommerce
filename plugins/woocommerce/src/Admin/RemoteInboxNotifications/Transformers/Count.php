@@ -6,21 +6,25 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
 use stdClass;
 
 /**
- * Count elements in Array.
+ * Count elements in Array or Countable object.
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
  */
 class Count implements TransformerInterface {
 	/**
-	 *  Count elements in Array.
+	 *  Count elements in Array or Countable object.
 	 *
-	 * @param array         $value an array to count.
-	 * @param stdClass|null $arguments arguments.
-	 * @param string|null   $default default value.
+	 * @param array|Countable $value an array to count.
+	 * @param stdClass|null   $arguments arguments.
+	 * @param string|null     $default default value.
 	 *
 	 * @return number
 	 */
 	public function transform( $value, stdClass $arguments = null, $default = null ) {
+		if ( ! is_array( $value ) && ! $value instanceof \Countable ) {
+			return $default;
+		}
+
 		return count( $value );
 	}
 
