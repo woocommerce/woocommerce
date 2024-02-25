@@ -8,6 +8,7 @@ import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -16,7 +17,6 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
-import { useState } from '@wordpress/element';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
