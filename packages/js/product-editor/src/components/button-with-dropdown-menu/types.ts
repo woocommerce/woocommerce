@@ -7,13 +7,11 @@ import type {
 	DropdownOption,
 } from '@wordpress/components';
 
-type ButtonVariant = Button.ButtonProps[ 'variant' ];
-
 type PositionYAxis = 'top' | 'middle' | 'bottom';
 type PositionXAxis = 'left' | 'center' | 'right';
 type PositionCorner = 'top' | 'right' | 'bottom' | 'left';
 
-type PopoverPlacement =
+export type PopoverPlacement =
 	| 'left'
 	| 'right'
 	| 'bottom'
@@ -27,25 +25,23 @@ type PopoverPlacement =
 	| 'top-end'
 	| 'top-start'; // @todo: pick from core
 
-type popoverPosition =
+export type PopoverPosition =
 	| `${ PositionYAxis }`
 	| `${ PositionYAxis } ${ PositionXAxis }`
 	| `${ PositionYAxis } ${ PositionXAxis } ${ PositionCorner }`;
 
-type popoverProps = {
+export type PopoverProps = {
 	placement?: PopoverPlacement;
-	position?: popoverPosition;
+	position?: PopoverPosition;
 	offset?: number;
 };
 
-export interface ButtonWithDropdownMenuProps {
-	text: string;
+export type ButtonWithDropdownMenuProps = Omit<
+	Button.ButtonProps,
+	'controls'
+> & {
 	dropdownButtonLabel?: string;
-	variant?: ButtonVariant;
 	defaultOpen?: boolean;
 	controls?: DropdownOption[];
-
-	popoverProps?: popoverProps;
-	onButtonClick?: () => void;
-	className?: string;
-}
+	popoverProps?: PopoverProps;
+};

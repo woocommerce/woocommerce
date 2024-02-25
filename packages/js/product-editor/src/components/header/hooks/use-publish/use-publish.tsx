@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import type { Product } from '@woocommerce/data';
+import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { MouseEvent } from 'react';
+import type { Product, ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,11 +14,9 @@ import { MouseEvent } from 'react';
 import { useValidations } from '../../../../contexts/validation-context';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
-import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 
 export function usePublish( {
 	productType = 'product',
-	productStatus,
 	disabled,
 	onClick,
 	onPublishSuccess,
@@ -27,7 +25,11 @@ export function usePublish( {
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ): Button.ButtonProps & {
+	publish(
+		productOrVariation?: Partial< Product | ProductVariation >
+	): Promise< Product | ProductVariation | undefined >;
+} {
 	const { isValidating, validate } = useValidations< Product >();
 
 	const [ productId ] = useEntityProp< number >(
@@ -36,7 +38,11 @@ export function usePublish( {
 		'id'
 	);
 
-	const isScheduled = useProductScheduled( productType );
+	const [ status, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+		'postType',
+		productType,
+		'status'
+	);
 
 	const { isSaving, isDirty } = useSelect(
 		( select ) => {
@@ -66,51 +72,37 @@ export function usePublish( {
 	const isBusy = isSaving || isValidating;
 	const isDisabled = disabled || isBusy || ! isDirty;
 
-	const isPublished =
-		productType === 'product' ? productStatus === 'publish' : true;
-
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( onClick ) {
-			onClick( event );
-		}
+	async function publish(
+		productOrVariation: Partial< Product | ProductVariation > = {}
+	) {
+		const isPublished = status === 'publish' || status === 'future';
 
 		try {
-			if ( productType === 'product' ) {
-				await validate( {
-					status: 'publish',
-				} );
-				// The publish button click not only change the status of the product
-				// but also save all the pending changes. So even if the status is
-				// publish it's possible to save the product too.
-				if ( ! isPublished ) {
-					await editEntityRecord(
-						'postType',
-						productType,
-						productId,
-						{
-							status: 'publish',
-						}
-					);
-				}
-			} else {
-				await validate();
-			}
+			// The publish button click not only change the status of the product
+			// but also save all the pending changes. So even if the status is
+			// publish it's possible to save the product too.
+			const data = ! isPublished
+				? { status: 'publish', ...productOrVariation }
+				: productOrVariation;
 
-			const publishedProduct = await saveEditedEntityRecord< Product >(
-				'postType',
-				productType,
-				productId,
-				{
-					throwOnError: true,
-				}
-			);
+			await validate( data as Partial< Product > );
+
+			await editEntityRecord( 'postType', productType, productId, data );
+
+			const publishedProduct = await saveEditedEntityRecord<
+				Product | ProductVariation
+			>( 'postType', productType, productId, {
+				throwOnError: true,
+			} );
 
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
+
+			return publishedProduct as Product | ProductVariation;
 		} catch ( error ) {
 			if ( onPublishError ) {
 				let wpError = error as WPError;
@@ -142,14 +134,32 @@ export function usePublish( {
 		}
 	}
 
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( isDisabled ) {
+			event.preventDefault?.();
+			return;
+		}
+
+		if ( onClick ) {
+			onClick( event );
+		}
+
+		await publish();
+	}
+
 	function getButtonText() {
-		if ( isScheduled ) {
+		if (
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+			status === 'future'
+		) {
 			return __( 'Schedule', 'woocommerce' );
 		}
 
-		return isPublished
-			? __( 'Update', 'woocommerce' )
-			: __( 'Publish', 'woocommerce' );
+		if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+			return __( 'Update', 'woocommerce' );
+		}
+
+		return __( 'Publish', 'woocommerce' );
 	}
 
 	return {
@@ -159,5 +169,6 @@ export function usePublish( {
 		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
+		publish,
 	};
 }
