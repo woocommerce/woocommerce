@@ -125,25 +125,6 @@
 					}
 				},
 				{
-					"name": "PHP WP: nightly",
-					"command": "test:php:env",
-					"changes": [
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test",
-						"config": {
-							"wpVersion": "nightly"
-						}
-					}
-				},
-				{
 					"name": "PHP WP: latest - 1",
 					"command": "test:php:env",
 					"changes": [
@@ -256,6 +237,7 @@
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build"
 		],
+		"ext": "js,css,php,json",
 		"ignoreRoot": []
 	},
 	"wireit": {
