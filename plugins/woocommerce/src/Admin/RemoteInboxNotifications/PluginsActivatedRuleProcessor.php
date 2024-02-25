@@ -41,7 +41,7 @@ class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
 	 * @return bool Whether the rule passes or not.
 	 */
 	public function process( $rule, $stored_state ) {
-		if ( 0 === count( $rule->plugins ) ) {
+		if ( ! is_countable( $rule->plugins ) || 0 === count( $rule->plugins ) ) {
 			return false;
 		}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent script caching by using the WC core version to hash Interactivity API assets instead of old WC Blocks version
