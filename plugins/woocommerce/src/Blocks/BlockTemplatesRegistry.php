@@ -28,12 +28,19 @@ class BlockTemplatesRegistry {
 	 *
 	 * @var AbstractTemplate[]|AbstractTemplatePart[]
 	 */
-	private static $templates = array();
+	private $templates = array();
 
 	/**
-	 * Registers all templates used by WooCommerce.
+	 * Constructor.
 	 */
-	public static function register_templates() {
+	public function __construct() {
+		 $this->init();
+	}
+
+	/**
+	 * Initialization method.
+	 */
+	public function init() {
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
 			$templates = array(
 				ProductCatalogTemplate::SLUG       => new ProductCatalogTemplate(),
@@ -57,7 +64,7 @@ class BlockTemplatesRegistry {
 		} else {
 			$template_parts = array();
 		}
-		self::$templates = array_merge( $templates, $template_parts );
+		$this->templates = array_merge( $templates, $template_parts );
 	}
 
 	/**
@@ -67,12 +74,9 @@ class BlockTemplatesRegistry {
 	 *
 	 * @return AbstractTemplate|AbstractTemplatePart|null
 	 */
-	public static function get_template( $template_slug ) {
-		if ( count( self::$templates ) === 0 ) {
-			self::register_templates();
-		}
-		if ( array_key_exists( $template_slug, self::$templates ) ) {
-			$registered_template = self::$templates[ $template_slug ];
+	public function get_template( $template_slug ) {
+		if ( array_key_exists( $template_slug, $this->templates ) ) {
+			$registered_template = $this->templates[ $template_slug ];
 			return $registered_template;
 		}
 		return null;

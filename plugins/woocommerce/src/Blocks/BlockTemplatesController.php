@@ -20,12 +20,18 @@ class BlockTemplatesController {
 	const TEMPLATES_ROOT_DIR = 'templates';
 
 	/**
+	 * Block templates registry.
+	 *
+	 * @var BlockTemplatesRegistry
+	 */
+	protected $block_templates_registry;
+
+	/**
 	 * Constructor.
 	 */
-	public function __construct() {
+	public function __construct( $block_templates_registry ) {
 		$this->init();
-
-		BlockTemplatesRegistry::register_templates();
+		$this->block_templates_registry = $block_templates_registry;
 	}
 
 	/**
@@ -154,7 +160,7 @@ class BlockTemplatesController {
 		$theme               = $template_name_parts[0] ?? '';
 		$slug                = $template_name_parts[1] ?? '';
 
-		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $this->block_templates_registry, $slug ) ) {
 			return null;
 		}
 
@@ -186,8 +192,8 @@ class BlockTemplatesController {
 			if ( ! is_wp_error( $template ) ) {
 				$template->id          = $theme . '//' . $slug;
 				$template->slug        = $slug;
-				$template->title       = BlockTemplateUtils::get_block_template_title( $slug );
-				$template->description = BlockTemplateUtils::get_block_template_description( $slug );
+				$template->title       = BlockTemplateUtils::get_block_template_title( $this->block_templates_registry, $slug );
+				$template->description = BlockTemplateUtils::get_block_template_description( $this->block_templates_registry, $slug );
 				unset( $template->source );
 
 				return $template;
@@ -211,7 +217,9 @@ class BlockTemplatesController {
 
 		$templates_eligible_for_fallback = array_filter(
 			$template_slugs,
-			array( BlockTemplateUtils::class, 'template_is_eligible_for_product_archive_fallback' )
+			function( $template_slug ) {
+				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $this->block_templates_registry, $template_slug );
+			}
 		);
 
 		if ( count( $templates_eligible_for_fallback ) > 0 ) {
@@ -262,10 +270,10 @@ class BlockTemplatesController {
 		list( $template_id, $template_slug ) = $template_name_parts;
 
 		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
+		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $this->block_templates_registry, $template_slug ) ) {
 			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
-			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
+			$template_object = BlockTemplateUtils::create_new_block_template_object( $this->block_templates_registry, $template_path, $template_type, $template_slug, true );
+			return BlockTemplateUtils::build_template_result_from_file( $this->block_templates_registry, $template_object, $template_type );
 		}
 
 		// This is a real edge-case, we are supporting users who have saved templates under the deprecated slug. See its definition for more information.
@@ -294,8 +302,8 @@ class BlockTemplatesController {
 
 		$directory          = BlockTemplateUtils::get_templates_directory( $template_type );
 		$template_file_path = $directory . '/' . $template_slug . '.html';
-		$template_object    = BlockTemplateUtils::create_new_block_template_object( $template_file_path, $template_type, $template_slug );
-		$template_built     = BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
+		$template_object    = BlockTemplateUtils::create_new_block_template_object( $this->block_templates_registry, $template_file_path, $template_type, $template_slug );
+		$template_built     = BlockTemplateUtils::build_template_result_from_file( $this->block_templates_registry, $template_object, $template_type );
 
 		if ( null !== $template_built ) {
 			return $template_built;
@@ -318,13 +326,13 @@ class BlockTemplatesController {
 			return $block_template;
 		}
 		if ( ! BlockTemplateUtils::template_has_title( $block_template ) ) {
-			$block_template->title = BlockTemplateUtils::get_block_template_title( $block_template->slug );
+			$block_template->title = BlockTemplateUtils::get_block_template_title( $this->block_templates_registry, $block_template->slug );
 		}
 		if ( ! $block_template->description ) {
-			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
+			$block_template->description = BlockTemplateUtils::get_block_template_description( $this->block_templates_registry, $block_template->slug );
 		}
 		if ( ! $block_template->area || 'uncategorized' === $block_template->area ) {
-			$block_template->area = BlockTemplateUtils::get_block_template_area( $block_template->slug, $template_type );
+			$block_template->area = BlockTemplateUtils::get_block_template_area( $this->block_templates_registry, $block_template->slug, $template_type );
 		}
 		return $block_template;
 	}
@@ -353,7 +361,7 @@ class BlockTemplatesController {
 			// If we have a template which is eligible for a fallback, we need to explicitly tell Gutenberg that
 			// it has a theme file (because it is using the fallback template file). And then `continue` to avoid
 			// adding duplicates.
-			if ( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) ) {
+			if ( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $this->block_templates_registry, $query_result, $template_file ) ) {
 				continue;
 			}
 
@@ -385,7 +393,7 @@ class BlockTemplatesController {
 				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
 			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
 			if ( $should_include ) {
-				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
+				$template       = BlockTemplateUtils::build_template_result_from_file( $this->block_templates_registry, $template_file, $template_type );
 				$query_result[] = $template;
 			}
 		}
@@ -407,13 +415,13 @@ class BlockTemplatesController {
 		$query_result = array_map(
 			function( $template ) use ( $template_type ) {
 				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
-					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
+					$template->title = BlockTemplateUtils::get_block_template_title( $this->block_templates_registry, $template->slug );
 				}
 				if ( ! $template->description ) {
-					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
+					$template->description = BlockTemplateUtils::get_block_template_description( $this->block_templates_registry, $template->slug );
 				}
 				if ( ! $template->area || 'uncategorized' === $template->area ) {
-					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
+					$template->area = BlockTemplateUtils::get_block_template_area( $this->block_templates_registry, $template->slug, $template_type );
 				}
 
 				return $template;
@@ -486,35 +494,35 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $already_found_templates ) ) {
-				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $template_slug, $already_found_templates );
+			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $this->block_templates_registry, $template_slug, $already_found_templates ) ) {
+				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $this->block_templates_registry, $template_slug, $already_found_templates );
 				$template_id           = explode( '//', $template->id );
 				$template->id          = $template_id[0] . '//' . $template_slug;
 				$template->slug        = $template_slug;
-				$template->title       = BlockTemplateUtils::get_block_template_title( $template_slug );
-				$template->description = BlockTemplateUtils::get_block_template_description( $template_slug );
+				$template->title       = BlockTemplateUtils::get_block_template_title( $this->block_templates_registry, $template_slug );
+				$template->description = BlockTemplateUtils::get_block_template_description( $this->block_templates_registry, $template_slug );
 				$templates[]           = $template;
 				continue;
 			}
 
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $this->block_templates_registry, $template_slug ) ) {
 				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
+				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $this->block_templates_registry, $template_file, $template_type, $template_slug, true );
 				continue;
 			}
 
 			// At this point the template only exists in the Blocks filesystem, if is a taxonomy-product_cat/tag/attribute.html template
 			// let's use the archive-product.html template from Blocks.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $this->block_templates_registry, $template_slug ) ) {
 				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
+				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $this->block_templates_registry, $template_file, $template_type, $template_slug, false );
 				continue;
 			}
 
 			// At this point the template only exists in the Blocks filesystem and has not been saved in the DB,
 			// or superseded by the theme.
-			$templates[] = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug );
+			$templates[] = BlockTemplateUtils::create_new_block_template_object( $this->block_templates_registry, $template_file, $template_type, $template_slug );
 		}
 
 		return $templates;

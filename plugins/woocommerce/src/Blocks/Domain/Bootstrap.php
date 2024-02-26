@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\QueryFilters;
@@ -145,6 +146,7 @@ class Bootstrap {
 			// regular rest requests to maintain compatibility with the store editor.
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
+			$this->container->get( BlockTemplatesRegistry::class );
 			$this->container->get( BlockTemplatesController::class );
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
@@ -245,9 +247,15 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
+			BlockTemplatesRegistry::class,
+			function ( Container $container ) {
+				return new BlockTemplatesRegistry();
+			}
+		);
+		$this->container->register(
 			BlockTemplatesController::class,
 			function ( Container $container ) {
-				return new BlockTemplatesController( $container->get( Package::class ) );
+				return new BlockTemplatesController( $container->get( BlockTemplatesRegistry::class ) );
 			}
 		);
 		$this->container->register(
