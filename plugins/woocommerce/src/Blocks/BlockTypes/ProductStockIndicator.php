@@ -86,6 +86,11 @@ class ProductStockIndicator extends AbstractBlock {
 
 		$post_id         = $block->context['postId'];
 		$product         = wc_get_product( $post_id );
+
+		if ( ! $product ) {
+			return '';
+		}
+
 		$is_in_stock     = $product->is_in_stock();
 		$is_on_backorder = $product->is_on_backorder();
 
