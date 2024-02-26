@@ -58,6 +58,7 @@ class WC_Helper_Admin {
 			'installedProducts'      => $installed_products,
 			'wooConnectInstalled'    => WC_Helper_Plugin::is_plugin_installed(),
 			'wooConnectActive'       => WC_Helper_Plugin::is_plugin_active(),
+			'wooConnectInstallUrl'   => WC_Helper_Plugin::generate_install_url(),
 		);
 
 		return $settings;
