@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+[Performance] Don't load REST API when hydrating blocks requests.
