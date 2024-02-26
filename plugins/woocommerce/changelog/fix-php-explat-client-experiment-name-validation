@@ -1,5 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Adjusted explat experiment name validation to match server side. Also made it fail more prominently in non-production environments.
-
-

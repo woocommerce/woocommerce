@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: CYS - Core: Font Library: Avoid crashing when Gutenberg is not installed.
-

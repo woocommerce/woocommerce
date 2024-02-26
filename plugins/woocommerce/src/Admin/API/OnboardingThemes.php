@@ -249,9 +249,69 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$core_themes = array(
+			array(
+				'name'           => 'Twenty Twenty-Four',
+				'price'          => 'Free',
+				'color_palettes' => array(
+					array(
+						'title'     => 'Black and white',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+					array(
+						'title'     => 'Brown Sugar',
+						'primary'   => '#EFEBE0',
+						'secondary' => '#AC6239',
+					),
+					array(
+						'title'     => 'Midnight',
+						'primary'   => '#161514',
+						'secondary' => '#AFADA7',
+					),
+					array(
+						'title'     => 'Olive',
+						'primary'   => '#FEFBF3',
+						'secondary' => '#7F7E7A',
+					),
+				),
+				'total_palettes' => 0,
+				'slug'           => 'twentytwentyfour',
+				'thumbnail_url'  => 'https://i0.wp.com/themes.svn.wordpress.org/twentytwentyfour/1.0/screenshot.png',
+				'link_url'       => 'https://wordpress.org/themes/twentytwentyfour/',
+			),
+			array(
+				'name'           => 'Highline',
+				'price'          => '$79/year',
+				'color_palettes' => array(),
+				'total_palettes' => 0,
+				'slug'           => 'highline',
+				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2023/12/Featured-image-538x403-1.png',
+				'link_url'       => 'https://woo.com/products/highline/',
+			),
+			array(
+				'name'           => 'Luminate',
+				'price'          => '$79/year',
+				'color_palettes' => array(),
+				'total_palettes' => 0,
+				'slug'           => 'luminate',
+				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/07/Featured-image-538x403-2.png',
+				'link_url'       => 'https://woo.com/products/luminate/',
+			),
+			array(
+				'name'           => 'Nokul',
+				'price'          => '$79/year',
+				'color_palettes' => array(),
+				'total_palettes' => 0,
+				'slug'           => 'nokul',
+				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/11/Product-logo.jpg',
+				'link_url'       => 'https://woo.com/products/nokul/',
+			),
+		);
+
 		// To be implemented: 1. Fetch themes from the marketplace API. 2. Convert prices to the requested currency.
 		// These are Dotcom themes.
-		$themes = array(
+		$default_themes = array(
 			array(
 				'name'           => 'Tsubaki',
 				'price'          => 'Free',
@@ -269,7 +329,6 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'slug'           => 'tazza',
 				'thumbnail_url'  => 'https://i0.wp.com/s2.wp.com/wp-content/themes/premium/tazza/screenshot.png',
 				'link_url'       => 'https://wordpress.com/theme/tazza/',
-				'total_palettes' => 0,
 			),
 			array(
 				'name'           => 'Amulet',
@@ -332,6 +391,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'link_url'       => 'https://wordpress.com/theme/zaino/',
 			),
 		);
+
+		$ai_connection_enabled = get_option( 'woocommerce_blocks_allow_ai_connection' );
+		$themes                = $ai_connection_enabled ? $default_themes : $core_themes;
 
 		// To be implemented: Filter themes based on industry.
 		if ( $industry ) {
