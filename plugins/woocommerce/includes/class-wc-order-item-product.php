@@ -15,6 +15,22 @@ defined( 'ABSPATH' ) || exit;
 class WC_Order_Item_Product extends WC_Order_Item {
 
 	/**
+	 * Legacy values.
+	 *
+	 * @deprecated 4.4.0 For legacy actions.
+	 * @var array
+	 */
+	public $legacy_values;
+
+	/**
+	 * Legacy cart item key.
+	 *
+	 * @deprecated 4.4.0 For legacy actions.
+	 * @var string
+	 */
+	public $legacy_cart_item_key;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0

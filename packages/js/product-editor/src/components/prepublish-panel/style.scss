@@ -1,0 +1,78 @@
+@import './visibility-section/style.scss';
+
+.woocommerce-product-publish-panel {
+	bottom: 0;
+    right: 0;
+    top: $admin-bar-height-big;
+	overflow: auto;
+    position: fixed;
+	background: $white;
+	transform: translateX(+100%);
+	animation: product-publish-panel__slide-in-animation 0.1s forwards;
+    width: 100%;
+
+	@include break-medium() {
+		top: $admin-bar-height;
+		width: $sidebar-width - $border-width;
+		@include reduce-motion("animation");
+
+		body.is-fullscreen-mode & {
+			top: 0;
+		}
+
+		// Keep it open on focus to avoid conflict with navigate-regions animation.
+		[role="region"]:focus & {
+			transform: translateX(0%);
+		}
+	}
+
+	&__header {
+		height: $header-height + $border-width;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 0 $grid-unit-20;
+
+		> button {
+			flex: 1;
+		}
+
+		.components-button {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
+	&__title {
+		padding: $grid-unit-20;
+		h4 {
+			font-size: 14px;
+			line-height: 20px;
+			margin: 8px 0;
+		}
+	}
+
+	&__content {
+		// Ensure the pre-publish panel accounts for the header and footer height.
+		min-height: calc( 100% - #{ $header-height + 200px } );
+	}
+
+	&__footer {
+		padding: 0 $grid-unit-20;
+		left: 0;
+		width: 100%;
+		min-height: $gap-largest + $gap-large;
+		display: flex;
+		align-items: center;
+
+		.components-base-control__field {
+			margin: 0;
+		}
+	}
+}
+
+@keyframes product-publish-panel__slide-in-animation {
+	100% {
+		transform: translateX(0%);
+	}
+}

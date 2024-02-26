@@ -1,5 +1,4 @@
-const { test: baseTest, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures' );
 
 async function addImageFromLibrary( page, imageName, actionButtonName ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
@@ -13,19 +12,8 @@ async function addImageFromLibrary( page, imageName, actionButtonName ) {
 }
 
 baseTest.describe( 'Products > Product Images', () => {
-	baseTest.use( { storageState: process.env.ADMINSTATE } );
-
 	const test = baseTest.extend( {
-		api: async ( { baseURL }, use ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-
-			await use( api );
-		},
+		storageState: process.env.ADMINSTATE,
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,

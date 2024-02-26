@@ -13,4 +13,5 @@ export type BlockEditorProps = {
 	postType: string;
 	productId: number;
 	settings?: ProductEditorSettings;
+	setIsEditorLoading: ( isEditorLoading: boolean ) => void;
 };
