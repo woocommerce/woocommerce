@@ -1,5 +1,14 @@
 == Changelog ==
 
+= 8.6.1 2024-02-20 =
+
+**WooCommerce**
+
+* Fix - Ensure WooCommerce Blocks scripts are uncached following a plugin update. [#44676](https://github.com/woocommerce/woocommerce/pull/44676)
+* Fix - Don't render attribution metabox for other order types. [#44680](https://github.com/woocommerce/woocommerce/pull/44680)
+* Fix - Fix the product_page shortcode not working if "status" is passed in as "any". [#44698](https://github.com/woocommerce/woocommerce/pull/44698)
+* Fix - Add default values for 'woocommerce_admin_billing_fields' and 'woocommerce_admin_shipping_fields' filters. [#44704](https://github.com/woocommerce/woocommerce/pull/44704)
+
 = 8.6.0 2024-02-13 =
 
 **WooCommerce**
