@@ -133,6 +133,10 @@ const AttributeFilterBlock = ( {
 			query: { orderby: 'menu_order' },
 		} );
 
+	const filterAvailableTerms =
+		blockAttributes.displayStyle !== 'dropdown' &&
+		blockAttributes.queryType === 'and';
+
 	const { results: filteredCounts, isLoading: filteredCountsLoading } =
 		useCollectionData( {
 			queryAttribute: {
@@ -141,6 +145,7 @@ const AttributeFilterBlock = ( {
 			},
 			queryState: {
 				...queryState,
+				attributes: filterAvailableTerms ? queryState.attributes : null,
 			},
 			isEditor,
 		} );
