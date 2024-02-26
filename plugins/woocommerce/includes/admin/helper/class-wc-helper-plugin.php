@@ -35,4 +35,58 @@ class WC_Helper_Plugin {
 	public static function is_plugin_installed(): bool {
 		return file_exists( WP_PLUGIN_DIR . '/' . self::WOO_MARKETPLACE_PLUGIN_MAIN_FILE );
 	}
+
+	/**
+	 * Generate the URL to install the Woo Connect plugin.
+	 *
+	 * @return string
+	 */
+	public static function generate_install_url(): string {
+		/**
+		 * Filter the base URL used to install the Woo Connect plugin.
+		 *
+		 * @since 8.7.0
+		 */
+		$install_url_base = apply_filters( 'woo_com_base_url', 'https://woo.com/' );
+		$install_url      = $install_url_base . 'in-app-purchase/install-woo-connect';
+
+		return self::add_auth_parameters( $install_url );
+	}
+
+	/**
+	 * Add the access token and signature to the provided URL.
+	 *
+	 * @param string $url The URL to add the access token and signature to.
+	 * @return string
+	 */
+	private static function add_auth_parameters( string $url ): string {
+		$auth = WC_Helper_Options::get( 'auth' );
+
+		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
+			return false;
+		}
+
+		$request_uri  = wp_parse_url( $url, PHP_URL_PATH );
+		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
+
+		if ( is_string( $query_string ) ) {
+			$request_uri .= '?' . $query_string;
+		}
+
+		$data = array(
+			'host'        => wp_parse_url( $url, PHP_URL_HOST ),
+			'request_uri' => $request_uri,
+			'method'      => 'GET',
+		);
+
+		$signature = hash_hmac( 'sha256', wp_json_encode( $data ), $auth['access_token_secret'] );
+
+		return add_query_arg(
+			array(
+				'token'     => $auth['access_token'],
+				'signature' => $signature,
+			),
+			$url
+		);
+	}
 }
