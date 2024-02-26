@@ -79,8 +79,6 @@ const prepareAttributes = async () => {
 	} );
 
 	await page.context().storageState( { path: adminFile } );
-	await browser.close();
-
 	await context.close();
 	await browser.close();
 
