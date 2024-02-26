@@ -140,7 +140,7 @@ jobs:
 
     k6:
         name: Runs k6 Performance tests
-        if: github.event.pull_request.user.login != 'github-actions[bot]'
+        if: (github.event.pull_request.user.login != 'github-actions[bot]') && (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'trunk')
         runs-on: ubuntu-20.04
         permissions:
             contents: read
