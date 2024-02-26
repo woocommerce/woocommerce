@@ -97,8 +97,8 @@ class ProductSaleBadge extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id    = $block->context['postId'];
-		$product    = wc_get_product( $post_id );
+		$post_id = $block->context['postId'];
+		$product = wc_get_product( $post_id );
 
 		if ( ! $product ) {
 			return null;
