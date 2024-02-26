@@ -1,5 +1,5 @@
 const { test: baseTest, expect } = require( '../../fixtures' );
-const { goToPostEditor } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 
 // need to figure out whether tests are being run on a mac
 const macOS = process.platform === 'darwin';
@@ -38,12 +38,15 @@ const test = baseTest.extend( {
 		// Cleanup
 		await api.delete( `products/${ product.id }`, { force: true } );
 	},
+	page: async ( { page }, use ) => {
+		await page.goto( 'wp-admin/post-new.php' );
+		await disableWelcomeModal( { page } );
+		await use( page );
+	},
 } );
 
 test.describe( 'Use Command Palette commands', () => {
 	test( 'can use the "Add new product" command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Add new product',
@@ -56,8 +59,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use the "Add new order" command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Add new order',
@@ -70,8 +71,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use the "Products" command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Products',
@@ -84,8 +83,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use the "Orders" command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'Orders',
@@ -98,8 +95,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use the product search command', async ( { page, product } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: product.name,
@@ -112,8 +107,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use a settings command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'WooCommerce Settings: Products',
@@ -124,8 +117,6 @@ test.describe( 'Use Command Palette commands', () => {
 	} );
 
 	test( 'can use an analytics command', async ( { page } ) => {
-		await goToPostEditor( { page } );
-
 		await clickOnCommandPaletteOption( {
 			page,
 			optionName: 'WooCommerce Analytics: Products',
