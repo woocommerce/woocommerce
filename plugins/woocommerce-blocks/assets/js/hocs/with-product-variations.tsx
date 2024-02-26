@@ -3,28 +3,53 @@
  */
 import { Component } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import PropTypes from 'prop-types';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 import { getProductVariations } from '@woocommerce/editor-components/utils';
+import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
+import {
+	ProductResponseItem,
+	ProductResponseVariationsItem,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { formatError } from '../base/utils/errors';
 
+interface WithProductVariationsProps {
+	selected: number[];
+	showVariations: boolean;
+	products: ProductResponseItem[];
+	isLoading?: boolean;
+	error?: ErrorObject;
+}
+
+interface State {
+	error: ErrorObject | null;
+	loading: boolean;
+	variations: { [ key: string ]: ProductResponseVariationsItem[] | null };
+}
+
 /**
  * HOC that queries variations for a component.
  *
- * @param {Function} OriginalComponent Component being wrapped.
+ * @param OriginalComponent Component being wrapped.
  */
 const withProductVariations = createHigherOrderComponent(
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
 	( OriginalComponent ) => {
-		class WrappedComponent extends Component {
-			state = {
+		class WrappedComponent extends Component<
+			WithProductVariationsProps,
+			State
+		> {
+			state: State = {
 				error: null,
 				loading: false,
 				variations: {},
 			};
+
+			private prevSelectedItem?: number;
 
 			componentDidMount() {
 				const { selected, showVariations } = this.props;
@@ -34,7 +59,7 @@ const withProductVariations = createHigherOrderComponent(
 				}
 			}
 
-			componentDidUpdate( prevProps ) {
+			componentDidUpdate( prevProps: WithProductVariationsProps ) {
 				const { isLoading, selected, showVariations } = this.props;
 
 				if (
@@ -65,7 +90,7 @@ const withProductVariations = createHigherOrderComponent(
 				);
 
 				if (
-					! productDetails.variations ||
+					! productDetails?.variations ||
 					productDetails.variations.length === 0
 				) {
 					this.setState( {
@@ -81,7 +106,11 @@ const withProductVariations = createHigherOrderComponent(
 
 				this.setState( { loading: true } );
 
-				getProductVariations( expandedProduct )
+				(
+					getProductVariations( expandedProduct ) as Promise<
+						ProductResponseVariationsItem[]
+					>
+				 )
 					.then( ( expandedProductVariations ) => {
 						const newVariations = expandedProductVariations.map(
 							( variation ) => ( {
@@ -112,12 +141,12 @@ const withProductVariations = createHigherOrderComponent(
 					} );
 			};
 
-			isProductId( itemId ) {
+			isProductId( itemId: number ) {
 				const { products } = this.props;
 				return products.some( ( p ) => p.id === itemId );
 			}
 
-			findParentProduct( variationId ) {
+			findParentProduct( variationId: number ) {
 				const { products } = this.props;
 				const parentProduct = products.filter(
 					( p ) =>
@@ -141,14 +170,13 @@ const withProductVariations = createHigherOrderComponent(
 				// can keep the same product expanded.
 				if ( selectedItem ) {
 					this.prevSelectedItem = selectedItem;
-				} else if ( this.prevSelectedItem ) {
+				} else if (
+					this.prevSelectedItem &&
+					! isLoading &&
+					! this.isProductId( this.prevSelectedItem )
+				) {
 					// If previous selected item was a variation
-					if (
-						! isLoading &&
-						! this.isProductId( this.prevSelectedItem )
-					) {
-						selectedItem = this.prevSelectedItem;
-					}
+					selectedItem = this.prevSelectedItem;
 				}
 
 				if ( ! isLoading && selectedItem ) {
@@ -165,6 +193,8 @@ const withProductVariations = createHigherOrderComponent(
 				const { error, loading, variations } = this.state;
 
 				return (
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore ignoring this line because @wordpress/compose does not expose the correct type for createHigherOrderComponent
 					<OriginalComponent
 						{ ...this.props }
 						error={ error || propsError }
@@ -175,17 +205,8 @@ const withProductVariations = createHigherOrderComponent(
 					/>
 				);
 			}
-
-			static propTypes = {
-				selected: PropTypes.array,
-				showVariations: PropTypes.bool,
-			};
-
-			static defaultProps = {
-				selected: [],
-				showVariations: false,
-			};
 		}
+
 		return WrappedComponent;
 	},
 	'withProductVariations'
