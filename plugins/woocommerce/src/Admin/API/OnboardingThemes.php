@@ -283,8 +283,29 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Highline',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#211f1d',
+						'secondary' => '#211f1d',
+					),
+					array(
+						'title'     => 'Additional color',
+						'primary'   => '#aaaaaa',
+						'secondary' => '#aaaaaa',
+					),
+					array(
+						'title'     => 'Accent Background',
+						'primary'   => '#b04b3c',
+						'secondary' => '#b04b3c',
+					),
+					array(
+						'title'     => 'Secondary Background',
+						'primary'   => '#dabfa1',
+						'secondary' => '#dabfa1',
+					),
+				),
+				'total_palettes' => 9,
 				'slug'           => 'highline',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2023/12/Featured-image-538x403-1.png',
 				'link_url'       => 'https://woo.com/products/highline/',
