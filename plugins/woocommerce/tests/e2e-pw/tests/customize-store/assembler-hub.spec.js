@@ -90,6 +90,9 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} ) => {
 		await page.goto( CUSTOMIZE_STORE_URL );
 		await page.click( 'text=Start designing' );
+		await page
+			.getByRole( 'button', { name: 'Design a new theme' } )
+			.click();
 
 		await page.waitForURL( ASSEMBLER_HUB_URL );
 
