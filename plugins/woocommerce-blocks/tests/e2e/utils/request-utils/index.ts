@@ -6,8 +6,8 @@ import { RequestUtils as BaseRequestUtils } from '@wordpress/e2e-test-utils-play
 /**
  * Internal dependencies
  */
-import { createPostFromTemplate } from './create-post-from-template';
-import { deletePost } from './delete-post';
+import { createPostFromTemplate, deletePost } from './posts';
+import { getTemplates, revertTemplate } from './templates';
 
 export class RequestUtils extends BaseRequestUtils {
 	// The `setup` override is necessary only until
@@ -37,6 +37,10 @@ export class RequestUtils extends BaseRequestUtils {
 		} );
 	}
 
+	/** @borrows getTemplates as this.getTemplates */
+	getTemplates: typeof getTemplates = getTemplates.bind( this );
+	/** @borrows revertTemplate as this.revertTemplate */
+	revertTemplate: typeof revertTemplate = revertTemplate.bind( this );
 	/** @borrows createPostFromTemplate as this.createPostFromTemplate */
 	createPostFromTemplate: typeof createPostFromTemplate =
 		createPostFromTemplate.bind( this );

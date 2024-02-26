@@ -1,4 +1,5 @@
-export * from './api';
+export { Admin, Editor, PageUtils } from '@wordpress/e2e-test-utils-playwright';
+
 export * from './cli';
 export * from './constants';
 export * from './editor';

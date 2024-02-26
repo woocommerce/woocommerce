@@ -129,8 +129,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( `/shop`, { waitUntil: 'commit' } );
 	} );
 
-	test.afterEach( async ( { templateApiUtils } ) => {
-		await templateApiUtils.revertTemplate(
+	test.afterEach( async ( { requestUtils } ) => {
+		await requestUtils.revertTemplate(
 			'woocommerce/woocommerce//archive-product'
 		);
 	} );

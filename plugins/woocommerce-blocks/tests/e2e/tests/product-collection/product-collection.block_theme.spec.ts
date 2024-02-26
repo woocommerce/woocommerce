@@ -11,14 +11,14 @@ import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async (
-		{ page, admin, editor, templateApiUtils, editorUtils },
+		{ page, admin, editor, requestUtils, editorUtils },
 		use
 	) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
 			admin,
 			editor,
-			templateApiUtils,
+			requestUtils,
 			editorUtils,
 		} );
 		await use( pageObject );

@@ -2,22 +2,24 @@
 /**
  * External dependencies
  */
-import { test as base, expect, request as baseRequest } from '@playwright/test';
-import type { ConsoleMessage } from '@playwright/test';
-import { Admin, Editor, PageUtils } from '@wordpress/e2e-test-utils-playwright';
+import { test as base, expect } from '@playwright/test';
 import {
-	TemplateApiUtils,
-	STORAGE_STATE_PATH,
+	Admin,
+	Editor,
 	EditorUtils,
 	FrontendUtils,
-	StoreApiUtils,
-	PerformanceUtils,
-	ShippingUtils,
 	LocalPickupUtils,
 	MiniCartUtils,
-	WPCLIUtils,
+	PageUtils,
+	PerformanceUtils,
 	RequestUtils,
+	ShippingUtils,
+	STORAGE_STATE_PATH,
+	StoreApiUtils,
+	WPCLIUtils,
 } from '@woocommerce/e2e-utils';
+
+import type { ConsoleMessage } from '@playwright/test';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -107,7 +109,6 @@ const test = base.extend<
 		admin: Admin;
 		editor: Editor;
 		pageUtils: PageUtils;
-		templateApiUtils: TemplateApiUtils;
 		editorUtils: EditorUtils;
 		frontendUtils: FrontendUtils;
 		storeApiUtils: StoreApiUtils;
@@ -143,8 +144,6 @@ const test = base.extend<
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
-	templateApiUtils: async ( {}, use ) =>
-		await use( new TemplateApiUtils( baseRequest ) ),
 	editorUtils: async ( { editor, page }, use ) => {
 		await use( new EditorUtils( editor, page ) );
 	},
