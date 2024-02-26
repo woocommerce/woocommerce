@@ -352,7 +352,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "ff3ff9f8f0f8f14175482b68d9e16b697089120894e6bd4d8cbf4d55145d9510",
+          "hash": "2cb0d0d594481127d144a95ccf8ca8ca826711dbf25a42fdc69a75c7d200d99f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -388,7 +388,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "16e577d96b41cc0252e8d55d0ada92a56fd0501fa8291c4d6cea309d839c496c",
+          "hash": "238d7b7d6b52bbf1840bf2e264d0724cde220f6dab343e7620fee1a7fd715c08",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93",
           "links": {
@@ -1022,7 +1022,7 @@
           "post_title": "User Experience Guidelines - Payment Button Size and Anatomy",
           "menu_title": "Payment Button Size",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-size.md",
-          "hash": "b16d9a6fb69bdbd67287823d376748b5b3e8c2b2b4df8d4f8773e23f4b0040f9",
+          "hash": "bec66a7aae90a2995d948f27510a12978f48676cf440fc3ac5c07db9f9d9de4b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-size.md",
           "id": "0920df1611e1b1b3e2f33c810a8f8e8ae09dd67c"
         },
@@ -1030,7 +1030,7 @@
           "post_title": "User Experience Guidelines - Payment Button Layout",
           "menu_title": "Payment Button Layout",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
-          "hash": "4bd261696746bdc087233e8fce9cda3c2e3a2cf53febf1ec494868bd6389b81f",
+          "hash": "59b75f884b59d42f4950543a255afa4297e6aeec918fa86b57cfbe56a79461cc",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
           "id": "96caecc340794e5c80af271e5cc844e0b3d80a04"
         }
@@ -1206,6 +1206,6 @@
       "categories": []
     }
   ],
-  "version": "8.7.0-dev",
-  "hash": "934f66f797937b8bdfbefb9880991da9d67df212cc4b542b3a866c89b52b82ae"
+  "version": "8.8.0-dev",
+  "hash": "73d011a411f40532b18db4cfb45e62950c7c7afa8d94242629dfcaf6a91e9246"
 }

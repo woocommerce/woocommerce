@@ -257,8 +257,7 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 			elements: {
 				button: {
 					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--montserrat)',
+						fontFamily: 'var(--wp--preset--font-family--arvo)',
 						fontStyle: 'normal',
 						fontWeight: '500',
 					},
@@ -464,6 +463,114 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 	},
 ];
 
+export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
+	{
+		title: 'Cardo Font + System Sans-serif',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Cardo',
+							slug: 'cardo',
+						},
+						{
+							fontFamily: 'System Sans-serif',
+							slug: 'system-sans-serif',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--cardo)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--system-sans-serif)',
+			},
+		},
+	},
+	{
+		title: 'Jost + Instrument Sans',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Jost',
+							slug: 'jost',
+						},
+						{
+							fontFamily: 'Instrument Sans',
+							slug: 'instrument-sans',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--jost)',
+						fontStyle: 'normal',
+						fontWeight: '100 900',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--instrument-sans)',
+			},
+		},
+	},
+	{
+		title: 'Inter + Cardo Font',
+		version: 2,
+		lookAndFeel: [] as Look[],
+		settings: {
+			typography: {
+				fontFamilies: {
+					theme: [
+						{
+							fontFamily: 'Inter',
+							slug: 'inter',
+						},
+						{
+							fontFamily: 'Cardo',
+							slug: 'cardo',
+						},
+					],
+				},
+			},
+		},
+		styles: {
+			elements: {
+				heading: {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontStyle: 'normal',
+						fontWeight: '300',
+					},
+				},
+			},
+			typography: {
+				fontFamily: 'var(--wp--preset--font-family--cardo)',
+			},
+		},
+	},
+];
+
 export const FONT_PAIRINGS = [
 	{
 		title: 'Commissioner + Crimson Pro',
@@ -490,7 +597,7 @@ export const FONT_PAIRINGS = [
 				button: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--commissioner)',
+							'var(--wp--preset--font-family--crimson-pro)',
 						fontWeight: '400',
 						lineHeight: '1',
 					},
@@ -922,4 +1029,5 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	...FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	...FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 ];

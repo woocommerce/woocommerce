@@ -160,7 +160,7 @@ class BlockTemplatesController {
 	 */
 	public function render_woocommerce_template_part( $attributes ) {
 		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
-			$template_part = BlockTemplateUtils::get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
+			$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
 
 			if ( $template_part && ! empty( $template_part->content ) ) {
 				return do_blocks( $template_part->content );
@@ -315,7 +315,7 @@ class BlockTemplatesController {
 		if ( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === strtolower( $template_id ) ) {
 			// Because we are using get_block_templates we have to unhook this method to prevent a recursive loop where this filter is applied.
 			remove_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
-			$template_with_deprecated_id = BlockTemplateUtils::get_block_template( $id, $template_type );
+			$template_with_deprecated_id = get_block_template( $id, $template_type );
 			// Let's hook this method back now that we have used the function.
 			add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 
@@ -596,9 +596,8 @@ class BlockTemplatesController {
 	public function get_block_templates( $slugs = array(), $template_type = 'wp_template' ) {
 		$templates_from_db  = BlockTemplateUtils::get_block_templates_from_db( $slugs, $template_type );
 		$templates_from_woo = $this->get_block_templates_from_woocommerce( $slugs, $templates_from_db, $template_type );
-		$templates          = array_merge( $templates_from_db, $templates_from_woo );
 
-		return BlockTemplateUtils::filter_block_templates_by_feature_flag( $templates );
+		return array_merge( $templates_from_db, $templates_from_woo );
 	}
 
 	/**

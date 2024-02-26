@@ -41,13 +41,21 @@ class PluginsActivatedRuleProcessor implements RuleProcessorInterface {
 	 * @return bool Whether the rule passes or not.
 	 */
 	public function process( $rule, $stored_state ) {
-		if ( 0 === count( $rule->plugins ) ) {
+		if ( ! is_countable( $rule->plugins ) || 0 === count( $rule->plugins ) ) {
 			return false;
 		}
 
 		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
 
 		foreach ( $rule->plugins as $plugin_slug ) {
+			if ( ! is_string( $plugin_slug ) ) {
+				$logger = wc_get_logger();
+				$logger->warning(
+					__( 'Invalid plugin slug provided in the plugins activated rule.', 'woocommerce' )
+				);
+				return false;
+			}
+
 			if ( ! in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
 				return false;
 			}

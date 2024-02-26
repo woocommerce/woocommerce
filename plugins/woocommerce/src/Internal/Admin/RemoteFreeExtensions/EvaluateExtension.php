@@ -20,7 +20,7 @@ class EvaluateExtension {
 	 * @param object $extension The extension to evaluate.
 	 * @return object The evaluated extension.
 	 */
-	public static function evaluate( $extension ) {
+	private static function evaluate( $extension ) {
 		global $wp_version;
 		$rule_evaluator = new RuleEvaluator();
 
@@ -48,5 +48,45 @@ class EvaluateExtension {
 		$extension->is_activated = in_array( explode( ':', $extension->key )[0], $activated_plugins, true );
 
 		return $extension;
+	}
+
+	/**
+	 * Evaluates the specs and returns the bundles with visible extensions.
+	 *
+	 * @param array $specs extensions spec array.
+	 * @param array $allowed_bundles Optional array of allowed bundles to be returned.
+	 * @return array The bundles and errors.
+	 */
+	public static function evaluate_bundles( $specs, $allowed_bundles = array() ) {
+		$bundles = array();
+
+		foreach ( $specs as $spec ) {
+			$spec              = (object) $spec;
+			$bundle            = (array) $spec;
+			$bundle['plugins'] = array();
+
+			if ( ! empty( $allowed_bundles ) && ! in_array( $spec->key, $allowed_bundles, true ) ) {
+				continue;
+			}
+
+			$errors = array();
+			foreach ( $spec->plugins as $plugin ) {
+				try {
+					$extension = self::evaluate( (object) $plugin );
+					if ( ! property_exists( $extension, 'is_visible' ) || $extension->is_visible ) {
+						$bundle['plugins'][] = $extension;
+					}
+				} catch ( \Throwable $e ) {
+					$errors[] = $e;
+				}
+			}
+
+			$bundles[] = $bundle;
+		}
+
+		return array(
+			'bundles' => $bundles,
+			'errors'  => $errors,
+		);
 	}
 }

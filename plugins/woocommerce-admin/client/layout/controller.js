@@ -16,7 +16,6 @@ import {
 	isWCAdmin,
 } from '@woocommerce/navigation';
 import { Spinner } from '@woocommerce/components';
-import { ProductPageSkeleton } from '@woocommerce/product-editor';
 
 /**
  * Internal dependencies
@@ -208,7 +207,6 @@ export const getPages = () => {
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {
 			container: ProductPage,
-			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},
@@ -274,7 +272,6 @@ export const getPages = () => {
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
 			container: ProductVariationPage,
-			fallback: ProductPageSkeleton,
 			layout: {
 				header: false,
 			},

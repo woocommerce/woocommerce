@@ -168,7 +168,7 @@ class TaskList {
 	 * @return bool
 	 */
 	public function is_visible() {
-		if ( ! $this->visible || ! count( $this->get_viewable_tasks() ) > 0 ) {
+		if ( ! $this->visible || $this->is_hidden() || ! count( $this->get_viewable_tasks() ) > 0 ) {
 			return false;
 		}
 		return ! $this->is_hidden();
@@ -199,6 +199,7 @@ class TaskList {
 				'action'                => 'remove_card',
 				'completed_task_count'  => $completed_count,
 				'incomplete_task_count' => count( $viewable_tasks ) - $completed_count,
+				'tasklist_id'           => $this->id,
 			)
 		);
 
@@ -324,11 +325,17 @@ class TaskList {
 	 * Track list completion of viewable tasks.
 	 */
 	public function possibly_track_completion() {
-		if ( ! $this->is_complete() ) {
+		if ( $this->has_previously_completed() ) {
 			return;
 		}
 
-		if ( $this->has_previously_completed() ) {
+		// If it's hidden, completion is tracked via hide method.
+		if ( $this->is_hidden() ) {
+			return;
+		}
+
+		// Expensive check, do it last.
+		if ( ! $this->is_complete() ) {
 			return;
 		}
 
@@ -336,7 +343,12 @@ class TaskList {
 		$completed_lists[] = $this->get_list_id();
 		update_option( self::COMPLETED_OPTION, $completed_lists );
 		$this->maybe_set_default_layout( $completed_lists );
-		$this->record_tracks_event( 'tasks_completed' );
+		$this->record_tracks_event(
+			'tasks_completed',
+			array(
+				'tasklist_id' => $this->id,
+			)
+		);
 	}
 
 	/**

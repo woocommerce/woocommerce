@@ -140,6 +140,26 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
+							setGlobalStyles: {
+								initial: 'pending',
+								states: {
+									pending: {
+										invoke: {
+											src: 'updateGlobalStylesWithDefaultValues',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									success: {
+										type: 'final',
+									},
+								},
+							},
 							installFontFamilies: {
 								initial: 'checkFontLibrary',
 								states: {
@@ -160,12 +180,10 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											onDone: {
 												target: 'success',
 											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
 										},
 									},
 									success: {
