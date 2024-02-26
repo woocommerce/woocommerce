@@ -32,7 +32,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			'.wc-block-components-review-list-item__text'
 		);
 
-		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
+		await expect( reviews.first() ).toHaveText( latestReview.review );
 	} );
 
 	test( 'can sort by highest rating in the frontend', async ( {
@@ -47,16 +47,16 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			'.wc-block-components-review-list-item__text'
 		);
 
-		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
+		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
-		select.selectOption( 'Highest rating' );
+		await select.selectOption( 'Highest rating' );
 
 		const highestRating = allReviews.sort(
 			( a, b ) => b.rating - a.rating
 		)[ 0 ];
 
-		await expect( reviews.nth( 0 ) ).toHaveText( highestRating.review );
+		await expect( reviews.first() ).toHaveText( highestRating.review );
 	} );
 
 	test( 'can sort by lowest rating in the frontend', async ( {
@@ -71,15 +71,15 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			'.wc-block-components-review-list-item__text'
 		);
 
-		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
+		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
-		select.selectOption( 'Lowest rating' );
+		await select.selectOption( 'Lowest rating' );
 
 		const lowestRating = allReviews.sort(
 			( a, b ) => a.rating - b.rating
 		)[ 0 ];
 
-		await expect( reviews.nth( 0 ) ).toHaveText( lowestRating.review );
+		await expect( reviews.first() ).toHaveText( lowestRating.review );
 	} );
 } );
