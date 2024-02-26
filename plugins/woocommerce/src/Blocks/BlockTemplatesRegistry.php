@@ -34,7 +34,7 @@ class BlockTemplatesRegistry {
 	 * Constructor.
 	 */
 	public function __construct() {
-		 $this->init();
+		$this->init();
 	}
 
 	/**

@@ -223,7 +223,7 @@ class BlockTemplateUtils {
 	/**
 	 * Build a new template object so that we can make Woo Blocks default templates available in the current theme should they not have any.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates
+	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
 	 * @param string                 $template_file Block template file path.
 	 * @param string                 $template_type wp_template or wp_template_part.
 	 * @param string                 $template_slug Block template slug e.g. single-product.

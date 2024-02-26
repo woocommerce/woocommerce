@@ -28,6 +28,8 @@ class BlockTemplatesController {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param BlockTemplatesRegistry $block_templates_registry Block templates registry.
 	 */
 	public function __construct( $block_templates_registry ) {
 		$this->init();
