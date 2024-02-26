@@ -483,7 +483,7 @@ class WC_Helper_Updater {
 			sprintf(
 				// translators: %s: URL of WooCommerce.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
-				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
+				esc_url( admin_url( 'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions' ) )
 			)
 		);
 	}
