@@ -45,10 +45,10 @@ class ProductStockIndicator extends AbstractBlock {
 	 * - Available on backorder
 	 * - 2 left in stock
 	 *
-	 * @param [bool]     $is_in_stock Whether the product is in stock.
-	 * @param [bool]     $is_low_stock Whether the product is low in stock.
-	 * @param [int|null] $low_stock_amount The amount of stock that is considered low.
-	 * @param [bool]     $is_on_backorder Whether the product is on backorder.
+	 * @param bool     $is_in_stock Whether the product is in stock.
+	 * @param bool     $is_low_stock Whether the product is low in stock.
+	 * @param int|null $low_stock_amount The amount of stock that is considered low.
+	 * @param bool     $is_on_backorder Whether the product is on backorder.
 	 * @return string Stock text.
 	 */
 	protected static function getTextBasedOnStock( $is_in_stock, $is_low_stock, $low_stock_amount, $is_on_backorder ) {
