@@ -2,7 +2,7 @@
 post_title: Updated - How to add a custom field to simple and variable products
 menu_title: Add custom fields to products
 tags: how-to
-version: 8.7.0
+version: 8.8.0
 ---
 
 In theory, this contains content specific to WooCommerce 8.7.0 or higher.

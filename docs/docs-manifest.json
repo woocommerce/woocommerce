@@ -30,9 +30,9 @@
           "post_title": "Updated - How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
-          "version": "8.6.0",
+          "version": "8.7.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
-          "hash": "76c201f46f7bae3d638b719b6e90d5c257d55dee01457a51ba34ea3cb4e9580b",
+          "hash": "c6c766f47a68c254365c8ddb0fbb2d38d90da90f7d116596d8c23994ab69eedd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
@@ -40,9 +40,9 @@
           "post_title": "Updated - How to add a custom field to simple and variable products",
           "menu_title": "Add custom fields to products",
           "tags": "how-to",
-          "version": "8.7.0",
+          "version": "8.8.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "c5c2d73483324e44af8a686bd1477c72ed0689fd8052fe4e7dc54f9537994a0b",
+          "hash": "7cf040a242783dd4470c13310d42794b914437cf82d7a894ee57f6b93c32fa97",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -1207,5 +1207,5 @@
     }
   ],
   "version": "8.8.0-dev",
-  "hash": "73d011a411f40532b18db4cfb45e62950c7c7afa8d94242629dfcaf6a91e9246"
+  "hash": "a61d8eef6eb58295d1723a4b681ea807d5c59c52f311e9a4cbf6c97f85da8f55"
 }
