@@ -8,9 +8,9 @@ import path from 'path';
 const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
 
 const test = base.extend< {
-	defaultBlockPostPage: Post;
+	defaultBlockPost: Post;
 } >( {
-	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			{ title: 'Active Filters Block' },
 			TEMPLATE_PATH,
@@ -26,9 +26,9 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 	test.describe( 'frontend', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
-			defaultBlockPostPage,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPostPage.link );
+			await page.goto( defaultBlockPost.link );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
 			const count = await ratingStars.count();
@@ -47,9 +47,9 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 
 		test( 'Selecting a checkbox filters down the products', async ( {
 			page,
-			defaultBlockPostPage,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPostPage.link );
+			await page.goto( defaultBlockPost.link );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/
@@ -59,9 +59,7 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 
 			// wait for navigation
 			await page.waitForURL(
-				( url ) =>
-					url.searchParams.has( 'rating_filter' ) &&
-					url.searchParams.get( 'rating_filter' ) === '1'
+				( url ) => url.searchParams.get( 'rating_filter' ) === '1'
 			);
 
 			const products = page.locator( '.wc-block-product' );
