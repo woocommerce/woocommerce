@@ -20,7 +20,7 @@ class EvaluateExtension {
 	 * @param object $extension The extension to evaluate.
 	 * @return object The evaluated extension.
 	 */
-	public static function evaluate( $extension ) {
+	private static function evaluate( $extension ) {
 		global $wp_version;
 		$rule_evaluator = new RuleEvaluator();
 

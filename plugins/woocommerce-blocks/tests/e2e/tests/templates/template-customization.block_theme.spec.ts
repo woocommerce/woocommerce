@@ -6,7 +6,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES, WC_TEMPLATES_SLUG } from './constants';
+import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const userText = `Hello World in the ${ testData.templateName } template`;
@@ -26,12 +26,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			page,
 		} ) => {
 			// Verify the template can be edited.
-			await admin.visitSiteEditor( {
-				postId: `${ WC_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
@@ -68,14 +66,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				page,
 			} ) => {
 				// Edit fallback template and verify changes are visible.
-				await admin.visitSiteEditor( {
-					postId: `${ WC_TEMPLATES_SLUG }//${
-						testData.fallbackTemplate?.templatePath || ''
-					}`,
-					postType: testData.templateType,
-				} );
-				await editorUtils.enterEditMode();
-				await editorUtils.closeWelcomeGuideModal();
+				await editorUtils.visitTemplateEditor(
+					testData.fallbackTemplate?.templateName || '',
+					testData.templateType
+				);
 				await editorUtils.editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
