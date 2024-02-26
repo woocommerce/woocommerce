@@ -53,7 +53,7 @@ export const initializeAnonId = async (): Promise< string | null > => {
 };
 
 export const getAnonId = async (): Promise< string | null > => {
-	if ( ! window.wcTracks?.isEnabled && ! window._wca.push ) {
+	if ( ! window.wcTracks?.isEnabled && ! window?._wca?.push ) {
 		return null;
 	}
 

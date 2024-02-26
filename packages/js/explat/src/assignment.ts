@@ -83,7 +83,7 @@ export const fetchExperimentAssignment = async ( {
 	experimentName: string;
 	anonId: string | null;
 } ): Promise< unknown > => {
-	if ( ! window.wcTracks?.isEnabled && ! window._wca.push ) {
+	if ( ! window.wcTracks?.isEnabled && ! window?._wca?.push ) {
 		throw new Error(
 			`Tracking is disabled, can't fetch experimentAssignment`
 		);
@@ -111,7 +111,7 @@ export const fetchExperimentAssignmentWithAuth = async ( {
 	experimentName: string;
 	anonId: string | null;
 } ): Promise< unknown > => {
-	if ( ! window.wcTracks?.isEnabled && ! window._wca.push ) {
+	if ( ! window.wcTracks?.isEnabled && ! window?._wca?.push ) {
 		throw new Error(
 			`Tracking is disabled, can't fetch experimentAssignment`
 		);

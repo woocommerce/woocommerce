@@ -27,7 +27,7 @@ declare global {
 }
 
 export const initializeExPlat = (): void => {
-	if ( window.wcTracks?.isEnabled || window._wca.push !== undefined ) {
+	if ( window.wcTracks?.isEnabled || window?._wca?.push !== undefined ) {
 		initializeAnonId().catch( ( e ) => logError( { message: e.message } ) );
 	}
 };
