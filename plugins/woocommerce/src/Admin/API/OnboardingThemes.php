@@ -313,8 +313,29 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Luminate',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#242a2e',
+						'secondary' => '#242a2e',
+					),
+					array(
+						'title'     => 'Lite',
+						'primary'   => '#f6f5f2',
+						'secondary' => '#f6f5f2',
+					),
+					array(
+						'title'     => 'Grey',
+						'primary'   => '#a5a5a5',
+						'secondary' => '#a5a5a5',
+					),
+					array(
+						'title'     => 'Lite Grey',
+						'primary'   => '#e4e4e1',
+						'secondary' => '#e4e4e1',
+					),
+				),
+				'total_palettes' => 5,
 				'slug'           => 'luminate',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/07/Featured-image-538x403-2.png',
 				'link_url'       => 'https://woo.com/products/luminate/',
