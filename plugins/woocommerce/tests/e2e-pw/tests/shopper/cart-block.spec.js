@@ -82,7 +82,9 @@ test.describe( 'Cart Block page', () => {
 		} );
 	} );
 
-	test( 'can create and see empty cart block', async ( { page } ) => {
+	test( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
+		page,
+	} ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 

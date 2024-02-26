@@ -113,7 +113,7 @@ test.describe( 'Mini Cart block page', () => {
 		} );
 	} );
 
-	test( 'can create and see empty mini cart', async ( {
+	test( 'can see empty mini cart, add and remove product, increase to max quantity, calculate tax and see redirection', async ( {
 		page,
 		baseURL,
 		context,
