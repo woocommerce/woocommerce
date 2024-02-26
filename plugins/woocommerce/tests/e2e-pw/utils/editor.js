@@ -9,18 +9,6 @@ const closeWelcomeModal = async ( { page } ) => {
 	}
 };
 
-const goToPageEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-	await closeWelcomeModal( { page } );
-};
-
-const goToPostEditor = async ( { page } ) => {
-	await page.goto( 'wp-admin/post-new.php' );
-
-	await closeWelcomeModal( { page } );
-};
-
 const disableWelcomeModal = async ( { page } ) => {
 	const isWelcomeGuideActive = await page.evaluate( () =>
 		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
@@ -31,6 +19,18 @@ const disableWelcomeModal = async ( { page } ) => {
 			wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'welcomeGuide' )
 		);
 	}
+};
+
+const goToPageEditor = async ( { page } ) => {
+	await page.goto( 'wp-admin/post-new.php?post_type=page' );
+
+	await disableWelcomeModal( { page } );
+};
+
+const goToPostEditor = async ( { page } ) => {
+	await page.goto( 'wp-admin/post-new.php' );
+
+	await disableWelcomeModal( { page } );
 };
 
 module.exports = {
