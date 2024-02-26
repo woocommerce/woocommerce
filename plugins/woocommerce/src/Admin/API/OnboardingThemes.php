@@ -343,8 +343,29 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Nokul',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Foreground and background',
+						'primary'   => '#000000',
+						'secondary' => '#f1eee2',
+					),
+					array(
+						'title'     => 'Foreground and secondary',
+						'primary'   => '#000000',
+						'secondary' => '#999999',
+					),
+					array(
+						'title'     => 'Foreground and accent',
+						'primary'   => '#000000',
+						'secondary' => '#d82f16',
+					),
+					array(
+						'title'     => 'Primary and background',
+						'primary'   => '#d9d0bf',
+						'secondary' => '#f1eee2',
+					),
+				),
+				'total_palettes' => 6,
 				'slug'           => 'nokul',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/11/Product-logo.jpg',
 				'link_url'       => 'https://woo.com/products/nokul/',
