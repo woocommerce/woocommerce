@@ -1,5 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures' );
 const { goToPostEditor } = require( '../../utils/editor' );
 
 // need to figure out whether tests are being run on a mac
@@ -21,41 +20,27 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	option.click();
 };
 
+const test = baseTest.extend( {
+	storageState: process.env.ADMINSTATE,
+	product: async ( { api }, use ) => {
+		let product = {
+			id: 0,
+			name: `Product ${ Date.now() }`,
+			type: 'simple',
+		};
+
+		await api.post( 'products', product ).then( ( response ) => {
+			product = response.data;
+		} );
+
+		await use( product );
+
+		// Cleanup
+		await api.delete( `products/${ product.id }`, { force: true } );
+	},
+} );
+
 test.describe( 'Use Command Palette commands', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
-
-	let productId;
-
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api
-			.post( 'products', {
-				name: 'Product to search',
-				type: 'simple',
-				regular_price: '12.99',
-			} )
-			.then( ( response ) => {
-				productId = response.data.id;
-			} );
-	} );
-
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.delete( `products/${ productId }`, {
-			force: true,
-		} );
-	} );
-
 	test( 'can use the "Add new product" command', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
@@ -112,17 +97,17 @@ test.describe( 'Use Command Palette commands', () => {
 		).toBeVisible();
 	} );
 
-	test( 'can use the product search command', async ( { page } ) => {
+	test( 'can use the product search command', async ( { page, product } ) => {
 		await goToPostEditor( { page } );
 
 		await clickOnCommandPaletteOption( {
 			page,
-			optionName: 'Product to search',
+			optionName: product.name,
 		} );
 
 		// Verify that the page has loaded.
 		await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
-			'Product to search'
+			`${ product.name }`
 		);
 	} );
 
