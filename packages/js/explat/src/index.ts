@@ -20,11 +20,14 @@ declare global {
 			isEnabled: boolean;
 			enable?: ( cb: () => void ) => void;
 		};
+		_wca: {
+			push?: ( cb: () => void ) => void;
+		};
 	}
 }
 
 export const initializeExPlat = (): void => {
-	if ( window.wcTracks?.isEnabled ) {
+	if ( window.wcTracks?.isEnabled || window._wca.push !== undefined ) {
 		initializeAnonId().catch( ( e ) => logError( { message: e.message } ) );
 	}
 };
