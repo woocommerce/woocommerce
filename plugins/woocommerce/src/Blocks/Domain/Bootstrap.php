@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Domain;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\AssetsController;
@@ -388,28 +389,28 @@ class Bootstrap {
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\Formatters',
 			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '7.2.0', 'Automattic\WooCommerce\StoreApi\Formatters', '7.4.0' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\Formatters', '6.4.0', 'Automattic\WooCommerce\StoreApi\Formatters', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Formatters::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi',
 			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '7.2.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '7.4.0' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\Domain\Services\ExtendRestApi', '6.4.0', 'Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\SchemaController',
 			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '7.2.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '7.4.0' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\SchemaController', '6.4.0', 'Automattic\WooCommerce\StoreApi\SchemaController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( SchemaController::class );
 			}
 		);
 		$this->container->register(
 			'Automattic\WooCommerce\Blocks\StoreApi\RoutesController',
 			function( Container $container ) {
-				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '7.2.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '7.4.0' );
+				$this->deprecated_dependency( 'Automattic\WooCommerce\Blocks\StoreApi\RoutesController', '6.4.0', 'Automattic\WooCommerce\StoreApi\RoutesController', '6.5.0' );
 				return $container->get( StoreApi::class )->container()->get( RoutesController::class );
 			}
 		);
@@ -480,7 +481,7 @@ class Bootstrap {
 		}
 
 		// If the $trigger_error_version was not yet reached, only log the error.
-		if ( version_compare( $this->package->get_version(), $trigger_error_version, '<' ) ) {
+		if ( version_compare( Constants::get_constant( 'WC_VERSION' ), $trigger_error_version, '<' ) ) {
 			$log_error = true;
 		}
 
