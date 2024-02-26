@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use WC_Admin_Settings;
 use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
+use WP_Filesystem_Base;
 
 /**
  * Settings class.
@@ -54,19 +55,38 @@ class Settings {
 	 */
 	public static function get_log_directory(): string {
 		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
-			return Constants::get_constant( 'WC_LOG_DIR' );
+			$dir = Constants::get_constant( 'WC_LOG_DIR' );
+		} else {
+			$upload_dir = wp_upload_dir( null, false );
+
+			/**
+			 * Filter to change the directory for storing WooCommerce's log files.
+			 *
+			 * @param string $dir The full directory path, with trailing slash.
+			 *
+			 * @since 8.8.0
+			 */
+			$dir = apply_filters( 'woocommerce_log_directory', $upload_dir['basedir'] . '/wc-logs/' );
 		}
 
-		$upload_dir = wp_upload_dir( null, false );
+		$dir = trailingslashit( $dir );
 
-		/**
-		 * Filter to change the directory for storing WooCommerce's log files.
-		 *
-		 * @param string $dir The full directory path, with trailing slash.
-		 *
-		 * @since 8.8.0
-		 */
-		$dir = apply_filters( 'woocommerce_log_directory', $upload_dir['basedir'] . '/wc-logs/' );
+		$realpath = realpath( $dir );
+		if ( false === $realpath ) {
+			$result = wp_mkdir_p( $dir );
+
+			if ( true === $result ) {
+				// Create infrastructure to prevent listing contents of the logs directory.
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				global $wp_filesystem;
+				if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
+					WP_Filesystem();
+				}
+
+				$wp_filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
+				$wp_filesystem->put_contents( $dir . 'index.html', '' );
+			}
+		}
 
 		return $dir;
 	}
