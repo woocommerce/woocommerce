@@ -20,7 +20,7 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	public static $template_area = 'mini-cart';
+	public $template_area = 'mini-cart';
 
 	/**
 	 * Initialization method.
@@ -34,7 +34,7 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Mini-Cart', 'Template name', 'woocommerce' );
 	}
 
@@ -43,7 +43,7 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' );
 	}
 

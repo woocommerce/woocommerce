@@ -31,7 +31,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Single Product', 'Template name', 'woocommerce' );
 	}
 
@@ -40,7 +40,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Displays a single product.', 'woocommerce' );
 	}
 

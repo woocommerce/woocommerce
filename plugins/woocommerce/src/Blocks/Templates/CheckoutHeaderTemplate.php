@@ -20,7 +20,7 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	public static $template_area = 'header';
+	public $template_area = 'header';
 
 	/**
 	 * Initialization method.
@@ -32,7 +32,7 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Checkout Header', 'Template name', 'woocommerce' );
 	}
 
@@ -41,7 +41,7 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Template used to display the simplified Checkout header.', 'woocommerce' );
 	}
 }

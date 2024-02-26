@@ -29,7 +29,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Order Confirmation', 'Template name', 'woocommerce' );
 	}
 
@@ -38,7 +38,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
 	}
 

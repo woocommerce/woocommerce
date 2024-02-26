@@ -31,7 +31,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Page: Checkout', 'Template name', 'woocommerce' );
 	}
 
@@ -40,7 +40,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
 	}
 

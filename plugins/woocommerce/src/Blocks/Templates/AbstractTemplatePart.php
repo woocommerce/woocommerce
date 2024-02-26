@@ -14,5 +14,5 @@ abstract class AbstractTemplatePart extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public static $template_area;
+	public $template_area;
 }

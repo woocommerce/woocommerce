@@ -31,7 +31,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Product Catalog', 'Template name', 'woocommerce' );
 	}
 
@@ -40,7 +40,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Displays your products.', 'woocommerce' );
 	}
 

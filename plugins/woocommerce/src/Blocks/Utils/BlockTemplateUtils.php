@@ -335,7 +335,7 @@ class BlockTemplateUtils {
 		if ( 'wp_template_part' === $template_type ) {
 			$registered_template = $block_templates_registry->get_template( $template_slug );
 			if ( $registered_template && property_exists( $registered_template, 'template_area' ) ) {
-				return $registered_template::$template_area;
+				return $registered_template->template_area;
 			}
 		}
 		return 'uncategorized';

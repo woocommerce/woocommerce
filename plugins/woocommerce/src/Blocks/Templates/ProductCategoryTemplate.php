@@ -37,7 +37,7 @@ class ProductCategoryTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Products by Category', 'Template name', 'woocommerce' );
 	}
 
@@ -46,7 +46,7 @@ class ProductCategoryTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Displays products filtered by a category.', 'woocommerce' );
 	}
 

@@ -37,7 +37,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Product Search Results', 'Template name', 'woocommerce' );
 	}
 
@@ -46,7 +46,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Displays search results for your store.', 'woocommerce' );
 	}
 

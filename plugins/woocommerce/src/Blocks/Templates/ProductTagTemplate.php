@@ -37,7 +37,7 @@ class ProductTagTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_title() {
+	public function get_template_title() {
 		return _x( 'Products by Tag', 'Template name', 'woocommerce' );
 	}
 
@@ -46,7 +46,7 @@ class ProductTagTemplate extends AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	public static function get_template_description() {
+	public function get_template_description() {
 		return __( 'Displays products filtered by a tag.', 'woocommerce' );
 	}
 

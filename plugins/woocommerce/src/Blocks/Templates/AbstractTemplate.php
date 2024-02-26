@@ -34,12 +34,12 @@ abstract class AbstractTemplate {
 	 *
 	 * @return string
 	 */
-	abstract public static function get_template_title();
+	abstract public function get_template_title();
 
 	/**
 	 * Should return the description of the template.
 	 *
 	 * @return string
 	 */
-	abstract public static function get_template_description();
+	abstract public function get_template_description();
 }
