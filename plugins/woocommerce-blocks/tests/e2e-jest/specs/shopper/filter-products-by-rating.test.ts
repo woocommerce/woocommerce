@@ -104,7 +104,7 @@ describe( `${ block.name } Block`, () => {
 			await goToTemplateEditor( {
 				postId: productCatalogTemplateId,
 			} );
-			await insertBlock( 'WooCommerce Product Grid Block' );
+			await insertBlock( 'Product Grid Classic Template' );
 			await insertBlock( block.name );
 			await saveTemplate();
 			await goToShopPage();

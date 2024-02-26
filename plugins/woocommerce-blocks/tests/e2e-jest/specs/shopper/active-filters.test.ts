@@ -219,7 +219,7 @@ describe.skip( 'Shopper → Active Filters Block', () => {
 				postId: 'woocommerce/woocommerce//archive-product',
 			} );
 
-			await insertBlock( 'WooCommerce Product Grid Block' );
+			await insertBlock( 'Product Grid Classic Template' );
 			await insertBlocks();
 
 			const canvasEl = canvas();
