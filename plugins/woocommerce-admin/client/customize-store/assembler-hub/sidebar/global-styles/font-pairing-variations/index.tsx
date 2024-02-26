@@ -18,7 +18,11 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 /**
  * Internal dependencies
  */
-import { FONT_PAIRINGS, FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from './constants';
+import {
+	FONT_PAIRINGS,
+	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
+} from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
 import { Look } from '~/customize-store/design-with-ai/types';
@@ -49,6 +53,13 @@ export const FontPairing = () => {
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
+	const isFontLibraryAvailable = context.isFontLibraryAvailable;
+	const trackingAllowed = useSelect(
+		( select ) =>
+			select( OPTIONS_STORE_NAME ).getOption(
+				'woocommerce_allow_tracking'
+			) === 'yes'
+	);
 
 	const fontPairings = useMemo( () => {
 		if ( isAIFlow( context.flowType ) ) {
@@ -57,6 +68,10 @@ export const FontPairing = () => {
 						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
 				  )
 				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+		}
+
+		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
+			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING;
 		}
 
 		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
@@ -78,7 +93,14 @@ export const FontPairing = () => {
 				},
 			};
 		}, [] );
-	}, [ aiOnline, aiSuggestions?.lookAndFeel, context.flowType, custom ] );
+	}, [
+		aiOnline,
+		aiSuggestions?.lookAndFeel,
+		context.flowType,
+		custom,
+		isFontLibraryAvailable,
+		trackingAllowed,
+	] );
 
 	if ( isLoading ) {
 		return (
