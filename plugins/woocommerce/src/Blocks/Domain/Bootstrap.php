@@ -255,7 +255,7 @@ class Bootstrap {
 		$this->container->register(
 			BlockTemplatesController::class,
 			function ( Container $container ) {
-				return new BlockTemplatesController( $container->get( BlockTemplatesRegistry::class ) );
+				return new BlockTemplatesController();
 			}
 		);
 		$this->container->register(

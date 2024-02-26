@@ -6,7 +6,6 @@ use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use WP_UnitTestCase;
 
@@ -28,10 +27,11 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		// Switch to a block theme and register templates.
-		$this->container = Package::container();
-		$this->container->get( BlockTemplatesController::class );
+		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
+		$this->container          = Package::container();
+		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
+		$block_templates_registry->init();
 
 		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
@@ -59,35 +59,31 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * @dataProvider provideFallbackData
 	 */
 	public function test_template_is_eligible_for_product_archive_fallback( $input, $expected ) {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$this->assertEquals( $expected, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $block_templates_registry, $input ) );
+		$this->assertEquals( $expected, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $input ) );
 	}
 
 	/**
 	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is not eligible.
 	 */
 	public function test_template_is_eligible_for_product_archive_fallback_from_db_no_eligible_template() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $block_templates_registry, 'single-product', array() ) );
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'single-product', array() ) );
 	}
 
 	/**
 	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible but not in the db.
 	 */
 	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_empty_db() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $block_templates_registry, 'taxonomy-product_cat', array() ) );
+		$this->assertEquals( false, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', array() ) );
 	}
 
 	/**
 	 * Test template_is_eligible_for_product_archive_fallback_from_db when the template is eligible and in the db.
 	 */
 	public function test_template_is_eligible_for_product_archive_fallback_from_db_eligible_template_custom_in_the_db() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$db_templates             = array(
+		$db_templates = array(
 			(object) array( 'slug' => 'archive-product' ),
 		);
-		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $block_templates_registry, 'taxonomy-product_cat', $db_templates ) );
+		$this->assertEquals( true, BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( 'taxonomy-product_cat', $db_templates ) );
 	}
 
 	/**
@@ -128,7 +124,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test build_template_result_from_file.
 	 */
 	public function test_build_template_result_from_file() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
 		switch_theme( 'storefront' );
 		$template_file = array(
 			'slug'        => 'single-product',
@@ -141,7 +136,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'description' => 'Displays a single product.',
 		);
 
-		$template = BlockTemplateUtils::build_template_result_from_file( $block_templates_registry, $template_file, 'wp_template' );
+		$template = BlockTemplateUtils::build_template_result_from_file( $template_file, 'wp_template' );
 
 		$this->assertEquals( BlockTemplateUtils::PLUGIN_SLUG . '//' . $template_file['slug'], $template->id );
 		$this->assertEquals( BlockTemplateUtils::PLUGIN_SLUG, $template->theme );
@@ -163,8 +158,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test set_has_theme_file_if_fallback_is_available when the template file has no fallback.
 	 */
 	public function test_set_has_theme_file_if_fallback_is_available_no_fallback() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$query_result             = array(
+		$query_result = array(
 			(object) array(
 				'slug'  => 'single-product',
 				'theme' => 'twentytwentytwo',
@@ -176,15 +170,14 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'theme' => 'twentytwentytwo',
 		);
 
-		$this->assertFalse( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $block_templates_registry, $query_result, $template_file ) );
+		$this->assertFalse( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) );
 	}
 
 	/**
 	 * Test set_has_theme_file_if_fallback_is_available when the template file has a fallback.
 	 */
 	public function test_set_has_theme_file_if_fallback_is_available_with_fallback() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$template_file            = (object) array(
+		$template_file = (object) array(
 			'slug'  => 'taxonomy-product_cat',
 			'theme' => 'twentytwentytwo',
 		);
@@ -196,15 +189,14 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			),
 		);
 
-		$this->assertTrue( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $block_templates_registry, $query_result, $template_file ) );
+		$this->assertTrue( BlockTemplateUtils::set_has_theme_file_if_fallback_is_available( $query_result, $template_file ) );
 	}
 
 	/**
 	 * Test create_new_block_template_object.
 	 */
 	public function test_create_new_block_template_object() {
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$expected_template        = (object) array(
+		$expected_template = (object) array(
 			'slug'        => 'single-product',
 			'id'          => 'woocommerce/woocommerce//single-product',
 			'path'        => __DIR__ . '/single-product.html',
@@ -217,7 +209,6 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		);
 
 		$template = BlockTemplateUtils::create_new_block_template_object(
-			$block_templates_registry,
 			__DIR__ . '/single-product.html',
 			'wp_template',
 			'single-product',

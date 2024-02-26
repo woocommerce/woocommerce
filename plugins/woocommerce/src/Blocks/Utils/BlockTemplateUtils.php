@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Options;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 
@@ -51,6 +52,18 @@ class BlockTemplateUtils {
 	 * @var string
 	 */
 	const DEPRECATED_PLUGIN_SLUG = 'woocommerce';
+
+	/**
+	 * Returns the template matching the slug
+	 *
+	 * @param string $template_slug Slug of the template to retrieve.
+	 *
+	 * @return AbstractTemplate|AbstractTemplatePart|null
+	 */
+	public static function get_template( $template_slug ) {
+		$block_templates_registry = Package::container()->get( BlockTemplatesRegistry::class );
+		return $block_templates_registry->get_template( $template_slug );
+	}
 
 	/**
 	 * Returns an array containing the references of
@@ -179,13 +192,12 @@ class BlockTemplateUtils {
 	 *
 	 * @internal Important: This method is an almost identical duplicate from wp-includes/block-template-utils.php as it was not intended for public use. It has been modified to build templates from plugins rather than themes.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param array|object           $template_file Theme file.
-	 * @param string                 $template_type wp_template or wp_template_part.
+	 * @param array|object $template_file Theme file.
+	 * @param string       $template_type wp_template or wp_template_part.
 	 *
 	 * @return \WP_Block_Template Template.
 	 */
-	public static function build_template_result_from_file( $block_templates_registry, $template_file, $template_type ) {
+	public static function build_template_result_from_file( $template_file, $template_type ) {
 		$template_file = (object) $template_file;
 
 		// If the theme has an archive-products.html template but does not have product taxonomy templates
@@ -208,14 +220,14 @@ class BlockTemplateUtils {
 		$template->source         = $template_file->source ? $template_file->source : 'plugin';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
-		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::get_block_template_title( $block_templates_registry, $template_file->slug );
-		$template->description    = ! empty( $template_file->description ) ? $template_file->description : self::get_block_template_description( $block_templates_registry, $template_file->slug );
+		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::get_block_template_title( $template_file->slug );
+		$template->description    = ! empty( $template_file->description ) ? $template_file->description : self::get_block_template_description( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
 		$template->origin         = $template_file->source;
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
-		$template->area           = self::get_block_template_area( $block_templates_registry, $template->slug, $template_type );
+		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
 		return $template;
 	}
@@ -223,15 +235,14 @@ class BlockTemplateUtils {
 	/**
 	 * Build a new template object so that we can make Woo Blocks default templates available in the current theme should they not have any.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_file Block template file path.
-	 * @param string                 $template_type wp_template or wp_template_part.
-	 * @param string                 $template_slug Block template slug e.g. single-product.
-	 * @param bool                   $template_is_from_theme If the block template file is being loaded from the current theme instead of Woo Blocks.
+	 * @param string $template_file Block template file path.
+	 * @param string $template_type wp_template or wp_template_part.
+	 * @param string $template_slug Block template slug e.g. single-product.
+	 * @param bool   $template_is_from_theme If the block template file is being loaded from the current theme instead of Woo Blocks.
 	 *
 	 * @return object Block template object.
 	 */
-	public static function create_new_block_template_object( $block_templates_registry, $template_file, $template_type, $template_slug, $template_is_from_theme = false ) {
+	public static function create_new_block_template_object( $template_file, $template_type, $template_slug, $template_is_from_theme = false ) {
 		$theme_name = wp_get_theme()->get( 'TextDomain' );
 
 		$new_template_item = array(
@@ -242,8 +253,8 @@ class BlockTemplateUtils {
 			'theme'       => $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG,
 			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
-			'title'       => self::get_block_template_title( $block_templates_registry, $template_slug ),
-			'description' => self::get_block_template_description( $block_templates_registry, $template_slug ),
+			'title'       => self::get_block_template_title( $template_slug ),
+			'description' => self::get_block_template_description( $template_slug ),
 			'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
 		);
 
@@ -294,12 +305,11 @@ class BlockTemplateUtils {
 	/**
 	 * Returns template title.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug The template slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Human friendly title.
 	 */
-	public static function get_block_template_title( $block_templates_registry, $template_slug ) {
-		$registered_template = $block_templates_registry->get_template( $template_slug );
+	public static function get_block_template_title( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
 		if ( isset( $registered_template ) ) {
 			return $registered_template->get_template_title();
 		} else {
@@ -311,12 +321,11 @@ class BlockTemplateUtils {
 	/**
 	 * Returns template description.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug The template slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Template description.
 	 */
-	public static function get_block_template_description( $block_templates_registry, $template_slug ) {
-		$registered_template = $block_templates_registry->get_template( $template_slug );
+	public static function get_block_template_description( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
 		if ( isset( $registered_template ) ) {
 			return $registered_template->get_template_description();
 		}
@@ -326,14 +335,13 @@ class BlockTemplateUtils {
 	/**
 	 * Returns area for template parts.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug The template part slug (e.g. mini-cart).
-	 * @param string                 $template_type Either `wp_template` or `wp_template_part`.
+	 * @param string $template_slug The template part slug (e.g. mini-cart).
+	 * @param string $template_type Either `wp_template` or `wp_template_part`.
 	 * @return string Template part area.
 	 */
-	public static function get_block_template_area( $block_templates_registry, $template_slug, $template_type ) {
+	public static function get_block_template_area( $template_slug, $template_type ) {
 		if ( 'wp_template_part' === $template_type ) {
-			$registered_template = $block_templates_registry->get_template( $template_slug );
+			$registered_template = self::get_template( $template_slug );
 			if ( $registered_template && property_exists( $registered_template, 'template_area' ) ) {
 				return $registered_template->template_area;
 			}
@@ -446,12 +454,11 @@ class BlockTemplateUtils {
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
 	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug Slug to check for fallbacks.
+	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback( $block_templates_registry, $template_slug ) {
-		$registered_template = $block_templates_registry->get_template( $template_slug );
+	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
 			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
 		}
@@ -461,13 +468,12 @@ class BlockTemplateUtils {
 	/**
 	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug Slug to check for fallbacks.
-	 * @param array                  $db_templates Templates that have already been found on the db.
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @param array  $db_templates Templates that have already been found on the db.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_db( $block_templates_registry, $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $block_templates_registry, $template_slug );
+	public static function template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $db_templates ) {
+		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
 		if ( ! $eligible_for_fallback ) {
 			return false;
 		}
@@ -485,13 +491,12 @@ class BlockTemplateUtils {
 	/**
 	 * Gets the `archive-product` fallback template stored on the db for a given slug.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug Slug to check for fallbacks.
-	 * @param array                  $db_templates Templates that have already been found on the db.
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @param array  $db_templates Templates that have already been found on the db.
 	 * @return boolean|object
 	 */
-	public static function get_fallback_template_from_db( $block_templates_registry, $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $block_templates_registry, $template_slug );
+	public static function get_fallback_template_from_db( $template_slug, $db_templates ) {
+		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
 		if ( ! $eligible_for_fallback ) {
 			return false;
 		}
@@ -511,12 +516,11 @@ class BlockTemplateUtils {
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute` templates can
 	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param string                 $template_slug Slug to check for fallbacks.
+	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_theme( $block_templates_registry, $template_slug ) {
-		return self::template_is_eligible_for_product_archive_fallback( $block_templates_registry, $template_slug )
+	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
+		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
 			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
 	}
@@ -533,19 +537,18 @@ class BlockTemplateUtils {
 	 *
 	 * It returns `true` if anything was changed, `false` otherwise.
 	 *
-	 * @param BlockTemplatesRegistry $block_templates_registry Registry of templates.
-	 * @param array                  $query_result Array of template objects.
-	 * @param object                 $template A specific template object which could have a fallback.
+	 * @param array  $query_result Array of template objects.
+	 * @param object $template A specific template object which could have a fallback.
 	 *
 	 * @return boolean
 	 */
-	public static function set_has_theme_file_if_fallback_is_available( $block_templates_registry, $query_result, $template ) {
+	public static function set_has_theme_file_if_fallback_is_available( $query_result, $template ) {
 		foreach ( $query_result as &$query_result_template ) {
 			if (
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				if ( self::template_is_eligible_for_product_archive_fallback_from_theme( $block_templates_registry, $template->slug ) ) {
+				if ( self::template_is_eligible_for_product_archive_fallback_from_theme( $template->slug ) ) {
 					$query_result_template->has_theme_file = true;
 				}
 
