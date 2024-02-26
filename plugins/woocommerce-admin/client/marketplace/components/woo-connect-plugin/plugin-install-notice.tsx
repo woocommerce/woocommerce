@@ -9,7 +9,6 @@ import { __ } from '@wordpress/i18n';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import {
 	WP_ADMIN_PLUGIN_LIST_URL,
-	WOO_CONNECT_PLUGIN_INSTALL_URL,
 	WOO_CONNECT_PLUGIN_DOWNLOAD_URL,
 } from '../constants';
 import './woo-connect-plugin.scss';
@@ -34,7 +33,7 @@ export default function PluginInstallNotice() {
 					{ message }
 					<div className="components-notice__buttons">
 						<Button
-							href={ WOO_CONNECT_PLUGIN_INSTALL_URL }
+							href={ wccomSettings?.wooConnectInstallUrl }
 							variant="secondary"
 						>
 							{ __( 'Install Woo Connect', 'woocommerce' ) }

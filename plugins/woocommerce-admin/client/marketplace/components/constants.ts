@@ -17,7 +17,5 @@ export const MARKETPLACE_COLLABORATION_PATH =
 	MARKETPLACE_HOST +
 	'/document/managing-woocommerce-com-subscriptions/#transfer-a-woocommerce-com-subscription';
 export const WP_ADMIN_PLUGIN_LIST_URL = ADMIN_URL + '/plugins.php';
-export const WOO_CONNECT_PLUGIN_INSTALL_URL =
-	'https://woo.com/woocom-plugin/install/';
 export const WOO_CONNECT_PLUGIN_DOWNLOAD_URL =
 	'https://woo.com/woocom-plugin/download/';
