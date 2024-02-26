@@ -4,12 +4,7 @@
  */
 import { test as base, expect, request as baseRequest } from '@playwright/test';
 import type { ConsoleMessage } from '@playwright/test';
-import {
-	Admin,
-	Editor,
-	PageUtils,
-	RequestUtils,
-} from '@wordpress/e2e-test-utils-playwright';
+import { Admin, Editor, PageUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
@@ -21,17 +16,8 @@ import {
 	LocalPickupUtils,
 	MiniCartUtils,
 	WPCLIUtils,
+	RequestUtils,
 } from '@woocommerce/e2e-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-
-/**
- * Internal dependencies
- */
-import {
-	PostPayload,
-	createPostFromTemplate,
-	deletePost,
-} from '../utils/create-dynamic-content';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -133,14 +119,7 @@ const test = base.extend<
 		wpCliUtils: WPCLIUtils;
 	},
 	{
-		requestUtils: RequestUtils & {
-			createPostFromTemplate: (
-				post: PostPayload,
-				templatePath: string,
-				data: unknown
-			) => Promise< Post >;
-			deletePost: ( id: number ) => Promise< void >;
-		};
+		requestUtils: RequestUtils;
 	}
 >( {
 	admin: async ( { page, pageUtils }, use ) => {
@@ -197,26 +176,7 @@ const test = base.extend<
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			const utilCreatePostFromTemplate = (
-				post: Partial< PostPayload >,
-				templatePath: string,
-				data: unknown
-			) =>
-				createPostFromTemplate(
-					requestUtils,
-					post,
-					templatePath,
-					data
-				);
-
-			const utilDeletePost = ( id: number ) =>
-				deletePost( requestUtils, id );
-
-			await use( {
-				...requestUtils,
-				createPostFromTemplate: utilCreatePostFromTemplate,
-				deletePost: utilDeletePost,
-			} );
+			await use( requestUtils );
 		},
 		{ scope: 'worker', auto: true },
 	],
