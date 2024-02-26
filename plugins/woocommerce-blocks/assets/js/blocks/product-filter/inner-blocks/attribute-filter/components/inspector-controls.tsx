@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
 import {
 	PanelBody,
 	ToggleControl,
@@ -23,8 +22,11 @@ import { BlockAttributes } from '../types';
 
 export const Inspector = ( {
 	attributes,
-	setAttributes,
-}: BlockEditProps< BlockAttributes > ) => {
+	setAttributeId,
+}: {
+	attributes: BlockAttributes;
+	setAttributeId: ( id: unknown ) => void;
+} ) => {
 	const { attributeId, showCounts, queryType, displayStyle, selectType } =
 		attributes;
 	return (
@@ -120,7 +122,7 @@ export const Inspector = ( {
 				<AttributeSelectControls
 					isCompact={ true }
 					attributeId={ attributeId }
-					setAttributes={ setAttributes }
+					setAttributeId={ setAttributeId }
 				/>
 			</PanelBody>
 		</InspectorControls>

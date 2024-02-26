@@ -34,7 +34,7 @@ jobs:
           
           # Calculate the date for the next Thursday after the merge
           THURSDAY_AFTER_MERGE=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_THURSDAY days" +"%Y-%m-%d")
-          WOOAF_RELEASE_DATE=$(date -u -d "${THURSDAY_AFTER_MERGE} + 6 days" +"%Y-%m-%d")
+          WOOAF_RELEASE_DATE=$(date -u -d "${THURSDAY_AFTER_MERGE} + 5 days" +"%Y-%m-%d")
           TEST_DATE_MESSAGE="Thursday, $THURSDAY_AFTER_MERGE. (Targeting release on $WOOAF_RELEASE_DATE)"
           echo "TEST_DATE_MESSAGE=${TEST_DATE_MESSAGE}" >> $GITHUB_ENV
 

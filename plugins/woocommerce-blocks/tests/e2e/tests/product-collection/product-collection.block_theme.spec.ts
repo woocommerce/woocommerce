@@ -56,20 +56,20 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			await pageObject.setNumberOfColumns( 2 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-2' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-2/
+			);
 
 			await pageObject.setNumberOfColumns( 4 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 		} );
 
 		test( 'Order By - sort products by title in descending order correctly', async ( {
@@ -93,39 +93,28 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		// Products can be filtered based on 'on sale' status.
-		test( 'Products can be filtered based on "on sale" status.', async ( {
+		test( 'Products can be filtered based on "on sale" status', async ( {
 			pageObject,
 		} ) => {
-			// On each page we show 9 products.
-			await expect( pageObject.products ).toHaveCount( 9 );
-			// All products should not be on sale.
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).not.toHaveCount( 9 );
+			const allProducts = pageObject.products;
+			const salePoducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
-			// In test data we have only 6 products on sale
-			await expect( pageObject.products ).toHaveCount( 6 );
-
-			// Expect all shown products to be on sale.
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.products ).toHaveCount( 6 );
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -327,8 +316,8 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test.describe( 'Inherit query from template', () => {
-			test( 'Inherit query from template should not be visible on posts', async ( {
+		test.describe( 'Sync with current template (former "Inherit query from template")', () => {
+			test( 'should not be visible on posts', async ( {
 				pageObject,
 			} ) => {
 				await pageObject.createNewPostAndInsertBlock();
@@ -342,7 +331,7 @@ test.describe( 'Product Collection', () => {
 				).toBeHidden();
 			} );
 
-			test( 'Inherit query from template should work as expected in Product Catalog template', async ( {
+			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
 			} ) => {
 				await pageObject.goToProductCatalogAndInsertCollection();
@@ -393,6 +382,44 @@ test.describe( 'Product Collection', () => {
 					sidebarSettings.getByLabel( SELECTORS.onSaleControlLabel )
 				).toBeChecked();
 			} );
+
+			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
+				pageObject,
+			} ) => {
+				// First Product Catalog
+				// Option should be visible & ENABLED by default
+				await pageObject.goToProductCatalogAndInsertCollection();
+
+				const sidebarSettings =
+					await pageObject.locateSidebarSettings();
+
+				await expect(
+					sidebarSettings.locator(
+						SELECTORS.inheritQueryFromTemplateControl
+					)
+				).toBeVisible();
+				await expect(
+					sidebarSettings.locator(
+						`${ SELECTORS.inheritQueryFromTemplateControl } input`
+					)
+				).toBeChecked();
+
+				// Second Product Catalog
+				// Option should be visible & DISABLED by default
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate( 'productCatalog' );
+
+				await expect(
+					sidebarSettings.locator(
+						SELECTORS.inheritQueryFromTemplateControl
+					)
+				).toBeVisible();
+				await expect(
+					sidebarSettings.locator(
+						`${ SELECTORS.inheritQueryFromTemplateControl } input`
+					)
+				).not.toBeChecked();
+			} );
 		} );
 	} );
 
@@ -411,18 +438,18 @@ test.describe( 'Product Collection', () => {
 				maxPageToShow: 2,
 			} );
 
-			await expect( await pageObject.products ).toHaveCount( 3 );
+			await expect( pageObject.products ).toHaveCount( 3 );
 
 			await pageObject.setDisplaySettings( {
 				itemsPerPage: 2,
 				offset: 0,
 				maxPageToShow: 2,
 			} );
-			await expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.products ).toHaveCount( 2 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.products ).toHaveCount( 2 );
 
 			const paginationNumbers =
 				pageObject.pagination.locator( '.page-numbers' );
@@ -921,13 +948,13 @@ test.describe( 'Product Collection', () => {
 				collection: 'productCatalog',
 			} );
 
-			await expect(
+			expect(
 				url.searchParams.has( 'productCollectionQueryContext[id]' )
 			).toBeTruthy();
 
 			// There shouldn't be collection in the query context
 			// Because Product Catalog isn't a collection
-			await expect(
+			expect(
 				url.searchParams.has(
 					'productCollectionQueryContext[collection]'
 				)
@@ -944,8 +971,8 @@ test.describe( 'Product Collection', () => {
 			const collectionName = url.searchParams.get(
 				'productCollectionQueryContext[collection]'
 			);
-			await expect( collectionName ).toBeTruthy();
-			await expect( collectionName ).toBe(
+			expect( collectionName ).toBeTruthy();
+			expect( collectionName ).toBe(
 				'woocommerce/product-collection/on-sale'
 			);
 		} );

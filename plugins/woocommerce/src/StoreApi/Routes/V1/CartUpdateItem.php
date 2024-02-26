@@ -18,15 +18,6 @@ class CartUpdateItem extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return self::get_path_regex();
-	}
-
-	/**
-	 * Get the path of this rest route.
-	 *
-	 * @return string
-	 */
-	public static function get_path_regex() {
 		return '/cart/update-item';
 	}
 
