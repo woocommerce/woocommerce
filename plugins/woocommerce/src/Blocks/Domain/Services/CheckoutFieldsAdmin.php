@@ -84,7 +84,7 @@ class CheckoutFieldsAdmin {
 	 * @param string            $context The context to show the fields for.
 	 * @return array
 	 */
-	public function admin_address_fields( $fields, $order, $context = 'edit' ) {
+	public function admin_address_fields( $fields, $order = null, $context = 'edit' ) {
 		if ( ! $order instanceof \WC_Order ) {
 			return $fields;
 		}
@@ -118,7 +118,7 @@ class CheckoutFieldsAdmin {
 	 * @param string            $context The context to show the fields for.
 	 * @return array
 	 */
-	public function admin_contact_fields( $fields, $order, $context = 'edit' ) {
+	public function admin_contact_fields( $fields, $order = null, $context = 'edit' ) {
 		if ( ! $order instanceof \WC_Order ) {
 			return $fields;
 		}
@@ -143,7 +143,7 @@ class CheckoutFieldsAdmin {
 	 * @param string            $context The context to show the fields for.
 	 * @return array
 	 */
-	public function admin_additional_fields( $fields, $order, $context = 'edit' ) {
+	public function admin_additional_fields( $fields, $order = null, $context = 'edit' ) {
 		if ( ! $order instanceof \WC_Order ) {
 			return $fields;
 		}

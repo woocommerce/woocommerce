@@ -10,7 +10,6 @@ import {
 	PageUtils,
 	RequestUtils,
 } from '@wordpress/e2e-test-utils-playwright';
-
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
@@ -23,6 +22,16 @@ import {
 	MiniCartUtils,
 	WPCLIUtils,
 } from '@woocommerce/e2e-utils';
+import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+
+/**
+ * Internal dependencies
+ */
+import {
+	PostPayload,
+	createPostFromTemplate,
+	deletePost,
+} from '../utils/create-dynamic-content';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -123,7 +132,14 @@ const test = base.extend<
 		wpCliUtils: WPCLIUtils;
 	},
 	{
-		requestUtils: RequestUtils;
+		requestUtils: RequestUtils & {
+			createPostFromTemplate: (
+				post: PostPayload,
+				templatePath: string,
+				data: unknown
+			) => Promise< Post >;
+			deletePost: ( id: number ) => Promise< void >;
+		};
 	}
 >( {
 	admin: async ( { page, pageUtils, editor }, use ) => {
@@ -180,7 +196,26 @@ const test = base.extend<
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			await use( requestUtils );
+			const utilCreatePostFromTemplate = (
+				post: Partial< PostPayload >,
+				templatePath: string,
+				data: unknown
+			) =>
+				createPostFromTemplate(
+					requestUtils,
+					post,
+					templatePath,
+					data
+				);
+
+			const utilDeletePost = ( id: number ) =>
+				deletePost( requestUtils, id );
+
+			await use( {
+				...requestUtils,
+				createPostFromTemplate: utilCreatePostFromTemplate,
+				deletePost: utilDeletePost,
+			} );
 		},
 		{ scope: 'worker', auto: true },
 	],

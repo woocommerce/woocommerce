@@ -35,7 +35,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await editor.publishPost();
 		const url = new URL( page.url() );
 		const postId = url.searchParams.get( 'post' );
-		await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+		await page.goto( `/?p=${ postId }` );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -59,24 +59,30 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		page,
 		frontendUtils,
 	} ) => {
+		// The price filter input is initially enabled, but it becomes disabled
+		// for the time it takes to fetch the data. To avoid setting the filter
+		// value before the input is properly initialized, we wait for the input
+		// to be disabled first. This is a safeguard to avoid flakiness which
+		// should be addressed in the code, but All Products block will be
+		// deprecated in the future, so we are not going to optimize it.
+		await page
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
 
-		// All Products block will be deprecated in the future, so we are not going to optimize it.
-
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$10', {
-			// eslint-disable-next-line playwright/no-force-option
-			force: true,
-		} );
+		await maxPriceInput.dblclick();
+		await maxPriceInput.fill( '$10' );
 		await maxPriceInput.press( 'Tab' );
-		await page.waitForResponse( ( response ) =>
-			response.url().includes( blockData.endpointAPI )
-		);
 
 		const allProductsBlock = await frontendUtils.getBlockByName(
 			'woocommerce/all-products'
@@ -89,9 +95,9 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			blockData.placeholderUrl
 		);
 
-		const products = await allProductsBlock.getByRole( 'listitem' ).all();
+		const allProducts = allProductsBlock.getByRole( 'listitem' );
 
-		expect( products ).toHaveLength( 1 );
+		await expect( allProducts ).toHaveCount( 1 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
@@ -111,7 +117,6 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 
 		await editor.canvas.locator( 'body' ).click();
-		( 'body' );
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
