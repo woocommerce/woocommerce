@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Fix condition in Promotions component so marketplace promotions are properly filtered by page.

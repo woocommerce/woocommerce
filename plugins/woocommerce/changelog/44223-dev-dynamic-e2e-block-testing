@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Add a system to support dynamic template testing in blocks e2e tests.
-
