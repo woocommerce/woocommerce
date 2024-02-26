@@ -21,8 +21,21 @@ const goToPostEditor = async ( { page } ) => {
 	await closeWelcomeModal( { page } );
 };
 
+const disableWelcomeModal = async ( { page } ) => {
+	const isWelcomeGuideActive = await page.evaluate( () =>
+		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
+	);
+
+	if ( isWelcomeGuideActive ) {
+		await page.evaluate( () =>
+			wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'welcomeGuide' )
+		);
+	}
+};
+
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
 	goToPostEditor,
+	disableWelcomeModal,
 };
