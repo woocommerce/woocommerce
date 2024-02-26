@@ -139,27 +139,35 @@ jobs:
                   test-type: E2E
 
     k6:
-        name: Run k6 Performance tests
-        needs: [api]
+        name: Runs k6 Performance tests
+        if: github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
             contents: read
         steps:
             - uses: actions/checkout@v3
-              with:
-                  ref: ${{ github.event.pull_request.merge_commit_sha }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
               with:
-                  test-type: k6
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Run k6 performance tests
-              id: run-k6-composite-action
-              uses: './.github/actions/tests/run-k6-tests'
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+              run: |
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
+
+            - name: Install k6
+              run: |
+                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+            - name: Run k6 tests
+              run: |
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
             - name: Send Slack alert on test failure
               if: failure() && steps.run-k6-composite-action.conclusion == 'failure'
