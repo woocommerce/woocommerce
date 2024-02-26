@@ -186,7 +186,7 @@ class WC_Helper_Updater {
 						),
 					)
 				),
-				'https://woo.com/woocom-plugin/install/',
+				esc_url( WC_Helper_Plugin::generate_install_url() ),
 			);
 			return;
 		}
