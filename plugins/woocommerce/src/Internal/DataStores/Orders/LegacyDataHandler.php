@@ -6,7 +6,9 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use WC_Abstract_Order;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -321,27 +323,168 @@ class LegacyDataHandler {
 	 * @param int    $order_id               Order ID.
 	 * @param string $source_data_store      Datastore to use as source. Should be either 'hpos' or 'posts'.
 	 * @param string $destination_data_store Datastore to use as destination. Should be either 'hpos' or 'posts'.
+	 * @param array  $fields                 List of metakeys or order properties to limit the backfill to.
 	 * @return void
 	 * @throws \Exception When an error occurs.
 	 */
-	public function backfill_order_to_datastore( int $order_id, string $source_data_store, string $destination_data_store ) {
+	public function backfill_order_to_datastore( int $order_id, string $source_data_store, string $destination_data_store, array $fields = array() ) {
 		$valid_data_stores = array( 'posts', 'hpos' );
 
 		if ( ! in_array( $source_data_store, $valid_data_stores, true ) || ! in_array( $destination_data_store, $valid_data_stores, true ) || $destination_data_store === $source_data_store ) {
 			throw new \Exception( sprintf( 'Invalid datastore arguments: %1$s -> %2$s.', $source_data_store, $destination_data_store ) );
 		}
 
-		$order = $this->get_order_from_datastore( $order_id, $source_data_store );
+		$fields    = array_filter( $fields );
+		$src_order = $this->get_order_from_datastore( $order_id, $source_data_store );
 
-		switch ( $destination_data_store ) {
-			case 'posts':
-				$order->get_data_store()->backfill_post_record( $order );
-				break;
-			case 'hpos':
-				$this->posts_to_cot_migrator->migrate_orders( array( $order_id ) );
-				break;
-			default:
-				break;
+		if ( ! $fields ) {
+			// Backfill entire orders.
+			if ( 'posts' === $destination_data_store ) {
+				$src_order->get_data_store()->backfill_post_record( $src_order );
+			} elseif ( 'hpos' === $destination_data_store ) {
+				$this->posts_to_cot_migrator->migrate_orders( array( $src_order->get_id() ) );
+			}
+		} else {
+			// Backfill a set of meta or props.
+			$dest_order = $this->get_order_from_datastore( $src_order->get_id(), $destination_data_store );
+
+			if ( ! empty( $fields['meta_keys'] ) ) {
+				$this->backfill_partial_order_meta( $src_order, $dest_order, $fields['meta_keys'] );
+			}
+
+			if ( ! empty( $fields['props'] ) ) {
+				$this->backfill_partial_order_props( $src_order, $dest_order, $fields['props'] );
+			}
+		}
+	}
+
+	/**
+	 * Backfills order metadata from one order to another.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param \WC_Abstract_Order $src_order  Source order.
+	 * @param \WC_Abstract_Order $dest_order Destination order.
+	 * @param string[]           $meta_keys  Metakey names.
+	 * @return void
+	 * @throws \Exception When an error occurs.
+	 */
+	private function backfill_partial_order_meta( \WC_Abstract_Order &$src_order, \WC_Abstract_Order &$dest_order, array $meta_keys = array() ) {
+		$internal_meta_keys = array_unique(
+			array_merge(
+				$src_order->get_data_store()->get_internal_meta_keys(),
+				$dest_order->get_data_store()->get_internal_meta_keys()
+			)
+		);
+
+		$possibly_internal_keys = array_intersect( $internal_meta_keys, $meta_keys );
+		if ( ! empty( $possibly_internal_keys ) ) {
+			throw new \Exception(
+				sprintf(
+					// translators: %s is a comma separated list of metakey names.
+					_n(
+						'%s is an internal meta key. Use --props to set it.',
+						'%s are internal meta keys. Use --props to set them.',
+						count( $possibly_internal_keys ),
+						'woocommerce'
+					),
+					implode( ', ', $possibly_internal_keys )
+				)
+			);
+		}
+
+		foreach ( $meta_keys as $meta_key ) {
+			$dest_order->delete_meta_data( $meta_key );
+
+			foreach ( $src_order->get_meta( $meta_key, false, 'edit' ) as $meta ) {
+				$dest_order->add_meta_data( $meta_key, $meta->value );
+			}
+
+			$dest_order->save_meta_data();
+		}
+	}
+
+	/**
+	 * Backfills order properties from one order to another.
+	 *
+	 * @since 8.8.0.
+	 *
+	 * @param \WC_Abstract_Order $src_order  Source order.
+	 * @param \WC_Abstract_Order $dest_order Destination order.
+	 * @param string[]           $props      Property names.
+	 * @return void
+	 * @throws \Exception When an error occurs.
+	 */
+	private function backfill_partial_order_props( \WC_Abstract_Order &$src_order, \WC_Abstract_Order &$dest_order, array $props = array() ) {
+		$invalid_props = array_filter(
+			$props,
+			function ( $prop_name ) use ( $src_order ) {
+				return ! in_array( $prop_name, $this->get_order_base_props(), true ) || ! method_exists( $src_order, "get_{$prop_name}" );
+			}
+		);
+
+		if ( ! empty( $invalid_props ) ) {
+			throw new \Exception(
+				sprintf(
+					// translators: %s is a list of order property names.
+					_n(
+						'%s is not a valid order property.',
+						'%s are not valid order properties.',
+						count( $invalid_props ),
+						'woocommerce'
+					),
+					implode( ', ', $invalid_props )
+				)
+			);
+		}
+
+		$new_values = array_combine(
+			$props,
+			array_map(
+				fn( $prop_name ) => $src_order->{"get_{$prop_name}"}(),
+				$props
+			)
+		);
+		$dest_order->set_props( $new_values );
+
+		if ( is_a( $dest_order->get_data_store()->get_current_class_name(), get_class( $this->data_store ), true ) ) {
+			// HPOS update.
+			$db_rows = (
+				function() use ( $dest_order ) {
+					return $this->get_db_rows_for_order( $dest_order, 'update', true );
+				}
+			)->call( $this->data_store, $dest_order );
+
+			$allowed_column_names = $this->get_hpos_columns_for_props( $props );
+			$db_util              = wc_get_container()->get( DatabaseUtil::class );
+
+			foreach ( $db_rows as $db_update ) {
+				// Prevent update of columns not associated to the chosen props.
+				if ( ! array_intersect_key( $db_update['data'], array_flip( $allowed_column_names ) ) ) {
+					continue;
+				}
+
+				$allowed_column_names_with_ids = array_merge(
+					$allowed_column_names,
+					array( 'id', 'order_id', 'address_type' )
+				);
+
+				$db_update['data']   = array_intersect_key( $db_update['data'], array_flip( $allowed_column_names_with_ids ) );
+				$db_update['format'] = array_intersect_key( $db_update['format'], array_flip( $allowed_column_names_with_ids ) );
+
+				ksort( $db_update['data'] );
+				ksort( $db_update['format'] );
+
+				$db_util->insert_on_duplicate_key_update( $db_update['table'], $db_update['data'], array_values( $db_update['format'] ) );
+			}
+		} else {
+			// CPT update.
+			$cpt_datastore = $this->data_store->get_cpt_data_store_instance();
+			if ( ! $cpt_datastore || ! method_exists( $cpt_datastore, 'update_order_from_object' ) ) {
+				throw new \Exception( __( 'The current backup datastore does not support updating orders from HPOS.', 'woocommerce' ) );
+			}
+
+			$cpt_datastore->update_order_from_object( $dest_order );
 		}
 	}
 
@@ -379,6 +522,30 @@ class LegacyDataHandler {
 		}
 
 		return $base_props;
+	}
+
+	/**
+	 * Returns a mapping of order property => column name (as in HPOS tables) for a set of order properties.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param array $props Order properties to fetch column names for.
+	 * @return string[string] Array of column names indexed by order property name.
+	 */
+	private function get_hpos_columns_for_props( array $props = array() ) : array {
+		$result = array();
+
+		foreach ( $this->data_store->get_all_order_column_mappings() as &$mapping ) {
+			foreach ( $mapping as $column_name => &$column_data ) {
+				if ( ! isset( $column_data['name'] ) || ! in_array( $column_data['name'], $props, true ) ) {
+					continue;
+				}
+
+				$result[ $column_data['name'] ] = $column_name;
+			}
+		}
+
+		return $result;
 	}
 
 }
