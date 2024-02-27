@@ -21,7 +21,7 @@ const PaymentsBannerFill = () => {
 
 export const registerPaymentsSettingsBannerFill = () => {
 	registerPlugin( 'woocommerce-admin-paymentsgateways-settings-banner', {
-		scope: 'woocommerce-payment-settings',
+		scope: 'woocommerce-payments-settings',
 		render: PaymentsBannerFill,
 	} );
 };
