@@ -16,10 +16,11 @@ import './stylesheets/_index.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { PageLayout, EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import { EmbeddedBodyLayout } from './embedded-body-layout';
-import { WcAdminPaymentsGatewaysBannerSlot } from './payments/payments-settings-banner-slotfill';
-import { WcAdminConflictErrorSlot } from './settings/conflict-error-slotfill.js';
 import './xstate.js';
 import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-background-colours';
+import { possiblyRenderSettingsSlots } from './settings/settings-slots';
+import { registerConflictErrorFill } from './settings/conflict-error-slotfill';
+import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
@@ -65,22 +66,7 @@ if ( appRoot ) {
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
 
-	const isWcAdminSettingsPaymentPage = document.getElementById(
-		'wc_payment_gateways_banner_slotfill'
-	);
-
-	if ( isWcAdminSettingsPaymentPage ) {
-		render(
-			WcAdminPaymentsGatewaysBannerSlot(),
-			isWcAdminSettingsPaymentPage
-		);
-	}
-
-	const isTaxPage = document.getElementById( 'wc_conflict_error_slotfill' );
-
-	if ( isTaxPage ) {
-		render( WcAdminConflictErrorSlot(), isTaxPage );
-	}
+	possiblyRenderSettingsSlots();
 
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
@@ -99,6 +85,9 @@ if ( appRoot ) {
 		<EmbeddedBodyLayout />,
 		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
 	);
+
+	registerConflictErrorFill();
+	registerPaymentsSettingsBannerFill();
 }
 
 // Render the CustomerEffortScoreTracksContainer only if
