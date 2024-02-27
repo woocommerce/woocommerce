@@ -32,8 +32,7 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 				'.wp-block-woocommerce-product-filter'
 			);
 
-			const count = await locator.count();
-			expect( count ).toBe( 1 );
+			await expect( locator ).toHaveCount( 1 );
 
 			const html = await locator.innerHTML();
 			expect( html.trim() ).toBe( '' );
