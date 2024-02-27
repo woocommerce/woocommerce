@@ -191,7 +191,7 @@ const SettingsErrorFill = () => {
 	);
 };
 
-export const registerConflictErrorFill = () => {
+export const registerTaxSettingsConflictErrorFill = () => {
 	registerPlugin( 'woocommerce-admin-tax-settings-conflict-warning', {
 		scope: 'woocommerce-tax-settings',
 		render: SettingsErrorFill,

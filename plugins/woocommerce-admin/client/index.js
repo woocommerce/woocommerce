@@ -19,7 +19,7 @@ import { EmbeddedBodyLayout } from './embedded-body-layout';
 import './xstate.js';
 import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-background-colours';
 import { possiblyRenderSettingsSlots } from './settings/settings-slots';
-import { registerConflictErrorFill } from './settings/conflict-error-slotfill';
+import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 
 const appRoot = document.getElementById( 'root' );
@@ -66,8 +66,6 @@ if ( appRoot ) {
 	// Render notices just above the WP content div.
 	const wpBody = document.getElementById( 'wpbody-content' );
 
-	possiblyRenderSettingsSlots();
-
 	const wrap =
 		wpBody.querySelector( '.wrap.woocommerce' ) ||
 		document.querySelector( '#wpbody-content > .woocommerce' ) ||
@@ -86,7 +84,9 @@ if ( appRoot ) {
 		wpBody.insertBefore( embeddedBodyContainer, wrap.nextSibling )
 	);
 
-	registerConflictErrorFill();
+	possiblyRenderSettingsSlots();
+
+	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
 }
 
