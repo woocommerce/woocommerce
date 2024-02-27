@@ -18,7 +18,7 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	/**
 	 * Initialization method.
 	 */
-	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	public function init() {
 		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
 
 		parent::init();

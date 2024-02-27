@@ -18,16 +18,9 @@ abstract class AbstractTemplate {
 	const SLUG = '';
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->init();
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	abstract protected function init(); // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	abstract public function init();
 
 	/**
 	 * Should return the title of the template.

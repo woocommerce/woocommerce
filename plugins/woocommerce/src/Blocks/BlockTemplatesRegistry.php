@@ -58,6 +58,11 @@ class BlockTemplatesRegistry {
 			$template_parts = array();
 		}
 		$this->templates = array_merge( $templates, $template_parts );
+
+		// Init all templates.
+		foreach ( $this->templates as $template ) {
+			$template->init();
+		}
 	}
 
 	/**

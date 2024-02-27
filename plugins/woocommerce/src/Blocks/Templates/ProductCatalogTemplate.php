@@ -21,7 +21,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 	}

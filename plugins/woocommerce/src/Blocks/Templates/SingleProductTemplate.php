@@ -21,7 +21,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	/**
 	 * Initialization method.
 	 */
-	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11, 3 );
 	}

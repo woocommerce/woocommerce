@@ -20,7 +20,7 @@ class CartTemplate extends AbstractPageTemplate {
 	/**
 	 * Initialization method.
 	 */
-	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
+	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 
 		parent::init();
