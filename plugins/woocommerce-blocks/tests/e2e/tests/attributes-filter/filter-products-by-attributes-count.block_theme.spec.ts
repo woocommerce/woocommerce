@@ -51,10 +51,7 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		defaultBlockPostPage,
 	} ) => {
 		await page.goto(
-			`${ defaultBlockPostPage.link }?filter_color=blue,gray&query_type_color=or`,
-			{
-				waitUntil: 'commit',
-			}
+			`${ defaultBlockPostPage.link }?filter_color=blue,gray&query_type_color=or`
 		);
 
 		// Check if the page has loaded successfully.
@@ -77,10 +74,7 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		defaultBlockPostPage,
 	} ) => {
 		await page.goto(
-			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`,
-			{
-				waitUntil: 'commit',
-			}
+			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
 		);
 
 		// Check if the page has loaded successfully.
