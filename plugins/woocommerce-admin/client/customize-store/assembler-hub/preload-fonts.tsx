@@ -46,6 +46,13 @@ export const PreloadFonts = () => {
 		} ) => void
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
+	// theme.json file font families
+	const [ baseFontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies',
+		undefined,
+		'base'
+	);
+
 	const { context } = useContext( CustomizeStoreContext );
 
 	const { globalStylesId, installedFontFamilies } = useSelect( ( select ) => {
@@ -176,7 +183,7 @@ export const PreloadFonts = () => {
 				) ) }
 			{ isNoAIFlow( context.flowType ) && (
 				<FontFamiliesLoader
-					fontFamilies={ enabledFontFamilies.custom }
+					fontFamilies={ baseFontFamilies.theme }
 					iframeInstance={ iframeInstance }
 				/>
 			) }

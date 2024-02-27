@@ -488,7 +488,7 @@ export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
 			elements: {
 				heading: {
 					typography: {
-						fontFamily: 'var(--wp--preset--font-family--cardo)',
+						fontFamily: 'var(--wp--preset--font-family--heading)',
 						fontStyle: 'normal',
 						fontWeight: '300',
 					},
@@ -496,41 +496,6 @@ export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
 			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--system-sans-serif)',
-			},
-		},
-	},
-	{
-		title: 'Jost + Instrument Sans',
-		version: 2,
-		lookAndFeel: [] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Jost',
-							slug: 'jost',
-						},
-						{
-							fontFamily: 'Instrument Sans',
-							slug: 'instrument-sans',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--jost)',
-						fontStyle: 'normal',
-						fontWeight: '100 900',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--instrument-sans)',
 			},
 		},
 	},
@@ -558,14 +523,14 @@ export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
 			elements: {
 				heading: {
 					typography: {
-						fontFamily: 'var(--wp--preset--font-family--inter)',
+						fontFamily: 'var(--wp--preset--font-family--body)',
 						fontStyle: 'normal',
 						fontWeight: '300',
 					},
 				},
 			},
 			typography: {
-				fontFamily: 'var(--wp--preset--font-family--cardo)',
+				fontFamily: 'var(--wp--preset--font-family--heading)',
 			},
 		},
 	},
