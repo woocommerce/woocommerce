@@ -16,8 +16,12 @@ class RemoteSpecValidator {
 	 */
 	private $schema;
 
-	public function __construct( $json_schema_path ) {
-		$this->schema = json_decode( file_get_contents( $json_schema_path ) );
+	public function __construct( $json_schema_string ) {
+		$this->schema = $json_schema_string;
+	}
+
+	public static function create_from_file( $json_schema_path ) {
+		return new self( json_decode( file_get_contents( $json_schema_path ) ) );
 	}
 
 	/**
@@ -41,7 +45,7 @@ class RemoteSpecValidator {
 				"Supported bundles are: " . implode( ', ', array_keys( $supported_bundles ) ) );
 		}
 
-		return new self( __DIR__ . "/../bundles/{$supported_bundles[$bundle]}" );
+		return static::create_from_file( __DIR__ . "/../bundles/{$supported_bundles[$bundle]}" );
 	}
 
 	/**
