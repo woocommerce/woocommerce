@@ -73,7 +73,10 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$upload_dir    = wp_upload_dir( null, false );
+		$log_directory = $upload_dir['basedir'] . '/wc-logs/';
+
+		$files = glob( $log_directory . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}

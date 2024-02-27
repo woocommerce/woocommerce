@@ -289,7 +289,7 @@ class Settings {
 	 */
 	private function get_filesystem_settings_definitions(): array {
 		$location_info = array();
-		$directory     = trailingslashit( Constants::get_constant( 'WC_LOG_DIR' ) );
+		$directory     = self::get_log_directory();
 
 		$location_info[] = sprintf(
 			// translators: %s is a location in the filesystem.
@@ -303,13 +303,6 @@ class Settings {
 		if ( ! wp_is_writable( $directory ) ) {
 			$location_info[] = __( '⚠️ This directory does not appear to be writable.', 'woocommerce' );
 		}
-
-		$location_info[] = sprintf(
-			// translators: %1$s is a code variable. %2$s is the name of a file.
-			__( 'Change the location by defining the %1$s constant in your %2$s file with a new path.', 'woocommerce' ),
-			'<code>WC_LOG_DIR</code>',
-			'<code>wp-config.php</code>'
-		);
 
 		$location_info[] = sprintf(
 			// translators: %s is an amount of computer disk space, e.g. 5 KB.

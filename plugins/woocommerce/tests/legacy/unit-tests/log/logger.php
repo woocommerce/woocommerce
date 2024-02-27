@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 
 /**
  * Class WC_Tests_Logger
@@ -39,7 +40,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$files = glob( Settings::get_log_directory() . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}
@@ -81,7 +82,7 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$path = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . 'unit-tests.log';
+		$path = Settings::get_log_directory() . 'unit-tests.log';
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 		file_put_contents( $path, 'Test file content.' );
 		$this->assertFileExists( $path );
