@@ -18,6 +18,10 @@ export function MultipleUpdateMenu( {
 	onChange,
 	onDelete,
 }: VariationActionsMenuProps ) {
+	if ( ! selection ) {
+		return null;
+	}
+
 	return (
 		<Dropdown
 			// @ts-expect-error missing prop in types.

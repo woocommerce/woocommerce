@@ -23,7 +23,7 @@ const mockVariation = {
 	downloads: [],
 	name: '',
 	parent_id: 1,
-} as ProductVariation;
+} as unknown as ProductVariation;
 
 const anotherMockVariation = {
 	id: 11,
@@ -32,7 +32,7 @@ const anotherMockVariation = {
 	downloads: [],
 	name: '',
 	parent_id: 1,
-} as ProductVariation;
+} as unknown as ProductVariation;
 
 describe( 'MultipleUpdateMenu', () => {
 	let onChangeMock: jest.Mock, onDeleteMock: jest.Mock;
@@ -83,7 +83,7 @@ describe( 'SingleUpdateMenu', () => {
 	it( 'should trigger product_variations_menu_view track when dropdown toggled', () => {
 		const { getByRole } = render(
 			<SingleUpdateMenu
-				selection={ mockVariation }
+				selection={ [ mockVariation ] }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -101,7 +101,7 @@ describe( 'SingleUpdateMenu', () => {
 	it( 'should render dropdown with pricing, inventory, and delete options when opened', () => {
 		const { queryByText, getByRole } = render(
 			<SingleUpdateMenu
-				selection={ mockVariation }
+				selection={ [ mockVariation ] }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -115,7 +115,7 @@ describe( 'SingleUpdateMenu', () => {
 	it( 'should call onDelete when Delete menuItem is clicked', async () => {
 		const { getByRole, getByText } = render(
 			<SingleUpdateMenu
-				selection={ mockVariation }
+				selection={ [ mockVariation ] }
 				onChange={ onChangeMock }
 				onDelete={ onDeleteMock }
 			/>
@@ -129,7 +129,7 @@ describe( 'SingleUpdateMenu', () => {
 		it( 'should open Inventory sub-menu if Inventory is clicked with click track', async () => {
 			const { queryByText, getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -140,7 +140,7 @@ describe( 'SingleUpdateMenu', () => {
 				'product_variations_menu_inventory_click',
 				{
 					source: TRACKS_SOURCE,
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
 			expect( queryByText( 'Update stock' ) ).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe( 'SingleUpdateMenu', () => {
 			window.prompt = jest.fn().mockReturnValue( '10' );
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -170,19 +170,22 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'stock_quantity_set',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				stock_quantity: 10,
-				manage_stock: true,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					stock_quantity: 10,
+					manage_stock: true,
+				},
+			] );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'product_variations_menu_inventory_update',
 				{
 					source: TRACKS_SOURCE,
 					action: 'stock_quantity_set',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
 		} );
@@ -191,7 +194,7 @@ describe( 'SingleUpdateMenu', () => {
 			window.prompt = jest.fn().mockReturnValue( null );
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -205,7 +208,7 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'stock_quantity_set',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
 			expect( onChangeMock ).not.toHaveBeenCalledWith( {
@@ -217,7 +220,7 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'stock_quantity_set',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
 		} );
@@ -225,7 +228,7 @@ describe( 'SingleUpdateMenu', () => {
 		it( 'should call onChange with toggled manage_stock when toggle "track quantity" is clicked', async () => {
 			const { getByRole, getByText, rerender } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -239,16 +242,19 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'manage_stock_toggle',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				manage_stock: true,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					manage_stock: true,
+				},
+			] );
 			onChangeMock.mockClear();
 			rerender(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation, manage_stock: true } }
+					selection={ [ { ...mockVariation, manage_stock: true } ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -256,15 +262,18 @@ describe( 'SingleUpdateMenu', () => {
 			await fireEvent.click( getByRole( 'button', { name: 'Actions' } ) );
 			await fireEvent.click( getByText( 'Inventory' ) );
 			await fireEvent.click( getByText( 'Toggle "track quantity"' ) );
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				manage_stock: false,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					manage_stock: false,
+				},
+			] );
 		} );
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to In stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -278,19 +287,22 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'set_status_in_stock',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				stock_status: PRODUCT_STOCK_STATUS_KEYS.instock,
-				manage_stock: false,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					stock_status: PRODUCT_STOCK_STATUS_KEYS.instock,
+					manage_stock: false,
+				},
+			] );
 		} );
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to Out of stock" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -304,19 +316,22 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'set_status_out_of_stock',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				stock_status: PRODUCT_STOCK_STATUS_KEYS.outofstock,
-				manage_stock: false,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					stock_status: PRODUCT_STOCK_STATUS_KEYS.outofstock,
+					manage_stock: false,
+				},
+			] );
 		} );
 
 		it( 'should call onChange with toggled stock_status when toggle "Set status to On back order" is clicked', async () => {
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -330,20 +345,23 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'set_status_on_back_order',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				stock_status: PRODUCT_STOCK_STATUS_KEYS.onbackorder,
-				manage_stock: false,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					stock_status: PRODUCT_STOCK_STATUS_KEYS.onbackorder,
+					manage_stock: false,
+				},
+			] );
 		} );
 
 		it( 'should call onChange with low_stock_amount when Edit low stock threshold is clicked', async () => {
 			window.prompt = jest.fn().mockReturnValue( '7' );
 			const { getByRole, getByText } = render(
 				<SingleUpdateMenu
-					selection={ { ...mockVariation } }
+					selection={ [ mockVariation ] }
 					onChange={ onChangeMock }
 					onDelete={ onDeleteMock }
 				/>
@@ -357,13 +375,16 @@ describe( 'SingleUpdateMenu', () => {
 				{
 					source: TRACKS_SOURCE,
 					action: 'low_stock_amount_set',
-					variation_id: 10,
+					variation_id: [ 10 ],
 				}
 			);
-			expect( onChangeMock ).toHaveBeenCalledWith( {
-				low_stock_amount: 7,
-				manage_stock: true,
-			} );
+			expect( onChangeMock ).toHaveBeenCalledWith( [
+				{
+					id: 10,
+					low_stock_amount: 7,
+					manage_stock: true,
+				},
+			] );
 		} );
 	} );
 } );

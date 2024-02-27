@@ -1,15 +1,19 @@
 /**
  * External dependencies
  */
-import { WooHeaderItem } from '@woocommerce/admin-layout';
+import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
+import { createElement, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -19,8 +23,9 @@ import { MoreMenu } from './more-menu';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
+import { PrepublishButton } from '../prepublish-panel';
 import { Tabs } from '../tabs';
-import { TRACKS_SOURCE } from '../../constants';
+import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -56,11 +61,29 @@ export function Header( {
 		'name'
 	);
 
+	const sidebarWidth = useAdminSidebarWidth();
+
+	useEffect( () => {
+		document
+			.querySelectorAll( '.interface-interface-skeleton__header' )
+			.forEach( ( el ) => {
+				if ( ( el as HTMLElement ).style ) {
+					( el as HTMLElement ).style.width =
+						'calc(100% - ' + sidebarWidth + 'px)';
+					( el as HTMLElement ).style.left = sidebarWidth + 'px';
+				}
+			} );
+	}, [ sidebarWidth ] );
+
 	if ( ! productId ) {
 		return null;
 	}
 
 	const isVariation = lastPersistedProduct?.parent_id > 0;
+	const isPublished =
+		productType === 'product'
+			? lastPersistedProduct?.status === 'publish'
+			: true;
 
 	return (
 		<div
@@ -136,12 +159,21 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					<PublishButton
-						productType={ productType }
-						productStatus={ lastPersistedProduct?.status }
-					/>
+					{ ! isPublished &&
+					window.wcAdminFeatures[ 'product-pre-publish-modal' ] ? (
+						<PrepublishButton
+							productId={ productId }
+							productType={ productType }
+						/>
+					) : (
+						<PublishButton
+							productType={ productType }
+							productStatus={ lastPersistedProduct?.status }
+						/>
+					) }
 
 					<WooHeaderItem.Slot name="product" />
+					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />
 					<MoreMenu />
 				</div>
 			</div>

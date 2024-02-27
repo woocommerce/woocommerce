@@ -8,20 +8,11 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import Downgrade from './components/downgrade';
 import Warning from './components/warning';
 import './editor.scss';
 import { getAllowedBlocks } from './utils';
-
-const BLOCK_NAME_MAP = {
-	'active-filters': 'woocommerce/product-filter-active',
-	'price-filter': 'woocommerce/product-filter-price',
-	'stock-filter': 'woocommerce/product-filter-stock-status',
-	'rating-filter': 'woocommerce/product-filter-rating',
-	'attribute-filter': 'woocommerce/product-filter-attribute',
-};
-
-type FilterType = keyof typeof BLOCK_NAME_MAP;
+import { BLOCK_NAME_MAP } from './constants';
+import type { FilterType } from './types';
 
 const Edit = ( {
 	attributes,
@@ -40,10 +31,6 @@ const Edit = ( {
 	return (
 		<nav { ...blockProps }>
 			{ ! isNested && <Warning /> }
-			<Downgrade
-				filterType={ attributes.filterType }
-				clientId={ clientId }
-			/>
 			<InnerBlocks
 				allowedBlocks={ getAllowedBlocks( [
 					...Object.values( BLOCK_NAME_MAP ),

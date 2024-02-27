@@ -105,4 +105,31 @@ class CartCheckoutUtils {
 		asort( $array_without_accents );
 		return array_replace( $array_without_accents, $array );
 	}
+
+	/**
+	 * Retrieves formatted shipping zones from WooCommerce.
+	 *
+	 * @return array An array of formatted shipping zones.
+	 */
+	public static function get_shipping_zones() {
+		$shipping_zones             = \WC_Shipping_Zones::get_zones();
+		$formatted_shipping_zones   = array_reduce(
+			$shipping_zones,
+			function( $acc, $zone ) {
+				$acc[] = [
+					'id'          => $zone['id'],
+					'title'       => $zone['zone_name'],
+					'description' => $zone['formatted_zone_location'],
+				];
+				return $acc;
+			},
+			[]
+		);
+		$formatted_shipping_zones[] = [
+			'id'          => 0,
+			'title'       => __( 'International', 'woocommerce' ),
+			'description' => __( 'Locations outside all other zones', 'woocommerce' ),
+		];
+		return $formatted_shipping_zones;
+	}
 }

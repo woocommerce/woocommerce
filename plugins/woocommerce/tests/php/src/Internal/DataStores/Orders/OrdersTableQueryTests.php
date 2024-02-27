@@ -523,7 +523,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 			'return' => 'ids',
 		);
 
-		$query_args['search_filter'] = 'all';
+		// Default search filter is all, so we don't need to set it explicitly.
 
 		$query_args['s'] = 'Product';
 		$query           = new OrdersTableQuery( $query_args );
@@ -536,5 +536,43 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$query_args['s'] = 'name';
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( $orders, $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'order_id' param passed in.
+	 */
+	public function test_query_s_filters_order_id() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => $orders[0],
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'order_id';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
+
+		$query_args['s'] = $orders[1];
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
+	}
+
+	/**
+	 * @testDox The 'search_filter' argument works with an 'customer_email' param passed in.
+	 */
+	public function test_query_s_filters_customer_email() {
+		$orders = $this->setup_dummy_orders_for_search_filter();
+
+		$query_args = array(
+			's'      => 'customer@woo.t',
+			'return' => 'ids',
+		);
+
+		$query_args['search_filter'] = 'customer_email';
+
+		$query = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
 	}
 }

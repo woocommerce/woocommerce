@@ -4,7 +4,6 @@
 import { BlockEditProps } from '@wordpress/blocks';
 
 export type BlockAttributes = {
-	queryParam: Record< string, unknown >;
 	attributeId: number;
 	showCounts: boolean;
 	queryType: string;

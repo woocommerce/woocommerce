@@ -35,43 +35,7 @@ import { RemoveConfirmationModal } from '../remove-confirmation-modal';
 import { TRACKS_SOURCE } from '../../constants';
 import { AttributeEmptyStateSkeleton } from './attribute-empty-state-skeleton';
 import { SectionActions } from '../block-slot-fill';
-
-type AttributeControlProps = {
-	value: EnhancedProductAttribute[];
-	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
-	onAddAnother?: () => void;
-	onRemoveItem?: () => void;
-	onChange: ( value: ProductAttribute[] ) => void;
-	onEdit?: ( attribute: ProductAttribute ) => void;
-	onRemove?: ( attribute: ProductAttribute ) => void;
-	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
-	onNewModalCancel?: () => void;
-	onNewModalClose?: () => void;
-	onNewModalOpen?: () => void;
-	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
-	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
-	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
-	onNoticeDismiss?: () => void;
-	createNewAttributesAsGlobal?: boolean;
-	useRemoveConfirmationModal?: boolean;
-	disabledAttributeIds?: number[];
-	termsAutoSelection?: 'first' | 'all';
-	defaultVisibility?: boolean;
-	uiStrings?: {
-		notice?: string | React.ReactElement;
-		emptyStateSubtitle?: string;
-		newAttributeListItemLabel?: string;
-		newAttributeModalTitle?: string;
-		newAttributeModalDescription?: string | React.ReactElement;
-		newAttributeModalNotice?: string;
-		customAttributeHelperMessage?: string;
-		attributeRemoveLabel?: string;
-		attributeRemoveConfirmationMessage?: string;
-		attributeRemoveConfirmationModalMessage?: string;
-		globalAttributeHelperMessage?: string;
-		disabledAttributeMessage?: string;
-	};
-};
+import { AttributeControlProps } from './types';
 
 export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	value,
@@ -89,6 +53,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onRemove = () => {},
 	onRemoveCancel = () => {},
 	onNoticeDismiss = () => {},
+	renderCustomEmptyState,
 	uiStrings,
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
@@ -109,6 +74,8 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		...uiStrings,
 	};
 	const [ isNewModalVisible, setIsNewModalVisible ] = useState( false );
+	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
+		useState< string >();
 	const [ removingAttribute, setRemovingAttribute ] =
 		useState< null | ProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
@@ -161,6 +128,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const closeNewModal = () => {
 		setIsNewModalVisible( false );
+		setDefaultAttributeSearch( undefined );
 		onNewModalClose();
 	};
 
@@ -235,19 +203,43 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 
+	function renderEmptyState() {
+		if ( isMobileViewport || value.length ) return null;
+
+		if ( renderCustomEmptyState ) {
+			return renderCustomEmptyState( {
+				addAttribute( search ) {
+					setDefaultAttributeSearch( search );
+					openNewModal();
+				},
+			} );
+		}
+
+		return <AttributeEmptyStateSkeleton />;
+	}
+
+	function renderSectionActions() {
+		if ( renderCustomEmptyState && value.length === 0 ) return null;
+
+		return (
+			<SectionActions>
+				{ uiStrings?.newAttributeListItemLabel && (
+					<Button
+						variant="secondary"
+						className="woocommerce-add-attribute-list-item__add-button"
+						onClick={ openNewModal }
+					>
+						{ uiStrings.newAttributeListItemLabel }
+					</Button>
+				) }
+			</SectionActions>
+		);
+	}
+
 	return (
 		<div className="woocommerce-attribute-field">
-			<SectionActions>
-				<Button
-					variant="secondary"
-					className="woocommerce-add-attribute-list-item__add-button"
-					onClick={ () => {
-						openNewModal();
-					} }
-				>
-					{ uiStrings.newAttributeListItemLabel }
-				</Button>
-			</SectionActions>
+			{ renderSectionActions() }
+
 			{ uiStrings.notice && (
 				<Notice
 					isDismissible={ true }
@@ -311,6 +303,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					}
 					termsAutoSelection={ termsAutoSelection }
 					defaultVisibility={ defaultVisibility }
+					defaultSearch={ defaultAttributeSearch }
 				/>
 			) }
 			<SelectControlMenuSlot />
@@ -376,9 +369,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 				/>
 			) }
-			{ ! isMobileViewport && value.length === 0 && (
-				<AttributeEmptyStateSkeleton />
-			) }
+			{ renderEmptyState() }
 		</div>
 	);
 };

@@ -2,8 +2,10 @@
  * External dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
+import apiFetch from '@wordpress/api-fetch';
+
 import {
-	apiFetch,
+	apiFetch as controlsApiFetch,
 	dispatch as deprecatedDispatch,
 	select,
 } from '@wordpress/data-controls';
@@ -12,8 +14,12 @@ import { controls } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_NAME, WC_PRODUCT_NAMESPACE } from './constants';
-import { Product, ProductQuery } from './types';
+import {
+	STORE_NAME,
+	WC_PRODUCT_NAMESPACE,
+	WC_V3_ENDPOINT_SUGGESTED_PRODUCTS,
+} from './constants';
+import { GetSuggestedProductsOptions, Product, ProductQuery } from './types';
 import {
 	getProductError,
 	getProductsError,
@@ -23,6 +29,7 @@ import {
 	getProductSuccess,
 } from './actions';
 import { request } from '../utils';
+import { createIdFromOptions } from './utils';
 
 const dispatch =
 	controls && controls.dispatch ? controls.dispatch : deprecatedDispatch;
@@ -58,7 +65,7 @@ export function* getProducts( query: Partial< ProductQuery > ) {
 
 export function* getProduct( productId: number ) {
 	try {
-		const product: Product = yield apiFetch( {
+		const product: Product = yield controlsApiFetch( {
 			path: addQueryArgs( `${ WC_PRODUCT_NAMESPACE }/${ productId }`, {
 				context: 'edit',
 			} ),
@@ -130,3 +137,16 @@ export function* getProductsTotalCount( query: Partial< ProductQuery > ) {
 export function* getPermalinkParts( productId: number ) {
 	yield resolveSelect( STORE_NAME, 'getProduct', [ productId ] );
 }
+
+export const getSuggestedProducts =
+	( options: GetSuggestedProductsOptions ) =>
+	// @ts-expect-error There are no types for this.
+	async ( { dispatch: contextualDispatch } ) => {
+		const key = createIdFromOptions( options );
+
+		const data = await apiFetch( {
+			path: addQueryArgs( WC_V3_ENDPOINT_SUGGESTED_PRODUCTS, options ),
+		} );
+
+		contextualDispatch.setSuggestedProductAction( key, data );
+	};

@@ -665,6 +665,26 @@ class FileController {
 	}
 
 	/**
+	 * Calculate the size, in bytes, of the log directory.
+	 *
+	 * @return int
+	 */
+	public function get_log_directory_size(): int {
+		$bytes = 0;
+		$path  = realpath( $this->log_directory );
+
+		if ( wp_is_writable( $path ) ) {
+			$iterator = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path, \FilesystemIterator::SKIP_DOTS ) );
+
+			foreach ( $iterator as $file ) {
+				$bytes += $file->getSize();
+			}
+		}
+
+		return $bytes;
+	}
+
+	/**
 	 * Invalidate the cache group related to log file data.
 	 *
 	 * @return bool True on successfully invalidating the cache.

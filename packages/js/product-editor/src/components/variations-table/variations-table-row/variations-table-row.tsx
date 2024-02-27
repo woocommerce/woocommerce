@@ -4,7 +4,7 @@
 
 import { Tag, __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
-import { ProductVariation } from '@woocommerce/data';
+import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { Button, CheckboxControl, Spinner } from '@wordpress/components';
 import {
@@ -90,11 +90,12 @@ export function VariationsTableRow( {
 		[ variableAttributes, variation ]
 	);
 
-	function handleChange( value: Partial< ProductVariation > ) {
-		onChange( {
-			...variation,
-			...value,
-		} );
+	function handleChange( values: PartialProductVariation[] ) {
+		onChange( values[ 0 ] );
+	}
+
+	function handleDelete( values: PartialProductVariation[] ) {
+		onDelete( values[ 0 ] );
 	}
 
 	return (
@@ -241,9 +242,9 @@ export function VariationsTableRow( {
 						</Button>
 
 						<SingleUpdateMenu
-							selection={ variation }
+							selection={ [ variation ] }
 							onChange={ handleChange }
-							onDelete={ onDelete }
+							onDelete={ handleDelete }
 						/>
 					</>
 				) }

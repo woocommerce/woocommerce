@@ -23,7 +23,7 @@ import {
 	ToneOfVoice,
 } from './pages';
 import { customizeStoreStateMachineEvents } from '..';
-
+import './style.scss';
 import { isAIFlow } from '../guards';
 import { navigateOrParent } from '../utils';
 

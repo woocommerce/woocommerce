@@ -20,8 +20,16 @@
 		position: static;
 	}
 
-	.interface-interface-skeleton__sidebar {
+	.interface-interface-skeleton__sidebar,
+	.interface-interface-skeleton__actions {
 		width: 280px;
+	}
+	.interface-interface-skeleton__actions {
+		top: 0;
+		border-left: 1px solid $gray-200;
+		position: relative !important;
+		background-color: $white;
+		z-index: 90;
 	}
 
 	.interface-interface-skeleton__header,

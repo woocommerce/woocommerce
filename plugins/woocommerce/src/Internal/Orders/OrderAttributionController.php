@@ -226,9 +226,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 		wp_enqueue_script(
 			'wc-order-attribution',
 			plugins_url( "assets/js/frontend/order-attribution{$this->get_script_suffix()}.js", WC_PLUGIN_FILE ),
-			// Technically, we do not need 'wp-data', 'wc-blocks-checkout' for classic checkout,
-			// but we do not seem to distingush and load blocks scripts there anyway.
-			array( 'sourcebuster-js', 'wp-data', 'wc-blocks-checkout' ),
+			// Technically we do depend on 'wp-data', 'wc-blocks-checkout' for blocks checkout,
+			// but as implementing conditional dependency on the server-side would be too complex,
+			// we resolve this condition at the client-side.
+			array( 'sourcebuster-js' ),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
 		);
@@ -415,27 +416,25 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function send_order_tracks( array $source_data, WC_Order $order ) {
-		$origin_label        = $this->get_origin_label(
+		$origin_label = $this->get_origin_label(
 			$source_data['source_type'] ?? '',
 			$source_data['utm_source'] ?? '',
 			false
 		);
-		$customer_identifier = $order->get_customer_id() ? $order->get_customer_id() : $order->get_billing_email();
-		$customer_info       = $this->get_customer_history( $customer_identifier );
-		$tracks_data         = array(
-			'order_id'             => $order->get_id(),
-			'source_type'          => $source_data['source_type'] ?? '',
-			'medium'               => $source_data['utm_medium'] ?? '',
-			'source'               => $source_data['utm_source'] ?? '',
-			'device_type'          => strtolower( $source_data['device_type'] ?? 'unknown' ),
-			'origin_label'         => strtolower( $origin_label ),
-			'session_pages'        => $source_data['session_pages'] ?? 0,
-			'session_count'        => $source_data['session_count'] ?? 0,
-			'order_total'          => $order->get_total(),
-			// Add 1 to include the current order (which is currently still Pending when the event is sent).
-			'customer_order_count' => $customer_info['order_count'] + 1,
-			'customer_registered'  => $order->get_customer_id() ? 'yes' : 'no',
+
+		$tracks_data = array(
+			'order_id'            => $order->get_id(),
+			'source_type'         => $source_data['source_type'] ?? '',
+			'medium'              => $source_data['utm_medium'] ?? '',
+			'source'              => $source_data['utm_source'] ?? '',
+			'device_type'         => strtolower( $source_data['device_type'] ?? 'unknown' ),
+			'origin_label'        => strtolower( $origin_label ),
+			'session_pages'       => $source_data['session_pages'] ?? 0,
+			'session_count'       => $source_data['session_count'] ?? 0,
+			'order_total'         => $order->get_total(),
+			'customer_registered' => $order->get_customer_id() ? 'yes' : 'no',
 		);
+
 		$this->proxy->call_static( WC_Tracks::class, 'record_event', 'order_attribution', $tracks_data );
 	}
 

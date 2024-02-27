@@ -11,19 +11,12 @@
 		"reusable": false
 	},
 	"usesContext": [ "query", "queryId" ],
-	"providesContext": {
-		"collectionData": "collectionData"
-	},
 	"attributes": {
 		"filterType": {
 			"type": "string"
 		},
 		"heading": {
 			"type": "string"
-		},
-		"collectionData": {
-			"type": "object",
-			"default": {}
 		}
 	},
 	"apiVersion": 2,

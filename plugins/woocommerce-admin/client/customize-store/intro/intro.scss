@@ -7,6 +7,10 @@
 	}
 }
 
+.woocommerce-customize-store-error-link {
+	cursor: pointer;
+}
+
 .woocommerce-customize-store-header {
 	min-height: 64px;
 	padding: 1rem;
@@ -95,6 +99,10 @@
 			color: #1e1e1e;
 			margin-bottom: 24px;
 		}
+	}
+
+	.woocommerce-cys-design-with-ai__error-notice {
+		margin: 0 0 24px;
 	}
 }
 

@@ -1,8 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\QueryFilters;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 /**
  * Product Filter: Attribute Block.
@@ -136,14 +139,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$product_attribute = wc_get_attribute( $attributes['attributeId'] );
-		$attribute_counts  = array_reduce(
-			$block->context['collectionData']['attribute_counts'] ?? [],
-			function( $acc, $count ) {
-				$acc[ $count['term'] ] = $count['count'];
-				return $acc;
-			},
-			[]
-		);
+		$attribute_counts  = $this->get_attribute_counts( $block, $product_attribute->slug, $attributes['queryType'] );
 
 		if ( empty( $attribute_counts ) ) {
 			return sprintf(
@@ -151,6 +147,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				get_block_wrapper_attributes(
 					array(
 						'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+						'data-has-filter'     => 'no',
 					)
 				),
 			);
@@ -203,6 +200,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				array(
 					'data-wc-context'     => wp_json_encode( $context ),
 					'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+					'data-has-filter'     => 'yes',
 				)
 			),
 			$content,
@@ -283,5 +281,52 @@ final class ProductFilterAttribute extends AbstractBlock {
 				'on_change' => "{$this->get_full_block_name()}::actions.updateProducts",
 			)
 		);
+	}
+
+	/**
+	 * Retrieve the attribute count for current block.
+	 *
+	 * @param WP_Block $block      Block instance.
+	 * @param string   $slug       Attribute slug.
+	 * @param string   $query_type Query type, accept 'and' or 'or'.
+	 */
+	private function get_attribute_counts( $block, $slug, $query_type ) {
+		$filters    = Package::container()->get( QueryFilters::class );
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		if ( 'and' !== strtolower( $query_type ) ) {
+			unset( $query_vars[ 'filter_' . str_replace( 'pa_', '', $slug ) ] );
+		}
+
+		unset(
+			$query_vars['taxonomy'],
+			$query_vars['term']
+		);
+
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
+		}
+
+		$counts           = $filters->get_attribute_counts( $query_vars, $slug );
+		$attribute_counts = array();
+
+		foreach ( $counts as $key => $value ) {
+			$attribute_counts[] = array(
+				'term'  => $key,
+				'count' => $value,
+			);
+		}
+
+		$attribute_counts = array_reduce(
+			$attribute_counts,
+			function( $acc, $count ) {
+				$acc[ $count['term'] ] = $count['count'];
+				return $acc;
+			},
+			[]
+		);
+
+		return $attribute_counts;
 	}
 }

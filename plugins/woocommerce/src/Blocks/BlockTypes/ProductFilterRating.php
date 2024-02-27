@@ -3,6 +3,10 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\InteractivityComponents\CheckboxList;
 use Automattic\WooCommerce\Blocks\InteractivityComponents\Dropdown;
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\QueryFilters;
+use Automattic\WooCommerce\Blocks\Package;
+
 
 /**
  * Product Filter: Rating Block
@@ -41,7 +45,7 @@ final class ProductFilterRating extends AbstractBlock {
 	 * @return array Active filters param keys.
 	 */
 	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$price_param_keys = array_filter(
+		$rating_param_keys = array_filter(
 			$url_param_keys,
 			function( $param ) {
 				return self::RATING_FILTER_QUERY_VAR === $param;
@@ -50,7 +54,7 @@ final class ProductFilterRating extends AbstractBlock {
 
 		return array_merge(
 			$filter_param_keys,
-			$price_param_keys
+			$rating_param_keys
 		);
 	}
 
@@ -110,22 +114,22 @@ final class ProductFilterRating extends AbstractBlock {
 			return '';
 		}
 
-		$rating_counts = $block->context['collectionData']['rating_counts'] ?? array();
+		$rating_counts = $this->get_rating_counts( $block );
 		$display_style = $attributes['displayStyle'] ?? 'list';
 		$show_counts   = $attributes['showCounts'] ?? false;
-
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'data-wc-interactive' => $this->get_full_block_name(),
-				'class'               => 'wc-block-rating-filter',
-			)
-		);
 
 		$filtered_rating_counts = array_filter(
 			$rating_counts,
 			function( $rating ) {
 				return $rating['count'] > 0;
 			}
+		);
+
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'data-wc-interactive' => $this->get_full_block_name(),
+				'data-has-filter'     => empty( $filtered_rating_counts ) ? 'no' : 'yes',
+			)
 		);
 
 		if ( empty( $filtered_rating_counts ) ) {
@@ -150,11 +154,8 @@ final class ProductFilterRating extends AbstractBlock {
 		return sprintf(
 			'<div %1$s>
 				%2$s
-				<div class="wc-block-rating-filter__controls">%3$s</div>
-				<div class="wc-block-rating-filter__actions"></div>
 			</div>',
 			$wrapper_attributes,
-			$content,
 			$input
 		);
 	}
@@ -207,11 +208,18 @@ final class ProductFilterRating extends AbstractBlock {
 				$count       = $rating['count'];
 				$count_label = $show_counts ? "($count)" : '';
 
+				$aria_label = sprintf(
+					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
+					__( 'Rated %s out of 5', 'woocommerce' ),
+					$rating_str,
+				);
+
 				return array(
-					'id'      => 'rating-' . $rating_str,
-					'checked' => in_array( $rating_str, $ratings_array, true ),
-					'label'   => $this->render_rating_label( (int) $rating_str, $count_label ),
-					'value'   => $rating_str,
+					'id'         => 'rating-' . $rating_str,
+					'checked'    => in_array( $rating_str, $ratings_array, true ),
+					'label'      => $this->render_rating_label( (int) $rating_str, $count_label ),
+					'aria_label' => $aria_label,
+					'value'      => $rating_str,
 				);
 			},
 			$rating_counts
@@ -268,5 +276,32 @@ final class ProductFilterRating extends AbstractBlock {
 			'action'         => "{$this->get_full_block_name()}::actions.onDropdownChange",
 			'placeholder'    => $placeholder_text,
 		);
+	}
+
+	/**
+	 * Retrieve the rating filter data for current block.
+	 *
+	 * @param WP_Block $block Block instance.
+	 */
+	private function get_rating_counts( $block ) {
+		$filters    = Package::container()->get( QueryFilters::class );
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		if ( ! empty( $query_vars['tax_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'rating_filter', true );
+		}
+
+		$counts = $filters->get_rating_counts( $query_vars );
+		$data   = array();
+
+		foreach ( $counts as $key => $value ) {
+			$data[] = array(
+				'rating' => $key,
+				'count'  => $value,
+			);
+		}
+
+		return $data;
 	}
 }

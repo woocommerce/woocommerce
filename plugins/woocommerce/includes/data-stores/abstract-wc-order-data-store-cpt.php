@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -707,6 +708,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Abstract_Order $order Order object.
 	 */
 	protected function update_order_meta_from_object( $order ) {
+		global $wpdb;
+
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}
@@ -734,7 +737,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					}
 				}
 			}
-			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			if ( is_object( $meta_data->value ) && '__PHP_Incomplete_Class' === get_class( $meta_data->value ) ) {
+				$meta_value = maybe_serialize( $meta_data->value );
+				$result     = $wpdb->insert(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id'    => $order->get_id(),
+						'meta_key'   => $meta_data->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					),
+					array( '%d', '%s', '%s' )
+				);
+				wp_cache_delete( $order->get_id(), 'post_meta' );
+				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID %d: "%s"', $order->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			} else {
+				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			}
 		}
 
 		// Find remaining meta that was deleted from the order but still present in the associated post.

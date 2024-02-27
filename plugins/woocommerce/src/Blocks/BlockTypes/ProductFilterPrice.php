@@ -1,6 +1,10 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
+use Automattic\WooCommerce\Blocks\QueryFilters;
+use Automattic\WooCommerce\Blocks\Package;
+
 /**
  * Product Filter: Price Block.
  */
@@ -116,7 +120,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			return '';
 		}
 
-		$price_range         = $block->context['collectionData']['price_range'] ?? [];
+		$price_range         = $this->get_filtered_price( $block );
 		$min_range           = $price_range['min_price'] ?? 0;
 		$max_range           = $price_range['max_price'] ?? 0;
 		$min_price           = intval( get_query_var( self::MIN_PRICE_QUERY_VAR, $min_range ) );
@@ -136,18 +140,17 @@ final class ProductFilterPrice extends AbstractBlock {
 			'inlineInput' => $inline_input
 		) = $attributes;
 
-		$wrapper_attributes = get_block_wrapper_attributes(
-			array(
-				'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
-				'data-wc-context'     => wp_json_encode( $data ),
-			)
+		$wrapper_attributes = array(
+			'class'               => $show_input_fields && $inline_input ? 'inline-input' : '',
+			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wc-context'     => wp_json_encode( $data ),
+			'data-has-filter'     => 'no',
 		);
 
 		if ( $min_range === $max_range || ! $max_range ) {
 			return sprintf(
 				'<div %s></div>',
-				$wrapper_attributes
+				get_block_wrapper_attributes( $wrapper_attributes )
 			);
 		}
 
@@ -188,9 +191,11 @@ final class ProductFilterPrice extends AbstractBlock {
 				$formatted_max_price
 			);
 
+		$wrapper_attributes['data-has-filter'] = 'yes';
+
 		ob_start();
 		?>
-			<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<div class="filter-controls">
 					<div
@@ -233,5 +238,29 @@ final class ProductFilterPrice extends AbstractBlock {
 			</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Retrieve the price filter data for current block.
+	 *
+	 * @param WP_Block $block Block instance.
+	 */
+	private function get_filtered_price( $block ) {
+		$filters    = Package::container()->get( QueryFilters::class );
+		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
+
+		unset( $query_vars['min_price'], $query_vars['max_price'] );
+
+		if ( ! empty( $query_vars['meta_query'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$query_vars['meta_query'] = ProductCollectionUtils::remove_query_array( $query_vars['meta_query'], 'key', '_price' );
+		}
+
+		$price_results = $filters->get_filtered_price( $query_vars );
+
+		return array(
+			'min_price' => intval( floor( $price_results->min_price ?? 0 ) ),
+			'max_price' => intval( ceil( $price_results->max_price ?? 0 ) ),
+		);
 	}
 }
