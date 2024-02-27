@@ -177,28 +177,27 @@ class CustomMetaBox {
 						<input type="text" id="metakeyinput" name="metakeyinput" value="" />
 					<?php } ?>
 				</td>
-				<td><textarea id="metavalue" name="metavalue" rows="2" cols="25"></textarea></td>
+				<td><textarea id="metavalue" name="metavalue" rows="2" cols="25"></textarea>
+				<?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
+				</td>
 			</tr>
-
-			<tr><td colspan="2">
-					<div class="submit">
-						<?php
-						submit_button(
-							__( 'Add Custom Field', 'woocommerce' ),
-							'',
-							'addmeta',
-							false,
-							array(
-								'id'            => 'newmeta-submit',
-								'data-wp-lists' => 'add:the-list:newmeta',
-							)
-						);
-						?>
-					</div>
-					<?php wp_nonce_field( 'add-meta', '_ajax_nonce-add-meta', false ); ?>
-				</td></tr>
 			</tbody>
 		</table>
+
+		<div class="submit add-custom-field">
+			<?php
+			submit_button(
+				__( 'Add Custom Field', 'woocommerce' ),
+				'',
+				'addmeta',
+				false,
+				array(
+					'id'            => 'newmeta-submit',
+					'data-wp-lists' => 'add:the-list:newmeta',
+				)
+			);
+			?>
+		</div>
 		<?php
 	}
 
