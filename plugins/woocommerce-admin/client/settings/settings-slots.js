@@ -17,6 +17,7 @@ export const possiblyRenderSettingsSlots = () => {
 			scope: 'woocommerce-payments-settings',
 		},
 		{ id: 'wc_tax_settings_slotfill', scope: 'woocommerce-tax-settings' },
+		{ id: 'wc_settings_slotfill', scope: 'woocommerce-settings' },
 	];
 
 	slots.forEach( ( slot ) => {
