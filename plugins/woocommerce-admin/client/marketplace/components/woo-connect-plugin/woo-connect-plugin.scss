@@ -46,16 +46,12 @@
 	}
 }
 
-.woocommerce-marketplace__woo-connect-plugin__notice {
-	&:last-child {
-		margin-bottom: $grid-unit-50;
-	}
+.woocommerce-marketplace__woo-connect-plugin__notices {
+	margin-bottom: $grid-unit-50;
 }
 
 .woocommerce-marketplace__discover {
-	.woocommerce-marketplace__woo-connect-plugin__notice {
-		&:last-child {
-			margin-bottom: $grid-unit-05;
-		}
+	.woocommerce-marketplace__woo-connect-plugin__notices {
+		margin-bottom: 0px;
 	}
 }
