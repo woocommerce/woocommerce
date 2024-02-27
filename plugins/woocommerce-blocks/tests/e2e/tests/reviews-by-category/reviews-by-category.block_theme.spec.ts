@@ -52,7 +52,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			'.wc-block-components-review-list-item__text'
 		);
 
-		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
+		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
 		await select.selectOption( 'Highest rating' );
@@ -61,7 +61,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			( a, b ) => b.rating - a.rating
 		)[ 0 ];
 
-		await expect( reviews.nth( 0 ) ).toHaveText( highestRating.review );
+		await expect( reviews.first() ).toHaveText( highestRating.review );
 	} );
 
 	test( 'can sort by lowest rating', async ( {
@@ -84,6 +84,6 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			( a, b ) => a.rating - b.rating
 		)[ 0 ];
 
-		await expect( reviews.nth( 0 ) ).toHaveText( lowestRating.review );
+		await expect( reviews.first() ).toHaveText( lowestRating.review );
 	} );
 } );
