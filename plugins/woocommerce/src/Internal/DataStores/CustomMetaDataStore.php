@@ -253,7 +253,7 @@ abstract class CustomMetaDataStore {
 			$query .= $wpdb->prepare( 'WHERE meta_key NOT LIKE %s ', $wpdb->esc_like( '_' ) . '%' );
 		}
 
-		$order  = in_array( $order, array( 'ASC', 'DESC' ), true ) ? $order : 'ASC';
+		$order  = in_array( strtoupper( $order ), array( 'ASC', 'DESC' ), true ) ? $order : 'ASC';
 		$query .= 'ORDER BY meta_key ' . $order . ' ';
 
 		if ( $limit ) {
