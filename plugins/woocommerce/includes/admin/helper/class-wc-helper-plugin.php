@@ -25,7 +25,7 @@ class WC_Helper_Plugin {
 	 * @return void
 	 */
 	public static function load(): void {
-		add_action( 'admin_init', array( __CLASS__, 'configure_admin_notices' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'show_woo_update_manager_install_notice' ) );
 	}
 
 	/**
@@ -101,56 +101,53 @@ class WC_Helper_Plugin {
 	}
 
 	/**
-	 * Configure admin notices.
-	 *
-	 * @return void
-	 */
-	public static function configure_admin_notices(): void {
-		if ( self::is_plugin_installed() ) {
-			return;
-		}
-
-		if ( ! self::is_loading_plugin_management_page() ) {
-			return;
-		}
-
-		add_action( 'admin_notices', array( __CLASS__, 'show_install_notice_on_plugin_management_page' ) );
-	}
-
-	/**
 	 * Show a notice on the plugins management page to install the Woo Update Manager plugin.
 	 *
 	 * @return void
 	 */
-	public static function show_install_notice_on_plugin_management_page(): void {
-		printf(
-			'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
-			sprintf(
-				wp_kses(
-				/* translators: 1: Woo Update Manager plugin install URL 2: Woo Update Manager plugin download URL */
-					__(
-						'Please <a href="%1$s">Install the Woo Update Manager</a> plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also <a href="%2$s">download</a> and install it manually.',
-						'woocommerce'
-					),
-					array(
-						'a' => array(
-							'href' => array(),
-						),
-					)
-				),
-				esc_url( self::generate_install_url() ),
-				esc_url( self::WOO_UPDATE_MANAGER_DOWNLOAD_URL )
-			)
-		);
+	public static function show_woo_update_manager_install_notice(): void {
+		if ( self::is_plugin_installed() ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+
+		if ( ! self::is_wc_admin_page() ) {
+			return;
+		}
+
+		if ( self::install_admin_notice_dismissed() ) {
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-installed.php';
 	}
 
 	/**
-	 * Check if the current page is the plugin management page.
+	 * Check if the current page is a wc-admin page.
 	 *
 	 * @return bool
 	 */
-	protected static function is_loading_plugin_management_page(): bool {
-		return 'plugins.php' === wp_parse_url( basename( get_self_link() ), PHP_URL_PATH );
+	protected static function is_wc_admin_page(): bool {
+		return isset( $_GET['page'] ) &&
+			(
+				'wc-admin' === $_GET['page'] ||
+				'wc-status' === $_GET['page'] ||
+				'wc-settings' === $_GET['page'] ||
+				'wc-reports' === $_GET['page']
+			)
+			|| isset( $_GET['post_type'] ) && 'shop_order' === $_GET['post_type'];
+	}
+
+	/**
+	 * Check if the installation notice has been dismissed.
+	 *
+	 * @return bool
+	 */
+	protected static function install_admin_notice_dismissed(): bool {
+		return get_user_meta( get_current_user_id(), 'dismissed_woo_updater_not_installed_notice', true );
 	}
 }
 
