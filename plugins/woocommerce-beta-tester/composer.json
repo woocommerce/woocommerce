@@ -13,7 +13,8 @@
 	"require-dev": {
 		"phpunit/phpunit": "^6.5 || ^7.5",
 		"woocommerce/woocommerce-sniffs": "^0.1.3",
-		"automattic/jetpack-changelogger": "3.3.0"
+		"automattic/jetpack-changelogger": "3.3.0",
+		"woocommerce/remote-specs-validation": "^1.0"
 	},
 	"scripts": {
 		"test": [
