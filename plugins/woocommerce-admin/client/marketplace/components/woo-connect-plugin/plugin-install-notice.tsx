@@ -24,7 +24,7 @@ export default function PluginInstallNotice() {
 		! wccomSettings?.wooConnectInstalled
 	) {
 		const message = __(
-			'Please install the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also download and install it manually in your stores.',
+			'Please install the Woo Update Manager plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also download and install it manually in your stores.',
 			'woocommerce'
 		);
 		return (
@@ -36,7 +36,7 @@ export default function PluginInstallNotice() {
 							href={ wccomSettings?.wooConnectInstallUrl }
 							variant="secondary"
 						>
-							{ __( 'Install Woo Connect', 'woocommerce' ) }
+							{ __( 'Install Woo Update Manager', 'woocommerce' ) }
 						</Button>
 						<Button
 							href={ WOO_CONNECT_PLUGIN_DOWNLOAD_URL }
@@ -53,7 +53,7 @@ export default function PluginInstallNotice() {
 		! wccomSettings?.wooConnectActive
 	) {
 		const message = __(
-			'Please activate the Woo Connect plugin to keep getting updates and streamlined support for your Woo.com subscriptions.',
+			'Please activate the Woo Update Manager plugin to keep getting updates and streamlined support for your Woo.com subscriptions.',
 			'woocommerce'
 		);
 		return (
@@ -65,7 +65,7 @@ export default function PluginInstallNotice() {
 							href={ WP_ADMIN_PLUGIN_LIST_URL }
 							variant="secondary"
 						>
-							{ __( 'Activate Woo Connect', 'woocommerce' ) }
+							{ __( 'Activate Woo Update Manager', 'woocommerce' ) }
 						</Button>
 					</div>
 				</Notice>
