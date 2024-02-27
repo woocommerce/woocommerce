@@ -17,6 +17,7 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 import { VisibilitySection } from './visibility-section';
 import { ScheduleSection } from './schedule-section';
+import { ShowPrepublishChecksSection } from './show-prepublish-checks-section';
 
 export function PrepublishPanel( {
 	productType = 'product',
@@ -63,9 +64,13 @@ export function PrepublishPanel( {
 				<h4>{ title }</h4>
 				<span>{ description }</span>
 			</div>
-			<VisibilitySection productType={ productType } />
-
-			<ScheduleSection postType={ productType } />
+			<div className="woocommerce-product-publish-panel__content">
+				<VisibilitySection productType={ productType } />
+				<ScheduleSection postType={ productType } />
+			</div>
+			<div className="woocommerce-product-publish-panel__footer">
+				<ShowPrepublishChecksSection />
+			</div>
 		</div>
 	);
 }

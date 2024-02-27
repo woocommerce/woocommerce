@@ -59,7 +59,8 @@
 	}
 }
 
-.woocommerce-customize-store__step-assemblerHub {
+.woocommerce-customize-store__step-assemblerHub,
+.woocommerce-customize-store__step-intro {
 	a {
 		text-decoration: none;
 	}
@@ -473,6 +474,24 @@
 
 		.global-styles-variation-container__iframe {
 			box-shadow: none;
+		}
+	}
+
+	.woocommerce-customize-store_sidebar-typography-upgrade-notice {
+		margin-top: 48px;
+		color: #1e1e1e;
+		padding: 0;
+		h4 {
+			text-transform: uppercase;
+			margin-bottom: 4px;
+		}
+		p {
+			margin: 0;
+		}
+
+		a,
+		button {
+			text-decoration: none;
 		}
 	}
 

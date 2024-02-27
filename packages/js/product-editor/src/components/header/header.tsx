@@ -27,6 +27,7 @@ import { PublishButton } from './publish-button';
 import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
+import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -63,6 +64,8 @@ export function Header( {
 		productType,
 		'name'
 	);
+
+	const { showPrepublishChecks } = useShowPrepublishChecks();
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -158,7 +161,10 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					<PublishButton productType={ productType } prePublish />
+					<PublishButton
+						productType={ productType }
+						prePublish={ showPrepublishChecks }
+					/>
 
 					<WooHeaderItem.Slot name="product" />
 					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />

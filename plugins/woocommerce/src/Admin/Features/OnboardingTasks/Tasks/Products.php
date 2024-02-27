@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  * Products Task
  */
 class Products extends Task {
+	const PRODUCT_COUNT_TRANSIENT_NAME = 'woocommerce_product_task_product_count_transient';
 
 	/**
 	 * Constructor
@@ -20,6 +21,11 @@ class Products extends Task {
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_manual_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_import_return_notice_script' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_load_sample_return_notice_script' ) );
+
+		add_action( 'woocommerce_update_product', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'woocommerce_new_product', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'wp_trash_post', array( $this, 'delete_product_count_cache' ) );
+		add_action( 'untrashed_post', array( $this, 'delete_product_count_cache' ) );
 	}
 
 	/**
@@ -156,12 +162,28 @@ class Products extends Task {
 	}
 
 	/**
+	 * Delete the product count transient used in has_products() method to refresh the cache.
+	 *
+	 * @return void
+	 */
+	public static function delete_product_count_cache() {
+		delete_transient( self::PRODUCT_COUNT_TRANSIENT_NAME );
+	}
+
+	/**
 	 * Check if the store has any user created published products.
 	 *
 	 * @return bool
 	 */
 	public static function has_products() {
-		return self::count_user_products() > 0;
+		$product_counts = get_transient( self::PRODUCT_COUNT_TRANSIENT_NAME );
+		if ( false !== $product_counts && is_numeric( $product_counts ) ) {
+			return (int) $product_counts > 0;
+		}
+
+		$product_counts = self::count_user_products();
+		set_transient( self::PRODUCT_COUNT_TRANSIENT_NAME, $product_counts );
+		return $product_counts > 0;
 	}
 
 	/**
