@@ -1,4 +1,4 @@
-const { test } = require( './block-editor-fixtures' );
+const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
