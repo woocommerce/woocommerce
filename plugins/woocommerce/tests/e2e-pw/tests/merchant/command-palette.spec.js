@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 
 // need to figure out whether tests are being run on a mac
