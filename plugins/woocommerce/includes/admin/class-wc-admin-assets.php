@@ -586,7 +586,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				'wc-admin-' . $script_name,
 				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
 				$script_assets['dependencies'],
-				WCAdminAssets::get_file_version( 'js' ),
+				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
 				true
 			);
 		}

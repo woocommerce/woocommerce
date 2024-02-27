@@ -459,6 +459,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 				GO_BACK_TO_DESIGN_WITHOUT_AI: {
 					target: 'intro',
+					actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 				},
 			},
 		},
