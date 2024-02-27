@@ -372,13 +372,13 @@ class LegacyDataHandler {
 	 * @return string[] Property names.
 	 */
 	private function get_order_base_props(): array {
-		return array_column(
-			call_user_func_array(
-				'array_merge',
-				array_values( $this->data_store->get_all_order_column_mappings() )
-			),
-			'name'
-		);
+		$base_props = array();
+
+		foreach ( $this->data_store->get_all_order_column_mappings() as $mapping ) {
+			$base_props = array_merge( $base_props, array_column( $mapping, 'name' ) );
+		}
+
+		return $base_props;
 	}
 
 }

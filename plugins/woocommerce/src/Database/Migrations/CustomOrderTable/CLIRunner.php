@@ -1063,6 +1063,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
 				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
 
+				// Format for NULL.
+				$hpos_value = is_null( $hpos_value ) ? '' : $hpos_value;
+				$cpt_value  = is_null( $cpt_value ) ? '' : $cpt_value;
+
 				return array(
 					'property' => $key,
 					'hpos'     => $hpos_value,
