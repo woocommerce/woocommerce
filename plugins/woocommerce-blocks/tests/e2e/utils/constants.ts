@@ -14,12 +14,19 @@ export const CLASSIC_THEME_NAME = 'Storefront';
 export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices`;
 export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices`;
 export const BASE_URL = 'http://localhost:8889';
-export const STORAGE_STATE_PATH = path.join(
-	process.cwd(),
-	'artifacts/storage-states/admin.json'
-);
 
-// User roles file paths
-export const adminFile = '.auth/admin.json';
-export const customerFile = '.auth/customer.json';
-export const guestFile = '.auth/guest.json';
+export const WP_ARTIFACTS_PATH =
+	process.env.WP_ARTIFACTS_PATH ||
+	path.join( process.cwd(), 'tests/e2e/artifacts' );
+
+export const STORAGE_STATE_PATH =
+	process.env.STORAGE_STATE_PATH ||
+	path.join( WP_ARTIFACTS_PATH, 'storage-states/admin.json' );
+
+// User roles storage states
+export const adminFile = STORAGE_STATE_PATH;
+export const customerFile = path.join(
+	path.dirname( STORAGE_STATE_PATH ),
+	'customer.json'
+);
+export const guestFile = { cookies: [], origins: [] };
