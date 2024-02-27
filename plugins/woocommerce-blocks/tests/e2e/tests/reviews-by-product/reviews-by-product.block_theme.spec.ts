@@ -55,7 +55,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
-		select.selectOption( 'Highest rating' );
+		await select.selectOption( 'Highest rating' );
 
 		const highestRating = allReviews.sort(
 			( a, b ) => b.rating - a.rating
@@ -79,7 +79,7 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
-		select.selectOption( 'Lowest rating' );
+		await select.selectOption( 'Lowest rating' );
 
 		const lowestRating = allReviews.sort(
 			( a, b ) => a.rating - b.rating
