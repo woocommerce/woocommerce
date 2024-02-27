@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 async function addImageFromLibrary( page, imageName, actionButtonName ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
