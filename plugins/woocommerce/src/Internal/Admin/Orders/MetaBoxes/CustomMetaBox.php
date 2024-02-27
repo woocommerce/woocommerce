@@ -92,11 +92,12 @@ class CustomMetaBox {
 	 * Compute keys to display in autofill when adding new meta key entry in custom meta box.
 	 * Currently, returns empty keys, will be implemented after caching is merged.
 	 *
+	 * @param mixed $deprecated Unused argument. For backwards compatibility.
 	 * @param \WP_Post|\WC_Order $order Order object.
 	 *
-	 * @return array|mixed Array of keys to display in autofill.
+	 * @return array Array of keys to display in autofill.
 	 */
-	public function order_meta_keys_autofill( $order ) {
+	public function order_meta_keys_autofill( $deprecated, $order ) {
 		if ( ! is_a( $order, \WC_Order::class ) ) {
 			return array();
 		}
@@ -150,7 +151,7 @@ class CustomMetaBox {
 	public function render_meta_form( \WC_Order $order ) : void {
 		$meta_key_input_id = 'metakeyselect';
 
-		$keys = $this->order_meta_keys_autofill( $order );
+		$keys = $this->order_meta_keys_autofill( null, $order );
 		?>
 		<p><strong><?php esc_html_e( 'Add New Custom Field:', 'woocommerce' ); ?></strong></p>
 		<table id="newmeta">
