@@ -448,7 +448,7 @@ export class EditorUtils {
 			name: 'Reset',
 		} );
 		await resetButton.click();
-		await this.page.getByText( `"${ templateName }" reverted.` ).waitFor();
+		await this.page.getByLabel( `"${ templateName }" reverted.` ).waitFor();
 	}
 
 	async updatePost() {
