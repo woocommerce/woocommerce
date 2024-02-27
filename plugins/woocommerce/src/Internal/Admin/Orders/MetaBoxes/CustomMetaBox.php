@@ -92,8 +92,8 @@ class CustomMetaBox {
 	 * Compute keys to display in autofill when adding new meta key entry in custom meta box.
 	 * Currently, returns empty keys, will be implemented after caching is merged.
 	 *
-	 * @param mixed $deprecated Unused argument. For backwards compatibility.
-	 * @param \WP_Post|\WC_Order $order Order object.
+	 * @param mixed              $deprecated Unused argument. For backwards compatibility.
+	 * @param \WP_Post|\WC_Order $order      Order object.
 	 *
 	 * @return array Array of keys to display in autofill.
 	 */
