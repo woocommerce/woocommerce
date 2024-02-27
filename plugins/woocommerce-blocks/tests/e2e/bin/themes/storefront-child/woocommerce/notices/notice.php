@@ -1,8 +1,8 @@
 <?php
 /**
- * Show error messages
+ * Show messages
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/notices/error.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/notices/notice.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -12,7 +12,7 @@
  *
  * @see     https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.6.0
+ * @version 3.9.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,10 +25,8 @@ if ( ! $notices ) {
 
 ?>
 
-<ul class="woocommerce-error" role="alert">
-	<?php foreach ( $notices as $notice ) : ?>
-		<li<?php echo wc_get_notice_data_attr( $notice ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php echo wc_kses_notice( $notice['notice'] ); ?>
-		</li>
-	<?php endforeach; ?>
-</ul>
+<?php foreach ( $notices as $notice ) : ?>
+	<div class="woocommerce-info"<?php echo wc_get_notice_data_attr( $notice ); ?>>
+		CLASSIC INFO NOTICE - <?php echo wc_kses_notice( $notice['notice'] ); ?>
+	</div>
+<?php endforeach; ?>
