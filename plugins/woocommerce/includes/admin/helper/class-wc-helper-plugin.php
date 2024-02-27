@@ -53,12 +53,20 @@ class WC_Helper_Plugin {
 	 */
 	public static function generate_install_url(): string {
 		/**
-		 * Filter the base URL used to install the Woo Connect plugin.
+		 * Filter the base URL used to install the Woo Update Manager plugin.
 		 *
 		 * @since 8.7.0
 		 */
 		$install_url_base = apply_filters( 'woo_com_base_url', 'https://woo.com/' );
-		$install_url      = $install_url_base . 'in-app-purchase/install-woo-connect';
+
+		/**
+		 * Filter the id of the Woo Update Manager plugin.
+		 *
+		 * @since 8.7.0
+		 */
+		$woo_update_manager_plugin_id = apply_filters( 'woo_update_manager_plugin_id', 18734003334043 );
+
+		$install_url = $install_url_base . 'auto-install/step/init/' . $woo_update_manager_plugin_id . '/';
 
 		return self::add_auth_parameters( $install_url );
 	}
