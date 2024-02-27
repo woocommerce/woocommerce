@@ -2,15 +2,14 @@ name: Metrics Tracking
 
 on:
     pull_request:
-      paths-ignore:
-        - '**.md'
-        - '**/changelog/**'
-        - '**/.wireit/**'
-        - 'docs/**'
-        - 'plugins/woo-ai/**'
-        - 'plugins/woocommerce-beta-tester/**'
-        - '**/tests/**'
-        - 'tools/**'
+      paths:
+        - 'plugins/woocommerce/**'
+        - 'tools/compare-perf/**'
+        - '!**/tests/**'
+        - '!**.md'
+        - '!**/changelog/**'
+        - '!**/.wireit/**'
+        - '!docs/**'
     push:
         branches: [trunk]
 
