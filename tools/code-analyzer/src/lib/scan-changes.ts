@@ -136,7 +136,7 @@ export const scanForChanges = async (
 		base,
 		compareVersion,
 		Logger.error,
-		[ 'tools', ...(exclude ? exclude : []) ]
+		[ 'tools', ...( exclude ? exclude : [] ) ]
 	);
 
 	// Only checkout the compare version if we're in CLI mode.
