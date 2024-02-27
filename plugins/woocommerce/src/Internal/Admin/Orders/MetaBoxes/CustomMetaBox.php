@@ -113,12 +113,7 @@ class CustomMetaBox {
 		 * @param \WC_Order  $order The current post object.
 		 */
 		$keys = apply_filters( 'postmeta_form_keys', null, $order );
-
-		$limit = 0;
-
-		if ( null === $keys ) {
-			$meta_data_store = wc_get_container()->get( OrdersTableDataStoreMeta::class );
-
+		if ( null === $keys || ! is_array( $keys ) ) {
 			/**
 			 * Compatibility filter for 'postmeta_form_limit', which filters the number of custom fields to retrieve
 			 * for the drop-down in the Custom Fields meta box.
@@ -127,15 +122,12 @@ class CustomMetaBox {
 			 *
 			 * @param int $limit Number of custom fields to retrieve. Default 30.
 			 */
-			$keys = $meta_data_store->get_meta_keys( apply_filters( 'postmeta_form_limit', 30 ) );
+			$limit = apply_filters( 'postmeta_form_limit', 30 );
+			$keys  = wc_get_container()->get( OrdersTableDataStoreMeta::class )->get_meta_keys( $limit );
 		}
 
 		if ( $keys ) {
 			natcasesort( $keys );
-		}
-
-		if ( $limit ) {
-			$keys = array_slice( $keys, 0, absint( $limit ) );
 		}
 
 		return $keys;
