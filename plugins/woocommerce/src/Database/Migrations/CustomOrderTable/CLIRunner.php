@@ -1113,6 +1113,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *   - posts
 	 * ---
 	 *
+	 * [--meta_keys=<meta_keys>]
+	 * : Comma separated list of meta keys to backfill.
+	 *
+	 * [--props=<props>]
+	 * : Comma separated list of order properties to backfill.
+	 *
 	 * @since 8.6.0
 	 *
 	 * @param array $args       Positional arguments passed to the command.
@@ -1140,8 +1146,14 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::error( __( 'Please use different source (--from) and destination (--to) datastores.', 'woocommerce' ) );
 		}
 
+		$fields = array_intersect_key( $assoc_args, array_flip( array( 'meta_keys', 'props' ) ) );
+		foreach ( $fields as &$field_names ) {
+			$field_names = is_string( $field_names ) ? array_map( 'trim', explode( ',', $field_names ) ) : $field_names;
+			$field_names = array_unique( array_filter( array_filter( $field_names, 'is_string' ) ) );
+		}
+
 		try {
-			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to );
+			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to, $fields );
 		} catch ( \Exception $e ) {
 			WP_CLI::error(
 				sprintf(
