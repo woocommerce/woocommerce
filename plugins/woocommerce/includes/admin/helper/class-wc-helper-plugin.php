@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Helper_Plugin {
 	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-marketplace/woo-marketplace.php';
-	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/woo-update-manager/download/';
+	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/products/woo-update-manager/';
 
 	/**
 	 * Loads the class, runs on init.
