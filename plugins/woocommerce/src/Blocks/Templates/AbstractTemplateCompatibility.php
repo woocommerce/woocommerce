@@ -136,7 +136,7 @@ abstract class AbstractTemplateCompatibility {
 				remove_action( $hook, $callback, $priority );
 			}
 		}
-		$class_name = basename( str_replace('\\', '/', get_class($this) ) );
+		$class_name = basename( str_replace( '\\', '/', get_class( $this ) ) );
 
 		/**
 		 * When extensions implement their equivalent blocks of the template
