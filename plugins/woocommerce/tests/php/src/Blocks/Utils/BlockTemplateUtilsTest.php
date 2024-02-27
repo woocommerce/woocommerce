@@ -29,9 +29,8 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 		// Switch to a block theme and initialize template logic.
 		switch_theme( 'twentytwentytwo' );
-		$this->container          = Package::container();
-		$block_templates_registry = $this->container->get( BlockTemplatesRegistry::class );
-		$block_templates_registry->init();
+		$this->container = Package::container();
+		$this->container->get( BlockTemplatesRegistry::class )->init();
 
 		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );

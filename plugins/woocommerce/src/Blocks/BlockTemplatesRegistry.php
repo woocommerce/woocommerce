@@ -31,13 +31,6 @@ class BlockTemplatesRegistry {
 	private $templates = array();
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		$this->init();
-	}
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {

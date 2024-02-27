@@ -146,8 +146,8 @@ class Bootstrap {
 			// regular rest requests to maintain compatibility with the store editor.
 			$this->container->get( BlockPatterns::class );
 			$this->container->get( BlockTypesController::class );
-			$this->container->get( BlockTemplatesRegistry::class );
-			$this->container->get( BlockTemplatesController::class );
+			$this->container->get( BlockTemplatesRegistry::class )->init();
+			$this->container->get( BlockTemplatesController::class )->init();
 			$this->container->get( ClassicTemplatesCompatibility::class );
 			$this->container->get( ArchiveProductTemplatesCompatibility::class )->init();
 			$this->container->get( SingleProductTemplateCompatibility::class )->init();
