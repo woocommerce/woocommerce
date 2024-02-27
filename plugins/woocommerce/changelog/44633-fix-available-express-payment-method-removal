@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fixed a bug where express payment methods could not be removed from the wc/store/payment data store.

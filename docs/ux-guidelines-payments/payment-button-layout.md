@@ -7,13 +7,13 @@ Define the position and alignment of buttons in relationship to their container,
 
 ### Product pages
 
-Position payment buttons correctly in relation to “Add to Cart” in horizontal or vertical layout, place payment buttons to the right of or below the “Add to Cart” button.
+Position payment buttons correctly in relation to "Add to Cart" in horizontal or vertical layout, place payment buttons to the right of or below the "Add to Cart" button.
 
 ![Product page layout.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Product-page-layout.png)
 
 ### Cart
 
-Position payment buttons correctly in relation to “Proceed to checkout” buttons in vertical layout. Place payment buttons above the “Proceed to checkout” button. Do not place payment buttons below the button or in between.
+Position payment buttons correctly in relation to "Proceed to checkout" buttons in vertical layout. Place payment buttons above the "Proceed to checkout" button. Do not place payment buttons below the button or in between.
 
 ![Cart layout.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Cart-layout.png)
 
