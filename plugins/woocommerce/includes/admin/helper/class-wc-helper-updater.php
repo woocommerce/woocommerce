@@ -178,8 +178,8 @@ class WC_Helper_Updater {
 		if ( ! WC_Helper_Plugin::is_plugin_installed() ) {
 			printf(
 				wp_kses(
-					/* translators: 1: Marketplace plugin install URL */
-					__( ' <a href="%1$s">Install Woo Connect to Update</a>.', 'woocommerce' ),
+					/* translators: 1: Woo Update Manager plugin install URL */
+					__( ' <a href="%1$s">Install Woo Update Manager to update</a>.', 'woocommerce' ),
 					array(
 						'a' => array(
 							'href' => array(),
@@ -192,7 +192,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate Woo Connect to Update.', 'woocommerce' );
+			echo esc_html_e( ' Activate Woo Update Manager to update.', 'woocommerce' );
 		}
 	}
 

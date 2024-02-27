@@ -47,7 +47,7 @@ class WC_Helper_Plugin {
 	}
 
 	/**
-	 * Generate the URL to install the Woo Connect plugin.
+	 * Generate the URL to install the Woo Update Manager plugin.
 	 *
 	 * @return string
 	 */
