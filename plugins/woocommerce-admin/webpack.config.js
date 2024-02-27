@@ -16,7 +16,6 @@ const NormalModuleReplacementPlugin =
 /**
  * Internal dependencies
  */
-const UnminifyWebpackPlugin = require( './unminify' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
@@ -79,16 +78,13 @@ const getEntryPoints = () => {
 		app: './client/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
-		entryPoints[ name ] = `../../packages/js/${ name }`;
+		entryPoints[ name ] = `./node_modules/@woocommerce/${ name }`;
 	} );
 	wpAdminScripts.forEach( ( name ) => {
 		entryPoints[ name ] = `./client/wp-admin-scripts/${ name }`;
 	} );
 	return entryPoints;
 };
-
-// WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
-const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
 const webpackConfig = {
 	mode: NODE_ENV,
@@ -98,10 +94,10 @@ const webpackConfig = {
 			// Output wpAdminScripts to wp-admin-scripts folder
 			// See https://github.com/woocommerce/woocommerce-admin/pull/3061
 			return wpAdminScripts.includes( data.chunk.name )
-				? `wp-admin-scripts/[name]${ outputSuffix }.js`
-				: `[name]/index${ outputSuffix }.js`;
+				? `wp-admin-scripts/[name].js`
+				: `[name]/index.js`;
 		},
-		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
+		chunkFilename: `chunks/[name].js`,
 		path: path.join( __dirname, '/build' ),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
@@ -244,13 +240,6 @@ const webpackConfig = {
 			startYear: 2000,
 		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
-		// We only want to generate unminified files in the development phase.
-		WC_ADMIN_PHASE === 'development' &&
-			// Generate unminified files to load the unminified version when `define( 'SCRIPT_DEBUG', true );` is set in wp-config.
-			new UnminifyWebpackPlugin( {
-				test: /\.js($|\?)/i,
-				mainEntry: 'app/index.min.js',
-			} ),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
