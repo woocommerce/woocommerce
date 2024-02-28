@@ -17,6 +17,7 @@ import { TestEnvVars, parseTestEnvConfig } from './test-environment';
  */
 interface LintJob {
 	projectName: string;
+	projectPath: string;
 	command: string;
 }
 
@@ -34,6 +35,7 @@ interface TestJobEnv {
  */
 interface TestJob {
 	projectName: string;
+	projectPath: string;
 	name: string;
 	command: string;
 	testEnv: TestJobEnv;
@@ -76,6 +78,7 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the lint job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
@@ -83,6 +86,7 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
  */
 function createLintJob(
 	projectName: string,
+	projectPath: string,
 	config: LintJobConfig,
 	changes: string[] | true,
 	options: CreateOptions
@@ -116,6 +120,7 @@ function createLintJob(
 
 	return {
 		projectName,
+		projectPath,
 		command: replaceCommandVars( config.command, options ),
 	};
 }
@@ -124,6 +129,7 @@ function createLintJob(
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the test job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
@@ -132,6 +138,7 @@ function createLintJob(
  */
 async function createTestJob(
 	projectName: string,
+	projectPath: string,
 	config: TestJobConfig,
 	changes: string[] | true,
 	options: CreateOptions,
@@ -181,6 +188,7 @@ async function createTestJob(
 
 	const createdJob: TestJob = {
 		projectName,
+		projectPath,
 		name: config.name,
 		command: replaceCommandVars( config.command, options ),
 		testEnv: {
@@ -289,6 +297,7 @@ async function createJobsForProject(
 			case JobType.Lint: {
 				const created = createLintJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options
@@ -305,6 +314,7 @@ async function createJobsForProject(
 			case JobType.Test: {
 				const created = await createTestJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options,

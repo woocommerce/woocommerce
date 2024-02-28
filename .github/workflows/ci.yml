@@ -118,15 +118,12 @@ jobs:
         - name: 'Run tests'
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
           
-        - name: 'Find project path'
-          run: echo "PROJECT_PATH=$(pnpm --filter=@woocommerce/plugin-woocommerce exec pwd)" >> $GITHUB_OUTPUT
-          
         - name: Upload artifacts
           if: always()
           uses: actions/upload-artifact@v4
           with:
             name: all-blob-reports
-            path: ${{ PROJECT_PATH }}/tests/e2e-pw/test-results/allure-results
+            path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
             retention-days: 1
             compression-level: 9
             
