@@ -143,17 +143,19 @@ Rules in an array are executed as an AND operation. If there are no rules in the
 Some rule types support an `operation` value, which is used to compare two
 values. The following operations are implemented:
 
--   `=`
--   `<`
--   `<=`
--   `>`
--   `>=`
--   `!=`
--   `contains`
--   `!contains`
--   `in` (Added in WooCommerce 8.2.0)
--   `!in` (Added in WooCommerce 8.2.0)
+- `=`
+- `<`
+- `<=`
+- `>`
+- `>=`
+- `!=`
+- `contains`
+- `!contains`
+- `in` (Added in WooCommerce 8.2.0)
+- `!in` (Added in WooCommerce 8.2.0)
+- `range` (Added in WooCommerce 8.8.0)
 
+#### contains and !contains
 `contains` and `!contains` allow checking if the provided value is present (or
 not present) in the haystack value. An example of this is using the
 `onboarding_profile` rule to match on a value in the `product_types` array -
@@ -169,6 +171,7 @@ onboarding profile:
 }
 ```
 
+#### in and !in
 `in` and `!in` allow checking if a value is found (or not found) in a provided array. For example, using the `in` comparison operator to check if the base country location value is found in a given array, as below. This rule matches if the `base_location_country` is `US`, `NZ`, or `ZA`. **NOTE:** These comparisons were added in **WooCommerce 8.2.0**. If the spec is read by an older version of WooCommerce, the rule will evaluate to `false`.
 
 ```json
@@ -180,6 +183,22 @@ onboarding profile:
 		"ZA"
 	],
 	"operation": "in"
+}
+```
+
+#### range
+
+`range` operator can check if a number falls within a certain range
+
+The following rule returns true when `woocommerce_remote_variant_assignment` value is between 1 and 10.
+
+```json
+{
+  "type": "option",
+  "value": [ 1, 10 ],
+  "default": 0,
+  "operation": "range",
+  "option_name": "woocommerce_remote_variant_assignment",
 }
 ```
 
