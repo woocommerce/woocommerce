@@ -103,6 +103,26 @@ class ProductCollection extends AbstractBlock {
 		return $block_content;
 	}
 
+	/**
+	 * Provides the location context into the block's context.
+	 *
+	 * The location context's schema is an array with the following:
+	 * - type: The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 * - sourceData: The context data.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site: []
+	 * - order: ['orderId' => int]
+	 * - cart: ['productIds' => array]
+	 * - archive: ['taxonomy' => string, 'termId' => int]
+	 * - product: ['productId' => int]
+	 *
+	 * @param array    $context      The block context.
+	 * @param array    $parsed_block The parsed block.
+	 * @param WP_Block $parent_block The parent block.
+	 *
+	 * @return array The block's context including the location context.
+	 */
 	public function provide_location_context( $context, $parsed_block, $parent_block ) {
 
 		// Run only on frontend.
@@ -125,9 +145,9 @@ class ProductCollection extends AbstractBlock {
 		if ( $is_in_single_product ) {
 
 			$context['location'] = array(
-				'type'        => 'product',
-				'source_data' => array(
-					'product_id' => absint( $parent_block->context['postId'] )
+				'type'       => 'product',
+				'sourceData' => array(
+					'productId' => absint( $parent_block->context['postId'] )
 				)
 			);
 
@@ -135,7 +155,7 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		// 3. Parse global context.
-		$context['location'] = ProductCollectionUtils::parse_global_context();
+		$context['location'] = ProductCollectionUtils::parse_global_location_context();
 		return $context;
 	}
 

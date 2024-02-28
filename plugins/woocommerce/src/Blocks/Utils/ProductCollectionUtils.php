@@ -11,10 +11,21 @@ class ProductCollectionUtils {
 
 	/**
 	 * Parse WP Query's global context for the Product Collection block.
+	 *
+	 * The return schema is:
+	 * - type: The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 * - sourceData: The context data.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site: []
+	 * - order: ['orderId' => int]
+	 * - cart: ['productIds' => array]
+	 * - archive: ['taxonomy' => string, 'termId' => int]
+	 * - product: ['productId' => int]
 	 * 
 	 * @return array Parsed context.
 	 */
-	public static function parse_global_context() {
+	public static function parse_global_location_context() {
 		global $wp_query;
 
 		// Default context.
@@ -25,8 +36,8 @@ class ProductCollectionUtils {
 		if ( ! ( $wp_query instanceof WP_Query ) ) {
 
 			return array(
-				'type'        => $type,
-				'source_data' => $source_data,
+				'type'       => $type,
+				'sourceData' => $source_data,
 			);
 		}
 
@@ -36,17 +47,17 @@ class ProductCollectionUtils {
 		if ( is_order_received_page() ) {
 
 			$type        = 'order';
-			$source_data = array( 'order_id' => absint( $wp_query->query_vars['order-received'] ) );
+			$source_data = array( 'orderId' => absint( $wp_query->query_vars['order-received'] ) );
 
 		} elseif ( ( is_cart() || is_checkout() ) && isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
 
 			$type  = 'cart';
 			$items = array();
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$items[] = absint( $cart_item[ 'product_id' ] );
+				$items[] = absint( $cart_item[ 'productId' ] );
 			}
 			$items       = array_unique( array_filter( $items ) );
-			$source_data = array( 'product_ids' => $items );
+			$source_data = array( 'productIds' => $items );
 
 		} elseif ( is_product_taxonomy() ) {
 
@@ -56,7 +67,7 @@ class ProductCollectionUtils {
 			$type        = 'archive';
 			$source_data = array(
 				'taxonomy' => wc_clean( $taxonomy ),
-				'term_id'  => absint( $term_id ),
+				'termId'   => absint( $term_id ),
 			);
 
 		} elseif ( is_product() ) {
@@ -64,12 +75,12 @@ class ProductCollectionUtils {
 			$source      = $wp_query->get_queried_object();
 			$product_id  = is_a( $source, 'WP_Post' ) ? absint( $source->ID ) : 0;
 			$type        = 'product';
-			$source_data = array( 'product_id' => $product_id );
+			$source_data = array( 'productId' => $product_id );
 		}
 
 		$context = array(
-			'type'        => $type,
-			'source_data' => $source_data,
+			'type'       => $type,
+			'sourceData' => $source_data,
 		);
 
 		return $context;
