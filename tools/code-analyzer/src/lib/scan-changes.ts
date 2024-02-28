@@ -116,7 +116,7 @@ export const scanForChanges = async (
 	base: string,
 	outputStyle: 'cli' | 'github',
 	clonedPath?: string,
-	exclude?: string[]
+	exclude: string[] = []
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
 
@@ -136,7 +136,7 @@ export const scanForChanges = async (
 		base,
 		compareVersion,
 		Logger.error,
-		[ 'tools', ...exclude ]
+		[ 'tools', ...( exclude ? exclude : [] ) ]
 	);
 
 	// Only checkout the compare version if we're in CLI mode.
