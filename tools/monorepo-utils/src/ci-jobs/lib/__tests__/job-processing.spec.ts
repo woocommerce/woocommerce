@@ -509,6 +509,45 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
+		it( 'should trigger e2e test job for single node', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'e2e',
+								name: 'Default',
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+			expect( jobs.e2eTest ).toHaveLength( 1 );
+			expect( jobs.e2eTest ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+			} );
+		} );
+
 		it( 'should trigger test job for dependent without changes when dependency has matching cascade key', async () => {
 			const jobs = await createJobsForChanges(
 				{
