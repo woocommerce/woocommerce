@@ -53,8 +53,6 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$settings               = $sut->get_settings_for_section( '' );
 		$settings_ids_and_types = $this->get_ids_and_types( $settings );
 
-		error_log( print_r( $settings_ids_and_types, true ) );
-
 		$expected = array(
 			'tax_options'                       => array( 'title', 'sectionend' ),
 			'woocommerce_prices_include_tax'    => 'radio',
