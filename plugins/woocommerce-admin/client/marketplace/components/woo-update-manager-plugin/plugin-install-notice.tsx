@@ -11,7 +11,7 @@ import {
 	WP_ADMIN_PLUGIN_LIST_URL,
 	WOO_CONNECT_PLUGIN_DOWNLOAD_URL,
 } from '../constants';
-import './woo-connect-plugin.scss';
+import './woo-update-manager-plugin.scss';
 
 export default function PluginInstallNotice() {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
@@ -28,7 +28,7 @@ export default function PluginInstallNotice() {
 			'woocommerce'
 		);
 		return (
-			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
+			<section className="woocommerce-marketplace__woo-update-manager-plugin__notices">
 				<Notice status="error" isDismissible={ false }>
 					{ message }
 					<div className="components-notice__buttons">
@@ -57,7 +57,7 @@ export default function PluginInstallNotice() {
 			'woocommerce'
 		);
 		return (
-			<section className="woocommerce-marketplace__woo-connect-plugin__notices">
+			<section className="woocommerce-marketplace__woo-update-manager-plugin__notices">
 				<Notice status="error" isDismissible={ false }>
 					{ message }
 					<div className="components-notice__buttons">

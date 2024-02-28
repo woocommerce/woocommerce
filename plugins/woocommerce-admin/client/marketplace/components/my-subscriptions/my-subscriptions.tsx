@@ -25,7 +25,7 @@ import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
-import PluginInstallNotice from '../woo-connect-plugin/plugin-install-notice';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );

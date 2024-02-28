@@ -13,7 +13,7 @@ import ProductLoader from '../product-loader/product-loader';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { ProductType } from '../product-list/types';
 import './discover.scss';
-import PluginInstallNotice from '../woo-connect-plugin/plugin-install-notice';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<

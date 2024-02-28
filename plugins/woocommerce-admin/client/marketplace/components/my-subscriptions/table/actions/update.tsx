@@ -20,7 +20,7 @@ import {
 	updateProduct,
 } from '../../../../utils/functions';
 import { NoticeStatus } from '../../../../contexts/types';
-import InstallWooConnectModal from '../../../woo-connect-plugin/install-woo-connect-modal';
+import InstallWooConnectModal from '../../../woo-update-manager-plugin/install-woo-connect-modal';
 
 interface UpdateProps {
 	subscription: Subscription;
