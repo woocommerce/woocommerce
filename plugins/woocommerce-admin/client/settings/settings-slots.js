@@ -1,5 +1,5 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { render } from '@wordpress/element';
 import { createSlotFill, SlotFillProvider } from '@wordpress/components';
