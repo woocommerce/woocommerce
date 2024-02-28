@@ -185,7 +185,7 @@ export const PreloadFonts = () => {
 				<FontFamiliesLoader
 					fontFamilies={ [
 						...baseFontFamilies.theme,
-						...enabledFontFamilies.theme,
+						...enabledFontFamilies.custom,
 					] }
 					iframeInstance={ iframeInstance }
 				/>
