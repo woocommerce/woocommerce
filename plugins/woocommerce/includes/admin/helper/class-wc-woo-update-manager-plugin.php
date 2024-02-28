@@ -84,20 +84,7 @@ class WC_Woo_Update_Manager_Plugin {
 			return false;
 		}
 
-		$request_uri  = wp_parse_url( $url, PHP_URL_PATH );
-		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
-
-		if ( is_string( $query_string ) ) {
-			$request_uri .= '?' . $query_string;
-		}
-
-		$data = array(
-			'host'        => wp_parse_url( $url, PHP_URL_HOST ),
-			'request_uri' => $request_uri,
-			'method'      => 'GET',
-		);
-
-		$signature = hash_hmac( 'sha256', wp_json_encode( $data ), $auth['access_token_secret'] );
+		$signature = WC_Helper_API::create_request_signature( (string) $auth['access_token_secret'], $url, 'GET' );
 
 		return add_query_arg(
 			array(
