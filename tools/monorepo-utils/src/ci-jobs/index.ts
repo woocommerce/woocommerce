@@ -50,6 +50,7 @@ const program = new Command( 'ci-jobs' )
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
+			setOutput( 'e2e-test-jobs', JSON.stringify( jobs.e2eTest ) );
 			return;
 		}
 
@@ -69,6 +70,15 @@ const program = new Command( 'ci-jobs' )
 			}
 		} else {
 			Logger.notice( 'No test jobs to run.' );
+		}
+
+		if ( jobs.e2eTest.length > 0 ) {
+			Logger.notice( 'E2E test Jobs' );
+			for ( const job of jobs.e2eTest ) {
+				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+			}
+		} else {
+			Logger.notice( 'No e2e test jobs to run.' );
 		}
 	} );
 

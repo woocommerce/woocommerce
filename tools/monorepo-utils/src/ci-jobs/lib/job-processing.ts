@@ -4,6 +4,7 @@
 import {
 	CommandVarOptions,
 	JobType,
+	TestType,
 	LintJobConfig,
 	TestJobConfig,
 } from './config';
@@ -44,6 +45,7 @@ interface TestJob {
 interface Jobs {
 	lint: LintJob[];
 	test: TestJob[];
+	e2eTest: TestJob[];
 }
 
 /**
@@ -219,6 +221,7 @@ async function createJobsForProject(
 	const newJobs: Jobs = {
 		lint: [],
 		test: [],
+		e2eTest: [],
 	};
 
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
@@ -241,6 +244,7 @@ async function createJobsForProject(
 		);
 		newJobs.lint.push( ...dependencyJobs.lint );
 		newJobs.test.push( ...dependencyJobs.test );
+		newJobs.e2eTest.push( ...dependencyJobs.e2eTest );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -311,7 +315,17 @@ async function createJobsForProject(
 				}
 
 				jobConfig.jobCreated = true;
-				newJobs.test.push( created );
+
+				switch ( jobConfig.testType ) {
+					case TestType.E2E: {
+						newJobs.e2eTest.push( created );
+						break;
+					}
+
+					default: {
+						newJobs.test.push( created );
+					}
+				}
 
 				// We need to track any cascade keys that this job is associated with so that
 				// dependent projects can trigger jobs with matching keys. We are expecting

@@ -294,6 +294,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -330,6 +331,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd <baseRef>',
@@ -370,6 +372,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -398,6 +401,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -423,6 +427,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -437,6 +442,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
+										testType: 'unit',
 										name: 'Default A',
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-a',
@@ -452,6 +458,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
+										testType: 'unit',
 										name: 'Default B',
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-b',
@@ -501,6 +508,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -516,6 +524,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
+										testType: 'unit',
 										name: 'Default A',
 										changes: [ /test-a.js$/ ],
 										command: 'test-cmd-a',
@@ -564,6 +573,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -579,6 +589,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
+										testType: 'unit',
 										name: 'Default A',
 										changes: [ /test-a.js$/ ],
 										command: 'test-cmd-a',
@@ -595,6 +606,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
+										testType: 'unit',
 										name: 'Default B',
 										changes: [ /test-b.js$/ ],
 										command: 'test-cmd-b',
@@ -647,6 +659,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
@@ -701,6 +714,7 @@ describe( 'Job Processing', () => {
 							},
 							{
 								type: JobType.Test,
+								testType: 'unit',
 								name: 'Default',
 								changes: [ /test.js$/ ],
 								command: 'test-cmd',
