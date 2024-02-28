@@ -10,26 +10,25 @@ use WP_Query;
 class ProductCollectionUtils {
 
 	/**
-	 * Parse the front-end context for the Product Collection block.
+	 * Parse WP Query's global context for the Product Collection block.
 	 * 
-	 * TODO: Parse block-level context
-	 * TODO: Parse ancestor-level context (e.g. Single Product block.)
-	 * 
-	 * @param WP_Block $block Block instance.
 	 * @return array Parsed context.
 	 */
-	public static function parse_context( $block ) {
+	public static function parse_global_context() {
 		global $wp_query;
 
-		// 1. Parse block-level context.
-		// ...
-
-		// 2. Parse ancestor-level context.
-		// ...
-
-		// 3. Parse global context.
+		// Default context.
+		// Hint: The Shop page uses the default context.
 		$type        = 'site';
 		$source_data = array();
+
+		if ( ! ( $wp_query instanceof WP_Query ) ) {
+
+			return array(
+				'type'        => $type,
+				'source_data' => $source_data,
+			);
+		}
 
 		 // As more areas are blockified, expected future contexts include:
 		 // - is_checkout_pay_page()
@@ -48,11 +47,6 @@ class ProductCollectionUtils {
 			}
 			$items       = array_unique( array_filter( $items ) );
 			$source_data = array( 'product_ids' => $items );
-
-		} elseif ( is_shop() ) {
-
-			$type        = 'archive';
-			$source_data = array();
 
 		} elseif ( is_product_taxonomy() ) {
 
@@ -78,7 +72,6 @@ class ProductCollectionUtils {
 			'source_data' => $source_data,
 		);
 
-		// Perhaps add a 3PD filter here.
 		return $context;
 	}
 

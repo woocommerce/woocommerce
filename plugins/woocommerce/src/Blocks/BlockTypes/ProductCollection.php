@@ -85,11 +85,58 @@ class ProductCollection extends AbstractBlock {
 		// Extend allowed `collection_params` for the REST API.
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
+		// Provide location context into block's context.
+		add_filter( 'render_block_context', array( $this, 'provide_location_context' ), 10, 3 );
+		add_filter( 'render_block_woocommerce/product-template', array( $this, 'test' ), 0, 3 );
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'add_navigation_id_directive' ), 10, 3 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
+	}
+
+	// TODO: Remove this method.
+	public function test( $block_content, $block, $instance ) {
+		$location = $instance->context['location'] ?? array();
+		$block_content = print_r( $location, true ) . $block_content;
+		return $block_content;
+	}
+
+	public function provide_location_context( $context, $parsed_block, $parent_block ) {
+
+		// Run only on frontend.
+		// This is needed to avoid SSR renders within patterns. @see https://github.com/woocommerce/woocommerce/issues/45181
+		if ( is_admin() || \WC()->is_rest_api_request() ) {
+			return $context;
+		}
+
+		// Only on Product Collection's children blocks.
+		if ( ! is_a( $parent_block, 'WP_Block' ) || 'woocommerce/product-collection' !== $parent_block->name ) {
+			return $context;
+		}
+
+		// 1. Parse block-level context.
+		// TODO: Parse block's attributes.
+
+		// 2. Parse ancestor-level context.
+		// @see Automattic\WooCommerce\Blocks\BlockTypes\SingleProduct::update_context()
+		$is_in_single_product = ! empty( $parent_block->context['singleProduct'] ) && $parent_block->context['singleProduct'] && ! empty( $parent_block->context['postId'] );
+		if ( $is_in_single_product ) {
+
+			$context['location'] = array(
+				'type'        => 'product',
+				'source_data' => array(
+					'product_id' => absint( $parent_block->context['postId'] )
+				)
+			);
+
+			return $context;
+		}
+
+		// 3. Parse global context.
+		$context['location'] = ProductCollectionUtils::parse_global_context();
+		return $context;
 	}
 
 	/**
@@ -101,11 +148,6 @@ class ProductCollection extends AbstractBlock {
 	 * @param \WP_Block $instance      The block instance.
 	 */
 	public function add_navigation_id_directive( $block_content, $block, $instance ) {
-
-		// Debug start.
-		$context = ProductCollectionUtils::parse_context( $instance );
-		$block_content = json_encode( $context ) . $block_content;
-		// Debug end.
 
 		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		if ( $is_product_collection_block ) {
@@ -300,6 +342,7 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	public function build_frontend_query( $query, $block, $page ) {
+
 		// If not in context of product collection block, return the query as is.
 		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
 		if ( ! $is_product_collection_block ) {
