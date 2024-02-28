@@ -62,36 +62,6 @@ export const FontPairing = () => {
 		}
 	];
 
-	// const baseFontFamilies = useSelect( ( select ) => {
-	// 	// @ts-ignore no types exist yet.
-	// 	const { __experimentalGetCurrentThemeGlobalStylesVariations } =
-	// 		select( coreStore );
-
-	// 	const variations =
-	// 		__experimentalGetCurrentThemeGlobalStylesVariations() ?? [];
-
-	// 	return variations.reduce(
-	// 		(
-	// 			acc: Array< FontFamily >,
-	// 			variation: {
-	// 				settings: {
-	// 					typography: {
-	// 						fontFamilies: { theme: Array< FontFamily > };
-	// 					};
-	// 				};
-	// 			}
-	// 		) => {
-	// 			if ( variation.settings?.typography?.fontFamilies.theme ) {
-	// 				return acc.concat(
-	// 					variation.settings.typography.fontFamilies.theme
-	// 				);
-	// 			}
-	// 			return acc;
-	// 		},
-	// 		[] as Array< FontFamily >
-	// 	);
-	// }, [] );
-
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
