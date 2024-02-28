@@ -135,10 +135,10 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: 'ubuntu-20.04'
-    needs: [ 
+    needs: [
       'project-jobs',
       'project-lint-jobs',
-      'project-test-jobs'
+      'project-test-jobs',
       'project-e2e-test-jobs'
     ]
     if: ${{ always() }}
