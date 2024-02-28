@@ -1,10 +1,9 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { test, expect } = require( '@playwright/test' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const pageTitle = 'Mini Cart';
-const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+const miniCartPageTitle = `Mini Cart ${ Date.now() }`;
+const miniCartPageSlug = miniCartPageTitle.replace( / /gi, '-' ).toLowerCase();
 const miniCartButton = '.wc-block-mini-cart__button';
 const miniCartBadge = '.wc-block-mini-cart__badge';
 
@@ -34,6 +33,8 @@ test.describe( 'Mini Cart block page', () => {
 				type: 'simple',
 				regular_price: singleProductPrice,
 				sale_price: singleProductSalePrice,
+				manage_stock: true,
+				stock_quantity: 2,
 			} )
 			.then( ( response ) => {
 				productId = response.data.id;
@@ -110,46 +111,21 @@ test.describe( 'Mini Cart block page', () => {
 		await api.delete( `shipping/zones/${ shippingZoneId }`, {
 			force: true,
 		} );
-		const base64auth = Buffer.from(
-			`${ admin.username }:${ admin.password }`
-		).toString( 'base64' );
-		const wpApi = await request.newContext( {
-			baseURL: `${ baseURL }/wp-json/wp/v2/`,
-			extraHTTPHeaders: {
-				Authorization: `Basic ${ base64auth }`,
-			},
-		} );
-		let response = await wpApi.get( `pages` );
-		const allPages = await response.json();
-		await allPages.forEach( async ( page ) => {
-			if ( page.title.rendered === pageTitle ) {
-				response = await wpApi.delete( `pages/${ page.id }`, {
-					data: {
-						force: true,
-					},
-				} );
-			}
-		} );
 	} );
 
-	test.beforeEach( async ( { context } ) => {
-		// shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-	} );
-
-	test( 'can see empty mini cart', async ( { page } ) => {
+	test( 'can see empty mini cart, add and remove product, increase to max quantity, calculate tax and see redirection', async ( {
+		page,
+		baseURL,
+		context,
+	} ) => {
 		// create a new page with mini cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( pageTitle );
+			.fill( miniCartPageTitle );
 		await page.getByRole( 'button', { name: 'Add default block' } ).click();
 		await page
 			.getByRole( 'document', {
@@ -165,13 +141,13 @@ test.describe( 'Mini Cart block page', () => {
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
 		await expect(
-			page.getByText( `${ pageTitle } is now live.` )
+			page.getByText( `${ miniCartPageTitle } is now live.` )
 		).toBeVisible();
 
 		// go to the page to test mini cart
-		await page.goto( pageSlug );
+		await page.goto( miniCartPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: miniCartPageTitle } )
 		).toBeVisible();
 		await page.locator( miniCartButton ).click();
 		await expect(
@@ -181,18 +157,12 @@ test.describe( 'Mini Cart block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'Shop' } )
 		).toBeVisible();
-	} );
 
-	test( 'can proceed to mini cart, observe it and proceed to the checkout', async ( {
-		page,
-	} ) => {
 		// add product to cart
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
 
 		// go to page with mini cart block and test with the product added
-		await page.goto( pageSlug );
+		await page.goto( miniCartPageSlug );
 		await expect( page.locator( miniCartBadge ) ).toContainText( '1' );
 		await page.locator( miniCartButton ).click();
 		await expect(
@@ -202,10 +172,14 @@ test.describe( 'Mini Cart block page', () => {
 			page.getByRole( 'link', { name: simpleProductName } )
 		).toBeVisible();
 		await expect(
-			page.locator( '.wc-block-components-product-badge' )
-		).toContainText( `Save $${ singleProductSalePrice }` );
+			page.getByText( `Save $${ singleProductSalePrice }` )
+		).toBeVisible();
 		await expect( page.getByText( simpleProductDesc ) ).toBeVisible();
-		await page.getByRole( 'button' ).filter( { hasText: '＋' } ).click();
+		// increase product quantity to its maximum
+		await page
+			.getByRole( 'button' )
+			.filter( { hasText: '＋', exact: true } )
+			.click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
 		).toBeVisible();
@@ -213,6 +187,9 @@ test.describe( 'Mini Cart block page', () => {
 		await expect(
 			page.locator( '.wc-block-components-totals-item__value' )
 		).toContainText( `$${ singleProductSalePrice * 2 }` );
+		await expect(
+			page.getByRole( 'button' ).filter( { hasText: '＋', exact: true } )
+		).toBeDisabled();
 		await page
 			.getByRole( 'button' )
 			.filter( { hasText: 'Remove item' } )
@@ -222,10 +199,8 @@ test.describe( 'Mini Cart block page', () => {
 		).toBeVisible();
 
 		// add product to cart and redirect from mini to regular cart
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await page.goto( pageSlug );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
+		await page.goto( miniCartPageSlug );
 		await page.locator( miniCartButton ).click();
 		await page.getByRole( 'link', { name: 'View my cart' } ).click();
 		await expect(
@@ -234,19 +209,17 @@ test.describe( 'Mini Cart block page', () => {
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
 
 		// go to mini cart and test redirection from mini cart to checkout
-		await page.goto( pageSlug );
+		await page.goto( miniCartPageSlug );
 		await page.locator( miniCartButton ).click();
 		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Checkout', exact: true } )
 		).toBeVisible();
 		await expect( page.locator( miniCartButton ) ).toBeHidden();
-	} );
 
-	test( 'can see mini cart total price inclusive with tax', async ( {
-		page,
-		baseURL,
-	} ) => {
+		// shopping cart is very sensitive to cookies, so be explicit
+		await context.clearCookies();
+
 		const api = new wcApi( {
 			url: baseURL,
 			consumerKey: process.env.CONSUMER_KEY,
@@ -259,9 +232,7 @@ test.describe( 'Mini Cart block page', () => {
 		} );
 
 		// add product to cart
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await page.goto( `/shop/?add-to-cart=${ productId }` );
 
 		// go to cart and add shipping details to calculate tax
 		await page.goto( '/cart/' ); // we will use the old cart for this purpose
@@ -275,9 +246,9 @@ test.describe( 'Mini Cart block page', () => {
 			'Shipping costs updated.'
 		);
 
-		await page.goto( pageSlug );
+		await page.goto( miniCartPageSlug );
 		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
+			page.getByRole( 'heading', { name: miniCartPageTitle } )
 		).toBeVisible();
 		await expect( page.locator( miniCartBadge ) ).toContainText( '1' );
 		await page.locator( miniCartButton ).click();

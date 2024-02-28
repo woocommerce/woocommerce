@@ -9,20 +9,36 @@ const closeWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const disableWelcomeModal = async ( { page } ) => {
+	await page.waitForLoadState();
+	await page.waitForFunction( () => window?.wp?.data );
+
+	const isWelcomeGuideActive = await page.evaluate( () =>
+		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
+	);
+
+	if ( isWelcomeGuideActive ) {
+		await page.evaluate( () =>
+			wp.data.dispatch( 'core/edit-post' ).toggleFeature( 'welcomeGuide' )
+		);
+	}
+};
+
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-	await closeWelcomeModal( { page } );
+	await disableWelcomeModal( { page } );
 };
 
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
 
-	await closeWelcomeModal( { page } );
+	await disableWelcomeModal( { page } );
 };
 
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
 	goToPostEditor,
+	disableWelcomeModal,
 };
