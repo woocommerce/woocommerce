@@ -231,7 +231,6 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 						fontFamily:
 							'var(--wp--preset--font-family--albert-sans)',
 						fontSize: 'var(--wp--preset--font-size--medium)',
-						fontStyle: 'normal',
 					},
 				},
 			},
