@@ -33,6 +33,40 @@ function filenameMatches( filename: string, hayStack: string[] ) {
 	return found.length > 0;
 }
 
+function getManifestVersion() {
+	let versionString = '';
+	let packageData;
+
+	const packageFile = path.join( process.cwd(), 'package.json' );
+	if ( ! fs.existsSync( packageFile ) ) {
+		return versionString;
+	}
+
+	try {
+		const packageString = fs.readFileSync( packageFile, 'utf8' );
+		packageData = JSON.parse( packageString );
+	} catch ( error ) {
+		return versionString;
+	}
+
+	if ( ! packageData.mddocs || ! packageData.mddocs.source ) {
+		return versionString;
+	}
+
+	const versionFile = path.join( process.cwd(), packageData.mddocs.source );
+	if ( ! fs.existsSync( versionFile ) ) {
+		return versionString;
+	}
+
+	const versionData = fs.readFileSync( versionFile, 'utf-8' );
+	const versions = versionData.match( /Version: ([0-9]+\.[0-9]+\.[0-9]+.*)/ );
+	if ( versions.length > 1 ) {
+		versionString = versions[ 1 ];
+	}
+
+	return versionString;
+}
+
 async function processDirectory(
 	rootDirectory: string,
 	subDirectory: string,
@@ -164,6 +198,7 @@ export async function generateManifestFromDirectory(
 			.filter( ( item ) => item.substring( 0, 1 ) !== '#' );
 	}
 
+	const version = getManifestVersion();
 	const manifest = await processDirectory(
 		rootDirectory,
 		subDirectory,
@@ -174,6 +209,9 @@ export async function generateManifestFromDirectory(
 		ignoreList ?? [],
 		false
 	);
+	if ( version.length ) {
+		manifest.version = version;
+	}
 
 	// Generate hash of the manifest contents.
 	const hash = crypto
