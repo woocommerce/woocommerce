@@ -183,7 +183,10 @@ export const PreloadFonts = () => {
 				) ) }
 			{ isNoAIFlow( context.flowType ) && (
 				<FontFamiliesLoader
-					fontFamilies={ baseFontFamilies.theme }
+					fontFamilies={ [
+						...baseFontFamilies.theme,
+						...enabledFontFamilies.theme,
+					] }
 					iframeInstance={ iframeInstance }
 				/>
 			) }

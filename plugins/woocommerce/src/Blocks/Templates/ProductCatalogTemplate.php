@@ -1,35 +1,29 @@
 <?php
+
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * ProductSearchResultsTemplate class.
+ * ProductCatalogTemplate class.
  *
  * @internal
  */
-class ProductSearchResultsTemplate extends AbstractTemplate {
+class ProductCatalogTemplate extends AbstractTemplate {
 
 	/**
 	 * The slug of the template.
 	 *
 	 * @var string
 	 */
-	const SLUG = 'product-search-results';
-
-	/**
-	 * The template used as a fallback if that one is customized.
-	 *
-	 * @var string
-	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	const SLUG = 'archive-product';
 
 	/**
 	 * Initialization method.
 	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'search_template_hierarchy', array( $this, 'update_search_template_hierarchy' ), 10, 3 );
+		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 	}
 
 	/**
@@ -38,7 +32,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 * @return string
 	 */
 	public function get_template_title() {
-		return _x( 'Product Search Results', 'Template name', 'woocommerce' );
+		return _x( 'Product Catalog', 'Template name', 'woocommerce' );
 	}
 
 	/**
@@ -47,14 +41,14 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 * @return string
 	 */
 	public function get_template_description() {
-		return __( 'Displays search results for your store.', 'woocommerce' );
+		return __( 'Displays your products.', 'woocommerce' );
 	}
 
 	/**
 	 * Renders the default block template from Woo Blocks if no theme templates exist.
 	 */
 	public function render_block_template() {
-		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {
+		if ( ! is_embed() && ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) ) {
 			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
@@ -68,14 +62,22 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * When the search is for products and a block theme is active, render the Product Search Template.
+	 * Update the product archive title to "Shop".
 	 *
-	 * @param array $templates Templates that match the search hierarchy.
+	 * @param string $post_type_name Post type 'name' label.
+	 * @param string $post_type      Post type.
+	 *
+	 * @return string
 	 */
-	public function update_search_template_hierarchy( $templates ) {
-		if ( ( is_search() && is_post_type_archive( 'product' ) ) && wc_current_theme_is_fse_theme() ) {
-			array_unshift( $templates, self::SLUG );
+	public function update_product_archive_title( $post_type_name, $post_type ) {
+		if (
+			function_exists( 'is_shop' ) &&
+			is_shop() &&
+			'product' === $post_type
+		) {
+			return __( 'Shop', 'woocommerce' );
 		}
-		return $templates;
+
+		return $post_type_name;
 	}
 }
