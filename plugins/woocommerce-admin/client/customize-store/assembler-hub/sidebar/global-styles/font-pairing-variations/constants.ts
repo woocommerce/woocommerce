@@ -225,6 +225,15 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--albert-sans)',
+						fontSize: 'var(--wp--preset--font-size--medium)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--lora)',
 				fontStyle: 'normal',
@@ -382,6 +391,14 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily:
+							'var(--wp--preset--font-family--newsreader)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--newsreader)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
@@ -419,6 +436,13 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--cormorant)',
+					},
+				},
+			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--work-sans)',
 			},
@@ -451,6 +475,13 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 						fontFamily: 'var(--wp--preset--font-family--raleway)',
 						fontStyle: 'normal',
 						fontWeight: '700',
+					},
+				},
+			},
+			blocks: {
+				'core/site-title': {
+					typography: {
+						fontFamily: 'var(--wp--preset--font-family--raleway)',
 					},
 				},
 			},
