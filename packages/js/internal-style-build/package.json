@@ -41,6 +41,7 @@
 		"@wordpress/base-styles": "wp-6.0",
 		"@wordpress/postcss-plugins-preset": "wp-6.0",
 		"css-loader": "^3.6.0",
+		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "^2.7.6",
 		"postcss-loader": "^4.3.0",
 		"sass-loader": "^10.5.0",

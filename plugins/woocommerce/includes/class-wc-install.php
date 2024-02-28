@@ -1877,16 +1877,6 @@ $hpos_table_schema;
 				'content' => '',
 			),
 			array(
-				'base'    => WC_LOG_DIR,
-				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			),
-			array(
-				'base'    => WC_LOG_DIR,
-				'file'    => 'index.html',
-				'content' => '',
-			),
-			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
 				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',

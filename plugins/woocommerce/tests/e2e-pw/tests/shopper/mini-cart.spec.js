@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const miniCartPageTitle = `Mini Cart ${ Date.now() }`;
@@ -121,7 +121,7 @@ test.describe( 'Mini Cart block page', () => {
 		// create a new page with mini cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
