@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Contains the logic to manage the Woo Marketplace plugin.
  */
 class WC_Helper_Plugin {
-	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-marketplace/woo-marketplace.php';
+	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-update-manager/woo-update-manager.php';
 	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/products/woo-update-manager/';
 
 	/**
@@ -29,7 +29,7 @@ class WC_Helper_Plugin {
 	}
 
 	/**
-	 * Check if the marketplace plugin is active.
+	 * Check if the Woo Update Manager plugin is active.
 	 *
 	 * @return bool
 	 */
@@ -38,7 +38,7 @@ class WC_Helper_Plugin {
 	}
 
 	/**
-	 * Check if the marketplace plugin is installed.
+	 * Check if the Woo Update Manager plugin is installed.
 	 *
 	 * @return bool
 	 */
