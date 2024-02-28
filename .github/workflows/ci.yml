@@ -119,7 +119,7 @@ jobs:
           run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
           
         - name: 'Find project path'
-          run: echo "PROJECT_PATH="(pnpm --filter=@woocommerce/plugin-woocommerce exec pwd)" >> $GITHUB_OUTPUT
+          run: echo "PROJECT_PATH=$(pnpm --filter=@woocommerce/plugin-woocommerce exec pwd)" >> $GITHUB_OUTPUT
           
         - name: Upload artifacts
           if: always()
