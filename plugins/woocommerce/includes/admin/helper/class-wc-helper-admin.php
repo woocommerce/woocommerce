@@ -49,16 +49,16 @@ class WC_Helper_Admin {
 		);
 
 		$settings['wccomHelper'] = array(
-			'isConnected'            => WC_Helper::is_site_connected(),
-			'connectURL'             => self::get_connection_url(),
-			'userEmail'              => $auth_user_email,
-			'userAvatar'             => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry'           => wc_get_base_location()['country'],
-			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
-			'installedProducts'      => $installed_products,
-			'wooConnectInstalled'    => WC_Helper_Plugin::is_plugin_installed(),
-			'wooConnectActive'       => WC_Helper_Plugin::is_plugin_active(),
-			'wooConnectInstallUrl'   => WC_Helper_Plugin::generate_install_url(),
+			'isConnected'                => WC_Helper::is_site_connected(),
+			'connectURL'                 => self::get_connection_url(),
+			'userEmail'                  => $auth_user_email,
+			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'               => wc_get_base_location()['country'],
+			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'          => $installed_products,
+			'wooUpdateManagerInstalled'  => WC_Helper_Plugin::is_plugin_installed(),
+			'wooUpdateManagerActive'     => WC_Helper_Plugin::is_plugin_active(),
+			'wooUpdateManagerInstallUrl' => WC_Helper_Plugin::generate_install_url(),
 		);
 
 		return $settings;

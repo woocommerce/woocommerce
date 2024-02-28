@@ -20,8 +20,8 @@ export default function PluginInstallNotice() {
 	}
 
 	if (
-		! wccomSettings?.wooConnectActive &&
-		! wccomSettings?.wooConnectInstalled
+		! wccomSettings?.wooUpdateManagerActive &&
+		! wccomSettings?.wooUpdateManagerInstalled
 	) {
 		const message = __(
 			'Please install the Woo Update Manager plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also download and install it manually in your stores.',
@@ -33,7 +33,7 @@ export default function PluginInstallNotice() {
 					{ message }
 					<div className="components-notice__buttons">
 						<Button
-							href={ wccomSettings?.wooConnectInstallUrl }
+							href={ wccomSettings?.wooUpdateManagerInstallUrl }
 							variant="secondary"
 						>
 							{ __( 'Install Woo Update Manager', 'woocommerce' ) }
@@ -49,8 +49,8 @@ export default function PluginInstallNotice() {
 			</section>
 		);
 	} else if (
-		wccomSettings?.wooConnectInstalled &&
-		! wccomSettings?.wooConnectActive
+		wccomSettings?.wooUpdateManagerInstalled &&
+		! wccomSettings?.wooUpdateManagerActive
 	) {
 		const message = __(
 			'Please activate the Woo Update Manager plugin to keep getting updates and streamlined support for your Woo.com subscriptions.',

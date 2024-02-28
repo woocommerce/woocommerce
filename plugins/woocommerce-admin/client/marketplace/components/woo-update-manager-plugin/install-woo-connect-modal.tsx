@@ -45,7 +45,7 @@ export default function InstallWooConnectModal( props: ConnectProps ) {
 					{ __( 'Download', 'woocommerce' ) }
 				</Button>
 				<Button
-					href={ wccomSettings?.wooConnectInstallUrl }
+					href={ wccomSettings?.wooUpdateManagerInstallUrl }
 					variant="primary"
 				>
 					{ __( 'Install', 'woocommerce' ) }

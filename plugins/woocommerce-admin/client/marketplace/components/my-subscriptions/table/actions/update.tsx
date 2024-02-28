@@ -24,7 +24,7 @@ import InstallWooConnectModal from '../../../woo-update-manager-plugin/install-w
 
 interface UpdateProps {
 	subscription: Subscription;
-	wooConnectActive: boolean;
+	wooUpdateManagerActive: boolean;
 }
 
 export default function Update( props: UpdateProps ) {
@@ -37,7 +37,7 @@ export default function Update( props: UpdateProps ) {
 		props.subscription.local &&
 		props.subscription.local.slug &&
 		props.subscription.local.path &&
-		props.wooConnectActive;
+		props.wooUpdateManagerActive;
 
 	function update() {
 		recordEvent( 'marketplace_product_update_button_clicked', {
@@ -159,7 +159,7 @@ export default function Update( props: UpdateProps ) {
 					onClose={ () => setShowModal( false ) }
 				/>
 			);
-		} else if ( ! props.wooConnectActive ) {
+		} else if ( ! props.wooUpdateManagerActive ) {
 			return (
 				<InstallWooConnectModal
 					subscription={ props.subscription }
