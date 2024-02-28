@@ -75,13 +75,10 @@ export const SidebarNavigationScreenFooter = () => {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
-		if ( blocks && blocks.length ) {
-			setHighlightedBlockClientId(
-				footerTemplatePartBlockClientId?.clientId ?? null
-			);
-		}
+		setHighlightedBlockClientId(
+			footerTemplatePartBlockClientId?.clientId ?? null
+		);
 	}, [
-		blocks,
 		footerTemplatePartBlockClientId?.clientId,
 		setHighlightedBlockClientId,
 	] );

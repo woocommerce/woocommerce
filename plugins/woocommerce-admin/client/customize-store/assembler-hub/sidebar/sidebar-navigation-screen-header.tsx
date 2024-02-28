@@ -76,16 +76,10 @@ export const SidebarNavigationScreenHeader = () => {
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
-		if ( blocks && blocks.length ) {
-			setHighlightedBlockClientId(
-				headerTemplatePartBlock?.clientId ?? null
-			);
-		}
-	}, [
-		blocks,
-		headerTemplatePartBlock?.clientId,
-		setHighlightedBlockClientId,
-	] );
+		setHighlightedBlockClientId(
+			headerTemplatePartBlock?.clientId ?? null
+		);
+	}, [ headerTemplatePartBlock?.clientId, setHighlightedBlockClientId ] );
 	const headerPatterns = useMemo(
 		() =>
 			patterns

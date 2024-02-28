@@ -142,6 +142,8 @@ export const BlockEditor = ( {} ) => {
 	`
 		: '';
 
+	const opacityClass = 'preview-opacity';
+
 	const renderedBlocks = useMemo(
 		() =>
 			blocks.map( ( block ) => {
@@ -149,7 +151,16 @@ export const BlockEditor = ( {} ) => {
 					! isHighlighting ||
 					block.clientId === highlightedBlockClientId
 				) {
-					return block;
+					return {
+						...block,
+						attributes: {
+							...block.attributes,
+							className: block.attributes.className?.replace(
+								opacityClass,
+								''
+							),
+						},
+					};
 				}
 
 				return {
@@ -157,7 +168,7 @@ export const BlockEditor = ( {} ) => {
 					attributes: {
 						...block.attributes,
 						className:
-							block.attributes.className + ' preview-opacity',
+							block.attributes.className + ` ${ opacityClass }`,
 					},
 				};
 			} ),
