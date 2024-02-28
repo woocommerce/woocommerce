@@ -28,6 +28,8 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 			page,
 			defaultBlockPost,
 		} ) => {
+			await page.goto( defaultBlockPost.link );
+
 			const locator = page.locator(
 				'.wp-block-woocommerce-product-filter'
 			);
