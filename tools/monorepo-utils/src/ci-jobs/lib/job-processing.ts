@@ -326,14 +326,35 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
+				// If the job is sharded we need to create multiple jobs for it.
+				let createdJobs = [];
+				if ( jobConfig.shards <= 1 ) {
+					createdJobs.push( created );
+				} else {
+					createdJobs = Array( jobConfig.shards )
+						.fill( null )
+						.map( ( _, i ) => {
+							const jobCopy = JSON.parse(
+								JSON.stringify( created )
+							);
+							jobCopy.name = `${ created.name } ${ i + 1 }/${
+								jobConfig.shards
+							}`;
+							jobCopy.command = `${ created.command } --shard ${
+								i + 1
+							}/${ jobConfig.shards }`;
+							return jobCopy;
+						} );
+				}
+
 				switch ( jobConfig.testType ) {
 					case TestType.E2E: {
-						newJobs.e2eTest.push( created );
+						newJobs.e2eTest.push( ...createdJobs );
 						break;
 					}
 
 					default: {
-						newJobs.test.push( created );
+						newJobs.test.push( ...createdJobs );
 					}
 				}
 

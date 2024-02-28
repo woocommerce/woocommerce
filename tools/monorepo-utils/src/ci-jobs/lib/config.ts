@@ -273,6 +273,11 @@ export interface TestJobConfig extends BaseJobConfig {
 	name: string;
 
 	/**
+	 * The number of shards to be created for this job.
+	 */
+	shards: number;
+
+	/**
 	 * The configuration for the test environment if one is needed.
 	 */
 	testEnv?: TestEnvConfig;
@@ -336,15 +341,12 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
-	if ( ! raw.testType ) {
-		raw.testType = TestType.Default;
-	}
-
 	validateCommandVars( raw.command );
 
 	const config: TestJobConfig = {
 		type: JobType.Test,
-		testType: raw.testType,
+		testType: raw.testType ? raw.testType : TestType.Default,
+		shards: parseInt( raw.shards, 10 ) || 0,
 		name: raw.name,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,

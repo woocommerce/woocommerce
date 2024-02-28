@@ -48,7 +48,7 @@
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
-		"test:e2e-sample": "pnpm test:e2e-pw ./tests/e2e-pw/tests/merchant/product-edit.spec.js",
+		"test:e2e-sample": "pnpm test:e2e-pw ./tests/e2e-pw/tests/merchant/product-edit.spec.js ./tests/e2e-pw/tests/merchant/product-delete.spec.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
@@ -167,6 +167,7 @@
 					"name": "Core e2e sample suite",
 					"testType": "e2e",
 					"command": "test:e2e-sample",
+					"shards": 2,
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
