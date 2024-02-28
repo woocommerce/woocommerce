@@ -136,6 +136,8 @@ describe( 'Config', () => {
 				jobs: [
 					{
 						type: JobType.Test,
+						testType: 'default',
+						shards: 0,
 						name: 'default',
 						changes: [
 							/^package\.json$/,
@@ -222,5 +224,86 @@ describe( 'Config', () => {
 				],
 			} );
 		} );
+
+		it.each( [
+			[ 'e2e', 'e2e' ],
+			[ '', 'default' ],
+		] )( 'should parse test config with testType', ( input, result ) => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						tests: [
+							{
+								name: 'default',
+								testType: input,
+								changes: '/src/**/*.{js,jsx,ts,tsx}',
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Test,
+						testType: result,
+						shards: 0,
+						name: 'default',
+						changes: [
+							/^package\.json$/,
+							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+						],
+						command: 'foo',
+					},
+				],
+			} );
+		} );
+
+		it.each( [
+			[ '0', 0 ],
+			[ '1', 1 ],
+			[ '', 0 ],
+			[ '.1', 0 ],
+			[ '3.1', 3 ],
+		] )(
+			'should parse test config with shards %i',
+			( input: any, result: number ) => {
+				const parsed = parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							tests: [
+								{
+									name: 'default',
+									testType: 'e2e',
+									shards: input,
+									changes: '/src/**/*.{js,jsx,ts,tsx}',
+									command: 'foo',
+								},
+							],
+						},
+					},
+				} );
+
+				expect( parsed ).toMatchObject( {
+					jobs: [
+						{
+							type: JobType.Test,
+							testType: 'e2e',
+							shards: result,
+							name: 'default',
+							changes: [
+								/^package\.json$/,
+								makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+							],
+							command: 'foo',
+						},
+					],
+				} );
+			}
+		);
 	} );
 } );

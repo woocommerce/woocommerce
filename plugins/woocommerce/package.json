@@ -164,7 +164,7 @@
 					}
 				},
 				{
-					"name": "Core e2e sample suite",
+					"name": "Core e2e tests",
 					"testType": "e2e",
 					"command": "test:e2e-sample",
 					"shards": 2,

@@ -122,7 +122,7 @@ jobs:
           if: always()
           uses: actions/upload-artifact@v4
           with:
-            name: all-blob-reports
+            name: all-blob-reports-${{ matrix.shardNumber }}
             path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
             retention-days: 1
             compression-level: 9

@@ -39,6 +39,7 @@ interface TestJob {
 	name: string;
 	command: string;
 	testEnv: TestJobEnv;
+	shardNumber: number;
 }
 
 /**
@@ -142,7 +143,8 @@ async function createTestJob(
 	config: TestJobConfig,
 	changes: string[] | true,
 	options: CreateOptions,
-	cascadeKeys: string[]
+	cascadeKeys: string[],
+	shardNumber: number
 ): Promise< TestJob | null > {
 	let triggered = false;
 
@@ -195,6 +197,7 @@ async function createTestJob(
 			shouldCreate: false,
 			envVars: {},
 		},
+		shardNumber,
 	};
 
 	// We want to make sure that we're including the configuration for
@@ -318,7 +321,8 @@ async function createJobsForProject(
 					jobConfig,
 					projectChanges,
 					options,
-					cascadeKeys
+					cascadeKeys,
+					0
 				);
 				if ( ! created ) {
 					break;
@@ -337,12 +341,9 @@ async function createJobsForProject(
 							const jobCopy = JSON.parse(
 								JSON.stringify( created )
 							);
-							jobCopy.name = `${ created.name } ${ i + 1 }/${
-								jobConfig.shards
-							}`;
-							jobCopy.command = `${ created.command } --shard ${
-								i + 1
-							}/${ jobConfig.shards }`;
+							jobCopy.shardNumber = i + 1;
+							jobCopy.name = `${ created.name } ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
+							jobCopy.command = `${ created.command } --shard ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
 							return jobCopy;
 						} );
 				}
