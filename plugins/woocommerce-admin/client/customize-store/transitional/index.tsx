@@ -94,15 +94,10 @@ export const Transitional = ( {
 					{ __( 'Your store looks great!', 'woocommerce' ) }
 				</h1>
 				<h2 className="woocommerce-customize-store__transitional-subheading">
-					{ isWooExpress
-						? __(
-								"You're one step closer to launching your online business — we can't wait to see it come to life.",
-								'woocommerce'
-						  )
-						: __(
-								'Your store is a reflection of your unique style and personality, and we are thrilled to see it come to life.',
-								'woocommerce'
-						  ) }
+					{ __(
+						"You're one step closer to launching your online business — we can't wait to see it come to life.",
+						'woocommerce'
+					) }
 				</h2>
 
 				<div className="woocommerce-customize-store__transitional-main-actions">

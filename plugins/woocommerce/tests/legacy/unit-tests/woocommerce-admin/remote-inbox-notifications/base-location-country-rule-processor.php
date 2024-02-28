@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Admin\RemoteInboxNotifications\BaseLocationCountryRul
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
- * class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor
  */
 class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor extends WC_Unit_Test_Case {
 	/**

@@ -305,6 +305,8 @@ class WC_Admin_Notices {
 			return;
 		}
 
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
+
 		$screen          = get_current_screen();
 		$screen_id       = $screen ? $screen->id : '';
 		$show_on_screens = array(

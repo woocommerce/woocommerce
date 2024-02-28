@@ -105,7 +105,7 @@ To change the value of `calypso_env`, set `WOOCOMMERCE_CALYPSO_ENVIRONMENT` to o
 
 ### Feature Flags
 
-Logic for the Calypso flows are gated behind two separate [Calypso feature flags](https://github.com/Automattic/wp-calypso/tree/master/config#feature-flags). Since Calypso's login, sign-up, and Jetpack authentication code is spread throughout a few different files, searching for these feature flags is the best way to locate parts of the flow for development.
+Logic for the Calypso flows are gated behind two separate [Calypso feature flags](https://github.com/Automattic/wp-calypso/tree/trunk/config#feature-flags). Since Calypso's login, sign-up, and Jetpack authentication code is spread throughout a few different files, searching for these feature flags is the best way to locate parts of the flow for development.
 
 * [`woocommerce/onboarding-oauth`](https://github.com/Automattic/wp-calypso/search?q=woocommerce%2Fonboarding-oauth&unscoped_q=woocommerce%2Fonboarding-oauth), which enables the updated Woo.com connection flow.
 * [`jetpack/connect/woocommerce`](https://github.com/Automattic/wp-calypso/search?q=%22jetpack%2Fconnect%2Fwoocommerce%22&unscoped_q=%22jetpack%2Fconnect%2Fwoocommerce%22), which enables the updated Jetpack connection flow.

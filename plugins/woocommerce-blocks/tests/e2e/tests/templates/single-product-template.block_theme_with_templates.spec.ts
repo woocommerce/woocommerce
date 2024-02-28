@@ -2,31 +2,37 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
+
+/**
+ * Internal dependencies
+ */
+import type { TemplateType } from '../../utils/types';
 
 const testData = {
 	permalink: '/product/belt',
-	templateName: 'Product: Belt',
+	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template',
+	templateType: 'wp_template' as TemplateType,
 };
 
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
 test.describe( 'Single Product Template', async () => {
+	test.afterAll( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+	} );
+
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editorUtils,
 		page,
 	} ) => {
 		// Edit the theme template.
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
-			postType: testData.templateType,
-		} );
-		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
+		await editorUtils.visitTemplateEditor(
+			testData.templateName,
+			testData.templateType
+		);
 		await editorUtils.editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },

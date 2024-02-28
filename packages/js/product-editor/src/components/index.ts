@@ -48,8 +48,6 @@ export {
 export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
 export { NumberControl as __experimentalNumberControl } from './number-control';
 
-export * from './product-page-skeleton';
-
 export * from './modal-editor-welcome-guide';
 
 export {
@@ -90,3 +88,10 @@ export {
 	ProductImage as __experimentalProductImage,
 	ProductImageProps,
 } from './product-image';
+
+export { Notice as __experimentalNotice } from './notice';
+
+export {
+	SchedulePublishModal as __experimentalSchedulePublishModal,
+	SchedulePublishModalProps,
+} from './schedule-publish-modal';

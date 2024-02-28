@@ -167,6 +167,7 @@ class PageController {
 			return apply_filters( 'woocommerce_navigation_get_breadcrumbs', array( '' ), $current_page );
 		}
 
+		$current_page['title'] = (array) $current_page['title'];
 		if ( 1 === count( $current_page['title'] ) ) {
 			$breadcrumbs = $current_page['title'];
 		} else {
