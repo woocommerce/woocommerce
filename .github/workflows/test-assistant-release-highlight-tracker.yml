@@ -76,7 +76,7 @@ jobs:
         id: notify
         with:
             slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
-            slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }}
+            slack-channel: ${{ secrets.WOO_CORE_RELEASES_HIGHLIGHTS_SLACK_CHANNEL }}
             slack-text: |
                 <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
                 *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
