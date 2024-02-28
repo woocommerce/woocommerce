@@ -6,6 +6,8 @@
  * @package WooCommerce\Admin\Helper
  */
 
+use Automattic\WooCommerce\Admin\PageController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -109,7 +111,7 @@ class WC_Woo_Update_Manager_Plugin {
 			return;
 		}
 
-		if ( ! self::is_wc_admin_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
 
@@ -118,22 +120,6 @@ class WC_Woo_Update_Manager_Plugin {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-installed.php';
-	}
-
-	/**
-	 * Check if the current page is a wc-admin page.
-	 *
-	 * @return bool
-	 */
-	protected static function is_wc_admin_page(): bool {
-		return isset( $_GET['page'] ) &&
-			(
-				'wc-admin' === $_GET['page'] ||
-				'wc-status' === $_GET['page'] ||
-				'wc-settings' === $_GET['page'] ||
-				'wc-reports' === $_GET['page']
-			)
-			|| isset( $_GET['post_type'] ) && 'shop_order' === $_GET['post_type'];
 	}
 
 	/**
