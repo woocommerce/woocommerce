@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Admin_Settings;
 use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
 use WP_Filesystem_Base;
@@ -57,7 +58,7 @@ class Settings {
 		if ( true === Constants::get_constant( 'WC_LOG_DIR_CUSTOM' ) ) {
 			$dir = Constants::get_constant( 'WC_LOG_DIR' );
 		} else {
-			$upload_dir = wp_upload_dir( null, false );
+			$upload_dir = wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_upload_dir' );
 
 			/**
 			 * Filter to change the directory for storing WooCommerce's log files.
