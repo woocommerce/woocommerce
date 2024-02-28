@@ -41,6 +41,11 @@ class WC_Admin_Tests_RemoteInboxNotifications_Comparison_Operation extends WC_Un
 
 	public function test_in() {
 		$this->assertTrue( $this->operation->compare( 'test', array( 'test', 'test2' ), 'in' ) );
+		$this->assertFalse( $this->operation->compare( 'test', array( 'test1', 'test2' ), 'in' ) );
+	}
+
+	public function test_not_in() {
+		$this->assertTrue( $this->operation->compare( 'test', array( 'test1', 'test2' ), '!in' ) );
 		$this->assertFalse( $this->operation->compare( 'test', array( 'test', 'test2' ), '!in' ) );
 	}
 }
