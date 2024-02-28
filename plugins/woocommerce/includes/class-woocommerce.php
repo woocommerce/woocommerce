@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\TimeUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
 
 /**
  * Main WooCommerce Class.
@@ -366,9 +366,18 @@ final class WooCommerce {
 		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
-		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+
+		/**
+		 * As of 8.8.0, it is preferable to use the `woocommerce_log_directory` filter hook to change the log
+		 * directory. WC_LOG_DIR_CUSTOM is a back-compatibility measure so we can tell if `WC_LOG_DIR` has been
+		 * defined outside of WC Core.
+		 */
+		if ( defined( 'WC_LOG_DIR' ) ) {
+			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		}
+		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );
