@@ -49,6 +49,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				command: 'test-lint',
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
@@ -83,6 +84,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				command: 'test-lint test-base-ref',
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
@@ -220,10 +222,12 @@ describe( 'Job Processing', () => {
 			expect( jobs.lint ).toHaveLength( 2 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				command: 'test-lint',
 			} );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test-b',
+				projectPath: 'test-b',
 				command: 'test-lint-b',
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
@@ -276,10 +280,12 @@ describe( 'Job Processing', () => {
 			expect( jobs.lint ).toHaveLength( 2 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test-a',
+				projectPath: 'test-a',
 				command: 'test-lint-a',
 			} );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test-b',
+				projectPath: 'test-b',
 				command: 'test-lint-b',
 			} );
 			expect( jobs.test ).toHaveLength( 0 );
@@ -313,6 +319,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
@@ -354,6 +361,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd test-base-ref',
 				testEnv: {
@@ -481,6 +489,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
@@ -490,6 +499,7 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-b',
+				projectPath: 'test-b',
 				name: 'Default B',
 				command: 'test-cmd-b',
 				testEnv: {
@@ -546,6 +556,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
@@ -555,6 +566,7 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
+				projectPath: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
 				testEnv: {
@@ -628,6 +640,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 2 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
@@ -637,6 +650,7 @@ describe( 'Job Processing', () => {
 			} );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test-a',
+				projectPath: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
 				testEnv: {
@@ -688,6 +702,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
@@ -730,11 +745,13 @@ describe( 'Job Processing', () => {
 			expect( jobs.lint ).toHaveLength( 1 );
 			expect( jobs.lint ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				command: 'test-lint',
 			} );
 			expect( jobs.test ).toHaveLength( 1 );
 			expect( jobs.test ).toContainEqual( {
 				projectName: 'test',
+				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
 				testEnv: {
