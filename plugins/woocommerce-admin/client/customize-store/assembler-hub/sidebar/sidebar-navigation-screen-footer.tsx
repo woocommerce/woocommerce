@@ -27,6 +27,8 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu',
@@ -93,36 +95,47 @@ export const SidebarNavigationScreenFooter = () => {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change your footer', 'woocommerce' )
+		: __( 'Choose your footer', 'woocommerce' );
+
+	const description = aiOnline
+		? __(
+				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+				'woocommerce'
+		  )
+		: __(
+				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
+				'woocommerce'
+		  );
+
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your footer', 'woocommerce' ) }
+			title={ title }
 			onNavigateBackClick={ resetHighlightedBlockIndex }
-			description={ createInterpolateElement(
-				__(
-					"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
-					'woocommerce'
+			description={ createInterpolateElement( description, {
+				EditorLink: (
+					<Link
+						onClick={ () => {
+							recordEvent(
+								'customize_your_store_assembler_hub_editor_link_click',
+								{
+									source: 'footer',
+								}
+							);
+							window.open(
+								`${ ADMIN_URL }site-editor.php`,
+								'_blank'
+							);
+							return false;
+						} }
+						href=""
+					/>
 				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'footer',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
-			) }
+			} ) }
 			content={
 				<>
 					<div className="woocommerce-customize-store__sidebar-footer-content">

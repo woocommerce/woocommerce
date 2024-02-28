@@ -10,6 +10,14 @@ import { allReviews, hoodieReviews } from '../../test-data/data/data';
 
 const latestReview = allReviews[ allReviews.length - 1 ];
 
+const highestRating = [ ...allReviews ].sort(
+	( a, b ) => b.rating - a.rating
+)[ 0 ];
+
+const lowestRating = [ ...allReviews ].sort(
+	( a, b ) => a.rating - b.rating
+)[ 0 ];
+
 const BLOCK_NAME = 'woocommerce/reviews-by-category';
 
 test.describe( `${ BLOCK_NAME } Block`, () => {
@@ -52,16 +60,12 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 			'.wc-block-components-review-list-item__text'
 		);
 
-		await expect( reviews.nth( 0 ) ).toHaveText( latestReview.review );
+		await expect( reviews.first() ).toHaveText( latestReview.review );
 
 		const select = page.getByLabel( 'Order by' );
 		await select.selectOption( 'Highest rating' );
 
-		const highestRating = allReviews.sort(
-			( a, b ) => b.rating - a.rating
-		)[ 0 ];
-
-		await expect( reviews.nth( 0 ) ).toHaveText( highestRating.review );
+		await expect( reviews.first() ).toHaveText( highestRating.review );
 	} );
 
 	test( 'can sort by lowest rating', async ( {
@@ -80,10 +84,6 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		const select = page.getByLabel( 'Order by' );
 		await select.selectOption( 'Lowest rating' );
 
-		const lowestRating = allReviews.sort(
-			( a, b ) => a.rating - b.rating
-		)[ 0 ];
-
-		await expect( reviews.nth( 0 ) ).toHaveText( lowestRating.review );
+		await expect( reviews.first() ).toHaveText( lowestRating.review );
 	} );
 } );

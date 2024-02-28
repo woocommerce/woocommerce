@@ -33,17 +33,6 @@ export default function Content(): JSX.Element {
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
-		// we are recording both the new and legacy events here for now
-		// they're separate methods to make it easier to remove the legacy one later
-		const marketplaceViewProps = {
-			view: query?.tab,
-			search_term: query?.term,
-			product_type: query?.section,
-			category: query?.category,
-		};
-
-		recordMarketplaceView( marketplaceViewProps );
-		recordLegacyTabView( marketplaceViewProps );
 
 		if ( query.tab && [ '', 'discover' ].includes( query.tab ) ) {
 			return;
@@ -82,6 +71,17 @@ export default function Content(): JSX.Element {
 				setProducts( [] );
 			} )
 			.finally( () => {
+				// we are recording both the new and legacy events here for now
+				// they're separate methods to make it easier to remove the legacy one later
+				const marketplaceViewProps = {
+					view: query?.tab,
+					search_term: query?.term,
+					product_type: query?.section,
+					category: query?.category,
+				};
+
+				recordMarketplaceView( marketplaceViewProps );
+				recordLegacyTabView( marketplaceViewProps );
 				setIsLoading( false );
 			} );
 		return () => {
