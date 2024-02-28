@@ -6,8 +6,8 @@
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords } from '@wordpress/core-data';
-import { select } from '@wordpress/data';
+import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -67,7 +67,19 @@ const MAX_PAGE_COUNT = 100;
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
-	const [ blocks, , onChange ] = useEditorBlocks();
+
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
+
 	const urlParams = useQuery();
 	const { currentState } = useContext( CustomizeStoreContext );
 
@@ -120,8 +132,8 @@ export const BlockEditor = ( {} ) => {
 		[ history, urlParams, pages ]
 	);
 
-	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const isHighlighting = highlightedBlockIndex !== -1;
+	const { highlightedBlockClientId } = useContext( HighlightedBlockContext );
+	const isHighlighting = highlightedBlockClientId !== null;
 	const additionalStyles = isHighlighting
 		? `
 		.wp-block.preview-opacity {
@@ -132,8 +144,11 @@ export const BlockEditor = ( {} ) => {
 
 	const renderedBlocks = useMemo(
 		() =>
-			blocks.map( ( block, i ) => {
-				if ( ! isHighlighting || i === highlightedBlockIndex ) {
+			blocks.map( ( block ) => {
+				if (
+					! isHighlighting ||
+					block.clientId === highlightedBlockClientId
+				) {
 					return block;
 				}
 
@@ -146,7 +161,7 @@ export const BlockEditor = ( {} ) => {
 					},
 				};
 			} ),
-		[ blocks, highlightedBlockIndex, isHighlighting ]
+		[ blocks, highlightedBlockClientId, isHighlighting ]
 	);
 
 	return (
