@@ -3392,6 +3392,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 	 *
 	 * @testWith ["hpos"]
 	 *           ["posts"]
+	 *
+	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
 	 */
 	public function test_order_util_get_count_for_type( $datastore_to_use ) {
 		$this->disable_cot_sync();
@@ -3403,7 +3405,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		}
 
 		// Create a few orders in various states.
-		$order_statuses  = array_keys( wc_get_order_statuses() );
+		$order_statuses = array_keys( wc_get_order_statuses() );
 
 		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
 		foreach ( $order_statuses as $i => $status ) {
