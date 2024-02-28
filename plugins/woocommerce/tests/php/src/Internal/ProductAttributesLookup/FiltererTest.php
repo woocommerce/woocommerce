@@ -962,7 +962,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
 		 */
 
-		$data[] = array( array( 'Blue', 'Green' ), 'and', true );
+		$data[] = array( array( 'Blue', 'Green' ), 'and', false );
 		return $data;
 	}
 
@@ -1095,7 +1095,7 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		 * When filtering by attributes having a variation AND others not having it:
 		 * The product shows, since when dealing with variation attributes we're effectively doing OR.
 		 */
-		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', true );
+		$data[] = array( array( 'Blue', 'Red', 'Green', 'White' ), 'and', false );
 
 		return $data;
 	}
