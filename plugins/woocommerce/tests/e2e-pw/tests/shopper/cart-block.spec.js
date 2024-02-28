@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const simpleProductName = 'Single Simple Product';
@@ -88,7 +88,7 @@ test.describe( 'Cart Block page', () => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
