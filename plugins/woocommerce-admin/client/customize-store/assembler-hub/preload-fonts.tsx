@@ -184,8 +184,8 @@ export const PreloadFonts = () => {
 			{ isNoAIFlow( context.flowType ) && (
 				<FontFamiliesLoader
 					fontFamilies={ [
+						...( enabledFontFamilies.custom ?? [] ),
 						...baseFontFamilies.theme,
-						...enabledFontFamilies.custom,
 					] }
 					iframeInstance={ iframeInstance }
 				/>
