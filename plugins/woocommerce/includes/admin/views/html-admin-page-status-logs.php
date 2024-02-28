@@ -47,7 +47,7 @@ $log_directory = LoggingUtil::get_log_directory();
 		<div class="clear"></div>
 	</div>
 	<div id="log-viewer">
-		<pre><?php echo esc_html( file_get_contents( $log_directory . $viewed_log ) ); ?></pre>
+		<pre><?php echo esc_html( file_get_contents( $log_directory . $viewed_log ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents ?></pre>
 	</div>
 <?php else : ?>
 	<div class="updated woocommerce-message inline"><p><?php esc_html_e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>
