@@ -235,7 +235,7 @@
 		"@wordpress/data": "wp-6.0"
 	},
 	"engines": {
-		"node": "^18.12.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"config": {
