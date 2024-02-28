@@ -69,8 +69,8 @@ class WC_REST_WCCOM_Site_Status_Controller extends WC_REST_WCCOM_Site_Controller
 				'success' => true,
 				'data'    => array(
 					'wc_version'                   => WC()->version,
-					'woo_update_manager_installed' => WC_Helper_Plugin::is_plugin_installed(),
-					'woo_update_manager_active'    => WC_Helper_Plugin::is_plugin_active(),
+					'woo_update_manager_installed' => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+					'woo_update_manager_active'    => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 				),
 			)
 		);

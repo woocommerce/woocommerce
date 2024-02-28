@@ -18,8 +18,8 @@ defined( 'ABSPATH' ) || exit;
 					'Please <a href="%1$s">Install the Woo Update Manager</a> plugin to keep getting updates and streamlined support for your Woo.com subscriptions. You can also <a href="%2$s">download</a> and install it manually.',
 					'woocommerce'
 				),
-				esc_url( WC_Helper_Plugin::generate_install_url() ),
-				esc_url( WC_Helper_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL )
+				esc_url( WC_Woo_Update_Manager_Plugin::generate_install_url() ),
+				esc_url( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL )
 			)
 		);
 		?>

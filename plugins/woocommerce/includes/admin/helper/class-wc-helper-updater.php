@@ -33,7 +33,7 @@ class WC_Helper_Updater {
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
 	public static function add_hook_for_modifying_update_notices() {
-		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
 	}
@@ -171,11 +171,11 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function add_install_marketplace_plugin_message( $plugin_data, $response ) {
-		if ( ! empty( $response->package ) || WC_Helper_Plugin::is_plugin_active() ) {
+		if ( ! empty( $response->package ) || WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			return;
 		}
 
-		if ( ! WC_Helper_Plugin::is_plugin_installed() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
 			printf(
 				wp_kses(
 					/* translators: 1: Woo Update Manager plugin install URL */
@@ -186,12 +186,12 @@ class WC_Helper_Updater {
 						),
 					)
 				),
-				esc_url( WC_Helper_Plugin::generate_install_url() ),
+				esc_url( WC_Woo_Update_Manager_Plugin::generate_install_url() ),
 			);
 			return;
 		}
 
-		if ( ! WC_Helper_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			echo esc_html_e( ' Activate Woo Update Manager to update.', 'woocommerce' );
 		}
 	}

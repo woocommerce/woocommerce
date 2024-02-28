@@ -1,8 +1,8 @@
 <?php
 /**
- * Woo Marketplace plugin manager.
+ * A utility class for Woo Update Manager plugin.
  *
- * @class WC_Helper_Updater
+ * @class WC_Woo_Update_Manager_Plugin
  * @package WooCommerce\Admin\Helper
  */
 
@@ -13,9 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Helper_Plugin Class
  *
- * Contains the logic to manage the Woo Marketplace plugin.
+ * Contains the logic to manage the Woo Update Manager plugin.
  */
-class WC_Helper_Plugin {
+class WC_Woo_Update_Manager_Plugin {
 	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-update-manager/woo-update-manager.php';
 	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/products/woo-update-manager/download/';
 
@@ -159,4 +159,4 @@ class WC_Helper_Plugin {
 	}
 }
 
-WC_Helper_Plugin::load();
+WC_Woo_Update_Manager_Plugin::load();

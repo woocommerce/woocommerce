@@ -56,7 +56,7 @@ class WC_Helper {
 	protected static function includes() {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-options.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-api.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin.php';
+		include_once dirname( __FILE__ ) . '/class-wc-woo-update-manager-plugin.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
 		include_once dirname( __FILE__ ) . '/class-wc-plugin-api-updater.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
