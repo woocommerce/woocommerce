@@ -27,20 +27,22 @@
           "id": "1629a329b1f4f1f24bba60f89e6f17c695b7ad0d"
         },
         {
-          "post_title": "How to configure caching plugins for WooCommerce",
+          "post_title": "Updated - How to configure caching plugins for WooCommerce",
           "menu_title": "Configure caching plugins",
           "tags": "how-to",
+          "version": "8.7.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
-          "hash": "5f0d999813ace7d5a9b2ae830d67b50c05806d87d1ba1cbb2d2c88a69aec1328",
+          "hash": "c6c766f47a68c254365c8ddb0fbb2d38d90da90f7d116596d8c23994ab69eedd",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/configuring-caching-plugins.md",
           "id": "9f484f8db1111fa6c1b6108d40939c967eea7f47"
         },
         {
-          "post_title": "How to add a custom field to simple and variable products",
+          "post_title": "Updated - How to add a custom field to simple and variable products",
           "menu_title": "Add custom fields to products",
           "tags": "how-to",
+          "version": "8.8.0",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
-          "hash": "3f9ca41cf853de77b48bb8c2e762129f7dbeef8b7680471d2d55fe0c7b32a5cb",
+          "hash": "7cf040a242783dd4470c13310d42794b914437cf82d7a894ee57f6b93c32fa97",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/building-a-woo-store/adding-a-custom-field-to-variable-products.md",
           "id": "64b686dcd5fdd4842be2fc570108231d5a8bfc1b"
         }
@@ -268,7 +270,7 @@
           "post_title": "Contributing Technical Documentation",
           "menu_title": "Contributing Docs",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "3bcfb5ac1ad271b34f4f13db409b1f5e50c6ed6e310f474bcc3ccc2f4b0448b1",
+          "hash": "75e3aa0a30e9fe86c807e2765aec963a0a9636c530a49bd1e8e0d03f69d65515",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
           "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
         }
@@ -917,11 +919,6 @@
       "categories": []
     },
     {
-      "category_slug": "utilities",
-      "category_title": "Utilities",
-      "categories": []
-    },
-    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woo.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woo.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1209,5 +1206,6 @@
       "categories": []
     }
   ],
-  "hash": "a485b51014a2262571751ae495976ca40aa8ffd4fddc7ee8ca8171ee51bd8984"
+  "version": "8.8.0-dev",
+  "hash": "a61d8eef6eb58295d1723a4b681ea807d5c59c52f311e9a4cbf6c97f85da8f55"
 }

@@ -1,8 +1,11 @@
 ---
-post_title: How to add a custom field to simple and variable products
+post_title: Updated - How to add a custom field to simple and variable products
 menu_title: Add custom fields to products
 tags: how-to
+version: 8.8.0
 ---
+
+In theory, this contains content specific to WooCommerce 8.7.0 or higher.
 
 In this tutorial you will learn how to create a custom field for a product and show it in your store. Together we will set up the skeleton plugin, and learn about WP naming conventions and WooCommerce hooks. In the end, you will have a functioning plugin for adding a custom field.
 

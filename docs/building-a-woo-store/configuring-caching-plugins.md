@@ -1,8 +1,11 @@
 ---
-post_title: How to configure caching plugins for WooCommerce
+post_title: Updated - How to configure caching plugins for WooCommerce
 menu_title: Configure caching plugins
 tags: how-to
+version: 8.7.0
 ---
+
+In theory, this contains content specific to WooCommerce 8.6.0 or higher.
 
 ## Excluding Pages from the Cache
 

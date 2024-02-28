@@ -26,6 +26,7 @@ export const generatePostFrontMatter = (
 		'content',
 		'menu_title',
 		'tags',
+		'version',
 	];
 
 	const frontMatter = matter( fileContents, {
