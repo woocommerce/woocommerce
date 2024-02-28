@@ -70,8 +70,6 @@ export const SidebarNavigationScreenHeader = () => {
 		( block ) => block.attributes.slug === 'header'
 	);
 
-	console.log( 'headerTemplatePartBlock', headerTemplatePartBlock );
-
 	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
 		useContext( HighlightedBlockContext );
 	// eslint-disable-next-line react-hooks/exhaustive-deps
