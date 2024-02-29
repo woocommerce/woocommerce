@@ -269,7 +269,7 @@ describe( 'Config', () => {
 			[ '.1', 0 ],
 			[ '3.1', 3 ],
 		] )(
-			'should parse test config with shards %i',
+			'should parse test config with %i shards',
 			( input: any, result: number ) => {
 				const parsed = parseCIConfig( {
 					name: 'foo',

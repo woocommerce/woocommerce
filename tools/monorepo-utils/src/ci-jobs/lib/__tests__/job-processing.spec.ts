@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { JobType } from '../config';
-import { createJobsForChanges } from '../job-processing';
+import { createJobsForChanges, getShardedJobs } from '../job-processing';
 import { parseTestEnvConfig } from '../test-environment';
 
 jest.mock( '../test-environment' );
@@ -825,5 +825,155 @@ describe( 'Job Processing', () => {
 				},
 			} );
 		} );
+
+		it( 'should trigger sharded test jobs for single node', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'e2e',
+								name: 'Default',
+								shards: 2,
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+			expect( jobs.e2eTest ).toHaveLength( 2 );
+			expect( jobs.e2eTest ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard 1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard 2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+	} );
+
+	describe( 'getShardedJobs', () => {
+		it( 'should create sharded jobs', async () => {
+			const jobs = getShardedJobs(
+				{
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shards: 2,
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+				}
+			);
+
+			expect( jobs ).toHaveLength( 2 );
+			expect( jobs ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard 1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard 2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+
+		it.each( [ 0, 1 ] )(
+			'should not create sharded jobs for %i shards',
+			async ( shards ) => {
+				const jobs = getShardedJobs(
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default',
+						command: 'test-cmd',
+						shardNumber: 0,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						type: JobType.Test,
+						testType: 'e2e',
+						name: 'Default',
+						shards,
+						changes: [ /test.js$/ ],
+						command: 'test-cmd',
+					}
+				);
+
+				expect( jobs ).toHaveLength( 1 );
+				expect( jobs ).toContainEqual( {
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+				} );
+			}
+		);
 	} );
 } );

@@ -82,7 +82,10 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
  * @param {TestJobConfig} jobConfig The job config.
  * @return {TestJob[]} The list of sharded jobs.
  */
-function getShardedJobs( job: TestJob, jobConfig: TestJobConfig ): TestJob[] {
+export function getShardedJobs(
+	job: TestJob,
+	jobConfig: TestJobConfig
+): TestJob[] {
 	let createdJobs = [];
 	if ( jobConfig.shards <= 1 ) {
 		createdJobs.push( job );
