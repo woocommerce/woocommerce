@@ -269,7 +269,7 @@ jobs:
 
             - name: Prepare test summary
               id: prepare-test-summary
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
                   E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
@@ -282,7 +282,7 @@ jobs:
                       return await script( { core } )
 
             - name: Find PR comment by github-actions[bot]
-              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+              uses: peter-evans/find-comment@v3
               id: find-comment
               with:
                   issue-number: ${{ github.event.pull_request.number }}
@@ -290,7 +290,7 @@ jobs:
                   body-includes: Test Results Summary
 
             - name: Create or update PR comment
-              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              uses: peter-evans/create-or-update-comment@v4
               with:
                   comment-id: ${{ steps.find-comment.outputs.comment-id }}
                   issue-number: ${{ github.event.pull_request.number }}
