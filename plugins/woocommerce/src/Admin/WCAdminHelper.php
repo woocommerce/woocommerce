@@ -100,8 +100,9 @@ class WCAdminHelper {
 	/**
 	 * Test if the site is fresh. A fresh site must meet the following requirements.
 	 *
-	 * - The current user was registered a month ago.
+	 * - The current user was registered less than 1 month ago.
 	 * - fresh_site option must be 1
+	 * 
 	 * @return bool
 	 * @throws \Exception
 	 */
