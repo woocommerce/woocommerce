@@ -323,6 +323,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -366,6 +367,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd test-base-ref',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -499,6 +501,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -509,6 +512,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test-b',
 				name: 'Default B',
 				command: 'test-cmd-b',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -549,6 +553,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -608,6 +613,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -618,6 +624,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -695,6 +702,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -705,6 +713,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test-a',
 				name: 'Default A',
 				command: 'test-cmd-a',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
@@ -758,6 +767,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: true,
 					start: 'test-start test-base-ref',
@@ -808,6 +818,7 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				name: 'Default',
 				command: 'test-cmd',
+				shardNumber: 0,
 				testEnv: {
 					shouldCreate: false,
 					envVars: {},
