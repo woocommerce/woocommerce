@@ -294,7 +294,7 @@ jobs:
   publish-api-test-reports:
     name: 'Publish API test reports'
     needs: [ project-api-test-jobs ]
-    if: ${{ always() && (contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' )) }}
+    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
     runs-on: ubuntu-latest
 
     steps:
