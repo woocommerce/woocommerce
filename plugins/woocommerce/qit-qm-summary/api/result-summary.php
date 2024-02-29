@@ -93,16 +93,18 @@ if ( ! class_exists( 'QM_Result_Summary' ) ) {
                 foreach ( $entries as $entry ) {
                     foreach ( $metrics as $category => &$metric_group ) {
 
-                        if ( isset( $metric_group['total_size'] ) && $category == 'resource_summary' ) { // For resources_summary
+                        if ( isset( $metric_group['scripts'] ) || isset( $metric_group['styles'] ) ) { // For resources_summary
                             foreach ( $entry['resources_summary'] as $resource_type => $resource_data ) {
-                                
-                                $metric_group[ $resource_type ]['total_size'][] = $resource_data['total_size'];
 
                                 if ($resource_type === 'scripts') {
                                     $scripts_large_assets = array_merge( $scripts_large_assets, $resource_data['large_assets'] );
                                 } elseif ($resource_type === 'styles') {
                                     $styles_large_assets = array_merge( $styles_large_assets, $resource_data['large_assets'] );
                                 }
+
+                                // if ( in_array( $resource_type, [ 'total_size' ] ) ) {
+                                //     $metric_group[ 'total_size' ][] = $resource_data['total_size'];
+                                // }
                             }
                         } else { // For other metrics
                             foreach ( $metric_group as $metric => &$values ) {
