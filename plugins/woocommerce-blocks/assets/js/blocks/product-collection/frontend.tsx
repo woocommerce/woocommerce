@@ -17,6 +17,9 @@ import './style.scss';
 export type ProductCollectionStoreContext = {
 	isPrefetchNextOrPreviousLink: boolean;
 	animation: 'start' | 'finish';
+	accessibilityMessage: string;
+	accessibilityLoadingMessage: string;
+	accessibilityLoadedMessage: string;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -96,6 +99,7 @@ const productCollectionStore = {
 
 				// Don't start animation if it doesn't take long to navigate.
 				const timeout = setTimeout( () => {
+					ctx.accessibilityMessage = ctx.accessibilityLoadingMessage;
 					ctx.animation = 'start';
 				}, 400 );
 
@@ -103,6 +107,16 @@ const productCollectionStore = {
 
 				// Clear the timeout if the navigation is fast.
 				clearTimeout( timeout );
+
+				// Announce that the page has been loaded. If the message is the
+				// same, we use a no-break space similar to the @wordpress/a11y
+				// package: https://github.com/WordPress/gutenberg/blob/c395242b8e6ee20f8b06c199e4fc2920d7018af1/packages/a11y/src/filter-message.js#L20-L26
+				ctx.accessibilityMessage =
+					ctx.accessibilityLoadedMessage +
+					( ctx.accessibilityMessage ===
+					ctx.accessibilityLoadedMessage
+						? '\u00A0'
+						: '' );
 
 				ctx.animation = 'finish';
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;

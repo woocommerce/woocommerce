@@ -109,28 +109,46 @@ class ProductCollection extends AbstractBlock {
 					'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 				);
 				$p->set_attribute( 'data-wc-interactive', wp_json_encode( array( 'namespace' => 'woocommerce/product-collection' ) ) );
-
-				/**
-				 * We don't prefetch the links if user haven't clicked on pagination links yet.
-				 * This way we avoid prefetching when the page loads.
-				 */
 				$p->set_attribute(
 					'data-wc-context',
-					'{ "isPrefetchNextOrPreviousLink": false }'
+					wp_json_encode(
+						array(
+							// The message to be announced by the screen reader when the page is loading or loaded.
+							'accessibilityLoadingMessage'  => __( 'Loading page, please wait.', 'woocommerce' ),
+							'accessibilityLoadedMessage'   => __( 'Page Loaded.', 'woocommerce' ),
+							// We don't prefetch the links if user haven't clicked on pagination links yet.
+							// This way we avoid prefetching when the page loads.
+							'isPrefetchNextOrPreviousLink' => false,
+						),
+						JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP
+					)
 				);
 				$block_content = $p->get_updated_html();
 			}
 
-			// Add animation div to the block content.
-			$last_tag_position = strripos( $block_content, '</div>' );
-			$block_content     = substr_replace(
-				$block_content,
-				'<div
+			/**
+			 * Add two div's:
+			 * 1. Pagination animation for visual users.
+			 * 2. Accessibility div for screen readers, to announce page load states.
+			 */
+			$last_tag_position                = strripos( $block_content, '</div>' );
+			$accessibility_and_animation_html = '
+				<div
 					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
 					class="wc-block-product-collection__pagination-animation"
 					data-wc-class--start-animation="state.startAnimation"
 					data-wc-class--finish-animation="state.finishAnimation">
-				</div>',
+				</div>
+				<div
+					data-wc-interactive="{&quot;namespace&quot;:&quot;woocommerce/product-collection&quot;}"
+					class="screen-reader-text"
+					aria-live="polite"
+					data-wc-text="context.accessibilityMessage">
+				</div>
+			';
+			$block_content                    = substr_replace(
+				$block_content,
+				$accessibility_and_animation_html,
 				$last_tag_position,
 				0
 			);

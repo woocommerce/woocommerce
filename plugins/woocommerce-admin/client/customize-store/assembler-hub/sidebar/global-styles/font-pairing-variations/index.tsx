@@ -18,7 +18,11 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 /**
  * Internal dependencies
  */
-import { FONT_PAIRINGS, FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from './constants';
+import {
+	FONT_PAIRINGS,
+	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
+} from './constants';
 import { VariationContainer } from '../variation-container';
 import { FontPairingVariationPreview } from './preview';
 import { Look } from '~/customize-store/design-with-ai/types';
@@ -47,8 +51,26 @@ export const FontPairing = () => {
 		Array< FontFamily >
 	];
 
+	// theme.json file font families
+	const [ baseFontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies',
+		undefined,
+		'base'
+	) as [
+		{
+			theme: Array< FontFamily >;
+		}
+	];
+
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
+	const isFontLibraryAvailable = context.isFontLibraryAvailable;
+	const trackingAllowed = useSelect(
+		( select ) =>
+			select( OPTIONS_STORE_NAME ).getOption(
+				'woocommerce_allow_tracking'
+			) === 'yes'
+	);
 
 	const fontPairings = useMemo( () => {
 		if ( isAIFlow( context.flowType ) ) {
@@ -57,6 +79,33 @@ export const FontPairing = () => {
 						font.lookAndFeel.includes( aiSuggestions?.lookAndFeel )
 				  )
 				: FONT_PAIRINGS_WHEN_AI_IS_OFFLINE;
+		}
+
+		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
+			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING.map(
+				( pair ) => {
+					const fontFamilies = pair.settings.typography.fontFamilies;
+
+					const fonts = baseFontFamilies.theme.filter(
+						( baseFontFamily ) =>
+							fontFamilies.theme.some(
+								( themeFont ) =>
+									themeFont.fontFamily === baseFontFamily.name
+							)
+					);
+
+					return {
+						...pair,
+						settings: {
+							typography: {
+								fontFamilies: {
+									theme: fonts,
+								},
+							},
+						},
+					};
+				}
+			);
 		}
 
 		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
@@ -78,7 +127,15 @@ export const FontPairing = () => {
 				},
 			};
 		}, [] );
-	}, [ aiOnline, aiSuggestions?.lookAndFeel, context.flowType, custom ] );
+	}, [
+		aiOnline,
+		aiSuggestions?.lookAndFeel,
+		baseFontFamilies,
+		context.flowType,
+		custom,
+		isFontLibraryAvailable,
+		trackingAllowed,
+	] );
 
 	if ( isLoading ) {
 		return (

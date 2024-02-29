@@ -5,6 +5,11 @@ import { Page } from '@playwright/test';
 import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
+/**
+ * Internal dependencies
+ */
+import type { TemplateType } from '../../utils/types';
+
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
@@ -369,6 +374,44 @@ export class EditorUtils {
 		await this.page
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
 			.getByText( 'Site updated.' )
+			.waitFor();
+	}
+
+	async visitTemplateEditor(
+		templateName: string,
+		templateType: TemplateType
+	) {
+		if ( templateType === 'wp_template_part' ) {
+			await this.page.goto(
+				`/wp-admin/site-editor.php?path=/${ templateType }/all`
+			);
+			const templateLink = this.page.getByRole( 'link', {
+				name: templateName,
+				exact: true,
+			} );
+			await templateLink.click();
+		} else {
+			await this.page.goto(
+				`/wp-admin/site-editor.php?path=/${ templateType }`
+			);
+			const templateButton = this.page.getByRole( 'button', {
+				name: templateName,
+				exact: true,
+			} );
+			await templateButton.click();
+		}
+
+		await this.enterEditMode();
+		await this.closeWelcomeGuideModal();
+		await this.waitForSiteEditorFinishLoading();
+
+		// Verify we are editing the correct template and it has the correct title.
+		const templateTypeName =
+			templateType === 'wp_template' ? 'template' : 'template part';
+		await this.page
+			.getByRole( 'heading', {
+				name: `Editing ${ templateTypeName }: ${ templateName }`,
+			} )
 			.waitFor();
 	}
 

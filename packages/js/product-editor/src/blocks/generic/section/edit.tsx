@@ -40,7 +40,6 @@ export function SectionBlockEdit( {
 					description={ description }
 					sectionTagName={ SectionTagName }
 					title={ title }
-					type="section"
 				/>
 			) }
 
