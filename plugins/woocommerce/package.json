@@ -169,8 +169,8 @@
 				{
 					"name": "Core e2e tests",
 					"testType": "e2e",
-					"command": "test:e2e-sample",
-					"shards": 2,
+					"command": "test:e2e-pw",
+					"shards": 5,
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
