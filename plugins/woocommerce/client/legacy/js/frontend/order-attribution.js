@@ -7,6 +7,7 @@
 	const $ = document.querySelector.bind( document );
 	const propertyAccessor = ( obj, path ) => path.split( '.' ).reduce( ( acc, part ) => acc && acc[ part ], obj );
 	const returnNull = () => null;
+	const stringifyFalsyInputValue = ( value ) => value === null || value === undefined ? '' : value;
 
 	// Hardcode Checkout store key (`wc.wcBlocksData.CHECKOUT_STORE_KEY`), as we no longer have `wc-blocks-checkout` as a dependency.
 	const CHECKOUT_STORE_KEY = 'wc/store/checkout';
@@ -31,11 +32,9 @@
 	 * @param {Object} values Object containing field values.
 	 */
 	function updateFormValues( values ) {
-		// Update inputs if any exist.
-		if( $( `input[name^="${params.prefix}"]` ) ) {
-			for( const key of Object.keys( wc_order_attribution.fields ) ) {
-				$( `input[name="${params.prefix}${key}"]` ).value = values && values[ key ] || '';
-			}
+		// Update `<wc-order-attribution-inputs>` elements if any exist.
+		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
+			element.values = values;
 		}
 
 	};
@@ -105,15 +104,6 @@
 	// Run init.
 	wc_order_attribution.setOrderTracking( params.allowTracking );
 
-	// Wait for (async) classic checkout initialization and set source values once loaded.
-	if ( $( 'form.woocommerce-checkout' ) !== null ) {
-		const previousInitCheckout = document.body.oninit_checkout;
-		document.body.oninit_checkout = () => {
-			updateFormValues( getData() );
-			previousInitCheckout && previousInitCheckout();
-		};
-	}
-
 	// Work around the lack of explicit script dependency for the checkout block.
 	// Conditionally, wait for and use 'wp-data' & 'wc-blocks-checkout.
 
@@ -135,5 +125,62 @@
 	} else {
 		eventuallyInitializeCheckoutBlock();
 	}
+
+	/**
+	 * Define an element to contribute order attribute values to the enclosing form.
+	 * To be used with the classic checkout.
+	 */
+	window.customElements.define( 'wc-order-attribution-inputs', class extends HTMLElement {
+		// Our bundler version does not support private class members, so we use a convention of `_` prefix.
+		// #values
+		// #fieldNames
+		constructor(){
+			super();
+			// Cache fieldNames available at the construction time, to avoid malformed behavior if they change in runtime.
+			this._fieldNames = Object.keys( wc_order_attribution.fields );
+			// Allow values to be lazily set before CE upgrade.
+			if ( this.hasOwnProperty( '_values' ) ) {
+			  let values = this.values;
+			  // Restore the setter.
+			  delete this.values;
+			  this.values = values || {};
+			}
+		}
+		/**
+		 * Stamp input elements to the element's light DOM.
+		 *
+		 * We could use `.elementInternals.setFromValue` and avoid sprouting `<input>` elements,
+		 * but it's not yet supported in Safari.
+		 */
+		connectedCallback() {
+			let inputs = '';
+			for( const fieldName of this._fieldNames ) {
+				const value = stringifyFalsyInputValue( this.values[ fieldName ] );
+				inputs += `<input type="hidden" name="${params.prefix}${fieldName}" value="${value}"/>`;
+			}
+			this.innerHTML = inputs;
+		}
+
+		/**
+		 * Update form values.
+		 */
+		set values( values ) {
+			this._values = values;
+			if( this.isConnected ) {
+				for( const fieldName of this._fieldNames ) {
+					const input = this.querySelector( `input[name="${params.prefix}${fieldName}"]` );
+					if( input ) {
+						input.value = stringifyFalsyInputValue( this.values[ fieldName ] );
+					} else {
+						console.warn( `Field "${fieldName}" not found. Most likely, the '<wc-order-attribution-inputs>' element was manipulated.`);
+					}
+				}
+			}
+		}
+		get values() {
+			return this._values;
+		}
+	} );
+
 
 }( window.wc_order_attribution ) );

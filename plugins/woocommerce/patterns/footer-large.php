@@ -26,7 +26,7 @@
 				<!-- wp:social-links {"size":"has-small-icon-size","style":{"spacing":{"blockGap":{"left":"16px"}}},"className":"is-style-logos-only"} -->
 				<ul class="wp-block-social-links has-small-icon-size is-style-logos-only">
 					<!-- wp:social-link {"url":"https://www.facebook.com","service":"facebook"} /-->
-					<!-- wp:social-link {"url":"https://www.twitter.com","service":"twitter"} /-->
+					<!-- wp:social-link {"url":"https://www.x.com","service":"x"} /-->
 					<!-- wp:social-link {"url":"https://www.instagram.com","service":"instagram"} /-->
 					<!-- wp:social-link {"url":"https://www.twitch.com","service":"twitch"} /-->
 				</ul>

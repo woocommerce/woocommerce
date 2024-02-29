@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update usages of WooCommerce Blocks version checks to use WooCommerce core version when possible
