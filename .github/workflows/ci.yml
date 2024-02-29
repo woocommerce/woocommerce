@@ -234,7 +234,7 @@ jobs:
   publish-e2e-test-reports:
     name: 'Publish e2e test reports'
     needs: [ project-e2e-test-jobs ]
-    if: ${{ always() && (contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' )) }}
+    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
     runs-on: ubuntu-latest
 
     steps:
