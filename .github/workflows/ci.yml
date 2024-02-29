@@ -172,7 +172,7 @@ jobs:
 
   merge-e2e-test-reports:
     name: 'Merge e2e test reports'
-    if: ${{ always() && needs.project-e2e-test-jobs.result != "skipped" && && needs.project-e2e-test-jobs.result != "cancelled" }}
+    if: ${{ always() && needs.project-e2e-test-jobs.result != 'skipped' && needs.project-e2e-test-jobs.result != 'cancelled' }}
     needs: [ project-e2e-test-jobs ]
     runs-on: ubuntu-latest
 
