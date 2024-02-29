@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix LegacyProxy::get_instance_of throwing an error when trying to get an instance of a non-Woo namespaced class. [#45178](https://github.com/woocommerce/woocommerce/pull/45178)
 * Fix - "Hero product chessboard" pattern: remove placeholder and update margins. [#44553](https://github.com/woocommerce/woocommerce/pull/44553)
 * Fix - Add checks and filters to the product_page shortcode. [#44666](https://github.com/woocommerce/woocommerce/pull/44666)
 * Fix - Adds a nonce check to the HPOS order sync tool. [#44667](https://github.com/woocommerce/woocommerce/pull/44667)
