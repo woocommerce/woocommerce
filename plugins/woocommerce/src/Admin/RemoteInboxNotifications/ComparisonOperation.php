@@ -65,6 +65,9 @@ class ComparisonOperation {
 				}
 				break;
 			case 'range':
+				if ( ! is_array( $right_operand ) || count( $right_operand ) !== 2 ) {
+					return false;
+				}
 				return $left_operand >= $right_operand[0] && $left_operand <= $right_operand[1];
 		}
 

@@ -34,6 +34,9 @@ class WC_Admin_Tests_RemoteInboxNotifications_Comparison_Operation extends WC_Un
 	public function test_range() {
 		$this->assertTrue( $this->operation->compare( 1, array( 1, 10 ), 'range') );
 		$this->assertFalse( $this->operation->compare( 11, array( 1, 10 ), 'range') );
+		$this->assertFalse( $this->operation->compare( 11, array( 1, 10, 2 ), 'range') );
+		$this->assertFalse( $this->operation->compare( 11, 'string', 'range') );
+
 	}
 
 	/**
