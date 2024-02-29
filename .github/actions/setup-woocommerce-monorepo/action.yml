@@ -18,7 +18,7 @@ runs:
           shell: 'bash'
           run: 'echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
         - name: 'Setup PNPM'
-          uses: 'pnpm/action-setup@v3'
+          uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
           with:
               version: ${{ steps.read-pnpm-version.outputs.version }}
         - name: 'Setup Node'
@@ -35,7 +35,7 @@ runs:
               coverage: 'none'
         - name: 'Cache Composer Dependencies'
           if: ${{ inputs.php-version != 'false' }}
-          uses: 'actions/cache@v4'
+          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
           with:
               path: '~/.cache/composer/files'
               key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
@@ -58,7 +58,7 @@ runs:
         - name: 'Cache Build Output'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
-          uses: 'google/wireit@setup-github-actions-caching/v1'
+          uses: 'google/wireit@4aad131006ea85c1e42af927534ebb13426dd730'
         - name: 'Build'
           # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
           if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
