@@ -413,18 +413,24 @@ function wc_get_chosen_shipping_method_ids() {
  * @return string|bool Either the chosen method ID or false if nothing is chosen yet.
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
-	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
-	$chosen_method  = isset( $chosen_methods[ $key ] ) ? $chosen_methods[ $key ] : false;
-	$changed        = wc_shipping_methods_have_changed( $key, $package );
 
 	// This is deprecated but here for BW compat. TODO: Remove in 4.0.0.
 	$method_counts = WC()->session->get( 'shipping_method_counts' );
 
+	$method_count = 0;
 	if ( ! empty( $method_counts[ $key ] ) ) {
 		$method_count = absint( $method_counts[ $key ] );
-	} else {
-		$method_count = 0;
 	}
+
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+	$chosen_method  = $chosen_methods[ $key ] ?? false;
+
+	// Array keys can only be int or string. This is to avoid a fatal error accessing $packages['rates'].
+	if ( ! is_int( $chosen_method ) && ! is_string( $chosen_method ) ) {
+		$chosen_method = false;
+	}
+
+	$changed = wc_shipping_methods_have_changed( $key, $package );
 
 	if ( ! isset( $package['rates'] ) || ! is_array( $package['rates'] ) ) {
 		$package['rates'] = array();
@@ -441,6 +447,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
+
 	return $chosen_method;
 }
 
