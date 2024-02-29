@@ -190,7 +190,8 @@ onboarding profile:
 
 #### range
 
-`range` operator can check if a number falls within a certain range
+`range` operator performs an inclusive check to determine if a number falls within a certain range.
+This means that both the 'from' and 'to' values of the specified range are included in the check. 
 
 The following rule returns true when `woocommerce_remote_variant_assignment` value is between 1 and 10.
 
