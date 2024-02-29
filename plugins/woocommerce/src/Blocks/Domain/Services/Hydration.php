@@ -60,30 +60,29 @@ class Hydration {
 
 		$preloaded_data = array();
 
-		try {
-			$response = $this->get_response_from_controller( $controller_class, $path );
-		} catch ( \Exception $e ) {
-			// This is executing in frontend of the site, a failure in hydration should not stop the site from working.
-			wc_get_logger()->warning(
-				'Error in hydrating REST API request: ' . $e->getMessage(),
-				array(
-					'source'    => 'blocks-hydration',
-					'data'      => array(
-						'path'       => $path,
-						'controller' => $controller_class,
-					),
-					'backtrace' => true,
-				)
-			);
-
-			$response = false;
-		}
-
-		if ( $response ) {
-			$preloaded_data = array(
-				'body'    => $response->get_data(),
-				'headers' => $response->get_headers(),
-			);
+		if ( null !== $controller_class ) {
+			try {
+				$response = $this->get_response_from_controller( $controller_class, $path );
+				if ( $response ) {
+					$preloaded_data = array(
+						'body'    => $response->get_data(),
+						'headers' => $response->get_headers(),
+					);
+				}
+			} catch ( \Exception $e ) {
+				// This is executing in frontend of the site, a failure in hydration should not stop the site from working.
+				wc_get_logger()->warning(
+					'Error in hydrating REST API request: ' . $e->getMessage(),
+					array(
+						'source'    => 'blocks-hydration',
+						'data'      => array(
+							'path'       => $path,
+							'controller' => $controller_class,
+						),
+						'backtrace' => true,
+					)
+				);
+			}
 		} else {
 			// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
 			$preloaded_requests = rest_preload_api_request( [], $path );
