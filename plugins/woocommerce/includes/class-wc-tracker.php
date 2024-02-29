@@ -1092,15 +1092,17 @@ class WC_Tracker {
 		);
 	}
 
+	/**
+	 * Get tracker data for additional fields on the checkout page.
+	 *
+	 * @return array Array of fields count and names.
+	 */
 	public static function get_checkout_additional_fields_data() {
 		$additional_fields_controller = Package::container()->get( CheckoutFields::class );
 
-		$fields_count = count( $additional_fields_controller->get_additional_fields() );
-		$fields_names = array_keys( $additional_fields_controller->get_additional_fields() );
-
 		return array(
-			'fields_count' => $fields_count,
-			'fields_names' => $fields_names,
+			'fields_count' => count( $additional_fields_controller->get_additional_fields() ),
+			'fields_names' => array_keys( $additional_fields_controller->get_additional_fields() ),
 		);
 	}
 	/**
