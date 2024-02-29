@@ -76,6 +76,32 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
 }
 
 /**
+ * Multiplies a job based on the shards job config. It updates the job names and command - currently only supporting Playwright sharding.
+ *
+ * @param {TestJob}       job       The job to be multiplied.
+ * @param {TestJobConfig} jobConfig The job config.
+ * @return {TestJob[]} The list of sharded jobs.
+ */
+function getShardedJobs( job: TestJob, jobConfig: TestJobConfig ): TestJob[] {
+	let createdJobs = [];
+	if ( jobConfig.shards <= 1 ) {
+		createdJobs.push( job );
+	} else {
+		createdJobs = Array( jobConfig.shards )
+			.fill( null )
+			.map( ( _, i ) => {
+				const jobCopy = JSON.parse( JSON.stringify( job ) );
+				jobCopy.shardNumber = i + 1;
+				jobCopy.name = `${ job.name } ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
+				jobCopy.command = `${ job.command } --shard ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
+				return jobCopy;
+			} );
+	}
+
+	return createdJobs;
+}
+
+/**
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
@@ -135,6 +161,7 @@ function createLintJob(
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
  * @param {Array.<string>}      cascadeKeys The cascade keys that have been triggered in dependencies.
+ * @param {number}              shardNumber The shard number for the job.
  * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
 async function createTestJob(
@@ -330,32 +357,18 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				// If the job is sharded we need to create multiple jobs for it.
-				let createdJobs = [];
-				if ( jobConfig.shards <= 1 ) {
-					createdJobs.push( created );
-				} else {
-					createdJobs = Array( jobConfig.shards )
-						.fill( null )
-						.map( ( _, i ) => {
-							const jobCopy = JSON.parse(
-								JSON.stringify( created )
-							);
-							jobCopy.shardNumber = i + 1;
-							jobCopy.name = `${ created.name } ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
-							jobCopy.command = `${ created.command } --shard ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
-							return jobCopy;
-						} );
-				}
-
 				switch ( jobConfig.testType ) {
 					case TestType.E2E: {
-						newJobs.e2eTest.push( ...createdJobs );
+						newJobs.e2eTest.push(
+							...getShardedJobs( created, jobConfig )
+						);
 						break;
 					}
 
 					default: {
-						newJobs.test.push( ...createdJobs );
+						newJobs.test.push(
+							...getShardedJobs( created, jobConfig )
+						);
 					}
 				}
 
