@@ -21,6 +21,8 @@ jobs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
+      api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
+      perf-test-jobs: ${{ steps.project-jobs.outputs.perf-test-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
