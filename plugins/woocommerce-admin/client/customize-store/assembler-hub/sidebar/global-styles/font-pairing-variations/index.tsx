@@ -51,6 +51,17 @@ export const FontPairing = () => {
 		Array< FontFamily >
 	];
 
+	// theme.json file font families
+	const [ baseFontFamilies ] = useGlobalSetting(
+		'typography.fontFamilies',
+		undefined,
+		'base'
+	) as [
+		{
+			theme: Array< FontFamily >;
+		}
+	];
+
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
@@ -71,7 +82,30 @@ export const FontPairing = () => {
 		}
 
 		if ( ! trackingAllowed || ! isFontLibraryAvailable ) {
-			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING;
+			return FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING.map(
+				( pair ) => {
+					const fontFamilies = pair.settings.typography.fontFamilies;
+
+					const fonts = baseFontFamilies.theme.filter(
+						( baseFontFamily ) =>
+							fontFamilies.theme.some(
+								( themeFont ) =>
+									themeFont.fontFamily === baseFontFamily.name
+							)
+					);
+
+					return {
+						...pair,
+						settings: {
+							typography: {
+								fontFamilies: {
+									theme: fonts,
+								},
+							},
+						},
+					};
+				}
+			);
 		}
 
 		return FONT_PAIRINGS_WHEN_AI_IS_OFFLINE.map( ( pair ) => {
@@ -96,6 +130,7 @@ export const FontPairing = () => {
 	}, [
 		aiOnline,
 		aiSuggestions?.lookAndFeel,
+		baseFontFamilies,
 		context.flowType,
 		custom,
 		isFontLibraryAvailable,

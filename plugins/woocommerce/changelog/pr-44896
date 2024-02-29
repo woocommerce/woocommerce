@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Make dynamic properties explicit in WC_Order_Item
