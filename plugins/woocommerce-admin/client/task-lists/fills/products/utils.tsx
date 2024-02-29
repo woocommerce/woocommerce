@@ -28,10 +28,13 @@ export const getProductTypes = ( {
 	 * @filter woocommerce_tasklist_experimental_product_types
 	 * @param {Object} productTypes Array of product types.
 	 */
-	let productTypes = [ ...baseProductTypes, ...applyFilters(
-		SETUP_TASKLIST_PRODUCT_TYPES,
-		[]
-	) as ProductType[] ];
+	let productTypes = [
+		...baseProductTypes,
+		...( applyFilters(
+			SETUP_TASKLIST_PRODUCT_TYPES,
+			[]
+		) as ProductType[] ),
+	];
 
 	if ( exclude && exclude?.length > 0 ) {
 		productTypes = productTypes.filter(

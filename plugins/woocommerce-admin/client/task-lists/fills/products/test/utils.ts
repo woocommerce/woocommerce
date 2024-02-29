@@ -7,7 +7,11 @@ import { addFilter } from '@wordpress/hooks';
  * Internal dependencies
  */
 import { getProductTypes, getSurfacedProductTypeKeys } from '../utils';
-import { ProductType, productTypes, onboardingProductTypesToSurfaced, SETUP_TASKLIST_PRODUCT_TYPES } from '../constants';
+import {
+	productTypes,
+	onboardingProductTypesToSurfaced,
+	SETUP_TASKLIST_PRODUCT_TYPES,
+} from '../constants';
 
 describe( 'getProductTypes', () => {
 	it( 'should return the product types', () => {
@@ -31,9 +35,13 @@ describe( 'getProductTypes', () => {
 			after: '',
 		};
 
-		addFilter(SETUP_TASKLIST_PRODUCT_TYPES, 'wc/admin/tests', ( productTypes ) => {
-			return [ ...productTypes, customProduct]
-		});
+		addFilter(
+			SETUP_TASKLIST_PRODUCT_TYPES,
+			'wc/admin/tests',
+			( filteredProductTypes ) => {
+				return [ ...filteredProductTypes, customProduct ];
+			}
+		);
 
 		expect(
 			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
