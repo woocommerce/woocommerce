@@ -35,11 +35,8 @@ jobs:
                       file: playwright.block-theme-with-templates.config.ts
                       resultPath: test-results-block-theme-with-templates
                 shards:
-                    - name: 1/5
-                    - name: 2/5
-                    - name: 3/5
-                    - name: 4/5
-                    - name: 5/5
+                    - name: 1/2
+                    - name: 2/2
         steps:
             - uses: actions/checkout@v3
 
