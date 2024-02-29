@@ -792,7 +792,7 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
-		// WordPress setse fresh_site to 0 after a page gets published.
+		// WordPress sets fresh_site to 0 after a page gets published.
 		// Prevent fresh_site option from being set to 0 so that we can use it for further customizations.
 		remove_action( 'publish_page', '_delete_option_fresh_site', 0 );
 
