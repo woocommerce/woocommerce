@@ -205,7 +205,8 @@ jobs:
           retention-days: 5
           
       - name: 'Publish reports'
-        env: 
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
