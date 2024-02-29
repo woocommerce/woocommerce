@@ -590,8 +590,10 @@
 	}
 }
 
-.woocommerce-customize-store__step-assemblerHub .edit-site-site-hub__view-mode-toggle-container {
-	padding: 16px 12px 0 16px;
+.woocommerce-customize-store__step-assemblerHub {
+	.edit-site-site-hub__view-mode-toggle-container {
+		padding: 16px 12px 0 16px;
+	}
 }
 
 .woocommerce-customize-store__step-intro {
