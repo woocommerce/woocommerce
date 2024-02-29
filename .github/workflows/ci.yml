@@ -167,7 +167,7 @@ jobs:
   publish-e2e-test-reports:
     name: 'Publish e2e test reports'
     needs: [ project-e2e-test-jobs ]
-    if: ${{ always() && needs.project-e2e-test-jobs.result != cancelled && needs.project-e2e-test-jobs.result != skipped }}
+    if: ${{ always() && fromJSON(needs.project-e2e-test-jobs.result) != 'cancelled' && fromJSON(needs.project-e2e-test-jobs.result) != 'skipped' }}
     runs-on: ubuntu-latest
 
     steps:
