@@ -459,6 +459,12 @@ class CLIRunner {
 								)
 							);
 						} else {
+							array_walk(
+								$errors_in_remigrate_batch,
+								function( &$errors_for_order ) {
+									$errors_for_order[] = array( 'remigrate_failed' => true );
+								}
+							);
 							$failed_ids = $failed_ids + $errors_in_remigrate_batch;
 						}
 					} else {
