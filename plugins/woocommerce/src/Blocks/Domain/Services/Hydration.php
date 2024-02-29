@@ -45,6 +45,7 @@ class Hydration {
 			return [];
 		}
 
+		// Allow-list only store API routes. No other request can be hydrated for safety.
 		$available_routes = StoreApi::container()->get( RoutesController::class )->get_all_routes( 'v1', true );
 		$controller_class = $this->match_route_to_handler( $path, $available_routes );
 
@@ -59,32 +60,26 @@ class Hydration {
 
 		$preloaded_data = array();
 
-		if ( null !== $controller_class ) {
-			$request           = new \WP_REST_Request( 'GET', $path );
-			$schema_controller = StoreApi::container()->get( SchemaController::class );
-			$controller        = new $controller_class(
-				$schema_controller,
-				$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
+		try {
+			$response = $this->get_response_from_controller( $controller_class, $path );
+		} catch ( \Exception $e ) {
+			// This is executing in frontend of the site, a failure in hydration should not stop the site from working.
+			wc_get_logger()->warning(
+				'Error in hydrating REST API request: ' . $e->getMessage(),
+				array(
+					'source'    => 'blocks-hydration',
+					'data'      => array(
+						'path'       => $path,
+						'controller' => $controller_class,
+					),
+					'backtrace' => true,
+				)
 			);
 
-			$response = $controller->get_response( $request );
-			$handler  = is_callable( array( $controller, 'get_args' ) ) ? $controller->get_args() : [];
+			$response = false;
+		}
 
-			/**
-			 * For backward compatibility with WC 8.6 and earlier, we manually call this filter that is otherwise called by WP's REST API. This provides the opportunity for 3PD plugins to hook into and change the response data.
-			 *
-			 * See `rest_request_before_callbacks` filter in WP core's `class-wp-rest-server.php`.
-			 *
-			 * @since 8.7.0
-			 *
-			 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
-			 *                                                                   Usually a WP_REST_Response or WP_Error.
-			 * @param array                                            $handler  Route handler used for the request.
-			 * @param WP_REST_Request                                  $request  Request used to generate the response.
-			 *
-			 */
-			$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
-
+		if ( $response ) {
 			$preloaded_data = array(
 				'body'    => $response->get_data(),
 				'headers' => $response->get_headers(),
@@ -100,6 +95,65 @@ class Hydration {
 
 		// Returns just the single preloaded request, or an empty array if it doesn't exist.
 		return $preloaded_data;
+	}
+
+	/**
+	 * Helper method to generate GET response from a controller. Also fires the `rest_request_after_callbacks` for backward compatibility.
+	 *
+	 * @param string $controller_class Controller class FQN that will respond to the request.
+	 * @param string $path             Request path regex.
+	 *
+	 * @return false|mixed|null Response
+	 */
+	private function get_response_from_controller( $controller_class, $path ) {
+		if ( null === $controller_class ) {
+			return false;
+		}
+
+		$request           = new \WP_REST_Request( 'GET', $path );
+		$schema_controller = StoreApi::container()->get( SchemaController::class );
+		$controller        = new $controller_class(
+			$schema_controller,
+			$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
+		);
+
+		$controller_args = is_callable( array( $controller, 'get_args' ) ) ? $controller->get_args() : [];
+
+		if ( empty( $controller_args ) ) {
+			return false;
+		}
+
+		// Get the handler that responds to read request.
+		$handler = current(
+			array_filter(
+				$controller_args,
+				function ( $method_handler ) {
+					return is_array( $method_handler ) && isset( $method_handler['methods'] ) && \WP_REST_Server::READABLE === $method_handler['methods'];
+				}
+			)
+		);
+
+		if ( ! $handler ) {
+			return false;
+		}
+
+		$response = call_user_func_array( $handler['callback'], array( $request ) );
+
+		/**
+		 * For backward compatibility with WC 8.6 and earlier, we manually call this filter that is otherwise called by WP's REST API. This provides the opportunity for 3PD plugins to hook into and change the response data.
+		 *
+		 * See `rest_request_before_callbacks` filter in WP core's `class-wp-rest-server.php`.
+		 *
+		 * @since 8.7.0
+		 *
+		 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
+		 *                                                                   Usually a WP_REST_Response or WP_Error.
+		 * @param array                                            $handler  Route handler used for the request.
+		 * @param WP_REST_Request                                  $request  Request used to generate the response.
+		 */
+		$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
+
+		return $response;
 	}
 
 	/**
