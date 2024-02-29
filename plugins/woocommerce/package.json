@@ -177,6 +177,7 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
+					"shards": 0,
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
