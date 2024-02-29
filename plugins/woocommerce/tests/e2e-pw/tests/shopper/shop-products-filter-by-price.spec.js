@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '10';
@@ -75,7 +75,7 @@ test.describe( 'Filter items in the shop by product price', () => {
 		// go to create a new page with filtering products by price
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
