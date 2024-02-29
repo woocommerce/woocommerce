@@ -1,70 +1,109 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { MouseEvent, useState } from 'react';
 import { Button } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { useEntityProp } from '@wordpress/core-data';
+import { dispatch, useDispatch } from '@wordpress/data';
+import { createElement, Fragment } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
+import { type Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
-import { MouseEvent } from 'react';
-import { Product } from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { store as productEditorUiStore } from '../../../store/product-editor-ui';
 import { getProductErrorMessage } from '../../../utils/get-product-error-message';
 import { recordProductEvent } from '../../../utils/record-product-event';
+import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
+import { TRACKS_SOURCE } from '../../../constants';
+import { ButtonWithDropdownMenu } from '../../button-with-dropdown-menu';
 import { usePublish } from '../hooks/use-publish';
 import { PublishButtonProps } from './types';
-import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
+import { useProductScheduled } from '../../../hooks/use-product-scheduled';
+import { SchedulePublishModal } from '../../schedule-publish-modal';
+import { formatScheduleDatetime } from '../../../utils';
+
+function getNoticeContent( product: Product, prevStatus: Product[ 'status' ] ) {
+	if (
+		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+		product.status === 'future'
+	) {
+		return sprintf(
+			// translators: %s: The datetime the product is scheduled for.
+			__( 'Product scheduled for %s.', 'woocommerce' ),
+			formatScheduleDatetime( product.date_created )
+		);
+	}
+
+	if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+		return __( 'Product updated.', 'woocommerce' );
+	}
+
+	return __( 'Product published.', 'woocommerce' );
+}
+
+function showSuccessNotice(
+	product: Product,
+	prevStatus: Product[ 'status' ]
+) {
+	const { createSuccessNotice } = dispatch( 'core/notices' );
+
+	const noticeContent = getNoticeContent( product, prevStatus );
+	const noticeOptions = {
+		icon: '🎉',
+		actions: [
+			{
+				label: __( 'View in store', 'woocommerce' ),
+				// Leave the url to support a11y.
+				url: product.permalink,
+				onClick( event: MouseEvent< HTMLAnchorElement > ) {
+					event.preventDefault();
+					// Notice actions do not support target anchor prop,
+					// so this forces the page to be opened in a new tab.
+					window.open( product.permalink, '_blank' );
+				},
+			},
+		],
+	};
+
+	createSuccessNotice( noticeContent, noticeOptions );
+}
 
 export function PublishButton( {
-	productStatus,
 	productType = 'product',
+	prePublish,
 	...props
 }: PublishButtonProps ) {
-	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( 'core/notices' );
-
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
+	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
 
-	const publishButtonProps = usePublish( {
+	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+		'postType',
 		productType,
-		productStatus,
+		'status'
+	);
+
+	const { publish, ...publishButtonProps } = usePublish( {
+		productType,
 		...props,
 		onPublishSuccess( savedProduct: Product ) {
 			const isPublished =
-				productType === 'product' ? productStatus === 'publish' : true;
+				savedProduct.status === 'publish' ||
+				savedProduct.status === 'future';
 
 			if ( isPublished ) {
 				recordProductEvent( 'product_update', savedProduct );
 			}
 
-			const noticeContent = isPublished
-				? __( 'Product updated.', 'woocommerce' )
-				: __( 'Product added.', 'woocommerce' );
-			const noticeOptions = {
-				icon: '🎉',
-				actions: [
-					{
-						label: __( 'View in store', 'woocommerce' ),
-						// Leave the url to support a11y.
-						url: savedProduct.permalink,
-						onClick( event: MouseEvent< HTMLAnchorElement > ) {
-							event.preventDefault();
-							// Notice actions do not support target anchor prop,
-							// so this forces the page to be opened in a new tab.
-							window.open( savedProduct.permalink, '_blank' );
-						},
-					},
-				],
-			};
-
-			createSuccessNotice( noticeContent, noticeOptions );
+			showSuccessNotice( savedProduct, prevStatus );
 
 			maybeShowFeedbackBar();
 
-			if ( productStatus === 'auto-draft' ) {
+			if ( prevStatus === 'auto-draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
@@ -74,6 +113,114 @@ export function PublishButton( {
 			createErrorNotice( message );
 		},
 	} );
+
+	const { isScheduled, schedule, date, formattedDate } =
+		useProductScheduled( productType );
+	const [ showScheduleModal, setShowScheduleModal ] = useState<
+		'schedule' | 'edit' | undefined
+	>();
+
+	if (
+		productType === 'product' &&
+		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+		prePublish
+	) {
+		function getPublishButtonControls() {
+			return [
+				isScheduled
+					? [
+							{
+								title: __( 'Publish now', 'woocommerce' ),
+								async onClick() {
+									await schedule( publish );
+								},
+							},
+							{
+								title: (
+									<div className="woocommerce-product-header__actions-edit-schedule">
+										<div>
+											{ __(
+												'Edit schedule',
+												'woocommerce'
+											) }
+										</div>
+										<div>{ formattedDate }</div>
+									</div>
+								),
+								onClick() {
+									setShowScheduleModal( 'edit' );
+								},
+							},
+					  ]
+					: [
+							{
+								title: __( 'Schedule publish', 'woocommerce' ),
+								onClick() {
+									setShowScheduleModal( 'schedule' );
+								},
+							},
+					  ],
+			];
+		}
+
+		function renderSchedulePublishModal() {
+			return (
+				showScheduleModal && (
+					<SchedulePublishModal
+						postType={ productType }
+						value={
+							showScheduleModal === 'edit' ? date : undefined
+						}
+						onCancel={ () => setShowScheduleModal( undefined ) }
+						onSchedule={ async ( value ) => {
+							await schedule( publish, value );
+							setShowScheduleModal( undefined );
+						} }
+					/>
+				)
+			);
+		}
+
+		if ( editedStatus !== 'publish' && editedStatus !== 'future' ) {
+			function handlePrePublishButtonClick(
+				event: MouseEvent< HTMLButtonElement >
+			) {
+				if ( publishButtonProps[ 'aria-disabled' ] ) {
+					event.preventDefault();
+					return;
+				}
+
+				recordEvent( 'product_prepublish_panel', {
+					source: TRACKS_SOURCE,
+					action: 'view',
+				} );
+				openPrepublishPanel();
+			}
+
+			return (
+				<>
+					<ButtonWithDropdownMenu
+						{ ...publishButtonProps }
+						onClick={ handlePrePublishButtonClick }
+						controls={ getPublishButtonControls() }
+					/>
+
+					{ renderSchedulePublishModal() }
+				</>
+			);
+		}
+
+		return (
+			<>
+				<ButtonWithDropdownMenu
+					{ ...publishButtonProps }
+					controls={ getPublishButtonControls() }
+				/>
+
+				{ renderSchedulePublishModal() }
+			</>
+		);
+	}
 
 	return <Button { ...publishButtonProps } />;
 }

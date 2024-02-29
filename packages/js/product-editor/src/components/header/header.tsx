@@ -4,7 +4,7 @@
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement, useEffect } from '@wordpress/element';
+import { createElement, useContext, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
@@ -18,14 +18,16 @@ import { PinnedItems } from '@wordpress/interface';
 /**
  * Internal dependencies
  */
+import { EditorLoadingContext } from '../../contexts/editor-loading-context';
 import { getHeaderTitle } from '../../utils';
 import { MoreMenu } from './more-menu';
 import { PreviewButton } from './preview-button';
 import { SaveDraftButton } from './save-draft-button';
 import { PublishButton } from './publish-button';
-import { PrepublishButton } from '../prepublish-panel';
+import { LoadingState } from './loading-state';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
+import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -41,6 +43,8 @@ export function Header( {
 	onTabSelect,
 	productType = 'product',
 }: HeaderProps ) {
+	const isEditorLoading = useContext( EditorLoadingContext );
+
 	const [ productId ] = useEntityProp< number >(
 		'postType',
 		productType,
@@ -61,6 +65,8 @@ export function Header( {
 		'name'
 	);
 
+	const { showPrepublishChecks } = useShowPrepublishChecks();
+
 	const sidebarWidth = useAdminSidebarWidth();
 
 	useEffect( () => {
@@ -75,15 +81,11 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
-	if ( ! productId ) {
-		return null;
+	if ( isEditorLoading ) {
+		return <LoadingState />;
 	}
 
 	const isVariation = lastPersistedProduct?.parent_id > 0;
-	const isPublished =
-		productType === 'product'
-			? lastPersistedProduct?.status === 'publish'
-			: true;
 
 	return (
 		<div
@@ -159,18 +161,10 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					{ ! isPublished &&
-					window.wcAdminFeatures[ 'product-pre-publish-modal' ] ? (
-						<PrepublishButton
-							productId={ productId }
-							productType={ productType }
-						/>
-					) : (
-						<PublishButton
-							productType={ productType }
-							productStatus={ lastPersistedProduct?.status }
-						/>
-					) }
+					<PublishButton
+						productType={ productType }
+						prePublish={ showPrepublishChecks }
+					/>
 
 					<WooHeaderItem.Slot name="product" />
 					<PinnedItems.Slot scope={ HEADER_PINNED_ITEMS_SCOPE } />

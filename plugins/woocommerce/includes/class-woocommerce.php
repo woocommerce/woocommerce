@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\TimeUtil;
+use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
 
 /**
  * Main WooCommerce Class.
@@ -37,7 +37,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.7.0';
+	public $version = '8.8.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -250,6 +250,8 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
+		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -283,6 +285,9 @@ final class WooCommerce {
 	 * Add woocommerce_inbox_variant for the Remote Inbox Notification.
 	 *
 	 * P2 post can be found at https://wp.me/paJDYF-1uJ.
+	 *
+	 * This will no longer be used. The more flexible add_woocommerce_remote_variant
+	 * below will be used instead.
 	 */
 	public function add_woocommerce_inbox_variant() {
 		$config_name = 'woocommerce_inbox_variant_assignment';
@@ -290,6 +295,18 @@ final class WooCommerce {
 			update_option( $config_name, wp_rand( 1, 12 ) );
 		}
 	}
+
+	/**
+	 * Add woocommerce_remote_variant_assignment used to determine cohort
+	 * or group assignment for Remote Spec Engines.
+	 */
+	public function add_woocommerce_remote_variant() {
+		$config_name = 'woocommerce_remote_variant_assignment';
+		if ( false === get_option( $config_name, false ) ) {
+			update_option( $config_name, wp_rand( 1, 120 ) );
+		}
+	}
+
 	/**
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
@@ -349,9 +366,18 @@ final class WooCommerce {
 		$this->define( 'WC_DISCOUNT_ROUNDING_MODE', 2 );
 		$this->define( 'WC_TAX_ROUNDING_MODE', 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ) ? 2 : 1 );
 		$this->define( 'WC_DELIMITER', '|' );
-		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+
+		/**
+		 * As of 8.8.0, it is preferable to use the `woocommerce_log_directory` filter hook to change the log
+		 * directory. WC_LOG_DIR_CUSTOM is a back-compatibility measure so we can tell if `WC_LOG_DIR` has been
+		 * defined outside of WC Core.
+		 */
+		if ( defined( 'WC_LOG_DIR' ) ) {
+			$this->define( 'WC_LOG_DIR_CUSTOM', true );
+		}
+		$this->define( 'WC_LOG_DIR', LoggingUtil::get_log_directory() );
 
 		// These three are kept defined for compatibility, but are no longer used.
 		$this->define( 'WC_NOTICE_MIN_PHP_VERSION', '7.2' );

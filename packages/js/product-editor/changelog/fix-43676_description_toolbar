@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix header toolbar in iframe modal editor to have block toolbar render correctly with latest Gutenberg and WP version.

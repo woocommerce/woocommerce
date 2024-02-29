@@ -25,7 +25,7 @@ class OnboardingProfileRuleProcessor implements RuleProcessorInterface {
 	public function process( $rule, $stored_state ) {
 		$onboarding_profile = get_option( 'woocommerce_onboarding_profile' );
 
-		if ( empty( $onboarding_profile ) ) {
+		if ( empty( $onboarding_profile ) || ! is_array( $onboarding_profile ) ) {
 			return false;
 		}
 

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import type { Product } from '@woocommerce/data';
+import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { MouseEvent } from 'react';
+import type { Product, ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,7 +17,6 @@ import type { PublishButtonProps } from '../../publish-button';
 
 export function usePublish( {
 	productType = 'product',
-	productStatus,
 	disabled,
 	onClick,
 	onPublishSuccess,
@@ -26,13 +25,23 @@ export function usePublish( {
 }: PublishButtonProps & {
 	onPublishSuccess?( product: Product ): void;
 	onPublishError?( error: WPError ): void;
-} ): Button.ButtonProps {
+} ): Button.ButtonProps & {
+	publish(
+		productOrVariation?: Partial< Product | ProductVariation >
+	): Promise< Product | ProductVariation | undefined >;
+} {
 	const { isValidating, validate } = useValidations< Product >();
 
 	const [ productId ] = useEntityProp< number >(
 		'postType',
 		productType,
 		'id'
+	);
+
+	const [ status, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+		'postType',
+		productType,
+		'status'
 	);
 
 	const { isSaving, isDirty } = useSelect(
@@ -42,8 +51,6 @@ export function usePublish( {
 				isSavingEntityRecord,
 				// @ts-expect-error There are no types for this.
 				hasEditsForEntityRecord,
-				// @ts-expect-error There are no types for this.
-				getRawEntityRecord,
 			} = select( 'core' );
 
 			return {
@@ -57,11 +64,6 @@ export function usePublish( {
 					productType,
 					productId
 				),
-				currentPost: getRawEntityRecord< boolean >(
-					'postType',
-					productType,
-					productId
-				),
 			};
 		},
 		[ productId ]
@@ -70,51 +72,37 @@ export function usePublish( {
 	const isBusy = isSaving || isValidating;
 	const isDisabled = disabled || isBusy || ! isDirty;
 
-	const isPublished =
-		productType === 'product' ? productStatus === 'publish' : true;
-
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( onClick ) {
-			onClick( event );
-		}
+	async function publish(
+		productOrVariation: Partial< Product | ProductVariation > = {}
+	) {
+		const isPublished = status === 'publish' || status === 'future';
 
 		try {
-			if ( productType === 'product' ) {
-				await validate( {
-					status: 'publish',
-				} );
-				// The publish button click not only change the status of the product
-				// but also save all the pending changes. So even if the status is
-				// publish it's possible to save the product too.
-				if ( ! isPublished ) {
-					await editEntityRecord(
-						'postType',
-						productType,
-						productId,
-						{
-							status: 'publish',
-						}
-					);
-				}
-			} else {
-				await validate();
-			}
+			// The publish button click not only change the status of the product
+			// but also save all the pending changes. So even if the status is
+			// publish it's possible to save the product too.
+			const data = ! isPublished
+				? { status: 'publish', ...productOrVariation }
+				: productOrVariation;
 
-			const publishedProduct = await saveEditedEntityRecord< Product >(
-				'postType',
-				productType,
-				productId,
-				{
-					throwOnError: true,
-				}
-			);
+			await validate( data as Partial< Product > );
+
+			await editEntityRecord( 'postType', productType, productId, data );
+
+			const publishedProduct = await saveEditedEntityRecord<
+				Product | ProductVariation
+			>( 'postType', productType, productId, {
+				throwOnError: true,
+			} );
 
 			if ( publishedProduct && onPublishSuccess ) {
 				onPublishSuccess( publishedProduct );
 			}
+
+			return publishedProduct as Product | ProductVariation;
 		} catch ( error ) {
 			if ( onPublishError ) {
 				let wpError = error as WPError;
@@ -146,14 +134,41 @@ export function usePublish( {
 		}
 	}
 
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( isDisabled ) {
+			event.preventDefault?.();
+			return;
+		}
+
+		if ( onClick ) {
+			onClick( event );
+		}
+
+		await publish();
+	}
+
+	function getButtonText() {
+		if (
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
+			status === 'future'
+		) {
+			return __( 'Schedule', 'woocommerce' );
+		}
+
+		if ( prevStatus === 'publish' || prevStatus === 'future' ) {
+			return __( 'Update', 'woocommerce' );
+		}
+
+		return __( 'Publish', 'woocommerce' );
+	}
+
 	return {
-		children: isPublished
-			? __( 'Update', 'woocommerce' )
-			: __( 'Add', 'woocommerce' ),
+		children: getButtonText(),
 		...props,
 		isBusy,
 		'aria-disabled': isDisabled,
 		variant: 'primary',
 		onClick: handleClick,
+		publish,
 	};
 }

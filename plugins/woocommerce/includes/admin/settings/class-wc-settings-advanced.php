@@ -335,7 +335,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'tracking_options',
-					'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+					'desc'  => __( 'Gathering usage data allows us to tailor your store setup experience, offer more relevant content, and help make WooCommerce better for everyone.', 'woocommerce' ),
 				),
 				array(
 					'title'         => __( 'Enable tracking', 'woocommerce' ),
@@ -361,7 +361,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Show Suggestions', 'woocommerce' ),
 					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
-					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
+					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.', 'woocommerce' ),
 					'id'            => 'woocommerce_show_marketplace_suggestions',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',

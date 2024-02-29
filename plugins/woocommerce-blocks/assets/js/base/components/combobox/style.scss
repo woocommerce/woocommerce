@@ -104,6 +104,12 @@
 					}
 				}
 
+				// Force empty rows to have a height.
+				&::after {
+					content: " ";
+					display: inline-block;
+				}
+
 				&:hover,
 				&:focus,
 				&.is-highlighted,

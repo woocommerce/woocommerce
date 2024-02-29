@@ -9,6 +9,7 @@ import {
 	useCallback,
 	useMemo,
 	useEffect,
+	useContext,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
@@ -27,6 +28,8 @@ import { useHomeTemplates } from '../hooks/use-home-templates';
 import { BlockInstance } from '@wordpress/blocks';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
+import { FlowType } from '~/customize-store/types';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -92,35 +95,45 @@ export const SidebarNavigationScreenHomepage = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns ] );
 
+	const { context } = useContext( CustomizeStoreContext );
+	const aiOnline = context.flowType === FlowType.AIOnline;
+
+	const title = aiOnline
+		? __( 'Change your homepage', 'woocommerce' )
+		: __( 'Choose your homepage', 'woocommerce' );
+	const sidebarMessage = aiOnline
+		? __(
+				'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
+				'woocommerce'
+		  )
+		: __(
+				'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+				'woocommerce'
+		  );
+
 	return (
 		<SidebarNavigationScreen
-			title={ __( 'Change your homepage', 'woocommerce' ) }
-			description={ createInterpolateElement(
-				__(
-					'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
-					'woocommerce'
+			title={ title }
+			description={ createInterpolateElement( sidebarMessage, {
+				EditorLink: (
+					<Link
+						onClick={ () => {
+							recordEvent(
+								'customize_your_store_assembler_hub_editor_link_click',
+								{
+									source: 'homepage',
+								}
+							);
+							window.open(
+								`${ ADMIN_URL }site-editor.php`,
+								'_blank'
+							);
+							return false;
+						} }
+						href=""
+					/>
 				),
-				{
-					EditorLink: (
-						<Link
-							onClick={ () => {
-								recordEvent(
-									'customize_your_store_assembler_hub_editor_link_click',
-									{
-										source: 'homepage',
-									}
-								);
-								window.open(
-									`${ ADMIN_URL }site-editor.php`,
-									'_blank'
-								);
-								return false;
-							} }
-							href=""
-						/>
-					),
-				}
-			) }
+			} ) }
 			content={
 				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">

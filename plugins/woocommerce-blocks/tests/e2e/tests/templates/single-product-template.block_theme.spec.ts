@@ -4,6 +4,10 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 test.describe( 'Single Product template', async () => {
+	test.afterAll( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+	} );
+
 	test( 'shows password form in products protected with password', async ( {
 		page,
 	} ) => {

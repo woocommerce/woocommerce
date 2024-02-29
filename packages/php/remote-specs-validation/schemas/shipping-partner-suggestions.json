@@ -1,0 +1,78 @@
+{
+	"title": "Payment Gateway Suggestions",
+	"type": "array",
+	"required": ["id", "title", "content", "image", "image_72x72", "external_link", "is_visible"],
+	"additionalProperties": false,
+	"items": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string"
+			},
+			"name": {
+				"type": "string"
+			},
+			"description": {
+				"type": "string"
+			},
+			"learn_more_link": {
+				"type": "string"
+			},
+			"layout_column": {
+				"$ref": "#/definitions/layout"
+			},
+			"layout_row": {
+				"$ref": "#/definitions/layout"
+			},
+			"is_visible": {
+				"oneOf": [
+					{"type": "boolean"},
+					{
+						"type": "array",
+						"items": {
+							"anyOf": [
+								{"$ref": "./shared/rules.json"}
+							]
+						}
+					}
+				]
+			},
+			"available_layouts": {
+				"type": "array",
+				"items": {
+					"type": "string",
+					"enum": ["row", "column"]
+				}
+			}
+		}
+	},
+	"definitions": {
+		"operations": {"$ref": "./shared/operations.json"},
+		"rules": {"$ref": "./shared/rules.json"},
+		"layout": {
+			"type": "object",
+			"properties": {
+				"image": {
+					"type": "string"
+				},
+				"features": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"icon": {
+								"type": "string"
+							},
+							"title": {
+								"type": "string"
+							},
+							"description": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

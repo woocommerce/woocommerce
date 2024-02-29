@@ -2,6 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
@@ -35,6 +38,21 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		parent::initialize();
 		add_filter( 'render_block', array( $this, 'add_alignment_class_to_wrapper' ), 10, 2 );
 		add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
+	}
+
+	/**
+	 * Extra data passed through from server to client for block.
+	 *
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
+	 */
+	protected function enqueue_data( array $attributes = [] ) {
+		parent::enqueue_data( $attributes );
+
+		// Indicate to interactivity powered components that this block is on the page,
+		// and needs refresh to update data.
+		$this->asset_data_registry->add( 'needsRefreshForInteractivityAPI', true, true );
 	}
 
 	/**
@@ -84,7 +102,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		if ( OrderConfirmationTemplate::get_slug() === $attributes['template'] ) {
+		if ( OrderConfirmationTemplate::SLUG === $attributes['template'] ) {
 			return $this->render_order_received();
 		}
 
@@ -94,9 +112,9 @@ class ClassicTemplate extends AbstractDynamicBlock {
 
 		$valid             = false;
 		$archive_templates = array(
-			'archive-product',
-			'taxonomy-product_cat',
-			'taxonomy-product_tag',
+			ProductCatalogTemplate::SLUG,
+			ProductCategoryTemplate::SLUG,
+			ProductTagTemplate::SLUG,
 			ProductAttributeTemplate::SLUG,
 			ProductSearchResultsTemplate::SLUG,
 		);
