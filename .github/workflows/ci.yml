@@ -208,6 +208,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
             WORKFLOW_NAME=publish-test-reports-pr.yml
