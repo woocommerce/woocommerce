@@ -88,7 +88,7 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
   
   project-e2e-test-jobs:
-    name: '${{ matrix.name }}'
+    name: 'E2E - ${{ matrix.name }}'
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
@@ -167,7 +167,7 @@ jobs:
   publish-e2e-test-reports:
     name: 'Publish e2e test reports'
     needs: [ project-e2e-test-jobs ]
-    if: ${{ always() }}
+    if: ${{ always() && needs.project-e2e-test-jobs.result != cancelled && needs.project-e2e-test-jobs.result != skipped }}
     runs-on: ubuntu-latest
 
     steps:
