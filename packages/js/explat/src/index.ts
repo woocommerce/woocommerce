@@ -12,6 +12,7 @@ import { logError } from './error';
 import {
 	fetchExperimentAssignment,
 	fetchExperimentAssignmentWithAuth,
+	canTrack,
 } from './assignment';
 import { getAnonId, initializeAnonId } from './anon';
 declare global {
@@ -27,7 +28,7 @@ declare global {
 }
 
 export const initializeExPlat = (): void => {
-	if ( window.wcTracks?.isEnabled || window?._wca?.push !== undefined ) {
+	if ( canTrack ) {
 		initializeAnonId().catch( ( e ) => logError( { message: e.message } ) );
 	}
 };
