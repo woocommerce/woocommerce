@@ -162,6 +162,34 @@ jobs:
           path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
           retention-days: 1
           compression-level: 9
+          
+  project-perf-test-jobs:
+    name: 'Performance - ${{ matrix.name }}'
+    runs-on: 'ubuntu-20.04'
+    needs: 'project-jobs'
+    if: ${{ needs.project-jobs.outputs.perf-test-jobs != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON( needs.project-jobs.outputs.perf-test-jobs ) }}
+    steps:
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup Monorepo'
+        id: 'setup-monorepo'
+        with:
+          install: '${{ matrix.projectName }}...'
+          build: '${{ matrix.projectName }}'
+
+      - name: 'Prepare Test Environment'
+        id: 'prepare-test-environment'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+
+      - name: 'Run tests'
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.

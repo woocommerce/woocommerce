@@ -52,6 +52,7 @@ const program = new Command( 'ci-jobs' )
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
 			setOutput( 'e2e-test-jobs', JSON.stringify( jobs.e2eTest ) );
 			setOutput( 'api-test-jobs', JSON.stringify( jobs.apiTest ) );
+			setOutput( 'perf-test-jobs', JSON.stringify( jobs.perfTest ) );
 			return;
 		}
 
@@ -88,7 +89,16 @@ const program = new Command( 'ci-jobs' )
 				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
 			}
 		} else {
-			Logger.notice( 'No api test jobs to run.' );
+			Logger.notice( 'No API test jobs to run.' );
+		}
+
+		if ( jobs.perfTest.length > 0 ) {
+			Logger.notice( 'Performance test Jobs' );
+			for ( const job of jobs.perfTest ) {
+				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+			}
+		} else {
+			Logger.notice( 'No performance test jobs to run.' );
 		}
 	} );
 
