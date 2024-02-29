@@ -60,8 +60,7 @@
 		column-gap: $gap-small;
 
 		&.wp-block-woocommerce-product-filter-price-content--inline {
-			grid-template-areas:
-				"left-input price-slider right-input";
+			grid-template-areas: "left-input price-slider right-input";
 			grid-template-columns: auto 1fr auto;
 		}
 	}
@@ -75,7 +74,7 @@
 	}
 
 	.wp-block-woocommerce-product-filter-price-content-right-input {
-		grid-area: right-input
+		grid-area: right-input;
 	}
 
 	.range {
