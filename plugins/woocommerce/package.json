@@ -172,6 +172,15 @@
 					"testEnv": {
 						"start": "env:test"
 					}
+				},
+				{
+					"name": "Core API tests",
+					"testType": "api",
+					"command": "test:api-pw",
+					"changes": [],
+					"testEnv": {
+						"start": "env:test"
+					}
 				}
 			]
 		}

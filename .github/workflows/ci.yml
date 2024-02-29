@@ -125,6 +125,43 @@ jobs:
           path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
           retention-days: 1
           compression-level: 9
+          
+  project-api-test-jobs:
+    name: 'API - ${{ matrix.name }}'
+    runs-on: 'ubuntu-20.04'
+    needs: 'project-jobs'
+    if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON( needs.project-jobs.outputs.api-test-jobs ) }}
+    steps:
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup Monorepo'
+        id: 'setup-monorepo'
+        with:
+          install: '${{ matrix.projectName }}...'
+          build: '${{ matrix.projectName }}'
+
+      - name: 'Prepare Test Environment'
+        id: 'prepare-test-environment'
+        if: ${{ matrix.testEnv.shouldCreate }}
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+
+      - name: 'Run tests'
+        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+
+      - name: 'Upload artifacts'
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-blob-reports-${{ matrix.shardNumber }}
+          path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
+          retention-days: 1
+          compression-level: 9
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -222,5 +259,65 @@ jobs:
               -f artifact=e2e-test-report \
               -f pr_number='' \
               -f test_type="e2e" \
+              --repo woocommerce/woocommerce-test-reports
+          fi
+
+
+  publish-api-test-reports:
+    name: 'Publish API test reports'
+    needs: [ project-api-test-jobs ]
+    if: ${{ always() && (contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' )) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'Install Allure CLI'
+        env:
+          DESTINATION_PATH: ../
+        run: ./.github/workflows/scripts/install-allure.sh
+
+      - name: 'Download blob reports from artifacts'
+        uses: actions/download-artifact@v4
+        with:
+          path: ./out/allure-results
+          pattern: all-blob-reports-*
+          run-id: project-api-test-jobs
+          merge-multiple: true
+
+      - name: 'Generate Allure report'
+        id: generate_allure_report
+        run: allure generate --clean ./out/allure-results --output ./out/allure-report
+
+      - name: 'Archive reports'
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-report
+          path: ./out
+          if-no-files-found: ignore
+          retention-days: 5
+          
+      - name: 'Publish reports'
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
+            WORKFLOW_NAME=publish-test-reports-pr.yml
+            gh workflow run publish-test-reports-pr.yml \
+              -f run_id=$RUN_ID \
+              -f api_artifact=api-test-report \
+              -f pr_number=$PR_NUMBER \
+              -f commit_sha=$COMMIT_SHA \
+              -f s3_root=public \
+              --repo woocommerce/woocommerce-test-reports
+          else
+            gh workflow run publish-test-reports-trunk-merge.yml \
+              -f run_id=$RUN_ID \
+              -f artifact=api-test-report \
+              -f pr_number='' \
+              -f test_type="api" \
               --repo woocommerce/woocommerce-test-reports
           fi

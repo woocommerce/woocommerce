@@ -49,6 +49,7 @@ interface Jobs {
 	lint: LintJob[];
 	test: TestJob[];
 	e2eTest: TestJob[];
+	apiTest: TestJob[];
 }
 
 /**
@@ -263,6 +264,7 @@ async function createJobsForProject(
 		lint: [],
 		test: [],
 		e2eTest: [],
+		apiTest: [],
 	};
 
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
@@ -286,6 +288,7 @@ async function createJobsForProject(
 		newJobs.lint.push( ...dependencyJobs.lint );
 		newJobs.test.push( ...dependencyJobs.test );
 		newJobs.e2eTest.push( ...dependencyJobs.e2eTest );
+		newJobs.apiTest.push( ...dependencyJobs.apiTest );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -363,6 +366,13 @@ async function createJobsForProject(
 				switch ( jobConfig.testType ) {
 					case TestType.E2E: {
 						newJobs.e2eTest.push(
+							...getShardedJobs( created, jobConfig )
+						);
+						break;
+					}
+
+					case TestType.Api: {
+						newJobs.apiTest.push(
 							...getShardedJobs( created, jobConfig )
 						);
 						break;

@@ -51,6 +51,7 @@ const program = new Command( 'ci-jobs' )
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
 			setOutput( 'e2e-test-jobs', JSON.stringify( jobs.e2eTest ) );
+			setOutput( 'api-test-jobs', JSON.stringify( jobs.apiTest ) );
 			return;
 		}
 
@@ -79,6 +80,15 @@ const program = new Command( 'ci-jobs' )
 			}
 		} else {
 			Logger.notice( 'No e2e test jobs to run.' );
+		}
+
+		if ( jobs.apiTest.length > 0 ) {
+			Logger.notice( 'API test Jobs' );
+			for ( const job of jobs.apiTest ) {
+				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+			}
+		} else {
+			Logger.notice( 'No api test jobs to run.' );
 		}
 	} );
 
