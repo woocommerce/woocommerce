@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix LegacyProxy::get_instance_of throwing an error when trying to get an instance of a non-Woo namespaced class.
