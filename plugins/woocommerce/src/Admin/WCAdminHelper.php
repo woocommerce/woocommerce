@@ -96,4 +96,25 @@ class WCAdminHelper {
 		}
 		return false;
 	}
+
+	/**
+	 * Test if the site is fresh. A fresh site must meet the following requirements.
+	 *
+	 * - The current user was registered a month ago.
+	 * - fresh_site option must be 1
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public static function is_site_fresh() {
+		$current_userdata = get_userdata( get_current_user_id() );
+		// Return false if we can't get user meta data for some reason.
+		if ( ! $current_userdata ) {
+			return false;
+		}
+
+		$date = new \DateTime( $current_userdata->user_registered );
+		$month_ago = new \DateTime( '-1 month' );
+
+		return get_option( 'fresh_site' ) === '1' && $date > $month_ago;
+	}
 }
