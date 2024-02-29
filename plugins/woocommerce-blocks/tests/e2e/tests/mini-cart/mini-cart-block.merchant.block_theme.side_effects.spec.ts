@@ -16,8 +16,8 @@ const blockData: BlockData = {
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate(
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.revertTemplate(
 				'woocommerce/woocommerce//single-product'
 			);
 		} );

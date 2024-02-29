@@ -2,8 +2,12 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
-import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
+import type {
+	Editor,
+	Admin,
+	RequestUtils,
+	EditorUtils,
+} from '@woocommerce/e2e-utils';
 
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
@@ -73,7 +77,7 @@ class ProductCollectionPage {
 	private page: Page;
 	private admin: Admin;
 	private editor: Editor;
-	private templateApiUtils: TemplateApiUtils;
+	private requestUtils: RequestUtils;
 	private editorUtils: EditorUtils;
 	BLOCK_NAME = 'Product Collection (Beta)';
 	productTemplate!: Locator;
@@ -88,19 +92,19 @@ class ProductCollectionPage {
 		page,
 		admin,
 		editor,
-		templateApiUtils,
+		requestUtils,
 		editorUtils,
 	}: {
 		page: Page;
 		admin: Admin;
 		editor: Editor;
-		templateApiUtils: TemplateApiUtils;
+		requestUtils: RequestUtils;
 		editorUtils: EditorUtils;
 	} ) {
 		this.page = page;
 		this.admin = admin;
 		this.editor = editor;
-		this.templateApiUtils = templateApiUtils;
+		this.requestUtils = requestUtils;
 		this.editorUtils = editorUtils;
 	}
 
@@ -169,7 +173,7 @@ class ProductCollectionPage {
 		template: string,
 		collection?: Collections
 	) {
-		await this.templateApiUtils.revertTemplate( template );
+		await this.requestUtils.revertTemplate( template );
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
@@ -193,7 +197,7 @@ class ProductCollectionPage {
 	}
 
 	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.templateApiUtils.revertTemplate(
+		await this.requestUtils.revertTemplate(
 			'woocommerce/woocommerce//archive-product'
 		);
 
