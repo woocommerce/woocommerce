@@ -6,6 +6,7 @@ on:
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
+            - '.github/workflows/blocks-playwright.yml'
 
 env:
     FORCE_COLOR: 1
