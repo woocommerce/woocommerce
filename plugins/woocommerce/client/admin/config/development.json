@@ -37,6 +37,6 @@
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
 		"async-product-editor-category-field": true,
-		"launch_your_store": false
+		"launch-your-store": false
 	}
 }
