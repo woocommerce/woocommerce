@@ -91,5 +91,5 @@ export const defaultSurfacedProductTypes =
 
 export const supportedOnboardingProductTypes = [ 'physical', 'downloads' ];
 
-export const SETUP_TASKLIST_PRODUCT_TYPES =
-	'woocommerce_tasklist_experimental_product_types';
+export const SETUP_TASKLIST_PRODUCT_TYPES_FILTER =
+	'experimental_woocommerce_tasklist_product_types';

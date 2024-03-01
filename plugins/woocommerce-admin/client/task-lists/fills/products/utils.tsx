@@ -23,7 +23,7 @@ export const getProductTypes = ( {
 	exclude?: ProductTypeKey[];
 } = {} ): ProductType[] => {
 	/**
-	 * Filter for adding custom product types to tasklist.
+	 * Experimental: Filter for adding custom product types to tasklist.
 	 *
 	 * @filter woocommerce_tasklist_experimental_product_types
 	 * @param {Object} productTypes Array of product types.
