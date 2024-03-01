@@ -392,7 +392,7 @@ class Checkout extends AbstractCartRoute {
 		 */
 		try {
 			$reserve_stock = new ReserveStock();
-			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : 10;
+			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : apply_filters( 'woocommerce_hold_stock_minutes_checkout_draft', 10 );
 			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
 		} catch ( ReserveStockException $e ) {
 			throw new RouteException(
