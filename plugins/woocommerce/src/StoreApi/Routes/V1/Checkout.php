@@ -391,9 +391,24 @@ class Checkout extends AbstractCartRoute {
 		 * If POSTing to the checkout (attempting to pay), set the timeout to 60 mins (using the woocommerce_hold_stock_minutes option).
 		 */
 		try {
+
 			$reserve_stock = new ReserveStock();
-			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : apply_filters( 'woocommerce_hold_stock_minutes_checkout_draft', 10 );
+
+			/**
+			 * Filters the hold stock duration in minutes for draft orders on checkout entry.
+			 *
+			 * This hook filters the duration in minutes that stock is held for draft orders on checkout entry, it allows a third party to amend the duration to increase/reduce the time the stock is held for draft orders on checkout entry.
+			 *
+			 * @since 8.8.0
+			 *
+			 * @param integer $minutes Minutes to hold stock for draft orders.
+			 */
+
+			$draft_order_hold_stock_minutes = apply_filters( 'woocommerce_draft_order_hold_stock_minutes', 10 );
+
+			$duration      = $request->get_method() === 'POST' ? (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) : $draft_order_hold_stock_minutes;
 			$reserve_stock->reserve_stock_for_order( $this->order, $duration );
+
 		} catch ( ReserveStockException $e ) {
 			throw new RouteException(
 				$e->getErrorCode(),
