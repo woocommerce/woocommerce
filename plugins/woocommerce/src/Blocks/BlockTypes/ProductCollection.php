@@ -136,10 +136,7 @@ class ProductCollection extends AbstractBlock {
 			return $context;
 		}
 
-		// 1. Parse block-level context.
-		// TODO: Parse block's attributes.
-
-		// 2. Parse ancestor-level context.
+		// Parse ancestor-level context.
 		// @see Automattic\WooCommerce\Blocks\BlockTypes\SingleProduct::update_context()
 		$is_in_single_product = ! empty( $parent_block->context['singleProduct'] ) && $parent_block->context['singleProduct'] && ! empty( $parent_block->context['postId'] );
 		if ( $is_in_single_product ) {
@@ -154,7 +151,7 @@ class ProductCollection extends AbstractBlock {
 			return $context;
 		}
 
-		// 3. Parse global context.
+		// Parse global context.
 		$context['location'] = ProductCollectionUtils::parse_global_location_context();
 		return $context;
 	}
