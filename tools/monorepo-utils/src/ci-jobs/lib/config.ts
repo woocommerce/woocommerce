@@ -24,13 +24,7 @@ export const enum JobType {
 /**
  * The type of the test job.
  */
-export enum TestType {
-	Default = 'default',
-	Unit = 'unit',
-	E2E = 'e2e',
-	Api = 'api',
-	Performance = 'performance',
-}
+export const testTypes = [ 'default', 'e2e', 'api', 'performance' ];
 
 /**
  * The variables that can be used in tokens on command strings
@@ -341,11 +335,16 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
+	let testType = 'default';
+	if ( raw.testType && testTypes.includes( raw.testType.toLowerCase() ) ) {
+		testType = raw.testType.toLowerCase();
+	}
+
 	validateCommandVars( raw.command );
 
 	const config: TestJobConfig = {
 		type: JobType.Test,
-		testType: raw.testType ? raw.testType : TestType.Default,
+		testType,
 		shards: parseInt( raw.shards, 10 ) || 0,
 		name: raw.name,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),

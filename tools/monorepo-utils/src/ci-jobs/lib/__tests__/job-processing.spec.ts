@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { JobType } from '../config';
+import { JobType, testTypes } from '../config';
 import { createJobsForChanges, getShardedJobs } from '../job-processing';
 import { parseTestEnvConfig } from '../test-environment';
 
@@ -292,6 +292,8 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger test job for single node', async () => {
+			const testType = 'default';
+
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -300,7 +302,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								shards: 0,
 								name: 'Default',
 								changes: [ /test.js$/ ],
@@ -317,8 +319,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 1 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -332,6 +334,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should replace vars in test command', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -340,7 +343,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -361,8 +364,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 1 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -376,6 +379,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should not trigger a test job that has already been created', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -384,7 +388,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -402,10 +406,11 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 0 );
 		} );
 
 		it( 'should not trigger test job for single node with no changes', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -414,7 +419,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -429,10 +434,11 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 0 );
 		} );
 
 		it( 'should trigger test job for project graph', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -441,7 +447,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -457,7 +463,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'default',
 										name: 'Default A',
 										shards: 0,
 										changes: [ /test-b.js$/ ],
@@ -474,7 +480,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'default',
 										name: 'Default B',
 										shards: 0,
 										changes: [ /test-b.js$/ ],
@@ -495,8 +501,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 2 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -507,7 +513,7 @@ describe( 'Job Processing', () => {
 					envVars: {},
 				},
 			} );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test-b',
 				projectPath: 'test-b',
 				name: 'Default B',
@@ -520,48 +526,51 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
-		it( 'should trigger e2e test job for single node', async () => {
-			const jobs = await createJobsForChanges(
-				{
-					name: 'test',
-					path: 'test',
-					ciConfig: {
-						jobs: [
-							{
-								type: JobType.Test,
-								testType: 'e2e',
-								name: 'Default',
-								shards: 0,
-								changes: [ /test.js$/ ],
-								command: 'test-cmd',
-							},
-						],
+		it.each( testTypes )(
+			'should trigger %s test job for single node',
+			async ( testType ) => {
+				const jobs = await createJobsForChanges(
+					{
+						name: 'test',
+						path: 'test',
+						ciConfig: {
+							jobs: [
+								{
+									type: JobType.Test,
+									testType,
+									name: 'Default',
+									shards: 0,
+									changes: [ /test.js$/ ],
+									command: 'test-cmd',
+								},
+							],
+						},
+						dependencies: [],
 					},
-					dependencies: [],
-				},
-				{
-					test: [ 'test.js' ],
-				},
-				{}
-			);
+					{
+						test: [ 'test.js' ],
+					},
+					{}
+				);
 
-			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 0 );
-			expect( jobs.e2eTest ).toHaveLength( 1 );
-			expect( jobs.e2eTest ).toContainEqual( {
-				projectName: 'test',
-				projectPath: 'test',
-				name: 'Default',
-				command: 'test-cmd',
-				shardNumber: 0,
-				testEnv: {
-					shouldCreate: false,
-					envVars: {},
-				},
-			} );
-		} );
+				expect( jobs.lint ).toHaveLength( 0 );
+				expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+				expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+				} );
+			}
+		);
 
 		it( 'should trigger test job for dependent without changes when dependency has matching cascade key', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -570,7 +579,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -587,7 +596,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'default',
 										name: 'Default A',
 										shards: 0,
 										changes: [ /test-a.js$/ ],
@@ -607,8 +616,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 2 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -619,7 +628,7 @@ describe( 'Job Processing', () => {
 					envVars: {},
 				},
 			} );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test-a',
 				projectPath: 'test-a',
 				name: 'Default A',
@@ -633,6 +642,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should isolate dependency cascade keys to prevent cross-dependency matching', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -641,7 +651,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -658,7 +668,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'default',
 										name: 'Default A',
 										shards: 0,
 										changes: [ /test-a.js$/ ],
@@ -676,7 +686,7 @@ describe( 'Job Processing', () => {
 								jobs: [
 									{
 										type: JobType.Test,
-										testType: 'unit',
+										testType: 'default',
 										name: 'Default B',
 										shards: 0,
 										changes: [ /test-b.js$/ ],
@@ -696,8 +706,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 2 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -708,7 +718,7 @@ describe( 'Job Processing', () => {
 					envVars: {},
 				},
 			} );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test-a',
 				projectPath: 'test-a',
 				name: 'Default A',
@@ -722,6 +732,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger test job for single node and parse test environment config', async () => {
+			const testType = 'default';
 			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
 				WP_ENV_CORE: 'https://wordpress.org/latest.zip',
 			} );
@@ -734,7 +745,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -761,8 +772,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 1 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -779,6 +790,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -792,7 +804,7 @@ describe( 'Job Processing', () => {
 							},
 							{
 								type: JobType.Test,
-								testType: 'unit',
+								testType,
 								name: 'Default',
 								shards: 0,
 								changes: [ /test.js$/ ],
@@ -812,8 +824,8 @@ describe( 'Job Processing', () => {
 				projectPath: 'test',
 				command: 'test-lint',
 			} );
-			expect( jobs.test ).toHaveLength( 1 );
-			expect( jobs.test ).toContainEqual( {
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
 				projectName: 'test',
 				projectPath: 'test',
 				name: 'Default',
@@ -827,6 +839,7 @@ describe( 'Job Processing', () => {
 		} );
 
 		it( 'should trigger sharded test jobs for single node', async () => {
+			const testType = 'default';
 			const jobs = await createJobsForChanges(
 				{
 					name: 'test',
@@ -835,7 +848,7 @@ describe( 'Job Processing', () => {
 						jobs: [
 							{
 								type: JobType.Test,
-								testType: 'e2e',
+								testType,
 								name: 'Default',
 								shards: 2,
 								changes: [ /test.js$/ ],
@@ -852,9 +865,8 @@ describe( 'Job Processing', () => {
 			);
 
 			expect( jobs.lint ).toHaveLength( 0 );
-			expect( jobs.test ).toHaveLength( 0 );
-			expect( jobs.e2eTest ).toHaveLength( 2 );
-			expect( jobs.e2eTest ).toEqual(
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toEqual(
 				expect.arrayContaining( [
 					{
 						projectName: 'test',

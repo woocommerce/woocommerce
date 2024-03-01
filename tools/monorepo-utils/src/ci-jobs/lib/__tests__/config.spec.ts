@@ -6,7 +6,7 @@ import { makeRe } from 'minimatch';
 /**
  * Internal dependencies
  */
-import { JobType, parseCIConfig } from '../config';
+import { JobType, parseCIConfig, testTypes } from '../config';
 
 describe( 'Config', () => {
 	describe( 'parseCIConfig', () => {
@@ -225,42 +225,82 @@ describe( 'Config', () => {
 			} );
 		} );
 
-		it.each( [
-			[ 'e2e', 'e2e' ],
-			[ '', 'default' ],
-		] )( 'should parse test config with testType', ( input, result ) => {
-			const parsed = parseCIConfig( {
-				name: 'foo',
-				config: {
-					ci: {
-						tests: [
-							{
-								name: 'default',
-								testType: input,
-								changes: '/src/**/*.{js,jsx,ts,tsx}',
-								command: 'foo',
-							},
-						],
+		it.each( testTypes )(
+			'should parse test config with expected testType',
+			( testType ) => {
+				const parsed = parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							tests: [
+								{
+									name: 'default',
+									testType,
+									changes: '/src/**/*.{js,jsx,ts,tsx}',
+									command: 'foo',
+								},
+							],
+						},
 					},
-				},
-			} );
+				} );
 
-			expect( parsed ).toMatchObject( {
-				jobs: [
-					{
-						type: JobType.Test,
-						testType: result,
-						shards: 0,
-						name: 'default',
-						changes: [
-							/^package\.json$/,
-							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
-						],
-						command: 'foo',
+				expect( parsed ).toMatchObject( {
+					jobs: [
+						{
+							type: JobType.Test,
+							testType,
+							shards: 0,
+							name: 'default',
+							changes: [
+								/^package\.json$/,
+								makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+							],
+							command: 'foo',
+						},
+					],
+				} );
+			}
+		);
+
+		it.each( [
+			[ '', 'default' ],
+			[ 'bad', 'default' ],
+		] )(
+			'should parse test config with unexpected testType',
+			( input, result ) => {
+				const parsed = parseCIConfig( {
+					name: 'foo',
+					config: {
+						ci: {
+							tests: [
+								{
+									name: 'default',
+									testType: input,
+									changes: '/src/**/*.{js,jsx,ts,tsx}',
+									command: 'foo',
+								},
+							],
+						},
 					},
-				],
-			} );
-		} );
+				} );
+
+				expect( parsed ).toMatchObject( {
+					jobs: [
+						{
+							type: JobType.Test,
+							testType: result,
+							shards: 0,
+							name: 'default',
+							changes: [
+								/^package\.json$/,
+								makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
+							],
+							command: 'foo',
+						},
+					],
+				} );
+			}
+		);
 
 		it.each( [
 			[ '0', 0 ],

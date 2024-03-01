@@ -4,7 +4,7 @@
 import {
 	CommandVarOptions,
 	JobType,
-	TestType,
+	testTypes,
 	LintJobConfig,
 	TestJobConfig,
 } from './config';
@@ -48,9 +48,6 @@ interface TestJob {
 interface Jobs {
 	lint: LintJob[];
 	test: TestJob[];
-	e2eTest: TestJob[];
-	apiTest: TestJob[];
-	perfTest: TestJob[];
 }
 
 /**
@@ -264,10 +261,11 @@ async function createJobsForProject(
 	const newJobs: Jobs = {
 		lint: [],
 		test: [],
-		e2eTest: [],
-		apiTest: [],
-		perfTest: [],
 	};
+
+	testTypes.forEach( ( type ) => {
+		newJobs[ `${ type }Test` ] = [];
+	} );
 
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
@@ -288,10 +286,13 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 		newJobs.lint.push( ...dependencyJobs.lint );
-		newJobs.test.push( ...dependencyJobs.test );
-		newJobs.e2eTest.push( ...dependencyJobs.e2eTest );
-		newJobs.apiTest.push( ...dependencyJobs.apiTest );
-		newJobs.perfTest.push( ...dependencyJobs.perfTest );
+		// newJobs.test.push( ...dependencyJobs.test );
+
+		testTypes.forEach( ( type ) => {
+			newJobs[ `${ type }Test` ].push(
+				...dependencyJobs[ `${ type }Test` ]
+			);
+		} );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -366,34 +367,9 @@ async function createJobsForProject(
 
 				jobConfig.jobCreated = true;
 
-				switch ( jobConfig.testType ) {
-					case TestType.E2E: {
-						newJobs.e2eTest.push(
-							...getShardedJobs( created, jobConfig )
-						);
-						break;
-					}
-
-					case TestType.Api: {
-						newJobs.apiTest.push(
-							...getShardedJobs( created, jobConfig )
-						);
-						break;
-					}
-
-					case TestType.Performance: {
-						newJobs.perfTest.push(
-							...getShardedJobs( created, jobConfig )
-						);
-						break;
-					}
-
-					default: {
-						newJobs.test.push(
-							...getShardedJobs( created, jobConfig )
-						);
-					}
-				}
+				newJobs[ `${ jobConfig.testType }Test` ].push(
+					...getShardedJobs( created, jobConfig )
+				);
 
 				// We need to track any cascade keys that this job is associated with so that
 				// dependent projects can trigger jobs with matching keys. We are expecting

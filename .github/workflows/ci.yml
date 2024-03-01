@@ -19,10 +19,10 @@ jobs:
     runs-on: 'ubuntu-20.04'
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
-      test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
+      default-test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
       e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
       api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
-      perf-test-jobs: ${{ steps.project-jobs.outputs.perf-test-jobs }}
+      performance-test-jobs: ${{ steps.project-jobs.outputs.perf-test-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -69,11 +69,11 @@ jobs:
     name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+    if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
+        include: ${{ fromJSON( needs.project-jobs.outputs.default-test-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -165,15 +165,15 @@ jobs:
           retention-days: 1
           compression-level: 9
           
-  project-perf-test-jobs:
+  project-performance-test-jobs:
     name: 'Performance - ${{ matrix.name }}'
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.perf-test-jobs != '[]' }}
+    if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.perf-test-jobs ) }}
+        include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
