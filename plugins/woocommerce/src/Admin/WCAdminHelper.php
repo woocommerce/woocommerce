@@ -104,11 +104,10 @@ class WCAdminHelper {
 	 * - fresh_site option must be 1
 	 *
 	 * @return bool
-	 * @throws \Exception
 	 */
 	public static function is_site_fresh() {
 		$fresh_site = get_option( 'fresh_site' );
-		if ( $fresh_site !== '1' ) {
+		if ( '1' !== $fresh_site ) {
 			return false;
 		}
 
@@ -118,7 +117,7 @@ class WCAdminHelper {
 			return false;
 		}
 
-		$date = new \DateTime( $current_userdata->user_registered );
+		$date      = new \DateTime( $current_userdata->user_registered );
 		$month_ago = new \DateTime( '-1 month' );
 
 		return $date > $month_ago;
