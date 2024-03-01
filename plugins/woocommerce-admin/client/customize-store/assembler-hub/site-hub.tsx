@@ -78,21 +78,13 @@ export const SiteHub = forwardRef(
 						className="edit-site-site-hub__text-content"
 						spacing="0"
 					>
-						<motion.div
+						<div
 							className={ classnames(
 								'edit-site-site-hub__view-mode-toggle-container',
 								{
 									'has-transparent-background': isTransparent,
 								}
 							) }
-							layout
-							transition={ {
-								type: 'tween',
-								duration: disableMotion
-									? 0
-									: HUB_ANIMATION_DURATION,
-								ease: 'easeOut',
-							} }
 						>
 							<Link
 								href={ getNewPath( {}, '/', {} ) }
@@ -100,7 +92,7 @@ export const SiteHub = forwardRef(
 							>
 								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
 							</Link>
-						</motion.div>
+						</div>
 
 						<AnimatePresence>
 							<motion.div
