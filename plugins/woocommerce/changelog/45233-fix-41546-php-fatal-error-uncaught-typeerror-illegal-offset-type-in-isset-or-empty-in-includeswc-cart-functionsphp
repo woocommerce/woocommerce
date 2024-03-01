@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Added validation to prevent fatal error in wc-cart-functions.php.
