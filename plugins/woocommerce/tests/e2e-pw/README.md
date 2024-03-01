@@ -133,7 +133,7 @@ After you run a test, it's best to restart the environment to start from a fresh
 
 ### Creating test structure
 
-It is a good practice to start working on the test by identifying what needs to be tested on the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
+It is a good practice to start working on the test by identifying what needs to be tested at the higher and lower levels. For example, if you are writing a test to verify that merchant can create a virtual product, the overview of the test will be as follows:
 
 -   Merchant can create virtual product
     -   Merchant can log in
