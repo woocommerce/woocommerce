@@ -6,7 +6,6 @@ import { Button, Dropdown } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 import { type Product } from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
