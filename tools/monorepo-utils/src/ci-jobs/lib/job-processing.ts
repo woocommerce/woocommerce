@@ -286,7 +286,6 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 		newJobs.lint.push( ...dependencyJobs.lint );
-		// newJobs.test.push( ...dependencyJobs.test );
 
 		testTypes.forEach( ( type ) => {
 			newJobs[ `${ type }Test` ].push(
