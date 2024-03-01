@@ -1008,8 +1008,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), esc_html( $this->get_code() ) );
 				break;
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
+				// We check for suplied billing email. On shortcode, this will be present for checkout requests.
+				$billing_email = \Automattic\WooCommerce\Utilities\ArrayUtil::get_value_or_default( $_POST, 'billing_email' );
 				/* translators: %s: coupon code */
-				$err = sprintf( __( 'Please enter a valid email on the Checkout to use the coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+				if ( is_email( $billing_email ) ) {
+					$err = sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+				} else {
+					$err = sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+				}
 				break;
 			case self::E_WC_COUPON_ALREADY_APPLIED:
 				$err = __( 'Coupon code already applied!', 'woocommerce' );
