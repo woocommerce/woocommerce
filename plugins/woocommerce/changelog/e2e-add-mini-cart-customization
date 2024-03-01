@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: improve existing test to include scenario customizing mini cart

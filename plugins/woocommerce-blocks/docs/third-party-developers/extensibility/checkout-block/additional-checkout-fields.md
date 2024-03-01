@@ -38,6 +38,9 @@ A common use-case for developers and merchants is to add a new field to the Chec
 
 This document will outline the steps an extension should take to register some additional checkout fields.
 
+> [!NOTE]  
+> Additional Checkout fields is still in the testing phases, use it to test the API and leave feedback in this [public discussion.](https://github.com/woocommerce/woocommerce/discussions/42995)
+
 ## Available field locations
 
 Additional checkout fields can be registered in three different places:

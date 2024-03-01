@@ -15,7 +15,7 @@ class ComparisonOperation {
 	 * Compare two operands using the specified operation.
 	 *
 	 * @param object $left_operand  The left hand operand.
-	 * @param object $right_operand The right hand operand.
+	 * @param object $right_operand The right hand operand -- 'value' from the rule definition.
 	 * @param string $operation     The operation used to compare the operands.
 	 */
 	public static function compare( $left_operand, $right_operand, $operation ) {
@@ -64,6 +64,11 @@ class ComparisonOperation {
 					return strpos( $left_operand, $right_operand ) === false;
 				}
 				break;
+			case 'range':
+				if ( ! is_array( $right_operand ) || count( $right_operand ) !== 2 ) {
+					return false;
+				}
+				return $left_operand >= $right_operand[0] && $left_operand <= $right_operand[1];
 		}
 
 		return false;
