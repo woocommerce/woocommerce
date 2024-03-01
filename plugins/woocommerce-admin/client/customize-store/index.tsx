@@ -46,7 +46,7 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners } from './utils';
+import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
 
@@ -174,6 +174,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		src: 'browserPopstateHandler',
 	},
 	on: {
+		GO_BACK_TO_DESIGN_WITH_AI: {
+			target: 'designWithAi',
+		},
+		GO_BACK_TO_DESIGN_WITHOUT_AI: {
+			target: 'intro',
+			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
 		},
@@ -454,13 +461,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				FINISH_CUSTOMIZATION: {
 					target: '.postAssemblerHub',
 				},
-				GO_BACK_TO_DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				GO_BACK_TO_DESIGN_WITHOUT_AI: {
-					target: 'intro',
-					actions: [ { type: 'updateQueryStep', step: 'intro' } ],
-				},
 			},
 		},
 		transitionalScreen: {
@@ -530,6 +530,7 @@ declare global {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
+			sendEvent: ( typeEvent: string ) => void;
 		};
 	}
 }
@@ -583,6 +584,20 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
+
+	useEffect( () => {
+		if ( isIframe( window ) ) {
+			return;
+		}
+		window.__wcCustomizeStore = {
+			...window.__wcCustomizeStore,
+			sendEvent: ( typeEvent: string ) => send( { type: typeEvent } ),
+		};
+	}, [ send ] );
+
+	window.__wcCustomizeStore = {
+		...window.__wcCustomizeStore,
+	};
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>

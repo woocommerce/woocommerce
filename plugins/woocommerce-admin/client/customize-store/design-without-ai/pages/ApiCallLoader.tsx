@@ -3,7 +3,7 @@
  */
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -11,7 +11,12 @@ import { useEffect, useState } from '@wordpress/element';
 import loaderAssemblingStore from '../../assets/images/loader-assembling-ai-optimized-store.svg';
 import loaderTurningLights from '../../assets/images/loader-turning-lights.svg';
 import openingTheDoors from '../../assets/images/loader-opening-the-doors.svg';
-import { createAugmentedSteps } from '~/customize-store/utils';
+import {
+	attachIframeListeners,
+	createAugmentedSteps,
+	onIframeLoad,
+} from '~/customize-store/utils';
+import { getNewPath } from '@woocommerce/navigation';
 
 const loaderSteps = [
 	{
@@ -98,6 +103,30 @@ export const ApiCallLoader = () => {
 	);
 };
 
+const AssemblerHub = () => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = useRef< HTMLIFrameElement >( null );
+	const [ isVisible, setIsVisible ] = useState( false );
+
+	return (
+		<iframe
+			ref={ iframe }
+			onLoad={ ( iframe ) => {
+				const showIframe = () => setIsVisible( true );
+				attachIframeListeners( iframe.currentTarget );
+				onIframeLoad( showIframe );
+				// Ceiling wait time set to 60 seconds
+				setTimeout( showIframe, 60 * 1000 );
+				window.parent.history?.pushState( {}, '', assemblerUrl );
+			} }
+			style={ { opacity: isVisible ? 1 : 0 } }
+			src={ assemblerUrl }
+			title="assembler-hub"
+			className="cys-fullscreen-iframe"
+		/>
+	);
+};
+
 export const AssembleHubLoader = () => {
 	// Show the last two steps of the loader so that the last frame is the shortest time possible
 	const augmentedSteps = createAugmentedSteps( loaderSteps.slice( -2 ), 10 );
@@ -105,30 +134,33 @@ export const AssembleHubLoader = () => {
 	const [ progress, setProgress ] = useState( augmentedSteps[ 0 ].progress );
 
 	return (
-		<Loader>
-			<Loader.Sequence
-				interval={ ( 2 * 1000 ) / ( augmentedSteps.length - 1 ) }
-				shouldLoop={ false }
-				onChange={ ( index ) => {
-					// to get around bad set state timing issue
-					setTimeout( () => {
-						setProgress( augmentedSteps[ index ].progress );
-					}, 0 );
-				} }
-			>
-				{ augmentedSteps.map( ( step, index ) => (
-					<Loader.Layout key={ index }>
-						<Loader.Illustration>
-							{ step.image }
-						</Loader.Illustration>
-						<Loader.Title>{ step.title }</Loader.Title>
-					</Loader.Layout>
-				) ) }
-			</Loader.Sequence>
-			<Loader.ProgressBar
-				className="smooth-transition"
-				progress={ progress || 0 }
-			/>
-		</Loader>
+		<>
+			<Loader>
+				<Loader.Sequence
+					interval={ ( 2 * 1000 ) / ( augmentedSteps.length - 1 ) }
+					shouldLoop={ false }
+					onChange={ ( index ) => {
+						// to get around bad set state timing issue
+						setTimeout( () => {
+							setProgress( augmentedSteps[ index ].progress );
+						}, 0 );
+					} }
+				>
+					{ augmentedSteps.map( ( step, index ) => (
+						<Loader.Layout key={ index }>
+							<Loader.Illustration>
+								{ step.image }
+							</Loader.Illustration>
+							<Loader.Title>{ step.title }</Loader.Title>
+						</Loader.Layout>
+					) ) }
+				</Loader.Sequence>
+				<Loader.ProgressBar
+					className="smooth-transition"
+					progress={ progress || 0 }
+				/>
+			</Loader>
+			<AssemblerHub />
+		</>
 	);
 };

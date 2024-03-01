@@ -31,6 +31,8 @@ import { GoBackWarningModal } from '../go-back-warning-modal';
  */
 import { CustomizeStoreContext } from '../';
 import { isAIFlow } from '~/customize-store/guards';
+import { navigateOrParent } from '~/customize-store/utils';
+import { getNewPath } from '@woocommerce/navigation';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -148,7 +150,7 @@ export const SidebarNavigationScreen = ( {
 				<GoBackWarningModal
 					setOpenWarningModal={ setOpenWarningModal }
 					onExitClicked={ () => {
-						sendEvent(
+						window.parent.__wcCustomizeStore.sendEvent(
 							flowType && isAIFlow( flowType )
 								? 'GO_BACK_TO_DESIGN_WITH_AI'
 								: 'GO_BACK_TO_DESIGN_WITHOUT_AI'
