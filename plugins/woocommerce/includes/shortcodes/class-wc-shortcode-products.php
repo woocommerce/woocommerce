@@ -636,8 +636,10 @@ class WC_Shortcode_Products {
 					'current_page' => $products->current_page,
 				)
 			);
-
-			$original_post = $GLOBALS['post'];
+			
+			if( ! empty($GLOBALS['post']) ):
+				$original_post = $GLOBALS['post'];
+			endif;
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 
@@ -664,7 +666,10 @@ class WC_Shortcode_Products {
 				}
 			}
 
-			$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			if( ! empty($original_post) ):
+				$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			endif;
+			
 			woocommerce_product_loop_end();
 
 			// Fire standard shop loop hooks when paginating results so we can show result counts and so on.
