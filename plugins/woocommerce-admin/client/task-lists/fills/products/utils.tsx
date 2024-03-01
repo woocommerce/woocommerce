@@ -14,7 +14,7 @@ import {
 	onboardingProductTypesToSurfaced,
 	supportedOnboardingProductTypes,
 	defaultSurfacedProductTypes,
-	SETUP_TASKLIST_PRODUCT_TYPES,
+	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 } from './constants';
 
 export const getProductTypes = ( {
@@ -28,13 +28,12 @@ export const getProductTypes = ( {
 	 * @filter woocommerce_tasklist_experimental_product_types
 	 * @param {Object} productTypes Array of product types.
 	 */
-	let productTypes = [
-		...baseProductTypes,
-		...( applyFilters(
-			SETUP_TASKLIST_PRODUCT_TYPES,
-			[]
-		) as ProductType[] ),
-	];
+	const injectedProductTypes = applyFilters(
+		SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
+		[]
+	) as ProductType[];
+
+	let productTypes = [ ...baseProductTypes, ...injectedProductTypes ];
 
 	if ( exclude && exclude?.length > 0 ) {
 		productTypes = productTypes.filter(

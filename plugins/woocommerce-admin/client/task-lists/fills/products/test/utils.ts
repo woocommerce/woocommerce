@@ -10,7 +10,7 @@ import { getProductTypes, getSurfacedProductTypeKeys } from '../utils';
 import {
 	productTypes,
 	onboardingProductTypesToSurfaced,
-	SETUP_TASKLIST_PRODUCT_TYPES,
+	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 } from '../constants';
 
 describe( 'getProductTypes', () => {
@@ -36,7 +36,7 @@ describe( 'getProductTypes', () => {
 		};
 
 		addFilter(
-			SETUP_TASKLIST_PRODUCT_TYPES,
+			SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 			'wc/admin/tests',
 			( filteredProductTypes ) => {
 				return [ ...filteredProductTypes, customProduct ];
