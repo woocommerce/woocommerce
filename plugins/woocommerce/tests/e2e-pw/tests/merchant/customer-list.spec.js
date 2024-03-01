@@ -78,6 +78,16 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		},
 	} );
 
+	test.beforeAll( async ( { api } ) => {
+		let oldCustomers = {};
+		await api.get( 'customers' ).then( ( response ) => {
+			oldCustomers = response.data;
+		} );
+		await api.post( `customers/batch`, {
+			delete: oldCustomers.map( ( customer ) => customer.id ),
+		} );
+	} );
+
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
