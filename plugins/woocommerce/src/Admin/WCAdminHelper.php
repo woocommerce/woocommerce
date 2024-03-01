@@ -107,6 +107,11 @@ class WCAdminHelper {
 	 * @throws \Exception
 	 */
 	public static function is_site_fresh() {
+		$fresh_site = get_option( 'fresh_site' );
+		if ( $fresh_site !== '1' ) {
+			return false;
+		}
+
 		$current_userdata = get_userdata( get_current_user_id() );
 		// Return false if we can't get user meta data for some reason.
 		if ( ! $current_userdata ) {
@@ -116,6 +121,6 @@ class WCAdminHelper {
 		$date = new \DateTime( $current_userdata->user_registered );
 		$month_ago = new \DateTime( '-1 month' );
 
-		return get_option( 'fresh_site' ) === '1' && $date > $month_ago;
+		return $date > $month_ago;
 	}
 }
