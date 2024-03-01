@@ -19,10 +19,10 @@ jobs:
     runs-on: 'ubuntu-20.04'
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
-      default-test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
+      default-test-jobs: ${{ steps.project-jobs.outputs.default-test-jobs }}
       e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
       api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
-      performance-test-jobs: ${{ steps.project-jobs.outputs.perf-test-jobs }}
+      performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'

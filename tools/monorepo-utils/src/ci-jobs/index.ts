@@ -54,7 +54,7 @@ const program = new Command( 'ci-jobs' )
 			testTypes.forEach( ( type ) => {
 				setOutput(
 					`${ type }-test-jobs`,
-					JSON.stringify( jobs[ type ] )
+					JSON.stringify( jobs[ `${ type }Test` ] )
 				);
 			} );
 			return;
