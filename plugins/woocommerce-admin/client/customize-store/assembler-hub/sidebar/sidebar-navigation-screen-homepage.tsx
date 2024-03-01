@@ -13,7 +13,8 @@ import {
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
-
+// @ts-expect-error No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 import { recordEvent } from '@woocommerce/tracks';
@@ -30,6 +31,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { useSelect } from '@wordpress/data';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -40,7 +42,17 @@ export const SidebarNavigationScreenHomepage = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
-	const [ blocks, , onChange ] = useEditorBlocks();
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			setSelectedPattern( pattern );
@@ -80,17 +92,7 @@ export const SidebarNavigationScreenHomepage = () => {
 			return;
 		}
 
-		const homeBlocks = blocks.slice( 1, -1 );
-		const _currentSelectedPattern = homePatterns.find( ( pattern ) => {
-			if ( homeBlocks.length !== pattern.blocks.length ) {
-				return false;
-			}
-			return homeBlocks.every(
-				( block, index ) => block.name === pattern.blocks[ index ].name
-			);
-		} );
-
-		setSelectedPattern( _currentSelectedPattern );
+		setSelectedPattern( selectedPattern );
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns ] );
