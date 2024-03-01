@@ -172,6 +172,10 @@ test.describe( 'Mini Cart block page', () => {
 			.click();
 		await page.locator( colorField ).fill( greenColor );
 		await page.getByTitle( 'Product Count', { exact: true } ).click();
+		// customize font size and weight
+		await page.getByLabel( 'Large', { exact: true } ).click();
+		await page.getByRole( 'button', { name: 'Font weight' } ).click();
+		await page.getByRole( 'option' ).filter( { hasText: 'Black' } ).click();
 
 		// publish created mini cart page
 		await page
@@ -201,6 +205,14 @@ test.describe( 'Mini Cart block page', () => {
 		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
 			'data-product-count-color',
 			`{"color":"#${ greenColor }"}`
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-font-size',
+			'large'
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-style',
+			'{"typography":{"fontWeight":"900"}}'
 		);
 		await page.locator( miniCartButton ).click();
 		await expect(
