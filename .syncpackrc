@@ -218,6 +218,15 @@
 		},
 		{
 			"dependencies": [
+				"simple-git"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^3.21.0"
+		},
+		{
+			"dependencies": [
 				"@types/node"
 			],
 			"packages": [

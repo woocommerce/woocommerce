@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Cache marketing task is_complete() method result

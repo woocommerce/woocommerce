@@ -142,7 +142,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const sidebarMessage =
 		context.flowType === FlowType.AIOnline
 			? __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
 					'woocommerce'
 			  )
 			: __(
@@ -238,6 +238,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
+								price={ theme.price }
 								onClick={ () => {
 									if ( theme.is_active ) {
 										sendEvent( {

@@ -376,8 +376,17 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		assemblerHub: {
-			initial: 'checkActiveThemeHasMods',
+			initial: 'fetchActiveThemeHasMods',
 			states: {
+				fetchActiveThemeHasMods: {
+					invoke: {
+						src: 'fetchActiveThemeHasMods',
+						onDone: {
+							actions: 'assignActiveThemeHasMods',
+							target: 'checkActiveThemeHasMods',
+						},
+					},
+				},
 				checkActiveThemeHasMods: {
 					always: [
 						{
@@ -450,6 +459,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 				GO_BACK_TO_DESIGN_WITHOUT_AI: {
 					target: 'intro',
+					actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 				},
 			},
 		},

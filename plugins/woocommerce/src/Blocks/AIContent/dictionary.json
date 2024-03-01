@@ -359,7 +359,7 @@
 		"content": {
 			"titles": [
 				{
-					"default": "Last chance",
+					"default": "Bestsellers",
 					"ai_prompt": "An impact phrase that advertises the featured products with at least 10 characters"
 				}
 			]

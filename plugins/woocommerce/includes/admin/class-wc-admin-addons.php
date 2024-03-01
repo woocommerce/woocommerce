@@ -79,31 +79,19 @@ class WC_Admin_Addons {
 	 * @return array|WP_Error
 	 */
 	public static function fetch_featured() {
+		$transient_name = 'wc_addons_featured';
+		// Important: WCCOM Extensions API v2.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
 		$locale   = get_user_locale();
-		$featured = self::get_locale_data_from_transient( 'wc_addons_featured', $locale );
+		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
 		if ( false === $featured ) {
-			$headers = array();
-			$auth    = WC_Helper_Options::get( 'auth' );
-
-			if ( ! empty( $auth['access_token'] ) ) {
-				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
-			}
-
-			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
-			$country          = WC()->countries->get_base_country();
-			if ( ! empty( $country ) ) {
-				$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
-			}
-
-			// Important: WCCOM Extensions API v2.0 is used.
-			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
-				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				)
+			$fetch_options = array(
+				'auth'    => true,
+				'locale'  => true,
+				'country' => true,
 			);
+			$raw_featured  = self::fetch( $url, $fetch_options );
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
@@ -143,7 +131,7 @@ class WC_Admin_Addons {
 			}
 
 			if ( $featured ) {
-				self::set_locale_data_in_transient( 'wc_addons_featured', $featured, $locale, DAY_IN_SECONDS );
+				self::set_locale_data_in_transient( $transient_name, $featured, $locale, DAY_IN_SECONDS );
 			}
 		}
 
@@ -1555,5 +1543,50 @@ class WC_Admin_Addons {
 		$transient_value            = is_array( $transient_value ) ? $transient_value : array();
 		$transient_value[ $locale ] = $value;
 		return set_transient( $transient, $transient_value, $expiration );
+	}
+
+	/**
+	 * Make wp_safe_remote_get request to Woo.com endpoint.
+	 * Optionally pass user auth token, locale or country.
+	 *
+	 * @param string $url     URL to request.
+	 * @param ?array $options Options for the request. For example, to pass auth token, locale and country,
+	 *                        pass array( 'auth' => true, 'locale' => true, 'country' => true, ).
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch( $url, $options = array() ) {
+		$headers = array();
+
+		if ( isset( $options['auth'] ) && $options['auth'] ) {
+			$auth = WC_Helper_Options::get( 'auth' );
+
+			if ( isset( $auth['access_token'] ) && ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+		}
+
+		$parameters = array();
+
+		if ( isset( $options['locale'] ) && $options['locale'] ) {
+			$parameters['locale'] = get_user_locale();
+		}
+
+		if ( isset( $options['country'] ) && $options['country'] ) {
+			$country = WC()->countries->get_base_country();
+			if ( ! empty( $country ) ) {
+				$parameters['country'] = $country;
+			}
+		}
+
+		$query_string = ! empty( $parameters ) ? '?' . http_build_query( $parameters ) : '';
+
+		return wp_safe_remote_get(
+			$url . $query_string,
+			array(
+				'headers'    => $headers,
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+			)
+		);
 	}
 }
