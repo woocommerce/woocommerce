@@ -102,7 +102,7 @@ class WCAdminHelper {
 	 *
 	 * - The current user was registered less than 1 month ago.
 	 * - fresh_site option must be 1
-	 * 
+	 *
 	 * @return bool
 	 * @throws \Exception
 	 */
