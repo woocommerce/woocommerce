@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use regular_price to determine if product is not sale and don't rely only on price for product_meta_lookup
+Use regular_price to determine if product is not sale and don't rely only on price for product_meta_lookup.
