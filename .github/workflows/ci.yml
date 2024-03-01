@@ -65,7 +65,7 @@ jobs:
       - name: 'Lint'
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-  project-test-jobs:
+  project-default-test-jobs:
     name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
     runs-on: 'ubuntu-20.04'
     needs: 'project-jobs'
