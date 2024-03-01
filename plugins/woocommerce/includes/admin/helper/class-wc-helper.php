@@ -1518,6 +1518,8 @@ class WC_Helper {
 			$source = 'inbox-notes';
 		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
 			$source = 'heartbeat-api';
+		elseif ( stripos( $request_uri, 'installer' ) ) :
+			$source = 'wccom-site-installer';
 		elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
 			$source = 'wc-cli';
 		endif;
