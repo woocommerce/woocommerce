@@ -401,7 +401,7 @@ class Checkout extends AbstractCartRoute {
 			 *
 			 * @since 8.8.0
 			 *
-			 * @param integer $minutes Minutes to hold stock for draft orders.
+			 * @param integer $minutes Minutes to hold stock for draft orders on checkout entry.
 			 */
 
 			$draft_order_hold_stock_minutes = apply_filters( 'woocommerce_draft_order_hold_stock_minutes', 10 );
