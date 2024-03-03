@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add `woocommerce_draft_order_hold_stock_minutes` filter hook to allow duration of stock reservation to hold stock for draft orders on checkout entry.
+Add `woocommerce_hold_stock_minutes_checkout_draft filter` hook to allow duration of stock reservation for checkout draft orders to be filtered
