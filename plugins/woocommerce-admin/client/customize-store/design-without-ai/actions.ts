@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { getNewPath } from '@woocommerce/navigation';
 import { sendParent } from 'xstate';
 
 /**

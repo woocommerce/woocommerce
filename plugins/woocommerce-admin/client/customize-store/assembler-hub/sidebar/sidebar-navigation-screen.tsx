@@ -31,8 +31,6 @@ import { GoBackWarningModal } from '../go-back-warning-modal';
  */
 import { CustomizeStoreContext } from '../';
 import { isAIFlow } from '~/customize-store/guards';
-import { navigateOrParent } from '~/customize-store/utils';
-import { getNewPath } from '@woocommerce/navigation';
 const { useLocation } = unlock( routerPrivateApis );
 
 export const SidebarNavigationScreen = ( {
@@ -56,7 +54,7 @@ export const SidebarNavigationScreen = ( {
 	backPath?: string;
 	onNavigateBackClick?: () => void;
 } ) => {
-	const { sendEvent, context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 	const [ openWarningModal, setOpenWarningModal ] =
 		useState< boolean >( false );
 	const location = useLocation();
