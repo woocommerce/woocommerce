@@ -68,6 +68,7 @@
 			.woocommerce-tag__text {
 				background-color: #DCDCDE; // $gray-5
 				border-radius: $gap-smallest;
+				font-weight: 400;
 			}
 
 			@include breakpoint( '<960px' ) {
