@@ -5,6 +5,7 @@ import { Sender } from 'xstate';
 import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 import { resolveSelect, dispatch } from '@wordpress/data';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
@@ -27,7 +28,11 @@ import {
 	getFontFamiliesAndFontFaceToInstall,
 } from './fonts';
 import { COLOR_PALETTES } from '../assembler-hub/sidebar/global-styles/color-palette-variations/constants';
-import { FONT_PAIRINGS_WHEN_AI_IS_OFFLINE } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import {
+	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
+	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
+} from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
+import { DesignWithoutAIStateMachineContext } from './types';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -150,10 +155,21 @@ const createProducts = async () => {
 	}
 };
 
-const updateGlobalStylesWithDefaultValues = async () => {
+const updateGlobalStylesWithDefaultValues = async (
+	context: DesignWithoutAIStateMachineContext
+) => {
 	// We are using the first color palette and font pairing that are displayed on the color/font picker on the sidebar.
 	const colorPalette = COLOR_PALETTES[ 0 ];
-	const fontPairing = FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ];
+
+	const allowTracking =
+		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+			'woocommerce_allow_tracking'
+		) ) === 'yes';
+
+	const fontPairing =
+		context.isFontLibraryAvailable && allowTracking
+			? FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ]
+			: FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING[ 0 ];
 
 	// @ts-expect-error No types for this exist yet.
 	const { invalidateResolutionForStoreSelector } = dispatch( coreStore );

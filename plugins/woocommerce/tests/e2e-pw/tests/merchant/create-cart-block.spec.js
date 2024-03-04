@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 
 const transformedCartBlockTitle = `Transformed Cart ${ Date.now() }`;
 const transformedCartBlockSlug = transformedCartBlockTitle
@@ -13,7 +13,7 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 		// go to create a new page
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		// fill page title
 		await page
