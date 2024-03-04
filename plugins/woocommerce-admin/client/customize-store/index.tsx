@@ -530,7 +530,9 @@ declare global {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
-			sendEvent: ( typeEvent: string ) => void;
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => void;
 		};
 	}
 }
@@ -591,7 +593,9 @@ export const CustomizeStoreController = ( {
 		}
 		window.__wcCustomizeStore = {
 			...window.__wcCustomizeStore,
-			sendEvent: ( typeEvent: string ) => send( { type: typeEvent } ),
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => send( typeEvent ),
 		};
 	}, [ send ] );
 
