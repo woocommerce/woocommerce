@@ -18,9 +18,11 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
 if ( ! $notices ) {
 	return;
 }
+
 ?>
 
 <?php foreach ( $notices as $notice ) : ?>

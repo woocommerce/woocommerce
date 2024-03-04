@@ -111,13 +111,8 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		// Include our hidden `<input>` elements on order notes and registration form.
-		$source_form_elements = function() {
-			$this->source_form_elements();
-		};
-
-		add_action( 'woocommerce_after_order_notes', $source_form_elements );
-		add_action( 'woocommerce_register_form', $source_form_elements );
+		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_html_element' ) );
+		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
 
 		// Update order based on submitted fields.
 		add_action(
@@ -347,13 +342,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add `<input type="hidden">` elements for source fields.
-	 * Used for checkout & customer register froms.
+	 * Add `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
+	 * Used for checkout & customer register forms.
 	 */
-	private function source_form_elements() {
-		foreach ( $this->field_names as $field_name ) {
-			printf( '<input type="hidden" name="%s" value="" />', esc_attr( $this->get_prefixed_field_name( $field_name ) ) );
-		}
+	public function stamp_html_element() {
+		printf( '<wc-order-attribution-inputs></wc-order-attribution-inputs>' );
 	}
 
 	/**

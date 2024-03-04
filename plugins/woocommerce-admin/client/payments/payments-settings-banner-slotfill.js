@@ -1,17 +1,16 @@
 /**
  * External dependencies
  */
-import { createSlotFill, SlotFillProvider } from '@wordpress/components';
-import { registerPlugin, PluginArea } from '@wordpress/plugins';
+import { createSlotFill } from '@wordpress/components';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
  */
 import { PaymentsBannerWrapper } from './payment-settings-banner';
+import { SETTINGS_SLOT_FILL_CONSTANT } from '../settings/settings-slots';
 
-const { Fill, Slot } = createSlotFill(
-	'__EXPERIMENTAL__WcAdminPaymentsGatewaysSettingsBanner'
-);
+const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 const PaymentsBannerFill = () => {
 	return (
 		<Fill>
@@ -20,18 +19,9 @@ const PaymentsBannerFill = () => {
 	);
 };
 
-export const WcAdminPaymentsGatewaysBannerSlot = () => {
-	return (
-		<>
-			<SlotFillProvider>
-				<Slot />
-				<PluginArea scope="woocommerce-settings" />
-			</SlotFillProvider>
-		</>
-	);
+export const registerPaymentsSettingsBannerFill = () => {
+	registerPlugin( 'woocommerce-admin-paymentsgateways-settings-banner', {
+		scope: 'woocommerce-payments-settings',
+		render: PaymentsBannerFill,
+	} );
 };
-
-registerPlugin( 'woocommerce-admin-paymentsgateways-settings-banner', {
-	scope: 'woocommerce-settings',
-	render: PaymentsBannerFill,
-} );

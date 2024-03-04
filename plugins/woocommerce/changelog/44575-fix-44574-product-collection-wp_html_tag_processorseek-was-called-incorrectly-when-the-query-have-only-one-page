@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix following notice on frontend: `Notice: Function WP_HTML_Tag_Processor::seek was called incorrectly. Unknown bookmark name. Please see <a>Debugging in WordPress</a> for more information. (This message was added in version 6.2.0.)`
-
