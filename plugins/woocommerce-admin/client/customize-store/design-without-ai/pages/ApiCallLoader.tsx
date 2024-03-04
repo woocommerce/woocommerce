@@ -4,6 +4,7 @@
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from '@wordpress/element';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -16,7 +17,6 @@ import {
 	createAugmentedSteps,
 	onIframeLoad,
 } from '~/customize-store/utils';
-import { getNewPath } from '@woocommerce/navigation';
 
 const loaderSteps = [
 	{
@@ -111,9 +111,9 @@ const AssemblerHub = () => {
 	return (
 		<iframe
 			ref={ iframe }
-			onLoad={ ( iframe ) => {
+			onLoad={ ( frame ) => {
 				const showIframe = () => setIsVisible( true );
-				attachIframeListeners( iframe.currentTarget );
+				attachIframeListeners( frame.currentTarget );
 				onIframeLoad( showIframe );
 				// Ceiling wait time set to 60 seconds
 				setTimeout( showIframe, 60 * 1000 );

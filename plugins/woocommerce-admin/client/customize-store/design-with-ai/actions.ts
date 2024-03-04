@@ -296,45 +296,6 @@ const redirectToAssemblerHub = async (
 	context: designWithAiStateMachineContext
 ) => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
-	const iframe = document.createElement( 'iframe' );
-	iframe.classList.add( 'cys-fullscreen-iframe' );
-	iframe.src = assemblerUrl;
-
-	const showIframe = () => {
-		if ( iframe.style.opacity === '1' ) {
-			// iframe is already visible
-			return;
-		}
-
-		const loader = document.getElementsByClassName(
-			'woocommerce-onboarding-loader'
-		);
-		if ( loader[ 0 ] ) {
-			( loader[ 0 ] as HTMLElement ).style.display = 'none';
-		}
-
-		iframe.style.opacity = '1';
-
-		if ( context.startLoadingTime ) {
-			const endLoadingTime = performance.now();
-			const timeToLoad = endLoadingTime - context.startLoadingTime;
-			recordEvent( 'customize_your_store_ai_wizard_loading_time', {
-				time_in_s: ( timeToLoad / 1000 ).toFixed( 2 ),
-			} );
-		}
-	};
-
-	iframe.onload = () => {
-		// Hide loading UI
-		attachIframeListeners( iframe );
-		onIframeLoad( showIframe );
-
-		// Ceiling wait time set to 60 seconds
-		setTimeout( showIframe, 60 * 1000 );
-		window.history?.pushState( {}, '', assemblerUrl );
-	};
-
-	document.body.appendChild( iframe );
 
 	// This is a workaround to update the "activeThemeHasMods" in the parent's machine
 	// state context. We should find a better way to do this using xstate actions,
