@@ -1213,6 +1213,7 @@ class DefaultPaymentGateways {
 				'payoneer-checkout',
 			),
 			'JP' => array(
+				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'square_credit_card',
@@ -1227,6 +1228,7 @@ class DefaultPaymentGateways {
 			'ZA' => array( 'payfast', 'paystack' ),
 			'NG' => array( 'paystack' ),
 			'GH' => array( 'paystack' ),
+			'AE' => array( 'woocommerce_payments' ),
 		);
 
 		// If the country code is not in the list, return default priority.
