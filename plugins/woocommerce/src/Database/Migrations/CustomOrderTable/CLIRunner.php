@@ -945,7 +945,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 		WP_CLI::log( sprintf( _n( 'Starting cleanup for %d order...', 'Starting cleanup for %d orders...', $order_count, 'woocommerce' ), $order_count ) );
 
 		do {
-			$order_ids = $handler->get_orders_for_cleanup( $q_order_ids, $q_limit );
+			$failed_ids = array();
+			$order_ids  = $handler->get_orders_for_cleanup( $q_order_ids, $q_limit );
 
 			foreach ( $order_ids as $order_id ) {
 				try {
@@ -957,6 +958,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				} catch ( \Exception $e ) {
 					// translators: %1$d is an order ID, %2$s is an error message.
 					WP_CLI::warning( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
+					$failed_ids[] = $order_id;
 				}
 
 				$progress->tick();
@@ -965,6 +967,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			if ( ! $all_orders ) {
 				break;
 			}
+
+			if ( $failed_ids && ! array_diff( $order_ids, $failed_ids ) ) {
+				WP_CLI::error(  __( 'Failed to clean up all orders in a batch. Aborting.', 'woocommerce' ) );
+				break;
+			}
+
 		} while ( $order_ids );
 
 		$progress->finish();
