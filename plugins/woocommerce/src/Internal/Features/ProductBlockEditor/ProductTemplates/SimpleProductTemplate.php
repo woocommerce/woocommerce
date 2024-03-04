@@ -568,6 +568,17 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'     => 10,
 			)
 		);
+
+		$product_catalog_section->add_block(
+			array(
+				'id'         => 'product-custom-fields-toggle',
+				'blockName'  => 'woocommerce/product-custom-fields-toggle-field',
+				'order'      => 20,
+				'attributes' => array(
+					'label' => __( 'Show custom fields', 'woocommerce' ),
+				),
+			)
+		);
 	}
 
 	/**
