@@ -548,7 +548,7 @@ class Plugins extends \WC_REST_Data_Controller {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce' ), 500 );
 		}
-
+		$has_cbd_industry = false;
 		if ( 'US' === WC()->countries->get_base_country() ) {
 			$profile = get_option( OnboardingProfile::DATA_OPTION, array() );
 			if ( ! empty( $profile['industry'] ) ) {

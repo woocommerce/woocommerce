@@ -1,15 +1,22 @@
 {
 	"name": "woocommerce/remote-specs-validation",
+	"version": "1.0.1",
 	"description": "Remote specs testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
-			"Automattic\\WooCommerce\\Tests\\RemoteSpecsValidation\\": "src/"
+			"Automattic\\WooCommerce\\RemoteSpecsValidation\\": "src/"
+		}
+	},
+  	"autoload-dev": {
+	  	"psr-4": {
+		  	"Automattic\\WooCommerce\\RemoteSpecsValidation\\Tests\\": "tests/"
 		}
 	},
 	"require-dev": {
-		"automattic/jetpack-changelogger": "^3.3.0"
+		"automattic/jetpack-changelogger": "3.3.0",
+		"phpunit/phpunit": "^9"
 	},
 	"extra": {
 		"changelogger": {
@@ -27,5 +34,8 @@
 			},
 			"changelog": "changelog.md"
 		}
+	},
+	"require": {
+		"opis/json-schema": "^2.3"
 	}
 }

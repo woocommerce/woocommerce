@@ -24,6 +24,10 @@ class ArraySearch implements TransformerInterface {
 	 * @return mixed|null
 	 */
 	public function transform( $value, stdClass $arguments = null, $default = null ) {
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
 		$key = array_search( $arguments->value, $value, true );
 		if ( false !== $key ) {
 			return $value[ $key ];

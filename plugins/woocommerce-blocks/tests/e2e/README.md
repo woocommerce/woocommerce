@@ -104,7 +104,7 @@ pnpm run test:e2e:classic-theme
 pnpm run test:e2e:block-theme-with-templates
 ```
 
-_Note: All command parameters of `test:e2e` can be used for these commands too.
+\_Note: All command parameters of `test:e2e` can be used for these commands too.
 
 ### Other ways of running tests
 
@@ -142,6 +142,75 @@ To see all options, run the following command:
 
 ```sh
 npx playwright test --help
+```
+
+### Generating dynamic posts to test block variations
+
+Testing a single block can be daunting considering all the different attribute combinations that could be
+considered valid for a single block. The basic templating system available in this test suite allows for
+the generation of dynamic posts that can be used to test block variations.
+
+Templates use the Handlebars templating system and you can put them anywhere. It's simplest to co-locate them
+with the test. You can easily pass custom attributes to a block in your template using the wp-block helper
+we've defined.
+
+It looks like this in the template:
+
+```handlebars
+{{#> wp-block name="woocommerce/featured-category" attributes=attributes /}}
+    You can nest content here if you want to test the block with some content.
+{{/wp-block}}
+```
+
+In your tests you can use `createPostFromTemplate` to create a post containing your template. If you use it
+more than once in your test you can extend the test suite and provide the posts as fixtures, like in the example
+below
+
+```js
+import { test as base } from '@playwright/test';
+
+const test = base.extend< {
+	dropdownBlockPostPage: TestingPost;
+	defaultBlockPostPage: TestingPost;
+} >( {
+	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+		const testingPost = await requestUtils.createPostFromTemplate(
+			requestUtils,
+			{ title: 'Product Filter Stock Status Block' },
+			TEMPLATE_PATH,
+			{}
+		);
+
+		await use( testingPost );
+		await requestUtils.deletePost( post.id );
+	},
+
+	dropdownBlockPostPage: async ( { requestUtils }, use ) => {
+		const testingPost = await requestUtils.createPostFromTemplate(
+			requestUtils,
+			{ title: 'Product Filter Stock Status Block' },
+			TEMPLATE_PATH,
+			{
+				attributes: {
+					displayStyle: 'dropdown',
+				},
+			}
+		);
+
+		await use( testingPost );
+		await requestUtils.deletePost( post.id );
+	},
+} );
+```
+
+In your test you can navigate to the page. You won't need to clean it up, because
+the fixture will take care of that for you.
+
+```js
+test( 'Test the block', async ( { page, defaultBlockPostPage } ) => {
+	await page.goto( defaultBlockPostPage.link );
+	// do your tests here
+} );
 ```
 
 ### Troubleshooting

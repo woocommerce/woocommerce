@@ -2649,3 +2649,21 @@ LIMIT 250
 function wc_update_860_remove_recommended_marketing_plugins_transient() {
 	delete_transient( 'wc_marketing_recommended_plugins' );
 }
+
+/**
+ * Create an .htaccess file and an empty index.html file to prevent listing of the default transient files directory,
+ * if the directory exists.
+ */
+function wc_update_870_prevent_listing_of_transient_files_directory() {
+	global $wp_filesystem;
+
+	$default_transient_files_dir = untrailingslashit( wp_upload_dir()['basedir'] ) . '/woocommerce_transient_files';
+	if ( ! is_dir( $default_transient_files_dir ) ) {
+		return;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	\WP_Filesystem();
+	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
+	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+}

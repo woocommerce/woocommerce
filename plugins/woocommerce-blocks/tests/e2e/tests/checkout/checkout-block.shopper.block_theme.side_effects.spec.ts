@@ -474,3 +474,135 @@ test.describe( 'Checkout Form Errors', () => {
 		).toBeVisible();
 	} );
 } );
+
+test.describe( 'Billing Address Form', () => {
+	const blockSelectorInEditor = blockData.selectors.editor.block as string;
+
+	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
+	test.beforeEach( async ( { editor, admin, editorUtils } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+		} );
+		await editorUtils.enterEditMode();
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
+
+		const checkbox = editor.page.getByRole( 'checkbox', {
+			name: 'Company',
+			exact: true,
+		} );
+		await checkbox.check();
+		await expect( checkbox ).toBeChecked();
+		await expect(
+			editor.canvas.locator(
+				'div.wc-block-components-address-form__company'
+			)
+		).toBeVisible();
+		await editorUtils.saveSiteEditorEntities();
+	} );
+
+	const shippingTestData = {
+		firstname: 'John',
+		lastname: 'Doe',
+		company: 'Automattic',
+		addressfirstline: '123 Easy Street',
+		addresssecondline: 'Testville',
+		country: 'United States (US)',
+		city: 'New York',
+		state: 'New York',
+		postcode: '90210',
+		phone: '01234567890',
+	};
+	const billingTestData = {
+		first_name: '',
+		last_name: '',
+		company: '',
+		address_1: '',
+		address_2: '',
+		country: 'United States (US)',
+		city: '',
+		state: 'New York',
+		postcode: '',
+		phone: '',
+	};
+
+	test( 'Ensure billing is empty and shipping address is filled for guest user', async ( {
+		frontendUtils,
+		page,
+		checkoutPageObject,
+	} ) => {
+		await frontendUtils.logout();
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
+		await checkoutPageObject.fillShippingDetails( shippingTestData );
+		await page.getByLabel( 'Use same address for billing' ).uncheck();
+
+		// Check shipping fields are filled.
+		for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			switch ( key ) {
+				case 'firstname':
+					await expect(
+						page.locator( '#shipping-first_name' )
+					).toHaveValue( value );
+					break;
+				case 'lastname':
+					await expect(
+						page.locator( '#shipping-last_name' )
+					).toHaveValue( value );
+					break;
+				case 'country':
+					await expect(
+						page.locator( '#shipping-country input' )
+					).toHaveValue( value );
+					break;
+				case 'addressfirstline':
+					await expect(
+						page.locator( '#shipping-address_1' )
+					).toHaveValue( value );
+					break;
+				case 'addresssecondline':
+					await expect(
+						page.locator( '#shipping-address_2' )
+					).toHaveValue( value );
+					break;
+				case 'state':
+					await expect(
+						page.locator( '#shipping-state input' )
+					).toHaveValue( value );
+					break;
+				default:
+					await expect(
+						page.locator( `#shipping-${ key }` )
+					).toHaveValue( value );
+			}
+		}
+
+		// Check billing fields are empty.
+		for ( const [ key, value ] of Object.entries( billingTestData ) ) {
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			switch ( key ) {
+				case 'country':
+					await expect(
+						page.locator( '#billing-country input' )
+					).toHaveValue( value );
+					break;
+				case 'state':
+					await expect(
+						page.locator( '#billing-state input' )
+					).toHaveValue( value );
+					break;
+				default:
+					await expect(
+						page.locator( `#billing-${ key }` )
+					).toHaveValue( value );
+			}
+		}
+	} );
+} );

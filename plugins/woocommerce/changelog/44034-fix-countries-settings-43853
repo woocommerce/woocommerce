@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Update `get_shipping_countries` to return an empty list of countries when shipping is disabled.
