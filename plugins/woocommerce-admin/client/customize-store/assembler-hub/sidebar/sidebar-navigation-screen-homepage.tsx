@@ -32,7 +32,6 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { useSelect } from '@wordpress/data';
-import { findPatternByBlock } from '~/customize-store/assembler-hub/sidebar/utils';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
