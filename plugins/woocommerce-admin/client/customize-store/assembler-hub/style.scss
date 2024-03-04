@@ -53,7 +53,8 @@
 	}
 }
 
-.woocommerce-customize-store {
+.woocommerce-customize-store-header,
+.edit-site-layout__header-container {
 	.edit-site-site-hub__view-mode-toggle-container a {
 		color: unset;
 	}
@@ -123,8 +124,6 @@
 	}
 
 	.edit-site-site-hub__view-mode-toggle-container {
-		padding: 16px 12px 0 16px;
-
 		.edit-site-layout__view-mode-toggle,
 		.edit-site-layout__view-mode-toggle-icon.edit-site-site-icon,
 		.edit-site-site-icon__icon {
@@ -592,6 +591,23 @@
 	}
 }
 
+.woocommerce-customize-store__step-assemblerHub {
+	.edit-site-site-hub__view-mode-toggle-container {
+		padding: 16px 12px 0 16px;
+	}
+}
+
+.woocommerce-customize-store__step-intro {
+	.edit-site-site-hub__view-mode-toggle-container {
+		height: 32px;
+	}
+
+	.edit-site-layout {
+		.edit-site-site-hub__view-mode-toggle-container {
+			padding-left: 16px;
+		}
+	}
+}
 
 .woocommerce-customize-store-tour-kit {
 	.woocommerce-tour-kit-step {
