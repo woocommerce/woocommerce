@@ -763,7 +763,16 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						</tr>
 						<?php
 						break;
-
+					case 'div':
+						?>
+						<div
+							id="<?php echo esc_attr( $value['id'] ); ?>"
+							class="<?php echo esc_attr( $value['class'] ); ?>"
+						>
+							<?php echo $value['value']; ?>
+						</div>
+						<?php
+						break;
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );
