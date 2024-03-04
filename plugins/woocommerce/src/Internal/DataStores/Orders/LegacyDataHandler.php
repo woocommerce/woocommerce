@@ -153,23 +153,24 @@ class LegacyDataHandler {
 	public function cleanup_post_data( int $order_id, bool $skip_checks = false ): void {
 		global $wpdb;
 
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			// translators: %d is an order ID.
-			throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
-		}
+		$post_is_placeholder = $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE === get_post_type( $order_id );
+		if ( ! $post_is_placeholder ) {
+			$order = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				// translators: %d is an order ID.
+				throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
+			}
 
 		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
-			if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
-				throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
-			}
+			throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
 		}
 
 		// Delete all metadata.
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->postmeta} WHERE post_id = %d",
-				$order->get_id()
+				$order_id
 			)
 		);
 
@@ -180,11 +181,11 @@ class LegacyDataHandler {
 				"UPDATE {$wpdb->posts} SET post_type = %s, post_status = %s WHERE ID = %d",
 				$this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE,
 				'draft',
-				$order->get_id()
+				$order_id
 			)
 		);
 
-		clean_post_cache( $order->get_id() );
+		clean_post_cache( $order_id );
 	}
 
 	/**
