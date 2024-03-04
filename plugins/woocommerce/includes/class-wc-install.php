@@ -2350,7 +2350,7 @@ $hpos_table_schema;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<b>Late or missing refunds</b>
+<p><b>Late or missing refunds</b></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
@@ -2370,7 +2370,7 @@ $hpos_table_schema;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<b>Sale items</b>
+<p><b>Sale items</b></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
