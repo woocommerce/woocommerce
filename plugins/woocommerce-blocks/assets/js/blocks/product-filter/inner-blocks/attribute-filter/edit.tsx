@@ -241,18 +241,13 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
-	const inspectorProps = {
-		...props,
-		setAttributeId,
-	};
-
 	return (
 		<Wrapper
 			onClickToolbarEdit={ toggleEditing }
 			isEditing={ isEditing }
 			blockProps={ blockProps }
 		>
-			<Inspector { ...inspectorProps } />
+			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown
