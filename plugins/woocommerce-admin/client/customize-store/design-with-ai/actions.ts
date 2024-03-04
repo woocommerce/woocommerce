@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { assign, spawn } from 'xstate';
-import {
-	getQuery,
-	updateQueryString,
-	getNewPath,
-} from '@woocommerce/navigation';
+import { getQuery, updateQueryString } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -29,7 +25,6 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
-import { attachIframeListeners, onIframeLoad } from '../utils';
 
 const assignStartLoadingTime = assign<
 	designWithAiStateMachineContext,
@@ -292,11 +287,7 @@ const recordTracksStepCompleted = (
 	} );
 };
 
-const redirectToAssemblerHub = async (
-	context: designWithAiStateMachineContext
-) => {
-	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
-
+const redirectToAssemblerHub = async () => {
 	// This is a workaround to update the "activeThemeHasMods" in the parent's machine
 	// state context. We should find a better way to do this using xstate actions,
 	// since state machines should rely only on their context.
@@ -306,33 +297,6 @@ const redirectToAssemblerHub = async (
 	// than the parent window.
 	// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
 	window.parent.__wcCustomizeStore.activeThemeHasMods = true;
-
-	// Listen for back button click
-	window.addEventListener(
-		'popstate',
-		() => {
-			const apiLoaderUrl = getNewPath(
-				{},
-				'/customize-store/design-with-ai/api-call-loader',
-				{}
-			);
-
-			// Only catch the back button click when the user is on the main assember hub page
-			// and trying to go back to the api loader page
-			if ( 'admin.php' + window.location.search === apiLoaderUrl ) {
-				iframe.contentWindow?.postMessage(
-					{
-						type: 'assemberBackButtonClicked',
-					},
-					'*'
-				);
-				// When the user clicks the back button, push state changes to the previous step
-				// Set it back to the assembler hub
-				window.history?.pushState( {}, '', assemblerUrl );
-			}
-		},
-		false
-	);
 };
 
 export const actions = {

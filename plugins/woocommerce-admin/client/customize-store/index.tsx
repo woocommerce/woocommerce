@@ -593,6 +593,10 @@ export const CustomizeStoreController = ( {
 		}
 		window.__wcCustomizeStore = {
 			...window.__wcCustomizeStore,
+			// This is needed because the iframe loads the entire Customize Store app.
+			// This means that the iframe instance will have different state machines
+			// than the parent window.
+			// Check https://github.com/woocommerce/woocommerce/issues/45278 for more details.
 			sendEventToIntroMachine: (
 				typeEvent: customizeStoreStateMachineEvents
 			) => send( typeEvent ),
