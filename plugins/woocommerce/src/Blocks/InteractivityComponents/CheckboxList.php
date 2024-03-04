@@ -33,7 +33,6 @@ class CheckboxList {
 		$checkbox_list_context = array(
 			'items'             => $items,
 			'initialItemsCount' => $intial_items_count,
-			'showAll'           => false,
 		);
 		$visible_items         = array_slice( $items, 0, $intial_items_count );
 		$namespace             = wp_json_encode( array( 'namespace' => 'woocommerce/interactivity-checkbox-list' ) );
