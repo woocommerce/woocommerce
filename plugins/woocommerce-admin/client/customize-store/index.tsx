@@ -176,6 +176,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	on: {
 		GO_BACK_TO_DESIGN_WITH_AI: {
 			target: 'designWithAi',
+			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
 		},
 		GO_BACK_TO_DESIGN_WITHOUT_AI: {
 			target: 'intro',
