@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Ensure the "Any" Filter condition is displayed on the left and the "All" filter condition needs to be displayed on the right side in the display settings.
+Ensure the "Any" Filter condition is displayed on the left and the "All" filter condition is displayed on the right side in the display settings for the Filter by Attribute block.
