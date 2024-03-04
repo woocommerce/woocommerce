@@ -76,6 +76,7 @@ class Init {
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -378,5 +379,38 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+	}
+
+	/**
+	 * Register user metas.
+	 */
+	public function register_user_metas() {
+		$field = 'metaboxhidden_product';
+
+		register_rest_field(
+			'user',
+			$field,
+			array(
+				'get_callback'    => function ( $object ) use ( $field ) {
+					// Get field as single value from post meta.
+					return get_user_meta( $object['id'], $field, true );
+				},
+				'update_callback' => function ( $value, $object ) use ( $field ) {
+					// Update the field/meta value.
+					update_user_meta( $object->ID, $field, $value );
+				},
+				'schema'          => array(
+					'type'        => 'array',
+					'description' => __( 'The metaboxhidden_product meta from the user metas.', 'woocommerce' ),
+					'items'       => array(
+						'type' => 'string',
+					),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_parse_list',
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+				),
+			)
+		);
 	}
 }
