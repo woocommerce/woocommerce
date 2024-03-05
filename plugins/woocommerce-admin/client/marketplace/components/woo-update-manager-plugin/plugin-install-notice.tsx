@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import sanitizeHTML from '../../../lib/sanitize-html';
 import { getAdminSetting } from '../../../utils/admin-settings';
 import {
 	WP_ADMIN_PLUGIN_LIST_URL,
@@ -23,14 +24,17 @@ export default function PluginInstallNotice() {
 		! wccomSettings?.wooUpdateManagerActive &&
 		! wccomSettings?.wooUpdateManagerInstalled
 	) {
-		const message = __(
-			'Please install the Woo.com Update Manager to continue receiving the updates and streamlined support included in your Woo.com subscriptions. Alternatively, you can download and install it manually.',
-			'woocommerce'
-		);
 		return (
 			<section className="woocommerce-marketplace__woo-update-manager-plugin__notices">
 				<Notice status="error" isDismissible={ false }>
-					{ message }
+					<span
+						dangerouslySetInnerHTML={ sanitizeHTML(
+							__(
+								'Please install the <b>Woo.com Update Manager</b> to continue receiving the updates and streamlined support included in your Woo.com subscriptions.<br/>Alternatively, you can download and install it manually.',
+								'woocommerce'
+							)
+						) }
+					></span>
 					<div className="components-notice__buttons">
 						<Button
 							href={ wccomSettings?.wooUpdateManagerInstallUrl }
@@ -52,14 +56,17 @@ export default function PluginInstallNotice() {
 		wccomSettings?.wooUpdateManagerInstalled &&
 		! wccomSettings?.wooUpdateManagerActive
 	) {
-		const message = __(
-			'Activate the Woo.com Update Manager to continue receiving the updates and streamlined support included in your Woo.com subscriptions.',
-			'woocommerce'
-		);
 		return (
 			<section className="woocommerce-marketplace__woo-update-manager-plugin__notices">
 				<Notice status="error" isDismissible={ false }>
-					{ message }
+					<span
+						dangerouslySetInnerHTML={ sanitizeHTML(
+							__(
+								'Activate the <b>Woo.com Update Manager</b> to continue receiving the updates and streamlined support included in your Woo.com subscriptions.',
+								'woocommerce'
+							)
+						) }
+					></span>
 					<div className="components-notice__buttons">
 						<Button
 							href={ WP_ADMIN_PLUGIN_LIST_URL }
