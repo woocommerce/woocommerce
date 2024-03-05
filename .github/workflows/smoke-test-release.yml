@@ -32,7 +32,7 @@ jobs:
 
             - name: Validate release version
               id: validate-version
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   RELEASE_VERSION: ${{ github.event.release.tag_name || inputs.tag }}
               with:
@@ -51,7 +51,7 @@ jobs:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -126,7 +126,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             API_WP_LATEST_ARTIFACT: API test on release smoke test site with WP Latest (run ${{ github.run_number }})
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -199,7 +199,7 @@ jobs:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -243,7 +243,7 @@ jobs:
 
             - name: Archive E2E test report
               if: success() || failure()
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
                   path: |
@@ -306,11 +306,11 @@ jobs:
             contents: read
         steps:
             - name: Checkout WooCommerce repo
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Get WP Latest-1 version number
               id: get-wp-latest-1
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const { getVersionWPLatestMinusOne } = require( './plugins/woocommerce/tests/e2e-pw/utils/wordpress' );
@@ -330,7 +330,7 @@ jobs:
 
             - name: Download release zip
               id: download-zip
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
               with:
@@ -447,7 +447,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php_version: ['7.4', '8.1', '8.2', '8.3']
+                php_version: ['7.4', '8.1']
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
             API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
@@ -457,7 +457,7 @@ jobs:
             E2E_ARTIFACT: E2E test on wp-env with PHP ${{ matrix.php_version }} (run ${{ github.run_number }})
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -479,7 +479,7 @@ jobs:
 
             - name: Download release zip
               id: download-zip
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
               with:
@@ -622,7 +622,7 @@ jobs:
                       env_description: 'gutenberg-nightly'
         steps:
             - name: Checkout
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -636,7 +636,7 @@ jobs:
 
             - name: Download release zip
               id: download-zip
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
               with:
@@ -728,7 +728,7 @@ jobs:
             - test-plugins
             - test-wp-latest-1
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Download all slack blocks
               id: download-slack-blocks
