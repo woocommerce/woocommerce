@@ -65,6 +65,7 @@ class WCAdminHelper {
 	 */
 	public static function is_wc_admin_active_for( $seconds ) {
 		$wc_admin_active_for = self::get_wcadmin_active_for_in_seconds();
+
 		return ( $wc_admin_active_for >= $seconds );
 	}
 
