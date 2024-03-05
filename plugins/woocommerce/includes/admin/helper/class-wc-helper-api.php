@@ -76,7 +76,7 @@ class WC_Helper_API {
 	 * @param array  $body The body of the request.
 	 * @return string The signature.
 	 */
-	public static function create_request_signature( string $access_token_secret, string $url, string $method, $body = null ): string {
+	private static function create_request_signature( string $access_token_secret, string $url, string $method, $body = null ): string {
 
 		$request_uri  = wp_parse_url( $url, PHP_URL_PATH );
 		$query_string = wp_parse_url( $url, PHP_URL_QUERY );
@@ -96,6 +96,30 @@ class WC_Helper_API {
 		}
 
 		return hash_hmac( 'sha256', wp_json_encode( $data ), $access_token_secret );
+	}
+
+	/**
+	 * Add the access token and signature to the provided URL.
+	 *
+	 * @param string $url The URL to add the access token and signature to.
+	 * @return string
+	 */
+	public static function add_auth_parameters( string $url ): string {
+		$auth = WC_Helper_Options::get( 'auth' );
+
+		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
+			return false;
+		}
+
+		$signature = self::create_request_signature( (string) $auth['access_token_secret'], $url, 'GET' );
+
+		return add_query_arg(
+			array(
+				'token'     => $auth['access_token'],
+				'signature' => $signature,
+			),
+			$url
+		);
 	}
 
 	/**
