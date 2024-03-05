@@ -19,6 +19,9 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
+		// Ensure pages exist.
+		WC_Install::create_pages();
+
 		// Set up permalinks.
 		update_option(
 			'woocommerce_permalinks',
@@ -30,6 +33,19 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 				'use_verbose_page_rules' => true,
 			)
 		);
+	}
+
+	/**
+	 * Tear down after class.
+	 */
+	public static function tearDownAfterClass(): void {
+		// Delete pages.
+		wp_delete_post( get_option( 'woocommerce_shop_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_cart_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_checkout_page_id' ), true );
+		wp_delete_post( get_option( 'woocommerce_myaccount_page_id' ), true );
+		wp_delete_post( wc_privacy_policy_page_id(), true );
+		wp_delete_post( wc_terms_and_conditions_page_id(), true );
 	}
 
 	/**
@@ -196,13 +212,13 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_is_store_page .
-	 * @return array
+	 * Get store page test data. This data is used to test is_store_page function.
+	 *
+	 * We don't use the data provider in this test because data provider are executed before setUpBeforeClass and cause other tests to fail since we need to create pages to generate the test data.
+	 *
+	 * @return array[] list of store page test data.
 	 */
-	public function store_page_data_provider() {
-			// Ensure pages exist.
-			WC_Install::create_pages();
-
+	public function get_store_page_test_data() {
 			return array(
 				array( get_permalink( wc_get_page_id( 'cart' ) ), true ), // Test case 1: URL matches cart page.
 				array( get_permalink( wc_get_page_id( 'myaccount' ) ) . '/orders/', true ), // Test case 2: URL matches my account > orders page.
@@ -215,14 +231,13 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @dataProvider store_page_data_provider
 	 *
 	 * Test is_store_page function with different URLs.
 	 *
 	 * @param string $url URL to test.
 	 * @param bool   $expected_result Expected result.
 	 */
-	public function test_is_store_page( $url, $expected_result ) {
+	public function test_is_store_page() {
 			global $wp_rewrite;
 
 			$wp_rewrite = $this->getMockBuilder( 'WP_Rewrite' )->getMock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -237,7 +252,12 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 				->method( 'generate_rewrite_rule' )
 				->willReturn( array( 'shop/(.+?)/?$' => 'index.php?product_cat=$matches[1]&year=$matches[2]' ) );
 
-			$result = WCAdminHelper::is_store_page( $url );
-			$this->assertEquals( $expected_result, $result );
+			$test_data = $this->get_store_page_test_data();
+
+			foreach ( $test_data as $data ) {
+				list( $url, $expected_result ) = $data;
+				$result                        = WCAdminHelper::is_store_page( $url );
+				$this->assertEquals( $expected_result, $result );
+			}
 	}
 }
