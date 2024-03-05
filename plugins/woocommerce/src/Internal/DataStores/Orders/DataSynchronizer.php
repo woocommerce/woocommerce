@@ -902,6 +902,18 @@ ORDER BY orders.id ASC
 		return 'Synchronizes orders between posts and custom order tables.';
 	}
 
+	/**
+	 * Prevents deletion of order backup posts (regardless of sync setting) when HPOS is authoritative and the order
+	 * still exists in HPOS.
+	 * This should help with edge cases where wp_delete_post() would delete the HPOS record too or backfill would sync
+	 * incorrect data from an order with no metadata from the posts table.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param WP_Post|false|null $delete Whether to go forward with deletion.
+	 * @param WP_Post            $post   Post object.
+	 * @return WP_Post|false|null
+	 */
 	private function maybe_prevent_deletion_of_post( $delete, $post ) {
 		if ( self::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type && $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
 			$delete = false;
