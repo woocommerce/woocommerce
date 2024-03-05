@@ -123,7 +123,7 @@ class WCAdminHelper {
 	}
 
 	/**
-	 * Test if a URL is a store page.
+	 * Test if a URL is a store page. This function only checks URL paths and does not consider the domain.
 	 *
 	 * Store pages are defined as:
 	 *
