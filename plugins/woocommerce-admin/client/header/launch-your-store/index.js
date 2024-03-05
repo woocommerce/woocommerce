@@ -39,7 +39,7 @@ export const LaunchYourStoreStatus = () => {
 		<div className="woocommerce-lys-status">
 			<div className="woocommerce-lys-status-pill-wrapper">
 				<div className="woocommerce-lys-status-pill">
-					<span>Launch Your Store Status</span>
+					<span>Coming soon</span>
 					<Icon icon={ moreVertical } size={ 18 } />
 				</div>
 			</div>
