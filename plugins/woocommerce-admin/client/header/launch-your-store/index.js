@@ -4,6 +4,11 @@
 import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 export const useLaunchYourStore = () => {
 	const { isLoading, launchStatus, showLaunchYourStore } = useSelect(
 		( select ) => {
@@ -29,5 +34,11 @@ export const useLaunchYourStore = () => {
 };
 
 export const LaunchYourStoreStatus = () => {
-	return <div>Launch Your Store Status</div>;
+	return (
+		<div className="woocommerce-lys-status">
+			<span className="woocommerce-lys-status-pill">
+				Launch Your Store Status
+			</span>
+		</div>
+	);
 };
