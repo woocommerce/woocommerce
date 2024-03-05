@@ -118,6 +118,7 @@ class TaskLists {
 			'Tax',
 			'Shipping',
 			'Marketing',
+			'LaunchYourStore',
 		);
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {
@@ -125,10 +126,6 @@ class TaskLists {
 			if ( false !== $key ) {
 				unset( $tasks[ $key ] );
 			}
-		}
-
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$tasks[] = 'LaunchYourStore';
 		}
 
 		// Remove the old Personalize your store task if the new CustomizeStore is enabled.

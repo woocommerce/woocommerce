@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Main WooCommerce Class.
@@ -252,6 +253,8 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
+		add_action( 'woocommerce_installed', array( $this, 'add_lys_default_values' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -304,6 +307,29 @@ final class WooCommerce {
 		$config_name = 'woocommerce_remote_variant_assignment';
 		if ( false === get_option( $config_name, false ) ) {
 			update_option( $config_name, wp_rand( 1, 120 ) );
+		}
+	}
+
+	/**
+	 * Set default option values for launch your store task.
+	 */
+	public function add_lys_default_values() {
+		$coming_soon      = current_action() === 'woocommerce_installed' ? 'yes' : 'no';
+		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'yes' : 'no';
+		$private_link     = 'yes';
+		$share_key        = wp_generate_password( 32, false );
+
+		if ( ! get_option( 'woocommerce_coming_soon' ) ) {
+			update_option( 'woocommerce_coming_soon', $coming_soon );
+		}
+		if ( ! get_option( 'woocommerce_store_pages_only' ) ) {
+			update_option( 'woocommerce_store_pages_only', $store_pages_only );
+		}
+		if ( ! get_option( 'woocommerce_private_link' ) ) {
+			update_option( 'woocommerce_private_link', $private_link );
+		}
+		if ( ! get_option( 'woocommerce_share_key' ) ) {
+			update_option( 'woocommerce_share_key', $share_key );
 		}
 	}
 
