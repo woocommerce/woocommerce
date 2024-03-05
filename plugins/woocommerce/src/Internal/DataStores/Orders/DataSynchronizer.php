@@ -105,6 +105,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Class constructor.
 	 */
 	public function __construct() {
+		self::add_filter( 'pre_delete_post', array( $this, 'maybe_prevent_deletion_of_post' ), 10, 2 );
 		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
 		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
@@ -899,6 +900,14 @@ ORDER BY orders.id ASC
 	 */
 	public function get_description(): string {
 		return 'Synchronizes orders between posts and custom order tables.';
+	}
+
+	private function maybe_prevent_deletion_of_post( $delete, $post ) {
+		if ( $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
+			return false;
+		}
+
+		return null;
 	}
 
 	/**
