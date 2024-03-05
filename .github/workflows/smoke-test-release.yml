@@ -133,6 +133,12 @@ jobs:
               with:
                   install: '@woocommerce/plugin-woocommerce...'
 
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 1
+              run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
+
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
@@ -141,13 +147,13 @@ jobs:
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
-                  report-name: ${{ env.API_WP_LATEST_ARTIFACT }}
+                  report-name: ${{ env.API_ARTIFACT }}
                   tests: hello
                   playwright-config: ci-release.playwright.config.js
               env:
-                  API_BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  USER_KEY: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  USER_SECRET: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
+                  BASE_URL: http://localhost:8086
+                  USER_KEY: admin
+                  USER_SECRET: password
                   UPDATE_WC: ${{ needs.validate-version.outputs.version }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
 
@@ -206,6 +212,17 @@ jobs:
               with:
                   install: '@woocommerce/plugin-woocommerce...'
 
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  WP_ENV_PHP_VERSION: 7.4
+                  ENABLE_HPOS: 1
+              run: pnpm env:test
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
             - name: Run E2E tests
               id: run-e2e-composite-action
               timeout-minutes: 60
@@ -214,15 +231,9 @@ jobs:
                   report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
                   playwright-config: ignore-plugin-tests.playwright.config.js
               env:
-                  ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
-                  ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  ADMIN_USER_EMAIL: ${{ secrets.RELEASE_TEST_ADMIN_USER_EMAIL }}
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
-                  CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  E2E_MAX_FAILURES: 25
-                  RESET_SITE: true
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
 
             - name: Download 'e2e-update-wc' artifact
               if: success() || failure()
