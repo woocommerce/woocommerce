@@ -42,7 +42,12 @@ export class FrontendUtils {
 		}
 
 		await addToCartButton.click();
-		await this.page.getByText( /has been added to your cart/ ).waitFor();
+		const actionUrl = await addToCartButton.getAttribute( 'href' );
+		if ( ! actionUrl ) {
+			throw new Error( 'Could not get add to cart URL.' );
+		}
+
+		await this.page.waitForURL( ( url ) => url.href.includes( actionUrl ) );
 	}
 
 	async goToCheckout() {
