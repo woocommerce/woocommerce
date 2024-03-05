@@ -218,6 +218,24 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 
 				array(
+					'title' => __( 'Site visibility', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => __( "Set your site to coming soon or live you're ready to launch", 'woocommerce' ),
+					'id'    => 'site_visibility',
+				),
+
+				array(
+					'id'              => 'wc_settings_general_site_visibility_slotfill',
+					'type'            => 'div',
+				),
+
+
+				array(
+					'type' => 'sectionend',
+					'id'   => 'general_options',
+				),
+
+				array(
 					'title' => __( 'Currency options', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ),
