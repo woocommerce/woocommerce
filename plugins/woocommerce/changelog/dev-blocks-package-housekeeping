@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+remove blocks nvmrc, add e2e artifacts to gitignore
