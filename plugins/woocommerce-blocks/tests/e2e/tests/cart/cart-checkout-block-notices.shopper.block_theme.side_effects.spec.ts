@@ -60,7 +60,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
@@ -75,7 +75,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-error svg' )
 		).toBeVisible();
@@ -88,7 +88,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
@@ -112,7 +112,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			)
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
@@ -125,7 +125,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.getByText( 'BLOCK ERROR NOTICE: Coupon code already applied!' )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-error svg' )
 		).toBeVisible();
@@ -136,7 +136,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.getByText( 'BLOCK INFO NOTICE: Your cart is currently empty.' )
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes and that the SVG is visible.
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
@@ -164,7 +164,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			)
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes.
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-message' )
 		).toBeVisible();
@@ -179,7 +179,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			)
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes.
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
 		).toBeVisible();
@@ -192,7 +192,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 			)
 		).toBeVisible();
 
-		// We're explicitly checking the CSS classes.
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-info' )
 		).toBeVisible();
