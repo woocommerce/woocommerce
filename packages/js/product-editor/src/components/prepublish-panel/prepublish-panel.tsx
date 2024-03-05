@@ -9,6 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 import { closeSmall } from '@wordpress/icons';
 import classnames from 'classnames';
+import type { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,6 +21,7 @@ import { TRACKS_SOURCE } from '../../constants';
 import { VisibilitySection } from './visibility-section';
 import { ScheduleSection } from './schedule-section';
 import { ShowPrepublishChecksSection } from './show-prepublish-checks-section';
+import { PostPublishSection, PostPublishTitle } from './post-publish';
 
 export function PrepublishPanel( {
 	productType = 'product',
@@ -34,25 +36,23 @@ export function PrepublishPanel( {
 		productType,
 		'date_created'
 	);
-	const [ editedProductName ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'name'
-	);
 	const [ productStatus ] = useEntityProp< string >(
 		'postType',
 		productType,
 		'status'
 	);
-	const [ permalink ] = useEntityProp< string >(
+	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
 		productType,
-		'permalink'
+		'status'
 	);
+
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
 	const isPublished =
-		productType === 'product' ? productStatus === 'publish' : true;
+		productType === 'product' && prevStatus !== 'future'
+			? productStatus === 'publish'
+			: true;
 
 	if ( editedDate !== date ) {
 		title = __( 'Are you ready to schedule this product?', 'woocommerce' );
@@ -98,27 +98,9 @@ export function PrepublishPanel( {
 		);
 	}
 
-	let productURL: URL | undefined;
-	if ( typeof permalink === 'string' ) {
-		productURL = new URL( permalink );
-	}
-
 	function getPanelTitle() {
 		if ( isPublished ) {
-			return (
-				<div className="woocommerce-product-publish-panel__published">
-					<a
-						className="woocommerce-product-list__product-name"
-						href={ productURL?.toString() }
-						target="_blank"
-						rel="noreferrer"
-					>
-						{ editedProductName }
-					</a>
-					&nbsp;
-					{ __( 'is now live.', 'woocommerce' ) }
-				</div>
-			);
+			return <PostPublishTitle productType={ productType } />;
 		}
 		return (
 			<>
@@ -130,7 +112,7 @@ export function PrepublishPanel( {
 
 	function getPanelSections() {
 		if ( isPublished ) {
-			return null;
+			return <PostPublishSection postType={ productType } />;
 		}
 		return (
 			<>
