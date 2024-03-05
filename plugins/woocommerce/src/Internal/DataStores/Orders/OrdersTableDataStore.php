@@ -593,7 +593,10 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$order_class = get_class( $order );
 		$post_order  = new $order_class();
 		$post_order->set_id( $order->get_id() );
-		$cpt_data_store->read( $post_order );
+
+		if ( $cpt_data_store->order_exists( $order->get_id() ) ) {
+			$cpt_data_store->read( $post_order );
+		}
 
 		// This compares the order data to the post data and set changes array for props that are changed.
 		$post_order->set_props( $order->get_data() );
