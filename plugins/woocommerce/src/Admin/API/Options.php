@@ -228,6 +228,7 @@ class Options extends \WC_REST_Data_Controller {
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',
+			'launch-status',
 		);
 
 		$theme_permissions = array(

@@ -21,7 +21,10 @@ import { Text, useSlot } from '@woocommerce/experimental';
 import './style.scss';
 import useIsScrolled from '../hooks/useIsScrolled';
 import { TasksReminderBar, useActiveSetupTasklist } from '../task-lists';
-import { LaunchYourStoreStatus } from './launch-your-store-status';
+import {
+	useLaunchYourStore,
+	LaunchYourStoreStatus,
+} from './launch-your-store-status';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
@@ -97,6 +100,12 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
+	const {
+		isLoading: isLoadingLaunchYourStoreStatus,
+		launchStatus,
+		showLaunchYourStore,
+	} = useLaunchYourStore();
+
 	return (
 		<div className={ className } ref={ headerElement }>
 			{ activeSetupList && (
@@ -125,7 +134,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					) }
 				</Text>
 
-				<LaunchYourStoreStatus />
+				{ ! isLoadingLaunchYourStoreStatus && showLaunchYourStore && (
+					<LaunchYourStoreStatus status={ launchStatus } />
+				) }
 
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
 			</div>
