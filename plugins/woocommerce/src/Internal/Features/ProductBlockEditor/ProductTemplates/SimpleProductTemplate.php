@@ -551,17 +551,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 		// Attributes section.
-		$product_catalog_section = $organization_group->add_section(
+		$product_attributes_section = $organization_group->add_section(
 			array(
 				'id'         => 'product-attributes-section',
 				'order'      => 20,
 				'attributes' => array(
 					'title'       => __( 'Attributes', 'woocommerce' ),
 					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
+					'blockGap'    => 'unit-40',
 				),
 			)
 		);
-		$product_catalog_section->add_block(
+		$product_attributes_section->add_block(
 			array(
 				'id'        => 'product-attributes',
 				'blockName' => 'woocommerce/product-attributes-field',
@@ -570,7 +571,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		if ( Features::is_enabled( 'product-custom-fields' ) ) {
-			$product_catalog_section->add_block(
+			$product_attributes_section->add_block(
 				array(
 					'id'         => 'product-custom-fields-toggle',
 					'blockName'  => 'woocommerce/product-custom-fields-toggle-field',
@@ -578,6 +579,29 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'attributes' => array(
 						'label' => __( 'Show custom fields', 'woocommerce' ),
 					),
+				)
+			);
+
+			$product_attributes_section->add_block(
+				array(
+					'id'         => 'product-custom-fields-section',
+					'blockName'  => 'woocommerce/product-section',
+					'order'      => 30,
+					'attributes' => array(
+						'title'       => __( 'Custom fields', 'woocommerce' ),
+						'description' => sprintf(
+							/* translators: %1$s: Custom fields guide link opening tag. %2$s: Custom fields guide link closing tag. */
+							__( 'Custom fields can be used in a variety of ways, such as sharing more detailed product information, showing more input fields, or internal inventory organization. %1$sRead more about custom fields?%2$s', 'woocommerce' ),
+							'<a href="https://woo.com" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
+					),
+				)
+			)->add_block(
+				array(
+					'id'        => 'product-custom-fields',
+					'blockName' => 'woocommerce/product-custom-fields',
+					'order'     => 10,
 				)
 			);
 		}
