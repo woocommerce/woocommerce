@@ -38,8 +38,6 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
-	test.use( { storageState: adminFile } );
-
 	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
@@ -66,7 +64,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
