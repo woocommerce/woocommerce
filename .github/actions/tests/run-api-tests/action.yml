@@ -23,7 +23,7 @@ runs:
           working-directory: plugins/woocommerce
           shell: bash
           run: pnpm exec playwright install chromium
-      
+
         - name: Run API tests.
           id: run-api-tests
           working-directory: plugins/woocommerce
@@ -41,7 +41,7 @@ runs:
 
         - name: Archive test report
           if: success() || ( failure() && steps.run-api-tests.conclusion == 'failure' )
-          uses: actions/upload-artifact@v3
+          uses: actions/upload-artifact@v4
           with:
               name: ${{ inputs.report-name }}
               path: |
