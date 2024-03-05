@@ -234,8 +234,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 *
 	 * Test is_store_page function with different URLs.
 	 *
-	 * @param string $url URL to test.
-	 * @param bool   $expected_result Expected result.
 	 */
 	public function test_is_store_page() {
 			global $wp_rewrite;
