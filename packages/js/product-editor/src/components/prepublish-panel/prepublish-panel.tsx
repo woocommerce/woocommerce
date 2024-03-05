@@ -9,7 +9,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 import { closeSmall } from '@wordpress/icons';
 import classnames from 'classnames';
-import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -45,10 +44,10 @@ export function PrepublishPanel( {
 		productType,
 		'status'
 	);
-	const [ productId ] = useEntityProp< number >(
+	const [ permalink ] = useEntityProp< string >(
 		'postType',
 		productType,
-		'id'
+		'permalink'
 	);
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
@@ -99,13 +98,19 @@ export function PrepublishPanel( {
 		);
 	}
 
+	let productURL: URL | undefined;
+	if ( typeof permalink === 'string' ) {
+		productURL = new URL( permalink );
+		productURL.searchParams.append( 'preview', 'true' );
+	}
+
 	function getPanelTitle() {
 		if ( isPublished ) {
 			return (
 				<div className="woocommerce-product-publish-panel__published">
 					<a
 						className="woocommerce-product-list__product-name"
-						href={ getNewPath( {}, `/product/${ productId }`, {} ) }
+						href={ productURL?.toString() }
 						target="_blank"
 						rel="noreferrer"
 					>
