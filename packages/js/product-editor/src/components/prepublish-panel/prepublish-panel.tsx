@@ -55,9 +55,6 @@ export function PrepublishPanel( {
 	const isPublished =
 		productType === 'product' ? productStatus === 'publish' : true;
 
-	console.log( 'isPublished', isPublished );
-	console.log( 'productStatus', productStatus );
-
 	if ( editedDate !== date ) {
 		title = __( 'Are you ready to schedule this product?', 'woocommerce' );
 		description = __(
