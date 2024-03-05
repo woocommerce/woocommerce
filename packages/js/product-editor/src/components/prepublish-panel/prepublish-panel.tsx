@@ -101,7 +101,6 @@ export function PrepublishPanel( {
 	let productURL: URL | undefined;
 	if ( typeof permalink === 'string' ) {
 		productURL = new URL( permalink );
-		productURL.searchParams.append( 'preview', 'true' );
 	}
 
 	function getPanelTitle() {
