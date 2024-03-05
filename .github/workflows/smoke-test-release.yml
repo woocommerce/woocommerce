@@ -15,24 +15,26 @@ env:
     E2E_WP_LATEST_ARTIFACT: E2E test on release smoke test site with WP Latest (run ${{ github.run_number }})
     E2E_UPDATE_WC_ARTIFACT: WooCommerce version update test on release smoke test site (run ${{ github.run_number }})
     SLACK_BLOCKS_ARTIFACT: slack-blocks
+
 jobs:
     validate-version:
         name: Validate release version
         permissions:
             contents: read
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         outputs:
             version: ${{ steps.validate-version.outputs.version }}
             created: ${{ steps.validate-version.outputs.created }}
             asset-id: ${{ steps.validate-version.outputs.asset-id }}
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
             - name: Validate release version
               id: validate-version
               uses: actions/github-script@v6
               env:
-                  RELEASE_VERSION: ${{ inputs.tag }}
+                  RELEASE_VERSION: ${{ github.event.release.tag_name || inputs.tag }}
               with:
                   github-token: ${{ secrets.E2E_GH_TOKEN }}
                   script: |
@@ -41,7 +43,7 @@ jobs:
 
     e2e-update-wc:
         name: Test WooCommerce update
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [validate-version]
         permissions:
             contents: read
@@ -54,7 +56,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
 
             - name: Run E2E tests
               id: run-e2e-composite-action
@@ -113,8 +115,8 @@ jobs:
 
     api-wp-latest:
         name: API on WP Latest
-        runs-on: ubuntu-20.04
-        needs: [validate-version, e2e-update-wc]
+        runs-on: ubuntu-latest
+        needs: [validate-version]
         permissions:
             contents: read
         outputs:
@@ -129,7 +131,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -189,8 +191,8 @@ jobs:
 
     e2e-wp-latest:
         name: E2E on WP Latest
-        runs-on: ubuntu-20.04
-        needs: [validate-version, api-wp-latest]
+        runs-on: ubuntu-latest
+        needs: [validate-version]
         permissions:
             contents: read
         env:
@@ -202,7 +204,7 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
+                  install: '@woocommerce/plugin-woocommerce...'
 
             - name: Run E2E tests
               id: run-e2e-composite-action
@@ -291,7 +293,7 @@ jobs:
 
     test-wp-latest-1:
         name: Test against WP Latest-1
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [validate-version]
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/api/allure-report
@@ -317,8 +319,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -440,12 +442,12 @@ jobs:
 
     test-php-versions:
         name: Test against PHP ${{ matrix.php_version }}
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [validate-version]
         strategy:
             fail-fast: false
             matrix:
-                php_version: ['7.4', '8.1']
+                php_version: ['7.4', '8.1', '8.2', '8.3']
         env:
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
             API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
@@ -460,8 +462,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -589,7 +591,7 @@ jobs:
 
     test-plugins:
         name: With ${{ matrix.plugin }}
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [validate-version]
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
@@ -599,7 +601,7 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - plugin: 'WooCommerce Payments'
+                    - plugin: 'WooPayments'
                       repo: 'automattic/woocommerce-payments'
                       env_description: 'woocommerce-payments'
                     - plugin: 'WooCommerce PayPal Payments'
@@ -625,8 +627,8 @@ jobs:
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Launch WP Env
               working-directory: plugins/woocommerce
@@ -711,7 +713,7 @@ jobs:
 
     post-slack-summary:
         name: Post Slack summary
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         if: |
