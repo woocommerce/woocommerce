@@ -499,9 +499,9 @@ class DataSynchronizer implements BatchProcessorInterface {
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
 SELECT COUNT(1) FROM $wpdb->posts posts
-INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
- AND orders.status not in ( 'auto-draft' )
+RIGHT JOIN $orders_table orders ON posts.ID=orders.id
+WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
+ AND orders.status NOT IN ( 'auto-draft' )
  AND orders.type IN ($order_post_type_placeholder)",
 				$order_post_types
 			);
@@ -511,7 +511,7 @@ WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
 SELECT COUNT(1) FROM $wpdb->posts posts
-LEFT JOIN $orders_table orders ON posts.id=orders.id
+LEFT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE
   posts.post_type in ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
@@ -624,12 +624,12 @@ ORDER BY posts.ID ASC",
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = $wpdb->prepare(
 					"
-SELECT posts.ID FROM $wpdb->posts posts
-INNER JOIN $orders_table orders ON posts.id=orders.id
-WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
-AND orders.status not in ( 'auto-draft' )
+SELECT orders.id FROM $wpdb->posts posts
+RIGHT JOIN $orders_table orders ON posts.ID=orders.id
+WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
+AND orders.status NOT IN ( 'auto-draft' )
 AND orders.type IN ($order_post_type_placeholders)
-ORDER BY posts.id ASC",
+ORDER BY posts.ID ASC",
 					$order_post_types
 				);
 				break;
