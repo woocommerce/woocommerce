@@ -92,8 +92,23 @@ export const SidebarNavigationScreenHomepage = () => {
 			return;
 		}
 
-		setSelectedPattern( selectedPattern );
+		const currentSelectedPattern = homePatterns.find( ( patterns ) => {
+			//'blocks' contains all blocks in the template, including the
+			// header and footer blocks, while the 'patterns.blocks' does
+			// not. For that reason we are removing the first and last
+			// blocks from the 'blocks' to be able to compare then
+			const homeBlocks = blocks.slice( 1, blocks.length - 1 );
 
+			if ( patterns.blocks.length !== homeBlocks.length ) {
+				return false;
+			}
+
+			return homeBlocks.every(
+				( block, i ) => block.name === patterns.blocks[ i ].name
+			);
+		} );
+
+		setSelectedPattern( currentSelectedPattern );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns ] );
 
