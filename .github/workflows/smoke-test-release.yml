@@ -90,7 +90,7 @@ jobs:
               id: run-api-composite-action
               uses: ./.github/actions/tests/run-api-tests
               with:
-                  report-name: ${{ env.API_ARTIFACT }}
+                  report-name: ${{ env.API_WP_LATEST_ARTIFACT }}
               env:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
