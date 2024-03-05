@@ -20,11 +20,26 @@ export type CheckboxListContext = {
 		value: string;
 		checked: boolean;
 	}[];
+	initialItemsCount: number;
+	showAll?: boolean;
 };
 
 store( 'woocommerce/interactivity-checkbox-list', {
-	state: {},
+	state: {
+		get visibleItems() {
+			const context = getContext< CheckboxListContext >();
+			console.log( context );
+			if ( ! context?.showAll && Array.isArray( context.items ) ) {
+				return context.items.slice( 0, context.initialItemsCount );
+			}
+			return context.items;
+		},
+	},
 	actions: {
+		showAllItems: () => {
+			const context = getContext< CheckboxListContext >();
+			context.showAll = true;
+		},
 		selectCheckboxItem: ( event: HTMLElementEvent< HTMLInputElement > ) => {
 			const context = getContext< CheckboxListContext >();
 			const value = event.target.value;
