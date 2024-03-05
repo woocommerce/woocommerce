@@ -218,9 +218,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Site visibility', 'woocommerce' ),
+					'title' => __( 'Site Visibility', 'woocommerce' ),
 					'type'  => 'title',
-					'desc'  => __( "Set your site to coming soon or live you're ready to launch", 'woocommerce' ),
 					'id'    => 'site_visibility',
 				),
 

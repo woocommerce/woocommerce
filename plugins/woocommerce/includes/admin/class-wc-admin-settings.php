@@ -763,13 +763,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						</tr>
 						<?php
 						break;
+
 					case 'div':
 						?>
 						<div
 							id="<?php echo esc_attr( $value['id'] ); ?>"
 							class="<?php echo esc_attr( $value['class'] ); ?>"
 						>
-							<?php echo $value['value']; ?>
+							<?php echo esc_html( $value['value'] ); ?>
 						</div>
 						<?php
 						break;
