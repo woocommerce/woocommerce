@@ -1149,7 +1149,7 @@
           "post_title": "WooCommerce Theme Guidelines - Accessibility",
           "menu_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
-          "hash": "019e11ea9fa0e7c77e1a3cc8d9cb0ed8cb64796e4efb4b938efa673b55aea34b",
+          "hash": "28c3931662bd44b20704f47b6c176491d4e47bf2af056ffb2558765fb081ca01",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
           "id": "9004b7f3768b6781dae24484c5aaad365bd21b12"
         }
@@ -1204,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "71353e1b181ad7bc7f08ede9857ae5ef6c4baecfc3431e80d2612b6fccba0f85"
+  "hash": "494b0c55a9312202c17bf17b4e50f1f574790788c1606be4c61c99ad479b279a"
 }
