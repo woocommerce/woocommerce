@@ -3962,9 +3962,6 @@ importers:
       usehooks-ts:
         specifier: ^2.9.1
         version: 2.9.1(react-dom@17.0.2)(react@17.0.2)
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
       wordpress-components:
         specifier: npm:@wordpress/components@14.2.0
         version: /@wordpress/components@14.2.0(@types/react@17.0.71)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)(reakit-utils@0.15.2)(redux@4.2.1)
@@ -4108,9 +4105,6 @@ importers:
       '@types/react-transition-group':
         specifier: ^4.4.10
         version: 4.4.10
-      '@types/uuid':
-        specifier: ^9.0.7
-        version: 9.0.7
       '@types/wordpress__block-editor':
         specifier: 6.0.6
         version: 6.0.6(react-dom@17.0.2)(react@17.0.2)
