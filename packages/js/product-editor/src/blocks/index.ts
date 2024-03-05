@@ -1,4 +1,5 @@
 export { init as initCatalogVisibility } from './product-fields/catalog-visibility';
+export { init as initCustomFields } from './product-fields/custom-fields';
 export { init as initCustomFieldsToogle } from './product-fields/custom-fields-toggle';
 export { init as initCheckbox } from './generic/checkbox';
 export { init as initCollapsible } from './generic/collapsible';
