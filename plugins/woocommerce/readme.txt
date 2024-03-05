@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix issue where no text would be displayed if no shipping methods are available in the cart/checkout [#45249](https://github.com/woocommerce/woocommerce/pull/45249)
 * Fix - Products Stock Indicator and Sale Badge: prevent fatal when block were used in a homepage [#45135](https://github.com/woocommerce/woocommerce/pull/45135)
 * Fix - Fix LegacyProxy::get_instance_of throwing an error when trying to get an instance of a non-Woo namespaced class. [#45178](https://github.com/woocommerce/woocommerce/pull/45178)
 * Fix - "Hero product chessboard" pattern: remove placeholder and update margins. [#44553](https://github.com/woocommerce/woocommerce/pull/44553)
