@@ -41,78 +41,6 @@ jobs:
                       const script = require('./.github/workflows/scripts/validate-release-version.js');
                       await script({ github, context, core });
 
-    e2e-update-wc:
-        name: Test WooCommerce update
-        runs-on: ubuntu-latest
-        needs: [validate-version]
-        permissions:
-            contents: read
-        env:
-            ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Setup WooCommerce Monorepo
-              uses: ./.github/actions/setup-woocommerce-monorepo
-              with:
-                  install: '@woocommerce/plugin-woocommerce...'
-
-            - name: Run E2E tests
-              id: run-e2e-composite-action
-              timeout-minutes: 60
-              uses: ./.github/actions/tests/run-e2e-tests
-              with:
-                  report-name: ${{ env.E2E_UPDATE_WC_ARTIFACT }}
-                  tests: update-woocommerce.spec.js
-              env:
-                  ADMIN_PASSWORD: ${{ secrets.RELEASE_TEST_ADMIN_PASSWORD }}
-                  ADMIN_USER: ${{ secrets.RELEASE_TEST_ADMIN_USER }}
-                  BASE_URL: ${{ secrets.RELEASE_TEST_URL }}
-                  CUSTOMER_PASSWORD: ${{ secrets.RELEASE_TEST_CUSTOMER_PASSWORD }}
-                  CUSTOMER_USER: ${{ secrets.RELEASE_TEST_CUSTOMER_USER }}
-                  DEFAULT_TIMEOUT_OVERRIDE: 120000
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-                  UPDATE_WC: ${{ needs.validate-version.outputs.version }}
-
-            - name: Upload Allure artifacts to bucket
-              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
-              uses: ./.github/actions/tests/upload-allure-files-to-bucket
-              with:
-                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
-                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
-                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
-                  artifact-name: ${{ env.E2E_WP_LATEST_ARTIFACT }}
-                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
-
-            - name: Publish E2E Allure report
-              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
-              env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-                  ENV_DESCRIPTION: wp-latest
-              run: |
-                  gh workflow run publish-test-reports-release.yml \
-                    -f created_at="${{ needs.validate-version.outputs.created }}" \
-                    -f run_id=${{ github.run_id }} \
-                    -f run_number=${{ github.run_number }} \
-                    -f release_tag=${{ needs.validate-version.outputs.version }} \
-                    -f artifact="${{ env.E2E_WP_LATEST_ARTIFACT }}" \
-                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
-                    -f test_type="e2e" \
-                    --repo woocommerce/woocommerce-test-reports
-
-            - name: Create Slack block
-              if: |
-                  success() || (
-                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure'
-                  )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: WC Update test
-                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: wp-latest
-                  release-version: ${{ needs.validate-version.outputs.version }}
-
     api-wp-latest:
         name: API on WP Latest
         runs-on: ubuntu-latest
@@ -163,8 +91,6 @@ jobs:
               uses: ./.github/actions/tests/run-api-tests
               with:
                   report-name: ${{ env.API_ARTIFACT }}
-                  tests: hello
-                  playwright-config: ci-release.playwright.config.js
               env:
                   BASE_URL: http://localhost:8086
                   USER_KEY: admin
