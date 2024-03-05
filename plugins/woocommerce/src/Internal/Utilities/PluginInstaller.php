@@ -158,28 +158,6 @@ class PluginInstaller implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Get the information provided by 'get_plugins' for a given plugin.
-	 * The returned array will also contain an extra boolean key, '_is_active_.
-	 *
-	 * @param string $plugin_name The name of the plugin to get information for.
-	 * @return array|null An array with plugin information, or null if no plugin is installed with that name.
-	 */
-	private function get_installed_plugin_info( string $plugin_name ): ?array {
-		wp_clean_plugins_cache();
-
-		$plugin_name = plugin_basename( $plugin_name );
-		$all_plugins = get_plugins();
-
-		$plugin_info = $all_plugins[ $plugin_name ] ?? null;
-		if ( is_null( $plugin_info ) ) {
-			return null;
-		}
-
-		$plugin_info['_is_active'] = in_array( $plugin_name, array_map( 'plugin_basename', wp_get_active_and_valid_plugins() ), true );
-		return $plugin_info;
-	}
-
-	/**
 	 * Run a callback in each existing site (if multisite) or just once (if single site).
 	 *
 	 * @param callable $callback The callback to run.
