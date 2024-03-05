@@ -42,16 +42,12 @@ export class FrontendUtils {
 		}
 
 		await addToCartButton.click();
-		const buttonHref = await addToCartButton.getAttribute( 'href' );
-		if ( ! buttonHref ) {
-			throw new Error(
-				'No href attribute found for "Add to cart" button.'
-			);
+		const actionUrl = await addToCartButton.getAttribute( 'href' );
+		if ( ! actionUrl ) {
+			throw new Error( 'Could not get add to cart URL.' );
 		}
 
-		await this.page.waitForFunction( ( href ) => {
-			return window?.location?.href.includes( href );
-		}, buttonHref );
+		await this.page.waitForURL( ( url ) => url.href.includes( actionUrl ) );
 	}
 
 	async goToCheckout() {
