@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { Icon, moreVertical } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -36,9 +37,12 @@ export const useLaunchYourStore = () => {
 export const LaunchYourStoreStatus = () => {
 	return (
 		<div className="woocommerce-lys-status">
-			<span className="woocommerce-lys-status-pill">
-				Launch Your Store Status
-			</span>
+			<div className="woocommerce-lys-status-pill-wrapper">
+				<div className="woocommerce-lys-status-pill">
+					<span>Launch Your Store Status</span>
+					<Icon icon={ moreVertical } size={ 18 } />
+				</div>
+			</div>
 		</div>
 	);
 };
