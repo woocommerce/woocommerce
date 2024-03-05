@@ -153,7 +153,7 @@ class LegacyDataHandler {
 	public function cleanup_post_data( int $order_id, bool $skip_checks = false ): void {
 		global $wpdb;
 
-		$post_is_placeholder = $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE === get_post_type( $order_id );
+		$post_is_placeholder = get_post_type( $order_id ) === $this->data_synchronizer::PLACEHOLDER_ORDER_POST_TYPE;
 		if ( ! $post_is_placeholder ) {
 			$order = wc_get_order( $order_id );
 
@@ -163,6 +163,7 @@ class LegacyDataHandler {
 			}
 
 		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
+			// translators: %1 is an order ID.
 			throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
 		}
 

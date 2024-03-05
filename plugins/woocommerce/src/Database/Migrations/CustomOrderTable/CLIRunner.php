@@ -969,10 +969,9 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			}
 
 			if ( $failed_ids && ! array_diff( $order_ids, $failed_ids ) ) {
-				WP_CLI::error(  __( 'Failed to clean up all orders in a batch. Aborting.', 'woocommerce' ) );
+				WP_CLI::error( __( 'Failed to clean up all orders in a batch. Aborting.', 'woocommerce' ) );
 				break;
 			}
-
 		} while ( $order_ids );
 
 		$progress->finish();
