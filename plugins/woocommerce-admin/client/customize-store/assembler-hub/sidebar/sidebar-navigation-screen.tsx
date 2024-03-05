@@ -54,7 +54,7 @@ export const SidebarNavigationScreen = ( {
 	backPath?: string;
 	onNavigateBackClick?: () => void;
 } ) => {
-	const { sendEvent, context } = useContext( CustomizeStoreContext );
+	const { context } = useContext( CustomizeStoreContext );
 	const [ openWarningModal, setOpenWarningModal ] =
 		useState< boolean >( false );
 	const location = useLocation();
@@ -148,10 +148,10 @@ export const SidebarNavigationScreen = ( {
 				<GoBackWarningModal
 					setOpenWarningModal={ setOpenWarningModal }
 					onExitClicked={ () => {
-						sendEvent(
+						window.parent.__wcCustomizeStore.sendEventToIntroMachine(
 							flowType && isAIFlow( flowType )
-								? 'GO_BACK_TO_DESIGN_WITH_AI'
-								: 'GO_BACK_TO_DESIGN_WITHOUT_AI'
+								? { type: 'GO_BACK_TO_DESIGN_WITH_AI' }
+								: { type: 'GO_BACK_TO_DESIGN_WITHOUT_AI' }
 						);
 					} }
 				/>
