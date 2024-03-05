@@ -229,6 +229,10 @@ class Options extends \WC_REST_Data_Controller {
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',
 			'launch-status',
+			'woocommerce_coming_soon',
+			'woocommerce_store_pages_only',
+			'woocommerce_private_link',
+			'woocommerce_share_key',
 		);
 
 		$theme_permissions = array(
