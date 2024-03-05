@@ -163,6 +163,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			sprintf(
 				'<input
 					class="min"
+					name="min"
 					type="text"
 					value="%d"
 					data-wc-bind--value="context.minPrice"
@@ -179,6 +180,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			sprintf(
 				'<input
 					class="max"
+					name="max"
 					type="text"
 					value="%d"
 					data-wc-bind--value="context.maxPrice"
