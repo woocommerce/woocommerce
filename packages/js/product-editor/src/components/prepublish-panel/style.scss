@@ -52,17 +52,17 @@
 	}
 
 	&__content {
-		// Ensure the pre-publish panel accounts for the header and footer height.
-		min-height: calc( 100% - #{ $header-height + 200px } );
+		min-height: calc( 100% - #{ $header-height + 220px } );
 	}
 
 	&__footer {
-		padding: 0 $grid-unit-20;
+		padding: $gap $grid-unit-20 $gap-largest $grid-unit-20;
 		left: 0;
 		width: 100%;
 		min-height: $gap-largest + $gap-large;
 		display: flex;
 		align-items: center;
+		padding-bottom: $gap-largest;
 
 		.components-base-control__field {
 			margin: 0;
@@ -75,6 +75,9 @@
 		&__header, &__title {
 			border-bottom: $border-width solid $gray-200;
 			font-weight: 500;
+		}
+		&__content {
+			min-height: calc( 100% - #{ $header-height + 147px } );
 		}
 	}
 }
