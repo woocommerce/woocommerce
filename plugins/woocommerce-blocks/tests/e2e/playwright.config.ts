@@ -29,6 +29,8 @@ const config: ExtendedPlaywrightTestConfig = {
 	testDir: 'tests',
 	retries: CI ? 2 : 0,
 	workers: 1,
+	// Don't report slow test "files", as we're running our tests in serial.
+	reportSlowTests: null,
 	reporter: process.env.CI
 		? [ [ 'github' ], [ 'list' ], [ 'html' ] ]
 		: 'list',
