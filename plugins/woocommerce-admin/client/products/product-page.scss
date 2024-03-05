@@ -35,11 +35,6 @@
 		@include break-medium() {
 			top: $admin-bar-height;
 			width: $sidebar-width;
-
-			// Keep it open on focus to avoid conflict with navigate-regions animation.
-			[role="region"]:focus & {
-				transform: translateX(0%);
-			}
 		}
 	}
 
