@@ -132,12 +132,27 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              env:
-                  ENABLE_HPOS: 1
               run: pnpm --filter=@woocommerce/plugin-woocommerce env:test
+
+            - name: Download release zip
+              id: download-zip
+              uses: actions/github-script@v7
+              env:
+                  ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
+              with:
+                  github-token: ${{ secrets.E2E_GH_TOKEN }}
+                  script: |
+                      const script = require('./.github/workflows/scripts/download-release-zip.js');
+                      await script({ github, context, core });
+
+            - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
+              run: unzip -d plugins -o ${{ env.ZIP_PATH }}
+              env:
+                  ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
@@ -211,13 +226,27 @@ jobs:
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
                   install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Load docker images and start containers.
               working-directory: plugins/woocommerce
-              env:
-                  WP_ENV_PHP_VERSION: 7.4
-                  ENABLE_HPOS: 1
               run: pnpm env:test
+
+            - name: Download release zip
+              id: download-zip
+              uses: actions/github-script@v7
+              env:
+                  ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
+              with:
+                  github-token: ${{ secrets.E2E_GH_TOKEN }}
+                  script: |
+                      const script = require('./.github/workflows/scripts/download-release-zip.js');
+                      await script({ github, context, core });
+
+            - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
+              run: unzip -d plugins -o ${{ env.ZIP_PATH }}
+              env:
+                  ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
 
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
