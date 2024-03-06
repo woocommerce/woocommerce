@@ -114,6 +114,35 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginsActivatedRuleProcessor exte
 	}
 
 	/**
+	 * Tests that the processor does not pass a plugins_activated rule when
+	 * plugin slug is invalid.
+	 *
+	 * @group fast
+	 */
+	public function test_spec_does_not_pass_with_invalid_plugin_slug() {
+		$mock_plugins_provider = new MockPluginsProvider(
+			array(
+				'plugin-slug-1',
+				'plugin-slug-2',
+			)
+		);
+		$processor             = new PluginsActivatedRuleProcessor( $mock_plugins_provider );
+		$rule                  = json_decode(
+			'{
+				"type": "plugins_activated",
+				"plugins": [
+					{},
+					1
+				]
+			}'
+		);
+
+		$result = $processor->process( $rule, new stdClass() );
+
+		$this->assertEquals( false, $result );
+	}
+
+	/**
 	 * Tests that the processor passes a plugins_activated rule with both
 	 * matching plugins.
 	 *

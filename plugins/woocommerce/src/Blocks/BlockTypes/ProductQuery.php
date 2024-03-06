@@ -176,6 +176,13 @@ class ProductQuery extends AbstractBlock {
 		$this->parsed_block = $parsed_block;
 
 		if ( self::is_woocommerce_variation( $parsed_block ) ) {
+			// Indicate to interactivity powered components that this block is on the page
+			// and needs refresh to update data.
+			$this->asset_data_registry->add(
+				'needsRefreshForInteractivityAPI',
+				true,
+				true
+			);
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
 			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
@@ -941,7 +948,7 @@ class ProductQuery extends AbstractBlock {
 		 * Get an array of taxonomy names associated with the "product" post type because
 		 * we also want to include custom taxonomies associated with the "product" post type.
 		 */
-		$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' );
+		$product_taxonomies = array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_visibility', 'product_shipping_class' ) );
 		$result             = array_filter(
 			$tax_query,
 			function( $item ) use ( $product_taxonomies ) {

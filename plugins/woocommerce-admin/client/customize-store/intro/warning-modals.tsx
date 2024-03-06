@@ -13,7 +13,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { customizeStoreStateMachineEvents } from '..';
 import { ADMIN_URL } from '~/utils/admin-settings';
-
 export const DesignChangeWarningModal = ( {
 	setOpenDesignChangeWarningModal,
 	sendEvent,

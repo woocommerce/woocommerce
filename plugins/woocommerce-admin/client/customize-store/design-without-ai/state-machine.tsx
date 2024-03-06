@@ -180,12 +180,10 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											onDone: {
 												target: 'success',
 											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
 										},
 									},
 									success: {

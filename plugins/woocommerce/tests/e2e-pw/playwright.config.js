@@ -23,6 +23,7 @@ const config = {
 	retries: CI ? 2 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
+	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter: [
 		[ 'list' ],
 		[
@@ -53,8 +54,10 @@ const config = {
 		screenshot: { mode: 'only-on-failure', fullPage: true },
 		stateDir: 'tests/e2e-pw/test-results/storage/',
 		trace: 'retain-on-failure',
-		video: 'on-first-retry',
+		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },
+		actionTimeout: 20 * 1000,
+		navigationTimeout: 20 * 1000,
 	},
 	projects: [
 		{

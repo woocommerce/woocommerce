@@ -365,7 +365,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$import = self::import_sample_products_from_csv( $template_path );
 
-		if ( is_wp_error( $import ) || 0 === count( $import['imported'] ) ) {
+		if ( is_wp_error( $import ) || ! is_array( $import['imported'] ) || 0 === count( $import['imported'] ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_product_creation_error',
 				/* translators: %s is template name */
@@ -739,6 +739,14 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		TaskLists::maybe_add_extended_tasks( $extended_tasks );
 
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
+
+		// We have no use for hidden lists, it's expensive to compute individual tasks completion.
+		$lists = array_filter(
+			$lists,
+			function( $list ) {
+				return ! $list->is_hidden();
+			}
+		);
 
 		$json = array_map(
 			function( $list ) {

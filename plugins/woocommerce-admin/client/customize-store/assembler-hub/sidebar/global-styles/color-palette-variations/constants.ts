@@ -13,7 +13,7 @@ export const COLOR_PALETTES = [
 							slug: 'primary',
 						},
 						{
-							color: '#000000',
+							color: '#636363',
 							name: 'Secondary',
 							slug: 'secondary',
 						},
@@ -37,6 +37,9 @@ export const COLOR_PALETTES = [
 			},
 		},
 		styles: {
+			blocks: {
+				'core/button': {},
+			},
 			color: {
 				background: 'var(--wp--preset--color--background)',
 				text: 'var(--wp--preset--color--foreground)',
@@ -46,6 +49,12 @@ export const COLOR_PALETTES = [
 					color: {
 						background: 'var(--wp--preset--color--primary)',
 						text: 'var(--wp--preset--color--background)',
+					},
+					':hover': {
+						color: {
+							background: 'var(--wp--preset--color--secondary)',
+							text: 'var(--wp--preset--color--background)',
+						},
 					},
 				},
 				link: {
