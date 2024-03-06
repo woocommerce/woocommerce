@@ -160,7 +160,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param array $block Block attributes.
 	 * @param array $context Block context.
 	 */
-	protected function provide_location_context_inner_blocks( $block, &$context ) {
+	protected function provide_location_context_for_inner_blocks( $block, &$context ) {
 		if ( empty( $this->product_collection_inner_blocks_names ) ) {
 			return;
 		}
