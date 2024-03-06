@@ -79,20 +79,12 @@ class ProductCollection extends AbstractBlock {
 
 		// Provide location context into block's context.
 		add_filter( 'render_block_context', array( $this, 'provide_location_context' ), 10, 3 );
-		add_filter( 'render_block_woocommerce/product-template', array( $this, 'test' ), 0, 3 );
 
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
-	}
-
-	// TODO: Remove this method.
-	public function test( $block_content, $block, $instance ) {
-		$location = $instance->context['location'] ?? array();
-		$block_content = print_r( $location, true ) . $block_content;
-		return $block_content;
 	}
 
 	/**
@@ -125,6 +117,7 @@ class ProductCollection extends AbstractBlock {
 
 		// Only on Product Collection's children blocks.
 		if ( ! is_a( $parent_block, 'WP_Block' ) || 'woocommerce/product-collection' !== $parent_block->name ) {
+
 			return $context;
 		}
 
@@ -136,8 +129,8 @@ class ProductCollection extends AbstractBlock {
 			$context['location'] = array(
 				'type'       => 'product',
 				'sourceData' => array(
-					'productId' => absint( $parent_block->context['postId'] )
-				)
+					'productId' => absint( $parent_block->context['postId'] ),
+				),
 			);
 
 			return $context;

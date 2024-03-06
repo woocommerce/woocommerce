@@ -22,7 +22,7 @@ class ProductCollectionUtils {
 	 * - cart: ['productIds' => array]
 	 * - archive: ['taxonomy' => string, 'termId' => int]
 	 * - product: ['productId' => int]
-	 * 
+	 *
 	 * @return array Parsed context.
 	 */
 	public static function parse_global_location_context() {
@@ -41,9 +41,9 @@ class ProductCollectionUtils {
 			);
 		}
 
-		 // As more areas are blockified, expected future contexts include:
-		 // - is_checkout_pay_page()
-		 // - is_view_order_page()
+		// As more areas are blockified, expected future contexts include:
+		// - is_checkout_pay_page().
+		// - is_view_order_page().
 		if ( is_order_received_page() ) {
 
 			$type        = 'order';
@@ -54,7 +54,7 @@ class ProductCollectionUtils {
 			$type  = 'cart';
 			$items = array();
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$items[] = absint( $cart_item[ 'productId' ] );
+				$items[] = absint( $cart_item['productId'] );
 			}
 			$items       = array_unique( array_filter( $items ) );
 			$source_data = array( 'productIds' => $items );
