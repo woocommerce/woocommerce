@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Woo_Update_Manager_Plugin {
 	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-update-manager/woo-update-manager.php';
 	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/products/woo-update-manager/download/';
+	const WOO_UPDATE_MANAGER_ID               = 18734003334043;
 
 	/**
 	 * Loads the class, runs on init.
@@ -61,16 +62,23 @@ class WC_Woo_Update_Manager_Plugin {
 		 */
 		$install_url_base = apply_filters( 'woo_com_base_url', 'https://woo.com/' );
 
+		$install_url = $install_url_base . 'auto-install-init/' . self::get_plugin_id() . '/';
+
+		return self::add_auth_parameters( $install_url );
+	}
+
+	/**
+	 * Get the id of the Woo Update Manager plugin.
+	 *
+	 * @return int
+	 */
+	public static function get_plugin_id(): int {
 		/**
 		 * Filter the id of the Woo Update Manager plugin.
 		 *
 		 * @since 8.7.0
 		 */
-		$woo_update_manager_plugin_id = apply_filters( 'woo_update_manager_plugin_id', 18734003334043 );
-
-		$install_url = $install_url_base . 'auto-install-init/' . $woo_update_manager_plugin_id . '/';
-
-		return self::add_auth_parameters( $install_url );
+		return (int) apply_filters( 'woo_update_manager_plugin_id', self::WOO_UPDATE_MANAGER_ID );
 	}
 
 	/**
