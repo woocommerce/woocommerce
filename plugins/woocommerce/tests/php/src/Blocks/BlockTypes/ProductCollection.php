@@ -78,13 +78,15 @@ class ProductCollection extends \WP_UnitTestCase {
 	 * @param bool  $woocommerce_on_sale WooCommerce on sale.
 	 * @param array $woocommerce_attributes WooCommerce attributes.
 	 * @param array $woocommerce_stock_status WooCommerce stock status.
+	 * @param array $time_frame The time frame for filtering.
 	 * @return WP_REST_Request
 	 */
-	private function build_request( $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array() ) {
+	private function build_request( $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array(), $time_frame = array() ) {
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
 		$request->set_param( 'woocommerceOnSale', $woocommerce_on_sale );
 		$request->set_param( 'woocommerceAttributes', $woocommerce_attributes );
 		$request->set_param( 'woocommerceStockStatus', $woocommerce_stock_status );
+		$request->set_param( 'timeFrame', $time_frame );
 		$request->set_param( 'isProductCollectionBlock', true );
 
 		return $request;
@@ -398,6 +400,54 @@ class ProductCollection extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test merging time range queries.
+	 */
+	public function test_merging_time_range_before_queries() {
+		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
+
+		$parsed_block                                = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['timeFrame'] = array(
+			'operator' => 'not-in',
+			'value'    => $time_frame_date,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'column'    => 'post_date_gmt',
+				'before'    => $time_frame_date,
+				'inclusive' => true,
+			),
+			$merged_query['date_query'],
+		);
+	}
+
+	/**
+	 * Test merging time range queries.
+	 */
+	public function test_merging_time_range_after_queries() {
+		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
+
+		$parsed_block                                = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['timeFrame'] = array(
+			'operator' => 'in',
+			'value'    => $time_frame_date,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'column'    => 'post_date_gmt',
+				'after'     => $time_frame_date,
+				'inclusive' => true,
+			),
+			$merged_query['date_query'],
+		);
+	}
+
+	/**
 	 * Test merging filter by stock status queries.
 	 */
 	public function test_merging_filter_by_attribute_queries() {
@@ -583,16 +633,21 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
-		$args         = array();
-		$on_sale      = 'true';
-		$attributes   = array(
+		$args            = array();
+		$on_sale         = 'true';
+		$attributes      = array(
 			array(
 				'taxonomy' => 'pa_test',
 				'termId'   => 1,
 			),
 		);
-		$stock_status = array( 'instock', 'outofstock' );
-		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
+		$stock_status    = array( 'instock', 'outofstock' );
+		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
+		$time_frame      = array(
+			'operator' => 'in',
+			'value'    => $time_frame_date,
+		);
+		$request         = $this->build_request( $on_sale, $attributes, $stock_status, $time_frame );
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
@@ -613,6 +668,15 @@ class ProductCollection extends \WP_UnitTestCase {
 				'operator' => 'NOT IN',
 			),
 			$updated_query['tax_query'],
+		);
+
+		$this->assertContains(
+			array(
+				'column'    => 'post_date_gmt',
+				'after'     => $time_frame_date,
+				'inclusive' => true,
+			),
+			$updated_query['date_query'],
 		);
 
 		$this->assertContains(
