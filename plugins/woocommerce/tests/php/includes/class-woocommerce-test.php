@@ -48,8 +48,8 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	public function test_add_lys_default_values_on_fresh_installation() {
 		update_option( 'fresh_site', '1' );
 
-		// Simulate 'woocommerce_installed' action.
-		do_action( 'woocommerce_installed' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
+		// Simulate 'woocommerce_newly_installed' action.
+		do_action( 'woocommerce_newly_installed' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );

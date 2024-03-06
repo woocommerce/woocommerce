@@ -253,7 +253,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
-		add_action( 'woocommerce_installed', array( $this, 'add_lys_default_values' ) );
+		add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
 
 		// These classes set up hooks on instantiation.
@@ -314,7 +314,7 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
-		$is_new_install = WC_Install::is_new_install();
+		$is_new_install = current_action() === 'woocommerce_newly_installed';
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
 		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
