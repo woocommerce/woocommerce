@@ -70,10 +70,13 @@
 	}
 
 	.post-publish-section {
+		&__postpublish-subheader {
+			margin: 0 0 $gap-small;
+		}
 		&__postpublish-post-address-container {
 			align-items: flex-end;
 			display: flex;
-			margin-bottom: $gap-large;
+			margin-bottom: $gap-small;
 			gap: $gap;
 		}
 		&__postpublish-post-address {
@@ -103,7 +106,7 @@
 			font-weight: 500;
 		}
 		&__content {
-			min-height: calc( 100% - #{ $header-height + 147px } );
+			min-height: calc( 100% - #{ $header-height + 177px } );
 		}
 	}
 }
