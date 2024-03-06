@@ -11,6 +11,9 @@ const {
 	REPEAT_EACH,
 } = process.env;
 
+/**
+ * @type {import('@playwright/test').FullConfig}
+ */
 const config = {
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
@@ -31,7 +34,7 @@ const config = {
 				outputFolder:
 					PLAYWRIGHT_HTML_REPORT ??
 					'./test-results/playwright-report',
-				open: CI ? 'never' : 'always',
+				open: CI ? 'never' : 'on-failure',
 			},
 		],
 		[
