@@ -244,12 +244,12 @@ class WC_Admin_Notices {
 	 * Hide a notice if the GET variable is set.
 	 */
 	public static function hide_notices() {
-		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) { // WPCS: input var ok, CSRF ok.
-			if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'woocommerce_hide_notices_nonce' ) ) { // WPCS: input var ok, CSRF ok.
+		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
+			if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'woocommerce_hide_notices_nonce' ) ) {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
+			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) );
 
 			/**
 			 * Filter the capability required to dismiss a given notice.
@@ -376,7 +376,8 @@ class WC_Admin_Notices {
 		if ( WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
-			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) {
 				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
 			} else {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';
@@ -460,7 +461,8 @@ class WC_Admin_Notices {
 	 * No shipping methods.
 	 */
 	public static function no_shipping_methods_notice() {
-		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) { // WPCS: input var ok, CSRF ok.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 
