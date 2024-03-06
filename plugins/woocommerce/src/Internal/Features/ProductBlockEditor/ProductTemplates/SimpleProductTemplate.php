@@ -853,6 +853,20 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'hideConditions' => $product_stock_status_hide_conditions,
 			)
 		);
+
+		$product_inventory_section->add_block(
+			array(
+				'id'         => 'product-purchase-note',
+				'blockName'  => 'woocommerce/product-text-area-field',
+				'order'      => 20,
+				'attributes' => array(
+					'property'    => 'purchase_note',
+					'label'       => __( 'Post-purchase note', 'woocommerce' ),
+					'placeholder' => __( 'Enter an optional note attached to the order confirmation message sent to the shopper.', 'woocommerce' ),
+				),
+			)
+		);
+
 		$product_inventory_advanced         = $product_inventory_section->add_block(
 			array(
 				'id'             => 'product-inventory-advanced',

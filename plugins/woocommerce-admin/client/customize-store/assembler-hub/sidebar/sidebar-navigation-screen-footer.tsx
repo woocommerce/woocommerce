@@ -14,6 +14,8 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
+// @ts-expect-error No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -29,6 +31,8 @@ import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
+import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
+import { useSelect } from '@wordpress/data';
 
 const SUPPORTED_FOOTER_PATTERNS = [
 	'woocommerce-blocks/footer-simple-menu',
@@ -43,18 +47,41 @@ export const SidebarNavigationScreenFooter = () => {
 	} );
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-	const [ blocks, , onChange ] = useEditorBlocks();
-	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
-		HighlightedBlockContext
+
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
 	);
+
+	const [ mainTemplateBlocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template_part',
+		footerTemplateId
+	);
+
+	const footerTemplatePartBlockClientId = mainTemplateBlocks.find(
+		( block ) => block.attributes.slug === 'footer'
+	);
+
+	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
+		useContext( HighlightedBlockContext );
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
-		if ( blocks && blocks.length ) {
-			setHighlightedBlockIndex( blocks.length - 1 );
-		}
-	}, [ setHighlightedBlockIndex, blocks ] );
+		setHighlightedBlockClientId(
+			footerTemplatePartBlockClientId?.clientId ?? null
+		);
+	}, [
+		footerTemplatePartBlockClientId?.clientId,
+		setHighlightedBlockClientId,
+	] );
 
 	const footerPatterns = useMemo(
 		() =>
@@ -115,7 +142,7 @@ export const SidebarNavigationScreenFooter = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockIndex }
+			onNavigateBackClick={ resetHighlightedBlockClientId }
 			description={ createInterpolateElement( description, {
 				EditorLink: (
 					<Link
