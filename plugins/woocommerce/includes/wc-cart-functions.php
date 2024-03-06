@@ -188,18 +188,20 @@ function wc_clear_cart_after_payment() {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			/**
-			 * Allows the list of order statuses that are considered pre-payment and therefore don't trigger the emptying of the cart to be filtered.
-			 *
-			 * Useful for appropriately handling custom order statuses.
-			 *
-			 * @since 8.6.1
-			 * @param array $statuses A list of order statuses that are considered pre-payment.
-			 * @return array The filtered list of ordered statuses.
-			 */
-			$pre_payment_statuses = apply_filters( 'woocommerce_before_payment_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
+			// If the order status is pending, failed or cancelled, the order must not have gone through.
+			$is_order_unpaid = $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
 
-			if ( ! $order->has_status( $pre_payment_statuses ) ) {
+			/**
+			 * Determine whether the cart should be cleared after payment.
+			 * 
+			 * @since 8.7.1
+			 * @param bool $should_clear_cart_after_payment Whether the cart should be cleared after payment.
+			 * @param WC_Order $order The order.
+			 * @return bool Whether the cart should be cleared after payment.
+			 */
+			$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', ! $is_order_unpaid, $order );
+			
+			if ( $should_clear_cart_after_payment ) {
 				WC()->cart->empty_cart();
 			}
 		}
