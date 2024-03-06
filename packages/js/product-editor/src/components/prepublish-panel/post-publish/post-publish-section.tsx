@@ -67,13 +67,14 @@ export function PostPublishSection( { postType }: PostPublishSectionProps ) {
 				<strong>{ __( 'What’s next?', 'woocommerce' ) }</strong>
 			</p>
 			<div className="post-publish-section__postpublish-post-address-container">
+				{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+				{ /* @ts-ignore TextControl requires an 'onChange' but it's not necessary here. */ }
 				<TextControl
 					className="post-publish-section__postpublish-post-address"
 					readOnly
 					label={ __( 'product address', 'woocommerce' ) }
 					value={ productURL }
 					onFocus={ onSelectInput }
-					onChange={ () => {} }
 				/>
 
 				<div className="post-publish-section__copy-button-wrap">
