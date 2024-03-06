@@ -46,6 +46,13 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
+	/**
+	 * An array of instance's inner block names.
+	 *
+	 * @var array
+	 */
+	protected $product_collection_inner_blocks_names = array();
+
 
 	/**
 	 * Initialize this block type.
@@ -78,7 +85,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
 		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'provide_location_context' ), 10, 3 );
+		add_filter( 'render_block_context', array( $this, 'update_context' ), 11, 3 );
 
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
@@ -88,9 +95,9 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Provides the location context into the block's context.
+	 * Provides the location context to each inner block of the product collection block.
 	 *
-	 * The location context's schema is an array with the following:
+	 * The context schema is an array with the following data:
 	 * - type: The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
 	 * - sourceData: The context data.
 	 *
@@ -102,43 +109,88 @@ class ProductCollection extends AbstractBlock {
 	 * - product: ['productId' => int]
 	 *
 	 * @param array    $context      The block context.
-	 * @param array    $parsed_block The parsed block.
+	 * @param array    $block        The parsed block.
 	 * @param WP_Block $parent_block The parent block.
 	 *
 	 * @return array The block's context including the location context.
 	 */
-	public function provide_location_context( $context, $parsed_block, $parent_block ) {
-
+	public function update_context( $context, $block, $parent_block ) {
 		// Run only on frontend.
 		// This is needed to avoid SSR renders within patterns. @see https://github.com/woocommerce/woocommerce/issues/45181
 		if ( is_admin() || \WC()->is_rest_api_request() ) {
 			return $context;
 		}
 
-		// Only on Product Collection's children blocks.
-		if ( ! is_a( $parent_block, 'WP_Block' ) || 'woocommerce/product-collection' !== $parent_block->name ) {
-
-			return $context;
+		if ( 'woocommerce/product-collection' === $block['blockName']
+			&& isset( $block['attrs']['query']['isProductCollectionBlock'] ) ) {
+					$this->product_collection_inner_blocks_names = array_reverse(
+						$this->extract_inner_block_names( $block )
+					);
 		}
 
-		// Parse ancestor-level context.
-		// @see Automattic\WooCommerce\Blocks\BlockTypes\SingleProduct::update_context()
-		$is_in_single_product = ! empty( $parent_block->context['singleProduct'] ) && $parent_block->context['singleProduct'] && ! empty( $parent_block->context['postId'] );
-		if ( $is_in_single_product ) {
+		$this->provide_location_context_inner_blocks( $block, $context );
 
-			$context['location'] = array(
+		return $context;
+	}
+
+	/**
+	 * Extract the inner block names for the Product Collection block.
+	 *
+	 * @param array $block The Product Collection block.
+	 * @param array $result Array of inner block names.
+	 *
+	 * @return array Array containing all the inner block names.
+	 */
+	protected function extract_inner_block_names( $block, &$result = array() ) {
+		if ( isset( $block['blockName'] ) ) {
+			$result[] = $block['blockName'];
+		}
+
+		if ( isset( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $inner_block ) {
+				$this->extract_inner_block_names( $inner_block, $result );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Add the productCollectionLocation context data into the inner blocks' context.
+	 *
+	 * @param array $block Block attributes.
+	 * @param array $context Block context.
+	 */
+	protected function provide_location_context_inner_blocks( $block, &$context ) {
+		if ( empty( $this->product_collection_inner_blocks_names ) ) {
+			return;
+		}
+
+		$block_name           = array_pop( $this->product_collection_inner_blocks_names );
+		$is_in_single_product = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+
+		if ( $block_name === $block['blockName'] ) {
+
+			$context['productCollectionLocation'] = $is_in_single_product ? array(
 				'type'       => 'product',
 				'sourceData' => array(
-					'productId' => absint( $parent_block->context['postId'] ),
+					'productId' => absint( $context['postId'] ),
 				),
-			);
-
-			return $context;
+			) : $this->get_location_context();
 		}
+	}
 
-		// Parse global context.
-		$context['location'] = ProductCollectionUtils::parse_global_location_context();
-		return $context;
+	/**
+	 * Get the global location context. 
+	 * Serve as a runtime cache for the location context.
+	 *
+	 * @return array The location context as described in self::update_context().
+	 */
+	protected function get_location_context() {
+		static $location_context = null;
+		if ( null === $location_context ) {
+			$location_context = ProductCollectionUtils::parse_global_location_context();
+		}
+		return $location_context;
 	}
 
 	/**

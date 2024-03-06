@@ -26,6 +26,7 @@ class ProductCollectionUtils {
 	 * @return array Parsed context.
 	 */
 	public static function parse_global_location_context() {
+		__DD( 'parse_global_location_context', '*****************************' );
 		global $wp_query;
 
 		// Default context.
