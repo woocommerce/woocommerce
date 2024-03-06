@@ -64,8 +64,21 @@ class CustomerAccount extends AbstractBlock {
 			false !== strpos( $content, get_permalink( wc_get_page_id( 'myaccount' ) ) ) ||
 			false !== strpos( $content, 'wp:page-list' )
 			) &&
+			isset( $context->ID ) &&
 			$block_is_hooked
 		) {
+			$existing_ignored_hooked_blocks = get_post_meta( $context->ID, '_wp_ignored_hooked_blocks', true );
+			$existing_ignored_hooked_blocks = ! empty( $existing_ignored_hooked_blocks ) ? json_decode( $existing_ignored_hooked_blocks, true ) : array();
+
+			// If the block is already ignored, return early.
+			if ( in_array( $block_name, $existing_ignored_hooked_blocks, true ) ) {
+				return $hooked_blocks;
+			}
+
+			// Add the block to the ignored list and remove it from the hooked blocks.
+			// This is required to keep parity with the editor in the event that the user removes the "My account" link.
+			$ignored_hooked_blocks = array_unique( array_merge( array( $block_name ), $existing_ignored_hooked_blocks ) );
+			update_post_meta( $context->ID, '_wp_ignored_hooked_blocks', wp_json_encode( $ignored_hooked_blocks ) );
 			$key = array_search( $block_name, $hooked_blocks, true );
 			unset( $hooked_blocks[ $key ] );
 		}
