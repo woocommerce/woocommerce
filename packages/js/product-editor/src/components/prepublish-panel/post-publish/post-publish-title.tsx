@@ -30,7 +30,7 @@ export function PostPublishTitle( {
 				sprintf(
 					/* translators: %s is the date when the product will be published */
 					__(
-						'<productURL /> now scheduled. It will go live on %s',
+						'<productURL /> is now scheduled. It will go live on %s',
 						'woocommerce'
 					),
 					formattedDate
