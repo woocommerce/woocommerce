@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { customer, admin } = require( '../../test-data/data' );
 
 const email = `test-${ Math.random() }@example.com`;
 const username = `newcustomer-${ Math.random() }`;
@@ -33,8 +34,19 @@ test.describe( 'Shopper Account Email Receiving', () => {
 	test.afterEach( async ( { page } ) => {
 		// delete created customer
 		await page.goto( 'wp-admin/users.php' );
-		await page.getByText( username ).last().hover();
-		await page.getByRole( 'link', { name: 'Delete' } ).last().click();
+		// await page.getByText( username ).last().hover();
+		// await page.getByRole( 'link', { name: 'Delete' } ).last().click();
+		await page
+			.getByRole( 'row', { name: username } )
+			.getByRole( 'checkbox' )
+			.check();
+		await page
+			.getByLabel( 'Select bulk action' )
+			.first()
+			.selectOption( { label: 'Delete' } );
+
+		await page.getByRole( 'button', { name: 'Apply' } ).first().click();
+
 		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();
 	} );
 
@@ -42,7 +54,9 @@ test.describe( 'Shopper Account Email Receiving', () => {
 		page,
 	} ) => {
 		// create a new customer
-		await page.goto( 'wp-admin/user-new.php' );
+		await page.goto( 'wp-admin/user-new.php', {
+			waitUntil: 'networkidle',
+		} );
 
 		await page.getByLabel( ' Username (required) ' ).fill( username );
 		await page.getByLabel( ' Email (required) ' ).fill( email );
@@ -84,7 +98,9 @@ test.describe( 'Shopper Account Email Receiving', () => {
 		page,
 	} ) => {
 		// create a new customer
-		await page.goto( 'wp-admin/user-new.php' );
+		await page.goto( 'wp-admin/user-new.php', {
+			waitUntil: 'networkidle',
+		} );
 
 		await page.getByLabel( ' Username (required) ' ).fill( username );
 		await page.getByLabel( ' Email (required) ' ).fill( email );
@@ -112,11 +128,20 @@ test.describe( 'Shopper Account Email Receiving', () => {
 		// initiate password reset from admin
 		await page.goto( 'wp-admin/users.php' );
 
-		await page.getByText( username ).last().hover();
+		// await page.getByText( username ).last().hover();
+		// await page
+		// 	.getByRole( 'link', { name: 'Send password reset' } )
+		// 	.last()
+		// 	.click();
 		await page
-			.getByRole( 'link', { name: 'Send password reset' } )
-			.last()
-			.click();
+			.getByRole( 'row', { name: username } )
+			.getByRole( 'checkbox' )
+			.check();
+		await page
+			.getByLabel( 'Select bulk action' )
+			.first()
+			.selectOption( { label: 'Send password reset' } );
+		await page.getByRole( 'button', { name: 'Apply' } ).first().click();
 
 		// verify that the email was sent
 		await page.goto(
@@ -148,7 +173,7 @@ test.describe( 'Shopper Password Reset Email Receiving', () => {
 	test.beforeEach( async ( { page } ) => {
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-				'customer@woocommercecoree2etestsuite.com'
+				customer.email
 			) }`
 		);
 		// clear out the email logs before each test
@@ -174,26 +199,28 @@ test.describe( 'Shopper Password Reset Email Receiving', () => {
 	} ) => {
 		await page.goto( 'my-account/lost-password/' );
 
-		await page
-			.getByLabel( 'Username or email' )
-			.fill( 'customer@woocommercecoree2etestsuite.com' );
+		await page.getByLabel( 'Username or email' ).fill( customer.email );
 		await page.getByRole( 'button', { name: 'Reset password' } ).click();
 
 		await page.waitForSelector( '.woocommerce-message' );
 
 		// verify that the email was sent
 		await page.goto( 'wp-login.php' );
-		await page.getByLabel( 'Username or Email Address' ).fill( 'admin' );
-		await page.getByLabel( 'Password', { exact: true } ).fill( 'password' );
+		await page
+			.getByLabel( 'Username or Email Address' )
+			.fill( admin.username );
+		await page
+			.getByLabel( 'Password', { exact: true } )
+			.fill( admin.password );
 		await page.getByRole( 'button', { name: 'Log In' } ).click();
 		await page.goto(
 			`wp-admin/tools.php?page=wpml_plugin_log&s=${ encodeURIComponent(
-				'customer@woocommercecoree2etestsuite.com'
+				customer.email
 			) }`
 		);
 
 		await expect( page.locator( 'td.column-receiver' ).first() ).toHaveText(
-			'customer@woocommercecoree2etestsuite.com'
+			customer.email
 		);
 		await expect(
 			page
