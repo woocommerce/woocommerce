@@ -139,7 +139,7 @@ jobs:
     e2e-wp-latest:
         name: E2E on WP Latest
         runs-on: ubuntu-latest
-        needs: [validate-version]
+        needs: [validate-version, api-wp-latest]
         permissions:
             contents: read
         env:
