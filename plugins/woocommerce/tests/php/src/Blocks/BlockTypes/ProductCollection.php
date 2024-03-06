@@ -79,24 +79,26 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Build a simplified request for testing.
 	 *
-	 * @param bool  $woocommerce_on_sale WooCommerce on sale.
-	 * @param array $woocommerce_attributes WooCommerce attributes.
-	 * @param array $woocommerce_stock_status WooCommerce stock status.
-	 * @param array $price_range Prie range.
+	 * @param array $params The parameters to set on the request.
 	 * @return WP_REST_Request
 	 */
-	private function build_request(
-		$woocommerce_on_sale = 'false',
-		$woocommerce_attributes = array(),
-		$woocommerce_stock_status = array(),
-		$price_range = array()
-	) {
+	private function build_request( $params = array() ) {
+		$params = wp_parse_args(
+			$params,
+			array(
+				'woocommerceOnSale'      => false,
+				'woocommerceAttributes'  => array(),
+				'woocommerceStockStatus' => array(),
+				'priceRange'             => array(),
+			)
+		);
+
+		$params['isProductCollectionBlock'] = true;
+
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
-		$request->set_param( 'woocommerceOnSale', $woocommerce_on_sale );
-		$request->set_param( 'woocommerceAttributes', $woocommerce_attributes );
-		$request->set_param( 'woocommerceStockStatus', $woocommerce_stock_status );
-		$request->set_param( 'priceRange', $price_range );
-		$request->set_param( 'isProductCollectionBlock', true );
+		foreach ( $params as $param => $value ) {
+			$request->set_param( $param, $value );
+		}
 
 		return $request;
 	}
@@ -594,20 +596,23 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_terms  = wc_get_product_visibility_term_ids();
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
-		$args         = array();
-		$on_sale      = 'true';
-		$attributes   = array(
-			array(
-				'taxonomy' => 'pa_test',
-				'termId'   => 1,
+		$args    = array();
+		$params  = array(
+			'featured'               => 'true',
+			'woocommerceOnSale'      => 'true',
+			'woocommerceAttributes'  => array(
+				array(
+					'taxonomy' => 'pa_test',
+					'termId'   => 1,
+				),
+			),
+			'woocommerceStockStatus' => array( 'instock', 'outofstock' ),
+			'priceRange'             => array(
+				'min' => 1,
+				'max' => 100,
 			),
 		);
-		$stock_status = array( 'instock', 'outofstock' );
-		$price_range  = array(
-			'min' => 1,
-			'max' => 100,
-		);
-		$request      = $this->build_request( $on_sale, $attributes, $stock_status, $price_range );
+		$request = $this->build_request( $params );
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
