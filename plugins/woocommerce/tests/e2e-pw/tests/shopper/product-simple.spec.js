@@ -1,6 +1,7 @@
 /* eslint-disable playwright/no-networkidle */
 /* eslint-disable jest/valid-expect */
 const { test, expect } = require( '@playwright/test' );
+const { admin } = require( '../../test-data/data' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const productPrice = '18.16';
@@ -160,8 +161,8 @@ test.describe( 'Single Product Page', () => {
 		page,
 	} ) => {
 		await page.goto( 'my-account' );
-		await page.locator( '#username' ).fill( 'admin' );
-		await page.locator( '#password' ).fill( 'password' );
+		await page.locator( '#username' ).fill( admin.username );
+		await page.locator( '#password' ).fill( admin.password );
 		await page.locator( 'text=Log in' ).click();
 
 		await page.goto( `product/${ simpleProductSlug }` );
