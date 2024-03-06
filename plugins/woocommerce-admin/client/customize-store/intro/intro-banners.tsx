@@ -9,6 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -222,6 +223,15 @@ export const NoAIBanner = ( {
 	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
 
 	return (
 		<>
@@ -234,7 +244,13 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					setIsModalOpen( true );
+					if ( ! isDefaultTheme ) {
+						setIsModalOpen( true );
+					} else {
+						sendEvent( {
+							type: 'DESIGN_WITHOUT_AI',
+						} );
+					}
 				} }
 				showAIDisclaimer={ false }
 			/>
@@ -271,6 +287,9 @@ export const NoAIBanner = ( {
 									type: 'DESIGN_WITHOUT_AI',
 								} );
 								setIsModalOpen( false );
+								recordEvent(
+									'customize_your_store_agree_to_theme_switch_click'
+								);
 							} }
 							variant="primary"
 						>

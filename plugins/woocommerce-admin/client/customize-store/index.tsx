@@ -83,9 +83,15 @@ const redirectToWooHome = () => {
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	window.location.href =
-		_context?.intro?.themeData?._links?.browse_all?.href ??
-		getAdminLink( 'themes.php' );
+	if ( isWooExpress() ) {
+		window.location.href =
+			_context?.intro?.themeData?._links?.browse_all?.href ??
+			getAdminLink( 'themes.php' );
+	} else {
+		window.location.href = getAdminLink(
+			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+		);
+	}
 };
 
 const markTaskComplete = async () => {
