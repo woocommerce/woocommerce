@@ -23,7 +23,7 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
-	retries: CI ? 2 : 0,
+	retries: 1,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reporter: [
@@ -34,7 +34,7 @@ const config = {
 				outputFolder:
 					PLAYWRIGHT_HTML_REPORT ??
 					'./test-results/playwright-report',
-				open: CI ? 'never' : 'on-failure',
+				open: 'on-failure',
 			},
 		],
 		[
