@@ -86,10 +86,11 @@ class ProductCollection extends \WP_UnitTestCase {
 		$params = wp_parse_args(
 			$params,
 			array(
+				'featured'               => false,
 				'woocommerceOnSale'      => false,
 				'woocommerceAttributes'  => array(),
 				'woocommerceStockStatus' => array(),
-				'priceRange'             => array(),
+        'priceRange'             => array(),
 			)
 		);
 
@@ -101,6 +102,26 @@ class ProductCollection extends \WP_UnitTestCase {
 		}
 
 		return $request;
+	}
+
+	/**
+	 * Test merging featured queries.
+	 */
+	public function test_merging_featured_queries() {
+		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['featured'] = true;
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => 'IN',
+				'taxonomy' => 'product_visibility',
+			),
+			$merged_query['tax_query']
+		);
 	}
 
 	/**
@@ -631,6 +652,15 @@ class ProductCollection extends \WP_UnitTestCase {
 				'field'    => 'term_taxonomy_id',
 				'terms'    => $product_visibility_not_in,
 				'operator' => 'NOT IN',
+			),
+			$updated_query['tax_query'],
+		);
+		$this->assertContains(
+			array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => 'IN',
 			),
 			$updated_query['tax_query'],
 		);
