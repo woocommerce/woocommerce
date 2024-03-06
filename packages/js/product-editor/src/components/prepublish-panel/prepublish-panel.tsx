@@ -43,7 +43,7 @@ export function PrepublishPanel( {
 
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
-	const isPublished =
+	const isPublishedOrScheduled =
 		productType === 'product' && prevStatus !== 'future'
 			? productStatus === 'publish'
 			: true;
@@ -57,7 +57,7 @@ export function PrepublishPanel( {
 	}
 
 	function getHeaderActions() {
-		if ( isPublished ) {
+		if ( isPublishedOrScheduled ) {
 			return (
 				<Button
 					className="woocommerce-publish-panel-close"
@@ -93,7 +93,7 @@ export function PrepublishPanel( {
 	}
 
 	function getPanelTitle() {
-		if ( isPublished ) {
+		if ( isPublishedOrScheduled ) {
 			return <PostPublishTitle productType={ productType } />;
 		}
 		return (
@@ -105,7 +105,7 @@ export function PrepublishPanel( {
 	}
 
 	function getPanelSections() {
-		if ( isPublished ) {
+		if ( isPublishedOrScheduled ) {
 			return <PostPublishSection postType={ productType } />;
 		}
 		return (
@@ -119,7 +119,7 @@ export function PrepublishPanel( {
 	return (
 		<div
 			className={ classnames( 'woocommerce-product-publish-panel', {
-				'is-published': isPublished,
+				'is-published': isPublishedOrScheduled,
 			} ) }
 		>
 			<div className="woocommerce-product-publish-panel__header">
