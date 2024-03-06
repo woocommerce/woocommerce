@@ -36,16 +36,10 @@ export function PrepublishPanel( {
 		productType,
 		'date_created'
 	);
-	const [ productStatus ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'status'
-	);
-	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
-		'postType',
-		productType,
-		'status'
-	);
+
+	const [ productStatus, , prevStatus ] = useEntityProp<
+		Product[ 'status' ]
+	>( 'postType', productType, 'status' );
 
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
