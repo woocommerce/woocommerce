@@ -350,6 +350,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				);
 		}
 
-		return new \WP_Error( $error_code, $error_message, [ 'status' => $http_status_code ] );
+		$additional_data = array_merge( $additional_data, [ 'status' => $http_status_code ] );
+
+		return new \WP_Error( $error_code, $error_message, $additional_data );
 	}
 }
