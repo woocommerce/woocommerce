@@ -75,9 +75,6 @@ test.describe( 'Shopper → Tax', () => {
 
 	test.afterAll( async () => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp option set woocommerce_prices_include_tax yes`
-		);
-		await cli(
 			`npm run wp-env run tests-cli -- wp option set woocommerce_tax_display_cart excl`
 		);
 	} );
