@@ -1022,11 +1022,8 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 */
 	protected function validate_cart_coupon( \WC_Coupon $coupon ) {
-		$cart      = $this->get_cart_instance();
-		$discounts = new \WC_Discounts( $cart );
-		$valid     = $discounts->is_coupon_valid( $coupon );
-
-		if ( is_wp_error( $valid ) ) {
+		if ( ! $coupon->is_valid() ) {
+			$cart = $this->get_cart_instance();
 			$cart->remove_coupon( $coupon->get_code() );
 			$cart->calculate_totals();
 			throw new RouteException(
@@ -1035,7 +1032,7 @@ class CartController {
 					/* translators: %1$s coupon code, %2$s reason. */
 					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woocommerce' ),
 					$coupon->get_code(),
-					wp_strip_all_tags( $valid->get_error_message() )
+					wp_strip_all_tags( $coupon->get_error_message() )
 				),
 				409
 			);
