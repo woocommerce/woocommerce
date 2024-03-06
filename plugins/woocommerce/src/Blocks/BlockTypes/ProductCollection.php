@@ -116,7 +116,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	public function update_context( $context, $block, $parent_block ) {
 		// Run only on frontend.
-		// This is needed to avoid SSR renders within patterns. @see https://github.com/woocommerce/woocommerce/issues/45181
+		// This is needed to avoid SSR renders within patterns. @see https://github.com/woocommerce/woocommerce/issues/45181.
 		if ( is_admin() || \WC()->is_rest_api_request() ) {
 			return $context;
 		}
@@ -180,7 +180,7 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Get the global location context. 
+	 * Get the global location context.
 	 * Serve as a runtime cache for the location context.
 	 *
 	 * @return array The location context as described in self::update_context().
