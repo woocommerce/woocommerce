@@ -3962,9 +3962,6 @@ importers:
       usehooks-ts:
         specifier: ^2.9.1
         version: 2.9.1(react-dom@17.0.2)(react@17.0.2)
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
       wordpress-components:
         specifier: npm:@wordpress/components@14.2.0
         version: /@wordpress/components@14.2.0(@types/react@17.0.71)(react-dom@17.0.2)(react-with-direction@1.4.0)(react@17.0.2)(reakit-utils@0.15.2)(redux@4.2.1)
@@ -4108,9 +4105,6 @@ importers:
       '@types/react-transition-group':
         specifier: ^4.4.10
         version: 4.4.10
-      '@types/uuid':
-        specifier: ^9.0.7
-        version: 9.0.7
       '@types/wordpress__block-editor':
         specifier: 6.0.6
         version: 6.0.6(react-dom@17.0.2)(react@17.0.2)
@@ -4621,8 +4615,8 @@ importers:
         specifier: ^7.1.0
         version: 7.3.3
       simple-git:
-        specifier: 3.5.0
-        version: 3.5.0
+        specifier: ^3.21.0
+        version: 3.21.0
 
   tools/monorepo-merge:
     dependencies:
@@ -47572,16 +47566,6 @@ packages:
       debug: 4.3.4(supports-color@9.4.0)
     transitivePeerDependencies:
       - supports-color
-
-  /simple-git@3.5.0:
-    resolution: {integrity: sha512-fZsaq5nzdxQRhMNs6ESGLpMUHoL5GRP+boWPhq9pMYMKwOGZV2jHOxi8AbFFA2Y/6u4kR99HoULizSbpzaODkA==}
-    dependencies:
-      '@kwsites/file-exists': 1.1.1
-      '@kwsites/promise-deferred': 1.1.1
-      debug: 4.3.4(supports-color@9.4.0)
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
 
   /simple-html-tokenizer@0.5.11:
     resolution: {integrity: sha512-C2WEK/Z3HoSFbYq8tI7ni3eOo/NneSPRoPpcM7WdLjFOArFuyXEjAoCdOC3DgMfRyziZQ1hCNR4mrNdWEvD0og==}
