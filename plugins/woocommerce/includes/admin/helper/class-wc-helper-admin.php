@@ -59,6 +59,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
+			'wooUpdateManagerPluginId' 	 => WC_Woo_Update_Manager_Plugin::get_plugin_id(),
 		);
 
 		return $settings;
