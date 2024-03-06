@@ -1167,15 +1167,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
-	 * Returns alternate error messages based on context (eg. Cart and Checkout)
+	 * Returns alternate error messages based on context (eg. Cart and Checkout).
 	 *
-	 * @param $error_code
+	 * @param int $err_code Message/error code.
 	 *
-	 * @return array
+	 * @return array Context based alternate error messages.
 	 */
-	public function get_context_based_coupon_errors( $error_code = null ) {
+	public function get_context_based_coupon_errors( $err_code = null ) {
 
-		switch ( $error_code ) {
+		switch ( $err_code ) {
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				return array(
 					'cart'     => sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
