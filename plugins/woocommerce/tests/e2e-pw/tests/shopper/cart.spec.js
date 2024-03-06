@@ -225,9 +225,26 @@ test.describe( 'Cart page', () => {
 		await page
 			.getByLabel( `Add to cart: “${ productName } cross-sell 1”` )
 			.click();
+		await expect(
+			page.getByRole( 'row' ).filter( {
+				has: page.getByRole( 'link', {
+					name: `${ productName } cross-sell 1`,
+					exact: true,
+				} ),
+			} )
+		).toBeVisible();
+
 		await page
 			.getByLabel( `Add to cart: “${ productName } cross-sell 2”` )
 			.click();
+		await expect(
+			page.getByRole( 'row' ).filter( {
+				has: page.getByRole( 'link', {
+					name: `${ productName } cross-sell 2`,
+					exact: true,
+				} ),
+			} )
+		).toBeVisible();
 		await page.waitForLoadState( 'networkidle' );
 
 		// reload page and confirm added products
@@ -242,16 +259,14 @@ test.describe( 'Cart page', () => {
 		await page
 			.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
 			.click();
-		await expect(
-			page.locator( '.woocommerce-message' )
-		).toContainText( `“${ productName } cross-sell 1” removed.` );
+		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
+			`“${ productName } cross-sell 1” removed.`
+		);
 		await page
 			.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
 			.click();
 		await expect(
-			page
-				.locator( '.woocommerce-message' )
-				.first()
+			page.locator( '.woocommerce-message' ).first()
 		).toContainText( `“${ productName } cross-sell 2” removed.` );
 
 		// check if you see now cross-sell products
