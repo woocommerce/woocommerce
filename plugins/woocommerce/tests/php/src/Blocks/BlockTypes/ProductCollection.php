@@ -409,7 +409,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Test merging time range queries.
 	 */
-	public function test_merging_time_range_before_queries() {
+	public function test_merging_time_frame_before_queries() {
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 
 		$parsed_block                                = $this->get_base_parsed_block();
@@ -433,7 +433,7 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Test merging time range queries.
 	 */
-	public function test_merging_time_range_after_queries() {
+	public function test_merging_time_frame_after_queries() {
 		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
 
 		$parsed_block                                = $this->get_base_parsed_block();
