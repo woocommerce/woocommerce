@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { SETTINGS_STORE_NAME, COUNTRIES_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -21,17 +21,27 @@ import {
 const validateLocationForm = ( values: FormValues ) => {
 	const errors = defaultValidate( values );
 
-	if ( ! values.addressLine1.trim().length ) {
+	if (
+		document.getElementById( 'woocommerce-store-address-form-address_1' ) &&
+		! values.addressLine1.trim().length
+	) {
 		errors.addressLine1 = __( 'Please enter an address', 'woocommerce' );
 	}
 
-	if ( ! values.postCode.trim().length ) {
+	if (
+		document.getElementById( 'woocommerce-store-address-form-postcode' ) &&
+		! values.postCode.trim().length
+	) {
 		errors.postCode = __( 'Please enter a post code', 'woocommerce' );
 	}
 
-	if ( ! values.city.trim().length ) {
+	if (
+		document.getElementById( 'woocommerce-store-address-form-city' ) &&
+		! values.city.trim().length
+	) {
 		errors.city = __( 'Please enter a city', 'woocommerce' );
 	}
+
 	return errors;
 };
 
@@ -63,7 +73,14 @@ export const StoreLocation: React.FC< {
 		if (
 			isResolving ||
 			isUpdating ||
-			! hasCompleteAddress( generalSettings || {} )
+			! hasCompleteAddress(
+				generalSettings || {},
+				Boolean(
+					document.getElementById(
+						'woocommerce-store-address-form-postcode'
+					)
+				)
+			)
 		) {
 			return;
 		}
