@@ -60,13 +60,10 @@ class CartApplyCoupon extends AbstractCartRoute {
 
 		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
-		try {
-			$this->cart_controller->apply_coupon( $coupon_code );
-		} catch ( \WC_REST_Exception $e ) {
-			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
-		}
+		$this->cart_controller->apply_coupon( $coupon_code );
 
 		$cart = $this->cart_controller->get_cart_instance();
+
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
 	}
 }
