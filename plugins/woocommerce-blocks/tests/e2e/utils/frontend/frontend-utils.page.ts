@@ -27,66 +27,43 @@ export class FrontendUtils {
 	}
 
 	async addToCart( itemName = '' ) {
-		let addToCartButton = this.page.getByLabel(
-			`Add to cart: “${ itemName }”`,
-			{
-				exact: true,
-			}
-		);
+		let addToCartButton;
 
-		if ( itemName === '' ) {
-			// Legacy template button.
-			addToCartButton = this.page.getByText( 'Add to cart', {
-				exact: true,
-			} );
+		if ( itemName !== '' ) {
+			// We can't use `getByRole()` here because the Add to Cart button
+			// might be a button (in blocks) or a link (in the legacy template).
+			addToCartButton = this.page.getByLabel(
+				`Add to cart: “${ itemName }”`
+			);
+		} else {
+			addToCartButton = this.page.getByText( 'Add to cart' ).first();
 		}
 
-		const buttonHref = await addToCartButton.getAttribute( 'href' );
-		if ( ! buttonHref ) {
-			throw new Error( 'Could not get add to cart URL.' );
-		}
-
-		const waitForURLPromise = this.page.waitForURL( ( url ) =>
-			url.href.includes( buttonHref )
-		);
 		await addToCartButton.click();
-		await waitForURLPromise;
 	}
 
 	async goToCheckout() {
-		await this.page.goto( '/checkout', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/checkout' );
 	}
 
 	async goToCart() {
-		await this.page.goto( '/cart', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart' );
 	}
 
 	async goToCartShortcode() {
-		await this.page.goto( '/cart-shortcode', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart-shortcode' );
 	}
 
 	async goToMiniCart() {
-		await this.page.goto( '/mini-cart', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/mini-cart' );
 	}
 
 	async goToShop() {
-		await this.page.goto( '/shop', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/shop' );
 	}
 
 	async logout() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/my-account' );
 		await this.page.click(
 			'.woocommerce-MyAccount-navigation-link--customer-logout a'
 		);
@@ -209,8 +186,6 @@ export class FrontendUtils {
 	}
 
 	async gotoMyAccount() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/my-account' );
 	}
 }

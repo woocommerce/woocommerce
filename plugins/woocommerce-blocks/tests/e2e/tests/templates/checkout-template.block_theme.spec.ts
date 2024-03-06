@@ -8,6 +8,10 @@ const templatePath = 'woocommerce/woocommerce//page-checkout';
 const templateType = 'wp_template';
 
 test.describe( 'Test the checkout template', async () => {
+	test.beforeEach( async ( { frontendUtils } ) => {
+		await frontendUtils.emptyCart();
+	} );
+
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		page,
@@ -58,18 +62,17 @@ test.describe( 'Test the checkout template', async () => {
 	} );
 
 	test( 'Admin bar edit site link opens site editor', async ( {
-		admin,
+		page,
+		editor,
 		frontendUtils,
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart();
-		await admin.page.goto( permalink, { waitUntil: 'load' } );
-		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
+		await page.goto( permalink );
+		await page.locator( '#wp-admin-bar-site-editor a' ).click();
+
 		await expect(
-			admin.page
-				.frameLocator( 'iframe[title="Editor canvas"i]' )
-				.locator( 'h1:has-text("Checkout")' )
-				.first()
+			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
 		).toBeVisible();
 	} );
 } );
