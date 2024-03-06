@@ -49,6 +49,7 @@ export const DesignWithNoAiController = ( {
 
 	const [ CurrentComponent, setCurrentComponent ] =
 		useState< DesignWithoutAiComponent | null >( null );
+
 	useEffect( () => {
 		if ( currentNodeMeta?.component ) {
 			setCurrentComponent( () => currentNodeMeta?.component );
