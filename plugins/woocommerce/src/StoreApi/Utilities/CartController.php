@@ -935,7 +935,8 @@ class CartController {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
 				wp_strip_all_tags( $valid->get_error_message() ),
-				400
+				400,
+				$valid->get_error_data()
 			);
 		}
 

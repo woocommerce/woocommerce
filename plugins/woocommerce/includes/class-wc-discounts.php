@@ -1058,12 +1058,21 @@ class WC_Discounts {
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
+			$additional_data = array(
+				'status'            => 400,
+				'coupon_error_code' => $e->getCode()
+			);
+
+			$context_coupon_errors = $coupon->get_context_based_coupon_errors( $e->getCode() );
+
+			if ( ! empty( $context_coupon_errors ) ) {
+				$additional_data['context_based_errors'] = $context_coupon_errors;
+			}
+
 			return new WP_Error(
 				'invalid_coupon',
 				$message,
-				array(
-					'status' => 400,
-				)
+				$additional_data
 			);
 		}
 
