@@ -31,6 +31,7 @@ class CustomerAccount extends AbstractBlock {
 		array(
 			'position' => 'last_child',
 			'anchor'   => 'core/navigation',
+			'callback' => 'should_unhook_block',
 		),
 	);
 
@@ -40,6 +41,36 @@ class CustomerAccount extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
+	}
+
+	/**
+	 * Callback for the Block Hooks API to determine if the block should be auto-inserted.
+	 *
+	 * @param array                             $hooked_blocks An array of block slugs hooked into a given context.
+	 * @param string                            $position      Position of the block insertion point.
+	 * @param string                            $anchor_block  The block acting as the anchor for the inserted block.
+	 * @param array|\WP_Post|\WP_Block_Template $context       Where the block is embedded.
+	 *
+	 * @return bool
+	 */
+	protected function should_unhook_block( $hooked_blocks, $position, $anchor_block, $context ) {
+		$block_name      = $this->namespace . '/' . $this->block_name;
+		$block_is_hooked = in_array( $block_name, $hooked_blocks, true );
+		$content         = $this->get_context_content( $context );
+
+		// If the context contains the my account permalink or the core/page-list block (which includes the my account link),
+		// and the block is hooked, unhook it.
+		if ( (
+			false !== strpos( $content, get_permalink( wc_get_page_id( 'myaccount' ) ) ) ||
+			false !== strpos( $content, 'wp:page-list' )
+			) &&
+			$block_is_hooked
+		) {
+			$key = array_search( $block_name, $hooked_blocks, true );
+			unset( $hooked_blocks[ $key ] );
+		}
+
+		return $hooked_blocks;
 	}
 
 	/**

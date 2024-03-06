@@ -42,6 +42,7 @@ trait BlockHooksTrait {
 		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
 		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
+
 				if ( $placement['position'] === $position && $placement['anchor'] === $anchor_block ) {
 					// If an area has been specified for this placement.
 					if (
@@ -58,6 +59,12 @@ trait BlockHooksTrait {
 					if ( ! isset( $placement['area'] ) ) {
 						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
 					}
+
+					// If a callback has been specified for this placement, call it.
+					$callback = isset( $placement['callback'] ) && is_callable( array( $this, $placement['callback'] ) ) ? array( $this, $placement['callback'] ) : null;
+					if ( null !== $callback ) {
+						$hooked_blocks = $callback( $hooked_blocks, $position, $anchor_block, $context );
+					}
 				}
 			}
 		}
@@ -73,9 +80,23 @@ trait BlockHooksTrait {
 	 * @return boolean
 	 */
 	protected function has_block_in_content( $context ) {
+		$content = $this->get_context_content( $context );
+		return strpos( $content, 'wp:' . $this->namespace . '/' . $this->block_name ) !== false;
+	}
+
+	/**
+	 * Given a provided context, returns the content of the context.
+	 *
+	 * @param array|\WP_Post|\WP_Block_Template $context Where the block is embedded.
+	 * @since 8.5.0
+	 * @return string
+	 */
+	protected function get_context_content( $context ) {
 		$content = is_array( $context ) && isset( $context['content'] ) ? $context['content'] : '';
 		$content = '' === $content && $context instanceof \WP_Block_Template ? $context->content : $content;
-		return strpos( $content, 'wp:' . $this->namespace . '/' . $this->block_name ) !== false;
+		$content = '' === $content && $context instanceof \WP_Post ? $context->post_content : $content;
+		return $content;
+
 	}
 
 	/**
