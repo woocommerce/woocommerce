@@ -21,7 +21,10 @@ class WC_Admin_Notices {
 	use AccessiblePrivateMethods;
 
 	/**
-	 * Stores notices.
+	 * Local notices cache.
+	 *
+	 * DON'T manipulate this field directly!
+	 * Always use get_notices and set_notices instead.
 	 *
 	 * @var array
 	 */
@@ -48,10 +51,18 @@ class WC_Admin_Notices {
 	);
 
 	/**
-	 * Constructor.
+	 * Stores a flag indicating if the code is running in a multisite setup.
+	 *
+	 * @var bool
+	 */
+	private static bool $is_multisite;
+
+	/**
+	 * Initializes the class.
 	 */
 	public static function init() {
-		self::$notices = get_option( 'woocommerce_admin_notices', array() );
+		self::$is_multisite = is_multisite();
+		self::set_notices( get_option( 'woocommerce_admin_notices', array() ) );
 
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
@@ -85,26 +96,50 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Store notices to DB
+	 * Store the locally cached notices to DB.
 	 */
 	public static function store_notices() {
 		update_option( 'woocommerce_admin_notices', self::get_notices() );
 	}
 
 	/**
-	 * Get notices
+	 * Get the value of the locally cached notices array for the current site.
 	 *
 	 * @return array
 	 */
 	public static function get_notices() {
-		return self::$notices;
+		if ( ! self::$is_multisite ) {
+			return self::$notices;
+		}
+
+		$blog_id = get_current_blog_id();
+		$notices = self::$notices[ $blog_id ] ?? null;
+		if ( ! is_null( $notices ) ) {
+			return $notices;
+		}
+
+		self::$notices[ $blog_id ] = get_option( 'woocommerce_admin_notices', array() );
+		return self::$notices[ $blog_id ];
 	}
 
 	/**
-	 * Remove all notices.
+	 * Set the locally cached notices array for the current site.
+	 *
+	 * @param array $notices New value for the locally cached notices array.
+	 */
+	private static function set_notices( array $notices ) {
+		if ( self::$is_multisite ) {
+			self::$notices[ get_current_blog_id() ] = $notices;
+		} else {
+			self::$notices = $notices;
+		}
+	}
+
+	/**
+	 * Remove all notices from the locally cached notices array.
 	 */
 	public static function remove_all_notices() {
-		self::$notices = array();
+		self::set_notices( array() );
 	}
 
 	/**
@@ -205,7 +240,7 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function add_notice( $name, $force_save = false ) {
-		self::$notices = array_unique( array_merge( self::get_notices(), array( $name ) ) );
+		self::set_notices( array_unique( array_merge( self::get_notices(), array( $name ) ) ) );
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
@@ -220,7 +255,7 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
-		self::$notices = array_diff( self::get_notices(), array( $name ) );
+		self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
 		delete_option( 'woocommerce_admin_notice_' . $name );
 
 		if ( $force_save ) {
