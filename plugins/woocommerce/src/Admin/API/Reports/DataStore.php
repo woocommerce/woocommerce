@@ -1398,12 +1398,14 @@ class DataStore extends SqlQuery {
 
 				$in_comparator = '=' === $comparator ? 'in' : 'not in';
 
+
 				// Add subquery for products ordered using attributes not used in variations.
+				$term_attribute_subquery = "select product_id from {$wpdb->prefix}wc_product_attributes_lookup where is_variation_attribute=0 and term_id = %s";
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$sql_clauses['where'][] = $wpdb->prepare(
 					"
 					( ( {$join_alias}.meta_key = %s AND {$join_alias}.meta_value {$comparator} %s ) or (
-						{$wpdb->prefix}wc_order_product_lookup.variation_id = 0 and {$wpdb->prefix}wc_order_product_lookup.product_id {$in_comparator} ( select product_id from {$wpdb->prefix}wc_product_attributes_lookup where is_variation_attribute=0 and term_id = %s )
+						{$wpdb->prefix}wc_order_product_lookup.variation_id = 0 and {$wpdb->prefix}wc_order_product_lookup.product_id {$in_comparator} ({$term_attribute_subquery})
 					) )",
 					$meta_key,
 					$meta_value,
