@@ -87,7 +87,7 @@ class ProductCollection extends \WP_UnitTestCase {
 				'woocommerceOnSale'      => false,
 				'woocommerceAttributes'  => array(),
 				'woocommerceStockStatus' => array(),
-        'timeFrame'              => array(),
+				'timeFrame'              => array(),
 			)
 		);
 
