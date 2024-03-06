@@ -52,7 +52,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		do_action( 'woocommerce_installed' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
+		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
@@ -69,7 +69,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		do_action( 'woocommerce_updated' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		$this->assertEquals( 'no', get_option( 'woocommerce_coming_soon' ) );
-		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
+		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
@@ -83,7 +83,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	public function test_add_lys_default_values_when_options_are_already_set() {
 		update_option( 'fresh_site', '0' );
 		update_option( 'woocommerce_coming_soon', 'yes' );
-		update_option( 'woocommerce_store_pages_only', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
 		update_option( 'woocommerce_private_link', 'yes' );
 		update_option( 'woocommerce_share_key', 'test' );
 		update_option( 'launch-status', 'unlaunched' );
@@ -92,7 +92,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		do_action( 'woocommerce_updated' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
+		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertEquals( 'test', get_option( 'woocommerce_share_key' ) );
 		$this->assertEquals( 'unlaunched', get_option( 'launch-status' ) );

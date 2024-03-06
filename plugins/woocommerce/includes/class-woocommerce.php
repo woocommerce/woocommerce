@@ -318,7 +318,7 @@ final class WooCommerce {
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
 		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
-		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'yes' : 'no';
+		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
 		$private_link     = 'yes';
 		$share_key        = wp_generate_password( 32, false );
 
