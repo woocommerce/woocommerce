@@ -157,6 +157,13 @@
 		.block-editor-block-list__block fieldset {
 			min-width: 0;
 		}
+
+		/* Remove the outline for the block when it is editable */
+		.block-editor-block-list__block.has-editable-outline {
+			&::after {
+				display: none;
+			}
+		}
 	}
 }
 
