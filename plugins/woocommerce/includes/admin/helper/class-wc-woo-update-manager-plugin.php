@@ -68,7 +68,7 @@ class WC_Woo_Update_Manager_Plugin {
 		 */
 		$woo_update_manager_plugin_id = apply_filters( 'woo_update_manager_plugin_id', 18734003334043 );
 
-		$install_url = $install_url_base . 'auto-install/step/init/' . $woo_update_manager_plugin_id . '/';
+		$install_url = $install_url_base . 'auto-install-init/' . $woo_update_manager_plugin_id . '/';
 
 		return self::add_auth_parameters( $install_url );
 	}
