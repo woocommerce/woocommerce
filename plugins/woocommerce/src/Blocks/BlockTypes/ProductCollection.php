@@ -128,7 +128,7 @@ class ProductCollection extends AbstractBlock {
 					);
 		}
 
-		$this->provide_location_context_inner_blocks( $block, $context );
+		$this->provide_location_context_for_inner_blocks( $block, $context );
 
 		return $context;
 	}
