@@ -13,7 +13,7 @@ import { getNewPath } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { useProductScheduled } from '../../../hooks/use-product-scheduled';
-import { PostPublishSectionProps } from './types';
+import { CopyButtonProps, PostPublishSectionProps } from './types';
 import { TRACKS_SOURCE } from '../../../constants';
 import { useProductURL } from '../../../hooks/use-product-url';
 
@@ -26,15 +26,7 @@ export function PostPublishSection( { postType }: PostPublishSectionProps ) {
 
 	const productURL = getProductURL( isScheduled );
 
-	const CopyButton = ( {
-		text,
-		onCopy,
-		children,
-	}: {
-		text: string;
-		onCopy: () => void;
-		children: JSX.Element;
-	} ) => {
+	const CopyButton = ( { text, onCopy, children }: CopyButtonProps ) => {
 		const ref = useCopyToClipboard(
 			text,
 			onCopy

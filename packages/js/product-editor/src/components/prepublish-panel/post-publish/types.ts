@@ -5,3 +5,9 @@ export type PostPublishSectionProps = {
 export type PostPublishTitleProps = {
 	productType: string;
 };
+
+export type CopyButtonProps = {
+	text: string;
+	onCopy: () => void;
+	children: JSX.Element;
+};
