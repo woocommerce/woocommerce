@@ -25,6 +25,7 @@ use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{ LoggingUtil, TimeUtil };
 use Automattic\WooCommerce\Admin\WCAdminHelper;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * Main WooCommerce Class.
@@ -253,8 +254,11 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
-		add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
-		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
+			add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
+		}
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
