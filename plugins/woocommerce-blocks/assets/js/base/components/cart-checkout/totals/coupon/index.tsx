@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { withInstanceId } from '@wordpress/compose';
@@ -85,6 +85,37 @@ export const TotalsCoupon = ( {
 		}
 	};
 
+	const [ errorMessage, setErrorMessage ] = useState( [] );
+	const { cartErrors } = useSelect( ( select ) => {
+		return {
+			cartErrors: select( 'wc/store/cart' ).getCartErrors(),
+		};
+	} );
+
+	useEffect( () => {
+		console.log( cartErrors );
+
+		const couponErrors = cartErrors.filter(
+			( cartError ) =>
+				cartError.code === 'woocommerce_rest_cart_coupon_error'
+		)?.[ 0 ];
+
+		if ( couponErrors ) {
+			if ( couponErrors?.data?.context_based_errors ) {
+				// check if we're on the cart or checkout page and set the error message accordingly
+
+				//set the cart error message
+				setErrorMessage(
+					couponErrors?.data?.context_based_errors?.checkout
+				);
+			}
+		}
+
+		// Get the error from cart store
+		// Do the logic to work out which error to display based on the errorID
+		// Update the state with the error code
+	}, [ cartErrors ] );
+
 	return (
 		<div className="wc-block-components-totals-coupon">
 			{ isCouponFormHidden ? (
@@ -136,6 +167,7 @@ export const TotalsCoupon = ( {
 							</Button>
 						</form>
 						<ValidationInputError
+							errorMessage={ errorMessage }
 							propertyName="coupon"
 							elementId={ textInputId }
 						/>
