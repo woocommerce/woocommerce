@@ -195,7 +195,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 
 			const regularPrice = page.locator( 'input[name="regular_price"]' );
-			await regularPrice.waitFor( { state: 'attached' } );
+			await regularPrice.waitFor( { state: 'visible', timeout: 5000 } );
 			await regularPrice.first().fill( '100' );
 
 			await page
