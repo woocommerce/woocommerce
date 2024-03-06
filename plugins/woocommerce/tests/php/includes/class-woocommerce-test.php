@@ -39,6 +39,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_store_pages_only' );
 		delete_option( 'woocommerce_private_link' );
 		delete_option( 'woocommerce_share_key' );
+		delete_option( 'launch-status' );
 	}
 
 	/**
@@ -55,6 +56,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
+		$this->assertEquals( 'unlaunched', get_option( 'launch-status' ) );
 	}
 
 	/**
@@ -71,6 +73,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
+		$this->assertEquals( 'launched', get_option( 'launch-status' ) );
 	}
 
 	/**
@@ -83,6 +86,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_store_pages_only', 'yes' );
 		update_option( 'woocommerce_private_link', 'yes' );
 		update_option( 'woocommerce_share_key', 'test' );
+		update_option( 'launch-status', 'unlaunched' );
 
 		// Simulate 'woocommerce_updated' action.
 		do_action( 'woocommerce_updated' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
@@ -91,5 +95,6 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
 		$this->assertEquals( 'test', get_option( 'woocommerce_share_key' ) );
+		$this->assertEquals( 'unlaunched', get_option( 'launch-status' ) );
 	}
 }

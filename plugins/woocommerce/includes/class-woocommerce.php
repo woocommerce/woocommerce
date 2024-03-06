@@ -314,22 +314,28 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
-		$coming_soon      = current_action() === 'woocommerce_installed' ? 'yes' : 'no';
+		$is_new_install = current_action() === 'woocommerce_installed';
+
+		$coming_soon      = $is_new_install ? 'yes' : 'no';
+		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
 		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'yes' : 'no';
 		$private_link     = 'yes';
 		$share_key        = wp_generate_password( 32, false );
 
-		if ( ! get_option( 'woocommerce_coming_soon' ) ) {
+		if ( false === get_option( 'woocommerce_coming_soon', false ) ) {
 			update_option( 'woocommerce_coming_soon', $coming_soon );
 		}
-		if ( ! get_option( 'woocommerce_store_pages_only' ) ) {
+		if ( false === get_option( 'woocommerce_store_pages_only', false ) ) {
 			update_option( 'woocommerce_store_pages_only', $store_pages_only );
 		}
-		if ( ! get_option( 'woocommerce_private_link' ) ) {
+		if ( false === get_option( 'woocommerce_private_link', false ) ) {
 			update_option( 'woocommerce_private_link', $private_link );
 		}
-		if ( ! get_option( 'woocommerce_share_key' ) ) {
+		if ( false === get_option( 'woocommerce_share_key', false ) ) {
 			update_option( 'woocommerce_share_key', $share_key );
+		}
+		if ( false === get_option( 'launch-status', false ) ) {
+			update_option( 'launch-status', $launch_status );
 		}
 	}
 
