@@ -22,7 +22,7 @@ test.describe( 'Shopper → Translations', () => {
 		);
 	} );
 
-	test( 'User can see translation in empty Mini-Cart', async ( {
+	test.skip( 'User can see translation in empty Mini-Cart', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,

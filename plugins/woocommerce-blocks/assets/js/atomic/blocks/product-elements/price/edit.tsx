@@ -46,7 +46,6 @@ const PriceEdit = ( {
 	setAttributes,
 	context,
 }: Props ): JSX.Element => {
-	console.log( 'trigger E2E tests' );
 	const blockProps = useBlockProps();
 	const blockAttrs = {
 		...attributes,
