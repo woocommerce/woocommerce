@@ -75,19 +75,26 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Build a simplified request for testing.
 	 *
-	 * @param bool  $woocommerce_on_sale WooCommerce on sale.
-	 * @param array $woocommerce_attributes WooCommerce attributes.
-	 * @param array $woocommerce_stock_status WooCommerce stock status.
-	 * @param array $time_frame The time frame for filtering.
+	 * @param array $params The parameters to set on the request.
 	 * @return WP_REST_Request
 	 */
-	private function build_request( $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array(), $time_frame = array() ) {
+	private function build_request( $params = array() ) {
+		$params = wp_parse_args(
+			$params,
+			array(
+				'woocommerceOnSale'      => false,
+				'woocommerceAttributes'  => array(),
+				'woocommerceStockStatus' => array(),
+				'timeFrame'              => array(),
+			)
+		);
+
+		$params['isProductCollectionBlock'] = true;
+
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
-		$request->set_param( 'woocommerceOnSale', $woocommerce_on_sale );
-		$request->set_param( 'woocommerceAttributes', $woocommerce_attributes );
-		$request->set_param( 'woocommerceStockStatus', $woocommerce_stock_status );
-		$request->set_param( 'timeFrame', $time_frame );
-		$request->set_param( 'isProductCollectionBlock', true );
+		foreach ( $params as $param => $value ) {
+			$request->set_param( $param, $value );
+		}
 
 		return $request;
 	}
@@ -634,20 +641,23 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
 		$args            = array();
-		$on_sale         = 'true';
-		$attributes      = array(
-			array(
-				'taxonomy' => 'pa_test',
-				'termId'   => 1,
+		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
+		$params          = array(
+			'featured'               => 'true',
+			'woocommerceOnSale'      => 'true',
+			'woocommerceAttributes'  => array(
+				array(
+					'taxonomy' => 'pa_test',
+					'termId'   => 1,
+				),
+			),
+			'woocommerceStockStatus' => array( 'instock', 'outofstock' ),
+			'timeFrame'              => array(
+				'operator' => 'in',
+				'value'    => $time_frame_date,
 			),
 		);
-		$stock_status    = array( 'instock', 'outofstock' );
-		$time_frame_date = gmdate( 'Y-m-d H:i:s' );
-		$time_frame      = array(
-			'operator' => 'in',
-			'value'    => $time_frame_date,
-		);
-		$request         = $this->build_request( $on_sale, $attributes, $stock_status, $time_frame );
+		$request         = $this->build_request( $params );
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
