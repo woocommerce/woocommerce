@@ -54,7 +54,7 @@ class ProductCollectionUtils {
 			$type  = 'cart';
 			$items = array();
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$items[] = absint( $cart_item['productId'] );
+				$items[] = absint( $cart_item['product_id'] );
 			}
 			$items       = array_unique( array_filter( $items ) );
 			$source_data = array( 'productIds' => $items );
