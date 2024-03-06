@@ -1009,11 +1009,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				break;
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				// We check for supplied billing email. On shortcode, this will be present for checkout requests.
-				$billing_email = \Automattic\WooCommerce\Utilities\ArrayUtil::get_value_or_default( $_POST, 'billing_email' );
-				/* translators: %s: coupon code */
+				$billing_email = \Automattic\WooCommerce\Utilities\ArrayUtil::get_value_or_default( $_POST, 'billing_email' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				if ( ! is_null( $billing_email ) ) {
+					/* translators: %s: coupon code */
 					$err = sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
 				} else {
+					/* translators: %s: coupon code */
 					$err = sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
 				}
 				break;
@@ -1178,7 +1179,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		switch ( $err_code ) {
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				return array(
+				    /* translators: %s: coupon code */
 					'cart'     => sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
+					/* translators: %s: coupon code */
 					'checkout' => sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
 				);
 			default:

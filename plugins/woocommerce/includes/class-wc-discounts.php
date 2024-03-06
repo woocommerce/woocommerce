@@ -1072,7 +1072,7 @@ class WC_Discounts {
 			return new WP_Error(
 				'invalid_coupon',
 				$message,
-				$additional_data
+				$additional_data,
 			);
 		}
 
