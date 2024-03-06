@@ -870,6 +870,13 @@
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
         },
         {
+          "post_title": "Template structure & Overriding templates via a theme",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
+          "hash": "faf1f9d46a5115cb3c573d61474e7e7b3ba473568956c87aca6a45be8f205b37",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+        },
+        {
           "post_title": "How to set up and use a child theme",
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
@@ -1204,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "494b0c55a9312202c17bf17b4e50f1f574790788c1606be4c61c99ad479b279a"
+  "hash": "9e8f681a35cdfd7a421e9c60116e75f89231891289eaae64d3ffc6ae8acc8929"
 }
