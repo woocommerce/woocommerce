@@ -335,6 +335,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		$additional_data['status'] = $http_status_code;
 
+		// If there was a conflict, return the cart so the client can resolve it.
 		if ( 409 === $http_status_code ) {
 			$cart                    = $this->cart_controller->get_cart_instance();
 			$additional_data['cart'] = $this->cart_schema->get_item_response( $cart );
