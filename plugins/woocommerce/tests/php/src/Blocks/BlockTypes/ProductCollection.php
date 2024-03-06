@@ -1,4 +1,5 @@
 <?php
+
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
@@ -75,19 +76,41 @@ class ProductCollection extends \WP_UnitTestCase {
 	/**
 	 * Build a simplified request for testing.
 	 *
-	 * @param bool  $woocommerce_on_sale WooCommerce on sale.
-	 * @param array $woocommerce_attributes WooCommerce attributes.
-	 * @param array $woocommerce_stock_status WooCommerce stock status.
+	 * @param string $featured WooCommerce featured.
+	 * @param bool   $woocommerce_on_sale WooCommerce on sale.
+	 * @param array  $woocommerce_attributes WooCommerce attributes.
+	 * @param array  $woocommerce_stock_status WooCommerce stock status.
 	 * @return WP_REST_Request
 	 */
-	private function build_request( $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array() ) {
+	private function build_request( $featured = 'false', $woocommerce_on_sale = 'false', $woocommerce_attributes = array(), $woocommerce_stock_status = array() ) {
 		$request = new \WP_REST_Request( 'GET', '/wp/v2/product' );
+		$request->set_param( 'featured', $featured );
 		$request->set_param( 'woocommerceOnSale', $woocommerce_on_sale );
 		$request->set_param( 'woocommerceAttributes', $woocommerce_attributes );
 		$request->set_param( 'woocommerceStockStatus', $woocommerce_stock_status );
 		$request->set_param( 'isProductCollectionBlock', true );
 
 		return $request;
+	}
+
+	/**
+	 * Test merging featured queries.
+	 */
+	public function test_merging_featured_queries() {
+		$parsed_block                               = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['featured'] = true;
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertContainsEquals(
+			array(
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => 'IN',
+				'taxonomy' => 'product_visibility',
+			),
+			$merged_query['tax_query']
+		);
 	}
 
 	/**
@@ -584,6 +607,7 @@ class ProductCollection extends \WP_UnitTestCase {
 		$product_visibility_not_in = array( is_search() ? $product_visibility_terms['exclude-from-search'] : $product_visibility_terms['exclude-from-catalog'] );
 
 		$args         = array();
+		$featured     = 'true';
 		$on_sale      = 'true';
 		$attributes   = array(
 			array(
@@ -592,7 +616,7 @@ class ProductCollection extends \WP_UnitTestCase {
 			),
 		);
 		$stock_status = array( 'instock', 'outofstock' );
-		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
+		$request      = $this->build_request( $featured, $on_sale, $attributes, $stock_status );
 
 		$updated_query = $this->block_instance->update_rest_query_in_editor( $args, $request );
 
@@ -611,6 +635,15 @@ class ProductCollection extends \WP_UnitTestCase {
 				'field'    => 'term_taxonomy_id',
 				'terms'    => $product_visibility_not_in,
 				'operator' => 'NOT IN',
+			),
+			$updated_query['tax_query'],
+		);
+		$this->assertContains(
+			array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => 'featured',
+				'operator' => 'IN',
 			),
 			$updated_query['tax_query'],
 		);
