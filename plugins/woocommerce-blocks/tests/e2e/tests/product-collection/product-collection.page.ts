@@ -141,20 +141,23 @@ class ProductCollectionPage {
 		await this.admin.createNewPost();
 		await this.editorUtils.closeWelcomeGuideModal();
 		await this.insertProductCollection();
-		await this.chooseCollectionInPost( collection );
 
-		// Wait for response with productCollectionQueryContext query parameter.
-		const WP_PRODUCT_ENDPOINT = '/wp/v2/product';
-		const QUERY_CONTEXT_PARAM = 'productCollectionQueryContext';
-		const response = await this.page.waitForResponse(
-			( currentResponse ) =>
-				currentResponse.url().includes( WP_PRODUCT_ENDPOINT ) &&
-				currentResponse.url().includes( QUERY_CONTEXT_PARAM ) &&
-				currentResponse.status() === 200
+		const productResponsePromise = this.page.waitForResponse(
+			( response ) => {
+				return (
+					response.url().includes( '/wp/v2/product' ) &&
+					response
+						.url()
+						.includes( 'productCollectionQueryContext' ) &&
+					response.status() === 200
+				);
+			}
 		);
 
-		const url = new URL( response.url() );
-		return url;
+		await this.chooseCollectionInPost( collection );
+		const productResponse = await productResponsePromise;
+
+		return new URL( productResponse.url() );
 	}
 
 	async publishAndGoToFrontend() {
