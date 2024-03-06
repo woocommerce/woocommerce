@@ -314,7 +314,7 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
-		$is_new_install = current_action() === 'woocommerce_installed';
+		$is_new_install = WC_Install::is_new_install();
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
 		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
