@@ -7,6 +7,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 /**
  * Internal dependencies
  */
+import { CustomFields } from '../../../components/custom-fields';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { CustomFieldsBlockAttributes } from './types';
 
@@ -15,5 +16,9 @@ export function Edit( {
 }: ProductEditorBlockEditProps< CustomFieldsBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	return <div { ...blockProps }></div>;
+	return (
+		<div { ...blockProps }>
+			<CustomFields />
+		</div>
+	);
 }

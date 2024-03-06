@@ -1,4 +1,4 @@
-.wp-block-woocommerce-product-custom-fields__empty-state {
+.woocommerce-product-custom-fields__empty-state {
 	@mixin skeleton {
 		@include placeholder();
 		background-color: $gray-200;

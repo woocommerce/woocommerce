@@ -18,35 +18,35 @@ export function EmptyState(
 		<div
 			{ ...props }
 			role="none"
-			className="wp-block-woocommerce-product-custom-fields__empty-state"
+			className="woocommerce-product-custom-fields__empty-state"
 		>
-			<div className="wp-block-woocommerce-product-custom-fields__empty-state-row">
+			<div className="woocommerce-product-custom-fields__empty-state-row">
 				<div>{ __( 'Custom field 1', 'woocommerce' ) }</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-name" />
+					<div className="woocommerce-product-custom-fields__empty-state-name" />
 				</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-actions" />
+					<div className="woocommerce-product-custom-fields__empty-state-actions" />
 				</div>
 			</div>
 
-			<div className="wp-block-woocommerce-product-custom-fields__empty-state-row">
+			<div className="woocommerce-product-custom-fields__empty-state-row">
 				<div>{ __( 'Custom field 2', 'woocommerce' ) }</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-name" />
+					<div className="woocommerce-product-custom-fields__empty-state-name" />
 				</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-actions" />
+					<div className="woocommerce-product-custom-fields__empty-state-actions" />
 				</div>
 			</div>
 
-			<div className="wp-block-woocommerce-product-custom-fields__empty-state-row">
+			<div className="woocommerce-product-custom-fields__empty-state-row">
 				<div>{ __( 'Custom field 3', 'woocommerce' ) }</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-name" />
+					<div className="woocommerce-product-custom-fields__empty-state-name" />
 				</div>
 				<div>
-					<div className="wp-block-woocommerce-product-custom-fields__empty-state-actions" />
+					<div className="woocommerce-product-custom-fields__empty-state-actions" />
 				</div>
 			</div>
 		</div>
