@@ -280,6 +280,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			} )
 			.fill( '/products' );
 		await page.keyboard.press( 'Enter' );
+		await expect( page.locator( 'circle' ) ).not.toBeVisible();
 
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )
