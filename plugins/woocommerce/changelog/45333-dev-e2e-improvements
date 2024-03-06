@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add e2e tests for the experimental product filter by attribute block
+
