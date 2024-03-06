@@ -571,23 +571,27 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		if ( Features::is_enabled( 'product-custom-fields' ) ) {
-			$product_attributes_section->add_block(
+			$organization_group->add_section(
+				array(
+					'id'         => 'product-custom-fields-wrapper-section',
+					'order'      => 30,
+				)
+			)->add_block(
 				array(
 					'id'         => 'product-custom-fields-toggle',
 					'blockName'  => 'woocommerce/product-custom-fields-toggle-field',
-					'order'      => 20,
+					'order'      => 10,
 					'attributes' => array(
 						'label' => __( 'Show custom fields', 'woocommerce' ),
 					),
 				)
-			);
-
-			$product_attributes_section->add_block(
+			)->add_block(
 				array(
 					'id'         => 'product-custom-fields-section',
 					'blockName'  => 'woocommerce/product-section',
-					'order'      => 30,
+					'order'      => 10,
 					'attributes' => array(
+						'blockGap'    => 'unit-30',
 						'title'       => __( 'Custom fields', 'woocommerce' ),
 						'description' => sprintf(
 							/* translators: %1$s: Custom fields guide link opening tag. %2$s: Custom fields guide link closing tag. */

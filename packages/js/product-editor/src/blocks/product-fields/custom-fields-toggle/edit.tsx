@@ -1,10 +1,14 @@
 /**
  * External dependencies
  */
-import { Spinner, ToggleControl } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
+import {
+	// @ts-expect-error no exported member.
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
+import { Spinner, ToggleControl } from '@wordpress/components';
+import { createElement, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,17 +25,25 @@ export function Edit( {
 }: ProductEditorBlockEditProps< CustomFieldsToggleBlockAttributes > ) {
 	const { label, _templateBlockId } = attributes;
 	const blockProps = useWooBlockProps( attributes );
+	const innerBlockProps = useInnerBlocksProps(
+		{
+			className:
+				'wp-block-woocommerce-product-custom-fields-toggle-field__inner-blocks',
+		},
+		{ templateLock: 'all' }
+	);
+
 	const { isLoading, metaboxhiddenProduct, saveMetaboxhiddenProduct } =
 		useMetaboxHiddenProduct();
 
-	function isChecked() {
+	const isChecked = useMemo( () => {
 		return (
 			metaboxhiddenProduct &&
 			! metaboxhiddenProduct.some(
 				( value ) => value === METABOX_HIDDEN_VALUE
 			)
 		);
-	}
+	}, [ metaboxhiddenProduct ] );
 
 	async function handleChange( checked: boolean ) {
 		const values = checked
@@ -51,14 +63,18 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<ToggleControl
-				label={ label }
-				checked={ isChecked() }
-				disabled={ isLoading }
-				onChange={ handleChange }
-			/>
+			<div className="wp-block-woocommerce-product-custom-fields-toggle-field__content">
+				<ToggleControl
+					label={ label }
+					checked={ isChecked }
+					disabled={ isLoading }
+					onChange={ handleChange }
+				/>
 
-			{ isLoading && <Spinner /> }
+				{ isLoading && <Spinner /> }
+			</div>
+
+			{ isChecked && <div { ...innerBlockProps } /> }
 		</div>
 	);
 }
