@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Dispatch, SetStateAction } from 'react';
+import type { SetStateAction } from 'react';
 import { useEntityProp } from '@wordpress/core-data';
 import { useMemo } from '@wordpress/element';
 
@@ -9,11 +9,11 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import type { Metadata } from '../../types';
-import { disjoinMetas, isCustomField } from './utils';
+import { disjoinMetas } from './utils';
 
 export function useCustomFields<
 	T extends Metadata< string > = Metadata< string >
->(): [ T[], Dispatch< T[] > ] {
+>() {
 	const [ metas, setMetas ] = useEntityProp< T[] >(
 		'postType',
 		'product',
@@ -34,10 +34,14 @@ export function useCustomFields<
 		const newValue =
 			typeof value === 'function' ? value( customFields ) : value;
 
-		const newValueWithoutPrefix = newValue.filter( isCustomField );
-
-		setMetas( [ ...internalMetas, ...newValueWithoutPrefix ] );
+		setMetas( [ ...internalMetas, ...newValue ] );
 	}
 
-	return [ customFields, setCustomFields ];
+	function removeCustomField( key: T[ 'key' ] ) {
+		setCustomFields( ( current ) =>
+			current.filter( ( customField ) => customField.key !== key )
+		);
+	}
+
+	return { customFields, removeCustomField };
 }

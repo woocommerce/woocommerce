@@ -14,10 +14,16 @@ import { EmptyState } from './empty-state';
 import type { CustomFieldsProps } from './types';
 
 export function CustomFields( {}: CustomFieldsProps ) {
-	const [ customFields ] = useCustomFields();
+	const { customFields, removeCustomField } = useCustomFields();
 
 	if ( customFields.length === 0 ) {
 		return <EmptyState />;
+	}
+
+	function removeButtonClickHandler( key: string ) {
+		return function handleRemoveButtonClick() {
+			removeCustomField( key );
+		};
 	}
 
 	return (
@@ -47,6 +53,9 @@ export function CustomFields( {}: CustomFieldsProps ) {
 								aria-label={ __(
 									'Remove custom field',
 									'woocommerce'
+								) }
+								onClick={ removeButtonClickHandler(
+									customField.key
 								) }
 							/>
 						</td>
