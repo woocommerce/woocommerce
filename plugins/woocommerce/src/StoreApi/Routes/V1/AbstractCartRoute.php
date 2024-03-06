@@ -335,8 +335,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		$additional_data['status'] = $http_status_code;
 
-		if( 409 === $http_status_code ) {
-			$cart = $this->cart_controller->get_cart_instance();
+		if ( 409 === $http_status_code ) {
+			$cart                    = $this->cart_controller->get_cart_instance();
 			$additional_data['cart'] = $this->cart_schema->get_item_response( $cart );
 		}
 
