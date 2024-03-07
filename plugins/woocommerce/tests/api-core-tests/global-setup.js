@@ -12,7 +12,8 @@ module.exports = async ( config ) => {
 	// If API_BASE_URL is configured and doesn't include localhost, running on daily host
 	if (
 		process.env.API_BASE_URL &&
-		! process.env.API_BASE_URL.includes( 'localhost' )
+		! process.env.API_BASE_URL.includes( 'localhost' ) &&
+		UPDATE_WC
 	) {
 		const { chromium, expect } = require( '@playwright/test' );
 
