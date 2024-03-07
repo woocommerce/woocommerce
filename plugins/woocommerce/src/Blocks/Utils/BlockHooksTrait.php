@@ -150,7 +150,10 @@ trait BlockHooksTrait {
 		 *
 		 * @since 8.5.0
 		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
+		$pattern_exclude_list = apply_filters(
+			'woocommerce_hooked_blocks_pattern_exclude_list',
+			array_unique( array_merge( isset( $this->hooked_block_excluded_patterns ) ? $this->hooked_block_excluded_patterns : array(), array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) ) )
+		);
 
 		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
 		if ( ! $pattern_slug ) {
