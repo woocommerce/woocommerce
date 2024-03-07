@@ -21,7 +21,7 @@ on:
 
 jobs:
     e2e:
-        name: ${{ inputs.name }} [${{ inputs.shard-index }}/${{ inputs.shard-total }}]
+        name: ${{ inputs.name }} [${{ matrix.shard-index }}/${{ matrix.shard-total }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
@@ -49,7 +49,7 @@ jobs:
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
-              run: pnpm playwright test --config=tests/e2e/${{ inputs.config }} --shard ${{ inputs.shard-index }}/${{ inputs.shard-total }}
+              run: pnpm playwright test --config=tests/e2e/${{ inputs.config }} --shard ${{ matrix.shard-index }}/${{ matrix.shard-total }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}
