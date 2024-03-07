@@ -230,7 +230,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'general_options',
+					'id'   => 'sectioned_site_visibility',
 				),
 
 				array(
