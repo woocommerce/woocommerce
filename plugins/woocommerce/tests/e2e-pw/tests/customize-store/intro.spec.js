@@ -4,8 +4,8 @@ const { features } = require('../../utils');
 const { activateTheme } = require('../../utils/themes');
 const { setOption } = require('../../utils/options');
 
-const ASSEMBLER_HUB_URL =
-	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub';
+const CUSTOMIZE_STORE_URL =
+	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 
 const skipTestIfUndefined = () => {
 	const skipMessage = `Skipping this test on daily run. Environment not compatible.`;
@@ -78,13 +78,8 @@ test.describe('Store owner can view the Intro page', () => {
 		page,
 		context,
 	} ) => {
-		await page.goto( ASSEMBLER_HUB_URL );
-		await expect(
-			page.locator(
-				'text=Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.'
-			)
-		).toBeVisible();
-
+		await page.goto( CUSTOMIZE_STORE_URL );
+		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
 		await context.setOffline( true );
 
 		await expect( page.locator( '.offline-banner' ) ).toBeVisible();
@@ -93,16 +88,52 @@ test.describe('Store owner can view the Intro page', () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'it shows the no AI banner on Core when the task is not completed', async ( {
+	test( 'it shows the "no AI" banner on Core when the task is not completed', async ( {
 		page,
 	} ) => {
-		await page.goto( ASSEMBLER_HUB_URL );
+		await page.goto( CUSTOMIZE_STORE_URL );
+
 		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
 		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
 		await expect(
-			page.locator(
-				'text=Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.'
-			)
+			page.getByRole( 'button', { name: 'Start designing' } )
 		).toBeVisible();
+	} );
+
+	test( 'it shows the "no AI customize theme" banner when the task is completed', async ( {
+		page,
+		baseURL,
+	} ) => {
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'yes'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated', error );
+		}
+		await page.goto( CUSTOMIZE_STORE_URL );
+
+		await expect(
+			page.locator( '.existing-no-ai-theme-banner' )
+		).toBeVisible();
+		await expect(
+			page.locator( 'text=Edit your custom theme' )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Customize your theme' } )
+		).toBeVisible();
+	} );
+
+	test.only( 'finish the flow', async ( { page } ) => {
+		await page.goto( CUSTOMIZE_STORE_URL );
+
+		await page.getByRole( 'button', { name: 'Start designing' } ).click();
+		await page
+			.getByRole( 'button', { name: 'Design a new theme' } )
+			.click();
+		await page.waitForTimeout( 10000 );
 	} );
 });

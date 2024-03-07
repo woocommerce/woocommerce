@@ -96,17 +96,17 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let bannerStatus: BannerStatus = 'default';
 
 	switch ( true ) {
-		case isNetworkOffline:
+		case isNetworkOffline: //DONE
 			bannerStatus = 'network-offline';
 			break;
-		case isJetpackOffline as boolean:
+		case isJetpackOffline as boolean: //DONE
 			bannerStatus = 'jetpack-offline';
 			break;
-		case context.flowType === FlowType.noAI &&
+		case context.flowType === FlowType.noAI && //DONE
 			! customizeStoreTaskCompleted:
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted: //DONE
 			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
