@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Woo_Update_Manager_Plugin {
 	const WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE = 'woo-update-manager/woo-update-manager.php';
 	const WOO_UPDATE_MANAGER_DOWNLOAD_URL     = 'https://woo.com/products/woo-update-manager/download/';
-	const WOO_UPDATE_MANAGER_ID               = 18734003334043;
+	const WOO_UPDATE_MANAGER_SLUG             = 'woo-update-manager';
 
 	/**
 	 * Loads the class, runs on init.
@@ -73,12 +73,25 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return int
 	 */
 	public static function get_plugin_id(): int {
+		$products               = WC_Helper_Updater::get_update_data();
+		$woo_update_manager_ids = array_keys(
+			array_filter(
+				$products,
+				function ( $product_data ) {
+					return self::WOO_UPDATE_MANAGER_SLUG === $product_data['slug'];
+				}
+			)
+		);
+
+		if ( empty( $woo_update_manager_ids ) ) {
+			return 0;
+		}
 		/**
 		 * Filter the id of the Woo Update Manager plugin.
 		 *
 		 * @since 8.7.0
 		 */
-		return (int) apply_filters( 'woo_update_manager_plugin_id', self::WOO_UPDATE_MANAGER_ID );
+		return (int) apply_filters( 'woo_update_manager_plugin_id', (int) $woo_update_manager_ids[0] );
 	}
 
 	/**
