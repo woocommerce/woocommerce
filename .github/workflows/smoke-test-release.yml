@@ -208,7 +208,7 @@ jobs:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
-                  
+
     merge-e2e-wp-latest:
         name: Merge E2E reports for WP Latest
         if: always()
@@ -232,7 +232,7 @@ jobs:
                   pattern: all-blob-reports-*
                   run-id: e2e-tests-run
                   merge-multiple: true
-            
+
             - name: Generate Test report.
               id: generate_e2e_report
               working-directory: plugins/woocommerce
@@ -250,7 +250,7 @@ jobs:
                       ${{ env.ALLURE_REPORT_DIR }}
                   if-no-files-found: ignore
                   retention-days: 5
-            
+
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
@@ -353,7 +353,7 @@ jobs:
               run: unzip -d plugins -o ${{ env.ZIP_PATH }}
               env:
                   ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
-                  
+
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
@@ -394,7 +394,7 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
-                    
+
             - name: Reset WP Env
               working-directory: plugins/woocommerce
               run: pnpm wp-env clean
@@ -518,7 +518,7 @@ jobs:
               run: unzip -d plugins -o ${{ env.ZIP_PATH }}
               env:
                   ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
-                  
+
             - name: Download and install Chromium browser.
               working-directory: plugins/woocommerce
               run: pnpm exec playwright install chromium
@@ -559,7 +559,7 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
-                    
+
             - name: Reset WP Env
               working-directory: plugins/woocommerce
               run: pnpm wp-env clean
@@ -709,8 +709,6 @@ jobs:
                   FORCE_COLOR: 1
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
-              env:
-                  E2E_MAX_FAILURES: 15
 
             - name: Upload Allure artifacts to bucket
               if: |
