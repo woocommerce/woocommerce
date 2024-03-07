@@ -61,6 +61,16 @@ const ProductCollectionContent = (
 		for ( const parentClientId of blockParents ) {
 			const parent = getBlock( parentClientId );
 			if ( parent && parent.name === 'core/block' ) {
+				// In order to prevent collisions, we're going to offset the queryID of blocks
+				// in patterns. We also want to randomize them so that they don't collide
+				// with other blocks in patterns on the page. Take care to check the
+				// offset so that we only do this once when the block is added to
+				// the page.
+				if ( attributes.queryId < 10000 ) {
+					queryId = 10000 + Math.floor( Math.random() * 1000000 );
+					break;
+				}
+
 				queryId = attributes.queryId;
 				break;
 			}
