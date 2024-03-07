@@ -36,7 +36,7 @@ test.describe( 'Shopper → Translations', () => {
 
 	test.afterAll( async () => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp language core activate en_US`
+			`npm run wp-env run tests-cli -- wp site switch-language en_US`
 		);
 	} );
 
