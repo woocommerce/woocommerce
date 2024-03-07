@@ -20,9 +20,6 @@ test.describe( 'Shopper → Translations', () => {
 		await cli(
 			`npm run wp-env run tests-cli -- wp language plugin install woocommerce nl_NL`
 		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp language plugin update woocommerce`
-		);
 	} );
 
 	test.afterAll( async () => {
