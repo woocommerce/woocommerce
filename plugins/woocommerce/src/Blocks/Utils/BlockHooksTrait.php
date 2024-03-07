@@ -60,10 +60,13 @@ trait BlockHooksTrait {
 						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
 					}
 
-					// If a callback has been specified for this placement, call it.
+					// If a callback has been specified for this placement, call it. This allows for custom block-specific logic to be run.
 					$callback = isset( $placement['callback'] ) && is_callable( array( $this, $placement['callback'] ) ) ? array( $this, $placement['callback'] ) : null;
 					if ( null !== $callback ) {
-						$hooked_blocks = $callback( $hooked_blocks, $position, $anchor_block, $context );
+						$modified_hooked_blocks = $callback( $hooked_blocks, $position, $anchor_block, $context );
+						if ( is_array( $modified_hooked_blocks ) ) {
+							$hooked_blocks = $modified_hooked_blocks;
+						}
 					}
 				}
 			}
