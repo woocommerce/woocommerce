@@ -34,6 +34,7 @@ export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 
 	function handleEditModalUpdate( customField: Metadata< string > ) {
 		updateCustomField( customField );
+		setSelectedCustomField( undefined );
 	}
 
 	function handleEditModalCancel() {

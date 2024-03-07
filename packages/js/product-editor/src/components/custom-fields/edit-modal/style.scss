@@ -1,0 +1,9 @@
+.woocommerce-product-custom-fields__edit-modal {
+	&-actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: $grid-unit-40;
+	}
+}
