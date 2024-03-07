@@ -11,7 +11,7 @@ import { WC_ASSET_URL } from '~/utils/admin-settings';
 const tiktok = (
 	<img
 		src={ `${ WC_ASSET_URL }images/marketing/tiktok.jpg` }
-		alt={ __( 'Tiktok', 'woocommerce' ) }
+		alt={ __( 'TikTok', 'woocommerce' ) }
 	/>
 );
 

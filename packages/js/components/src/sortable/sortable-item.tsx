@@ -2,32 +2,22 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { DragEvent, DragEventHandler, KeyboardEvent, useEffect } from 'react';
+import React, { DragEvent, useEffect } from 'react';
 import classnames from 'classnames';
-import {
-	cloneElement,
-	createElement,
-	useRef,
-	useContext,
-} from '@wordpress/element';
+import { createElement, useRef, useContext } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { SortableChild } from './types';
 import { SortableContext } from './sortable';
 
-export type SortableItemProps = {
-	id: string | number;
+export type SortableItemProps = React.DetailedHTMLProps<
+	React.HTMLAttributes< HTMLDivElement >,
+	HTMLDivElement
+> & {
 	index: number;
-	children: SortableChild;
-	className: string;
-	onKeyDown?: ( event: KeyboardEvent< HTMLLIElement > ) => void;
 	isDragging?: boolean;
-	onDragStart?: DragEventHandler< HTMLDivElement >;
-	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLLIElement >;
 	isSelected?: boolean;
 };
 
@@ -35,14 +25,14 @@ export const SortableItem = ( {
 	id,
 	children,
 	className,
-	onKeyDown,
 	isDragging = false,
 	isSelected = false,
 	onDragStart = () => null,
 	onDragEnd = () => null,
-	onDragOver = () => null,
+	role = 'listitem',
+	...props
 }: SortableItemProps ) => {
-	const ref = useRef< HTMLLIElement >( null );
+	const ref = useRef< HTMLDivElement >( null );
 	const sortableContext = useContext( SortableContext );
 
 	const handleDragStart = ( event: DragEvent< HTMLDivElement > ) => {
@@ -61,16 +51,15 @@ export const SortableItem = ( {
 	}, [ isSelected ] );
 
 	return (
-		<li
+		<div
+			{ ...props }
 			aria-selected={ isSelected }
 			className={ classnames( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
 				'is-selected': isSelected,
 			} ) }
 			id={ `woocommerce-sortable__item-${ id }` }
-			onDragOver={ onDragOver }
-			role="option"
-			onKeyDown={ onKeyDown }
+			role={ role }
 			onDrop={ ( event ) => event.preventDefault() }
 			ref={ ref }
 			tabIndex={ isSelected ? 0 : -1 }
@@ -95,14 +84,11 @@ export const SortableItem = ( {
 								onDragEnd: onDraggableEnd,
 							} }
 						>
-							{ cloneElement( children, {
-								onDragStart: onDraggableStart,
-								onDragEnd: onDraggableEnd,
-							} ) }
+							{ children }
 						</SortableContext.Provider>
 					);
 				} }
 			</Draggable>
-		</li>
+		</div>
 	);
 };

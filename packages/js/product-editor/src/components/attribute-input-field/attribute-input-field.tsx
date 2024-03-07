@@ -1,15 +1,12 @@
 /**
  * External dependencies
  */
-import { sprintf, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Spinner, Icon } from '@wordpress/components';
-import { plus } from '@wordpress/icons';
-import { createElement } from '@wordpress/element';
+import { Spinner } from '@wordpress/components';
+import { createElement, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	QueryProductAttribute,
-	ProductAttribute,
 	WCDataSelector,
 	ProductAttributesActions,
 	WPDataActions,
@@ -18,34 +15,21 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	__experimentalSelectControl as SelectControl,
 	__experimentalSelectControlMenu as Menu,
-	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { TRACKS_SOURCE } from '../../constants';
-
-type NarrowedQueryAttribute = Pick< QueryProductAttribute, 'id' | 'name' >;
-
-type AttributeInputFieldProps = {
-	value?: EnhancedProductAttribute | null;
-	onChange: (
-		value?:
-			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
-			| string
-	) => void;
-	label?: string;
-	placeholder?: string;
-	disabled?: boolean;
-	ignoredAttributeIds?: number[];
-	createNewAttributesAsGlobal?: boolean;
-};
-
-function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
-	return attribute.id === -99;
-}
+import { MenuAttributeList } from './menu-attribute-list';
+import {
+	AttributeInputFieldProps,
+	getItemPropsType,
+	getMenuPropsType,
+	NarrowedQueryAttribute,
+	UseComboboxGetItemPropsOptions,
+	UseComboboxGetMenuPropsOptions,
+} from './types';
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
@@ -53,6 +37,8 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	placeholder,
 	label,
 	disabled,
+	disabledAttributeIds = [],
+	disabledAttributeMessage,
 	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 } ) => {
@@ -71,6 +57,24 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			attributes: getProductAttributes(),
 		};
 	} );
+
+	const markedAttributes = useMemo(
+		function setDisabledAttribute() {
+			return (
+				attributes?.map( ( attribute: NarrowedQueryAttribute ) => ( {
+					...attribute,
+					isDisabled: disabledAttributeIds.includes( attribute.id ),
+				} ) ) ?? []
+			);
+		},
+		[ attributes, disabledAttributeIds ]
+	);
+
+	function isNewAttributeListItem(
+		attribute: NarrowedQueryAttribute
+	): boolean {
+		return attribute.id === -99;
+	}
 
 	const getFilteredItems = (
 		allItems: NarrowedQueryAttribute[],
@@ -91,9 +95,11 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 
 		if (
 			inputValue.length > 0 &&
-			! allItems.find(
-				( item ) => item.name.toLowerCase() === inputValue.toLowerCase()
-			)
+			( createNewAttributesAsGlobal ||
+				! allItems.find(
+					( item ) =>
+						item.name.toLowerCase() === inputValue.toLowerCase()
+				) )
 		) {
 			return [
 				...filteredItems,
@@ -112,7 +118,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( { name: attribute.name } ).then(
+			createProductAttribute( {
+				name: attribute.name,
+				generate_slug: true,
+			} ).then(
 				( newAttr ) => {
 					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
@@ -139,7 +148,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
-			items={ attributes || [] }
+			items={ markedAttributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
 			getFilteredItems={ getFilteredItems }
@@ -147,13 +156,14 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			getItemLabel={ ( item ) => item?.name || '' }
 			getItemValue={ ( item ) => item?.id || '' }
 			selected={ value }
-			onSelect={ ( attribute ) => {
+			onSelect={ ( attribute: NarrowedQueryAttribute ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
 					addNewAttribute( attribute );
 				} else {
 					onChange( {
 						id: attribute.id,
 						name: attribute.name,
+						slug: attribute.slug as string,
 						options: [],
 					} );
 				}
@@ -167,43 +177,33 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				getItemProps,
 				getMenuProps,
 				isOpen,
+			}: {
+				items: NarrowedQueryAttribute[];
+				highlightedIndex: number;
+				getItemProps: (
+					options: UseComboboxGetItemPropsOptions< NarrowedQueryAttribute >
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				) => any;
+				getMenuProps: getMenuPropsType;
+				isOpen: boolean;
 			} ) => {
 				return (
 					<Menu getMenuProps={ getMenuProps } isOpen={ isOpen }>
 						{ isLoading ? (
 							<Spinner />
 						) : (
-							renderItems.map( ( item, index: number ) => (
-								<MenuItem
-									key={ item.id }
-									index={ index }
-									isActive={ highlightedIndex === index }
-									item={ item }
-									getItemProps={ getItemProps }
-								>
-									{ isNewAttributeListItem( item ) ? (
-										<div className="woocommerce-attribute-input-field__add-new">
-											<Icon
-												icon={ plus }
-												size={ 20 }
-												className="woocommerce-attribute-input-field__add-new-icon"
-											/>
-											<span>
-												{ sprintf(
-													/* translators: The name of the new attribute term to be created */
-													__(
-														'Create "%s"',
-														'woocommerce'
-													),
-													item.name
-												) }
-											</span>
-										</div>
-									) : (
-										item.name
-									) }
-								</MenuItem>
-							) )
+							<MenuAttributeList
+								renderItems={ renderItems }
+								highlightedIndex={ highlightedIndex }
+								disabledAttributeMessage={
+									disabledAttributeMessage
+								}
+								getItemProps={
+									getItemProps as (
+										options: UseComboboxGetMenuPropsOptions
+									) => getItemPropsType< NarrowedQueryAttribute >
+								}
+							/>
 						) }
 					</Menu>
 				);

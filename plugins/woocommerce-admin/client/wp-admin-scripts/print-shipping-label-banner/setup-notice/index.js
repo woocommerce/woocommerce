@@ -29,6 +29,7 @@ export default function SetupNotice( { isSetupError, errorReason } ) {
 				: setupErrorDescriptions[ setupErrorTypes.SETUP ];
 
 		return sprintf(
+			/* translators: %s is the action from the setup error description above */
 			__(
 				'Unable to %s the plugin. Refresh the page and try again.',
 				'woocommerce'

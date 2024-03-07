@@ -13,6 +13,14 @@ use Automattic\WooCommerce\Admin\DateTimeProvider\CurrentDateTimeProvider;
  * Rule processor for sending before a specified date/time.
  */
 class PublishBeforeTimeRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * The DateTime provider.
+	 *
+	 * @var DateTimeProviderInterface
+	 */
+	protected $date_time_provider;
+
 	/**
 	 * Constructor.
 	 *
@@ -45,6 +53,12 @@ class PublishBeforeTimeRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function validate( $rule ) {
 		if ( ! isset( $rule->publish_before ) ) {
+			return false;
+		}
+
+		try {
+			new \DateTime( $rule->publish_before );
+		} catch ( \Throwable $e ) {
 			return false;
 		}
 

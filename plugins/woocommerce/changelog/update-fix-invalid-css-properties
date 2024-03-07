@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Update CSS prop 'end' to 'flex-end' when using flexbox.

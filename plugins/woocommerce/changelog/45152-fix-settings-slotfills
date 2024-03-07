@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize Slots on Settings pages by creating scopes for each page that has a Slot

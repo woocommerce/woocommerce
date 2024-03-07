@@ -38,6 +38,21 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
+	 * Badge.
+	 *
+	 * @return string
+	 */
+	public function get_badge() {
+		/**
+		 * Filter WooPayments onboarding task badge.
+		 *
+		 * @param string     $badge    Badge content.
+		 * @since 8.2.0
+		 */
+		return apply_filters( 'woocommerce_admin_woopayments_onboarding_task_badge', '' );
+	}
+
+	/**
 	 * Content.
 	 *
 	 * @return string
@@ -73,15 +88,8 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_additional_info() {
-		if ( WCPayPromotionInit::is_woopay_eligible() ) {
-			return __(
-				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
-				'woocommerce'
-			);
-		}
-
 		return __(
-			'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
+			'Accept credit/debit cards and other popular payment methods with no setup or monthly fees — and manage payments right from your store dashboard.',
 			'woocommerce'
 		);
 	}
@@ -93,7 +101,7 @@ class WooCommercePayments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::is_connected();
+			$this->is_complete_result = self::is_connected() && ! self::is_account_partially_onboarded();
 		}
 
 		return $this->is_complete_result;
@@ -109,8 +117,7 @@ class WooCommercePayments extends Task {
 
 		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
 			self::is_installed() &&
-			self::is_supported() &&
-			! self::is_connected();
+			self::is_supported();
 	}
 
 	/**
@@ -147,6 +154,23 @@ class WooCommercePayments extends Task {
 			$wc_payments_gateway = \WC_Payments::get_gateway();
 			return method_exists( $wc_payments_gateway, 'is_connected' )
 				? $wc_payments_gateway->is_connected()
+				: false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if WooCommerce Payments needs setup.
+	 * Errored data or payments not enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_account_partially_onboarded() {
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
+				? $wc_payments_gateway->is_account_partially_onboarded()
 				: false;
 		}
 

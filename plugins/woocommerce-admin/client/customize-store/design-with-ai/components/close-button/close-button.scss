@@ -1,0 +1,11 @@
+.close-cys-design-with-ai {
+	transition: none;
+	border: none;
+	padding: 0;
+	margin: 20px 0 0 20px;
+	height: 24px;
+	&:focus {
+		outline: 0 !important;
+		box-shadow: none !important;
+	}
+}

@@ -3,8 +3,10 @@
  */
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	Product,
 	ProductAttribute,
 	ProductAttributeTerm,
+	ProductDefaultAttribute,
 } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
 import { useCallback, useEffect, useState } from '@wordpress/element';
@@ -23,7 +25,10 @@ export type EnhancedProductAttribute = ProductAttribute & {
 type useProductAttributesProps = {
 	allAttributes: ProductAttribute[];
 	isVariationAttributes?: boolean;
-	onChange: ( attributes: EnhancedProductAttribute[] ) => void;
+	onChange: (
+		attributes: ProductAttribute[],
+		defaultAttributes: ProductDefaultAttribute[]
+	) => void;
 	productId?: number;
 };
 
@@ -35,6 +40,29 @@ const getFilteredAttributes = (
 		? attr.filter( ( attribute ) => !! attribute.variation )
 		: attr.filter( ( attribute ) => ! attribute.variation );
 };
+
+function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
+	return values.reduce< Product[ 'default_attributes' ] >(
+		( prevDefaultAttributes, currentAttribute ) => {
+			if (
+				// defaults to true.
+				currentAttribute.isDefault === undefined ||
+				currentAttribute.isDefault === true
+			) {
+				return [
+					...prevDefaultAttributes,
+					{
+						id: currentAttribute.id,
+						name: currentAttribute.name,
+						option: currentAttribute.options[ 0 ],
+					},
+				];
+			}
+			return prevDefaultAttributes;
+		},
+		[]
+	);
+}
 
 export function useProductAttributes( {
 	allAttributes = [],
@@ -53,7 +81,6 @@ export function useProductAttributes( {
 			)
 				.getProductAttributeTerms< ProductAttributeTerm[] >( {
 					attribute_id: attributeId,
-					product: productId,
 				} )
 				.then(
 					( attributeTerms ) => {
@@ -69,21 +96,22 @@ export function useProductAttributes( {
 
 	const enhanceAttribute = (
 		globalAttribute: ProductAttribute,
-		terms: ProductAttributeTerm[]
+		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
 			...globalAttribute,
-			terms: terms.length > 0 ? terms : undefined,
-			options: terms.length === 0 ? globalAttribute.options : [],
+			terms: ( allTerms || [] ).filter( ( term ) =>
+				globalAttribute.options.includes( term.name )
+			),
 		};
 	};
 
 	const getAugmentedAttributes = (
-		atts: ProductAttribute[],
+		atts: EnhancedProductAttribute[],
 		variation: boolean,
 		startPosition: number
-	) => {
-		return atts.map( ( attribute, index ) => ( {
+	): ProductAttribute[] => {
+		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
 			position: startPosition + index,
@@ -91,6 +119,7 @@ export function useProductAttributes( {
 	};
 
 	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
+		const defaultAttributes = manageDefaultAttributes( newAttributes );
 		let otherAttributes = isVariationAttributes
 			? allAttributes.filter( ( attribute ) => ! attribute.variation )
 			: allAttributes.filter( ( attribute ) => !! attribute.variation );
@@ -126,15 +155,15 @@ export function useProductAttributes( {
 		);
 
 		if ( isVariationAttributes ) {
-			onChange( [
-				...otherAugmentedAttributes,
-				...newAugmentedAttributes,
-			] );
+			onChange(
+				[ ...otherAugmentedAttributes, ...newAugmentedAttributes ],
+				defaultAttributes
+			);
 		} else {
-			onChange( [
-				...newAugmentedAttributes,
-				...otherAugmentedAttributes,
-			] );
+			onChange(
+				[ ...newAugmentedAttributes, ...otherAugmentedAttributes ],
+				defaultAttributes
+			);
 		}
 	};
 

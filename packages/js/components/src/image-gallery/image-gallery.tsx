@@ -100,12 +100,11 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 			>
 				{ orderedChildren.map( ( child, childIndex ) => {
 					const isToolbarVisible = child.key === activeToolbarKey;
-					const isCoverItem = ( childIndex === 0 ) as boolean;
 
 					return cloneElement(
 						child,
 						{
-							isCover: isCoverItem,
+							isDraggable: allowDragging && ! child.props.isCover,
 							className: classnames( {
 								'is-toolbar-visible': isToolbarVisible,
 							} ),
@@ -129,6 +128,20 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 											event.relatedTarget as Element
 										 ).closest(
 											'.media-modal, .components-modal__frame'
+										) ) ||
+									( event.relatedTarget &&
+										// Check if not a button within the toolbar is clicked, to prevent hiding the toolbar.
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar'
+										) ) ||
+									( event.relatedTarget &&
+										// Prevent toolbar from hiding if the dropdown is clicked within the toolbar.
+										(
+											event.relatedTarget as Element
+										 ).closest(
+											'.woocommerce-image-gallery__toolbar-dropdown-popover'
 										) )
 								) {
 									return;
@@ -138,6 +151,7 @@ export const ImageGallery: React.FC< ImageGalleryProps > = ( {
 						},
 						isToolbarVisible ? (
 							<ImageGalleryToolbar
+								value={ child.props.id }
 								allowDragging={ allowDragging }
 								childIndex={ childIndex }
 								lastChild={

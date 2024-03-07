@@ -16,7 +16,7 @@ import { scrollPopperToVisibleAreaIfNeeded } from './utils';
 import { getSteps } from './get-steps';
 
 const WCAddonsTour = () => {
-	const [ showTour, setShowTour ] = useState( false );
+	const [ showTour, setShowTour ] = useState( true );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 
@@ -62,7 +62,7 @@ const WCAddonsTour = () => {
 			const timeoutId = setTimeout( showPopper, 500 );
 
 			const intervalId = observePositionChange(
-				'.wc-addons-wrap',
+				'.woocommerce-marketplace',
 				showPopper,
 				150
 			);

@@ -1,0 +1,15 @@
+.wp-block-woocommerce-product-attributes-field {
+	.woocommerce-sortable {
+		padding: 0;
+	}
+
+	.woocommerce-sortable__handle {
+		display: none;
+	}
+
+	.components-button.has-icon {
+		svg {
+			fill: $gray-700;
+		}
+	}
+}

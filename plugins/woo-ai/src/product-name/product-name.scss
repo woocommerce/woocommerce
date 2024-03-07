@@ -7,161 +7,162 @@ $z-index-header: 1002;
 $border-radius: 4px;
 
 #woocommerce-ai-app-product-name-suggestions {
-  position: relative;
+	position: relative;
 }
 
 .wc-product-name-suggestions-container {
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  overflow: visible;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: $base-bg-color;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-  z-index: $z-index-container;
-  box-sizing: border-box;
+	border: 1px solid $border-color;
+	border-radius: $border-radius;
+	overflow: visible;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background: $base-bg-color;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+	z-index: $z-index-container;
+	box-sizing: border-box;
 
-  .wc-product-name-suggestions__magic-image {
-	height: 24px;
-	width: 24px;
-  }
-
-  .woo-ai-get-suggestions-btn {
-    border: none;
-    width: 100%;
-    text-align: left;
-    background-color: $base-bg-color;
-    padding: 10px;
-    border-radius: $border-radius;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0;
-	line-height: 18px;
-
-    img {
-      vertical-align: middle;
-    }
-
-    &__content {
-      display: flex;
-      align-items: center;
-    }
-
-    .woocommerce-pill {
-      display: inline-block;
-      font-size: .8em;
-      color: $base-text-color;
-      padding: 2px 8px;
-    }
-  }
-
-  .woo-ai-get-suggestions-btn:hover {
-    background-color: $hover-bg-color;
-  }
-
-  .wc-product-name-suggestions__suggested-names {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border-bottom: 1px solid #dcdcde;
-
-    .suggestion-item {
-      background-color: $base-bg-color;
-      margin-bottom: 0;
-      cursor: pointer;
-
-      .suggestion-content-container {
-        display: flex;
-        flex-direction: column;
-
-        .suggestion-content {
-          margin: .8em 0 .25em;
-        }
-
-        .suggestion-reason {
-          color: grey;
-          margin: .25em 0 .8em;
-        }
-      }
-
-      button.select-suggestion {
-        border: none;
-        width: 100%;
-        text-align: left;
-        background-color: $base-bg-color;
-        color: inherit;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .button.use-suggestion {
-          border: none;
-          background: initial;
-          visibility: hidden;
-
-          &:hover {
-            visibility: visible;
-          }
-        }
-
-        &:hover {
-          background-color: $hover-bg-color;
-
-          .button.use-suggestion {
-            visibility: visible;
-          }
-        }
-      }
-    }
-  }
-
-  .wc-product-name-suggestions__loading-message {
-    border-radius: $border-radius;
-    margin: 0;
-    background-color: $hover-bg-color;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-
-    .woo-ai-loading-message_spinner {
-      svg.woocommerce-spinner {
-        width: 28px;
-        height: 28px;
-        vertical-align: middle;
-        margin-right: 0.5em;
-      }
-    }
-  }
-
-  .wc-product-name-suggestions__error-message {
-	display: flex;
-	align-items: center;
-    margin: 0;
-    padding: 10px;
-
-	img {
-		margin-right: 10px;
+	.wc-product-name-suggestions__magic-image {
+		height: 24px;
+		width: 24px;
 	}
-  }
 
-  .wc-product-name-suggestions__tip-message {
-    margin: 0;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-	justify-content: space-between;
+	.woo-ai-get-suggestions-btn {
+		border: none;
+		width: 100%;
+		text-align: left;
+		background-color: $base-bg-color;
+		padding: 10px;
+		border-radius: $border-radius;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin: 0;
+		line-height: 18px;
 
-    img {
-      vertical-align: middle;
-    }
-  }
+		img {
+			vertical-align: middle;
+		}
+
+		&__content {
+			display: flex;
+			align-items: center;
+		}
+
+		.woocommerce-pill {
+			display: inline-block;
+			font-size: 0.8em;
+			color: $base-text-color;
+			padding: 2px 8px;
+		}
+	}
+
+	.woo-ai-get-suggestions-btn:hover {
+		background-color: $hover-bg-color;
+	}
+
+	.wc-product-name-suggestions__suggested-names {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		border-bottom: 1px solid #dcdcde;
+
+		.suggestion-item {
+			background-color: $base-bg-color;
+			margin-bottom: 0;
+			cursor: pointer;
+
+			.suggestion-content-container {
+				display: flex;
+				flex-direction: column;
+
+				.suggestion-content {
+					margin: 0.8em 0 0.25em;
+				}
+
+				.suggestion-reason {
+					color: grey;
+					margin: 0.25em 0 0.8em;
+				}
+			}
+
+			button.select-suggestion {
+				border: none;
+				width: 100%;
+				text-align: left;
+				background-color: $base-bg-color;
+				color: inherit;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+
+				.button.use-suggestion {
+					border: none;
+					background: initial;
+					visibility: hidden;
+
+					&:hover {
+						visibility: visible;
+					}
+				}
+
+				&:hover {
+					background-color: $hover-bg-color;
+
+					.button.use-suggestion {
+						visibility: visible;
+					}
+				}
+			}
+		}
+	}
+
+	.wc-product-name-suggestions__loading-message {
+		border-radius: $border-radius;
+		margin: 0;
+		background-color: $hover-bg-color;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+
+		.woo-ai-loading-message_spinner {
+
+			svg.woocommerce-spinner {
+				width: 28px;
+				height: 28px;
+				vertical-align: middle;
+				margin-right: 0.5em;
+			}
+		}
+	}
+
+	.wc-product-name-suggestions__error-message {
+		display: flex;
+		align-items: center;
+		margin: 0;
+		padding: 10px;
+
+		img {
+			margin-right: 10px;
+		}
+	}
+
+	.wc-product-name-suggestions__tip-message {
+		margin: 0;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+
+		img {
+			vertical-align: middle;
+		}
+	}
 }
 
 .woocommerce-layout > .woocommerce-layout__header {
-  z-index: $z-index-header;
+	z-index: $z-index-header;
 }
 
 .woo-ai-get-suggestions-powered_by {
@@ -171,7 +172,7 @@ $border-radius: 4px;
 		text-decoration: none;
 		padding: 0 3px 3px 3px;
 
-		&:after {
+		&::after {
 			font: 16px/11px dashicons;
 			content: "\f504";
 			font-weight: normal;

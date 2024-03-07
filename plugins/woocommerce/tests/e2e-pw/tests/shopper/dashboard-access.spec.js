@@ -10,7 +10,9 @@ test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.
 	};
 
 	for ( const [ description, path ] of Object.entries( dashboardScreens ) ) {
-		test( `Customer is redirected from ${description} back to the My Account page.`, async ( { page } ) => {
+		test( `Customer is redirected from ${ description } back to the My Account page.`, async ( {
+			page,
+		} ) => {
 			await page.goto( path );
 			expect( page.url() ).toContain( '/my-account/' );
 		} );

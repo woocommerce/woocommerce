@@ -1,19 +1,8 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
+const shouldSkip =
+	API_BASE_URL !== undefined && ! API_BASE_URL.includes( 'localhost' );
 
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
 /**
  * Tests for the WooCommerce API.
  *
@@ -21,7 +10,6 @@ const skipTestIfCI = () => {
  * @group system status
  *
  */
-skipTestIfCI();
 
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
@@ -30,44 +18,87 @@ test.describe( 'System Status API tests', () => {
 		const responseJSON = await response.json();
 		expect( response.status() ).toEqual( 200 );
 
-		expect( responseJSON ).toEqual(
-			expect.objectContaining( {
-				environment: expect.objectContaining( {
-					home_url: expect.any( String ),
-					site_url: expect.any( String ),
-					version: expect.any( String ),
-					log_directory: expect.any( String ),
-					log_directory_writable: expect.any( Boolean ),
-					wp_version: expect.any( String ),
-					wp_multisite: expect.any( Boolean ),
-					wp_memory_limit: expect.any( Number ),
-					wp_debug_mode: expect.any( Boolean ),
-					wp_cron: expect.any( Boolean ),
-					language: expect.any( String ),
-					external_object_cache: null,
-					server_info: expect.any( String ),
-					php_version: expect.any( String ),
-					php_post_max_size: expect.any( Number ),
-					php_max_execution_time: expect.any( Number ),
-					php_max_input_vars: expect.any( Number ),
-					curl_version: expect.any( String ),
-					suhosin_installed: expect.any( Boolean ),
-					max_upload_size: expect.any( Number ),
-					mysql_version: expect.any( String ),
-					mysql_version_string: expect.any( String ),
-					default_timezone: expect.any( String ),
-					fsockopen_or_curl_enabled: expect.any( Boolean ),
-					soapclient_enabled: expect.any( Boolean ),
-					domdocument_enabled: expect.any( Boolean ),
-					gzip_enabled: expect.any( Boolean ),
-					mbstring_enabled: expect.any( Boolean ),
-					remote_post_successful: expect.any( Boolean ),
-					remote_post_response: expect.any( String ),
-					remote_get_successful: expect.any( Boolean ),
-					remote_get_response: expect.any( String ),
-				} ),
-			} )
-		);
+		// local environment differs from external hosts.  Local listed first.
+		if ( ! shouldSkip ) {
+			expect( responseJSON ).toEqual(
+				expect.objectContaining( {
+					environment: expect.objectContaining( {
+						home_url: expect.any( String ),
+						site_url: expect.any( String ),
+						version: expect.any( String ),
+						log_directory: expect.any( String ),
+						log_directory_writable: expect.any( Boolean ),
+						wp_version: expect.any( String ),
+						wp_multisite: expect.any( Boolean ),
+						wp_memory_limit: expect.any( Number ),
+						wp_debug_mode: expect.any( Boolean ),
+						wp_cron: expect.any( Boolean ),
+						language: expect.any( String ),
+						external_object_cache: null,
+						server_info: expect.any( String ),
+						php_version: expect.any( String ),
+						php_post_max_size: expect.any( Number ),
+						php_max_execution_time: expect.any( Number ),
+						php_max_input_vars: expect.any( Number ),
+						curl_version: expect.any( String ),
+						suhosin_installed: expect.any( Boolean ),
+						max_upload_size: expect.any( Number ),
+						mysql_version: expect.any( String ),
+						mysql_version_string: expect.any( String ),
+						default_timezone: expect.any( String ),
+						fsockopen_or_curl_enabled: expect.any( Boolean ),
+						soapclient_enabled: expect.any( Boolean ),
+						domdocument_enabled: expect.any( Boolean ),
+						gzip_enabled: expect.any( Boolean ),
+						mbstring_enabled: expect.any( Boolean ),
+						remote_post_successful: expect.any( Boolean ),
+						remote_post_response: expect.any( String ),
+						remote_get_successful: expect.any( Boolean ),
+						remote_get_response: expect.any( String ),
+					} ),
+				} )
+			);
+		} else {
+			expect( responseJSON ).toEqual(
+				expect.objectContaining( {
+					environment: expect.objectContaining( {
+						home_url: expect.any( String ),
+						site_url: expect.any( String ),
+						version: expect.any( String ),
+						log_directory: expect.any( String ),
+						log_directory_writable: expect.any( Boolean ),
+						wp_version: expect.any( String ),
+						wp_multisite: expect.any( Boolean ),
+						wp_memory_limit: expect.any( Number ),
+						wp_debug_mode: expect.any( Boolean ),
+						wp_cron: expect.any( Boolean ),
+						language: expect.any( String ),
+						external_object_cache: expect.any( Boolean ),
+						server_info: expect.any( String ),
+						php_version: expect.any( String ),
+						php_post_max_size: expect.any( Number ),
+						php_max_execution_time: expect.any( Number ),
+						php_max_input_vars: expect.any( Number ),
+						curl_version: expect.any( String ),
+						suhosin_installed: expect.any( Boolean ),
+						max_upload_size: expect.any( Number ),
+						mysql_version: expect.any( String ),
+						mysql_version_string: expect.any( String ),
+						default_timezone: expect.any( String ),
+						fsockopen_or_curl_enabled: expect.any( Boolean ),
+						soapclient_enabled: expect.any( Boolean ),
+						domdocument_enabled: expect.any( Boolean ),
+						gzip_enabled: expect.any( Boolean ),
+						mbstring_enabled: expect.any( Boolean ),
+						remote_post_successful: expect.any( Boolean ),
+						remote_post_response: expect.any( Number ),
+						remote_get_successful: expect.any( Boolean ),
+						remote_get_response: expect.any( Number ),
+					} ),
+				} )
+			);
+		}
+
 		expect( responseJSON ).toEqual(
 			expect.objectContaining( {
 				database: expect.objectContaining( {
@@ -328,6 +359,7 @@ test.describe( 'System Status API tests', () => {
 				} ),
 			} )
 		);
+
 		expect( responseJSON ).toEqual(
 			expect.objectContaining( {
 				active_plugins: expect.arrayContaining( [
@@ -374,14 +406,36 @@ test.describe( 'System Status API tests', () => {
 				] ),
 			} )
 		);
-		expect( responseJSON ).toEqual(
-			expect.objectContaining( {
-				dropins_mu_plugins: expect.objectContaining( {
-					dropins: [],
-					mu_plugins: [],
-				} ),
-			} )
-		);
+
+		// local environment differs from external hosts.  Local listed first.
+		if ( ! shouldSkip ) {
+			expect( responseJSON ).toEqual(
+				expect.objectContaining( {
+					dropins_mu_plugins: expect.objectContaining( {
+						dropins: expect.arrayContaining( [] ),
+						mu_plugins: expect.arrayContaining( [] ),
+					} ),
+				} )
+			);
+		} else {
+			expect( responseJSON ).toEqual(
+				expect.objectContaining( {
+					dropins_mu_plugins: expect.objectContaining( {
+						dropins: expect.arrayContaining( [
+							{
+								name: expect.any( String ),
+								plugin: expect.any( String ),
+							},
+							{
+								name: expect.any( String ),
+								plugin: expect.any( String ),
+							},
+						] ),
+						mu_plugins: [],
+					} ),
+				} )
+			);
+		}
 		expect( responseJSON ).toEqual(
 			expect.objectContaining( {
 				theme: expect.objectContaining( {
@@ -393,7 +447,7 @@ test.describe( 'System Status API tests', () => {
 					has_woocommerce_support: expect.any( Boolean ),
 					has_woocommerce_file: expect.any( Boolean ),
 					has_outdated_templates: expect.any( Boolean ),
-					overrides: [],
+					overrides: expect.any( Array ),
 					parent_name: expect.any( String ),
 					parent_version: expect.any( String ),
 					parent_version_latest: expect.any( String ),

@@ -49,6 +49,7 @@ const attributeList: ProductAttribute[] = [
 		id: 15,
 		name: 'Automotive',
 		position: 0,
+		slug: 'Automotive',
 		visible: true,
 		variation: false,
 		options: [ 'test' ],
@@ -56,6 +57,7 @@ const attributeList: ProductAttribute[] = [
 	{
 		id: 1,
 		name: 'Color',
+		slug: 'Color',
 		position: 2,
 		visible: true,
 		variation: true,

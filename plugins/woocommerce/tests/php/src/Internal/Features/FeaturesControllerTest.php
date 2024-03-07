@@ -33,38 +33,60 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
-		$features = array(
-			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
-			),
-			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
-			),
-			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
-			),
-			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
-			),
+		parent::setUp();
+
+		$this->set_up_plugins();
+
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function( $features_controller ) {
+				$this->reset_features_list( $this->sut );
+
+				$features = array(
+					'mature1'       => array(
+						'name'            => 'Mature feature 1',
+						'description'     => 'The mature feature number 1',
+						'is_experimental' => false,
+					),
+					'mature2'       => array(
+						'name'            => 'Mature feature 2',
+						'description'     => 'The mature feature number 2',
+						'is_experimental' => false,
+					),
+					'experimental1' => array(
+						'name'            => 'Experimental feature 1',
+						'description'     => 'The experimental feature number 1',
+						'is_experimental' => true,
+					),
+					'experimental2' => array(
+						'name'            => 'Experimental feature 2',
+						'description'     => 'The experimental feature number 2',
+						'is_experimental' => true,
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			11
 		);
 
-		$this->do_set_up( $features );
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+
+		delete_option( 'woocommerce_feature_mature1_enabled' );
+		delete_option( 'woocommerce_feature_mature2_enabled' );
+		delete_option( 'woocommerce_feature_experimental1_enabled' );
+		delete_option( 'woocommerce_feature_experimental2_enabled' );
+
+		remove_all_filters( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION );
 	}
 
 	/**
 	 * Runs before each test.
-	 *
-	 * @param array $features The fake features list to use.
 	 */
-	public function do_set_up( array $features ): void {
+	private function set_up_plugins(): void {
 		$this->reset_container_resolutions();
 		$this->reset_legacy_proxy_mocks();
 
@@ -98,38 +120,42 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				'the_plugin_4',
 			)
 		);
+	}
 
-		$this->sut = new FeaturesController();
-		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
-		$init_features_method = new \ReflectionMethod( $this->sut, 'init_features' );
-		$init_features_method->setAccessible( true );
-		$init_features_method->invoke( $this->sut, $features );
+	/**
+	 * Resets the array of registered features so we can populate it with test features.
+	 *
+	 * @param FeaturesController $sut The instance of the FeaturesController class.
+	 *
+	 * @return void
+	 */
+	private function reset_features_list( $sut ) {
+		$reflection_class = new \ReflectionClass( $sut );
 
-		delete_option( 'woocommerce_feature_mature1_enabled' );
-		delete_option( 'woocommerce_feature_mature2_enabled' );
-		delete_option( 'woocommerce_feature_experimental1_enabled' );
-		delete_option( 'woocommerce_feature_experimental2_enabled' );
+		$features = $reflection_class->getProperty( 'features' );
+		$features->setAccessible( true );
+		$features->setValue( $sut, array() );
+	}
 
-		remove_all_filters( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION );
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		$this->reset_features_list( $this->sut );
+		remove_all_actions( 'woocommerce_register_feature_definitions' );
+
+		parent::tearDown();
 	}
 
 	/**
 	 * @testdox 'get_features' returns existing non-experimental features without enabling information if requested to do so.
 	 */
 	public function test_get_features_not_including_experimental_not_including_values() {
-		$actual = $this->sut->get_features( false, false );
+		$actual = array_keys( $this->sut->get_features( false, false ) );
 
 		$expected = array(
-			'mature1' => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
-			),
-			'mature2' => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
-			),
+			'mature1',
+			'mature2',
 		);
 
 		$this->assertEquals( $expected, $actual );
@@ -139,29 +165,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox 'get_features' returns all existing features without enabling information if requested to do so.
 	 */
 	public function test_get_features_including_experimental_not_including_values() {
-		$actual = $this->sut->get_features( true, false );
+		$actual = array_keys( $this->sut->get_features( true, false ) );
 
 		$expected = array(
-			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
-			),
-			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
-			),
-			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
-			),
-			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
-			),
+			'mature1',
+			'mature2',
+			'experimental1',
+			'experimental2',
 		);
 
 		$this->assertEquals( $expected, $actual );
@@ -176,32 +186,28 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_experimental1_enabled', 'yes' );
 		// No option for experimental2.
 
-		$actual = $this->sut->get_features( true, true );
+		$actual = array_map(
+			function( $feature ) {
+				return array_intersect_key(
+					$feature,
+					array( 'is_enabled' => '' )
+				);
+			},
+			$this->sut->get_features( true, true )
+		);
 
 		$expected = array(
 			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
-				'is_enabled'      => true,
+				'is_enabled' => true,
 			),
 			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
-				'is_enabled'      => false,
+				'is_enabled' => false,
 			),
 			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
-				'is_enabled'      => true,
+				'is_enabled' => true,
 			),
 			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
-				'is_enabled'      => false,
+				'is_enabled' => false,
 			),
 		);
 
@@ -483,40 +489,50 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox 'get_compatible_features_for_plugin' returns proper information for a plugin that has declared compatibility with the passed feature, when only enabled features are requested.
 	 */
 	public function test_get_compatible_enabled_features_for_registered_plugin() {
-		$features = array(
-			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
-			),
-			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
-			),
-			'mature3'       => array(
-				'name'            => 'Mature feature 3',
-				'description'     => 'The mature feature number 3',
-				'is_experimental' => false,
-			),
-			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
-			),
-			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
-			),
-			'experimental3' => array(
-				'name'            => 'Experimental feature 3',
-				'description'     => 'The experimental feature number 3',
-				'is_experimental' => true,
-			),
-		);
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function( $features_controller ) {
+				$this->reset_features_list( $this->sut );
 
-		$this->do_set_up( $features );
+				$features = array(
+					'mature1'       => array(
+						'name'            => 'Mature feature 1',
+						'description'     => 'The mature feature number 1',
+						'is_experimental' => false,
+					),
+					'mature2'       => array(
+						'name'            => 'Mature feature 2',
+						'description'     => 'The mature feature number 2',
+						'is_experimental' => false,
+					),
+					'mature3'       => array(
+						'name'            => 'Mature feature 3',
+						'description'     => 'The mature feature number 3',
+						'is_experimental' => false,
+					),
+					'experimental1' => array(
+						'name'            => 'Experimental feature 1',
+						'description'     => 'The experimental feature number 1',
+						'is_experimental' => true,
+					),
+					'experimental2' => array(
+						'name'            => 'Experimental feature 2',
+						'description'     => 'The experimental feature number 2',
+						'is_experimental' => true,
+					),
+					'experimental3' => array(
+						'name'            => 'Experimental feature 3',
+						'description'     => 'The experimental feature number 3',
+						'is_experimental' => true,
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			20
+		);
 
 		$this->simulate_inside_before_woocommerce_init_hook();
 
@@ -809,6 +825,33 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// phpcs:enable
 
 		$local_sut = new FeaturesController();
+
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function( $features_controller ) use ( $local_sut ) {
+				$this->reset_features_list( $local_sut );
+
+				$features = array(
+					'custom_order_tables'  => array(
+						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'    => true,
+						'enabled_by_default' => false,
+					),
+					'cart_checkout_blocks' => array(
+						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental' => false,
+						'disable_ui'      => true,
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			20
+		);
+
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
 		$plugins = array( 'compatible_plugin1', 'compatible_plugin2' );
 		$fake_plugin_util->set_active_plugins( $plugins );
@@ -816,16 +859,19 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$local_sut->declare_compatibility( 'custom_order_tables', $plugin );
 			$local_sut->declare_compatibility( 'cart_checkout_blocks', $plugin );
 		}
+
 		$cot_controller   = new CustomOrdersTableController();
 		$cot_setting_call = function () use ( $fake_plugin_util, $local_sut ) {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
-			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+
+			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
+		$actual           = call_user_func( $cot_setting['disabled'] );
+		$this->assertEquals( array(), $actual );
 
-		$this->assertEquals( $cot_setting['disabled'], array() );
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};
@@ -863,6 +909,33 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 
 		$local_sut = new FeaturesController();
+
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function( $features_controller ) use ( $local_sut ) {
+				$this->reset_features_list( $local_sut );
+
+				$features = array(
+					'custom_order_tables'  => array(
+						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'    => true,
+						'enabled_by_default' => false,
+					),
+					'cart_checkout_blocks' => array(
+						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental' => false,
+						'disable_ui'      => true,
+					),
+				);
+
+				foreach ( $features as $slug => $definition ) {
+					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
+				}
+			},
+			20
+		);
+
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
 		$plugins = array( 'compatible_plugin', 'incompatible_plugin' );
 		$fake_plugin_util->set_active_plugins( $plugins );
@@ -875,11 +948,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			$this->plugin_util         = $fake_plugin_util;
 			$this->features_controller = $local_sut;
 			$this->data_synchronizer   = wc_get_container()->get( DataSynchronizer::class );
-			return $this->get_hpos_feature_setting( array(), CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+
+			return $this->get_hpos_setting_for_feature();
 		};
 		$cot_setting      = $cot_setting_call->call( $cot_controller );
+		$actual           = call_user_func( $cot_setting['disabled'] );
+		$this->assertEquals( array( 'yes' ), $actual );
 
-		$this->assertEquals( $cot_setting['disabled'], array( 'yes' ) );
 		$incompatible_plugins = function () use ( $plugins ) {
 			return $this->get_incompatible_plugins( 'all', array_flip( $plugins ) );
 		};

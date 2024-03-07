@@ -168,7 +168,6 @@ export const addHistoryListener = ( listener ) => {
 
 	if ( ! window.wcNavigation.historyPatched ) {
 		( ( history ) => {
-			/* global CustomEvent */
 			const pushState = history.pushState;
 			const replaceState = history.replaceState;
 			history.pushState = function ( state ) {

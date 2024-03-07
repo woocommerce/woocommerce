@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix failure due to multiple h2 tags in the Product Vendors plugin

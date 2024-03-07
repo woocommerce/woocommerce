@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Limit index length to 191 characters by default, additionally connect HPOS to verify DB tooling.

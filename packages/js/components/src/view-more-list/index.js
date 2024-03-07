@@ -22,6 +22,7 @@ const ViewMoreList = ( { items } ) => {
 		<Tag
 			className="woocommerce-view-more-list"
 			label={ sprintf(
+				/* translators: %d: number of items more to view */
 				__( '+%d more', 'woocommerce' ),
 				items.length - 1
 			) }

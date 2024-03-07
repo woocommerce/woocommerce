@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { ProductAttribute } from '@woocommerce/data';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -31,6 +32,15 @@ export const Attributes: React.FC< AttributesProps > = ( {
 	return (
 		<AttributeControl
 			value={ attributes }
+			disabledAttributeIds={ value
+				.filter( ( attr ) => !! attr.variation )
+				.map( ( attr ) => attr.id ) }
+			uiStrings={ {
+				disabledAttributeMessage: __(
+					'Already used in Variations',
+					'woocommerce'
+				),
+			} }
 			onAdd={ () => {
 				recordEvent( 'product_add_attributes_modal_add_button_click' );
 			} }
@@ -47,6 +57,16 @@ export const Attributes: React.FC< AttributesProps > = ( {
 				}
 				recordEvent( 'product_add_attribute_button' );
 			} }
+			onAddAnother={ () => {
+				recordEvent(
+					'product_add_attributes_modal_add_another_attribute_button_click'
+				);
+			} }
+			onRemoveItem={ () => {
+				recordEvent(
+					'product_add_attributes_modal_remove_attribute_button_click'
+				);
+			} }
 			onRemove={ () =>
 				recordEvent(
 					'product_remove_attribute_confirmation_confirm_click'
@@ -57,6 +77,8 @@ export const Attributes: React.FC< AttributesProps > = ( {
 					'product_remove_attribute_confirmation_cancel_click'
 				)
 			}
+			termsAutoSelection="first"
+			defaultVisibility={ true }
 		/>
 	);
 };

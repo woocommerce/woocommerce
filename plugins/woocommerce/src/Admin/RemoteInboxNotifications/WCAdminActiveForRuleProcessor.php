@@ -13,6 +13,14 @@ defined( 'ABSPATH' ) || exit;
  * given number of seconds.
  */
 class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * Provides the amount of time wcadmin has been active for.
+	 *
+	 * @var WCAdminActiveForProvider
+	 */
+	protected $wcadmin_active_for_provider;
+
 	/**
 	 * Constructor
 	 *
@@ -35,7 +43,12 @@ class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function process( $rule, $stored_state ) {
 		$active_for_seconds = $this->wcadmin_active_for_provider->get_wcadmin_active_for_in_seconds();
-		$rule_seconds       = $rule->days * DAY_IN_SECONDS;
+
+		if ( ! $active_for_seconds || ! is_numeric( $active_for_seconds ) || $active_for_seconds < 0 ) {
+			return false;
+		}
+
+		$rule_seconds = $rule->days * DAY_IN_SECONDS;
 
 		return ComparisonOperation::compare(
 			$active_for_seconds,
@@ -52,7 +65,8 @@ class WCAdminActiveForRuleProcessor implements RuleProcessorInterface {
 	 * @return bool Pass/fail.
 	 */
 	public function validate( $rule ) {
-		if ( ! isset( $rule->days ) ) {
+		// Ensure that 'days' property is set and is a valid numeric value.
+		if ( ! isset( $rule->days ) || ! is_numeric( $rule->days ) || $rule->days < 0 ) {
 			return false;
 		}
 

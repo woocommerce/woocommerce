@@ -30,14 +30,19 @@ import {
 	Extension,
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	WCUser,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
+import { findComponentMeta } from '~/utils/xstate/find-component';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
 	UserProfile,
@@ -52,9 +57,9 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
-import { Loader } from './pages/Loader';
+import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins';
-import { getPluginSlug } from '~/utils';
+import { getPluginSlug, useFullScreen } from '~/utils';
 import './style.scss';
 import {
 	InstallationCompletedResult,
@@ -64,7 +69,9 @@ import {
 } from './services/installAndActivatePlugins';
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
-import { findComponentMeta } from './utils/find-component';
+import { ComponentMeta } from './types';
+import { getCountryCode } from '~/dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -94,6 +101,8 @@ export type BusinessInfoEvent = {
 		industry?: IndustryChoice;
 		storeLocation: CountryStateOption[ 'key' ];
 		geolocationOverruled: boolean;
+		isOptInMarketing: boolean;
+		storeEmailAddress: string;
 	};
 };
 
@@ -107,7 +116,9 @@ export type BusinessLocationEvent = {
 export type PluginsInstallationRequestedEvent = {
 	type: 'PLUGINS_INSTALLATION_REQUESTED';
 	payload: {
-		plugins: CoreProfilerStateMachineContext[ 'pluginsSelected' ];
+		pluginsShown: string[];
+		pluginsSelected: string[];
+		pluginsUnselected: string[];
 	};
 };
 
@@ -132,6 +143,8 @@ export type OnboardingProfile = {
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
 	is_store_country_set: boolean | null;
+	store_email?: string;
+	is_agree_marketing?: boolean;
 };
 
 export type PluginsPageSkippedEvent = {
@@ -185,6 +198,10 @@ export type CoreProfilerStateMachineContext = {
 	};
 	onboardingProfile: OnboardingProfile;
 	jetpackAuthUrl?: string;
+	persistBusinessInfoRef?: ReturnType< typeof spawn >;
+	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
+	spawnGeolocationRef?: ReturnType< typeof spawn >;
+	currentUserEmail: string | undefined;
 };
 
 const getAllowTrackingOption = async () =>
@@ -299,6 +316,29 @@ const handleOnboardingProfileOption = assign( {
 	},
 } );
 
+const getCurrentUserEmail = async () => {
+	const currentUser: WCUser< 'email' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser?.email;
+};
+
+const assignCurrentUserEmail = assign( {
+	currentUserEmail: (
+		_context,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		if (
+			event.data &&
+			event.data.length > 0 &&
+			event.data !== 'wordpress@example.com' // wordpress default prefilled email address
+		) {
+			return event.data;
+		}
+		return undefined;
+	},
+} );
+
 const assignOnboardingProfile = assign( {
 	onboardingProfile: (
 		_context,
@@ -314,7 +354,6 @@ const getGeolocation = async ( context: CoreProfilerStateMachineContext ) => {
 };
 
 const preFetchGeolocation = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnGeolocationRef: ( context: CoreProfilerStateMachineContext ) =>
 		spawn(
 			() => getGeolocation( context ),
@@ -339,25 +378,42 @@ const redirectToJetpackAuthPage = (
 	_context: CoreProfilerStateMachineContext,
 	event: { data: { url: string } }
 ) => {
-	window.location.href = event.data.url + '&installed_ext_success=1';
-};
+	const url = new URL( event.data.url );
+	url.searchParams.set( 'installed_ext_success', '1' );
+	const selectedPlugin = _context.pluginsSelected.find(
+		( plugin ) => plugin === 'jetpack' || plugin === 'jetpack-boost'
+	);
 
-const updateTrackingOption = (
-	_context: CoreProfilerStateMachineContext,
-	event: IntroOptInEvent
-) => {
-	if (
-		event.payload.optInDataSharing &&
-		typeof window.wcTracks.enable === 'function'
-	) {
-		window.wcTracks.enable( () => {
-			initializeExPlat();
-		} );
-	} else if ( ! event.payload.optInDataSharing ) {
-		window.wcTracks.isEnabled = false;
+	if ( selectedPlugin ) {
+		const pluginName =
+			selectedPlugin === 'jetpack' ? 'jetpack-ai' : 'jetpack-boost';
+		url.searchParams.set( 'plugin_name', pluginName );
 	}
 
-	const trackingValue = event.payload.optInDataSharing ? 'yes' : 'no';
+	window.location.href = url.toString();
+};
+
+const updateTrackingOption = async (
+	context: CoreProfilerStateMachineContext
+) => {
+	await new Promise< void >( ( resolve ) => {
+		if (
+			context.optInDataSharing &&
+			typeof window.wcTracks.enable === 'function'
+		) {
+			window.wcTracks.enable( () => {
+				initializeExPlat();
+				resolve(); // resolve the promise only after explat is enabled by the callback
+			} );
+		} else {
+			if ( ! context.optInDataSharing ) {
+				window.wcTracks.isEnabled = false;
+			}
+			resolve();
+		}
+	} );
+
+	const trackingValue = context.optInDataSharing ? 'yes' : 'no';
 	dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_allow_tracking: trackingValue,
 	} );
@@ -381,7 +437,6 @@ const updateOnboardingProfileOption = (
 };
 
 const spawnUpdateOnboardingProfileOption = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	spawnUpdateOnboardingProfileOptionRef: (
 		context: CoreProfilerStateMachineContext
 	) =>
@@ -395,6 +450,49 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_default_country: countryAndState,
 	} );
+};
+
+const updateStoreCurrency = async ( countryAndState: string ) => {
+	const { general: settings = {} } = await resolveSelect(
+		SETTINGS_STORE_NAME
+	).getSettings( 'general' );
+
+	const countryCode = getCountryCode( countryAndState ) as string;
+	const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+		'onboarding',
+		{}
+	);
+	const currencySettings = CurrencyFactory().getDataForCountry(
+		countryCode,
+		localeInfo,
+		currencySymbols
+	) as {
+		code: string;
+		symbolPosition: string;
+		thousandSeparator: string;
+		decimalSeparator: string;
+		precision: string;
+	};
+
+	if ( Object.keys( currencySettings ).length === 0 ) {
+		return;
+	}
+
+	return dispatch( SETTINGS_STORE_NAME ).updateAndPersistSettingsForGroup(
+		'general',
+		{
+			general: {
+				...settings,
+				woocommerce_currency: currencySettings.code,
+				woocommerce_currency_pos: currencySettings.symbolPosition,
+				woocommerce_price_thousand_sep:
+					currencySettings.thousandSeparator,
+				woocommerce_price_decimal_sep:
+					currencySettings.decimalSeparator,
+				woocommerce_price_num_decimals: currencySettings.precision,
+			},
+		}
+	);
 };
 
 const assignStoreLocation = assign( {
@@ -421,6 +519,9 @@ const updateBusinessInfo = async (
 	const refreshedOnboardingProfile = ( await resolveSelect(
 		OPTIONS_STORE_NAME
 	).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
+
+	await updateStoreCurrency( event.payload.storeLocation );
+
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		blogname: event.payload.storeName,
 		woocommerce_default_country: event.payload.storeLocation,
@@ -428,12 +529,16 @@ const updateBusinessInfo = async (
 			...refreshedOnboardingProfile,
 			is_store_country_set: true,
 			industry: [ event.payload.industry ],
+			is_agree_marketing: event.payload.isOptInMarketing,
+			store_email:
+				event.payload.storeEmailAddress.length > 0
+					? event.payload.storeEmailAddress
+					: null,
 		},
 	} );
 };
 
 const persistBusinessInfo = assign( {
-	// @ts-expect-error -- TODO fix this type issue.
 	persistBusinessInfoRef: (
 		context: CoreProfilerStateMachineContext,
 		event: BusinessInfoEvent
@@ -503,7 +608,7 @@ const getPlugins = async () => {
 	);
 };
 
-/** Special callback that is used to trigger a navigation event if the user uses the browser's back or foward buttons */
+/** Special callback that is used to trigger a navigation event if the user uses the browser's back or forward buttons */
 const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
 	const popstateHandler = () => {
 		sendBack( 'EXTERNAL_URL_UPDATE' );
@@ -545,7 +650,7 @@ const updateQueryStep: CoreProfilerMachineAssign = (
 
 const assignPluginsSelected = assign( {
 	pluginsSelected: ( _context, event: PluginsInstallationRequestedEvent ) => {
-		return event.payload.plugins.map( getPluginSlug );
+		return event.payload.pluginsSelected.map( getPluginSlug );
 	},
 } );
 
@@ -563,7 +668,6 @@ const coreProfilerMachineActions = {
 	...recordTracksActions,
 	handlePlugins,
 	updateQueryStep,
-	updateTrackingOption,
 	handleTrackingOption,
 	handleGeolocation,
 	handleStoreNameOption,
@@ -575,6 +679,7 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
+	assignCurrentUserEmail,
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
@@ -588,9 +693,11 @@ const coreProfilerMachineServices = {
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
+	getCurrentUserEmail,
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
+	updateTrackingOption,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -623,6 +730,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
+		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -725,11 +833,8 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				introOptIn: {
 					on: {
 						INTRO_COMPLETED: {
-							target: '#userProfile',
-							actions: [
-								'assignOptInDataSharing',
-								'updateTrackingOption',
-							],
+							target: 'postIntroOptIn',
+							actions: [ 'assignOptInDataSharing' ],
 						},
 						INTRO_SKIPPED: {
 							// if the user skips the intro, we set the optInDataSharing to false and go to the Business Location page
@@ -740,33 +845,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							],
 						},
 					},
-					entry: [
-						{
-							type: 'recordTracksStepViewed',
-							step: 'intro_opt_in',
-						},
-						{ type: 'updateQueryStep', step: 'intro-opt-in' },
-					],
-					exit: actions.choose( [
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_COMPLETED',
-							actions: 'recordTracksIntroCompleted',
-						},
-						{
-							cond: ( _context, event ) =>
-								event.type === 'INTRO_SKIPPED',
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									step: 'intro_opt_in',
-								},
-							],
-						},
-					] ),
 					meta: {
 						progress: 20,
 						component: IntroOptIn,
+					},
+				},
+				postIntroOptIn: {
+					invoke: {
+						src: 'updateTrackingOption',
+						onDone: {
+							actions: [ 'recordTracksIntroCompleted' ],
+							target: '#userProfile',
+						},
 					},
 				},
 			},
@@ -974,6 +1064,28 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							},
 						},
+						currentUserEmail: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCurrentUserEmail',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignCurrentUserEmail',
+											],
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
 					},
 					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
 					onDone: {
@@ -994,7 +1106,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					on: {
 						BUSINESS_INFO_COMPLETED: {
 							target: 'postBusinessInfo',
-							actions: [ 'recordTracksBusinessInfoCompleted' ],
+							actions: [
+								'recordTracksBusinessInfoCompleted',
+								'recordTracksIsEmailChanged',
+							],
 						},
 					},
 				},
@@ -1073,9 +1188,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											context.businessInfo
 												.location as string
 										);
+									const currencyUpdate = updateStoreCurrency(
+										context.businessInfo.location as string
+									);
+
 									return Promise.all( [
 										skipped,
 										businessLocation,
+										currencyUpdate,
 									] );
 								},
 								onDone: {
@@ -1084,7 +1204,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							},
 						},
 						// Although we don't need to wait 3 seconds for the following states
-						// We will dispaly 20% and 80% progress for 1.5 seconds each
+						// We will display 20% and 80% progress for 1.5 seconds each
 						// for the sake of user experience.
 						progress20: {
 							entry: assign( {
@@ -1121,7 +1241,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1186,7 +1306,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 				plugins: {
@@ -1214,7 +1334,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 						PLUGINS_INSTALLATION_REQUESTED: {
 							target: 'installPlugins',
-							actions: [ 'assignPluginsSelected' ],
+							actions: [
+								'assignPluginsSelected',
+								'recordTracksPluginsInstallationRequest',
+							],
 						},
 					},
 					meta: {
@@ -1245,7 +1368,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1267,7 +1390,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						],
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1298,7 +1421,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 						progress: 100,
 					},
 				},
@@ -1393,7 +1516,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					},
 					meta: {
-						component: Loader,
+						component: CoreProfilerLoader,
 					},
 				},
 			},
@@ -1432,11 +1555,15 @@ export const CoreProfilerController = ( {
 				hasJetpackSelected: ( context ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) => plugin === 'jetpack'
+							( plugin ) =>
+								plugin === 'jetpack' ||
+								plugin === 'jetpack-boost'
 						) !== undefined ||
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								plugin.key === 'jetpack' && plugin.is_activated
+								( plugin.key === 'jetpack' ||
+									plugin.key === 'jetpack-boost' ) &&
+								plugin.is_activated
 						) !== undefined
 					);
 				},
@@ -1450,7 +1577,7 @@ export const CoreProfilerController = ( {
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
-		findComponentMeta( currentState?.meta ?? undefined )
+		findComponentMeta< ComponentMeta >( currentState?.meta ?? undefined )
 	);
 
 	const navigationProgress = currentNodeMeta?.progress;
@@ -1468,19 +1595,7 @@ export const CoreProfilerController = ( {
 			? Object.keys( state.value )[ 0 ]
 			: state.value;
 
-	useEffect( () => {
-		document.body.classList.remove( 'woocommerce-admin-is-loading' );
-		document.body.classList.add( 'woocommerce-profile-wizard__body' );
-		document.body.classList.add( 'woocommerce-admin-full-screen' );
-		document.body.classList.add( 'is-wp-toolbar-disabled' );
-		return () => {
-			document.body.classList.remove(
-				'woocommerce-profile-wizard__body'
-			);
-			document.body.classList.remove( 'woocommerce-admin-full-screen' );
-			document.body.classList.remove( 'is-wp-toolbar-disabled' );
-		};
-	} );
+	useFullScreen( [ 'woocommerce-profile-wizard__body' ] );
 
 	return (
 		<>

@@ -91,7 +91,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$marketing_channels_service = wc_get_container()->get( MarketingChannelsService::class );
 
 		// Aggregate the campaigns from all registered marketing channels.
-		$responses = [];
+		$responses = array();
 		foreach ( $marketing_channels_service->get_registered_channels() as $channel ) {
 			foreach ( $channel->get_campaigns() as $campaign ) {
 				$response    = $this->prepare_item_for_response( $campaign, $request );
@@ -141,18 +141,25 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data = [
+		$data = array(
 			'id'         => $item->get_id(),
 			'channel'    => $item->get_type()->get_channel()->get_slug(),
 			'title'      => $item->get_title(),
 			'manage_url' => $item->get_manage_url(),
-		];
+		);
 
 		if ( $item->get_cost() instanceof Price ) {
-			$data['cost'] = [
+			$data['cost'] = array(
 				'value'    => wc_format_decimal( $item->get_cost()->get_value() ),
 				'currency' => $item->get_cost()->get_currency(),
-			];
+			);
+		}
+
+		if ( $item->get_sales() instanceof Price ) {
+			$data['sales'] = array(
+				'value'    => wc_format_decimal( $item->get_sales()->get_value() ),
+				'currency' => $item->get_sales()->get_currency(),
+			);
 		}
 
 		$context = $request['context'] ?? 'view';
@@ -168,55 +175,73 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 * @return array Item schema data.
 	 */
 	public function get_item_schema() {
-		$schema = [
+		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'marketing_campaign',
 			'type'       => 'object',
-			'properties' => [
-				'id'         => [
+			'properties' => array(
+				'id'         => array(
 					'description' => __( 'The unique identifier for the marketing campaign.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'channel'    => [
+				),
+				'channel'    => array(
 					'description' => __( 'The unique identifier for the marketing channel that this campaign belongs to.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'title'      => [
+				),
+				'title'      => array(
 					'description' => __( 'Title of the marketing campaign.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'manage_url' => [
+				),
+				'manage_url' => array(
 					'description' => __( 'URL to the campaign management page.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
-				],
-				'cost'       => [
+				),
+				'cost'       => array(
 					'description' => __( 'Cost of the marketing campaign.', 'woocommerce' ),
-					'context'     => [ 'view' ],
+					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'type'        => 'object',
-					'properties'  => [
-						'value'    => [
+					'properties'  => array(
+						'value'    => array(
 							'type'     => 'string',
-							'context'  => [ 'view' ],
+							'context'  => array( 'view' ),
 							'readonly' => true,
-						],
-						'currency' => [
+						),
+						'currency' => array(
 							'type'     => 'string',
-							'context'  => [ 'view' ],
+							'context'  => array( 'view' ),
 							'readonly' => true,
-						],
-					],
-				],
-			],
-		];
+						),
+					),
+				),
+				'sales'      => array(
+					'description' => __( 'Sales of the marketing campaign.', 'woocommerce' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'type'        => 'object',
+					'properties'  => array(
+						'value'    => array(
+							'type'     => 'string',
+							'context'  => array( 'view' ),
+							'readonly' => true,
+						),
+						'currency' => array(
+							'type'     => 'string',
+							'context'  => array( 'view' ),
+							'readonly' => true,
+						),
+					),
+				),
+			),
+		);
 
 		return $this->add_additional_fields_schema( $schema );
 	}

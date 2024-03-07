@@ -13,6 +13,14 @@ use Automattic\WooCommerce\Admin\DateTimeProvider\CurrentDateTimeProvider;
  * Rule processor for sending after a specified date/time.
  */
 class PublishAfterTimeRuleProcessor implements RuleProcessorInterface {
+
+	/**
+	 * The DateTime provider.
+	 *
+	 * @var DateTimeProviderInterface
+	 */
+	protected $date_time_provider;
+
 	/**
 	 * Constructor.
 	 *
@@ -45,6 +53,12 @@ class PublishAfterTimeRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function validate( $rule ) {
 		if ( ! isset( $rule->publish_after ) ) {
+			return false;
+		}
+
+		try {
+			new \DateTime( $rule->publish_after );
+		} catch ( \Throwable $e ) {
 			return false;
 		}
 

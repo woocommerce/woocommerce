@@ -1,23 +1,25 @@
 /**
  * Internal dependencies
  */
-import { Loader } from '../pages/Loader';
+import { CoreProfilerLoader } from '../components/loader/Loader';
 import { WithSetupWizardLayout } from './WithSetupWizardLayout';
 
 import '../style.scss';
 
 export const Short = () => (
-	<Loader
+	<CoreProfilerLoader
 		context={ { loader: { progress: 10, useStages: 'skipGuidedSetup' } } }
 	/>
 );
 
 export const Plugins = () => (
-	<Loader context={ { loader: { progress: 10, useStages: 'plugins' } } } />
+	<CoreProfilerLoader
+		context={ { loader: { progress: 10, useStages: 'plugins' } } }
+	/>
 );
 
 export default {
 	title: 'WooCommerce Admin/Application/Core Profiler/Loader',
-	component: Loader,
+	component: CoreProfilerLoader,
 	decorators: [ WithSetupWizardLayout ],
 };

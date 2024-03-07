@@ -360,7 +360,7 @@ abstract class WC_CSV_Exporter {
 	 * Additionally, Excel exposes the ability to launch arbitrary commands through
 	 * the DDE protocol.
 	 *
-	 * @see http://www.contextis.com/resources/blog/comma-separated-vulnerabilities/
+	 * @see https://owasp.org/www-community/attacks/CSV_Injection
 	 * @see https://hackerone.com/reports/72785
 	 *
 	 * @since 3.1.0
@@ -368,7 +368,9 @@ abstract class WC_CSV_Exporter {
 	 * @return string
 	 */
 	public function escape_data( $data ) {
-		$active_content_triggers = array( '=', '+', '-', '@' );
+		// 0x09: Tab (\t)
+		// 0x0d: Carriage Return (\r)
+		$active_content_triggers = array( '=', '+', '-', '@', chr( 0x09 ), chr( 0x0d ) );
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
 			$data = "'" . $data;
@@ -477,33 +479,13 @@ abstract class WC_CSV_Exporter {
 	}
 
 	/**
-	 * Write to the CSV file, ensuring escaping works across versions of
-	 * PHP.
+	 * Write to the CSV file.
 	 *
-	 * PHP 5.5.4 uses '\' as the default escape character. This is not RFC-4180 compliant.
-	 * \0 disables the escape character.
-	 *
-	 * @see https://bugs.php.net/bug.php?id=43225
-	 * @see https://bugs.php.net/bug.php?id=50686
-	 * @see https://github.com/woocommerce/woocommerce/issues/19514
 	 * @since 3.4.0
-	 * @see https://github.com/woocommerce/woocommerce/issues/24579
-	 * @since 3.9.0
 	 * @param resource $buffer Resource we are writing to.
 	 * @param array    $export_row Row to export.
 	 */
 	protected function fputcsv( $buffer, $export_row ) {
-
-		if ( version_compare( PHP_VERSION, '5.5.4', '<' ) ) {
-			ob_start();
-			$temp = fopen( 'php://output', 'w' ); // @codingStandardsIgnoreLine
-    		fputcsv( $temp, $export_row, $this->get_delimiter(), '"' ); // @codingStandardsIgnoreLine
-			fclose( $temp ); // @codingStandardsIgnoreLine
-			$row = ob_get_clean();
-			$row = str_replace( '\\"', '\\""', $row );
-			fwrite( $buffer, $row ); // @codingStandardsIgnoreLine
-		} else {
-			fputcsv( $buffer, $export_row, $this->get_delimiter(), '"', "\0" ); // @codingStandardsIgnoreLine
-		}
+		fputcsv( $buffer, $export_row, $this->get_delimiter(), '"', "\0" ); // @codingStandardsIgnoreLine
 	}
 }

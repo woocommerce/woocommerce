@@ -25,7 +25,7 @@ class SpecRunner {
 
 		// Create or update the note.
 		$existing_note_ids = $data_store->get_notes_with_name( $spec->slug );
-		if ( count( $existing_note_ids ) === 0 ) {
+		if ( ! is_countable( $existing_note_ids ) || count( $existing_note_ids ) === 0 ) {
 			$note = new Note();
 			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 		} else {
@@ -37,12 +37,16 @@ class SpecRunner {
 
 		// Evaluate the spec and get the new note status.
 		$previous_status = $note->get_status();
-		$status          = EvaluateAndGetStatus::evaluate(
-			$spec,
-			$previous_status,
-			$stored_state,
-			new RuleEvaluator()
-		);
+		try {
+			$status = EvaluateAndGetStatus::evaluate(
+				$spec,
+				$previous_status,
+				$stored_state,
+				new RuleEvaluator()
+			);
+		} catch ( \Throwable $e ) {
+			return $e;
+		}
 
 		// If the status is changing, update the created date to now.
 		if ( $previous_status !== $status ) {

@@ -1,26 +1,17 @@
 const { test, expect } = require( '@playwright/test' );
 const { API_BASE_URL } = process.env;
+const shouldSkip = API_BASE_URL != undefined;
+
 const exp = require( 'constants' );
 const { keys } = require( 'lodash' );
 const {
 	countries,
 	currencies,
+	externalCurrencies,
+	externalCountries,
 	stateOptions,
 } = require( '../../data/settings' );
 
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
 /**
  * Tests for the WooCommerce API.
  *
@@ -28,9 +19,8 @@ const skipTestIfCI = () => {
  * @group settings
  *
  */
-skipTestIfCI();
 
-test.describe( 'Settings API tests: CRUD', () => {
+test.describe.serial( 'Settings API tests: CRUD', () => {
 	test.describe( 'List all settings groups', () => {
 		test( 'can retrieve all settings groups', async ( { request } ) => {
 			// call API to retrieve all settings groups
@@ -336,6 +326,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -387,33 +378,45 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_all_except_countries',
-						label: 'Sell to all countries, except for&hellip;',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_specific_allowed_countries',
-						label: 'Sell to specific countries',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_all_except_countries',
+							label: 'Sell to all countries, except for&hellip;',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
+
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_allowed_countries',
+							label: 'Sell to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -436,19 +439,25 @@ test.describe( 'Settings API tests: CRUD', () => {
 				] )
 			);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_specific_ship_to_countries',
-						label: 'Ship to specific countries',
-						description: '',
-						type: 'multiselect',
-						default: '',
-						value: '',
-						options: expect.objectContaining( countries ),
-					} ),
-				] )
-			);
+			// different on external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_specific_ship_to_countries',
+							label: 'Ship to specific countries',
+							description: '',
+							type: 'multiselect',
+							default: '',
+							value: '',
+							options: expect.objectContaining( countries ),
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -512,21 +521,25 @@ test.describe( 'Settings API tests: CRUD', () => {
 				] )
 			);
 
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_currency',
-						label: 'Currency',
-						description:
-							'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
-						type: 'select',
-						default: 'USD',
-						options: expect.objectContaining( currencies ),
-						tip: 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
-						value: 'USD',
-					} ),
-				] )
-			);
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_currency',
+							label: 'Currency',
+							description:
+								'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
+							type: 'select',
+							default: 'USD',
+							options: expect.objectContaining( currencies ),
+							tip: 'This controls what currency prices are listed at in the catalog and which currency gateways will take payments in.',
+							value: 'USD',
+						} ),
+					] )
+				);
+			} else {
+				// This test is also failing on external hosts
+			}
 
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
@@ -998,7 +1011,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_file_download_method',
 						label: 'File download method',
 						description:
-							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://docs.woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
+							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://woo.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
 						type: 'select',
 						default: 'force',
 						options: {
@@ -1629,34 +1642,45 @@ test.describe( 'Settings API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_cart_page_id',
-						label: 'Cart page',
-						description: 'Page contents: [woocommerce_cart]',
-						type: 'select',
-						default: '',
-						tip: 'Page contents: [woocommerce_cart]',
-						value: expect.any( String ),
-						options: expect.any( Object ),
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_checkout_page_id',
-						label: 'Checkout page',
-						description: 'Page contents: [woocommerce_checkout]',
-						type: 'select',
-						default: expect.any( Number ),
-						tip: 'Page contents: [woocommerce_checkout]',
-						value: expect.any( String ),
-						options: expect.any( Object ),
-					} ),
-				] )
-			);
+
+			// not present in external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_cart_page_id',
+							label: 'Cart page',
+							description:
+								'Page where shoppers review their shopping cart',
+							type: 'select',
+							default: '',
+							tip: 'Page where shoppers review their shopping cart',
+							value: expect.any( String ),
+							options: expect.any( Object ),
+						} ),
+					] )
+				);
+			}
+
+			// not present in external host
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_checkout_page_id',
+							label: 'Checkout page',
+							description:
+								'Page where shoppers go to finalize their purchase',
+							type: 'select',
+							default: expect.any( Number ),
+							tip: 'Page where shoppers go to finalize their purchase',
+							value: expect.any( String ),
+							options: expect.any( Object ),
+						} ),
+					] )
+				);
+			}
+
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -1853,19 +1877,24 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_allow_tracking',
-						label: 'Enable tracking',
-						description: 'Allow usage of WooCommerce to be tracked',
-						type: 'checkbox',
-						default: 'no',
-						tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
-						value: 'no',
-					} ),
-				] )
-			);
+			if ( ! shouldSkip ) {
+				expect( responseJSON ).toEqual(
+					expect.arrayContaining( [
+						expect.objectContaining( {
+							id: 'woocommerce_allow_tracking',
+							label: 'Enable tracking',
+							description:
+								'Allow usage of WooCommerce to be tracked',
+							type: 'checkbox',
+							default: 'no',
+							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woo.com/usage-tracking" target="_blank">Woo.com Usage Tracking Documentation</a>.',
+							value: 'no',
+						} ),
+					] )
+				);
+			} else {
+				// Test is failing on external hosts
+			}
 			expect( responseJSON ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -1874,7 +1903,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						description: 'Display suggestions within WooCommerce',
 						type: 'checkbox',
 						default: 'yes',
-						tip: 'Leave this box unchecked if you do not want to see suggested extensions.',
+						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.',
 						value: 'yes',
 					} ),
 				] )
@@ -1884,7 +1913,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.objectContaining( {
 						id: 'woocommerce_analytics_enabled',
 						label: 'Analytics',
-						description: 'Enables WooCommerce Analytics',
+						description: 'Enable WooCommerce Analytics',
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
@@ -1897,7 +1926,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_navigation_enabled',
 						label: 'Navigation',
 						description: expect.stringContaining(
-							'Adds the new WooCommerce navigation experience to the dashboard'
+							'Add the new WooCommerce navigation experience to the dashboard'
 						),
 						type: 'checkbox',
 						value: expect.any( String ),
@@ -2087,9 +2116,9 @@ test.describe( 'Settings API tests: CRUD', () => {
 							'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
 						type: 'textarea',
 						default:
-							'Hopefully they’ll be back. Read more about <a href="https://docs.woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
+							'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
 						tip: 'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: 'Hopefully they’ll be back. Read more about <a href="https://docs.woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
+						value: 'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
 					} ),
 				] )
 			);

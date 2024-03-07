@@ -21,6 +21,11 @@
 		"onboarding-tasks": true,
 		"payment-gateway-suggestions": true,
 		"product-variation-management": true,
+		"product-virtual-downloadable": true,
+		"product-external-affiliate": true,
+		"product-grouped": true,
+		"product-linked": true,
+		"product-pre-publish-modal": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"settings": false,
@@ -31,6 +36,7 @@
 		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
-		"async-product-editor-category-field": true
+		"async-product-editor-category-field": true,
+		"launch-your-store": false
 	}
 }

@@ -10,7 +10,7 @@
  * Version:              {{version}}
  * Requires at least:    6.2
  * WC requires at least: 7.8
- * Requires PHP:         7.3
+ * Requires PHP:         7.4
 {{#author}}
  * Author:               {{author}}
 {{/author}}
@@ -31,6 +31,11 @@
  * @package              {{namespace}}
  */
 
+use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry;
+
+
 /**
  * Registers the block using the metadata loaded from the `block.json` file.
  * Behind the scenes, it registers also all assets so they can be enqueued
@@ -40,58 +45,27 @@
  */
 function {{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init() {
 	if ( isset( $_GET['page'] ) && $_GET['page'] === 'wc-admin' ) {
-		register_block_type( __DIR__ . '/build' );
+		BlockRegistry::get_instance()->register_block_type_from_metadata( __DIR__ . '/build' );
 	}
 }
 add_action( 'init', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_block_init' );
 
-function {{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor( $args ) {
-	// if the product block editor is not enabled, return the args as-is
-	if ( ! class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ||
-			! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-		return $args;
-	}
+function {{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor( BlockTemplateInterface $template ) {
+	if ( $template instanceof ProductFormTemplateInterface && 'simple-product' === $template->get_id() ) {
+		$basic_details = $template->get_section_by_id( 'basic-details' );
 
-	// if the template is not set or is not an array, return the args as-is
-	if ( ! isset( $args['template'] ) || ! is_array( $args['template'] ) ) {
-		return $args;
-	}
-
-	$template = $args['template'];
-
-	// find the 'Basic details' section and add our block to the end of it
-	foreach ( $template as $tab_index => $tab ) {
-		$tab_properties = $tab[1];
-
-		if ( 'general' === $tab_properties['id'] ) {
-			$tab_sections = $tab[2];
-
-			foreach ( $tab_sections as $section_index => $section ) {
-				$section_properties = $section[1];
-
-				// TODO: this is not the right way to do this, since it is checking a localized string.
-				if ( 'Basic details' === $section_properties['title'] ) {
-					$section_fields = $section[2];
-
-					// add our block to the end of the section
-					$section_fields[] = [
-						'{{namespace}}/{{slug}}',
-						[
-							'message' => '{{title}}',
-						]
-					];
-
-					// update the template with our new block
-					$args[ 'template' ][ $tab_index ][2][ $section_index ][2] = $section_fields;
-
-					break;
-				}
-			}
-
-			break;
+		if ( $basic_details ) {
+			$basic_details->add_block(
+				[
+					'id' 	     => '{{namespace}}-{{slug}}',
+					'order'	     => 40,
+					'blockName'  => '{{namespace}}/{{slug}}',
+					'attributes' => [
+						'message' => '{{title}}',
+					]
+				]
+			);
 		}
 	}
-
-	return $args;
 }
-add_filter( 'woocommerce_register_post_type_product', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor', 100 );
+add_filter( 'woocommerce_block_template_register', '{{namespaceSnakeCase}}_{{slugSnakeCase}}_add_block_to_product_editor', 100 );

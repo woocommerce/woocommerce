@@ -172,8 +172,8 @@ test.describe( 'Shopper Checkout Login Account', () => {
 		// check my account page
 		await page.goto( '/my-account/' );
 		await expect( page.url() ).toContain( 'my-account/' );
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'My account'
-		);
+		await expect(
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
 	} );
 } );

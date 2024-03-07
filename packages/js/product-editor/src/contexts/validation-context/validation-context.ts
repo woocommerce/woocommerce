@@ -13,6 +13,7 @@ export const ValidationContext = createContext< ValidationContextProps< any > >(
 	{
 		errors: {},
 		registerValidator: () => () => {},
+		unRegisterValidator: () => () => {},
 		validateField: () => Promise.resolve( undefined ),
 		validateAll: () => Promise.resolve( {} ),
 	}

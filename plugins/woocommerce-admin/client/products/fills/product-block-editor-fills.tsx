@@ -3,16 +3,9 @@
  */
 import { MenuGroup } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
-	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-} from '@woocommerce/product-editor';
-import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { registerPlugin } from '@wordpress/plugins';
 import { useSelect } from '@wordpress/data';
-import { WooHeaderItem } from '@woocommerce/admin-layout';
-
+import { Product, ProductVariation } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -27,22 +20,30 @@ import {
 	AboutTheEditorMenuItem,
 } from '../fills/more-menu-items';
 
-const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
-	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
+export type MoreMenuFillProps = { productType?: string; onClose: () => void };
 
-	const { type, status } = useSelect(
+export const MoreMenuFill = ( {
+	productType = 'product',
+	onClose,
+}: MoreMenuFillProps ) => {
+	const [ id ] = useEntityProp( 'postType', productType, 'id' );
+
+	const product = useSelect< Product | ProductVariation >(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', 'product', id ) as Product;
+
+			return getEntityRecord( 'postType', productType, id ) as
+				| Product
+				| ProductVariation;
 		},
-		[ id ]
+		[ id, productType ]
 	);
 
 	const recordClick = ( optionName: string ) => {
 		recordEvent( 'product_dropdown_option_click', {
 			selected_option: optionName,
-			product_type: type,
-			product_status: status,
+			product_type: product.type,
+			product_status: product.status,
 		} );
 	};
 
@@ -66,7 +67,9 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 			</MenuGroup>
 			<MenuGroup>
 				<ClassicEditorMenuItem
-					productId={ id }
+					productId={
+						( product as ProductVariation ).parent_id ?? product.id
+					}
 					onClick={ () => {
 						recordClick( 'classic_editor' );
 						onClose();
@@ -76,26 +79,3 @@ const MoreMenuFill = ( { onClose }: { onClose: () => void } ) => {
 		</>
 	);
 };
-
-const ProductHeaderFill = () => {
-	const [ id ] = useEntityProp( 'postType', 'product', 'id' );
-
-	return <ProductMVPFeedbackModalContainer productId={ id } />;
-};
-
-registerPlugin( 'wc-admin-more-menu', {
-	// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
-	scope: 'woocommerce-product-block-editor',
-	render: () => (
-		<>
-			<WooProductMoreMenuItem>
-				{ ( { onClose }: { onClose: () => void } ) => (
-					<MoreMenuFill onClose={ onClose } />
-				) }
-			</WooProductMoreMenuItem>
-			<WooHeaderItem name="product">
-				<ProductHeaderFill />
-			</WooHeaderItem>
-		</>
-	),
-} );

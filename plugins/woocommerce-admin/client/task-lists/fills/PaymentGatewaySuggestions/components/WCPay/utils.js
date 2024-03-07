@@ -91,6 +91,8 @@ export function isWCPaySupported( countryCode ) {
 		'HU',
 		'RO',
 		'SE',
+		'JP',
+		'AE',
 	];
 
 	return supportedCountries.includes( countryCode );

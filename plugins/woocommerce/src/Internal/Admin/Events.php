@@ -36,7 +36,6 @@ use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
-use Automattic\WooCommerce\Internal\Admin\Notes\TestCheckout;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use Automattic\WooCommerce\Internal\Admin\Notes\UnsecuredReportFiles;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
@@ -92,7 +91,6 @@ class Events {
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
-		TestCheckout::class,
 		TrackingOptIn::class,
 		WooCommercePayments::class,
 		WooCommerceSubscriptions::class,
@@ -156,7 +154,7 @@ class Events {
 			MerchantEmailNotifications::run();
 		}
 
-		if ( Features::is_enabled( 'onboarding' ) ) {
+		if ( Features::is_enabled( 'core-profiler' ) ) {
 			( new MailchimpScheduler() )->run();
 		}
 	}
@@ -180,7 +178,14 @@ class Events {
 					$note = clone $note_from_db;
 					$note->set_title( $note_from_class->get_title() );
 					$note->set_content( $note_from_class->get_content() );
-					$note->set_actions( $note_from_class->get_actions() );
+					$actions = $note_from_class->get_actions();
+					foreach ( $actions as $action ) {
+						$matching_action = $note->get_action( $action->name );
+						if ( $matching_action && $matching_action->id ) {
+							$action->id = $matching_action->id;
+						}
+					}
+					$note->set_actions( $actions );
 					return $note;
 				}
 				break;

@@ -44,6 +44,14 @@ const attributeTerms: Record< number, ProductAttributeTerm[] > = {
 			menu_order: 0,
 			count: 2,
 		},
+		{
+			id: 66,
+			name: 'Yellow',
+			slug: 'yellow',
+			description: '',
+			menu_order: 0,
+			count: 2,
+		},
 	],
 	3: [
 		{
@@ -100,6 +108,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 0,
 		variation: false,
 		visible: false,
+		slug: 'local',
 	},
 	{
 		id: 2,
@@ -108,6 +117,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 1,
 		variation: false,
 		visible: true,
+		slug: 'color',
 	},
 	{
 		id: 3,
@@ -116,6 +126,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 2,
 		variation: false,
 		visible: true,
+		slug: 'size',
 	},
 ];
 
@@ -164,15 +175,18 @@ describe( 'useProductAttributes', () => {
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
 			result.current.handleChange( [
-				allAttributes[ 0 ],
-				allAttributes[ 1 ],
-				{ ...testAttributes[ 0 ] },
+				{ ...allAttributes[ 0 ], isDefault: false },
+				{ ...allAttributes[ 1 ], isDefault: false },
+				{ ...testAttributes[ 0 ], isDefault: false },
 			] );
-			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...allAttributes[ 0 ], position: 0 },
-				{ ...allAttributes[ 1 ], position: 1 },
-				{ ...testAttributes[ 0 ], variation: false, position: 2 },
-			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 0 ], position: 0 },
+					{ ...allAttributes[ 1 ], position: 1 },
+					{ ...testAttributes[ 0 ], variation: false, position: 2 },
+				],
+				[]
+			);
 		} );
 
 		it( 'should keep both variable and non variable as part of the onChange list, when isVariation is false', async () => {
@@ -194,12 +208,17 @@ describe( 'useProductAttributes', () => {
 			);
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
-			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
-			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...testAttributes[ 0 ], variation: false, position: 0 },
-				{ ...allAttributes[ 0 ], position: 1 },
-				{ ...allAttributes[ 1 ], position: 2 },
+			result.current.handleChange( [
+				{ ...testAttributes[ 0 ], isDefault: false },
 			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...testAttributes[ 0 ], variation: false, position: 0 },
+					{ ...allAttributes[ 0 ], position: 1 },
+					{ ...allAttributes[ 1 ], position: 2 },
+				],
+				[]
+			);
 		} );
 
 		it( 'should keep both variable and non variable as part of the onChange list, when isVariation is true', async () => {
@@ -221,12 +240,17 @@ describe( 'useProductAttributes', () => {
 			);
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
-			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
-			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...allAttributes[ 0 ], position: 0 },
-				{ ...allAttributes[ 1 ], position: 1 },
-				{ ...testAttributes[ 0 ], variation: true, position: 2 },
+			result.current.handleChange( [
+				{ ...testAttributes[ 0 ], isDefault: false },
 			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 0 ], position: 0 },
+					{ ...allAttributes[ 1 ], position: 1 },
+					{ ...testAttributes[ 0 ], variation: true, position: 2 },
+				],
+				[]
+			);
 		} );
 
 		it( 'should remove duplicate globals', async () => {
@@ -248,11 +272,16 @@ describe( 'useProductAttributes', () => {
 			);
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
-			result.current.handleChange( [ { ...testAttributes[ 1 ] } ] );
-			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...allAttributes[ 1 ], position: 0 },
-				{ ...allAttributes[ 0 ], position: 1, variation: true },
+			result.current.handleChange( [
+				{ ...testAttributes[ 1 ], isDefault: false },
 			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 1 ], position: 0 },
+					{ ...allAttributes[ 0 ], position: 1, variation: true },
+				],
+				[]
+			);
 		} );
 
 		it( 'should remove duplicate locals by name', async () => {
@@ -274,11 +303,94 @@ describe( 'useProductAttributes', () => {
 			);
 			jest.runOnlyPendingTimers();
 			await waitForNextUpdate();
-			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
-			expect( onChange ).toHaveBeenCalledWith( [
-				{ ...allAttributes[ 1 ], position: 0 },
-				{ ...allAttributes[ 0 ], position: 1, variation: true },
+			result.current.handleChange( [
+				{ ...testAttributes[ 0 ], isDefault: false },
 			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 1 ], position: 0 },
+					{ ...allAttributes[ 0 ], position: 1, variation: true },
+				],
+				[]
+			);
+		} );
+
+		it( 'should pass default attributes as second param, defaulting to true when isDefault is not defined', async () => {
+			const allAttributes = [
+				{ ...testAttributes[ 0 ] },
+				{ ...testAttributes[ 1 ] },
+			];
+			const onChange = jest.fn();
+			const { result, waitForNextUpdate } = renderHook(
+				useProductAttributes,
+				{
+					initialProps: {
+						allAttributes,
+						onChange,
+						isVariationAttributes: true,
+						productId: 123,
+					},
+				}
+			);
+			jest.runOnlyPendingTimers();
+			await waitForNextUpdate();
+			result.current.handleChange( [ { ...testAttributes[ 0 ] } ] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 1 ], position: 0 },
+					{ ...allAttributes[ 0 ], position: 1, variation: true },
+				],
+				[
+					{
+						id: testAttributes[ 0 ].id,
+						name: testAttributes[ 0 ].name,
+						option: testAttributes[ 0 ].options[ 0 ],
+					},
+				]
+			);
+		} );
+
+		it( 'should pass default attributes as second param, when isDefault is true', async () => {
+			const allAttributes = [
+				{ ...testAttributes[ 0 ] },
+				{ ...testAttributes[ 1 ] },
+			];
+			const onChange = jest.fn();
+			const { result, waitForNextUpdate } = renderHook(
+				useProductAttributes,
+				{
+					initialProps: {
+						allAttributes,
+						onChange,
+						isVariationAttributes: true,
+						productId: 123,
+					},
+				}
+			);
+			jest.runOnlyPendingTimers();
+			await waitForNextUpdate();
+			result.current.handleChange( [
+				{ ...testAttributes[ 0 ], isDefault: true },
+				{ ...testAttributes[ 1 ], isDefault: true },
+			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 0 ], position: 0, variation: true },
+					{ ...allAttributes[ 1 ], position: 1, variation: true },
+				],
+				[
+					{
+						id: testAttributes[ 0 ].id,
+						name: testAttributes[ 0 ].name,
+						option: testAttributes[ 0 ].options[ 0 ],
+					},
+					{
+						id: testAttributes[ 1 ].id,
+						name: testAttributes[ 1 ].name,
+						option: testAttributes[ 1 ].options[ 0 ],
+					},
+				]
+			);
 		} );
 	} );
 
@@ -353,7 +465,7 @@ describe( 'useProductAttributes', () => {
 			);
 		} );
 
-		it( 'sets terms for any global attributes and options to empty array', async () => {
+		it( 'sets terms for any global attributes and leaves options the same', async () => {
 			const allAttributes = [
 				{ ...testAttributes[ 0 ] },
 				{ ...testAttributes[ 1 ] },
@@ -375,13 +487,16 @@ describe( 'useProductAttributes', () => {
 			await waitForNextUpdate();
 			expect( result.current.attributes.length ).toBe( 3 );
 			expect( result.current.attributes[ 0 ].terms ).toEqual(
-				attributeTerms[ result.current.attributes[ 0 ].id ]
+				attributeTerms[ result.current.attributes[ 0 ].id ].filter(
+					( t ) => allAttributes[ 1 ].options.includes( t.name )
+				)
 			);
-			expect( result.current.attributes[ 0 ].options ).toEqual( [] );
+			expect( result.current.attributes[ 0 ].options ).toEqual(
+				result.current.attributes[ 0 ].options
+			);
 			expect( result.current.attributes[ 1 ].terms ).toEqual(
 				attributeTerms[ result.current.attributes[ 1 ].id ]
 			);
-			expect( result.current.attributes[ 1 ].options ).toEqual( [] );
 		} );
 	} );
 } );

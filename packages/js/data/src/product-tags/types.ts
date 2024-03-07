@@ -8,7 +8,7 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 
-type ProductTag = {
+export type ProductTag = {
 	id: number;
 	slug: string;
 	name: string;
@@ -17,7 +17,7 @@ type ProductTag = {
 	count: number;
 };
 
-type Query = {
+export type Query = {
 	context?: string;
 	page: number;
 	per_page: number;

@@ -102,10 +102,24 @@ class WC_Unit_Tests_Bootstrap {
 	 * Register autoloader for the files in the 'tests/tools' directory, for the root namespace 'Automattic\WooCommerce\Testing\Tools'.
 	 */
 	protected static function register_autoloader_for_testing_tools() {
-		return spl_autoload_register(
+		spl_autoload_register(
 			function ( $class ) {
+				$tests_directory   = dirname( __FILE__, 2 );
+				$helpers_directory = $tests_directory . '/php/helpers';
+
+				// Support loading top-level classes from the `php/helpers` directory.
+				if ( false === strpos( $class, '\\' ) ) {
+					$helper_path = realpath( "$helpers_directory/$class.php" );
+
+					if ( dirname( $helper_path ) === $helpers_directory && file_exists( $helper_path ) ) {
+						require $helper_path;
+						return;
+					}
+				}
+
+				// Otherwise, check if this might relate to an Automattic\WooCommerce\Testing\Tools class.
 				$prefix   = 'Automattic\\WooCommerce\\Testing\\Tools\\';
-				$base_dir = dirname( dirname( __FILE__ ) ) . '/Tools/';
+				$base_dir = $tests_directory . '/Tools/';
 				$len      = strlen( $prefix );
 				if ( strncmp( $prefix, $class, $len ) !== 0 ) {
 					// no, move to the next registered autoloader.
@@ -211,6 +225,10 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
+
+		if ( ! getenv( 'HPOS' ) ) {
+			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
+		}
 
 		WC_Install::install();
 

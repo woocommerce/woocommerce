@@ -140,6 +140,7 @@ export const TaskItemExample: Story = ( args ) => (
 			}
 			showActionButton={ false }
 			title="A high-priority task without `Primary action`"
+			badge="Badge content"
 		/>
 		<TaskItem
 			action={ () => {} }

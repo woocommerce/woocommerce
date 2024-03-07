@@ -45,7 +45,7 @@ type BaseTreeProps = {
 	 * ancestors and its descendants are also selected. If it's false
 	 * only the clicked item is selected.
 	 *
-	 * @param  value The selection
+	 * @param value The selection
 	 */
 	onSelect?( value: Item | Item[] ): void;
 	/**
@@ -54,7 +54,7 @@ type BaseTreeProps = {
 	 * are also unselected. If it's false only the clicked item is
 	 * unselected.
 	 *
-	 * @param  value The unselection
+	 * @param value The unselection
 	 */
 	onRemove?( value: Item | Item[] ): void;
 	/**
@@ -66,8 +66,8 @@ type BaseTreeProps = {
 	 * 	shouldItemBeHighlighted={ isFirstChild }
 	 * />
 	 *
-	 * @param  item The current linked tree item, useful to
-	 *              traverse the entire linked tree from this item.
+	 * @param item The current linked tree item, useful to
+	 *             traverse the entire linked tree from this item.
 	 *
 	 * @see {@link LinkedTree}
 	 */
@@ -97,7 +97,7 @@ export type TreeProps = BaseTreeProps &
 		 * 	getItemLabel={ ( item ) => <span>${ item.data.label }</span> }
 		 * />
 		 *
-		 * @param  item The current rendering tree item
+		 * @param item The current rendering tree item
 		 *
 		 * @see {@link LinkedTree}
 		 */
@@ -112,7 +112,7 @@ export type TreeProps = BaseTreeProps &
 		 * 	}
 		 * />
 		 *
-		 * @param  item The tree item to determine if should be expanded.
+		 * @param item The tree item to determine if should be expanded.
 		 *
 		 * @see {@link LinkedTree}
 		 */

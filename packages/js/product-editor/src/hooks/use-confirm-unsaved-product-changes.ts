@@ -11,27 +11,33 @@ import { useEntityProp } from '@wordpress/core-data';
 import { preventLeavingProductForm } from '../utils/prevent-leaving-product-form';
 import { useProductEdits } from './use-product-edits';
 
-export function useConfirmUnsavedProductChanges() {
+export function useConfirmUnsavedProductChanges(
+	productType = <string>'product'
+) {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
-	const { hasEdits } = useProductEdits();
+	const { hasEdits } = useProductEdits( productType );
 	const { isSaving } = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
 				isSaving: isSavingEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
 		},
-		[ productId ]
+		[ productId, productType ]
 	);
 
-	useConfirmUnsavedChanges( hasEdits || isSaving, preventLeavingProductForm );
+	useConfirmUnsavedChanges(
+		hasEdits || isSaving,
+		preventLeavingProductForm( productId )
+	);
 }

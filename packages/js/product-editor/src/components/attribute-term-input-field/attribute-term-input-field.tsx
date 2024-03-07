@@ -12,6 +12,7 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 import { useDebounce } from '@wordpress/compose';
 import { plus } from '@wordpress/icons';
 import {
@@ -24,11 +25,13 @@ import {
 	__experimentalSelectControlMenu as Menu,
 	__experimentalSelectControlMenuItem as MenuItem,
 } from '@woocommerce/components';
+import { cleanForSlug } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { CreateAttributeTermModal } from './create-attribute-term-modal';
+import { TRACKS_SOURCE } from '../../constants';
 
 type AttributeTermInputFieldProps = {
 	value?: ProductAttributeTerm[];
@@ -37,7 +40,14 @@ type AttributeTermInputFieldProps = {
 	placeholder?: string;
 	disabled?: boolean;
 	label?: string;
+	autoCreateOnSelect?: boolean;
+	readOnlyWhenClosed?: boolean;
 };
+
+interface customError extends Error {
+	code: string;
+	message: string;
+}
 
 let uniqueId = 0;
 
@@ -50,10 +60,9 @@ export const AttributeTermInputField: React.FC<
 	disabled,
 	attributeId,
 	label = '',
+	autoCreateOnSelect = true,
+	readOnlyWhenClosed = false,
 } ) => {
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-	);
 	const attributeTermInputId = useRef(
 		`woocommerce-attribute-term-field-${ ++uniqueId }`
 	);
@@ -61,8 +70,12 @@ export const AttributeTermInputField: React.FC<
 		ProductAttributeTerm[]
 	>( [] );
 	const [ isFetching, setIsFetching ] = useState( false );
+	const [ isCreatingTerm, setIsCreatingTerm ] = useState( false );
 	const [ addNewAttributeTermName, setAddNewAttributeTermName ] =
 		useState< string >();
+	const { createNotice } = useDispatch( 'core/notices' );
+	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
+		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
 
 	const fetchItems = useCallback(
 		( searchString?: string | undefined ) => {
@@ -105,20 +118,6 @@ export const AttributeTermInputField: React.FC<
 		onChange( value.filter( ( opt ) => opt.slug !== item.slug ) );
 	};
 
-	const onSelect = ( item: ProductAttributeTerm ) => {
-		// Add new item.
-		if ( item.id === -99 ) {
-			setAddNewAttributeTermName( item.name );
-			return;
-		}
-		const isSelected = value.find( ( i ) => i.slug === item.slug );
-		if ( isSelected ) {
-			onRemove( item );
-			return;
-		}
-		onChange( [ ...value, item ] );
-	};
-
 	const focusSelectControl = () => {
 		const selectControlInputField: HTMLInputElement | null =
 			document.querySelector(
@@ -131,6 +130,78 @@ export const AttributeTermInputField: React.FC<
 				selectControlInputField.focus();
 			}, 0 );
 		}
+	};
+
+	const createAttributeTerm = async (
+		attribute: Partial< ProductAttributeTerm >
+	) => {
+		recordEvent( 'product_attribute_term_add', {
+			source: TRACKS_SOURCE,
+		} );
+		setIsCreatingTerm( true );
+		try {
+			const newAttribute: ProductAttributeTerm =
+				await createProductAttributeTerm( {
+					...attribute,
+					attribute_id: attributeId,
+				} );
+			recordEvent( 'product_attribute_term_add_success', {
+				source: TRACKS_SOURCE,
+			} );
+			onChange( [ ...value, newAttribute ] );
+			invalidateResolutionForStoreSelector( 'getProductAttributes' );
+			invalidateResolutionForStoreSelector( 'getProductAttributeTerms' );
+			setIsCreatingTerm( false );
+		} catch ( err: unknown ) {
+			let error = {
+				source: TRACKS_SOURCE,
+				code: 'Unknown error.',
+				message: 'An unknown error occurred.',
+			};
+			let noticeMessage = __(
+				'Failed to create attribute term.',
+				'woocommerce'
+			);
+			const errorResponse = err as customError;
+			if ( errorResponse?.code && errorResponse?.message ) {
+				error = {
+					...error,
+					code: errorResponse.code,
+					message: errorResponse.message,
+				};
+				if ( errorResponse.code === 'term_exists' ) {
+					noticeMessage = __(
+						'Attribute term already exists.',
+						'woocommerce'
+					);
+				}
+			}
+			recordEvent( 'product_attribute_term_add_failed', error );
+			createNotice( 'error', noticeMessage );
+			setIsCreatingTerm( false );
+		}
+	};
+
+	const onSelect = ( item: ProductAttributeTerm ) => {
+		// Add new item.
+		if ( item.id === -99 ) {
+			if ( autoCreateOnSelect ) {
+				createAttributeTerm( {
+					name: item.name,
+					slug: cleanForSlug( item.name ),
+				} );
+				focusSelectControl();
+			} else {
+				setAddNewAttributeTermName( item.name );
+			}
+			return;
+		}
+		const isSelected = value.find( ( i ) => i.slug === item.slug );
+		if ( isSelected ) {
+			onRemove( item );
+			return;
+		}
+		onChange( [ ...value, item ] );
 	};
 
 	const selectedTermSlugs = ( value || [] ).map( ( term ) => term.slug );
@@ -169,8 +240,12 @@ export const AttributeTermInputField: React.FC<
 					const { changes, type } = actionAndChanges;
 					switch ( type ) {
 						case selectControlStateChangeTypes.ControlledPropUpdatedSelectedItem:
+							const listIsOpen = isCreatingTerm
+								? { isOpen: isCreatingTerm }
+								: {};
 							return {
 								...changes,
+								...listIsOpen,
 								inputValue: state.inputValue,
 							};
 						case selectControlStateChangeTypes.ItemClick:
@@ -193,6 +268,7 @@ export const AttributeTermInputField: React.FC<
 				selected={ value }
 				onSelect={ onSelect }
 				onRemove={ onRemove }
+				readOnlyWhenClosed={ readOnlyWhenClosed }
 				className={
 					'woocommerce-attribute-term-field ' +
 					attributeTermInputId.current
@@ -209,7 +285,7 @@ export const AttributeTermInputField: React.FC<
 					return (
 						<Menu isOpen={ isOpen } getMenuProps={ getMenuProps }>
 							{ [
-								isFetching ? (
+								isFetching || isCreatingTerm ? (
 									<div
 										key="loading-spinner"
 										className="woocommerce-attribute-term-field__loading-spinner"
@@ -236,14 +312,7 @@ export const AttributeTermInputField: React.FC<
 													onChange={ () => null }
 													checked={ isSelected }
 													label={
-														<span
-															style={ {
-																fontWeight:
-																	isSelected
-																		? 'bold'
-																		: 'normal',
-															} }
-														>
+														<span>
 															{ item.name }
 														</span>
 													}
@@ -278,24 +347,26 @@ export const AttributeTermInputField: React.FC<
 					);
 				} }
 			</SelectControl>
-			{ addNewAttributeTermName && attributeId !== undefined && (
-				<CreateAttributeTermModal
-					initialAttributeTermName={ addNewAttributeTermName }
-					onCancel={ () => {
-						setAddNewAttributeTermName( undefined );
-						focusSelectControl();
-					} }
-					attributeId={ attributeId }
-					onCreated={ ( newAttribute ) => {
-						onSelect( newAttribute );
-						setAddNewAttributeTermName( undefined );
-						invalidateResolutionForStoreSelector(
-							'getProductAttributeTerms'
-						);
-						focusSelectControl();
-					} }
-				/>
-			) }
+			{ ! autoCreateOnSelect &&
+				addNewAttributeTermName &&
+				attributeId !== undefined && (
+					<CreateAttributeTermModal
+						initialAttributeTermName={ addNewAttributeTermName }
+						onCancel={ () => {
+							setAddNewAttributeTermName( undefined );
+							focusSelectControl();
+						} }
+						attributeId={ attributeId }
+						onCreated={ ( newAttribute ) => {
+							onSelect( newAttribute );
+							setAddNewAttributeTermName( undefined );
+							invalidateResolutionForStoreSelector(
+								'getProductAttributeTerms'
+							);
+							focusSelectControl();
+						} }
+					/>
+				) }
 		</>
 	);
 };

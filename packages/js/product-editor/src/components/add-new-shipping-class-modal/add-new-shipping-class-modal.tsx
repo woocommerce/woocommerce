@@ -111,6 +111,21 @@ export function AddNewShippingClassModal( {
 	onAdd,
 	onCancel,
 }: AddNewShippingClassModalProps ) {
+	function handleSubmit( values: Partial< ProductShippingClass > ) {
+		return onAdd(
+			Object.entries( values ).reduce( function removeEmptyValue(
+				current,
+				[ name, value ]
+			) {
+				return {
+					...current,
+					[ name ]: value === '' ? undefined : value,
+				};
+			},
+			{} )
+		);
+	}
+
 	return (
 		<Modal
 			title={ __( 'New shipping class', 'woocommerce' ) }
@@ -121,7 +136,7 @@ export function AddNewShippingClassModal( {
 				initialValues={ shippingClass ?? INITIAL_VALUES }
 				validate={ validateForm }
 				errors={ {} }
-				onSubmit={ onAdd }
+				onSubmit={ handleSubmit }
 			>
 				{ ( childrenProps: {
 					handleSubmit: () => Promise< ProductShippingClass >;

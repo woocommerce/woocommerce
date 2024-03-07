@@ -165,7 +165,7 @@ class WC_Shortcode_My_Account {
 	/**
 	 * Edit address page.
 	 *
-	 * @param string $load_address Type of address to load.
+	 * @param string $load_address Type of address; 'billing' or 'shipping'.
 	 */
 	public static function edit_address( $load_address = 'billing' ) {
 		$current_user = wp_get_current_user();

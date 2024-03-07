@@ -14,7 +14,8 @@ import interpolateComponents from '@automattic/interpolate-components';
  * Internal dependencies
  */
 import TimerImage from './timer.svg';
-import { WC_ASSET_URL } from '~/utils/admin-settings';
+import { WC_ASSET_URL, getAdminSetting } from '~/utils/admin-settings';
+import sanitizeHTML from '~/lib/sanitize-html';
 
 const connect = ( createNotice, setIsBusy ) => {
 	const errorMessage = __(
@@ -36,6 +37,9 @@ const connect = ( createNotice, setIsBusy ) => {
 };
 
 const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
+	const incentive =
+		getAdminSetting( 'wcpayWelcomePageIncentive' ) ||
+		window.wcpaySettings?.connectIncentive;
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isBusy, setIsBusy ] = useState( false );
 	const onClick = () => {
@@ -54,12 +58,20 @@ const WoocommercePaymentsHeader = ( { task, trackClick } ) => {
 			/>
 			<div className="woocommerce-task-header__contents">
 				<h1>{ __( "It's time to get paid", 'woocommerce' ) }</h1>
-				<p>
-					{ __(
-						"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
-						'woocommerce'
-					) }
-				</p>
+				{ incentive?.task_header_content ? (
+					<p
+						dangerouslySetInnerHTML={ sanitizeHTML(
+							incentive.task_header_content
+						) }
+					/>
+				) : (
+					<p>
+						{ __(
+							"You're only one step away from getting paid. Verify your business details to start managing transactions with WooPayments.",
+							'woocommerce'
+						) }
+					</p>
+				) }
 				<p>
 					{ interpolateComponents( {
 						mixedString: __(

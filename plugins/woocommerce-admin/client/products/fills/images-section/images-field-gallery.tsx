@@ -48,8 +48,8 @@ export const ImagesGalleryField = () => {
 		recordEvent( 'product_images_change_image_order_via_image_gallery' );
 		setValue( 'images', orderedImages );
 	};
-	const onFileUpload = ( files: MediaItem[] ) => {
-		if ( files[ 0 ].id ) {
+	const onFileUpload = ( files: MediaItem | MediaItem[] ) => {
+		if ( Array.isArray( files ) && files[ 0 ].id ) {
 			recordEvent( 'product_images_add_via_file_upload_area' );
 			setValue( 'images', [ ...images, ...files ] );
 		}
@@ -167,7 +167,7 @@ export const ImagesGalleryField = () => {
 								}
 							} }
 							onUpload={ ( files ) => {
-								if ( files[ 0 ].id ) {
+								if ( Array.isArray( files ) && files[ 0 ].id ) {
 									recordEvent(
 										'product_images_add_via_drag_and_drop_upload'
 									);

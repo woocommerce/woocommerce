@@ -47,7 +47,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	 * Test for remote file.
 	 */
 	public function test_parse_file_path_for_remote_file() {
-		$remote_file_path = 'https://dummy.woocommerce.com/dummy_file.jpg';
+		$remote_file_path = 'https://dummy.woo.com/dummy_file.jpg';
 		$parsed_file_path = WC_Download_Handler::parse_file_path( $remote_file_path );
 		$this->assertTrue( $parsed_file_path['remote_file'] );
 	}

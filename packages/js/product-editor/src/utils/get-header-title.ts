@@ -11,8 +11,8 @@ import { AUTO_DRAFT_NAME } from './constants';
 /**
  * Get the header title using the product name.
  *
- * @param  editedProductName  Name value entered for the product.
- * @param  initialProductName Name already persisted to the database.
+ * @param editedProductName  Name value entered for the product.
+ * @param initialProductName Name already persisted to the database.
  * @return The new title
  */
 export const getHeaderTitle = (

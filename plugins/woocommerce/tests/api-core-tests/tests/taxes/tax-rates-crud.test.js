@@ -1,21 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
-
 const { allUSTaxesExample } = require( '../../data' );
 const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
+const shouldSkip = API_BASE_URL != undefined;
 
 /**
  * Tests for the WooCommerce API.
@@ -24,9 +10,8 @@ const skipTestIfCI = () => {
  * @group taxes
  *
  */
-skipTestIfCI();
 
-test.describe( 'Tax Rates API tests: CRUD', () => {
+test.describe.serial( 'Tax Rates API tests: CRUD', () => {
 	let taxRateId;
 
 	test.describe( 'Create a tax rate', () => {
@@ -154,11 +139,14 @@ test.describe( 'Tax Rates API tests: CRUD', () => {
 			);
 			expect( response.status() ).toEqual( 200 );
 
-			// Verify that the tax rate can no longer be retrieved.
-			const getDeletedTaxRateResponse = await request.get(
-				`/wp-json/wc/v3/taxes/${ taxRateId }`
-			);
-			expect( getDeletedTaxRateResponse.status() ).toEqual( 404 );
+			// only run this test on wp-env -- with external hosting there is caching
+			if ( ! shouldSkip ) {
+				// Verify that the tax rate can no longer be retrieved.
+				const getDeletedTaxRateResponse = await request.get(
+					`/wp-json/wc/v3/taxes/${ taxRateId }`
+				);
+				expect( getDeletedTaxRateResponse.status() ).toEqual( 404 );
+			}
 		} );
 	} );
 
@@ -258,13 +246,16 @@ test.describe( 'Tax Rates API tests: CRUD', () => {
 			expect( response.status() ).toEqual( 200 );
 			expect( deletedTaxRateIds ).toEqual( taxRateIdsToDelete );
 
-			// Verify that the deleted tax rates cannot be retrieved.
-			for ( const taxRateId of taxRateIdsToDelete ) {
-				//Call the API to attempte to retrieve the tax rates
-				const response = await request.get(
-					`wp-json/wc/v3/taxes/${ taxRateId }`
-				);
-				expect( response.status() ).toEqual( 404 );
+			// only run this step on wp-env -- caching with external hosting makes unreliable
+			if ( ! shouldSkip ) {
+				// Verify that the deleted tax rates cannot be retrieved.
+				for ( const taxRateId of taxRateIdsToDelete ) {
+					//Call the API to attempte to retrieve the tax rates
+					const response = await request.get(
+						`wp-json/wc/v3/taxes/${ taxRateId }`
+					);
+					expect( response.status() ).toEqual( 404 );
+				}
 			}
 		} );
 	} );

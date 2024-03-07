@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useMemo, useState } from '@wordpress/element';
+import { useContext, useMemo, useState, useEffect } from '@wordpress/element';
 import { DependencyList } from 'react';
 
 /**
@@ -23,15 +23,23 @@ export function useValidation< T >(
 		[ validatorId, ...deps ]
 	);
 
+	useEffect( () => {
+		return () => {
+			context.unRegisterValidator( validatorId );
+		};
+	}, [] );
+
 	return {
 		ref,
 		error: context.errors[ validatorId ],
 		isValidating,
-		async validate() {
+		async validate( newData?: Record< string, unknown > ) {
 			setIsValidating( true );
-			return context.validateField( validatorId ).finally( () => {
-				setIsValidating( false );
-			} );
+			return context
+				.validateField( validatorId, newData )
+				.finally( () => {
+					setIsValidating( false );
+				} );
 		},
 	};
 }

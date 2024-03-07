@@ -1,15 +1,15 @@
 <?php
 /**
  * Plugin Name: WooCommerce
- * Plugin URI: https://woocommerce.com/
- * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 8.1.0-dev
+ * Plugin URI: https://woo.com/
+ * Description: An ecommerce toolkit that helps you sell anything. Beautifully.
+ * Version: 8.8.0-dev
  * Author: Automattic
- * Author URI: https://woocommerce.com
+ * Author URI: https://woo.com
  * Text Domain: woocommerce
  * Domain Path: /i18n/languages/
- * Requires at least: 6.2
- * Requires PHP: 7.3
+ * Requires at least: 6.3
+ * Requires PHP: 7.4
  *
  * @package WooCommerce
  */
@@ -18,6 +18,10 @@ defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 	define( 'WC_PLUGIN_FILE', __FILE__ );
+}
+
+if ( ! defined( 'WC_BLOCKS_IS_FEATURE_PLUGIN' ) ) {
+	define( 'WC_BLOCKS_IS_FEATURE_PLUGIN', true );
 }
 
 // Load core packages and the autoloader.

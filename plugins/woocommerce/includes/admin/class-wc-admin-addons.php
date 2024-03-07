@@ -64,30 +64,34 @@ class WC_Admin_Addons {
 	 * @return void
 	 */
 	public static function render_featured() {
+		$featured = self::fetch_featured();
+
+		if ( is_wp_error( $featured ) ) {
+			self::output_empty( $featured->get_error_message() );
+		}
+
+		self::output_featured( $featured );
+	}
+
+	/**
+	 * Fetch featured products from WCCOM's the Featured 2.0 Endpoint and cache the data for a day.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch_featured() {
+		$transient_name = 'wc_addons_featured';
+		// Important: WCCOM Extensions API v2.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
 		$locale   = get_user_locale();
-		$featured = self::get_locale_data_from_transient( 'wc_addons_featured', $locale );
+		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
+
 		if ( false === $featured ) {
-			$headers = array();
-			$auth    = WC_Helper_Options::get( 'auth' );
-
-			if ( ! empty( $auth['access_token'] ) ) {
-				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
-			}
-
-			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
-			$country          = WC()->countries->get_base_country();
-			if ( ! empty( $country ) ) {
-				$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
-			}
-
-			// Important: WCCOM Extensions API v2.0 is used.
-			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
-				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				)
+			$fetch_options = array(
+				'auth'    => true,
+				'locale'  => true,
+				'country' => true,
 			);
+			$raw_featured  = self::fetch( $url, $fetch_options );
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
@@ -96,9 +100,7 @@ class WC_Admin_Addons {
 					? __( 'We encountered an SSL error. Please ensure your site supports TLS version 1.2 or above.', 'woocommerce' )
 					: $raw_featured->get_error_message();
 
-				self::output_empty( $message );
-
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			$response_code = (int) wp_remote_retrieve_response_code( $raw_featured );
@@ -117,26 +119,23 @@ class WC_Admin_Addons {
 					$response_code
 				);
 
-				self::output_empty( $message );
-
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
 			if ( empty( $featured ) || ! is_array( $featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
 				$message = __( 'Our request to the featured API got a malformed response.', 'woocommerce' );
-				self::output_empty( $message );
 
-				return;
+				return new WP_Error( 'wc-addons-connection-error', $message );
 			}
 
 			if ( $featured ) {
-				self::set_locale_data_in_transient( 'wc_addons_featured', $featured, $locale, DAY_IN_SECONDS );
+				self::set_locale_data_in_transient( $transient_name, $featured, $locale, DAY_IN_SECONDS );
 			}
 		}
 
-		self::output_featured( $featured );
+		return $featured;
 	}
 
 	/**
@@ -316,16 +315,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://woocommerce.com/storefront/';
+			$url         = 'https://woo.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
@@ -1015,11 +1014,11 @@ class WC_Admin_Addons {
 					wp_kses_post(
 						/* translators: a url */
 						__(
-							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">Woo.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
-					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					'https://woo.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
 				);
 				?>
 			</p>
@@ -1252,7 +1251,7 @@ class WC_Admin_Addons {
 				'title'       => $locale->title,
 				'description' => $locale->description,
 				'image'       => ( 'http' === substr( $locale->image, 0, 4 ) ) ? $locale->image : WC()->plugin_url() . $locale->image,
-				'image_alt'   => $locale->image_alt,
+				'image_alt'   => $locale->image_alt ?? '',
 				'actions'     => $promotion_actions,
 			);
 		}
@@ -1544,5 +1543,50 @@ class WC_Admin_Addons {
 		$transient_value            = is_array( $transient_value ) ? $transient_value : array();
 		$transient_value[ $locale ] = $value;
 		return set_transient( $transient, $transient_value, $expiration );
+	}
+
+	/**
+	 * Make wp_safe_remote_get request to Woo.com endpoint.
+	 * Optionally pass user auth token, locale or country.
+	 *
+	 * @param string $url     URL to request.
+	 * @param ?array $options Options for the request. For example, to pass auth token, locale and country,
+	 *                        pass array( 'auth' => true, 'locale' => true, 'country' => true, ).
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch( $url, $options = array() ) {
+		$headers = array();
+
+		if ( isset( $options['auth'] ) && $options['auth'] ) {
+			$auth = WC_Helper_Options::get( 'auth' );
+
+			if ( isset( $auth['access_token'] ) && ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+		}
+
+		$parameters = array();
+
+		if ( isset( $options['locale'] ) && $options['locale'] ) {
+			$parameters['locale'] = get_user_locale();
+		}
+
+		if ( isset( $options['country'] ) && $options['country'] ) {
+			$country = WC()->countries->get_base_country();
+			if ( ! empty( $country ) ) {
+				$parameters['country'] = $country;
+			}
+		}
+
+		$query_string = ! empty( $parameters ) ? '?' . http_build_query( $parameters ) : '';
+
+		return wp_safe_remote_get(
+			$url . $query_string,
+			array(
+				'headers'    => $headers,
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+			)
+		);
 	}
 }

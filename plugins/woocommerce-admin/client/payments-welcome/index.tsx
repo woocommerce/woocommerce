@@ -19,7 +19,6 @@ import FrequentlyAskedQuestionsSimple from './faq-simple';
 
 declare global {
 	interface Window {
-		wcCalypsoBridge: unknown;
 		location: Location;
 		wcSettings: {
 			admin: {
@@ -32,6 +31,9 @@ declare global {
 					description: string;
 					cta_label: string;
 					tc_url: string;
+				};
+				currency?: {
+					symbol: string;
 				};
 			};
 		};

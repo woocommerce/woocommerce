@@ -79,7 +79,7 @@ class Tax extends Task {
 	public function get_content() {
 		return self::can_use_automated_taxes()
 			? __(
-				'Good news! WooCommerce Services and Jetpack can automate your sales tax calculations for you.',
+				'Good news! WooCommerce Tax can automate your sales tax calculations for you.',
 				'woocommerce'
 			)
 			: __(
@@ -115,7 +115,10 @@ class Tax extends Task {
 	 */
 	public function is_complete() {
 		if ( $this->is_complete_result === null ) {
-			$this->is_complete_result = get_option( 'wc_connect_taxes_enabled' ) ||
+			$wc_connect_taxes_enabled = get_option( 'wc_connect_taxes_enabled' );
+			$is_wc_connect_taxes_enabled = ( $wc_connect_taxes_enabled === 'yes' ) || ( $wc_connect_taxes_enabled === true ); // seems that in some places boolean is used, and other places 'yes' | 'no' is used
+
+			$this->is_complete_result = $is_wc_connect_taxes_enabled ||
 				count( TaxDataStore::get_taxes( array() ) ) > 0 ||
 				get_option( 'woocommerce_no_sales_tax' ) !== false;
 		}

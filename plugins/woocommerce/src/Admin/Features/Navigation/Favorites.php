@@ -22,6 +22,13 @@ class Favorites {
 	const META_NAME = 'navigation_favorites';
 
 	/**
+	 * Favorites instance.
+	 *
+	 * @var Favorites|null
+	 */
+	protected static $instance = null;
+
+	/**
 	 * Get class instance.
 	 */
 	final public static function instance() {

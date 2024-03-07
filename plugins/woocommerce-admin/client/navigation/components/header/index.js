@@ -20,7 +20,7 @@ import useIsScrolled from '../../../hooks/useIsScrolled';
 const Header = () => {
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const homeUrl = getSetting( 'homeUrl', '' );
-	const isScrolled = useIsScrolled();
+	const { isScrolled } = useIsScrolled();
 	const [ isFolded, setIsFolded ] = useState(
 		document.body.classList.contains( false )
 	);

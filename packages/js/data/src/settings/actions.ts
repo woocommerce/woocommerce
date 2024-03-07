@@ -131,6 +131,8 @@ export function* updateAndPersistSettingsForGroup(
 	group: string,
 	data: Settings
 ) {
+	// Preemptively set requesting to allow for loading UI when optimistically updating settings.
+	yield setIsRequesting( group, true );
 	yield updateSettingsForGroup( group, data );
 	yield* persistSettingsForGroup( group );
 }

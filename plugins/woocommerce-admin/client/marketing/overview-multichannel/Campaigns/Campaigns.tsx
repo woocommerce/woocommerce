@@ -20,6 +20,7 @@ import {
 	TablePlaceholder,
 	Link,
 } from '@woocommerce/components';
+import { isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -40,6 +41,11 @@ const tableHeaders = [
 	{
 		key: 'cost',
 		label: __( 'Cost', 'woocommerce' ),
+		isNumeric: true,
+	},
+	{
+		key: 'sales',
+		label: __( 'Sales', 'woocommerce' ),
 		isNumeric: true,
 	},
 ];
@@ -138,7 +144,16 @@ export const Campaigns = () => {
 									<FlexBlock>
 										<Flex direction="column" gap={ 1 }>
 											<FlexItem className="woocommerce-marketing-campaigns-card__campaign-title">
-												<Link href={ el.manageUrl }>
+												<Link
+													type={
+														isWCAdmin(
+															el.manageUrl
+														)
+															? 'wc-admin'
+															: 'external'
+													}
+													href={ el.manageUrl }
+												>
 													{ el.title }
 												</Link>
 											</FlexItem>
@@ -153,6 +168,7 @@ export const Campaigns = () => {
 							),
 						},
 						{ display: el.cost },
+						{ display: el.sales },
 					];
 				} ) }
 			/>

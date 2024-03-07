@@ -1,0 +1,71 @@
+# Editors
+project.xml
+project.properties
+/nbproject/private/
+.buildpath
+.project
+.settings*
+.idea
+.vscode
+!.vscode/extensions.json
+!.vscode/storybook.code-snippets
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
+
+# Grunt
+/node_modules/
+none
+
+# Sass
+.sass-cache/
+
+# OS X metadata
+.DS_Store
+
+# Windows junk
+Thumbs.db
+
+# ApiGen
+/wc-apidocs/
+
+# Behat/CLI Tests
+tests/cli/installer
+tests/cli/composer.phar
+tests/cli/composer.lock
+tests/cli/composer.json
+tests/cli/vendor
+
+# Unit tests
+/tmp
+/tests/bin/tmp
+/reports
+
+# E2E tests
+/tests/e2e-tests/config/local-*.json
+**/e2e/test-results/
+**/e2e/artifacts/
+/artifacts/
+/playwright-report/
+**/e2e/.auth
+**/e2e/bin/themes/*.zip
+**/e2e/utils/performance/reports/
+
+# Logs
+/logs
+
+# Composer
+/vendor/
+
+# Built files
+/build/
+bin/languages
+bin/eslint-plugin-woocommerce/node_modules/
+woocommerce-gutenberg-products-block.zip
+storybook-static/
+blocks.ini
+/wp-content/
+/.wp-env.override.json
+/eslint_report.json
+/storybook/dist
+.phpunit.result.cache

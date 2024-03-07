@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow --re-migrate to work without --verbose in HPOS CLI verification tool.

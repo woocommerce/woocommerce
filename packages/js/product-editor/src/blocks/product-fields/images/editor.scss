@@ -1,0 +1,33 @@
+@import "./place-holder/style.scss";
+
+.wp-block-woocommerce-product-images-field {
+	.woocommerce-sortable {
+		margin-top: 0;
+		padding: 0;
+	}
+
+	&.has-images {
+		.woocommerce-image-gallery {
+			margin-top: $gap-largest;
+		}
+	}
+
+	&:not(.has-images) {
+		.woocommerce-sortable {
+			display: none;
+		}
+	}
+}
+
+.woocommerce-product-form__media-uploader {
+	.woocommerce-media-uploader {
+		.components-drop-zone {
+			// This height cannot be higher than this, otherwise it will invade the area from the block below.
+			min-height: 84px;
+		}
+
+		&__label {
+			display: none;
+		}
+	}
+}

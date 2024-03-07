@@ -2,6 +2,7 @@ declare global {
 	interface Window {
 		wcSettings: {
 			variationTitleAttributesSeparator?: string;
+			countries: Record< string, string >;
 		};
 	}
 }

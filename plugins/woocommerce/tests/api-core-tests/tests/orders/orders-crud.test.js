@@ -1,20 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { order } = require( '../../data' );
 const { API_BASE_URL } = process.env;
-
-const skipTestIfCI = () => {
-	const skipMessage = 'Skipping this test because running on CI';
-	// !FIXME This test fails on CI because of differences in environment.
-	test.skip( () => {
-		const shouldSkip = API_BASE_URL != undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
+const shouldSkip = API_BASE_URL != undefined;
 
 /**
  * Billing properties to update.
@@ -77,7 +64,7 @@ const simpleProduct = {
  * @group orders
  *
  */
-test.describe( 'Orders API tests: CRUD', () => {
+test.describe.serial( 'Orders API tests: CRUD', () => {
 	let orderId;
 
 	test.describe( 'Create an order', () => {
@@ -245,8 +232,6 @@ test.describe( 'Orders API tests: CRUD', () => {
 		} );
 	} );
 
-	skipTestIfCI();
-
 	test.describe( 'Update an order', () => {
 		test.beforeAll( async ( { request } ) => {
 			// Create the product and save its id
@@ -269,10 +254,19 @@ test.describe( 'Orders API tests: CRUD', () => {
 			);
 		} );
 
+		const delay = ( delayInms ) => {
+			return new Promise( ( resolve ) =>
+				setTimeout( resolve, delayInms )
+			);
+		};
+
 		for ( const expectedOrderStatus of statusesDataTable ) {
 			test( `can update status of an order to ${ expectedOrderStatus }`, async ( {
 				request,
 			} ) => {
+				if ( shouldSkip ) {
+					await delay( 1000 ); // if this runs too fast on an external host, it fails
+				}
 				const requestPayload = {
 					status: expectedOrderStatus,
 				};
@@ -368,8 +362,6 @@ test.describe( 'Orders API tests: CRUD', () => {
 			expect( responseJSON.date_paid_gmt ).not.toBeNull();
 		} );
 	} );
-
-	skipTestIfCI();
 
 	test.describe( 'Delete an order', () => {
 		test( 'can permanently delete an order', async ( { request } ) => {

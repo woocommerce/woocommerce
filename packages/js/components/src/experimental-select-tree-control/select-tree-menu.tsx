@@ -104,6 +104,8 @@ export const SelectTreeMenu = ( {
 						}
 					) }
 					position={ position }
+					flip={ false }
+					resize={ false }
 					animate={ false }
 					onFocusOutside={ ( event ) => {
 						if ( isEventOutside( event ) ) {
@@ -124,7 +126,6 @@ export const SelectTreeMenu = ( {
 							) : (
 								<Tree
 									{ ...props }
-									id={ `${ props.id }-menu` }
 									ref={ ref }
 									items={ items }
 									onTreeBlur={ onClose }
