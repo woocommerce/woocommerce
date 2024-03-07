@@ -291,7 +291,7 @@ jobs:
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     test-wp-latest-1:
-        name: Test against WP Latest-1 ${{ matrix.shard.name }}
+        name: API and E2E against WP Latest-1 ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         env:
@@ -459,7 +459,7 @@ jobs:
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     test-php-versions:
-        name: Test against PHP ${{ matrix.php_version }} ${{ matrix.shard.name }}
+        name: API and E2E against PHP ${{ matrix.php_version }} ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         strategy:
@@ -622,7 +622,7 @@ jobs:
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     test-plugins:
-        name: With ${{ matrix.plugin }}
+        name: E2E With ${{ matrix.plugin }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         env:
