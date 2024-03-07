@@ -27,6 +27,7 @@ const SiteVisibility = ( {
 	woocommerce_lys_setting_store_pages_only,
 	woocommerce_lys_setting_private_link,
 	isLoading,
+	placeholder = false,
 } ) => {
 	const [ comingSoon, setComingSoon ] = useState(
 		woocommerce_lys_setting_coming_soon
@@ -49,11 +50,21 @@ const SiteVisibility = ( {
 	] );
 
 	if ( isLoading ) {
-		return null;
+		return (
+			<SiteVisibility
+				woocommerce_lys_setting_coming_soon={ 'yes' }
+				isLoading={ false }
+				placeholder={ true }
+			/>
+		);
 	}
 
 	return (
-		<div className="site-visibility-settings-slotfill">
+		<div
+			className={ classNames( 'site-visibility-settings-slotfill', {
+				placeholder,
+			} ) }
+		>
 			<input
 				type="hidden"
 				value={ comingSoon }
@@ -184,11 +195,16 @@ const SiteVisibilityComponent = compose(
 			woocommerce_lys_setting_private_link: getOption(
 				'woocommerce_lys_setting_private_link'
 			),
-			isLoading: ! hasFinishedResolution( 'getOption', [
-				'woocommerce_lys_setting_coming_soon',
-				'woocommerce_lys_setting_store_pages_only',
-				'woocommerce_lys_setting_private_link',
-			] ),
+			isLoading:
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_lys_setting_coming_soon',
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_lys_setting_store_pages_only',
+				] ) ||
+				! hasFinishedResolution( 'getOption', [
+					'woocommerce_lys_setting_private_link',
+				] ),
 		};
 	} )
 )( SiteVisibility );

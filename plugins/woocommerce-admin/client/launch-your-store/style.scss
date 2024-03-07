@@ -3,6 +3,10 @@
 	font-weight: 400;
 	color: #1E1E1E;
 
+	&.placeholder {
+		opacity: 0.3;
+	}
+
 	.components-form-toggle {
 		.components-form-toggle__input:focus+.components-form-toggle__track {
 			box-shadow: none;
@@ -39,6 +43,7 @@
 		font-size: inherit;
 		font-weight: inherit;
 		color: inherit;
+		margin-bottom: 24px;
 	}
 
 	.components-radio-control__input[type=radio]:focus {
@@ -60,6 +65,12 @@
 			.components-toggle-control {
 				.components-h-stack {
 					align-items: baseline;
+				}
+			}
+
+			.components-base-control__field {
+				p {
+					margin-top: 6px;
 				}
 			}
 		}
