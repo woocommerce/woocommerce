@@ -573,8 +573,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		if ( Features::is_enabled( 'product-custom-fields' ) ) {
 			$organization_group->add_section(
 				array(
-					'id'         => 'product-custom-fields-wrapper-section',
-					'order'      => 30,
+					'id'    => 'product-custom-fields-wrapper-section',
+					'order' => 30,
 				)
 			)->add_block(
 				array(
