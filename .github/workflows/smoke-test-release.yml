@@ -333,12 +333,11 @@ jobs:
 
             - name: Run API tests
               id: run-api-composite-action
-              uses: ./.github/actions/tests/run-api-tests
-              with:
-                  report-name: ${{ env.API_WP_LATEST_X_ARTIFACT }}-${{ matrix.shard.number }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -368,6 +367,12 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
+                    
+            - name: Reset WP Env
+              working-directory: plugins/woocommerce
+              run: pnpm wp-env clean
+              env:
+                  WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
             - name: Run E2E tests
               timeout-minutes: 60
@@ -489,12 +494,11 @@ jobs:
 
             - name: Run API tests
               id: run-api-composite-action
-              uses: ./.github/actions/tests/run-api-tests
-              with:
-                  report-name: ${{ env.API_ARTIFACT }}-${{ matrix.shard.number }}
               env:
                   ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
@@ -524,6 +528,12 @@ jobs:
                     -f env_description="${{ env.ENV_DESCRIPTION }}" \
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
+                    
+            - name: Reset WP Env
+              working-directory: plugins/woocommerce
+              run: pnpm wp-env clean
+              env:
+                  WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
 
             - name: Run E2E tests
               timeout-minutes: 60
@@ -611,6 +621,12 @@ jobs:
                     - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
                       env_description: 'gutenberg-nightly'
+                shard:
+                    [
+                        { number: 1, name: 1/3 },
+                        { number: 2, name: 2/3 },
+                        { number: 3, name: 3/3 },
+                    ]
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -653,13 +669,15 @@ jobs:
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
 
-            - name: Run the rest of E2E tests
-              id: run-e2e-composite-action
+            - name: Run E2E tests
               timeout-minutes: 60
-              uses: ./.github/actions/tests/run-e2e-tests
-              with:
-                  playwright-config: ignore-plugin-tests.playwright.config.js
-                  report-name: ${{ env.ARTIFACT_NAME }}
+              id: run-e2e-composite-action
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
               env:
                   E2E_MAX_FAILURES: 15
 
