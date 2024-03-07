@@ -15,6 +15,20 @@ final class QueryFilters {
 	 */
 	public function init() {
 		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
+		add_filter( 'query_vars', function( $query_vars ) {
+			$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ), 'public' => true ) );
+			$product_taxonomies = array_filter(
+				$product_taxonomies,
+				function( $item ) {
+					// We can use better check to filter product attribute out. This is just for demo.
+					return strpos( $item, 'pa_' ) !== 0;
+				}
+			);
+			foreach ($product_taxonomies as $taxonomy ) {
+				$query_vars[] = "filter_{$taxonomy}";
+			}
+			return $query_vars;
+		} );
 		add_filter( 'woocommerce_product_query_tax_query', function( $tax_query ) {
 			$chosen_terms = array();
 			if ( ! empty( $_GET ) ) {
@@ -45,7 +59,7 @@ final class QueryFilters {
 					'field'            => 'slug',
 					'terms'            => $data['terms'],
 					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
-					'include_children' => true,
+					'include_children' => false,
 				);
 			}
 			$tax_query[] = $_tax_query;
