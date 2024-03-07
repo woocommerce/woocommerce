@@ -273,6 +273,16 @@ jobs:
 
             - run: ls -lah ${{steps.download.outputs.download-path}}
 
+            - name: Upload release zip to Cloudflare R2 bucket
+              uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+              with:
+                r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+                r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+                r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+                r2-bucket: ${{ secrets.R2_BUCKET }}
+                source-dir: ${{ steps.download.outputs.download-path }}
+                destination-dir: ./monthly/
+
             - name: Send release zip to Slack
               id: send-file-slack
               run : |
@@ -317,6 +327,16 @@ jobs:
                   path: download
 
             - run: ls -lah ${{steps.download.outputs.download-path}}
+
+            - name: Upload release zip to Cloudflare R2 bucket
+              uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+              with:
+                r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+                r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+                r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+                r2-bucket: ${{ secrets.R2_BUCKET }}
+                source-dir: ${{ steps.download.outputs.download-path }}
+                destination-dir: ./accelerated/
 
             - name: Send release zip to Slack
               id: send-file-slack
