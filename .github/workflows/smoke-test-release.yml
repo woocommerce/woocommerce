@@ -366,6 +366,14 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js --shard ${{ matrix.shard.name }}
 
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
@@ -530,6 +538,14 @@ jobs:
                   ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
