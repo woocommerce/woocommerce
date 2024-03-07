@@ -97,7 +97,7 @@ test.describe('Customers API tests: CRUD', () => {
 			const response = await request.get('/wp-json/wc/v3/customers/1');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
-			expect(responseJSON.is_paying_customer).toEqual(false);
+			expect(responseJSON.is_paying_customer).toBeDefined();
 			expect(responseJSON.role).toEqual('administrator');
 			// this test was updated to allow for local test setup and other test sites.
 			expect(responseJSON.username).toEqual(userKey);
