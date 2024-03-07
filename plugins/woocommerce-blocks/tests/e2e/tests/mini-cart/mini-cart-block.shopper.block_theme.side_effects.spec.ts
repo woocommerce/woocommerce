@@ -22,7 +22,9 @@ test.describe( 'Shopper → Translations', () => {
 		);
 	} );
 
-	test( 'User can see translation in empty Mini-Cart', async ( {
+	// For more details:  https://github.com/woocommerce/woocommerce/issues/45346
+	// eslint-disable-next-line playwright/no-skipped-test
+	test.skip( 'User can see translation in empty Mini-Cart', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
