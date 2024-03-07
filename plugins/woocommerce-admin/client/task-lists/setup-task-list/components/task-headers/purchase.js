@@ -48,10 +48,6 @@ const PurchaseHeader = ( { task } ) => {
 				>
 					{ __( 'Continue', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ task.time }</span>
-				</p>
 			</div>
 			{ cartModalOpen && (
 				<CartModal

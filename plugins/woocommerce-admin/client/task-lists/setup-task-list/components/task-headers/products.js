@@ -7,10 +7,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
+import { isImportProduct } from '~/task-lists/fills/utils';
 
 const ProductsHeader = ( { task, goToTask } ) => {
+	const isImportProductHeader = isImportProduct();
 	return (
 		<div className="woocommerce-task-header__contents-container">
 			<img
@@ -22,7 +23,11 @@ const ProductsHeader = ( { task, goToTask } ) => {
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'List your products', 'woocommerce' ) }</h1>
+				<h1>
+					{ isImportProductHeader
+						? __( 'Import your products', 'woocommerce' )
+						: __( 'List your products', 'woocommerce' ) }
+				</h1>
 				<p>
 					{ __(
 						'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store. ',
@@ -34,12 +39,10 @@ const ProductsHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Add products', 'woocommerce' ) }
+					{ isImportProductHeader
+						? __( 'Import products', 'woocommerce' )
+						: __( 'Add products', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ __( '2 minutes', 'woocommerce' ) }</span>
-				</p>
 			</div>
 		</div>
 	);

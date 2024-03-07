@@ -39,10 +39,6 @@ const AppearanceHeader = ( { task } ) => {
 				>
 					{ taskCta }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ taskTime }</span>
-				</p>
 			</div>
 		</div>
 	);

@@ -33,10 +33,6 @@ const MarketingHeader = ( { task, goToTask } ) => {
 				>
 					{ __( 'Grow your business', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ task.time }</span>
-				</p>
 			</div>
 		</div>
 	);

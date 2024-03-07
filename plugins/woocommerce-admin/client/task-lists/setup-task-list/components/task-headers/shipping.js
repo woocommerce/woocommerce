@@ -35,10 +35,6 @@ const ShippingHeader = ( { task, goToTask } ) => {
 				>
 					{ __( 'Start shipping', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ task.time }</span>
-				</p>
 			</div>
 		</div>
 	);

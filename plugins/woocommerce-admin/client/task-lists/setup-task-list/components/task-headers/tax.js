@@ -33,10 +33,6 @@ const TaxHeader = ( { task, goToTask } ) => {
 				>
 					{ __( 'Collect sales tax', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ task.time }</span>
-				</p>
 			</div>
 		</div>
 	);
