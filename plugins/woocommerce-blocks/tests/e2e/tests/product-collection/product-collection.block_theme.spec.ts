@@ -421,6 +421,7 @@ test.describe( 'Product Collection', () => {
 				).not.toBeChecked();
 			} );
 		} );
+	} );
 
 	test.describe( 'Toolbar settings', () => {
 		test.beforeEach( async ( { pageObject } ) => {
