@@ -21,7 +21,16 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Translations', () => {
 	test.beforeAll( async () => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp language core activate nl_NL`
+			`npm run wp-env run tests-cli -- wp language core install nl_NL`
+		);
+		await cli(
+			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
+		);
+		await cli(
+			`npm run wp-env run tests-cli -- wp language plugin install woocommerce nl_NL`
+		);
+		await cli(
+			`npm run wp-env run tests-cli -- wp language plugin update woocommerce`
 		);
 	} );
 
