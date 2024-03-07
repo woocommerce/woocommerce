@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading( $paid = false ) {
-			return __( 'Order #{order_number}', 'woocommerce' );
+			return __( 'Details for order #{order_number}', 'woocommerce' );
 		}
 
 		/**
