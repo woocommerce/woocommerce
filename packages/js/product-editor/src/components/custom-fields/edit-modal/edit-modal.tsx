@@ -29,16 +29,21 @@ export function EditModal( {
 	onCancel,
 	...props
 }: EditModalProps ) {
-	const [ value, setValue ] = useState< Metadata< string > >( initialValue );
+	const [ customField, setCustomField ] =
+		useState< Metadata< string > >( initialValue );
 	const [ validationError, setValidationError ] = useState< string >();
 	const nameTextRef = useRef< HTMLInputElement >( null );
 
 	function renderTitle() {
-		return sprintf( __( 'Edit %s', 'woocommerce' ), value.key );
+		return sprintf(
+			/* translators: %s: the name of the custom field */
+			__( 'Edit %s', 'woocommerce' ),
+			customField.key
+		);
 	}
 
 	function handleNameChange( key: string ) {
-		setValue( ( current ) => ( { ...current, key } ) );
+		setCustomField( ( current ) => ( { ...current, key } ) );
 	}
 
 	function handleNameBlur( event: FocusEvent< HTMLInputElement > ) {
@@ -47,18 +52,18 @@ export function EditModal( {
 	}
 
 	function handleValueChange( value: string ) {
-		setValue( ( current ) => ( { ...current, value } ) );
+		setCustomField( ( current ) => ( { ...current, value } ) );
 	}
 
 	function handleUpdateButtonClick() {
-		const error = validateName( value.key );
+		const error = validateName( customField.key );
 		if ( error ) {
 			setValidationError( error );
 			nameTextRef.current?.focus();
 			return;
 		}
 
-		onUpdate( value );
+		onUpdate( customField );
 	}
 
 	return (
@@ -76,14 +81,14 @@ export function EditModal( {
 				ref={ nameTextRef }
 				label={ __( 'Name', 'woocommerce' ) }
 				error={ validationError }
-				value={ value.key }
+				value={ customField.key }
 				onChange={ handleNameChange }
 				onBlur={ handleNameBlur }
 			/>
 
 			<TextControl
 				label={ __( 'Value', 'woocommerce' ) }
-				value={ value.value }
+				value={ customField.value }
 				onChange={ handleValueChange }
 			/>
 
