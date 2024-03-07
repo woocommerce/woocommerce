@@ -330,6 +330,10 @@ jobs:
               run: unzip -d plugins -o ${{ env.ZIP_PATH }}
               env:
                   ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
+                  
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
 
             - name: Run API tests
               id: run-api-composite-action
@@ -491,6 +495,10 @@ jobs:
               run: unzip -d plugins -o ${{ env.ZIP_PATH }}
               env:
                   ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
+                  
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
 
             - name: Run API tests
               id: run-api-composite-action
