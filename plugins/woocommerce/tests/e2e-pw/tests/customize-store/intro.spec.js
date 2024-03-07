@@ -92,4 +92,17 @@ test.describe('Store owner can view the Intro page', () => {
 			page.locator( 'text=Looking to design your store using AI?' )
 		).toBeVisible();
 	} );
+
+	test.only( 'it shows the no AI banner on Core when the task is not completed', async ( {
+		page,
+	} ) => {
+		await page.goto( ASSEMBLER_HUB_URL );
+		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
+		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
+		await expect(
+			page.locator(
+				'text=Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.'
+			)
+		).toBeVisible();
+	} );
 });
