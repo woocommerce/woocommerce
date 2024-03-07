@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -243,6 +244,9 @@ class WC_Install {
 		'8.6.0' => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',
 		),
+		'8.7.0' => array(
+			'wc_update_870_prevent_listing_of_transient_files_directory',
+		),
 	);
 
 	/**
@@ -456,6 +460,11 @@ class WC_Install {
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
 
+		// Force a flush of rewrite rules even if the corresponding hook isn't initialized yet.
+		if ( ! has_action( 'woocommerce_flush_rewrite_rules' ) ) {
+			flush_rewrite_rules();
+		}
+
 		/**
 		 * Flush the rewrite rules after install or update.
 		 *
@@ -557,6 +566,7 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
+		TransientFilesEngine::add_endpoint();
 	}
 
 	/**
@@ -782,6 +792,10 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
+		// WordPress sets fresh_site to 0 after a page gets published.
+		// Prevent fresh_site option from being set to 0 so that we can use it for further customizations.
+		remove_action( 'publish_page', '_delete_option_fresh_site', 0 );
+
 		// Set the locale to the store locale to ensure pages are created in the correct language.
 		wc_switch_to_site_locale();
 
@@ -1863,16 +1877,6 @@ $hpos_table_schema;
 		$files = array(
 			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
-				'file'    => 'index.html',
-				'content' => '',
-			),
-			array(
-				'base'    => WC_LOG_DIR,
-				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			),
-			array(
-				'base'    => WC_LOG_DIR,
 				'file'    => 'index.html',
 				'content' => '',
 			),

@@ -2,10 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, Fragment } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { useEntityProp } from '@wordpress/core-data';
+import { closeSmall } from '@wordpress/icons';
+import classnames from 'classnames';
+import type { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -14,48 +18,121 @@ import { PublishButton } from '../header/publish-button';
 import { PrepublishPanelProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
+import { VisibilitySection } from './visibility-section';
+import { ScheduleSection } from './schedule-section';
+import { ShowPrepublishChecksSection } from './show-prepublish-checks-section';
+import { PostPublishSection, PostPublishTitle } from './post-publish';
 
 export function PrepublishPanel( {
-	productId,
 	productType = 'product',
-	title = __( 'Are you ready to add this product?', 'woocommerce' ),
+	title = __( 'Are you ready to publish this product?', 'woocommerce' ),
 	description = __(
 		'Double-check your settings before sharing this product with customers.',
 		'woocommerce'
 	),
 }: PrepublishPanelProps ) {
-	const lastPersistedProduct = useSelect(
-		( select ) => {
-			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', productType, productId );
-		},
-		[ productType, productId ]
+	const [ editedDate, , date ] = useEntityProp< string >(
+		'postType',
+		productType,
+		'date_created'
 	);
+
+	const [ productStatus, , prevStatus ] = useEntityProp<
+		Product[ 'status' ]
+	>( 'postType', productType, 'status' );
 
 	const { closePrepublishPanel } = useDispatch( productEditorUiStore );
 
-	return (
-		<div className="woocommerce-product-publish-panel">
-			<div className="woocommerce-product-publish-panel__header">
-				<PublishButton
-					productType={ productType }
-					productStatus={ lastPersistedProduct?.status }
+	const isPublishedOrScheduled =
+		productType === 'product' && prevStatus !== 'future'
+			? productStatus === 'publish'
+			: true;
+
+	if ( editedDate !== date ) {
+		title = __( 'Are you ready to schedule this product?', 'woocommerce' );
+		description = __(
+			'Your product will be published at the specified date and time.',
+			'woocommerce'
+		);
+	}
+
+	function getHeaderActions() {
+		if ( isPublishedOrScheduled ) {
+			return (
+				<Button
+					className="woocommerce-publish-panel-close"
+					icon={ closeSmall }
+					label={ __( 'Close panel', 'woocommerce' ) }
+					onClick={ () => {
+						recordEvent( 'product_prepublish_panel', {
+							source: TRACKS_SOURCE,
+							action: 'close',
+						} );
+						closePrepublishPanel();
+					} }
 				/>
+			);
+		}
+		return (
+			<>
+				<PublishButton productType={ productType } />
 				<Button
 					variant={ 'secondary' }
 					onClick={ () => {
-						recordEvent( 'product_prepublish_cancel', {
+						recordEvent( 'product_prepublish_panel', {
 							source: TRACKS_SOURCE,
+							action: 'cancel',
 						} );
 						closePrepublishPanel();
 					} }
 				>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
-			</div>
-			<div className="woocommerce-product-publish-panel__title">
+			</>
+		);
+	}
+
+	function getPanelTitle() {
+		if ( isPublishedOrScheduled ) {
+			return <PostPublishTitle productType={ productType } />;
+		}
+		return (
+			<>
 				<h4>{ title }</h4>
 				<span>{ description }</span>
+			</>
+		);
+	}
+
+	function getPanelSections() {
+		if ( isPublishedOrScheduled ) {
+			return <PostPublishSection postType={ productType } />;
+		}
+		return (
+			<>
+				<VisibilitySection productType={ productType } />
+				<ScheduleSection postType={ productType } />
+			</>
+		);
+	}
+
+	return (
+		<div
+			className={ classnames( 'woocommerce-product-publish-panel', {
+				'is-published': isPublishedOrScheduled,
+			} ) }
+		>
+			<div className="woocommerce-product-publish-panel__header">
+				{ getHeaderActions() }
+			</div>
+			<div className="woocommerce-product-publish-panel__title">
+				{ getPanelTitle() }
+			</div>
+			<div className="woocommerce-product-publish-panel__content">
+				{ getPanelSections() }
+			</div>
+			<div className="woocommerce-product-publish-panel__footer">
+				<ShowPrepublishChecksSection />
 			</div>
 		</div>
 	);

@@ -279,7 +279,7 @@ final class AssetsController {
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( \Automattic\WooCommerce\Blocks\Package::get_path() . $file ) ) {
 			return filemtime( \Automattic\WooCommerce\Blocks\Package::get_path() . $file );
 		}
-		return \Automattic\WooCommerce\Blocks\Package::get_version();
+		return $this->api->wc_version;
 	}
 
 	/**

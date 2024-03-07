@@ -127,9 +127,7 @@ class ProductCollectionPage {
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost( { legacyCanvas: true } );
-		await this.editor.insertBlock( {
-			name: this.BLOCK_SLUG,
-		} );
+		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
 		await this.editor.openDocumentSettingsSidebar();
@@ -142,23 +140,24 @@ class ProductCollectionPage {
 	} ) {
 		await this.admin.createNewPost();
 		await this.editorUtils.closeWelcomeGuideModal();
-		await this.editor.insertBlock( {
-			name: this.BLOCK_SLUG,
-		} );
-		await this.chooseCollectionInPost( collection );
+		await this.insertProductCollection();
 
-		// Wait for response with productCollectionQueryContext query parameter.
-		const WP_PRODUCT_ENDPOINT = '/wp/v2/product';
-		const QUERY_CONTEXT_PARAM = 'productCollectionQueryContext';
-		const response = await this.page.waitForResponse(
-			( currentResponse ) =>
-				currentResponse.url().includes( WP_PRODUCT_ENDPOINT ) &&
-				currentResponse.url().includes( QUERY_CONTEXT_PARAM ) &&
-				currentResponse.status() === 200
+		const productResponsePromise = this.page.waitForResponse(
+			( response ) => {
+				return (
+					response.url().includes( '/wp/v2/product' ) &&
+					response
+						.url()
+						.includes( 'productCollectionQueryContext' ) &&
+					response.status() === 200
+				);
+			}
 		);
 
-		const url = new URL( response.url() );
-		return url;
+		await this.chooseCollectionInPost( collection );
+		const productResponse = await productResponsePromise;
+
+		return new URL( productResponse.url() );
 	}
 
 	async publishAndGoToFrontend() {
@@ -192,6 +191,10 @@ class ProductCollectionPage {
 		await this.page.goto( `/shop` );
 	}
 
+	async insertProductCollection() {
+		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+	}
+
 	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
 		await this.templateApiUtils.revertTemplate(
 			'woocommerce/woocommerce//archive-product'
@@ -203,7 +206,7 @@ class ProductCollectionPage {
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
 		await this.editor.canvas.click( 'body' );
-		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
+		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.openDocumentSettingsSidebar();
 		await this.editor.saveSiteEditorEntities();
@@ -553,11 +556,6 @@ class ProductCollectionPage {
 	 */
 	private async insertSingleProductBlock() {
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
-		await this.page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wc/store/v1/products' ) &&
-				response.status() === 200
-		);
 		const singleProductBlock = await this.editorUtils.getBlockByName(
 			'woocommerce/single-product'
 		);

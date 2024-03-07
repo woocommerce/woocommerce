@@ -72,6 +72,9 @@
 "packages/js/onboarding/**/*":
   - team: ghidorah
 
+"packages/js/product-editor/**/*":
+  - team: mothra
+
 "packages/js/tracks/**/*":
   - team: mothra
 
@@ -85,10 +88,14 @@
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: mothra
   - team: ghidorah
-  
+
 "plugins/woocommerce-admin/**/*":
   - team: mothra
   - team: ghidorah
+
+"plugins/woocommerce-blocks/**/*":
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
   - team: vortex
@@ -96,8 +103,8 @@
 "tools/**/*":
   - team: vortex
 
-"**/composer.json":
+'**/composer.json':
   - team: vortex
 
-"**/package.json":
+'**/package.json':
   - team: vortex
