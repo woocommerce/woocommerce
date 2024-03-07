@@ -78,6 +78,9 @@ export function BlockEditor( {
 		return canUser( 'create', 'media', '' ) !== false;
 	}, [] );
 
+	const { closeModalEditor, closePrepublishPanel } =
+		useDispatch( productEditorUiStore );
+
 	/**
 	 * Fire wp-pin-menu event once to trigger the pinning of the menu.
 	 * That can be necessary since wpwrap's height wasn't being recalculated after the skeleton
@@ -156,6 +159,8 @@ export function BlockEditor( {
 			return;
 		}
 
+		closePrepublishPanel();
+
 		const blockInstances = synchronizeBlocksWithTemplate(
 			[],
 			layoutTemplate.blockTemplates
@@ -184,8 +189,6 @@ export function BlockEditor( {
 	const isModalEditorOpen = useSelect( ( select ) => {
 		return select( productEditorUiStore ).isModalEditorOpen();
 	}, [] );
-
-	const { closeModalEditor } = useDispatch( productEditorUiStore );
 
 	if ( isModalEditorOpen ) {
 		return (
