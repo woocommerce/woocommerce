@@ -764,13 +764,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
-					case 'div':
+					case 'slotfill_placeholder':
 						?>
 						<div
 							id="<?php echo esc_attr( $value['id'] ); ?>"
 							class="<?php echo esc_attr( $value['class'] ); ?>"
 						>
-							<?php echo esc_html( $value['value'] ); ?>
 						</div>
 						<?php
 						break;
