@@ -267,6 +267,7 @@ class ProductCollectionPage {
 			name: 'Order by',
 		} );
 		await orderByComboBox.selectOption( orderBy );
+		await this.page.waitForSelector( SELECTORS.product );
 		await this.refreshLocators( 'editor' );
 	}
 
