@@ -15,7 +15,11 @@ import { EmptyState } from './empty-state';
 import type { Metadata } from '../../types';
 import type { CustomFieldsProps } from './types';
 
-export function CustomFields( { className, ...props }: CustomFieldsProps ) {
+export function CustomFields( {
+	className,
+	renderActionButtonsWrapper = ( buttons ) => buttons,
+	...props
+}: CustomFieldsProps ) {
 	const { customFields, updateCustomField } = useCustomFields();
 	const [ selectedCustomField, setSelectedCustomField ] =
 		useState< Metadata< string > >();
@@ -43,6 +47,12 @@ export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 
 	return (
 		<>
+			{ renderActionButtonsWrapper(
+				<Button variant="secondary">
+					{ __( 'Add new', 'woocommerce' ) }
+				</Button>
+			) }
+
 			<table
 				{ ...props }
 				className={ classNames(
