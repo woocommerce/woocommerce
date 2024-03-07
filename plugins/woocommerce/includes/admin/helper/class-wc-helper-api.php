@@ -116,7 +116,7 @@ class WC_Helper_API {
 			(string) $auth['access_token_secret'],
 			$url,
 			! empty( $args['method'] ) ? $args['method'] : 'GET',
-			$args['body']
+			$args['body'] ?? null
 		);
 
 		if ( empty( $args['headers'] ) ) {
