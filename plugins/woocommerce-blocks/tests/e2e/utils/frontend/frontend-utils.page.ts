@@ -56,6 +56,12 @@ export class FrontendUtils {
 		} );
 	}
 
+	async goToCartShortcode() {
+		await this.page.goto( '/cart-shortcode', {
+			waitUntil: 'commit',
+		} );
+	}
+
 	async goToMiniCart() {
 		await this.page.goto( '/mini-cart', {
 			waitUntil: 'domcontentloaded',
@@ -66,6 +72,15 @@ export class FrontendUtils {
 		await this.page.goto( '/shop', {
 			waitUntil: 'commit',
 		} );
+	}
+
+	async logout() {
+		await this.page.goto( '/my-account', {
+			waitUntil: 'domcontentloaded',
+		} );
+		await this.page.click(
+			'.woocommerce-MyAccount-navigation-link--customer-logout a'
+		);
 	}
 
 	async emptyCart() {

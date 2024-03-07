@@ -2786,6 +2786,17 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#order_custom #postcustomstuff {
+	.add-custom-field {
+		padding: 12px 8px 8px;
+	}
+
+	.submit {
+		border: 0 none;
+		float: none;
+	}
+}
+
 #side-sortables #woocommerce-order-downloads {
 	.buttons,
 	.select2-container {

@@ -40,7 +40,6 @@ export function SubsectionBlockEdit( {
 					description={ description }
 					sectionTagName={ SubsectionTagName }
 					title={ title }
-					type="subsection"
 				/>
 			) }
 

@@ -135,4 +135,45 @@ class WC_Admin_Tests_Admin_Helper extends WP_UnitTestCase {
 			'2 month old store not within 6+ months?'  => array( 2 * MONTH_IN_SECONDS, 'month-6+', false ),
 		);
 	}
+
+	/**
+	 * Test is_fresh_site with registered date.
+	 */
+	public function test_is_fresh_site_user_registered_less_than_a_month() {
+		update_option( 'fresh_site', '1' );
+		$user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		wp_set_current_user( $user );
+		$this->assertTrue( WCAdminHelper::is_site_fresh() );
+
+		// Update registered date to January.
+		// The function should return false.
+		wp_update_user(
+			array(
+				'ID'              => $user,
+				'user_registered' => '2024-01-27 20:56:29',
+			)
+		);
+		$this->assertFalse( WCAdminHelper::is_site_fresh() );
+	}
+
+	/**
+	 * Test is_fresh_site with fresh_site option.
+	 */
+	public function test_is_fresh_site_fresh_site_option_must_be_1() {
+		update_option( 'fresh_site', '0' );
+		$user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		wp_set_current_user( $user );
+		$this->assertFalse( WCAdminHelper::is_site_fresh() );
+
+		update_option( 'fresh_site', '1' );
+		$this->assertTrue( WCAdminHelper::is_site_fresh() );
+	}
 }

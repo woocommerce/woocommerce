@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+[CYS] Fix the intro path when exiting the assembler.
