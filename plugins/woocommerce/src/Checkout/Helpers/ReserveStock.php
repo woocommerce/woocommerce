@@ -68,7 +68,19 @@ final class ReserveStock {
 	public function reserve_stock_for_order( $order, $minutes = 0 ) {
 		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
 
-		if ( ! $minutes || ! $this->is_enabled() ) {
+		/**
+		 * Filters whether an order should allow stock to be reserved.
+		 *
+		 * This hook allows an order to be included/excluded from stock reservation, useful if a third party developer wants to exclude an order from having any stock reserved if the order meets certain criteria.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param bool $reserve_stock_for_order If true, products in the order will have stock reserved if available. Default: true.
+		 * @param \WC_Order $order Order object.
+		 */
+		$reserve_stock_for_order = apply_filters( 'woocommerce_reserve_stock_for_order', true, $order );
+
+		if ( ! $minutes || ! $reserve_stock_for_order || ! $this->is_enabled() ) {
 			return;
 		}
 
