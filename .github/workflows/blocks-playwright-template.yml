@@ -9,29 +9,24 @@ on:
             config:
                 required: true
                 type: string
-            results-path:
+            results-folder:
                 required: true
                 type: string
             shard-index:
                 required: true
-                type: array
+                type: number
             shard-total:
                 required: true
                 type: number
 
 jobs:
     e2e:
-        name: ${{ inputs.name }} [${{ matrix.shard-index }}/${{ matrix.shard-total }}]
+        name: ${{ inputs.name }} [${{ inputs.shard-index }}/${{ inputs.shard-total }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: plugins/woocommerce-blocks
-        strategy:
-            fail-fast: false
-            matrix:
-                shard-index: ${{ inputs.shard-index }}
-                shard-total: ${{ inputs.shard-total }}
         steps:
             - uses: actions/checkout@v3
 
@@ -49,11 +44,11 @@ jobs:
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
-              run: pnpm playwright test --config=tests/e2e/${{ inputs.config }} --shard ${{ matrix.shard-index }}/${{ matrix.shard-total }}
+              run: pnpm playwright test --config=tests/e2e/${{ inputs.config }} --shard ${{ inputs.shard-index }}/${{ inputs.shard-total }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}
               with:
-                  name: playwright-report-${{ inputs.config }}
-                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results${{ inputs.config }}
+                  name: playwright-report-${{ inputs.results-folder }}
+                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/${{ inputs.results-folder }}
                   if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
