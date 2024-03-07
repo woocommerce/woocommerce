@@ -385,19 +385,22 @@ class Init {
 	 * Register user metas.
 	 */
 	public function register_user_metas() {
-		$field = 'metaboxhidden_product';
-
 		register_rest_field(
 			'user',
-			$field,
+			'metaboxhidden_product',
 			array(
-				'get_callback'    => function ( $object ) use ( $field ) {
-					// Get field as single value from post meta.
-					return get_user_meta( $object['id'], $field, true );
+				'get_callback'    => function ( $object, $attr ) {
+					$hidden = get_user_meta( $object['id'], $attr, true );
+
+					if ( is_array( $hidden ) ) {
+						return $hidden;
+					}
+
+					return array( 'postcustom' );
 				},
-				'update_callback' => function ( $value, $object ) use ( $field ) {
+				'update_callback' => function ( $value, $object, $attr ) {
 					// Update the field/meta value.
-					update_user_meta( $object->ID, $field, $value );
+					update_user_meta( $object->ID, $attr, $value );
 				},
 				'schema'          => array(
 					'type'        => 'array',
