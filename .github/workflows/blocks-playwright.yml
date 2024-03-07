@@ -15,7 +15,7 @@ env:
 
 jobs:
     e2e:
-        name: ${{ matrix.config.name }} (${{ matrix.shards.name }})
+        name: ${{ matrix.config.name }} [${{ matrix.shards.name }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
@@ -25,7 +25,7 @@ jobs:
             fail-fast: false
             matrix:
                 config:
-                    - name: Default Theme (Block)
+                    - name: Default (Block) Theme
                       file: playwright.config.ts
                       resultPath: test-results
                     - name: Classic Theme
