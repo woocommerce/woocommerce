@@ -18,9 +18,7 @@ export async function handleConfirm( {
 	const value = window.confirm( message );
 
 	if ( value === null ) {
-		if ( onCancel ) {
-			onCancel();
-		}
+		onCancel?.();
 		return;
 	}
 
