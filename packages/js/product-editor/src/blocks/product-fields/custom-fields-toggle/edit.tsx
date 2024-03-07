@@ -3,12 +3,12 @@
  */
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
+import { Spinner, ToggleControl } from '@wordpress/components';
+import { createElement, useMemo } from '@wordpress/element';
 import {
 	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
-import { Spinner, ToggleControl } from '@wordpress/components';
-import { createElement, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies

@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import { useCustomFields } from '../../hooks/use-custom-fields';
 import { EmptyState } from './empty-state';
 import type { CustomFieldsProps } from './types';
 
-export function CustomFields( {}: CustomFieldsProps ) {
+export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 	const { customFields } = useCustomFields();
 
 	if ( customFields.length === 0 ) {
@@ -19,7 +20,13 @@ export function CustomFields( {}: CustomFieldsProps ) {
 	}
 
 	return (
-		<table className="woocommerce-product-custom-fields__table">
+		<table
+			{ ...props }
+			className={ classNames(
+				'woocommerce-product-custom-fields__table',
+				className
+			) }
+		>
 			<thead>
 				<tr className="woocommerce-product-custom-fields__table-row">
 					<th>{ __( 'Name', 'woocommerce' ) }</th>
