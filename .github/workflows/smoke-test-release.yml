@@ -212,7 +212,7 @@ jobs:
     merge-e2e-wp-latest:
         name: Merge E2E reports for WP Latest
         if: always()
-        needs: [e2e-wp-latest]
+        needs: [e2e-wp-latest, validate-version]
         runs-on: ubuntu-latest
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
@@ -652,12 +652,6 @@ jobs:
                     - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
                       env_description: 'gutenberg-nightly'
-                shard:
-                    [
-                        { number: 1, name: 1/3 },
-                        { number: 2, name: 2/3 },
-                        { number: 3, name: 3/3 },
-                    ]
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -708,7 +702,7 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
               working-directory: plugins/woocommerce
-              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js
 
             - name: Upload Allure artifacts to bucket
               if: |
@@ -760,7 +754,7 @@ jobs:
               failure() && contains( needs.*.result, 'failure' )
             )
         needs:
-            - e2e-wp-latest
+            - merge-e2e-wp-latest
             - validate-version
             - test-php-versions
             - test-plugins
