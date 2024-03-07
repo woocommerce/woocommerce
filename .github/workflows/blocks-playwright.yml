@@ -15,7 +15,7 @@ env:
 
 jobs:
     e2e:
-        name: ${{ matrix.config.name }} [${{ matrix.shards.name }}]
+        name: ${{ matrix.name }} [${{ matrix.shardIndex }}/${{ matrix.shardTotal }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
@@ -24,25 +24,30 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                config:
-                    - name: Default (Block) Theme
-                      file: playwright.config.ts
-                      resultPath: test-results
-                    - name: Classic Theme
-                      file: playwright.classic-theme.config.ts
-                      resultPath: test-results-classic-theme
-                    - name: Side Effects
-                      file: playwright.side-effects.config.ts
-                      resultPath: test-results-side-effects
-                    - name: Block Theme With Templates
-                      file: playwright.block-theme-with-templates.config.ts
-                      resultPath: test-results-block-theme-with-templates
-                shards:
-                    - name: 1/5
-                    - name: 2/5
-                    - name: 3/5
-                    - name: 4/5
-                    - name: 5/5
+                config: [
+                    playwright.config.ts,
+                    playwright.classic-theme.config.ts,
+                    playwright.side-effects.config.ts,
+                    playwright.block-theme-with-templates.config.ts
+                ]
+                include:
+                    - config: playwright.config.ts
+                      name: Default (Block) Theme
+                      shardIndex: [1, 2, 3, 4, 5]
+                      shardTotal: 5
+                    - config: playwright.classic-theme.config.ts
+                      name: Classic Theme
+                      shardIndex: [1, 2, 3, 4]
+                      shardTotal: 4
+                    - config: playwright.side-effects.config.ts
+                      name: Side Effects
+                      shardIndex: [1, 2, 3, 4, 5]
+                      shardTotal: 5
+                    - config: playwright.block-theme-with-templates.config.ts
+                      name: Block Theme With Templates
+                      shardIndex: [1]
+                      shardTotal: 1
+
         steps:
             - uses: actions/checkout@v3
 
@@ -60,7 +65,7 @@ jobs:
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
-              run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.shards.name }}
+              run: pnpm playwright test --config=tests/e2e/${{ matrix.config }} --shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
             - uses: actions/upload-artifact@v3
               if: ${{ failure() }}
