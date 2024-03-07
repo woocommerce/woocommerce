@@ -11,7 +11,6 @@ import { WC_ADMIN_NAMESPACE } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL, getAdminSetting } from '~/utils/admin-settings';
 import sanitizeHTML from '~/lib/sanitize-html';
 

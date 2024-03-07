@@ -10,7 +10,6 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import CartModal from '~/dashboard/components/cart-modal';
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
 const PurchaseHeader = ( { task } ) => {

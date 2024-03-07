@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
 const TaxHeader = ( { task, goToTask } ) => {

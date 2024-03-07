@@ -7,7 +7,6 @@ import { Button } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 import { useAppearanceClick } from '../../../fills/appearance';
 
@@ -17,7 +16,6 @@ const AppearanceHeader = ( { task } ) => {
 	const taskTitle = task.title;
 	const taskDescription = task.content;
 	const taskCta = task.actionLabel;
-	const taskTime = task.time;
 
 	return (
 		<div className="woocommerce-task-header__contents-container">
