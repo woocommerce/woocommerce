@@ -21,7 +21,7 @@ import { deriveWpAdminBackgroundColours } from './utils/derive-wp-admin-backgrou
 import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
-import { registerSiteAvailbilitySlotFill } from './launch-your-store/settings-slotfill';
+import { registerSiteVisibilitySlotFill } from './launch-your-store/settings-slotfill';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
@@ -89,7 +89,7 @@ if ( appRoot ) {
 
 	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
-	registerSiteAvailbilitySlotFill();
+	registerSiteVisibilitySlotFill();
 }
 
 // Render the CustomerEffortScoreTracksContainer only if

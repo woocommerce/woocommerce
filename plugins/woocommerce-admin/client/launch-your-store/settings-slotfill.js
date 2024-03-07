@@ -217,7 +217,7 @@ const SiteVisibilitySlotFill = () => {
 	);
 };
 
-export const registerSiteAvailbilitySlotFill = () => {
+export const registerSiteVisibilitySlotFill = () => {
 	registerPlugin( 'woocommerce-admin-site-visibility-settings-slotfill', {
 		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
