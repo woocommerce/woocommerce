@@ -111,6 +111,10 @@ const blocks = {
 		customDir: 'product-filter/inner-blocks/active-filters',
 		isExperimental: true,
 	},
+	'product-filter-taxonomy': {
+		customDir: 'product-filter/inner-blocks/taxonomy-filter',
+		isExperimental: true,
+	},
 	'order-confirmation-summary': {
 		customDir: 'order-confirmation/summary',
 	},
