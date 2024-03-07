@@ -6,6 +6,9 @@ on:
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
+    # Allow manually triggering the workflow.
+    workflow_dispatch:
+
 
 env:
     FORCE_COLOR: 1
