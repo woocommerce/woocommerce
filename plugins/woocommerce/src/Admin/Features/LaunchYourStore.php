@@ -2,11 +2,19 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+/**
+ * Takes care of Launch Your Store related actions.
+ */
 class LaunchYourStore {
 	public function __construct() {
 		add_action( 'woocommerce_update_options_general', array( $this, 'save_site_visibility_options' ) );
 	}
 
+	/**
+	 * Save values submitted from WooCommerce -> Settings -> General.
+	 *
+	 * @return void
+	 */
 	public function save_site_visibility_options() {
 		$options = array(
 			'woocommerce_lys_setting_coming_soon' => ['yes', 'no'],
