@@ -198,8 +198,6 @@ jobs:
                   E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
               working-directory: plugins/woocommerce
-              with:
-                  report-name: e2e-wp-latest--partial--run-${{ github.run_number }}
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Download 'e2e-update-wc' artifact
