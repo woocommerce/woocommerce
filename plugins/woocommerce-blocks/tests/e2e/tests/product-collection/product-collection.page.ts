@@ -618,7 +618,6 @@ class ProductCollectionPage {
 
 	private async waitForProductsToLoad() {
 		// Wait for the product blocks to be loaded.
-		await this.page.waitForSelector( SELECTORS.product );
 		await this.page.waitForSelector( 'wc-block-product-template__spinner', {
 			state: 'detached',
 		} );
