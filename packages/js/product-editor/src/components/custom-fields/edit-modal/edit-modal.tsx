@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { Button, Modal } from '@wordpress/components';
-import { createElement, useState } from '@wordpress/element';
+import { createElement, useState, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
+import type { FocusEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import classNames from 'classnames';
 import { TextControl } from '../../text-control';
 import type { Metadata } from '../../../types';
 import type { EditModalProps } from './types';
-import { FocusEvent } from 'react';
 
 function validateName( value: string ) {
 	if ( value.startsWith( '_' ) ) {
@@ -31,6 +31,7 @@ export function EditModal( {
 }: EditModalProps ) {
 	const [ value, setValue ] = useState< Metadata< string > >( initialValue );
 	const [ validationError, setValidationError ] = useState< string >();
+	const nameTextRef = useRef< HTMLInputElement >( null );
 
 	function renderTitle() {
 		return sprintf( __( 'Edit %s', 'woocommerce' ), value.key );
@@ -41,7 +42,8 @@ export function EditModal( {
 	}
 
 	function handleNameBlur( event: FocusEvent< HTMLInputElement > ) {
-		setValidationError( validateName( event.target.value ) );
+		const error = validateName( event.target.value );
+		setValidationError( error );
 	}
 
 	function handleValueChange( value: string ) {
@@ -52,6 +54,7 @@ export function EditModal( {
 		const error = validateName( value.key );
 		if ( error ) {
 			setValidationError( error );
+			nameTextRef.current?.focus();
 			return;
 		}
 
@@ -70,6 +73,7 @@ export function EditModal( {
 			) }
 		>
 			<TextControl
+				ref={ nameTextRef }
 				label={ __( 'Name', 'woocommerce' ) }
 				error={ validationError }
 				value={ value.key }
