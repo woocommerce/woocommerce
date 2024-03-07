@@ -1,10 +1,8 @@
 /**
  * External dependencies
  */
-import { Button } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { closeSmall } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -14,16 +12,10 @@ import { EmptyState } from './empty-state';
 import type { CustomFieldsProps } from './types';
 
 export function CustomFields( {}: CustomFieldsProps ) {
-	const { customFields, removeCustomField } = useCustomFields();
+	const { customFields } = useCustomFields();
 
 	if ( customFields.length === 0 ) {
 		return <EmptyState />;
-	}
-
-	function removeButtonClickHandler( key: string ) {
-		return function handleRemoveButtonClick() {
-			removeCustomField( key );
-		};
 	}
 
 	return (
@@ -47,18 +39,7 @@ export function CustomFields( {}: CustomFieldsProps ) {
 						<td className="woocommerce-product-custom-fields__table-datacell">
 							{ customField.value }
 						</td>
-						<td className="woocommerce-product-custom-fields__table-datacell">
-							<Button
-								icon={ closeSmall }
-								aria-label={ __(
-									'Remove custom field',
-									'woocommerce'
-								) }
-								onClick={ removeButtonClickHandler(
-									customField.key
-								) }
-							/>
-						</td>
+						<td className="woocommerce-product-custom-fields__table-datacell"></td>
 					</tr>
 				) ) }
 			</tbody>

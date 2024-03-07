@@ -37,11 +37,5 @@ export function useCustomFields<
 		setMetas( [ ...internalMetas, ...newValue ] );
 	}
 
-	function removeCustomField( key: T[ 'key' ] ) {
-		setCustomFields( ( current ) =>
-			current.filter( ( customField ) => customField.key !== key )
-		);
-	}
-
-	return { customFields, removeCustomField };
+	return { customFields, setCustomFields };
 }
