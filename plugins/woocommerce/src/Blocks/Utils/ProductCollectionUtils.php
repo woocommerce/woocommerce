@@ -12,18 +12,17 @@ class ProductCollectionUtils {
 	/**
 	 * Parse WP Query's global context for the Product Collection block.
 	 *
-	 * The return schema is:
-	 * - type: The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
-	 * - sourceData: The context data.
-	 *
 	 * The sourceData structure depends on the context type as follows:
-	 * - site: []
-	 * - order: ['orderId' => int]
-	 * - cart: ['productIds' => array]
-	 * - archive: ['taxonomy' => string, 'termId' => int]
-	 * - product: ['productId' => int]
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
 	 *
-	 * @return array Parsed context.
+	 * @return array $context {
+	 *     @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *     @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
+	 * }
 	 */
 	public static function parse_global_location_context() {
 		global $wp_query;

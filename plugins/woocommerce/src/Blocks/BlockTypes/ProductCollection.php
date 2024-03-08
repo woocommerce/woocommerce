@@ -47,14 +47,6 @@ class ProductCollection extends AbstractBlock {
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
 	/**
-	 * An array of instance's inner block names.
-	 *
-	 * @var array
-	 */
-	protected $product_collection_inner_blocks_names = array();
-
-
-	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -85,7 +77,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
 		// Provide location context into block's context.
-		add_filter( 'render_block_context', array( $this, 'update_context' ), 11, 3 );
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
 
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
@@ -96,87 +88,56 @@ class ProductCollection extends AbstractBlock {
 
 	/**
 	 * Provides the location context to each inner block of the product collection block.
-	 *
-	 * The context schema is an array with the following data:
-	 * - type: The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
-	 * - sourceData: The context data.
+	 * Hint: Only blocks using the 'query' context will be affected.
 	 *
 	 * The sourceData structure depends on the context type as follows:
-	 * - site: []
-	 * - order: ['orderId' => int]
-	 * - cart: ['productIds' => array]
-	 * - archive: ['taxonomy' => string, 'termId' => int]
-	 * - product: ['productId' => int]
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
+	 *
+	 * @see ProductCollectionUtils::parse_global_location_context()
+	 * 
+	 * @example array(
+	 *   'type'       => 'product',
+	 *   'sourceData' => array( 'productId' => 123 ),
+	 * )
 	 *
 	 * @param array    $context      The block context.
 	 * @param array    $block        The parsed block.
 	 * @param WP_Block $parent_block The parent block.
 	 *
-	 * @return array The block's context including the location context.
+	 * @return array $context {
+	 *     The context including the product collection location context.
+	 *
+	 *     @type array $productCollectionLocation {
+	 *         @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
+	 *     }
+	 * }
 	 */
-	public function update_context( $context, $block, $parent_block ) {
+	public function provide_location_context_for_inner_blocks( $context ) {
 		// Run only on frontend.
-		// This is needed to avoid SSR renders within patterns. @see https://github.com/woocommerce/woocommerce/issues/45181.
+		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
 		if ( is_admin() || \WC()->is_rest_api_request() ) {
 			return $context;
 		}
 
-		if ( 'woocommerce/product-collection' === $block['blockName']
-			&& isset( $block['attrs']['query']['isProductCollectionBlock'] ) ) {
-					$this->product_collection_inner_blocks_names = array_reverse(
-						$this->extract_inner_block_names( $block )
-					);
+		// Target only product collection's inner blocks that use the 'query' context.
+		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
+			return $context;
 		}
 
-		$this->provide_location_context_for_inner_blocks( $block, $context );
+		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+		$context['productCollectionLocation'] = $is_in_single_product ? array(
+			'type'       => 'product',
+			'sourceData' => array(
+				'productId' => absint( $context['postId'] ),
+			),
+		) : $this->get_location_context();
 
 		return $context;
-	}
-
-	/**
-	 * Extract the inner block names for the Product Collection block.
-	 *
-	 * @param array $block The Product Collection block.
-	 * @param array $result Array of inner block names.
-	 *
-	 * @return array Array containing all the inner block names.
-	 */
-	protected function extract_inner_block_names( $block, &$result = array() ) {
-		if ( isset( $block['blockName'] ) ) {
-			$result[] = $block['blockName'];
-		}
-
-		if ( isset( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				$this->extract_inner_block_names( $inner_block, $result );
-			}
-		}
-		return $result;
-	}
-
-	/**
-	 * Add the productCollectionLocation context data into the inner blocks' context.
-	 *
-	 * @param array $block Block attributes.
-	 * @param array $context Block context.
-	 */
-	protected function provide_location_context_for_inner_blocks( $block, &$context ) {
-		if ( empty( $this->product_collection_inner_blocks_names ) ) {
-			return;
-		}
-
-		$block_name           = array_pop( $this->product_collection_inner_blocks_names );
-		$is_in_single_product = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
-
-		if ( $block_name === $block['blockName'] ) {
-
-			$context['productCollectionLocation'] = $is_in_single_product ? array(
-				'type'       => 'product',
-				'sourceData' => array(
-					'productId' => absint( $context['postId'] ),
-				),
-			) : $this->get_location_context();
-		}
 	}
 
 	/**
@@ -185,7 +146,7 @@ class ProductCollection extends AbstractBlock {
 	 *
 	 * @return array The location context as described in self::update_context().
 	 */
-	protected function get_location_context() {
+	private function get_location_context() {
 		static $location_context = null;
 		if ( null === $location_context ) {
 			$location_context = ProductCollectionUtils::parse_global_location_context();
@@ -434,7 +395,6 @@ class ProductCollection extends AbstractBlock {
 	 * @return array
 	 */
 	public function build_frontend_query( $query, $block, $page ) {
-
 		// If not in context of product collection block, return the query as is.
 		$is_product_collection_block = $block->context['query']['isProductCollectionBlock'] ?? false;
 		if ( ! $is_product_collection_block ) {
