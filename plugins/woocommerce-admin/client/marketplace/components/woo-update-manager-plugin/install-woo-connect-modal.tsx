@@ -89,6 +89,12 @@ export default function InstallWooConnectModal( props: ConnectProps ) {
 					/>
 				</p>
 				<ButtonGroup className="woocommerce-marketplace__header-account-modal-button-group">
+					<Button
+						onClick={ props.onClose }
+						variant="secondary"
+					>
+						{ __( 'Close', 'woocommerce' ) }
+					</Button>
 					<Button href={ WP_ADMIN_PLUGIN_LIST_URL } variant="primary">
 						{ __( 'Activate', 'woocommerce' ) }
 					</Button>
