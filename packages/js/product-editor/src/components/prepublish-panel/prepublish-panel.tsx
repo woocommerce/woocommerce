@@ -70,9 +70,9 @@ export function PrepublishPanel( {
 		if ( ! isPublishedOrScheduled ) {
 			return;
 		}
-		document.addEventListener( 'click', handleClickOutside );
+		document.addEventListener( 'mouseup', handleClickOutside );
 		return () => {
-			document.removeEventListener( 'click', handleClickOutside );
+			document.removeEventListener( 'mouseup', handleClickOutside );
 		};
 	}, [ isPublishedOrScheduled ] );
 
