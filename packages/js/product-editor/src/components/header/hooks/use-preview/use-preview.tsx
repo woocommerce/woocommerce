@@ -14,6 +14,7 @@ import { MouseEvent } from 'react';
  */
 import { useValidations } from '../../../../contexts/validation-context';
 import { WPError } from '../../../../utils/get-product-error-message';
+import { useProductURL } from '../../../../hooks/use-product-url';
 import { PreviewButtonProps } from '../../preview-button';
 
 export function usePreview( {
@@ -36,11 +37,7 @@ export function usePreview( {
 		'id'
 	);
 
-	const [ permalink ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'permalink'
-	);
+	const { getProductURL } = useProductURL( productType );
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
@@ -71,12 +68,6 @@ export function usePreview( {
 
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
-
-	let previewLink: URL | undefined;
-	if ( typeof permalink === 'string' ) {
-		previewLink = new URL( permalink );
-		previewLink.searchParams.append( 'preview', 'true' );
-	}
 
 	/**
 	 * Overrides the default anchor behaviour when the product has unsaved changes.
@@ -157,7 +148,7 @@ export function usePreview( {
 		'aria-disabled': ariaDisabled,
 		// Note that the href is always passed for a11y support. So
 		// the final rendered element is always an anchor.
-		href: previewLink?.toString(),
+		href: getProductURL( true ),
 		variant: 'tertiary',
 		onClick: handleClick,
 	};

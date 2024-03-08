@@ -219,6 +219,12 @@ class CLIRunner {
 
 			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
 			$order_count      = $remaining_count - $batch_size;
+
+			if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
+				wp_cache_flush_runtime();
+			}
+
+			$GLOBALS['wpdb']->flush();
 		}
 
 		$progress->finish();
