@@ -137,7 +137,7 @@ jobs:
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     e2e-wp-latest:
-        name: E2E on WP Latest
+        name: E2E on WP Latest ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version, api-wp-latest]
         permissions:
