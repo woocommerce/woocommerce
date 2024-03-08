@@ -48,7 +48,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		update_option( 'fresh_site', '1' );
 
 		$this->set_current_action( 'woocommerce_newly_installed' );
-		( new WooCommerce() )->add_lys_default_values();
+		( WooCommerce::instance() )->add_lys_default_values();
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
@@ -65,7 +65,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		update_option( 'fresh_site', '0' );
 
 		$this->set_current_action( 'woocommerce_updated' );
-		( new WooCommerce() )->add_lys_default_values();
+		( WooCommerce::instance() )->add_lys_default_values();
 
 		$this->assertEquals( 'no', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
@@ -88,7 +88,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		update_option( 'launch-status', 'unlaunched' );
 
 		$this->set_current_action( 'woocommerce_updated' );
-		( new WooCommerce() )->add_lys_default_values();
+		( WooCommerce::instance() )->add_lys_default_values();
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
