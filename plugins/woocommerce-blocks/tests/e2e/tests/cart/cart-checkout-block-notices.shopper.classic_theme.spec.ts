@@ -5,8 +5,9 @@ import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import {
 	cli,
 	CLASSIC_THEME_SLUG,
-	CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_SLUG,
-	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_SLUG,
+	CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
+	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
+	CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -47,7 +48,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await frontendUtils.emptyCart();
 	} );
 
-	test( 'default classic notice templates are visible', async ( {
+	test( 'classic notice templates are visible by default', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -91,12 +92,12 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 	} );
 
-	test( 'custom classic notice templates are visible', async ( {
+	test( 'classic notice templates are visible on template overwrite', async ( {
 		frontendUtils,
 		page,
 	} ) => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_SLUG }`
+			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG }`
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -147,12 +148,12 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 	} );
 
-	test( 'custom block notice templates are visible', async ( {
+	test( 'block notice templates are visible on template overwrite', async ( {
 		frontendUtils,
 		page,
 	} ) => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_SLUG }`
+			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG }`
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -190,6 +191,56 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 
 		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_THEME_SLUG }`
+		);
+	} );
+
+	test( 'block notice templates are visible by filter', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG }`
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'Coupon code already applied!' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeVisible();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
+		await expect(
+			page.getByText( 'Your cart is currently empty.' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
 		await expect(
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
