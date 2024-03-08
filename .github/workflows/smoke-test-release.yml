@@ -578,7 +578,7 @@ jobs:
             - name: Download Beta/RC zip
               id: download-wp-zip
               working-directory: plugins/woocommerce
-              run: curl -O -L ${{ steps.get-wp-url.outputs.getVersionWPLatestBetaRC }} -o wp.zip
+              run: curl -O -L ${{ steps.get-wp-url.outputs.url }} -o wp.zip
 
             - name: Update WP Env with Beta/RC
               working-directory: plugins/woocommerce

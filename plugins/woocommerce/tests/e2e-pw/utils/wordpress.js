@@ -33,7 +33,7 @@ const getVersionWPLatestBetaRC = async ( { core, github } ) => {
 	);
 	const currentDevelopmentURL = developmentOffer.download;
 
-	core.setOutput( 'version', currentDevelopmentURL );
+	core.setOutput( 'url', currentDevelopmentURL );
 };
 
 module.exports = { getVersionWPLatestMinusOne, getVersionWPLatestBetaRC };
