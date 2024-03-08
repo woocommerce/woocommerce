@@ -9,6 +9,9 @@ const userKey = USER_KEY ?? 'admin';
 const userSecret = USER_SECRET ?? 'password';
 const base64auth = btoa( `${ userKey }:${ userSecret }` );
 
+/**
+ * @type {import('@playwright/test').FullConfig}
+ */
 const config = {
 	userKey,
 	userSecret,
@@ -19,8 +22,8 @@ const config = {
 	globalSetup: require.resolve( './global-setup' ),
 	outputDir: './test-results/report',
 	testDir: 'tests',
-	retries: CI ? 4 : 2,
-	workers: 4,
+	retries: 1,
+	workers: 1,
 	reporter: [
 		[ 'list' ],
 		[
@@ -29,7 +32,7 @@ const config = {
 				outputFolder:
 					process.env.PLAYWRIGHT_HTML_REPORT ??
 					'./test-results/playwright-report',
-				open: CI ? 'never' : 'always',
+				open: 'on-failure',
 			},
 		],
 		[
