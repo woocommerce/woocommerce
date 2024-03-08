@@ -95,8 +95,9 @@ class ProductCollection extends AbstractBlock {
 	 * @return string Updated block content with added interactivity attributes.
 	 */
 	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
-		$is_product_collection_block = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
-		if ( $is_product_collection_block ) {
+		$is_product_collection_block    = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
+		$is_enhanced_pagination_enabled = $block['attrs']['enhancedPagination'] ?? true;
+		if ( $is_product_collection_block && $is_enhanced_pagination_enabled ) {
 			// Enqueue the Interactivity API runtime.
 			wp_enqueue_script( 'wc-interactivity' );
 
@@ -166,13 +167,15 @@ class ProductCollection extends AbstractBlock {
 	 * @param \WP_Block $instance      The block instance.
 	 */
 	public function add_navigation_link_directives( $block_content, $block, $instance ) {
-		$query_context               = $instance->context['query'] ?? array();
-		$is_product_collection_block = $query_context['isProductCollectionBlock'] ?? false;
-		$query_id                    = $instance->context['queryId'] ?? null;
-		$parsed_query_id             = $this->parsed_block['attrs']['queryId'] ?? null;
+		$is_product_collection_block    = $query_context['isProductCollectionBlock'] ?? false;
+		$query_context                  = $instance->context['query'] ?? array();
+		$query_id                       = $instance->context['queryId'] ?? null;
+		$parsed_query_id                = $this->parsed_block['attrs']['queryId'] ?? null;
+		$is_enhanced_pagination_enabled = $this->parsed_block['attrs']['enhancedPagination'] ?? true;
 
-		// Only proceed if the block is a product collection block and query IDs match.
-		if ( $is_product_collection_block && $query_id === $parsed_query_id ) {
+		// Only proceed if the block is a product collection block,
+		// enhaced pagination is enabled and query IDs match.
+		if ( $is_product_collection_block && $is_enhanced_pagination_enabled && $query_id === $parsed_query_id ) {
 			$block_content = $this->process_pagination_links( $block_content );
 		}
 

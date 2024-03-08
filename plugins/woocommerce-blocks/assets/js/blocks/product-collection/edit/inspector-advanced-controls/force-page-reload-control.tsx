@@ -32,7 +32,7 @@ const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
 		<ToggleControl
 			label={ __( 'Force Page Reload', 'woocommerce' ) }
 			help={ helpText }
-			checked={ enhancedPagination }
+			checked={ ! enhancedPagination }
 			onChange={ () =>
 				setAttributes( { enhancedPagination: ! enhancedPagination } )
 			}
