@@ -89,7 +89,12 @@ if ( appRoot ) {
 
 	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
-	registerSiteVisibilitySlotFill();
+	if (
+		window.wcAdminFeatures &&
+		window.wcAdminFeatures[ 'launch-your-store' ] === true
+	) {
+		registerSiteVisibilitySlotFill();
+	}
 }
 
 // Render the CustomerEffortScoreTracksContainer only if
