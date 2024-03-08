@@ -421,6 +421,14 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
 
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+              working-directory: plugins/woocommerce
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
@@ -591,6 +599,14 @@ jobs:
                   FORCE_COLOR: 1
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+              working-directory: plugins/woocommerce
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
 
             - name: Upload Allure artifacts to bucket
               if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
