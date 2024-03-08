@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useEffect } from '@wordpress/element';
 import { ToggleControl } from '@wordpress/components';
 
 import type { ProductCollectionSetAttributes } from '../../types';
@@ -23,6 +24,12 @@ const helpTextIfDisabled = __(
 const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
 	const { enhancedPagination, setAttributes } = props;
 	const hasUnsupportedBlocks = false; // TODO: Detect unsupported blocks
+
+	useEffect( () => {
+		if ( enhancedPagination && hasUnsupportedBlocks ) {
+			setAttributes( { enhancedPagination: false } );
+		}
+	}, [ enhancedPagination, hasUnsupportedBlocks, setAttributes ] );
 
 	const helpText = hasUnsupportedBlocks
 		? helpTextIfDisabled
