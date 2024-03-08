@@ -119,7 +119,7 @@ class WC_Woo_Update_Manager_Plugin {
 	}
 
 	/**
-	 * Show a notice on the plugins management page to install the Woo Update Manager plugin.
+	 * Show a notice on the WC admin pages to install or activate the Woo Update Manager plugin.
 	 *
 	 * @return void
 	 */
