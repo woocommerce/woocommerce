@@ -61,10 +61,22 @@ store< PriceFilterStore >( 'woocommerce/product-filter-price', {
 	},
 	actions: {
 		updateProducts: ( event: HTMLElementEvent< HTMLInputElement > ) => {
+			const { decimalSeparator } = getCurrency();
 			const context = getContext< PriceFilterContext >();
 			const { minRange, minPrice, maxPrice, maxRange } = context;
 			const type = event.target.name;
-			const value = parseFloat( event.target.value );
+			const value = parseInt(
+				event.target.value
+					.replace(
+						new RegExp( `[^0-9\\${ decimalSeparator }]+`, 'g' ),
+						''
+					)
+					.replace(
+						new RegExp( `\\${ decimalSeparator }`, 'g' ),
+						'.'
+					),
+				10
+			);
 
 			const currentMinPrice =
 				type === 'min'
