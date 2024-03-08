@@ -21,4 +21,19 @@ const getVersionWPLatestMinusOne = async ( { core, github } ) => {
 	core.setOutput( 'version', latestMinus1 );
 };
 
-module.exports = { getVersionWPLatestMinusOne };
+const getVersionWPLatestBetaRC = async ( { core, github } ) => {
+	const URL_WP_BETA_RC_VERSION_CHECK =
+		'https://api.wordpress.org/core/version-check/1.7/?channel=beta';
+
+	const response = await github.request( URL_WP_BETA_RC_VERSION_CHECK );
+
+	const body = response.data;
+	const developmentOffer = body.offers.find(
+		( offer ) => offer.response === 'development'
+	);
+	const currentDevelopmentURL = developmentOffer.download;
+
+	core.setOutput( 'version', currentDevelopmentURL );
+};
+
+module.exports = { getVersionWPLatestMinusOne, getVersionWPLatestBetaRC };
