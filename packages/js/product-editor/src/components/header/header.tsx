@@ -60,8 +60,8 @@ export function Header( {
 			const { getEntityRecord } = select( 'core' );
 			return getEntityRecord( 'postType', productType, productId );
 		},
-		[ productId ]
-	);
+		[ productId, productType ]
+	) as Product;
 
 	const [ editedProductName ] = useEntityProp< string >(
 		'postType',

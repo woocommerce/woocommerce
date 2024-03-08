@@ -7,6 +7,9 @@ import { Product } from '@woocommerce/data';
 import { createElement, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, external } from '@wordpress/icons';
+// import { store as annotationsStore } from '@wordpress/annotations';
+
+// console.log( { annotationsStore } );
 
 /**
  * Internal dependencies

@@ -72,7 +72,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const productId = useEntityId( 'postType', 'product' );
 
 	const { validate } = useValidations< Product >();
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -91,7 +90,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
@@ -250,7 +248,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// @ts-expect-error Expected 3 arguments, but got 4.
 				{
 					throwOnError: true,
 				}
