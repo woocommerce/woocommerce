@@ -19,6 +19,59 @@ import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 
+const SwitchThemeWarningModal = ( {
+	setIsModalOpen,
+	sendEvent,
+}: {
+	setIsModalOpen: ( value: boolean ) => void;
+	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+} ) => {
+	return (
+		<Modal
+			className={
+				'woocommerce-customize-store__theme-switch-warning-modal'
+			}
+			title={ __(
+				'Are you sure you want to design a new theme?',
+				'woocommerce'
+			) }
+			onRequestClose={ () => setIsModalOpen( false ) }
+			shouldCloseOnClickOutside={ false }
+		>
+			<p>
+				{ __(
+					'Your active theme will be changed and you could lose any changes you’ve made to it.',
+					'woocommerce'
+				) }
+			</p>
+			<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
+				<Button
+					onClick={ () => {
+						setIsModalOpen( false );
+					} }
+					variant="link"
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</Button>
+				<Button
+					onClick={ () => {
+						sendEvent( {
+							type: 'DESIGN_WITHOUT_AI',
+						} );
+						setIsModalOpen( false );
+						recordEvent(
+							'customize_your_store_agree_to_theme_switch_click'
+						);
+					} }
+					variant="primary"
+				>
+					{ __( 'Design a new theme', 'woocommerce' ) }
+				</Button>
+			</div>
+		</Modal>
+	);
+};
+
 export const BaseIntroBanner = ( {
 	bannerTitle,
 	bannerText,
@@ -255,48 +308,10 @@ export const NoAIBanner = ( {
 				showAIDisclaimer={ false }
 			/>
 			{ isModalOpen && (
-				<Modal
-					className={
-						'woocommerce-customize-store__theme-switch-warning-modal'
-					}
-					title={ __(
-						'Are you sure you want to design a new theme?',
-						'woocommerce'
-					) }
-					onRequestClose={ () => setIsModalOpen( false ) }
-					shouldCloseOnClickOutside={ false }
-				>
-					<p>
-						{ __(
-							'Your active theme will be changed and you could lose any changes you’ve made to it.',
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
-						<Button
-							onClick={ () => {
-								setIsModalOpen( false );
-							} }
-							variant="link"
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							onClick={ () => {
-								sendEvent( {
-									type: 'DESIGN_WITHOUT_AI',
-								} );
-								setIsModalOpen( false );
-								recordEvent(
-									'customize_your_store_agree_to_theme_switch_click'
-								);
-							} }
-							variant="primary"
-						>
-							{ __( 'Design a new theme', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Modal>
+				<SwitchThemeWarningModal
+					sendEvent={ sendEvent }
+					setIsModalOpen={ setIsModalOpen }
+				/>
 			) }
 		</>
 	);
