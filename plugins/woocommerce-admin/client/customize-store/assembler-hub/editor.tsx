@@ -5,7 +5,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useEffect, useMemo } from '@wordpress/element';
+import { StrictMode, useEffect, useMemo } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -23,8 +23,8 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 /**
  * Internal dependencies
  */
-import { BlockEditor } from './block-editor';
 import { editorIsLoaded } from '../utils';
+import { BlockEditorContainer } from './block-editor-container';
 
 export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 	const { context, hasPageContentFocus } = useSelect( ( select ) => {
@@ -84,7 +84,7 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 					content={
 						<>
 							<GlobalStylesRenderer />
-							<BlockEditor />
+							<BlockEditorContainer />
 						</>
 					}
 				/>
