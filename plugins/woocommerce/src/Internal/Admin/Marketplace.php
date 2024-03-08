@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Helper_Updater;
+use WC_Woo_Update_Manager_Plugin;
 
 /**
  * Contains backend logic for the Marketplace feature.
@@ -17,6 +19,8 @@ class Marketplace {
 
 	/**
 	 * Class initialization, to be executed when the class is resolved by the container.
+	 *
+	 * @internal
 	 */
 	final public function init() {
 		if ( false === FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
@@ -57,7 +61,7 @@ class Marketplace {
 			array(
 				'id'     => 'woocommerce-marketplace',
 				'parent' => 'woocommerce',
-				'title'  => __( 'Extensions', 'woocommerce' ),
+				'title'  => __( 'Extensions', 'woocommerce' ) . self::get_marketplace_update_count_html(),
 				'path'   => '/extensions',
 			),
 		);
@@ -68,6 +72,25 @@ class Marketplace {
 		 * @since 8.0
 		 */
 		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
+	}
+
+	/**
+	 * Create the menu bubble for extensions menu based on number of updates available.
+	 *
+	 * @return string
+	 */
+	private static function get_marketplace_update_count_html() {
+		$count = WC_Helper_Updater::get_updates_count();
+		if ( empty( $count ) ) {
+			return '';
+		}
+
+		$count = intval( $count );
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+			$count ++;
+		}
+
+		return sprintf( ' <span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
 	}
 
 	/**
