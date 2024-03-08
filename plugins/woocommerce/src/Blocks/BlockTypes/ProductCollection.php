@@ -104,7 +104,7 @@ class ProductCollection extends AbstractBlock {
 	 *   'sourceData' => array( 'productId' => 123 ),
 	 * )
 	 *
-	 * @param array  $context  The block context.
+	 * @param array $context  The block context.
 	 * @return array $context {
 	 *     The context including the product collection location context.
 	 *
