@@ -371,32 +371,55 @@ export const ExistingAiThemeBanner = ( {
 	);
 };
 
-export const ExistingNoAiThemeBanner = () => {
+export const ExistingNoAiThemeBanner = ( {
+	sendEvent,
+}: {
+	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+} ) => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+
 	return (
-		<BaseIntroBanner
-			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
-			bannerText={ __(
-				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
-				'woocommerce'
+		<>
+			<BaseIntroBanner
+				bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+				bannerText={ __(
+					'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
+					'woocommerce'
+				) }
+				bannerClass="existing-no-ai-theme-banner"
+				buttonIsLink={ false }
+				bannerButtonOnClick={ () => {
+					recordEvent( 'customize_your_store_intro_customize_click' );
+					if ( ! isDefaultTheme ) {
+						setIsModalOpen( true );
+					} else {
+						sendEvent( {
+							type: 'DESIGN_WITHOUT_AI',
+						} );
+					}
+				} }
+				bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
+				showAIDisclaimer={ false }
+				previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
+			/>
+			{ isModalOpen && (
+				<SwitchThemeWarningModal
+					sendEvent={ sendEvent }
+					setIsModalOpen={ setIsModalOpen }
+				/>
 			) }
-			bannerClass="existing-no-ai-theme-banner"
-			buttonIsLink={ false }
-			bannerButtonOnClick={ () => {
-				recordEvent( 'customize_your_store_intro_customize_click' );
-				navigateOrParent(
-					window,
-					getNewPath(
-						{ customizing: true },
-						'/customize-store/assembler-hub',
-						{}
-					)
-				);
-			} }
-			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
-			showAIDisclaimer={ false }
-			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
-		></BaseIntroBanner>
+		</>
 	);
 };
