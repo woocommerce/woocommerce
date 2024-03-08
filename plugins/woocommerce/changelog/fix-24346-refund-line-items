@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Adjusts the way refunds are displayed (including in emails), to make it clearer that the line item is indeed a refund.
