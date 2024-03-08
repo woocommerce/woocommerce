@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { dispatch, useSelect } from '@wordpress/data';
+import { dispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import type { Product, ProductStatus } from '@woocommerce/data';
 
@@ -53,14 +53,9 @@ export function useProductManager< T = Product >( postType: string ) {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isTrashing, setTrashing ] = useState( false );
 	const { isValidating, validate } = useValidations< T >();
-	const { editedProduct, isDirty } = useSelect(
+	// const { entity, editedProduct, isDirty } = useSelect(
+	const { isDirty } = useSelect(
 		( select ) => ( {
-			// @ts-expect-error There are no types for this.
-			editedProduct: select( 'core' ).getEditedEntityRecord(
-				'postType',
-				postType,
-				id
-			),
 			// @ts-expect-error There are no types for this.
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
@@ -77,6 +72,11 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
+
+			const { blocks, content, selection, ...editedProduct } = WPSelect(
+				'core'
+				// @ts-expect-error There are no types for this.
+			).getEditedEntityRecord( 'postType', postType, id );
 
 			const savedProduct = await saveEntityRecord(
 				'postType',
