@@ -70,9 +70,7 @@ export function PrepublishPanel( {
 		if ( ! isPublishedOrScheduled ) {
 			return;
 		}
-
 		document.addEventListener( 'mousedown', handleClickOutside );
-
 		return () => {
 			document.removeEventListener( 'mousedown', handleClickOutside );
 		};
