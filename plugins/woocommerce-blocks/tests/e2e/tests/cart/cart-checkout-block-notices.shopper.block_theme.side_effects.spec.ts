@@ -47,7 +47,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await frontendUtils.emptyCart();
 	} );
 
-	test( 'block notice templates are visible by default', async ( {
+	test( 'default block notice templates are visible', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -95,7 +95,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		).toBeVisible();
 	} );
 
-	test( 'block notice templates are visible on template overwrite', async ( {
+	test( 'custom block notice templates are visible by template overwrite', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -147,7 +147,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 	} );
 
-	test( 'classic notice templates are visible on template overwrite', async ( {
+	test( 'classic notice templates are visible by template overwrite', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -203,7 +203,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		);
 	} );
 
-	test( 'classic notice templates cannot be triggered via filter', async ( {
+	test( 'default classic notice templates cannot be triggered by filter', async ( {
 		frontendUtils,
 		page,
 	} ) => {
