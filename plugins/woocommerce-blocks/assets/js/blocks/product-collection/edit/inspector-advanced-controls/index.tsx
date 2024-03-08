@@ -13,12 +13,13 @@ import type { ProductCollectionEditComponentProps } from '../../types';
 export default function ToolbarControls(
 	props: ProductCollectionEditComponentProps
 ) {
-	const { attributes, setAttributes } = props;
+	const { clientId, attributes, setAttributes } = props;
 	const { enhancedPagination } = attributes;
 
 	return (
 		<InspectorAdvancedControls>
 			<ForcePageReloadControl
+				clientId={ clientId }
 				enhancedPagination={ enhancedPagination }
 				setAttributes={ setAttributes }
 			/>
