@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Avoid any issues when the package is loaded in an mu-plugin.

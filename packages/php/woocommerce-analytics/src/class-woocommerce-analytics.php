@@ -56,6 +56,11 @@ class Woocommerce_Analytics {
 	 * @return bool
 	 */
 	public static function should_track_store() {
+		// Ensure this is available, even with mu-plugins.
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
 		/**
 		 * Make sure WooCommerce is installed and active
 		 *
