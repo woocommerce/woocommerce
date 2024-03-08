@@ -13,7 +13,7 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	public function data_provider_test_geolocation_ajax_get_location_hash(): array {
 		return array(
 			array(
-				'e6c92cbd0e81',
+				'393fc03f1382',
 				array(
 					'country'  => 'GB',
 					'state'    => 'Greater London',
@@ -22,7 +22,16 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 				),
 			),
 			array(
-				'2a20d6f979cd',
+				'393fc03f1382',
+				array(
+					'country'  => 'GB',
+					'state'    => 'greater london',
+					'postcode' => 'NW1 8QL',
+					'city'     => 'london',
+				),
+			),
+			array(
+				'87b6bacfb240',
 				array(
 					'country'  => 'US',
 					'state'    => 'CA',
@@ -31,7 +40,7 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 				),
 			),
 			array(
-				'd5655d9bc4ca',
+				'd6a2e7e49ac0',
 				array(
 					'country'  => 'FI',
 					'state'    => '',
