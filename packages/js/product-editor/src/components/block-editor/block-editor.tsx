@@ -128,7 +128,7 @@ export function BlockEditor( {
 
 	const { record: product } = useEntityRecord(
 		'postType',
-		'product',
+		postType,
 		productId
 	);
 
