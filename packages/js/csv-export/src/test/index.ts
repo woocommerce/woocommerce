@@ -11,7 +11,6 @@ import {
 	downloadCSVFile,
 	generateCSVDataFromTable,
 	generateCSVFileName,
-	todayDateStr,
 } from '../index';
 import mockCSVData from '../__mocks__/mock-csv-data';
 import mockHeaders from '../__mocks__/mock-headers';
@@ -65,14 +64,16 @@ describe( 'generateCSVDataFromTable', () => {
 } );
 
 describe( 'generateCSVFileName', () => {
+	jest.useFakeTimers().setSystemTime( new Date( '2024-12-23' ) );
+
 	it( 'should generate a file name with the date when no params are provided', () => {
 		const fileName = generateCSVFileName();
-		expect( fileName ).toBe( todayDateStr() + '.csv' );
+		expect( fileName ).toBe( '2024-12-23.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and the date', () => {
 		const fileName = generateCSVFileName( 'Revenue table' );
-		expect( fileName ).toBe( 'revenue-table_' + todayDateStr() + '.csv' );
+		expect( fileName ).toBe( 'revenue-table_2024-12-23.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and `params`', () => {
@@ -81,9 +82,7 @@ describe( 'generateCSVFileName', () => {
 			order: 'desc',
 		} );
 		expect( fileName ).toBe(
-			'revenue-table_' +
-				todayDateStr() +
-				'_orderby-revenue_order-desc.csv'
+			'revenue-table_2024-12-23_orderby-revenue_order-desc.csv'
 		);
 	} );
 } );

@@ -86,7 +86,7 @@ export function generateCSVDataFromTable( headers: Header[], rows: Rows ) {
  *
  * @return {string} the formatted date.
  */
-export function todayDateStr() {
+function todayDateStr() {
 	const date = new Date();
 	const dateStr = date.toISOString().split( 'T' )[ 0 ];
 
