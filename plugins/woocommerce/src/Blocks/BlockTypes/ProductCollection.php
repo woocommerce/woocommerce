@@ -98,16 +98,13 @@ class ProductCollection extends AbstractBlock {
 	 * - product: [ 'productId'  => int ]
 	 *
 	 * @see ProductCollectionUtils::parse_global_location_context()
-	 * 
+	 *
 	 * @example array(
 	 *   'type'       => 'product',
 	 *   'sourceData' => array( 'productId' => 123 ),
 	 * )
 	 *
-	 * @param array    $context      The block context.
-	 * @param array    $block        The parsed block.
-	 * @param WP_Block $parent_block The parent block.
-	 *
+	 * @param array  $context  The block context.
 	 * @return array $context {
 	 *     The context including the product collection location context.
 	 *
