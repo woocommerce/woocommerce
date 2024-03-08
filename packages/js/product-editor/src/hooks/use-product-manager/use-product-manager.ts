@@ -53,7 +53,6 @@ export function useProductManager< T = Product >( postType: string ) {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isTrashing, setTrashing ] = useState( false );
 	const { isValidating, validate } = useValidations< T >();
-	// const { entity, editedProduct, isDirty } = useSelect(
 	const { isDirty } = useSelect(
 		( select ) => ( {
 			// @ts-expect-error There are no types for this.
