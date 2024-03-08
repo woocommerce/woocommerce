@@ -1,15 +1,15 @@
 .site-visibility-settings-slotfill {
 	line-height: 16px;
 	font-weight: 400;
-	color: #1E1E1E;
-	margin: 32px 0px 32px 0px;
+	color: #1e1e1e;
+	margin: 32px 0 32px 0;
 
 	&.placeholder {
 		opacity: 0.3;
 	}
 
 	.components-form-toggle {
-		.components-form-toggle__input:focus+.components-form-toggle__track {
+		.components-form-toggle__input:focus + .components-form-toggle__track {
 			box-shadow: none;
 		}
 		.components-form-toggle__track {
@@ -33,7 +33,7 @@
 	}
 
 	.site-visibility-settings-slotfill-section-description {
-		margin: 4px 0px 18px 28px;
+		margin: 4px 0 18px 28px;
 	}
 
 	p {
@@ -47,13 +47,13 @@
 		margin-bottom: 24px;
 	}
 
-	.components-radio-control__input[type=radio]:focus {
+	.components-radio-control__input[type='radio']:focus {
 		outline: none;
 		box-shadow: none;
 	}
 
 	.site-visibility-settings-slotfill-section {
-		max-width: 620px;;
+		max-width: 620px;
 		&:last-child {
 			margin-top: 16px;
 		}
@@ -62,7 +62,7 @@
 			&.is-hidden {
 				display: none;
 			}
-			margin: 16px 0px 0px 30px;
+			margin: 16px 0 0 30px;
 			.components-toggle-control {
 				.components-h-stack {
 					align-items: baseline;
