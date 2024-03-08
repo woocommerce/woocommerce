@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
 <p>
 	<?php
 	/* Translators: %s Domain name from the callback URL. */
-	printf( esc_html__( 'Credentials will be shared with the website %s.', 'woocommerce' ), '<strong>' . esc_html( wp_parse_url( $callback_url, PHP_URL_HOST ) ) . '</strong>' );
+	printf( esc_html__( 'Approving will share credentials with %s. Do not proceed if this looks suspicious in any way.', 'woocommerce' ), '<strong>' . esc_html( wp_parse_url( $callback_url, PHP_URL_HOST ) ) . '</strong>' );
 	?>
 </p>
 
