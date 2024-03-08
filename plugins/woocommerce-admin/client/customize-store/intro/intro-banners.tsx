@@ -228,6 +228,7 @@ export const NoAIBanner = ( {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// @ts-expect-error There are no types for this
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 
