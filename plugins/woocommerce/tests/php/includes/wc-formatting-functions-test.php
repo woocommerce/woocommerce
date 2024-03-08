@@ -39,11 +39,14 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 * Data provider for test_wc_format_postcode.
 	 *
 	 * @return array[]
+	 * @see WC_Tests_Formatting_Functions::test_wc_format_postcode for US, GB, BR, JP, NL, LV
 	 */
 	public function data_provider_test_wc_format_postcode(): array {
 		return array(
 			array( 'D02 AF30', 'D02AF30', 'IE' ),
 			array( '1000-205', '1000205', 'PT' ),
+			array( '1234', '1234', 'DK' ),
+			array( 'DK-1234', 'DK-1234', 'DK' ),
 		);
 	}
 
@@ -57,6 +60,6 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 * @param string $country Country input for wc_format_postcode().
 	 */
 	public function test_wc_format_postcode( string $assert, string $postcode, string $country ) {
-		$this->assertSame( $assert, wc_format_postcode( $postcode, $country ) );
+		$this->assertSame( $assert, wc_format_postcode( $postcode, $country ), "Test formatting of $postcode postcodes." );
 	}
 }
