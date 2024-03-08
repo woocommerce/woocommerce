@@ -2284,13 +2284,13 @@ $hpos_table_schema;
 	 */
 	private static function get_refunds_return_policy_page_content() {
 		return <<<EOT
-<!-- wp:paragraph -->
-<p><b>This is a sample page.</b></p>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h3 class="wp-block-heading">This is a sample page.</h3>
+<!-- /wp:heading -->
 
-<!-- wp:paragraph -->
-<h3>Overview</h3>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Overview</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Our refund and returns policy lasts 30 days. If 30 days have passed since your purchase, we can’t offer you a full refund or exchange.</p>
@@ -2349,9 +2349,9 @@ $hpos_table_schema;
 <p>If you are approved, then your refund will be processed, and a credit will automatically be applied to your credit card or original method of payment, within a certain amount of days.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><b>Late or missing refunds</b></p>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h3 class="wp-block-heading">Late or missing refunds</h3>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>If you haven’t received a refund yet, first check your bank account again.</p>
@@ -2369,9 +2369,9 @@ $hpos_table_schema;
 <p>If you’ve done all of this and you still have not received your refund yet, please contact us at {email address}.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<p><b>Sale items</b></p>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h3 class="wp-block-heading">Sale items</h3>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Only regular priced items may be refunded. Sale items cannot be refunded.</p>
