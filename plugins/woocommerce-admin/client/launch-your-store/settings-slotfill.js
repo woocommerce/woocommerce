@@ -78,6 +78,7 @@ const SiteVisibility = ( {
 				value={ privateLink }
 				name="woocommerce_private_link"
 			/>
+			<h2>{ __( 'Site Visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
 				{ __(
 					"Set your site to coming soon or live you're ready to launch",

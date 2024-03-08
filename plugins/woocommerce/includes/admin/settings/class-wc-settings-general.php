@@ -218,19 +218,8 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 
 				array(
-					'title' => __( 'Site Visibility', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'site_visibility',
-				),
-
-				array(
 					'id'    => 'wc_settings_general_site_visibility_slotfill',
 					'type'  => 'slotfill_placeholder',
-				),
-
-				array(
-					'type' => 'sectionend',
-					'id'   => 'sectioned_site_visibility',
 				),
 
 				array(
