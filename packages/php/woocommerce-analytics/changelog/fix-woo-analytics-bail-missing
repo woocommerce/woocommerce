@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+General: bail early when WooCommerce is not active.

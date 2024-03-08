@@ -29,6 +29,10 @@ class Woocommerce_Analytics {
 	 * @return void
 	 */
 	public static function init() {
+		if ( ! self::should_track_store() ) {
+			return;
+		}
+
 		// loading _wca.
 		add_action( 'wp_head', array( __CLASS__, 'wp_head_top' ), 1 );
 
