@@ -57,25 +57,26 @@ export function PrepublishPanel( {
 	}
 	const panelRef = useRef< HTMLDivElement >( null );
 
-	useEffect( () => {
-		function handleClickOutside( event: MouseEvent ) {
-			if ( ! panelRef.current || ! isPublishedOrScheduled ) {
-				return;
-			}
+	function handleClickOutside( event: MouseEvent ) {
+		if (
+			panelRef.current &&
+			! panelRef.current.contains( event.target as Node )
+		) {
+			closePrepublishPanel();
+		}
+	}
 
-			if (
-				panelRef.current &&
-				! panelRef.current.contains( event.target as Node )
-			) {
-				closePrepublishPanel();
-			}
+	useEffect( () => {
+		if ( ! isPublishedOrScheduled ) {
+			return;
 		}
 
 		document.addEventListener( 'mousedown', handleClickOutside );
+
 		return () => {
 			document.removeEventListener( 'mousedown', handleClickOutside );
 		};
-	}, [ isPublishedOrScheduled, closePrepublishPanel, panelRef ] );
+	}, [ isPublishedOrScheduled ] );
 
 	function getHeaderActions() {
 		if ( isPublishedOrScheduled ) {
