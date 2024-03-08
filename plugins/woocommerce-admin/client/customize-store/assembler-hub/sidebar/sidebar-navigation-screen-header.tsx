@@ -35,10 +35,10 @@ import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
 
 const SUPPORTED_HEADER_PATTERNS = [
+	'woocommerce-blocks/header-centered-menu',
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
-	'woocommerce-blocks/header-centered-menu',
 ];
 
 export const SidebarNavigationScreenHeader = () => {

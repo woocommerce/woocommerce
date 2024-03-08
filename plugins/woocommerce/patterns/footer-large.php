@@ -38,13 +38,11 @@
 
 		<!-- wp:column {"width":"20%","style":{"spacing":{"padding":{"top":"0px"}}}} -->
 		<div class="wp-block-column" style="padding-top:0px;flex-basis:20%">
-			<!-- wp:navigation {"overlayMenu":"never","layout":{"overlayMenu":"never","type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
 		</div>
 		<!-- /wp:column -->
 
 		<!-- wp:column {"verticalAlignment":"top","width":"20%","style":{"spacing":{"blockGap":"16px"}}} -->
 		<div class="wp-block-column is-vertically-aligned-top" style="flex-basis:20%">
-			<!-- wp:navigation {"overlayMenu":"never","layout":{"overlayMenu":"never","type":"flex","orientation":"vertical"},"style":{"spacing":{"blockGap":"10px"}}} /-->
 		</div>
 		<!-- /wp:column -->
 
