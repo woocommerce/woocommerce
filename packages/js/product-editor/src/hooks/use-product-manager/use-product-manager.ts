@@ -53,8 +53,14 @@ export function useProductManager< T = Product >( postType: string ) {
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isTrashing, setTrashing ] = useState( false );
 	const { isValidating, validate } = useValidations< T >();
-	const { isDirty } = useSelect(
+	const { editedProduct, isDirty } = useSelect(
 		( select ) => ( {
+			// @ts-expect-error There are no types for this.
+			editedProduct: select( 'core' ).getEditedEntityRecord(
+				'postType',
+				postType,
+				id
+			),
 			// @ts-expect-error There are no types for this.
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
@@ -70,17 +76,16 @@ export function useProductManager< T = Product >( postType: string ) {
 			setIsSaving( true );
 
 			await validate( extraProps );
+			const { saveEntityRecord } = dispatch( 'core' );
 
-			// @ts-expect-error There are no types for this.
-			const { editEntityRecord, saveEditedEntityRecord } =
-				dispatch( 'core' );
-
-			await editEntityRecord< T >( 'postType', postType, id, extraProps );
-
-			const savedProduct = await saveEditedEntityRecord< T >(
+			const savedProduct = await saveEntityRecord(
 				'postType',
 				postType,
-				id,
+				{
+					...editedProduct,
+					...extraProps,
+				},
+				// @ts-expect-error There are no types for this.
 				{
 					throwOnError: true,
 				}
