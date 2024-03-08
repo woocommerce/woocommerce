@@ -578,9 +578,9 @@ jobs:
 
             - name: Reset WP Env
               working-directory: plugins/woocommerce
-              run: pnpm wp-env clean
               env:
-                  WP_ENV_CORE: WordPress/WordPress#${{ steps.get-wp-latest-1.outputs.version }}
+                  WP_ENV_PHP_VERSION: ${{ matrix.php_version }}
+              run: pnpm wp-env clean
 
             - name: Run E2E tests
               timeout-minutes: 60
