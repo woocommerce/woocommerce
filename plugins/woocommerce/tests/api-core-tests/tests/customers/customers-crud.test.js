@@ -94,7 +94,7 @@ test.describe('Customers API tests: CRUD', () => {
 			request
 		}) => {
 			// call API to retrieve the previously saved customer
-			const response = await request.get('/wp-json/wc/v3/customers/1');
+			const response = await request.get('/wp-json/wc/v3/customers/117422370');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.is_paying_customer).toBeDefined();
@@ -214,7 +214,7 @@ test.describe('Customers API tests: CRUD', () => {
 			 * (https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#woocommerce-playwright-end-to-end-tests
 			 */
 			const response = await request.put(
-				`/wp-json/wc/v3/customers/1`, {
+				`/wp-json/wc/v3/customers/117422370`, {
 					data: {
 						first_name: 'admin',
 						billing: {
@@ -237,7 +237,7 @@ test.describe('Customers API tests: CRUD', () => {
 			request
 		}) => {
 			// call API to retrieve the admin customer we updated above
-			const response = await request.get('/wp-json/wc/v3/customers/1');
+			const response = await request.get('/wp-json/wc/v3/customers/117422370');
 			const responseJSON = await response.json();
 			expect(response.status()).toEqual(200);
 			expect(responseJSON.first_name).toEqual('admin');
