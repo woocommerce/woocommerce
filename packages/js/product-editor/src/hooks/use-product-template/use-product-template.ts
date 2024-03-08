@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { ProductType } from '@woocommerce/data';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { ProductTemplate } from '../../types';
+import { Metadata, ProductTemplate } from '../../types';
 
 declare global {
 	interface Window {
@@ -16,12 +16,26 @@ declare global {
 	}
 }
 
+const matchesAllTemplateMetaFields = (
+	templateMeta: Metadata< string >[],
+	productMeta: Metadata< string >[]
+) =>
+	templateMeta.every( ( item ) =>
+		productMeta.find(
+			( productMetaEntry ) =>
+				productMetaEntry.key === item.key &&
+				productMetaEntry.value === item.value
+		)
+	);
+
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	productType: ProductType | undefined
+	product: Partial< Product >
 ) => {
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
+
+	const productType = product?.type;
 
 	const productTemplateIdToFind =
 		productType === 'variable'
@@ -38,10 +52,35 @@ export const useProductTemplate = (
 	);
 
 	if ( ! matchingProductTemplate ) {
-		// Fallback to the first template with the same product type.
-		matchingProductTemplate = productTemplates.find(
+		// Look for matching templates based on product data described on each template.
+		const matchingTemplates = productTemplates.filter(
 			( productTemplate ) =>
-				productTemplate.productData.type === productTypeToFind
+				Object.entries( productTemplate.productData ).every(
+					( [ key, value ] ) => {
+						if ( ! product ) {
+							return false;
+						}
+
+						if ( key === 'meta_data' ) {
+							return matchesAllTemplateMetaFields(
+								value,
+								( product && product[ key ] ) || []
+							);
+						}
+
+						return product[ key ] === value;
+					}
+				)
+		);
+
+		// If there are multiple matching templates, we should use the one with the most matching fields.
+		matchingProductTemplate = matchingTemplates.reduce(
+			( previous, current ) =>
+				Object.keys( current.productData ).length >
+				Object.keys( previous.productData ).length
+					? current
+					: previous,
+			matchingTemplates[ 0 ]
 		);
 	}
 

@@ -13,7 +13,6 @@ import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
-import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -32,6 +31,9 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityRecord,
 } from '@wordpress/core-data';
 
 /**
@@ -119,18 +121,20 @@ export function BlockEditor( {
 		};
 	}, [ canUserCreateMedia, _settings ] );
 
-	const [ productType ] = useProductEntityProp< Product[ 'type' ] >( 'type', {
-		postType,
-	} );
-
 	const [ productTemplateId ] = useProductEntityProp< string >(
 		'meta_data._product_template_id',
 		{ postType }
 	);
 
+	const { record: product } = useEntityRecord(
+		'postType',
+		'product',
+		productId
+	);
+
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		productType
+		product
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
