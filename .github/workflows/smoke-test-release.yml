@@ -578,11 +578,11 @@ jobs:
             - name: Download Beta/RC zip
               id: download-wp-zip
               working-directory: plugins/woocommerce
-              run: curl -O -L ${{ steps.get-wp-url.outputs.url }} -o wp.zip
+              run: curl -o wp.zip -L ${{ steps.get-wp-url.outputs.url }}
 
             - name: Update WP Env with Beta/RC
               working-directory: plugins/woocommerce
-              run: pnpm wp-env run tests-cli wp core update --zip wp.zip
+              run: pnpm wp-env run tests-cli wp core update wp.zip
 
     # Run API and E2E tests on PHP 7.4 and 8.1
     test-php-versions:
