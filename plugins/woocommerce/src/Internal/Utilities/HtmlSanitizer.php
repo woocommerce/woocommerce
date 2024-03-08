@@ -41,7 +41,7 @@ class HtmlSanitizer {
 	 * @return string
 	 */
 	public function styled_post_content( string $html ): string {
-		$rules = wp_kses_allowed_html( 'post' );
+		$rules          = wp_kses_allowed_html( 'post' );
 		$rules['style'] = true;
 		return wp_kses( $html, $rules );
 	}
