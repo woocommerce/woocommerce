@@ -42,19 +42,37 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 * @see WC_Tests_Formatting_Functions::test_wc_format_postcode for US, GB, BR, JP, NL, LV
 	 */
 	public function data_provider_test_wc_format_postcode(): array {
-		return array(
+		$ie = array(
 			array( 'D02 AF30', 'D02AF30', 'IE' ),
+		);
+
+		$pt = array(
 			array( '1000-205', '1000205', 'PT' ),
+		);
+
+		$dk = array(
 			array( '1234', '1234', 'DK' ),
 			array( 'DK-1234', 'DK-1234', 'DK' ),
+			array( 'DK-1234', 'dk-1234', 'DK' ),
+		);
+
+		$se = array(
 			array( '113 52', '11352', 'SE' ),
+		);
+
+		$sk = array(
 			array( '811 02', '81102', 'SK' ),
 			array( 'SK-811 02', 'SK-81102', 'SK' ),
 			array( 'SK-811 02', 'sk-81102', 'SK' ),
+		);
+
+		$cz = array(
 			array( '115 03', '11503', 'CZ' ),
 			array( 'CZ-115 03', 'CZ-11503', 'CZ' ),
 			array( 'CZ-115 03', 'cz-11503', 'CZ' ),
 		);
+
+		return array_merge( $ie, $pt, $dk, $se, $sk, $cz );
 	}
 
 	/**
