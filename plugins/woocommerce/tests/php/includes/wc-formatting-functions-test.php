@@ -48,6 +48,12 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			array( '1234', '1234', 'DK' ),
 			array( 'DK-1234', 'DK-1234', 'DK' ),
 			array( '113 52', '11352', 'SE' ),
+			array( '811 02', '81102', 'SK' ),
+			array( 'SK-811 02', 'SK-81102', 'SK' ),
+			array( 'SK-811 02', 'sk-81102', 'SK' ),
+			array( '115 03', '11503', 'CZ' ),
+			array( 'CZ-115 03', 'CZ-11503', 'CZ' ),
+			array( 'CZ-115 03', 'cz-11503', 'CZ' ),
 		);
 	}
 
