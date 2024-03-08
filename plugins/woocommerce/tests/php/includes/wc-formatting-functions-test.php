@@ -47,6 +47,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			array( '1000-205', '1000205', 'PT' ),
 			array( '1234', '1234', 'DK' ),
 			array( 'DK-1234', 'DK-1234', 'DK' ),
+			array( '113 52', '11352', 'SE' ),
 		);
 	}
 

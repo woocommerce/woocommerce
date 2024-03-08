@@ -979,6 +979,9 @@ function wc_format_postcode( $postcode, $country ) {
 	$postcode = wc_normalize_postcode( $postcode ?? '' );
 
 	switch ( $country ) {
+		case 'SE':
+			$postcode = substr_replace( $postcode, ' ', -2, 0 );
+			break;
 		case 'CA':
 		case 'GB':
 			$postcode = substr_replace( $postcode, ' ', -3, 0 );
