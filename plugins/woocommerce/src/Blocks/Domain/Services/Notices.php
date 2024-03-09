@@ -44,7 +44,12 @@ class Notices {
 		add_action(
 			'after_setup_theme',
 			function() {
-				// Allow classic theme developers to opt-in to using block notices.
+				/**
+				 * Allow classic theme developers to opt-in to using block notices.
+				 *
+				 * @param bool $use_block_notices_in_classic_theme Whether to use block notices in classic theme.
+				 * @return bool
+				 */
 				if ( wp_is_block_theme() || apply_filters( 'woocommerce_use_block_notices_in_classic_theme', false ) ) {
 					add_filter( 'wc_get_template', [ $this, 'get_notices_template' ], 10, 5 );
 				}
