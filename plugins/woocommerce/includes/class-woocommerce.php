@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Api\Main as ApiMain;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
@@ -279,6 +280,8 @@ final class WooCommerce {
 		foreach ( $hook_register_classes as $hook_register_class ) {
 			$hook_register_class->register();
 		}
+
+		ApiMain::initialize();
 	}
 
 	/**

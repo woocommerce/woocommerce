@@ -14,6 +14,8 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets": "wireit",
 		"build:zip": "./bin/build-zip.sh",
+		"build:api": "./bin/build-api.sh",
+		"build:uglyapi": "SKIP_PHPCBF=1 ./bin/build-api.sh",
 		"changelog": "composer install && composer exec -- changelogger",
 		"docker:down": "pnpm exec wc-e2e docker:down",
 		"docker:ssh": "pnpm exec wc-e2e docker:ssh",

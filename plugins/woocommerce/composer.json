@@ -26,6 +26,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
+		"webonyx/graphql-php": "^15.10",
 		"woocommerce/action-scheduler": "3.7.2"
 	},
 	"require-dev": {

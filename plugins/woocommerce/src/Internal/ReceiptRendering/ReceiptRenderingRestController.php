@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
+use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use \WP_REST_Server;
 use \WP_REST_Request;

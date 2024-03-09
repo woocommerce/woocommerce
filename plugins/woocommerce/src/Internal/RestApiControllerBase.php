@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\ReceiptRendering;
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -130,7 +130,7 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * @return array The updated list of WooCommerce REST API namespaces/controllers.
 	 */
 	protected function handle_woocommerce_rest_api_get_rest_namespaces( array $namespaces ): array {
-		$namespaces['wc/v3'][ $this->get_rest_api_namespace() ] = static::class;
+		$namespaces[ $this->route_namespace ][ $this->get_rest_api_namespace() ] = static::class;
 		return $namespaces;
 	}
 
@@ -155,7 +155,8 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * Handle a request for one of the provided REST API endpoints.
 	 *
 	 * If an exception is thrown, the exception message will be returned as part of the response
-	 * if the user has the 'manage_woocommerce' capability.
+	 * if the exception is an InvalidArgumentException, it has a is_client_aware method that returns true,
+	 * or if the user has the 'manage_woocommerce' capability.
 	 *
 	 * Note that the method specified in $method_name must have a 'protected' visibility and accept one argument of type 'WP_REST_Request'.
 	 *
@@ -168,10 +169,14 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 			return rest_ensure_response( $this->$method_name( $request ) );
 		} catch ( InvalidArgumentException $ex ) {
 			$message = $ex->getMessage();
-			return new WP_Error( 'woocommerce_rest_invalid_argument', $message ? $message : __( 'Internal server error', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_argument', $message, array( 'status' => 400 ) );
 		} catch ( Exception $ex ) {
+			$status_code = method_exists( $ex, 'get_status_code' ) ? $ex->get_status_code() : 500;
+			if ( method_exists( $ex, 'is_client_aware' ) && $ex->is_client_aware() ) {
+				return new WP_Error( 'woocommerce_rest_client_aware_error', $ex->getMessage(), array( 'status' => $status_code ) );
+			}
 			wc_get_logger()->error( StringUtil::class_name_without_namespace( static::class ) . ": when executing method $method_name: {$ex->getMessage()}" );
-			return $this->internal_wp_error( $ex );
+			return $this->internal_wp_error( $ex, $status_code );
 		}
 	}
 
@@ -179,16 +184,16 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	 * Return an WP_Error object for an internal server error, with exception information if the current user is an admin.
 	 *
 	 * @param Exception $exception The exception to maybe include information from.
+	 * @param int       $status_code The HTTP status code for the response.
 	 * @return WP_Error
 	 */
-	protected function internal_wp_error( Exception $exception ): WP_Error {
-		$data = array( 'status' => 500 );
+	protected function internal_wp_error( Exception $exception, int $status_code = 500 ): WP_Error {
+		$data = array( 'status' => $status_code );
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			$data['exception_class']   = get_class( $exception );
 			$data['exception_message'] = $exception->getMessage();
 			$data['exception_trace']   = (array) $exception->getTrace();
 		}
-		$data['exception_message'] = $exception->getMessage();
 
 		return new WP_Error( 'woocommerce_rest_internal_error', __( 'Internal server error', 'woocommerce' ), $data );
 	}

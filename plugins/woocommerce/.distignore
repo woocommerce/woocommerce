@@ -13,6 +13,7 @@
 /storybook/
 /tests/
 /e2e/
+/src/Internal/Api/DesignTime/
 babel.config.js
 blocks.ini
 composer.*
