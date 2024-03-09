@@ -575,14 +575,9 @@ jobs:
                       const { getVersionWPLatestBetaRC } = require( './plugins/woocommerce/tests/e2e-pw/utils/wordpress' );
                       await getVersionWPLatestBetaRC( { core, github } );
 
-            - name: Download Beta/RC zip
-              id: download-wp-zip
-              working-directory: plugins/woocommerce
-              run: curl -o wp.zip -L ${{ steps.get-wp-url.outputs.url }}
-
             - name: Update WP Env with Beta/RC
               working-directory: plugins/woocommerce
-              run: pnpm wp-env run tests-cli wp core update wp.zip
+              run: pnpm wp-env run tests-cli wp core update ${{ steps.get-wp-url.outputs.url }}
 
     # Run API and E2E tests on PHP 7.4 and 8.1
     test-php-versions:
