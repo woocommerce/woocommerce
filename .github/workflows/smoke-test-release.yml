@@ -579,6 +579,124 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm wp-env run tests-cli wp core update ${{ steps.get-wp-url.outputs.url }}
 
+            - name: Download release zip
+              id: download-zip
+              uses: actions/github-script@v7
+              env:
+                  ASSET_ID: ${{ needs.validate-version.outputs.asset-id }}
+              with:
+                  github-token: ${{ secrets.E2E_GH_TOKEN }}
+                  script: |
+                      const script = require('./.github/workflows/scripts/download-release-zip.js');
+                      await script({ github, context, core });
+
+            - name: Replace `plugins/woocommerce` with unzipped woocommerce release build
+              run: unzip -d plugins -o ${{ env.ZIP_PATH }}
+              env:
+                  ZIP_PATH: ${{ steps.download-zip.outputs.zip-path }}
+
+            - name: Download and install Chromium browser.
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright install chromium
+
+            - name: Run API tests
+              id: run-api-composite-action
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/api-core-tests/playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Upload Allure artifacts to bucket
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.API_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.API_ALLURE_REPORT_DIR }}
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  artifact-name: ${{ env.API_WP_PRERELEASE_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+
+            - name: Publish API Allure report
+              if: success() || ( failure() && steps.run-api-composite-action.conclusion == 'failure' )
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: wp-latest-beta-rc
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.validate-version.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.validate-version.outputs.version }} \
+                    -f artifact="${{ env.API_WP_PRERELEASE_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="api" \
+                    --repo woocommerce/woocommerce-test-reports
+
+            - name: Reset WP Env
+              working-directory: plugins/woocommerce
+              run: pnpm wp-env clean
+
+            - name: Run E2E tests
+              timeout-minutes: 60
+              id: run-e2e-composite-action
+              env:
+                  USE_WP_ENV: 1
+                  E2E_MAX_FAILURES: 15
+                  FORCE_COLOR: 1
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
+              working-directory: plugins/woocommerce
+              run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
+
+            - name: Generate Test report.
+              if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+              working-directory: plugins/woocommerce
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
+              run: pnpm exec allure generate --clean ${{ env.ALLURE_RESULTS_DIR }} --output ${{ env.ALLURE_REPORT_DIR }}
+
+            - name: Upload Allure artifacts to bucket
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
+              with:
+                  aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
+                  aws-region: ${{ secrets.REPORTS_AWS_REGION }}
+                  aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
+                  artifact-name: ${{ env.E2E_WP_PRERELEASE_ARTIFACT }}
+                  s3-bucket: ${{ secrets.REPORTS_BUCKET }}
+
+            - name: Publish E2E Allure report
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
+              env:
+                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  ENV_DESCRIPTION: wp-latest-1
+              run: |
+                  gh workflow run publish-test-reports-release.yml \
+                    -f created_at="${{ needs.validate-version.outputs.created }}" \
+                    -f run_id=${{ github.run_id }} \
+                    -f run_number=${{ github.run_number }} \
+                    -f release_tag=${{ needs.validate-version.outputs.version }} \
+                    -f artifact="${{ env.E2E_WP_PRERELEASE_ARTIFACT }}" \
+                    -f env_description="${{ env.ENV_DESCRIPTION }}" \
+                    -f test_type="e2e" \
+                    --repo woocommerce/woocommerce-test-reports
+
     # Run API and E2E tests on PHP 7.4 and 8.1
     test-php-versions:
         name: API and E2E against PHP ${{ matrix.php_version }} ${{ matrix.shard.name }}
