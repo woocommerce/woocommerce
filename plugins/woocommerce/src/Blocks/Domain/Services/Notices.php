@@ -47,6 +47,7 @@ class Notices {
 				/**
 				 * Allow classic theme developers to opt-in to using block notices.
 				 *
+				 * @since 8.8.0
 				 * @param bool $use_block_notices_in_classic_theme Whether to use block notices in classic theme.
 				 * @return bool
 				 */
