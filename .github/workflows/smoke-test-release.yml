@@ -579,6 +579,10 @@ jobs:
               working-directory: plugins/woocommerce
               run: pnpm wp-env run tests-cli wp core update ${{ steps.get-wp-url.outputs.url }}
 
+            - name: Run a database update
+              working-directory: plugins/woocommerce
+              run: pnpm wp-env run tests-cli wp core update-db
+
             - name: Download release zip
               id: download-zip
               uses: actions/github-script@v7
