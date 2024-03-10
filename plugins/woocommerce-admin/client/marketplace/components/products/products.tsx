@@ -121,7 +121,7 @@ export default function Products( props: ProductsProps ): JSX.Element {
 
 		return (
 			<>
-				<div className={ 'woocommerce-marketplace__sub-header' }>
+				<div className="woocommerce-marketplace__sub-header">
 					{ props.categorySelector && (
 						<CategorySelector type={ props.type } />
 					) }
