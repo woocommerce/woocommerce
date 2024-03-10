@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
 
 /**
@@ -59,7 +59,7 @@ export default function ProductListContent( props: {
 	return (
 		<div className={ classes }>
 			{ props.products.map( ( product, index ) => (
-				<>
+				<Fragment key={ product.id }>
 					<ProductCard
 						key={ product.id }
 						type={ props.type }
@@ -106,8 +106,10 @@ export default function ProductListContent( props: {
 							} ),
 						} }
 					/>
-					{ index === bannerPosition && <NoAIBanner /> }
-				</>
+					{ index === bannerPosition && (
+						<NoAIBanner sendEvent={ () => {} } />
+					) }
+				</Fragment>
 			) ) }
 		</div>
 	);
