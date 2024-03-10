@@ -18,6 +18,7 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -46,7 +47,6 @@ export default function Products( props: ProductsProps ): JSX.Element {
 	const singularLabel = LABELS[ props.type ].singularLabel;
 	const query = useQuery();
 	const category = query?.category;
-
 	const perPage = props.perPage ?? MARKETPLACE_ITEMS_PER_PAGE;
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
@@ -121,9 +121,19 @@ export default function Products( props: ProductsProps ): JSX.Element {
 
 		return (
 			<>
-				{ props.categorySelector && (
-					<CategorySelector type={ props.type } />
-				) }
+				<div className={ 'woocommerce-marketplace__sub-header' }>
+					{ props.categorySelector && (
+						<CategorySelector type={ props.type } />
+					) }
+					{ props.type === 'theme' && (
+						<Button
+							className="woocommerce-marketplace__customize-your-store-button"
+							variant="secondary"
+							href={ `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store` }
+							text={ __( 'Design your own', 'woocommerce' ) }
+						/>
+					) }
+				</div>
 				<ProductListContent
 					products={ products }
 					type={ props.type }
