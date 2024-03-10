@@ -4,7 +4,7 @@ This feature uses JSON to retrieve the currently recommended payment gateways. T
 
 After merchants click on a recommendation, plugins from this source will then walk through an installer step, followed by a connection step with the minimum required fields for setup defined by the downloaded plugin.
 
-### Quick start
+## Quick start
 
 Gateway suggestions are retrieved from a REST API and can be added via a remote JSON data source or filtered with the `woocommerce_admin_payment_gateway_suggestion_specs` filter.
 
