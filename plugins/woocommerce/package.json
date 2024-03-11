@@ -59,7 +59,7 @@
 		"test:unit:env": "pnpm test:php:env",
 		"test:unit:env:watch": "pnpm test:php:env:watch",
 		"update-wp-env": "php ./tests/e2e-pw/bin/update-wp-env.php",
-		"watch:build": "WC_ADMIN_PHASE=development pnpm --filter='@woocommerce/admin-library' build:project:feature-config && pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:copy-assets": "wireit"
 	},
