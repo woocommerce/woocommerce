@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable MD033 -->
+
 # Totals Footer Item
 
 The following Totals Footer Item filter are available:
