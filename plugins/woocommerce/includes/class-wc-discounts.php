@@ -1065,7 +1065,7 @@ class WC_Discounts {
 			$context_coupon_errors = $coupon->get_context_based_coupon_errors( $e->getCode() );
 
 			if ( ! empty( $context_coupon_errors ) ) {
-				$additional_data['context_based_errors'] = $context_coupon_errors;
+				$additional_data['details'] = $context_coupon_errors;
 			}
 
 			return new WP_Error(

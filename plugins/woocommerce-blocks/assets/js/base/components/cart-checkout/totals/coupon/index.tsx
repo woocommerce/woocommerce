@@ -105,23 +105,17 @@ export const TotalsCoupon = ( {
 				cartError.code === 'woocommerce_rest_cart_coupon_error'
 		)?.[ 0 ];
 
-		if ( ! couponErrors || ! couponErrors?.data?.context_based_errors ) {
+		if ( ! couponErrors || ! couponErrors?.data?.details ) {
 			return;
 		}
 
 		// Check if we're on the cart or checkout page and set the error message accordingly.
-		if (
-			orderId &&
-			orderId > 0 &&
-			couponErrors?.data?.context_based_errors?.checkout
-		) {
+		if ( orderId && orderId > 0 && couponErrors?.data?.details?.checkout ) {
 			// Set the Checkout error message.
-			setErrorMessage(
-				couponErrors?.data?.context_based_errors?.checkout
-			);
-		} else if ( couponErrors?.data?.context_based_errors?.cart ) {
+			setErrorMessage( couponErrors.data.details.checkout );
+		} else if ( couponErrors?.data?.details?.cart ) {
 			// Set the Cart error message.
-			setErrorMessage( couponErrors?.data?.context_based_errors?.cart );
+			setErrorMessage( couponErrors.data.details.cart );
 		}
 	}, [ cartErrors, orderId ] );
 
