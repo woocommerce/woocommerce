@@ -3,6 +3,9 @@
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
+use WC_Helper_Product;
+use WC_Tax;
+use WP_Query;
 
 /**
  * Tests for the ProductCollection block type
@@ -88,6 +91,7 @@ class ProductCollection extends \WP_UnitTestCase {
 				'woocommerceAttributes'  => array(),
 				'woocommerceStockStatus' => array(),
 				'timeFrame'              => array(),
+				'priceRange'             => array(),
 			)
 		);
 
@@ -677,6 +681,10 @@ class ProductCollection extends \WP_UnitTestCase {
 			'timeFrame'              => array(
 				'operator' => 'in',
 				'value'    => $time_frame_date,
+      },
+			'priceRange'             => array(
+				'min' => 1,
+				'max' => 100,
 			),
 		);
 
@@ -730,5 +738,203 @@ class ProductCollection extends \WP_UnitTestCase {
 			),
 			$updated_query['tax_query'],
 		);
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+				'max' => 100,
+			),
+			$updated_query['priceRange'],
+		);
+	}
+
+	/**
+	 * Test that price range queries are set so they can be picked up in the `posts_clauses` filter.
+	 */
+	public function test_price_range_queries() {
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 1,
+			'max' => 100,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+				'max' => 100,
+			),
+			$merged_query['priceRange'],
+		);
+	}
+
+	/**
+	 * Tests that empty price range clauses are not added to the query.
+	 */
+	public function test_price_range_clauses_empty() {
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 0,
+			'max' => 0,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 0,
+				'max' => 0,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		$this->assertStringNotContainsString( 'wc_product_meta_lookup.min_price', $query->request );
+		$this->assertStringNotContainsString( 'wc_product_meta_lookup.max_price', $query->request );
+	}
+
+	/**
+	 * Tests that the minimum in a price range is added if set.
+	 */
+	public function test_price_range_clauses_min_price() {
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 1,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
+	}
+
+	/**
+	 * Tests that the maximum in a price range is added if set.
+	 */
+	public function test_price_range_clauses_max_price() {
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'max' => 1,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'max' => 1,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 1.', $query->request );
+	}
+
+	/**
+	 * Tests that the both the minimum and maximum in a price range is added if set.
+	 */
+	public function test_price_range_clauses_min_max_price() {
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 1,
+			'max' => 2,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+				'max' => 2,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+	}
+
+	/**
+	 * Tests that the both the minimum and maximum in a price range is added if set.
+	 */
+	public function test_price_range_clauses_min_max_price_tax_exclusive() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_shop', 'excl' );
+
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 1,
+			'max' => 2,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+				'max' => 2,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		delete_option( 'woocommerce_tax_display_shop' );
+		delete_option( 'woocommerce_prices_include_tax' );
+
+		$this->assertStringContainsString( 'wc_product_meta_lookup.min_price >= 1.', $query->request );
+		$this->assertStringContainsString( 'wc_product_meta_lookup.max_price <= 2.', $query->request );
+	}
+
+	/**
+	 * Tests that the both the minimum and maximum in a price range with taxes inclusive is added if set.
+	 */
+	public function test_price_range_clauses_min_max_price_tax_inclusive() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+		WC_Tax::create_tax_class( 'collection-test' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_class( 'collection-test' );
+		$product->save();
+
+		$parsed_block                                 = $this->get_base_parsed_block();
+		$parsed_block['attrs']['query']['priceRange'] = array(
+			'min' => 1,
+			'max' => 2,
+		);
+
+		$merged_query = $this->initialize_merged_query( $parsed_block );
+
+		$this->assertEquals(
+			array(
+				'min' => 1,
+				'max' => 2,
+			),
+			$merged_query['priceRange'],
+		);
+
+		$query = new WP_Query( $merged_query );
+
+		delete_option( 'woocommerce_tax_display_shop' );
+		delete_option( 'woocommerce_prices_include_tax' );
+		$product->delete();
+		WC_Tax::delete_tax_class_by( 'slug', 'collection-test' );
+
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`min_price` >= 1.", $query->request );
+		$this->assertStringContainsString( "( wc_product_meta_lookup.tax_class = 'collection-test' AND wc_product_meta_lookup.`max_price` <= 2.", $query->request );
 	}
 }

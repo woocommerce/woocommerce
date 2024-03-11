@@ -67,6 +67,17 @@ final class ReserveStock {
 	 */
 	public function reserve_stock_for_order( $order, $minutes = 0 ) {
 		$minutes = $minutes ? $minutes : (int) get_option( 'woocommerce_hold_stock_minutes', 60 );
+		/**
+		 * Filters the number of minutes an order should reserve stock for.
+		 *
+		 * This hook allows the number of minutes that stock in an order should be reserved for to be filtered, useful for third party developers to increase/reduce the number of minutes if the order meets certain criteria, or to exclude an order from stock reservation using a zero value.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param int       $minutes How long to reserve stock for the order in minutes. Defaults to woocommerce_hold_stock_minutes or 10 if block checkout entry.
+		 * @param \WC_Order $order Order object.
+		 */
+		$minutes = (int) apply_filters( 'woocommerce_order_hold_stock_minutes', $minutes, $order );
 
 		if ( ! $minutes || ! $this->is_enabled() ) {
 			return;
