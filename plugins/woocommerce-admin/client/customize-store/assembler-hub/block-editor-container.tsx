@@ -67,7 +67,11 @@ export const BlockEditorContainer = () => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
 
-	const currentTemplate = useSelect(
+	const currentTemplate:
+		| {
+				id: string;
+		  }
+		| undefined = useSelect(
 		( select ) =>
 			// @ts-expect-error No types for this exist yet.
 			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
@@ -76,7 +80,7 @@ export const BlockEditorContainer = () => {
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
-		currentTemplate.id
+		currentTemplate?.id ?? ''
 	);
 
 	const urlParams = useQuery();
