@@ -38,6 +38,6 @@
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
 		"async-product-editor-category-field": true,
-		"launch-your-store": false
+		"launch-your-store": true
 	}
 }
