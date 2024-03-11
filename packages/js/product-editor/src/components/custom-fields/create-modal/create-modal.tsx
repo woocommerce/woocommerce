@@ -12,42 +12,15 @@ import type { FocusEvent } from 'react';
  * Internal dependencies
  */
 import { TextControl } from '../../text-control';
+import { validate, type ValidationErrors } from '../utils/validations';
 import type { Metadata } from '../../../types';
 import type { CreateModalProps } from './types';
-
-function validateName( value: string ) {
-	if ( ! value ) {
-		return __( 'The name is required.', 'woocommerce' );
-	}
-
-	if ( value.startsWith( '_' ) ) {
-		return __(
-			'The name cannot begin with the underscore (_) character.',
-			'woocommerce'
-		);
-	}
-}
-
-function validateValue( value: string ) {
-	if ( ! value ) {
-		return __( 'The value is required.', 'woocommerce' );
-	}
-}
 
 const DEFAULT_CUSTOM_FIELD = {
 	id: 1,
 	key: '',
 	value: '',
 } satisfies Metadata< string >;
-
-type ValidationErrors = {
-	[ id: string ]:
-		| {
-				name?: string;
-				value?: string;
-		  }
-		| undefined;
-};
 
 export function CreateModal( {
 	onCreate,
@@ -59,57 +32,66 @@ export function CreateModal( {
 	);
 	const [ validationError, setValidationError ] =
 		useState< ValidationErrors >( {} );
-	const inputRefs = useRef< Record< string, HTMLInputElement | null > >( {} );
+	const inputRefs = useRef<
+		Record<
+			string,
+			Record< keyof Metadata< string >, HTMLInputElement | null >
+		>
+	>( {} );
 
 	useEffect( function focusFirstNameInputOnMount() {
-		inputRefs.current[ `name${ DEFAULT_CUSTOM_FIELD.id }` ]?.focus();
+		const firstRef = inputRefs.current[ DEFAULT_CUSTOM_FIELD.id ];
+		firstRef?.key?.focus();
 	}, [] );
 
-	function nameChangeHandler( customField: Metadata< string > ) {
-		return function handleNameChange( key: string ) {
+	function getRef(
+		customField: Metadata< string >,
+		prop: keyof Metadata< string >
+	) {
+		return function setRef( element: HTMLInputElement ) {
+			const id = String( customField.id );
+			inputRefs.current[ id ] = {
+				...inputRefs.current[ id ],
+				[ prop ]: element,
+			};
+		};
+	}
+
+	function getValidationError(
+		customField: Metadata< string >,
+		prop: keyof Metadata< string >
+	) {
+		return validationError[ String( customField.id ) ]?.[ prop ];
+	}
+
+	function changeHandler(
+		customField: Metadata< string >,
+		prop: keyof Metadata< string >
+	) {
+		return function handleChange( value: string ) {
 			setCustomFields( ( current ) =>
 				current.map( ( field ) =>
-					field.id === customField.id ? { ...field, key } : field
+					field.id === customField.id
+						? { ...field, [ prop ]: value }
+						: field
 				)
 			);
 		};
 	}
 
-	function nameBlurHandler( customField: Metadata< string > ) {
-		return function handleNameBlur(
-			event: FocusEvent< HTMLInputElement >
-		) {
-			const error = validateName( event.target.value );
+	function blurHandler(
+		customField: Metadata< string >,
+		prop: keyof Metadata< string >
+	) {
+		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
+			const error = validate( {
+				...customField,
+				[ prop ]: event.target.value,
+			} );
+			const id = String( customField.id );
 			setValidationError( ( current ) => ( {
 				...current,
-				[ `${ customField.id }` ]: {
-					name: error,
-					value: current?.[ `${ customField.id }` ]?.value,
-				},
-			} ) );
-		};
-	}
-
-	function valueChangeHandler( customField: Metadata< string > ) {
-		return function handleValueChange( value: string ) {
-			setCustomFields( ( current ) =>
-				current.map( ( field ) =>
-					field.id === customField.id ? { ...field, value } : field
-				)
-			);
-		};
-	}
-
-	function valueBlurHandler( customField: Metadata< string > ) {
-		return function handleValueBlur(
-			event: FocusEvent< HTMLInputElement >
-		) {
-			const error = validateValue( event.target.value );
-			setValidationError( ( current ) => ( {
-				[ `${ customField.id }` ]: {
-					name: current?.[ `${ customField.id }` ]?.name,
-					value: error,
-				},
+				[ id ]: error,
 			} ) );
 		};
 	}
@@ -145,15 +127,14 @@ export function CreateModal( {
 	function handleAddButtonClick() {
 		const { errors, hasErrors } = customFields.reduce(
 			( prev, customField ) => {
-				const errors = {
-					name: validateName( customField.key ),
-					value: validateValue( customField.value ?? '' ),
-				};
-				prev.errors[ `${ customField.id }` ] = errors;
+				const errors = validate( customField );
+				prev.errors[ String( customField.id ) ] = errors;
 
-				if ( errors.name ) {
+				if ( errors.key ) {
 					if ( ! prev.hasErrors ) {
-						inputRefs.current[ `name${ customField.id }` ]?.focus();
+						inputRefs.current[
+							String( customField.id )
+						]?.key?.focus();
 					}
 					prev.hasErrors = true;
 				}
@@ -161,8 +142,8 @@ export function CreateModal( {
 				if ( errors.value ) {
 					if ( ! prev.hasErrors ) {
 						inputRefs.current[
-							`value${ customField.id }`
-						]?.focus();
+							String( customField.id )
+						]?.value?.focus();
 					}
 					prev.hasErrors = true;
 				}
@@ -200,32 +181,21 @@ export function CreateModal( {
 						className="woocommerce-product-custom-fields__create-modal-list-item"
 					>
 						<TextControl
-							ref={ ( element ) => {
-								inputRefs.current[ `name${ customField.id }` ] =
-									element;
-							} }
+							ref={ getRef( customField, 'key' ) }
 							label={ __( 'Name', 'woocommerce' ) }
-							error={
-								validationError[ `${ customField.id }` ]?.name
-							}
+							error={ getValidationError( customField, 'key' ) }
 							value={ customField.key }
-							onChange={ nameChangeHandler( customField ) }
-							onBlur={ nameBlurHandler( customField ) }
+							onChange={ changeHandler( customField, 'key' ) }
+							onBlur={ blurHandler( customField, 'key' ) }
 						/>
 
 						<TextControl
-							ref={ ( element ) => {
-								inputRefs.current[
-									`value${ customField.id }`
-								] = element;
-							} }
+							ref={ getRef( customField, 'value' ) }
 							label={ __( 'Value', 'woocommerce' ) }
-							error={
-								validationError[ `${ customField.id }` ]?.value
-							}
+							error={ getValidationError( customField, 'value' ) }
 							value={ customField.value }
-							onChange={ valueChangeHandler( customField ) }
-							onBlur={ valueBlurHandler( customField ) }
+							onChange={ changeHandler( customField, 'value' ) }
+							onBlur={ blurHandler( customField, 'value' ) }
 						/>
 
 						<Button
