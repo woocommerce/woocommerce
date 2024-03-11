@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEntityProp } from '@wordpress/core-data';
-import { dispatch, useSelect, select as WPSelect } from '@wordpress/data';
+import { dispatch, useSelect, select as wpSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import type { Product, ProductStatus } from '@woocommerce/data';
 
@@ -72,7 +72,7 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
-			const { blocks, content, selection, ...editedProduct } = WPSelect(
+			const { blocks, content, selection, ...editedProduct } = wpSelect(
 				'core'
 				// @ts-expect-error There are no types for this.
 			).getEditedEntityRecord( 'postType', postType, id );
