@@ -37,5 +37,16 @@ export function useCustomFields<
 		setMetas( [ ...internalMetas, ...newValue ] );
 	}
 
-	return { customFields, setCustomFields };
+	function updateCustomField( customField: T ) {
+		setCustomFields( ( current ) =>
+			current.map( ( field ) => {
+				if ( customField.id && field.id === customField.id ) {
+					return customField;
+				}
+				return field;
+			} )
+		);
+	}
+
+	return { customFields, setCustomFields, updateCustomField };
 }
