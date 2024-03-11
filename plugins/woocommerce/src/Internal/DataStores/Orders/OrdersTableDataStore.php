@@ -634,7 +634,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @param \WC_Abstract_Order $order Source order.
 	 * @param array              $args  Update args.
-	 * @throws \Exception When an error occurs.
+	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order, $args = array() ) {
 		$args = wp_parse_args(
@@ -647,11 +647,11 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		$hpos_order = new \WC_Order();
 		$hpos_order->set_id( $order->get_id() );
 		$this->read( $hpos_order );
-		$hpos_order->set_props( $new_values );
+		$hpos_order->set_props( $order->get_data() );
 
 		if ( ! $args['props'] ) {
 			$hpos_order->save();
-			return;
+			return true;
 		}
 
 		$allowed_columns = $this->get_column_names_for_props( $args['props'] );
@@ -676,6 +676,8 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 
 			$this->database_util->insert_on_duplicate_key_update( $db_update['table'], $db_update['data'], array_values( $db_update['format'] ) );
 		}
+
+		return true;
 	}
 
 	/**
