@@ -81,6 +81,10 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
+
+		// Disable client-side-navigation if incompatible blocks are detected.
+		add_filter( 'render_block_data',  array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+
 	}
 
 	/**
@@ -232,6 +236,76 @@ class ProductCollection extends AbstractBlock {
 				$processor->set_attribute( 'data-wc-on--mouseenter', 'actions.prefetchOnHover' );
 			}
 		}
+	}
+
+	function disable_enhanced_pagination( $parsed_block ) {
+		static $enhanced_query_stack                = array();
+		static $dirty_enhanced_queries              = array();
+		static $render_product_collection_callback  = null;
+
+		$block_name = $parsed_block['blockName'];
+
+		if (
+			'woocommerce/product-collection' === $block_name &&
+			isset( $parsed_block['attrs']['enhancedPagination'] ) &&
+			true === $parsed_block['attrs']['enhancedPagination'] &&
+			isset( $parsed_block['attrs']['queryId'] )
+		) {
+			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
+
+			if ( ! isset( $render_product_collection_callback ) ) {
+				/**
+				 * Filter that disables the enhanced pagination feature during block
+				 * rendering when a plugin block has been found inside. It does so
+				 * by adding an attribute called `data-wp-navigation-disabled` which
+				 * is later handled by the front-end logic.
+				 *
+				 * @param string   $content  The block content.
+				 * @param array    $block    The full block, including name and attributes.
+				 * @return string Returns the modified output of the query block.
+				 */
+				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
+					$has_enhanced_pagination =
+						isset( $block['attrs']['enhancedPagination'] ) &&
+						true === $block['attrs']['enhancedPagination'] &&
+						isset( $block['attrs']['queryId'] );
+
+					if ( ! $has_enhanced_pagination ) {
+						return $content;
+					}
+
+					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
+						// Disable navigation in the router store config.
+						wp_interactivity_config( 'woocommerce/product-collection', array( 'clientNavigationDisabled' => true ) );
+						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
+					}
+
+					array_pop( $enhanced_query_stack );
+
+					if ( empty( $enhanced_query_stack ) ) {
+						remove_filter( 'render_product_collectio', $render_product_collection_callback );
+						$render_product_collection_callback = null;
+					}
+
+					return $content;
+				};
+
+				add_filter( 'render_product_collectio', $render_product_collection_callback, 10, 2 );
+			}
+		} elseif (
+			! empty( $enhanced_query_stack ) &&
+			isset( $block_name ) &&
+			( ! str_starts_with( $block_name, 'core/' ) ||
+			  ! str_starts_with( $block_name, 'woocommerce/') ||
+			  'core/post-content' === $block_name ||
+			  'woocommerce/post-content' === $block_name )
+		) {
+			foreach ( $enhanced_query_stack as $query_id ) {
+				$dirty_enhanced_queries[ $query_id ] = true;
+			}
+		}
+
+		return $parsed_block;
 	}
 
 	/**

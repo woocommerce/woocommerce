@@ -38,6 +38,11 @@ const isValidEvent = ( event: MouseEvent ) =>
 	! event.shiftKey &&
 	! event.defaultPrevented;
 
+const forcePageReload = ( href: string ) => {
+	window.location.assign( href );
+	return new Promise( () => {} );
+};
+
 /**
  * Ensures the visibility of the first product in the collection.
  * Scrolls the page to the first product if it's not in the viewport.
@@ -98,6 +103,11 @@ const productCollectionStore = {
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
 
+				const { clientNavigationDisabled } = getConfig();
+				if ( clientNavigationDisabled ) {
+					yield forcePageReload( ref.href );
+				}
+
 				// Don't start animation if it doesn't take long to navigate.
 				const timeout = setTimeout( () => {
 					ctx.accessibilityMessage = ctx.accessibilityLoadingMessage;
@@ -142,6 +152,11 @@ const productCollectionStore = {
 		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
+			const { clientNavigationDisabled } = getConfig();
+			if ( clientNavigationDisabled ) {
+				return;
+			}
+
 			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
