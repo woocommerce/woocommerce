@@ -448,7 +448,8 @@ export class EditorUtils {
 			name: 'Reset',
 		} );
 		const waitForReset = this.page
-			.getByLabel( `"${ templateName }" reverted.` )
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( `"${ templateName }" reverted.` )
 			.waitFor();
 		await resetButton.click();
 		await waitForReset;
