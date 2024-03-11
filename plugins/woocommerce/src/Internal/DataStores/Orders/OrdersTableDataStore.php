@@ -644,37 +644,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			)
 		);
 
-		if ( $args['props'] ) {
-			// Check props are valid.
-			$invalid_props = array();
-			$new_values    = array();
-
-			foreach ( (array) $args['props'] as $prop_name ) {
-				if ( ! method_exists( $order, "get_{$prop_name}" ) ) {
-					$invalid_props[] = $prop_name;
-				} else {
-					$new_values[ $prop_name ] = $order->{"get_{$prop_name}"}();
-				}
-			}
-
-			if ( ! empty( $invalid_props ) ) {
-				throw new \Exception(
-					sprintf(
-						// translators: %s is a list of order property names.
-						_n(
-							'%s is not a valid order property.',
-							'%s are not valid order properties.',
-							count( $invalid_props ),
-							'woocommerce'
-						),
-						implode( ', ', $invalid_props )
-					)
-				);
-			}
-		} else {
-			$new_values = $order->get_data();
-		}
-
 		$hpos_order = new \WC_Order();
 		$hpos_order->set_id( $order->get_id() );
 		$this->read( $hpos_order );

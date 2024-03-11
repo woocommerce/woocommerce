@@ -398,8 +398,35 @@ class LegacyDataHandler {
 				throw new \Exception( __( 'The backup datastore does not support updating orders.', 'woocommerce' ) );
 			}
 
-			$dest_order->set_props( $src_order->get_data() );
-			$datastore->update_order_from_object( $dest_order, array( 'props' => $fields['props'] ) );
+			// Check props are valid.
+			$invalid_props = array();
+			$new_values    = array();
+
+			foreach ( (array) $fields['props'] as $prop_name ) {
+				if ( ! method_exists( $src_order, "get_{$prop_name}" ) ) {
+					$invalid_props[] = $prop_name;
+				} else {
+					$new_values[ $prop_name ] = $src_order->{"get_{$prop_name}"}();
+				}
+			}
+
+			if ( ! empty( $invalid_props ) ) {
+				throw new \Exception(
+					sprintf(
+						// translators: %s is a list of order property names.
+						_n(
+							'%s is not a valid order property.',
+							'%s are not valid order properties.',
+							count( $invalid_props ),
+							'woocommerce'
+						),
+						implode( ', ', $invalid_props )
+					)
+				);
+			}
+
+			$dest_order->set_props( $new_values );
+			$datastore->update_order_from_object( $dest_order, 'hpos' === $destination_data_store ? array( 'props' => $fields['props'] ) : array() );
 		}
 	}
 
