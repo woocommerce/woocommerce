@@ -127,10 +127,10 @@ export function CreateModal( {
 	function handleAddButtonClick() {
 		const { errors, hasErrors } = customFields.reduce(
 			( prev, customField ) => {
-				const errors = validate( customField );
-				prev.errors[ String( customField.id ) ] = errors;
+				const _errors = validate( customField );
+				prev.errors[ String( customField.id ) ] = _errors;
 
-				if ( errors.key ) {
+				if ( _errors.key ) {
 					if ( ! prev.hasErrors ) {
 						inputRefs.current[
 							String( customField.id )
@@ -139,7 +139,7 @@ export function CreateModal( {
 					prev.hasErrors = true;
 				}
 
-				if ( errors.value ) {
+				if ( _errors.value ) {
 					if ( ! prev.hasErrors ) {
 						inputRefs.current[
 							String( customField.id )
