@@ -1,0 +1,15 @@
+.wp-block-woocommerce-product-custom-fields-toggle-field {
+	&__content {
+		display: flex;
+		gap: $grid-unit;
+		align-items: center;
+
+		.components-spinner {
+			margin: 0;
+		}
+	}
+
+	&__inner-blocks {
+		margin-top: $grid-unit-60;
+	}
+}

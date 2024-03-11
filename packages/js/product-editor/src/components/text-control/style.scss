@@ -1,0 +1,12 @@
+.woocommerce-product-text-control {
+	&.has-error {
+		.components-input-control__container
+			.components-input-control__backdrop {
+			border-color: $studio-red-50;
+		}
+
+		.components-base-control__help {
+			color: $studio-red-50;
+		}
+	}
+}

@@ -1049,8 +1049,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'BG' => array( 'stripe', 'ppcp-gateway' ),
-			'HR' => array( 'ppcp-gateway' ),
+			'BG' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'HR' => array( 'woocommerce_payments', 'ppcp-gateway' ),
 			'CH' => array(
 				'woocommerce_payments',
 				'stripe',
@@ -1058,15 +1058,16 @@ class DefaultPaymentGateways {
 				'mollie_wc_gateway_banktransfer',
 				'klarna_payments',
 			),
-			'CY' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
-			'CZ' => array( 'stripe', 'ppcp-gateway' ),
+			'CY' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'CZ' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
 			'DK' => array(
+				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'EE' => array( 'stripe', 'ppcp-gateway', 'airwallex_main' ),
+			'EE' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'airwallex_main' ),
 			'ES' => array(
 				'woocommerce_payments',
 				'stripe',
@@ -1077,6 +1078,7 @@ class DefaultPaymentGateways {
 				'amazon_payments_advanced',
 			),
 			'FI' => array(
+				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'mollie_wc_gateway_banktransfer',
@@ -1112,8 +1114,8 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'GR' => array( 'stripe', 'ppcp-gateway' ),
-			'HU' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'GR' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'airwallex_main' ),
+			'HU' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
 			'IE' => array(
 				'woocommerce_payments',
 				'stripe',
@@ -1131,10 +1133,10 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'LV' => array( 'stripe', 'ppcp-gateway' ),
-			'LT' => array( 'stripe', 'ppcp-gateway' ),
-			'LU' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
-			'MT' => array( 'stripe', 'ppcp-gateway' ),
+			'LV' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'LT' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'LU' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'MT' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
 			'NL' => array(
 				'woocommerce_payments',
 				'stripe',
@@ -1144,7 +1146,7 @@ class DefaultPaymentGateways {
 				'klarna_payments',
 				'amazon_payments_advanced',
 			),
-			'NO' => array( 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ),
+			'NO' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'kco', 'klarna_payments' ),
 			'PL' => array(
 				'woocommerce_payments',
 				'stripe',
@@ -1157,12 +1159,14 @@ class DefaultPaymentGateways {
 				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
+				'airwallex_main',
 				'amazon_payments_advanced',
 			),
-			'RO' => array( 'stripe', 'ppcp-gateway' ),
-			'SK' => array( 'stripe', 'ppcp-gateway' ),
-			'SL' => array( 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
+			'RO' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'SK' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway' ),
+			'SL' => array( 'woocommerce_payments', 'stripe', 'ppcp-gateway', 'amazon_payments_advanced' ),
 			'SE' => array(
+				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'kco',
@@ -1213,6 +1217,7 @@ class DefaultPaymentGateways {
 				'payoneer-checkout',
 			),
 			'JP' => array(
+				'woocommerce_payments',
 				'stripe',
 				'ppcp-gateway',
 				'square_credit_card',
@@ -1227,6 +1232,7 @@ class DefaultPaymentGateways {
 			'ZA' => array( 'payfast', 'paystack' ),
 			'NG' => array( 'paystack' ),
 			'GH' => array( 'paystack' ),
+			'AE' => array( 'woocommerce_payments' ),
 		);
 
 		// If the country code is not in the list, return default priority.
