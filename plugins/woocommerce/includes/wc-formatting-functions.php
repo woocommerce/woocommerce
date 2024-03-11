@@ -1300,7 +1300,7 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 
 	// for accessibility (a11y) we'll also display that information to screen readers
 	$price .= '<span class="screen-reader-text">';
-	$price .= sprintf( esc_html__( 'Original price was: %s.', 'woocommerce' ), $formatted_regular_price );
+	$price .= esc_html( sprintf( __( 'Original price was: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_regular_price ) ) );
 	$price .= '</span>';
 
 	// add the sale price
@@ -1308,7 +1308,7 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 
 	// for accessibility (a11y) we'll also display that information to screen readers
 	$price .= '<span class="screen-reader-text">';
-	$price .= sprintf( esc_html__( 'Current price is: %s.', 'woocommerce' ), $formatted_sale_price );
+	$price .= esc_html( sprintf( __( 'Current price is: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_sale_price ) ) );
 	$price .= '</span>';
 
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
