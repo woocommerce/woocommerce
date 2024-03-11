@@ -17,7 +17,7 @@ export const useLaunchYourStore = () => {
 		const { hasFinishedResolution, getOption } =
 			select( OPTIONS_STORE_NAME );
 
-		const isLoading =
+		const allOptionResolutionsFinished =
 			! hasFinishedResolution( 'getOption', [ 'launch-status' ] ) &&
 			! hasFinishedResolution( 'getOption', [
 				'woocommerce_coming_soon',
@@ -31,7 +31,7 @@ export const useLaunchYourStore = () => {
 			! hasFinishedResolution( 'getOption', [ 'woocommerce_share_key' ] );
 
 		return {
-			isLoading,
+			isLoading: allOptionResolutionsFinished,
 			launchStatus: getOption( 'launch-status' ),
 			comingSoon: getOption( 'woocommerce_coming_soon' ),
 			storePagesOnly: getOption( 'woocommerce_store_pages_only' ),

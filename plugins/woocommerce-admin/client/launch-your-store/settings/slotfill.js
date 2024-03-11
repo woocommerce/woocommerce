@@ -9,10 +9,7 @@ import {
 import { useState, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { withSelect } from '@wordpress/data';
 import classNames from 'classnames';
-import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
