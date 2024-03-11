@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Filters the quantity validation for a cart item being updated via the Store API.
