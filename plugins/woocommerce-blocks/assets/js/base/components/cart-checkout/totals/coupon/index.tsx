@@ -88,7 +88,7 @@ export const TotalsCoupon = ( {
 		}
 	};
 
-	const [ errorMessage, setErrorMessage ] = useState( [] );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const { cartErrors } = useSelect( ( select ) => {
 		return {
 			cartErrors: select( 'wc/store/cart' ).getCartErrors(),
@@ -123,7 +123,7 @@ export const TotalsCoupon = ( {
 			// Set the Cart error message.
 			setErrorMessage( couponErrors?.data?.context_based_errors?.cart );
 		}
-	}, [ cartErrors ] );
+	}, [ cartErrors, orderId ] );
 
 	return (
 		<div className="wc-block-components-totals-coupon">
