@@ -12,7 +12,7 @@ import { registerProductEditorBlockType } from '../../../utils';
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import { Edit } from './edit';
+import { TextFieldBlockEdit } from './edit';
 import { TextBlockAttributes } from './types';
 
 const { name, ...metadata } =
@@ -22,7 +22,7 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: Edit,
+	edit: TextFieldBlockEdit,
 };
 
 export const init = () =>

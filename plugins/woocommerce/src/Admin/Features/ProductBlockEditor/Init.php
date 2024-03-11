@@ -77,6 +77,8 @@ class Init {
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
 
+			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -378,5 +380,26 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+	}
+
+	/**
+	 * Registers the metadata block attribute for all block types.
+	 *
+	 * @param array $args Array of arguments for registering a block type.
+	 * @return array $args
+	 */
+	public function register_metadata_attribute( $args ) {
+		// Setup attributes if needed.
+		if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		if ( ! array_key_exists( 'metadata', $args['attributes'] ) ) {
+			$args['attributes']['metadata'] = array(
+				'type' => 'object',
+			);
+		}
+
+		return $args;
 	}
 }

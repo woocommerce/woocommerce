@@ -3,6 +3,7 @@
  */
 import registerProductEditorUiStore from './store/product-editor-ui';
 import registerProductEditorHooks from './wp-hooks';
+import registerCoreParagraphBindingSource from './bindings';
 
 export * from './components';
 export {
@@ -26,6 +27,11 @@ export * from './utils';
  * Store
  */
 export * from './store/product-editor-ui';
+
+/*
+ * Bindings
+ */
+registerCoreParagraphBindingSource();
 
 /**
  * Hooks

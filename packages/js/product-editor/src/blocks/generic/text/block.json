@@ -8,6 +8,10 @@
 	"keywords": [ "products", "text" ],
 	"textdomain": "default",
 	"attributes": {
+		"value": {
+			"type": "string",
+			"__experimentalRole": "content"
+		},
 		"label": {
 			"type": "string",
 			"__experimentalRole": "content"

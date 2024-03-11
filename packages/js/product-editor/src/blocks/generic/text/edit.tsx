@@ -13,14 +13,14 @@ import { Icon, external } from '@wordpress/icons';
  */
 import { TextControl } from '../../../components/text-control';
 import { useValidation } from '../../../contexts/validation-context';
-import { useProductEdits } from '../../../hooks/use-product-edits';
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { TextBlockAttributes } from './types';
+import { useProductEdits } from '../../../hooks/use-product-edits';
+import { getBlockBoundSourePropsList } from '../../../bindings-sources/entity/product';
 
-export function Edit( {
+export function TextFieldBlockEdit( {
 	attributes,
-	context: { postType },
+	setAttributes,
 }: ProductEditorBlockEditProps< TextBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
@@ -39,12 +39,12 @@ export function Edit( {
 		disabled,
 		type,
 		suffix,
+		value,
 	} = attributes;
 
-	const [ value, setValue ] = useProductEntityProp< string >( property, {
-		postType,
-		fallbackValue: '',
-	} );
+	const setValue = ( newValue: string ) => {
+		setAttributes( { value: newValue } );
+	};
 
 	const { hasEdit } = useProductEdits();
 
@@ -167,7 +167,18 @@ export function Edit( {
 				label={ label }
 				onChange={ setValue }
 				onBlur={ () => {
-					if ( hasEdit( property ) ) {
+					/*
+					 * Check if the value attribute is bound
+					 * to a product entity property.
+					 * We consider, by convention, the block should have
+					 * only one bound attribute.
+					 * @todo: `hasEdit` should be removed when the block is
+					 * refactored to use the new binding system.
+					 */
+					const boundAttribute =
+						getBlockBoundSourePropsList( attributes )?.[ 0 ];
+
+					if ( hasEdit( boundAttribute ) ) {
 						validate();
 					}
 				} }
