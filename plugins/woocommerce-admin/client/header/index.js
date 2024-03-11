@@ -100,9 +100,9 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const { isLoading, launchStatus, showLaunchYourStore } =
+	const { isLoading, launchStatus, launchYourStoreEnabled } =
 		useLaunchYourStore();
-	const showLaunchYourStoreStatus = showLaunchYourStore && ! isLoading;
+	const showLaunchYourStoreStatus = launchYourStoreEnabled && ! isLoading;
 
 	return (
 		<div className={ className } ref={ headerElement }>

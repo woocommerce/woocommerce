@@ -5,7 +5,7 @@ import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
 export const useLaunchYourStore = () => {
-	const { isLoading, launchStatus, showLaunchYourStore } = useSelect(
+	const { isLoading, launchStatus, launchYourStoreEnabled } = useSelect(
 		( select ) => {
 			const { hasFinishedResolution, getOption } =
 				select( OPTIONS_STORE_NAME );
@@ -32,7 +32,7 @@ export const useLaunchYourStore = () => {
 				storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
 				privateLink: getOption( 'woocommerce_private_link' ),
 				shareKey: getOption( 'woocommerce_share_key' ),
-				showLaunchYourStore:
+				launchYourStoreEnabled:
 					window.wcAdminFeatures[ 'launch-your-store' ],
 			};
 		}
@@ -41,6 +41,6 @@ export const useLaunchYourStore = () => {
 	return {
 		isLoading,
 		launchStatus,
-		showLaunchYourStore,
+		launchYourStoreEnabled,
 	};
 };
