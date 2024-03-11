@@ -5,7 +5,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { StrictMode, useEffect, useMemo } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { useSelect, useDispatch } from '@wordpress/data';
