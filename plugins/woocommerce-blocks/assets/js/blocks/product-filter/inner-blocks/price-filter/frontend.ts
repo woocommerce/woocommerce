@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@woocommerce/interactivity';
+import { store, getContext, getElement } from '@woocommerce/interactivity';
 import { formatPrice, getCurrency } from '@woocommerce/price-format';
 import { HTMLElementEvent } from '@woocommerce/types';
 
@@ -70,16 +70,27 @@ store< PriceFilterStore >( 'woocommerce/product-filter-price', {
 				type === 'min'
 					? Math.min(
 							Number.isNaN( value ) ? minRange : value,
-							maxRange - 1
+							maxPrice
 					  )
 					: minPrice;
 			const currentMaxPrice =
 				type === 'max'
 					? Math.max(
 							Number.isNaN( value ) ? maxRange : value,
-							minRange + 1
+							minPrice
 					  )
 					: maxPrice;
+
+			// In some occasions the input element is updated with the incorrect value.
+			// By using the element that triggered the event, we can ensure the correct value is used for the input.
+			const element = getElement();
+			if ( type === 'min' ) {
+				element.ref.value = currentMinPrice;
+			}
+
+			if ( type === 'max' ) {
+				element.ref.value = currentMaxPrice;
+			}
 
 			context.minPrice = currentMinPrice;
 			context.maxPrice = currentMaxPrice;

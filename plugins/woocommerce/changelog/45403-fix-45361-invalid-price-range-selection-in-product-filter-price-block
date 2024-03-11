@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an issue where shoppers could select invalid price ranges in the Product Filter: Price (Beta) block
