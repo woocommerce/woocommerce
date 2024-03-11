@@ -80,6 +80,7 @@ class WC_Product_Traits {
 		foreach ( $product_traits as $trait ) {
 			if ( is_string( $trait ) && class_exists( $trait ) ) {
 				$this->product_traits[ $trait::get_slug() ] = $trait;
+				$trait::add_hooks();
 			}
         }
 	}
