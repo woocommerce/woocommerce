@@ -88,7 +88,7 @@ The `totalValue` filter allows to format the total price in the footer of the Ca
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
 
 const modifyTotalsPrice = ( defaultValue, extensions, args, validation ) => {
-	return "You'll have to pay <price/> right away";
+	return 'Pay <price/> now';
 };
 
 registerCheckoutFilters( 'my-extension', {
@@ -104,11 +104,11 @@ registerCheckoutFilters( 'my-extension', {
 <tr>
 <td valign="top">Before:
 <br><br>
-...
+<img width="361" alt="Before applying the Total Value filter" src="https://github.com/woocommerce/woocommerce/assets/3323310/4b788bdd-6fbd-406c-a9ad-4fb13f901c23">
 </td>
 <td valign="top">After:
 <br><br>
-...
+<img width="355" alt="After applying the Total Value filter" src="https://github.com/woocommerce/woocommerce/assets/3323310/1b1b5f72-7f2f-4ee5-b2a4-1d8eb2208deb">
 </td>
 </tr>
 </table>
