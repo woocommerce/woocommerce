@@ -9,58 +9,42 @@ import {
 import { useState, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { withSelect } from '@wordpress/data';
 import classNames from 'classnames';
-import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { SETTINGS_SLOT_FILL_CONSTANT } from '../settings/settings-slots';
+import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
+import { useLaunchYourStore } from '../use-launch-your-store';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const SiteVisibility = ( {
-	woocommerce_coming_soon,
-	woocommerce_store_pages_only,
-	woocommerce_private_link,
-	isLoading,
-	placeholder = false,
-} ) => {
-	const [ comingSoon, setComingSoon ] = useState( woocommerce_coming_soon );
+const SiteVisibility = () => {
+	const {
+		isLoading,
+		comingSoon: initialComingSoon = false,
+		storePagesOnly: initialStorePagesOnly = false,
+		privateLink: initialPrivateLink = false,
+	} = useLaunchYourStore();
+	const [ comingSoon, setComingSoon ] = useState( initialComingSoon );
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
-		woocommerce_store_pages_only
+		initialStorePagesOnly
 	);
-	const [ privateLink, setPrivateLink ] = useState(
-		woocommerce_private_link
-	);
+	const [ privateLink, setPrivateLink ] = useState( initialPrivateLink );
 
 	useEffect( () => {
-		setComingSoon( woocommerce_coming_soon );
-		setStorePagesOnly( woocommerce_store_pages_only );
-		setPrivateLink( woocommerce_private_link );
-	}, [
-		woocommerce_coming_soon,
-		woocommerce_store_pages_only,
-		woocommerce_private_link,
-	] );
-
-	if ( isLoading ) {
-		return (
-			<SiteVisibility
-				woocommerce_lys_setting_coming_soon={ 'yes' }
-				isLoading={ false }
-				placeholder={ true }
-			/>
-		);
-	}
+		if ( ! isLoading ) {
+			setComingSoon( initialComingSoon );
+			setStorePagesOnly( initialStorePagesOnly );
+			setPrivateLink( initialPrivateLink );
+		}
+	}, [ isLoading ] );
 
 	return (
 		<div
 			className={ classNames( 'site-visibility-settings-slotfill', {
-				placeholder,
+				placeholder: isLoading,
 			} ) }
 		>
 			<input
@@ -179,35 +163,10 @@ const SiteVisibility = ( {
 	);
 };
 
-const SiteVisibilityComponent = compose(
-	withSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
-		return {
-			woocommerce_coming_soon: getOption( 'woocommerce_coming_soon' ),
-			woocommerce_store_pages_only: getOption(
-				'woocommerce_store_pages_only'
-			),
-			woocommerce_private_link: getOption( 'woocommerce_private_link' ),
-			isLoading:
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_coming_soon',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_store_pages_only',
-				] ) ||
-				! hasFinishedResolution( 'getOption', [
-					'woocommerce_private_link',
-				] ),
-		};
-	} )
-)( SiteVisibility );
-
 const SiteVisibilitySlotFill = () => {
 	return (
 		<Fill>
-			<SiteVisibilityComponent />
+			<SiteVisibility />
 		</Fill>
 	);
 };
