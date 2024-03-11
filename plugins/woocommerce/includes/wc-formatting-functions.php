@@ -1290,8 +1290,8 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	
-	// format the prices 
+
+	// format the prices
 	$formatted_regular_price = is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price;
 	$formatted_sale_price = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
 
