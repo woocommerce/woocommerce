@@ -1179,7 +1179,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		switch ( $err_code ) {
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
 				return array(
-				    /* translators: %s: coupon code */
+					/* translators: %s: coupon code */
 					'cart'     => sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
 					/* translators: %s: coupon code */
 					'checkout' => sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
