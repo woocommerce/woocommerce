@@ -3,7 +3,6 @@
  */
 import { useSelect } from '@wordpress/data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { isConversionPossible } from '@woocommerce/blocks/classic-shortcode/cart';
 
 const unsupportedBlocks = [
 	'core/post-content',
