@@ -1,14 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/product-custom-fields-toggle-field",
-	"title": "Product custom fields toggle control",
+	"name": "woocommerce/product-custom-fields",
+	"title": "Product custom fields control",
 	"category": "woocommerce",
-	"description": "The product custom fields toggle.",
+	"description": "The product custom fields.",
 	"keywords": [ "products", "custom", "fields" ],
 	"textdomain": "default",
 	"attributes": {
-		"label": {
+		"name": {
 			"type": "string",
 			"__experimentalRole": "content"
 		}
@@ -22,5 +22,6 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
+	"usesContext": [ "postType" ],
 	"editorStyle": "file:./editor.css"
 }

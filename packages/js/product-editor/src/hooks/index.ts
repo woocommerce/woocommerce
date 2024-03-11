@@ -1,3 +1,4 @@
+export { useCustomFields as __experimentalUseCustomFields } from './use-custom-fields';
 export { useProductHelper as __experimentalUseProductHelper } from './use-product-helper';
 export { useFeedbackBar as __experimentalUseFeedbackBar } from './use-feedback-bar';
 export { useVariationsOrder as __experimentalUseVariationsOrder } from './use-variations-order';
