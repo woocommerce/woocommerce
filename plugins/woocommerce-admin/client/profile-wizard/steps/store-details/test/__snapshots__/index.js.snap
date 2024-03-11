@@ -459,7 +459,7 @@ Object {
                     <input
                       autocomplete="address-line1"
                       class="components-text-control__input"
-                       id="woocommerce-store-address-form-address_1"
+                      id="woocommerce-store-address-form-address_1"
                       placeholder="Address"
                       type="text"
                       value=""
