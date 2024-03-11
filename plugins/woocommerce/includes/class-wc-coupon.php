@@ -90,7 +90,14 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public $sort = 0;
 
-	/**
+    /**
+     * Error message.
+     *
+     * @var string
+     */
+    protected $error_message = '';
+
+    /**
 	 * Coupon constructor. Loads coupon data.
 	 *
 	 * @param mixed $data Coupon data, object, ID or code.
