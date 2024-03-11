@@ -12,7 +12,11 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+import {
+	CoreCollectionNames,
+	CoreFilterNames,
+	ETimeFrameOperator,
+} from '../types';
 
 const collection = {
 	name: CoreCollectionNames.NEW_ARRIVALS,
@@ -37,6 +41,10 @@ const attributes = {
 		order: 'desc',
 		perPage: 5,
 		pages: 1,
+		timeFrame: {
+			operator: ETimeFrameOperator.IN,
+			value: '-7 days',
+		},
 	},
 	collection: collection.name,
 	hideControls: [ CoreFilterNames.INHERIT, CoreFilterNames.ORDER ],
