@@ -36,6 +36,14 @@ const SiteVisibility = () => {
 	);
 	const [ privateLink, setPrivateLink ] = useState( initialPrivateLink );
 
+	useEffect( () => {
+		if ( ! isLoading ) {
+			setComingSoon( initialComingSoon );
+			setStorePagesOnly( initialStorePagesOnly );
+			setPrivateLink( initialPrivateLink );
+		}
+	}, [ isLoading ] );
+
 	return (
 		<div
 			className={ classNames( 'site-visibility-settings-slotfill', {
