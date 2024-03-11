@@ -681,7 +681,7 @@ class ProductCollection extends \WP_UnitTestCase {
 			'timeFrame'              => array(
 				'operator' => 'in',
 				'value'    => $time_frame_date,
-      },
+			},
 			'priceRange'             => array(
 				'min' => 1,
 				'max' => 100,
