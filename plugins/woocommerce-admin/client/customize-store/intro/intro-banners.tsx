@@ -229,6 +229,10 @@ export const NoAIBanner = () => {
 	}, [] );
 
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/design',
+	} );
 
 	return (
 		<>
@@ -244,13 +248,7 @@ export const NoAIBanner = () => {
 					if ( ! isDefaultTheme ) {
 						setIsModalOpen( true );
 					} else {
-						window.location.href = addQueryArgs(
-							`${ ADMIN_URL }admin.php`,
-							{
-								page: 'wc-admin',
-								path: '/customize-store/design',
-							}
-						);
+						window.location.href = customizeStoreDesignUrl;
 					}
 				} }
 				showAIDisclaimer={ false }
@@ -288,13 +286,7 @@ export const NoAIBanner = () => {
 									window,
 									`${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign`
 								);
-								window.location.href = addQueryArgs(
-									`${ ADMIN_URL }admin.php`,
-									{
-										page: 'wc-admin',
-										path: '/customize-store/design',
-									}
-								);
+								window.location.href = customizeStoreDesignUrl;
 								setIsModalOpen( false );
 								recordEvent(
 									'customize_your_store_agree_to_theme_switch_click'
