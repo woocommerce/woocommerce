@@ -32,6 +32,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected $list_table_type = 'product';
 
+
+	private $ai_suggestions = array();
+
 	/**
 	 * Constructor.
 	 */
@@ -117,6 +120,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$show_columns['cb']    = '<input type="checkbox" />';
 		$show_columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$show_columns['name']  = __( 'Name', 'woocommerce' );
+		
+		$show_columns['insights'] = '<img class="wc-product-name-suggestions__magic-image" src="http://wcp-tk.jurassic.tube/wp-content/plugins/woo-ai/build/a86a63a783db1e6b9597.svg" alt="AI suggestions" title="AI suggestions">';
 
 		if ( wc_product_sku_enabled() ) {
 			$show_columns['sku'] = __( 'SKU', 'woocommerce' );
@@ -146,9 +151,71 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		// $orders_stats_ai_suggestions = $this->ask_ai_about_insights_for_orders_stats( $url, $token );
 
 		// products
-		$products_ai_suggestions = $this->ask_ai_for_products_ingights( $url, $token );
+		// $products_ai_suggestions = $this->ask_ai_for_products_ingights( $url, $token );
+
+
+		// NEW: suggest price increases for popular products, and reductions for overstocked ones
+		$this->get_product_insights( $url, $token, $connection );
+		// use items_sold and orders_count to determine popularity
+
 
 		return array_merge( $show_columns, $columns );
+	}
+
+	private function get_product_insights( $url, $token, $connection ) {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
+		$start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
+		$end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				'before' => $end_date,
+				'after'  => $start_date,
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		$json_data = rest_do_request( $request );
+		$json_object = json_encode( $json_data );
+		
+		$prompt = implode("\n", [
+			'You are a WooCommerce expert.',
+			'Analyze the provided WooCommerce product data, focusing on items_sold, net_revenue, orders_count, stock_quantity, and price, to predict an optimal pricing strategy. Use correlations between sales performance, demand, and supply to generate a succinct price suggestion.',
+			'Outcome: Deliver a single, insightful sentence for every product on the recommended price adjustment for maximum revenue, considering demand-supply dynamics. Make sure that the suggestion is short and contains as much useful information as possible (e.g. percents)',
+			'Your response should contain json object with list of products and their insights, where object key is product_id and value contains the single insightful sentence.',
+			'From all the products, choose four main products that need most attention for price increase or decrease, and keep only them in the response.',
+			$json_object,
+		]);
+
+		$body = array(
+			'feature' => 'ai-product-suggestions',
+			'prompt'  => $prompt,
+			'token'   => $token,
+		);
+
+		// $can_be_run = get_transient('can_be_run_transient'); // Get the value from the transient
+		
+
+		// if (! $can_be_run) {
+			$test = $connection->fetch_ai_response( $token, $prompt, 20 );
+			$this->ai_suggestions = json_decode($test['completion'], true)['data'];
+
+			// $can_be_run = false; // Set to false after running
+			// set_transient('can_be_run_transient', true, 120); // Create transient for two minutes
+		// } else {
+		// 	$this->ai_suggestions = []; // Return empty array if cannot be run
+		// }
+
+
+		// $insights = wp_remote_post(
+		// 	$url,
+		// 	array(
+		// 		'body'    => $body,
+		// 		'timeout' => 20,
+		// 	)
+		// );
+		// $this->ai_suggestions = $insights;
+		// return $insights;
+		return [];
 	}
 
 	private function ask_ai_for_products_ingights( $url, $token ) {
@@ -186,7 +253,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				'timeout' => 20,
 			)
 		);
-		return $response;
+		
+		// return $response;
 	
 	}
 
@@ -366,6 +434,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_sku_column() {
 		echo $this->object->get_sku() ? esc_html( $this->object->get_sku() ) : '<span class="na">&ndash;</span>';
+	}
+
+	protected function render_insights_column() {
+		// map body json to array of ids and insights
+		if ( ! empty( $this->ai_suggestions[ $this->object->get_id() ] ) && null !== $this->ai_suggestions[ $this->object->get_id() ] ) {
+			echo '<img class="wc-product-name-suggestions__magic-image" src="http://wcp-tk.jurassic.tube/wp-content/plugins/woo-ai/build/a86a63a783db1e6b9597.svg" alt="" title="' . esc_attr( $this->ai_suggestions[ $this->object->get_id() ] ) . '">';
+		}
+		echo "";
 	}
 
 	/**
