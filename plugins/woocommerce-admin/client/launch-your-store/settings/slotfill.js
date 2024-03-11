@@ -17,8 +17,8 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { SETTINGS_SLOT_FILL_CONSTANT } from '../settings/settings-slots';
-import { useLaunchYourStore } from './use-launch-your-store';
+import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
+import { useLaunchYourStore } from '../use-launch-your-store';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
