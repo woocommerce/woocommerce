@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { closeSmall } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
@@ -21,8 +22,12 @@ export function CustomFields( {
 	renderActionButtonsWrapper = ( buttons ) => buttons,
 	...props
 }: CustomFieldsProps ) {
-	const { customFields, addCustomFields, updateCustomField } =
-		useCustomFields();
+	const {
+		customFields,
+		addCustomFields,
+		updateCustomField,
+		removeCustomField,
+	} = useCustomFields();
 
 	const [ showCreateModal, setShowCreateModal ] = useState( false );
 	const [ selectedCustomField, setSelectedCustomField ] =
@@ -41,6 +46,14 @@ export function CustomFields( {
 	) {
 		return function handleCustomFieldEditButtonClick() {
 			setSelectedCustomField( customField );
+		};
+	}
+
+	function customFieldRemoveButtonClickHandler(
+		customField: Metadata< string >
+	) {
+		return function handleCustomFieldRemoveButtonClick() {
+			removeCustomField( customField );
 		};
 	}
 
@@ -105,6 +118,17 @@ export function CustomFields( {
 								>
 									{ __( 'Edit', 'woocommerce' ) }
 								</Button>
+
+								<Button
+									icon={ closeSmall }
+									onClick={ customFieldRemoveButtonClickHandler(
+										customField
+									) }
+									aria-label={ __(
+										'Remove custom field',
+										'woocommerce'
+									) }
+								/>
 							</td>
 						</tr>
 					) ) }
