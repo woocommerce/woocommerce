@@ -12,7 +12,7 @@ composer require woocommerce/remote-specs-validation
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------- |
 | remote-inbox-notification.json    | <https://woocommerce.com/wp-json/wccom/inbox-notifications/2.0/notifications.json>                     | remote-inbox-notification    |
 | payment-gateway-suggestions.json  | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json>               | payment-gateway-suggestions  |
-| obw-free-extensions.json          | <https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json>                        | obw-free-extensions          |
+| obw-free-extensions.json          | <https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json>                        | obw-free-extensions          |
 | wc-pay-promotions.json            | <https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/payment-method/promotions.json> | wc-pay-promotions            |
 | shipping-partner-suggestions.json | <https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/2.0/suggestions.json>              | shipping-partner-suggestions |
 
