@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Creation of dynamic property WC_Coupon::$error_message PHP deprecation notice
