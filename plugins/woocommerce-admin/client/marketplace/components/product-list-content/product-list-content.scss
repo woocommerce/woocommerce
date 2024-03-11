@@ -23,6 +23,14 @@
 	.woocommerce-customize-store-banner-content {
 		margin-top: 63px;
 	}
+
+	&__browse-wp-theme-directory {
+		margin-top: 24px;
+
+		a {
+			text-decoration: none;
+		}
+	}
 }
 
 @media screen and (min-width: $breakpoint-medium) {
