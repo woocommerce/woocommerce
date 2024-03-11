@@ -681,11 +681,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		if ( is_null( get_post( $order->get_id() ) ) ) {
 			// Attempt to create the backup post if missing.
 			unset( $post_data['ID'] );
-			$post_data['import_id']        = $order->get_id();
+			$post_data['import_id'] = $order->get_id();
 
 			$updated = wp_insert_post( $post_data, true, false );
 		} else {
-			$updated   = wp_update_post( $post_data, true );
+			$updated = wp_update_post( $post_data, true );
 		}
 
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
