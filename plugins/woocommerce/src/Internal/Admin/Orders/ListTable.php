@@ -5,9 +5,12 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Exception;
 use WC_Order;
 use WP_List_Table;
 use WP_Screen;
+
+use function WP_CLI\Utils\esc_cmd;
 
 /**
  * Admin list table for orders as managed by the OrdersTableDataStore.
@@ -856,6 +859,7 @@ class ListTable extends WP_List_Table {
 			array(
 				'cb'               => '<input type="checkbox" />',
 				'order_number'     => esc_html__( 'Order', 'woocommerce' ),
+				'ai_suggestions'   => esc_html__( 'Suggestions', 'woocommerce' ),
 				'order_date'       => esc_html__( 'Date', 'woocommerce' ),
 				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
 				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),

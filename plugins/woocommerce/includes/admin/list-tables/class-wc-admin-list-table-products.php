@@ -6,6 +6,8 @@
  * @version  3.3.0
  */
 
+use Automattic\WooCommerce\Blocks\AI\Connection;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -130,7 +132,164 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
 		$show_columns['date']        = __( 'Date', 'woocommerce' );
 
+		$connection = new Connection();
+		$site_id = $connection->get_site_id();
+		$token = $connection->get_jwt_token( $site_id );
+		// send request to AI through front-end and text-completion API
+		$url = 'https://public-api.wordpress.com/wpcom/v2/text-completion';
+
+		// /wc-analytics/reports/products/stats
+		// $products_stats_ai_suggestions = $this->ask_ai_about_insights_for_products_stats( $url, $token );
+
+
+		// orders/stats
+		// $orders_stats_ai_suggestions = $this->ask_ai_about_insights_for_orders_stats( $url, $token );
+
+		// products
+		$products_ai_suggestions = $this->ask_ai_for_products_ingights( $url, $token );
+
 		return array_merge( $show_columns, $columns );
+	}
+
+	private function ask_ai_for_products_ingights( $url, $token ) {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
+		$start_date = '2023-12-01 00:00:00';
+		$end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				'before' => $end_date,
+				'after'  => $start_date,
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		$products = rest_do_request( $request )->data;
+		$json_object = json_encode( $json_data );
+		$prompt = implode("\n", [
+			'You are a WooCommerce expert.',
+			'Analyze the following report which contains reports for products on the store, and give three main insights you made based on this, especially for orders_count numbers for different products.',
+			'Your response should be in json.',
+			'',
+			$json_object,
+		]);
+
+		$body = array(
+			'feature' => 'ai-product-suggestions',
+			'prompt'  => $prompt,
+			'token'   => $token,
+		);
+
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => $body,
+				'timeout' => 20,
+			)
+		);
+		return $response;
+	
+	}
+
+	private function ask_ai_about_insights_for_orders_stats( $url, $token ) {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/orders/stats' );
+		$start_date = '2023-12-01 00:00:00';
+		$end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				'before' => $end_date,
+				'after'  => $start_date,
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		$order_stats = rest_do_request( $request );
+		$a = 1;
+		
+	}
+
+	private function ask_ai_about_insights_for_products_stats( $url, $token ) {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products/stats' );
+		$start_date = '2023-12-01 00:00:00';
+		$end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				'before' => $end_date,
+				'after'  => $start_date,
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		$second_response = rest_do_request( $request );
+		
+		// $request = new WP_REST_Request('GET', '/wc/v3/reports/sales');
+		// $request->set_query_params([
+		// 	// Set any necessary query parameters for the request
+		// 	'date_min' => '2024-01-01',
+		// 	'date_max' => '2024-02-31',
+		// ]);
+		// // Dispatch the request
+		// $response = rest_do_request($request);
+
+		// intervals
+		// stard date
+		// end date
+
+		// items sold
+		// net revenue
+		// orders count
+		// product count
+				
+		// for each interval in $second_response->data['intervals'], get 
+		// date_start, date_end, subtotals['items_sold'], subtotals['net_revenue'], subtotals['orders_count'], subtotals['products_count']
+		// put them in a json object
+
+		$json_data = array();
+
+		foreach ( $second_response->data['intervals'] as $interval ) {
+			$date_start = $interval['date_start'];
+			$date_end = $interval['date_end'];
+			$items_sold = $interval['subtotals']->items_sold;
+			$net_revenue = $interval['subtotals']->net_revenue;
+			$orders_count = $interval['subtotals']->orders_count;
+			$products_count = $interval['subtotals']->products_count;
+
+			$data = array(
+				'date_start' => $date_start,
+				'date_end' => $date_end,
+				'items_sold' => $items_sold,
+				'net_revenue' => $net_revenue,
+				'orders_count' => $orders_count,
+				'products_count' => $products_count,
+			);
+
+			$json_data[] = $data;
+		}
+		
+		
+		
+		$json_object = json_encode( $json_data );
+		$prompt = implode("\n", [
+			'You are a WooCommerce expert.',
+			'Analyze the following report which contains store selling performance, and give three main insights you made based on this. The report object is grouped by date intervals.',
+			'Your response should be in json.',
+			'',
+			$json_object,
+		]);
+
+		$body = array(
+			'feature' => 'ai-product-suggestions',
+			'prompt'  => $prompt,
+			'token'   => $token,
+		);
+
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => $body,
+				'timeout' => 20,
+			)
+		);
+		return $response;
 	}
 
 	/**
