@@ -282,10 +282,6 @@ export const NoAIBanner = () => {
 						</Button>
 						<Button
 							onClick={ () => {
-								navigateOrParent(
-									window,
-									`${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign`
-								);
 								window.location.href = customizeStoreDesignUrl;
 								setIsModalOpen( false );
 								recordEvent(
