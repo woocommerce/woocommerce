@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -95,6 +96,15 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect((select) => {
+		return select('core').getCurrentTheme() as Theme;
+	}, []);
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
@@ -104,6 +114,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted && !isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
