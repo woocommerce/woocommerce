@@ -633,47 +633,31 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * Updates an order (in this datastore) from another order object.
 	 *
 	 * @param \WC_Abstract_Order $order Source order.
-	 * @param array              $args  Update args.
 	 * @return bool Whether the order was updated.
 	 */
-	public function update_order_from_object( $order, $args = array() ) {
-		$args = wp_parse_args(
-			$args,
-			array(
-				'props' => array(),
-			)
-		);
-
+	public function update_order_from_object( $order ) {
 		$hpos_order = new \WC_Order();
 		$hpos_order->set_id( $order->get_id() );
 		$this->read( $hpos_order );
 		$hpos_order->set_props( $order->get_data() );
 
-		if ( ! $args['props'] ) {
-			$hpos_order->save();
-			return true;
+		// Meta keys.
+		foreach ( $hpos_order->get_meta_data() as &$meta ) {
+			$hpos_order->delete_meta_data( $meta->key );
 		}
 
-		$allowed_columns = $this->get_column_names_for_props( $args['props'] );
-		$db_rows         = $this->get_db_rows_for_order( $hpos_order, 'update', true );
+		foreach ( $order->get_meta_data() as &$meta ) {
+			$hpos_order->add_meta_data( $meta->key, $meta->value );
+		}
 
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		$hpos_order->save_meta_data();
+		remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+
+		$db_rows = $this->get_db_rows_for_order( $hpos_order, 'update', true );
 		foreach ( $db_rows as $db_update ) {
-			// Prevent accidental update of another prop by limiting columns to explicitly requested props.
-			if ( ! array_intersect_key( $db_update['data'], array_flip( $allowed_columns ) ) ) {
-				continue;
-			}
-
-			$allowed_column_names_with_ids = array_merge(
-				$allowed_columns,
-				array( 'id', 'order_id', 'address_type' )
-			);
-
-			$db_update['data']   = array_intersect_key( $db_update['data'], array_flip( $allowed_column_names_with_ids ) );
-			$db_update['format'] = array_intersect_key( $db_update['format'], array_flip( $allowed_column_names_with_ids ) );
-
 			ksort( $db_update['data'] );
 			ksort( $db_update['format'] );
-
 			$this->database_util->insert_on_duplicate_key_update( $db_update['table'], $db_update['data'], array_values( $db_update['format'] ) );
 		}
 
@@ -2050,7 +2034,24 @@ FROM $order_meta_table
 		 */
 		$ext_rows = apply_filters( 'woocommerce_orders_table_datastore_extra_db_rows_for_order', array(), $order, $context );
 
-		return array_merge( $result, $ext_rows );
+		/**
+		 * Filters the rows that are going to be inserted or updated during an order save.
+		 *
+		 * @since 8.8.0
+		 * @internal Use 'woocommerce_orders_table_datastore_extra_db_rows_for_order' for adding rows to the database save.
+		 *
+		 * @param array     $rows    Array of rows to be inserted/updated. See 'woocommerce_orders_table_datastore_extra_db_rows_for_order' for exact format.
+		 * @param \WC_Order $order   The order object.
+		 * @param string    $context The context of the operation: 'create' or 'update'.
+		 */
+		$result = apply_filters(
+			'woocommerce_orders_table_datastore_db_rows_for_order',
+			array_merge( $result, $ext_rows ),
+			$order,
+			$context
+		);
+
+		return $result;
 	}
 
 	/**
@@ -3058,31 +3059,17 @@ CREATE TABLE $meta_table (
 		$current_time      = $this->legacy_proxy->call_function( 'current_time', 'mysql', 1 );
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
 
-		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
-	}
-
-	/**
-	 * Returns a mapping of order property => column name (as in HPOS tables) for a set of order properties.
-	 *
-	 * @since 8.8.0
-	 *
-	 * @param array $props Order properties to fetch column names for.
-	 * @return array<string,string> Array of column names indexed by order property name.
-	 */
-	protected function get_column_names_for_props( array $props = array() ) : array {
-		$result = array();
-
-		foreach ( $this->get_all_order_column_mappings() as &$mapping ) {
-			foreach ( $mapping as $column_name => &$column_data ) {
-				if ( ! isset( $column_data['name'] ) || ! in_array( $column_data['name'], $props, true ) ) {
-					continue;
-				}
-
-				$result[ $column_data['name'] ] = $column_name;
-			}
-		}
-
-		return $result;
+		/**
+		 * Allows code to skip a full order save() when metadata is changed.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param bool $should_save Whether to trigger a full save after metadata is changed.
+		 */
+		return apply_filters(
+			'woocommerce_orders_table_datastore_should_save_after_meta_change',
+			$order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) )
+		);
 	}
 
 }

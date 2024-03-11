@@ -337,8 +337,8 @@ class LegacyDataHandler {
 		$fields    = array_filter( $fields );
 		$src_order = $this->get_order_from_datastore( $order_id, $source_data_store );
 
+		// Backfill entire orders.
 		if ( ! $fields ) {
-			// Backfill entire orders.
 			if ( 'posts' === $destination_data_store ) {
 				$src_order->get_data_store()->backfill_post_record( $src_order );
 			} elseif ( 'hpos' === $destination_data_store ) {
@@ -348,33 +348,22 @@ class LegacyDataHandler {
 			return;
 		}
 
+		$this->validate_backfill_fields( $fields, $src_order );
+
 		$dest_order = $this->get_order_from_datastore( $src_order->get_id(), $destination_data_store );
+
+		if ( 'posts' === $destination_data_store ) {
+			$datastore = $this->data_store->get_cpt_data_store_instance();
+		} elseif ( 'hpos' === $destination_data_store ) {
+			$datastore = $this->data_store;
+		}
+
+		if ( ! $datastore || ! method_exists( $datastore, 'update_order_from_object' ) ) {
+			throw new \Exception( __( 'The backup datastore does not support updating orders.', 'woocommerce' ) );
+		}
 
 		// Backfill meta.
 		if ( ! empty( $fields['meta_keys'] ) ) {
-			$internal_meta_keys = array_unique(
-				array_merge(
-					$src_order->get_data_store()->get_internal_meta_keys(),
-					$dest_order->get_data_store()->get_internal_meta_keys()
-				)
-			);
-
-			$possibly_internal_keys = array_intersect( $internal_meta_keys, $fields['meta_keys'] );
-			if ( ! empty( $possibly_internal_keys ) ) {
-				throw new \Exception(
-					sprintf(
-						// translators: %s is a comma separated list of metakey names.
-						_n(
-							'%s is an internal meta key. Use --props to set it.',
-							'%s are internal meta keys. Use --props to set them.',
-							count( $possibly_internal_keys ),
-							'woocommerce'
-						),
-						implode( ', ', $possibly_internal_keys )
-					)
-				);
-			}
-
 			foreach ( $fields['meta_keys'] as $meta_key ) {
 				$dest_order->delete_meta_data( $meta_key );
 
@@ -382,53 +371,39 @@ class LegacyDataHandler {
 					$dest_order->add_meta_data( $meta_key, $meta->value );
 				}
 			}
-
-			$dest_order->save_meta_data();
 		}
 
 		// Backfill props.
 		if ( ! empty( $fields['props'] ) ) {
-			if ( 'posts' === $destination_data_store ) {
-				$datastore = $this->data_store->get_cpt_data_store_instance();
-			} elseif ( 'hpos' === $destination_data_store ) {
-				$datastore = $this->data_store;
-			}
-
-			if ( ! $datastore || ! method_exists( $datastore, 'update_order_from_object' ) ) {
-				throw new \Exception( __( 'The backup datastore does not support updating orders.', 'woocommerce' ) );
-			}
-
-			// Check props are valid.
-			$invalid_props = array();
-			$new_values    = array();
-
-			foreach ( (array) $fields['props'] as $prop_name ) {
-				if ( ! method_exists( $src_order, "get_{$prop_name}" ) ) {
-					$invalid_props[] = $prop_name;
-				} else {
-					$new_values[ $prop_name ] = $src_order->{"get_{$prop_name}"}();
-				}
-			}
-
-			if ( ! empty( $invalid_props ) ) {
-				throw new \Exception(
-					sprintf(
-						// translators: %s is a list of order property names.
-						_n(
-							'%s is not a valid order property.',
-							'%s are not valid order properties.',
-							count( $invalid_props ),
-							'woocommerce'
-						),
-						implode( ', ', $invalid_props )
-					)
-				);
-			}
+			$new_values = array_combine(
+				$fields['props'],
+				array_map(
+					fn( $prop_name ) => $src_order->{"get_{$prop_name}"}(),
+					$fields['props']
+				)
+			);
 
 			$dest_order->set_props( $new_values );
 			$dest_order->apply_changes();
-			$datastore->update_order_from_object( $dest_order, 'hpos' === $destination_data_store ? array( 'props' => $fields['props'] ) : array() );
+
+			if ( 'hpos' === $destination_data_store ) {
+				$limit_cb = function( $rows, $order ) use ( $dest_order, $fields ) {
+					if ( $dest_order->get_id() === $order->get_id() ) {
+						$rows = $this->limit_hpos_update_to_props( $rows, $fields['props'] );
+					}
+
+					return $rows;
+				};
+				add_filter( 'woocommerce_orders_table_datastore_db_rows_for_order', $limit_cb, 10, 2 );
+			}
 		}
+
+		$datastore->update_order_from_object( $dest_order );
+
+		if ( 'hpos' === $destination_data_store && isset( $limit_cb ) ) {
+			remove_filter( 'woocommerce_orders_table_datastore_db_rows_for_order', $limit_cb );
+		}
+
 	}
 
 	/**
@@ -465,6 +440,112 @@ class LegacyDataHandler {
 		}
 
 		return $base_props;
+	}
+
+	/**
+	 * Filters a set of HPOS row updates to those matching a specific set of order properties.
+	 * Hooked onto 'woocommerce_orders_table_datastore_db_rows_for_order'.
+	 *
+	 * @param array    $rows  Details for the db update.
+	 * @param string[] $props Order property names.
+	 * @return array
+	 * @see OrdersTableDataStore::get_db_rows_for_order()
+	 */
+	private function limit_hpos_update_to_props( array $rows, array $props ) {
+		// Determine HPOS columns corresponding to the props in the $props array.
+		$allowed_columns = array();
+		foreach ( $this->data_store->get_all_order_column_mappings() as &$mapping ) {
+			foreach ( $mapping as $column_name => &$column_data ) {
+				if ( ! isset( $column_data['name'] ) || ! in_array( $column_data['name'], $props, true ) ) {
+					continue;
+				}
+
+				$allowed_columns[ $column_data['name'] ] = $column_name;
+			}
+		}
+
+		foreach ( $rows as $i => &$db_update ) {
+			// Prevent accidental update of another prop by limiting columns to explicitly requested props.
+			if ( ! array_intersect_key( $db_update['data'], array_flip( $allowed_columns ) ) ) {
+				unset( $rows[ $i ] );
+				continue;
+			}
+
+			$allowed_column_names_with_ids = array_merge(
+				$allowed_columns,
+				array( 'id', 'order_id', 'address_type' )
+			);
+
+			$db_update['data']   = array_intersect_key( $db_update['data'], array_flip( $allowed_column_names_with_ids ) );
+			$db_update['format'] = array_intersect_key( $db_update['format'], array_flip( $allowed_column_names_with_ids ) );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Validates meta_keys and property names for a partial order backfill.
+	 *
+	 * @param array              $fields An array possibly having entries with index 'meta_keys' and/or 'props',
+	 *                                   corresponding to an array of order meta keys and/or order properties.
+	 * @param \WC_Abstract_Order $order  The order being validated.
+	 * @throws \Exception When a validation error occurs.
+	 * @return void
+	 */
+	private function validate_backfill_fields( array $fields, \WC_Abstract_Order $order ) {
+		if ( ! $fields ) {
+			return;
+		}
+
+		if ( ! empty( $fields['meta_keys'] ) ) {
+			$internal_meta_keys = array_unique(
+				array_merge(
+					$this->data_store->get_internal_meta_keys(),
+					$this->data_store->get_cpt_data_store_instance()->get_internal_meta_keys()
+				)
+			);
+
+			$possibly_internal_keys = array_intersect( $internal_meta_keys, $fields['meta_keys'] );
+			if ( ! empty( $possibly_internal_keys ) ) {
+				throw new \Exception(
+					sprintf(
+						// translators: %s is a comma separated list of metakey names.
+						_n(
+							'%s is an internal meta key. Use --props to set it.',
+							'%s are internal meta keys. Use --props to set them.',
+							count( $possibly_internal_keys ),
+							'woocommerce'
+						),
+						implode( ', ', $possibly_internal_keys )
+					)
+				);
+			}
+		}
+
+		if ( ! empty( $fields['props'] ) ) {
+			$invalid_props = array_filter(
+				$fields['props'],
+				function( $prop_name ) use ( $order ) {
+					return ! method_exists( $order, "get_{$prop_name}" );
+				}
+			);
+
+			if ( ! empty( $invalid_props ) ) {
+				throw new \Exception(
+					sprintf(
+						// translators: %s is a list of order property names.
+						_n(
+							'%s is not a valid order property.',
+							'%s are not valid order properties.',
+							count( $invalid_props ),
+							'woocommerce'
+						),
+						implode( ', ', $invalid_props )
+					)
+				);
+			}
+		}
+
 	}
 
 }
