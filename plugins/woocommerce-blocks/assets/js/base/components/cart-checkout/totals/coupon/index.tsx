@@ -11,9 +11,12 @@ import {
 	ValidationInputError,
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
-import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import classnames from 'classnames';
 import type { MouseEvent, MouseEventHandler } from 'react';
+import {
+	CHECKOUT_STORE_KEY,
+	VALIDATION_STORE_KEY,
+} from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -92,28 +95,34 @@ export const TotalsCoupon = ( {
 		};
 	} );
 
-	useEffect( () => {
-		console.log( cartErrors );
+	const orderId = useSelect( ( select ) =>
+		select( CHECKOUT_STORE_KEY ).getOrderId()
+	);
 
+	useEffect( () => {
 		const couponErrors = cartErrors.filter(
 			( cartError ) =>
 				cartError.code === 'woocommerce_rest_cart_coupon_error'
 		)?.[ 0 ];
 
-		if ( couponErrors ) {
-			if ( couponErrors?.data?.context_based_errors ) {
-				// check if we're on the cart or checkout page and set the error message accordingly
-
-				//set the cart error message
-				setErrorMessage(
-					couponErrors?.data?.context_based_errors?.checkout
-				);
-			}
+		if ( ! couponErrors || ! couponErrors?.data?.context_based_errors ) {
+			return;
 		}
 
-		// Get the error from cart store
-		// Do the logic to work out which error to display based on the errorID
-		// Update the state with the error code
+		// Check if we're on the cart or checkout page and set the error message accordingly.
+		if (
+			orderId &&
+			orderId > 0 &&
+			couponErrors?.data?.context_based_errors?.checkout
+		) {
+			// Set the Checkout error message.
+			setErrorMessage(
+				couponErrors?.data?.context_based_errors?.checkout
+			);
+		} else if ( couponErrors?.data?.context_based_errors?.cart ) {
+			// Set the Cart error message.
+			setErrorMessage( couponErrors?.data?.context_based_errors?.cart );
+		}
 	}, [ cartErrors ] );
 
 	return (
