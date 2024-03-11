@@ -290,7 +290,7 @@ jobs:
                   env-slug: wp-latest
                   release-version: ${{ needs.validate-version.outputs.version }}
 
-    # Run E2E tests on WP Latest-1 (previous stable)
+    # Run API and E2E tests on WP Latest-1 (previous stable)
     test-wp-latest-1:
         name: API and E2E against WP Latest-1 ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
@@ -413,7 +413,6 @@ jobs:
               id: run-e2e-composite-action
               env:
                   USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
@@ -651,7 +650,6 @@ jobs:
               id: run-e2e-composite-action
               env:
                   USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
@@ -815,7 +813,6 @@ jobs:
               id: run-e2e-composite-action
               env:
                   USE_WP_ENV: 1
-                  E2E_MAX_FAILURES: 15
                   FORCE_COLOR: 1
               working-directory: plugins/woocommerce
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
