@@ -447,8 +447,11 @@ export class EditorUtils {
 		const resetButton = templateRow.getByRole( 'button', {
 			name: 'Reset',
 		} );
+		const waitForReset = this.page
+			.getByLabel( `"${ templateName }" reverted.` )
+			.waitFor();
 		await resetButton.click();
-		await this.page.getByLabel( `"${ templateName }" reverted.` ).waitFor();
+		await waitForReset;
 	}
 
 	async updatePost() {
