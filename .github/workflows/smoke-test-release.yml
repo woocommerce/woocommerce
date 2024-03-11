@@ -469,7 +469,7 @@ jobs:
                   test-name: WP Latest-1 (${{ steps.get-wp-latest-1.outputs.version }})-${{ matrix.shard.number }}
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
                   e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: wp-latest-1
+                  env-slug: wp-latest-1-shard-${{ matrix.shard.number }}
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     merge-wp-latest-1:
@@ -867,7 +867,7 @@ jobs:
                   test-name: PHP ${{ matrix.php_version }}
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
                   e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: php-${{ matrix.php_version }}
+                  env-slug: php-${{ matrix.php_version }}-shard-${{ matrix.shard.number }}
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run E2E tests on WP Latest with different plugins
