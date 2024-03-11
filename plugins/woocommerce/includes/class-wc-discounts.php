@@ -1059,8 +1059,7 @@ class WC_Discounts {
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
 			$additional_data = array(
-				'status'            => 400,
-				'coupon_error_code' => $e->getCode()
+				'status' => 400,
 			);
 
 			$context_coupon_errors = $coupon->get_context_based_coupon_errors( $e->getCode() );
