@@ -426,6 +426,7 @@ class LegacyDataHandler {
 			}
 
 			$dest_order->set_props( $new_values );
+			$dest_order->apply_changes();
 			$datastore->update_order_from_object( $dest_order, 'hpos' === $destination_data_store ? array( 'props' => $fields['props'] ) : array() );
 		}
 	}
