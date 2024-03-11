@@ -210,7 +210,7 @@ export class EditorUtils {
 				name: 'Edit',
 				exact: true,
 			} )
-			.click();
+			.dispatchEvent( 'click' );
 
 		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
 			state: 'hidden',
