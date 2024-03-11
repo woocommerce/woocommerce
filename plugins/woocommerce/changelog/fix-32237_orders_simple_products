@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Include simple product support in the attributes filter within the analytics orders view.
