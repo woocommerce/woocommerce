@@ -3,17 +3,17 @@
 /**
  * External dependencies
  */
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
+// @ts-expect-error No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
 import { useQuery } from '@woocommerce/navigation';
+// @ts-expect-error No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 import { useCallback, useContext, useMemo } from '@wordpress/element';
 
@@ -49,7 +49,7 @@ const findPageIdByBlockClientId = ( event: MouseEvent ) => {
 	if ( navLink ) {
 		const blockClientId = navLink.getAttribute( 'data-block' );
 		const navLinkBlocks =
-			// @ts-ignore No types for this exist yet.
+			// @ts-expect-error No types for this exist yet.
 			select( blockEditorStore ).getBlocksByClientId( blockClientId );
 
 		if ( navLinkBlocks && navLinkBlocks.length ) {
