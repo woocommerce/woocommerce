@@ -9,6 +9,7 @@ import classnames from 'classnames';
  */
 import './product-list-content.scss';
 import '~/customize-store/intro/intro.scss';
+import '~/customize-store/style.scss';
 import ProductCard from '../product-card/product-card';
 import { Product, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
@@ -106,9 +107,7 @@ export default function ProductListContent( props: {
 							} ),
 						} }
 					/>
-					{ index === bannerPosition && (
-						<NoAIBanner sendEvent={ () => {} } />
-					) }
+					{ index === bannerPosition && <NoAIBanner /> }
 				</Fragment>
 			) ) }
 		</div>

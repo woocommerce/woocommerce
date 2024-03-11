@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
 import { Button, Modal } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
@@ -16,7 +17,7 @@ import { useSelect } from '@wordpress/data';
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 
 export const BaseIntroBanner = ( {
@@ -217,11 +218,7 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
-export const NoAIBanner = ( {
-	sendEvent,
-}: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
-} ) => {
+export const NoAIBanner = () => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
 		stylesheet?: string;
@@ -247,9 +244,13 @@ export const NoAIBanner = ( {
 					if ( ! isDefaultTheme ) {
 						setIsModalOpen( true );
 					} else {
-						sendEvent( {
-							type: 'DESIGN_WITHOUT_AI',
-						} );
+						window.location.href = addQueryArgs(
+							`${ ADMIN_URL }admin.php`,
+							{
+								page: 'wc-admin',
+								path: '/customize-store/design',
+							}
+						);
 					}
 				} }
 				showAIDisclaimer={ false }
@@ -283,9 +284,17 @@ export const NoAIBanner = ( {
 						</Button>
 						<Button
 							onClick={ () => {
-								sendEvent( {
-									type: 'DESIGN_WITHOUT_AI',
-								} );
+								navigateOrParent(
+									window,
+									`${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign`
+								);
+								window.location.href = addQueryArgs(
+									`${ ADMIN_URL }admin.php`,
+									{
+										page: 'wc-admin',
+										path: '/customize-store/design',
+									}
+								);
 								setIsModalOpen( false );
 								recordEvent(
 									'customize_your_store_agree_to_theme_switch_click'
