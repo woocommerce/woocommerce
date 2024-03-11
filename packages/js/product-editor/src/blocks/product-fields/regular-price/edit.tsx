@@ -8,7 +8,6 @@ import { Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
-import { useEntityProp } from '@wordpress/core-data';
 import {
 	createElement,
 	createInterpolateElement,
@@ -32,21 +31,16 @@ import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
+	setAttributes,
 	clientId,
-	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, isRequired, tooltip } = attributes;
-	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
-		'postType',
-		context.postType || 'product',
-		'regular_price'
-	);
-	const [ salePrice ] = useEntityProp< string >(
-		'postType',
-		context.postType || 'product',
-		'sale_price'
-	);
+	const { label, help, isRequired, tooltip, regularPrice, salePrice } =
+		attributes;
+
+	const setRegularPrice = ( newPrice: string ) =>
+		setAttributes( { regularPrice: newPrice } );
+
 	const inputProps = useCurrencyInputProps( {
 		value: regularPrice,
 		onChange: setRegularPrice,

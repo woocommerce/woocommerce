@@ -5,7 +5,6 @@ import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
-import { useEntityProp } from '@wordpress/core-data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -26,20 +25,14 @@ import { Label } from '../../../components/label/label';
 export function Edit( {
 	attributes,
 	clientId,
-	context,
+	setAttributes,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, tooltip } = attributes;
-	const [ regularPrice ] = useEntityProp< string >(
-		'postType',
-		context.postType || 'product',
-		'regular_price'
-	);
-	const [ salePrice, setSalePrice ] = useEntityProp< string >(
-		'postType',
-		context.postType || 'product',
-		'sale_price'
-	);
+	const { label, help, tooltip, regularPrice, salePrice } = attributes;
+
+	const setSalePrice = ( newPrice: string ) =>
+		setAttributes( { salePrice: newPrice } );
+
 	const inputProps = useCurrencyInputProps( {
 		value: salePrice,
 		onChange: setSalePrice,

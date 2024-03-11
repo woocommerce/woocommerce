@@ -43,11 +43,13 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import { AUTO_DRAFT_NAME } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
-export function Edit( {
+export function NameBlockEdit( {
 	attributes,
+	setAttributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
+	const { name } = attributes;
 
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
@@ -68,11 +70,6 @@ export function Edit( {
 	);
 
 	const [ sku, setSku ] = useEntityProp( 'postType', 'product', 'sku' );
-	const [ name, setName ] = useEntityProp< string >(
-		'postType',
-		'product',
-		'name'
-	);
 
 	const { permalinkPrefix, permalinkSuffix } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -212,7 +209,9 @@ export function Edit( {
 							'e.g. 12 oz Coffee Mug',
 							'woocommerce'
 						) }
-						onChange={ setName }
+						onChange={ ( newName: string ) => {
+							setAttributes( { name: newName } );
+						} }
 						value={ name && name !== AUTO_DRAFT_NAME ? name : '' }
 						autoComplete="off"
 						data-1p-ignore
