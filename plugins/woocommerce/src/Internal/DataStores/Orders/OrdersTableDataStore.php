@@ -630,6 +630,86 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Updates an order (in this datastore) from another order object.
+	 *
+	 * @param \WC_Abstract_Order $order Source order.
+	 * @param array              $args  Update args.
+	 * @throws \Exception When an error occurs.
+	 */
+	public function update_order_from_object( $order, $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'props' => array(),
+			)
+		);
+
+		if ( $args['props'] ) {
+			// Check props are valid.
+			$invalid_props = array();
+			$new_values    = array();
+
+			foreach ( (array) $args['props'] as $prop_name ) {
+				if ( ! method_exists( $order, "get_{$prop_name}" ) ) {
+					$invalid_props[] = $prop_name;
+				} else {
+					$new_values[ $prop_name ] = $order->{"get_{$prop_name}"}();
+				}
+			}
+
+			if ( ! empty( $invalid_props ) ) {
+				throw new \Exception(
+					sprintf(
+						// translators: %s is a list of order property names.
+						_n(
+							'%s is not a valid order property.',
+							'%s are not valid order properties.',
+							count( $invalid_props ),
+							'woocommerce'
+						),
+						implode( ', ', $invalid_props )
+					)
+				);
+			}
+		} else {
+			$new_values = $order->get_data();
+		}
+
+		$hpos_order = new \WC_Order();
+		$hpos_order->set_id( $order->get_id() );
+		$this->read( $hpos_order );
+		$hpos_order->set_props( $new_values );
+
+		if ( ! $args['props'] ) {
+			$hpos_order->save();
+			return;
+		}
+
+		$allowed_columns = $this->get_column_names_for_props( $args['props'] );
+		$db_rows         = $this->get_db_rows_for_order( $hpos_order, 'update', true );
+
+		foreach ( $db_rows as $db_update ) {
+			// Prevent accidental update of another prop by limiting columns to explicitly requested props.
+			if ( ! array_intersect_key( $db_update['data'], array_flip( $allowed_columns ) ) ) {
+				continue;
+			}
+
+			$allowed_column_names_with_ids = array_merge(
+				$allowed_columns,
+				array( 'id', 'order_id', 'address_type' )
+			);
+
+			$db_update['data']   = array_intersect_key( $db_update['data'], array_flip( $allowed_column_names_with_ids ) );
+			$db_update['format'] = array_intersect_key( $db_update['format'], array_flip( $allowed_column_names_with_ids ) );
+
+			ksort( $db_update['data'] );
+			ksort( $db_update['format'] );
+
+			$this->database_util->insert_on_duplicate_key_update( $db_update['table'], $db_update['data'], array_values( $db_update['format'] ) );
+		}
+	}
+
+	/**
 	 * Get information about whether permissions are granted yet.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -3009,4 +3089,29 @@ CREATE TABLE $meta_table (
 
 		return $order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 	}
+
+	/**
+	 * Returns a mapping of order property => column name (as in HPOS tables) for a set of order properties.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param array $props Order properties to fetch column names for.
+	 * @return array<string,string> Array of column names indexed by order property name.
+	 */
+	protected function get_column_names_for_props( array $props = array() ) : array {
+		$result = array();
+
+		foreach ( $this->get_all_order_column_mappings() as &$mapping ) {
+			foreach ( $mapping as $column_name => &$column_data ) {
+				if ( ! isset( $column_data['name'] ) || ! in_array( $column_data['name'], $props, true ) ) {
+					continue;
+				}
+
+				$result[ $column_data['name'] ] = $column_name;
+			}
+		}
+
+		return $result;
+	}
+
 }
