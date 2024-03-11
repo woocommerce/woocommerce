@@ -70,7 +70,7 @@ final class ReserveStock {
 		/**
 		 * Filters the number of minutes an order should reserve stock for.
 		 *
-		 * This hook allows the number of minutes stock in an order should be reserved for to be filtered, useful for third party developers to increase/reduce the number of minutes, or to exclude an order entirely if the order meets certain criteria.
+		 * This hook allows the number of minutes that stock in an order should be reserved for to be filtered, useful for third party developers to increase/reduce the number of minutes if the order meets certain criteria, or to exclude an order from stock reservation using a zero value.
 		 *
 		 * @since 8.8.0
 		 *
