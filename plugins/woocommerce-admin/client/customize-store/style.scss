@@ -241,6 +241,14 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 
 	.core-profiler__checkbox {
 		padding: 16px 32px 16px 32px;
+
+		div {
+			display: flex;
+
+			.components-checkbox-control__input-container {
+				display: block;
+			}
+		}
 	}
 
 	.woocommerce-customize-store__design-change-warning-modal-footer {
@@ -250,7 +258,13 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		display: flex;
 		gap: 12px;
 		justify-content: flex-end;
+
+		button.is-link {
+			padding: 6px 12px;
+			text-decoration: none;
+		}
 	}
+
 }
 
 .woocommerce-onboarding-loader {
