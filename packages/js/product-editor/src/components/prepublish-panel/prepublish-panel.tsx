@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement, Fragment } from '@wordpress/element';
+import { createElement, Fragment, useRef, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -55,6 +55,26 @@ export function PrepublishPanel( {
 			'woocommerce'
 		);
 	}
+	const panelRef = useRef< HTMLDivElement >( null );
+
+	function handleClickOutside( event: MouseEvent ) {
+		if (
+			panelRef.current &&
+			! panelRef.current.contains( event.target as Node )
+		) {
+			closePrepublishPanel();
+		}
+	}
+
+	useEffect( () => {
+		if ( ! isPublishedOrScheduled ) {
+			return;
+		}
+		document.addEventListener( 'mouseup', handleClickOutside );
+		return () => {
+			document.removeEventListener( 'mouseup', handleClickOutside );
+		};
+	}, [ isPublishedOrScheduled ] );
 
 	function getHeaderActions() {
 		if ( isPublishedOrScheduled ) {
@@ -118,6 +138,7 @@ export function PrepublishPanel( {
 
 	return (
 		<div
+			ref={ panelRef }
 			className={ classnames( 'woocommerce-product-publish-panel', {
 				'is-published': isPublishedOrScheduled,
 			} ) }
