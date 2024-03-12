@@ -57,7 +57,7 @@
 		"@wordpress/element": "wp-6.0"
 	},
 	"devDependencies": {
-		"@types/react": "^17.0.71",
+		"@types/react": "^18.2.65",
 		"@types/wordpress__components": "^19.10.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
@@ -79,7 +79,7 @@
 		"wireit": "0.14.3"
 	},
 	"peerDependencies": {
-		"@types/react": "^17.0.71",
+		"@types/react": "^18.2.65",
 		"react": "18.2.0",
 		"react-dom": "18.2.0"
 	},

@@ -51,7 +51,7 @@
 			"dependencies": [
 				"@types/react"
 			],
-			"pinVersion": "^17.0.71",
+			"pinVersion": "^18.2.65",
 			"packages": [
 				"**"
 			]
@@ -60,7 +60,7 @@
 			"dependencies": [
 				"@types/react-dom"
 			],
-			"pinVersion": "^17.0.25",
+			"pinVersion": "^18.2.21",
 			"packages": [
 				"**"
 			]
