@@ -13,7 +13,7 @@ final class QueryFilters {
 	/**
 	 * Initialization method.
 	 *
-	 * @deprecated 8.7.0
+	 * @deprecated 8.7.0 No longer used by internal code and not recommended.
 	 * @internal
 	 */
 	public function init() {
@@ -23,7 +23,7 @@ final class QueryFilters {
 	/**
 	 * Filter the posts clauses of the main query to suport global filters.
 	 *
-	 * @deprecated 8.7.0
+	 * @deprecated 8.7.0 No longer used by internal code and not recommended.
 	 * @param array     $args     Query args.
 	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
