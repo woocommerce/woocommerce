@@ -1194,15 +1194,15 @@ class WC_Helper {
 	 * Get a subscriptions install URL.
 	 *
 	 * @param string $product_key Subscription product key.
-	 * @param int    $product_id Subscription product id.
+	 * @param string $product_slug Subscription product slug.
 	 * @return string
 	 */
-	public static function get_subscription_install_url( $product_key, $product_id ) {
+	public static function get_subscription_install_url( $product_key, $product_slug ) {
 		$install_url = add_query_arg(
 			array(
 				'product-key' => $product_key,
 			),
-			self::get_install_base_url() . "{$product_id}/"
+			self::get_install_base_url() . "{$product_slug}/"
 		);
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
