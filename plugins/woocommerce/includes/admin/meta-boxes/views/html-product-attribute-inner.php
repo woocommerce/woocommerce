@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					/**
 					* Filter the length (number of terms) rendered in the list.
 					*
-					* @since 8.6.0
+					* @since 8.8.0
 					* @param int $term_limit The maximum number of terms to display in the list.
 					*/
 					$term_limit = absint( apply_filters( 'woocommerce_admin_terms_metabox_datalimit', 50 ) );
