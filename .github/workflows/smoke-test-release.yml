@@ -205,7 +205,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-reports-${{ matrix.shard.number }}
+                  name: wp-latest-e2e-${{ matrix.shard.number }}
                   path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -230,7 +230,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
-                  pattern: all-blob-reports-*
+                  pattern: wp-latest-e2e-*
                   run-id: e2e-tests-run
                   merge-multiple: true
 
@@ -353,7 +353,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-api-blob-reports-${{ matrix.shard.number }}
+                  name: wp-latest-1-api-${{ matrix.shard.number }}
                   path: ${{ env.API_ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -379,7 +379,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-e2e-blob-reports-${{ matrix.shard.number }}
+                  name: wp-latest-1-e2e-${{ matrix.shard.number }}
                   path: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -409,7 +409,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
-                  pattern: all-e2e-blob-reports-*
+                  pattern: wp-latest-1-api-*
                   run-id: test-wp-latest-1
                   merge-multiple: true
 
@@ -455,7 +455,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
-                  pattern: all-blob-reports-*
+                  pattern: wp-latest-1-e2e-*
                   run-id: e2e-tests-run
                   merge-multiple: true
 
@@ -588,7 +588,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-api-blob-reports-${{ matrix.shard.number }}
+                  name: wp-prerelease-api-${{ matrix.shard.number }}
                   path: ${{ env.API_ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -611,7 +611,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-reports-${{ matrix.shard.number }}
+                  name: wp-prerelease-e2e-${{ matrix.shard.number }}
                   path: ${{ env.E2E_ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
@@ -642,7 +642,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ${{ env.E2E_ALLURE_RESULTS_DIR }}
-                  pattern: all-blob-reports-*
+                  pattern: wp-prerelease-e2e-*
                   run-id: test-wp-prerelease
                   merge-multiple: true
 
@@ -681,7 +681,7 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   path: ${{ env.API_ALLURE_RESULTS_DIR }}
-                  pattern: all-api-blob-reports-*
+                  pattern: wp-prerelease-api-*
                   run-id: test-wp-prerelease
                   merge-multiple: true
 
