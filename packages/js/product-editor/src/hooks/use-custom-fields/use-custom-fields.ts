@@ -37,6 +37,10 @@ export function useCustomFields<
 		setMetas( [ ...internalMetas, ...newValue ] );
 	}
 
+	function addCustomFields( value: T[] ) {
+		setCustomFields( ( current ) => [ ...current, ...value ] );
+	}
+
 	function updateCustomField( customField: T ) {
 		setCustomFields( ( current ) =>
 			current.map( ( field ) => {
@@ -48,5 +52,10 @@ export function useCustomFields<
 		);
 	}
 
-	return { customFields, setCustomFields, updateCustomField };
+	return {
+		customFields,
+		addCustomFields,
+		setCustomFields,
+		updateCustomField,
+	};
 }

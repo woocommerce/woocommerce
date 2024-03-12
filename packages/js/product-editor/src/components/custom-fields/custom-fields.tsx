@@ -10,18 +10,30 @@ import classNames from 'classnames';
  * Internal dependencies
  */
 import { useCustomFields } from '../../hooks/use-custom-fields';
+import { CreateModal } from './create-modal';
 import { EditModal } from './edit-modal';
 import { EmptyState } from './empty-state';
 import type { Metadata } from '../../types';
 import type { CustomFieldsProps } from './types';
 
-export function CustomFields( { className, ...props }: CustomFieldsProps ) {
-	const { customFields, updateCustomField } = useCustomFields();
+export function CustomFields( {
+	className,
+	renderActionButtonsWrapper = ( buttons ) => buttons,
+	...props
+}: CustomFieldsProps ) {
+	const { customFields, addCustomFields, updateCustomField } =
+		useCustomFields();
+
+	const [ showCreateModal, setShowCreateModal ] = useState( false );
 	const [ selectedCustomField, setSelectedCustomField ] =
 		useState< Metadata< string > >();
 
 	if ( customFields.length === 0 ) {
 		return <EmptyState />;
+	}
+
+	function handleAddNewButtonClick() {
+		setShowCreateModal( true );
 	}
 
 	function customFieldEditButtonClickHandler(
@@ -30,6 +42,15 @@ export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 		return function handleCustomFieldEditButtonClick() {
 			setSelectedCustomField( customField );
 		};
+	}
+
+	function handleCreateModalCreate( value: Metadata< string >[] ) {
+		addCustomFields( value );
+		setShowCreateModal( false );
+	}
+
+	function handleCreateModalCancel() {
+		setShowCreateModal( false );
 	}
 
 	function handleEditModalUpdate( customField: Metadata< string > ) {
@@ -43,6 +64,12 @@ export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 
 	return (
 		<>
+			{ renderActionButtonsWrapper(
+				<Button variant="secondary" onClick={ handleAddNewButtonClick }>
+					{ __( 'Add new', 'woocommerce' ) }
+				</Button>
+			) }
+
 			<table
 				{ ...props }
 				className={ classNames(
@@ -83,6 +110,13 @@ export function CustomFields( { className, ...props }: CustomFieldsProps ) {
 					) ) }
 				</tbody>
 			</table>
+
+			{ showCreateModal && (
+				<CreateModal
+					onCreate={ handleCreateModalCreate }
+					onCancel={ handleCreateModalCancel }
+				/>
+			) }
 
 			{ selectedCustomField && (
 				<EditModal
