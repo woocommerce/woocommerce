@@ -165,17 +165,29 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	private function get_product_insights( $url, $token, $connection ) {
 		// data from the last ten weeks
 		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
-		$start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
-		$end_date   = date('Y-m-d') . ' 23:59:59';
+		// $start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
+		// $end_date   = date('Y-m-d') . ' 23:59:59';
 		$request->set_query_params(
 			array(
-				'before' => $end_date,
-				'after'  => $start_date,
+				// 'before' => $end_date,
+				// 'after'  => $start_date,
+				'extended_info' => 'true',
 				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
 			)
 		);
 		$json_data = rest_do_request( $request );
 		$json_object = json_encode( $json_data );
+
+		// $stock_report    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/stock' );
+		// $request->set_query_params(
+		// 	array(
+		// 		'before' => $end_date,
+		// 		'after'  => $start_date,
+		// 		'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+		// 	)
+		// );
+		// $stock_data = rest_do_request( $stock_report );
+		// $stock_result = json_encode( $stock_data );
 		
 		$prompt = implode("\n", [
 			'You are a WooCommerce expert.',
