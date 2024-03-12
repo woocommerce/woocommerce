@@ -25,7 +25,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Product Collection', () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 	test.describe( 'Sync with current template (former "Inherit query from template")', () => {
