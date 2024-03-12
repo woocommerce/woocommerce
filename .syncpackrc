@@ -30,7 +30,9 @@
 			]
 		},
 		{
-			"dependencies": [ "**" ],
+			"dependencies": [
+				"**"
+			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
@@ -80,7 +82,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^17.0.2"
+			"pinVersion": "18.2.0"
 		},
 		{
 			"dependencies": [

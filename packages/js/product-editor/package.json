@@ -117,8 +117,8 @@
 		"mini-css-extract-plugin": "^2.7.6",
 		"postcss": "^8.4.32",
 		"postcss-loader": "^4.3.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
 		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
@@ -151,8 +151,8 @@
 	"peerDependencies": {
 		"@types/react": "^17.0.71",
 		"@wordpress/data": "wp-6.0",
-		"react": "^17.0.2",
-		"react-dom": "^17.0.2"
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
 	},
 	"config": {
 		"ci": {

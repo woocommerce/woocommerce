@@ -66,7 +66,7 @@
 		"@wordpress/i18n": "wp-6.0",
 		"classnames": "^2.3.2",
 		"gridicons": "^3.4.2",
-		"react": "^17.0.2",
+		"react": "18.2.0",
 		"string-similarity": "4.0.4"
 	},
 	"devDependencies": {
