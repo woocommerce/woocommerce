@@ -132,7 +132,7 @@ final class QuantityLimits {
 		 *
 		 * @since 8.7.1
 		 *
-   		 * @param boolean $valid True if the new quantity is valid, false otherwise.
+   		 * @param \WP_Error|true $valid True if the new quantity is valid, \WP_Error otherwise.
 		 * @param integer $quantity Quantity to validate.
 		 * @param \WC_Product|array $cart_item Cart item.
 		 * @return \WP_Error|true
