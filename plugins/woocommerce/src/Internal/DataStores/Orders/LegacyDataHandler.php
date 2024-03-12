@@ -384,9 +384,9 @@ class LegacyDataHandler {
 			);
 
 			$dest_order->set_props( $new_values );
-			$dest_order->apply_changes();
 
 			if ( 'hpos' === $destination_data_store ) {
+				$dest_order->apply_changes();
 				$limit_cb = function( $rows, $order ) use ( $dest_order, $fields ) {
 					if ( $dest_order->get_id() === $order->get_id() ) {
 						$rows = $this->limit_hpos_update_to_props( $rows, $fields['props'] );
