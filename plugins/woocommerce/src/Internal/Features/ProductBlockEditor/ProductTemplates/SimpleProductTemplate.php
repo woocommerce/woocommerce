@@ -704,7 +704,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 
 	/**
 	 * Get the tax classes as select options.
-	 * 
+	 *
 	 * @param string $post_type The post type.
 	 * @return array Array of options.
 	 */

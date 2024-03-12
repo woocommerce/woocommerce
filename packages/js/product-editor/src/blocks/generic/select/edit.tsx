@@ -4,7 +4,6 @@
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { SelectControl } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
