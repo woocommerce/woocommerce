@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
+use Automattic\WooCommerce\Internal\Traits\Traitable;
 
 /**
  * Legacy product contains all deprecated methods for this class and can be
@@ -27,6 +28,8 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php';
  * @package WooCommerce\Abstracts
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
+
+	use Traitable;
 
 	/**
 	 * This is the name of this object type.
@@ -165,23 +168,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
+
+		$traits = WC()->product_traits()->get_all_traits();
+		foreach ( $traits as $trait ) {
+			new $trait( $this );
+		}
 	}
-
-	public function __call( $name, $arguments ) {
-		// Allow getters to get properties if no method exists.
-		if ( substr( $name, 0, 4 ) === 'get_' ) {
-			$prop = substr( $name, 4, strlen( $name ) );
-			return $this->get_prop( $prop, ...$arguments );
-		}
-
-		// Allow setters to set properties if no method exists.
-		if ( substr( $name, 0, 4 ) === 'set_' ) {
-			$prop = substr( $name, 4, strlen( $name ) );
-			return $this->set_prop( $prop, ...$arguments );
-		}
-
-		throw new BadMethodCallException("No such method exists: $name");
-    }
 
 	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.

@@ -86,4 +86,6 @@ abstract class WC_Product_Trait {
 		);
 	}
 
+	public static function add_hooks() {}
+
 }
