@@ -142,6 +142,15 @@ const productCollectionStore = {
 		 */
 		*prefetchOnHover() {
 			const { ref } = getElement();
+
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				return;
+			}
+
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
