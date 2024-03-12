@@ -85,7 +85,7 @@ const TotalsFooterItem = ( {
 
 	const priceComponent = (
 		<FormattedMonetaryAmount
-			className="wc-block-components-totals-footer-item-tax-value"
+			className="wc-block-components-totals-item__value"
 			currency={ currency }
 			value={ parseInt( totalPrice, 10 ) }
 		/>
