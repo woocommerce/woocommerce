@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Bump all remote spec endpoints to version `2.0`.

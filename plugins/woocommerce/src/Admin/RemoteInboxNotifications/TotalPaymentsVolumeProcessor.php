@@ -23,17 +23,22 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$dates      = TimeInterval::get_timeframe_dates( $rule->timeframe );
-		$reports_revenue = new RevenueQuery(
+		$dates           = TimeInterval::get_timeframe_dates( $rule->timeframe );
+		$reports_revenue = $this->get_reports_query(
 			array(
-				'before' => $dates['end'],
-				'after'  => $dates['start'],
+				'before'   => $dates['end'],
+				'after'    => $dates['start'],
 				'interval' => 'year',
-				'fields' => array( 'total_sales' ),
+				'fields'   => array( 'total_sales' ),
 			)
 		);
-		$report_data    = $reports_revenue->get_data();
-		$value          = $report_data->totals->total_sales;
+		$report_data     = $reports_revenue->get_data();
+
+		if ( ! $report_data || ! isset( $report_data->totals->total_sales ) ) {
+			return false;
+		}
+
+		$value = $report_data->totals->total_sales;
 
 		return ComparisonOperation::compare(
 			$value,
@@ -62,7 +67,7 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 			return false;
 		}
 
-		if ( ! isset( $rule->value ) ) {
+		if ( ! isset( $rule->value ) || ! is_numeric( $rule->value ) ) {
 			return false;
 		}
 
@@ -71,5 +76,18 @@ class TotalPaymentsVolumeProcessor implements RuleProcessorInterface {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get the report query.
+	 *
+	 * @param array $args The query args.
+	 *
+	 * @return RevenueQuery The report query.
+	 */
+	protected function get_reports_query( $args ) {
+		return new RevenueQuery(
+			$args
+		);
 	}
 }

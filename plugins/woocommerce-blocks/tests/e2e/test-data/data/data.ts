@@ -58,8 +58,9 @@ export const customer = {
 	},
 };
 
+// Reviews are ordered by when they were created.
 // source: plugins/woocommerce-blocks/tests/e2e/bin/scripts/parallel/reviews.sh
-export const reviews = [
+export const hoodieReviews = [
 	{
 		name: `${ customer.first_name } ${ customer.last_name }`,
 		email: customer.email,
@@ -73,6 +74,23 @@ export const reviews = [
 		rating: 4,
 	},
 ];
+
+export const capReviews = [
+	{
+		name: `${ customer.first_name } ${ customer.last_name }`,
+		email: customer.email,
+		review: 'Really awful.',
+		rating: 1,
+	},
+	{
+		name: `${ customer.first_name } ${ customer.last_name }`,
+		email: customer.email,
+		review: 'Bad!',
+		rating: 2,
+	},
+];
+
+export const allReviews = hoodieReviews.concat( capReviews );
 
 export const storeDetails = {
 	us: {

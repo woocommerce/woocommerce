@@ -24,6 +24,7 @@ export type DesignWithoutAiComponentMeta = {
 
 export const DesignWithNoAiController = ( {
 	parentMachine,
+	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
@@ -32,6 +33,11 @@ export const DesignWithNoAiController = ( {
 	const [ , , service ] = useMachine( designWithNoAiStateMachineDefinition, {
 		devTools: process.env.NODE_ENV === 'development',
 		parent: parentMachine,
+		context: {
+			...designWithNoAiStateMachineDefinition.context,
+			isFontLibraryAvailable:
+				parentContext?.isFontLibraryAvailable ?? false,
+		},
 	} );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
@@ -43,6 +49,7 @@ export const DesignWithNoAiController = ( {
 
 	const [ CurrentComponent, setCurrentComponent ] =
 		useState< DesignWithoutAiComponent | null >( null );
+
 	useEffect( () => {
 		if ( currentNodeMeta?.component ) {
 			setCurrentComponent( () => currentNodeMeta?.component );

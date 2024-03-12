@@ -157,6 +157,19 @@ export const assignIsFontLibraryAvailable = assign<
 	},
 } );
 
+export const assignActiveThemeHasMods = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	activeThemeHasMods: ( context, event: unknown ) => {
+		return (
+			event as DoneInvokeEvent< {
+				activeThemeHasMods: boolean;
+			} >
+		 ).data.activeThemeHasMods;
+	},
+} );
+
 export const assignFlags = assign<
 	customizeStoreStateMachineContext,
 	customizeStoreStateMachineEvents
@@ -168,9 +181,9 @@ export const assignFlags = assign<
 
 		return window.parent.__wcCustomizeStore.activeThemeHasMods;
 	},
-	isFontLibraryAvailable: ( context ) => {
+	isFontLibraryAvailable: () => {
 		if ( ! isIframe( window ) ) {
-			return context.isFontLibraryAvailable;
+			return window.__wcCustomizeStore.isFontLibraryAvailable;
 		}
 		const isFontLibraryAvailable =
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;

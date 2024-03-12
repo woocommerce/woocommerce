@@ -11,8 +11,10 @@ namespace Automattic\WooCommerce\Internal\Admin\Onboarding;
 class Onboarding {
 	/**
 	 * Initialize onboarding functionality.
+	 *
+	 * @internal This method is for internal purposes only.
 	 */
-	public static function init() {
+	final public static function init() {
 		OnboardingHelper::instance()->init();
 		OnboardingIndustries::init();
 		OnboardingJetpack::instance()->init();
@@ -21,5 +23,6 @@ class Onboarding {
 		OnboardingSetupWizard::instance()->init();
 		OnboardingSync::instance()->init();
 		OnboardingThemes::init();
+		OnboardingFonts::init();
 	}
 }

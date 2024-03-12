@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Remove customer order count from order attribution checkout data.

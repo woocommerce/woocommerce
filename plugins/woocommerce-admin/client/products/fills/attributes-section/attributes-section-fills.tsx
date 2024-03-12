@@ -2,13 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
 import {
 	__experimentalWooProductSectionItem as WooProductSectionItem,
 	__experimentalWooProductFieldItem as WooProductFieldItem,
 	__experimentalProductSectionLayout as ProductSectionLayout,
 } from '@woocommerce/product-editor';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -29,30 +27,12 @@ export const AttributesSectionFills = () => (
 				title={ __( 'Attributes', 'woocommerce' ) }
 				className="woocommerce-product-attributes-section"
 				description={
-					<>
-						<span>
-							{ __(
-								'Add descriptive pieces of information that customers can use to filter and search for this product.',
-								'woocommerce'
-							) }
-						</span>
-						<Link
-							className="woocommerce-form-section__header-link"
-							href="https://woo.com/document/managing-product-taxonomies/#product-attributes"
-							target="_blank"
-							type="external"
-							onClick={ () => {
-								recordEvent(
-									'learn_more_about_attributes_help'
-								);
-							} }
-						>
-							{ __(
-								'Learn more about attributes',
-								'woocommerce'
-							) }
-						</Link>
-					</>
+					<span>
+						{ __(
+							'Use global attributes to allow shoppers to filter and search for this product. Use custom attributes to provide detailed product information.',
+							'woocommerce'
+						) }
+					</span>
 				}
 			>
 				<WooProductFieldItem.Slot section={ ATTRIBUTES_SECTION_ID } />

@@ -9,7 +9,7 @@ import { useQuery } from '@woocommerce/navigation';
  */
 import './content.scss';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
-import { getAdminSetting } from '../../../utils/admin-settings';
+import { getAdminSetting } from '~/utils/admin-settings';
 import Discover from '../discover/discover';
 import Products from '../products/products';
 import SearchResults from '../search-results/search-results';
@@ -22,6 +22,7 @@ import {
 	recordLegacyTabView,
 } from '../../utils/tracking';
 import InstallNewProductModal from '../install-flow/install-new-product-modal';
+import Promotions from '../promotions/promotions';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -32,17 +33,6 @@ export default function Content(): JSX.Element {
 	// Get the content for this screen
 	useEffect( () => {
 		const abortController = new AbortController();
-		// we are recording both the new and legacy events here for now
-		// they're separate methods to make it easier to remove the legacy one later
-		const marketplaceViewProps = {
-			view: query?.tab,
-			search_term: query?.term,
-			product_type: query?.section,
-			category: query?.category,
-		};
-
-		recordMarketplaceView( marketplaceViewProps );
-		recordLegacyTabView( marketplaceViewProps );
 
 		if ( query.tab && [ '', 'discover' ].includes( query.tab ) ) {
 			return;
@@ -81,6 +71,17 @@ export default function Content(): JSX.Element {
 				setProducts( [] );
 			} )
 			.finally( () => {
+				// we are recording both the new and legacy events here for now
+				// they're separate methods to make it easier to remove the legacy one later
+				const marketplaceViewProps = {
+					view: query?.tab,
+					search_term: query?.term,
+					product_type: query?.section,
+					category: query?.category,
+				};
+
+				recordMarketplaceView( marketplaceViewProps );
+				recordLegacyTabView( marketplaceViewProps );
 				setIsLoading( false );
 			} );
 		return () => {
@@ -134,6 +135,7 @@ export default function Content(): JSX.Element {
 
 	return (
 		<div className="woocommerce-marketplace__content">
+			<Promotions />
 			<InstallNewProductModal products={ products } />
 			{ renderContent() }
 		</div>

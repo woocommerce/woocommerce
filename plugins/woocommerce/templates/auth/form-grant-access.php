@@ -12,7 +12,7 @@
  *
  * @see https://woo.com/document/template-structure/
  * @package WooCommerce\Templates\Auth
- * @version 4.3.0
+ * @version 8.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -41,6 +41,13 @@ defined( 'ABSPATH' ) || exit;
 		<li><?php echo esc_html( $permission ); ?></li>
 	<?php endforeach; ?>
 </ul>
+
+<p>
+	<?php
+	/* Translators: %s Domain name from the callback URL. */
+	printf( esc_html__( 'Approving will share credentials with %s. Do not proceed if this looks suspicious in any way.', 'woocommerce' ), '<strong>' . esc_html( wp_parse_url( $callback_url, PHP_URL_HOST ) ) . '</strong>' );
+	?>
+</p>
 
 <div class="wc-auth-logged-in-as">
 	<?php echo get_avatar( $user->ID, 70 ); ?>

@@ -117,6 +117,7 @@ function Iframe( {
 				// content.
 				src={ src }
 				title={ __( 'Editor canvas', 'woocommerce' ) }
+				name="editor-canvas"
 			>
 				{ iframeDocument &&
 					createPortal(

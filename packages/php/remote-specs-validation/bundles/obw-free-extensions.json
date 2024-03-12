@@ -1,0 +1,707 @@
+{
+  "title": "Onboarding Wizard Free Extensions",
+  "type": "array",
+  "additionalProperties": false,
+  "required": [
+    "key",
+    "title",
+    "plugins"
+  ],
+  "items": {
+    "key": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_visible": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/rules"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "operations": {
+      "type": "string",
+      "enum": [
+        "=",
+        "<",
+        "<=",
+        ">",
+        ">=",
+        "!=",
+        "contains",
+        "!contains",
+        "in",
+        "!in",
+        "range"
+      ]
+    },
+    "rules": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operands"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "or"
+              ]
+            },
+            "operands": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/rules"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/rules"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operand"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "not"
+              ]
+            },
+            "operand": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/rules"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/rules"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "fail"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "publish_after"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "publish_after_time"
+              ]
+            },
+            "publish_after": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "publish_before"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "publish_before_time"
+              ]
+            },
+            "publish_before": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "base_location_country"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "base_location_state"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "plugins"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "plugins_activated"
+              ]
+            },
+            "plugins": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "plugin",
+            "version",
+            "operator"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "plugin_version"
+              ]
+            },
+            "plugin": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "operator": {
+              "$ref": "#/definitions/operations"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "index",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "stored_state"
+              ]
+            },
+            "index": {
+              "type": "string"
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": [
+                "string",
+                "boolean"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "product_count"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "order_count"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "operation",
+            "days"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "wcadmin_active_for"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "days": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "index",
+            "operation",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "onboarding_profile"
+              ]
+            },
+            "index": {
+              "type": "string"
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "plan"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "is_woo_express"
+              ]
+            },
+            "plan": {
+              "type": "string",
+              "enum": [
+                "trial",
+                "essential",
+                "performance"
+              ]
+            },
+            "value": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "note_name",
+            "operation"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "note_status"
+              ]
+            },
+            "note_name": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "actioned",
+                "unactione",
+                "pending"
+              ],
+              "default": "pending"
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "value": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "timeframe",
+            "value",
+            "operation"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "total_payments_value"
+              ]
+            },
+            "timeframe": {
+              "type": "string",
+              "enum": [
+                "last_week",
+                "last_month",
+                "last_quarter",
+                "last_6_months",
+                "last_year"
+              ]
+            },
+            "value": {
+              "type": "integer"
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "option_name",
+            "value",
+            "operation"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "option"
+              ]
+            },
+            "option_name": {
+              "type": "string"
+            },
+            "value": {
+              "type": [
+                "string",
+                "integer",
+                "boolean",
+                "array"
+              ]
+            },
+            "default": {
+              "type": [
+                "string",
+                "integer",
+                "boolean",
+                "array"
+              ]
+            },
+            "operation": {
+              "$ref": "#/definitions/operations"
+            },
+            "option_transformers": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "array_column"
+                      ]
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "required": [
+                        "key"
+                      ],
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "array_flatten"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "array_keys"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "array_search"
+                      ]
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "required": [
+                        "value"
+                      ],
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "array_values"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "dot_notation"
+                      ]
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "required": [
+                        "path"
+                      ],
+                      "properties": {
+                        "path": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "count"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "use"
+                  ],
+                  "properties": {
+                    "use": {
+                      "type": "string",
+                      "enum": [
+                        "prepare_url"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "is_ecommerce"
+              ]
+            },
+            "value": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "pass"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -143,6 +143,7 @@ export const Layout = () => {
 	}
 
 	return (
+		// This causes the editor to re-render when the logo block ids change. Maybe we can find a better way to do this.
 		<LogoBlockContext.Provider
 			value={ {
 				logoBlockIds,

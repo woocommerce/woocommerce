@@ -1,22 +1,16 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
-use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
 use Automattic\WooCommerce\Blocks\Options;
-use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
-use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 
 /**
  * Utility methods used for serving block templates from WooCommerce Blocks.
  * {@internal This class and its methods should only be used within the BlockTemplateController.php and is not intended for public use.}
  */
 class BlockTemplateUtils {
-	const ELIGIBLE_FOR_ARCHIVE_PRODUCT_FALLBACK = array( 'taxonomy-product_cat', 'taxonomy-product_tag', ProductAttributeTemplate::SLUG );
 	/**
 	 * Directory names for block templates
 	 *
@@ -58,6 +52,18 @@ class BlockTemplateUtils {
 	 * @var string
 	 */
 	const DEPRECATED_PLUGIN_SLUG = 'woocommerce';
+
+	/**
+	 * Returns the template matching the slug
+	 *
+	 * @param string $template_slug Slug of the template to retrieve.
+	 *
+	 * @return AbstractTemplate|AbstractTemplatePart|null
+	 */
+	public static function get_template( $template_slug ) {
+		$block_templates_registry = Package::container()->get( BlockTemplatesRegistry::class );
+		return $block_templates_registry->get_template( $template_slug );
+	}
 
 	/**
 	 * Returns an array containing the references of
@@ -207,7 +213,7 @@ class BlockTemplateUtils {
 		$template->content = self::inject_theme_attribute_in_content( $template_content );
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
-		if ( 'archive-product' === $template_file->slug ) {
+		if ( ProductCatalogTemplate::SLUG === $template_file->slug ) {
 			$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
 		}
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
@@ -221,20 +227,8 @@ class BlockTemplateUtils {
 		$template->origin         = $template_file->source;
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
-		$template->area           = 'uncategorized';
+		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
-		// Force the Mini-Cart template part to be in the Mini-Cart template part area.
-		// @todo When this class is refactored, move title, description, and area definition to the template classes (CheckoutHeaderTemplate, MiniCartTemplate, etc).
-		if ( 'wp_template_part' === $template_type ) {
-			switch ( $template_file->slug ) {
-				case 'mini-cart':
-					$template->area = 'mini-cart';
-					break;
-				case 'checkout-header':
-					$template->area = 'header';
-					break;
-			}
-		}
 		return $template;
 	}
 
@@ -309,15 +303,15 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns template titles.
+	 * Returns template title.
 	 *
-	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Human friendly title.
 	 */
 	public static function get_block_template_title( $template_slug ) {
-		$plugin_template_types = self::get_plugin_block_template_types();
-		if ( isset( $plugin_template_types[ $template_slug ] ) ) {
-			return $plugin_template_types[ $template_slug ]['title'];
+		$registered_template = self::get_template( $template_slug );
+		if ( isset( $registered_template ) ) {
+			return $registered_template->get_template_title();
 		} else {
 			// Human friendly title converted from the slug.
 			return ucwords( preg_replace( '/[\-_]/', ' ', $template_slug ) );
@@ -325,72 +319,34 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns template descriptions.
+	 * Returns template description.
 	 *
-	 * @param string $template_slug The templates slug (e.g. single-product).
+	 * @param string $template_slug The template slug (e.g. single-product).
 	 * @return string Template description.
 	 */
 	public static function get_block_template_description( $template_slug ) {
-		$plugin_template_types = self::get_plugin_block_template_types();
-		if ( isset( $plugin_template_types[ $template_slug ] ) ) {
-			return $plugin_template_types[ $template_slug ]['description'];
+		$registered_template = self::get_template( $template_slug );
+		if ( isset( $registered_template ) ) {
+			return $registered_template->get_template_description();
 		}
 		return '';
 	}
 
 	/**
-	 * Returns a filtered list of plugin template types, containing their
-	 * localized titles and descriptions.
+	 * Returns area for template parts.
 	 *
-	 * @return array The plugin template types.
+	 * @param string $template_slug The template part slug (e.g. mini-cart).
+	 * @param string $template_type Either `wp_template` or `wp_template_part`.
+	 * @return string Template part area.
 	 */
-	public static function get_plugin_block_template_types() {
-		return array(
-			'single-product'                      => array(
-				'title'       => _x( 'Single Product', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays a single product.', 'woocommerce' ),
-			),
-			'archive-product'                     => array(
-				'title'       => _x( 'Product Catalog', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays your products.', 'woocommerce' ),
-			),
-			'taxonomy-product_cat'                => array(
-				'title'       => _x( 'Products by Category', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by a category.', 'woocommerce' ),
-			),
-			'taxonomy-product_tag'                => array(
-				'title'       => _x( 'Products by Tag', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by a tag.', 'woocommerce' ),
-			),
-			ProductAttributeTemplate::SLUG        => array(
-				'title'       => _x( 'Products by Attribute', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays products filtered by an attribute.', 'woocommerce' ),
-			),
-			ProductSearchResultsTemplate::SLUG    => array(
-				'title'       => _x( 'Product Search Results', 'Template name', 'woocommerce' ),
-				'description' => __( 'Displays search results for your store.', 'woocommerce' ),
-			),
-			MiniCartTemplate::SLUG                => array(
-				'title'       => _x( 'Mini-Cart', 'Template name', 'woocommerce' ),
-				'description' => __( 'Template used to display the Mini-Cart drawer.', 'woocommerce' ),
-			),
-			CartTemplate::get_slug()              => array(
-				'title'       => _x( 'Page: Cart', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' ),
-			),
-			CheckoutTemplate::get_slug()          => array(
-				'title'       => _x( 'Page: Checkout', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' ),
-			),
-			CheckoutHeaderTemplate::SLUG          => array(
-				'title'       => _x( 'Checkout Header', 'Template name', 'woocommerce' ),
-				'description' => __( 'Template used to display the simplified Checkout header.', 'woocommerce' ),
-			),
-			OrderConfirmationTemplate::get_slug() => array(
-				'title'       => _x( 'Order Confirmation', 'Template name', 'woocommerce' ),
-				'description' => __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' ),
-			),
-		);
+	public static function get_block_template_area( $template_slug, $template_type ) {
+		if ( 'wp_template_part' === $template_type ) {
+			$registered_template = self::get_template( $template_slug );
+			if ( $registered_template && property_exists( $registered_template, 'template_area' ) ) {
+				return $registered_template->template_area;
+			}
+		}
+		return 'uncategorized';
 	}
 
 	/**
@@ -493,28 +449,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Retrieves a single unified template object using its id.
-	 *
-	 * @param string $id            Template unique identifier (example: theme_slug//template_slug).
-	 * @param string $template_type Optional. Template type: `wp_template` or 'wp_template_part`.
-	 *                              Default `wp_template`.
-	 *
-	 * @return WP_Block_Template|null Template.
-	 */
-	public static function get_block_template( $id, $template_type ) {
-		if ( function_exists( 'get_block_template' ) ) {
-			return get_block_template( $id, $template_type );
-		}
-
-		if ( function_exists( 'gutenberg_get_block_template' ) ) {
-			return gutenberg_get_block_template( $id, $template_type );
-		}
-
-		return null;
-
-	}
-
-	/**
 	 * Checks if we can fall back to the `archive-product` template for a given slug.
 	 *
 	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
@@ -524,7 +458,11 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		return in_array( $template_slug, self::ELIGIBLE_FOR_ARCHIVE_PRODUCT_FALLBACK, true );
+		$registered_template = self::get_template( $template_slug );
+		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
+			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
+		}
+		return false;
 	}
 
 	/**
@@ -543,7 +481,7 @@ class BlockTemplateUtils {
 		$array_filter = array_filter(
 			$db_templates,
 			function ( $template ) use ( $template_slug ) {
-				return 'archive-product' === $template->slug;
+				return ProductCatalogTemplate::SLUG === $template->slug;
 			}
 		);
 
@@ -564,7 +502,7 @@ class BlockTemplateUtils {
 		}
 
 		foreach ( $db_templates as $template ) {
-			if ( 'archive-product' === $template->slug ) {
+			if ( ProductCatalogTemplate::SLUG === $template->slug ) {
 				return $template;
 			}
 		}
@@ -584,7 +522,7 @@ class BlockTemplateUtils {
 	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
 		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( 'archive-product' );
+			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
 	}
 
 	/**
@@ -619,35 +557,6 @@ class BlockTemplateUtils {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Filter block templates by feature flag.
-	 *
-	 * @param WP_Block_Template[] $block_templates An array of block template objects.
-	 *
-	 * @return WP_Block_Template[] An array of block template objects.
-	 */
-	public static function filter_block_templates_by_feature_flag( $block_templates ) {
-		$feature_gating = new FeatureGating();
-		$flag           = $feature_gating->get_flag();
-
-		/**
-		 * An array of block templates with slug as key and flag as value.
-		 *
-		 * @var array
-		*/
-		$block_templates_with_feature_gate = array();
-
-		return array_filter(
-			$block_templates,
-			function( $block_template ) use ( $flag, $block_templates_with_feature_gate ) {
-				if ( isset( $block_templates_with_feature_gate[ $block_template->slug ] ) ) {
-					return $block_templates_with_feature_gate[ $block_template->slug ] <= $flag;
-				}
-				return true;
-			}
-		);
 	}
 
 	/**
@@ -727,18 +636,11 @@ class BlockTemplateUtils {
 
 	/**
 	 * Returns whether the blockified templates should be used or not.
-	 * First, we need to make sure WordPress version is higher than 6.1 (lowest that supports Products block).
-	 * Then, if the option is not stored on the db, we need to check if the current theme is a block one or not.
+	 * If the option is not stored on the db, we need to check if the current theme is a block one or not.
 	 *
 	 * @return boolean
 	 */
 	public static function should_use_blockified_product_grid_templates() {
-		$minimum_wp_version = '6.1';
-
-		if ( version_compare( $GLOBALS['wp_version'], $minimum_wp_version, '<' ) ) {
-			return false;
-		}
-
 		$use_blockified_templates = get_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 
 		if ( false === $use_blockified_templates ) {
@@ -820,7 +722,7 @@ class BlockTemplateUtils {
 			$theme_has_template    = self::theme_has_template_part( $slug );
 			$template_slug_to_load = $theme_has_template ? get_stylesheet() : self::PLUGIN_SLUG;
 		}
-		$template_part = self::get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
+		$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			return $template_part->content;
