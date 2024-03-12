@@ -11,9 +11,9 @@ import {
 	ValidationInputError,
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import classnames from 'classnames';
 import type { MouseEvent, MouseEventHandler } from 'react';
-import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
