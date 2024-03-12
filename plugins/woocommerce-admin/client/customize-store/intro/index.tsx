@@ -100,9 +100,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 		stylesheet?: string;
 	}
 
-	const currentTheme = useSelect((select) => {
-		return select('core').getCurrentTheme() as Theme;
-	}, []);
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
 
 	switch ( true ) {
@@ -116,7 +116,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			! customizeStoreTaskCompleted:
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted && !isDefaultTheme:
+		case context.flowType === FlowType.noAI &&
+			customizeStoreTaskCompleted &&
+			! isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
