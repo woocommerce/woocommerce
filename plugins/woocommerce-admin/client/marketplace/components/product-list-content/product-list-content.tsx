@@ -140,7 +140,7 @@ export default function ProductListContent( props: {
 							<a
 								href={
 									ADMIN_URL +
-									'theme-install.php?browse=block-themes'
+									'theme-install.php?search=e-commerce'
 								}
 							/>
 						),
