@@ -18,6 +18,7 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -145,6 +146,7 @@ export default function Products( props: ProductsProps ): JSX.Element {
 
 	return (
 		<div className={ containerClassName }>
+			<PluginInstallNotice />
 			<h2 className={ productListTitleClassName }>
 				{ isLoading ? ' ' : title }
 			</h2>

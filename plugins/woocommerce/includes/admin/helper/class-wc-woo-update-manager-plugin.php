@@ -88,15 +88,11 @@ class WC_Woo_Update_Manager_Plugin {
 	}
 
 	/**
-	 * Show a notice on the plugins management page to install the Woo Update Manager plugin.
+	 * Show a notice on the WC admin pages to install or activate the Woo Update Manager plugin.
 	 *
 	 * @return void
 	 */
 	public static function show_woo_update_manager_install_notice(): void {
-		if ( self::is_plugin_installed() ) {
-			return;
-		}
-
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return;
 		}
@@ -105,11 +101,25 @@ class WC_Woo_Update_Manager_Plugin {
 			return;
 		}
 
-		if ( self::install_admin_notice_dismissed() ) {
+		if ( self::is_plugin_installed() && self::is_plugin_active() ) {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-installed.php';
+		if ( ! self::is_plugin_installed() ) {
+
+			if ( self::install_admin_notice_dismissed() ) {
+				return;
+			}
+
+			include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-installed.php';
+			return;
+		}
+
+		if ( self::activate_admin_notice_dismissed() ) {
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-activated.php';
 	}
 
 	/**
@@ -119,6 +129,15 @@ class WC_Woo_Update_Manager_Plugin {
 	 */
 	protected static function install_admin_notice_dismissed(): bool {
 		return get_user_meta( get_current_user_id(), 'dismissed_woo_updater_not_installed_notice', true );
+	}
+
+	/**
+	 * Check if the activation notice has been dismissed.
+	 *
+	 * @return bool
+	 */
+	protected static function activate_admin_notice_dismissed(): bool {
+		return get_user_meta( get_current_user_id(), 'dismissed_woo_updater_not_activated_notice', true );
 	}
 }
 

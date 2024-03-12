@@ -75,7 +75,7 @@ export default function MySubscriptions(): JSX.Element {
 					) }
 				</p>
 				<Button href={ connectUrl() } variant="primary">
-					{ __( 'Manage your subscriptions', 'woocommerce' ) }
+					{ __( 'Connect your store', 'woocommerce' ) }
 				</Button>
 			</div>
 		);
