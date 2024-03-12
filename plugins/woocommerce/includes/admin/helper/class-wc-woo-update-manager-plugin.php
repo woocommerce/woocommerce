@@ -55,7 +55,7 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return string
 	 */
 	public static function generate_install_url(): string {
-		$install_url = WC_Helper::get_install_base_url() . self::get_plugin_id() . '/';
+		$install_url = WC_Helper::get_install_base_url() . self::WOO_UPDATE_MANAGER_SLUG . '/';
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
 	}
@@ -65,26 +65,8 @@ class WC_Woo_Update_Manager_Plugin {
 	 *
 	 * @return int
 	 */
-	public static function get_plugin_id(): int {
-		$products               = WC_Helper_Updater::get_update_data();
-		$woo_update_manager_ids = array_keys(
-			array_filter(
-				$products,
-				function ( $product_data ) {
-					return self::WOO_UPDATE_MANAGER_SLUG === $product_data['slug'];
-				}
-			)
-		);
-
-		if ( empty( $woo_update_manager_ids ) ) {
-			return 0;
-		}
-		/**
-		 * Filter the id of the Woo Update Manager plugin.
-		 *
-		 * @since 8.7.0
-		 */
-		return (int) apply_filters( 'woo_update_manager_plugin_id', (int) $woo_update_manager_ids[0] );
+	public static function get_plugin_slug(): string {
+		return self::WOO_UPDATE_MANAGER_SLUG;
 	}
 
 	/**

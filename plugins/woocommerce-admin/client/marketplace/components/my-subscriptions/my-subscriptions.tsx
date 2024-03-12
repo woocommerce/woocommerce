@@ -57,7 +57,8 @@ export default function MySubscriptions(): JSX.Element {
 	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
 		( subscription: Subscription ) =>
 			! subscription.subscription_installed &&
-			wccomSettings?.wooUpdateManagerPluginId !== subscription.product_id
+			wccomSettings?.wooUpdateManagerPluginSlug !==
+				subscription.product_slug
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
