@@ -211,7 +211,7 @@ jobs:
                   compression-level: 9
 
     merge-e2e-wp-latest:
-        name: Merge E2E reports for WP Latest
+        name: WP Latest merge E2E reports
         if: always()
         needs: [e2e-wp-latest, validate-version]
         runs-on: ubuntu-latest
@@ -292,7 +292,7 @@ jobs:
 
     # Run API and E2E tests on WP Latest-1 (previous stable)
     test-wp-latest-1:
-        name: API and E2E against WP Latest-1 ${{ matrix.shard.name }}
+        name: WP Latest-1 API & E2E ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         env:
@@ -456,24 +456,8 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              if: |
-                  success() || (
-                    failure() && (
-                      steps.run-api-composite-action.outputs.result == 'failure' ||
-                      steps.run-e2e-composite-action.outputs.result == 'failure' 
-                    ) 
-                  )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: WP Latest-1 (${{ steps.get-wp-latest-1.outputs.version }})-${{ matrix.shard.number }}
-                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
-                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: wp-latest-1
-                  release-version: ${{ needs.validate-version.outputs.version }}
-
     merge-wp-latest-1:
-        name: Merge E2E reports for WP Latest-1
+        name: WP Latest-1 merge E2E reports
         if: always()
         needs: [test-wp-latest-1, validate-version]
         runs-on: ubuntu-latest
@@ -523,9 +507,18 @@ jobs:
                   aws-secret-access-key: ${{ secrets.REPORTS_AWS_SECRET_ACCESS_KEY }}
                   artifact-name: ${{ env.E2E_WP_LATEST_X_ARTIFACT }}
 
+            - name: Create Slack block
+              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+              with:
+                  test-name: WP Latest-1 (${{ needs.test-wp-latest-1.outputs['get-wp-latest-1'].version }})
+                  api-result: ${{ needs.test-wp-latest-1.outputs['run-api-composite-action'].result }}
+                  e2e-result: ${{ needs.test-wp-latest-1.outputs['run-e2e-composite-action'].result }}
+                  env-slug: wp-latest-1
+                  release-version: ${{ needs.validate-version.outputs.version }}
+
     # Run API and E2E tests on WP beta or RC
     test-wp-prerelease:
-        name: API and E2E against WP beta or RC ${{ matrix.shard.name }}
+        name: WP beta or RC API & E2E ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         env:
@@ -695,7 +688,7 @@ jobs:
 
     # Run API and E2E tests on PHP 7.4 and 8.1
     test-php-versions:
-        name: API and E2E against PHP ${{ matrix.php_version }} ${{ matrix.shard.name }}
+        name: PHP ${{ matrix.php_version }} API & E2E  ${{ matrix.shard.name }}
         runs-on: ubuntu-latest
         needs: [validate-version]
         strategy:
@@ -867,12 +860,12 @@ jobs:
                   test-name: PHP ${{ matrix.php_version }}
                   api-result: ${{ steps.run-api-composite-action.outputs.result }}
                   e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: php-${{ matrix.php_version }}
+                  env-slug: php-${{ matrix.php_version }}-shard-${{ matrix.shard.number }}
                   release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run E2E tests on WP Latest with different plugins
     test-plugins:
-        name: E2E With ${{ matrix.plugin }}
+        name: ${{ matrix.plugin }} E2E tests
         runs-on: ubuntu-latest
         needs: [validate-version]
         env:
