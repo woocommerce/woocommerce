@@ -195,6 +195,18 @@ test.describe( 'Variations tab', () => {
 			await regularPrice.first().fill( '100' );
 
 			await page
+				.locator( '.woocommerce-product-tabs' )
+				.getByRole( 'button', { name: 'Inventory' } )
+				.click();
+
+			const sku = page.locator( 'input[name="woocommerce-product-sku"]' );
+			await sku.waitFor( { state: 'visible' } );
+			await sku.first().click();
+			await sku
+				.first()
+				.fill( `product-sku-${ new Date().getTime().toString() }` );
+
+			await page
 				.locator( '.woocommerce-product-header__actions' )
 				.getByRole( 'button', {
 					name: 'Update',
