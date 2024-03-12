@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Remove moment dependency from the csv-export package.
