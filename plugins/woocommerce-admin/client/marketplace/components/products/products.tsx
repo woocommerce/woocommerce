@@ -152,8 +152,7 @@ export default function Products( props: ProductsProps ) {
 							if ( ! isDefaultTheme ) {
 								setIsModalOpen( true );
 							} else {
-								window.location.href =
-									customizeStoreDesignUrl;
+								window.location.href = customizeStoreDesignUrl;
 							}
 						} }
 					/>
