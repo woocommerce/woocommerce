@@ -26,6 +26,7 @@ import {
  */
 import { useValidation } from '../../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
+import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { SalePriceBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { Label } from '../../../components/label/label';
@@ -52,18 +53,11 @@ export function Edit( {
 		onChange: setRegularPrice,
 	} );
 
-	const interpolatedHelp = help
-		? createInterpolateElement( help, {
-				PricingTab: (
-					<Link
-						href={ getNewPath( { tab: 'pricing' } ) }
-						onClick={ () => {
-							recordEvent( 'product_pricing_help_click' );
-						} }
-					/>
-				),
-		  } )
-		: null;
+	function renderHelp() {
+		if ( help ) {
+			return <span dangerouslySetInnerHTML={ sanitizeHTML( help ) } />;
+		}
+	}
 
 	const regularPriceId = useInstanceId(
 		BaseControl,
@@ -115,7 +109,7 @@ export function Edit( {
 				help={
 					regularPriceValidationError
 						? regularPriceValidationError
-						: interpolatedHelp
+						: renderHelp()
 				}
 				className={ classNames( {
 					'has-error': regularPriceValidationError,
