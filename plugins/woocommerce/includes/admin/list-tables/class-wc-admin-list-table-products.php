@@ -151,19 +151,18 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$product_stats = $this->get_product_stats( $product_reports );
 
 		$prompt = implode("\n", [
-			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies without considering stock context if stock status or stock quantity data is missing.',
-			'Focus on the following fields: product_id, items_sold, net_revenue, stock_status, stock_quantity, orders_count, price, intervals[].subtotals.items_sold, intervals[].subtotals.net_revenue, intervals[].subtotals.orders_count. ',
-			'For the three most popular products, use their sales performance and demand data to predict concise price adjustments for maximum revenue, excluding stock context if stock data is unavailable.',
-			'Provide a JSON object with product_ids as keys and concise, insightful sentences on price adjustment as values. Include useful information like adjustment percentages.',
-			'Add a bit of personal touch e.g. by mentioning product name',
+			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies. Focus on critical fields for decision-making and consider stock data only for products where "manage_stock" is true.',
+			'Concentrate on: product_id, items_sold, net_revenue, orders_count, price. When "manage_stock" is true, also consider stock_status and stock_quantity for those products.',
+			'Base your price adjustment suggestions on sales performance, demand data, and stock context (where applicable) for the three most popular products.',
+			'Output a JSON object with product_ids as keys. Provide insightful sentences on price adjustments as values, including suggested adjustment percentages, and mention stock considerations where relevant.',
 			'Expected response format:',
 			'{
-				"product_id": "Insightful sentence on price adjustment",
-				...
+				"product_id": "Insightful sentence on price adjustment for product",
 			}',
 			json_encode($product_reports),
 			json_encode($product_stats),
 		]);
+		
 
 		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
 		$this->ai_suggestions = json_decode($suggestions['completion'], true);
