@@ -139,49 +139,47 @@ export default function Products( props: ProductsProps ) {
 			<h2 className={ productListTitleClassName }>
 				{ isLoading ? ' ' : title }
 			</h2>
-			<>
-				<div className="woocommerce-marketplace__sub-header">
-					{ props.categorySelector && (
-						<CategorySelector type={ props.type } />
-					) }
-					{ props.type === 'theme' && (
-						<Button
-							className="woocommerce-marketplace__customize-your-store-button"
-							variant="secondary"
-							text={ __( 'Design your own', 'woocommerce' ) }
-							onClick={ () => {
-								if ( ! isDefaultTheme ) {
-									setIsModalOpen( true );
-								} else {
-									window.location.href =
-										customizeStoreDesignUrl;
-								}
-							} }
-						/>
-					) }
-				</div>
-				{ isModalOpen && (
-					<ThemeSwitchWarningModal
-						setIsModalOpen={ setIsModalOpen }
-						customizeStoreDesignUrl={ customizeStoreDesignUrl }
-					/>
+			<div className="woocommerce-marketplace__sub-header">
+				{ props.categorySelector && (
+					<CategorySelector type={ props.type } />
 				) }
-				<ProductListContent
-					products={ products }
-					type={ props.type }
-					className={ productListClass }
-					searchTerm={ props.searchTerm }
-					category={ category }
-				/>
-				{ showAllButton && (
+				{ props.type === 'theme' && (
 					<Button
-						className={ viewAllButonClassName }
+						className="woocommerce-marketplace__customize-your-store-button"
 						variant="secondary"
-						text={ __( 'View all', 'woocommerce' ) }
-						onClick={ () => showSection( props.type ) }
+						text={ __( 'Design your own', 'woocommerce' ) }
+						onClick={ () => {
+							if ( ! isDefaultTheme ) {
+								setIsModalOpen( true );
+							} else {
+								window.location.href =
+									customizeStoreDesignUrl;
+							}
+						} }
 					/>
 				) }
-			</>
+			</div>
+			{ isModalOpen && (
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+				/>
+			) }
+			<ProductListContent
+				products={ products }
+				type={ props.type }
+				className={ productListClass }
+				searchTerm={ props.searchTerm }
+				category={ category }
+			/>
+			{ showAllButton && (
+				<Button
+					className={ viewAllButonClassName }
+					variant="secondary"
+					text={ __( 'View all', 'woocommerce' ) }
+					onClick={ () => showSection( props.type ) }
+				/>
+			) }
 		</div>
 	);
 }
