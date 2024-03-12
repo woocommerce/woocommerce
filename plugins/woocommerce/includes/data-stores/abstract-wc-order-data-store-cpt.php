@@ -654,6 +654,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Given an initialized order object, update the post/postmeta records.
 	 *
 	 * @param WC_Abstract_Order $order Order object.
+	 *
 	 * @return bool Whether the order was updated.
 	 */
 	public function update_order_from_object( $order ) {
