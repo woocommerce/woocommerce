@@ -65,9 +65,8 @@ class Cart extends ControllerTestCase {
 		);
 
 		wc_empty_cart();
-		$this->keys   = array();
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		wc()->cart->add_to_cart( $this->products[1]->get_id() );
 		wc()->cart->apply_coupon( $this->coupon->get_code() );
 
 		// Draft order.
