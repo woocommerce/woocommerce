@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
