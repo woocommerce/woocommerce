@@ -67,9 +67,20 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
-						target: 'preAssembleSite',
+						target: 'installTheme',
 					},
 				],
+			},
+			installTheme: {
+				invoke: {
+					src: 'installAndActivateTheme',
+					onDone: {
+						target: 'preAssembleSite',
+					},
+					onError: {
+						actions: 'redirectToIntroWithError',
+					},
+				},
 			},
 			preAssembleSite: {
 				initial: 'preApiCallLoader',
@@ -82,24 +93,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 						type: 'parallel',
 						states: {
-							installAndActivateTheme: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'installAndActivateTheme',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: { type: 'final' },
-								},
-							},
 							assembleSite: {
 								initial: 'pending',
 								states: {
