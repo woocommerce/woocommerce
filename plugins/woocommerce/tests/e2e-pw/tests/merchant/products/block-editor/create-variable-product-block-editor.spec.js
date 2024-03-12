@@ -3,7 +3,6 @@ const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
-const { toggleProductVariationTour } = require( '../../../../utils/tours' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product&tab=variations';
@@ -22,10 +21,6 @@ const attributesData = {
 
 test.describe( 'Variations tab', () => {
 	test.describe( 'Create variable product', () => {
-		test.use( { storageState: process.env.ADMINSTATE } );
-		test.beforeAll( async ( { request } ) => {
-			await toggleProductVariationTour( request, false );
-		} );
 		test.skip(
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
