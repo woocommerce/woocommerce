@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Close prepublish panel before creating new product #45397

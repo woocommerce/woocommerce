@@ -35,8 +35,8 @@ import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
 import { useSelect } from '@wordpress/data';
 
 const SUPPORTED_FOOTER_PATTERNS = [
-	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-with-3-menus',
+	'woocommerce-blocks/footer-simple-menu',
 	'woocommerce-blocks/footer-large',
 ];
 
