@@ -135,7 +135,7 @@ final class QuantityLimits {
    		 * @param boolean $valid True if the new quantity is valid, false otherwise.
 		 * @param integer $quantity Quantity to validate.
 		 * @param \WC_Product|array $cart_item Cart item.
-		 * @return integer
+		 * @return \WP_Error|true
 		 */
 		return apply_filters( 'woocommerce_store_api_validate_cart_item_quantity', true, $quantity, $cart_item );
 	}
