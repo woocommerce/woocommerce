@@ -53,7 +53,7 @@ class PaymentGatewaySuggestionsTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', 'US:CA' );
 
 		$response_mock_ref = function( $preempt, $parsed_args, $url ) {
-			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json' ) ) {
+			if ( str_contains( $url, 'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json' ) ) {
 				return array(
 					'success' => true,
 					'body'    => wp_json_encode(

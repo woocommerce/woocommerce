@@ -9,19 +9,19 @@ Use the appropriate button style depending on the site theme.
 
 ### Dark
 
-Use on white or light-color backgrounds. Don’t use on black or dark backgrounds.
+Use on white or light-color backgrounds. Don't use on black or dark backgrounds.
 
 ![Dark.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Dark.png)
 
 ### Light
 
-Use on dark-color backgrounds. Don’t use on white or light backgrounds.
+Use on dark-color backgrounds. Don't use on white or light backgrounds.
 
 ![Light.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Light.png)
 
 ### Light with outline
 
-Use on white or light-color backgrounds that don’t provide sufficient contrast. Don’t use on dark or saturated backgrounds.
+Use on white or light-color backgrounds that don't provide sufficient contrast. Don't use on dark or saturated backgrounds.
 
 ![Light with outline.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Light-with-outline.png)
 

@@ -76,14 +76,28 @@ class FontFace {
 	/**
 	 * Handles the upload of a font file using wp_handle_upload().
 	 *
-	 * Copied from Gutenberg: https://github.com/WordPress/gutenberg/blob/b283c47dba96d74dd7589a823d8ab84c9e5a4765/lib/compat/wordpress-6.5/fonts/class-wp-rest-font-faces-controller.php/#L859-L883
+	 * Copied from Gutenberg: https://github.com/WordPress/gutenberg/blob/f4889bf58ddeb8470c8d2a765f1b57229c515eda/lib/compat/wordpress-6.5/fonts/class-wp-rest-font-faces-controller.php/#L859-L896
 	 *
 	 * @param array $file Single file item from $_FILES.
 	 * @return array Array containing uploaded file attributes on success, or error on failure.
 	 */
 	private static function handle_font_file_upload( $file ) {
 		add_filter( 'upload_mimes', array( 'WP_Font_Utils', 'get_allowed_font_mime_types' ) );
-		add_filter( 'upload_dir', 'wp_get_font_dir' );
+
+		/*
+		 * Set the upload directory to the fonts directory.
+		 *
+		 * wp_get_font_dir() contains the 'font_dir' hook, whose callbacks are
+		 * likely to call wp_get_upload_dir().
+		 *
+		 * To avoid an infinite loop, don't hook wp_get_font_dir() to 'upload_dir'.
+		 * Instead, just pass its return value to the 'upload_dir' callback.
+		 */
+		$font_dir       = wp_get_font_dir();
+		$set_upload_dir = function () use ( $font_dir ) {
+			return $font_dir;
+		};
+		add_filter( 'upload_dir', $set_upload_dir );
 
 		$overrides = array(
 			'upload_error_handler' => array( self::class, 'handle_font_file_upload_error' ),
@@ -100,8 +114,7 @@ class FontFace {
 		);
 
 		$uploaded_file = wp_handle_upload( $file, $overrides );
-
-		remove_filter( 'upload_dir', 'wp_get_font_dir' );
+		remove_filter( 'upload_dir', $set_upload_dir );
 		remove_filter( 'upload_mimes', array( 'WP_Font_Utils', 'get_allowed_font_mime_types' ) );
 
 		return $uploaded_file;
