@@ -14,6 +14,7 @@ use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
+use WC_Helper;
 use WP_Error;
 use WP_Upgrader;
 
@@ -35,6 +36,7 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 	}
 
 	/**
@@ -530,6 +532,24 @@ class PluginsHelper {
 		);
 
 		return self::get_action_data( $actions );
+	}
+
+	public static function maybe_show_connect_notice_in_plugin_list() {
+		global $pagenow;
+
+		if ( 'plugins.php' !== $pagenow ) {
+			return;
+		}
+
+		if ( WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		$notice_string = __( 'Connect your store to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' );
+		echo
+			'<div class="notice notice-error is-dismissible">
+	    		<p>' . $notice_string . '</p>
+	    	</div>';
 	}
 
 }
