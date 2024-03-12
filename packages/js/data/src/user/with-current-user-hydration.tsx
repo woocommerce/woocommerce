@@ -25,7 +25,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
-				// @ts-expect-error Resolved type is incorrect.
+
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -34,7 +34,6 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
-			// @ts-expect-error Resolved type is incorrect.
 			const { startResolution, finishResolution, receiveCurrentUser } =
 				useDispatch( STORE_NAME );
 
