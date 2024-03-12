@@ -103,6 +103,23 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		return wp_parse_args( $custom, $columns );
 	}
 
+	private function get_product_reports() {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
+		// $start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
+		// $end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				// 'before' => $end_date,
+				// 'after'  => $start_date,
+				'extended_info' => 'true',
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		return rest_do_request( $request );
+	}
+
+
 	/**
 	 * Define which columns to show on this screen.
 	 *
@@ -161,41 +178,50 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		return array_merge( $show_columns, $columns );
 	}
 
-	private function get_product_insights( $url, $token, $connection ) {
-		// data from the last ten weeks
-		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
-		// $start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
-		// $end_date   = date('Y-m-d') . ' 23:59:59';
-		$request->set_query_params(
-			array(
-				// 'before' => $end_date,
-				// 'after'  => $start_date,
-				'extended_info' => 'true',
-				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
-			)
-		);
-		$json_data = rest_do_request( $request );
-		$json_object = json_encode( $json_data );
+	private function get_product_stats( $products ) {
+		if ( isset( $products->data ) && is_array( $products->data ) ) {
+			$count = 0;
+			foreach ( $products->data as $item ) {
+				$product_id = $item['product_id'];
+				$stats_request = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products/stats' );
+				$stats_request->set_query_params(
+					array(
+						'products' => $product_id,
+					)
+				);
+				$stats_response = rest_do_request( $stats_request )->data;
 
-		// $stock_report    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/stock' );
-		// $request->set_query_params(
-		// 	array(
-		// 		'before' => $end_date,
-		// 		'after'  => $start_date,
-		// 		'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
-		// 	)
-		// );
-		// $stock_data = rest_do_request( $stock_report );
-		// $stock_result = json_encode( $stock_data );
-		
+				if ( isset( $stats_response ) ) {
+					$stats_array[ $product_id ] = $stats_response;
+				}
+
+				$count++;
+			}
+		}
+		return $stats_array;
+	}
+
+	private function get_product_insights( $url, $token, $connection ) {
+		$product_reports = $this->get_product_reports();
+		$product_stats = $this->get_product_stats( $product_reports );
+
+
+
 		$prompt = implode("\n", [
-			'You are a WooCommerce expert.',
-			'Analyze the provided WooCommerce product data, focusing on items_sold, net_revenue, orders_count, stock_quantity, and price, to predict an optimal pricing strategy. Use correlations between sales performance, demand, and supply to generate a succinct price suggestion.',
-			'Outcome: Deliver a single, insightful sentence for every product on the recommended price adjustment for maximum revenue, considering demand-supply dynamics. Make sure that the suggestion is short and contains as much useful information as possible (e.g. percents)',
-			'Your response should contain json object with list of products and their insights, where object key is product_id and value contains the single insightful sentence.',
-			'From all the products, choose four main products that need most attention for price increase or decrease, and keep only them in the response.',
-			$json_object,
+			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies without considering stock context if stock status or stock quantity data is missing.',
+			'Focus on the following fields: product_id, items_sold, net_revenue, stock_status, stock_quantity, orders_count, price, intervals[].subtotals.items_sold, intervals[].subtotals.net_revenue, intervals[].subtotals.orders_count. ',
+			'For the three most popular products, use their sales performance and demand data to predict concise price adjustments for maximum revenue, excluding stock context if stock data is unavailable.',
+			'Provide a JSON object with product_ids as keys and concise, insightful sentences on price adjustment as values. Include useful information like adjustment percentages.',
+			'Add a bit of personal touch e.g. by mentioning product name',
+			'Expected response format:',
+			'{
+				"product_id": "Increase price by X% based on demand",
+				...
+			}',
+			json_encode($product_reports),
+			json_encode($product_stats),
 		]);
+		
 
 		$body = array(
 			'feature' => 'ai-product-suggestions',
@@ -203,30 +229,12 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			'token'   => $token,
 		);
 
-		// $can_be_run = get_transient('can_be_run_transient'); // Get the value from the transient
-		
+		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
+		$this->ai_suggestions = json_decode($suggestions['completion'], true);
 
-		// if (! $can_be_run) {
-			$test = $connection->fetch_ai_response( $token, $prompt, 20 );
-			$this->ai_suggestions = json_decode($test['completion'], true)['data'];
-
-			// $can_be_run = false; // Set to false after running
-			// set_transient('can_be_run_transient', true, 120); // Create transient for two minutes
-		// } else {
-		// 	$this->ai_suggestions = []; // Return empty array if cannot be run
-		// }
-
-
-		// $insights = wp_remote_post(
-		// 	$url,
-		// 	array(
-		// 		'body'    => $body,
-		// 		'timeout' => 20,
-		// 	)
-		// );
-		// $this->ai_suggestions = $insights;
-		// return $insights;
 		return [];
+
+
 	}
 
 	private function ask_ai_for_products_ingights( $url, $token ) {
