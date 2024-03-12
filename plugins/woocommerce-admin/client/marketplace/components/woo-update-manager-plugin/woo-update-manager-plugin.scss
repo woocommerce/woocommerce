@@ -56,3 +56,12 @@
 		margin-bottom: 0px;
 	}
 }
+
+.woocommerce-marketplace__header-account-modal {
+	.components-button {
+		&.is-link {
+			text-decoration: none;
+			padding: 6px 12px;
+		}
+	}
+}
