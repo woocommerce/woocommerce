@@ -150,9 +150,16 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$product_reports = $this->get_product_reports();
 		$product_stats = $this->get_product_stats( $product_reports );
 
-		$prompt = implode("\n", [
+		$prompt = $this->get_prompt_price_orders_count_and_stock_analysis( json_encode($product_reports), json_encode($product_stats) );
+
+		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
+		$this->ai_suggestions = json_decode($suggestions['completion'], true);
+	}
+
+	private function get_prompt_price_orders_count_and_stock_analysis( $product_reports, $product_stats ) {
+		return $prompt = implode("\n", [
 			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies. Focus on critical fields for decision-making and consider stock data only for products where "manage_stock" is true.',
-			'Concentrate on: product_id, items_sold, net_revenue, orders_count, price. When "manage_stock" is true, also consider stock_status and stock_quantity for those products.',
+			'Concentrate on: product_id, items_sold, net_revenue, orders_count, price. When "manage_stock" is true, also consider stock_status and stock_quantity for those products. If "manage_stock" is false, ignore stock data and do not provide stock-related insights (but keep the rest of insights).',
 			'Base your price adjustment suggestions on sales performance, demand data, and stock context (where applicable) for the three most popular products.',
 			'Output a JSON object with product_ids as keys. Provide insightful sentences on price adjustments as values, including suggested adjustment percentages, and mention stock considerations where relevant.',
 			'Expected response format:',
@@ -162,10 +169,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			json_encode($product_reports),
 			json_encode($product_stats),
 		]);
-		
-
-		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
-		$this->ai_suggestions = json_decode($suggestions['completion'], true);
 	}
 
 	private function get_product_reports() {
