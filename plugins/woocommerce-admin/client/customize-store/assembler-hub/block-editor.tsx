@@ -6,8 +6,8 @@
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
 // @ts-ignore No types for this exist yet.
-import { useEntityRecords } from '@wordpress/core-data';
-import { select } from '@wordpress/data';
+import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 // @ts-ignore No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
@@ -67,7 +67,19 @@ const MAX_PAGE_COUNT = 100;
 export const BlockEditor = ( {} ) => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
-	const [ blocks, , onChange ] = useEditorBlocks();
+
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
+
 	const urlParams = useQuery();
 	const { currentState } = useContext( CustomizeStoreContext );
 
@@ -120,8 +132,8 @@ export const BlockEditor = ( {} ) => {
 		[ history, urlParams, pages ]
 	);
 
-	const { highlightedBlockIndex } = useContext( HighlightedBlockContext );
-	const isHighlighting = highlightedBlockIndex !== -1;
+	const { highlightedBlockClientId } = useContext( HighlightedBlockContext );
+	const isHighlighting = highlightedBlockClientId !== null;
 	const additionalStyles = isHighlighting
 		? `
 		.wp-block.preview-opacity {
@@ -130,11 +142,25 @@ export const BlockEditor = ( {} ) => {
 	`
 		: '';
 
+	const opacityClass = 'preview-opacity';
+
 	const renderedBlocks = useMemo(
 		() =>
-			blocks.map( ( block, i ) => {
-				if ( ! isHighlighting || i === highlightedBlockIndex ) {
-					return block;
+			blocks.map( ( block ) => {
+				if (
+					! isHighlighting ||
+					block.clientId === highlightedBlockClientId
+				) {
+					return {
+						...block,
+						attributes: {
+							...block.attributes,
+							className: block.attributes.className?.replace(
+								opacityClass,
+								''
+							),
+						},
+					};
 				}
 
 				return {
@@ -142,11 +168,11 @@ export const BlockEditor = ( {} ) => {
 					attributes: {
 						...block.attributes,
 						className:
-							block.attributes.className + ' preview-opacity',
+							block.attributes.className + ` ${ opacityClass }`,
 					},
 				};
 			} ),
-		[ blocks, highlightedBlockIndex, isHighlighting ]
+		[ blocks, highlightedBlockClientId, isHighlighting ]
 	);
 
 	return (
@@ -157,9 +183,11 @@ export const BlockEditor = ( {} ) => {
 					onChange={
 						// We need to pass onChange for the logo screen so that logo block can be updated when we change the logo attributes in logo sidebar navigation screen component.
 						// We also need to pass onChange for the assembler hub screen so when a block set an attribute during the block initialization, the block editor will be updated.
+						// We also need to pass onChange when the homepage pattern is updated because the Product Collection block sets a dynamic attribute and we need to update the block editor.
 						// For other screens, we don't need to pass onChange. Otherwise, we'll get a race condition issue where the block editor will be updated twice: once from the onChange in the sidebar component, and once from the onChange in the block editor component.
 						[
 							'/customize-store/assembler-hub/logo',
+							'/customize-store/assembler-hub/homepage',
 							'/customize-store/assembler-hub',
 						].includes( urlParams.path )
 							? onChange

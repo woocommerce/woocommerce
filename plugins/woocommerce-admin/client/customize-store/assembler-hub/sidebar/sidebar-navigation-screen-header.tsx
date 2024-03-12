@@ -14,6 +14,9 @@ import {
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+// @ts-expect-error No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -29,12 +32,13 @@ import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
+import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
 
 const SUPPORTED_HEADER_PATTERNS = [
+	'woocommerce-blocks/header-centered-menu',
 	'woocommerce-blocks/header-essential',
 	'woocommerce-blocks/header-minimal',
 	'woocommerce-blocks/header-large',
-	'woocommerce-blocks/header-centered-menu',
 ];
 
 export const SidebarNavigationScreenHeader = () => {
@@ -44,17 +48,38 @@ export const SidebarNavigationScreenHeader = () => {
 	} );
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-	const [ blocks, , onChange ] = useEditorBlocks();
-	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
-		HighlightedBlockContext
+
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
 	);
+
+	const [ mainTemplateBlocks ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template_part',
+		headerTemplateId
+	);
+
+	const headerTemplatePartBlock = mainTemplateBlocks.find(
+		( block ) => block.attributes.slug === 'header'
+	);
+
+	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
+		useContext( HighlightedBlockContext );
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
-		setHighlightedBlockIndex( 0 );
-	}, [ setHighlightedBlockIndex ] );
-
+		setHighlightedBlockClientId(
+			headerTemplatePartBlock?.clientId ?? null
+		);
+	}, [ headerTemplatePartBlock?.clientId, setHighlightedBlockClientId ] );
 	const headerPatterns = useMemo(
 		() =>
 			patterns
@@ -103,7 +128,7 @@ export const SidebarNavigationScreenHeader = () => {
 	return (
 		<SidebarNavigationScreen
 			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockIndex }
+			onNavigateBackClick={ resetHighlightedBlockClientId }
 			description={ createInterpolateElement(
 				__(
 					"Select a new header from the options below. Your header includes your site's navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
