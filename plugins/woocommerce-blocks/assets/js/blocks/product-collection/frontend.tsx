@@ -98,6 +98,13 @@ const productCollectionStore = {
 			const wcNavigationId = (
 				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
 			 )?.dataset?.wcNavigationId;
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				yield forcePageReload( ref.href );
+			}
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
@@ -148,6 +155,15 @@ const productCollectionStore = {
 		*prefetch() {
 			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
+
+			const isDisabled = (
+				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
+			 )?.dataset.wcNavigationDisabled;
+
+			if ( isDisabled ) {
+				return;
+			}
+
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}

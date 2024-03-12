@@ -275,8 +275,11 @@ class ProductCollection extends AbstractBlock {
 					}
 
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
-						// Disable navigation in the router store config.
-						wp_interactivity_config( 'woocommerce/product-collection', array( 'clientNavigationDisabled' => true ) );
+						$p = new WP_HTML_Tag_Processor( $content );
+						if ( $p->next_tag() ) {
+							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
+						}
+						$content = $p->get_updated_html();
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
 
