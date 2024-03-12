@@ -141,7 +141,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 *
 	 * - When $price->currency is 'USD' and $price->value is '1000', it should return '$1000.00'.
 	 * - When $price->currency is 'JPY' and $price->value is '1000', it should return '¥1,000'.
-	 * - When $price->currency is 'AED' and $price->value is '1000', it should return '5.000,00 د.إ	'.
+	 * - When $price->currency is 'AED' and $price->value is '1000', it should return '5.000,00 د.إ'.
 	 *
 	 * @param Price $price Price object.
 	 * @return String formatted price.
