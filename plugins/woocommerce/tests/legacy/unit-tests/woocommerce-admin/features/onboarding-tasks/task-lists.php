@@ -26,6 +26,16 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down
+	 */
+	public function tearDown(): void {
+		TaskLists::clear_lists();
+		TaskLists::init_default_lists();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Tests that the "woocommerce_admin_experimental_onboarding_tasklists" filter is able to append tasks to any tasklist.
 	 */
 	public function test_default_tasklists_can_be_add_by_onboarding_filter() {
