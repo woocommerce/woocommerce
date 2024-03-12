@@ -8,7 +8,7 @@ import {
 	getElement,
 	getContext,
 	getConfig,
-} from '@wordpress/interactivity';
+} from '@woocommerce/interactivity';
 
 /**
  * Internal dependencies
