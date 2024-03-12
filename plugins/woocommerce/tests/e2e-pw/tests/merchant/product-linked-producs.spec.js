@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Products > Related products', () => {
 	const test = baseTest.extend( {

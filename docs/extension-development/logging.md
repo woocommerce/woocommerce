@@ -48,7 +48,7 @@ Uncheck the box here to turn off all logging. This is not recommended in most ci
 
 Out-of-the-box, WooCommerce has two different log storage methods available:
 
-* **File system** - Log entries are recorded to files. Files are differentiated by the `source` value for the log entry (see the "Adding logs" section below), and by the current date. The files are stored in `wp-content/uploads/wc-logs`, but this can be changed by defining the `WC_LOG_DIR` constant in your `wp-config.php` file with a custom path. Log files can be up to 5 MB in size, after which the log file will rotate.
+* **File system** - Log entries are recorded to files. Files are differentiated by the `source` value for the log entry (see the "Adding logs" section below), and by the current date. The files are stored in the `wc-logs` subdirectory of the site's `uploads` directory. A custom directory can be defined using the `woocommerce_log_directory` filter hook. Log files can be up to 5 MB in size, after which the log file will rotate.
 * **Database** - Log entries are recorded to the database, in the `{$wpdb->prefix}woocommerce_log` table.
 
 If you change this setting, and you already have some log entries, those entries will not be migrated to the other storage method, but neither will they be deleted.

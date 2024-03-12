@@ -36,7 +36,24 @@ class WC_Logger implements WC_Logger_Interface {
 	 * @param string $threshold Optional. Define an explicit threshold. May be configured via  WC_LOG_THRESHOLD. By default, all logs will be processed.
 	 */
 	public function __construct( $handlers = null, $threshold = null ) {
-		if ( null === $handlers ) {
+		if ( is_array( $handlers ) ) {
+			$this->handlers = $handlers;
+		}
+
+		if ( is_string( $threshold ) ) {
+			$this->threshold = $threshold;
+		}
+	}
+
+	/**
+	 * Get an array of log handler instances.
+	 *
+	 * @return WC_Log_Handler_Interface[]
+	 */
+	protected function get_handlers() {
+		if ( ! is_null( $this->handlers ) ) {
+			$handlers = $this->handlers;
+		} else {
 			$default_handler  = LoggingUtil::get_default_handler();
 			$handler_instance = new $default_handler();
 
@@ -50,12 +67,12 @@ class WC_Logger implements WC_Logger_Interface {
 			$handlers = apply_filters( 'woocommerce_register_log_handlers', array( $handler_instance ) );
 		}
 
-		$register_handlers = array();
+		$registered_handlers = array();
 
 		if ( ! empty( $handlers ) && is_array( $handlers ) ) {
 			foreach ( $handlers as $handler ) {
 				if ( $handler instanceof WC_Log_Handler_Interface ) {
-					$register_handlers[] = $handler;
+					$registered_handlers[] = $handler;
 				} else {
 					wc_doing_it_wrong(
 						__METHOD__,
@@ -71,12 +88,22 @@ class WC_Logger implements WC_Logger_Interface {
 			}
 		}
 
+		return $registered_handlers;
+	}
+
+	/**
+	 * Get the log threshold as a numerical level severity.
+	 *
+	 * @return int
+	 */
+	protected function get_threshold() {
+		$threshold = $this->threshold;
+
 		if ( ! WC_Log_Levels::is_valid_level( $threshold ) ) {
 			$threshold = LoggingUtil::get_level_threshold();
 		}
 
-		$this->handlers  = $register_handlers;
-		$this->threshold = WC_Log_Levels::get_level_severity( $threshold );
+		return WC_Log_Levels::get_level_severity( $threshold );
 	}
 
 	/**
@@ -90,11 +117,9 @@ class WC_Logger implements WC_Logger_Interface {
 			return false;
 		}
 
-		if ( null === $this->threshold ) {
-			return true;
-		}
+		$threshold = $this->get_threshold();
 
-		return $this->threshold <= WC_Log_Levels::get_level_severity( $level );
+		return $threshold <= WC_Log_Levels::get_level_severity( $level );
 	}
 
 	/**
@@ -148,7 +173,7 @@ class WC_Logger implements WC_Logger_Interface {
 		if ( $this->should_handle( $level ) ) {
 			$timestamp = time();
 
-			foreach ( $this->handlers as $handler ) {
+			foreach ( $this->get_handlers() as $handler ) {
 				/**
 				 * Filter the logging message. Returning null will prevent logging from occurring since 5.3.
 				 *
@@ -296,11 +321,13 @@ class WC_Logger implements WC_Logger_Interface {
 		if ( ! $source ) {
 			return false;
 		}
-		foreach ( $this->handlers as $handler ) {
+
+		foreach ( $this->get_handlers() as $handler ) {
 			if ( is_callable( array( $handler, 'clear' ) ) ) {
 				$handler->clear( $source );
 			}
 		}
+
 		return true;
 	}
 
@@ -313,7 +340,7 @@ class WC_Logger implements WC_Logger_Interface {
 		$days      = LoggingUtil::get_retention_period();
 		$timestamp = strtotime( "-{$days} days" );
 
-		foreach ( $this->handlers as $handler ) {
+		foreach ( $this->get_handlers() as $handler ) {
 			if ( is_callable( array( $handler, 'delete_logs_before_timestamp' ) ) ) {
 				$handler->delete_logs_before_timestamp( $timestamp );
 			}

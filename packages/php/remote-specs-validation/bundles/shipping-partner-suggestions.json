@@ -711,7 +711,8 @@
         "contains",
         "!contains",
         "in",
-        "!in"
+        "!in",
+        "range"
       ]
     },
     "rules": {

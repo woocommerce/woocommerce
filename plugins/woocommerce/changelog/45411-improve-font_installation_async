@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: CYS: improve font installation with the async job.
+

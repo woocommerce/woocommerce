@@ -18,17 +18,12 @@ import {
  * Internal dependencies
  */
 import { AttributeSelectControls } from './attribute-select-controls';
-import { BlockAttributes } from '../types';
+import { EditProps } from '../types';
 
-export const Inspector = ( {
-	attributes,
-	setAttributeId,
-}: {
-	attributes: BlockAttributes;
-	setAttributeId: ( id: unknown ) => void;
-} ) => {
+export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 	const { attributeId, showCounts, queryType, displayStyle, selectType } =
 		attributes;
+
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
@@ -122,7 +117,11 @@ export const Inspector = ( {
 				<AttributeSelectControls
 					isCompact={ true }
 					attributeId={ attributeId }
-					setAttributeId={ setAttributeId }
+					setAttributeId={ ( id: number ) => {
+						setAttributes( {
+							attributeId: id,
+						} );
+					} }
 				/>
 			</PanelBody>
 		</InspectorControls>

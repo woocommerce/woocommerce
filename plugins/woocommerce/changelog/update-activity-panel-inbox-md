@@ -1,4 +1,5 @@
 Significance: patch
-Type: update
+Type: tweak
+Comment: Minor changes to example plugin code in Markdown file.
 
-Updated example plugin code in activity-panel-inbox.md to include namespacing.
+
