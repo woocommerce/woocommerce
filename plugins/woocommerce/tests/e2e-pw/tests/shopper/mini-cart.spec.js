@@ -113,26 +113,71 @@ test.describe( 'Mini Cart block page', () => {
 		} );
 	} );
 
-	test( 'can see empty mini cart, add and remove product, increase to max quantity, calculate tax and see redirection', async ( {
+	test( 'can see empty customized mini cart, add and remove product, increase to max quantity, calculate tax and see redirection', async ( {
 		page,
 		baseURL,
 		context,
 	} ) => {
-		// create a new page with mini cart block
+		const colorField = '.components-input-control__input';
+		const miniCartBlock = '.wp-block-woocommerce-mini-cart';
+		const redColor = 'ff0000';
+		const blueColor = '002eff';
+		const greenColor = '00cc09';
+
+		// go to create a new page
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
 		await disableWelcomeModal( { page } );
 
+		// add page title and mini cart block
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
 			.fill( miniCartPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		await page.getByLabel( 'Add block' ).click();
 		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/mini' );
-		await page.keyboard.press( 'Enter' );
+			.getByLabel( 'Search for blocks and patterns' )
+			.fill( '/mini cart' );
+		await page
+			.getByRole( 'option' )
+			.filter( { hasText: 'Mini-Cart' } )
+			.click();
+		await expect( page.getByLabel( 'Block: Mini-Cart' ) ).toBeVisible();
+
+		// customize mini cart block
+		await page.getByLabel( 'Block: Mini-Cart' ).click();
+		// display total price
+		await page.getByLabel( 'Display total price' ).click();
+		// open drawer when a product
+		await page.getByLabel( 'Open drawer when adding' ).click();
+		// open styles in the sidebar
+		await page.getByLabel( 'Styles', { exact: true } ).click();
+		// customize price color
+		await page.getByTitle( 'Price', { exact: true } ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom color picker.' } )
+			.click();
+		await page.locator( colorField ).fill( redColor );
+		await page.getByTitle( 'Price', { exact: true } ).click();
+		// customize icon color
+		await page.getByTitle( 'Icon', { exact: true } ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom color picker.' } )
+			.click();
+		await page.locator( colorField ).fill( blueColor );
+		await page.getByTitle( 'Icon', { exact: true } ).click();
+		// customize product count color
+		await page.getByTitle( 'Product Count', { exact: true } ).click();
+		await page
+			.getByRole( 'button', { name: 'Custom color picker.' } )
+			.click();
+		await page.locator( colorField ).fill( greenColor );
+		await page.getByTitle( 'Product Count', { exact: true } ).click();
+		// customize font size and weight
+		await page.getByLabel( 'Large', { exact: true } ).click();
+		await page.getByRole( 'button', { name: 'Font weight' } ).click();
+		await page.getByRole( 'option' ).filter( { hasText: 'Black' } ).click();
+
+		// publish created mini cart page
 		await page
 			.getByRole( 'button', { name: 'Publish', exact: true } )
 			.click();
@@ -144,11 +189,31 @@ test.describe( 'Mini Cart block page', () => {
 			page.getByText( `${ miniCartPageTitle } is now live.` )
 		).toBeVisible();
 
-		// go to the page to test mini cart
+		// go to created page and verify customized and empty mini cart
 		await page.goto( miniCartPageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: miniCartPageTitle } )
 		).toBeVisible();
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-price-color',
+			`{"color":"#${ redColor }"}`
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-icon-color',
+			`{"color":"#${ blueColor }"}`
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-product-count-color',
+			`{"color":"#${ greenColor }"}`
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-font-size',
+			'large'
+		);
+		await expect( page.locator( miniCartBlock ) ).toHaveAttribute(
+			'data-style',
+			'{"typography":{"fontWeight":"900"}}'
+		);
 		await page.locator( miniCartButton ).click();
 		await expect(
 			page.getByText( 'Your cart is currently empty!' )

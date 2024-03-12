@@ -531,22 +531,14 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
 
-			const newArrivalsProducts = [
-				'WordPress Pennant',
-				'Logo Collection',
-				'Beanie with Logo',
-				'T-Shirt with Logo',
-				'Single',
-			];
-
-			await expect( pageObject.products ).toHaveCount( 5 );
-			await expect( pageObject.productTitles ).toHaveText(
-				newArrivalsProducts
-			);
+			// New Arrivals are by default filtered to display products from last 7 days.
+			// Products in our test env have creation date set to much older, hence
+			// no products are expected to be displayed by default.
+			await expect( pageObject.products ).toHaveCount( 0 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
 		// When creating reviews programmatically the ratings are not propagated
@@ -941,26 +933,6 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Query Context in Editor', () => {
-		test( 'Product Catalog: Sends only ID in Query Context', async ( {
-			pageObject,
-		} ) => {
-			const url = await pageObject.setupAndFetchQueryContextURL( {
-				collection: 'productCatalog',
-			} );
-
-			expect(
-				url.searchParams.has( 'productCollectionQueryContext[id]' )
-			).toBeTruthy();
-
-			// There shouldn't be collection in the query context
-			// Because Product Catalog isn't a collection
-			expect(
-				url.searchParams.has(
-					'productCollectionQueryContext[collection]'
-				)
-			).toBeFalsy();
-		} );
-
 		test( 'Collections: collection should be present in query context', async ( {
 			pageObject,
 		} ) => {

@@ -51,7 +51,34 @@
 }
 
 .wp-block-woocommerce-product-filter-price {
+	.wp-block-woocommerce-product-filter-price-content {
+		display: grid;
+		grid-template-areas:
+			"price-slider price-slider price-slider"
+			"left-input   middle-input right-input";
+		grid-template-columns: auto 1fr auto;
+		column-gap: $gap-small;
+
+		&.wp-block-woocommerce-product-filter-price-content--inline {
+			grid-template-areas: "left-input price-slider right-input";
+			grid-template-columns: auto 1fr auto;
+		}
+	}
+
+	.wp-block-woocommerce-product-filter-price-content-price-range-slider {
+		grid-area: price-slider;
+	}
+
+	.wp-block-woocommerce-product-filter-price-content-left-input {
+		grid-area: left-input;
+	}
+
+	.wp-block-woocommerce-product-filter-price-content-right-input {
+		grid-area: right-input;
+	}
+
 	.range {
+		grid-area: "price-slider";
 		--low: 0%;
 		--high: 100%;
 		--range-color: currentColor;
@@ -183,12 +210,6 @@
 	}
 
 	.text {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin: 16px 0;
-		gap: 8px;
-
 		input[type="text"] {
 			padding: 8px;
 			margin: 0;
@@ -203,17 +224,4 @@
 		}
 	}
 
-	&.inline-input {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-
-		.text {
-			display: contents;
-		}
-
-		.text .min {
-			order: -1;
-		}
-	}
 }
