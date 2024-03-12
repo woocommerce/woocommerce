@@ -103,23 +103,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		return wp_parse_args( $custom, $columns );
 	}
 
-	private function get_product_reports() {
-		// data from the last ten weeks
-		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
-		// $start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
-		// $end_date   = date('Y-m-d') . ' 23:59:59';
-		$request->set_query_params(
-			array(
-				// 'before' => $end_date,
-				// 'after'  => $start_date,
-				'extended_info' => 'true',
-				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
-			)
-		);
-		return rest_do_request( $request );
-	}
-
-
 	/**
 	 * Define which columns to show on this screen.
 	 *
@@ -156,26 +139,50 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$connection = new Connection();
 		$site_id = $connection->get_site_id();
 		$token = $connection->get_jwt_token( $site_id );
+
 		// send request to AI through front-end and text-completion API
-		$url = 'https://public-api.wordpress.com/wpcom/v2/text-completion';
-
-		// /wc-analytics/reports/products/stats
-		// $products_stats_ai_suggestions = $this->ask_ai_about_insights_for_products_stats( $url, $token );
-
-
-		// orders/stats
-		// $orders_stats_ai_suggestions = $this->ask_ai_about_insights_for_orders_stats( $url, $token );
-
-		// products
-		// $products_ai_suggestions = $this->ask_ai_for_products_ingights( $url, $token );
-
-
-		// NEW: suggest price increases for popular products, and reductions for overstocked ones
-		$this->get_product_insights( $url, $token, $connection );
-		// use items_sold and orders_count to determine popularity
-
-
+		$this->create_product_insights( $token, $connection );
+	
 		return array_merge( $show_columns, $columns );
+	}
+
+	private function create_product_insights( $token, $connection ) {
+		$product_reports = $this->get_product_reports();
+		$product_stats = $this->get_product_stats( $product_reports );
+
+		$prompt = implode("\n", [
+			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies without considering stock context if stock status or stock quantity data is missing.',
+			'Focus on the following fields: product_id, items_sold, net_revenue, stock_status, stock_quantity, orders_count, price, intervals[].subtotals.items_sold, intervals[].subtotals.net_revenue, intervals[].subtotals.orders_count. ',
+			'For the three most popular products, use their sales performance and demand data to predict concise price adjustments for maximum revenue, excluding stock context if stock data is unavailable.',
+			'Provide a JSON object with product_ids as keys and concise, insightful sentences on price adjustment as values. Include useful information like adjustment percentages.',
+			'Add a bit of personal touch e.g. by mentioning product name',
+			'Expected response format:',
+			'{
+				"product_id": "Insightful sentence on price adjustment",
+				...
+			}',
+			json_encode($product_reports),
+			json_encode($product_stats),
+		]);
+
+		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
+		$this->ai_suggestions = json_decode($suggestions['completion'], true);
+	}
+
+	private function get_product_reports() {
+		// data from the last ten weeks
+		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
+		// $start_date = date('Y-m-d H:i:s', strtotime('-3 months'));
+		// $end_date   = date('Y-m-d') . ' 23:59:59';
+		$request->set_query_params(
+			array(
+				// 'before' => $end_date,
+				// 'after'  => $start_date,
+				'extended_info' => 'true',
+				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
+			)
+		);
+		return rest_do_request( $request );
 	}
 
 	private function get_product_stats( $products ) {
@@ -199,99 +206,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			}
 		}
 		return $stats_array;
-	}
-
-	private function get_product_insights( $url, $token, $connection ) {
-		$product_reports = $this->get_product_reports();
-		$product_stats = $this->get_product_stats( $product_reports );
-
-
-
-		$prompt = implode("\n", [
-			'As a WooCommerce expert, analyze the provided product and sales data to recommend optimal pricing strategies without considering stock context if stock status or stock quantity data is missing.',
-			'Focus on the following fields: product_id, items_sold, net_revenue, stock_status, stock_quantity, orders_count, price, intervals[].subtotals.items_sold, intervals[].subtotals.net_revenue, intervals[].subtotals.orders_count. ',
-			'For the three most popular products, use their sales performance and demand data to predict concise price adjustments for maximum revenue, excluding stock context if stock data is unavailable.',
-			'Provide a JSON object with product_ids as keys and concise, insightful sentences on price adjustment as values. Include useful information like adjustment percentages.',
-			'Add a bit of personal touch e.g. by mentioning product name',
-			'Expected response format:',
-			'{
-				"product_id": "Increase price by X% based on demand",
-				...
-			}',
-			json_encode($product_reports),
-			json_encode($product_stats),
-		]);
-		
-
-		$body = array(
-			'feature' => 'ai-product-suggestions',
-			'prompt'  => $prompt,
-			'token'   => $token,
-		);
-
-		$suggestions = $connection->fetch_ai_response( $token, $prompt, 20 );
-		$this->ai_suggestions = json_decode($suggestions['completion'], true);
-
-		return [];
-
-
-	}
-
-	private function ask_ai_for_products_ingights( $url, $token ) {
-		// data from the last ten weeks
-		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/products' );
-		$start_date = '2023-12-01 00:00:00';
-		$end_date   = date('Y-m-d') . ' 23:59:59';
-		$request->set_query_params(
-			array(
-				'before' => $end_date,
-				'after'  => $start_date,
-				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
-			)
-		);
-		$products = rest_do_request( $request )->data;
-		$json_object = json_encode( $json_data );
-		$prompt = implode("\n", [
-			'You are a WooCommerce expert.',
-			'Analyze the following report which contains reports for products on the store, and give three main insights you made based on this, especially for orders_count numbers for different products.',
-			'Your response should be in json.',
-			'',
-			$json_object,
-		]);
-
-		$body = array(
-			'feature' => 'ai-product-suggestions',
-			'prompt'  => $prompt,
-			'token'   => $token,
-		);
-
-		$response = wp_remote_post(
-			$url,
-			array(
-				'body'    => $body,
-				'timeout' => 20,
-			)
-		);
-		
-		// return $response;
-	
-	}
-
-	private function ask_ai_about_insights_for_orders_stats( $url, $token ) {
-		// data from the last ten weeks
-		$request    = new \WP_REST_Request( 'GET', '/wc-analytics/reports/orders/stats' );
-		$start_date = '2023-12-01 00:00:00';
-		$end_date   = date('Y-m-d') . ' 23:59:59';
-		$request->set_query_params(
-			array(
-				'before' => $end_date,
-				'after'  => $start_date,
-				'stats'  => 'revenue/total_sales,revenue/net_revenue,orders/orders_count,products/items_sold,variations/items_sold',
-			)
-		);
-		$order_stats = rest_do_request( $request );
-		$a = 1;
-		
 	}
 
 	private function ask_ai_about_insights_for_products_stats( $url, $token ) {
