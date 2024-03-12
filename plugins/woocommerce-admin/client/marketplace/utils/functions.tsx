@@ -422,6 +422,25 @@ const appendURLParams = (
 	return urlObject.toString();
 };
 
+// Delete the given query parameters from a URL, while preserving the rest
+const deleteURLParams = (
+	url: string,
+	paramsToDelete: Array< string >
+): string => {
+	if ( ! url ) {
+		return url;
+	}
+
+	const urlObject = new URL( url );
+	if ( ! urlObject ) {
+		return url;
+	}
+	paramsToDelete.forEach( ( param ) => {
+		urlObject.searchParams.delete( param );
+	} );
+	return urlObject.toString();
+};
+
 const renewUrl = ( subscription: Subscription ): string => {
 	return appendURLParams( MARKETPLACE_CART_PATH, [
 		[ 'renew_product', subscription.product_id.toString() ],
@@ -436,16 +455,35 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
-const connectUrl = (): string => {
+const connectUrl = (
+	maybeInstallWum?: string,
+	wumInstallSuccessUrl?: string,
+	wumInstallScenario?: string
+): string => {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	if ( ! wccomSettings.connectURL ) {
 		return '';
 	}
 
-	return appendURLParams( wccomSettings.connectURL, [
-		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	const redirectAdminUrl = deleteURLParams( window.location.href, [
+		'maybe-install-wum',
+		'wum-install-scenario',
+		'wum-install-success-url',
 	] );
+
+	const urlParams: Array< [ string, string ] > = [
+		[ 'redirect_admin_url', encodeURIComponent( redirectAdminUrl ) ],
+		[ 'maybe-install-wum', maybeInstallWum ?? '1' ],
+	];
+	if ( wumInstallScenario ) {
+		urlParams.push( [ 'wum-install-scenario', wumInstallScenario ] );
+	}
+	if ( wumInstallSuccessUrl ) {
+		urlParams.push( [ 'wum-install-success-url', wumInstallSuccessUrl ] );
+	}
+
+	return appendURLParams( wccomSettings.connectURL, urlParams );
 };
 
 export {

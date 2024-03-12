@@ -785,6 +785,18 @@ class WC_Helper {
 			$redirect_url_args['install'] = sanitize_text_field( wp_unslash( $_GET['install'] ) );
 		}
 
+		if ( isset( $_GET['maybe-install-wum'] ) ) {
+			$redirect_url_args['maybe-install-wum'] = sanitize_text_field( wp_unslash( $_GET['maybe-install-wum'] ) );
+		}
+
+		if ( isset( $_GET['wum-install-scenario'] ) ) {
+			$redirect_url_args['wum-install-scenario'] = sanitize_text_field( wp_unslash( $_GET['wum-install-scenario'] ) );
+		}
+
+		if ( isset( $_GET['wum-install-success-url'] ) ) {
+			$redirect_url_args['wum-install-success-url'] = sanitize_text_field( wp_unslash( $_GET['wum-install-success-url'] ) );
+		}
+
 		$redirect_uri = add_query_arg(
 			$redirect_url_args,
 			admin_url( 'admin.php' )
@@ -918,16 +930,47 @@ class WC_Helper {
 			exit;
 		}
 
-		wp_safe_redirect(
-			self::get_helper_redirect_url(
-				array(
-					'page'             => 'wc-addons',
-					'section'          => 'helper',
-					'wc-helper-status' => 'helper-connected',
+		$maybe_install_wum = false;
+		if ( $access_token['maybe_install_wum_global'] && isset( $_GET['maybe-install-wum'] ) ) {
+			$maybe_install_wum = boolval( sanitize_text_field( wp_unslash( $_GET['maybe-install-wum'] ) ) );
+		}
+
+		if ( ! $maybe_install_wum || WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			wp_safe_redirect(
+				self::get_helper_redirect_url(
+					array(
+						'page'             => 'wc-addons',
+						'section'          => 'helper',
+						'wc-helper-status' => 'helper-connected',
+					)
 				)
-			)
+			);
+			exit;
+		}
+
+		$wum_install_url = self::get_install_base_url() . WC_Woo_Update_Manager_Plugin::get_plugin_id() . '/';
+
+		$wum_install_url_args =[
+			'stop-on-success' => 1,
+		];
+
+		if ( isset( $_GET['wum-install-scenario'] ) ) {
+			$wum_install_url_args['wum-install-scenario'] = sanitize_text_field( wp_unslash( $_GET['wum-install-scenario'] ) );
+		}
+
+		if ( isset( $_GET['wum-install-success-url'] ) ) {
+			$wum_install_url_args['success-url'] = sanitize_text_field( wp_unslash( $_GET['wum-install-success-url'] ) );
+		}
+
+		$wum_install_url = add_query_arg(
+			$wum_install_url_args,
+			$wum_install_url
 		);
-		die();
+
+		$wum_install_url = WC_Helper_API::add_auth_parameters( $wum_install_url );
+
+		wp_redirect( esc_url_raw( $wum_install_url ) );
+		exit;
 	}
 
 	/**

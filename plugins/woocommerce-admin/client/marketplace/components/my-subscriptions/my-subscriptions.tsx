@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useQuery } from '@woocommerce/navigation';
 import { createInterpolateElement, useContext } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 
@@ -29,6 +30,7 @@ import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-not
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
+	const query = useQuery();
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 	const installedTableDescription = createInterpolateElement(
@@ -74,7 +76,14 @@ export default function MySubscriptions(): JSX.Element {
 						'woocommerce'
 					) }
 				</p>
-				<Button href={ connectUrl() } variant="primary">
+				<Button
+					href={ connectUrl(
+						query[ 'maybe-install-wum' ],
+						query[ 'wum-install-success-url' ],
+						query[ 'wum-install-scenario' ]
+					) }
+					variant="primary"
+				>
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
 				</Button>
 			</div>
