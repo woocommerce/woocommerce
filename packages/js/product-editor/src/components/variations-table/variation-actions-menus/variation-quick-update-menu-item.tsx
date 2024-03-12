@@ -59,6 +59,7 @@ export const VariationQuickUpdateMenuItem: React.FC< MenuItemProps > & {
 			key={ updateType }
 			name={ getGroupName( group, updateType === MULTIPLE_UPDATE ) }
 		>
+			{ /* @ts-expect-error Type not compatible with React 18. */ }
 			{ ( fillProps: Fill.Props & VariationQuickUpdateSlotProps ) =>
 				createOrderedChildren(
 					<MenuItem onClick={ handleClick( fillProps ) }>

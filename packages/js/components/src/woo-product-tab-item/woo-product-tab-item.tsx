@@ -33,10 +33,10 @@ type WooProductFieldSlotProps = {
 
 const DEFAULT_TAB_ORDER = 20;
 
-export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
-	Slot: React.VFC<
-		Omit< Slot.Props, 'children' > & WooProductFieldSlotProps
-	>;
+export const WooProductTabItem: React.FC<
+	WooProductTabItemProps & { children?: ReactNode }
+> & {
+	Slot: React.FC< Omit< Slot.Props, 'children' > & WooProductFieldSlotProps >;
 } = ( { children, tabProps, templates } ) => {
 	deprecated( `__experimentalWooProductTabItem`, {
 		version: '13.0.0',
@@ -56,6 +56,7 @@ export const WooProductTabItem: React.FC< WooProductTabItemProps > & {
 					name={ `woocommerce_product_tab_${ templateData.name }` }
 					key={ templateData.name }
 				>
+					{ /*  @ts-expect-error - not compatible with React 18 types. */ }
 					{ ( fillProps: Fill.Props ) => {
 						return createOrderedChildren< Fill.Props >(
 							children,

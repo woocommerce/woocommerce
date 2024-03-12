@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
@@ -24,7 +24,9 @@ type WooProductSectionSlotProps = {
 
 const DEFAULT_SECTION_ORDER = 20;
 
-export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
+export const WooProductSectionItem: React.FC<
+	WooProductSectionItemProps & { children: ReactNode }
+> & {
 	Slot: React.FC< Slot.Props & WooProductSectionSlotProps >;
 } = ( { children, tabs } ) => {
 	deprecated( `__experimentalWooProductSectionItem`, {
@@ -40,6 +42,7 @@ export const WooProductSectionItem: React.FC< WooProductSectionItemProps > & {
 					name={ `woocommerce_product_section_${ tabName }` }
 					key={ tabName }
 				>
+					{ /* @ts-expect-error - Not typed correctly for React 18. */ }
 					{ ( fillProps: Fill.Props ) => {
 						return createOrderedChildren<
 							Fill.Props & { tabName: string }

@@ -17,7 +17,7 @@ import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
 import { Tag } from '@woocommerce/components';
-import { Product } from '@woocommerce/data';
+import { Product, ProductStatus } from '@woocommerce/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -55,7 +55,12 @@ export function Header( {
 		'id'
 	);
 
-	const lastPersistedProduct = useSelect(
+	const lastPersistedProduct = useSelect< {
+		parent_id: number;
+		name: string;
+		id: string;
+		status: ProductStatus;
+	} >(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return getEntityRecord( 'postType', productType, productId );

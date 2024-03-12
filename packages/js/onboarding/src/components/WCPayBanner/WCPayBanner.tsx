@@ -16,6 +16,7 @@ import { Link } from '@woocommerce/components';
  */
 import { PaymentMethodsIcons } from './PaymentMethodsIcons';
 import { WCPayBannerImage } from './WCPayBannerImage';
+import { ReactNode } from 'react';
 
 export const WCPayBannerFooter: React.VFC< {
 	isWooPayEligible: boolean;
@@ -148,7 +149,9 @@ export const WCPayBannerBody: React.VFC< {
 	);
 };
 
-export const WCPayBanner: React.FC = ( { children } ) => {
+export const WCPayBanner: React.FC< { children: ReactNode } > = ( {
+	children,
+} ) => {
 	return (
 		<Card size="medium" className="woocommerce-recommended-payments-banner">
 			{ children }

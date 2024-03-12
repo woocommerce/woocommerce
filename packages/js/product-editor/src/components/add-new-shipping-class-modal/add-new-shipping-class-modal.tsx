@@ -138,6 +138,7 @@ export function AddNewShippingClassModal( {
 				errors={ {} }
 				onSubmit={ handleSubmit }
 			>
+				{ /* @ts-expect-error Type not compatible with React 18. */ }
 				{ ( childrenProps: {
 					handleSubmit: () => Promise< ProductShippingClass >;
 				} ) => (

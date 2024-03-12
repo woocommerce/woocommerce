@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import classnames from 'classnames';
+import { ReactNode } from 'react';
 
 type FormSectionProps = {
 	title: JSX.Element | string;
@@ -10,12 +11,9 @@ type FormSectionProps = {
 	className?: string;
 };
 
-export const FormSection: React.FC< FormSectionProps > = ( {
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const FormSection: React.FC<
+	FormSectionProps & { children: ReactNode }
+> = ( { title, description, className, children } ) => {
 	return (
 		<div className={ classnames( 'woocommerce-form-section', className ) }>
 			<div className="woocommerce-form-section__header">

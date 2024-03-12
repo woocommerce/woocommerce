@@ -31,7 +31,13 @@ type ImageGalleryToolbarDropdownProps = {
 	MediaUploadComponent: MediaUploadComponentType;
 };
 
-export function ImageGalleryToolbarDropdown( {
+export const ImageGalleryToolbarDropdown: React.FC<
+	ImageGalleryToolbarDropdownProps & {
+		children?:
+			| React.ReactNode
+			| ( ( props: { onClose: () => void } ) => React.ReactNode );
+	}
+> = ( {
 	children,
 	onReplace,
 	onRemove,
@@ -39,7 +45,7 @@ export function ImageGalleryToolbarDropdown( {
 	removeBlockLabel,
 	MediaUploadComponent = MediaUpload,
 	...props
-}: React.PropsWithChildren< ImageGalleryToolbarDropdownProps > ) {
+} ) => {
 	return (
 		<DropdownMenu
 			icon={ moreVertical }
@@ -98,4 +104,4 @@ export function ImageGalleryToolbarDropdown( {
 			) }
 		</DropdownMenu>
 	);
-}
+};

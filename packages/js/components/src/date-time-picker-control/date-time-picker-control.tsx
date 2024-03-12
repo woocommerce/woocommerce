@@ -265,23 +265,26 @@ export const DateTimePickerControl = forwardRef(
 			onBlurRef.current = onBlur;
 		}, [ onBlur ] );
 
-		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
-			if (
-				! willOpen &&
-				typeof onBlurRef.current === 'function' &&
-				inputControl.current
-			) {
-				// in case the component is blurred before a debounced
-				// change has been processed, immediately set the input string
-				// to the current value of the input field, so that
-				// it won't be set back to the pre-change value
-				setInputStringAndMaybeCallOnChange(
-					inputControl.current.value,
-					true
-				);
-				onBlurRef.current();
-			}
-		}, [] );
+		const callOnBlurIfDropdownIsNotOpening = useCallback(
+			( willOpen: boolean ) => {
+				if (
+					! willOpen &&
+					typeof onBlurRef.current === 'function' &&
+					inputControl.current
+				) {
+					// in case the component is blurred before a debounced
+					// change has been processed, immediately set the input string
+					// to the current value of the input field, so that
+					// it won't be set back to the pre-change value
+					setInputStringAndMaybeCallOnChange(
+						inputControl.current.value,
+						true
+					);
+					onBlurRef.current();
+				}
+			},
+			[]
+		);
 
 		return (
 			<Dropdown

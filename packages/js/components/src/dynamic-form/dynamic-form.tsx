@@ -74,6 +74,7 @@ export const DynamicForm: React.FC< DynamicFormProps > = ( {
 			onSubmit={ onSubmit }
 			validate={ validate }
 		>
+			{ /*  @ts-expect-error - not compatible with React 18 types. */ }
 			{ ( {
 				getInputProps,
 				handleSubmit,

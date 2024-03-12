@@ -10,6 +10,7 @@ import deprecated from '@wordpress/deprecated';
  */
 import { ProductSectionLayout } from './product-section-layout';
 import { WooProductFieldItem } from '../woo-product-field-item';
+import { ReactNode } from 'react';
 
 type ProductFieldSectionProps = {
 	id: string;
@@ -18,13 +19,9 @@ type ProductFieldSectionProps = {
 	className?: string;
 };
 
-export const ProductFieldSection: React.FC< ProductFieldSectionProps > = ( {
-	id,
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const ProductFieldSection: React.FC<
+	ProductFieldSectionProps & { children: ReactNode }
+> = ( { id, title, description, className, children } ) => {
 	deprecated( `__experimentalProductFieldSection`, {
 		version: '13.0.0',
 		plugin: '@woocommerce/components',

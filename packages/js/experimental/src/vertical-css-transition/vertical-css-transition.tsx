@@ -86,6 +86,7 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 		const appearing =
 			cssTransitionRef.current &&
 			cssTransitionRef.current.context &&
+			// @ts-expect-error Context is not typed. TODO - fix this.
 			cssTransitionRef.current.context.isMounting;
 		let duration;
 		if ( state.startsWith( 'enter' ) ) {
@@ -121,12 +122,14 @@ export const VerticalCSSTransition: React.FC< VerticalCSSTransitionProps > = ( {
 			in={ transitionIn }
 			ref={ cssTransitionRef }
 		>
+			{ /* @ts-expect-error Type not compatible with React 18 */ }
 			{ ( state: 'entering' | 'entered' | 'exiting' | 'exited' ) => (
 				<div
 					className="vertical-css-transition-container"
 					style={ getTransitionStyle( state ) }
 					ref={ collapseContainerRef }
 				>
+					{ /* @ts-expect-error TransitionChildren type not compatible with ReactNode */ }
 					{ children }
 				</div>
 			) }

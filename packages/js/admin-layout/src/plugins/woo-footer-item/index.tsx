@@ -37,6 +37,7 @@ export const WooFooterItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_FOOTER_SLOT_NAME }>
+			{ /* @ts-expect-error Type not compatible with React 18 */ }
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }

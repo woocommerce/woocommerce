@@ -13,7 +13,13 @@ import {
 	useImperativeHandle,
 } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
-import { ChangeEvent, PropsWithChildren, useRef } from 'react';
+import {
+	ChangeEvent,
+	PropsWithChildren,
+	ReactElement,
+	ReactNode,
+	useRef,
+} from 'react';
 import _setWith from 'lodash/setWith';
 import _get from 'lodash/get';
 import _clone from 'lodash/clone';
@@ -134,7 +140,10 @@ function FormComponent< Values extends Record< string, any > >(
 		onChange = () => {},
 		onChanges = () => {},
 		...props
-	}: PropsWithChildren< FormProps< Values > >,
+	}: FormProps< Values > & {
+		// Could not supply the type for the arguments as its an inline function declared in the component
+		children?: ReactNode | ( ( state: unknown ) => ReactElement );
+	},
 	ref: React.Ref< FormRef< Values > >
 ): React.ReactElement | null {
 	const initialValues = useRef( props.initialValues ?? ( {} as Values ) );

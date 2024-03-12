@@ -41,23 +41,26 @@ export function TabButton( {
 
 	return (
 		<Fill name={ TABS_SLOT_NAME }>
-			{ ( fillProps: TabsFillProps ) => {
-				const { onClick } = fillProps;
-				return (
-					<OrderedWrapper order={ order }>
-						<Button
-							key={ id }
-							className={ classes }
-							onClick={ () => onClick( id ) }
-							id={ `woocommerce-product-tab__${ id }` }
-							aria-controls={ `woocommerce-product-tab__${ id }-content` }
-							aria-selected={ selected }
-						>
-							{ children }
-						</Button>
-					</OrderedWrapper>
-				);
-			} }
+			{
+				// @ts-expect-error Type not compatible with React 18.
+				( fillProps: TabsFillProps ) => {
+					const { onClick } = fillProps;
+					return (
+						<OrderedWrapper order={ order }>
+							<Button
+								key={ id }
+								className={ classes }
+								onClick={ () => onClick( id ) }
+								id={ `woocommerce-product-tab__${ id }` }
+								aria-controls={ `woocommerce-product-tab__${ id }-content` }
+								aria-selected={ selected }
+							>
+								{ children }
+							</Button>
+						</OrderedWrapper>
+					);
+				}
+			}
 		</Fill>
 	);
 }

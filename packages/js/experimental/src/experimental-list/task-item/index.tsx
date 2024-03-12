@@ -87,6 +87,7 @@ const OptionalTaskTooltip: React.FC< {
 const OptionalExpansionWrapper: React.FC< {
 	expandable: boolean;
 	expanded: boolean;
+	children: React.ReactNode;
 } > = ( { children, expandable, expanded } ) => {
 	if ( ! expandable ) {
 		return expanded ? <>{ children }</> : null;

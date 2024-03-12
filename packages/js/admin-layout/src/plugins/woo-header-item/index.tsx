@@ -53,6 +53,7 @@ export const WooHeaderItem: React.FC< {
 } = ( { children, order = 1, name = '' } ) => {
 	return (
 		<Fill name={ getSlotFillName( name ) }>
+			{ /* @ts-expect-error Type not compatible with React 18 */ }
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }

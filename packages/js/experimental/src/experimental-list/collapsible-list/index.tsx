@@ -262,6 +262,7 @@ export const ExperimentalCollapsibleList: React.FC< CollapsibleListProps > = ( {
 					mountOnEnter={ true }
 					unmountOnExit={ false }
 				>
+					{ /* @ts-expect-error Type not compatible with React 18 */ }
 					{ (
 						state: 'entering' | 'entered' | 'exiting' | 'exited'
 					) => {

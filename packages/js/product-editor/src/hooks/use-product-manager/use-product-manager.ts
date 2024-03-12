@@ -55,7 +55,6 @@ export function useProductManager< T = Product >( postType: string ) {
 	const { isValidating, validate } = useValidations< T >();
 	const { isDirty } = useSelect(
 		( select ) => ( {
-			// @ts-expect-error There are no types for this.
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
 				postType,
@@ -72,9 +71,9 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
+			// @ts-expect-error There are no types for this.
 			const { blocks, content, selection, ...editedProduct } = wpSelect(
 				'core'
-				// @ts-expect-error There are no types for this.
 			).getEditedEntityRecord( 'postType', postType, id );
 
 			const savedProduct = await saveEntityRecord(
@@ -84,7 +83,6 @@ export function useProductManager< T = Product >( postType: string ) {
 					...editedProduct,
 					...extraProps,
 				},
-				// @ts-expect-error There are no types for this.
 				{
 					throwOnError: true,
 				}
@@ -117,7 +115,6 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			await validate();
 
-			// @ts-expect-error There are no types for this.
 			const { deleteEntityRecord, saveEditedEntityRecord } =
 				dispatch( 'core' );
 

@@ -39,7 +39,7 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 		updateSettingsForGroup,
 	} = useDispatch( STORE_NAME );
 	const updateSettings = useCallback(
-		( name, data ) => {
+		( name: string, data: unknown ) => {
 			updateSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]
@@ -50,7 +50,7 @@ export const useSettings = ( group: string, settingsKeys: string[] = [] ) => {
 		persistSettingsForGroup( group );
 	}, [ group ] );
 	const updateAndPersistSettings = useCallback(
-		( name, data ) => {
+		( name: string, data: unknown ) => {
 			updateAndPersistSettingsForGroup( group, { [ name ]: data } );
 		},
 		[ group ]

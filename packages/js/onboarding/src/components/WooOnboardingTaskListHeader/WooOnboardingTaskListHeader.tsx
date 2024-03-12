@@ -20,6 +20,7 @@ export const WooOnboardingTaskListHeader = ( {
 	id,
 	...props
 }: WooOnboardingTaskListHeaderProps & Slot.Props ) => (
+	// @ts-expect-error Type not compatible with React 18
 	<Fill
 		name={ 'woocommerce_onboarding_task_list_header_' + id }
 		{ ...props }

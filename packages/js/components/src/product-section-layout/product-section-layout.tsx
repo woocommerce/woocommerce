@@ -7,6 +7,7 @@ import deprecated from '@wordpress/deprecated';
  * Internal dependencies
  */
 import { FormSection } from '../form-section';
+import { ReactNode } from 'react';
 
 type ProductSectionLayoutProps = {
 	title: string;
@@ -14,12 +15,9 @@ type ProductSectionLayoutProps = {
 	className?: string;
 };
 
-export const ProductSectionLayout: React.FC< ProductSectionLayoutProps > = ( {
-	title,
-	description,
-	className,
-	children,
-} ) => {
+export const ProductSectionLayout: React.FC<
+	ProductSectionLayoutProps & { children: ReactNode }
+> = ( { title, description, className, children } ) => {
 	deprecated( `__experimentalProductSectionLayout`, {
 		version: '13.0.0',
 		plugin: '@woocommerce/components',

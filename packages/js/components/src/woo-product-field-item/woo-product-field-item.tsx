@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement, Children, Fragment } from '@wordpress/element';
 import deprecated from '@wordpress/deprecated';
@@ -57,6 +57,7 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 			name={ `woocommerce_product_field_${ sectionName }` }
 			key={ fieldId }
 		>
+			{ /*  @ts-expect-error - not compatible with React 18 types. */ }
 			{ ( fillProps: Fill.Props ) =>
 				createOrderedChildren<
 					Fill.Props &
@@ -79,7 +80,9 @@ const WooProductFieldFill: React.FC< WooProductFieldFillProps > = ( {
 	);
 };
 
-export const WooProductFieldItem: React.FC< WooProductFieldItemProps > & {
+export const WooProductFieldItem: React.FC<
+	WooProductFieldItemProps & { children: ReactNode }
+> & {
 	Slot: React.FC< Slot.Props & WooProductFieldSlotProps >;
 } = ( { children, sections, id } ) => {
 	return (

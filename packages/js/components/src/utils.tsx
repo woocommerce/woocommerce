@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { isValidElement, Fragment } from 'react';
+import { isValidElement, Fragment, ReactElement } from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { cloneElement, createElement } from '@wordpress/element';
 
@@ -20,7 +20,11 @@ type ChildrenProps = {
  * @return {Object} Object with the keys: children and props.
  */
 function getChildrenAndProps< T = Fill.Props, S = Record< string, unknown > >(
-	children: React.ReactNode,
+	children:
+		| React.ReactNode
+		| ( (
+				props: T & { order: number } & Record< string, unknown >
+		  ) => ReactElement ),
 	order: number,
 	props: T,
 	injectProps?: S

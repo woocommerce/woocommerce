@@ -25,6 +25,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
+				// @ts-expect-error These types are out of date.
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -33,6 +34,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
+			// @ts-expect-error These types are out of date.
 			const { startResolution, finishResolution, receiveCurrentUser } =
 				useDispatch( STORE_NAME );
 

@@ -39,6 +39,7 @@ export const WooHeaderNavigationItem: React.FC< {
 } = ( { children, order = 1 } ) => {
 	return (
 		<Fill name={ WC_HEADER_NAVIGATION_SLOT_NAME }>
+			{ /* @ts-expect-error Type not compatible with React 18 */ }
 			{ ( fillProps: Fill.Props ) => {
 				return createOrderedChildren( children, order, fillProps );
 			} }
