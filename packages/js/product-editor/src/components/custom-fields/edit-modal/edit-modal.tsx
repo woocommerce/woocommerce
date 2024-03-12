@@ -12,16 +12,8 @@ import type { FocusEvent } from 'react';
  */
 import { TextControl } from '../../text-control';
 import type { Metadata } from '../../../types';
+import { type ValidationError, validate } from '../utils/validations';
 import type { EditModalProps } from './types';
-
-function validateName( value: string ) {
-	if ( value.startsWith( '_' ) ) {
-		return __(
-			'The name cannot begin with the underscore (_) character.',
-			'woocommerce'
-		);
-	}
-}
 
 export function EditModal( {
 	initialValue,
@@ -31,8 +23,10 @@ export function EditModal( {
 }: EditModalProps ) {
 	const [ customField, setCustomField ] =
 		useState< Metadata< string > >( initialValue );
-	const [ validationError, setValidationError ] = useState< string >();
-	const nameTextRef = useRef< HTMLInputElement >( null );
+	const [ validationError, setValidationError ] =
+		useState< ValidationError >();
+	const keyInputRef = useRef< HTMLInputElement >( null );
+	const valueInputRef = useRef< HTMLInputElement >( null );
 
 	function renderTitle() {
 		return sprintf(
@@ -42,24 +36,37 @@ export function EditModal( {
 		);
 	}
 
-	function handleNameChange( key: string ) {
-		setCustomField( ( current ) => ( { ...current, key } ) );
+	function changeHandler( prop: keyof Metadata< string > ) {
+		return function handleChange( value: string ) {
+			setCustomField( ( current ) => ( {
+				...current,
+				[ prop ]: value,
+			} ) );
+		};
 	}
 
-	function handleNameBlur( event: FocusEvent< HTMLInputElement > ) {
-		const error = validateName( event.target.value );
-		setValidationError( error );
-	}
-
-	function handleValueChange( value: string ) {
-		setCustomField( ( current ) => ( { ...current, value } ) );
+	function blurHandler( prop: keyof Metadata< string > ) {
+		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
+			const error = validate( {
+				...customField,
+				[ prop ]: event.target.value,
+			} );
+			setValidationError( error );
+		};
 	}
 
 	function handleUpdateButtonClick() {
-		const error = validateName( customField.key );
-		if ( error ) {
-			setValidationError( error );
-			nameTextRef.current?.focus();
+		const errors = validate( customField );
+
+		if ( errors.key || errors.value ) {
+			setValidationError( errors );
+
+			if ( errors.key ) {
+				keyInputRef.current?.focus();
+				return;
+			}
+
+			valueInputRef.current?.focus();
 			return;
 		}
 
@@ -78,18 +85,21 @@ export function EditModal( {
 			) }
 		>
 			<TextControl
-				ref={ nameTextRef }
+				ref={ keyInputRef }
 				label={ __( 'Name', 'woocommerce' ) }
-				error={ validationError }
+				error={ validationError?.key }
 				value={ customField.key }
-				onChange={ handleNameChange }
-				onBlur={ handleNameBlur }
+				onChange={ changeHandler( 'key' ) }
+				onBlur={ blurHandler( 'key' ) }
 			/>
 
 			<TextControl
+				ref={ valueInputRef }
 				label={ __( 'Value', 'woocommerce' ) }
+				error={ validationError?.value }
 				value={ customField.value }
-				onChange={ handleValueChange }
+				onChange={ changeHandler( 'value' ) }
+				onBlur={ blurHandler( 'value' ) }
 			/>
 
 			<div className="woocommerce-product-custom-fields__edit-modal-actions">

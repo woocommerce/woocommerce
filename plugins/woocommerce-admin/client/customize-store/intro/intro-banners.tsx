@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
-import { Button, Modal } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -16,8 +17,9 @@ import { useSelect } from '@wordpress/data';
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -217,11 +219,7 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
-export const NoAIBanner = ( {
-	sendEvent,
-}: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
-} ) => {
+export const NoAIBanner = () => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
 		stylesheet?: string;
@@ -232,6 +230,10 @@ export const NoAIBanner = ( {
 	}, [] );
 
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/design',
+	} );
 
 	return (
 		<>
@@ -247,56 +249,16 @@ export const NoAIBanner = ( {
 					if ( ! isDefaultTheme ) {
 						setIsModalOpen( true );
 					} else {
-						sendEvent( {
-							type: 'DESIGN_WITHOUT_AI',
-						} );
+						window.location.href = customizeStoreDesignUrl;
 					}
 				} }
 				showAIDisclaimer={ false }
 			/>
 			{ isModalOpen && (
-				<Modal
-					className={
-						'woocommerce-customize-store__theme-switch-warning-modal'
-					}
-					title={ __(
-						'Are you sure you want to design a new theme?',
-						'woocommerce'
-					) }
-					onRequestClose={ () => setIsModalOpen( false ) }
-					shouldCloseOnClickOutside={ false }
-				>
-					<p>
-						{ __(
-							'Your active theme will be changed and you could lose any changes you’ve made to it.',
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
-						<Button
-							onClick={ () => {
-								setIsModalOpen( false );
-							} }
-							variant="link"
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							onClick={ () => {
-								sendEvent( {
-									type: 'DESIGN_WITHOUT_AI',
-								} );
-								setIsModalOpen( false );
-								recordEvent(
-									'customize_your_store_agree_to_theme_switch_click'
-								);
-							} }
-							variant="primary"
-						>
-							{ __( 'Design a new theme', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Modal>
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+				/>
 			) }
 		</>
 	);
