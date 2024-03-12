@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import Button from '@woocommerce/base-components/button';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { withInstanceId } from '@wordpress/compose';
@@ -13,10 +13,7 @@ import {
 import { useSelect } from '@wordpress/data';
 import classnames from 'classnames';
 import type { MouseEvent, MouseEventHandler } from 'react';
-import {
-	CHECKOUT_STORE_KEY,
-	VALIDATION_STORE_KEY,
-} from '@woocommerce/block-data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -88,37 +85,6 @@ export const TotalsCoupon = ( {
 		}
 	};
 
-	const [ errorMessage, setErrorMessage ] = useState( '' );
-	const { cartErrors } = useSelect( ( select ) => {
-		return {
-			cartErrors: select( 'wc/store/cart' ).getCartErrors(),
-		};
-	} );
-
-	const orderId = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getOrderId()
-	);
-
-	useEffect( () => {
-		const couponErrors = cartErrors.filter(
-			( cartError ) =>
-				cartError.code === 'woocommerce_rest_cart_coupon_error'
-		)?.[ 0 ];
-
-		if ( ! couponErrors || ! couponErrors?.data?.details ) {
-			return;
-		}
-
-		// Check if we're on the cart or checkout page and set the error message accordingly.
-		if ( orderId && orderId > 0 && couponErrors?.data?.details?.checkout ) {
-			// Set the Checkout error message.
-			setErrorMessage( couponErrors.data.details.checkout );
-		} else if ( couponErrors?.data?.details?.cart ) {
-			// Set the Cart error message.
-			setErrorMessage( couponErrors.data.details.cart );
-		}
-	}, [ cartErrors, orderId ] );
-
 	return (
 		<div className="wc-block-components-totals-coupon">
 			{ isCouponFormHidden ? (
@@ -170,7 +136,6 @@ export const TotalsCoupon = ( {
 							</Button>
 						</form>
 						<ValidationInputError
-							errorMessage={ errorMessage }
 							propertyName="coupon"
 							elementId={ textInputId }
 						/>
