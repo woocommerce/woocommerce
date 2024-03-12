@@ -188,8 +188,8 @@ function wc_clear_cart_after_payment() {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
-			// If the order status is pending, failed or cancelled, the order must not have gone through.
-			$is_order_unpaid = $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
+			// If the order status is neither pending, failed, nor cancelled, the order must have gone through.
+			$did_order_succeed = ! $order->has_status( array( 'failed', 'pending', 'cancelled' ) );
 
 			/**
 			 * Determine whether the cart should be cleared after payment.
@@ -199,7 +199,7 @@ function wc_clear_cart_after_payment() {
 			 * @param WC_Order $order The order.
 			 * @return bool Whether the cart should be cleared after payment.
 			 */
-			$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', ! $is_order_unpaid, $order );
+			$should_clear_cart_after_payment = apply_filters( 'woocommerce_should_clear_cart_after_payment', $did_order_succeed, $order );
 
 			if ( $should_clear_cart_after_payment ) {
 				WC()->cart->empty_cart();
