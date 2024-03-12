@@ -7,7 +7,6 @@ import {
 	prefetch,
 	getElement,
 	getContext,
-	getConfig,
 } from '@woocommerce/interactivity';
 
 /**
@@ -103,11 +102,6 @@ const productCollectionStore = {
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
 
-				const { clientNavigationDisabled } = getConfig();
-				if ( clientNavigationDisabled ) {
-					yield forcePageReload( ref.href );
-				}
-
 				// Don't start animation if it doesn't take long to navigate.
 				const timeout = setTimeout( () => {
 					ctx.accessibilityMessage = ctx.accessibilityLoadingMessage;
@@ -152,11 +146,6 @@ const productCollectionStore = {
 		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
-			const { clientNavigationDisabled } = getConfig();
-			if ( clientNavigationDisabled ) {
-				return;
-			}
-
 			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
