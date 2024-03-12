@@ -228,6 +228,7 @@ export const NoAIBanner = ( {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// @ts-expect-error TODO: Fix this type issue.
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 

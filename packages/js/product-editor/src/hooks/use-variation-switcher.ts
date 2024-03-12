@@ -16,7 +16,6 @@ export function useVariationSwitcher( {
 	parentId,
 	parentProductType,
 }: VariationSwitcherProps ) {
-	// @ts-expect-error There are no types for this.
 	const { invalidateResolution } = useDispatch( 'core' );
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -27,7 +26,7 @@ export function useVariationSwitcher( {
 				return {};
 			}
 			const { getEntityRecord } = select( 'core' );
-			const parentProduct = getEntityRecord(
+			const parentProduct = getEntityRecord< { variations: number[] } >(
 				'postType',
 				parentProductType || 'product',
 				parentId

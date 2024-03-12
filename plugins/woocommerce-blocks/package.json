@@ -152,8 +152,8 @@
 		"@types/lodash": "4.14.182",
 		"@types/prop-types": "^15.7.11",
 		"@types/puppeteer": "5.4.6",
-		"@types/react": "^17.0.71",
-		"@types/react-dom": "18.0.10",
+		"@types/react": "^18.2.65",
+		"@types/react-dom": "18.2.21",
 		"@types/react-transition-group": "^4.4.10",
 		"@types/wordpress__block-editor": "6.0.6",
 		"@types/wordpress__blocks": "11.0.9",
@@ -319,11 +319,11 @@
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
 		"usehooks-ts": "^2.9.1",
-		"wordpress-components": "npm:@wordpress/components@14.2.0"
+		"wordpress-components": "npm:@wordpress/components@27.1.0"
 	},
 	"peerDependencies": {
-		"react": "^17.0.0",
-		"react-dom": "^17.0.0"
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
 	},
 	"optionalDependencies": {
 		"ndb": "1.1.5"

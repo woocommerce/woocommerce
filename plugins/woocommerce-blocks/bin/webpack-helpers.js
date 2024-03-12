@@ -38,6 +38,7 @@ const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
+		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),
 		'@woocommerce/atomic-blocks': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }atomic/blocks`
