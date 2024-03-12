@@ -55,16 +55,9 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return string
 	 */
 	public static function generate_install_url(): string {
-		/**
-		 * Filter the base URL used to install the Woo Update Manager plugin.
-		 *
-		 * @since 8.7.0
-		 */
-		$install_url_base = apply_filters( 'woo_com_base_url', 'https://woo.com/' );
+		$install_url = WC_Helper::get_install_base_url() . self::get_plugin_id() . '/';
 
-		$install_url = $install_url_base . 'auto-install-init/' . self::get_plugin_id() . '/';
-
-		return self::add_auth_parameters( $install_url );
+		return WC_Helper_API::add_auth_parameters( $install_url );
 	}
 
 	/**
@@ -92,30 +85,6 @@ class WC_Woo_Update_Manager_Plugin {
 		 * @since 8.7.0
 		 */
 		return (int) apply_filters( 'woo_update_manager_plugin_id', (int) $woo_update_manager_ids[0] );
-	}
-
-	/**
-	 * Add the access token and signature to the provided URL.
-	 *
-	 * @param string $url The URL to add the access token and signature to.
-	 * @return string
-	 */
-	private static function add_auth_parameters( string $url ): string {
-		$auth = WC_Helper_Options::get( 'auth' );
-
-		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
-			return false;
-		}
-
-		$signature = WC_Helper_API::create_request_signature( (string) $auth['access_token_secret'], $url, 'GET' );
-
-		return add_query_arg(
-			array(
-				'token'     => $auth['access_token'],
-				'signature' => $signature,
-			),
-			$url
-		);
 	}
 
 	/**
