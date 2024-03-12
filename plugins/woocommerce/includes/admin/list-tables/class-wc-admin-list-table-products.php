@@ -120,8 +120,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$show_columns['cb']    = '<input type="checkbox" />';
 		$show_columns['thumb'] = '<span class="wc-image tips" data-tip="' . esc_attr__( 'Image', 'woocommerce' ) . '">' . __( 'Image', 'woocommerce' ) . '</span>';
 		$show_columns['name']  = __( 'Name', 'woocommerce' );
-		
-		$show_columns['insights'] = '<img class="wc-product-name-suggestions__magic-image" src="http://wcp-tk.jurassic.tube/wp-content/plugins/woo-ai/build/a86a63a783db1e6b9597.svg" alt="AI suggestions" title="AI suggestions">';
 
 		if ( wc_product_sku_enabled() ) {
 			$show_columns['sku'] = __( 'SKU', 'woocommerce' );
@@ -132,6 +130,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		}
 
 		$show_columns['price']       = __( 'Price', 'woocommerce' );
+		$show_columns['insights'] = '<img class="wc-product-name-suggestions__magic-image" src="http://wcp-tk.jurassic.tube/wp-content/plugins/woo-ai/build/a86a63a783db1e6b9597.svg" alt="AI suggestions" title="AI suggestions">';
 		$show_columns['product_cat'] = __( 'Categories', 'woocommerce' );
 		$show_columns['product_tag'] = __( 'Tags', 'woocommerce' );
 		$show_columns['featured']    = '<span class="wc-featured parent-tips" data-tip="' . esc_attr__( 'Featured', 'woocommerce' ) . '">' . __( 'Featured', 'woocommerce' ) . '</span>';
