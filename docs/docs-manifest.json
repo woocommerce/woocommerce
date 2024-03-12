@@ -14,11 +14,6 @@
   ],
   "categories": [
     {
-      "category_slug": "blocks-theming",
-      "category_title": "Blocks Theming",
-      "categories": []
-    },
-    {
       "content": "\nDiscover tutorials and guides for creating custom WooCommerce stores. This section is your toolkit for building advanced, modern online shops that meet the needs of merchants and customers alike.\n",
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
@@ -1209,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "e1fd35828d538937bb33eb6c904bc2b811f085021eb84b8a794ffef9032fb1e5"
+  "hash": "54c558ffb682cee4ce5f81069690e47439b174cffac8e4d0950d014145dcad9e"
 }
