@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
 use WC_Helper;
+use WC_Helper_Updater;
 use WP_Error;
 use WP_Upgrader;
 
@@ -28,6 +29,8 @@ if ( ! function_exists( 'get_plugins' ) ) {
  * Class PluginsHelper
  */
 class PluginsHelper {
+
+	public const PLUGIN_UPGRADE_COUNT_EXTRA_NOTICE_THRESHOLD = 1;
 
 	/**
 	 * Initialize hooks.
@@ -545,7 +548,14 @@ class PluginsHelper {
 			return;
 		}
 
-		$notice_string = __( 'Connect your store to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' );
+		$notice_string = "";
+
+		if ( WC_Helper_Updater::get_updates_count() >= self::PLUGIN_UPGRADE_COUNT_EXTRA_NOTICE_THRESHOLD ) {
+			$notice_string .= __( 'Your store might be at risk as you are running old versions of Woo plugins.', 'woocommerce' );
+			$notice_string .= " ";
+		}
+
+		$notice_string .= __( 'Connect your store to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' );
 		echo
 			'<div class="notice notice-error is-dismissible">
 	    		<p>' . $notice_string . '</p>
