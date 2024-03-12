@@ -75,6 +75,7 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
+			activeTheme,
 			themeData,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
@@ -96,14 +97,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 
-	interface Theme {
-		stylesheet?: string;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const isDefaultTheme = activeTheme === 'twentytwentyfour';
 
 	switch ( true ) {
 		case isNetworkOffline:

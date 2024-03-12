@@ -4,7 +4,7 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -105,9 +105,16 @@ export const fetchIntroData = async () => {
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const theme = ( await resolveSelect( 'core' ).getCurrentTheme() ) as Theme;
+
 	return {
 		customizeStoreTaskCompleted,
 		themeData,
+		activeTheme: theme.stylesheet || '',
 		currentThemeIsAiGenerated,
 	};
 };
