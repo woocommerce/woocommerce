@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTem
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
+use WC_Tax;
 
 /**
  * Simple Product Template.
@@ -673,34 +674,42 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$pricing_advanced_block->add_block(
 			array(
 				'id'         => 'product-tax-class',
-				'blockName'  => 'woocommerce/product-radio-field',
+				'blockName'  => 'woocommerce/product-select-field',
 				'order'      => 10,
 				'attributes' => array(
-					'title'       => __( 'Tax class', 'woocommerce' ),
-					'description' => sprintf(
+					'label'    => __( 'Tax class', 'woocommerce' ),
+					'help'     => sprintf(
 					/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-						__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
+						__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
 						'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
-					'property'    => 'tax_class',
-					'options'     => array(
-						array(
-							'label' => __( 'Standard', 'woocommerce' ),
-							'value' => '',
-						),
-						array(
-							'label' => __( 'Reduced rate', 'woocommerce' ),
-							'value' => 'reduced-rate',
-						),
-						array(
-							'label' => __( 'Zero rate', 'woocommerce' ),
-							'value' => 'zero-rate',
-						),
-					),
+					'property' => 'tax_class',
+					'options'  => $this->get_tax_classes(),
 				),
 			)
 		);
+	}
+
+	private function get_tax_classes() {
+		$tax_classes = array();
+
+		// Add standard class.
+		$tax_classes[] = array(
+			'label' => __( 'Standard rate', 'woocommerce' ),
+			'value' => '',
+		);
+
+		$classes = WC_Tax::get_tax_classes();
+
+		foreach ( $classes as $class ) {
+			$tax_classes[] = array(
+				'label' => $class,
+				'value' => sanitize_title( $class ),
+			);
+		}
+
+		return $tax_classes;
 	}
 
 	/**
