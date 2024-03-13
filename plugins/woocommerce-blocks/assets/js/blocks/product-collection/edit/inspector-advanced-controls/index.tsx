@@ -10,7 +10,7 @@ import { InspectorAdvancedControls } from '@wordpress/block-editor';
 import ForcePageReloadControl from './force-page-reload-control';
 import type { ProductCollectionEditComponentProps } from '../../types';
 
-export default function ToolbarControls(
+export default function ProductCollectionAdvancedInspectorControls(
 	props: ProductCollectionEditComponentProps
 ) {
 	const { clientId, attributes, setAttributes } = props;

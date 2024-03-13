@@ -10,7 +10,6 @@ import { ToggleControl } from '@wordpress/components';
  */
 import { useHasUnsupportedBlocks } from './utils';
 import type { ProductCollectionSetAttributes } from '../../types';
-import attributes from '@woocommerce/blocks/reviews/attributes';
 
 type ForcePageReloadControlProps = {
 	clientId: string;
