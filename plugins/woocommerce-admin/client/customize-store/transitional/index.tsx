@@ -99,36 +99,37 @@ export const Transitional = ( {
 				</h2>
 
 				<WooCYSSecondaryButtonSlot />
+				<div className="woocommerce-customize-store__transitional-buttons">
+					{ showSurveyButton && (
+						<Button
+							className="woocommerce-customize-store__transitional-preview-buttonwoocommerce-customize-store__transitional-preview-button"
+							variant="secondary"
+							onClick={ () => {
+								recordEvent(
+									isWooExpress
+										? 'customize_your_store_transitional_survey_click'
+										: 'customize_your_store_on_core_transitional_survey_click'
+								);
+								setSurveyOpen( true );
+							} }
+						>
+							{ __( 'Share feedback', 'woocommerce' ) }
+						</Button>
+					) }
 
-				{ showSurveyButton && (
 					<Button
 						className="woocommerce-customize-store__transitional-preview-button"
-						variant="secondary"
+						variant="primary"
 						onClick={ () => {
 							recordEvent(
-								isWooExpress
-									? 'customize_your_store_transitional_survey_click'
-									: 'customize_your_store_on_core_transitional_survey_click'
+								'customize_your_store_transitional_preview_store_click'
 							);
-							setSurveyOpen( true );
+							window.open( homeUrl, '_blank' );
 						} }
 					>
-						{ __( 'Share feedback', 'woocommerce' ) }
+						{ __( 'View store', 'woocommerce' ) }
 					</Button>
-				) }
-
-				<Button
-					className="woocommerce-customize-store__transitional-preview-button"
-					variant="primary"
-					onClick={ () => {
-						recordEvent(
-							'customize_your_store_transitional_preview_store_click'
-						);
-						window.open( homeUrl, '_blank' );
-					} }
-				>
-					{ __( 'View store', 'woocommerce' ) }
-				</Button>
+				</div>
 				<h2 className="woocommerce-customize-store__transitional-main-actions-title">
 					{ __( "What's next?", 'woocommerce' ) }
 				</h2>
