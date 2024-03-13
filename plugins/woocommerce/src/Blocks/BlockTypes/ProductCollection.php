@@ -171,8 +171,8 @@ class ProductCollection extends AbstractBlock {
 	 * @param \WP_Block $instance      The block instance.
 	 */
 	public function add_navigation_link_directives( $block_content, $block, $instance ) {
-		$is_product_collection_block    = $query_context['isProductCollectionBlock'] ?? false;
 		$query_context                  = $instance->context['query'] ?? array();
+		$is_product_collection_block    = $query_context['isProductCollectionBlock'] ?? false;
 		$query_id                       = $instance->context['queryId'] ?? null;
 		$parsed_query_id                = $this->parsed_block['attrs']['queryId'] ?? null;
 		$is_enhanced_pagination_enabled = ! ( $this->parsed_block['attrs']['forcePageReload'] ?? false );
