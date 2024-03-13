@@ -111,7 +111,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * Go through the specs and run them.
 	 */
 	public static function run() {
-		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
+		$specs = RemoteInboxNotificationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 
 		if ( false === $specs || ! is_countable( $specs ) || count( $specs ) === 0 ) {
 			return;
@@ -204,7 +204,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		if ( ! $note_from_db instanceof Note || get_user_locale() === $note_from_db->get_locale() ) {
 			return $note_from_db;
 		}
-		$specs = DataSourcePoller::get_instance()->get_specs_from_data_sources();
+		$specs = RemoteInboxNotificationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 		foreach ( $specs as $spec ) {
 			if ( $spec->slug !== $note_from_db->get_name() ) {
 				continue;
