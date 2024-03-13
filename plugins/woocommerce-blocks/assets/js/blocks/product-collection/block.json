@@ -35,9 +35,9 @@
 		"queryContextIncludes": {
 			"type": "array"
 		},
-		"enhancedPagination": {
+		"forcePageReload": {
 			"type": "boolean",
-			"default": true
+			"default": false
 		}
 	},
 	"providesContext": {

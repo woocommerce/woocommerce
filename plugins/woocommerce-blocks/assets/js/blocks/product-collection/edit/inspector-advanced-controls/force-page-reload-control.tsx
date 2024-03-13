@@ -13,7 +13,7 @@ import type { ProductCollectionSetAttributes } from '../../types';
 
 type ForcePageReloadControlProps = {
 	clientId: string;
-	enhancedPagination: boolean;
+	forcePageReload: boolean;
 	setAttributes: ProductCollectionSetAttributes;
 };
 
@@ -27,14 +27,14 @@ const helpTextIfDisabled = __(
 );
 
 const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
-	const { clientId, enhancedPagination, setAttributes } = props;
+	const { clientId, forcePageReload, setAttributes } = props;
 	const hasUnsupportedBlocks = useHasUnsupportedBlocks( clientId );
 
 	useEffect( () => {
-		if ( enhancedPagination && hasUnsupportedBlocks ) {
-			setAttributes( { enhancedPagination: false } );
+		if ( ! forcePageReload && hasUnsupportedBlocks ) {
+			setAttributes( { forcePageReload: true } );
 		}
-	}, [ enhancedPagination, hasUnsupportedBlocks, setAttributes ] );
+	}, [ forcePageReload, hasUnsupportedBlocks, setAttributes ] );
 
 	const helpText = hasUnsupportedBlocks
 		? helpTextIfDisabled
@@ -44,9 +44,9 @@ const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
 		<ToggleControl
 			label={ __( 'Force Page Reload', 'woocommerce' ) }
 			help={ helpText }
-			checked={ ! enhancedPagination }
+			checked={ forcePageReload }
 			onChange={ () =>
-				setAttributes( { enhancedPagination: ! enhancedPagination } )
+				setAttributes( { forcePageReload: ! forcePageReload } )
 			}
 			disabled={ hasUnsupportedBlocks }
 		/>

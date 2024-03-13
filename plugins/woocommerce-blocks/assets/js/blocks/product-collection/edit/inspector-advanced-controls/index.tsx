@@ -14,13 +14,13 @@ export default function ToolbarControls(
 	props: ProductCollectionEditComponentProps
 ) {
 	const { clientId, attributes, setAttributes } = props;
-	const { enhancedPagination } = attributes;
+	const { forcePageReload } = attributes;
 
 	return (
 		<InspectorAdvancedControls>
 			<ForcePageReloadControl
 				clientId={ clientId }
-				enhancedPagination={ enhancedPagination }
+				forcePageReload={ forcePageReload }
 				setAttributes={ setAttributes }
 			/>
 		</InspectorAdvancedControls>

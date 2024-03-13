@@ -100,7 +100,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	public function enhance_product_collection_with_interactivity( $block_content, $block ) {
 		$is_product_collection_block    = $block['attrs']['query']['isProductCollectionBlock'] ?? false;
-		$is_enhanced_pagination_enabled = $block['attrs']['enhancedPagination'] ?? true;
+		$is_enhanced_pagination_enabled = ! ( $block['attrs']['forcePageReload'] ?? false );
 		if ( $is_product_collection_block && $is_enhanced_pagination_enabled ) {
 			// Enqueue the Interactivity API runtime.
 			wp_enqueue_script( 'wc-interactivity' );
@@ -175,7 +175,7 @@ class ProductCollection extends AbstractBlock {
 		$query_context                  = $instance->context['query'] ?? array();
 		$query_id                       = $instance->context['queryId'] ?? null;
 		$parsed_query_id                = $this->parsed_block['attrs']['queryId'] ?? null;
-		$is_enhanced_pagination_enabled = $this->parsed_block['attrs']['enhancedPagination'] ?? true;
+		$is_enhanced_pagination_enabled = ! ( $this->parsed_block['attrs']['forcePageReload'] ?? false );
 
 		// Only proceed if the block is a product collection block,
 		// enhaced pagination is enabled and query IDs match.
@@ -247,8 +247,7 @@ class ProductCollection extends AbstractBlock {
 
 		if (
 			'woocommerce/product-collection' === $block_name &&
-			isset( $parsed_block['attrs']['enhancedPagination'] ) &&
-			true === $parsed_block['attrs']['enhancedPagination'] &&
+			! ( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
 			isset( $parsed_block['attrs']['queryId'] )
 		) {
 			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
@@ -266,8 +265,7 @@ class ProductCollection extends AbstractBlock {
 				 */
 				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
 					$has_enhanced_pagination =
-						isset( $block['attrs']['enhancedPagination'] ) &&
-						true === $block['attrs']['enhancedPagination'] &&
+					! ( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
 						isset( $block['attrs']['queryId'] );
 
 					if ( ! $has_enhanced_pagination ) {

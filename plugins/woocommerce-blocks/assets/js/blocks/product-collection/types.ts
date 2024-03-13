@@ -22,7 +22,7 @@ export interface ProductCollectionAttributes {
 	 * Contain the list of attributes that should be included in the queryContext
 	 */
 	queryContextIncludes: string[];
-	enhancedPagination: boolean;
+	forcePageReload: boolean;
 }
 
 export enum LayoutOptions {

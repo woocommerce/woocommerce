@@ -72,7 +72,7 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		shrinkColumns: true,
 	},
 	queryContextIncludes: [ 'collection' ],
-	enhancedPagination: true,
+	forcePageReload: false,
 };
 
 export const getDefaultQuery = (
