@@ -105,7 +105,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_jetpack_authorization_url' ),
-					'permission_callback' => array( $this, 'can_install_plugins' ),
+					'permission_callback' => array( $this, 'can_manage_woocommerce' ),
 					'args'                => array(
 						'redirect_url' => array(
 							'description'       => 'The URL to redirect to after authorization',
@@ -261,6 +261,23 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			return new WP_Error(
 				'woocommerce_rest_cannot_update',
 				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check whether the current user has permission to manage woocommerce
+	 *
+	 * @return WP_Error|boolean
+	 */
+	public function can_manage_woocommerce() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_update',
+				__( 'Sorry, you cannot manage woocommerce settings.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}

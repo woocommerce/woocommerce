@@ -138,6 +138,35 @@ class OnboardingPluginsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
+	public function test_jetpack_auth_requires_manage_woocommerce() {
+		$this->useUserWithoutPluginsPermission();
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/jetpack-authorization-url' );
+		$request->set_param('redirect_url', 'test');
+		$request->set_param('from', 'test');
+
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 403, $response->get_status() );
+
+		$user = $this->factory->user->create(
+			array(
+				'role' => 'shop_manager',
+			)
+		);
+
+		wp_set_current_user( $user );
+
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/jetpack-authorization-url' );
+		$request->set_param('redirect_url', 'test');
+		$request->set_param('from', 'test');
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// We'll get an error from the endpoint since Jetpack isn't installed.
+		// We just want to make sure we're passing the permission check.
+		$this->assertTrue( $response->get_status() !== 403 );
+	}
+
 	/**
 	 * Test permissions.
 	 *
