@@ -1290,26 +1290,25 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-
-	// format the prices
+	// Format the prices.
 	$formatted_regular_price = is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price;
-	$formatted_sale_price = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
+	$formatted_sale_price    = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
 
-	// strike through pricing
+	// Strikethrough pricing.
 	$price = '<del aria-hidden="true">' . $formatted_regular_price . '</del> ';
 
-	// for accessibility (a11y) we'll also display that information to screen readers
+	// For accessibility (a11y) we'll also display that information to screen readers.
 	$price .= '<span class="screen-reader-text">';
-	// translators: Original price was %s. E.g. Original price was $20.00.
+	// translators: %s is a product's regular price.
 	$price .= esc_html( sprintf( __( 'Original price was: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_regular_price ) ) );
 	$price .= '</span>';
 
-	// add the sale price
+	// Add the sale price.
 	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
 
-	// for accessibility (a11y) we'll also display that information to screen readers
+	// For accessibility (a11y) we'll also display that information to screen readers.
 	$price .= '<span class="screen-reader-text">';
-	// translators: Current price is %s. E.g. Current price is $15.00.
+	// translators: %s is a product's current (sale) price.
 	$price .= esc_html( sprintf( __( 'Current price is: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_sale_price ) ) );
 	$price .= '</span>';
 
