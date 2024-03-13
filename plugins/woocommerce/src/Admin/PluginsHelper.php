@@ -537,6 +537,11 @@ class PluginsHelper {
 		return self::get_action_data( $actions );
 	}
 
+	/**
+	 * Show notices to connect to woo.com for unconnected store in the plugin list.
+	 *
+	 * @return void
+	 */
 	public static function maybe_show_connect_notice_in_plugin_list() {
 		global $pagenow;
 
