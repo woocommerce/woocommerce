@@ -86,7 +86,6 @@ export const Transitional = ( {
 				isTransparent={ false }
 				className="edit-site-layout__hub"
 			/>
-
 			<div className="woocommerce-customize-store__transitional-content">
 				<h1 className="woocommerce-customize-store__transitional-heading">
 					{ __( 'Your store looks great!', 'woocommerce' ) }
@@ -130,7 +129,7 @@ export const Transitional = ( {
 					>
 						{ __( 'View store', 'woocommerce' ) }
 					</Button>
-				<div className="woocommerce-customize-store__transitional-actions">
+
 					<div className="woocommerce-customize-store__transitional-action">
 						<div className="woocommerce-customize-store__transitional-action__icon">
 							<Icon icon={ blockTagCloud } />
