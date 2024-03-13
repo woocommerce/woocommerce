@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 
 	/**
-	 * OOrder details email.
+	 * Order details email.
 	 *
 	 * An email sent to the customer via admin, that summarizes the details of their order. This was
 	 * historically referred to as the 'invoice', and for backwards compatibility reasons that is still
