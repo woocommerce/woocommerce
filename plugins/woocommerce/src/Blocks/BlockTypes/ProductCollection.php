@@ -238,6 +238,26 @@ class ProductCollection extends AbstractBlock {
 		}
 	}
 
+	private function is_block_compatible( $block_name ) {
+		// Check for explicitly unsupported blocks
+		if ( 'core/post-content' === $block_name ||
+			 'woocommerce/mini-cart' === $block_name ||
+			 'woocommerce/featured-product' === $block_name ) {
+			return false;
+		}
+
+		// Check for supported prefixes
+		if (
+			str_starts_with( $block_name, 'core/' ) ||
+			str_starts_with( $block_name, 'woocommerce/' )
+		) {
+			return true;
+		}
+
+		// Otherwise block is unsupported
+		return false;
+	}
+
 	function disable_enhanced_pagination( $parsed_block ) {
 		static $enhanced_query_stack                = array();
 		static $dirty_enhanced_queries              = array();
@@ -298,12 +318,7 @@ class ProductCollection extends AbstractBlock {
 		} elseif (
 			! empty( $enhanced_query_stack ) &&
 			isset( $block_name ) &&
-			! ( str_starts_with( $block_name, 'core/' ) ||
-			    str_starts_with( $block_name, 'woocommerce/' ) ||
-				'core/post-content' === $block_name ||
-			  	'woocommerce/mini-cart' === $block_name ||
-			  	'woocommerce/featured-product' === $block_name
-			)
+			! is_block_compatible( $block_name )
 		) {
 			foreach ( $enhanced_query_stack as $query_id ) {
 				$dirty_enhanced_queries[ $query_id ] = true;
