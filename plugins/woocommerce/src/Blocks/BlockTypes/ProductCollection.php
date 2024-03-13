@@ -244,11 +244,13 @@ class ProductCollection extends AbstractBlock {
 		static $render_product_collection_callback  = null;
 
 		$block_name = $parsed_block['blockName'];
+		$force_page_reload_global =
+			$parsed_block['attrs']['forcePageReload'] ?? false &&
+			isset( $block['attrs']['queryId'] );
 
 		if (
 			'woocommerce/product-collection' === $block_name &&
-			! ( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
-			isset( $parsed_block['attrs']['queryId'] )
+			! $force_page_reload_global
 		) {
 			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
 
@@ -264,16 +266,16 @@ class ProductCollection extends AbstractBlock {
 				 * @return string Returns the modified output of the query block.
 				 */
 				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
-					$has_enhanced_pagination =
-					! ( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
+					$force_page_reload =
+						$parsed_block['attrs']['forcePageReload'] ?? false &&
 						isset( $block['attrs']['queryId'] );
 
-					if ( ! $has_enhanced_pagination ) {
+					if ( $force_page_reload ) {
 						return $content;
 					}
 
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
-						$p = new WP_HTML_Tag_Processor( $content );
+						$p = new \WP_HTML_Tag_Processor( $content );
 						if ( $p->next_tag() ) {
 							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
 						}
