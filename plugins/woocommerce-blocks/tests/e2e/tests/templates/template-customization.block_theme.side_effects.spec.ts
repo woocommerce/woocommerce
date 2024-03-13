@@ -50,6 +50,8 @@ for ( const testData of testToRun ) {
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
 			);
 
+			await page.waitForTimeout( 2000 );
+
 			// Edit the theme template. The theme template is not
 			// directly available from the UI, because the customized
 			// one takes priority, so we go directly to its URL.
