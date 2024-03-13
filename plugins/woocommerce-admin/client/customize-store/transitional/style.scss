@@ -35,6 +35,10 @@
 		flex-direction: column;
 		align-items: center;
 		padding-top: 40px;
+
+		button {
+			margin-top: 20px;
+		}
 	}
 
 	.woocommerce-customize-store__transitional-heading {
@@ -61,74 +65,59 @@
 		width: 560px;
 	}
 
+	.woocommerce-customize-store__transitional-main-actions-title {
+		font-size: 20px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 24px; /* 120% */
+		margin-top: 100px;
+		margin-bottom: 40px;
+	}
+
 	.woocommerce-customize-store__transitional-main-actions {
 		margin: 20px 0 0;
 		display: flex;
 		gap: 20px;
 		flex-direction: row;
 
-		.components-button {
-			padding: 8px 16px;
-			height: 40px;
+		h3 {
+			margin: 0;
+			font-size: 16px;
+			font-style: normal;
+			font-weight: 500;
+			line-height: 24px; /* 150% */
+			letter-spacing: -0.32px;
 		}
-	}
 
-	.woocommerce-customize-store__transitional-actions {
-		display: flex;
-		flex-direction: row;
-		margin-top: 50px;
-		gap: 40px;
+		.components-button {
+			text-decoration: none;
+		}
 
 		.woocommerce-customize-store__transitional-action {
 			display: flex;
+		}
 
-			h3 {
-				color: $gray-900;
-				font-size: 16px;
-				font-style: normal;
-				font-weight: 500;
-				line-height: 24px; /* 150% */
-				margin: 0;
-			}
+		.woocommerce-customize-store__transitional-action__icon,
+		.woocommerce-customize-store__transitional-action__content {
+			flex: 1;
+		}
+
+		.woocommerce-customize-store__transitional-action__icon {
+			text-align: right;
+			max-width: 40px;
+			padding-right: 16px;
+		}
+
+		.woocommerce-customize-store__transitional-action__content {
+			max-width: 250px;
+			padding-right: 2px;
 
 			p {
-				margin: 5px 0 0;
-				color: $gray-700;
-				font-size: 13px;
-				font-style: normal;
-				font-weight: 400;
-				line-height: 16px; /* 123.077% */
-				height: 48px;
-			}
-
-			.components-button {
-				margin-top: 16px;
-				padding: 0;
-				margin-left: 0;
-				height: 20px;
-				width: fit-content;
-
-				&:hover {
-					background: transparent;
-				}
+				margin-top: 5px;
+				margin-bottom: 16px;
 			}
 		}
 	}
-}
-
-.woocommerce-customize-store__transitional-action__icon,
-.woocommerce-customize-store__transitional-action__content {
-	flex: 1;
-}
-
-.woocommerce-customize-store__transitional-action__icon {
-	text-align: right;
-	max-width: 40px;
-	padding-right: 16px;
-}
-
-.woocommerce-customize-store__transitional-action__content {
-	max-width: 250px;
 }
 
 .woocommerce-ai-survey-modal {

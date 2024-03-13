@@ -27,7 +27,8 @@ import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
 import blockTagCloud from '../assets/icons/block-tag-cloud.js';
-import { Icon, brush } from '@wordpress/icons';
+import brush from '../assets/icons/brush.js';
+import { Icon } from '@wordpress/icons';
 
 export * as actions from './actions';
 export * as services from './services';
@@ -97,39 +98,39 @@ export const Transitional = ( {
 					) }
 				</h2>
 
+				<WooCYSSecondaryButtonSlot />
+
+				<Button
+					className="woocommerce-customize-store__transitional-preview-button"
+					variant="secondary"
+					onClick={ () => {
+						recordEvent(
+							isWooExpress
+								? 'customize_your_store_transitional_survey_click'
+								: 'customize_your_store_on_core_transitional_survey_click'
+						);
+						setSurveyOpen( true );
+					} }
+				>
+					{ __( 'Share feedback', 'woocommerce' ) }
+				</Button>
+
+				<Button
+					className="woocommerce-customize-store__transitional-preview-button"
+					variant="primary"
+					onClick={ () => {
+						recordEvent(
+							'customize_your_store_transitional_preview_store_click'
+						);
+						window.open( homeUrl, '_blank' );
+					} }
+				>
+					{ __( 'View store', 'woocommerce' ) }
+				</Button>
+				<h2 className="woocommerce-customize-store__transitional-main-actions-title">
+					{ __( "What's next?", 'woocommerce' ) }
+				</h2>
 				<div className="woocommerce-customize-store__transitional-main-actions">
-					<WooCYSSecondaryButtonSlot />
-
-					{ showSurveyButton && (
-						<Button
-							className="woocommerce-customize-store__transitional-preview-button"
-							variant="secondary"
-							onClick={ () => {
-								recordEvent(
-									isWooExpress
-										? 'customize_your_store_transitional_survey_click'
-										: 'customize_your_store_on_core_transitional_survey_click'
-								);
-								setSurveyOpen( true );
-							} }
-						>
-							{ __( 'Share feedback', 'woocommerce' ) }
-						</Button>
-					) }
-
-					<Button
-						className="woocommerce-customize-store__transitional-preview-button"
-						variant="primary"
-						onClick={ () => {
-							recordEvent(
-								'customize_your_store_transitional_preview_store_click'
-							);
-							window.open( homeUrl, '_blank' );
-						} }
-					>
-						{ __( 'View store', 'woocommerce' ) }
-					</Button>
-
 					<div className="woocommerce-customize-store__transitional-action">
 						<div className="woocommerce-customize-store__transitional-action__icon">
 							<Icon icon={ blockTagCloud } />
@@ -145,7 +146,7 @@ export const Transitional = ( {
 								) }
 							</p>
 							<Button
-								variant="tertiary"
+								variant="link"
 								onClick={ () => {
 									recordEvent(
 										'customize_your_store_transitional_editor_click'
@@ -176,7 +177,7 @@ export const Transitional = ( {
 								) }
 							</p>
 							<Button
-								variant="tertiary"
+								variant="link"
 								onClick={ () => {
 									recordEvent(
 										'customize_your_store_transitional_editor_click'
@@ -210,7 +211,7 @@ export const Transitional = ( {
 								) }
 							</p>
 							<Button
-								variant="tertiary"
+								variant="link"
 								onClick={ () => {
 									recordEvent(
 										'customize_your_store_transitional_home_click'
