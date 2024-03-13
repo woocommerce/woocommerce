@@ -272,7 +272,7 @@ class ProductCollection extends AbstractBlock {
 	 * @param array $parsed_block The block being rendered.
 	 * @return string Returns the parsed block, unmodified.
 	 */
-	private function disable_enhanced_pagination( $parsed_block ) {
+	public function disable_enhanced_pagination( $parsed_block ) {
 		static $enhanced_query_stack               = array();
 		static $dirty_enhanced_queries             = array();
 		static $render_product_collection_callback = null;
