@@ -4199,8 +4199,8 @@ importers:
         specifier: 10.12.0
         version: 10.12.0(jest@29.7.0)(puppeteer-core@21.6.0)
       '@wordpress/e2e-test-utils-playwright':
-        specifier: 0.19.0
-        version: 0.19.0(@playwright/test@1.39.0)(typescript@5.3.2)
+        specifier: wp-6.5
+        version: 0.19.2(@playwright/test@1.39.0)(typescript@5.3.2)
       '@wordpress/e2e-tests':
         specifier: ^4.9.2
         version: 4.9.2(@swc/core@1.3.100)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.2.4)(eslint-import-resolver-webpack@0.13.2)(jest@29.7.0)(puppeteer-core@21.6.0)(puppeteer@17.1.3)(react-dom@17.0.2)(react@17.0.2)(typescript@5.3.2)
@@ -20843,13 +20843,13 @@ packages:
       '@wordpress/i18n': 4.47.0
       '@wordpress/url': 3.48.0
 
-  /@wordpress/api-fetch@6.48.0:
-    resolution: {integrity: sha512-Yo9kpwf07OXt/xV82EfYlnR4Dl6T/VnhKbo0wtmOO7fLxhfOrF0rFgJM4X78WEWBYcjnGwQD5c5ufad7X5XK1A==}
+  /@wordpress/api-fetch@6.50.0:
+    resolution: {integrity: sha512-a459l9WD58W5UyQkD6c54+4hv2hZzstDSzoJRMOZGSeEfbgN+49vgHLNEVhDHjNsS7Z6X2KeyyR/YoRgtXfloA==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.23.6
-      '@wordpress/i18n': 4.51.0
-      '@wordpress/url': 3.52.0
+      '@wordpress/i18n': 4.53.0
+      '@wordpress/url': 3.54.0
     dev: true
 
   /@wordpress/autop@3.16.0:
@@ -22612,16 +22612,16 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@wordpress/e2e-test-utils-playwright@0.19.0(@playwright/test@1.39.0)(typescript@5.3.2):
-    resolution: {integrity: sha512-iNg5t+fqNZwzBULhe9kMGd36nVlX/WmNeB75wDUKX37fms2ZhiMppj7lt5VGQ82nWDvM+Fq/h89wfioeJKiHhA==}
+  /@wordpress/e2e-test-utils-playwright@0.19.2(@playwright/test@1.39.0)(typescript@5.3.2):
+    resolution: {integrity: sha512-pB/WsJwtbKLrKEhdr8HEmjThP6XGuFJmEHfxSm76l/S5Hc0dzhFHAYojk3iu0VEZMUlgppUNYfXTab8JTCkwBA==}
     engines: {node: '>=12'}
     peerDependencies:
       '@playwright/test': '>=1'
     dependencies:
       '@playwright/test': 1.39.0
-      '@wordpress/api-fetch': 6.48.0
-      '@wordpress/keycodes': 3.51.0
-      '@wordpress/url': 3.52.0
+      '@wordpress/api-fetch': 6.50.0
+      '@wordpress/keycodes': 3.53.0
+      '@wordpress/url': 3.54.0
       change-case: 4.1.2
       form-data: 4.0.0
       get-port: 5.1.1
@@ -23385,8 +23385,8 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
 
-  /@wordpress/hooks@3.51.0:
-    resolution: {integrity: sha512-u//qLJCfgmGBLEdAtZx5C1KzmhcCYDIk46feYGBR9DHB1/fqdvMpxc20un62i8QgYvJyF7GChmerkPbssa6a8w==}
+  /@wordpress/hooks@3.53.0:
+    resolution: {integrity: sha512-Ul8iS+bzJMuN/ZD1HTcs3fwXC6eKLCvJJZmb61tEQ+Z3dubjf6vFQizE6Tl3ZaVlcc2/rtwb0rdEPLfnR6ePFg==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.23.6
@@ -23454,13 +23454,13 @@ packages:
       sprintf-js: 1.1.3
       tannin: 1.2.0
 
-  /@wordpress/i18n@4.51.0:
-    resolution: {integrity: sha512-JiMEstT98R1e4bgI8DA+XVCXUSis/6eZ7+RF5nHuDiseIyQ68B2D2FzYoEFaw/zaVebvtWA0lZ8HbHihgsSVPQ==}
+  /@wordpress/i18n@4.53.0:
+    resolution: {integrity: sha512-Ovp00blCGhgKwtLQbxT/gweB9r9vGPLkneM28KhCQvgHIlpyDRESIr+CMIDov7KxKnO2gzfnwfrNhXgZX+a/3Q==}
     engines: {node: '>=12'}
     hasBin: true
     dependencies:
       '@babel/runtime': 7.23.6
-      '@wordpress/hooks': 3.51.0
+      '@wordpress/hooks': 3.53.0
       gettext-parser: 1.4.0
       memize: 2.1.0
       sprintf-js: 1.1.3
@@ -23876,12 +23876,12 @@ packages:
       '@wordpress/i18n': 4.47.0
       change-case: 4.1.2
 
-  /@wordpress/keycodes@3.51.0:
-    resolution: {integrity: sha512-wudlftpjZ/2tZ2gKY7w2m7BG4LBhmEvDn2K48IbTcMtEyFJidIB0IFpT+skR1aFhIekGDZ7W8UXPQVbjwbWhwA==}
+  /@wordpress/keycodes@3.53.0:
+    resolution: {integrity: sha512-fNmjwZCdKg0EqXUQTJzdLj4sC58vIp8UqRKg+DeHQX4xAjLyTN8/JzMvmxPFF2nv57a1J5FLtOONqdrxaETGYg==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.23.6
-      '@wordpress/i18n': 4.51.0
+      '@wordpress/i18n': 4.53.0
     dev: true
 
   /@wordpress/keycodes@3.6.1:
@@ -25019,8 +25019,8 @@ packages:
       '@babel/runtime': 7.23.6
       remove-accents: 0.5.0
 
-  /@wordpress/url@3.52.0:
-    resolution: {integrity: sha512-LkKQT7Hv+7ekCQ8fjDg2CK2FUtQhnzI/1PSCcmuL9guxsrQBKoiQFoGvsTUfXC4TtlkyV/gI/iB0zfoyq5t1Gg==}
+  /@wordpress/url@3.54.0:
+    resolution: {integrity: sha512-65/2c3vzzgX4VEd90GG1tbZTN1b10NiqAa2V+a/m0Ak9RoCyAY0MtNNEa4kxCxUyN5ajpgCJCzVJIKDNVj/Fhg==}
     engines: {node: '>=12'}
     dependencies:
       '@babel/runtime': 7.23.6

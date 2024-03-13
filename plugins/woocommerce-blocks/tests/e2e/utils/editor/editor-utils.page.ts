@@ -299,14 +299,15 @@ export class EditorUtils {
 	}
 
 	async saveTemplate() {
-		await Promise.all( [
-			this.editor.saveSiteEditorEntities(),
-			this.editor.page.waitForResponse(
-				( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' ) ||
-					response.url().includes( 'wp-json/wp/v2/template-parts/' )
-			),
-		] );
+		const waitForResponse = this.editor.page.waitForResponse(
+			( response ) =>
+				response.url().includes( 'wp-json/wp/v2/templates/' ) ||
+				response.url().includes( 'wp-json/wp/v2/template-parts/' )
+		);
+
+		await this.editor.saveSiteEditorEntities();
+
+		await waitForResponse;
 	}
 
 	async closeWelcomeGuideModal() {
