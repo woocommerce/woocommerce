@@ -96,6 +96,54 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 						type: 'parallel',
 						states: {
+							firstStep: {
+								initial: 'installTheme',
+								states: {
+									installTheme: {
+										invoke: {
+											src: 'installAndActivateTheme',
+											onDone: {
+												target: 'globalStyles',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									globalStyles: {
+										invoke: {
+											src: 'updateGlobalStylesWithDefaultValues',
+											onDone: {
+												target: 'success',
+											},
+											onError: {
+												actions:
+													'redirectToIntroWithError',
+											},
+										},
+									},
+									success: { type: 'final' },
+								},
+							},
+							// installAndActivateTheme: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'installAndActivateTheme',
+							// 				onDone: {
+							// 					target: 'success',
+							// 				},
+							// 				onError: {
+							// 					actions:
+							// 						'redirectToIntroWithError',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: { type: 'final' },
+							// 	},
+							// },
 							assembleSite: {
 								initial: 'pending',
 								states: {
@@ -136,26 +184,26 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
-							setGlobalStyles: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'updateGlobalStylesWithDefaultValues',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
+							// setGlobalStyles: {
+							// 	initial: 'pending',
+							// 	states: {
+							// 		pending: {
+							// 			invoke: {
+							// 				src: 'updateGlobalStylesWithDefaultValues',
+							// 				onDone: {
+							// 					target: 'success',
+							// 				},
+							// 				onError: {
+							// 					actions:
+							// 						'redirectToIntroWithError',
+							// 				},
+							// 			},
+							// 		},
+							// 		success: {
+							// 			type: 'final',
+							// 		},
+							// 	},
+							// },
 							installFontFamilies: {
 								initial: 'checkFontLibrary',
 								states: {
