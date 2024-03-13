@@ -122,6 +122,15 @@
 		},
 		{
 			"dependencies": [
+				"github-label-sync"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.1"
+		},
+		{
+			"dependencies": [
 				"@playwright/test"
 			],
 			"packages": [
