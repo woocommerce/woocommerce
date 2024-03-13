@@ -15,7 +15,7 @@ inputs:
     s3-bucket:
         required: true
     include-allure-results:
-        dafault: false
+        default: false
 
 runs:
     using: composite
