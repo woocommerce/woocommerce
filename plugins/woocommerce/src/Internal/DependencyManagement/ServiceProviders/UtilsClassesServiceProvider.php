@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\PluginUtil;
@@ -20,7 +21,7 @@ use Automattic\WooCommerce\Utilities\TimeUtil;
 /**
  * Service provider for the non-static utils classes in the Automattic\WooCommerce\src namespace.
  */
-class UtilsClassesServiceProvider extends AbstractServiceProvider {
+class UtilsClassesServiceProvider extends AbstractInterfaceServiceProvider {
 
 	/**
 	 * The classes/interfaces that are serviced by this service provider.
@@ -35,6 +36,7 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 		COTMigrationUtil::class,
 		WebhookUtil::class,
 		TimeUtil::class,
+		PluginInstaller::class,
 	);
 
 	/**
@@ -50,5 +52,6 @@ class UtilsClassesServiceProvider extends AbstractServiceProvider {
 			->addArguments( array( CustomOrdersTableController::class, DataSynchronizer::class ) );
 		$this->share( WebhookUtil::class );
 		$this->share( TimeUtil::class );
+		$this->share_with_implements_tags( PluginInstaller::class );
 	}
 }
