@@ -123,8 +123,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				if ( ! isset( $field_schema[ $key ] ) ) {
-					// Sanitize text field since we have no info about what it *should* be. Sanitizing it is safer than leaving it alone.
-					$carry[ $key ] = sanitize_text_field( $address[ $key ] );
 					return $carry;
 				}
 				switch ( $key ) {
