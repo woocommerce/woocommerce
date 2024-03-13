@@ -24,7 +24,7 @@ export const enum JobType {
 /**
  * The type of the test job.
  */
-export const testTypes = [ 'default', 'e2e', 'api', 'performance' ];
+export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
 
 /**
  * The variables that can be used in tokens on command strings
