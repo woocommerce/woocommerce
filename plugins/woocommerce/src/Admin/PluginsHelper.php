@@ -555,10 +555,21 @@ class PluginsHelper {
 			$notice_string .= " ";
 		}
 
-		$notice_string .= __( 'Connect your store to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' );
+		$connect_page_url = add_query_arg( array(
+			'page' => 'wc-admin',
+			'tab'  => 'my-subscriptions',
+			'path' => urlencode( '/extensions' ),
+		), admin_url( 'admin.php' ) );
+
+		$notice_string .= sprintf(
+			/* translators: %s: Connect page URL */
+			__( '<a href="%s">Connect your store</a> to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			$connect_page_url
+		);
+
 		echo
 			'<div class="notice notice-error is-dismissible">
-	    		<p>' . $notice_string . '</p>
+	    		<p class="widefat">' . $notice_string . '</p>
 	    	</div>';
 	}
 
