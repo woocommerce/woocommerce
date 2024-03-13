@@ -83,7 +83,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'posts_clauses', array( $this, 'add_price_range_filter_posts_clauses' ), 10, 2 );
 
 		// Disable client-side-navigation if incompatible blocks are detected.
-		add_filter( 'render_block_data',  array( $this, 'disable_enhanced_pagination' ), 10, 1 );
+		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 	}
 
@@ -238,15 +238,21 @@ class ProductCollection extends AbstractBlock {
 		}
 	}
 
+	/**
+	 * Verifies if the inner block is compatible with Interactivity API.
+	 *
+	 * @param string $block_name Name of the block to verify.
+	 * @return boolean
+	 */
 	private function is_block_compatible( $block_name ) {
-		// Check for explicitly unsupported blocks
+		// Check for explicitly unsupported blocks.
 		if ( 'core/post-content' === $block_name ||
 			 'woocommerce/mini-cart' === $block_name ||
 			 'woocommerce/featured-product' === $block_name ) {
 			return false;
 		}
 
-		// Check for supported prefixes
+		// Check for supported prefixes.
 		if (
 			str_starts_with( $block_name, 'core/' ) ||
 			str_starts_with( $block_name, 'woocommerce/' )
@@ -254,16 +260,24 @@ class ProductCollection extends AbstractBlock {
 			return true;
 		}
 
-		// Otherwise block is unsupported
+		// Otherwise block is unsupported.
 		return false;
 	}
 
+	/**
+	 * Check inner blocks of Product Collection block if there's one
+	 * incompatible with Interactivity API and if so, disable client-side
+	 * naviagtion.
+	 *
+	 * @param array $parsed_block The block being rendered.
+	 * @return string Returns the parsed block, unmodified.
+	 */
 	function disable_enhanced_pagination( $parsed_block ) {
-		static $enhanced_query_stack                = array();
-		static $dirty_enhanced_queries              = array();
-		static $render_product_collection_callback  = null;
+		static $enhanced_query_stack               = array();
+		static $dirty_enhanced_queries             = array();
+		static $render_product_collection_callback = null;
 
-		$block_name = $parsed_block['blockName'];
+		$block_name               = $parsed_block['blockName'];
 		$force_page_reload_global =
 			$parsed_block['attrs']['forcePageReload'] ?? false &&
 			isset( $block['attrs']['queryId'] );
