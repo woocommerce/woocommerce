@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
-
 /**
  * Class encapsulating getting the processor for a given rule type.
  */
