@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 
 
 /**
@@ -25,6 +27,11 @@ class AdditionalFields extends MockeryTestCase {
 	protected $fields;
 
 	/**
+	 * Checkout fields controller.
+	 * @var CheckoutFields
+	 */
+	protected $controller;
+	/**
 	 * Setup products and a cart, as well as register fields.
 	 */
 	protected function setUp(): void {
@@ -35,6 +42,7 @@ class AdditionalFields extends MockeryTestCase {
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		$this->register_fields();
+		$this->controller = Package::container()->get( CheckoutFields::class );
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -151,6 +159,7 @@ class AdditionalFields extends MockeryTestCase {
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
 	}
+
 	/**
 	 * Test if suite valid fields register without an error.
 	 */
@@ -193,7 +202,6 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $data['schema']['properties']['shipping_address']['properties'] );
 		$this->assertArrayHasKey( 'plugin-namespace/job-function', $data['schema']['properties']['additional_fields']['properties'] );
 		$this->assertArrayHasKey( 'plugin-namespace/leave-on-porch', $data['schema']['properties']['additional_fields']['properties'] );
-
 	}
 
 	/**
@@ -308,8 +316,8 @@ class AdditionalFields extends MockeryTestCase {
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				\Mockery::mustBe( '__experimental_woocommerce_blocks_register_checkout_field' ),
-				\Mockery::mustBe( 'A checkout field cannot be registered without an id.' ),
+				'__experimental_woocommerce_blocks_register_checkout_field',
+				'A checkout field cannot be registered without an id.',
 			)
 		)->once();
 
@@ -337,17 +345,21 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertEquals( \count( $this->controller->get_additional_fields() ), count( $this->fields ), \sprintf( 'An unexpected field is registered' ) );
 	}
 
 	/**
 	 * Ensure an error is triggered when a field is registered with an invalid ID.
 	 */
 	public function test_invalid_id_in_registration() {
+		$id              = 'invalid-id';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'__experimental_woocommerce_blocks_register_checkout_field',
-				\esc_html( 'Unable to register field with id: "invalid-id". A checkout field id must consist of namespace/name.' ),
+				\esc_html( \sprintf( 'Unable to register field with id: "%s". A checkout field id must consist of namespace/name.', $id ) ),
 
 			)
 		)->once();
@@ -363,7 +375,7 @@ class AdditionalFields extends MockeryTestCase {
 		);
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'invalid-id',
+				'id'       => $id,
 				'label'    => 'Invalid ID',
 				'location' => 'additional',
 				'type'     => 'text',
@@ -377,17 +389,21 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
 	 * Ensure an error is triggered when a field is registered without a label.
 	 */
 	public function test_missing_label_in_registration() {
+		$id              = 'plugin-namespace/missing-label';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'__experimental_woocommerce_blocks_register_checkout_field',
-				\esc_html( 'Unable to register field with id: "plugin-namespace/missing-label". The field label is required.' ),
+				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field label is required.', $id ) ),
 			)
 		)->once();
 
@@ -402,7 +418,7 @@ class AdditionalFields extends MockeryTestCase {
 		);
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'plugin-namespace/missing-label',
+				'id'       => $id,
 				'location' => 'additional',
 				'type'     => 'text',
 				'required' => false,
@@ -415,17 +431,21 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
 	 * Ensure an error is triggered when a field is registered without a location key.
 	 */
 	public function test_missing_location_in_registration() {
+		$id              = 'plugin-namespace/missing-location';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'__experimental_woocommerce_blocks_register_checkout_field',
-				\esc_html( 'Unable to register field with id: "plugin-namespace/missing-location". The field location is required.' ),
+				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field location is required.', $id ) ),
 			)
 		)->once();
 
@@ -440,7 +460,7 @@ class AdditionalFields extends MockeryTestCase {
 		);
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'    => 'plugin-namespace/missing-location',
+				'id'    => $id,
 				'label' => 'Missing Location',
 				'type'  => 'text',
 			)
@@ -452,17 +472,21 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
 	 * Ensure an error is triggered when a field is registered with an invalid location key (contact, address, additional).
 	 */
 	public function test_invalid_location_in_registration() {
+		$id              = 'plugin-namespace/invalid-location';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'__experimental_woocommerce_blocks_register_checkout_field',
-				\esc_html( 'Unable to register field with id: "plugin-namespace/invalid-location". The field location is invalid.' ),
+				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field location is invalid.', $id ) ),
 			)
 		)->once();
 
@@ -478,7 +502,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'plugin-namespace/invalid-location',
+				'id'       => $id,
 				'label'    => 'Invalid Location',
 				'location' => 'invalid',
 				'type'     => 'text',
@@ -493,17 +517,21 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
 	 * Ensure an error is triggered when a field is registered with an existing id.
 	 */
 	public function test_already_registered_field() {
+		$id              = 'plugin-namespace/gov-id';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
 				'__experimental_woocommerce_blocks_register_checkout_field',
-				\esc_html( 'Unable to register field with id: "plugin-namespace/gov-id". The field is already registered.' ),
+				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field is already registered.', $id ) ),
 			)
 		)->once();
 
@@ -519,7 +547,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'plugin-namespace/gov-id',
+				'id'       => $id,
 				'label'    => 'Government ID',
 				'location' => 'address',
 				'type'     => 'text',
@@ -540,6 +568,7 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
 	 */
 	public function test_invalid_type_in_registration() {
+		$id              = 'plugin-namespace/invalid-type';
 		$action_callback = \Mockery::mock( 'ActionCallback' );
 		$action_callback->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
@@ -547,7 +576,7 @@ class AdditionalFields extends MockeryTestCase {
 				\esc_html(
 					sprintf(
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
-						'plugin-namespace/invalid-type',
+						$id,
 						'invalid',
 						implode( ', ', array( 'text', 'select', 'checkbox' ) )
 					)
@@ -567,7 +596,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
-				'id'       => 'plugin-namespace/invalid-type',
+				'id'       => $id,
 				'label'    => 'Invalid Type',
 				'location' => 'additional',
 				'type'     => 'invalid',
@@ -582,6 +611,9 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -625,6 +657,9 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -668,6 +703,9 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field didn't register.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -710,7 +748,10 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		// Fields should still be registered regardless of the error.
+		// Ensures it's registered without attributes.
+		$this->assertEmpty( $this->controller->get_additional_fields()[ $id ]['attributes'] );
+
+		// Fields should makes it to Store API.
 		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
 		$response = rest_get_server()->dispatch( $request );
 
@@ -729,7 +770,11 @@ class AdditionalFields extends MockeryTestCase {
 			print_r( $data['schema']['properties']['additional_fields'], true )
 		);
 
+		// Unregister the field.
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered anymore.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -779,6 +824,9 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
+		// Ensures it's registered without invalid attributes.
+		$this->assertArrayNotHasKey( 'invalidAttribute', $this->controller->get_additional_fields()[ $id ]['attributes'] );
+
 		// Fields should still be registered regardless of the error.
 		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
 		$response = rest_get_server()->dispatch( $request );
@@ -799,6 +847,9 @@ class AdditionalFields extends MockeryTestCase {
 		);
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered anymore.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -841,6 +892,9 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -885,6 +939,9 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -951,6 +1008,9 @@ class AdditionalFields extends MockeryTestCase {
 		);
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered anymore.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -987,6 +1047,9 @@ class AdditionalFields extends MockeryTestCase {
 		);
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1030,7 +1093,7 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-		// Fields should still be registered regardless of the error, but with no duplicate values.
+		// Fields should still be registered regardless of the error, but with with required as optional.
 		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/checkout' );
 		$response = rest_get_server()->dispatch( $request );
 
@@ -1043,6 +1106,9 @@ class AdditionalFields extends MockeryTestCase {
 		);
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1084,9 +1150,8 @@ class AdditionalFields extends MockeryTestCase {
 
 		$data = $response->get_data();
 
-		$this->assertArrayHasKey( 'plugin-namespace/hidden-field', $data['schema']['properties']['billing_address']['properties'] );
+		$this->assertArrayHasKey( $id, $data['schema']['properties']['billing_address']['properties'] );
 
-		\__internal_woocommerce_blocks_deregister_checkout_field( 'plugin-namespace/hidden-field' );
 		\remove_action(
 			'doing_it_wrong_run',
 			array(
@@ -1094,6 +1159,11 @@ class AdditionalFields extends MockeryTestCase {
 				'doing_it_wrong_run',
 			)
 		);
+
+			\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1256,6 +1326,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1321,6 +1394,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'Invalid value provided.', $data['data']['params']['additional_fields'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1393,6 +1469,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1465,6 +1544,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'Invalid value provided.', $data['data']['params']['additional_fields'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1525,6 +1607,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( \sprintf( 'There was a problem with the provided shipping address: %s is required', $label ), $data['message'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
@@ -1587,6 +1672,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( \sprintf( 'There was a problem with the provided shipping address: %s is required', $label ), $data['message'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		// Ensures the field isn't registered.
+		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
 	}
 
 	/**
