@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+
 /**
  * Rule processor that fails.
  *
