@@ -3059,6 +3059,10 @@ CREATE TABLE $meta_table (
 		$current_time      = $this->legacy_proxy->call_function( 'current_time', 'mysql', 1 );
 		$current_date_time = new \WC_DateTime( $current_time, new \DateTimeZone( 'GMT' ) );
 
+		$should_save =
+			$order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
+			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
+
 		/**
 		 * Allows code to skip a full order save() when metadata is changed.
 		 *
@@ -3066,10 +3070,7 @@ CREATE TABLE $meta_table (
 		 *
 		 * @param bool $should_save Whether to trigger a full save after metadata is changed.
 		 */
-		return apply_filters(
-			'woocommerce_orders_table_datastore_should_save_after_meta_change',
-			$order->get_date_modified() < $current_date_time && empty( $order->get_changes() ) && ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) )
-		);
+		return apply_filters( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $should_save );
 	}
 
 }
