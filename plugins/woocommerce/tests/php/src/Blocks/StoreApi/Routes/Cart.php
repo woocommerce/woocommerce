@@ -406,6 +406,9 @@ class Cart extends ControllerTestCase {
 		);
 	}
 
+	/**
+	 * Test updating customer with a virtual cart only, this should test the address copying functionality.
+	 */
 	public function test_update_customer_virtual_cart() {
 		// Add a virtual item to cart.
 		wc_empty_cart();
