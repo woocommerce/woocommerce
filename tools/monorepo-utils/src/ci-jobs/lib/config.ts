@@ -259,7 +259,7 @@ export interface TestJobConfig extends BaseJobConfig {
 	/**
 	 * The type of the test.
 	 */
-	testType: string;
+	testType: typeof testTypes[number];
 
 	/**
 	 * The name for the job.
