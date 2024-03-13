@@ -81,6 +81,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						actions: 'redirectToIntroWithError',
 					},
 				},
+				meta: {
+					component: ApiCallLoader,
+				},
 			},
 			preAssembleSite: {
 				initial: 'preApiCallLoader',
