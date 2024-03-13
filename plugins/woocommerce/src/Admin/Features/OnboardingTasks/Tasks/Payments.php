@@ -4,7 +4,8 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
+use Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage;
+
 /**
  * Payments Task
  */
@@ -108,10 +109,21 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		if ( WooCommercePayments::is_supported() && is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
-			return admin_url( '/wp-admin/admin.php?page=wc-admin&path=/payments/connect' );
-		} else {
-			return admin_url( 'wp-admin/admin.php?page=wc-admin&task=payments' );
+		// Check if the store is supported by WooPayments.
+		if ( WooCommercePayments::is_supported() ) {
+			// Check if WooPayments is active.
+			if ( class_exists( '\WC_Payments' ) ) {
+				// Point to the WooPayments Connect page.
+				return admin_url( 'admin.php?page=wc-admin&path=/payments/connect' );
+			}
+
+			// Check if there is an active WooPayments incentive via the welcome page.
+			if ( WcPayWelcomePage::instance()->must_be_visible() ) {
+				// Point to the WooPayments welcome page.
+				return admin_url( 'admin.php?page=wc-admin&path=/wc-pay-welcome-page' );
+			}
 		}
+
+		return admin_url( 'admin.php?page=wc-admin&task=payments' );
 	}
 }
