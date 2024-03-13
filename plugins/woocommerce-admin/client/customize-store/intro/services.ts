@@ -105,9 +105,16 @@ export const fetchIntroData = async () => {
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const theme = ( await resolveSelect( 'core' ).getCurrentTheme() ) as Theme;
+
 	return {
 		customizeStoreTaskCompleted,
 		themeData,
+		activeTheme: theme.stylesheet || '',
 		currentThemeIsAiGenerated,
 	};
 };
