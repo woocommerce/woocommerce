@@ -654,7 +654,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 		await expect(
 			page.getByText(
-				'Please enter a valid email to use the coupon code "email-restricted".'
+				'Please enter a valid email to use coupon code "email-restricted".'
 			)
 		).toBeVisible();
 	} );
