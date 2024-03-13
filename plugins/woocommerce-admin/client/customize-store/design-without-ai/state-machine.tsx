@@ -67,23 +67,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
-						target: 'installTheme',
-					},
-				],
-			},
-			installTheme: {
-				invoke: {
-					src: 'installAndActivateTheme',
-					onDone: {
 						target: 'preAssembleSite',
 					},
-					onError: {
-						actions: 'redirectToIntroWithError',
-					},
-				},
-				meta: {
-					component: ApiCallLoader,
-				},
+				],
 			},
 			preAssembleSite: {
 				initial: 'preApiCallLoader',
@@ -96,24 +82,12 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						},
 						type: 'parallel',
 						states: {
-							firstStep: {
-								initial: 'installTheme',
+							installAndActivateTheme: {
+								initial: 'pending',
 								states: {
-									installTheme: {
+									pending: {
 										invoke: {
 											src: 'installAndActivateTheme',
-											onDone: {
-												target: 'globalStyles',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									globalStyles: {
-										invoke: {
-											src: 'updateGlobalStylesWithDefaultValues',
 											onDone: {
 												target: 'success',
 											},
@@ -126,24 +100,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							// installAndActivateTheme: {
-							// 	initial: 'pending',
-							// 	states: {
-							// 		pending: {
-							// 			invoke: {
-							// 				src: 'installAndActivateTheme',
-							// 				onDone: {
-							// 					target: 'success',
-							// 				},
-							// 				onError: {
-							// 					actions:
-							// 						'redirectToIntroWithError',
-							// 				},
-							// 			},
-							// 		},
-							// 		success: { type: 'final' },
-							// 	},
-							// },
 							assembleSite: {
 								initial: 'pending',
 								states: {
@@ -184,26 +140,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
-							// setGlobalStyles: {
-							// 	initial: 'pending',
-							// 	states: {
-							// 		pending: {
-							// 			invoke: {
-							// 				src: 'updateGlobalStylesWithDefaultValues',
-							// 				onDone: {
-							// 					target: 'success',
-							// 				},
-							// 				onError: {
-							// 					actions:
-							// 						'redirectToIntroWithError',
-							// 				},
-							// 			},
-							// 		},
-							// 		success: {
-							// 			type: 'final',
-							// 		},
-							// 	},
-							// },
 							installFontFamilies: {
 								initial: 'checkFontLibrary',
 								states: {

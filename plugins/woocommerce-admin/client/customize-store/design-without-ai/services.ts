@@ -51,9 +51,12 @@ const browserPopstateHandler =
 		};
 	};
 
-const installAndActivateTheme = async () => {
+const installAndActivateTheme = async (
+	context: DesignWithoutAIStateMachineContext
+) => {
 	try {
 		await setTheme( THEME_SLUG );
+		await updateGlobalStylesWithDefaultValues( context );
 	} catch ( error ) {
 		recordEvent(
 			'customize_your_store__no_ai_install_and_activate_theme_error',
