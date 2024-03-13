@@ -28,14 +28,35 @@ const matchesAllTemplateMetaFields = (
 		)
 	);
 
+function templateDataMatchesProductData(
+	productTemplate: ProductTemplate,
+	product: Partial< Product >
+): unknown {
+	return Object.entries( productTemplate.productData ).every(
+		( [ key, value ] ) => {
+			if ( key === 'meta_data' ) {
+				return matchesAllTemplateMetaFields(
+					value,
+					product.meta_data || []
+				);
+			}
+
+			return product[ key ] === value;
+		}
+	);
+}
+
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
-	product: Partial< Product >
+	product: Partial< Product > | undefined
 ) => {
+	if ( ! product ) {
+		return { productTemplate: undefined, isResolving: true };
+	}
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productType = product?.type;
+	const productType = product.type;
 
 	const productTemplateIdToFind =
 		productType === 'variable'
@@ -55,22 +76,7 @@ export const useProductTemplate = (
 		// Look for matching templates based on product data described on each template.
 		const matchingTemplates = productTemplates.filter(
 			( productTemplate ) =>
-				Object.entries( productTemplate.productData ).every(
-					( [ key, value ] ) => {
-						if ( ! product ) {
-							return false;
-						}
-
-						if ( key === 'meta_data' ) {
-							return matchesAllTemplateMetaFields(
-								value,
-								( product && product[ key ] ) || []
-							);
-						}
-
-						return product[ key ] === value;
-					}
-				)
+				templateDataMatchesProductData( productTemplate, product )
 		);
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
