@@ -259,7 +259,7 @@ export interface TestJobConfig extends BaseJobConfig {
 	/**
 	 * The type of the test.
 	 */
-	testType: typeof testTypes[number];
+	testType: ( typeof testTypes )[ number ];
 
 	/**
 	 * The name for the job.
@@ -335,8 +335,11 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
-	let testType = 'default';
-	if ( raw.testType && testTypes.includes( raw.testType.toLowerCase() ) ) {
+	let testType: ( typeof testTypes )[ number ] = 'default';
+	if (
+		raw.testType &&
+		testTypes.includes( raw.testType.toString().toLowerCase() )
+	) {
 		testType = raw.testType.toLowerCase();
 	}
 

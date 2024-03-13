@@ -265,6 +265,8 @@ describe( 'Config', () => {
 		it.each( [
 			[ '', 'default' ],
 			[ 'bad', 'default' ],
+			[ 1, 'default' ],
+			[ undefined, 'default' ],
 		] )(
 			'should parse test config with unexpected testType',
 			( input, result ) => {
