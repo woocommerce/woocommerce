@@ -122,9 +122,6 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$address           = array_reduce(
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
-				if ( ! isset( $field_schema[ $key ] ) ) {
-					return $carry;
-				}
 				switch ( $key ) {
 					case 'country':
 						$carry[ $key ] = wc_strtoupper( sanitize_text_field( wp_unslash( $address[ $key ] ) ) );
@@ -171,7 +168,7 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		// correct format, and finally the second validation step is to ensure the correctly-formatted values
 		// match what we expect (postcode etc.).
 		foreach ( $address as $key => $value ) {
-			if ( isset( $schema[ $key ] ) && is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
+			if ( is_wp_error( rest_validate_value_from_schema( $value, $schema[ $key ], $key ) ) ) {
 				$errors->add(
 					'invalid_' . $key,
 					sprintf(
