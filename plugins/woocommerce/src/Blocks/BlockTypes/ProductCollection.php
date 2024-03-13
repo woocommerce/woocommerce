@@ -298,10 +298,12 @@ class ProductCollection extends AbstractBlock {
 		} elseif (
 			! empty( $enhanced_query_stack ) &&
 			isset( $block_name ) &&
-			( ! str_starts_with( $block_name, 'core/' ) ||
-			  ! str_starts_with( $block_name, 'woocommerce/') ||
-			  'core/post-content' === $block_name ||
-			  'woocommerce/post-content' === $block_name )
+			! ( str_starts_with( $block_name, 'core/' ) ||
+			    str_starts_with( $block_name, 'woocommerce/' ) ||
+				'core/post-content' === $block_name ||
+			  	'woocommerce/mini-cart' === $block_name ||
+			  	'woocommerce/featured-product' === $block_name
+			)
 		) {
 			foreach ( $enhanced_query_stack as $query_id ) {
 				$dirty_enhanced_queries[ $query_id ] = true;
