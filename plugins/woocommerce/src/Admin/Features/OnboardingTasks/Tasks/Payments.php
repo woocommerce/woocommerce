@@ -108,7 +108,7 @@ class Payments extends Task {
 	 */
 	public function get_action_url()
 	{
-		if( WooCommercePayments::is_supported() ) {
+		if( WooCommercePayments::is_supported() && is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
 			return admin_url("/wp-admin/admin.php?page=wc-admin&path=/payments/connect");
 		} else {
 			return admin_url("wp-admin/admin.php?page=wc-admin&task=payments");
