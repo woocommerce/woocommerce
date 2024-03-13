@@ -67,8 +67,6 @@ const GeneralSettings = () => {
 									// eslint-disable-next-line jsx-a11y/anchor-has-content
 									<a
 										href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-										target="_blank"
-										rel="noopener noreferrer"
 									/>
 								),
 							}
