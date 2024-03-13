@@ -304,7 +304,7 @@ jobs:
         uses: automattic/action-test-results-to-slack@v0.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_token: ${{ secrets.SMOKE_TEST_SLACK_TOKEN }}
+          slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
 
   publish-api-test-reports:
