@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
-
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\WooCommercePayments;
 /**
  * Payments Task
  */
@@ -99,5 +99,20 @@ class Payments extends Task {
 		);
 
 		return ! empty( $enabled_gateways );
+	}
+
+	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url()
+	{
+		if( WooCommercePayments::is_supported() ) {
+			return admin_url("/wp-admin/admin.php?page=wc-admin&path=/payments/connect");
+		} else {
+			return admin_url("wp-admin/admin.php?page=wc-admin&task=payments");
+		}
+
 	}
 }
