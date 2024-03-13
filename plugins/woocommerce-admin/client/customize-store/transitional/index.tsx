@@ -135,9 +135,12 @@ export const Transitional = ( {
 				</h2>
 				<div className="woocommerce-customize-store__transitional-main-actions">
 					<div className="woocommerce-customize-store__transitional-action">
-						<div className="woocommerce-customize-store__transitional-action__icon">
-							<Icon icon={ blockTagCloud } />
-						</div>
+						<Icon
+							className={
+								'woocommerce-customize-store__transitional-action__icon'
+							}
+							icon={ blockTagCloud }
+						/>
 						<div className="woocommerce-customize-store__transitional-action__content">
 							<h3>
 								{ __( 'Add your products', 'woocommerce' ) }
@@ -166,9 +169,12 @@ export const Transitional = ( {
 					</div>
 
 					<div className="woocommerce-customize-store__transitional-action">
-						<div className="woocommerce-customize-store__transitional-action__icon">
-							<Icon icon={ brush } />
-						</div>
+						<Icon
+							className={
+								'woocommerce-customize-store__transitional-action__icon'
+							}
+							icon={ brush }
+						/>
 						<div className="woocommerce-customize-store__transitional-action__content">
 							<h3>
 								{ __( 'Fine-tune your design', 'woocommerce' ) }
@@ -197,9 +203,12 @@ export const Transitional = ( {
 					</div>
 
 					<div className="woocommerce-customize-store__transitional-action">
-						<div className="woocommerce-customize-store__transitional-action__icon">
-							<Icon icon={ lessonPlan } />
-						</div>
+						<Icon
+							className={
+								'woocommerce-customize-store__transitional-action__icon'
+							}
+							icon={ lessonPlan }
+						/>
 						<div className="woocommerce-customize-store__transitional-action__content">
 							<h3>
 								{ __(
