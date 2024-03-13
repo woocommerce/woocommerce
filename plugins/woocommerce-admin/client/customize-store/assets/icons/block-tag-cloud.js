@@ -19,5 +19,4 @@ const blockTagCloud = (
 		/>
 	</SVG>
 );
-
 export default blockTagCloud;
