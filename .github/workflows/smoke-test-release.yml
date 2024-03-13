@@ -856,7 +856,7 @@ jobs:
               run: pnpm exec playwright test --config=tests/e2e-pw/ignore-plugin-tests.playwright.config.js --shard ${{ matrix.shard.name }}
 
             - name: Generate Test report.
-              if: success() || ( failure() && steps.run-e2e-tests.conclusion == 'failure' )
+              if: success() || ( failure() && steps.run-e2e-composite-action.conclusion == 'failure' )
               working-directory: plugins/woocommerce
               env:
                   ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
