@@ -32,14 +32,7 @@ const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
 
 	useEffect( () => {
 		if ( ! forcePageReload && hasUnsupportedBlocks ) {
-			const advancedControlsElement = document.getElementsByClassName(
-				'block-editor-block-inspector__advanced'
-			)[ 0 ];
-			advancedControlsElement.classList.add( 'bring-attention' );
 			setAttributes( { forcePageReload: true } );
-			return advancedControlsElement.classList.remove(
-				'bring-attention'
-			);
 		}
 	}, [ forcePageReload, hasUnsupportedBlocks, setAttributes ] );
 

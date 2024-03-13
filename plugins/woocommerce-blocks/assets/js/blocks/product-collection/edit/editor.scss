@@ -90,21 +90,6 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 	}
 }
 
-// Orange dot in Advanced options
-.block-editor-block-inspector__advanced.bring-attention {
-	.components-panel__body-title {
-		button:after {
-			content: '';
-			width: 8px;
-			height: 8px;
-			border-radius: 50%;
-			// Color hardcoded on purpose!
-			background-color: #dd823b;
-			margin-left: 4px;
-		}
-	}
-}
-
 // Price Range Filter
 .wc-block-product-price-range-control {
 	input {
