@@ -13,10 +13,11 @@ import {
  */
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
-CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
-	if ( ! testData.canBeOverriddenByThemes ) {
-		return;
-	}
+const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
+	( data ) => data.canBeOverriddenByThemes
+);
+
+for ( const testData of testToRun ) {
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
@@ -94,4 +95,4 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			);
 		} );
 	} );
-} );
+}
