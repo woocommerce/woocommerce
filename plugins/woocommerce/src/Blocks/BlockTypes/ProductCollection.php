@@ -247,8 +247,8 @@ class ProductCollection extends AbstractBlock {
 	private function is_block_compatible( $block_name ) {
 		// Check for explicitly unsupported blocks.
 		if ( 'core/post-content' === $block_name ||
-			 'woocommerce/mini-cart' === $block_name ||
-			 'woocommerce/featured-product' === $block_name ) {
+			'woocommerce/mini-cart' === $block_name ||
+			'woocommerce/featured-product' === $block_name ) {
 			return false;
 		}
 

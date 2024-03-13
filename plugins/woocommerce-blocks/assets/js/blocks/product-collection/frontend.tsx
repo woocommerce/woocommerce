@@ -39,6 +39,8 @@ const isValidEvent = ( event: MouseEvent ) =>
 
 const forcePageReload = ( href: string ) => {
 	window.location.assign( href );
+	// It's function called in generator expecting asyncFunc return.
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	return new Promise( () => {} );
 };
 
@@ -162,9 +164,7 @@ const productCollectionStore = {
 		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
-			const context = getContext< ProductCollectionStoreContext >();
 			const { ref } = getElement();
-
 			const isDisabled = (
 				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
 			 )?.dataset.wcNavigationDisabled;
@@ -172,6 +172,8 @@ const productCollectionStore = {
 			if ( isDisabled ) {
 				return;
 			}
+
+			const context = getContext< ProductCollectionStoreContext >();
 
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );

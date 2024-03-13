@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
 import { InspectorAdvancedControls } from '@wordpress/block-editor';
 
 /**
