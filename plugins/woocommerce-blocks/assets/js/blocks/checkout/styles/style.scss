@@ -9,6 +9,11 @@
 		border-bottom: 0;
 		margin: 0 0 1em;
 	}
+
+	.wp-block-woocommerce-checkout-order-summary-block {
+		border: 1px solid $universal-border-light;
+		border-radius: 5px;
+	}
 }
 
 .wp-block-woocommerce-checkout.is-loading {
@@ -22,7 +27,9 @@
 	}
 	.wp-block-woocommerce-checkout-fields-block {
 		width: 65%;
-		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(
+			math.div($gap-largest, 1060px)
+		); // ~1060px is the default width of the content area in Storefront.
 	}
 	.wp-block-woocommerce-checkout-totals-block,
 	.wp-block-woocommerce-checkout-fields-block {
@@ -101,7 +108,9 @@
 
 // For Twenty Twenty we need to increase specificity a bit more.
 .theme-twentytwenty .wp-block-woocommerce-checkout.is-loading {
-	.wp-block-woocommerce-checkout-totals-block .wc-block-components-panel > h2 {
+	.wp-block-woocommerce-checkout-totals-block
+		.wc-block-components-panel
+		> h2 {
 		@include font-size(large);
 		@include reset-box();
 	}

@@ -25,6 +25,10 @@
 	table.wc-block-cart-items td {
 		margin: 0 0 $gap * 2.5;
 	}
+	.wp-block-woocommerce-cart-order-summary-block {
+		border: 1px solid $universal-border-light;
+		border-radius: 5px;
+	}
 }
 
 // Loading placeholder state.
@@ -105,7 +109,8 @@
 	table.wc-block-cart-items {
 		margin: 0;
 	}
-	.wc-block-components-shipping-rates-control .wc-block-components-radio-control__option {
+	.wc-block-components-shipping-rates-control
+		.wc-block-components-radio-control__option {
 		padding: 0 0 0 em($gap-huge);
 	}
 }
@@ -132,7 +137,7 @@
 
 	.wc-block-cart__totals-title {
 		@include text-heading();
-		@include font-size( smaller );
+		@include font-size(smaller);
 		display: block;
 		font-weight: 700;
 		padding: $gap-smaller $gap $gap-smaller 0;
@@ -192,7 +197,9 @@
 	.wp-block-woocommerce-cart-items-block {
 		box-sizing: border-box;
 		margin: 0;
-		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(
+			math.div($gap-largest, 1060px)
+		); // ~1060px is the default width of the content area in Storefront.
 		width: 65%;
 		min-height: 10em;
 	}
@@ -227,7 +234,7 @@
 }
 
 // Skeleton is shown before mobile classes are appended.
-@media only screen and ( max-width: 700px ) {
+@media only screen and (max-width: 700px) {
 	.wp-block-woocommerce-cart.is-loading {
 		padding-top: $gap;
 
