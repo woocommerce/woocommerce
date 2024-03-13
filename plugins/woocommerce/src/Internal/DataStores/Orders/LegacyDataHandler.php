@@ -59,7 +59,7 @@ class LegacyDataHandler {
 	 * @param array $order_ids If provided, total is computed only among IDs in this array, which can be either individual IDs or ranges like "100-200".
 	 * @return int Number of orders.
 	 */
-	public function count_orders_for_cleanup( $order_ids = array() ) : int {
+	public function count_orders_for_cleanup( $order_ids = array() ): int {
 		global $wpdb;
 		return (int) $wpdb->get_var( $this->build_sql_query_for_cleanup( $order_ids, 'count' ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared in build_sql_query_for_cleanup().
 	}
@@ -156,11 +156,11 @@ class LegacyDataHandler {
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			// translators: %d is an order ID.
-			throw new \Exception( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) );
+			throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
 		}
 
 		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
-			throw new \Exception( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) );
+			throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables.', 'woocommerce' ) ) ) );
 		}
 
 		// Delete all metadata.
@@ -194,7 +194,7 @@ class LegacyDataHandler {
 	 */
 	private function is_order_newer_than_post( \WC_Abstract_Order $order ): bool {
 		if ( ! is_a( $order->get_data_store()->get_current_class_name(), OrdersTableDataStore::class, true ) ) {
-			throw new \Exception( __( 'Order is not an HPOS order.', 'woocommerce' ) );
+			throw new \Exception( esc_html__( 'Order is not an HPOS order.', 'woocommerce' ) );
 		}
 
 		$post = get_post( $order->get_id() );
@@ -253,7 +253,7 @@ class LegacyDataHandler {
 				$val2 = get_post_meta( $order_id, $key, true );
 			}
 
-			if ( $val1 != $val2 ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+			if ( $val1 != $val2 ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison,Universal.Operators.StrictComparisons.LooseNotEqual
 				$diff[ $key ] = array( $val1, $val2 );
 			}
 		}
@@ -285,7 +285,7 @@ class LegacyDataHandler {
 
 		if ( ! $order_type ) {
 			// translators: %d is an order ID.
-			throw new \Exception( sprintf( __( '%d is not an order or has an invalid order type.', 'woocommerce' ), $order_id ) );
+			throw new \Exception( esc_html( sprintf( __( '%d is not an order or has an invalid order type.', 'woocommerce' ), $order_id ) ) );
 		}
 
 		$classname = $order_type['class_name'];
@@ -331,7 +331,7 @@ class LegacyDataHandler {
 		$valid_data_stores = array( 'posts', 'hpos' );
 
 		if ( ! in_array( $source_data_store, $valid_data_stores, true ) || ! in_array( $destination_data_store, $valid_data_stores, true ) || $destination_data_store === $source_data_store ) {
-			throw new \Exception( sprintf( 'Invalid datastore arguments: %1$s -> %2$s.', $source_data_store, $destination_data_store ) );
+			throw new \Exception( esc_html( sprintf( 'Invalid datastore arguments: %1$s -> %2$s.', $source_data_store, $destination_data_store ) ) );
 		}
 
 		$fields    = array_filter( $fields );
@@ -359,7 +359,7 @@ class LegacyDataHandler {
 		}
 
 		if ( ! $datastore || ! method_exists( $datastore, 'update_order_from_object' ) ) {
-			throw new \Exception( __( 'The backup datastore does not support updating orders.', 'woocommerce' ) );
+			throw new \Exception( esc_html__( 'The backup datastore does not support updating orders.', 'woocommerce' ) );
 		}
 
 		// Backfill meta.
@@ -387,7 +387,7 @@ class LegacyDataHandler {
 
 			if ( 'hpos' === $destination_data_store ) {
 				$dest_order->apply_changes();
-				$limit_cb = function( $rows, $order ) use ( $dest_order, $fields ) {
+				$limit_cb = function ( $rows, $order ) use ( $dest_order, $fields ) {
 					if ( $dest_order->get_id() === $order->get_id() ) {
 						$rows = $this->limit_hpos_update_to_props( $rows, $fields['props'] );
 					}
@@ -403,7 +403,6 @@ class LegacyDataHandler {
 		if ( 'hpos' === $destination_data_store && isset( $limit_cb ) ) {
 			remove_filter( 'woocommerce_orders_table_datastore_db_rows_for_order', $limit_cb );
 		}
-
 	}
 
 	/**
@@ -508,15 +507,17 @@ class LegacyDataHandler {
 			$possibly_internal_keys = array_intersect( $internal_meta_keys, $fields['meta_keys'] );
 			if ( ! empty( $possibly_internal_keys ) ) {
 				throw new \Exception(
-					sprintf(
-						// translators: %s is a comma separated list of metakey names.
-						_n(
-							'%s is an internal meta key. Use --props to set it.',
-							'%s are internal meta keys. Use --props to set them.',
-							count( $possibly_internal_keys ),
-							'woocommerce'
-						),
-						implode( ', ', $possibly_internal_keys )
+					esc_html(
+						sprintf(
+							// translators: %s is a comma separated list of metakey names.
+							_n(
+								'%s is an internal meta key. Use --props to set it.',
+								'%s are internal meta keys. Use --props to set them.',
+								count( $possibly_internal_keys ),
+								'woocommerce'
+							),
+							implode( ', ', $possibly_internal_keys )
+						)
 					)
 				);
 			}
@@ -525,27 +526,27 @@ class LegacyDataHandler {
 		if ( ! empty( $fields['props'] ) ) {
 			$invalid_props = array_filter(
 				$fields['props'],
-				function( $prop_name ) use ( $order ) {
+				function ( $prop_name ) use ( $order ) {
 					return ! method_exists( $order, "get_{$prop_name}" );
 				}
 			);
 
 			if ( ! empty( $invalid_props ) ) {
 				throw new \Exception(
-					sprintf(
-						// translators: %s is a list of order property names.
-						_n(
-							'%s is not a valid order property.',
-							'%s are not valid order properties.',
-							count( $invalid_props ),
-							'woocommerce'
-						),
-						implode( ', ', $invalid_props )
+					esc_html(
+						sprintf(
+							// translators: %s is a list of order property names.
+							_n(
+								'%s is not a valid order property.',
+								'%s are not valid order properties.',
+								count( $invalid_props ),
+								'woocommerce'
+							),
+							implode( ', ', $invalid_props )
+						)
 					)
 				);
 			}
 		}
-
 	}
-
 }

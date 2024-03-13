@@ -531,7 +531,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string Alias.
 	 */
-	private function get_order_table_alias() : string {
+	private function get_order_table_alias(): string {
 		return 'o';
 	}
 
@@ -540,7 +540,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string Alias.
 	 */
-	private function get_op_table_alias() : string {
+	private function get_op_table_alias(): string {
 		return 'p';
 	}
 
@@ -551,7 +551,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @return string Alias.
 	 */
-	private function get_address_table_alias( string $type ) : string {
+	private function get_address_table_alias( string $type ): string {
 		return 'billing' === $type ? 'b' : 's';
 	}
 
@@ -1140,7 +1140,7 @@ WHERE
 	 * @param int $order_id The order id to check.
 	 * @return bool True if an order exists with the given name.
 	 */
-	public function order_exists( $order_id ) : bool {
+	public function order_exists( $order_id ): bool {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -1179,7 +1179,7 @@ WHERE
 		$data      = $this->get_order_data_for_ids( $order_ids );
 
 		if ( count( $data ) !== count( $order_ids ) ) {
-			throw new \Exception( __( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
+			throw new \Exception( esc_html__( 'Invalid order IDs in call to read_multiple()', 'woocommerce' ) );
 		}
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
@@ -1223,7 +1223,7 @@ WHERE
 	 *
 	 * @return bool Whether the order should be synced.
 	 */
-	private function should_sync_order( \WC_Abstract_Order $order ) : bool {
+	private function should_sync_order( \WC_Abstract_Order $order ): bool {
 		$draft_order    = in_array( $order->get_status(), array( 'draft', 'auto-draft' ), true );
 		$already_synced = in_array( $order->get_id(), self::$reading_order_ids, true );
 		return ! $draft_order && ! $already_synced;
@@ -1260,7 +1260,7 @@ WHERE
 	 *
 	 * @return array Filtered meta data.
 	 */
-	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
+	public function filter_raw_meta_data( &$object, $raw_meta_data ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 		$filtered_meta_data = parent::filter_raw_meta_data( $object, $raw_meta_data );
 		$allowed_keys       = array(
 			'_billing_address_index',
@@ -1268,7 +1268,7 @@ WHERE
 		);
 		$allowed_meta       = array_filter(
 			$raw_meta_data,
-			function( $meta ) use ( $allowed_keys ) {
+			function ( $meta ) use ( $allowed_keys ) {
 				return in_array( $meta->meta_key, $allowed_keys, true );
 			}
 		);
@@ -1837,7 +1837,7 @@ FROM $order_meta_table
 			);
 
 			if ( ! $post_id ) {
-				throw new \Exception( __( 'Could not create order in posts table.', 'woocommerce' ) );
+				throw new \Exception( esc_html__( 'Could not create order in posts table.', 'woocommerce' ) );
 			}
 
 			$order->set_id( $post_id );
@@ -1861,7 +1861,7 @@ FROM $order_meta_table
 
 			if ( false === $result ) {
 				// translators: %s is a table name.
-				throw new \Exception( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) );
+				throw new \Exception( esc_html( sprintf( __( 'Could not persist order to database table "%s".', 'woocommerce' ), $update['table'] ) ) );
 			}
 		}
 
@@ -2164,7 +2164,7 @@ FROM $order_meta_table
 				/**
 				 * Fires immediately after an order is deleted.
 				 *
-				 * @since
+				 * @since 2.7.0
 				 *
 				 * @param int $order_id ID of the order that has been deleted.
 				 */
@@ -2189,7 +2189,7 @@ FROM $order_meta_table
 				/**
 				 * Fires immediately after an order is trashed.
 				 *
-				 * @since
+				 * @since 2.7.0
 				 *
 				 * @param int $order_id ID of the order that has been trashed.
 				 */
@@ -2250,7 +2250,7 @@ FROM $order_meta_table
 	 *
 	 * @return void
 	 */
-	private function upshift_or_delete_child_orders( $order ) : void {
+	private function upshift_or_delete_child_orders( $order ): void {
 		global $wpdb;
 
 		$order_table     = self::get_orders_table_name();
@@ -2755,7 +2755,6 @@ FROM $order_meta_table
 		if ( $save ) {
 			$order->save_meta_data();
 		}
-
 	}
 
 	/**
@@ -2923,7 +2922,7 @@ CREATE TABLE $meta_table (
 	 * @param  WC_Data $object WC_Data object.
 	 * @return array
 	 */
-	public function read_meta( &$object ) {
+	public function read_meta( &$object ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 		$raw_meta_data = $this->data_store_meta->read_meta( $object );
 		return $this->filter_raw_meta_data( $object, $raw_meta_data );
 	}
@@ -2936,7 +2935,7 @@ CREATE TABLE $meta_table (
 	 *
 	 * @return bool
 	 */
-	public function delete_meta( &$object, $meta ) {
+	public function delete_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 		global $wpdb;
 
 		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
@@ -2984,7 +2983,7 @@ CREATE TABLE $meta_table (
 	 *
 	 * @return int|bool  meta ID or false on failure
 	 */
-	public function add_meta( &$object, $meta ) {
+	public function add_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
 		$meta->id        = $add_meta;
 		$changes_applied = $this->after_meta_change( $object, $meta );
@@ -3006,7 +3005,7 @@ CREATE TABLE $meta_table (
 	 *
 	 * @return bool The number of rows updated, or false on error.
 	 */
-	public function update_meta( &$object, $meta ) {
+	public function update_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
@@ -3072,5 +3071,4 @@ CREATE TABLE $meta_table (
 		 */
 		return apply_filters( 'woocommerce_orders_table_datastore_should_save_after_meta_change', $should_save );
 	}
-
 }
