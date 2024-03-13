@@ -31,7 +31,7 @@ const matchesAllTemplateMetaFields = (
 function templateDataMatchesProductData(
 	productTemplate: ProductTemplate,
 	product: Partial< Product >
-): unknown {
+): boolean {
 	return Object.entries( productTemplate.productData ).every(
 		( [ key, value ] ) => {
 			if ( key === 'meta_data' ) {
@@ -46,17 +46,25 @@ function templateDataMatchesProductData(
 	);
 }
 
+function findBetterMatchTemplate( matchingTemplates: ProductTemplate[] ) {
+	return matchingTemplates.reduce(
+		( previous, current ) =>
+			Object.keys( current.productData ).length >
+			Object.keys( previous.productData ).length
+				? current
+				: previous,
+		matchingTemplates[ 0 ]
+	);
+}
+
 export const useProductTemplate = (
 	productTemplateId: string | undefined,
 	product: Partial< Product > | undefined
 ) => {
-	if ( ! product ) {
-		return { productTemplate: undefined, isResolving: true };
-	}
 	const productTemplates =
 		window.productBlockEditorSettings?.productTemplates ?? [];
 
-	const productType = product.type;
+	const productType = product?.type;
 
 	const productTemplateIdToFind =
 		productType === 'variable'
@@ -72,7 +80,7 @@ export const useProductTemplate = (
 			productTemplate.productData.type === productTypeToFind
 	);
 
-	if ( ! matchingProductTemplate ) {
+	if ( ! matchingProductTemplate && product ) {
 		// Look for matching templates based on product data described on each template.
 		const matchingTemplates = productTemplates.filter(
 			( productTemplate ) =>
@@ -80,14 +88,7 @@ export const useProductTemplate = (
 		);
 
 		// If there are multiple matching templates, we should use the one with the most matching fields.
-		matchingProductTemplate = matchingTemplates.reduce(
-			( previous, current ) =>
-				Object.keys( current.productData ).length >
-				Object.keys( previous.productData ).length
-					? current
-					: previous,
-			matchingTemplates[ 0 ]
-		);
+		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
 	}
 
 	// When we switch to getting the product template from the API,
