@@ -45,15 +45,16 @@ The following screenshot shows which parts the individual filters affect:
 
 The following [Totals Footer Item filter](./available-filters/totals-footer-item.md) is available:
 
--   [totalLabel](./available-filters/totals-footer-item.md#totallabel)
+-   [`totalLabel`](./available-filters/totals-footer-item.md#totallabel)
+-   [`totalValue`](./available-filters/totals-footer-item.md#totalvalue)
 
 ## Checkout and place order button filters
 
 The following [Checkout and place order button filters](./available-filters/checkout-and-place-order-button.md) are available:
 
--   [proceedToCheckoutButtonLabel](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
--   [proceedToCheckoutButtonLink](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
--   [placeOrderButtonLabel](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
+-   [`proceedToCheckoutButtonLabel`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
+-   [`proceedToCheckoutButtonLink`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
+-   [`placeOrderButtonLabel`](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
 
 ## Coupon filters
 
