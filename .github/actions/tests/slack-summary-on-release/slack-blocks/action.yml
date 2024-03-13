@@ -52,6 +52,8 @@ runs:
               CONTEXT_JSON: ${{ toJSON(steps.generate-json.outputs.result) }}
           run: echo ${{ env.CONTEXT_JSON }} > "${{ inputs.test-name }}.json"
 
+        # updating this to v4 breaks this in a lot of workflows because you can't use the
+        # same name for the artifact multiple times.  The ENV for the name has to be unique.
         - name: Upload JSON file as artifact
           uses: actions/upload-artifact@v4
           with:
