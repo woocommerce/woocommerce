@@ -100,20 +100,22 @@ export const Transitional = ( {
 
 				<WooCYSSecondaryButtonSlot />
 
-				<Button
-					className="woocommerce-customize-store__transitional-preview-button"
-					variant="secondary"
-					onClick={ () => {
-						recordEvent(
-							isWooExpress
-								? 'customize_your_store_transitional_survey_click'
-								: 'customize_your_store_on_core_transitional_survey_click'
-						);
-						setSurveyOpen( true );
-					} }
-				>
-					{ __( 'Share feedback', 'woocommerce' ) }
-				</Button>
+				{ showSurveyButton && (
+					<Button
+						className="woocommerce-customize-store__transitional-preview-button"
+						variant="secondary"
+						onClick={ () => {
+							recordEvent(
+								isWooExpress
+									? 'customize_your_store_transitional_survey_click'
+									: 'customize_your_store_on_core_transitional_survey_click'
+							);
+							setSurveyOpen( true );
+						} }
+					>
+						{ __( 'Share feedback', 'woocommerce' ) }
+					</Button>
+				) }
 
 				<Button
 					className="woocommerce-customize-store__transitional-preview-button"
