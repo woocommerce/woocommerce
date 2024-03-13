@@ -126,17 +126,17 @@ jobs:
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              if: |
-                  success() || (
-                    failure() && steps.run-api-composite-action.outputs.result == 'failure'
-                  )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: API WP Latest
-                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
-                  env-slug: wp-latest
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   if: |
+            #       success() || (
+            #         failure() && steps.run-api-composite-action.outputs.result == 'failure'
+            #       )
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: API WP Latest
+            #       api-result: ${{ steps.run-api-composite-action.outputs.result }}
+            #       env-slug: wp-latest
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run E2E tests on WP Latest (stable)
     e2e-wp-latest:
@@ -265,14 +265,14 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              if: steps.generate_e2e_report.conclusion == 'success'
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: E2E WP Latest
-                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: wp-latest
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   if: steps.generate_e2e_report.conclusion == 'success'
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: E2E WP Latest
+            #       e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+            #       env-slug: wp-latest
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run API and E2E tests on WP Latest-1 (previous stable)
     test-wp-latest-1:
@@ -496,14 +496,14 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: WP Latest-1 (${{ needs.test-wp-latest-1.outputs['get-wp-latest-1'].version }})
-                  api-result: ${{ needs.test-wp-latest-1.outputs['run-api-composite-action'].result }}
-                  e2e-result: ${{ needs.test-wp-latest-1.outputs['run-e2e-composite-action'].result }}
-                  env-slug: wp-latest-1
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: WP Latest-1 (${{ needs.test-wp-latest-1.outputs['get-wp-latest-1'].version }})
+            #       api-result: ${{ needs.test-wp-latest-1.outputs['run-api-composite-action'].result }}
+            #       e2e-result: ${{ needs.test-wp-latest-1.outputs['run-e2e-composite-action'].result }}
+            #       env-slug: wp-latest-1
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run API and E2E tests on WP beta or RC
     test-wp-prerelease:
@@ -722,14 +722,14 @@ jobs:
                     -f test_type="api" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: WP Prerelease
-                  api-result: ${{ needs.test-wp-test-wp-prerelease.outputs['run-api-composite-action'].result }}
-                  e2e-result: ${{ needs.test-wp-test-wp-prerelease.outputs['run-e2e-composite-action'].result }}
-                  env-slug: wp-prerelease
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: WP Prerelease
+            #       api-result: ${{ needs.test-wp-test-wp-prerelease.outputs['run-api-composite-action'].result }}
+            #       e2e-result: ${{ needs.test-wp-test-wp-prerelease.outputs['run-e2e-composite-action'].result }}
+            #       env-slug: wp-prerelease
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run API and E2E tests on PHP 7.4 and 8.1
     test-php-versions:
@@ -892,21 +892,21 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              if: |
-                  success() || (
-                    failure() && (
-                      steps.run-api-composite-action.outputs.result == 'failure' ||
-                      steps.run-e2e-composite-action.outputs.result == 'failure' 
-                    )
-                  )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: PHP ${{ matrix.php_version }}
-                  api-result: ${{ steps.run-api-composite-action.outputs.result }}
-                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: php-${{ matrix.php_version }}-shard-${{ matrix.shard.number }}
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   if: |
+            #       success() || (
+            #         failure() && (
+            #           steps.run-api-composite-action.outputs.result == 'failure' ||
+            #           steps.run-e2e-composite-action.outputs.result == 'failure'
+            #         )
+            #       )
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: PHP ${{ matrix.php_version }}
+            #       api-result: ${{ steps.run-api-composite-action.outputs.result }}
+            #       e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+            #       env-slug: php-${{ matrix.php_version }}-shard-${{ matrix.shard.number }}
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Run E2E tests on WP Latest with different plugins
     test-plugins:
@@ -1020,55 +1020,55 @@ jobs:
                     -f test_type="e2e" \
                     --repo woocommerce/woocommerce-test-reports
 
-            - name: Create Slack block
-              if: |
-                  success() || (
-                    failure() && steps.run-e2e-composite-action.outputs.result == 'failure' )
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
-              with:
-                  test-name: With ${{ matrix.plugin }}
-                  e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
-                  env-slug: ${{ matrix.env_description }}
-                  release-version: ${{ needs.validate-version.outputs.version }}
+            # - name: Create Slack block
+            #   if: |
+            #       success() || (
+            #         failure() && steps.run-e2e-composite-action.outputs.result == 'failure' )
+            #   uses: ./.github/actions/tests/slack-summary-on-release/slack-blocks
+            #   with:
+            #       test-name: With ${{ matrix.plugin }}
+            #       e2e-result: ${{ steps.run-e2e-composite-action.outputs.result }}
+            #       env-slug: ${{ matrix.env_description }}
+            #       release-version: ${{ needs.validate-version.outputs.version }}
 
     # Post Slack summary
-    post-slack-summary:
-        name: Post Slack summary
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-        if: |
-            github.ref_name == 'trunk' &&
-            success() || (
-              failure() && contains( needs.*.result, 'failure' )
-            )
-        needs:
-            - merge-e2e-wp-latest
-            - validate-version
-            - test-php-versions
-            - test-plugins
-            - test-wp-latest-1
-        steps:
-            - uses: actions/checkout@v4
+    # post-slack-summary:
+    #     name: Post Slack summary
+    #     runs-on: ubuntu-latest
+    #     permissions:
+    #         contents: read
+    #     if: |
+    #         github.ref_name == 'trunk' &&
+    #         success() || (
+    #           failure() && contains( needs.*.result, 'failure' )
+    #         )
+    #     needs:
+    #         - merge-e2e-wp-latest
+    #         - validate-version
+    #         - test-php-versions
+    #         - test-plugins
+    #         - test-wp-latest-1
+    #     steps:
+    #         - uses: actions/checkout@v4
 
-            - name: Download all slack blocks
-              id: download-slack-blocks
-              uses: actions/download-artifact@v3
-              with:
-                  name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
-                  path: /tmp/slack-payload
+    #         - name: Download all slack blocks
+    #           id: download-slack-blocks
+    #           uses: actions/download-artifact@v3
+    #           with:
+    #               name: ${{ env.SLACK_BLOCKS_ARTIFACT }}
+    #               path: /tmp/slack-payload
 
-            - name: Construct payload from all blocks
-              id: run-payload-action
-              uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
-              with:
-                  release-version: ${{ needs.validate-version.outputs.version }}
-                  blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
+    #         - name: Construct payload from all blocks
+    #           id: run-payload-action
+    #           uses: ./.github/actions/tests/slack-summary-on-release/slack-payload
+    #           with:
+    #               release-version: ${{ needs.validate-version.outputs.version }}
+    #               blocks-dir: ${{ steps.download-slack-blocks.outputs.download-path }}
 
-            - name: Send Slack message
-              uses: slackapi/slack-github-action@v1.23.0
-              with:
-                  channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
-                  payload: ${{ steps.run-payload-action.outputs.payload }}
-              env:
-                  SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
+    #         - name: Send Slack message
+    #           uses: slackapi/slack-github-action@v1.23.0
+    #           with:
+    #               channel-id: ${{ secrets.RELEASE_TEST_SLACK_CHANNEL }}
+    #               payload: ${{ steps.run-payload-action.outputs.payload }}
+    #           env:
+    #               SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
