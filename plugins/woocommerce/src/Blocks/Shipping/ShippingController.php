@@ -159,7 +159,11 @@ class ShippingController {
 		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
 			foreach ( $settings as $index => $setting ) {
 				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
-					$settings[ $index ]['desc']    .= ' (' . __( 'Not available when using the <a href="https://woo.com/document/woocommerce-blocks-local-pickup/">Local pickup options powered by the Checkout block</a>.', 'woocommerce' ) . ')';
+					$settings[ $index ]['desc'] .= sprintf(
+						/* translators: %s: URL to the documentation. */
+						__( 'Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>.', 'woocommerce' ),
+						'https://woo.com/document/woocommerce-blocks-local-pickup/'
+					);
 					$settings[ $index ]['disabled'] = true;
 					$settings[ $index ]['value']    = 'no';
 					break;
