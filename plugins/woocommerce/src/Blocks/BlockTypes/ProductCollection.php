@@ -332,7 +332,7 @@ class ProductCollection extends AbstractBlock {
 		} elseif (
 			! empty( $enhanced_query_stack ) &&
 			isset( $block_name ) &&
-			! is_block_compatible( $block_name )
+			! $this->is_block_compatible( $block_name )
 		) {
 			foreach ( $enhanced_query_stack as $query_id ) {
 				$dirty_enhanced_queries[ $query_id ] = true;
