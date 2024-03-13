@@ -21,10 +21,10 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.beforeEach( async ( { requestUtils } ) => {
+		test.beforeAll( async ( { requestUtils } ) => {
 			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
-		test.afterEach( async ( { requestUtils } ) => {
+		test.afterAll( async ( { requestUtils } ) => {
 			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
 

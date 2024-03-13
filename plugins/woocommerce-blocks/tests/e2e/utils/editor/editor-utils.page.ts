@@ -452,7 +452,13 @@ export class EditorUtils {
 			.getByLabel( 'Dismiss this notice' )
 			.getByText( `"${ templateName }" reverted.` )
 			.waitFor();
+
+		const waitForSavedLabel = this.page
+			.getByRole( 'button', { name: 'Saved' } )
+			.waitFor();
+
 		await resetButton.click();
+		await waitForSavedLabel;
 		await waitForReset;
 	}
 
