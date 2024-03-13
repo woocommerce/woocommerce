@@ -23,6 +23,11 @@ import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
 import ToolbarControls from './toolbar-controls';
 
+// In order to prevent collisions, we're going to offset the queryID of blocks
+// in patterns. Take care to check the offset so that we only do this
+// once when the block is added to the page..
+const PATTERN_QUERY_ID_OFFSET = 10000;
+
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
@@ -36,58 +41,59 @@ const ProductCollectionContent = (
 	const instanceId = useInstanceId( ProductCollectionContent );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore These selectors aren't getting their types loaded for some reason.
-	const { getBlock, getBlockParents } = useSelect( blockEditorStore );
+	const { getBlockParentsByBlockName } = useSelect( blockEditorStore );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
 	 */
-	useEffect( () => {
-		// In order to properly support pagination this block has a queryId attribute that
-		// is initialized to a unique value when the block is first added to the editor.
-		// We use the `instanceId` for this purpose. It is stable across saves as long
-		// as the order of instances of these blocks in the editor does not change.
-		// The block will be re-indexed in that case, however, this won't cause
-		// any problems since the queryid only has to be stable across client
-		// renders.
-		let queryId = instanceId as number;
+	useEffect(
+		() => {
+			// In order to properly support pagination this block has a queryId attribute that
+			// is initialized to a unique value when the block is first added to the editor.
+			// We use the `instanceId` for this purpose. It is stable across saves as long
+			// as the order of instances of these blocks in the editor does not change.
+			// The block will be re-indexed in that case, however, this won't cause
+			// any problems since the queryid only has to be stable across client
+			// renders.
+			let queryId = instanceId as number;
 
-		// We DO need to be careful to not change the queryId if the block is part of a
-		// sync pattern. When multiple instances of the same pattern are placed on a
-		// page, updates to one will cause the others to be re-inserted. This will
-		// increment the ID again and trigger a re-insertion of another instance
-		// that updates the ID again, and so on until the browser hangs.
-		const blockParents = getBlockParents( clientId );
-		for ( const parentClientId of blockParents ) {
-			const parent = getBlock( parentClientId );
-			if ( parent && parent.name === 'core/block' ) {
-				// In order to prevent collisions, we're going to offset the queryID of blocks
-				// in patterns. We also want to randomize them so that they don't collide
-				// with other blocks in patterns on the page. Take care to check the
-				// offset so that we only do this once when the block is added to
-				// the page.
-				if ( attributes.queryId < 10000 ) {
-					queryId = 10000 + Math.floor( Math.random() * 1000000 );
-					break;
+			// We need to take special care when handling instances in a sync pattern
+			// to avoid an infinite loop. When two instances of a pattern are placed
+			// on the same page, updating one will cause the other to be re-inserted.
+			// If we change the ID on init it will trigger a loop as each competes
+			// to set a new queryId and update the sync pattern.
+			const blockParents = getBlockParentsByBlockName(
+				clientId,
+				'core/block'
+			);
+			if ( blockParents.length > 0 ) {
+				// We use an offset to identify instances in patterns so that
+				// we know whether or not the ID needs to be initialized.
+				if ( attributes.queryId >= PATTERN_QUERY_ID_OFFSET ) {
+					queryId = attributes.queryId;
+				} else {
+					queryId =
+						PATTERN_QUERY_ID_OFFSET +
+						// Randomize the queryId to avoid potential collisions.
+						Math.floor( Math.random() * 1000000 );
 				}
-
-				queryId = attributes.queryId;
-				break;
 			}
-		}
 
-		setAttributes( {
-			...DEFAULT_ATTRIBUTES,
-			query: {
-				...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
-				inherit: getDefaultValueOfInheritQueryFromTemplate(),
-			},
-			...( attributes as Partial< ProductCollectionAttributes > ),
-			queryId,
-		} );
+			setAttributes( {
+				...DEFAULT_ATTRIBUTES,
+				query: {
+					...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
+					inherit: getDefaultValueOfInheritQueryFromTemplate(),
+				},
+				...( attributes as Partial< ProductCollectionAttributes > ),
+				queryId,
+			} );
+		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+		[]
+	);
 
 	/**
 	 * If inherit is not a boolean, then we haven't set default attributes yet.
