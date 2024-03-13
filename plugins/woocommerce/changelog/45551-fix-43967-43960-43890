@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Update `husky`
+Comment: Update `husky`, add @playwright/test to syncpack
 
