@@ -444,7 +444,7 @@ class LegacyDataHandler {
 
 	/**
 	 * Filters a set of HPOS row updates to those matching a specific set of order properties.
-	 * Hooked onto 'woocommerce_orders_table_datastore_db_rows_for_order'.
+	 * Called via the `woocommerce_orders_table_datastore_db_rows_for_order` filter in `backfill_order_to_datastore`.
 	 *
 	 * @param array    $rows  Details for the db update.
 	 * @param string[] $props Order property names.
