@@ -12,6 +12,7 @@ class Payments extends Task {
 
 	/**
 	 * Used to cache is_complete() method result.
+	 *
 	 * @var null
 	 */
 	private $is_complete_result = null;
@@ -106,13 +107,11 @@ class Payments extends Task {
 	 *
 	 * @return string
 	 */
-	public function get_action_url()
-	{
-		if( WooCommercePayments::is_supported() && is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
-			return admin_url("/wp-admin/admin.php?page=wc-admin&path=/payments/connect");
+	public function get_action_url() {
+		if ( WooCommercePayments::is_supported() && is_plugin_active( 'woocommerce-payments/woocommerce-payments.php' ) ) {
+			return admin_url( '/wp-admin/admin.php?page=wc-admin&path=/payments/connect' );
 		} else {
-			return admin_url("wp-admin/admin.php?page=wc-admin&task=payments");
+			return admin_url( 'wp-admin/admin.php?page=wc-admin&task=payments' );
 		}
-
 	}
 }
