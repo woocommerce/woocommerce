@@ -30,7 +30,7 @@ class SpecRunner {
 			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 		} else {
 			$note = Notes::get_note( $existing_note_ids[0] );
-			if ( $note === false ) {
+			if ( false === $note ) {
 				return;
 			}
 		}
@@ -56,7 +56,7 @@ class SpecRunner {
 		// Get the matching locale or fall back to en-US.
 		$locale = self::get_locale( $spec->locales );
 
-		if ( $locale === null ) {
+		if ( null === $locale ) {
 			return;
 		}
 
@@ -127,7 +127,7 @@ class SpecRunner {
 			array_filter(
 				$locales,
 				function( $l ) {
-					return $l->locale === 'en_US';
+					return 'en_US' === $l->locale;
 				}
 			)
 		);
@@ -167,7 +167,7 @@ class SpecRunner {
 			array_filter(
 				$action_locales,
 				function( $l ) {
-					return $l->locale === 'en_US';
+					return 'en_US' === $l->locale;
 				}
 			)
 		);
@@ -196,7 +196,7 @@ class SpecRunner {
 
 			$note->add_action(
 				$action->name,
-				( $action_locale === null || ! isset( $action_locale->label ) )
+				( null === $action_locale || ! isset( $action_locale->label ) )
 					? ''
 					: $action_locale->label,
 				$url,

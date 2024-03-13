@@ -28,8 +28,10 @@ class StoredStateSetupForProducts {
 
 	/**
 	 * Initialize the class via the init hook.
+	 *
+	 * @internal
 	 */
-	public static function init() {
+	final public static function init() {
 		add_action( self::ASYNC_RUN_REMOTE_NOTIFICATIONS_ACTION_NAME, array( __CLASS__, 'run_remote_notifications' ) );
 	}
 

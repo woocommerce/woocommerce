@@ -113,8 +113,17 @@ abstract class DataSourcePoller {
 			$specs_group = get_transient( $this->args['transient_name'] );
 			$specs       = isset( $specs_group[ $locale ] ) ? $specs_group[ $locale ] : array();
 		}
+
+		/**
+		 * Filter specs.
+		 *
+		 * @param array      $specs List of specs.
+		 * @param string     $this->id Spec identifier.
+		 *
+		 * @since 8.8.0
+		 */
 		$specs = apply_filters( self::FILTER_NAME_SPECS, $specs, $this->id );
-		return $specs !== false ? $specs : array();
+		return false !== $specs ? $specs : array();
 	}
 
 	/**
@@ -123,7 +132,16 @@ abstract class DataSourcePoller {
 	 * @return bool Whether any specs were read.
 	 */
 	public function read_specs_from_data_sources() {
-		$specs        = array();
+		$specs = array();
+
+		/**
+		 * Filter data sources.
+		 *
+		 * @param array      $this->data_sources List of data sources.
+		 * @param string     $this->id Spec identifier.
+		 *
+		 * @since 8.8.0
+		 */
 		$data_sources = apply_filters( self::FILTER_NAME, $this->data_sources, $this->id );
 
 		// Note that this merges the specs from the data sources based on the
@@ -203,7 +221,7 @@ abstract class DataSourcePoller {
 		$body  = $response['body'];
 		$specs = json_decode( $body );
 
-		if ( $specs === null ) {
+		if ( null === $specs ) {
 			$logger->error(
 				'Empty response in data feed',
 				$logger_context
