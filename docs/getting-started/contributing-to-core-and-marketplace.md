@@ -1,5 +1,10 @@
-Whether you're a seasoned WordPress developer, or a WooCommerce developer looking to get more involved with our open source ecosystem, please review our guidelines on GitHub and start contributing!
+---
+post_title: Contributing to WooCommrece Core
+menu_title: Contribute to WooCommerce Core
+tags: reference
+---
 
+Whether you're a seasoned WordPress developer, or a WooCommerce developer looking to get more involved with our open source ecosystem, please check out our guidelines on GitHub and start contributing!
 
 ### [Contributor Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md)
 
