@@ -21,6 +21,7 @@ module.exports = {
 			"README.md",
 			"block.json",
 			"*.php",
+			"build",
 			"vendor",
 			"includes",
 			"languages"
