@@ -17,7 +17,7 @@ class ArrayColumn extends DeprecatedClassFacade {
 	 *
 	 * @var string
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\BaseLocationCountryRuleProcessor';
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayColumn';
 
 	/**
 	 * The version that this class was deprecated in.
