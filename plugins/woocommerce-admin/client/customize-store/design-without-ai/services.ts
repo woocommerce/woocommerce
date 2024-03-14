@@ -32,7 +32,7 @@ import {
 	FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
 	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
-import { DesignWithoutAIStateMachineContext } from './types';
+import { DesignWithoutAIStateMachineContext, Theme } from './types';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -158,21 +158,35 @@ const createProducts = async () => {
 	}
 };
 
-const getCurrentGlobalStylesId = async () => {
-	const activeThemes = await resolveSelect( 'core' ).getEntityRecords(
-		'root',
-		'theme',
-		{ status: 'active' },
-		true
-	);
+const getActiveThemeWithRetries = async (): Promise< Theme[] | null > => {
+	let retries = 3;
 
-	if ( ! activeThemes.length ) {
+	while ( retries > 0 ) {
+		const activeThemes = ( await resolveSelect( 'core' ).getEntityRecords(
+			'root',
+			'theme',
+			{ status: 'active' },
+			true
+		) ) as Theme[];
+		if ( activeThemes ) {
+			return activeThemes;
+		}
+
+		retries--;
+	}
+
+	return null;
+};
+
+const getCurrentGlobalStylesId = async (): Promise< number | null > => {
+	let activeThemes = await getActiveThemeWithRetries();
+	if ( ! activeThemes ) {
 		return null;
 	}
 
 	const currentThemeLinks = activeThemes[ 0 ]?._links;
 	const url = currentThemeLinks?.[ 'wp:user-global-styles' ]?.[ 0 ]?.href;
-	const globalStylesObject = await apiFetch( { url } );
+	const globalStylesObject = ( await apiFetch( { url } ) ) as { id: number };
 
 	return globalStylesObject.id;
 };
