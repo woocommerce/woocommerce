@@ -54,6 +54,7 @@ class TransformerService {
 
 			$transformer = self::create_transformer( $transformer_config->use );
 			if ( null === $transformer ) {
+				// @phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				throw new InvalidArgumentException( "Unable to find a transformer by name: {$transformer_config->use}" );
 			}
 

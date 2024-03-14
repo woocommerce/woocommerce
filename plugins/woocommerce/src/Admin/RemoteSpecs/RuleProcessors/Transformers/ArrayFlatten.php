@@ -28,7 +28,7 @@ class ArrayFlatten implements TransformerInterface {
 		$return = array();
 		array_walk_recursive(
 			$value,
-			function( $item ) use ( &$return ) {
+			function ( $item ) use ( &$return ) {
 				$return[] = $item;
 			}
 		);
