@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `woocommerce_order_hold_stock_minutes` filter hook to allow the number of minutes stock in an order should be reserved for to be filtered.

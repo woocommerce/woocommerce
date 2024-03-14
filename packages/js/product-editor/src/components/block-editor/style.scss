@@ -150,12 +150,25 @@
 			padding-bottom: 128px;
 		}
 
-		.block-editor-block-list__block:not([contenteditable]):focus:after {
-			display: none; // use important or increase specificity.
-		}
+		.block-editor-block-list__block {
+			/* Remove the outline for the block when it is focused */
+			&:not([contenteditable]):focus {
+				&::after {
+					display: none;
+				}
+			}
 
-		.block-editor-block-list__block fieldset {
-			min-width: 0;
+			/* Address overflow issue */
+			fieldset {
+				min-width: 0;
+			}
+
+			/* Remove the outline for the block when it is editable */
+			&.has-editable-outline {
+				&::after {
+					display: none;
+				}
+			}
 		}
 	}
 }

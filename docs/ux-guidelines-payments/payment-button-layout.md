@@ -25,7 +25,7 @@ Position payment buttons correctly in horizontal layout, consistent in size and 
 
 ### Mobile view
 
-Express payment buttons on mobile should occupy the full width. Don’t use the express payment border as it reduces the view area.
+Express payment buttons on mobile should occupy the full width. Don't use the express payment border as it reduces the view area.
 
 ![Mobile view.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Mobile-view.png)
 
