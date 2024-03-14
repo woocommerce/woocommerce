@@ -51,6 +51,39 @@ const browserPopstateHandler =
 		};
 	};
 
+const getActiveThemeWithRetries = async (): Promise< Theme[] | null > => {
+	let retries = 3;
+
+	while ( retries > 0 ) {
+		const activeThemes = ( await resolveSelect( 'core' ).getEntityRecords(
+			'root',
+			'theme',
+			{ status: 'active' },
+			true
+		) ) as Theme[];
+		if ( activeThemes ) {
+			return activeThemes;
+		}
+
+		retries--;
+	}
+
+	return null;
+};
+
+const getCurrentGlobalStylesId = async (): Promise< number | null > => {
+	const activeThemes = await getActiveThemeWithRetries();
+	if ( ! activeThemes ) {
+		return null;
+	}
+
+	const currentThemeLinks = activeThemes[ 0 ]?._links;
+	const url = currentThemeLinks?.[ 'wp:user-global-styles' ]?.[ 0 ]?.href;
+	const globalStylesObject = ( await apiFetch( { url } ) ) as { id: number };
+
+	return globalStylesObject.id;
+};
+
 const updateGlobalStylesWithDefaultValues = async (
 	context: DesignWithoutAIStateMachineContext
 ) => {
@@ -94,7 +127,6 @@ const updateGlobalStylesWithDefaultValues = async (
 		}
 	);
 };
-
 
 const installAndActivateTheme = async (
 	context: DesignWithoutAIStateMachineContext
@@ -201,39 +233,6 @@ const createProducts = async () => {
 	} catch ( error ) {
 		throw error;
 	}
-};
-
-const getActiveThemeWithRetries = async (): Promise< Theme[] | null > => {
-	let retries = 3;
-
-	while ( retries > 0 ) {
-		const activeThemes = ( await resolveSelect( 'core' ).getEntityRecords(
-			'root',
-			'theme',
-			{ status: 'active' },
-			true
-		) ) as Theme[];
-		if ( activeThemes ) {
-			return activeThemes;
-		}
-
-		retries--;
-	}
-
-	return null;
-};
-
-const getCurrentGlobalStylesId = async (): Promise< number | null > => {
-	const activeThemes = await getActiveThemeWithRetries();
-	if ( ! activeThemes ) {
-		return null;
-	}
-
-	const currentThemeLinks = activeThemes[ 0 ]?._links;
-	const url = currentThemeLinks?.[ 'wp:user-global-styles' ]?.[ 0 ]?.href;
-	const globalStylesObject = ( await apiFetch( { url } ) ) as { id: number };
-
-	return globalStylesObject.id;
 };
 
 export const services = {
