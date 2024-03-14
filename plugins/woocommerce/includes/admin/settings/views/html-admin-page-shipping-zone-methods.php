@@ -1,4 +1,7 @@
 <?php
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+
 /**
  * Shipping zone admin
  *
@@ -197,7 +200,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
 
+
 							foreach ( $methods_placed_in_order as $method ) {
+								if ( CartCheckoutUtils::is_checkout_block_default() && ! ShippingController::is_legacy_local_pickup_active() && 'local_pickup' === $method->id ) {
+									continue;
+								}
+
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
@@ -214,7 +222,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
-							echo '</div>'
+
+							if ( CartCheckoutUtils::is_checkout_block_default() ) {
+								if ( ShippingController::is_legacy_local_pickup_active() ) {
+									echo '<div>Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in the <a href="/admin.php?page=wc-settings&tab=shipping&section=pickup_location">Local pickup settings page</a>.</div>';
+								} else {
+									echo '<div>Local pickup: set up pickup locations in the <a href="/admin.php?page=wc-settings&tab=shipping&section=pickup_location">Local pickup settings page</a>.</div>';
+								}
+							}
+
+							echo '</div>';
+
 							?>
 						</fieldset>
 					</form>

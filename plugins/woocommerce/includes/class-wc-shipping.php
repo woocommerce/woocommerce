@@ -410,4 +410,27 @@ class WC_Shipping {
 		wc_deprecated_function( 'sort_shipping_methods', '2.6' );
 		return $this->shipping_methods;
 	}
+
+	/**
+	 * Check if legacy local pickup is activated in any of the shipping zones or in the Rest of the World zone.
+	 *
+	 * @return bool
+	 */
+	public function is_legacy_local_pickup_active() {
+		$shipping_zones      = WC_Shipping_Zones::get_zones();
+		$shipping_zones['0'] = array(
+			'zone_name'        => __( 'Rest of the World', 'woocommerce' ),
+			'shipping_methods' => WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods(),
+		);
+
+		foreach ( $shipping_zones as $zone_id => $zone ) {
+			foreach ( $zone['shipping_methods'] as $method_id => $method ) {
+				if ( 'local_pickup' === $method->id && $method->is_enabled() ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }

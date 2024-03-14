@@ -492,4 +492,39 @@ class ShippingController {
 
 		return $served;
 	}
+
+	/**
+	 * Check if legacy local pickup is activated in any of the shipping zones or in the Rest of the World zone.
+	 *
+	 * @return bool
+	 */
+	public function is_legacy_local_pickup_active() {
+		$has_legacy_pickup = false;
+
+		// Get all shipping zones.
+		$shipping_zones              = \WC_Shipping_Zones::get_zones( 'admin' );
+		$international_shipping_zone = new \WC_Shipping_Zone( 0 );
+
+		// Loop through each shipping zone.
+		foreach ( $shipping_zones as $shipping_zone ) {
+			// Get all registered rates for this shipping zone.
+			$shipping_methods = $shipping_zone['shipping_methods'];
+			// Loop through each registered rate.
+			foreach ( $shipping_methods as $shipping_method ) {
+				if ( 'local_pickup' === $shipping_method->id && 'yes' === $shipping_method->enabled ) {
+					$has_legacy_pickup = true;
+					break 2;
+				}
+			}
+		}
+
+		foreach ( $international_shipping_zone->get_shipping_methods( true ) as $shipping_method ) {
+			if ( 'local_pickup' === $shipping_method->id ) {
+				$has_legacy_pickup = true;
+				break;
+			}
+		}
+
+		return $has_legacy_pickup;
+	}
 }
