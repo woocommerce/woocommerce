@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+Comment: Limit checkbox clickable area from being out of bounds
+
