@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
 use WC_Helper;
-use WC_Helper_Updater;
 use WP_Error;
 use WP_Upgrader;
 
@@ -29,8 +28,6 @@ if ( ! function_exists( 'get_plugins' ) ) {
  * Class PluginsHelper
  */
 class PluginsHelper {
-
-	public const PLUGIN_UPGRADE_COUNT_EXTRA_NOTICE_THRESHOLD = 1;
 
 	/**
 	 * Initialize hooks.
@@ -555,7 +552,7 @@ class PluginsHelper {
 
 		$notice_string = '';
 
-		if ( WC_Helper_Updater::get_updates_count() >= self::PLUGIN_UPGRADE_COUNT_EXTRA_NOTICE_THRESHOLD ) {
+		if ( count( WC_Helper::get_local_woo_plugins() ) > 0 ) {
 			$notice_string .= __( 'Your store might be at risk as you are running old versions of Woo plugins.', 'woocommerce' );
 			$notice_string .= ' ';
 		}
