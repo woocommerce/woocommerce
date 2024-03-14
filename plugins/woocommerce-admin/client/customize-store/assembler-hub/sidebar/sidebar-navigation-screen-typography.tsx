@@ -25,7 +25,7 @@ import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
 export const SidebarNavigationScreenTypography = () => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -202,7 +202,7 @@ export const SidebarNavigationScreenTypography = () => {
 										<Button
 											onClick={ async () => {
 												optIn();
-												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store/design/install-fonts`;
+												sendEvent( 'INSTALL_FONTS' );
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }

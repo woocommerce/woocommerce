@@ -57,6 +57,7 @@ export type customizeStoreStateMachineEvents =
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
@@ -200,6 +201,12 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			actions: [
 				{ type: 'assignNoAIFlowError' },
 				{ type: 'updateQueryStep', step: 'intro' },
+			],
+		},
+		INSTALL_FONTS: {
+			target: 'designWithoutAi',
+			actions: [
+				{ type: 'updateQueryStep', step: 'design/install-fonts' },
 			],
 		},
 	},
