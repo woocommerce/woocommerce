@@ -14,9 +14,13 @@ import './style.scss';
 
 export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
-	const dropdownText = isComingSoon
-		? __( 'Coming soon', 'woocommerce' )
-		: __( 'Live', 'woocommerce' );
+	const isStorePagesOnly =
+		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
+	const comingSoonText = isStorePagesOnly
+		? __( 'Coming soon - Store pages only', 'woocommerce' )
+		: __( 'Coming soon', 'woocommerce' );
+	const liveText = __( 'Live', 'woocommerce' );
+	const dropdownText = isComingSoon ? comingSoonText : liveText;
 	return (
 		<div className="woocommerce-lys-status">
 			<div className="woocommerce-lys-status-pill-wrapper">
