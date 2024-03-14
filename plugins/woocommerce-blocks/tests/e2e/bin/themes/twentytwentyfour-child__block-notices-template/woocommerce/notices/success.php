@@ -31,7 +31,7 @@ if ( ! $notices ) {
 			<path d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"></path>
 		</svg>
 		<div class="wc-block-components-notice-banner__content">
-			BLOCK SUCCESS NOTICE - <?php echo wc_kses_notice( $notice['notice'] ); ?>
+			BLOCK SUCCESS NOTICE: <?php echo wc_kses_notice( $notice['notice'] ); ?>
 		</div>
 	</div>
 <?php endforeach; ?>
