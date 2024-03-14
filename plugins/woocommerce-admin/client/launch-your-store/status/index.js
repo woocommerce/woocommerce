@@ -49,7 +49,10 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 										'admin.php?page=wc-settings'
 									) }
 								>
-									Manage site visibility
+									{ __(
+										'Manage site visibility',
+										'woocommerce'
+									) }
 								</MenuItem>
 								{ isComingSoon && (
 									<MenuItem
@@ -58,7 +61,10 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 											'admin.php?page=wc-settings'
 										) }
 									>
-										Customize "Coming soon" page
+										{ __(
+											'Customize "Coming soon" page',
+											'woocommerce'
+										) }
 									</MenuItem>
 								) }
 							</MenuGroup>
