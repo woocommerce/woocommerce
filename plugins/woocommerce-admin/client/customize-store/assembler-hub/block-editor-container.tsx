@@ -16,6 +16,8 @@ import { useQuery } from '@woocommerce/navigation';
 // @ts-expect-error No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
 import { useCallback, useContext, useMemo } from '@wordpress/element';
+// @ts-expect-error No types for this exist yet.
+import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 
 /**
  * Internal dependencies
@@ -78,8 +80,16 @@ export const BlockEditorContainer = () => {
 		[]
 	);
 
+	const { templateType } = useSelect( ( select ) => {
+		const { getEditedPostType } = unlock( select( editSiteStore ) );
+
+		return {
+			templateType: getEditedPostType(),
+		};
+	}, [] );
+
 	const [ blocks, , onChange ] = useEditorBlocks(
-		'wp_template',
+		templateType,
 		currentTemplate?.id ?? ''
 	);
 
