@@ -80,6 +80,8 @@ export const BlockEditorContainer = () => {
 		[]
 	);
 
+	// This is necessary to avoid this issue: https://github.com/woocommerce/woocommerce/issues/45593
+	// Related PR: https://github.com/woocommerce/woocommerce/pull/45600
 	const { templateType } = useSelect( ( select ) => {
 		const { getEditedPostType } = unlock( select( editSiteStore ) );
 
