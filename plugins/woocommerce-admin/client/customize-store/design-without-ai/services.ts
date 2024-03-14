@@ -166,17 +166,14 @@ const getCurrentGlobalStylesId = async () => {
 		true
 	);
 
-	// @ts-expect-error
 	if ( ! activeThemes.length ) {
 		return null;
 	}
 
-	// @ts-expect-error
 	const currentThemeLinks = activeThemes[ 0 ]?._links;
 	const url = currentThemeLinks?.[ 'wp:user-global-styles' ]?.[ 0 ]?.href;
 	const globalStylesObject = await apiFetch( { url } );
 
-	// @ts-expect-error
 	return globalStylesObject.id;
 };
 
@@ -197,6 +194,9 @@ const updateGlobalStylesWithDefaultValues = async (
 			: FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING[ 0 ];
 
 	const globalStylesId = await getCurrentGlobalStylesId();
+	if ( ! globalStylesId ) {
+		return;
+	}
 
 	// @ts-expect-error No types for this exist yet.
 	const { saveEntityRecord } = dispatch( coreStore );
