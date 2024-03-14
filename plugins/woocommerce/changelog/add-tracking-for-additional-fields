@@ -1,5 +1,5 @@
 Significance: patch
 Type: add
-Comment: This feature is behind feature flag
+Message: Adds Checkout additional fields to the store weekly snapshot.
 
 
