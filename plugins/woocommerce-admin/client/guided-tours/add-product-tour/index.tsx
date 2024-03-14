@@ -20,6 +20,8 @@ import {
 	useProductStepChange,
 } from './use-product-step-change';
 import { useTrackPublishButton } from './use-track-publish-button';
+import { applyFilters } from '@wordpress/hooks';
+import { WooStep } from '@woocommerce/components/build-types/tour-kit/types';
 
 const getTourConfig = ( {
 	isExcerptEditorTmceActive,
@@ -32,6 +34,176 @@ const getTourConfig = ( {
 	closeHandler: TourKitTypes.CloseHandler;
 	onNextStepHandler: ( currentStepIndex: number ) => void;
 } ): TourKitTypes.WooConfig => {
+	const urlParams = new URLSearchParams( window.location.search );
+	const defaultSteps: TourKitTypes.WooStep[] = [
+		{
+			referenceElements: {
+				desktop: '#title',
+			},
+			focusElement: {
+				desktop: '#title',
+			},
+			meta: {
+				name: 'product-name',
+				heading: __( 'Product name', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Start typing your new product name here. This will be what your customers will see in your store.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#postdivrich',
+			},
+			focusElement: {
+				iframe: isContentEditorTmceActive ? '#content_ifr' : undefined,
+				desktop: isContentEditorTmceActive
+					? '#tinymce'
+					: '#wp-content-editor-container > .wp-editor-area',
+			},
+			meta: {
+				name: 'product-description',
+				heading: __( 'Add your product description', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Add your full product description here. Describe your product in detail.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#woocommerce-product-data',
+			},
+			focusElement: {
+				desktop: '#_regular_price',
+			},
+			meta: {
+				name: 'product-data',
+				heading: __( 'Add your product data', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Use the tabs to switch between sections and insert product details. Start by adding your product price.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#postexcerpt',
+			},
+			focusElement: {
+				iframe: isExcerptEditorTmceActive ? '#excerpt_ifr' : undefined,
+				desktop: isExcerptEditorTmceActive
+					? '#tinymce'
+					: '#wp-excerpt-editor-container > .wp-editor-area',
+			},
+			meta: {
+				name: 'product-short-description',
+				heading: __(
+					'Add your short product description',
+					'woocommerce'
+				),
+				descriptions: {
+					desktop: __(
+						'Type a quick summary for your product here. This will appear on the product page right under the product name.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#postimagediv',
+			},
+			focusElement: {
+				desktop: '#set-post-thumbnail',
+			},
+			meta: {
+				name: 'product-image',
+				heading: __( 'Add your product image', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Upload an image to your product here. Ideally a JPEG or PNG about 600 px wide or bigger. This image will be shown in your store’s catalog.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#tagsdiv-product_tag',
+			},
+			focusElement: {
+				desktop: '#new-tag-product_tag',
+			},
+			meta: {
+				name: 'product-tags',
+				heading: __( 'Add your product tags', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Add your product tags here. Tags are a method of labeling your products to make them easier for customers to find. For example, if you sell clothing, and you have a lot of cat prints, you could make a tag for “cat.”',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#product_catdiv',
+			},
+			meta: {
+				name: 'product-categories',
+				heading: __( 'Add your product categories', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Add your product categories here. Assign categories to your products to make them easier to browse through and find in your store.',
+						'woocommerce'
+					),
+				},
+			},
+		},
+		{
+			referenceElements: {
+				desktop: '#submitdiv',
+			},
+			focusElement: {
+				desktop: '#submitdiv',
+			},
+			meta: {
+				name: 'publish',
+				heading: __( 'Publish your product 🎉', 'woocommerce' ),
+				descriptions: {
+					desktop: __(
+						'Good work! Now you can publish your product to your store by hitting the “Publish” button or keep editing it.',
+						'woocommerce'
+					),
+				},
+				primaryButton: {
+					text: __( 'Keep editing', 'woocommerce' ),
+				},
+			},
+		},
+	];
+
+	/**
+	 * Experimental: Filter for manipulating the product tour.
+	 *
+	 * @filter experimental_woocommerce_admin_product_tour_steps
+	 * @param {Object} WooStep Array of Woo tour guide steps.
+	 * @param string tutorialType The type of tutorial to display.
+	 */
+	const steps: TourKitTypes.WooStep[] = applyFilters(
+		'experimental_woocommerce_admin_product_tour_steps',
+		defaultSteps,
+		urlParams.get( 'tutorial_type' )
+	) as TourKitTypes.WooStep[];
+
 	return {
 		placement: 'bottom-start',
 		options: {
@@ -74,168 +246,7 @@ const getTourConfig = ( {
 				onNextStep: onNextStepHandler,
 			},
 		},
-		steps: [
-			{
-				referenceElements: {
-					desktop: '#title',
-				},
-				focusElement: {
-					desktop: '#title',
-				},
-				meta: {
-					name: 'product-name',
-					heading: __( 'Product name', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Start typing your new product name here. This will be what your customers will see in your store.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#postdivrich',
-				},
-				focusElement: {
-					iframe: isContentEditorTmceActive
-						? '#content_ifr'
-						: undefined,
-					desktop: isContentEditorTmceActive
-						? '#tinymce'
-						: '#wp-content-editor-container > .wp-editor-area',
-				},
-				meta: {
-					name: 'product-description',
-					heading: __(
-						'Add your product description',
-						'woocommerce'
-					),
-					descriptions: {
-						desktop: __(
-							'Add your full product description here. Describe your product in detail.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#woocommerce-product-data',
-				},
-				focusElement: {
-					desktop: '#_regular_price',
-				},
-				meta: {
-					name: 'product-data',
-					heading: __( 'Add your product data', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Use the tabs to switch between sections and insert product details. Start by adding your product price.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#postexcerpt',
-				},
-				focusElement: {
-					iframe: isExcerptEditorTmceActive
-						? '#excerpt_ifr'
-						: undefined,
-					desktop: isExcerptEditorTmceActive
-						? '#tinymce'
-						: '#wp-excerpt-editor-container > .wp-editor-area',
-				},
-				meta: {
-					name: 'product-short-description',
-					heading: __(
-						'Add your short product description',
-						'woocommerce'
-					),
-					descriptions: {
-						desktop: __(
-							'Type a quick summary for your product here. This will appear on the product page right under the product name.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#postimagediv',
-				},
-				focusElement: {
-					desktop: '#set-post-thumbnail',
-				},
-				meta: {
-					name: 'product-image',
-					heading: __( 'Add your product image', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Upload an image to your product here. Ideally a JPEG or PNG about 600 px wide or bigger. This image will be shown in your store’s catalog.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#tagsdiv-product_tag',
-				},
-				focusElement: {
-					desktop: '#new-tag-product_tag',
-				},
-				meta: {
-					name: 'product-tags',
-					heading: __( 'Add your product tags', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Add your product tags here. Tags are a method of labeling your products to make them easier for customers to find. For example, if you sell clothing, and you have a lot of cat prints, you could make a tag for “cat.”',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#product_catdiv',
-				},
-				meta: {
-					name: 'product-categories',
-					heading: __( 'Add your product categories', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Add your product categories here. Assign categories to your products to make them easier to browse through and find in your store.',
-							'woocommerce'
-						),
-					},
-				},
-			},
-			{
-				referenceElements: {
-					desktop: '#submitdiv',
-				},
-				focusElement: {
-					desktop: '#submitdiv',
-				},
-				meta: {
-					name: 'publish',
-					heading: __( 'Publish your product 🎉', 'woocommerce' ),
-					descriptions: {
-						desktop: __(
-							'Good work! Now you can publish your product to your store by hitting the “Publish” button or keep editing it.',
-							'woocommerce'
-						),
-					},
-					primaryButton: {
-						text: __( 'Keep editing', 'woocommerce' ),
-					},
-				},
-			},
-		],
+		steps,
 		closeHandler,
 	};
 };
