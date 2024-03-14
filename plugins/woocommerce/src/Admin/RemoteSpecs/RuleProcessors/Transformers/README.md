@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 -->
+
 # Option Transformer
 
 An option transformer is a class that transforms the given option value into a different value for the comparison operation.
@@ -6,7 +8,7 @@ Transformers run in the order in which they are defined, and each transformer pa
 
 **Definition example**: transformers are always used with `option` rule.
 
-```
+```js
   {
     "slug": "test-note",
      ...
@@ -41,13 +43,13 @@ Transformers run in the order in which they are defined, and each transformer pa
 
 PHP's built-in `array_column` to select values from a single column. For more information about how array_column works, please see PHP's [official documentation](https://www.php.net/manual/en/function.array-column.php).
 
-#### Arguments:
+### Arguments
 
 | name | description    |
 | ---- | -------------- |
 | key  | array key name |
 
-#### Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -60,7 +62,7 @@ PHP's built-in `array_column` to select values from a single column. For more in
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following data
 
@@ -100,9 +102,9 @@ Use `array_column` to extract `array("media", "software")` then choose the first
 
 Flattens a nested array.
 
-#### Arguments: N/A
+### Arguments: N/A
 
-#### Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -112,7 +114,7 @@ Flattens a nested array.
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following data
 
@@ -153,9 +155,9 @@ Use `array_flatten` to extract `array("member1", "member2", "member3")` then use
 
 PHP's built-in `array_keys` to return keys from an array. For more information about how `array_keys` works, please see PHP’s [official documentation](https://www.php.net/manual/en/function.array-column.php).
 
-#### Arguments: N/A
+### Arguments: N/A
 
-####Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -165,7 +167,7 @@ PHP's built-in `array_keys` to return keys from an array. For more information a
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following data
 
@@ -199,13 +201,13 @@ Use `array_keys` to extract `array("name", "address", "supports_version_2")` and
 
 PHP's built-in `array_search` to search a value in an array. For more information about how `array_search` works, please see PHP’s [official documentation](https://www.php.net/manual/en/function.array-search.php).
 
-#### Arguments:
+### Arguments
 
 |name|description|
 |----|---------|
 | value | a value to search in the given array |
 
-#### Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -218,7 +220,7 @@ PHP's built-in `array_search` to search a value in an array. For more informatio
 ],
 ```
 
-#### Examples
+### Examples
 
 See examples from [array_flatten](#array_flatten) and [array_keys](#array_keys)
 
@@ -227,9 +229,9 @@ See examples from [array_flatten](#array_flatten) and [array_keys](#array_keys)
 PHP's built-in array_values to return values from an array. For more information about how `array_values` works, please see PHP’s [official documentation](https://www.php.net/manual/en/function.array-values).
 
 
-#### Arguments: N/A
+### Arguments: N/A
 
-#### Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -239,7 +241,7 @@ PHP's built-in array_values to return values from an array. For more information
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following data
 
@@ -266,9 +268,9 @@ Use `array_values` to extract `array("x-large")`
 
 Uses dot notation to select a value in an array. Dot notation lets you access an array as if it is an object.
 
-#### Arguments: N/A
+### Arguments: N/A
 
-#### Definition:
+### Definition
 
 
 ```php
@@ -282,7 +284,7 @@ Uses dot notation to select a value in an array. Dot notation lets you access an
 ],
 ```
 
-#### Example:
+### Example
 
 
 
@@ -329,9 +331,9 @@ Select `member2`. You can access array items with an index.
 
 PHP's built-in count to return the number of values from a countable, such as an array.
 
-#### Arguments: N/A
+### Arguments: N/A
 
-#### Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -341,7 +343,7 @@ PHP's built-in count to return the number of values from a countable, such as an
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following list of usernames
 
@@ -369,9 +371,9 @@ Let's count # of users with `count`
 
 This prepares the site URL by removing the protocol and the last slash.
 
-#### Arguments: N/A
+### Arguments: N/A
 
-####Definition:
+### Definition
 
 ```php
 "transformers": [
@@ -381,7 +383,7 @@ This prepares the site URL by removing the protocol and the last slash.
 ],
 ```
 
-#### Example:
+### Example
 
 Given the following data
 

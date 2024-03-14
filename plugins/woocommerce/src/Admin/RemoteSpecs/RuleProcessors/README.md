@@ -1,8 +1,8 @@
-## Rule
+# Rule
 
 Rules in an array are executed as an AND operation. If there are no rules in the array the result is false and the specified notification is not shown.
 
-### Operations
+## Operations
 
 Some rule types support an `operation` value, which is used to compare two
 values. The following operations are implemented:
@@ -19,7 +19,7 @@ values. The following operations are implemented:
 - `!in` (Added in WooCommerce 8.2.0)
 - `range` (Added in WooCommerce 8.8.0)
 
-#### contains and !contains
+### contains and !contains
 
 `contains` and `!contains` allow checking if the provided value is present (or
 not present) in the haystack value. An example of this is using the
@@ -36,7 +36,7 @@ onboarding profile:
 }
 ```
 
-#### in and !in
+### in and !in
 
 `in` and `!in` allow checking if a value is found (or not found) in a provided array. For example, using the `in` comparison operator to check if the base country location value is found in a given array, as below. This rule matches if the `base_location_country` is `US`, `NZ`, or `ZA`. **NOTE:** These comparisons were added in **WooCommerce 8.2.0**. If the spec is read by an older version of WooCommerce, the rule will evaluate to `false`.
 
@@ -52,7 +52,7 @@ onboarding profile:
 }
 ```
 
-#### range
+### range
 
 `range` operator performs an inclusive check to determine if a number falls within a certain range.
 This means that both the 'from' and 'to' values of the specified range are included in the check. 
@@ -69,7 +69,7 @@ The following rule returns true when `woocommerce_remote_variant_assignment` val
 }
 ```
 
-### Plugins activated
+## Plugins activated
 
 This passes if all of the listed plugins are installed and activated.
 
@@ -85,7 +85,7 @@ This passes if all of the listed plugins are installed and activated.
 }
 ```
 
-### Publish after time
+## Publish after time
 
 This passes if the system time is after the specified date/time.
 
@@ -100,7 +100,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 }
 ```
 
-### Publish before time
+## Publish before time
 
 This passes if the system time is before the specified date/time.
 
@@ -115,7 +115,7 @@ Note that using both `publish_after_time` and `publish_before_time` allows timeb
 }
 ```
 
-### Not
+## Not
 
 This negates the rules in the provided set of rules. Note that the rules in `operand` get ANDed together into a single boolean.
 
@@ -131,7 +131,7 @@ This negates the rules in the provided set of rules. Note that the rules in `ope
 }
 ```
 
-### Or
+## Or
 
 This performs an OR operation on the operands, passing if any of the operands evaluates to true. Note that if the operands are an array of `Rule`s (as in the first example), each operand is treated as an AND operation.
 
@@ -165,7 +165,7 @@ Alternatively:
 }
 ```
 
-### Fail
+## Fail
 
 This just returns a false value. This is useful if you want to keep a specification around, but don't want it displayed.
 
@@ -175,7 +175,7 @@ This just returns a false value. This is useful if you want to keep a specificat
 }
 ```
 
-### Plugin version
+## Plugin version
 
 This compares the installed version of the plugin to the required version, using the comparison operator. If the plugin isn’t activated this returns false.
 
@@ -192,7 +192,7 @@ This example passes if Jetpack 8.4.1 is installed and activated.
 }
 ```
 
-### Stored state
+## Stored state
 
 This allows access to a stored state containing calculated values that otherwise would be impossible to reproduce using other rules. It performs the comparison operation against the stored state value.
 
@@ -219,7 +219,7 @@ new_product_count
 
 `index`, `operation`, and `value` are required.
 
-### Product count
+## Product count
 
 This passes if the number of products currently in the system match the comparison operation.
 
@@ -235,7 +235,7 @@ This example passes if there are more than 10 products currently in the system.
 
 `operation` and `value` are required.
 
-### Order count
+## Order count
 
 This passes if the number of orders currently in the system match the comparison operation.
 
@@ -251,7 +251,7 @@ This example passes if there are more than 10 orders currently in the system.
 
 `operation` and `value` are required.
 
-### WooCommerce Admin active for
+## WooCommerce Admin active for
 
 This passes if the time WooCommerce Admin has been active for (in days) matches the comparison operation.
 
@@ -269,7 +269,7 @@ This example passes if it has been active for more than 8 days.
 
 `operation` and `days` are required.
 
-### Onboarding profile
+## Onboarding profile
 
 This allows access to the onboarding profile that was built up in the onboarding wizard. The below example passes when the current revenue selected was "none".
 
@@ -284,7 +284,7 @@ This allows access to the onboarding profile that was built up in the onboarding
 
 `index`, `operation`, and `value` are all required.
 
-### Is eCommerce
+## Is eCommerce
 
 This passes when the store is on a WordPress.com site with the eCommerce plan.
 
@@ -297,7 +297,7 @@ This passes when the store is on a WordPress.com site with the eCommerce plan.
 
 `value` is required.
 
-### Is Woo Express
+## Is Woo Express
 
 This passes when the store is on a WordPress.com site with a Woo Express plan active.
 You can optionally pass the `plan` name to target a specific Woo Express plan, e.g. `performance`.
@@ -313,7 +313,7 @@ You can optionally pass the `plan` name to target a specific Woo Express plan, e
 `value` is required.
 `plan` is optional, e.g. `trial`, `essential`, `performance`.
 
-### Base location - country
+## Base location - country
 
 This passes when the store is located in the specified country.
 
@@ -327,7 +327,7 @@ This passes when the store is located in the specified country.
 
 `value` and `operation` are both required.
 
-### Base location - state
+## Base location - state
 
 This passes when the store is located in the specified state.
 
@@ -341,7 +341,7 @@ This passes when the store is located in the specified state.
 
 `value` and `operation` are both required.
 
-### Note status
+## Note status
 
 This passes when the status of the specified note matches the specified status.
 The below example passes when the `wc-admin-mobile-app` note has not been
@@ -356,7 +356,7 @@ actioned.
 }
 ```
 
-### Total Payments Value
+## Total Payments Value
 
 This passes when the total value of all payments for a given timeframe
 compared to the provided value pass the operation test.
@@ -374,7 +374,7 @@ compared to the provided value pass the operation test.
 
 `timeframe`, `value`, and `operation` are all required.
 
-### Option
+## Option
 
 This passes when the option value matches the value using the operation.
 
@@ -390,7 +390,7 @@ This passes when the option value matches the value using the operation.
 
 `option_name`, `value`, and `operation` are all required. `default` is not required and allows a default value to be used if the option does not exist.
 
-#### Option Transformer
+### Option Transformer
 
 This transforms the given option value into a different value by a series of transformers.
 
@@ -449,7 +449,7 @@ If you want to ensure that the industry array contains `fashion-apparel-accessor
 
 You can find a list of transformers and examples in the transformer [README](./Transformers/README.md).
 
-### WCA updated
+## WCA updated
 
 This passes when WooCommerce Admin has just been updated. The specs will be run
 on update. Note that this doesn't provide a way to check the version number as
