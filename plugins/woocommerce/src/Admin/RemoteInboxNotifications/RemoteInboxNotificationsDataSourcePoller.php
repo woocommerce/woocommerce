@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
 
 /**
  * Specs data source poller class.
