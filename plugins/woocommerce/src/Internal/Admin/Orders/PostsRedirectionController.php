@@ -130,7 +130,16 @@ class PostsRedirectionController {
 		$redirect_from_types   = wc_get_order_types( 'admin-menu' );
 		$redirect_from_types[] = 'shop_order_placehold';
 
-		if ( ! $post_id || ! in_array( get_post_type( $post_id ), $redirect_from_types, true ) || ! isset( $_GET['action'] ) ) {
+		$order_type = get_post_type( $post_id );
+		if ( ! $order_type ) {
+			// Attempt to determine whether this is a valid order on the HPOS side before bailing out.
+			$datastore = new \WC_Data_Store( 'order' );
+			if ( $datastore->has_callable( 'get_order_type' ) ) {
+				$order_type = $datastore->get_order_type( $post_id );
+			}
+		}
+
+		if ( ! $post_id || ! in_array( $order_type, $redirect_from_types, true ) || ! isset( $_GET['action'] ) ) {
 			return;
 		}
 
