@@ -624,10 +624,10 @@ jobs:
         env:
             E2E_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             E2E_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
-            E2E_WP_PRERELEASE_ARTIFACT: E2E test on wp-env with WordPress beta or RC (run ${{ github.run_number }})-${{ matrix.shard.number }}
+            E2E_WP_PRERELEASE_ARTIFACT: E2E test on wp-env with WordPress beta or RC (run ${{ github.run_number }})
             API_ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/api/allure-report
             API_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/api/allure-results
-            API_WP_PRERELEASE_ARTIFACT: API test on wp-env with WordPress beta or RC (run ${{ github.run_number }})-${{ matrix.shard.number }}
+            API_WP_PRERELEASE_ARTIFACT: API test on wp-env with WordPress beta or RC (run ${{ github.run_number }})
 
         steps:
             - uses: actions/checkout@v3
@@ -654,6 +654,9 @@ jobs:
             - name: Upload Allure artifacts to bucket
               if: steps.generate_e2e_report.conclusion == 'success'
               uses: ./.github/actions/tests/upload-allure-files-to-bucket
+              env:
+                  ALLURE_RESULTS_DIR: ${{ env.E2E_ALLURE_RESULTS_DIR }}
+                  ALLURE_REPORT_DIR: ${{ env.E2E_ALLURE_REPORT_DIR }}
               with:
                   aws-access-key-id: ${{ secrets.REPORTS_AWS_ACCESS_KEY_ID }}
                   aws-region: ${{ secrets.REPORTS_AWS_REGION }}
