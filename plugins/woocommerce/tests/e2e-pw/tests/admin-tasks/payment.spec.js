@@ -33,6 +33,38 @@ test.describe( 'Payment setup task', () => {
 	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
 		page,
 	} ) => {
+		// ensure store address is a non supported country
+		await api.post( 'settings/general/batch', {
+			update: [
+				{
+					id: 'woocommerce_store_address',
+					value: 'addr 1',
+				},
+				{
+					id: 'woocommerce_store_city',
+					value: 'San Francisco',
+				},
+				{
+					id: 'woocommerce_default_country',
+					// Morocco: Unsupported country:region
+					value: 'MA:maagd',
+				},
+				{
+					id: 'woocommerce_store_postcode',
+					value: '80000',
+				},
+			],
+		} );
+		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+		await page.locator( 'text=Get paid' ).click();
+		await expect(
+			page.locator( '.woocommerce-layout__header-wrapper > h1' )
+		).toHaveText( 'Get paid' );
+	} );
+
+	test( 'Can visit the WooPayments Connect page instead of setup task for supported countries', async ( {
+		page,
+	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await page.locator( 'text=Get paid' ).click();
 		await expect(
