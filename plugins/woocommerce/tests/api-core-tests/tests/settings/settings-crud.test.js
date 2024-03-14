@@ -225,9 +225,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'email_customer_invoice',
-						label: 'Customer invoice / Order details',
+						label: 'Order details',
 						description:
-							'Customer invoice emails can be sent to customers containing their order information and payment links.',
+							'Order detail emails can be sent to customers containing their order information and payment links.',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
