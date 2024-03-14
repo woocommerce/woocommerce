@@ -7,9 +7,17 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 themes_dir="$script_dir/../../themes"
 
 # Delete the child themes if they already exist.
-wp theme delete storefront-child
-wp theme delete twentytwentyfour-child
+wp theme delete storefront-child__block-notices-filter
+wp theme delete storefront-child__block-notices-template
+wp theme delete storefront-child__classic-notices-template
+wp theme delete twentytwentyfour-child__block-notices-filter
+wp theme delete twentytwentyfour-child__block-notices-template
+wp theme delete twentytwentyfour-child__classic-notices-template
 
 # Install the child themes.
-wp theme install "$themes_dir/storefront-child.zip"
-wp theme install "$themes_dir/twentytwentyfour-child.zip"
+wp theme install "$themes_dir/storefront-child__block-notices-filter.zip"
+wp theme install "$themes_dir/storefront-child__block-notices-template.zip"
+wp theme install "$themes_dir/storefront-child__classic-notices-template.zip"
+wp theme install "$themes_dir/twentytwentyfour-child__block-notices-filter.zip"
+wp theme install "$themes_dir/twentytwentyfour-child__block-notices-template.zip"
+wp theme install "$themes_dir/twentytwentyfour-child__classic-notices-template.zip"
