@@ -8,12 +8,20 @@ import { renderHook } from '@testing-library/react-hooks';
  */
 import productEntitySourceHandler from '..';
 
+let mockState;
+
 jest.mock( '@wordpress/core-data', () => ( {
-	useEntityProp: jest.fn(),
+	useEntityProp: jest.fn().mockImplementation( ( kind, name, key ) => {
+		return mockState?.[ key ] ? mockState[ key ] : [];
+	} ),
 } ) );
 
 describe( 'useSource', () => {
 	let blockInstance;
+
+	mockState = {
+		external_property_name: [ 'External source property Value' ],
+	};
 
 	beforeEach( () => {
 		blockInstance = {
@@ -48,6 +56,19 @@ describe( 'useSource', () => {
 
 		expect( result.error ).toEqual(
 			new Error( 'The "prop" argument is required.' )
+		);
+	} );
+
+	it( 'return the value of the product entity property', () => {
+		const { useSource } = productEntitySourceHandler;
+		const { result } = renderHook( () =>
+			useSource( blockInstance, {
+				prop: 'external_property_name',
+			} )
+		);
+
+		expect( result.current.value ).toEqual(
+			'External source property Value'
 		);
 	} );
 } );
