@@ -254,7 +254,7 @@
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
-						"client/**/*.{js,jsx,ts,tsx,scss}"
+						"client/**/*.{js,jsx,ts,tsx,scss,json}"
 					],
 					"cascade": "test:js"
 				}

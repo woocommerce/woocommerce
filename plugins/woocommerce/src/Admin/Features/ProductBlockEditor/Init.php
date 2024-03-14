@@ -393,7 +393,8 @@ class Init {
 					$hidden = get_user_meta( $object['id'], $attr, true );
 
 					if ( is_array( $hidden ) ) {
-						return $hidden;
+						// Ensures to always return a string array.
+						return array_values( $hidden );
 					}
 
 					return array( 'postcustom' );
