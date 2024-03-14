@@ -30,7 +30,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 
-test.describe( `${ blockData.name }`, () => {
+test.describe( blockData.name, () => {
 	test.beforeEach( async ( { requestUtils, admin, editorUtils, editor } ) => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 		await requestUtils.deleteAllTemplates( 'wp_template_part' );
@@ -62,9 +62,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editorUtils.saveTemplate();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const blockFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
@@ -77,7 +75,7 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should be enabled by default', async ( { pageObject } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			const zoomWhileHoveringSetting =
-				await pageObject.getZoomWhileHoveringSetting();
+				pageObject.getZoomWhileHoveringSetting();
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
@@ -90,27 +88,23 @@ test.describe( `${ blockData.name }`, () => {
 			await pageObject.toggleZoomWhileHoveringSetting( true );
 			await editorUtils.saveTemplate();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
 
-			// img[style] is the selector because the style attribute is Interactivity API.
 			const imgElement = blockFrontend.locator( 'img' ).first();
-			const style = await imgElement.evaluate( ( el ) => el.style );
-
-			await expect( style.transform ).toBe( 'scale(1)' );
-
-			await imgElement.hover();
-
-			const styleOnHover = await imgElement.evaluate(
-				( el ) => el.style
+			await expect( imgElement ).toHaveAttribute(
+				'style',
+				/transform: scale\(1\)/
 			);
 
-			await expect( styleOnHover.transform ).toBe( 'scale(1.3)' );
+			await imgElement.hover();
+			await expect( imgElement ).toHaveAttribute(
+				'style',
+				/transform: scale\(1\.3\)/
+			);
 		} );
 
 		test( 'should not work on frontend when is disabled', async ( {
@@ -120,33 +114,29 @@ test.describe( `${ blockData.name }`, () => {
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await pageObject.toggleZoomWhileHoveringSetting( false );
-			const buttonElement =
-				await pageObject.getZoomWhileHoveringSetting();
+			const buttonElement = pageObject.getZoomWhileHoveringSetting();
 
 			await expect( buttonElement ).not.toBeChecked();
 
 			await editorUtils.saveTemplate();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
 			} );
 
 			const imgElement = blockFrontend.locator( 'img' ).first();
-			const style = await imgElement.evaluate( ( el ) => el.style );
-
-			await expect( style.transform ).toBe( '' );
-
-			await imgElement.hover();
-
-			const styleOnHover = await imgElement.evaluate(
-				( el ) => el.style
+			await expect( imgElement ).not.toHaveAttribute(
+				'style',
+				/transform: scale\(1\)/
 			);
 
-			await expect( styleOnHover.transform ).toBe( '' );
+			await imgElement.hover();
+			await expect( imgElement ).not.toHaveAttribute(
+				'style',
+				/transform: scale\(1\.3\)/
+			);
 		} );
 	} );
 
@@ -158,28 +148,25 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductGalleryBlock( { cleanContent: false } );
 		await pageObject.addAddToCartWithOptionsBlock();
 
-		const block = await pageObject.getMainImageBlock( {
+		const mainImageBlock = await pageObject.getMainImageBlock( {
 			page: 'editor',
 		} );
-
-		await expect( block ).toBeVisible();
+		await expect( mainImageBlock ).toBeVisible();
 
 		await editorUtils.saveTemplate();
-
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
 		} );
-
 		const largeImageElement = largeImageBlockOnFrontend.locator(
 			'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
 		);
 
-		const imageSourceForLargeImageElement =
-			await largeImageElement.getAttribute( 'src' );
+		await expect( largeImageElement ).toHaveAttribute(
+			'src',
+			/hoodie-2-2/
+		);
 
 		const addToCartWithOptionsBlock =
 			await pageObject.getAddToCartWithOptionsBlock( {
@@ -193,21 +180,9 @@ test.describe( `${ blockData.name }`, () => {
 		await addToCartWithOptionsColorSelector.selectOption( 'Green' );
 		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
 
-		const largeImageElementAfterSelectingVariation =
-			largeImageBlockOnFrontend.locator(
-				'.wc-block-woocommerce-product-gallery-large-image__image--active-image-slide'
-			);
-
-		const imageSourceForLargeImageElementAfterSelectingVariation =
-			await largeImageElementAfterSelectingVariation.getAttribute(
-				'src'
-			);
-
-		expect( imageSourceForLargeImageElement ).not.toEqual(
-			imageSourceForLargeImageElementAfterSelectingVariation
+		await expect( largeImageElement ).toHaveAttribute(
+			'src',
+			/hoodie-green-1-2/
 		);
-		expect(
-			imageSourceForLargeImageElementAfterSelectingVariation
-		).toContain( 'hoodie-green-1' );
 	} );
 } );

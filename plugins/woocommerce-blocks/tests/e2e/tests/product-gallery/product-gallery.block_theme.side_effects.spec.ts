@@ -116,9 +116,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editorUtils.saveTemplate();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const visibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -145,12 +143,10 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editorUtils.saveTemplate();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			const scriptLoadedPromise =
+				waitForJavascriptFrontendFileIsLoaded( page );
+			await page.goto( blockData.productPage );
+			await scriptLoadedPromise;
 
 			const visibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {

@@ -86,7 +86,8 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 
-test.describe( `${ blockData.name }`, () => {
+// eslint-disable-next-line playwright/no-skipped-test
+test.describe.skip( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 		await requestUtils.deleteAllTemplates( 'wp_template_part' );
@@ -102,8 +103,7 @@ test.describe( `${ blockData.name }`, () => {
 		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 	} );
 
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'Renders Next/Previous Button block on the editor side', async ( {
+	test( 'Renders Next/Previous Button block on the editor side', async ( {
 		editor,
 		pageObject,
 	} ) => {
@@ -118,8 +118,7 @@ test.describe( `${ blockData.name }`, () => {
 		await expect( block ).toBeVisible();
 	} );
 
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'Renders Next/Previous Button block on the frontend side', async ( {
+	test( 'Renders Next/Previous Button block on the frontend side', async ( {
 		admin,
 		editorUtils,
 		editor,
@@ -147,8 +146,7 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( `${ blockData.name } Settings`, () => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Hide correctly the arrows', async ( {
+		test( 'Hide correctly the arrows', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -193,8 +191,7 @@ test.describe( `${ blockData.name }`, () => {
 			expect( rightArrow ).toBe( false );
 		} );
 
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Show button outside of the image', async ( {
+		test( 'Show button outside of the image', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -274,8 +271,7 @@ test.describe( `${ blockData.name }`, () => {
 			).toBeGreaterThan( frontendBoundingClientRect.gallery.right );
 		} );
 
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Show button inside of the image', async ( {
+		test( 'Show button inside of the image', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -355,8 +351,7 @@ test.describe( `${ blockData.name }`, () => {
 			);
 		} );
 
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Show buttons at the top of the image', async ( {
+		test( 'Show buttons at the top of the image', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -416,8 +411,7 @@ test.describe( `${ blockData.name }`, () => {
 			);
 		} );
 
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Show buttons at the middle of the image', async ( {
+		test( 'Show buttons at the middle of the image', async ( {
 			page,
 			editor,
 			editorUtils,
@@ -474,8 +468,7 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( frontendBlock ).toHaveCSS( 'align-items', 'center' );
 		} );
 
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( 'Show buttons at the bottom of the image by default', async ( {
+		test( 'Show buttons at the bottom of the image by default', async ( {
 			page,
 			editor,
 			editorUtils,

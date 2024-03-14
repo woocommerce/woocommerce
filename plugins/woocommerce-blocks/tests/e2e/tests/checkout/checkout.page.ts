@@ -279,10 +279,6 @@ export class CheckoutPage {
 			) )
 		) {
 			await shipping.click();
-			await this.page.waitForResponse( ( request ) => {
-				const url = request.url();
-				return url.includes( 'wc/store/v1/batch' );
-			} );
 			await this.page.waitForFunction( () => {
 				return ! window.wp.data
 					.select( 'wc/store/cart' )

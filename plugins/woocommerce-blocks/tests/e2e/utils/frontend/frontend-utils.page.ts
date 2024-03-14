@@ -27,57 +27,43 @@ export class FrontendUtils {
 	}
 
 	async addToCart( itemName = '' ) {
-		await this.page.waitForLoadState( 'domcontentloaded' );
+		let addToCartButton;
+
 		if ( itemName !== '' ) {
 			// We can't use `getByRole()` here because the Add to Cart button
 			// might be a button (in blocks) or a link (in the legacy template).
-			await this.page
-				.getByLabel( `Add to cart: “${ itemName }”` )
-				.click();
+			addToCartButton = this.page.getByLabel(
+				`Add to cart: “${ itemName }”`
+			);
 		} else {
-			await this.page.click( 'text=Add to cart' );
+			addToCartButton = this.page.getByText( 'Add to cart' ).first();
 		}
 
-		await this.page.waitForResponse( ( request ) => {
-			const url = request.url();
-			return url.includes( 'add_to_cart' ) || url.includes( 'batch' );
-		} );
+		await addToCartButton.click();
 	}
 
 	async goToCheckout() {
-		await this.page.goto( '/checkout', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/checkout' );
 	}
 
 	async goToCart() {
-		await this.page.goto( '/cart', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart' );
 	}
 
 	async goToCartShortcode() {
-		await this.page.goto( '/cart-shortcode', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/cart-shortcode' );
 	}
 
 	async goToMiniCart() {
-		await this.page.goto( '/mini-cart', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/mini-cart' );
 	}
 
 	async goToShop() {
-		await this.page.goto( '/shop', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/shop' );
 	}
 
 	async logout() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'domcontentloaded',
-		} );
+		await this.page.goto( '/my-account' );
 		await this.page.click(
 			'.woocommerce-MyAccount-navigation-link--customer-logout a'
 		);
@@ -200,8 +186,6 @@ export class FrontendUtils {
 	}
 
 	async gotoMyAccount() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'commit',
-		} );
+		await this.page.goto( '/my-account' );
 	}
 }

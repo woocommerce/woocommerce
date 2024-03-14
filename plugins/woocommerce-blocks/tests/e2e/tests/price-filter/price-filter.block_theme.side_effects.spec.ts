@@ -1,17 +1,20 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
+import type { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BASE_URL, cli } from '@woocommerce/e2e-utils';
 
-const blockData: BlockData< {
+type PriceFilterBlockData = BlockData & {
 	urlSearchParamWhenFilterIsApplied: string;
 	endpointAPI: string;
 	placeholderUrl: string;
-} > = {
+};
+
+const blockData: PriceFilterBlockData = {
 	name: 'woocommerce/price-filter',
 	mainClass: '.wc-block-price-filter',
+	slug: '',
 	selectors: {
 		frontend: {},
 		editor: {},
@@ -23,7 +26,7 @@ const blockData: BlockData< {
 
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 		await editor.insertBlock( { name: 'woocommerce/all-products' } );
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -43,16 +46,14 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			'woocommerce/all-products'
 		);
 
-		const img = allProductsBlock.locator( 'img' ).first();
-
-		await expect( img ).not.toHaveAttribute(
+		const productImage = allProductsBlock.locator( 'img' ).first();
+		await expect( productImage ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
-		const products = await allProductsBlock.getByRole( 'listitem' ).all();
-
-		expect( products ).toHaveLength( 9 );
+		const allProducts = allProductsBlock.getByRole( 'listitem' );
+		await expect( allProducts ).toHaveCount( 9 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
@@ -88,16 +89,15 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			'woocommerce/all-products'
 		);
 
-		const img = allProductsBlock.locator( 'img' ).first();
-
-		await expect( img ).not.toHaveAttribute(
+		const productImage = allProductsBlock.locator( 'img' ).first();
+		await expect( productImage ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
 		const allProducts = allProductsBlock.getByRole( 'listitem' );
-
 		await expect( allProducts ).toHaveCount( 1 );
+
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
@@ -110,6 +110,13 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 	} );
+
+	test.afterAll( async () => {
+		await cli(
+			'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
+		);
+	} );
+
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
@@ -126,7 +133,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop`, { waitUntil: 'commit' } );
+		await page.goto( '/shop' );
 	} );
 
 	test.afterEach( async ( { templateApiUtils } ) => {
@@ -140,14 +147,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
-		legacyTemplate.waitFor();
-
-		const products = await legacyTemplate
+		const allProducts = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 16 );
+		await expect( allProducts ).toHaveCount( 16 );
 	} );
 
 	// eslint-disable-next-line playwright/no-skipped-test
@@ -159,30 +163,18 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			name: 'Filter products by maximum price',
 		} );
 
-		await frontendUtils.selectTextInput( maxPriceInput );
+		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$10' );
 		await maxPriceInput.press( 'Tab' );
-		await page.waitForURL( ( url ) =>
-			url
-				.toString()
-				.includes( blockData.urlSearchParamWhenFilterIsApplied )
-		);
 
 		const legacyTemplate = await frontendUtils.getBlockByName(
 			'woocommerce/legacy-template'
 		);
 
-		const products = await legacyTemplate
+		const allProducts = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 1 );
-	} );
-
-	test.afterAll( async () => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
-		);
+		await expect( allProducts ).toHaveCount( 1 );
 	} );
 } );

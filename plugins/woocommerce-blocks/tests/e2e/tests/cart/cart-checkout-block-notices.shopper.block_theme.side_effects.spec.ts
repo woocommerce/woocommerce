@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
+import { expect, test } from '@woocommerce/e2e-playwright-utils';
 import {
 	cli,
 	BLOCK_THEME_SLUG,
@@ -10,17 +10,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CheckoutPage } from '../checkout/checkout.page';
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-
-const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
-		const pageObject = new CheckoutPage( {
-			page,
-		} );
-		await use( pageObject );
-	},
-} );
 
 test.describe( 'Shopper → Block Notice Templates', () => {
 	test.beforeEach( async ( { wpCliUtils, frontendUtils } ) => {

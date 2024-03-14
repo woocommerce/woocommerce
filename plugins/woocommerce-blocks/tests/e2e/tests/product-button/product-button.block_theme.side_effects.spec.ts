@@ -46,24 +46,17 @@ test.describe( `${ blockData.name } Block`, () => {
 			.locator( '[data-product_id]' )
 			.getAttribute( 'data-product_id' );
 
-		const productName = await page
-			.locator( `li.post-${ productId } h3` )
-			.textContent();
+		const productTitle = page.locator( `li.post-${ productId } h3` );
 
-		// We want to fail the test if the product name is not found.
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( ! productName ) {
-			return test.fail( ! productName, 'Product name was not found' );
-		}
+		await expect( productTitle ).not.toBeEmpty();
 
-		await block.locator( 'loading' ).waitFor( {
-			state: 'detached',
-		} );
 		await block.click();
+
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
 		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 
 		await frontendUtils.goToCheckout();
+		const productName = ( await productTitle.textContent() ) as string;
 		const productElement = page.getByText( productName, {
 			exact: true,
 		} );
@@ -86,15 +79,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		const productId = await button.getAttribute( 'data-product_id' );
 
-		const productName = await page
-			.locator( `li.post-${ productId } h3` )
-			.textContent();
+		const productTitle = page.locator( `li.post-${ productId } h3` );
 
-		// We want to fail the test if the product name is not found.
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( ! productName ) {
-			return test.fail( ! productName, 'Product name was not found' );
-		}
+		await expect( productTitle ).not.toBeEmpty();
 
 		await block.click();
 
@@ -104,6 +91,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await frontendUtils.goToCheckout();
 
+		const productName = ( await productTitle.textContent() ) as string;
 		const productElement = page.getByText( productName, {
 			exact: true,
 		} );

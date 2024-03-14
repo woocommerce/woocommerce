@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { adminFile, guestFile } from '@woocommerce/e2e-utils';
+import { guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -20,8 +20,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Shipping', () => {
-	test.use( { storageState: adminFile } );
-
 	test( 'Merchant can enable shipping calculator and hide shipping costs before address is entered', async ( {
 		page,
 		shippingUtils,

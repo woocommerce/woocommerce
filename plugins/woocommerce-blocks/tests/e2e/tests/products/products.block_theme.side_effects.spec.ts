@@ -152,16 +152,15 @@ for ( const {
 				parentClientId
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
+			const templatesResponsePromise = page.waitForResponse(
+				( response ) =>
 					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			);
 
-			await page.goto( frontendPage, {
-				waitUntil: 'load',
-			} );
+			await editor.saveSiteEditorEntities();
+			await templatesResponsePromise;
+
+			await page.goto( frontendPage );
 
 			const classicProducts = await getProductsNameFromClassicTemplate(
 				page
