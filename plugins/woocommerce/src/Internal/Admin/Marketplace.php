@@ -83,12 +83,16 @@ class Marketplace {
 	private static function get_marketplace_update_count_html() {
 		$count = WC_Helper_Updater::get_updates_count();
 		if ( empty( $count ) ) {
-			return '';
+			$count = 0;
 		}
 
 		$count = intval( $count );
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			$count ++;
+		}
+
+		if ( 0 === $count ) {
+			return '';
 		}
 
 		return sprintf( ' <span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
