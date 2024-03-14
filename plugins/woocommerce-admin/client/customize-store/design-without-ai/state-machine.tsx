@@ -32,7 +32,6 @@ export const hasStepInUrl = (
 export const hasInstallFontsInUrl = () => {
 	const { path = '' } = getQuery() as { path: string };
 	const pathFragments = path.split( '/' );
-	debugger;
 	return (
 		pathFragments[ 2 ] === 'design' &&
 		pathFragments[ 3 ] === 'install-fonts'
