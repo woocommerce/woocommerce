@@ -20,11 +20,11 @@ export function useCustomFields<
 		'meta_data'
 	);
 
-	const { customFields, internalMetas } = useMemo(
+	const { customFields, otherMetas } = useMemo(
 		function extractCustomFieldsFromMetas() {
 			return metas.reduce( disjoinMetas< T >, {
 				customFields: [],
-				internalMetas: [],
+				otherMetas: [],
 			} );
 		},
 		[ metas ]
@@ -34,7 +34,7 @@ export function useCustomFields<
 		const newValue =
 			typeof value === 'function' ? value( customFields ) : value;
 
-		setMetas( [ ...internalMetas, ...newValue ] );
+		setMetas( [ ...otherMetas, ...newValue ] );
 	}
 
 	function addCustomFields( value: T[] ) {
@@ -52,10 +52,36 @@ export function useCustomFields<
 		);
 	}
 
+	function removeCustomField( customField: T ) {
+		setCustomFields( ( current ) => {
+			// If the id is undefined then it is a local copy.
+			if ( customField.id === undefined ) {
+				return current.filter( function isNotEquals( field ) {
+					return ! (
+						field.key === customField.key &&
+						field.value === customField.value
+					);
+				} );
+			}
+
+			return current.map( ( field ) => {
+				if ( field.id === customField.id ) {
+					return {
+						...field,
+						value: null,
+					};
+				}
+
+				return field;
+			} );
+		} );
+	}
+
 	return {
 		customFields,
 		addCustomFields,
 		setCustomFields,
 		updateCustomField,
+		removeCustomField,
 	};
 }
