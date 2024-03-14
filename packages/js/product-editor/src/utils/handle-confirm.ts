@@ -15,12 +15,10 @@ export async function handleConfirm( {
 	onCancel,
 }: HandleConfirmProps ) {
 	// eslint-disable-next-line no-alert
-	const value = window.confirm( message );
-
-	if ( value === null ) {
-		onCancel?.();
+	if ( window.confirm(message) ) {
+		onOk?.();
 		return;
 	}
 
-	onOk();
+	onCancel?.();
 }
