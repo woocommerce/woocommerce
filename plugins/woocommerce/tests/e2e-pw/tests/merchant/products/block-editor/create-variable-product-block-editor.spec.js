@@ -3,6 +3,9 @@ const { test } = require( '../../../../fixtures/block-editor-fixtures' );
 const { expect } = require( '@playwright/test' );
 
 const { clickOnTab } = require( '../../../../utils/simple-products' );
+const {
+	disableVariableProductBlockTour,
+} = require( '../../../../utils/product-block-editor' );
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product&tab=variations';
@@ -30,6 +33,8 @@ test.describe( 'Variations tab', () => {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
+			await disableVariableProductBlockTour( { page } );
+
 			await clickOnTab( 'General', page );
 			await page
 				.getByPlaceholder( 'e.g. 12 oz Coffee Mug' )
@@ -74,7 +79,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 
 			await expect(
-				await page.getByText( attributesData.options[ 0 ] ).first()
+				page.getByText( attributesData.options[ 0 ] ).first()
 			).toBeVisible();
 
 			await page
@@ -88,7 +93,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 
 			await expect(
-				await page.getByText( attributesData.options[ 1 ] ).first()
+				page.getByText( attributesData.options[ 1 ] ).first()
 			).toBeVisible();
 
 			await page
@@ -102,7 +107,7 @@ test.describe( 'Variations tab', () => {
 				.click();
 
 			await expect(
-				await page.getByText( attributesData.options[ 2 ] ).first()
+				page.getByText( attributesData.options[ 2 ] ).first()
 			).toBeVisible();
 
 			await page
@@ -111,19 +116,6 @@ test.describe( 'Variations tab', () => {
 					name: 'Add',
 				} )
 				.click();
-
-			try {
-				await page
-					.getByLabel( 'Close Tour' )
-					.click( { timeout: 3000 } );
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users/1?_locale=user' ) &&
-						response.status() === 200
-				);
-			} catch ( e ) {
-				console.log( 'Tour was not visible, skipping.' );
-			}
 
 			page.on( 'dialog', ( dialog ) => dialog.accept( '50' ) );
 			await page.locator( `text=Set prices` ).click( { timeout: 3000 } );
@@ -224,7 +216,7 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
-			const editedItem = await page
+			const editedItem = page
 				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first();
 
