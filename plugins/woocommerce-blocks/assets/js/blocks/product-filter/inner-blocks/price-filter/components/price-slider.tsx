@@ -34,7 +34,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="min"
 			type="text"
-			value={ minPrice }
+			value={ formattedMinPrice }
 			onChange={ onChange }
 		/>
 	) : (
@@ -45,7 +45,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="max"
 			type="text"
-			value={ maxPrice }
+			value={ formattedMaxPrice }
 			onChange={ onChange }
 		/>
 	) : (

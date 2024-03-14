@@ -164,11 +164,12 @@ final class ProductFilterPrice extends AbstractBlock {
 					class="min"
 					name="min"
 					type="text"
-					value="%d"
-					data-wc-bind--value="context.minPrice"
+					value="%s"
+					data-wc-bind--value="state.formattedMinPrice"
 					data-wc-on--change="actions.updateProducts"
+					pattern=""
 				/>',
-				esc_attr( $min_price )
+				wp_strip_all_tags( $formatted_min_price )
 			) : sprintf(
 				'<span data-wc-text="state.formattedMinPrice">%s</span>',
 				// Not escaped, as this is HTML.
@@ -181,11 +182,11 @@ final class ProductFilterPrice extends AbstractBlock {
 					class="max"
 					name="max"
 					type="text"
-					value="%d"
-					data-wc-bind--value="context.maxPrice"
+					value="%s"
+					data-wc-bind--value="state.formattedMaxPrice"
 					data-wc-on--change="actions.updateProducts"
 				/>',
-				esc_attr( $max_price )
+				wp_strip_all_tags( $formatted_max_price )
 			) : sprintf(
 				'<span data-wc-text="state.formattedMaxPrice">%s</span>',
 				// Not escaped, as this is HTML.

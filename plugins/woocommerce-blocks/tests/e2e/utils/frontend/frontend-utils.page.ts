@@ -48,6 +48,8 @@ export class FrontendUtils {
 		await this.page.goto( '/checkout', {
 			waitUntil: 'domcontentloaded',
 		} );
+
+		await this.page.waitForSelector( '#email' );
 	}
 
 	async goToCart() {
