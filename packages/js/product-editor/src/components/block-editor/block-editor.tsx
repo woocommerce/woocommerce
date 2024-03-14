@@ -126,7 +126,7 @@ export function BlockEditor( {
 		{ postType }
 	);
 
-	const { record: product, isResolving } = useEntityRecord(
+	const { record: product } = useEntityRecord(
 		'postType',
 		postType,
 		productId
@@ -134,7 +134,7 @@ export function BlockEditor( {
 
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		! isResolving ? product || null : undefined
+		product
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
