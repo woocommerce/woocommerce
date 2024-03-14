@@ -553,18 +553,21 @@ class PluginsHelper {
 			return;
 		}
 
-		$notice_string = "";
+		$notice_string = '';
 
 		if ( WC_Helper_Updater::get_updates_count() >= self::PLUGIN_UPGRADE_COUNT_EXTRA_NOTICE_THRESHOLD ) {
 			$notice_string .= __( 'Your store might be at risk as you are running old versions of Woo plugins.', 'woocommerce' );
-			$notice_string .= " ";
+			$notice_string .= ' ';
 		}
 
-		$connect_page_url = add_query_arg( array(
-			'page' => 'wc-admin',
-			'tab'  => 'my-subscriptions',
-			'path' => urlencode( '/extensions' ),
-		), admin_url( 'admin.php' ) );
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
 
 		$notice_string .= sprintf(
 			/* translators: %s: Connect page URL */
@@ -572,9 +575,8 @@ class PluginsHelper {
 			$connect_page_url
 		);
 
-		echo
-			'<div class="notice notice-error is-dismissible">
-	    		<p class="widefat">' . $notice_string . '</p>
+		echo '<div class="notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $notice_string ) . '</p>
 	    	</div>';
 	}
 
