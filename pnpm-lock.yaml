@@ -3894,8 +3894,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       classnames:
-        specifier: 2.3.1
-        version: 2.3.1
+        specifier: ^2.3.2
+        version: 2.3.2
       compare-versions:
         specifier: 4.1.3
         version: 4.1.3
@@ -28280,10 +28280,6 @@ packages:
       define-property: 0.2.5
       isobject: 3.0.1
       static-extend: 0.1.2
-
-  /classnames@2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
-    dev: false
 
   /classnames@2.3.2:
     resolution: {integrity: sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==}
