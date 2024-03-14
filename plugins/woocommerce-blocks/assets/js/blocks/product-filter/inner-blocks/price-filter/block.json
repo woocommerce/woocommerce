@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"name": "woocommerce/product-filter-price",
 	"version": "1.0.0",
-	"title": "Product Filter: Price",
+	"title": "Product Filter: Price (Beta)",
 	"description": "Enable customers to filter the product collection by choosing a price range.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],

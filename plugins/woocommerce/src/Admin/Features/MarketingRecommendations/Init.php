@@ -2,13 +2,15 @@
 
 namespace Automattic\WooCommerce\Admin\Features\MarketingRecommendations;
 
+use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Marketing Recommendations engine.
  * This goes through the specs and gets marketing recommendations.
  */
-class Init {
+class Init extends RemoteSpecsEngine {
 	/**
 	 * Slug of the category specifying marketing extensions on the Woo.com store.
 	 *
@@ -54,6 +56,29 @@ class Init {
 		return $specs;
 	}
 
+	/**
+	 * Process specs.
+	 *
+	 * @param array|null $specs Marketing recommendations spec array.
+	 * @return array
+	 */
+	protected static function evaluate_specs( array $specs = null ) {
+		$suggestions = array();
+		$errors      = array();
+
+		foreach ( $specs as $spec ) {
+			try {
+				$suggestions[] = self::object_to_array( $spec );
+			} catch ( \Throwable $e ) {
+				$errors[] = $e;
+			}
+		}
+
+		return array(
+			'suggestions' => $suggestions,
+			'errors'      => $errors,
+		);
+	}
 
 	/**
 	 * Load recommended plugins from Woo.com
@@ -61,14 +86,30 @@ class Init {
 	 * @return array
 	 */
 	public static function get_recommended_plugins(): array {
-		$specs  = self::get_specs();
-		$result = array();
+		$specs   = self::get_specs();
+		$results = self::evaluate_specs( $specs );
 
-		foreach ( $specs as $spec ) {
-			$result[] = self::object_to_array( $spec );
+		$specs_to_return = $results['suggestions'];
+		$specs_to_save   = null;
+
+		if ( empty( $specs_to_return ) ) {
+			// When suggestions is empty, replace it with defaults and save for 3 hours.
+			$specs_to_save   = DefaultMarketingRecommendations::get_all();
+			$specs_to_return = self::evaluate_specs( $specs_to_save )['suggestions'];
+		} elseif ( count( $results['errors'] ) > 0 ) {
+			// When suggestions is not empty but has errors, save it for 3 hours.
+			$specs_to_save = $specs;
 		}
 
-		return $result;
+		if ( $specs_to_save ) {
+			MarketingRecommendationsDataSourcePoller::get_instance()->set_specs_transient( $specs_to_save, 3 * HOUR_IN_SECONDS );
+		}
+		$errors = $results['errors'];
+		if ( ! empty( $errors ) ) {
+			self::log_errors( $errors );
+		}
+
+		return $specs_to_return;
 	}
 
 	/**
@@ -139,16 +180,22 @@ class Init {
 	 * This is used to convert the specs to an array so that they can be returned by the API.
 	 *
 	 * @param mixed $obj Object to convert.
+	 * @param array &$visited Reference to an array keeping track of all seen objects to detect circular references.
 	 * @return array
 	 */
-	protected static function object_to_array( $obj ) {
+	public static function object_to_array( $obj, &$visited = array() ) {
 		if ( is_object( $obj ) ) {
-			$obj = (array) $obj;
+			if ( in_array( $obj, $visited, true ) ) {
+				// Circular reference detected.
+				return null;
+			}
+			$visited[] = $obj;
+			$obj       = (array) $obj;
 		}
 		if ( is_array( $obj ) ) {
 			$new = array();
 			foreach ( $obj as $key => $val ) {
-				$new[ $key ] = self::object_to_array( $val );
+				$new[ $key ] = self::object_to_array( $val, $visited );
 			}
 		} else {
 			$new = $obj;

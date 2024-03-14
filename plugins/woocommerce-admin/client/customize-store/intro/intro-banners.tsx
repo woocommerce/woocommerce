@@ -2,20 +2,24 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
+import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -215,27 +219,48 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
-export const NoAIBanner = ( {
-	sendEvent,
-}: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
-} ) => {
+export const NoAIBanner = () => {
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/design',
+	} );
+
 	return (
-		<BaseIntroBanner
-			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
-			bannerText={ __(
-				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
-				'woocommerce'
+		<>
+			<BaseIntroBanner
+				bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+				bannerText={ __(
+					'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+					'woocommerce'
+				) }
+				bannerClass="no-ai-banner"
+				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+				bannerButtonOnClick={ () => {
+					if ( ! isDefaultTheme ) {
+						setIsModalOpen( true );
+					} else {
+						window.location.href = customizeStoreDesignUrl;
+					}
+				} }
+				showAIDisclaimer={ false }
+			/>
+			{ isModalOpen && (
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+				/>
 			) }
-			bannerClass="no-ai-banner"
-			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
-			bannerButtonOnClick={ () => {
-				sendEvent( {
-					type: 'DESIGN_WITHOUT_AI',
-				} );
-			} }
-			showAIDisclaimer={ false }
-		/>
+		</>
 	);
 };
 

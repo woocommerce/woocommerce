@@ -227,7 +227,7 @@
 	}
 
 	.woocommerce-task-header__contents-container {
-		padding: 20px 24px;
+		padding: 24px 40px 24px 24px;
 		position: relative;
 		flex: 1;
 		overflow: hidden;
@@ -271,13 +271,27 @@
 		}
 
 		max-width: 70%;
+
+		h1 {
+			color: $gray-900;
+			font-size: 1.25rem;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 28px; /* 140% */
+			padding: 0;
+		}
+
 		p,
 		span {
 			color: $gray-700;
+			font-size: 0.8125rem;
+			font-style: normal;
+			font-weight: 400;
+			line-height: 16px; /* 123.077% */
 		}
 
 		p:first-of-type {
-			margin-top: $gap-smallest;
+			margin-top: $gap-smaller;
 		}
 
 		// This is required in order to have svg image as background.

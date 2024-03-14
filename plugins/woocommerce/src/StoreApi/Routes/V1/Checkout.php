@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
-use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
 use Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException;
@@ -10,9 +9,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
-use Automattic\WooCommerce\StoreApi\SchemaController;
-use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
-use Automattic\WooCommerce\Blocks\Package;
 
 /**
  * Checkout class.
@@ -419,9 +415,10 @@ class Checkout extends AbstractCartRoute {
 
 		// Billing address is a required field.
 		foreach ( $request['billing_address'] as $key => $value ) {
-			if ( is_callable( [ $customer, "set_billing_$key" ] ) ) {
-				$customer->{"set_billing_$key"}( $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+			$callback = "set_billing_$key";
+			if ( is_callable( [ $customer, $callback ] ) ) {
+				$customer->$callback( $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
 				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
 			}
 		}
@@ -430,12 +427,22 @@ class Checkout extends AbstractCartRoute {
 		$shipping_address_values = $request['shipping_address'] ?? $request['billing_address'];
 
 		foreach ( $shipping_address_values as $key => $value ) {
-			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
-				$customer->{"set_shipping_$key"}( $value );
-			} elseif ( 'phone' === $key ) {
-				$customer->update_meta_data( 'shipping_phone', $value );
-			} elseif ( $this->additional_fields_controller->is_field( $key, 'address' ) ) {
+			$callback = "set_shipping_$key";
+			if ( is_callable( [ $customer, $callback ] ) ) {
+				$customer->$callback( $value );
+			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
 				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
+			}
+		}
+
+		// Persist contact fields to session.
+		$contact_fields = $this->additional_fields_controller->get_contact_fields_keys();
+
+		if ( ! empty( $contact_fields ) ) {
+			foreach ( $contact_fields as $key ) {
+				if ( isset( $request['additional_fields'], $request['additional_fields'][ $key ] ) ) {
+					$this->additional_fields_controller->persist_field_for_customer( $key, $request['additional_fields'][ $key ], $customer );
+				}
 			}
 		}
 

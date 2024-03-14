@@ -28,6 +28,7 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-radio-field' ), 'Radio field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-pricing-field' ), 'Pricing field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-section' ), 'Section component not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-subsection' ), 'Subsection component not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-tab' ), 'Tab component not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-toggle-field' ), 'Toggle field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-taxonomy-field' ), 'Taxonomy field not registered.' );
@@ -42,6 +43,8 @@ class BlockRegistryTest extends WC_Unit_Test_Case {
 		$block_registry = BlockRegistry::get_instance();
 
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-catalog-visibility-field' ), 'Catalog visibility field not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-custom-fields' ), 'Custom fields not registered.' );
+		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-custom-fields-toggle-field' ), 'Custom fields toggle field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-description-field' ), 'Description field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-downloads-field' ), 'Downloads field not registered.' );
 		$this->assertTrue( $block_registry->is_registered( 'woocommerce/product-images-field' ), 'Images field not registered.' );

@@ -100,7 +100,7 @@ This selector will return the state from the collections store.
 
 #### _Returns_ <!-- omit in toc -->
 
--   `object`: The state from the collections storew ith the following properties:
+-   `object`: The state from the collections store with the following properties:
    	- _namespace_ `string`: The route namespace for the collection, eg. `/wc/blocks`.
     - _resourceName_ `string`: The resource name for the collection, eg. `products/attributes`.
     - _query_ `object`: The query arguments for the collection, eg. `{ order: 'ASC', sortBy: Price }`.

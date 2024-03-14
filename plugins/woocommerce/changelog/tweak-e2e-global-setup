@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Streamline and improve execution time of the `woocommerce-blocks` global E2E setup.

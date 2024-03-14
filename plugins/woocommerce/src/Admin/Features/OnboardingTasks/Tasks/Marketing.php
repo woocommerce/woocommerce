@@ -11,6 +11,13 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFre
  */
 class Marketing extends Task {
 	/**
+	 * Used to cache is_complete() method result.
+	 *
+	 * @var null
+	 */
+	private $is_complete_result = null;
+
+	/**
 	 * ID.
 	 *
 	 * @return string
@@ -61,7 +68,11 @@ class Marketing extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return self::has_installed_extensions();
+		if ( null === $this->is_complete_result ) {
+			$this->is_complete_result = self::has_installed_extensions();
+		}
+
+		return $this->is_complete_result;
 	}
 
 	/**

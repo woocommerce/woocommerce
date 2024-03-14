@@ -409,7 +409,7 @@ class WC_Helper {
 		}
 
 		$filters = array_fill_keys( array_keys( self::get_filters() ), 0 );
-		if ( empty( $subscriptions ) ) {
+		if ( ! is_array( $subscriptions ) || empty( $subscriptions ) ) {
 			return array();
 		}
 
@@ -1237,15 +1237,15 @@ class WC_Helper {
 	 * Get a subscriptions install URL.
 	 *
 	 * @param string $product_key Subscription product key.
-	 * @param int    $product_id Subscription product id.
+	 * @param string $product_slug Subscription product slug.
 	 * @return string
 	 */
-	public static function get_subscription_install_url( $product_key, $product_id ) {
+	public static function get_subscription_install_url( $product_key, $product_slug ) {
 		$install_url = add_query_arg(
 			array(
 				'product-key' => $product_key,
 			),
-			self::get_install_base_url() . "{$product_id}/"
+			self::get_install_base_url() . "{$product_slug}/"
 		);
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
@@ -1489,7 +1489,7 @@ class WC_Helper {
 				if ( is_readable( $txt ) ) {
 					$txt = file_get_contents( $txt );
 					$txt = preg_split( '#\s#', $txt );
-					if ( count( $txt ) >= 2 ) {
+					if ( is_array( $txt ) && count( $txt ) >= 2 ) {
 						$header = sprintf( '%d:%s', $txt[0], $txt[1] );
 					}
 				}

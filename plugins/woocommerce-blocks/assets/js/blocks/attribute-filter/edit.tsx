@@ -231,12 +231,12 @@ const Edit = ( {
 							className="wc-block-attribute-filter__conditions-toggle"
 						>
 							<ToggleGroupControlOption
-								value="and"
-								label={ __( 'All', 'woocommerce' ) }
-							/>
-							<ToggleGroupControlOption
 								value="or"
 								label={ __( 'Any', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="and"
+								label={ __( 'All', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }

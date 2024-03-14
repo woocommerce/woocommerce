@@ -26,11 +26,7 @@ const TotalsItemValue = ( {
 	currency,
 }: Partial< TotalsItemProps > ): ReactElement | null => {
 	if ( isValidElement( value ) ) {
-		return (
-			<div className="wc-block-components-totals-item__value">
-				{ value }
-			</div>
-		);
+		return <>{ value }</>;
 	}
 
 	return Number.isFinite( value ) ? (

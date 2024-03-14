@@ -355,7 +355,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				),
 			)
 		);
-		$product_inventory_inner_section = $product_inventory_section->add_section(
+		$product_inventory_inner_section = $product_inventory_section->add_subsection(
 			array(
 				'id'    => 'product-variation-inventory-inner-section',
 				'order' => 10,

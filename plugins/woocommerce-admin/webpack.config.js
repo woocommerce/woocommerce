@@ -101,7 +101,7 @@ const webpackConfig = {
 				? `wp-admin-scripts/[name]${ outputSuffix }.js`
 				: `[name]/index${ outputSuffix }.js`;
 		},
-		chunkFilename: `chunks/[name]${ outputSuffix }.js`,
+		chunkFilename: `chunks/[name]${ outputSuffix }.js?ver=[contenthash]`,
 		path: path.join( __dirname, '/build' ),
 		library: {
 			// Expose the exports of entry points so we can consume the libraries in window.wc.[modulename] with WooCommerceDependencyExtractionWebpackPlugin.
@@ -200,7 +200,8 @@ const webpackConfig = {
 		// The package build process doesn't handle extracting CSS from JS files, so we copy them separately.
 		new CopyWebpackPlugin( {
 			patterns: wcAdminPackages.map( ( packageName ) => ( {
-				from: `../../packages/js/${ packageName }/build-style/*.css`,
+				// Copy css and style.asset.php files.
+				from: `../../packages/js/${ packageName }/build-style/*.{css,php}`,
 				to: `./${ packageName }/[name][ext]`,
 				noErrorOnMissing: true,
 				// Overwrites files already in compilation.assets to ensure we use the assets from the build-style.

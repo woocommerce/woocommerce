@@ -69,7 +69,7 @@ export const fetchActiveThemeHasMods = async () => {
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
 
-	return activeThemeHasMods;
+	return { activeThemeHasMods };
 };
 
 export const fetchIntroData = async () => {
@@ -115,7 +115,7 @@ export const fetchIntroData = async () => {
 const fetchIsFontLibraryAvailable = async () => {
 	try {
 		await apiFetch( {
-			path: '/wp/v2/font-collections',
+			path: '/wp/v2/font-collections?_fields=slug',
 			method: 'GET',
 		} );
 
@@ -139,13 +139,6 @@ export const setFlags = async () => {
 				window.__wcCustomizeStore = {
 					...window.__wcCustomizeStore,
 					isFontLibraryAvailable,
-				};
-			} )(),
-			ACTIVE_THEME_HAS_MODS: ( async () => {
-				const activeThemeHasMods = await fetchActiveThemeHasMods();
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					activeThemeHasMods,
 				};
 			} )(),
 		};

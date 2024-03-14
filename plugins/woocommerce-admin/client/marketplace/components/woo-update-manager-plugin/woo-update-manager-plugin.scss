@@ -31,6 +31,7 @@
 			align-items: center;
 			gap: $grid-unit-15;
 			padding: 0px;
+			margin-left: 12px;
 		}
 
 		.components-notice__buttons {
@@ -53,5 +54,14 @@
 .woocommerce-marketplace__discover {
 	.woocommerce-marketplace__woo-update-manager-plugin__notices {
 		margin-bottom: 0px;
+	}
+}
+
+.woocommerce-marketplace__header-account-modal {
+	.components-button {
+		&.is-link {
+			text-decoration: none;
+			padding: 6px 12px;
+		}
 	}
 }

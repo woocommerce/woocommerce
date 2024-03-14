@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
 import {
 	PanelBody,
 	ToggleControl,
@@ -19,14 +18,12 @@ import {
  * Internal dependencies
  */
 import { AttributeSelectControls } from './attribute-select-controls';
-import { BlockAttributes } from '../types';
+import { EditProps } from '../types';
 
-export const Inspector = ( {
-	attributes,
-	setAttributes,
-}: BlockEditProps< BlockAttributes > ) => {
+export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 	const { attributeId, showCounts, queryType, displayStyle, selectType } =
 		attributes;
+
 	return (
 		<InspectorControls key="inspector">
 			<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
@@ -120,7 +117,11 @@ export const Inspector = ( {
 				<AttributeSelectControls
 					isCompact={ true }
 					attributeId={ attributeId }
-					setAttributes={ setAttributes }
+					setAttributeId={ ( id: number ) => {
+						setAttributes( {
+							attributeId: id,
+						} );
+					} }
 				/>
 			</PanelBody>
 		</InspectorControls>

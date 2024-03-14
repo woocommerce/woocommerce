@@ -115,6 +115,7 @@ const Edit = ( props: EditProps ) => {
 	const [ isEditing, setIsEditing ] = useState(
 		! attributeId && ! isPreview
 	);
+
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		AttributeTerm[]
 	>( [] );

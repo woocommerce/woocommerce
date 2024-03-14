@@ -1,17 +1,9 @@
 /**
  * External dependencies
  */
-import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	BaseControl,
-	CheckboxControl,
-	// @ts-expect-error `__experimentalInputControl` does exist.
-	__experimentalInputControl as InputControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -19,6 +11,7 @@ import {
 
 import { RequirePasswordBlockAttributes } from './types';
 import { ProductEditorBlockEditProps } from '../../../types';
+import { RequirePassword } from '../../../components/require-password';
 
 export function Edit( {
 	attributes,
@@ -32,37 +25,13 @@ export function Edit( {
 		'post_password'
 	);
 
-	const [ checked, setChecked ] = useState( Boolean( postPassword ) );
-	const postPasswordId = useInstanceId(
-		BaseControl,
-		'post_password'
-	) as string;
-
 	return (
 		<div { ...blockProps }>
-			<CheckboxControl
+			<RequirePassword
 				label={ label }
-				checked={ checked }
-				className="wp-block-woocommerce-product-password-fields__field"
-				onChange={ ( selected ) => {
-					setChecked( selected );
-					if ( ! selected ) {
-						setPostPassword( '' );
-					}
-				} }
+				postPassword={ postPassword }
+				onInputChange={ setPostPassword }
 			/>
-			{ checked && (
-				<BaseControl
-					id={ postPasswordId }
-					label={ __( 'Password', 'woocommerce' ) }
-				>
-					<InputControl
-						id={ postPasswordId }
-						value={ postPassword }
-						onChange={ setPostPassword }
-					/>
-				</BaseControl>
-			) }
 		</div>
 	);
 }

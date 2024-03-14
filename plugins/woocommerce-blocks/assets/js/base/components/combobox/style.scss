@@ -10,6 +10,11 @@
 		@include reset-typography();
 		@include reset-box();
 
+		// Fixes width in the editor.
+		.components-flex {
+			width: 100%;
+		}
+
 		.components-base-control__field {
 			@include reset-box();
 			position: relative;
@@ -102,6 +107,12 @@
 					.has-dark-controls & {
 						background-color: $select-item-dark;
 					}
+				}
+
+				// Force empty rows to have a height.
+				&::after {
+					content: " ";
+					display: inline-block;
 				}
 
 				&:hover,
