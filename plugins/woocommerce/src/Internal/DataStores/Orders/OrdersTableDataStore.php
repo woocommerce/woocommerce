@@ -593,6 +593,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		// Attempt to create the backup post if missing.
 		if ( $order->get_id() && is_null( get_post( $order->get_id() ) ) ) {
 			if ( ! $this->maybe_create_backup_post( $order, 'backfill' ) ) {
+				// translators: %d is an order ID.
 				$this->error_logger->warning( sprintf( __( 'Unable to create backup post for order %d.', 'woocommerce' ), $order->get_id() ) );
 			}
 		}
