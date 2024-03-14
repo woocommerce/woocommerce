@@ -17,9 +17,9 @@ const lessonPLan = (
 		/>
 		<Path
 			fill="#1E1E1E"
-			fill-rule="evenodd"
+			fillRule="evenodd"
 			d="M6 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0-1a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm2 4a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm-1 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"
-			clip-rule="evenodd"
+			clipRule="evenodd"
 		/>
 		<Path fill="#1E1E1E" d="M11.111 17.75H20v-1.5h-8.889v1.5Z" />
 	</SVG>
