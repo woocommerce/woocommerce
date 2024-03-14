@@ -23,8 +23,8 @@
 		background-color: #e6f2e8;
 		color: #005c12;
 
-		&:before {
-			content: "";
+		&::before {
+			content: '';
 			width: 6px;
 			height: 6px;
 			border-radius: 3px;
