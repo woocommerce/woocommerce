@@ -51,6 +51,51 @@ const browserPopstateHandler =
 		};
 	};
 
+const updateGlobalStylesWithDefaultValues = async (
+	context: DesignWithoutAIStateMachineContext
+) => {
+	// We are using the first color palette and font pairing that are displayed on the color/font picker on the sidebar.
+	const colorPalette = COLOR_PALETTES[ 0 ];
+
+	const allowTracking =
+		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
+			'woocommerce_allow_tracking'
+		) ) === 'yes';
+
+	const fontPairing =
+		context.isFontLibraryAvailable && allowTracking
+			? FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ]
+			: FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING[ 0 ];
+
+	const globalStylesId = await getCurrentGlobalStylesId();
+	if ( ! globalStylesId ) {
+		return;
+	}
+
+	// @ts-expect-error No types for this exist yet.
+	const { saveEntityRecord } = dispatch( coreStore );
+
+	await saveEntityRecord(
+		'root',
+		'globalStyles',
+		{
+			id: globalStylesId,
+			styles: mergeBaseAndUserConfigs(
+				colorPalette?.styles || {},
+				fontPairing?.styles || {}
+			),
+			settings: mergeBaseAndUserConfigs(
+				colorPalette?.settings || {},
+				fontPairing?.settings || {}
+			),
+		},
+		{
+			throwOnError: true,
+		}
+	);
+};
+
+
 const installAndActivateTheme = async (
 	context: DesignWithoutAIStateMachineContext
 ) => {
@@ -179,7 +224,7 @@ const getActiveThemeWithRetries = async (): Promise< Theme[] | null > => {
 };
 
 const getCurrentGlobalStylesId = async (): Promise< number | null > => {
-	let activeThemes = await getActiveThemeWithRetries();
+	const activeThemes = await getActiveThemeWithRetries();
 	if ( ! activeThemes ) {
 		return null;
 	}
@@ -189,50 +234,6 @@ const getCurrentGlobalStylesId = async (): Promise< number | null > => {
 	const globalStylesObject = ( await apiFetch( { url } ) ) as { id: number };
 
 	return globalStylesObject.id;
-};
-
-const updateGlobalStylesWithDefaultValues = async (
-	context: DesignWithoutAIStateMachineContext
-) => {
-	// We are using the first color palette and font pairing that are displayed on the color/font picker on the sidebar.
-	const colorPalette = COLOR_PALETTES[ 0 ];
-
-	const allowTracking =
-		( await resolveSelect( OPTIONS_STORE_NAME ).getOption(
-			'woocommerce_allow_tracking'
-		) ) === 'yes';
-
-	const fontPairing =
-		context.isFontLibraryAvailable && allowTracking
-			? FONT_PAIRINGS_WHEN_AI_IS_OFFLINE[ 0 ]
-			: FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING[ 0 ];
-
-	const globalStylesId = await getCurrentGlobalStylesId();
-	if ( ! globalStylesId ) {
-		return;
-	}
-
-	// @ts-expect-error No types for this exist yet.
-	const { saveEntityRecord } = dispatch( coreStore );
-
-	await saveEntityRecord(
-		'root',
-		'globalStyles',
-		{
-			id: globalStylesId,
-			styles: mergeBaseAndUserConfigs(
-				colorPalette?.styles || {},
-				fontPairing?.styles || {}
-			),
-			settings: mergeBaseAndUserConfigs(
-				colorPalette?.settings || {},
-				fontPairing?.settings || {}
-			),
-		},
-		{
-			throwOnError: true,
-		}
-	);
 };
 
 export const services = {
