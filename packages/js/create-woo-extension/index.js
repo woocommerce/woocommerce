@@ -17,5 +17,13 @@ module.exports = {
 		customScripts: {
 			postinstall: 'composer install',
 		},
+		files: [
+			"README.md",
+			"block.json",
+			"*.php",
+			"vendor",
+			"includes",
+			"languages"
+		]
 	},
 };
