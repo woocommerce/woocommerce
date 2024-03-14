@@ -234,10 +234,6 @@ export const NoAIBanner = ( {
 	}, [] );
 
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
-	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
-		page: 'wc-admin',
-		path: '/customize-store/design',
-	} );
 
 	return (
 		<>
@@ -261,7 +257,7 @@ export const NoAIBanner = ( {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+					redirectToCYSFlow={ redirectToCYSFlow }
 				/>
 			) }
 		</>
