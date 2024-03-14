@@ -16,13 +16,13 @@ class Count implements TransformerInterface {
 	 *
 	 * @param array|Countable $value an array to count.
 	 * @param stdClass|null   $arguments arguments.
-	 * @param string|null     $default default value.
+	 * @param string|null     $default_value default value.
 	 *
 	 * @return number
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
+	public function transform( $value, stdClass $arguments = null, $default_value = null ) {
 		if ( ! is_array( $value ) && ! $value instanceof \Countable ) {
-			return $default;
+			return $default_value;
 		}
 
 		return count( $value );

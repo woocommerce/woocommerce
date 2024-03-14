@@ -16,13 +16,13 @@ class ArrayKeys implements TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments arguments.
-	 * @param string|null   $default default value.
+	 * @param string|null   $default_value default value.
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = array() ) {
+	public function transform( $value, stdClass $arguments = null, $default_value = array() ) {
 		if ( ! is_array( $value ) ) {
-			return $default;
+			return $default_value;
 		}
 
 		return array_keys( $value );

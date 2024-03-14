@@ -22,14 +22,14 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * @return bool The result of the operation.
 	 */
 	public function process( $rule, $stored_state ) {
-		$is_contains    = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
-		$default_value  = $is_contains ? array() : false;
-		$is_default_set = property_exists( $rule, 'default' );
-		$default        = $is_default_set ? $rule->default : $default_value;
-		$option_value   = $this->get_option_value( $rule, $default, $is_contains );
+		$is_contains                     = $rule->operation && strpos( $rule->operation, 'contains' ) !== false;
+		$value_when_default_not_provided = $is_contains ? array() : false;
+		$is_default_set                  = property_exists( $rule, 'default' );
+		$default_value                   = $is_default_set ? $rule->default : $value_when_default_not_provided;
+		$option_value                    = $this->get_option_value( $rule, $default_value, $is_contains );
 
 		if ( isset( $rule->transformers ) && is_array( $rule->transformers ) ) {
-			$option_value = TransformerService::apply( $option_value, $rule->transformers, $is_default_set, $default );
+			$option_value = TransformerService::apply( $option_value, $rule->transformers, $is_default_set, $default_value );
 		}
 
 		return ComparisonOperation::compare(
@@ -43,13 +43,13 @@ class OptionRuleProcessor implements RuleProcessorInterface {
 	 * Retrieves the option value and handles logging if necessary.
 	 *
 	 * @param object $rule         The specific rule being processed.
-	 * @param mixed  $default      The default value.
+	 * @param mixed  $default_value      The default value.
 	 * @param bool   $is_contains  Indicates whether the operation is "contains".
 	 *
 	 * @return mixed The option value.
 	 */
-	private function get_option_value( $rule, $default, $is_contains ) {
-		$option_value      = get_option( $rule->option_name, $default );
+	private function get_option_value( $rule, $default_value, $is_contains ) {
+		$option_value      = get_option( $rule->option_name, $default_value );
 		$is_contains_valid = $is_contains && ( is_array( $option_value ) || ( is_string( $option_value ) && is_string( $rule->value ) ) );
 
 		if ( $is_contains && ! $is_contains_valid ) {

@@ -37,12 +37,12 @@ class TransformerService {
 	 * @param mixed  $target_value a value to transform.
 	 * @param array  $transformer_configs transform configuration.
 	 * @param bool   $is_default_set flag on is default value set.
-	 * @param string $default default value.
+	 * @param string $default_value default value.
 	 *
 	 * @throws InvalidArgumentException Throws when one of the requried arguments is missing.
 	 * @return mixed|null
 	 */
-	public static function apply( $target_value, array $transformer_configs, $is_default_set, $default ) {
+	public static function apply( $target_value, array $transformer_configs, $is_default_set, $default_value ) {
 		foreach ( $transformer_configs as $transformer_config ) {
 			if ( ! isset( $transformer_config->use ) ) {
 				throw new InvalidArgumentException( 'Missing required config value: use' );
@@ -57,7 +57,7 @@ class TransformerService {
 				throw new InvalidArgumentException( "Unable to find a transformer by name: {$transformer_config->use}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			$target_value = $transformer->transform( $target_value, $transformer_config->arguments, $is_default_set ? $default : null );
+			$target_value = $transformer->transform( $target_value, $transformer_config->arguments, $is_default_set ? $default_value : null );
 
 			// Break early when there's no more value to traverse.
 			if ( null === $target_value ) {
@@ -68,13 +68,13 @@ class TransformerService {
 		if ( $is_default_set ) {
 			// Nulls always return the default value.
 			if ( null === $target_value ) {
-				return $default;
+				return $default_value;
 			}
 
 			// When type of the default value is different from the target value, return the default value
 			// to ensure type safety.
-			if ( gettype( $default ) !== gettype( $target_value ) ) {
-				return $default;
+			if ( gettype( $default_value ) !== gettype( $target_value ) ) {
+				return $default_value;
 			}
 		}
 

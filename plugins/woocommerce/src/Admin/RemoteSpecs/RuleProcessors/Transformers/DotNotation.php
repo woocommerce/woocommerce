@@ -18,48 +18,48 @@ class DotNotation implements TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments required argument 'path'.
-	 * @param string|null   $default default value.
+	 * @param string|null   $default_value default value.
 	 *
 	 * @throws InvalidArgumentException Throws when the required 'path' is missing.
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdclass $arguments = null, $default = null ) {
+	public function transform( $value, stdclass $arguments = null, $default_value = null ) {
 		if ( is_object( $value ) ) {
 			// if the value is an object, convert it to an array.
 			$value = json_decode( wp_json_encode( $value ), true );
 		}
 
-		return $this->get( $value, $arguments->path, $default );
+		return $this->get( $value, $arguments->path, $default_value );
 	}
 
 	/**
-	 * Find the given $path in $array by dot notation.
+	 * Find the given $path in $array_to_search by dot notation.
 	 *
-	 * @param array  $array an array to search in.
+	 * @param array  $array_to_search an array to search in.
 	 * @param string $path a path in the given array.
-	 * @param null   $default default value to return if $path was not found.
+	 * @param null   $default_value default value to return if $path was not found.
 	 *
 	 * @return mixed|null
 	 */
-	public function get( $array, $path, $default = null ) {
-		if ( ! is_array( $array ) ) {
-			return $default;
+	public function get( $array_to_search, $path, $default_value = null ) {
+		if ( ! is_array( $array_to_search ) ) {
+			return $default_value;
 		}
 
-		if ( isset( $array[ $path ] ) ) {
-			return $array[ $path ];
+		if ( isset( $array_to_search[ $path ] ) ) {
+			return $array_to_search[ $path ];
 		}
 
 		foreach ( explode( '.', $path ) as $segment ) {
-			if ( ! is_array( $array ) || ! array_key_exists( $segment, $array ) ) {
-				return $default;
+			if ( ! is_array( $array_to_search ) || ! array_key_exists( $segment, $array_to_search ) ) {
+				return $default_value;
 			}
 
-			$array = $array[ $segment ];
+			$array_to_search = $array_to_search[ $segment ];
 		}
 
-		return $array;
+		return $array_to_search;
 	}
 
 	/**

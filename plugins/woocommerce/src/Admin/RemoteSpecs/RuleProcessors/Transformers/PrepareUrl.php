@@ -16,23 +16,23 @@ class PrepareUrl implements TransformerInterface {
 	 *
 	 * @param string        $value a value to transform.
 	 * @param stdClass|null $arguments arguments.
-	 * @param string|null   $default default value.
+	 * @param string|null   $default_value default value.
 	 *
 	 * @return mixed|null
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
+	public function transform( $value, stdClass $arguments = null, $default_value = null ) {
 		if ( ! is_string( $value ) ) {
-			return $default;
+			return $default_value;
 		}
 
 		$url_parts = wp_parse_url( rtrim( $value, '/' ) );
 
 		if ( ! $url_parts ) {
-			return $default;
+			return $default_value;
 		}
 
 		if ( ! isset( $url_parts['host'] ) ) {
-			return $default;
+			return $default_value;
 		}
 
 		if ( isset( $url_parts['path'] ) ) {

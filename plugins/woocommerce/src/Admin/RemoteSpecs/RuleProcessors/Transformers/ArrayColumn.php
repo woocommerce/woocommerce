@@ -17,15 +17,15 @@ class ArrayColumn implements TransformerInterface {
 	 *
 	 * @param mixed         $value a value to transform.
 	 * @param stdClass|null $arguments required arguments 'key'.
-	 * @param string|null   $default default value.
+	 * @param string|null   $default_value default value.
 	 *
 	 * @throws InvalidArgumentException Throws when the required argument 'key' is missing.
 	 *
 	 * @return mixed
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = array() ) {
+	public function transform( $value, stdClass $arguments = null, $default_value = array() ) {
 		if ( ! is_array( $value ) ) {
-			return $default;
+			return $default_value;
 		}
 
 		return array_column( $value, $arguments->key );
