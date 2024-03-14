@@ -57,7 +57,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 								{ isComingSoon && (
 									<MenuItem
 										href={ getAdminLink(
-											// For now, waiting on the actual link. See https://github.com/woocommerce/team-ghidorah/issues/289.
+											// For now, waiting on the actual link.
 											'admin.php?page=wc-settings'
 										) }
 									>
