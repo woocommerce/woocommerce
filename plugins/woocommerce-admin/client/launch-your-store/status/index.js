@@ -3,6 +3,7 @@
  */
 import { Icon, moreVertical } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -28,10 +29,18 @@ export const LaunchYourStoreStatus = () => {
 					renderContent={ () => (
 						<>
 							<MenuGroup>
-								<MenuItem href="https://developer.wordpress.org/block-editor/reference-guides/components/button/">
+								<MenuItem
+									href={ getAdminLink(
+										'admin.php?page=wc-settings'
+									) }
+								>
 									Manage site visibility
 								</MenuItem>
-								<MenuItem href="https://developer.wordpress.org/block-editor/reference-guides/components/button/">
+								<MenuItem
+									href={ getAdminLink(
+										'admin.php?page=wc-settings' // For now, waiting on the actual link
+									) }
+								>
 									Customize "Coming soon" page
 								</MenuItem>
 							</MenuGroup>
