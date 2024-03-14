@@ -265,6 +265,15 @@
 		},
 		{
 			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^14.16.1"
+		},
+		{
+			"dependencies": [
 				"@types/node"
 			],
 			"packages": [
