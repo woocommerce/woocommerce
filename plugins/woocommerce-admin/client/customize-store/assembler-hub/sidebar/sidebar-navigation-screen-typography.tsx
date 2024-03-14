@@ -67,7 +67,7 @@ export const SidebarNavigationScreenTypography = () => {
 		upgradeNotice = '';
 	}
 
-	const OptIn = () => {
+	const optIn = () => {
 		recordEvent(
 			'customize_your_store_assembler_hub_opt_in_usage_tracking'
 		);
@@ -201,18 +201,8 @@ export const SidebarNavigationScreenTypography = () => {
 										</Button>
 										<Button
 											onClick={ async () => {
-												await dispatch(
-													OPTIONS_STORE_NAME
-												).updateOptions( {
-													woocommerce_allow_tracking:
-														OptInDataSharing
-															? 'yes'
-															: 'no',
-												} );
-
-												OptIn();
-												closeModal();
-												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
+												optIn();
+												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store/design/install-fonts`;
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }

@@ -205,6 +205,17 @@ const updateGlobalStylesWithDefaultValues = async (
 	);
 };
 
+export const enableTracking = async () => {
+	try {
+		await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+			woocommerce_allow_tracking: 'yes',
+		} );
+		window.wcTracks.isEnabled = true;
+	} catch ( error ) {
+		throw error;
+	}
+};
+
 export const services = {
 	assembleSite,
 	browserPopstateHandler,
@@ -212,4 +223,5 @@ export const services = {
 	createProducts,
 	installFontFamilies,
 	updateGlobalStylesWithDefaultValues,
+	enableTracking,
 };
