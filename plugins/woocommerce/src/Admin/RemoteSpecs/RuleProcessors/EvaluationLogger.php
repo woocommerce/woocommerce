@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 /**
  * Class EvaluationLogger
  *
- * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications
+ * @package Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors
  */
 class EvaluationLogger {
 	/**

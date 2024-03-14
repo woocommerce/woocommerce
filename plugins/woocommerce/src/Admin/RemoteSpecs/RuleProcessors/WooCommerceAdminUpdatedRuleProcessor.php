@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
+
 defined( 'ABSPATH' ) || exit;
 
 /**

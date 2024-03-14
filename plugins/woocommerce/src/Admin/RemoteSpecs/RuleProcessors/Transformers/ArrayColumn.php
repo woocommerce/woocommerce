@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\TransformerInterface;
 use InvalidArgumentException;
 use stdClass;
 

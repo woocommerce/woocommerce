@@ -1,6 +1,6 @@
 <?php
 
-namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
+namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers;
 
 use InvalidArgumentException;
 use stdClass;
@@ -10,7 +10,7 @@ use stdClass;
  *
  * Class TransformerService
  *
- * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications
+ * @package Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers
  */
 class TransformerService {
 	/**
@@ -23,7 +23,7 @@ class TransformerService {
 	public static function create_transformer( $name ) {
 		$camel_cased = str_replace( ' ', '', ucwords( str_replace( '_', ' ', $name ) ) );
 
-		$classname = __NAMESPACE__ . '\\Transformers\\' . $camel_cased;
+		$classname = __NAMESPACE__ . '\\' . $camel_cased;
 		if ( ! class_exists( $classname ) ) {
 			return null;
 		}

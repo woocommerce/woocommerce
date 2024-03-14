@@ -5,6 +5,8 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors;
 
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\TransformerService;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
