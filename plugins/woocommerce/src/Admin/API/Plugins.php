@@ -601,9 +601,9 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		// Point to the WooPayments Connect page rather then straight to the onboarding flow.
+		// Point to the WooPayments Connect page rather than straight to the onboarding flow.
 		return( array(
-			'connectUrl' => admin_url( 'admin.php?page=wc-admin&path=/payments/connect' ),
+			'connectUrl' => add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/connect' ) ),
 		) );
 	}
 
