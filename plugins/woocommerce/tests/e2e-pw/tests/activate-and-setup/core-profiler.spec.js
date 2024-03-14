@@ -107,7 +107,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Add products to sell' )
+				page.getByText( 'List your products' )
 			).toBeVisible();
 			// go to the plugins page to make sure that extensions weren't installed
 			await page.goto( 'wp-admin/plugins.php' );
@@ -258,7 +258,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'Add products to sell' )
+				page.getByText( 'List your products' )
 			).toBeVisible();
 			// go to the plugins page to make sure that extensions were installed
 			await page.goto( 'wp-admin/plugins.php' );
