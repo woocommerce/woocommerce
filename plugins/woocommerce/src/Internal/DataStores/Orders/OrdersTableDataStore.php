@@ -1892,7 +1892,11 @@ FROM $order_meta_table
 			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 		);
 
-		if ( 'backfill' === $context && $order->get_id() ) {
+		if ( 'backfill' === $context ) {
+			if ( ! $order->get_id() ) {
+				return 0;
+			}
+
 			$data['import_id'] = $order->get_id();
 		}
 
