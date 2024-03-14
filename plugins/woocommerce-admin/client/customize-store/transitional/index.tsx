@@ -26,9 +26,7 @@ import { navigateOrParent } from '../utils';
 import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
-import blockTagCloud from '../assets/icons/block-tag-cloud.js';
-import brush from '../assets/icons/brush.js';
-import { Icon } from '@wordpress/icons';
+import { Icon, brush, tag } from '@wordpress/icons';
 
 export * as actions from './actions';
 export * as services from './services';
@@ -139,7 +137,7 @@ export const Transitional = ( {
 							className={
 								'woocommerce-customize-store__transitional-action__icon'
 							}
-							icon={ blockTagCloud }
+							icon={ tag }
 						/>
 						<div className="woocommerce-customize-store__transitional-action__content">
 							<h3>
