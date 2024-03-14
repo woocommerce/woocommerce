@@ -21,7 +21,6 @@ import {
 } from './use-product-step-change';
 import { useTrackPublishButton } from './use-track-publish-button';
 import { applyFilters } from '@wordpress/hooks';
-import { WooStep } from '@woocommerce/components/build-types/tour-kit/types';
 
 const getTourConfig = ( {
 	isExcerptEditorTmceActive,
