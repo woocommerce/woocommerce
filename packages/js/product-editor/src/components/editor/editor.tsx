@@ -37,11 +37,7 @@ import { EditorProps } from './types';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { PrepublishPanel } from '../prepublish-panel/prepublish-panel';
 
-export function Editor( {
-	product,
-	productType = 'product',
-	settings,
-}: EditorProps ) {
+export function Editor( { product, productType = 'product' }: EditorProps ) {
 	const [ isEditorLoading, setIsEditorLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
@@ -77,7 +73,6 @@ export function Editor( {
 									content={
 										<>
 											<BlockEditor
-												settings={ settings }
 												postType={ productType }
 												productId={ productId }
 												context={ {
