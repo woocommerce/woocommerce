@@ -595,6 +595,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 			if ( ! $this->maybe_create_backup_post( $order, 'backfill' ) ) {
 				// translators: %d is an order ID.
 				$this->error_logger->warning( sprintf( __( 'Unable to create backup post for order %d.', 'woocommerce' ), $order->get_id() ) );
+				return;
 			}
 		}
 
@@ -1901,7 +1902,7 @@ FROM $order_meta_table
 			$data['import_id'] = $order->get_id();
 		}
 
-		return wp_insert_post( $order );
+		return wp_insert_post( $data );
 	}
 
 	/**
