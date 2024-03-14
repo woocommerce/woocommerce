@@ -33,13 +33,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
-			if ( $this->is_complete() ) {
-				return __( 'You set up payments', 'woocommerce' );
-			}
-			return __( 'Set up payments', 'woocommerce' );
-		}
-		return __( 'Set up payments', 'woocommerce' );
+		return __( 'Get paid', 'woocommerce' );
 	}
 
 	/**
