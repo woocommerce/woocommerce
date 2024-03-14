@@ -59,10 +59,11 @@ class Marketplace {
 	public static function get_marketplace_pages() {
 		$marketplace_pages = array(
 			array(
-				'id'     => 'woocommerce-marketplace',
-				'parent' => 'woocommerce',
-				'title'  => __( 'Extensions', 'woocommerce' ) . self::get_marketplace_update_count_html(),
-				'path'   => '/extensions',
+				'id'         => 'woocommerce-marketplace',
+				'parent'     => 'woocommerce',
+				'title'      => __( 'Extensions', 'woocommerce' ) . self::get_marketplace_update_count_html(),
+				'page_title' => __( 'Extensions', 'woocommerce' ),
+				'path'       => '/extensions',
 			),
 		);
 
