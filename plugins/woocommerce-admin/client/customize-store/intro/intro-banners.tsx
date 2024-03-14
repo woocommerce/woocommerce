@@ -219,7 +219,11 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
-export const NoAIBanner = () => {
+export const NoAIBanner = ( {
+	redirectToCYSFlow,
+}: {
+	redirectToCYSFlow: () => void;
+} ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
 		stylesheet?: string;
@@ -249,7 +253,7 @@ export const NoAIBanner = () => {
 					if ( ! isDefaultTheme ) {
 						setIsModalOpen( true );
 					} else {
-						window.location.href = customizeStoreDesignUrl;
+						redirectToCYSFlow();
 					}
 				} }
 				showAIDisclaimer={ false }
