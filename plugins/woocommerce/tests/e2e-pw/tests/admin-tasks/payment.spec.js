@@ -34,10 +34,10 @@ test.describe( 'Payment setup task', () => {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( 'text=Set up payments' ).click();
+		await page.locator( 'text=Get paid' ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'Set up payments' );
+		).toHaveText( 'Get paid' );
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
