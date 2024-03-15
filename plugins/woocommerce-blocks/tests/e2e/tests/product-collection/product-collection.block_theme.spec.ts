@@ -61,8 +61,14 @@ test.describe( 'Product Collection', () => {
 				{ name: 'woocommerce/product-rating', attributes: {} },
 				{ name: 'woocommerce/product-sku', attributes: {} },
 				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
-				{ name: 'woocommerce/product-summary', attributes: {} },
 				{ name: 'woocommerce/product-sale-badge', attributes: {} },
+				{
+					name: 'core/post-excerpt',
+					attributes: {
+						__woocommerceNamespace:
+							'woocommerce/product-collection/product-summary',
+					},
+				},
 				{
 					name: 'core/post-terms',
 					attributes: { term: 'product_tag' },
@@ -82,18 +88,20 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
-		const verifyProductContent = ( product: Locator ) => {
-			expect( product ).toContainText( 'Beanie' ); // core/post-title
-			expect( product ).toContainText(
+		const verifyProductContent = async ( product: Locator ) => {
+			await expect( product ).toContainText( 'Beanie' ); // core/post-title
+			await expect( product ).toContainText(
 				'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.'
 			); // woocommerce/product-price
-			expect( product ).toContainText( 'woo-beanie' ); // woocommerce/product-sku
-			expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
-			expect( product ).toContainText( 'This is a simple product.' ); // woocommerce/product-summary
-			expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
-			expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
-			expect( product ).toContainText( 'SaleProduct on sale' ); // woocommerce/product-sale-badge
-			expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
+			await expect( product ).toContainText( 'woo-beanie' ); // woocommerce/product-sku
+			await expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
+			await expect( product ).toContainText(
+				'This is a simple product.'
+			); // core/post-excerpt
+			await expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
+			await expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
+			await expect( product ).toContainText( 'SaleProduct on sale' ); // woocommerce/product-sale-badge
+			await expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
 		};
 
 		test( 'In a post', async ( { pageObject } ) => {
@@ -104,7 +112,7 @@ test.describe( 'Product Collection', () => {
 
 			const product = pageObject.products.nth( 1 );
 
-			verifyProductContent( product );
+			await verifyProductContent( product );
 		} );
 
 		test( 'In a Product Archive (Product Catalog)', async ( {
@@ -120,18 +128,19 @@ test.describe( 'Product Collection', () => {
 
 			const product = pageObject.products.nth( 1 );
 
-			verifyProductContent( product );
+			await verifyProductContent( product );
 		} );
 
 		test( 'On a Home Page', async ( { pageObject, editor } ) => {
 			await pageObject.goToHomePageAndInsertCollection();
+
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
 			const product = pageObject.products.nth( 1 );
 
-			verifyProductContent( product );
+			await verifyProductContent( product );
 		} );
 	} );
 
