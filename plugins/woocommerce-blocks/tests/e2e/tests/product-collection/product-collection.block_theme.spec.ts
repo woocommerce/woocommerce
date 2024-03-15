@@ -53,14 +53,14 @@ test.describe( 'Product Collection', () => {
 			// - woocommerce/product-image
 			// - core/post-title
 			// - woocommerce/product-price
-			// - woocommerce/product-image
+			// - woocommerce/product-button
 			// We're adding remaining ones
 			const productElements = [
 				{ name: 'woocommerce/product-rating', attributes: {} },
 				{ name: 'woocommerce/product-sku', attributes: {} },
 				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
 				{ name: 'woocommerce/product-summary', attributes: {} },
-				{ name: 'woocommerce/product-rating', attributes: {} },
+				{ name: 'woocommerce/product-sale-badge', attributes: {} },
 				{
 					name: 'core/post-terms',
 					attributes: { term: 'product_tag' },
@@ -80,26 +80,18 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
-		const verifyFirstProductContent = ( firstProduct: Locator ) => {
-			expect( firstProduct ).toContainText( 'Album' );
-			expect( firstProduct ).toContainText( '$15.00' );
-			expect( firstProduct ).toContainText( 'No Reviews' );
-			expect( firstProduct ).toContainText( 'SKU: WOO-ALBUM' );
-			expect( firstProduct ).toContainText( 'In stock' );
-			expect( firstProduct ).toContainText( 'No Reviews' );
-			expect( firstProduct ).toContainText( 'No tags' );
-			expect( firstProduct ).toContainText( 'Music' );
+			expect( product ).toContainText( 'SALE' ); // woocommerce/product-sale-badge
 		};
 
 		test( 'In a post', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 			await expect( pageObject.products ).toHaveCount( 9 );
-			await insertProductElements( { pageObject } );
+			await insertProductElements( pageObject );
 			await pageObject.publishAndGoToFrontend();
 
-			const firstProduct = pageObject.products.first();
+			const product = pageObject.products.nth( 2 );
 
-			verifyFirstProductContent( firstProduct );
+			verifyProductContent( product );
 		} );
 
 		test( 'In a Product Archive (Product Catalog)', async ( {
@@ -110,25 +102,25 @@ test.describe( 'Product Collection', () => {
 				'woocommerce/woocommerce//archive-product'
 			);
 			await expect( pageObject.products ).toHaveCount( 9 );
-			await insertProductElements( { pageObject } );
+			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
-			const firstProduct = pageObject.products.first();
+			const product = pageObject.products.nth( 2 );
 
-			verifyFirstProductContent( firstProduct );
+			verifyProductContent( product );
 		} );
 
 		test( 'On a Home Page', async ( { pageObject, editor } ) => {
 			await pageObject.goToHomePageAndInsertCollection();
 			await expect( pageObject.products ).toHaveCount( 9 );
-			await insertProductElements( { pageObject } );
+			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
-			const firstProduct = pageObject.products.first();
+			const product = pageObject.products.nth( 2 );
 
-			verifyFirstProductContent( firstProduct );
+			verifyProductContent( product );
 		} );
 	} );
 
