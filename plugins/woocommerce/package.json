@@ -174,7 +174,13 @@
 					"name": "Core e2e tests",
 					"testType": "e2e",
 					"command": "test:e2e-pw",
-					"shards": 5,
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5", 
+						"--shard=3/5", 
+						"--shard=4/5", 
+						"--shard=5/5"
+					],
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
@@ -184,7 +190,6 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
-					"shards": 0,
 					"changes": [],
 					"testEnv": {
 						"start": "env:test"
@@ -194,7 +199,6 @@
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
-					"shards": 0,
 					"changes": [],
 					"testEnv": {
 						"start": "env:perf"
