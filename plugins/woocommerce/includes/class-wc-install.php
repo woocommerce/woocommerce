@@ -2284,9 +2284,9 @@ $hpos_table_schema;
 	 */
 	private static function get_refunds_return_policy_page_content() {
 		return <<<EOT
-<!-- wp:heading -->
-<h3 class="wp-block-heading">This is a sample page.</h3>
-<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p><b>This is a sample page.</b></p>
+<!-- /wp:paragraph -->
 
 <!-- wp:heading -->
 <h2 class="wp-block-heading">Overview</h2>
