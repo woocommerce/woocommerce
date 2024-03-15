@@ -80,8 +80,6 @@ export function HeaderToolbar( {
 				// @ts-expect-error These selectors are available in the block data store.
 				getBlockSelectionStart,
 			} = select( blockEditorStore );
-			// @ts-expect-error These selectors are available in the block data store.
-			const { get: getPreference } = select( preferencesStore );
 
 			return {
 				isTextModeEnabled: getEditorMode() === 'text',
