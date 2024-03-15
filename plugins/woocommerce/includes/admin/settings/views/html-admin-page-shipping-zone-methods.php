@@ -1,13 +1,12 @@
-<?php // phpcs:ignore Squiz.Commenting.FileComment.Missing
-
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
-
+<?php
 /**
  * Shipping zone admin
  *
  * @package WooCommerce\Admin\Shipping
  */
+
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
