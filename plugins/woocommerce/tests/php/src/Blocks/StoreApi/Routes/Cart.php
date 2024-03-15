@@ -16,6 +16,7 @@ use Spy_REST_Server;
  */
 class Cart extends ControllerTestCase {
 
+
 	/**
 	 * Setup test product data. Called before every test.
 	 */
@@ -65,6 +66,7 @@ class Cart extends ControllerTestCase {
 		);
 
 		wc_empty_cart();
+		$this->reset_customer_state();
 		$this->keys   = array();
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
 		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
@@ -77,6 +79,21 @@ class Cart extends ControllerTestCase {
 		wc()->session->set( 'store_api_draft_order', $order->get_id() );
 	}
 
+	/**
+	 * Resets customer state and remove any existing data from previous tests.
+	 */
+	private function reset_customer_state() {
+		wc()->customer->set_billing_country( 'US' );
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_billing_state( '' );
+		wc()->customer->set_shipping_state( '' );
+		wc()->customer->set_billing_postcode( '' );
+		wc()->customer->set_shipping_postcode( '' );
+		wc()->customer->set_shipping_city( '' );
+		wc()->customer->set_billing_city( '' );
+		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_billing_address_1( '' );
+	}
 	/**
 	 * Test getting cart.
 	 */
