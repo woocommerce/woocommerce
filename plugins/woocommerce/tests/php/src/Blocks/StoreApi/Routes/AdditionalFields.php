@@ -95,10 +95,10 @@ class AdditionalFields extends MockeryTestCase {
 					'autocapitalize' => 'none',
 					'maxLength'      => '30',
 				),
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return trim( $value );
 				},
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					return strlen( $value ) > 3;
 				},
 			),
@@ -108,24 +108,24 @@ class AdditionalFields extends MockeryTestCase {
 				'location' => 'contact',
 				'required' => true,
 				'type'     => 'select',
-				'options'  => [
-					[
+				'options'  => array(
+					array(
 						'label' => 'Director',
 						'value' => 'director',
-					],
-					[
+					),
+					array(
 						'label' => 'Engineering',
 						'value' => 'engineering',
-					],
-					[
+					),
+					array(
 						'label' => 'Customer Support',
 						'value' => 'customer-support',
-					],
-					[
+					),
+					array(
 						'label' => 'Other',
 						'value' => 'other',
-					],
-				],
+					),
+				),
 			),
 			array(
 				'id'       => 'plugin-namespace/leave-on-porch',
@@ -135,7 +135,6 @@ class AdditionalFields extends MockeryTestCase {
 			),
 		);
 		array_map( '__experimental_woocommerce_blocks_register_checkout_field', $this->fields );
-
 	}
 
 	/**
@@ -974,14 +973,14 @@ class AdditionalFields extends MockeryTestCase {
 				'location' => 'additional',
 				'type'     => 'select',
 				'options'  => array(
-					[
+					array(
 						'label' => 'Option 1',
 						'value' => 'duplicate',
-					],
-					[
+					),
+					array(
 						'label' => 'Option 2',
 						'value' => 'duplicate',
-					],
+					),
 				),
 				'required' => true,
 			)
@@ -1025,14 +1024,14 @@ class AdditionalFields extends MockeryTestCase {
 				'location' => 'additional',
 				'type'     => 'select',
 				'options'  => array(
-					[
+					array(
 						'label' => 'Option 1',
 						'value' => 'option-1',
-					],
-					[
+					),
+					array(
 						'label' => 'Option 2',
 						'value' => 'option-2',
-					],
+					),
 				),
 			)
 		);
@@ -1278,7 +1277,7 @@ class AdditionalFields extends MockeryTestCase {
 				'label'             => 'Sanitize Text',
 				'location'          => 'additional',
 				'type'              => 'text',
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return 'sanitized-' . $value;
 				},
 			)
@@ -1343,7 +1342,7 @@ class AdditionalFields extends MockeryTestCase {
 				'label'             => 'Validate Text',
 				'location'          => 'additional',
 				'type'              => 'text',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					if ( 'invalid' === $value ) {
 						return new \WP_Error( 'invalid_value', 'Invalid value provided.' );
 					}
@@ -1416,7 +1415,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		add_filter(
 			'__experimental_woocommerce_blocks_sanitize_additional_field',
-			function( $value, $key ) use ( $id ) {
+			function ( $value, $key ) use ( $id ) {
 				if ( $key === $id ) {
 					return 'sanitized-' . $value;
 				}
@@ -1492,7 +1491,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		add_action(
 			'__experimental_woocommerce_blocks_validate_additional_field',
-			function( \WP_Error $errors, $key, $value ) use ( $id ) {
+			function ( \WP_Error $errors, $key, $value ) use ( $id ) {
 				if ( $key === $id && 'invalid' === $value ) {
 					$errors->add( 'my_invalid_value', 'Invalid value provided.' );
 				}
@@ -1598,7 +1597,7 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => [],
+				'additional_fields' => array(),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1662,7 +1661,7 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => [],
+				'additional_fields' => array(),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );

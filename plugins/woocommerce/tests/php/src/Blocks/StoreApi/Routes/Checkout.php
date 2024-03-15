@@ -50,7 +50,7 @@ class Checkout extends MockeryTestCase {
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
 				'namespace'       => 'extension_namespace',
-				'schema_callback' => function() {
+				'schema_callback' => function () {
 					return array(
 						'extension_key' => array(
 							'description' => 'Test key',
