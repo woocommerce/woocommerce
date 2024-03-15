@@ -3545,8 +3545,8 @@ importers:
         specifier: ^12.6.1
         version: 12.6.1(@babel/core@7.23.5)(react-dom@17.0.2)(react@17.0.2)(typescript@5.3.3)
       '@wordpress/stylelint-config':
-        specifier: ^20.0.3
-        version: 20.0.3(postcss@8.4.32)(stylelint@14.16.1)
+        specifier: ^21.36.0
+        version: 21.36.0(postcss@8.4.32)(stylelint@14.16.1)
       '@xstate/inspect':
         specifier: 0.8.0
         version: 0.8.0(ws@8.15.0)(xstate@4.37.1)

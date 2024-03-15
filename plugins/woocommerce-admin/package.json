@@ -172,7 +172,7 @@
 		"@wordpress/postcss-themes": "^1.0.5",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^12.6.1",
-		"@wordpress/stylelint-config": "^20.0.3",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"@xstate/inspect": "0.8.0",
 		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.16",
