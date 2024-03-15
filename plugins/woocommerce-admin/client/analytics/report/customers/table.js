@@ -143,7 +143,11 @@ function CustomersReportTable( {
 			const countryName = getCountryName( country );
 
 			const customerName =
-				userId === 0 && name === ' ' ? <Pill>Guest</Pill> : name;
+				userId === 0 && name === ' ' ? (
+					<Pill>{ __( 'Guest', 'woocommerce' ) }</Pill>
+				) : (
+					name
+				);
 
 			const customerNameLink = userId ? (
 				<Link
