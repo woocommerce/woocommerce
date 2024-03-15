@@ -93,11 +93,5 @@ module.exports = {
 				'react/react-in-jsx-scope': 'off',
 			},
 		},
-		{
-			files: [ '*.css', '*sass', '*.scss}' ],
-			rules: {
-				quotes: [ 'error', 'double' ],
-			},
-		},
 	],
 };
