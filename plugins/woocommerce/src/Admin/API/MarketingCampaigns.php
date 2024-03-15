@@ -147,8 +147,11 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 * @return String formatted price.
 	 */
 	private function get_formatted_price( $price ) {
+		// Get $currency_info based on user locale or default locale.
+		$user_locale = get_user_locale();
 		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
-		$currency_info     = $currency_info_all[ $price->get_currency() ]['default'];
+		$currency_info_locales = $currency_info_all[ $price->get_currency() ];
+		$currency_info     = $currency_info_locales[ $user_locale ] ?? $currency_info_locales['default'];
 
 		// Get $num_decimals to be passed to wc_price.
 		$locale_info_all = include WC()->plugin_path() . '/i18n/locale-info.php';
