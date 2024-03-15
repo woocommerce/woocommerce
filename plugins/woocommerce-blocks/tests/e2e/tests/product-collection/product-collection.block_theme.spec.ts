@@ -48,7 +48,45 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', async () => {
-		test( 'In a post', async ( { pageObject } ) => {} );
+		const insertProductElements = async ( { pageObject } ) => {
+			// By default there are inner blocks:
+			// - woocommerce/product-image
+			// - core/post-title
+			// - woocommerce/product-price
+			// - woocommerce/product-image
+			// We're adding remaining ones
+			const productElements = [
+				{ name: 'woocommerce/product-rating', attributes: {} },
+				{ name: 'woocommerce/product-sku', attributes: {} },
+				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+				{ name: 'woocommerce/product-summary', attributes: {} },
+				{ name: 'woocommerce/product-rating', attributes: {} },
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_tag' },
+				},
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_cat' },
+				},
+			];
+
+			await Promise.all(
+				productElements.map( async ( productElement ) => {
+					await pageObject.insertBlockInProductCollection(
+						productElement
+					);
+				} )
+			);
+		};
+
+		test( 'In a post', async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+			await insertProductElements( { pageObject } );
+			await pageObject.publishAndGoToFrontend();
+			expect( pageObject.productTemplate ).not.toBeNull();
+			// EXPECT
+		} );
 
 		test( 'In a Product Archive (Product Catalog)', async ( {
 			pageObject,

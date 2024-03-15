@@ -127,6 +127,7 @@ class ProductCollectionPage {
 
 	async createNewPostAndInsertBlock( collection?: Collections ) {
 		await this.admin.createNewPost( { legacyCanvas: true } );
+		await this.editorUtils.closeWelcomeGuideModal();
 		await this.insertProductCollection();
 		await this.chooseCollectionInPost( collection );
 		await this.refreshLocators( 'editor' );
@@ -514,6 +515,25 @@ class ProductCollectionPage {
 		height: number;
 	} ) {
 		await this.page.setViewportSize( { width, height } );
+	}
+
+	async insertBlockInProductCollection( block: {
+		name: string;
+		attributes: object;
+	} ) {
+		await this.waitForProductsToLoad();
+		const productTemplate = await this.editorUtils.getBlockByName(
+			'woocommerce/product-template'
+		);
+		const productTemplateId =
+			( await productTemplate.getAttribute( 'data-block' ) ) ?? '';
+
+		await this.editor.selectBlocks( productTemplate );
+		await this.editorUtils.insertBlock(
+			block,
+			undefined,
+			productTemplateId
+		);
 	}
 
 	async insertProductCollectionInSingleProductBlock() {
