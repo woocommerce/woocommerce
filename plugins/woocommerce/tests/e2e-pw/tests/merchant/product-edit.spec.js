@@ -163,7 +163,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 					.soft( page.locator( 'p' ).locator( 'del' ) )
 					.toHaveText( `$${ expectedRegularPrice }` );
 				await expect
-					.soft( page.locator( 'p' ).getByRole( 'insertion' ) )
+					.soft( page.locator( 'p' ).locator( 'ins' ) )
 					.toHaveText( `$${ expectedSalePrice }` );
 				await expect
 					.soft( page.getByText( `${ expectedStockQty } in stock` ) )

@@ -128,7 +128,6 @@ export const Layout = () => {
 				>
 					<Transitional
 						sendEvent={ sendEvent }
-						editor={ editor }
 						isWooExpress={ isWooExpress() }
 						isSurveyOpen={ isSurveyOpen }
 						setSurveyOpen={ setSurveyOpen }

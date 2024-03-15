@@ -9,6 +9,7 @@ import {
 } from '@wordpress/element';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -119,7 +120,22 @@ export default function ProductListContent( props: {
 								} ),
 							} }
 						/>
-						{ index === bannerPosition && <NoAIBanner /> }
+						{ index === bannerPosition && (
+							<NoAIBanner
+								redirectToCYSFlow={ () => {
+									const customizeStoreDesignUrl =
+										addQueryArgs(
+											`${ ADMIN_URL }admin.php`,
+											{
+												page: 'wc-admin',
+												path: '/customize-store/design',
+											}
+										);
+									window.location.href =
+										customizeStoreDesignUrl;
+								} }
+							/>
+						) }
 					</Fragment>
 				) ) }
 			</div>
