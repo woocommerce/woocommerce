@@ -154,32 +154,14 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$locale_index    = array_search( $price->get_currency(), array_column( $locale_info_all, 'currency_code' ), true );
 		$num_decimals    = array_values( $locale_info_all )[ $locale_index ]['num_decimals'];
 
-		add_filter(
-			'woocommerce_price_format',
-			function ( $format, $currency_pos ) use ( $currency_info ) {
-				$currency_pos = $currency_info['currency_pos'];
-				$format       = '%1$s%2$s';
-
-				switch ( $currency_pos ) {
-					case 'left':
-						$format = '%1$s%2$s';
-						break;
-					case 'right':
-						$format = '%2$s%1$s';
-						break;
-					case 'left_space':
-						$format = '%1$s&nbsp;%2$s';
-						break;
-					case 'right_space':
-						$format = '%2$s&nbsp;%1$s';
-						break;
-				}
-
-				return $format;
-			},
-			999,
-			2
-		);
+		$currency_pos = $currency_info['currency_pos'];
+		$currencyFormats = [
+			'left'        => '%1$s%2$s',
+			'right'       => '%2$s%1$s',
+			'left_space'  => '%1$s&nbsp;%2$s',
+			'right_space' => '%2$s&nbsp;%1$s',
+		];
+		$price_format = $currencyFormats[$currency_pos] ?? $currencyFormats['left'];
 
 		$price_value     = wc_format_decimal( $price->get_value() );
 		$price_formatted = wc_price(
@@ -189,6 +171,7 @@ class MarketingCampaigns extends WC_REST_Controller {
 				'decimal_separator'  => $currency_info['decimal_sep'],
 				'thousand_separator' => $currency_info['thousand_sep'],
 				'decimals'           => $num_decimals,
+				'price_format'       => $price_format,
 			)
 		);
 
