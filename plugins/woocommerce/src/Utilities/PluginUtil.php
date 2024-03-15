@@ -37,11 +37,20 @@ class PluginUtil {
 	private $woocommerce_aware_active_plugins = null;
 
 	/**
+	 * List of plugins excluded from feature compatibility warnings in UI.
+	 *
+	 * @var string[]
+	 */
+	private $plugins_excluded_from_compatibility_ui;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
 		self::add_action( 'activated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
 		self::add_action( 'deactivated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
+
+		$this->plugins_excluded_from_compatibility_ui = array( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 	}
 
 	/**
@@ -180,10 +189,11 @@ class PluginUtil {
 	 *
 	 * @return string Warning string.
 	 */
-	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ) : string {
+	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ): string {
 		$feature_warning    = '';
 		$incompatibles      = array_merge( $plugin_feature_info['incompatible'], $plugin_feature_info['uncertain'] );
 		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
+		$incompatibles      = array_values( array_diff( $incompatibles, $this->get_plugins_excluded_from_compatibility_ui() ) );
 		$incompatible_count = count( $incompatibles );
 		if ( $incompatible_count > 0 ) {
 			if ( 1 === $incompatible_count ) {
@@ -231,5 +241,16 @@ class PluginUtil {
 		}
 
 		return $feature_warning;
+	}
+
+	/**
+	 * Get the names of the plugins that are excluded from the feature compatibility UI.
+	 * These plugins won't be considered as incompatible with any existing feature for the purposes
+	 * of displaying compatibility warning in UI, even if they declare incompatibilities explicitly.
+	 *
+	 * @return string[] Plugin names relative to the root plugins directory.
+	 */
+	public function get_plugins_excluded_from_compatibility_ui() {
+		return $this->plugins_excluded_from_compatibility_ui;
 	}
 }
