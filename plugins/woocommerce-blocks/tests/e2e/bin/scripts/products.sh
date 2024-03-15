@@ -24,6 +24,7 @@ wp post meta update $hoodie_product_id _product_image_gallery "$image1,$image2,$
 # Create a tag, so we can add tests for tag-related blocks and templates.
 tag_id=$(wp wc product_tag create --name="Recommended" --slug="recommended" --description="Curated products selected by our experts" --porcelain --user=1)
 wp wc product update $hoodie_product_id --tags="[ { \"id\": $tag_id } ]" --user=1
+wp wc product update $beanie_product_id --tags="[ { \"id\": $tag_id } ]" --user=1
 
 # This is a non-hacky work around to set up the cross sells product.
 cap_product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
