@@ -7,12 +7,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
 import classNames from 'classnames';
-import { isWpVersion } from '@woocommerce/settings';
-import {
-	store as preferencesStore,
-	// @ts-expect-error No types for this exist yet.
-} from '@wordpress/preferences';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	BlockEditorProvider,
 	BlockInspector,
@@ -38,8 +32,8 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
+import { useBlockToolbarSettings } from './hooks/use-block-toolbar-settings';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
-import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -105,13 +99,8 @@ export function IframeEditor( {
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
-	const { hasFixedToolbar } = useSelect( ( select ) => {
-		// @ts-expect-error These selectors are available in the block data store.
-		const { get: getPreference } = select( preferencesStore );
-		return {
-			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-		};
-	}, [] );
+	const { canUseInlineFixedBlockToolbar, hasInlineFixedBlockToolbar } =
+		useBlockToolbarSettings();
 
 	useEffect( () => {
 		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
@@ -121,9 +110,6 @@ export function IframeEditor( {
 	}, [] );
 
 	const settings = __settings || parentEditorSettings;
-
-	const inlineFixedBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
 		<div className="woocommerce-iframe-editor">
@@ -144,8 +130,7 @@ export function IframeEditor( {
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar:
-							hasFixedToolbar || ! inlineFixedBlockToolbar,
+						hasFixedToolbar: hasInlineFixedBlockToolbar,
 						templateLock: false,
 					} }
 					value={ blocks }
@@ -184,7 +169,7 @@ export function IframeEditor( {
 								'woocommerce-iframe-editor__content',
 								{
 									'old-fixed-toolbar-shown':
-										! inlineFixedBlockToolbar,
+										! canUseInlineFixedBlockToolbar,
 								}
 							) }
 							onClick={ (

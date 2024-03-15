@@ -14,7 +14,6 @@ import {
 	Fragment,
 	useEffect,
 } from '@wordpress/element';
-import { isWpVersion } from '@woocommerce/settings';
 import classnames from 'classnames';
 import { MouseEvent } from 'react';
 import {
@@ -46,7 +45,7 @@ import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
-import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
+import { useBlockToolbarSettings } from '../hooks/use-block-toolbar-settings';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -63,41 +62,38 @@ export function HeaderToolbar( {
 		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const {
-		isInserterEnabled,
-		isTextModeEnabled,
-		hasBlockSelection,
-		hasFixedToolbar,
-	} = useSelect( ( select ) => {
-		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			hasInserterItems,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockRootClientId,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockSelectionEnd,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			__unstableGetEditorMode: getEditorMode,
+	const { isInserterEnabled, isTextModeEnabled, hasBlockSelection } =
+		useSelect( ( select ) => {
+			const {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				hasInserterItems,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				getBlockRootClientId,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				getBlockSelectionEnd,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				__unstableGetEditorMode: getEditorMode,
+				// @ts-expect-error These selectors are available in the block data store.
+				getBlockSelectionStart,
+			} = select( blockEditorStore );
 			// @ts-expect-error These selectors are available in the block data store.
-			getBlockSelectionStart,
-		} = select( blockEditorStore );
-		// @ts-expect-error These selectors are available in the block data store.
-		const { get: getPreference } = select( preferencesStore );
+			const { get: getPreference } = select( preferencesStore );
 
-		return {
-			isTextModeEnabled: getEditorMode() === 'text',
-			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
-					undefined
-			),
-			hasBlockSelection: !! getBlockSelectionStart(),
-			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-		};
-	}, [] );
+			return {
+				isTextModeEnabled: getEditorMode() === 'text',
+				isInserterEnabled: hasInserterItems(
+					getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+						undefined
+				),
+				hasBlockSelection: !! getBlockSelectionStart(),
+			};
+		}, [] );
+
+	const { hasInlineFixedBlockToolbar } = useBlockToolbarSettings();
 
 	/* translators: accessibility text for the editor toolbar */
 	const toolbarAriaLabel = __( 'Document tools', 'woocommerce' );
@@ -120,9 +116,6 @@ export function HeaderToolbar( {
 			setIsBlockToolsCollapsed( false );
 		}
 	}, [ hasBlockSelection ] );
-
-	const renderBlockToolbar =
-		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
 		<NavigableToolbar
@@ -162,7 +155,7 @@ export function HeaderToolbar( {
 					<ToolbarItem as={ EditorHistoryRedo } />
 					<ToolbarItem as={ DocumentOverview } />
 				</div>
-				{ hasFixedToolbar && isLargeViewport && renderBlockToolbar && (
+				{ hasInlineFixedBlockToolbar && isLargeViewport && (
 					<>
 						<div
 							className={ classnames(
