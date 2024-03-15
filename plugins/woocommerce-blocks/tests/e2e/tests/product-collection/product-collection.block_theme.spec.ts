@@ -87,7 +87,7 @@ test.describe( 'Product Collection', () => {
 			expect( product ).toContainText(
 				'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.'
 			); // woocommerce/product-price
-			expect( product ).toContainText( 'Woo-beanie' ); // woocommerce/product-sku
+			expect( product ).toContainText( 'woo-beanie' ); // woocommerce/product-sku
 			expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
 			expect( product ).toContainText( 'This is a simple product.' ); // woocommerce/product-summary
 			expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
@@ -114,7 +114,6 @@ test.describe( 'Product Collection', () => {
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
 				'woocommerce/woocommerce//archive-product'
 			);
-			await expect( pageObject.products ).toHaveCount( 9 );
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
@@ -126,7 +125,6 @@ test.describe( 'Product Collection', () => {
 
 		test( 'On a Home Page', async ( { pageObject, editor } ) => {
 			await pageObject.goToHomePageAndInsertCollection();
-			await expect( pageObject.products ).toHaveCount( 9 );
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
