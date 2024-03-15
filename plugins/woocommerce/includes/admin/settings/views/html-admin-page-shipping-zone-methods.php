@@ -225,9 +225,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							if ( CartCheckoutUtils::is_checkout_block_default() ) {
 								if ( ShippingController::is_legacy_local_pickup_active() ) {
-									echo '<div>Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in the <a href="/admin.php?page=wc-settings&tab=shipping&section=pickup_location">Local pickup settings page</a>.</div>';
+									echo sprintf(
+										__(
+											/* translators: %s: Local pickup settings page URL. */
+											'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in  the <a href="%s">Local pickup settings page</a>.',
+											'woocommerce'
+										),
+										esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section=pickup_location'))
+									);
 								} else {
-									echo '<div>Local pickup: set up pickup locations in the <a href="/admin.php?page=wc-settings&tab=shipping&section=pickup_location">Local pickup settings page</a>.</div>';
+									echo sprintf(
+										__(
+											/* translators: %s: Local pickup settings page URL. */
+											'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.',
+											'woocommerce'
+										),
+										esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section=pickup_location'))
+									);
+
 								}
 							}
 
