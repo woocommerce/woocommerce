@@ -7,6 +7,15 @@ const {
 	disableVariableProductBlockTour,
 } = require( '../../../../utils/product-block-editor' );
 
+const { variableProducts: utils } = require( '../../../../utils' );
+
+const {
+	createVariableProduct,
+	deleteProductsAddedByTests,
+	showVariableProductTour,
+	productAttributes,
+} = utils;
+
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product&tab=variations';
 
@@ -22,8 +31,23 @@ const attributesData = {
 	options: [ 'Small', 'Medium', 'Large' ],
 };
 
+let productId_editVariations, productId_deleteVariations;
+
 test.describe( 'Variations tab', () => {
 	test.describe( 'Create variable product', () => {
+		test.beforeAll( async ( { browser } ) => {
+			productId_editVariations = await createVariableProduct(
+				productAttributes
+			);
+			productId_deleteVariations = await createVariableProduct(
+				productAttributes
+			);
+			await showVariableProductTour( browser, false );
+		} );
+
+		test.afterAll( async () => {
+			await deleteProductsAddedByTests();
+		} );
 		test.skip(
 			isTrackingSupposedToBeEnabled,
 			'The block product editor is not being tested'
@@ -161,11 +185,17 @@ test.describe( 'Variations tab', () => {
 		} );
 
 		test( 'can edit a variation', async ( { page } ) => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' );
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_editVariations }`
+			);
+
+			await clickOnTab( 'Variations', page );
 
 			await page
-				.locator( 'a.row-title:has-text("Variable product Name")' )
-				.first()
+				.locator(
+					'.woocommerce-variations-table-error-or-empty-state__actions'
+				)
+				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
 			await clickOnTab( 'Variations', page );
@@ -229,14 +259,18 @@ test.describe( 'Variations tab', () => {
 		} );
 
 		test( 'can delete a variation', async ( { page } ) => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' );
-
-			await page
-				.locator( 'a.row-title:has-text("Variable product Name")' )
-				.first()
-				.click();
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
+			);
 
 			await clickOnTab( 'Variations', page );
+
+			await page
+				.locator(
+					'.woocommerce-variations-table-error-or-empty-state__actions'
+				)
+				.getByRole( 'button', { name: 'Generate from options' } )
+				.click();
 
 			await page
 				.locator( '.woocommerce-product-variations__table-body > div' )
@@ -257,7 +291,7 @@ test.describe( 'Variations tab', () => {
 						'.woocommerce-product-variations__table-body > div'
 					)
 					.count()
-			).toEqual( attributesData.options.length - 1 );
+			).toEqual( 5 );
 		} );
 	} );
 } );
