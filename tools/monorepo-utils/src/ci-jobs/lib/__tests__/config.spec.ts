@@ -137,7 +137,7 @@ describe( 'Config', () => {
 					{
 						type: JobType.Test,
 						testType: 'default',
-						shards: 0,
+						shardingArguments: [],
 						name: 'default',
 						changes: [
 							/^package\.json$/,
@@ -249,7 +249,7 @@ describe( 'Config', () => {
 						{
 							type: JobType.Test,
 							testType,
-							shards: 0,
+							shardingArguments: [],
 							name: 'default',
 							changes: [
 								/^package\.json$/,
@@ -291,7 +291,7 @@ describe( 'Config', () => {
 						{
 							type: JobType.Test,
 							testType: result,
-							shards: 0,
+							shardingArguments: [],
 							name: 'default',
 							changes: [
 								/^package\.json$/,
@@ -305,14 +305,15 @@ describe( 'Config', () => {
 		);
 
 		it.each( [
-			[ '0', 0 ],
-			[ '1', 1 ],
-			[ '', 0 ],
-			[ '.1', 0 ],
-			[ '3.1', 3 ],
+			[ [], [] ],
+			[ undefined, [] ],
+			[
+				[ 'a', 'b' ],
+				[ 'a', 'b' ],
+			],
 		] )(
-			'should parse test config with %i shards',
-			( input: any, result: number ) => {
+			'should parse test config with shards',
+			( shardingArguments: any, result: string[] ) => {
 				const parsed = parseCIConfig( {
 					name: 'foo',
 					config: {
@@ -321,7 +322,7 @@ describe( 'Config', () => {
 								{
 									name: 'default',
 									testType: 'e2e',
-									shards: input,
+									shardingArguments,
 									changes: '/src/**/*.{js,jsx,ts,tsx}',
 									command: 'foo',
 								},
@@ -335,7 +336,7 @@ describe( 'Config', () => {
 						{
 							type: JobType.Test,
 							testType: 'e2e',
-							shards: result,
+							shardingArguments: result,
 							name: 'default',
 							changes: [
 								/^package\.json$/,

@@ -86,16 +86,18 @@ export function getShardedJobs(
 	jobConfig: TestJobConfig
 ): TestJob[] {
 	let createdJobs = [];
-	if ( jobConfig.shards <= 1 ) {
+	const shards = jobConfig.shardingArguments.length;
+
+	if ( shards <= 1 ) {
 		createdJobs.push( job );
 	} else {
-		createdJobs = Array( jobConfig.shards )
+		createdJobs = Array( shards )
 			.fill( null )
 			.map( ( _, i ) => {
 				const jobCopy = JSON.parse( JSON.stringify( job ) );
 				jobCopy.shardNumber = i + 1;
-				jobCopy.name = `${ job.name } ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
-				jobCopy.command = `${ job.command } --shard ${ jobCopy.shardNumber }/${ jobConfig.shards }`;
+				jobCopy.name = `${ job.name } ${ i + 1 }/${ shards }`;
+				jobCopy.command = `${ job.command } ${ jobConfig.shardingArguments[ i ] }`;
 				return jobCopy;
 			} );
 	}
