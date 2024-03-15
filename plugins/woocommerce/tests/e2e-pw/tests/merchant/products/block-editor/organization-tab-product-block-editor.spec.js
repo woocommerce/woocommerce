@@ -125,10 +125,7 @@ test.describe( 'General tab', () => {
 
 			await expect( productId ).toBeDefined();
 			await expect( title ).toHaveText( productData.name );
-		} );
-		test( 'can see a product with tag and category, after introducing the password', async ( {
-			page,
-		} ) => {
+
 			await page.goto( `/?post_type=product&p=${ productId }` );
 
 			await page
