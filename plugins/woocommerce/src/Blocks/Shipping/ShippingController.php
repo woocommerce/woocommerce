@@ -498,7 +498,7 @@ class ShippingController {
 	 *
 	 * @return bool
 	 */
-	public function is_legacy_local_pickup_active() {
+	public static function is_legacy_local_pickup_active() {
 		$has_legacy_pickup = false;
 
 		// Get all shipping zones.
