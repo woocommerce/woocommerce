@@ -467,9 +467,7 @@ test.describe( 'Checkout Form Errors (guest user)', () => {
 	} );
 } );
 
-test.describe( 'Billing Address Form (guest user)', () => {
-	test.use( { storageState: guestFile } );
-
+test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
