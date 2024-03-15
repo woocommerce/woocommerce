@@ -150,10 +150,12 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$currency_info_all = include WC()->plugin_path() . '/i18n/currency-info.php';
 		$currency_info     = $currency_info_all[ $price->get_currency() ]['default'];
 
+		// Get $num_decimals to be passed to wc_price.
 		$locale_info_all = include WC()->plugin_path() . '/i18n/locale-info.php';
 		$locale_index    = array_search( $price->get_currency(), array_column( $locale_info_all, 'currency_code' ), true );
 		$num_decimals    = array_values( $locale_info_all )[ $locale_index ]['num_decimals'];
 
+		// Get $price_format to be passed to wc_price.
 		$currency_pos = $currency_info['currency_pos'];
 		$currencyFormats = [
 			'left'        => '%1$s%2$s',
