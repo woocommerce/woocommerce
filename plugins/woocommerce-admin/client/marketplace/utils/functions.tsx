@@ -480,7 +480,10 @@ const connectUrl = (
 		urlParams.push( [ 'wum-install-scenario', wumInstallScenario ] );
 	}
 	if ( wumInstallSuccessUrl ) {
-		urlParams.push( [ 'wum-install-success-url', wumInstallSuccessUrl ] );
+		urlParams.push( [
+			'wum-install-success-url',
+			encodeURIComponent( wumInstallSuccessUrl ),
+		] );
 	}
 
 	return appendURLParams( wccomSettings.connectURL, urlParams );

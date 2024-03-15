@@ -77,13 +77,29 @@ class WC_Helper {
 
 		// No active connection.
 		if ( ! self::is_site_connected() ) {
+			$connect_url_args = array(
+				'page'              => 'wc-addons',
+				'section'           => 'helper',
+				'wc-helper-connect' => 1,
+				'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
+			);
+
+			if ( isset( $_GET['maybe-install-wum'] ) ) {
+				$connect_url_args['maybe-install-wum'] = sanitize_text_field( wp_unslash( $_GET['maybe-install-wum'] ) );
+			} else {
+				$connect_url_args['maybe-install-wum'] = 1;
+			}
+
+			if ( isset( $_GET['wum-install-scenario'] ) ) {
+				$connect_url_args['wum-install-scenario'] = sanitize_text_field( wp_unslash( $_GET['wum-install-scenario'] ) );
+			}
+
+			if ( isset( $_GET['wum-install-success-url'] ) ) {
+				$connect_url_args['wum-install-success-url'] = sanitize_text_field( wp_unslash( $_GET['wum-install-success-url'] ) );
+			}
+
 			$connect_url = add_query_arg(
-				array(
-					'page'              => 'wc-addons',
-					'section'           => 'helper',
-					'wc-helper-connect' => 1,
-					'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
-				),
+				rawurlencode_deep( $connect_url_args ),
 				admin_url( 'admin.php' )
 			);
 
@@ -798,7 +814,7 @@ class WC_Helper {
 		}
 
 		$redirect_uri = add_query_arg(
-			$redirect_url_args,
+			rawurlencode_deep( $redirect_url_args ),
 			admin_url( 'admin.php' )
 		);
 
@@ -948,9 +964,9 @@ class WC_Helper {
 			exit;
 		}
 
-		$wum_install_url = self::get_install_base_url() . WC_Woo_Update_Manager_Plugin::get_plugin_id() . '/';
+		$wum_install_url = self::get_install_base_url() . WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG . '/';
 
-		$wum_install_url_args =[
+		$wum_install_url_args = [
 			'stop-on-success' => 1,
 		];
 
@@ -963,7 +979,7 @@ class WC_Helper {
 		}
 
 		$wum_install_url = add_query_arg(
-			$wum_install_url_args,
+			rawurlencode_deep( $wum_install_url_args ),
 			$wum_install_url
 		);
 
