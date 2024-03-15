@@ -33,6 +33,12 @@ test.describe( 'Payment setup task', () => {
 	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
 		page,
 	} ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
 		// ensure store address is a non supported country
 		await api.post( 'settings/general/batch', {
 			update: [
