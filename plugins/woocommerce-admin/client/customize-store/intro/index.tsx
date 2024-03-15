@@ -97,7 +97,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let bannerStatus: BannerStatus = 'default';
 
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';
-
+	console.log( { isDefaultTheme } );
 	switch ( true ) {
 		case isNetworkOffline: //DONE
 			bannerStatus = 'network-offline';
@@ -107,17 +107,21 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI && //DONE
 			! customizeStoreTaskCompleted:
+			console.log( 1 );
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI &&
+		case context.flowType === FlowType.noAI && //DONE
 			customizeStoreTaskCompleted &&
 			! isDefaultTheme:
+			console.log( 2 );
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted: //DONE
+			console.log( 3 );
 			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
+			console.log( 4 );
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
 			break;
 		case customizeStoreTaskCompleted && currentThemeIsAiGenerated:

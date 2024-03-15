@@ -23,56 +23,56 @@ const skipTestIfUndefined = () => {
 
 skipTestIfUndefined();
 
-test.describe('Store owner can view the Intro page', () => {
-	test.use({ storageState: process.env.ADMINSTATE });
+test.describe( 'Store owner can view the Intro page', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeAll(async ({ baseURL }) => {
+	test.beforeAll( async ( { baseURL } ) => {
 		// In some environments the tour blocks clicking other elements.
 		await setOption(
 			request,
 			baseURL,
 			'woocommerce_customize_store_onboarding_tour_hidden',
-			'yes',
+			'yes'
 		);
 
 		await features.setFeatureFlag(
 			request,
 			baseURL,
 			'customize-store',
-			true,
+			true
 		);
 
 		// Need a block enabled theme to test
-		await activateTheme('twentytwentythree');
-	});
+		await activateTheme( 'twentytwentyfour' );
+	} );
 
-	test.beforeEach(async ({ baseURL }) => {
+	test.beforeEach( async ( { baseURL } ) => {
 		try {
 			await setOption(
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
-				'no',
+				'no'
 			);
-		} catch (error) {
-			console.log('Store completed option not updated', error);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated', error );
 		}
-	});
+	} );
 
-	test.afterAll(async ({ baseURL }) => {
-		await features.resetFeatureFlags(request, baseURL);
+	test.afterAll( async ( { baseURL } ) => {
+		await features.resetFeatureFlags( request, baseURL );
 
 		// Reset theme back to twentynineteen
-		await activateTheme('twentynineteen');
+		await activateTheme( 'twentynineteen' );
 
 		// Reset tour to visible.
 		await setOption(
 			request,
 			baseURL,
 			'woocommerce_customize_store_onboarding_tour_hidden',
-			'no',
+			'no'
 		);
-	});
+	} );
 
 	test( 'it shows the offline banner when the network is offline', async ( {
 		page,
@@ -127,13 +127,63 @@ test.describe('Store owner can view the Intro page', () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'finish the flow', async ( { page } ) => {
+	test( 'it shows the "no AI" banner when the task is completed and the theme is not the default', async ( {
+		page,
+		baseURL,
+	} ) => {
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'ye,,,s'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated', error );
+		}
+		await activateTheme( 'twentytwentythree' );
+
 		await page.goto( CUSTOMIZE_STORE_URL );
 
-		await page.getByRole( 'button', { name: 'Start designing' } ).click();
-		await page
-			.getByRole( 'button', { name: 'Design a new theme' } )
-			.click();
-		await page.waitForTimeout( 10000 );
+		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
+		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Start designing' } )
+		).toBeVisible();
 	} );
-});
+
+	test.only( 'it shows the "no AI" banner, when the task is completed and the theme is not the default', async ( {
+		page,
+		baseURL,
+	} ) => {
+		try {
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'ye,,,s'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updat,ed', error );
+		}
+		await activateTheme( 'twentytwentythree' );
+
+		await page.goto( CUSTOMIZE_STORE_URL );
+
+		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
+		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'Start designing' } )
+		).toBeVisible();
+	} );
+
+	// test.only( 'finish the flo,w',, a,,,,,,s,,y,nc ( { page } ) => {
+	// 	await page.goto( CUSTOMIZE_,STO,RE_URL );
+	//
+	// 	await page.getByRole( 'button', { name: 'Start designing' } ).click();
+	// 	await page
+	// 		.getByRole( 'button', { name: 'Design a new theme' } )
+	// 		.click();
+	// 	await page.waitForTimeout( 10000 );
+	// } );
+} );
