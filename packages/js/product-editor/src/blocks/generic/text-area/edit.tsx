@@ -6,12 +6,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { createElement } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
-import { useDispatch } from '@wordpress/data';
-import {
-	BlockControls,
-	RichText,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
+import { BlockControls, RichText } from '@wordpress/block-editor';
 import classNames from 'classnames';
 
 /**
@@ -23,9 +18,9 @@ import type {
 	TextAreaBlockEditProps,
 } from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
+import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { Label } from '../../../components/label/label';
-import React from 'react';
 
 export function TextAreaBlockEdit( {
 	attributes,
@@ -67,22 +62,10 @@ export function TextAreaBlockEdit( {
 		postType,
 	} );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	const { clearSelectedBlock } = useDispatch( blockEditorStore );
-
-	function handleBlur(
-		event:
-			| React.FocusEvent< 'p', Element >
-			| React.FocusEvent< HTMLTextAreaElement >
-	) {
-		const isToolbar = event.relatedTarget?.closest(
-			'.block-editor-block-contextual-toolbar'
-		);
-		if ( ! isToolbar ) {
-			clearSelectedBlock();
-		}
-	}
+	// This is a workaround to hide the toolbar when the block is blurred.
+	// This is a temporary solution until using Gutenberg 18 with the
+	// fix from https://github.com/WordPress/gutenberg/pull/59800
+	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
 
 	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -143,7 +126,7 @@ export function TextAreaBlockEdit( {
 						placeholder={ placeholder }
 						required={ required }
 						disabled={ disabled }
-						onBlur={ handleBlur }
+						onBlur={ hideToolbar }
 					/>
 				) }
 
@@ -154,7 +137,7 @@ export function TextAreaBlockEdit( {
 						placeholder={ placeholder }
 						required={ required }
 						disabled={ disabled }
-						onBlur={ handleBlur }
+						onBlur={ hideToolbar }
 					/>
 				) }
 			</BaseControl>
