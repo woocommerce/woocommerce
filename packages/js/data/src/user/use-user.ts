@@ -17,6 +17,7 @@ import { WCUser } from './types';
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
 		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
+		// @ts-expect-error bleh
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
 			select( STORE_NAME );
 

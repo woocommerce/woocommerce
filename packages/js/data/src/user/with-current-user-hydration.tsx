@@ -25,6 +25,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
+				// @ts-expect-error bleh
 				const { isResolving, hasFinishedResolution } =
 					select( STORE_NAME );
 				return (
@@ -33,6 +34,7 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				);
 			} );
 
+			// @ts-expect-error bleh
 			const { startResolution, finishResolution, receiveCurrentUser } =
 				useDispatch( STORE_NAME );
 

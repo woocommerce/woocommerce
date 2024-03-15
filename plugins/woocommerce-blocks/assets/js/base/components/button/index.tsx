@@ -7,7 +7,6 @@ import { Button as AriakitButton } from '@ariakit/react';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import Spinner from '../../../../../packages/components/spinner';
 
 // export interface ButtonProps

@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
-import { ComboboxControl } from 'wordpress-components';
+import { Combobox as ComboboxControl } from '@ariakit/react';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
 import { useDispatch, useSelect } from '@wordpress/data';

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { SelectControl } from 'wordpress-components';
+import { Select as SelectControl } from '@ariakit/react';
 import type { SelectControl as SelectControlType } from '@wordpress/components';
 import { useEffect } from '@wordpress/element';
 import classnames from 'classnames';
