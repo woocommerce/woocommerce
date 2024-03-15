@@ -84,13 +84,15 @@ test.describe( 'Product Collection', () => {
 
 		const verifyProductContent = ( product: Locator ) => {
 			expect( product ).toContainText( 'Beanie' ); // core/post-title
-			expect( product ).toContainText( '$20.00 $15.00' ); // woocommerce/product-price
-			expect( product ).toContainText( 'SKU: WOO-BEANIE' ); // woocommerce/product-sku
+			expect( product ).toContainText(
+				'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.'
+			); // woocommerce/product-price
+			expect( product ).toContainText( 'Woo-beanie' ); // woocommerce/product-sku
 			expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
 			expect( product ).toContainText( 'This is a simple product.' ); // woocommerce/product-summary
 			expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
 			expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
-			expect( product ).toContainText( 'SALE' ); // woocommerce/product-sale-badge
+			expect( product ).toContainText( 'SaleProduct on sale' ); // woocommerce/product-sale-badge
 			expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
 		};
 
@@ -100,7 +102,7 @@ test.describe( 'Product Collection', () => {
 			await insertProductElements( pageObject );
 			await pageObject.publishAndGoToFrontend();
 
-			const product = pageObject.products.nth( 2 );
+			const product = pageObject.products.nth( 1 );
 
 			verifyProductContent( product );
 		} );
@@ -117,7 +119,7 @@ test.describe( 'Product Collection', () => {
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
-			const product = pageObject.products.nth( 2 );
+			const product = pageObject.products.nth( 1 );
 
 			verifyProductContent( product );
 		} );
@@ -129,7 +131,7 @@ test.describe( 'Product Collection', () => {
 			await editor.saveSiteEditorEntities();
 			await pageObject.goToProductCatalogFrontend();
 
-			const product = pageObject.products.nth( 2 );
+			const product = pageObject.products.nth( 1 );
 
 			verifyProductContent( product );
 		} );
