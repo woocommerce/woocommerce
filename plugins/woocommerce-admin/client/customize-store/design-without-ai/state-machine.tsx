@@ -127,7 +127,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						onDone: {
 							target: '#designWithoutAI.showAssembleHub',
 						},
-						type: 'final',
+						type: 'compound',
 					},
 				},
 			},
@@ -201,9 +201,8 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 								},
 							},
 							installFontFamilies: {
-								...installFontFamiliesState,
+								initial: installFontFamiliesState.initial,
 								states: {
-									...installFontFamiliesState.states,
 									checkFontLibrary:
 										installFontFamiliesState.states
 											.checkFontLibrary,
