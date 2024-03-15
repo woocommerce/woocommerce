@@ -161,7 +161,9 @@ export default function Products( props: ProductsProps ) {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+					redirectToCYSFlow={ () => {
+						window.location.href = customizeStoreDesignUrl;
+					} }
 				/>
 			) }
 			<ProductListContent
