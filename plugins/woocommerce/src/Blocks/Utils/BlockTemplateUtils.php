@@ -268,14 +268,21 @@ class BlockTemplateUtils {
 	 * @return array $path_list A list of paths to all template part files.
 	 */
 	public static function get_template_paths( $base_directory ) {
+		static $template_path_list = array();
+		if ( isset( $template_path_list[ $base_directory ] ) ) {
+			return $template_path_list[ $base_directory ];
+		}
 		$path_list = array();
-		if ( file_exists( $base_directory ) ) {
+		try {
 			$nested_files      = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $base_directory ) );
 			$nested_html_files = new \RegexIterator( $nested_files, '/^.+\.html$/i', \RecursiveRegexIterator::GET_MATCH );
 			foreach ( $nested_html_files as $path => $file ) {
 				$path_list[] = $path;
 			}
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Do nothing.
 		}
+		$template_path_list[ $base_directory ] = $path_list;
 		return $path_list;
 	}
 
@@ -391,7 +398,7 @@ class BlockTemplateUtils {
 		// or the stylesheet directory for child themes.
 		$possible_paths = array_reduce(
 			$possible_templates_dir,
-			function( $carry, $item ) use ( $template_filename ) {
+			function ( $carry, $item ) use ( $template_filename ) {
 				$filepath = DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . $template_filename;
 
 				$carry[] = get_stylesheet_directory() . $filepath;
@@ -570,13 +577,13 @@ class BlockTemplateUtils {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
 		$customised_template_slugs = array_map(
-			function( $template ) {
+			function ( $template ) {
 				return $template->slug;
 			},
 			array_values(
 				array_filter(
 					$templates,
-					function( $template ) {
+					function ( $template ) {
 						// This template has been customised and saved as a post.
 						return 'custom' === $template->source;
 					}
@@ -591,7 +598,7 @@ class BlockTemplateUtils {
 		return array_values(
 			array_filter(
 				$templates,
-				function( $template ) use ( $customised_template_slugs ) {
+				function ( $template ) use ( $customised_template_slugs ) {
 					// This template has been customised and saved as a post, so return it.
 					return ! ( 'theme' === $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
 				}
@@ -611,7 +618,7 @@ class BlockTemplateUtils {
 	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
 		$filtered_templates = array_filter(
 			$templates,
-			function( $template ) use ( $templates, $theme_slug ) {
+			function ( $template ) use ( $templates, $theme_slug ) {
 				if ( $template->theme === $theme_slug ) {
 					// This is a customized template based on the theme template, so it should be returned.
 					return true;
@@ -620,7 +627,7 @@ class BlockTemplateUtils {
 				// Only return it if there isn't a customized version of the theme template.
 				$is_there_a_customized_theme_template = array_filter(
 					$templates,
-					function( $theme_template ) use ( $template, $theme_slug ) {
+					function ( $theme_template ) use ( $template, $theme_slug ) {
 						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug;
 					}
 				);
@@ -700,7 +707,7 @@ class BlockTemplateUtils {
 		$saved_woo_templates = $check_query->posts;
 
 		return array_map(
-			function( $saved_woo_template ) {
+			function ( $saved_woo_template ) {
 				return self::build_template_result_from_post( $saved_woo_template );
 			},
 			$saved_woo_templates
