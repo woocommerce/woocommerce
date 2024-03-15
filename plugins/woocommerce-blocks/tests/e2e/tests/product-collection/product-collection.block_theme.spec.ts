@@ -48,7 +48,9 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Renders correctly with all Product Elements', async () => {
-		const insertProductElements = async ( { pageObject } ) => {
+		const insertProductElements = async (
+			pageObject: ProductCollectionPage
+		) => {
 			// By default there are inner blocks:
 			// - woocommerce/product-image
 			// - core/post-title
@@ -80,7 +82,16 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
+		const verifyProductContent = ( product: Locator ) => {
+			expect( product ).toContainText( 'Beanie' ); // core/post-title
+			expect( product ).toContainText( '$20.00 $15.00' ); // woocommerce/product-price
+			expect( product ).toContainText( 'SKU: WOO-BEANIE' ); // woocommerce/product-sku
+			expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
+			expect( product ).toContainText( 'This is a simple product.' ); // woocommerce/product-summary
+			expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
+			expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
 			expect( product ).toContainText( 'SALE' ); // woocommerce/product-sale-badge
+			expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
 		};
 
 		test( 'In a post', async ( { pageObject } ) => {
