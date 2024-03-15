@@ -150,7 +150,7 @@ export const useUserPreferences = () => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
-			// @ts-expect-error There are no types for this.
+			// @ts-expect-error No types exist.
 			saveUser = async ( userToSave: {
 				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };
