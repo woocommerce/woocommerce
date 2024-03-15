@@ -102,11 +102,34 @@ test.describe( 'Product Collection', () => {
 			verifyFirstProductContent( firstProduct );
 		} );
 
-		// test( 'In a Product Archive (Product Catalog)', async ( {
-		// 	pageObject,
-		// } ) => {} );
+		test( 'In a Product Archive (Product Catalog)', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+			await expect( pageObject.products ).toHaveCount( 9 );
+			await insertProductElements( { pageObject } );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToProductCatalogFrontend();
 
-		// test( 'On a Home Page', async ( { pageObject } ) => {} );
+			const firstProduct = pageObject.products.first();
+
+			verifyFirstProductContent( firstProduct );
+		} );
+
+		test( 'On a Home Page', async ( { pageObject, editor } ) => {
+			await pageObject.goToHomePageAndInsertCollection();
+			await expect( pageObject.products ).toHaveCount( 9 );
+			await insertProductElements( { pageObject } );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToProductCatalogFrontend();
+
+			const firstProduct = pageObject.products.first();
+
+			verifyFirstProductContent( firstProduct );
+		} );
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {

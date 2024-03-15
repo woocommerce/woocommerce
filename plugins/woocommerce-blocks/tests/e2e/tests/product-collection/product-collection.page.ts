@@ -5,6 +5,11 @@ import { Locator, Page } from '@playwright/test';
 import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
 import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
 
+/**
+ * Internal dependencies
+ */
+import { BLOCK_THEME_SLUG } from '../../utils/constants';
+
 export const SELECTORS = {
 	productTemplate: '.wc-block-product-template',
 	product: '.wc-block-product-template .wc-block-product',
@@ -196,13 +201,12 @@ class ProductCollectionPage {
 		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
 	}
 
-	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.templateApiUtils.revertTemplate(
-			'woocommerce/woocommerce//archive-product'
-		);
-
+	async goToTemplateAndInsertCollection(
+		postId: string,
+		collection?: Collections
+	) {
 		await this.admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId,
 			postType: 'wp_template',
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
@@ -211,6 +215,24 @@ class ProductCollectionPage {
 		await this.chooseCollectionInTemplate( collection );
 		await this.editor.openDocumentSettingsSidebar();
 		await this.editor.saveSiteEditorEntities();
+	}
+
+	async goToHomePageAndInsertCollection( collection?: Collections ) {
+		await this.goToTemplateAndInsertCollection(
+			`${ BLOCK_THEME_SLUG }//home`,
+			collection
+		);
+	}
+
+	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
+		await this.templateApiUtils.revertTemplate(
+			'woocommerce/woocommerce//archive-product'
+		);
+
+		await this.goToTemplateAndInsertCollection(
+			'woocommerce/woocommerce//archive-product',
+			collection
+		);
 	}
 
 	async searchProducts( phrase: string ) {
