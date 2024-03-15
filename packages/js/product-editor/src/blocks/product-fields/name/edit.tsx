@@ -49,6 +49,7 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
+	// @ts-expect-error Types are out of date.
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -58,6 +59,7 @@ export function Edit( {
 
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
+		// @ts-expect-error Types are out of date.
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -232,11 +234,15 @@ export function Edit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							const { slug, permalink }: Product =
-								await saveEntityRecord( 'postType', 'product', {
+							// @ts-expect-error Types are out of date.
+							const { slug, permalink } = await saveEntityRecord(
+								'postType',
+								'product',
+								{
 									id: product.id,
 									slug: updatedSlug,
-								} );
+								}
+							);
 
 							if ( slug && permalink ) {
 								editEntityRecord(
