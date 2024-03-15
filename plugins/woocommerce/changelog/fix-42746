@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add some safeguards against programmatic removal of orders due to sync when HPOS is active.

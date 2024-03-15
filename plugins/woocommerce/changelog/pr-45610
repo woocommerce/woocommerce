@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Exclude the Legacy REST API plugin from the feature compatibility UI

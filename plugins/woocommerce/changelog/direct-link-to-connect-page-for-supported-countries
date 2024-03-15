@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Redirect to WooPayments Connect page in the Payments task if the merchant is from a supported country and WooPayments is installed

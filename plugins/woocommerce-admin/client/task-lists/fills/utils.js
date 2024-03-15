@@ -11,7 +11,7 @@ const onboardingData = getAdminSetting( 'onboarding' );
 export const isImportProduct = () => {
 	return (
 		window?.wcAdminFeatures?.[ 'import-products-task' ] &&
-		onboardingData?.profile?.selling_venues &&
-		onboardingData?.profile?.selling_venues !== 'no'
+		onboardingData?.profile?.business_choice &&
+		onboardingData?.profile?.business_choice === 'im_already_selling'
 	);
 };
