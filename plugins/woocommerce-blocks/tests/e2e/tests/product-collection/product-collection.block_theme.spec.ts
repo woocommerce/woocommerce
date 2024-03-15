@@ -326,7 +326,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test.describe( 'Sync with current template (former "Inherit query from template")', () => {
+		test.describe( 'Sync with current template', () => {
 			test( 'should not be visible on posts', async ( {
 				pageObject,
 			} ) => {
