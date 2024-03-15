@@ -17,9 +17,17 @@
 		},
 		"heading": {
 			"type": "string"
+		},
+		"isPreview": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"example": {
+		"attributes": {
+			"isPreview": true
 		}
 	},
 	"apiVersion": 2,
-	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"example": {}
+	"$schema": "https://schemas.wp.org/trunk/block.json"
 }
