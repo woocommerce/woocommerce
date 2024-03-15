@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Apply upstream performance improvement to _get_templates_paths
