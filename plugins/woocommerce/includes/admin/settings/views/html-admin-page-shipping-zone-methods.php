@@ -1,4 +1,5 @@
-<?php
+<?php // phpcs:ignore Squiz.Commenting.FileComment.Missing
+
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
 
@@ -18,7 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
-<?php do_action( 'woocommerce_shipping_zone_before_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_before_methods_table', $zone );
+?>
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
@@ -93,7 +97,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_shipping_zone_after_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
+?>
 
 <p class="submit">
 	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
@@ -200,7 +207,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
 
-
 							foreach ( $methods_placed_in_order as $method ) {
 								if ( CartCheckoutUtils::is_checkout_block_default() && ! ShippingController::is_legacy_local_pickup_active() && 'local_pickup' === $method->id ) {
 									continue;
@@ -225,22 +231,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							if ( CartCheckoutUtils::is_checkout_block_default() ) {
 								if ( ShippingController::is_legacy_local_pickup_active() ) {
-									echo sprintf(
-										__(
-											/* translators: %s: Local pickup settings page URL. */
+									printf(
+										/* translators: %s: Local pickup settings page URL. */
+										esc_html__(
 											'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in  the <a href="%s">Local pickup settings page</a>.',
 											'woocommerce'
 										),
-										esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section=pickup_location'))
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
 									);
 								} else {
-									echo sprintf(
-										__(
-											/* translators: %s: Local pickup settings page URL. */
+									printf(
+										/* translators: %s: Local pickup settings page URL. */
+										esc_html__(
 											'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.',
 											'woocommerce'
 										),
-										esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section=pickup_location'))
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
 									);
 
 								}
