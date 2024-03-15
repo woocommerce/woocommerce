@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: Fix crash that occurred in description editor modal with Gutenberg 17.9
