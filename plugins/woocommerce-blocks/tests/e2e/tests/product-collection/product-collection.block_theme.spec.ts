@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Request } from '@playwright/test';
+import type { Request, Locator } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -80,19 +80,33 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
+		const verifyFirstProductContent = ( firstProduct: Locator ) => {
+			expect( firstProduct ).toContainText( 'Album' );
+			expect( firstProduct ).toContainText( '$15.00' );
+			expect( firstProduct ).toContainText( 'No Reviews' );
+			expect( firstProduct ).toContainText( 'SKU: WOO-ALBUM' );
+			expect( firstProduct ).toContainText( 'In stock' );
+			expect( firstProduct ).toContainText( 'No Reviews' );
+			expect( firstProduct ).toContainText( 'No tags' );
+			expect( firstProduct ).toContainText( 'Music' );
+		};
+
 		test( 'In a post', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
+			await expect( pageObject.products ).toHaveCount( 9 );
 			await insertProductElements( { pageObject } );
 			await pageObject.publishAndGoToFrontend();
-			expect( pageObject.productTemplate ).not.toBeNull();
-			// EXPECT
+
+			const firstProduct = pageObject.products.first();
+
+			verifyFirstProductContent( firstProduct );
 		} );
 
-		test( 'In a Product Archive (Product Catalog)', async ( {
-			pageObject,
-		} ) => {} );
+		// test( 'In a Product Archive (Product Catalog)', async ( {
+		// 	pageObject,
+		// } ) => {} );
 
-		test( 'On a Home Page', async ( { pageObject } ) => {} );
+		// test( 'On a Home Page', async ( { pageObject } ) => {} );
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {
