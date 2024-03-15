@@ -202,7 +202,9 @@ export const SidebarNavigationScreenTypography = () => {
 										<Button
 											onClick={ async () => {
 												optIn();
-												sendEvent( 'INSTALL_FONTS' );
+												window.parent.__wcCustomizeStore.sendEventToIntroMachine(
+													{ type: 'INSTALL_FONTS' }
+												);
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
