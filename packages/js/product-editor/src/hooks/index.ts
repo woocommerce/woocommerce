@@ -7,3 +7,4 @@ export { default as __experimentalUseProductEntityProp } from './use-product-ent
 export { default as __experimentalUseProductMetadata } from './use-product-metadata';
 export { useProductTemplate as __experimentalUseProductTemplate } from './use-product-template';
 export { useProductScheduled as __experimentalUseProductScheduled } from './use-product-scheduled';
+export { useClearSelectedBlockOnBlur as __experimentalClearSelectedBlockOnBlur } from './use-clear-selected-block-on-blur';
