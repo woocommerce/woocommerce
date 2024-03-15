@@ -125,11 +125,11 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
-		await page.goto( '/my-account', { waitUntil: 'commit' } );
+		await page.goto( '/my-account' );
 
-		// Verify that the user is logged out.
 		await expect(
-			page.getByRole( 'heading', { name: 'Login' } )
+			page.getByRole( 'heading', { name: 'Login' } ),
+			'User is not logged out'
 		).toBeVisible();
 
 		await frontendUtils.emptyCart();
