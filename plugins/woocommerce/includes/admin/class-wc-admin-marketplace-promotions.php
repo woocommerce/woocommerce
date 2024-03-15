@@ -31,24 +31,30 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return void
 	 */
-	public static function init_marketplace_promotions() {
-		// Add the callback for our scheduled action.
-		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
-			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
-		}
+    public static function init_marketplace_promotions() {
+        add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ) );
+        register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+    }
 
-		if ( self::is_admin_page() ) {
-			// Schedule the action twice a day, starting now.
-			if ( false === wp_next_scheduled( self::SCHEDULED_ACTION_HOOK ) ) {
-				wp_schedule_event( time(), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
-			}
+	/**
+	 * Schedule the action to fetch promotions data.
+	 */
+    public static function schedule_promotion_fetch() {
+        // Add the callback for our scheduled action.
+        if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
+            add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
+        }
+    
+        // Schedule the action twice a day using Action Scheduler
+        if ( false === as_next_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
+            as_schedule_recurring_action( time(), 12 * HOUR_IN_SECONDS, self::SCHEDULED_ACTION_HOOK );
+        }
 
-			self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
-			self::maybe_show_bubble_promotions();
-		}
-
-		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
-	}
+        if ( self::is_admin_page() ) {
+            self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
+            self::maybe_show_bubble_promotions();
+        }
+    }
 
 	/**
 	 * Check if the request is for an admin page, and not ajax.
@@ -282,7 +288,6 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function clear_scheduled_event() {
-		$timestamp = wp_next_scheduled( self::SCHEDULED_ACTION_HOOK );
-		wp_unschedule_event( $timestamp, self::SCHEDULED_ACTION_HOOK );
+		as_unschedule_all_actions( self::SCHEDULED_ACTION_HOOK );
 	}
 }
