@@ -15,7 +15,7 @@ export const useClearSelectedBlockOnBlur = () => {
 	function handleBlur( event: {
 		relatedTarget: ( EventTarget & Element ) | null;
 	} ) {
-		const isToolbar = event.relatedTarget?.closest(
+		const isToolbar = event?.relatedTarget?.closest(
 			'.block-editor-block-contextual-toolbar'
 		);
 
