@@ -660,10 +660,17 @@ class ProductCollectionPage {
 	}
 
 	private async waitForProductsToLoad() {
-		// Wait for the product blocks to be loaded.
-		await this.page.waitForSelector( 'wc-block-product-template__spinner', {
-			state: 'detached',
-		} );
+		const loaderInTemplate = this.page
+			.frameLocator( 'iframe[name="editor-canvas"]' )
+			.getByLabel( 'Block: Product Template' )
+			.locator( 'circle' );
+		const loaderInPost = this.page
+			.getByLabel( 'Block: Product Template' )
+			.locator( 'circle' );
+		await Promise.all( [
+			loaderInTemplate.waitFor( { state: 'hidden', timeout: 100000 } ),
+			loaderInPost.waitFor( { state: 'hidden', timeout: 100000 } ),
+		] );
 	}
 }
 
