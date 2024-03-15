@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Soft deprecate All Products block in favor of the Product Collection block
