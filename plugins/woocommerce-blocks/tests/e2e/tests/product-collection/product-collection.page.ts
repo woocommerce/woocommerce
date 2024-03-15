@@ -190,6 +190,7 @@ class ProductCollectionPage {
 			this.BLOCK_SLUG
 		);
 		await this.chooseCollectionInTemplate( collection );
+		await this.refreshLocators( 'editor' );
 		await this.editor.saveSiteEditorEntities();
 	}
 
