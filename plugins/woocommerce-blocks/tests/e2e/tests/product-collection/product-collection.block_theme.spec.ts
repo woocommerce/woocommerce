@@ -47,6 +47,16 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
+	test.describe( 'Renders correctly with all Product Elements', async () => {
+		test( 'In a post', async ( { pageObject } ) => {} );
+
+		test( 'In a Product Archive (Product Catalog)', async ( {
+			pageObject,
+		} ) => {} );
+
+		test( 'On a Home Page', async ( { pageObject } ) => {} );
+	} );
+
 	test.describe( 'Product Collection Sidebar Settings', () => {
 		test.beforeEach( async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
