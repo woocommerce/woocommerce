@@ -207,7 +207,8 @@ jobs:
       'project-jobs',
       'project-lint-jobs',
       'project-default-test-jobs',
-      'project-e2e-test-jobs'
+      'project-e2e-test-jobs',
+      'project-api-test-jobs'
     ]
     if: ${{ always() }}
     steps:
@@ -231,6 +232,11 @@ jobs:
           result="${{ needs.project-e2e-test-jobs.result }}"
           if [[ $result != "success" && $result != "skipped" ]]; then
             echo "One or more e2e test jobs have failed."
+            exit 1
+          fi
+          result="${{ needs.project-api-test-jobs.result }}"
+          if [[ $result != "success" && $result != "skipped" ]]; then
+            echo "One or more api test jobs have failed."
             exit 1
           fi
           echo "All jobs have completed successfully."
