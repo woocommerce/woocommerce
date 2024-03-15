@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
@@ -17,7 +16,7 @@ import { useSelect } from '@wordpress/data';
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 

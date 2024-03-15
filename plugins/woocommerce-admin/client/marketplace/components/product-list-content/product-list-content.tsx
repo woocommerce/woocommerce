@@ -9,6 +9,7 @@ import {
 } from '@wordpress/element';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
