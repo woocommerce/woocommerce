@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { Button as WPButton } from 'wordpress-components';
-import type { Button as WPButtonType } from '@wordpress/components';
 import classNames from 'classnames';
+import { Button as AriakitButton } from '@ariakit/react';
 
 /**
  * Internal dependencies
@@ -11,42 +10,45 @@ import classNames from 'classnames';
 import './style.scss';
 import Spinner from '../../../../../packages/components/spinner';
 
-export interface ButtonProps
-	extends Omit< WPButtonType.ButtonProps, 'variant' | 'href' > {
-	/**
-	 * Show spinner
-	 *
-	 * @default false
-	 */
-	showSpinner?: boolean | undefined;
-	/**
-	 * Button variant
-	 */
+// export interface ButtonProps
+// 	extends Omit< WPButtonType.ButtonProps, 'variant' | 'href' > {
+// 	/**
+// 	 * Show spinner
+// 	 *
+// 	 * @default false
+// 	 */
+// 	showSpinner?: boolean | undefined;
+// 	/**
+// 	 * Button variant
+// 	 */
+// 	variant?: 'text' | 'contained' | 'outlined';
+// 	/**
+// 	 * The URL the button should link to.
+// 	 */
+// 	href?: string | undefined;
+// }
+
+// export interface AnchorProps extends Omit< ButtonProps, 'href' > {
+// 	/**
+// 	 * Button href
+// 	 */
+// 	href?: string | undefined;
+// }
+
+type ButtonProps = {
+	className?: string;
+	showSpinner?: boolean;
+	children: React.ReactNode;
 	variant?: 'text' | 'contained' | 'outlined';
-	/**
-	 * The URL the button should link to.
-	 */
-	href?: string | undefined;
-}
+} & React.ComponentProps< typeof AriakitButton >;
 
-export interface AnchorProps extends Omit< ButtonProps, 'href' > {
-	/**
-	 * Button href
-	 */
-	href?: string | undefined;
-}
-
-/**
- * Component that visually renders a button but semantically might be `<button>` or `<a>` depending
- * on the props.
- */
 const Button = ( {
 	className,
 	showSpinner = false,
 	children,
 	variant = 'contained',
 	...props
-}: ButtonProps ): JSX.Element => {
+}: ButtonProps ) => {
 	const buttonClassName = classNames(
 		'wc-block-components-button',
 		'wp-element-button',
@@ -58,12 +60,12 @@ const Button = ( {
 	);
 
 	return (
-		<WPButton className={ buttonClassName } { ...props }>
+		<AriakitButton className={ buttonClassName } { ...props }>
 			{ showSpinner && <Spinner /> }
 			<span className="wc-block-components-button__text">
 				{ children }
 			</span>
-		</WPButton>
+		</AriakitButton>
 	);
 };
 
