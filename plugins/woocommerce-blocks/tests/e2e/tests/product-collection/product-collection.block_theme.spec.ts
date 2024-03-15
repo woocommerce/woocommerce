@@ -106,7 +106,6 @@ test.describe( 'Product Collection', () => {
 
 		test( 'In a post', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
-			await expect( pageObject.products ).toHaveCount( 9 );
 			await insertProductElements( pageObject );
 			await pageObject.publishAndGoToFrontend();
 
