@@ -205,9 +205,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		INSTALL_FONTS: {
 			target: 'designWithoutAi',
-			actions: [
-				{ type: 'updateQueryStep', step: 'design/install-fonts' },
-			],
 		},
 	},
 	states: {

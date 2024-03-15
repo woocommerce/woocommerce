@@ -29,15 +29,6 @@ export const hasStepInUrl = (
 	);
 };
 
-export const hasInstallFontsInUrl = () => {
-	const { path = '' } = getQuery() as { path: string };
-	const pathFragments = path.split( '/' );
-	return (
-		pathFragments[ 2 ] === 'design' &&
-		pathFragments[ 3 ] === 'install-fonts'
-	);
-};
-
 const installFontFamiliesState = {
 	initial: 'checkFontLibrary',
 	states: {
@@ -108,12 +99,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				always: [
 					{
 						cond: {
-							type: 'hasInstallFontsInUrl',
-						},
-						target: 'installFontFamilies',
-					},
-					{
-						cond: {
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
@@ -139,10 +124,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						installFontFamiliesState.states.checkFontLibrary,
 					pending: installFontFamiliesState.states.pending,
 					success: {
-						meta: {
-							component: AssembleHubLoader,
+						onDone: {
+							target: '#designWithoutAI.showAssembleHub',
 						},
-						entry: [ 'redirectToAssemblerHub' ],
 						type: 'final',
 					},
 				},
@@ -243,7 +227,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					component: AssembleHubLoader,
 				},
 				entry: [ 'redirectToAssemblerHub' ],
-				type: 'final',
 			},
 		},
 	},
@@ -252,7 +235,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
-			hasInstallFontsInUrl,
 			isFontLibraryAvailable,
 		},
 	}

@@ -9,7 +9,7 @@ import {
 	useContext,
 	useState,
 } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -24,6 +24,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
+import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 export const SidebarNavigationScreenTypography = () => {
 	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
@@ -202,9 +203,15 @@ export const SidebarNavigationScreenTypography = () => {
 										<Button
 											onClick={ async () => {
 												optIn();
-												window.parent.__wcCustomizeStore.sendEventToIntroMachine(
-													{ type: 'INSTALL_FONTS' }
-												);
+												if ( isIframe( window ) ) {
+													sendMessageToParent( {
+														type: 'INSTALL_FONTS',
+													} );
+												} else {
+													sendEvent(
+														'INSTALL_FONTS'
+													);
+												}
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }

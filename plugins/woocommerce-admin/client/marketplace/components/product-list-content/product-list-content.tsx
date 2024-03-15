@@ -22,7 +22,6 @@ import { Product, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { NoAIBanner } from '~/customize-store/intro/intro-banners';
-import { addQueryArgs } from '@wordpress/url';
 
 export default function ProductListContent( props: {
 	products: Product[];
