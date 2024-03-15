@@ -287,7 +287,7 @@
 		}
 
 		.theme-card__active {
-			background-color: rgba(var(--wp-admin-theme-color--rgb), .12);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.12);
 			color: var(--wp-admin-theme-color, #fff);
 		}
 
