@@ -439,39 +439,41 @@ test.describe( 'Shopper → Checkout block → Place Order', () => {
 } );
 
 test.describe( 'Checkout Form Errors', () => {
-	test.use( { storageState: guestFile } );
+	test.describe( 'Guest user', () => {
+		test.use( { storageState: guestFile } );
 
-	test( 'User can see errors when form is incomplete', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
+		test( 'can see errors when form is incomplete', async ( {
+			frontendUtils,
+			page,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
 
-		await page.getByLabel( 'Email address' ).clear();
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
+			await page.getByLabel( 'Email address' ).clear();
+			await page.getByRole( 'button', { name: 'Place order' } ).click();
 
-		// Verify that all required fields show the correct warning.
-		await expect(
-			page.getByText( 'Please enter a valid email address' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid first name' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid last name' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid address' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid city' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid zip code' )
-		).toBeVisible();
+			// Verify that all required fields show the correct warning.
+			await expect(
+				page.getByText( 'Please enter a valid email address' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Please enter a valid first name' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Please enter a valid last name' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Please enter a valid address' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Please enter a valid city' )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Please enter a valid zip code' )
+			).toBeVisible();
+		} );
 	} );
 } );
 
@@ -530,79 +532,82 @@ test.describe( 'Billing Address Form', () => {
 		phone: '',
 	};
 
-	test( 'Ensure billing is empty and shipping address is filled for guest user', async ( {
-		frontendUtils,
-		page,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.logout();
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		await checkoutPageObject.fillShippingDetails( shippingTestData );
-		await page.getByLabel( 'Use same address for billing' ).uncheck();
+	test.describe( 'Guest user', () => {
+		test.use( { storageState: guestFile } );
 
-		// Check shipping fields are filled.
-		for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			switch ( key ) {
-				case 'firstname':
-					await expect(
-						page.locator( '#shipping-first_name' )
-					).toHaveValue( value );
-					break;
-				case 'lastname':
-					await expect(
-						page.locator( '#shipping-last_name' )
-					).toHaveValue( value );
-					break;
-				case 'country':
-					await expect(
-						page.locator( '#shipping-country input' )
-					).toHaveValue( value );
-					break;
-				case 'addressfirstline':
-					await expect(
-						page.locator( '#shipping-address_1' )
-					).toHaveValue( value );
-					break;
-				case 'addresssecondline':
-					await expect(
-						page.locator( '#shipping-address_2' )
-					).toHaveValue( value );
-					break;
-				case 'state':
-					await expect(
-						page.locator( '#shipping-state input' )
-					).toHaveValue( value );
-					break;
-				default:
-					await expect(
-						page.locator( `#shipping-${ key }` )
-					).toHaveValue( value );
-			}
-		}
+		test( 'Ensure billing is empty and shipping address is filled', async ( {
+			frontendUtils,
+			page,
+			checkoutPageObject,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+			await checkoutPageObject.fillShippingDetails( shippingTestData );
+			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
-		// Check billing fields are empty.
-		for ( const [ key, value ] of Object.entries( billingTestData ) ) {
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			switch ( key ) {
-				case 'country':
-					await expect(
-						page.locator( '#billing-country input' )
-					).toHaveValue( value );
-					break;
-				case 'state':
-					await expect(
-						page.locator( '#billing-state input' )
-					).toHaveValue( value );
-					break;
-				default:
-					await expect(
-						page.locator( `#billing-${ key }` )
-					).toHaveValue( value );
+			// Check shipping fields are filled.
+			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				switch ( key ) {
+					case 'firstname':
+						await expect(
+							page.locator( '#shipping-first_name' )
+						).toHaveValue( value );
+						break;
+					case 'lastname':
+						await expect(
+							page.locator( '#shipping-last_name' )
+						).toHaveValue( value );
+						break;
+					case 'country':
+						await expect(
+							page.locator( '#shipping-country input' )
+						).toHaveValue( value );
+						break;
+					case 'addressfirstline':
+						await expect(
+							page.locator( '#shipping-address_1' )
+						).toHaveValue( value );
+						break;
+					case 'addresssecondline':
+						await expect(
+							page.locator( '#shipping-address_2' )
+						).toHaveValue( value );
+						break;
+					case 'state':
+						await expect(
+							page.locator( '#shipping-state input' )
+						).toHaveValue( value );
+						break;
+					default:
+						await expect(
+							page.locator( `#shipping-${ key }` )
+						).toHaveValue( value );
+				}
 			}
-		}
+
+			// Check billing fields are empty.
+			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				switch ( key ) {
+					case 'country':
+						await expect(
+							page.locator( '#billing-country input' )
+						).toHaveValue( value );
+						break;
+					case 'state':
+						await expect(
+							page.locator( '#billing-state input' )
+						).toHaveValue( value );
+						break;
+					default:
+						await expect(
+							page.locator( `#billing-${ key }` )
+						).toHaveValue( value );
+				}
+			}
+		} );
 	} );
 } );
