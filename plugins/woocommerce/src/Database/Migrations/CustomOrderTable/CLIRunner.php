@@ -219,6 +219,12 @@ class CLIRunner {
 
 			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
 			$order_count      = $remaining_count - $batch_size;
+
+			if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
+				wp_cache_flush_runtime();
+			}
+
+			$GLOBALS['wpdb']->flush();
 		}
 
 		$progress->finish();
@@ -308,7 +314,6 @@ class CLIRunner {
 	 *
 	 * [--re-migrate]
 	 * : Attempt to re-migrate orders that failed verification. You should only use this option when you have never run the site with HPOS as authoritative source of order data yet, or you have manually checked the reported errors, otherwise, you risk stale data overwriting the more recent data.
-	 * This option can only be enabled when --verbose flag is also set.
 	 * default: false
 	 *
 	 * ## EXAMPLES
@@ -371,6 +376,8 @@ class CLIRunner {
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
 
+		$error_processing = false;
+
 		if ( ! $order_count ) {
 			return WP_CLI::warning( __( 'There are no orders to verify, aborting.', 'woocommerce' ) );
 		}
@@ -404,53 +411,70 @@ class CLIRunner {
 			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
 			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
 			$failed_ids                  = $verbose ? array() : $failed_ids + $failed_ids_in_current_batch;
+			$error_processing            = $error_processing || ! empty( $failed_ids_in_current_batch );
 			$processed                  += count( $order_ids );
 			$batch_total_time            = microtime( true ) - $batch_start_time;
 			$batch_count ++;
 			$total_time += $batch_total_time;
 
-			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
-				$errors = wp_json_encode( $failed_ids_in_current_batch, JSON_PRETTY_PRINT );
-				WP_CLI::warning(
-					sprintf(
-					/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-						_n(
-							'%1$d error found: %2$s. Please review the error above.',
-							'%1$d errors found: %2$s. Please review the errors above.',
-							count( $failed_ids_in_current_batch ),
-							'woocommerce'
-						),
-						count( $failed_ids_in_current_batch ),
-						$errors
-					)
-				);
-				if ( $remigrate ) {
+			if ( count( $failed_ids_in_current_batch ) > 0 ) {
+				if ( $verbose ) {
+					$errors = wp_json_encode( $failed_ids_in_current_batch, JSON_PRETTY_PRINT );
 					WP_CLI::warning(
 						sprintf(
-							__( 'Attempting to remigrate...', 'woocommerce' )
+						/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+							_n(
+								'%1$d error found: %2$s. Please review the error above.',
+								'%1$d errors found: %2$s. Please review the errors above.',
+								count( $failed_ids_in_current_batch ),
+								'woocommerce'
+							),
+							count( $failed_ids_in_current_batch ),
+							$errors
 						)
 					);
-					$failed_ids = array_keys( $failed_ids_in_current_batch );
-					$this->synchronizer->process_batch( $failed_ids );
-					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids );
-					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids, $errors_in_remigrate_batch );
+				}
+
+				if ( $remigrate ) {
+					$failed_ids       = $failed_ids ? array_diff_key( $failed_ids, $failed_ids_in_current_batch ) : array();
+					$error_processing = ( ! $verbose ) && $failed_ids;
+
+					$verbose && WP_CLI::warning( sprintf( __( 'Attempting to remigrate...', 'woocommerce' ) ) );
+
+					$failed_ids_in_current_batch_keys = array_keys( $failed_ids_in_current_batch );
+					$this->synchronizer->process_batch( $failed_ids_in_current_batch_keys );
+					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids_in_current_batch_keys );
+					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids_in_current_batch_keys, $errors_in_remigrate_batch );
+
 					if ( count( $errors_in_remigrate_batch ) > 0 ) {
+						$error_processing = true;
 						$formatted_errors = wp_json_encode( $errors_in_remigrate_batch, JSON_PRETTY_PRINT );
-						WP_CLI::warning(
-							sprintf(
-							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-								_n(
-									'%1$d error found: %2$s when re-migrating order. Please review the error above.',
-									'%1$d errors found: %2$s when re-migrating orders. Please review the errors above.',
+
+						if ( $verbose ) {
+							WP_CLI::warning(
+								sprintf(
+								/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+									_n(
+										'%1$d error found: %2$s when re-migrating order. Please review the error above.',
+										'%1$d errors found: %2$s when re-migrating orders. Please review the errors above.',
+										count( $errors_in_remigrate_batch ),
+										'woocommerce'
+									),
 									count( $errors_in_remigrate_batch ),
-									'woocommerce'
-								),
-								count( $errors_in_remigrate_batch ),
-								$formatted_errors
-							)
-						);
+									$formatted_errors
+								)
+							);
+						} else {
+							array_walk(
+								$errors_in_remigrate_batch,
+								function( &$errors_for_order ) {
+									$errors_for_order[] = array( 'remigrate_failed' => true );
+								}
+							);
+							$failed_ids = $failed_ids + $errors_in_remigrate_batch;
+						}
 					} else {
-						WP_CLI::warning( 'Re-migration successful.', 'woocommerce' );
+						$verbose && WP_CLI::warning( 'Re-migration successful.', 'woocommerce' );
 					}
 				}
 			}
@@ -478,11 +502,7 @@ class CLIRunner {
 		$progress->finish();
 		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
 
-		if ( $verbose ) {
-			return;
-		}
-
-		if ( 0 === count( $failed_ids ) ) {
+		if ( ! $error_processing ) {
 			return WP_CLI::success(
 				sprintf(
 					/* Translators: %1$d is the number of migrated orders and %2$d is time taken. */
@@ -497,8 +517,6 @@ class CLIRunner {
 				)
 			);
 		} else {
-			$errors = wp_json_encode( $failed_ids, JSON_PRETTY_PRINT );
-
 			return WP_CLI::error(
 				sprintf(
 					'%1$s %2$s',
@@ -513,17 +531,19 @@ class CLIRunner {
 						$processed,
 						$total_time
 					),
-					sprintf(
-						/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-						_n(
-							'%1$d error found: %2$s. Please review the error above.',
-							'%1$d errors found: %2$s. Please review the errors above.',
+					$failed_ids
+						? sprintf(
+							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+							_n(
+								'%1$d error found: %2$s. Please review the error above.',
+								'%1$d errors found: %2$s. Please review the errors above.',
+								count( $failed_ids ),
+								'woocommerce'
+							),
 							count( $failed_ids ),
-							'woocommerce'
-						),
-						count( $failed_ids ),
-						$errors
-					)
+							wp_json_encode( $failed_ids, JSON_PRETTY_PRINT )
+						)
+						: __( 'Please review the errors above.', 'woocommerce' )
 				)
 			);
 		}
@@ -1043,6 +1063,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
 				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
 
+				// Format for NULL.
+				$hpos_value = is_null( $hpos_value ) ? '' : $hpos_value;
+				$cpt_value  = is_null( $cpt_value ) ? '' : $cpt_value;
+
 				return array(
 					'property' => $key,
 					'hpos'     => $hpos_value,
@@ -1089,6 +1113,12 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *   - posts
 	 * ---
 	 *
+	 * [--meta_keys=<meta_keys>]
+	 * : Comma separated list of meta keys to backfill.
+	 *
+	 * [--props=<props>]
+	 * : Comma separated list of order properties to backfill.
+	 *
 	 * @since 8.6.0
 	 *
 	 * @param array $args       Positional arguments passed to the command.
@@ -1116,8 +1146,14 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			WP_CLI::error( __( 'Please use different source (--from) and destination (--to) datastores.', 'woocommerce' ) );
 		}
 
+		$fields = array_intersect_key( $assoc_args, array_flip( array( 'meta_keys', 'props' ) ) );
+		foreach ( $fields as &$field_names ) {
+			$field_names = is_string( $field_names ) ? array_map( 'trim', explode( ',', $field_names ) ) : $field_names;
+			$field_names = array_unique( array_filter( array_filter( $field_names, 'is_string' ) ) );
+		}
+
 		try {
-			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to );
+			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to, $fields );
 		} catch ( \Exception $e ) {
 			WP_CLI::error(
 				sprintf(

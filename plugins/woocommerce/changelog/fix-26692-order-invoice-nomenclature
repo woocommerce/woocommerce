@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prefer the use of 'order details' (instead of 'invoice') in our order emails.

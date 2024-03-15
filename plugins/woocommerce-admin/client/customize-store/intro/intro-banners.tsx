@@ -3,12 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Button, Modal } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,6 +18,7 @@ import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
+import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
 export const BaseIntroBanner = ( {
 	bannerTitle,
@@ -217,11 +219,20 @@ export const ThemeHasModsBanner = ( {
 };
 
 export const NoAIBanner = ( {
-	sendEvent,
+	redirectToCYSFlow,
 }: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+	redirectToCYSFlow: () => void;
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
 
 	return (
 		<>
@@ -234,50 +245,19 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					setIsModalOpen( true );
+					if ( ! isDefaultTheme ) {
+						setIsModalOpen( true );
+					} else {
+						redirectToCYSFlow();
+					}
 				} }
 				showAIDisclaimer={ false }
 			/>
 			{ isModalOpen && (
-				<Modal
-					className={
-						'woocommerce-customize-store__theme-switch-warning-modal'
-					}
-					title={ __(
-						'Are you sure you want to design a new theme?',
-						'woocommerce'
-					) }
-					onRequestClose={ () => setIsModalOpen( false ) }
-					shouldCloseOnClickOutside={ false }
-				>
-					<p>
-						{ __(
-							'Your active theme will be changed and you could lose any changes you’ve made to it.',
-							'woocommerce'
-						) }
-					</p>
-					<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
-						<Button
-							onClick={ () => {
-								setIsModalOpen( false );
-							} }
-							variant="link"
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							onClick={ () => {
-								sendEvent( {
-									type: 'DESIGN_WITHOUT_AI',
-								} );
-								setIsModalOpen( false );
-							} }
-							variant="primary"
-						>
-							{ __( 'Design a new theme', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Modal>
+				<ThemeSwitchWarningModal
+					setIsModalOpen={ setIsModalOpen }
+					redirectToCYSFlow={ redirectToCYSFlow }
+				/>
 			) }
 		</>
 	);

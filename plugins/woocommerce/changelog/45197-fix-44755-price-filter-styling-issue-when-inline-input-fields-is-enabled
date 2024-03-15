@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix styling issue for the Price Filter block preventing fields from appearing inline when the Inline input fields option is enabled

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Prevent fresh_site option from being set to 0 after WooCommerce installation.

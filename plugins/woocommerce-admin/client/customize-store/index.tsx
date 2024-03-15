@@ -46,7 +46,7 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners } from './utils';
+import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
 
@@ -83,9 +83,15 @@ const redirectToWooHome = () => {
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	window.location.href =
-		_context?.intro?.themeData?._links?.browse_all?.href ??
-		getAdminLink( 'themes.php' );
+	if ( isWooExpress() ) {
+		window.location.href =
+			_context?.intro?.themeData?._links?.browse_all?.href ??
+			getAdminLink( 'themes.php' );
+	} else {
+		window.location.href = getAdminLink(
+			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+		);
+	}
 };
 
 const markTaskComplete = async () => {
@@ -174,6 +180,14 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		src: 'browserPopstateHandler',
 	},
 	on: {
+		GO_BACK_TO_DESIGN_WITH_AI: {
+			target: 'designWithAi',
+			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
+		},
+		GO_BACK_TO_DESIGN_WITHOUT_AI: {
+			target: 'intro',
+			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
 		},
@@ -292,6 +306,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 									target: 'success',
 									actions: [
 										'assignThemeData',
+										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
 									],
@@ -454,13 +469,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				FINISH_CUSTOMIZATION: {
 					target: '.postAssemblerHub',
 				},
-				GO_BACK_TO_DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				GO_BACK_TO_DESIGN_WITHOUT_AI: {
-					target: 'intro',
-					actions: [ { type: 'updateQueryStep', step: 'intro' } ],
-				},
 			},
 		},
 		transitionalScreen: {
@@ -530,6 +538,9 @@ declare global {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => void;
 		};
 	}
 }
@@ -583,6 +594,26 @@ export const CustomizeStoreController = ( {
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
 		devTools: process.env.NODE_ENV === 'development',
 	} );
+
+	useEffect( () => {
+		if ( isIframe( window ) ) {
+			return;
+		}
+		window.__wcCustomizeStore = {
+			...window.__wcCustomizeStore,
+			// This is needed because the iframe loads the entire Customize Store app.
+			// This means that the iframe instance will have different state machines
+			// than the parent window.
+			// Check https://github.com/woocommerce/woocommerce/issues/45278 for more details.
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => send( typeEvent ),
+		};
+	}, [ send ] );
+
+	window.__wcCustomizeStore = {
+		...window.__wcCustomizeStore,
+	};
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
