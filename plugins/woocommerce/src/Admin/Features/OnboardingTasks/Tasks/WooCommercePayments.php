@@ -34,7 +34,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up WooPayments', 'woocommerce' );
+		return __( 'Get paid with WooPayments', 'woocommerce' );
 	}
 
 	/**
@@ -80,18 +80,6 @@ class WooCommercePayments extends Task {
 	 */
 	public function get_action_label() {
 		return __( 'Finish setup', 'woocommerce' );
-	}
-
-	/**
-	 * Additional info.
-	 *
-	 * @return string
-	 */
-	public function get_additional_info() {
-		return __(
-			'Accept credit/debit cards and other popular payment methods with no setup or monthly fees — and manage payments right from your store dashboard.',
-			'woocommerce'
-		);
 	}
 
 	/**

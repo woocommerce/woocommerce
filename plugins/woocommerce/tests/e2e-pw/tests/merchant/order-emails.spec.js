@@ -237,7 +237,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				.getByRole( 'row' )
 				.filter( { hasText: customerBilling.email } )
 				.filter( {
-					hasText: `Invoice for order #${ orderId } on ${ storeName }`,
+					hasText: `Details for order #${ orderId } on ${ storeName }`,
 				} )
 		).toBeVisible();
 	} );
