@@ -6,9 +6,6 @@ import {
 	// @ts-expect-error no exported member.
 	type ComponentType,
 } from '@wordpress/element';
-/**
- * Internal dependencies
- */
 
 export type AttributeBindingProps = {
 	source: string;
@@ -21,7 +18,6 @@ export type BoundBlockAttributes = BlockAttributes & {
 	metadata?: {
 		bindings: MetadataBindingsProps;
 	};
-	// attribute?: string;
 };
 
 export type BoundBlockEditInstance = CoreBlockEditProps< BoundBlockAttributes >;

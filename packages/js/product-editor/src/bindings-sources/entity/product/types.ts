@@ -3,7 +3,7 @@ export type WooEntitySourceArgs = {
 	 * The kind of entity to bind.
 	 * Default is `postType`.
 	 */
-	kind?: string;
+	kind?: 'postType' | string;
 
 	/*
 	 * The name of the entity to bind.
