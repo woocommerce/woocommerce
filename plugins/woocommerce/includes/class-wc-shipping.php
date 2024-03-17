@@ -423,8 +423,8 @@ class WC_Shipping {
 			'shipping_methods' => WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods(),
 		);
 
-		foreach ( $shipping_zones as $zone_id => $zone ) {
-			foreach ( $zone['shipping_methods'] as $method_id => $method ) {
+		foreach ( $shipping_zones as $zone ) {
+			foreach ( $zone['shipping_methods'] as $method ) {
 				if ( 'local_pickup' === $method->id && $method->is_enabled() ) {
 					return true;
 				}
