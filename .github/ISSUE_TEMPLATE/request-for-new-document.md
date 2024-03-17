@@ -2,7 +2,7 @@
 name: "\U0001F4C4 Request for New Document"
 about: Suggest the creation of a new documentation topic that doesn't exist yet.
 title: "[DOC-REQ]"
-labels: 'type: documentation'
+labels: ''
 assignees: ''
 
 ---

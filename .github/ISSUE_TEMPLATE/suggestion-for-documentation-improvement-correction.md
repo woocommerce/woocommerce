@@ -2,7 +2,7 @@
 name: "\U0001F4DD Suggestion for Documentation Improvement/Correction"
 about: Propose a specific improvement or correction for an existing document.
 title: "[DOC-BUG]"
-labels: 'type: documentation'
+labels: ''
 assignees: ''
 
 ---
