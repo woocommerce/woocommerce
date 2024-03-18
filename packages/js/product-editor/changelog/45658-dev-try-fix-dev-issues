@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Update minimal wp dependencies to fix TS type issues when building the monorepo
+
