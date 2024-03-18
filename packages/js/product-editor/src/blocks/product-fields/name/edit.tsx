@@ -43,7 +43,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import { AUTO_DRAFT_NAME } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
-export function Edit( {
+export function NameBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
@@ -234,7 +234,6 @@ export function Edit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,
