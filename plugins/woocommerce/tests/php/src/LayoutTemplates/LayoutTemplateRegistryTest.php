@@ -4,8 +4,8 @@ namespace Automattic\WooCommerce\Tests\LayoutTemplates;
 
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
 use WC_Unit_Test_Case;
 
