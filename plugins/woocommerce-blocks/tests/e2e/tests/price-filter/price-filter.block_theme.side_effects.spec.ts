@@ -50,9 +50,9 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			blockData.placeholderUrl
 		);
 
-		const products = await allProductsBlock.getByRole( 'listitem' ).all();
+		const products = allProductsBlock.getByRole( 'listitem' );
 
-		expect( products ).toHaveLength( 9 );
+		await expect( products ).toHaveCount( 9 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
@@ -140,14 +140,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
-		legacyTemplate.waitFor();
-
-		const products = await legacyTemplate
+		const products = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 16 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	// eslint-disable-next-line playwright/no-skipped-test
@@ -172,12 +169,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
-		const products = await legacyTemplate
+		const products = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 1 );
+		await expect( products ).toHaveCount( 1 );
 	} );
 
 	test.afterAll( async () => {

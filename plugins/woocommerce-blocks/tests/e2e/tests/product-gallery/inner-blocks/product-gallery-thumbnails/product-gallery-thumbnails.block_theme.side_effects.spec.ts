@@ -480,11 +480,11 @@ test.describe( `${ blockData.name }`, () => {
 				'4.2'
 			);
 
-			let numberOfThumbnailsOnScreen = await thumbnailsBlock
-				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
-				.all();
+			let numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 
-			expect( numberOfThumbnailsOnScreen ).toHaveLength( 4 );
+			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 4 );
 
 			await changeNumberOfThumbnailsInputValue(
 				page,
@@ -492,11 +492,11 @@ test.describe( `${ blockData.name }`, () => {
 				'4.7'
 			);
 
-			numberOfThumbnailsOnScreen = await thumbnailsBlock
-				.locator( '.wc-block-product-gallery-thumbnails__thumbnail' )
-				.all();
+			numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
 
-			expect( numberOfThumbnailsOnScreen ).toHaveLength( 5 );
+			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
 		} );
 	} );
 } );
