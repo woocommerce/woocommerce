@@ -12,7 +12,7 @@ export class CartPage {
 
 	async findProductRow( productName: string ) {
 		return this.page.locator( '.wc-block-cart-items__row', {
-			hasText: new RegExp( `^${ productName }$` ), // exact match
+			hasText: new RegExp( productName ),
 		} );
 	}
 }
