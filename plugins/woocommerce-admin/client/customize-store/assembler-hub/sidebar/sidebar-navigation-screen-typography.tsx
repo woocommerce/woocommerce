@@ -201,7 +201,7 @@ export const SidebarNavigationScreenTypography = () => {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ async () => {
+											onClick={ () => {
 												optIn();
 												if ( isIframe( window ) ) {
 													sendMessageToParent( {
