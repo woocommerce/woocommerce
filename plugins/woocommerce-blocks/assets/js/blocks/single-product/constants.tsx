@@ -27,7 +27,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		[
 			[
 				'core/column',
-				{ templateLock: false },
+				{},
 				[
 					[
 						'woocommerce/product-image',
