@@ -91,7 +91,7 @@ export default function ProductListContent( props: {
 											[ 'utm_medium', 'product' ],
 											[ 'utm_campaign', 'wcaddons' ],
 											[ 'utm_content', 'devpartner' ],
-									  ] )
+										] )
 									: '',
 								price: product.price,
 								url: appendURLParams(
