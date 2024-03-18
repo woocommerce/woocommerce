@@ -425,6 +425,7 @@ class Init {
 	 * This is a fallback/temporary solution until
 	 * the Gutenberg core version registers the metadata attribute.
 	 * @see https://github.com/WordPress/gutenberg/blob/6aaa3686ae67adc1a6a6b08096d3312859733e1b/lib/compat/wordpress-6.5/blocks.php#L27-L47
+	 * ToDo: Remove this method once the Gutenberg core version registers the metadata attribute.
 	 *
 	 * @param array $args Array of arguments for registering a block type.
 	 * @return array $args
