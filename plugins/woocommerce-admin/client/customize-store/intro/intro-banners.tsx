@@ -229,6 +229,7 @@ export const NoAIBanner = ( {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore - Resolved DT types don't have this type available.
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
