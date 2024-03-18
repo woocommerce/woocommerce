@@ -133,19 +133,24 @@ const getProgressBarPluginConfig = ( name ) => {
 };
 
 const getCacheGroups = () => ( {
-	'base-components': {
-		test: /\/assets\/js\/base\/components\//,
-		name( module, chunks, cacheGroupKey ) {
-			const moduleFileName = module
-				.identifier()
-				.split( '/' )
-				.reduceRight( ( item ) => item );
-			const allChunksNames = chunks
-				.map( ( item ) => item.name )
-				.join( '~' );
-			return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-		},
+	defaultVendors: {
+		test: /[\\/]node_modules[\\/]/,
+		priority: -10,
+		reuseExistingChunk: true,
 	},
+	// 'base-components': {
+	// 	test: /\/assets\/js\/base\/components\//,
+	// 	name( module, chunks, cacheGroupKey ) {
+	// 		const moduleFileName = module
+	// 			.identifier()
+	// 			.split( '/' )
+	// 			.reduceRight( ( item ) => item );
+	// 		const allChunksNames = chunks
+	// 			.map( ( item ) => item.name )
+	// 			.join( '~' );
+	// 		return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+	// 	},
+	// },
 	'base-context': {
 		test: /\/assets\/js\/base\/context\//,
 		name( module, chunks, cacheGroupKey ) {

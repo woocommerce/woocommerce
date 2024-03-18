@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Placeholder, Button } from '@wordpress/components';
-import { Icon, shipping } from '@wordpress/icons';
+import { Button } from '@ariakit/react';
 import { ADMIN_URL } from '@woocommerce/settings';
+// import { Icon, shipping } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -13,11 +13,12 @@ import './style.scss';
 
 const NoShippingPlaceholder = () => {
 	return (
-		<Placeholder
-			icon={ <Icon icon={ shipping } /> }
-			label={ __( 'Shipping options', 'woocommerce' ) }
-			className="wc-block-checkout__no-shipping-placeholder"
-		>
+		// <Placeholder
+		// 	icon={ <Icon icon={ shipping } /> }
+		// 	label={ __( 'Shipping options', 'woocommerce' ) }
+		// 	className="wc-block-checkout__no-shipping-placeholder"
+		// >
+		<div>
 			<span className="wc-block-checkout__no-shipping-placeholder-description">
 				{ __(
 					'Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here.',
@@ -32,7 +33,8 @@ const NoShippingPlaceholder = () => {
 			>
 				{ __( 'Configure Shipping Options', 'woocommerce' ) }
 			</Button>
-		</Placeholder>
+		</div>
+		// </Placeholder>
 	);
 };
 

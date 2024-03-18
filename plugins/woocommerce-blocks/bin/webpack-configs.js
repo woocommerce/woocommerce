@@ -771,6 +771,7 @@ const getStylingConfig = ( options = {} ) => {
 		},
 		optimization: {
 			splitChunks: {
+				chunks: 'all',
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					editorStyle: {
