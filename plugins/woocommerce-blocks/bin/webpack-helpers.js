@@ -131,6 +131,11 @@ const getProgressBarPluginConfig = ( name ) => {
 };
 
 const getCacheGroups = () => ( {
+	vendor: {
+		test: /[\\/]node_modules[\\/]/,
+		name: 'vendor',
+		chunks: 'all',
+	},
 	'base-components': {
 		test: /\/assets\/js\/base\/components\//,
 		name( module, chunks, cacheGroupKey ) {

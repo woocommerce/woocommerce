@@ -375,23 +375,11 @@ const getFrontConfig = ( options = {} ) => {
 			concatenateModules:
 				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
 			splitChunks: {
+				chunks: 'all',
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					...getCacheGroups(),
-					'base-components': {
-						test: /\/assets\/js\/base\/components\//,
-						name( module, chunks, cacheGroupKey ) {
-							const moduleFileName = module
-								.identifier()
-								.split( '/' )
-								.reduceRight( ( item ) => item );
-							const allChunksNames = chunks
-								.map( ( item ) => item.name )
-								.join( '~' );
-							return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-						},
-					},
 				},
 			},
 			minimizer: [
@@ -800,21 +788,6 @@ const getStylingConfig = ( options = {} ) => {
 						priority: 10,
 					},
 					...getCacheGroups(),
-					'base-components': {
-						test: /\/assets\/js\/base\/components\//,
-						name( module, chunks, cacheGroupKey ) {
-							const moduleFileName = module
-								.identifier()
-								.split( '/' )
-								.reduceRight( ( item ) => item )
-								.split( '|' )
-								.reduce( ( item ) => item );
-							const allChunksNames = chunks
-								.map( ( item ) => item.name )
-								.join( '~' );
-							return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
-						},
-					},
 				},
 			},
 		},
