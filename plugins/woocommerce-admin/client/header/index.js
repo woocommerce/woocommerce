@@ -100,7 +100,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const { isLoading, launchStatus, launchYourStoreEnabled } =
+	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
 		useLaunchYourStore();
 	const showLaunchYourStoreStatus = launchYourStoreEnabled && ! isLoading;
 
@@ -137,7 +137,10 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				</Text>
 
 				{ showLaunchYourStoreStatus && (
-					<LaunchYourStoreStatus status={ launchStatus } />
+					<LaunchYourStoreStatus
+						comingSoon={ comingSoon }
+						storePagesOnly={ storePagesOnly }
+					/>
 				) }
 
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
