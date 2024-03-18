@@ -47,6 +47,15 @@ abstract class WC_Product_Module {
 	abstract public static function get_slug();
 
 	/**
+	 * Get pass through methods.
+	 *
+	 * @return string
+	 */
+	public static function get_passthrough_methods() {
+		return array();
+	}
+
+	/**
 	 * Get the product property that determines if this module is enabled or not.
 	 * Defaults to the module slug.
 	 *

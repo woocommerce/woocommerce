@@ -54,6 +54,16 @@ class WC_Product_Module_Variable extends WC_Product_Module {
 		return 'variable';
 	}
 
+	public static function get_passthrough_methods() {
+		return array(
+			'is_variable'
+		);
+	}
+
+	public function is_variable() {
+		return true;
+	}
+
 	/**
 	 * Get compatible modules.
 	 */

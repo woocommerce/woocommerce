@@ -23,6 +23,26 @@ class WC_Product_Modular extends WC_Product {
     private $modules = array();
 
     /**
+	 * Aliased methods.
+	 *
+	 * @var array
+	 */
+    private $aliased_methods = array();
+
+    /**
+     * Allow modules to alias certain methods and pass through to the module.
+     */
+    public function __call( $name, $parameters ) {
+        if ( ! isset( $this->aliased_methods[ $name ] ) ) {
+            throw new BadMethodCallException( "Method {$name} does not exist." );
+        }
+
+        $method = $this->aliased_methods[ $name ];
+
+        return call_user_func_array( $method, $parameters );
+    }
+
+    /**
 	 * Get the product if ID is passed, otherwise the product is new and empty.
 	 * This class should NOT be instantiated, but the wc_get_product() function
 	 * should be used. It is possible, but the wc_get_product() is preferred.
@@ -34,7 +54,12 @@ class WC_Product_Modular extends WC_Product {
 		parent::__construct( $product );
 
         foreach ( $modules as $module ) {
-            $this->modules[ $module::get_slug() ] = new $module( $this );
+            $module_instance                      = new $module( $this );
+            $this->modules[ $module::get_slug() ] = $module_instance;
+            $passthrough_methods                  = $module::get_passthrough_methods();
+            foreach ( $passthrough_methods as $method ) {
+                $this->aliased_methods[ $method ] = array( $module_instance, $method );
+            }
         }
 	}
 
