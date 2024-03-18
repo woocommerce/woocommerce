@@ -37,7 +37,7 @@ test.describe( 'Payment setup task', () => {
 		await page.locator( 'text=Get paid' ).click();
 		await expect(
 			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'WooPayments' );
+		).toHaveText( 'Get paid' );
 	} );
 
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
