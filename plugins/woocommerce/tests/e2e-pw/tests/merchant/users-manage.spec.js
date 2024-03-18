@@ -1,68 +1,95 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
+const now = Date.now();
+
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
-	customer: async ( { api }, use ) => {
-		let customer;
+	customer: async ( { api, wpApi }, use ) => {
+		let user = {
+			username: `customer.${ now }`,
+			email: `customer.${ now }@example.com`,
+		};
+		await api.post( 'customers', user ).then( ( response ) => {
+			user = response.data;
+		} );
 
-		await api
-			.post( 'customers', {
-				email: 'john.doe@example.com',
-				first_name: 'John',
-				last_name: 'Doe',
-				username: 'john.doe',
-				billing: {
-					first_name: 'John',
-					last_name: 'Doe',
-					company: '',
-					address_1: '969 Market',
-					address_2: '',
-					city: 'San Francisco',
-					state: 'CA',
-					postcode: '94103',
-					country: 'US',
-					email: 'john.doe@example.com',
-					phone: '(555) 555-5555',
-				},
-				shipping: {
-					first_name: 'John',
-					last_name: 'Doe',
-					company: '',
-					address_1: '969 Market',
-					address_2: '',
-					city: 'San Francisco',
-					state: 'CA',
-					postcode: '94103',
-					country: 'US',
-				},
-			} )
-			.then( ( response ) => {
-				customer = response.data;
-			} );
+		await use( user );
 
-		await use( customer );
+		// Use wp api instead, because the wc api incorrectly returns 400 instead of 404 if the user is already deleted.
+		// To avoid test failure in case of 400, an exception needs to be added required in the validateStatus api definition,
+		// which is not ideal, because we want 400 errors to be thrown
+		await wpApi.delete( `/wp-json/wp/v2/users/${ user.id }`, {
+			data: {
+				force: true,
+				reassign: 1,
+			},
+		} );
+	},
+	manager: async ( { wpApi }, use ) => {
+		let user = {
+			username: `manager.${ now }`,
+			email: `manager.${ now }@example.com`,
+			password: 'ewdveth345tgrg',
+			roles: [ 'shop_manager' ],
+		};
 
-		await api.delete( `customers/${ customer.id }`, { force: true } );
+		const response = await wpApi.post( '/wp-json/wp/v2/users', {
+			data: user,
+		} );
+		user = await response.json();
+
+		await use( user );
+
+		await wpApi.delete( `/wp-json/wp/v2/users/${ user.id }`, {
+			data: {
+				force: true,
+				reassign: 1,
+			},
+		} );
 	},
 } );
 
-test( 'can edit a customer', async ( { page, customer } ) => {
+async function userDeletionTest( page, username ) {
+	await page.goto( `wp-admin/users.php?s=${ username }` );
+
+	await test.step( 'hover the the username and delete', async () => {
+		await page.getByRole( 'link', { name: username, exact: true } ).hover();
+		await page.getByRole( 'link', { name: 'Delete' } ).click();
+	} );
+
+	await test.step( 'confirm deletion', async () => {
+		await expect( page.getByText( `${ username }` ) ).toBeVisible();
+		await page.getByRole( 'button', { name: 'Confirm Deletion' } ).click();
+	} );
+
+	await test.step( 'verify the user was deleted', async () => {
+		await expect( page.getByText( 'User deleted' ) ).toBeVisible();
+		await page.goto( `wp-admin/users.php?s=${ username }` );
+		await expect( page.locator( '#the-list tr' ) ).toHaveCount( 1 );
+		await expect( page.getByText( 'No users found' ) ).toBeVisible();
+	} );
+}
+
+test( `can edit a customer`, async ( { page, customer } ) => {
 	await page.goto( `wp-admin/user-edit.php?user_id=${ customer.id }` );
 
-	await test.step( 'edit the customer name', async () => {} );
-
-	await test.step( 'verify the changes', async () => {
-		// await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
-		// 	newProduct.name
-		// );
-		// await expect( page.locator( '.wp-editor-area' ).first() ).toContainText(
-		// 	newProduct.description
-		// );
-		// await expect( page.getByLabel( 'Regular price ($)' ) ).toHaveValue(
-		// 	newProduct.regularPrice
-		// );
-		// await expect( page.getByLabel( 'Sale price ($)' ) ).toHaveValue(
-		// 	newProduct.salePrice
-		// );
+	await test.step( 'update user data', async () => {
+		await expect( page ).toHaveTitle( /Edit User/ );
 	} );
+} );
+
+test( `can edit a shop manager`, async ( { page, manager } ) => {
+	await page.goto( `wp-admin/user-edit.php?user_id=${ manager.id }` );
+
+	await test.step( 'update user data', async () => {
+		await expect( page ).toHaveTitle( /Edit User/ );
+	} );
+} );
+
+test( `can delete a customer`, async ( { page, customer } ) => {
+	await userDeletionTest( page, customer.username );
+} );
+
+test( `can delete a shop manager`, async ( { page, manager } ) => {
+	await userDeletionTest( page, manager.username );
 } );
