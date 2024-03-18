@@ -110,6 +110,13 @@ export const getQueryExcludedScreens = () =>
 		'homescreen',
 	] );
 
+export const getScreenFromUrl = ( url = window.location.href ) => {
+	const urlObject = new URL( url );
+	if ( isWCAdmin( url ) ) {
+		return getScreenFromPath( urlObject.searchParams.get( 'path' ) );
+	}
+};
+
 /**
  * Retrieve a string 'name' representing the current screen
  *
