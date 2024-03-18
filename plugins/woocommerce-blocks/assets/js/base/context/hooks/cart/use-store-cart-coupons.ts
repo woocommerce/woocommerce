@@ -49,17 +49,13 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 		select( CHECKOUT_STORE_KEY ).getOrderId()
 	);
 
-	// Check if we're on the cart or checkout page and set the error message accordingly.
+	// Return cart, checkout or generic error message.
 	const getCouponErrorMessage = ( error: ApiErrorResponse ) => {
-		// Set the Checkout error message.
 		if ( orderId && orderId > 0 && error?.data?.details?.checkout ) {
 			return error.data.details.checkout;
-		}
-		// Set the Cart error message.
-		else if ( error?.data?.details?.cart ) {
+		} else if ( error?.data?.details?.cart ) {
 			return error.data.details.cart;
 		}
-
 		return error.message;
 	};
 
