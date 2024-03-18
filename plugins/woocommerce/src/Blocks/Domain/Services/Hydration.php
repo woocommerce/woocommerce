@@ -140,7 +140,7 @@ class Hydration {
 
 		/**
 		 * For backward compatibility with WC 8.6 and earlier, we manually call this filter that is otherwise called by WP's REST API. This provides the opportunity for 3PD plugins to hook into and change the response data.
-		 *
+		 * Note that altering the Store API final response is something we discourage and won't ultimately support. This will be deprecated in favor of better, more integrated solutions.
 		 * See `rest_request_before_callbacks` filter in WP core's `class-wp-rest-server.php`.
 		 *
 		 * @since 8.7.0
