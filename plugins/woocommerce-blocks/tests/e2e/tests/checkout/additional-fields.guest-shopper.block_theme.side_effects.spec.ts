@@ -147,36 +147,29 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			await checkoutPageObject.page.evaluate(
 				'document.activeElement.blur()'
 			);
-
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )
 				.check();
 			await checkoutPageObject.page
 				.getByLabel( 'Do you want to subscribe to our newsletter?' )
 				.check();
+
+			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
+				( request ) => {
+					return request.url().includes( 'batch' );
+				}
+			);
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
-
-			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
-				( { url } ) => {
-					return url().includes( 'batch' );
-				}
-			);
-			await checkoutPageObject.page
-				.getByRole( 'group', {
-					name: 'Billing address',
-				} )
-				.getByLabel( 'Can a truck fit down your road?' )
-				.check();
 			await formUpdateRequestPromise;
 
 			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
-				( { url } ) => {
-					return url().includes( 'batch' );
+				( request ) => {
+					return request.url().includes( 'batch' );
 				}
 			);
 			await checkoutPageObject.page

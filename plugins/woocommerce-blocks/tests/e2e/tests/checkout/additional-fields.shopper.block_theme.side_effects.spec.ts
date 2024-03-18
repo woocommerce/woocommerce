@@ -278,8 +278,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.fill( 'wide' );
 
 			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
-				( { url } ) => {
-					return url().includes( 'batch' );
+				( request ) => {
+					return request.url().includes( 'batch' );
 				}
 			);
 			await checkoutPageObject.page
@@ -299,8 +299,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.fill( 'wide' );
 
 			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
-				( { url } ) => {
-					return url().includes( 'batch' );
+				( request ) => {
+					return request.url().includes( 'batch' );
 				}
 			);
 			await checkoutPageObject.page
