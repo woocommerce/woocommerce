@@ -104,6 +104,8 @@ test.describe( 'Product Collection', () => {
 			await expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
 		};
 
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'In a post', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 			await insertProductElements( pageObject );
@@ -114,6 +116,8 @@ test.describe( 'Product Collection', () => {
 			await verifyProductContent( product );
 		} );
 
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'In a Product Archive (Product Catalog)', async ( {
 			pageObject,
 			editor,
@@ -130,6 +134,8 @@ test.describe( 'Product Collection', () => {
 			await verifyProductContent( product );
 		} );
 
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'On a Home Page', async ( { pageObject, editor } ) => {
 			await pageObject.goToHomePageAndInsertCollection();
 
