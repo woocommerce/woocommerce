@@ -32,6 +32,7 @@ for ( const testData of testToRun ) {
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			admin,
 			frontendUtils,
+			editor,
 			editorUtils,
 			page,
 		} ) => {
@@ -40,11 +41,11 @@ for ( const testData of testToRun ) {
 				testData.templateName,
 				testData.templateType
 			);
-			await editorUtils.editor.insertBlock( {
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
 			await cli(
 				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
@@ -64,7 +65,7 @@ for ( const testData of testToRun ) {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( { frontendUtils, page } );

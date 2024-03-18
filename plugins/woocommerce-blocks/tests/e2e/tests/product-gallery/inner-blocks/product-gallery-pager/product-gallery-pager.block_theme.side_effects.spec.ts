@@ -65,7 +65,7 @@ test.describe( `${ blockData.name }`, () => {
 
 	test( 'Renders Product Gallery Pager block on the editor and frontend side', async ( {
 		page,
-		editorUtils,
+		editor,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
@@ -76,7 +76,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 
 		await page.goto( blockData.productPage );
 

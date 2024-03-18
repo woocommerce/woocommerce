@@ -27,6 +27,7 @@ test.describe( 'Single Product template', async () => {
 
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
+		editor,
 		editorUtils,
 		page,
 	} ) => {
@@ -57,11 +58,11 @@ test.describe( 'Single Product template', async () => {
 		await page.getByLabel( 'Fallback content' ).click();
 
 		// Edit the template.
-		await editorUtils.editor.insertBlock( {
+		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 
 		// Verify edits are visible.
 		await page.goto( testData.permalink );

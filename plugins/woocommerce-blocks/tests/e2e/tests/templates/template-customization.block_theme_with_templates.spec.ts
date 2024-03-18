@@ -24,6 +24,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
+			editor,
 			editorUtils,
 			frontendUtils,
 			page,
@@ -33,11 +34,11 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				testData.templateName,
 				testData.templateType
 			);
-			await editorUtils.editor.insertBlock( {
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
 			await expect(
@@ -74,6 +75,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
 				frontendUtils,
+				editor,
 				editorUtils,
 				page,
 			} ) => {
@@ -82,13 +84,13 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 					testData.fallbackTemplate?.templateName || '',
 					testData.templateType
 				);
-				await editorUtils.editor.insertBlock( {
+				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
 						content: fallbackTemplateUserText,
 					},
 				} );
-				await editorUtils.saveTemplate();
+				await editor.saveSiteEditorEntities();
 				await testData.visitPage( { frontendUtils, page } );
 				await expect(
 					page.getByText( fallbackTemplateUserText )
