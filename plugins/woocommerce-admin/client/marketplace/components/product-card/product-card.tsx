@@ -124,10 +124,10 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const classNames = classnames(
 		'woocommerce-marketplace__product-card',
 		`woocommerce-marketplace__product-card--${ type }`,
-		product.label ? `woocommerce-marketplace__product-card-label--${ product.label }` : null,
 		{
 			'is-loading': isLoading,
 			'is-small': props.small,
+			'is-sponsored': isSponsored(),
 		}
 	);
 
