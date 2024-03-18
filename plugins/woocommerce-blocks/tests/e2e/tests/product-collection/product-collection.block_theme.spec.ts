@@ -117,7 +117,7 @@ test.describe( 'Product Collection', () => {
 			await expect( salePoducts ).toHaveCount( 6 );
 		} );
 
-		test.only( 'Products can be filtered based on selection in handpicked products option', async ( {
+		test( 'Products can be filtered based on selection in handpicked products option', async ( {
 			pageObject,
 		} ) => {
 			await pageObject.addFilter( 'Show Hand-picked Products' );
