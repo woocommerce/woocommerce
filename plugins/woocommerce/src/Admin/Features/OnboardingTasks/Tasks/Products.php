@@ -43,13 +43,7 @@ class Products extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( $this->get_parent_option( 'use_completed_title' ) === true ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added products', 'woocommerce' );
-			}
-			return __( 'Add products', 'woocommerce' );
-		}
-		return __( 'Add my products', 'woocommerce' );
+		return __( 'Add your products', 'woocommerce' );
 	}
 
 	/**

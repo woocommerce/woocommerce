@@ -3,11 +3,10 @@
  * SimpleProductTemplate
  */
 
-namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\DownloadableProductTrait;
 
 /**
  * Simple Product Template.
@@ -551,23 +550,64 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 		// Attributes section.
-		$product_catalog_section = $organization_group->add_section(
+		$product_attributes_section = $organization_group->add_section(
 			array(
 				'id'         => 'product-attributes-section',
 				'order'      => 20,
 				'attributes' => array(
 					'title'       => __( 'Attributes', 'woocommerce' ),
-					'description' => __( 'Add descriptive pieces of information that customers can use to filter and search for this product. <a href="https://woo.com/document/managing-product-taxonomies/#product-attributes" target="_blank" rel="noreferrer">Learn more</a>.', 'woocommerce' ),
+					'description' => __( 'Use global attributes to allow shoppers to filter and search for this product. Use custom attributes to provide detailed product information.', 'woocommerce' ),
+					'blockGap'    => 'unit-40',
 				),
 			)
 		);
-		$product_catalog_section->add_block(
+		$product_attributes_section->add_block(
 			array(
 				'id'        => 'product-attributes',
 				'blockName' => 'woocommerce/product-attributes-field',
 				'order'     => 10,
 			)
 		);
+
+		if ( Features::is_enabled( 'product-custom-fields' ) ) {
+			$organization_group->add_section(
+				array(
+					'id'    => 'product-custom-fields-wrapper-section',
+					'order' => 30,
+				)
+			)->add_block(
+				array(
+					'id'         => 'product-custom-fields-toggle',
+					'blockName'  => 'woocommerce/product-custom-fields-toggle-field',
+					'order'      => 10,
+					'attributes' => array(
+						'label' => __( 'Show custom fields', 'woocommerce' ),
+					),
+				)
+			)->add_block(
+				array(
+					'id'         => 'product-custom-fields-section',
+					'blockName'  => 'woocommerce/product-section',
+					'order'      => 10,
+					'attributes' => array(
+						'blockGap'    => 'unit-30',
+						'title'       => __( 'Custom fields', 'woocommerce' ),
+						'description' => sprintf(
+							/* translators: %1$s: Custom fields guide link opening tag. %2$s: Custom fields guide link closing tag. */
+							__( 'Custom fields can be used in a variety of ways, such as sharing more detailed product information, showing more input fields, or internal inventory organization. %1$sRead more about custom fields%2$s', 'woocommerce' ),
+							'<a href="https://wordpress.org/documentation/article/assign-custom-fields/" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
+					),
+				)
+			)->add_block(
+				array(
+					'id'        => 'product-custom-fields',
+					'blockName' => 'woocommerce/product-custom-fields',
+					'order'     => 10,
+				)
+			);
+		}
 	}
 
 	/**

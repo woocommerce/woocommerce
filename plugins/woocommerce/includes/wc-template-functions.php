@@ -1245,6 +1245,15 @@ if ( ! function_exists( 'woocommerce_template_loop_category_link_close' ) ) {
 	}
 }
 
+if ( ! function_exists( 'woocommerce_product_taxonomy_archive_header' ) ) {
+	/**
+	 * Output the products header on taxonomy archives.
+	 */
+	function woocommerce_product_taxonomy_archive_header() {
+		wc_get_template( 'loop/header.php' );
+	}
+}
+
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	/**
 	 * Show an archive description on taxonomy archives.

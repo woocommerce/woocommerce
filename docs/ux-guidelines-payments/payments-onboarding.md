@@ -28,7 +28,7 @@ Follow the Woo User Experience guidelines for [Settings](docs/user-experience/se
 
 Include sensible default settings to minimize the configuration effort for the user.
 
-After the merchant has completed all the actions that are required for your plugin’s onboarding, merchants are redirected back to the Woo admin to select payment methods to offer and configure additional settings for the plugin.
+After the merchant has completed all the actions that are required for your plugin's onboarding, merchants are redirected back to the Woo admin to select payment methods to offer and configure additional settings for the plugin.
 
 If you're offering multiple payment methods within the plugin, present the choices clearly to the merchant and provide an indication of which payment methods are enabled.
 

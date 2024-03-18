@@ -317,7 +317,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				/**
 				 * Fires immediately after an order is trashed.
 				 *
-				 * @since
+				 * @since 2.7.0
 				 *
 				 * @param int      $order_id ID of the order that has been trashed.
 				 */
