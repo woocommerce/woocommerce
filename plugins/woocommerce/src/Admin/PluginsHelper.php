@@ -540,9 +540,7 @@ class PluginsHelper {
 	 * @return void
 	 */
 	public static function maybe_show_connect_notice_in_plugin_list() {
-		global $pagenow;
-
-		if ( 'plugins.php' !== $pagenow ) {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
 			return;
 		}
 
