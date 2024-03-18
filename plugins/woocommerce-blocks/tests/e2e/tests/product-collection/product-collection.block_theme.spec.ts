@@ -441,8 +441,10 @@ test.describe( 'Product Collection', () => {
 
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -493,10 +495,12 @@ test.describe( 'Product Collection', () => {
 
 			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -746,7 +750,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( "Product Catalog Collection can be added in post and doesn't inherit query from template", async ( {
+		test( "Product Catalog Collection can be added in post and doesn't sync query with template", async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
@@ -764,12 +768,14 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
-		test( 'Product Catalog Collection can be added in product archive and inherits query from template', async ( {
+		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
+			editor,
 		} ) => {
 			await pageObject.goToProductCatalogAndInsertCollection(
 				'productCatalog'
 			);
+			await editor.openDocumentSettingsSidebar();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(
