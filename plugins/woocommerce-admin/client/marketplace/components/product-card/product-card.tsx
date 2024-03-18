@@ -24,7 +24,9 @@ export interface ProductCardProps {
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
-	const SPONSORED_PRODUCT_LABEL = 'promoted';
+	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
+	const SPONSORED_PRODUCT_STRIPE_SIZE = '8px'; // unfortunately can't be defined in CSS - height of "stripe"
+
 	const { isLoading, type } = props;
 	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
@@ -45,6 +47,20 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
+	}
+
+	/**
+	 * Sponsored products with a primary_color set have that color applied as a dynamically-colored stripe at the top of the card.
+	 * In an ideal world this could be set in a data- attribute and we'd use CSS calc() and attr() to get it, but
+	 * attr() doesn't have very good support yet, so we need to apply some inline CSS to stripe sponsored results.
+	 */
+	function inlineCss(): Object {
+		if ( ! isSponsored() || ! product.primary_color ) {
+			return {};
+		}
+		return {
+			background: `linear-gradient(${product.primary_color} 0, ${product.primary_color} ${SPONSORED_PRODUCT_STRIPE_SIZE}, white ${SPONSORED_PRODUCT_STRIPE_SIZE}, white)`
+		};
 	}
 
 	function recordTracksEvent( event: string, data: ExtraProperties ) {
@@ -116,7 +132,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	);
 
 	return (
-		<Card className={ classNames } aria-hidden={ isLoading }>
+		<Card className={ classNames } aria-hidden={ isLoading } style={ inlineCss() }>
 			<div className="woocommerce-marketplace__product-card__content">
 				{ isTheme && (
 					<div className="woocommerce-marketplace__product-card__image">
