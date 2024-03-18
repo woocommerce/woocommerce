@@ -29,6 +29,15 @@ export const hasStepInUrl = (
 	);
 };
 
+export const hasFontInstallInUrl = () => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 2 ] === 'design' &&
+		pathFragments[ 3 ] === 'install-fonts'
+	);
+};
+
 const installFontFamiliesState = {
 	initial: 'checkFontLibrary',
 	states: {
@@ -99,6 +108,13 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				always: [
 					{
 						cond: {
+							type: 'hasFontInstallInUrl',
+							step: 'design',
+						},
+						target: 'installFontFamilies',
+					},
+					{
+						cond: {
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
@@ -124,11 +140,11 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						installFontFamiliesState.states.checkFontLibrary,
 					pending: installFontFamiliesState.states.pending,
 					success: {
-						onDone: {
-							target: '#designWithoutAI.showAssembleHub',
-						},
-						type: 'compound',
+						type: 'final',
 					},
+				},
+				onDone: {
+					target: '#designWithoutAI.showAssembleHub',
 				},
 			},
 			preAssembleSite: {
@@ -235,6 +251,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		guards: {
 			hasStepInUrl,
 			isFontLibraryAvailable,
+			hasFontInstallInUrl,
 		},
 	}
 );

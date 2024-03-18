@@ -204,7 +204,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			],
 		},
 		INSTALL_FONTS: {
-			target: 'designWithoutAi',
+			target: 'designWithoutAi.installFonts',
 		},
 	},
 	states: {
@@ -365,6 +365,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 				designWithoutAi: {
 					entry: [ { type: 'updateQueryStep', step: 'design' } ],
+					meta: {
+						component: DesignWithoutAi,
+					},
+				},
+				// This state is used to install fonts and then redirect to the assembler hub.
+				installFonts: {
+					entry: [
+						{
+							type: 'updateQueryStep',
+							step: 'design/install-fonts',
+						},
+					],
 					meta: {
 						component: DesignWithoutAi,
 					},
