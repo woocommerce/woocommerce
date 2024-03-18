@@ -27,7 +27,7 @@ export default async function getRelatedProducts(
 	options: getRelatedProductsOptions = {}
 ): Promise< Product[] | undefined > {
 	const { getEntityRecord } = select( 'core' );
-	const product = getEntityRecord( 'postType', 'product', productId );
+	const product = getEntityRecord< Product >( 'postType', 'product', productId );
 	if ( ! product ) {
 		return;
 	}
@@ -87,8 +87,7 @@ export async function getSuggestedProductsFor( {
 	postType = 'product',
 	forceRequest = false,
 	exclude = [],
-}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
-	// @ts-expect-error There are no types for this.
+}: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {	
 	const { getEditedEntityRecord } = select( 'core' );
 
 	const data: Product = getEditedEntityRecord( 'postType', postType, postId );

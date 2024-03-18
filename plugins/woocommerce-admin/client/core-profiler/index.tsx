@@ -317,7 +317,7 @@ const handleOnboardingProfileOption = assign( {
 } );
 
 const getCurrentUserEmail = async () => {
-	const currentUser: WCUser< 'email' > = await resolveSelect(
+	const currentUser: WCUser< 'edit' > = await resolveSelect(
 		USER_STORE_NAME
 	).getCurrentUser();
 	return currentUser?.email;

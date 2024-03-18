@@ -16,7 +16,6 @@ import { WCUser } from './types';
  */
 export const useUser = () => {
 	const userData = useSelect( ( select ) => {
-		// TODO: Update @types/wordpress__core-data to include the 'hasStartedResolution', 'hasFinishedResolution' method.
 		const { getCurrentUser, hasStartedResolution, hasFinishedResolution } =
 			select( STORE_NAME );
 
@@ -25,7 +24,7 @@ export const useUser = () => {
 				hasStartedResolution( 'getCurrentUser' ) &&
 				! hasFinishedResolution( 'getCurrentUser' ),
 			// We register additional user data in backend so we need to use a type assertion here for WC user.
-			user: getCurrentUser() as WCUser< 'capabilities' >,
+			user: getCurrentUser() as WCUser< 'edit' >,
 			getCurrentUser,
 		};
 	} );

@@ -49,7 +49,6 @@ export function Edit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -59,7 +58,6 @@ export function Edit( {
 
 	const productId = useEntityId( 'postType', 'product' );
 	const product: Product = useSelect( ( select ) =>
-		// @ts-expect-error There are no types for this.
 		select( 'core' ).getEditedEntityRecord(
 			'postType',
 			'product',
@@ -234,7 +232,6 @@ export function Edit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// @ts-expect-error There are no types for this.
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,
