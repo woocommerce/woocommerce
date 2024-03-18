@@ -12,7 +12,7 @@ If you have ever wanted to contribute to the WooCommerce platform as a developer
 
 ### [Contribution Environment Set-Up](https://github.com/woocommerce/woocommerce/tree/trunk)
 
-Visit the WooCommerce home repository on GitHub to learn the first steps to environment set up and platform contribution expectations.
+Visit the WooCommerce monorepo on GitHub to learn the first steps to environment set up and platform contribution expectations.
 
 ### [Marketplace Contribution Guidelines](https://woo.com/document/marketplace-overview/)
 
