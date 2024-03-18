@@ -10,6 +10,7 @@ module.exports = {
 			files: [ 'client/**/*.js', 'client/**/*.jsx', 'client/**/*.tsx' ],
 			rules: {
 				'react/react-in-jsx-scope': 'off',
+				'@typescript-eslint/ban-ts-comment': 'warn',
 			},
 		},
 	],

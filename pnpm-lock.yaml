@@ -2697,9 +2697,6 @@ importers:
       '@types/wordpress__components':
         specifier: ^19.10.5
         version: 19.10.5(react-dom@17.0.2)(react@17.0.2)
-      '@types/wordpress__core-data':
-        specifier: 2.4.5
-        version: 2.4.5
       '@types/wordpress__data':
         specifier: 6.0.2
         version: 6.0.2
@@ -3196,8 +3193,8 @@ importers:
         specifier: wp-6.0
         version: 5.4.1(react@17.0.2)
       '@wordpress/core-data':
-        specifier: wp-6.5
-        version: 6.28.6(@types/react@17.0.71)(react-dom@17.0.2)(react@17.0.2)
+        specifier: wp-6.0
+        version: 4.4.5(react@17.0.2)
       '@wordpress/data':
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
@@ -3427,6 +3424,9 @@ importers:
       '@types/wordpress__compose':
         specifier: 4.0.1
         version: 4.0.1
+      '@types/wordpress__data':
+        specifier: 6.0.0
+        version: 6.0.0
       '@types/wordpress__data-controls':
         specifier: ~2.2.0
         version: 2.2.0

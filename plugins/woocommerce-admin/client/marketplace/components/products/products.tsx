@@ -56,6 +56,7 @@ export default function Products( props: ProductsProps ) {
 	}
 
 	const currentTheme = useSelect( ( select ) => {
+		// @ts-ignore - Resolved DT types don't have this type available.
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
