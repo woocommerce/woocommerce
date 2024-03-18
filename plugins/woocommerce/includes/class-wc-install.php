@@ -1204,7 +1204,7 @@ class WC_Install {
 
 		wp_clean_plugins_cache();
 		if ( isset( get_plugins()[ $plugin_name ] ) ) {
-			if ( ! get_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ) {
+			if ( ! ( get_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
 				// The plugin was installed manually so let's not interfere.
 				return;
 			}
