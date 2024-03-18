@@ -196,10 +196,12 @@ class ProductCollectionPage {
 
 	async goToProductCatalogFrontend() {
 		await this.page.goto( `/shop` );
+		await this.refreshLocators( 'frontend' );
 	}
 
 	async goToHomePageFrontend() {
 		await this.page.goto( `/` );
+		await this.refreshLocators( 'frontend' );
 	}
 
 	async insertProductCollection() {

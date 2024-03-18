@@ -302,10 +302,16 @@ test.describe( 'Product Collection', () => {
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Recommended',
 			] );
-			await expect( pageObject.productTitles ).toHaveText( [ 'Beanie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.productTitles ).toHaveText( [ 'Beanie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 		} );
 
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
