@@ -126,7 +126,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop`, { waitUntil: 'commit' } );
+		await page.goto( `/shop` );
 	} );
 
 	test.afterEach( async ( { templateApiUtils } ) => {

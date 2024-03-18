@@ -130,9 +130,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const block = await pageObject.getNextPreviousButtonsBlock( {
 			page: 'frontend',
@@ -172,9 +170,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const leftArrow = await page
 				.locator( blockData.selectors.editor.leftArrow.off )
@@ -242,9 +238,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
 				pageObject,
@@ -318,9 +312,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
 				pageObject,
@@ -380,9 +372,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{
@@ -436,9 +426,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{
@@ -487,9 +475,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{

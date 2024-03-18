@@ -118,9 +118,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -142,9 +140,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPageNotOnSale, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPageNotOnSale );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -183,9 +179,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -232,9 +226,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -277,9 +269,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,

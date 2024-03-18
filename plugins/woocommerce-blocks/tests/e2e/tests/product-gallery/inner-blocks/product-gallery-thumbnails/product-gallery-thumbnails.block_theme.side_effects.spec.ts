@@ -102,9 +102,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const groupBlockFrontend = (
 			await frontendUtils.getBlockByClassWithParent(
@@ -153,9 +151,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 		} );
 
 		// We can test the left position of thumbnails by cross-checking:
@@ -223,9 +219,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
@@ -314,9 +308,7 @@ test.describe( `${ blockData.name }`, () => {
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
 			await editor.saveSiteEditorEntities();
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
@@ -407,9 +399,7 @@ test.describe( `${ blockData.name }`, () => {
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
 			await editor.saveSiteEditorEntities();
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(

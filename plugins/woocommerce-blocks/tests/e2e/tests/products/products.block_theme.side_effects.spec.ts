@@ -154,9 +154,7 @@ for ( const {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( frontendPage, {
-				waitUntil: 'load',
-			} );
+			await page.goto( frontendPage );
 
 			const classicProducts = await getProductsNameFromClassicTemplate(
 				page

@@ -62,9 +62,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const blockFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
@@ -90,9 +88,7 @@ test.describe( `${ blockData.name }`, () => {
 			await pageObject.toggleZoomWhileHoveringSetting( true );
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -126,9 +122,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -165,9 +159,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
