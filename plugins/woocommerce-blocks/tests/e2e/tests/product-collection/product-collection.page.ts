@@ -209,18 +209,19 @@ class ProductCollectionPage {
 	}
 
 	async goToTemplateAndInsertCollection(
-		postId: string,
+		template: string,
 		collection?: Collections
 	) {
+		await this.templateApiUtils.revertTemplate( template );
 		await this.admin.visitSiteEditor( {
-			postId,
+			postId: template,
 			postType: 'wp_template',
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
 		await this.editor.canvas.click( 'body' );
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
-		await this.editor.openDocumentSettingsSidebar();
+		await this.refreshLocators( 'editor' );
 		await this.editor.saveSiteEditorEntities();
 	}
 
@@ -232,10 +233,6 @@ class ProductCollectionPage {
 	}
 
 	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
-		await this.templateApiUtils.revertTemplate(
-			'woocommerce/woocommerce//archive-product'
-		);
-
 		await this.goToTemplateAndInsertCollection(
 			'woocommerce/woocommerce//archive-product',
 			collection
