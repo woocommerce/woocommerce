@@ -52,7 +52,7 @@
 	}
 
 	&__content {
-		min-height: calc( 100% - #{ $header-height + 220px } );
+		min-height: calc( 100% - #{ $header-height + 222px } );
 		.editor-post-publish-panel__link {
 			font-weight: 400;
    			 padding-left: $gap-smallest;
