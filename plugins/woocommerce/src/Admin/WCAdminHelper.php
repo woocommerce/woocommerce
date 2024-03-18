@@ -161,6 +161,14 @@ class WCAdminHelper {
 			'terms'     => wc_terms_and_conditions_page_id(),
 		);
 
+		/**
+		 * Filter the store pages array to check if a URL is a store page.
+		 *
+		 * @since 8.8.0
+		 * @param array $store_pages The store pages array. The keys are the page slugs and the values are the page IDs.
+		 */
+		$store_pages = apply_filters( 'woocommerce_store_pages', $store_pages );
+
 		foreach ( $store_pages as $page => $page_id ) {
 			if ( 0 >= $page_id ) {
 				continue;
