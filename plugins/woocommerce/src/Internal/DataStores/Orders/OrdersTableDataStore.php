@@ -589,11 +589,24 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		self::$backfilling_order_ids[] = $order->get_id();
+
+		// Attempt to create the backup post if missing.
+		if ( $order->get_id() && is_null( get_post( $order->get_id() ) ) ) {
+			if ( ! $this->maybe_create_backup_post( $order, 'backfill' ) ) {
+				// translators: %d is an order ID.
+				$this->error_logger->warning( sprintf( __( 'Unable to create backup post for order %d.', 'woocommerce' ), $order->get_id() ) );
+				return;
+			}
+		}
+
 		$this->update_order_meta_from_object( $order );
 		$order_class = get_class( $order );
 		$post_order  = new $order_class();
 		$post_order->set_id( $order->get_id() );
-		$cpt_data_store->read( $post_order );
+
+		if ( $cpt_data_store->order_exists( $order->get_id() ) ) {
+			$cpt_data_store->read( $post_order );
+		}
 
 		// This compares the order data to the post data and set changes array for props that are changed.
 		$post_order->set_props( $order->get_data() );
@@ -1822,20 +1835,10 @@ FROM $order_meta_table
 	 * @since 6.8.0
 	 */
 	protected function persist_order_to_db( &$order, bool $force_all_fields = false ) {
-		$context   = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
-		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+		$context = ( 0 === absint( $order->get_id() ) ) ? 'create' : 'update';
 
 		if ( 'create' === $context ) {
-			$post_id = wp_insert_post(
-				array(
-					'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
-					'post_status'   => 'draft',
-					'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
-					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
-					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				)
-			);
-
+			$post_id = $this->maybe_create_backup_post( $order, 'create' );
 			if ( ! $post_id ) {
 				throw new \Exception( esc_html__( 'Could not create order in posts table.', 'woocommerce' ) );
 			}
@@ -1869,6 +1872,37 @@ FROM $order_meta_table
 		$this->update_address_index_meta( $order, $changes );
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
+	}
+
+	/**
+	 * Takes care of creating the backup post in the posts table (placeholder or actual order post, depending on sync settings).
+	 *
+	 * @since 8.8.0
+	 *
+	 * @param \WC_Abstract_Order $order   The order.
+	 * @param string             $context The context: either 'create' or 'backfill'.
+	 * @return int The new post ID.
+	 */
+	protected function maybe_create_backup_post( &$order, string $context ): int {
+		$data_sync = wc_get_container()->get( DataSynchronizer::class );
+
+		$data = array(
+			'post_type'     => $data_sync->data_sync_is_enabled() ? $order->get_type() : $data_sync::PLACEHOLDER_ORDER_POST_TYPE,
+			'post_status'   => 'draft',
+			'post_parent'   => $order->get_changes()['parent_id'] ?? $order->get_data()['parent_id'] ?? 0,
+			'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+		);
+
+		if ( 'backfill' === $context ) {
+			if ( ! $order->get_id() ) {
+				return 0;
+			}
+
+			$data['import_id'] = $order->get_id();
+		}
+
+		return wp_insert_post( $data );
 	}
 
 	/**
