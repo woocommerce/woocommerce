@@ -30,11 +30,12 @@ for ( const testData of testToRun ) {
 		} );
 
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
-			admin,
-			frontendUtils,
-			editor,
-			editorUtils,
 			page,
+			admin,
+			editor,
+			requestUtils,
+			editorUtils,
+			frontendUtils,
 		} ) => {
 			// Edit the WooCommerce default template
 			await editorUtils.visitTemplateEditor(
@@ -47,11 +48,7 @@ for ( const testData of testToRun ) {
 			} );
 			await editor.saveSiteEditorEntities();
 
-			await cli(
-				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-			);
-
-			await page.waitForTimeout( 2000 );
+			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
 			// Edit the theme template. The theme template is not
 			// directly available from the UI, because the customized
@@ -93,9 +90,7 @@ for ( const testData of testToRun ) {
 			).toBeVisible();
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 
-			await cli(
-				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-			);
+			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 		} );
 	} );
 }

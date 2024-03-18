@@ -96,11 +96,12 @@ test.describe( 'Shopper → Notice Templates', () => {
 	} );
 
 	test( 'custom block notice templates are visible by template overwrite', async ( {
+		requestUtils,
 		frontendUtils,
 		page,
 	} ) => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG }`
+		await requestUtils.activateTheme(
+			BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -142,17 +143,16 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
+		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 	} );
 
 	test( 'classic notice templates are visible by template overwrite', async ( {
+		requestUtils,
 		frontendUtils,
 		page,
 	} ) => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG }`
+		await requestUtils.activateTheme(
+			BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -198,17 +198,16 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.locator( '.woocommerce-notices-wrapper .woocommerce-info' )
 		).toBeVisible();
 
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
+		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 	} );
 
 	test( 'default classic notice templates cannot be triggered by filter', async ( {
+		requestUtils,
 		frontendUtils,
 		page,
 	} ) => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG }`
+		await requestUtils.activateTheme(
+			BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -254,8 +253,6 @@ test.describe( 'Shopper → Notice Templates', () => {
 			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 
-		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-		);
+		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 	} );
 } );
