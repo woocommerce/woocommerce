@@ -5,7 +5,6 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import {
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
 } from '@woocommerce/e2e-utils';
 
 /**
