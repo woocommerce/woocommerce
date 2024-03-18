@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Disable the checkout menu within Customizer when the checkout block is the default checkout page.

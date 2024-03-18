@@ -18,6 +18,7 @@ import type {
 	TextAreaBlockEditProps,
 } from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
+import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { Label } from '../../../components/label/label';
 
@@ -60,6 +61,11 @@ export function TextAreaBlockEdit( {
 	const [ content, setContent ] = useProductEntityProp< string >( property, {
 		postType,
 	} );
+
+	// This is a workaround to hide the toolbar when the block is blurred.
+	// This is a temporary solution until using Gutenberg 18 with the
+	// fix from https://github.com/WordPress/gutenberg/pull/59800
+	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
 
 	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -120,6 +126,7 @@ export function TextAreaBlockEdit( {
 						placeholder={ placeholder }
 						required={ required }
 						disabled={ disabled }
+						onBlur={ hideToolbar }
 					/>
 				) }
 
@@ -130,6 +137,7 @@ export function TextAreaBlockEdit( {
 						placeholder={ placeholder }
 						required={ required }
 						disabled={ disabled }
+						onBlur={ hideToolbar }
 					/>
 				) }
 			</BaseControl>
