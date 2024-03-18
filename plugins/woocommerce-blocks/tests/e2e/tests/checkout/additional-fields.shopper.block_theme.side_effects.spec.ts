@@ -236,6 +236,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 			checkoutPageObject,
 		} ) => {
+			let formUpdateRequestPromise;
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -274,12 +276,19 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'wide' );
+
+			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
+				( { url } ) => {
+					return url().includes( 'batch' );
+				}
+			);
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
+			await formUpdateRequestPromise;
 
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
@@ -288,12 +297,19 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'wide' );
+
+			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
+				( { url } ) => {
+					return url().includes( 'batch' );
+				}
+			);
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Shipping address',
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'super-wide' );
+			await formUpdateRequestPromise;
 
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )

@@ -99,6 +99,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			let formUpdateRequestPromise;
+
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.fillInCheckoutWithTestData(
 				{},
@@ -159,19 +161,31 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
 
+			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
+				( { url } ) => {
+					return url().includes( 'batch' );
+				}
+			);
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
+			await formUpdateRequestPromise;
 
+			formUpdateRequestPromise = checkoutPageObject.page.waitForRequest(
+				( { url } ) => {
+					return url().includes( 'batch' );
+				}
+			);
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
+			await formUpdateRequestPromise;
 
 			await checkoutPageObject.placeOrder();
 
