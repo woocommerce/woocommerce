@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import type { MainContentComponentProps } from '../main-content';
+import type { MainContentComponentProps } from '../xstate';
 export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 	return (
 		<div

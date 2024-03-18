@@ -5,7 +5,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import type { SidebarComponentProps } from '../sidebar';
+import type { SidebarComponentProps } from '../xstate';
 export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	props
 ) => {

@@ -16,13 +16,13 @@ import {
 	sidebarMachine,
 	SidebarComponentProps,
 	SidebarContainer,
-} from './sidebar';
+} from './sidebar/xstate';
 import {
 	MainContentMachineEvents,
 	mainContentMachine,
 	MainContentComponentProps,
 	MainContentContainer,
-} from './main-content';
+} from './main-content/xstate';
 
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;

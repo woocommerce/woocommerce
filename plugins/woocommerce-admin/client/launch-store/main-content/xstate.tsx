@@ -6,9 +6,9 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { LoadingPage } from '../loading';
-import { LaunchYourStoreSuccess } from '../launch-store-success';
-import { SitePreviewPage } from '../site-preview';
+import { LoadingPage } from './pages/loading';
+import { LaunchYourStoreSuccess } from './pages/launch-store-success';
+import { SitePreviewPage } from './pages/site-preview';
 import type { LaunchYourStoreComponentProps } from '..';
 
 export type MainContentMachineContext = {

@@ -8,9 +8,9 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { LaunchYourStoreHubSidebar } from '../hub';
+import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import type { LaunchYourStoreComponentProps } from '..';
-import type { mainContentMachine } from '../main-content';
+import type { mainContentMachine } from '../main-content/xstate';
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
