@@ -51,6 +51,15 @@ class Cart extends ControllerTestCase {
 					'weight'        => 10,
 				)
 			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 4',
+					'stock_status'  => 'instock',
+					'regular_price' => 10,
+					'weight'        => 10,
+					'virtual'       => true,
+				)
+			),
 		);
 
 		// Add product #3 as a cross-sell for product #1.
@@ -414,6 +423,47 @@ class Cart extends ControllerTestCase {
 		);
 	}
 
+	/**
+	 * Test updating customer with a virtual cart only, this should test the address copying functionality.
+	 */
+	public function test_update_customer_virtual_cart() {
+		// Add a virtual item to cart.
+		wc_empty_cart();
+		$this->keys   = array();
+		$this->keys[] = wc()->cart->add_to_cart( $this->products[3]->get_id() );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address' => (object) array(
+					'first_name' => 'Han',
+					'last_name'  => 'Solo',
+					'address_1'  => 'Test address 1',
+					'address_2'  => 'Test address 2',
+					'city'       => 'Test City',
+					'state'      => 'AL',
+					'postcode'   => '90210',
+					'country'    => 'US',
+					'email'      => 'testaccount@test.com',
+				),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			200,
+			array(
+				'shipping_rates' => array(),
+			)
+		);
+		// Restore cart for other tests.
+		wc_empty_cart();
+		$this->keys   = array();
+		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id() );
+		wc()->cart->apply_coupon( $this->coupon->get_code() );
+	}
 
 	/**
 	 * Test applying coupon to cart.
