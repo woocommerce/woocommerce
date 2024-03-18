@@ -9,7 +9,7 @@ import {
 	useContext,
 	useState,
 } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { Link } from '@woocommerce/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -24,8 +24,9 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from './global-styles';
 import { CustomizeStoreContext } from '..';
 import { FlowType } from '~/customize-store/types';
+import { isIframe, sendMessageToParent } from '~/customize-store/utils';
 export const SidebarNavigationScreenTypography = () => {
-	const { context } = useContext( CustomizeStoreContext );
+	const { context, sendEvent } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
 	const isFontLibraryAvailable = context.isFontLibraryAvailable;
 
@@ -67,7 +68,7 @@ export const SidebarNavigationScreenTypography = () => {
 		upgradeNotice = '';
 	}
 
-	const OptIn = () => {
+	const optIn = () => {
 		recordEvent(
 			'customize_your_store_assembler_hub_opt_in_usage_tracking'
 		);
@@ -200,19 +201,17 @@ export const SidebarNavigationScreenTypography = () => {
 											{ __( 'Cancel', 'woocommerce' ) }
 										</Button>
 										<Button
-											onClick={ async () => {
-												await dispatch(
-													OPTIONS_STORE_NAME
-												).updateOptions( {
-													woocommerce_allow_tracking:
-														OptInDataSharing
-															? 'yes'
-															: 'no',
-												} );
-
-												OptIn();
-												closeModal();
-												window.location.href = `${ ADMIN_URL }admin.php?page=wc-admin&path=%2Fcustomize-store%2Fassembler-hub`;
+											onClick={ () => {
+												optIn();
+												if ( isIframe( window ) ) {
+													sendMessageToParent( {
+														type: 'INSTALL_FONTS',
+													} );
+												} else {
+													sendEvent(
+														'INSTALL_FONTS'
+													);
+												}
 											} }
 											variant="primary"
 											disabled={ ! OptInDataSharing }
