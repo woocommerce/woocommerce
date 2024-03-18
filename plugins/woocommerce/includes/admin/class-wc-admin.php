@@ -41,7 +41,7 @@ class WC_Admin {
 		}
 
 		// Fetch list of promotions from Woo.com for WooCommerce admin UI. We need to fire earlier than admin_init so we can filter menu items.
-		add_action( 'woocommerce_init', array( 'WC_Admin_Marketplace_Promotions', 'init_marketplace_promotions' ) );
+		WC_Admin_Marketplace_Promotions::init();
 	}
 
 	/**
