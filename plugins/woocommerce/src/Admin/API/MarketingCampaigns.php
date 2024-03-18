@@ -148,10 +148,10 @@ class MarketingCampaigns extends WC_REST_Controller {
 	 */
 	private function get_formatted_price( $price ) {
 		// Get $num_decimals to be passed to wc_price.
-		$locale_info_all  = include WC()->plugin_path() . '/i18n/locale-info.php';
-		$locale_index     = array_search( $price->get_currency(), array_column( $locale_info_all, 'currency_code' ), true );
-		$locale           = array_values( $locale_info_all )[ $locale_index ];
-		$num_decimals     = $locale['num_decimals'];
+		$locale_info_all = include WC()->plugin_path() . '/i18n/locale-info.php';
+		$locale_index    = array_search( $price->get_currency(), array_column( $locale_info_all, 'currency_code' ), true );
+		$locale          = array_values( $locale_info_all )[ $locale_index ];
+		$num_decimals    = $locale['num_decimals'];
 
 		// Get $currency_info based on user locale or default locale.
 		$currency_locales = $locale['locales'];
@@ -159,14 +159,14 @@ class MarketingCampaigns extends WC_REST_Controller {
 		$currency_info    = $currency_locales[ $user_locale ] ?? $currency_locales['default'];
 
 		// Get $price_format to be passed to wc_price.
-		$currency_pos = $currency_info['currency_pos'];
-		$currencyFormats = [
+		$currency_pos     = $currency_info['currency_pos'];
+		$currency_formats = array(
 			'left'        => '%1$s%2$s',
 			'right'       => '%2$s%1$s',
 			'left_space'  => '%1$s&nbsp;%2$s',
 			'right_space' => '%2$s&nbsp;%1$s',
-		];
-		$price_format = $currencyFormats[$currency_pos] ?? $currencyFormats['left'];
+		);
+		$price_format     = $currency_formats[ $currency_pos ] ?? $currency_formats['left'];
 
 		$price_value     = wc_format_decimal( $price->get_value() );
 		$price_formatted = wc_price(
@@ -310,6 +310,4 @@ class MarketingCampaigns extends WC_REST_Controller {
 
 		return $params;
 	}
-
-
 }
