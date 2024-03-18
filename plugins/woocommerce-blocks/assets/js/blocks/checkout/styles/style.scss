@@ -13,6 +13,27 @@
 	.wp-block-woocommerce-checkout-order-summary-block {
 		border: 1px solid $universal-border-light;
 		border-radius: 5px;
+
+		// Display the subtotal, fees, discounts, taxes, and shipping blocks as grouped.
+		// Specificity is needed to override the default styles.
+		.wc-block-components-totals-wrapper.wp-block-woocommerce-checkout-order-summary-subtotal-block {
+			padding-bottom: 0;
+		}
+		.wc-block-components-totals-wrapper.wp-block-woocommerce-checkout-order-summary-shipping-block {
+			border-top: 0;
+			padding-bottom: 0;
+		}
+		.wc-block-components-totals-wrapper.wp-block-woocommerce-checkout-order-summary-discount-block {
+			border-top: 0;
+			padding-bottom: 0;
+		}
+		.wc-block-components-totals-wrapper.wp-block-woocommerce-checkout-order-summary-fee-block {
+			border-top: 0;
+			padding-bottom: 0;
+		}
+		.wc-block-components-totals-wrapper.wp-block-woocommerce-checkout-order-summary-taxes-block {
+			border-top: 0;
+		}
 	}
 }
 
