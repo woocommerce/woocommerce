@@ -21,6 +21,7 @@ import type {
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
+import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
 // In order to prevent collisions, we're going to offset the queryID of blocks
@@ -107,6 +108,7 @@ const ProductCollectionContent = (
 	return (
 		<div { ...blockProps }>
 			<InspectorControls { ...props } />
+			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
 			<div { ...innerBlocksProps } />
 		</div>

@@ -1,7 +1,9 @@
 name: Run Blocks Playwright Tests
+
 on:
     pull_request:
         paths:
+            - '.github/workflows/blocks-playwright.yml' # This file
             - 'plugins/woocommerce-blocks/**'
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'

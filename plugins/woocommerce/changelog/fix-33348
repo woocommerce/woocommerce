@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve memory usage in HPOS sync CLI tool.
