@@ -13,6 +13,15 @@ defined( 'ABSPATH' ) || exit;
 class WC_Product_Module_Variable extends WC_Product_Module {
 
 	/**
+	 * Stores product data.
+	 *
+	 * @var array
+	 */
+	protected $extra_data = array(
+		'variable_data_key' => 'example_default',
+	);
+
+	/**
 	 * Contains a reference to the data store for this class.
 	 *
 	 * @since 3.0.0

@@ -19,6 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Product_Module {
 
 	/**
+	 * Stores product data.
+	 *
+	 * @var array
+	 */
+	protected $extra_data = [];
+
+	/**
 	 * The product.
 	 *
 	 * @var WC_Product
@@ -93,6 +100,15 @@ abstract class WC_Product_Module {
 			array_keys( WC()->product_modules()->get_all_modules() ),
 			static::get_compatible_modules(),
 		);
+	}
+
+	/**
+	 * Get extra store data.
+	 *
+	 * @return array
+	 */
+	public function get_extra_data() {
+		return $this->extra_data;
 	}
 
 	public static function add_hooks() {}

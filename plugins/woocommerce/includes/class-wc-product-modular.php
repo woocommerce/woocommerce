@@ -53,12 +53,15 @@ class WC_Product_Modular extends WC_Product {
 	public function __construct( $product = 0, $modules = array() ) {
 		parent::__construct( $product );
 
-        foreach ( $modules as $module ) {
-            $module_instance                      = new $module( $this );
-            $this->modules[ $module::get_slug() ] = $module_instance;
-            $passthrough_methods                  = $module::get_passthrough_methods();
+        foreach ( $modules as $module_class_name ) {
+            $module                        = new $module_class_name( $this );
+            $module_slug                   = $module::get_slug();
+            $this->modules[ $module_slug ] = $module;
+            $this->data                    = array_merge( $this->data, $module->get_extra_data() );
+            $this->default_data            = $this->data;
+            $passthrough_methods           = $module::get_passthrough_methods();
             foreach ( $passthrough_methods as $method ) {
-                $this->aliased_methods[ $method ] = array( $module_instance, $method );
+                $this->aliased_methods[ $method ] = array( $module, $method );
             }
         }
 	}
@@ -86,5 +89,32 @@ class WC_Product_Modular extends WC_Product {
 
         return false;
     }
+
+    /**
+	 * Activate a module by slug.
+	 *
+	 * @param string $module_slug Module slug.
+	 */
+	public function activate_module( $module_slug ) {
+		$modules       = $this->get_prop( 'modules' );
+		$module_exists = (bool) WC()->product_modules()->get_module( $module_slug );
+
+		// @todo Could optionally do some compatibility checking here and throw warnings or disable other modules.
+		if ( $module_exists && ! in_array( $module_slug, $modules ) ) {
+			$modules[] = $module_slug;
+		}
+
+		$this->set_prop( 'modules', $modules );
+	}
+
+	/**
+	 * Deactivate a module by slug.
+	 *
+	 * @param string $module_slug Module slug.
+	 */
+	public function deactivate_module( $module_slug ) {
+		$modules       = $this->get_prop( 'modules' );
+		$this->set_prop( 'modules', array_diff( $modules, array( $module_slug ) ) );
+	}
 
 }
