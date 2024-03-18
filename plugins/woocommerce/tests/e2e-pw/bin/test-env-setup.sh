@@ -22,7 +22,7 @@ wp-env run tests-cli wp plugin activate test-helper-apis
 echo -e 'Add Customer user \n'
 wp-env run tests-cli wp user create customer customer@woocommercecoree2etestsuite.com \
 	--user_pass=password \
-	--role=subscriber \
+	--role=customer \
 	--first_name='Jane' \
 	--last_name='Smith' \
 	--user_registered='2022-01-01 12:23:45'
