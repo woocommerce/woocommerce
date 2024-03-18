@@ -131,10 +131,10 @@ const getProgressBarPluginConfig = ( name ) => {
 };
 
 const getCacheGroups = () => ( {
-	vendor: {
+	defaultVendors: {
 		test: /[\\/]node_modules[\\/]/,
-		name: 'vendor',
-		chunks: 'all',
+		priority: -10,
+		reuseExistingChunk: true,
 	},
 	'base-components': {
 		test: /\/assets\/js\/base\/components\//,

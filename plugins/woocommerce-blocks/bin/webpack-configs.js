@@ -375,9 +375,9 @@ const getFrontConfig = ( options = {} ) => {
 			concatenateModules:
 				isProduction && ! process.env.WP_BUNDLE_ANALYZER,
 			splitChunks: {
-				chunks: 'all',
 				minSize: 200000,
 				automaticNameDelimiter: '--',
+				chunks: 'all',
 				cacheGroups: {
 					...getCacheGroups(),
 				},
