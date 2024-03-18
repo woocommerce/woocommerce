@@ -24,6 +24,7 @@ export interface ProductCardProps {
 }
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
+	const SPONSORED_PRODUCT_LABEL = 'promoted';
 	const { isLoading, type } = props;
 	const query = useQuery();
 	// Get the product if provided; if not provided, render a skeleton loader
@@ -33,12 +34,18 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		vendorName: '',
 		vendorUrl: '',
 		icon: '',
+		label: null,
+		primary_color: null,
 		url: '',
 		price: 0,
 		image: '',
 		averageRating: null,
 		reviewsCount: null,
 	};
+
+	function isSponsored(): boolean {
+		return SPONSORED_PRODUCT_LABEL === product.label;
+	}
 
 	function recordTracksEvent( event: string, data: ExtraProperties ) {
 		const tracksData = props.tracksData;
@@ -101,6 +108,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	const classNames = classnames(
 		'woocommerce-marketplace__product-card',
 		`woocommerce-marketplace__product-card--${ type }`,
+		product.label ? `woocommerce-marketplace__product-card-label--${ product.label }` : null,
 		{
 			'is-loading': isLoading,
 			'is-small': props.small,
@@ -158,14 +166,25 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 								</a>
 							</h2>
 							{ isLoading && (
-								<p className="woocommerce-marketplace__product-card__vendor" />
-							) }
-							{ ! isLoading && productVendor && (
-								<p className="woocommerce-marketplace__product-card__vendor">
-									<span>{ __( 'By ', 'woocommerce' ) }</span>
-									{ productVendor }
+								<p className="woocommerce-marketplace__product-card__vendor-details">
+									<span className="woocommerce-marketplace__product-card__vendor" />
 								</p>
 							) }
+							{ ! isLoading &&
+								<p className="woocommerce-marketplace__product-card__vendor-details">
+									{ productVendor &&
+										<span className="woocommerce-marketplace__product-card__vendor">
+											<span>{ __( 'By ', 'woocommerce' ) }</span>
+											{ productVendor }
+										</span>
+									}
+									{ isSponsored() &&
+										<span className="woocommerce-marketplace__product-card__sponsored-label">
+											{ __( 'Sponsored', 'woocommerce' ) }
+										</span>
+									}
+								</p>
+							}
 						</div>
 					</div>
 				</div>

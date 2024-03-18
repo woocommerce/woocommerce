@@ -79,6 +79,8 @@ export default function ProductListContent( props: {
 								image: product.image,
 								type: product.type,
 								icon: product.icon,
+								label: product.label,
+								primary_color: product.primary_color,
 								vendorName: product.vendorName,
 								vendorUrl: product.vendorUrl
 									? appendURLParams( product.vendorUrl, [
