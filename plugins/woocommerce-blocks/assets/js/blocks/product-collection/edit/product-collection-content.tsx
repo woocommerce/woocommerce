@@ -4,7 +4,6 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect } from '@wordpress/element';
-import { v4 as uuidV4 } from 'uuid';
 
 /**
  * Internal dependencies
@@ -17,6 +16,7 @@ import type {
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
 import InspectorControls from './inspector-controls';
+import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
 const ProductCollectionContent = (
@@ -39,16 +39,6 @@ const ProductCollectionContent = (
 			setAttributes( { queryId: Number( instanceId ) } );
 		}
 	}, [ queryId, instanceId, setAttributes ] );
-
-	/**
-	 * We need to set a unique ID for each instance of this block.
-	 * This will help us uniquely identify each block.
-	 */
-	useEffect( () => {
-		if ( ! attributes?.id ) {
-			setAttributes( { id: uuidV4() } );
-		}
-	}, [ attributes, setAttributes ] );
 
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
@@ -80,6 +70,7 @@ const ProductCollectionContent = (
 	return (
 		<div { ...blockProps }>
 			<InspectorControls { ...props } />
+			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />
 			<div { ...innerBlocksProps } />
 		</div>

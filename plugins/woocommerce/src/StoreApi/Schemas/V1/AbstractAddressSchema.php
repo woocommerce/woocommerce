@@ -119,7 +119,9 @@ abstract class AbstractAddressSchema extends AbstractSchema {
 		$sanitization_util = new SanitizationUtils();
 		$address           = (array) $address;
 		$field_schema      = $this->get_properties();
-		$address           = array_reduce(
+		// omit all keys from address that are not in the schema. This should account for email.
+		$address = array_intersect_key( $address, $field_schema );
+		$address = array_reduce(
 			array_keys( $address ),
 			function( $carry, $key ) use ( $address, $validation_util, $field_schema ) {
 				switch ( $key ) {

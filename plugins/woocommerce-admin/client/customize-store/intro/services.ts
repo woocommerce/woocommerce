@@ -69,7 +69,7 @@ export const fetchActiveThemeHasMods = async () => {
 		styleRevs?.length > 0 ||
 		hasModifiedPages;
 
-	return activeThemeHasMods;
+	return { activeThemeHasMods };
 };
 
 export const fetchIntroData = async () => {
@@ -105,9 +105,16 @@ export const fetchIntroData = async () => {
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
+	interface Theme {
+		stylesheet?: string;
+	}
+
+	const theme = ( await resolveSelect( 'core' ).getCurrentTheme() ) as Theme;
+
 	return {
 		customizeStoreTaskCompleted,
 		themeData,
+		activeTheme: theme.stylesheet || '',
 		currentThemeIsAiGenerated,
 	};
 };
@@ -139,13 +146,6 @@ export const setFlags = async () => {
 				window.__wcCustomizeStore = {
 					...window.__wcCustomizeStore,
 					isFontLibraryAvailable,
-				};
-			} )(),
-			ACTIVE_THEME_HAS_MODS: ( async () => {
-				const activeThemeHasMods = await fetchActiveThemeHasMods();
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					activeThemeHasMods,
 				};
 			} )(),
 		};

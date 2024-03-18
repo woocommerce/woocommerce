@@ -52,7 +52,7 @@ export const SaveHub = () => {
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
 	const navigator = useNavigator();
-	const { resetHighlightedBlockIndex } = useContext(
+	const { resetHighlightedBlockClientId } = useContext(
 		HighlightedBlockContext
 	);
 	const isEditorLoading = useIsSiteEditorLoading();
@@ -164,7 +164,7 @@ export const SaveHub = () => {
 
 		try {
 			await save();
-			resetHighlightedBlockIndex();
+			resetHighlightedBlockClientId();
 			navigator.goToParent();
 		} catch ( error ) {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -56,20 +56,20 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			await pageObject.setNumberOfColumns( 2 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-2' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-2/
+			);
 
 			await pageObject.setNumberOfColumns( 4 );
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect(
-				await pageObject.productTemplate.getAttribute( 'class' )
-			).toContain( 'columns-4' );
+			await expect( pageObject.productTemplate ).toHaveClass(
+				/columns-4/
+			);
 		} );
 
 		test( 'Order By - sort products by title in descending order correctly', async ( {
@@ -93,39 +93,28 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		// Products can be filtered based on 'on sale' status.
-		test( 'Products can be filtered based on "on sale" status.', async ( {
+		test( 'Products can be filtered based on "on sale" status', async ( {
 			pageObject,
 		} ) => {
-			// On each page we show 9 products.
-			await expect( pageObject.products ).toHaveCount( 9 );
-			// All products should not be on sale.
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).not.toHaveCount( 9 );
+			const allProducts = pageObject.products;
+			const salePoducts = pageObject.products.filter( {
+				hasText: 'Product on sale',
+			} );
+
+			await expect( allProducts ).toHaveCount( 9 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.setShowOnlyProductsOnSale( {
 				onSale: true,
 			} );
 
-			// In test data we have only 6 products on sale
-			await expect( pageObject.products ).toHaveCount( 6 );
-
-			// Expect all shown products to be on sale.
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.products ).toHaveCount( 6 );
-			await expect(
-				await pageObject.productImages.filter( {
-					hasText: 'Product on sale',
-				} )
-			).toHaveCount( await pageObject.productImages.count() );
+
+			await expect( allProducts ).toHaveCount( 6 );
+			await expect( salePoducts ).toHaveCount( 6 );
 		} );
 
 		test( 'Products can be filtered based on selection in handpicked products option', async ( {
@@ -449,18 +438,18 @@ test.describe( 'Product Collection', () => {
 				maxPageToShow: 2,
 			} );
 
-			await expect( await pageObject.products ).toHaveCount( 3 );
+			await expect( pageObject.products ).toHaveCount( 3 );
 
 			await pageObject.setDisplaySettings( {
 				itemsPerPage: 2,
 				offset: 0,
 				maxPageToShow: 2,
 			} );
-			await expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.products ).toHaveCount( 2 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( await pageObject.products ).toHaveCount( 2 );
+			await expect( pageObject.products ).toHaveCount( 2 );
 
 			const paginationNumbers =
 				pageObject.pagination.locator( '.page-numbers' );
@@ -542,22 +531,14 @@ test.describe( 'Product Collection', () => {
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'newArrivals' );
 
-			const newArrivalsProducts = [
-				'WordPress Pennant',
-				'Logo Collection',
-				'Beanie with Logo',
-				'T-Shirt with Logo',
-				'Single',
-			];
-
-			await expect( pageObject.products ).toHaveCount( 5 );
-			await expect( pageObject.productTitles ).toHaveText(
-				newArrivalsProducts
-			);
+			// New Arrivals are by default filtered to display products from last 7 days.
+			// Products in our test env have creation date set to much older, hence
+			// no products are expected to be displayed by default.
+			await expect( pageObject.products ).toHaveCount( 0 );
 
 			await pageObject.publishAndGoToFrontend();
 
-			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.products ).toHaveCount( 0 );
 		} );
 
 		// When creating reviews programmatically the ratings are not propagated
@@ -952,26 +933,6 @@ test.describe( 'Product Collection', () => {
 	} );
 
 	test.describe( 'Query Context in Editor', () => {
-		test( 'Product Catalog: Sends only ID in Query Context', async ( {
-			pageObject,
-		} ) => {
-			const url = await pageObject.setupAndFetchQueryContextURL( {
-				collection: 'productCatalog',
-			} );
-
-			await expect(
-				url.searchParams.has( 'productCollectionQueryContext[id]' )
-			).toBeTruthy();
-
-			// There shouldn't be collection in the query context
-			// Because Product Catalog isn't a collection
-			await expect(
-				url.searchParams.has(
-					'productCollectionQueryContext[collection]'
-				)
-			).toBeFalsy();
-		} );
-
 		test( 'Collections: collection should be present in query context', async ( {
 			pageObject,
 		} ) => {
@@ -982,8 +943,8 @@ test.describe( 'Product Collection', () => {
 			const collectionName = url.searchParams.get(
 				'productCollectionQueryContext[collection]'
 			);
-			await expect( collectionName ).toBeTruthy();
-			await expect( collectionName ).toBe(
+			expect( collectionName ).toBeTruthy();
+			expect( collectionName ).toBe(
 				'woocommerce/product-collection/on-sale'
 			);
 		} );

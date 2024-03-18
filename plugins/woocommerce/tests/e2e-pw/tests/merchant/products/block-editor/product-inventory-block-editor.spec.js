@@ -1,5 +1,7 @@
-const { test: baseTest } = require( './block-editor-fixtures' );
-const { expect } = require( '../../../../fixtures' );
+const {
+	test: baseTest,
+} = require( '../../../../fixtures/block-editor-fixtures' );
+const { expect } = require( '../../../../fixtures/fixtures' );
 
 const test = baseTest.extend( {
 	product: async ( { api }, use ) => {
@@ -95,10 +97,14 @@ test( 'can track stock quantity', async ( { page, product } ) => {
 		await page.getByLabel( "Don't allow purchases" ).check();
 	} );
 
-	const quantity = '1';
+	const quantity = '2';
 
 	await test.step( 'update available quantity', async () => {
+		await page.locator( '[name="stock_quantity"]' ).clear();
 		await page.locator( '[name="stock_quantity"]' ).fill( quantity );
+		await expect( page.locator( '[name="stock_quantity"]' ) ).toHaveValue(
+			quantity
+		);
 	} );
 
 	await test.step( 'update the product', async () => {

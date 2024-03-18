@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-Comment: Clean up some methods of `BlockTemplateUtils` and make `BlockTemplatesController` only load in themes that support templates/template parts.
-

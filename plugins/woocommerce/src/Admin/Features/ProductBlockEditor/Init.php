@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
 use WP_Block_Editor_Context;
 
@@ -76,6 +76,7 @@ class Init {
 			add_action( 'current_screen', array( $this, 'set_current_screen_to_block_editor_if_wc_admin' ) );
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
+			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -378,5 +379,42 @@ class Init {
 		);
 
 		$this->redirection_controller->set_product_templates( $this->product_templates );
+	}
+
+	/**
+	 * Register user metas.
+	 */
+	public function register_user_metas() {
+		register_rest_field(
+			'user',
+			'metaboxhidden_product',
+			array(
+				'get_callback'    => function ( $object, $attr ) {
+					$hidden = get_user_meta( $object['id'], $attr, true );
+
+					if ( is_array( $hidden ) ) {
+						// Ensures to always return a string array.
+						return array_values( $hidden );
+					}
+
+					return array( 'postcustom' );
+				},
+				'update_callback' => function ( $value, $object, $attr ) {
+					// Update the field/meta value.
+					update_user_meta( $object->ID, $attr, $value );
+				},
+				'schema'          => array(
+					'type'        => 'array',
+					'description' => __( 'The metaboxhidden_product meta from the user metas.', 'woocommerce' ),
+					'items'       => array(
+						'type' => 'string',
+					),
+					'arg_options' => array(
+						'sanitize_callback' => 'wp_parse_list',
+						'validate_callback' => 'rest_validate_request_arg',
+					),
+				),
+			)
+		);
 	}
 }

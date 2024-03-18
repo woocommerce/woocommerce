@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -31,8 +31,15 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { FlowType } from '~/customize-store/types';
 
 export const SidebarNavigationScreenMain = () => {
+	const {
+		context: { flowType },
+	} = useContext( CustomizeStoreContext );
+	const aiOnline = flowType === FlowType.AIOnline;
+
 	return (
 		<SidebarNavigationScreen
 			isRoot
@@ -101,7 +108,15 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ __( 'Change the color palette', 'woocommerce' ) }
+							{ aiOnline
+								? __(
+										'Change the color palette',
+										'woocommerce'
+								  )
+								: __(
+										'Choose your color palette',
+										'woocommerce'
+								  ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -117,7 +132,9 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ __( 'Change fonts', 'woocommerce' ) }
+							{ aiOnline
+								? __( 'Change fonts', 'woocommerce' )
+								: __( 'Choose fonts', 'woocommerce' ) }
 						</NavigatorButton>
 					</ItemGroup>
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
@@ -140,7 +157,9 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ __( 'Change your header', 'woocommerce' ) }
+							{ aiOnline
+								? __( 'Change your header', 'woocommerce' )
+								: __( 'Choose your header', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -156,7 +175,9 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ __( 'Change your homepage', 'woocommerce' ) }
+							{ aiOnline
+								? __( 'Change your homepage', 'woocommerce' )
+								: __( 'Design your homepage', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -172,7 +193,9 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ __( 'Change your footer', 'woocommerce' ) }
+							{ aiOnline
+								? __( 'Change your footer', 'woocommerce' )
+								: __( 'Choose your footer', 'woocommerce' ) }
 						</NavigatorButton>
 						{ /* TODO: Turn on this in Phrase 2  */ }
 						{ /* <NavigatorButton

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve webpack cache-busting version parameter by using file contents hash

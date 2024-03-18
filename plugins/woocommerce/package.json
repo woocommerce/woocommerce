@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.7.0",
+	"version": "8.8.0",
 	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
@@ -93,6 +93,7 @@
 					"name": "PHP",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -109,6 +110,7 @@
 					"name": "PHP 8.0",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -125,28 +127,10 @@
 					}
 				},
 				{
-					"name": "PHP WP: nightly",
-					"command": "test:php:env",
-					"changes": [
-						"composer.lock",
-						"includes/**/*.php",
-						"patterns/**/*.php",
-						"src/**/*.php",
-						"templates/**/*.php",
-						"tests/php/**/*.php",
-						"tests/unit-tests/**/*.php"
-					],
-					"testEnv": {
-						"start": "env:test",
-						"config": {
-							"wpVersion": "nightly"
-						}
-					}
-				},
-				{
 					"name": "PHP WP: latest - 1",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -166,6 +150,7 @@
 					"name": "PHP WP: latest - 2",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -256,6 +241,7 @@
 			"node_modules/@woocommerce/classic-assets/build",
 			"node_modules/@woocommerce/admin-library/build"
 		],
+		"ext": "js,css,php,json",
 		"ignoreRoot": []
 	},
 	"wireit": {

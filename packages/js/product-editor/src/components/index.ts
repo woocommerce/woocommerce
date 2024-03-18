@@ -90,3 +90,13 @@ export {
 } from './product-image';
 
 export { Notice as __experimentalNotice } from './notice';
+
+export {
+	SchedulePublishModal as __experimentalSchedulePublishModal,
+	SchedulePublishModalProps,
+} from './schedule-publish-modal';
+
+export {
+	CustomFields as __experimentalCustomFields,
+	CustomFieldsProps,
+} from './custom-fields';
