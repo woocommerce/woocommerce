@@ -624,7 +624,24 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		} );
 	} );
 
-	test( 'coupon cannot be used by any customer (email restricted)', async ( {
+	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
+																							  page,
+																						  } ) => {
+		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+		await page.waitForLoadState( 'networkidle' );
+
+		await page.goto( '/cart/' );
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'Please enter a valid email at checkout to use coupon code "email-restricted".'
+			)
+		).toBeVisible();
+	} );
+
+	test( 'coupon cannot be used by any customer on checkout (email restricted)', async ( {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
