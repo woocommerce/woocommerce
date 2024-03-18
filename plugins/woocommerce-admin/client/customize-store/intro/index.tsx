@@ -95,9 +95,8 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
-
+	console.log( context.flowType );
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';
-	console.log( { isDefaultTheme } );
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
@@ -107,13 +106,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
-			console.log( 1 );
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI &&
 			customizeStoreTaskCompleted &&
 			! isDefaultTheme:
-			console.log( 2 );
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
