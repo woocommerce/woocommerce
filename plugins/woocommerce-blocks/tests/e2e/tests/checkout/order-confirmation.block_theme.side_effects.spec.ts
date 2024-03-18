@@ -53,17 +53,13 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await localPickupUtils.enableLocalPickup();
 	} );
 
-	test( 'Place order as a logged in user', async ( {
-		frontendUtils,
-		pageObject,
-		page,
-	} ) => {
+	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -127,16 +123,12 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
-	test( 'Place order as guest user', async ( {
-		frontendUtils,
-		pageObject,
-		page,
-	} ) => {
-		await page.goto( '/my-account', { waitUntil: 'commit' } );
+	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
+		await page.goto( '/my-account' );
 
-		// Verify that the user is logged out.
 		await expect(
-			page.getByRole( 'heading', { name: 'Login' } )
+			page.getByRole( 'heading', { name: 'Login' } ),
+			'User is not logged out'
 		).toBeVisible();
 
 		await frontendUtils.emptyCart();
@@ -144,7 +136,7 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await expect(
+		expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE

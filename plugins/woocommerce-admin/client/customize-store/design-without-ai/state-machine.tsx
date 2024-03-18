@@ -140,26 +140,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									},
 								},
 							},
-							setGlobalStyles: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'updateGlobalStylesWithDefaultValues',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
 							installFontFamilies: {
 								initial: 'checkFontLibrary',
 								states: {
