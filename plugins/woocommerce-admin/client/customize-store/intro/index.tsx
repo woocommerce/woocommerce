@@ -99,29 +99,27 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';
 	console.log( { isDefaultTheme } );
 	switch ( true ) {
-		case isNetworkOffline: //DONE
+		case isNetworkOffline:
 			bannerStatus = 'network-offline';
 			break;
-		case isJetpackOffline as boolean: //DONE
+		case isJetpackOffline as boolean:
 			bannerStatus = 'jetpack-offline';
 			break;
-		case context.flowType === FlowType.noAI && //DONE
+		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
 			console.log( 1 );
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI && //DONE
+		case context.flowType === FlowType.noAI &&
 			customizeStoreTaskCompleted &&
 			! isDefaultTheme:
 			console.log( 2 );
 			bannerStatus = FlowType.noAI;
 			break;
-		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted: //DONE
-			console.log( 3 );
+		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
 			bannerStatus = 'existing-no-ai-theme';
 			break;
 		case ! customizeStoreTaskCompleted && activeThemeHasMods:
-			console.log( 4 );
 			bannerStatus = 'task-incomplete-active-theme-has-mods';
 			break;
 		case customizeStoreTaskCompleted && currentThemeIsAiGenerated:

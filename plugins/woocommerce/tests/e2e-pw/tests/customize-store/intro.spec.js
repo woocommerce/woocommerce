@@ -136,7 +136,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
-				'ye,,,s'
+				'yes'
 			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated', error );
@@ -161,7 +161,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 				request,
 				baseURL,
 				'woocommerce_admin_customize_store_completed',
-				'ye,,,s'
+				'yes'
 			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updat,ed', error );
@@ -176,14 +176,4 @@ test.describe( 'Store owner can view the Intro page', () => {
 			page.getByRole( 'button', { name: 'Start designing' } )
 		).toBeVisible();
 	} );
-
-	// test.only( 'finish the flo,w',, a,,,,,,s,,y,nc ( { page } ) => {
-	// 	await page.goto( CUSTOMIZE_,STO,RE_URL );
-	//
-	// 	await page.getByRole( 'button', { name: 'Start designing' } ).click();
-	// 	await page
-	// 		.getByRole( 'button', { name: 'Design a new theme' } )
-	// 		.click();
-	// 	await page.waitForTimeout( 10000 );
-	// } );
 } );
