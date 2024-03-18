@@ -119,7 +119,7 @@ class WC_Admin_Marketplace_Promotions {
 		if ( $promotions ) {
 			// Filter out any expired promotions.
 			$promotions = self::get_active_promotions( $promotions );
-			set_transient( self::TRANSIENT_NAME, $promotions, DAY_IN_SECONDS );
+			set_transient( self::TRANSIENT_NAME, $promotions, 12 * HOUR_IN_SECONDS );
 		}
 	}
 
