@@ -198,6 +198,10 @@ class ProductCollectionPage {
 		await this.page.goto( `/shop` );
 	}
 
+	async goToHomePageFrontend() {
+		await this.page.goto( `/` );
+	}
+
 	async insertProductCollection() {
 		await this.editor.insertBlock( { name: this.BLOCK_SLUG } );
 	}

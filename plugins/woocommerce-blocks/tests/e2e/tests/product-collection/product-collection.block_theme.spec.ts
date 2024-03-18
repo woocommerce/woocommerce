@@ -141,7 +141,7 @@ test.describe( 'Product Collection', () => {
 
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
-			await pageObject.goToProductCatalogFrontend();
+			await pageObject.goToHomePageFrontend();
 
 			const product = pageObject.products.nth( 1 );
 
