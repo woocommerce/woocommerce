@@ -30,7 +30,9 @@
 			]
 		},
 		{
-			"dependencies": [ "**" ],
+			"dependencies": [
+				"**"
+			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
@@ -141,6 +143,15 @@
 			],
 			"packages": [
 				"@woocommerce/experimental"
+			],
+			"isIgnored": true
+		},
+		{
+			"dependencies": [
+				"@wordpress/core-data"
+			],
+			"packages": [
+				"@woocommerce/data"
 			],
 			"isIgnored": true
 		},
