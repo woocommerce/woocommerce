@@ -166,22 +166,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
 
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
-
 			await checkoutPageObject.page
 				.getByRole( 'group', {
 					name: 'Billing address',
 				} )
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
-
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
-
-			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
 			await checkoutPageObject.placeOrder();
 

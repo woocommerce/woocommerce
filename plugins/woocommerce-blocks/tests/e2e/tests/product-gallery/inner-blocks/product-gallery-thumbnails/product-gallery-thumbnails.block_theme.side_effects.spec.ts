@@ -100,12 +100,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		expect( isThumbnailsBlockEarlier ).toBe( true );
 
-		await Promise.all( [
-			editor.saveSiteEditorEntities(),
-			page.waitForResponse( ( response ) =>
-				response.url().includes( 'wp-json/wp/v2/templates/' )
-			),
-		] );
+		await editor.saveSiteEditorEntities();
 
 		await page.goto( blockData.productPage, {
 			waitUntil: 'commit',
@@ -226,12 +221,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( true );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
@@ -323,13 +313,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
-
+			await editor.saveSiteEditorEntities();
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
 			} );
@@ -422,13 +406,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
-
+			await editor.saveSiteEditorEntities();
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
 			} );

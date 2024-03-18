@@ -159,7 +159,8 @@ export class CheckoutPage {
 	 * Blurs the current input and waits for the checkout to finish any loading or calculating.
 	 */
 	async waitForCheckoutToFinishUpdating() {
-		await this.page.evaluate( 'document.activeElement.blur()' );
+		await this.page.keyboard.press( 'Escape' );
+
 		await this.page.waitForFunction( () => {
 			return (
 				! window.wp.data
@@ -337,9 +338,6 @@ export class CheckoutPage {
 			const field = billingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
-
-		// Blur active field to trigger customer address update.
-		await this.page.keyboard.press( 'Escape' );
 	}
 
 	async fillShippingDetails(

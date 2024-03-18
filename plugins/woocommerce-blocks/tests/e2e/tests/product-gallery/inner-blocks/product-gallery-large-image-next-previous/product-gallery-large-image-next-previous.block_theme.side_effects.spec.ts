@@ -128,12 +128,7 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await addBlock( admin, editor, editorUtils );
 
-		await Promise.all( [
-			editor.saveSiteEditorEntities(),
-			page.waitForResponse( ( response ) =>
-				response.url().includes( 'wp-json/wp/v2/templates/' )
-			),
-		] );
+		await editor.saveSiteEditorEntities();
 
 		await page.goto( blockData.productPage, {
 			waitUntil: 'commit',
@@ -245,12 +240,7 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
@@ -326,12 +316,7 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
@@ -393,12 +378,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-start' );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
@@ -454,12 +434,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'center' );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
@@ -510,12 +485,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage, {
 				waitUntil: 'commit',
