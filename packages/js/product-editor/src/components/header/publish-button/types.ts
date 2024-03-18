@@ -8,6 +8,6 @@ export type PublishButtonProps = Omit<
 	'aria-disabled' | 'variant' | 'children'
 > & {
 	productType?: string;
-	isPrePublishButton?: boolean;
+	isMenuButton?: boolean;
 	isPrePublishPanelVisible?: boolean;
 };

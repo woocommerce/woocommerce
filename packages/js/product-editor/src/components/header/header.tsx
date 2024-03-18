@@ -250,7 +250,7 @@ export function Header( {
 					<PublishButton
 						productType={ productType }
 						isPrePublishPanelVisible={ showPrepublishChecks }
-						isPrePublishButton
+						isMenuButton
 					/>
 
 					<WooHeaderItem.Slot name="product" />

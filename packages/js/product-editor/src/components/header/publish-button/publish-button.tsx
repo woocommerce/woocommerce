@@ -25,7 +25,7 @@ import type { PublishButtonProps } from './types';
 
 export function PublishButton( {
 	productType = 'product',
-	isPrePublishButton,
+	isMenuButton,
 	isPrePublishPanelVisible = true,
 	...props
 }: PublishButtonProps ) {
@@ -69,7 +69,7 @@ export function PublishButton( {
 	if (
 		productType === 'product' &&
 		window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-		isPrePublishButton
+		isMenuButton
 	) {
 		function renderPublishButtonMenu(
 			menuProps: Dropdown.RenderProps
