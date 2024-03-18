@@ -29,8 +29,49 @@ export const hasStepInUrl = (
 	);
 };
 
+export const hasFontInstallInUrl = () => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 2 ] === 'design' &&
+		pathFragments[ 3 ] === 'install-fonts'
+	);
+};
+
+const installFontFamiliesState = {
+	initial: 'checkFontLibrary',
+	states: {
+		checkFontLibrary: {
+			always: [
+				{
+					cond: {
+						type: 'isFontLibraryAvailable',
+					},
+					target: 'pending',
+				},
+				{ target: 'success' },
+			],
+		},
+		pending: {
+			invoke: {
+				src: 'installFontFamilies',
+				onDone: {
+					target: 'success',
+				},
+				onError: {
+					actions: 'redirectToIntroWithError',
+				},
+			},
+		},
+		success: {
+			type: 'final',
+		},
+	},
+};
+
 export type DesignWithoutAIStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
 
 export const designWithNoAiStateMachineDefinition = createMachine(
@@ -49,6 +90,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			EXTERNAL_URL_UPDATE: {
 				target: 'navigate',
 			},
+			INSTALL_FONTS: {
+				target: 'installFontFamilies',
+			},
 		},
 		context: {
 			startLoadingTime: null,
@@ -64,12 +108,44 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				always: [
 					{
 						cond: {
+							type: 'hasFontInstallInUrl',
+							step: 'design',
+						},
+						target: 'installFontFamilies',
+					},
+					{
+						cond: {
 							type: 'hasStepInUrl',
 							step: 'design',
 						},
 						target: 'preAssembleSite',
 					},
 				],
+			},
+			installFontFamilies: {
+				meta: {
+					component: ApiCallLoader,
+				},
+				initial: 'enableTracking',
+				states: {
+					enableTracking: {
+						invoke: {
+							src: 'enableTracking',
+							onDone: {
+								target: 'checkFontLibrary',
+							},
+						},
+					},
+					checkFontLibrary:
+						installFontFamiliesState.states.checkFontLibrary,
+					pending: installFontFamiliesState.states.pending,
+					success: {
+						type: 'final',
+					},
+				},
+				onDone: {
+					target: '#designWithoutAI.showAssembleHub',
+				},
 			},
 			preAssembleSite: {
 				initial: 'preApiCallLoader',
@@ -141,31 +217,13 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 								},
 							},
 							installFontFamilies: {
-								initial: 'checkFontLibrary',
+								initial: installFontFamiliesState.initial,
 								states: {
-									checkFontLibrary: {
-										always: [
-											{
-												cond: {
-													type: 'isFontLibraryAvailable',
-												},
-												target: 'pending',
-											},
-											{ target: 'success' },
-										],
-									},
-									pending: {
-										invoke: {
-											src: 'installFontFamilies',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
+									checkFontLibrary:
+										installFontFamiliesState.states
+											.checkFontLibrary,
+									pending:
+										installFontFamiliesState.states.pending,
 									success: {
 										type: 'final',
 									},
@@ -184,7 +242,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					component: AssembleHubLoader,
 				},
 				entry: [ 'redirectToAssemblerHub' ],
-				type: 'final',
 			},
 		},
 	},
@@ -194,6 +251,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		guards: {
 			hasStepInUrl,
 			isFontLibraryAvailable,
+			hasFontInstallInUrl,
 		},
 	}
 );
