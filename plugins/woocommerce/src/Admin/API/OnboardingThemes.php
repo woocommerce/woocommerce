@@ -250,7 +250,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 		}
 
 		$in_app_purchase_params               = \WC_Admin_Addons::get_in_app_purchase_url_params();
-		$in_app_purchase_params['wccom-back'] = '/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
+		$in_app_purchase_params['wccom-back'] = urlencode('/wp-admin/admin.php?page=wc-admin&path=/customize-store');
 
 		$core_themes = array(
 			array(
