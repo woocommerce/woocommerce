@@ -178,6 +178,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 											{ productVendor }
 										</span>
 									}
+									{ productVendor && isSponsored() &&
+										<span aria-hidden="true" className="woocommerce-marketplace__product-card__vendor-details__separator">·</span>
+									}
 									{ isSponsored() &&
 										<span className="woocommerce-marketplace__product-card__sponsored-label">
 											{ __( 'Sponsored', 'woocommerce' ) }

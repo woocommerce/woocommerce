@@ -167,7 +167,13 @@
 
 		&__vendor-details {
 			display: flex;
-			gap: $grid-unit-05;
+			gap: $grid-unit-10;
+
+			&__separator {
+				color: $gray-300;
+				font-size: 28px;
+				line-height: 16px;
+			}
 		}
 
 		&__vendor {
@@ -184,6 +190,10 @@
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
 			text-decoration: none;
+		}
+
+		&__sponsored-label {
+			color: $gray-700;
 		}
 
 		&__description {
