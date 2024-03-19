@@ -934,9 +934,9 @@ class CartController {
 		if ( is_wp_error( $valid ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
-				wp_strip_all_tags( $valid->get_error_message() ),
+				esc_html( wp_strip_all_tags( $valid->get_error_message() ) ),
 				400,
-				$valid->get_error_data()
+				$valid->get_error_data() // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			);
 		}
 
