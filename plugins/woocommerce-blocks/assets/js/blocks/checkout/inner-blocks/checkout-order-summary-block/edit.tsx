@@ -30,6 +30,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		[ 'woocommerce/checkout-order-summary-fee-block', {}, [] ],
 		[ 'woocommerce/checkout-order-summary-discount-block', {}, [] ],
 		[ 'woocommerce/checkout-order-summary-shipping-block', {}, [] ],
+		[ 'woocommerce/checkout-order-summary-coupon-form-block', {}, [] ],
 		[ 'woocommerce/checkout-order-summary-taxes-block', {}, [] ],
 		[ 'woocommerce/checkout-order-summary-coupon-form-block', {}, [] ],
 	] as TemplateArray;
