@@ -163,7 +163,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_sections() {
 			$sections = $this->get_own_sections();
-			return apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
+			return (array) apply_filters( 'woocommerce_get_sections_' . $this->id, $sections );
 		}
 
 		/**
