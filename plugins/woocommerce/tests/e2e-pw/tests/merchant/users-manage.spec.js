@@ -1,10 +1,9 @@
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
-const now = Date.now();
-
 const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	customer: async ( { api, wpApi }, use ) => {
+		const now = Date.now();
 		let user = {
 			username: `customer.${ now }`,
 			email: `customer.${ now }@example.com`,
@@ -26,6 +25,7 @@ const test = baseTest.extend( {
 		} );
 	},
 	manager: async ( { wpApi }, use ) => {
+		const now = Date.now();
 		let user = {
 			username: `manager.${ now }`,
 			email: `manager.${ now }@example.com`,
@@ -70,11 +70,92 @@ async function userDeletionTest( page, username ) {
 	} );
 }
 
-test( `can edit a customer`, async ( { page, customer } ) => {
+test.only( `can edit a customer`, async ( { page, customer } ) => {
 	await page.goto( `wp-admin/user-edit.php?user_id=${ customer.id }` );
+	await expect( page ).toHaveTitle( /Edit User/ );
+
+	const now = Date.now();
+	const updatedCustomer = {
+		first_name: `First ${ now }`,
+		last_name: `Last ${ now }`,
+		nick_name: `nickname${ now }`,
+		email: `customer.${ now }@example.com`,
+		billing: {
+			first_name: `First ${ now }`,
+			last_name: `Last ${ now }`,
+			company: 'Los Pollos Hermanos',
+			country: 'United States (US)',
+			address_1: '308 Negra Arroyo Lane',
+			address_2: 'Suite 6',
+			city: 'Albuquerque',
+			state: 'New Mexico',
+			postcode: '87104',
+			phone: '505-842-5662',
+			email: `customer.${ now }@example.com`,
+		},
+	};
 
 	await test.step( 'update user data', async () => {
-		await expect( page ).toHaveTitle( /Edit User/ );
+		await page
+			.getByLabel( 'First Name', { exact: true } )
+			.fill( updatedCustomer.first_name );
+		await page
+			.getByLabel( 'Last Name', { exact: true } )
+			.fill( updatedCustomer.last_name );
+		await page
+			.getByLabel( 'Nickname (required)', { exact: true } )
+			.fill( updatedCustomer.nick_name );
+		await page
+			.getByLabel( 'Email (required)', { exact: true } )
+			.fill( updatedCustomer.email );
+	} );
+
+	await test.step( 'update billing address', async () => {
+		await page
+			.locator( '#billing_first_name' )
+			.fill( updatedCustomer.billing.first_name );
+		await page
+			.locator( '#billing_last_name' )
+			.fill( updatedCustomer.billing.last_name );
+		await page
+			.locator( '#billing_company' )
+			.fill( updatedCustomer.billing.company );
+		await page
+			.locator( '#billing_address_1' )
+			.fill( updatedCustomer.billing.address_1 );
+		await page
+			.locator( '#billing_address_2' )
+			.fill( updatedCustomer.billing.address_2 );
+		await page
+			.locator( '#billing_city' )
+			.fill( updatedCustomer.billing.city );
+		await page
+			.locator( '#billing_postcode' )
+			.fill( updatedCustomer.billing.postcode );
+		await page
+			.locator( '#billing_country' )
+			.selectText( updatedCustomer.billing.country );
+		await page
+			.locator( '#billing_state' )
+			.selectText( updatedCustomer.billing.state );
+		await page
+			.locator( '#billing_phone' )
+			.fill( updatedCustomer.billing.phone );
+		await page
+			.locator( '#billing_email' )
+			.fill( updatedCustomer.billing.email );
+	} );
+
+	await test.step( 'copy shipping address from billing address', async () => {
+		await page.getByLabel( 'Copy from billing address' ).click();
+	} );
+
+	await test.step( 'save the changes', async () => {
+		await page.getByRole( 'button', { name: 'Update User' } ).click();
+	} );
+
+	await test.step( 'verify the updates', async () => {
+		await page.getByText( 'User updated' ).isVisible();
 	} );
 } );
 
