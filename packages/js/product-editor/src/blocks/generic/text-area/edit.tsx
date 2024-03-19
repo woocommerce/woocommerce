@@ -51,6 +51,8 @@ export function TextAreaBlockEdit( {
 		'wp-block-woocommerce-product-content-field__content'
 	);
 
+	const labelId = contentId.toString() + '__label';
+
 	// `property` attribute is required.
 	if ( ! property ) {
 		throw new Error(
@@ -102,6 +104,7 @@ export function TextAreaBlockEdit( {
 				id={ contentId.toString() }
 				label={
 					<Label
+						id={ labelId }
 						label={ label || '' }
 						required={ required }
 						note={ note }
@@ -113,6 +116,7 @@ export function TextAreaBlockEdit( {
 				{ isRichTextMode && (
 					<RichText
 						id={ contentId.toString() }
+						aria-labelledby={ labelId }
 						identifier="content"
 						tagName="p"
 						value={ content || '' }
