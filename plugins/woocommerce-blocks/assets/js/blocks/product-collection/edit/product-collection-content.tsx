@@ -3,15 +3,16 @@
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import type {
 	ProductCollectionAttributes,
-	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
+	ProductCollectionQuery,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
@@ -22,6 +23,14 @@ import ToolbarControls from './toolbar-controls';
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
+	const [ previewState, setPreviewState ] = useState( {
+		isPreview: false,
+		previewMessage: '',
+	} );
+	useEffect( () => {
+		props.handlePreviewState( previewState, setPreviewState );
+	}, [ previewState, props ] );
+
 	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
 
@@ -67,8 +76,28 @@ const ProductCollectionContent = (
 		return null;
 	}
 
+	console.log( 'previewState.isPreview', previewState );
+
 	return (
 		<div { ...blockProps }>
+			{ previewState.isPreview && (
+				<Button
+					variant="primary"
+					size="small"
+					style={ {
+						position: 'absolute',
+						top: 0,
+						right: 0,
+						zIndex: 1000,
+					} }
+					showTooltip
+					label={ previewState.previewMessage }
+					className="wc-block-product-collection__preview-button"
+				>
+					Preview
+				</Button>
+			) }
+
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />

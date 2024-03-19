@@ -29,6 +29,8 @@ import {
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
+	CoreCollectionNames,
+	PreviewState,
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
@@ -226,3 +228,46 @@ export const withUpgradeNoticeControls =
 	};
 
 addFilter( 'editor.BlockEdit', metadata.name, withUpgradeNoticeControls );
+
+export const withHandlePreviewState =
+	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
+	( props: BlockEditProps< ProductCollectionAttributes > ) => {
+		if ( ! isProductCollection( props.name ) ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		let previewMessage = __(
+			'Actual products will vary depending on the currently viewed page.',
+			'woocommerce'
+		);
+
+		/**
+		 * Example:
+		 * How to change the preview message based on the collection selected.
+		 */
+		if ( props.attributes.collection === CoreCollectionNames.ON_SALE ) {
+			previewMessage = __(
+				'Custom tooltip for on sale collection.',
+				'woocommerce'
+			);
+		}
+
+		const handlePreviewState = (
+			previewState: PreviewState,
+			setPreviewState: React.Dispatch<
+				React.SetStateAction< PreviewState >
+			>
+		) => {
+			setTimeout( () => {
+				setPreviewState( {
+					isPreview: ! previewState.isPreview,
+					previewMessage,
+				} );
+			}, 5000 );
+		};
+
+		return (
+			<BlockEdit { ...props } handlePreviewState={ handlePreviewState } />
+		);
+	};
+addFilter( 'editor.BlockEdit', metadata.name, withHandlePreviewState );

@@ -2,20 +2,19 @@
  * External dependencies
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { BlockEditProps } from '@wordpress/blocks';
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import type { ProductCollectionAttributes } from '../types';
+import type { ProductCollectionEditComponentProps } from '../types';
 import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import './editor.scss';
 
-const Edit = ( props: BlockEditProps< ProductCollectionAttributes > ) => {
+const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes } = props;
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
