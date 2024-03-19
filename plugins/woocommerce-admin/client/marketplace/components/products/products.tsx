@@ -65,6 +65,10 @@ export default function Products( props: ProductsProps ) {
 		page: 'wc-admin',
 		path: '/customize-store/design',
 	} );
+	const assemblerHubUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/assembler-hub',
+	} );
 
 	const customizeStoreTask = useSelect( ( select ) => {
 		return select( ONBOARDING_STORE_NAME ).getTask( 'customize-store' );
@@ -154,11 +158,10 @@ export default function Products( props: ProductsProps ) {
 						variant="secondary"
 						text={ __( 'Design your own', 'woocommerce' ) }
 						onClick={ () => {
-							if (
-								! isDefaultTheme ||
-								customizeStoreTask?.isComplete
-							) {
+							if ( ! isDefaultTheme ) {
 								setIsModalOpen( true );
+							} else if ( customizeStoreTask?.isComplete ) {
+								window.location.href = assemblerHubUrl;
 							} else {
 								window.location.href = customizeStoreDesignUrl;
 							}
