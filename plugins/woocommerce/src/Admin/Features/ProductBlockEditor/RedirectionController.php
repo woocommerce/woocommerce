@@ -66,6 +66,10 @@ class RedirectionController {
 		$digital_product     = $product->is_downloadable() || $product->is_virtual();
 		$product_template_id = $product->get_meta( '_product_template_id' );
 
+		if ( is_a( $product, 'WC_Product_Modular' ) ) {
+			return true;
+		}
+
 		foreach ( $this->product_templates as $product_template ) {
 			if ( is_null( $product_template->get_layout_template_id() ) ) {
 				continue;
