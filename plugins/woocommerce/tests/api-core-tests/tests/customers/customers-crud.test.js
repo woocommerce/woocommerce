@@ -129,7 +129,7 @@ test.describe( 'Customers API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toEqual( 0 );
+			expect( responseJSON.length ).toEqual( 1 );
 		} );
 
 		// however, if we pass in the search string for role 'all' then all users are returned
@@ -145,7 +145,7 @@ test.describe( 'Customers API tests: CRUD', () => {
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 200 );
 			expect( Array.isArray( responseJSON ) ).toBe( true );
-			expect( responseJSON.length ).toBeGreaterThanOrEqual( 1 );
+			expect( responseJSON.length ).toBeGreaterThanOrEqual( 3 );
 		} );
 	} );
 
