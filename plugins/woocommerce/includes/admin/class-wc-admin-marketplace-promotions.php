@@ -66,19 +66,13 @@ class WC_Admin_Marketplace_Promotions {
     }
 
 	/**
-	 * Get promotions to show in the Woo in-app marketplace.
-	 * Only run on selected pages in the main WooCommerce menu in wp-admin.
-	 * Loads promotions in transient with one day life.
+	 * Get promotions to show in the Woo in-app marketplace and load them into a transient
+	 * with a 12-hour life. Run as a recurring scheduled action.
 	 *
 	 * @return void
 	 */
 	public static function fetch_marketplace_promotions() {
-		$promotions = get_transient( self::TRANSIENT_NAME );
-
-		if ( false !== $promotions ) {
-			return;
-		}
-
+		// Fetch promotions from the API.
 		$fetch_options  = array(
 			'auth'    => true,
 			'country' => true,
@@ -93,6 +87,8 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_promotions->get_error_message() );
+
+			return;
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $raw_promotions );
@@ -103,6 +99,8 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
+
+			return;
 		}
 
 		$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ), true );
@@ -113,14 +111,14 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
+
+			return;
 		}
 		// phpcs:enable WordPress.NamingConventions.ValidHookName.UseUnderscores
 
-		if ( $promotions ) {
-			// Filter out any expired promotions.
-			$promotions = self::get_active_promotions( $promotions );
-			set_transient( self::TRANSIENT_NAME, $promotions, 12 * HOUR_IN_SECONDS );
-		}
+		// Filter out any expired promotions.
+		$active_promotions = self::get_active_promotions( $promotions );
+		set_transient( self::TRANSIENT_NAME, $active_promotions, 12 * HOUR_IN_SECONDS );
 	}
 
 	/**
