@@ -159,7 +159,7 @@ export class CheckoutPage {
 	 * Blurs the current input and waits for the checkout to finish any loading or calculating.
 	 */
 	async waitForCheckoutToFinishUpdating() {
-		await this.page.keyboard.press( 'Escape' );
+		await this.page.evaluate( 'document.activeElement.blur()' );
 
 		await this.page.waitForFunction( () => {
 			return (
