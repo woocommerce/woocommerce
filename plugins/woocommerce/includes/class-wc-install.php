@@ -282,6 +282,7 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		self::add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
+		self::add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
 	}
 
 	/**
@@ -1204,7 +1205,7 @@ class WC_Install {
 
 		wp_clean_plugins_cache();
 		if ( isset( get_plugins()[ $plugin_name ] ) ) {
-			if ( ! ( get_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
+			if ( ! ( get_site_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
 				// The plugin was installed manually so let's not interfere.
 				return;
 			}
@@ -1222,7 +1223,15 @@ class WC_Install {
 					'info_link' => 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
 				)
 			);
-			$install_ok     = $install_result['install_ok'];
+
+			if ( $install_result['already_installing'] ?? null ) {
+				// The plugin is in the process of being installed already (can happen in multisite),
+				// but we still need to activate it for ourselves once it's installed.
+				as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
+				return;
+			}
+
+			$install_ok = $install_result['install_ok'];
 		}
 
 		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
