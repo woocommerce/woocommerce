@@ -9,10 +9,10 @@ import { withInstanceId } from '@wordpress/compose';
 import {
 	ValidatedTextInput,
 	ValidationInputError,
+	Panel,
 } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
-import classnames from 'classnames';
 import type { MouseEvent, MouseEventHandler } from 'react';
 
 /**
@@ -46,28 +46,16 @@ export const TotalsCoupon = ( {
 	displayCouponForm = false,
 }: TotalsCouponProps ): JSX.Element => {
 	const [ couponValue, setCouponValue ] = useState( '' );
-	const [ isCouponFormHidden, setIsCouponFormHidden ] = useState(
-		! displayCouponForm
-	);
+	const [ isCouponFormVisible, setIsCouponFormVisible ] =
+		useState( displayCouponForm );
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
-	const formWrapperClass = classnames(
-		'wc-block-components-totals-coupon__content',
-		{
-			'screen-reader-text': isCouponFormHidden,
-		}
-	);
 	const { validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
 			validationErrorId: store.getValidationErrorId( textInputId ),
 		};
 	} );
-	const handleCouponAnchorClick: MouseEventHandler< HTMLAnchorElement > = (
-		e: MouseEvent< HTMLAnchorElement >
-	) => {
-		e.preventDefault();
-		setIsCouponFormHidden( false );
-	};
+
 	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
 		e: MouseEvent< HTMLButtonElement >
 	) => {
@@ -76,73 +64,64 @@ export const TotalsCoupon = ( {
 			onSubmit( couponValue )?.then( ( result ) => {
 				if ( result ) {
 					setCouponValue( '' );
-					setIsCouponFormHidden( true );
+					setIsCouponFormVisible( false );
 				}
 			} );
 		} else {
 			setCouponValue( '' );
-			setIsCouponFormHidden( true );
+			setIsCouponFormVisible( true );
 		}
 	};
 
 	return (
-		<div className="wc-block-components-totals-coupon">
-			{ isCouponFormHidden ? (
-				<a
-					role="button"
-					href="#wc-block-components-totals-coupon__form"
-					className="wc-block-components-totals-coupon-link"
-					aria-label={ __( 'Add a coupon', 'woocommerce' ) }
-					onClick={ handleCouponAnchorClick }
-				>
-					{ __( 'Add a coupon', 'woocommerce' ) }
-				</a>
-			) : (
-				<LoadingMask
-					screenReaderLabel={ __(
-						'Applying coupon…',
-						'woocommerce'
-					) }
-					isLoading={ isLoading }
-					showSpinner={ false }
-				>
-					<div className={ formWrapperClass }>
-						<form
-							className="wc-block-components-totals-coupon__form"
-							id="wc-block-components-totals-coupon__form"
-						>
-							<ValidatedTextInput
-								id={ textInputId }
-								errorId="coupon"
-								className="wc-block-components-totals-coupon__input"
-								label={ __( 'Enter code', 'woocommerce' ) }
-								value={ couponValue }
-								ariaDescribedBy={ validationErrorId }
-								onChange={ ( newCouponValue ) => {
-									setCouponValue( newCouponValue );
-								} }
-								focusOnMount={ true }
-								validateOnMount={ false }
-								showError={ false }
-							/>
-							<Button
-								className="wc-block-components-totals-coupon__button"
-								disabled={ isLoading || ! couponValue }
-								showSpinner={ isLoading }
-								onClick={ handleCouponSubmit }
-								type="submit"
-							>
-								{ __( 'Apply', 'woocommerce' ) }
-							</Button>
-						</form>
-						<ValidationInputError
-							propertyName="coupon"
-							elementId={ textInputId }
+		<Panel
+			className="wc-block-components-totals-coupon"
+			initialOpen={ isCouponFormVisible }
+			hasBorder={ false }
+			title={ __( 'Add a coupon', 'woocommerce' ) }
+			state={ [ isCouponFormVisible, setIsCouponFormVisible ] }
+		>
+			<LoadingMask
+				screenReaderLabel={ __( 'Applying coupon…', 'woocommerce' ) }
+				isLoading={ isLoading }
+				showSpinner={ false }
+			>
+				<div className="wc-block-components-totals-coupon__content">
+					<form
+						className="wc-block-components-totals-coupon__form"
+						id="wc-block-components-totals-coupon__form"
+					>
+						<ValidatedTextInput
+							id={ textInputId }
+							errorId="coupon"
+							className="wc-block-components-totals-coupon__input"
+							label={ __( 'Enter code', 'woocommerce' ) }
+							value={ couponValue }
+							ariaDescribedBy={ validationErrorId }
+							onChange={ ( newCouponValue ) => {
+								setCouponValue( newCouponValue );
+							} }
+							focusOnMount={ true }
+							validateOnMount={ false }
+							showError={ false }
 						/>
-					</div>
-				</LoadingMask>
-			) }
-		</div>
+						<Button
+							className="wc-block-components-totals-coupon__button"
+							disabled={ isLoading || ! couponValue }
+							showSpinner={ isLoading }
+							onClick={ handleCouponSubmit }
+							type="submit"
+						>
+							{ __( 'Apply', 'woocommerce' ) }
+						</Button>
+					</form>
+					<ValidationInputError
+						propertyName="coupon"
+						elementId={ textInputId }
+					/>
+				</div>
+			</LoadingMask>
+		</Panel>
 	);
 };
 
