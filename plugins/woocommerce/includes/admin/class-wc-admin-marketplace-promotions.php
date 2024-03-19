@@ -67,7 +67,7 @@ class WC_Admin_Marketplace_Promotions {
 	/**
 	 * Schedule the action to fetch promotions data.
 	 */
-    public static function schedule_promotion_fetch() {
+	public static function schedule_promotion_fetch() {
 		// Schedule the action twice a day using Action Scheduler
 		if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
 			as_schedule_recurring_action( time(), 12 * HOUR_IN_SECONDS, self::SCHEDULED_ACTION_HOOK );
