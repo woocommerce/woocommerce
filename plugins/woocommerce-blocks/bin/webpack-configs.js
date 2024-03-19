@@ -135,6 +135,12 @@ woocommerce_blocks_env = ${ NODE_ENV }
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					...getCacheGroups(),
+					commons: {
+						// Just vendor the largest UI dependencies shared across blocks-components and blocks-checkout.
+						test: /[\\/]node_modules[\\/](?:@wordpress[\\/](?:components|icons)|@ariakit[\\/](?:react|react-core|core)|dompurify|react-number-format|react-transition-group|postcode-validator|@babel|object-assign)[\\/]/,
+						name: 'wc-blocks-vendors-core',
+						chunks: 'all',
+					},
 				},
 			},
 			minimizer: [
