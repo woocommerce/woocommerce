@@ -73,7 +73,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( 'archive-product', $slug ),
+			'post_name__in' => array( $this->fallback_template, $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -94,7 +94,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && 'archive-product' === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && $this->fallback_template === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {

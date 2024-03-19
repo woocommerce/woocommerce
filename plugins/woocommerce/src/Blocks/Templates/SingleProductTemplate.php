@@ -19,25 +19,11 @@ class SingleProductTemplate extends AbstractTemplate {
 	const SLUG = 'single-product';
 
 	/**
-	 * The title of the template.
-	 *
-	 * @var string
-	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
+		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11, 3 );
 	}
 
 	/**

@@ -23,7 +23,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = 'archive-product';
+	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Initialization method.

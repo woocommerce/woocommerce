@@ -22,7 +22,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = 'archive-product';
+	public $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Initialization method.
@@ -47,7 +47,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 * @return string
 	 */
 	public function get_template_description() {
-		return __( 'Displays products filtered by an attribute.', 'woocommerce' );
+		return __( 'Displays search results for your store.', 'woocommerce' );
 	}
 
 	/**

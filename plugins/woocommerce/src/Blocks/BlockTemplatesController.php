@@ -308,10 +308,12 @@ class BlockTemplatesController {
 				continue;
 			}
 
+			// If the template has a fallback, we should not include it in the list of templates.
 			$template_data = BlockTemplateUtils::get_template( $template_file->slug );
 			if ( isset( $template_data->fallback_template ) ) {
 				continue;
 			}
+
 			$is_not_custom   = false === array_search(
 				$theme_slug . '//' . $template_file->slug,
 				array_column( $query_result, 'id' ),

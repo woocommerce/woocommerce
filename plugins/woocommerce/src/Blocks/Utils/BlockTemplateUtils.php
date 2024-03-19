@@ -510,7 +510,7 @@ class BlockTemplateUtils {
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
 		$registered_template = self::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			return 'archive-product' === $registered_template->fallback_template;
+			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
 		}
 		return false;
 	}
