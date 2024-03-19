@@ -43,7 +43,7 @@ class WC_Admin_Marketplace_Promotions {
 		 * @since 8.8
 		 */
 		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
-			self::clear_scheduled_event();
+			add_action( 'init', array( __CLASS__, 'clear_scheduled_event' ), 10 );
 
 			return;
 		}
