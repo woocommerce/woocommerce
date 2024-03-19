@@ -58,6 +58,7 @@ class WC_Admin_Marketplace_Promotions {
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
 			|| defined( 'DOING_CRON' ) && DOING_CRON
+			|| defined( 'WP_CLI' ) && WP_CLI
 		) {
 			return;
 		}
