@@ -205,12 +205,12 @@ export class EditorUtils {
 	}
 
 	async enterEditMode() {
-		await this.editor.page
+		await this.page
 			.getByRole( 'button', {
 				name: 'Edit',
 				exact: true,
 			} )
-			.dispatchEvent( 'click' );
+			.click();
 
 		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
 			state: 'hidden',
@@ -377,6 +377,8 @@ export class EditorUtils {
 			await this.page.goto(
 				`/wp-admin/site-editor.php?path=/${ templateType }/all`
 			);
+			await this.waitForSiteEditorFinishLoading();
+
 			const templateLink = this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
@@ -386,6 +388,8 @@ export class EditorUtils {
 			await this.page.goto(
 				`/wp-admin/site-editor.php?path=/${ templateType }`
 			);
+			await this.waitForSiteEditorFinishLoading();
+
 			const templateButton = this.page.getByRole( 'button', {
 				name: templateName,
 				exact: true,
@@ -395,7 +399,6 @@ export class EditorUtils {
 
 		await this.enterEditMode();
 		await this.closeWelcomeGuideModal();
-		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
 		const templateTypeName =
