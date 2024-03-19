@@ -35,7 +35,7 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return void
 	 */
-    public static function init() {
+	public static function init() {
 		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
 
 		/**
@@ -61,18 +61,18 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
-        self::maybe_show_bubble_promotions();
-    }
+		self::maybe_show_bubble_promotions();
+	}
 
 	/**
 	 * Schedule the action to fetch promotions data.
 	 */
     public static function schedule_promotion_fetch() {
-        // Schedule the action twice a day using Action Scheduler
-        if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
-            as_schedule_recurring_action( time(), 12 * HOUR_IN_SECONDS, self::SCHEDULED_ACTION_HOOK );
-        }
-    }
+		// Schedule the action twice a day using Action Scheduler
+		if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
+			as_schedule_recurring_action( time(), 12 * HOUR_IN_SECONDS, self::SCHEDULED_ACTION_HOOK );
+		}
+	}
 
 	/**
 	 * Get promotions to show in the Woo in-app marketplace and load them into a transient
