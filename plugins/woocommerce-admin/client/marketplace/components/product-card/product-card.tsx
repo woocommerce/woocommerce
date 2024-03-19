@@ -54,7 +54,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	 * In an ideal world this could be set in a data- attribute and we'd use CSS calc() and attr() to get it, but
 	 * attr() doesn't have very good support yet, so we need to apply some inline CSS to stripe sponsored results.
 	 */
-	function inlineCss(): Object {
+	function inlineCss(): object {
 		if ( ! isSponsored() || ! product.primary_color ) {
 			return {};
 		}
