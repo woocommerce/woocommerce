@@ -445,10 +445,6 @@ const connectUrl = (): string => {
 
 	return appendURLParams( wccomSettings.connectURL, [
 		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
-		[
-			'wum-installed',
-			wccomSettings.wooUpdateManagerInstalled ? '1' : '0',
-		],
 	] );
 };
 
