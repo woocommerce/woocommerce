@@ -30,19 +30,28 @@ class WC_Admin_Marketplace_Promotions {
 	 * Shows notice and adds menu badge to WooCommerce Extensions item
 	 * if the promotions API requests them.
 	 *
-	 * This method is called from WC_Admin when it is instantiated in
+	 * WC_Admin calls this method when it is instantiated during
 	 * is_admin requests.
 	 *
 	 * @return void
 	 */
     public static function init() {
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+
+		/**
+		 * Filter to suppress the requests for and showing of marketplace promotions.
+		 * @since 8.8
+		 */
+		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
+			return;
+		}
+
 		// Add the callback for our scheduled action.
 		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
 			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
 		}
 
 		add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ), 10 );
-        register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
 
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
