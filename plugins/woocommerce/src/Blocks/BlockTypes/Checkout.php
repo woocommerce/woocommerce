@@ -41,6 +41,8 @@ class Checkout extends AbstractBlock {
 				return isset( $_GET['_wp-find-template'] ) ? false : $return;
 			}
 		);
+
+		add_action( 'save_post', [ $this, 'update_local_pickup_title' ], 10, 2 );
 	}
 
 	/**
@@ -240,6 +242,31 @@ class Checkout extends AbstractBlock {
 	 */
 	protected function is_checkout_endpoint() {
 		return is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' );
+	}
+
+	/**
+	 * Update the local pickup title in WooCommerce Settings when the checkout page containing a Checkout block is saved.
+	 *
+	 * @param $post_id int  The post ID.
+	 * @param $post    WP_Post The post object.
+	 * @return void
+	 */
+	public function update_local_pickup_title( $post_id, $post ) {
+		// Cast to string for Checkout page ID comparison because get_option can return it as a string, so better to compare both values as strings.
+		if ( false === has_block( 'woocommerce/checkout', $post ) || (string) get_option( 'woocommerce_checkout_page_id' ) !== (string) $post_id ) {
+			return;
+		}
+		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
+		if ( ! isset( $pickup_location_settings['title'] ) ) {
+			return;
+		}
+		$post_blocks = parse_blocks( $post->post_content );
+		$title = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
+		if ( $title ) {
+			$pickup_location_settings['title'] = $title;
+
+			update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
+		}
 	}
 
 	/**
