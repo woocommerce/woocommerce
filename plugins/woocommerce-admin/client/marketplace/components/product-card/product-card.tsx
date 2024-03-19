@@ -215,7 +215,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 										</span>
 									) }
 								</p>
-							}
+							) }
 						</div>
 					</div>
 				</div>
