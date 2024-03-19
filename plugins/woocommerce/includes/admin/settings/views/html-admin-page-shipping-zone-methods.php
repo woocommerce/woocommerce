@@ -257,8 +257,6 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 								echo '</p>';
 							}
 
-
-
 							?>
 						</fieldset>
 					</form>
