@@ -249,6 +249,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$in_app_purchase_params               = \WC_Admin_Addons::get_in_app_purchase_url_params();
+		$in_app_purchase_params['wccom-back'] = rawurlencode( '/wp-admin/admin.php?page=wc-admin&path=/customize-store' );
+
 		$core_themes = array(
 			array(
 				'name'           => 'Twenty Twenty-Four',
@@ -308,7 +311,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'total_palettes' => 9,
 				'slug'           => 'highline',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2023/12/Featured-image-538x403-1.png',
-				'link_url'       => 'https://woo.com/products/highline/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/highline/' ),
 			),
 			array(
 				'name'           => 'Luminate',
@@ -338,7 +341,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'total_palettes' => 5,
 				'slug'           => 'luminate',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/07/Featured-image-538x403-2.png',
-				'link_url'       => 'https://woo.com/products/luminate/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/luminate/' ),
 			),
 			array(
 				'name'           => 'Nokul',
@@ -368,7 +371,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'total_palettes' => 6,
 				'slug'           => 'nokul',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/11/Product-logo.jpg',
-				'link_url'       => 'https://woo.com/products/nokul/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/nokul/' ),
 			),
 		);
 
