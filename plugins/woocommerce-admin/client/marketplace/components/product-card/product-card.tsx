@@ -191,22 +191,29 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 									<span className="woocommerce-marketplace__product-card__vendor" />
 								</p>
 							) }
-							{ ! isLoading &&
+							{ ! isLoading && (
 								<p className="woocommerce-marketplace__product-card__vendor-details">
-									{ productVendor &&
+									{ productVendor && (
 										<span className="woocommerce-marketplace__product-card__vendor">
-											<span>{ __( 'By ', 'woocommerce' ) }</span>
+											<span>
+												{ __( 'By ', 'woocommerce' ) }
+											</span>
 											{ productVendor }
 										</span>
-									}
-									{ productVendor && isSponsored() &&
-										<span aria-hidden="true" className="woocommerce-marketplace__product-card__vendor-details__separator">·</span>
-									}
-									{ isSponsored() &&
+									) }
+									{ productVendor && isSponsored() && (
+										<span
+											aria-hidden="true"
+											className="woocommerce-marketplace__product-card__vendor-details__separator"
+										>
+											·
+										</span>
+									) }
+									{ isSponsored() && (
 										<span className="woocommerce-marketplace__product-card__sponsored-label">
 											{ __( 'Sponsored', 'woocommerce' ) }
 										</span>
-									}
+									) }
 								</p>
 							}
 						</div>

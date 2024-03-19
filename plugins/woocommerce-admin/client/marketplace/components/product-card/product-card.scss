@@ -286,27 +286,27 @@
 		}
 
 		&.is-sponsored::before {
-			content: ' ';
-			height: 46px;
-			width: 46px;
 			background: #09B58540;
-			display: block;
 			border-radius: 50%;
+			content: ' ';
+			display: block;
+			height: 46px;
 			position: absolute;
 			right: -23px;
 			top: 20px;
+			width: 46px;
 		}
 
 		&.is-sponsored::after {
-			content: ' ';
-			height: 30px;
-			width: 30px;
 			background: #09B585;
-			display: block;
 			border-radius: 50%;
+			content: ' ';
+			display: block;
+			height: 30px;
 			position: absolute;
 			right: -15px;
 			top: 28px;
+			width: 30px;
 		}
 	}
 }
