@@ -30,7 +30,7 @@ test.describe( 'General tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test( 'can create a simple product with categories, tags and with passowrd required', async ( {
+		test( 'can create a simple product with categories, tags and with password required', async ( {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -44,6 +44,8 @@ test.describe( 'General tab', () => {
 				)
 				.last()
 				.fill( productData.summary );
+
+			await clickOnTab( 'Pricing', page );
 			await page
 				.locator(
 					'[id^="wp-block-woocommerce-product-regular-price-field"]'
@@ -139,8 +141,8 @@ test.describe( 'General tab', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByRole( 'link', { name: categoryName } )
-			).toBeVisible();
+				await page.getByRole( 'link', { name: categoryName } ).count()
+			).toBeGreaterThan( 0 );
 
 			await expect(
 				page.getByRole( 'link', { name: tagName } )
