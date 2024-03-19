@@ -43,7 +43,7 @@ class WC_Admin_Marketplace_Promotions {
 		 * @since 8.8
 		 */
 		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
-			add_action( 'init', array( __CLASS__, 'clear_scheduled_event' ), 10 );
+			add_action( 'init', array( __CLASS__, 'clear_scheduled_event' ), 13 );
 
 			return;
 		}
@@ -53,7 +53,9 @@ class WC_Admin_Marketplace_Promotions {
 			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
 		}
 
-		add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ), 10 );
+		if ( is_admin() ) {
+			add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ), 12 );
+		}
 
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
@@ -291,3 +293,7 @@ class WC_Admin_Marketplace_Promotions {
 	}
 }
 
+// Fetch list of promotions from Woo.com for WooCommerce admin UI.
+if ( ! has_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ) ) ) {
+	add_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ), 11 );
+}
