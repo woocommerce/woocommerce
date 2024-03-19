@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Elements: fix some warning thrown when there was no post ID available
