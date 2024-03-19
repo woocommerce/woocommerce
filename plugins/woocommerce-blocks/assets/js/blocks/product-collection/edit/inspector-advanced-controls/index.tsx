@@ -8,6 +8,7 @@ import { InspectorAdvancedControls } from '@wordpress/block-editor';
  */
 import ForcePageReloadControl from './force-page-reload-control';
 import type { ProductCollectionEditComponentProps } from '../../types';
+import { Block } from 'assets/js/atomic/blocks/product-elements/price/block';
 
 export default function ProductCollectionAdvancedInspectorControls(
 	props: ProductCollectionEditComponentProps
