@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	Fragment,
-	useEffect,
-	useState,
-} from '@wordpress/element';
+import { Fragment, useEffect, useState } from '@wordpress/element';
 import classnames from 'classnames';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -118,22 +114,23 @@ export default function ProductListContent( props: {
 								} ),
 							} }
 						/>
-						{ index === bannerPosition && (
-							<NoAIBanner
-								redirectToCYSFlow={ () => {
-									const customizeStoreDesignUrl =
-										addQueryArgs(
-											`${ ADMIN_URL }admin.php`,
-											{
-												page: 'wc-admin',
-												path: '/customize-store/design',
-											}
-										);
-									window.location.href =
-										customizeStoreDesignUrl;
-								} }
-							/>
-						) }
+						{ index === bannerPosition &&
+							props.type === 'theme' && (
+								<NoAIBanner
+									redirectToCYSFlow={ () => {
+										const customizeStoreDesignUrl =
+											addQueryArgs(
+												`${ ADMIN_URL }admin.php`,
+												{
+													page: 'wc-admin',
+													path: '/customize-store/design',
+												}
+											);
+										window.location.href =
+											customizeStoreDesignUrl;
+									} }
+								/>
+							) }
 					</Fragment>
 				) ) }
 			</div>
