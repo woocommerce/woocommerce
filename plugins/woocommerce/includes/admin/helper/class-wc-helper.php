@@ -833,6 +833,7 @@ class WC_Helper {
 						)
 					)
 					: '',
+				'wum-installed' =>      WC_Woo_Update_Manager_Plugin::is_plugin_installed() ? '1' : '0',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
