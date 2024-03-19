@@ -6,6 +6,7 @@
  */
 
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
  * Data Functions.
@@ -105,6 +106,39 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
 		wp_delete_attachment( $image_id[0], true ); // Remove attachment.
+	}
+
+	/**
+	 * Test that the attributes getter only returns valid WC_Product_Attribute instances.
+	 *
+	 * @since 8.8.0
+	 */
+	public function test_get_product_attributes_sanitization() {
+		$attributes = array();
+		$attribute  = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'Test Attribute' );
+		$attribute->set_options( array( 'Fish', 'Fingers' ) );
+		$attribute->set_position( 0 );
+		$attribute->set_visible( true );
+		$attribute->set_variation( false );
+		$attributes['test-attribute'] = $attribute;
+
+		$product = ProductHelper::create_simple_product();
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$callback = function( $atts ) {
+			$atts['invalid']  = 'invalid attribute';
+			$atts['invalid2'] = 'another invalid attribute';
+			return $atts;
+		};
+
+		add_filter( 'woocommerce_product_get_attributes', $callback );
+		$actual_attributes = $product->get_attributes();
+		$this->assertCount( 1, $actual_attributes );
+		$this->assertTrue( reset( $actual_attributes ) instanceof WC_Product_Attribute );
+		remove_filter( 'woocommerce_product_get_attributes', $callback );
 	}
 
 	/**

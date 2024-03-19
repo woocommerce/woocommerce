@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the product get_attributes method only returns valid attribute objects in its array

@@ -525,10 +525,15 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Returns product attributes.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return array
+	 * @return WC_Product_Attribute[]
 	 */
 	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
+		$attributes = $this->get_prop( 'attributes', $context );
+
+		return array_filter(
+			$attributes,
+			fn( $attribute ) => $attribute instanceof WC_Product_Attribute
+		);
 	}
 
 	/**
