@@ -22,6 +22,7 @@ import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -64,6 +65,10 @@ export default function Products( props: ProductsProps ) {
 		page: 'wc-admin',
 		path: '/customize-store/design',
 	} );
+
+	const customizeStoreTask = useSelect( ( select ) => {
+		return select( ONBOARDING_STORE_NAME ).getTask( 'customize-store' );
+	}, [] );
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
 	const showAllButton = props.showAllButton ?? false;
@@ -149,7 +154,10 @@ export default function Products( props: ProductsProps ) {
 						variant="secondary"
 						text={ __( 'Design your own', 'woocommerce' ) }
 						onClick={ () => {
-							if ( ! isDefaultTheme ) {
+							if (
+								! isDefaultTheme ||
+								customizeStoreTask?.isComplete
+							) {
 								setIsModalOpen( true );
 							} else {
 								window.location.href = customizeStoreDesignUrl;
