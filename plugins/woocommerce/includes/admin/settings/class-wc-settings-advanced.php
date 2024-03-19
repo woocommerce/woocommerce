@@ -134,6 +134,26 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				array(
+					'title'    => __( 'Coming soon', 'woocommerce' ),
+					'desc'     => __( 'TBD', 'woocommerce' ),
+					'id'       => 'woocommerce_coming_soon_page_id',
+					'type'     => 'single_select_page_with_search',
+					'default'  => '',
+					'class'    => 'wc-page-search',
+					'css'      => 'min-width:300px;',
+					'args'     => array(
+						'exclude' =>
+							array(
+								wc_get_page_id( 'checkout' ),
+								wc_get_page_id( 'myaccount' ),
+							),
+					),
+					'desc_tip' => true,
+					'autoload' => false,
+				),
+
+
+				array(
 					'type' => 'sectionend',
 					'id'   => 'advanced_page_options',
 				),
