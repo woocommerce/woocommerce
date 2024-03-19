@@ -25,7 +25,7 @@ export interface ProductCardProps {
 
 function ProductCard( props: ProductCardProps ): JSX.Element {
 	const SPONSORED_PRODUCT_LABEL = 'promoted'; // what product.label indicates a sponsored placement
-	const SPONSORED_PRODUCT_STRIPE_SIZE = '8px'; // unfortunately can't be defined in CSS - height of "stripe"
+	const SPONSORED_PRODUCT_STRIPE_SIZE = '5px'; // unfortunately can't be defined in CSS - height of "stripe"
 
 	const { isLoading, type } = props;
 	const query = useQuery();
