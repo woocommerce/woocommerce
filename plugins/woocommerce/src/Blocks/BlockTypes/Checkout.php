@@ -243,6 +243,31 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
+	 * Recurse through the blocks to find the shipping methods block, then get the value of the localPickupText attribute from it.
+	 *
+	 * @param $blocks array The block(s) to search for the local pickup text.
+	 * @return void|string  The local pickup text if found, otherwise void.
+	 */
+	private function find_local_pickup_text_in_checkout_block( $blocks ) {
+		if ( ! is_array( $blocks ) ) {
+			return;
+		}
+		foreach ( $blocks as $block ) {
+			if ( ! empty ( $block['blockName'] ) && 'woocommerce/checkout-shipping-method-block' === $block['blockName'] ) {
+				if ( ! empty( $block['attrs']['localPickupText'] ) ) {
+					return $block['attrs']['localPickupText'];
+				}
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$answer = $this->find_local_pickup_text_in_checkout_block( $block['innerBlocks'] );
+				if ( $answer ) {
+					return $answer;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
