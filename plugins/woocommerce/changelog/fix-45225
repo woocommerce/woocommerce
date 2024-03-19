@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error when updating HPOS setting without changing value.

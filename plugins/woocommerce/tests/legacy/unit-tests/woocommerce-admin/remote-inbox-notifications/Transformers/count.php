@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\Count;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\Count;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_Transformers_ArrayValues

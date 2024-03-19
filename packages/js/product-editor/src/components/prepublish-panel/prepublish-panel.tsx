@@ -20,7 +20,6 @@ import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { TRACKS_SOURCE } from '../../constants';
 import { VisibilitySection } from './visibility-section';
 import { ScheduleSection } from './schedule-section';
-import { ShowPrepublishChecksSection } from './show-prepublish-checks-section';
 import { PostPublishSection, PostPublishTitle } from './post-publish';
 
 export function PrepublishPanel( {
@@ -152,9 +151,7 @@ export function PrepublishPanel( {
 			<div className="woocommerce-product-publish-panel__content">
 				{ getPanelSections() }
 			</div>
-			<div className="woocommerce-product-publish-panel__footer">
-				<ShowPrepublishChecksSection />
-			</div>
+			<div className="woocommerce-product-publish-panel__footer" />
 		</div>
 	);
 }

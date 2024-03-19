@@ -50,7 +50,7 @@ class Checkout extends MockeryTestCase {
 			array(
 				'endpoint'        => CheckoutSchema::IDENTIFIER,
 				'namespace'       => 'extension_namespace',
-				'schema_callback' => function() {
+				'schema_callback' => function () {
 					return array(
 						'extension_key' => array(
 							'description' => 'Test key',
@@ -86,9 +86,8 @@ class Checkout extends MockeryTestCase {
 			),
 		);
 		wc_empty_cart();
-		$this->keys   = array();
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
-		$this->keys[] = wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
 	}
 
 	/**
