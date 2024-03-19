@@ -183,6 +183,18 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
+		await this.page
+			.waitForRequest(
+				( request ) => {
+					return request.url().includes( 'batch' );
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is just in case there's a debounced request
+				// still to be made, e.g. from checking "Can a truck fit down
+				// your road?" field.
+			} );
 		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
