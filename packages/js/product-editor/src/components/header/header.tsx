@@ -134,7 +134,7 @@ export function Header( {
 			);
 		}
 		if (
-			( productStatus !== 'future' && catalogVisibility === 'hidden' ) ||
+			( productStatus !== 'future' && catalogVisibility !== 'visible' ) ||
 			( isVariation && productStatus === 'private' )
 		) {
 			tags.push(
