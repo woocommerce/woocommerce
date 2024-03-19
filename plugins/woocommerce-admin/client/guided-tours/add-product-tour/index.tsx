@@ -203,6 +203,10 @@ const getTourConfig = ( {
 		urlParams.get( 'tutorial_type' )
 	) as TourKitTypes.WooStep[];
 
+	if ( ! Array.isArray( steps ) ) {
+		throw new Error( 'Tour guide steps must be an array.' );
+	}
+
 	return {
 		placement: 'bottom-start',
 		options: {
@@ -304,7 +308,10 @@ export const ProductTour = () => {
 		} );
 
 		const query = new URLSearchParams( window.location.search );
-		if ( query.get( 'tutorial' ) === 'true' ) {
+		if (
+			query.get( 'tutorial' ) === 'true' &&
+			tourConfig.steps?.length > 0
+		) {
 			const intervalId = waitUntilElementTopNotChange(
 				tourConfig.steps[ 0 ].referenceElements?.desktop || '',
 				() => {
