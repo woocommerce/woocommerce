@@ -31,32 +31,17 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 *
 	 * @return string
 	 */
-	public $slug = 'page-checkout';
+	public function get_template_title() {
+		return _x( 'Page: Checkout', 'Template name', 'woocommerce' );
+	}
 
 	/**
-	 * The title of the template.
+	 * Returns the description of the template.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	public $template_title;
-
-	/**
-	 * The description of the template.
-	 *
-	 * @var string
-	 */
-	public $template_description;
-
-	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		$this->template_title       = _x( 'Page: Checkout', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
-
-		parent::init();
-
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+	public function get_template_description() {
+		return __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
 	}
 
 	/**

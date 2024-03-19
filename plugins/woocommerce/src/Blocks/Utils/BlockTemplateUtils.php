@@ -508,7 +508,7 @@ class BlockTemplateUtils {
 	 * @return boolean
 	 */
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
-		$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
+		$registered_template = self::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
 			return 'archive-product' === $registered_template->fallback_template;
 		}
@@ -721,7 +721,13 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns whether the passed `$template` has the legacy template block.
+	 * Updates the title, description and area of a template to the correct values and to make them more user-friendly.
+	 * For example, instead of:
+	 * - Title: `Tag (product_tag)`
+	 * - Description: `Displays taxonomy: Tag.`
+	 * we display:
+	 * - Title: `Products by Tag`
+	 * - Description: `Displays products filtered by a tag.`.
 	 *
 	 * @param WP_Block_Template $template The template object.
 	 * @param string            $template_type wp_template or wp_template_part.
@@ -732,13 +738,6 @@ class BlockTemplateUtils {
 		if ( ! $template ) {
 			return $template;
 		}
-		// Enforce our titles and descriptions for WooCommerce templates. They are more user-friendly.
-		// For example, instead of:
-		// * Title: `Tag (product_tag)`
-		// * Description: `Displays taxonomy: Tag.`
-		// we display:
-		// * Title: `Products by Tag`
-		// * Description: `Displays products filtered by a tag.`.
 		$formatted_title       = self::get_block_template_title( $template->slug );
 		$formatted_description = self::get_block_template_description( $template->slug );
 		$formatted_area        = self::get_block_template_area( $template->slug, $template_type );

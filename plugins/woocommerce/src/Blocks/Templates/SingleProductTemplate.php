@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * SingleProductTemplae class.
+ * SingleProductTemplate class.
  *
  * @internal
  */
@@ -36,11 +36,26 @@ class SingleProductTemplate extends AbstractTemplate {
 	 * Initialization method.
 	 */
 	public function init() {
-		$this->template_title       = _x( 'Single Product', 'Template name', 'woocommerce' );
-		$this->template_description = __( 'Displays a single product.', 'woocommerce' );
-
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 10, 3 );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public function get_template_title() {
+		return _x( 'Single Product', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public function get_template_description() {
+		return __( 'Displays a single product.', 'woocommerce' );
 	}
 
 	/**
@@ -60,13 +75,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-<<<<<<< HEAD
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-=======
-			if ( ! BlockTemplateUtils::theme_has_template( $this->slug ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
->>>>>>> e54f6a4075 (Make it so Products by Category and Products by Tag aren't listed in the Site Editor templates list by default)
 		}
 	}
 
