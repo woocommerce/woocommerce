@@ -284,30 +284,6 @@
 				line-height: 1.5;
 			}
 		}
-
-		&.is-sponsored::before {
-			background: rgba($celadon-30, 0.25);
-			border-radius: 50%;
-			content: ' ';
-			display: block;
-			height: 46px;
-			position: absolute;
-			right: -23px;
-			top: 20px;
-			width: 46px;
-		}
-
-		&.is-sponsored::after {
-			background: $celadon-30;
-			border-radius: 50%;
-			content: ' ';
-			display: block;
-			height: 30px;
-			position: absolute;
-			right: -15px;
-			top: 28px;
-			width: 30px;
-		}
 	}
 }
 
