@@ -69,26 +69,18 @@ export const BlockEditorContainer = () => {
 	const history = useHistory();
 	const settings = useSiteEditorSettings();
 
-	const currentTemplate:
-		| {
-				id: string;
-		  }
-		| undefined = useSelect(
-		( select ) =>
-			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+	const { currentTemplate, templateType } = useSelect(
+		( select ) => ( {
+			currentTemplate:
+				// @ts-expect-error No types for this exist yet.
+				select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+			templateType: unlock( select( editSiteStore ) ).getEditedPostType(),
+			templateParts: unlock(
+				select( editSiteStore )
+			).getCurrentTemplateTemplateParts(),
+		} ),
 		[]
 	);
-
-	// This is necessary to avoid this issue: https://github.com/woocommerce/woocommerce/issues/45593
-	// Related PR: https://github.com/woocommerce/woocommerce/pull/45600
-	const { templateType } = useSelect( ( select ) => {
-		const { getEditedPostType } = unlock( select( editSiteStore ) );
-
-		return {
-			templateType: getEditedPostType(),
-		};
-	}, [] );
 
 	const [ blocks, , onChange ] = useEditorBlocks(
 		templateType,

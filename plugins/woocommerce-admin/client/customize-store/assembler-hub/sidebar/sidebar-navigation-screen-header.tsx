@@ -17,6 +17,10 @@ import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
+// @ts-expect-error No types for this exist yet.
+import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
+// @ts-expect-error No types for this exist yet.
+import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
@@ -49,10 +53,15 @@ export const SidebarNavigationScreenHeader = () => {
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
 
-	const currentTemplate = useSelect(
-		( select ) =>
-			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+	const { currentTemplate, templateType } = useSelect(
+		( select ) => ( {
+			currentTemplate:
+				// @ts-expect-error No types for this exist yet.
+				select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+			templateParts: unlock(
+				select( editSiteStore )
+			).getCurrentTemplateTemplateParts(),
+		} ),
 		[]
 	);
 
