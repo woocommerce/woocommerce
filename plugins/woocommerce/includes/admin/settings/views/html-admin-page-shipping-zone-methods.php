@@ -228,30 +228,36 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
 
+							echo '</div>';
+
 							if ( CartCheckoutUtils::is_checkout_block_default() ) {
+								echo '<p class="wc-shipping-legacy-local-pickup-help-text-container">';
+
 								if ( ShippingController::is_legacy_local_pickup_active() ) {
 									printf(
+										wp_kses(
 										/* translators: %s: Local pickup settings page URL. */
-										esc_html__(
-											'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in  the <a href="%s">Local pickup settings page</a>.',
-											'woocommerce'
+											__( 'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											array( 'a' => array( 'href' => array() ) )
 										),
 										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
 									);
+
 								} else {
 									printf(
+										wp_kses(
 										/* translators: %s: Local pickup settings page URL. */
-										esc_html__(
-											'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.',
-											'woocommerce'
+											__( 'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											array( 'a' => array( 'href' => array() ) )
 										),
 										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
 									);
-
 								}
+
+								echo '</p>';
 							}
 
-							echo '</div>';
+
 
 							?>
 						</fieldset>
