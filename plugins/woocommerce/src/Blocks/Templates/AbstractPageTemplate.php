@@ -42,7 +42,7 @@ abstract class AbstractPageTemplate extends AbstractTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, $this->slug );
+			array_unshift( $templates, static::SLUG );
 		}
 		return $templates;
 	}

@@ -16,7 +16,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $slug = 'single-product';
+	const SLUG = 'single-product';
 
 	/**
 	 * The title of the template.
@@ -65,7 +65,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$valid_slugs = [ $this->slug ];
+			$valid_slugs = array( self::SLUG );
 			if ( 'product' === $post->post_type && $post->post_name ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}
@@ -89,8 +89,8 @@ class SingleProductTemplate extends AbstractTemplate {
 	 */
 	public function update_single_product_content( $query_result, $query, $template_type ) {
 		$query_result = array_map(
-			function( $template ) {
-				if ( str_contains( $template->slug, $this->slug ) ) {
+			function ( $template ) {
+				if ( str_contains( $template->slug, self::SLUG ) ) {
 					// We don't want to add the compatibility layer on the Editor Side.
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
 					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.

@@ -68,7 +68,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
 			return null;
 		}
-		if ( BlockTemplateUtils::theme_has_template( $this->slug ) ) {
+		if ( BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
 			return null;
 		}
 
@@ -115,7 +115,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 			$theme_slug         = wp_get_theme()->get_stylesheet();
 
 			// Add fallback content when creating the page.
-			if ( $template->id === $theme_slug . '//' . $this->slug && ( ! isset( $template->content ) || '' === $template->content ) ) {
+			if ( $template->id === $theme_slug . '//' . self::SLUG && ( ! isset( $template->content ) || '' === $template->content ) ) {
 				$fallback_template_content = file_get_contents( $template_file_path );
 				$template->content         = BlockTemplateUtils::inject_theme_attribute_in_content( $fallback_template_content );
 				// Remove the term description block from the archive-product template
@@ -139,7 +139,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	public function template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
 			array_unshift( $templates, $this->fallback_template );
-			array_unshift( $templates, $this->slug );
+			array_unshift( $templates, self::SLUG );
 
 			// Make it searching for a template returns the default WooCommerce template.
 			add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
@@ -157,7 +157,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	 */
 	public function add_block_templates( $query_result, $query, $template_type ) {
 		// Is it's not the same slug, do nothing.
-		if ( isset( $query['slug__in'] ) && ! in_array( $this->slug, $query['slug__in'], true ) ) {
+		if ( isset( $query['slug__in'] ) && ! in_array( self::SLUG, $query['slug__in'], true ) ) {
 			return $query_result;
 		}
 		// If it's not the same template type, do nothing.
@@ -165,7 +165,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 			return $query_result;
 		}
 		// If the theme has the template, do nothing.
-		if ( BlockTemplateUtils::theme_has_template( $this->slug ) ) {
+		if ( BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
 			return $query_result;
 		}
 		$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
@@ -175,7 +175,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 			return $query_result;
 		}
 
-		$template_object = BlockTemplateUtils::create_new_block_template_object( $template_file_path, 'wp_template', $this->slug, true );
+		$template_object = BlockTemplateUtils::create_new_block_template_object( $template_file_path, 'wp_template', self::SLUG, true );
 		$template        = BlockTemplateUtils::build_template_result_from_file( $template_object, 'wp_template' );
 		$query_result[]  = $template;
 

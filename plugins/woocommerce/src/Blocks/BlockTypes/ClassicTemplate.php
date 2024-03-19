@@ -102,7 +102,7 @@ class ClassicTemplate extends AbstractDynamicBlock {
 			$frontend_scripts::load_scripts();
 		}
 
-		if ( 'order-confirmation' === $attributes['template'] ) {
+		if ( OrderConfirmationTemplate::SLUG === $attributes['template'] ) {
 			return $this->render_order_received();
 		}
 
@@ -112,11 +112,11 @@ class ClassicTemplate extends AbstractDynamicBlock {
 
 		$valid             = false;
 		$archive_templates = array(
-			'archive-product',
-			'taxonomy-product_cat',
-			'taxonomy-product_tag',
-			'taxonomy-product_attribute',
-			'product-search-results',
+			ProductCatalogTemplate::SLUG,
+			ProductCategoryTemplate::SLUG,
+			ProductTagTemplate::SLUG,
+			ProductAttributeTemplate::SLUG,
+			ProductSearchResultsTemplate::SLUG,
 		);
 
 		// Set selected template when we directly find template base slug.

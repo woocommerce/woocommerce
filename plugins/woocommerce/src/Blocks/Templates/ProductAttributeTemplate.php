@@ -16,7 +16,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $slug = 'taxonomy-product_attribute';
+	const SLUG = 'taxonomy-product_attribute';
 
 	/**
 	 * The template used as a fallback if that one is customized.
@@ -61,7 +61,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 		}
 
 		if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) ) {
-			$templates = get_block_templates( array( 'slug__in' => array( $this->slug ) ) );
+			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
@@ -79,7 +79,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	public function update_taxonomy_template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
 		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wc_current_theme_is_fse_theme() ) {
-			array_splice( $templates, count( $templates ) - 1, 0, $this->slug );
+			array_splice( $templates, count( $templates ) - 1, 0, self::SLUG );
 		}
 
 		return $templates;
