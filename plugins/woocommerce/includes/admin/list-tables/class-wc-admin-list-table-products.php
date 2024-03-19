@@ -662,13 +662,16 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Add a sample product badge to the product list table.
 	 *
+	 * @param string $column_name Column name.
+	 * @param int    $post_id     Post ID.
+	 *
 	 * @since 8.8.0
 	 */
-	function add_sample_product_badge( $column_name, $post_id ) {
+	public function add_sample_product_badge( $column_name, $post_id ) {
 		$is_sample_product = 'product' === get_post_type( $post_id ) && get_post_meta( $post_id, '_headstart_post', true );
 
 		if ( $is_sample_product && 'name' === $column_name ) {
-			echo '<span class="sample-product-badge" style="margin-right: 6px;border-radius: 4px; background: #F6F7F7; padding: 4px; color: #3C434A;font-size: 12px;font-style: normal;font-weight: 400;line-height: 16px; height: 24px;">' . __( 'Sample', 'woocommerce' ) . '</span>';
+			echo '<span class="sample-product-badge" style="margin-right: 6px;border-radius: 4px; background: #F6F7F7; padding: 4px; color: #3C434A;font-size: 12px;font-style: normal;font-weight: 400;line-height: 16px; height: 24px;">' . esc_html__( 'Sample', 'woocommerce' ) . '</span>';
 		}
 	}
 }
