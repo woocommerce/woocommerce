@@ -83,6 +83,7 @@ class WC_Helper {
 					'section'           => 'helper',
 					'wc-helper-connect' => 1,
 					'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
+					'wum-installed'     => WC_Woo_Update_Manager_Plugin::is_plugin_installed() ? '1' : '0',
 				),
 				admin_url( 'admin.php' )
 			);
