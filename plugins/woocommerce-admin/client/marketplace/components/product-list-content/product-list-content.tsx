@@ -2,13 +2,11 @@
  * External dependencies
  */
 import {
-	createInterpolateElement,
 	Fragment,
 	useEffect,
 	useState,
 } from '@wordpress/element';
 import classnames from 'classnames';
-import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
@@ -138,30 +136,6 @@ export default function ProductListContent( props: {
 						) }
 					</Fragment>
 				) ) }
-			</div>
-			<div
-				className={
-					'woocommerce-marketplace__browse-wp-theme-directory'
-				}
-			>
-				<b>{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }</b>
-				{ createInterpolateElement(
-					__(
-						' Browse the <a>WordPress.org theme directory</a> to discover more.',
-						'woocommerce'
-					),
-					{
-						a: (
-							// eslint-disable-next-line jsx-a11y/anchor-has-content
-							<a
-								href={
-									ADMIN_URL +
-									'theme-install.php?search=e-commerce'
-								}
-							/>
-						),
-					}
-				) }
 			</div>
 		</>
 	);
