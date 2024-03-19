@@ -61,9 +61,15 @@ final class AssetsController {
 		// The price package is shared externally so has no blocks prefix.
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
+		// Register vendor scripts for cart/checkout blocks.
 		$this->api->register_script( 'wc-blocks-vendors-core', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-core' ), array(), false );
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', array( 'wc-blocks-vendors-core' ) );
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', array( 'wc-blocks-vendors-core' ) );
+
+		// Register vendor scripts for frontend scripts.
+		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'wc-checkout-block-frontend', $this->api->get_block_asset_build_path( 'checkout-frontend' ), array( 'wc-blocks-vendors-frontend' ), false );
+		$this->api->register_script( 'wc-cart-block-frontend', $this->api->get_block_asset_build_path( 'cart-frontend' ), array( 'wc-blocks-vendors-frontend' ), false );
 
 		// Register the interactivity components here for now.
 		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );

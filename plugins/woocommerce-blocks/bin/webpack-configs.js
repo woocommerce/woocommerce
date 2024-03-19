@@ -385,6 +385,13 @@ const getFrontConfig = ( options = {} ) => {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					...getCacheGroups(),
+					commons: {
+						// Just vendor the largest UI dependencies shared across frontend scripts.
+						test: /[\\/]node_modules[\\/](?:@wordpress[\\/](?:components|icons)|@ariakit[\\/](?:react|react-core|core)|dompurify|stylis|@floating-ui|@emotion|react-number-format|react-transition-group|postcode-validator)[\\/]/,
+						// Will be suffixed with -frontend.
+						name: 'wc-blocks-vendors',
+						chunks: 'all',
+					},
 					'base-components': {
 						test: /\/assets\/js\/base\/components\//,
 						name( module, chunks, cacheGroupKey ) {
