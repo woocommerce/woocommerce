@@ -5,11 +5,10 @@
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\Init as PaymentGatewaySuggestions;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PassRuleProcessor;
 
 /**
  * class WC_Admin_Tests_PaymentGatewaySuggestions_Init
