@@ -32,35 +32,7 @@ test.describe( 'Payment setup task', () => {
 
 	test( 'Can visit the WooPayments Connect page instead of setup task for supported countries', async ( {
 		page,
-		baseURL,
 	} ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// ensure store address is US
-		await api.post( 'settings/general/batch', {
-			update: [
-				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
-					id: 'woocommerce_default_country',
-					value: 'US:CA',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '94107',
-				},
-			],
-		} );
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await page.locator( 'text=Get paid' ).click();
 		await expect(
