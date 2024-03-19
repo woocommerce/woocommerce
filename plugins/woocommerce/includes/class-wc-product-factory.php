@@ -42,16 +42,6 @@ class WC_Product_Factory {
 
 		$classname = self::get_product_classname( $product_id, $product_type );
 
-		// @todo Need a new feature flag here.
-		if ( $product_type === 'ModularProduct' || true ) {
-			$modules = WC()->product_modules()->get_all_modules();
-			try {
-				return new WC_Product_Modular( $product_id, $modules );
-			} catch ( Exception $e ) {
-				return false;
-			}
-		}
-
 		try {
 			return new $classname( $product_id, $deprecated );
 		} catch ( Exception $e ) {

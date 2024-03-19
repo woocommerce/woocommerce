@@ -82,6 +82,15 @@ class WC_Product_Module_Variable extends WC_Product_Module {
 	}
 
 	/**
+	 * Get the deprecated product type.
+	 *
+	 * @return string
+	 */
+	public static function get_deprecated_product_type() {
+		return 'variable';
+	}
+
+	/**
 	 * Check if the product is variable.
 	 *
 	 * @return bool

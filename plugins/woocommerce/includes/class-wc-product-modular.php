@@ -57,8 +57,10 @@ class WC_Product_Modular extends WC_Product {
 	 * @param int|WC_Product|object $product Product to init.
 	 * @param array                 $modules Modules to instantiate with the product.
 	 */
-	public function __construct( $product = 0, $modules = array() ) {
+	public function __construct( $product = 0 ) {
 		parent::__construct( $product );
+        $modules          = WC()->product_modules()->get_all_modules();
+		$this->data_store = WC_Data_Store::load( 'product-modular' );
 
         foreach ( $modules as $module_class_name ) {
             $module                        = new $module_class_name( $this );
@@ -79,7 +81,12 @@ class WC_Product_Modular extends WC_Product {
 	 * @return string
 	 */
 	public function get_type() {
-		// @todo Possibly return deprecated type to allow backwards compatibility.
+        foreach ( $this->active_modules as $module_slug ) {
+            if ( isset( $this->modules[ $module_slug ] ) && method_exists( $this->modules[ $module_slug ], 'get_deprecated_product_type' ) ) {
+                return $this->modules[ $module_slug ]::get_deprecated_product_type();
+            }
+        }
+
 		return 'modular';
 	}
 

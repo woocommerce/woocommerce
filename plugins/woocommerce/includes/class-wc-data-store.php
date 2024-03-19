@@ -49,6 +49,7 @@ class WC_Data_Store {
 		'payment-token'         => 'WC_Payment_Token_Data_Store',
 		'product'               => 'WC_Product_Data_Store_CPT',
 		'product-grouped'       => 'WC_Product_Grouped_Data_Store_CPT',
+		'product-modular'       => 'WC_Product_Modular_Data_Store_CPT',
 		'product-variable'      => 'WC_Product_Variable_Data_Store_CPT',
 		'product-variation'     => 'WC_Product_Variation_Data_Store_CPT',
 		'shipping-zone'         => 'WC_Shipping_Zone_Data_Store',
@@ -106,6 +107,7 @@ class WC_Data_Store {
 		} else {
 			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
 		}
+
 	}
 
 	/**

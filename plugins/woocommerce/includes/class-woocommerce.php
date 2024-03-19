@@ -589,6 +589,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-coupon-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-grouped-data-store-cpt.php';
+		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-modular-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variable-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/class-wc-product-variation-data-store-cpt.php';
 		include_once WC_ABSPATH . 'includes/data-stores/abstract-wc-order-item-type-data-store.php';
