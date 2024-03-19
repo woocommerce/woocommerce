@@ -60,7 +60,6 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		}
 		return {
 			background: `linear-gradient(${ product.primary_color } 0, ${ product.primary_color } ${ SPONSORED_PRODUCT_STRIPE_SIZE }, white ${ SPONSORED_PRODUCT_STRIPE_SIZE }, white)`,
-
 		};
 	}
 
