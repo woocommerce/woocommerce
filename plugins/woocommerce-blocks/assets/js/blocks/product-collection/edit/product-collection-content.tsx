@@ -23,11 +23,18 @@ import ToolbarControls from './toolbar-controls';
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
+	// I have implemented this internal state to handle the preview state.
+	// As you can see it contains isPreview and previewMessage.
+	// - isPreview is a boolean to check if the block is in preview mode.
+	// - previewMessage is a string to display the preview message in tooltip.
 	const [ previewState, setPreviewState ] = useState( {
 		isPreview: false,
 		previewMessage: '',
 	} );
 	useEffect( () => {
+		// This is where we call the function provided by the 3PDs.
+		// We are passing the previewState and setPreviewState as arguments.
+		// 3PDs will be able to update the state based on their own logic.
 		props.handlePreviewState( previewState, setPreviewState );
 	}, [ previewState, props ] );
 

@@ -252,6 +252,12 @@ export const withHandlePreviewState =
 			);
 		}
 
+		/**
+		 * 3PDs will be able to pass handlePreviewState as a prop & then update the state
+		 * based on their own logic.
+		 * Example: As you can see below, we are updating the state after 5 seconds.
+		 *          Also, we are toggling the isPreview state in each 5 seconds.
+		 */
 		const handlePreviewState = (
 			previewState: PreviewState,
 			setPreviewState: React.Dispatch<
@@ -267,6 +273,7 @@ export const withHandlePreviewState =
 		};
 
 		return (
+			// Here we are passing the handlePreviewState as a prop to the BlockEdit.
 			<BlockEdit { ...props } handlePreviewState={ handlePreviewState } />
 		);
 	};
