@@ -501,11 +501,9 @@ class ShippingController {
 	 * @return bool
 	 */
 	public static function is_legacy_local_pickup_active() {
-		$shipping_zones      = WC_Shipping_Zones::get_zones();
-		$shipping_zones['0'] = array(
-			'zone_name'        => __( 'Rest of the World', 'woocommerce' ),
-			'shipping_methods' => WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods(),
-		);
+		$rest_of_the_world = \WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
+		$shipping_zones    = \WC_Shipping_Zones::get_zones();
+		array_unshift( $shipping_zones, $rest_of_the_world->get_data() );
 
 		foreach ( $shipping_zones as $zone ) {
 			foreach ( $zone['shipping_methods'] as $method ) {
