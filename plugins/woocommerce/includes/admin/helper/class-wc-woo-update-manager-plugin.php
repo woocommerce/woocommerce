@@ -79,6 +79,10 @@ class WC_Woo_Update_Manager_Plugin {
 			return;
 		}
 
+		if ( ! WC_Helper::is_site_connected() ) {
+			return;
+		}
+
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
