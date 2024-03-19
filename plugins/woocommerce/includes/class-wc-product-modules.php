@@ -78,6 +78,7 @@ class WC_Product_Modules {
 
 		foreach ( $product_modules as $module ) {
 			if ( is_string( $module ) && class_exists( $module ) ) {
+				$module::init();
 				$this->product_modules[ $module::get_slug() ] = $module;
 			}
         }

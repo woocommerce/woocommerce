@@ -23,6 +23,13 @@ class WC_Product_Modular extends WC_Product {
     private $modules = array();
 
     /**
+	 * Active modules.
+	 *
+	 * @var array
+	 */
+    private $active_modules = array();
+
+    /**
 	 * Aliased methods.
 	 *
 	 * @var array
@@ -96,15 +103,15 @@ class WC_Product_Modular extends WC_Product {
 	 * @param string $module_slug Module slug.
 	 */
 	public function activate_module( $module_slug ) {
-		$modules       = $this->get_prop( 'modules' );
-		$module_exists = (bool) WC()->product_modules()->get_module( $module_slug );
+		$active_modules = $this->active_modules;
+		$module_exists  = (bool) WC()->product_modules()->get_module( $module_slug );
 
 		// @todo Could optionally do some compatibility checking here and throw warnings or disable other modules.
-		if ( $module_exists && ! in_array( $module_slug, $modules ) ) {
-			$modules[] = $module_slug;
+		if ( $module_exists && ! in_array( $module_slug, $active_modules ) ) {
+			$active_modules[] = $module_slug;
 		}
 
-		$this->set_prop( 'modules', $modules );
+		$this->active_modules = $active_modules;
 	}
 
 	/**
@@ -113,8 +120,17 @@ class WC_Product_Modular extends WC_Product {
 	 * @param string $module_slug Module slug.
 	 */
 	public function deactivate_module( $module_slug ) {
-		$modules       = $this->get_prop( 'modules' );
-		$this->set_prop( 'modules', array_diff( $modules, array( $module_slug ) ) );
+		$modules              = $this->get_prop( 'modules' );
+		$this->active_modules = array_diff( $modules, array( $module_slug ) );
 	}
+
+    /**
+     * Check if module is active.
+     *
+     * @return bool
+     */
+    public function is_module_active( $module_slug ) {
+        return in_array( $module_slug, $this->active_modules, true );
+    }
 
 }

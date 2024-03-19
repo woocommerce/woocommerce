@@ -23,7 +23,7 @@ abstract class WC_Product_Module {
 	 *
 	 * @var array
 	 */
-	protected $extra_data = [];
+	protected $extra_data = array();
 
 	/**
 	 * The product.
@@ -109,6 +109,15 @@ abstract class WC_Product_Module {
 	 */
 	public function get_extra_data() {
 		return $this->extra_data;
+	}
+
+	/**
+	 * Check if this module is active in the product.
+	 *
+	 * @return bool
+	 */
+	private function is_active() {
+		$this->product->is_module_active( self::get_slug() );
 	}
 
 	public static function add_hooks() {}

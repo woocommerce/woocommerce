@@ -46,6 +46,13 @@ class WC_Product_Module_Variable extends WC_Product_Module {
 	}
 
 	/**
+	 * Initialize the module.
+	 */
+	public static function init() {
+		add_filter( 'woocommerce_product_add_to_cart_text', array( __CLASS__, 'add_to_cart_text' ), 10, 2 );
+	}
+
+	/**
 	 * Get the name.
 	 *
 	 * @return string
@@ -63,14 +70,24 @@ class WC_Product_Module_Variable extends WC_Product_Module {
 		return 'variable';
 	}
 
+	/**
+	 * Get the product passthrough methods.
+	 *
+	 * @return array
+	 */
 	public static function get_passthrough_methods() {
 		return array(
 			'is_variable'
 		);
 	}
 
+	/**
+	 * Check if the product is variable.
+	 *
+	 * @return bool
+	 */
 	public function is_variable() {
-		return true;
+		return $this->product->is_module_active( 'variable' );
 	}
 
 	/**
@@ -124,6 +141,19 @@ class WC_Product_Module_Variable extends WC_Product_Module {
 	 */
 	public function set_visible_children( $visible_children ) {
 		$this->visible_children = array_filter( wp_parse_id_list( (array) $visible_children ) );
+	}
+
+	/**
+	 * Get the add to cart button text.
+	 *
+	 * @return string
+	 */
+	public static function add_to_cart_text( $text, $product ) {
+		if ( ! $product->is_module_active( self::get_slug() ) ) {
+			return $text;
+		}
+
+		return $product->is_purchasable() ? __( 'Select options', 'woocommerce' ) : __( 'Add variation', 'woocommerce' );
 	}
 
 }
