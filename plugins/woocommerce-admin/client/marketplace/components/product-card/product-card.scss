@@ -165,11 +165,22 @@
 			position: relative;
 		}
 
+		&__vendor-details {
+			display: flex;
+			gap: $grid-unit-10;
+			margin: 0;
+			padding: 0;
+
+			&__separator {
+				color: $gray-300;
+				font-size: 28px;
+				line-height: 16px;
+			}
+		}
+
 		&__vendor {
 			display: flex;
 			gap: $grid-unit-05;
-			margin: 0;
-			padding: 0;
 			/* Allow vendor link to "punch through" the "whole card clickable" trick: */
 			position: relative;
 		}
@@ -179,6 +190,10 @@
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 1;
 			text-decoration: none;
+		}
+
+		&__sponsored-label {
+			color: $gray-700;
 		}
 
 		&__description {
