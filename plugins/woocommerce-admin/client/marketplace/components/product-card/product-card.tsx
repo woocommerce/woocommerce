@@ -133,7 +133,11 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 	);
 
 	return (
-		<Card className={ classNames } aria-hidden={ isLoading } style={ inlineCss() }>
+		<Card
+			className={ classNames }
+			aria-hidden={ isLoading }
+			style={ inlineCss() }
+		>
 			<div className="woocommerce-marketplace__product-card__content">
 				{ isTheme && (
 					<div className="woocommerce-marketplace__product-card__image">
