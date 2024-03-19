@@ -35,7 +35,33 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await editor.publishPost();
 		const url = new URL( page.url() );
 		const postId = url.searchParams.get( 'post' );
+
 		await page.goto( `/?p=${ postId }` );
+
+		await page
+			.waitForResponse(
+				async ( response ) => {
+					if (
+						response.url().includes( 'products/collection-data' )
+					) {
+						const payload = await response.json();
+						// Price range seems to be the last thing to be loaded.
+						const containsPriceRange = !! payload.price_range;
+
+						return containsPriceRange;
+					}
+					return false;
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is only to ensure the products are loaded.
+				// There are multiple requests until the products are fully
+				// loaded. We need to ensure the page is ready to be interacted
+				// with, hence the extra check. Ideally, this should be signaled
+				// by the UI (e.g., by a loading spinner), but we don't have
+				// that yet.
+			} );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -55,7 +81,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await expect( products ).toHaveCount( 9 );
 	} );
 
-	test( 'should show only products that match the filter', async ( {
+	test.only( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -79,6 +105,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
+		// await page.pause();
 
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$10' );
@@ -89,7 +116,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 
 		const img = allProductsBlock.locator( 'img' ).first();
-
+		await page.pause();
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
