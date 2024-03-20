@@ -5,7 +5,7 @@
 
 	label {
 		align-items: flex-start;
-		display: flex;
+		display: inline-flex;
 		position: relative;
 		cursor: pointer;
 		@include font-size(small);

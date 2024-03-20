@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotification
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\WCAdminActiveForRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\WCAdminActiveForRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_WCAdminActiveForRuleProcessor
