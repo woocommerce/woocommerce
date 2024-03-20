@@ -681,7 +681,7 @@ final class WooCommerce {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
 		}
 
-		if ( $this->is_request( 'admin') || $this->is_request( 'cron' ) ) {
+		if ( $this->is_request( 'admin' ) || $this->is_request( 'cron' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		}
 
