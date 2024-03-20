@@ -88,7 +88,7 @@ class Marketplace {
 
 		$count = intval( $count );
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			$count++;
+			++$count;
 		}
 
 		if ( 0 === $count ) {
