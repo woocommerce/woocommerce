@@ -14,7 +14,7 @@ Build the example extension by running the pnpm script and passing the example n
 
 
 ```bash
-WC_EXT=<example> pnpm --filter=woocommerce/client/admin example
+WC_EXT=<example> pnpm --filter=@woocommerce/admin-library example
 ```
 
 You should see a new directory in `./woocommerce/plugins/{example} path.` Include the output plugin in your `.wp-env.json` or `.wp-env.override.json` and restart the WordPress instance. WooCommerce will now reflect the changes made by the example extension.

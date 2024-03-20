@@ -45,13 +45,7 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
-			if ( $this->is_complete() ) {
-				return __( 'You added shipping costs', 'woocommerce' );
-			}
-			return __( 'Add shipping costs', 'woocommerce' );
-		}
-		return __( 'Set up shipping', 'woocommerce' );
+		return __( 'Get your products shipped', 'woocommerce' );
 	}
 
 	/**
@@ -122,7 +116,7 @@ class Shipping extends Task {
 				return true;
 			}
 
-			return in_array( $store_country, array( 'CA', 'AU', 'GB', 'ES', 'IT', 'DE', 'FR', 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true );
+			return in_array( $store_country, array( 'CA', 'AU', 'NZ', 'SG', 'HK', 'GB', 'ES', 'IT', 'DE', 'FR', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT', 'NL', 'AT', 'BE' ), true );
 		}
 
 		return self::has_physical_products();

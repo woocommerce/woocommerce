@@ -5,9 +5,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { useMemo } from '@wordpress/element';
-// @ts-ignore No types for this exist yet.
-import { EntityProvider } from '@wordpress/core-data';
+import { useEffect, useMemo } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import { InterfaceSkeleton } from '@wordpress/interface';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -18,8 +16,6 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 // @ts-ignore No types for this exist yet.
 import CanvasSpinner from '@wordpress/edit-site/build-module/components/canvas-spinner';
 // @ts-ignore No types for this exist yet.
-import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
-// @ts-ignore No types for this exist yet.
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-ignore No types for this exist yet.
 import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/components/global-styles-renderer';
@@ -27,11 +23,10 @@ import { GlobalStylesRenderer } from '@wordpress/edit-site/build-module/componen
 /**
  * Internal dependencies
  */
-import { BlockEditor } from './block-editor';
+import { editorIsLoaded } from '../utils';
+import { BlockEditorContainer } from './block-editor-container';
 
 export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
-	const { record: template } = useEditedEntityRecord();
-	const { id: templateId, type: templateType } = template;
 	const { context, hasPageContentFocus } = useSelect( ( select ) => {
 		const {
 			getEditedPostContext,
@@ -65,36 +60,35 @@ export const Editor = ( { isLoading }: { isLoading: boolean } ) => {
 		};
 	}, [ hasPageContentFocus, context, setEditedPostContext ] );
 
+	useEffect( () => {
+		if ( ! isLoading ) {
+			editorIsLoaded();
+		}
+	}, [ isLoading ] );
+
 	return (
 		<>
 			{ isLoading ? <CanvasSpinner /> : null }
-			<EntityProvider kind="root" type="site">
-				<EntityProvider
-					kind="postType"
-					type={ templateType }
-					id={ templateId }
-				>
-					<BlockContextProvider value={ blockContext }>
-						<InterfaceSkeleton
-							enableRegionNavigation={ false }
-							className={ classnames(
-								'woocommerce-customize-store__edit-site-editor',
-								'edit-site-editor__interface-skeleton',
-								{
-									'show-icon-labels': false,
-									'is-loading': isLoading,
-								}
-							) }
-							content={
-								<>
-									<GlobalStylesRenderer />
-									<BlockEditor />
-								</>
-							}
-						/>
-					</BlockContextProvider>
-				</EntityProvider>
-			</EntityProvider>
+
+			<BlockContextProvider value={ blockContext }>
+				<InterfaceSkeleton
+					enableRegionNavigation={ false }
+					className={ classnames(
+						'woocommerce-customize-store__edit-site-editor',
+						'edit-site-editor__interface-skeleton',
+						{
+							'show-icon-labels': false,
+							'is-loading': isLoading,
+						}
+					) }
+					content={
+						<>
+							<GlobalStylesRenderer />
+							<BlockEditorContainer />
+						</>
+					}
+				/>
+			</BlockContextProvider>
 		</>
 	);
 };

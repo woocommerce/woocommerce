@@ -108,6 +108,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 0,
 		variation: false,
 		visible: false,
+		slug: 'local',
 	},
 	{
 		id: 2,
@@ -116,6 +117,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 1,
 		variation: false,
 		visible: true,
+		slug: 'color',
 	},
 	{
 		id: 3,
@@ -124,6 +126,7 @@ const testAttributes: ProductAttribute[] = [
 		position: 2,
 		variation: false,
 		visible: true,
+		slug: 'size',
 	},
 ];
 

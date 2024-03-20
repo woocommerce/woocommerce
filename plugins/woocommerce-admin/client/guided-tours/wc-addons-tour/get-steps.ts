@@ -26,7 +26,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"Power up your store by adding extra functionality with extensions or integrate your store with other software and services.<br/><br/>Here you'll find hundreds of trusted solutions for your store — all reviewed and approved by the Woo team.<br/><br/>You can also browse the Woo Marketplace at WooCommerce.com.",
+							"Power up your store by adding extra functionality with extensions or integrate your store with other software and services.<br/><br/>Here you'll find hundreds of trusted solutions for your store — all reviewed and approved by the Woo team.<br/><br/>You can also browse the Woo Marketplace at Woo.com.",
 							'woocommerce'
 						),
 						{
@@ -113,14 +113,14 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"All of your Woo Marketplace purchases can be found here, or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! You're now ready to power up your store.",
+							"All of your Woo Marketplace purchases can be found here, or on Woo.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! You're now ready to power up your store.",
 							'woocommerce'
 						),
 						{
 							a1: createElement(
 								'a',
 								{
-									href: 'https://woocommerce.com/refund-policy/',
+									href: 'https://woo.com/refund-policy/',
 									'aria-label': __(
 										'Refund policy',
 										'woocommerce'
@@ -134,7 +134,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 							a2: createElement(
 								'a',
 								{
-									href: 'https://woocommerce.com/my-account/create-a-ticket/',
+									href: 'https://woo.com/my-account/create-a-ticket/',
 									'aria-label': __(
 										'Contact support',
 										'woocommerce'

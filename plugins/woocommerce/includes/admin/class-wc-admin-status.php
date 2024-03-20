@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Logging\PageController as LoggingPageController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +15,12 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Status Class.
  */
 class WC_Admin_Status {
+	/**
+	 * An instance of the DB log handler list table.
+	 *
+	 * @var WC_Admin_Log_Table_List
+	 */
+	private static $db_log_list_table;
 
 	/**
 	 * Handles output of the reports page in admin.
@@ -104,13 +111,7 @@ class WC_Admin_Status {
 	 * Show the logs page.
 	 */
 	public static function status_logs() {
-		$log_handler = Constants::get_constant( 'WC_LOG_HANDLER' );
-
-		if ( 'WC_Log_Handler_DB' === $log_handler ) {
-			self::status_logs_db();
-		} else {
-			self::status_logs_file();
-		}
+		wc_get_container()->get( LoggingPageController::class )->render();
 	}
 
 	/**
@@ -138,15 +139,17 @@ class WC_Admin_Status {
 	 * Show the log page contents for db log handler.
 	 */
 	public static function status_logs_db() {
-		if ( ! empty( $_REQUEST['flush-logs'] ) ) { // WPCS: input var ok, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce handled in flush_db_logs().
+		if ( isset( $_REQUEST['flush-logs'] ) ) {
 			self::flush_db_logs();
 		}
 
-		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) { // WPCS: input var ok, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce handled in log_table_bulk_actions().
+		if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['log'] ) ) {
 			self::log_table_bulk_actions();
 		}
 
-		$log_table_list = new WC_Admin_Log_Table_List();
+		$log_table_list = self::get_db_log_list_table();
 		$log_table_list->prepare_items();
 
 		include_once __DIR__ . '/views/html-admin-page-status-logs-db.php';
@@ -312,19 +315,37 @@ class WC_Admin_Status {
 	}
 
 	/**
+	 * Return a stored instance of the DB log list table class.
+	 *
+	 * @return WC_Admin_Log_Table_List
+	 */
+	public static function get_db_log_list_table() {
+		if ( is_null( self::$db_log_list_table ) ) {
+			self::$db_log_list_table = new WC_Admin_Log_Table_List();
+		}
+
+		return self::$db_log_list_table;
+	}
+
+
+	/**
 	 * Clear DB log table.
 	 *
 	 * @since 3.0.0
 	 */
 	private static function flush_db_logs() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) { // WPCS: input var ok, sanitization ok.
-			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		check_admin_referer( 'bulk-logs' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to manage log entries.', 'woocommerce' ) );
 		}
 
 		WC_Log_Handler_DB::flush();
 
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
-		exit();
+		$sendback = wp_sanitize_redirect( admin_url( 'admin.php?page=wc-status&tab=logs' ) );
+
+		wp_safe_redirect( $sendback );
+		exit;
 	}
 
 	/**
@@ -333,15 +354,22 @@ class WC_Admin_Status {
 	 * @since 3.0.0
 	 */
 	private static function log_table_bulk_actions() {
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'woocommerce-status-logs' ) ) { // WPCS: input var ok, sanitization ok.
-			wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
+		check_admin_referer( 'bulk-logs' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to manage log entries.', 'woocommerce' ) );
 		}
 
-		$log_ids = array_map( 'absint', (array) isset( $_REQUEST['log'] ) ? wp_unslash( $_REQUEST['log'] ) : array() ); // WPCS: input var ok, sanitization ok.
+		$log_ids = (array) filter_input( INPUT_GET, 'log', FILTER_CALLBACK, array( 'options' => 'absint' ) );
 
-		if ( ( isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] ) || ( isset( $_REQUEST['action2'] ) && 'delete' === $_REQUEST['action2'] ) ) { // WPCS: input var ok, sanitization ok.
+		$action = self::get_db_log_list_table()->current_action();
+
+		if ( 'delete' === $action ) {
 			WC_Log_Handler_DB::delete( $log_ids );
-			wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
+
+			$sendback = remove_query_arg( array( 'action', 'action2', 'log', '_wpnonce', '_wp_http_referer' ), wp_get_referer() );
+
+			wp_safe_redirect( $sendback );
 			exit();
 		}
 	}
@@ -400,7 +428,7 @@ class WC_Admin_Status {
 				$has_newer_version = false;
 				$version_string    = $plugin['version'];
 				$network_string    = '';
-				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) || strstr( $plugin['url'], 'woo.com' ) ) {
 					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
 						/* translators: 1: current version. 2: latest version */
 						$version_string = sprintf( __( '%1$s (update to version %2$s is available)', 'woocommerce' ), $plugin['version'], $plugin['version_latest'] );

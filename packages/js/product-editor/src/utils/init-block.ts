@@ -1,11 +1,13 @@
 /**
  * External dependencies
  */
-import {
-	Block,
-	BlockConfiguration,
-	registerBlockType,
-} from '@wordpress/blocks';
+import { Block, BlockConfiguration } from '@wordpress/blocks';
+import deprecated from '@wordpress/deprecated';
+
+/**
+ * Internal dependencies
+ */
+import { registerProductEditorBlockType } from './register-product-editor-block-type';
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -23,9 +25,13 @@ export function initBlock<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( block: BlockRepresentation< T > ): Block< T > | undefined {
+	deprecated( 'initBlock()', {
+		alternative: 'registerProductEditorBlockType()',
+	} );
+
 	if ( ! block ) {
 		return;
 	}
-	const { metadata, settings, name } = block;
-	return registerBlockType< T >( { name, ...metadata }, settings );
+
+	return registerProductEditorBlockType( block );
 }

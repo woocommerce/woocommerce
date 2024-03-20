@@ -42,7 +42,7 @@ class CustomBlockTemplate extends AbstractBlockTemplate {
 	 *
 	 * @param array $block_config The block data.
 	 */
-	public function add_custom_block( array $block_config ): BlockInterface {
+	public function add_custom_block( array $block_config ): CustomBlockInterface {
 		$block = new CustomBlock( $block_config, $this->get_root_template(), $this );
 		return $this->add_inner_block( $block );
 	}

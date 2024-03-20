@@ -422,7 +422,7 @@ export class ShippingBanner extends Component {
 									),
 									wcsLink: (
 										<ExternalLink
-											href="https://woocommerce.com/products/shipping/?utm_medium=product"
+											href="https://woo.com/products/shipping/?utm_medium=product"
 											target="_blank"
 											type="external"
 											onClick={

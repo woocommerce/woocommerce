@@ -63,7 +63,7 @@ The following WP Data API calls are used in the Core Profiler:
 
 - `resolveSelect( ONBOARDING_STORE_NAME ).getFreeExtensions()`
 
-This is used to retrieve the list of extensions that will be shown on the Extensions page. It makes an API call to the WooCommerce REST API, which will make a call to WooCommerce.com if permitted. Otherwise it retrieves the locally stored list of free extensions.
+This is used to retrieve the list of extensions that will be shown on the Extensions page. It makes an API call to the WooCommerce REST API, which will make a call to Woo.com if permitted. Otherwise it retrieves the locally stored list of free extensions.
 
 - `resolveSelect( COUNTRIES_STORE_NAME ).getCountries()`
 

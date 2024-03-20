@@ -5,7 +5,7 @@
 		"product-block-editor": true,
 		"coupons": true,
 		"core-profiler": true,
-		"customize-store": false,
+		"customize-store": true,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
@@ -19,7 +19,13 @@
 		"new-product-management-experience": false,
 		"onboarding": true,
 		"onboarding-tasks": true,
-		"product-variation-management": false,
+		"product-variation-management": true,
+		"product-virtual-downloadable": true,
+		"product-external-affiliate": true,
+		"product-grouped": true,
+		"product-linked": true,
+		"product-pre-publish-modal": false,
+		"product-custom-fields": false,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
 		"payment-gateway-suggestions": true,
@@ -31,6 +37,7 @@
 		"woo-mobile-welcome": true,
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
-		"async-product-editor-category-field": false
+		"async-product-editor-category-field": false,
+		"launch-your-store": false
 	}
 }

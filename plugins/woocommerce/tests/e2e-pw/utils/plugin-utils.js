@@ -12,7 +12,7 @@ const execAsync = promisify( require( 'child_process' ).exec );
  * @param {string} password
  * @returns Base64-encoded string
  */
-const encodeCredentials = ( username, password ) => {
+export const encodeCredentials = ( username, password ) => {
 	return Buffer.from( `${ username }:${ password }` ).toString( 'base64' );
 };
 

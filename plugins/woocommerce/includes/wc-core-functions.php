@@ -1125,30 +1125,6 @@ function get_woocommerce_api_url( $path ) {
 }
 
 /**
- * Get a log file path.
- *
- * @since 2.2
- *
- * @param string $handle name.
- * @return string the log file path.
- */
-function wc_get_log_file_path( $handle ) {
-	return WC_Log_Handler_File::get_log_file_path( $handle );
-}
-
-/**
- * Get a log file name.
- *
- * @since 3.3
- *
- * @param string $handle Name.
- * @return string The log file name.
- */
-function wc_get_log_file_name( $handle ) {
-	return WC_Log_Handler_File::get_log_file_name( $handle );
-}
-
-/**
  * Recursively get page children.
  *
  * @param  int $page_id Page ID.
@@ -2003,9 +1979,7 @@ function wc_remove_number_precision_deep( $value ) {
  *     - an instance which will be used directly as the logger
  * In either case, the class or instance *must* implement WC_Logger_Interface.
  *
- * @see WC_Logger_Interface
- *
- * @return WC_Logger
+ * @return WC_Logger_Interface
  */
 function wc_get_logger() {
 	static $logger = null;
@@ -2102,25 +2076,6 @@ function wc_print_r( $expression, $return = false ) {
 
 	return false;
 }
-
-/**
- * Registers the default log handler.
- *
- * @since 3.0
- * @param array $handlers Handlers.
- * @return array
- */
-function wc_register_default_log_handler( $handlers ) {
-	$handler_class = Constants::get_constant( 'WC_LOG_HANDLER' );
-	if ( is_null( $handler_class ) || ! class_exists( $handler_class ) ) {
-		$handler_class = WC_Log_Handler_File::class;
-	}
-
-	array_push( $handlers, new $handler_class() );
-
-	return $handlers;
-}
-add_filter( 'woocommerce_register_log_handlers', 'wc_register_default_log_handler' );
 
 /**
  * Based on wp_list_pluck, this calls a method instead of returning a property.
@@ -2532,7 +2487,7 @@ function wc_selected( $value, $options ) {
 function wc_get_server_database_version() {
 	global $wpdb;
 
-	if ( empty( $wpdb->is_mysql ) || ! $wpdb->use_mysqli ) {
+	if ( empty( $wpdb->is_mysql ) || empty( $wpdb->use_mysqli ) ) {
 		return array(
 			'string' => '',
 			'number' => '',

@@ -135,10 +135,19 @@ export function parseNumber(
 		const [ , decimals ] = value.split( decimalSeparator );
 		parsedPrecision = decimals ? decimals.length : 0;
 	}
+	let parsedValue = value;
+	if ( thousandSeparator ) {
+		parsedValue = parsedValue.replace(
+			new RegExp( `\\${ thousandSeparator }`, 'g' ),
+			''
+		);
+	}
+	if ( decimalSeparator ) {
+		parsedValue = parsedValue.replace(
+			new RegExp( `\\${ decimalSeparator }`, 'g' ),
+			'.'
+		);
+	}
 
-	return Number.parseFloat(
-		value
-			.replace( new RegExp( `\\${ thousandSeparator }`, 'g' ), '' )
-			.replace( new RegExp( `\\${ decimalSeparator }`, 'g' ), '.' )
-	).toFixed( parsedPrecision );
+	return Number.parseFloat( parsedValue ).toFixed( parsedPrecision );
 }

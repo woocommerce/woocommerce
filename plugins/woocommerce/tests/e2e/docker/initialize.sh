@@ -24,11 +24,12 @@ wp plugin install https://github.com/woocommerce/woocommerce-reset/zipball/trunk
 # install the WP Mail Logging plugin to test emails
 wp plugin install wp-mail-logging --activate
 
-# Activate our Filter Setter utility.
+# Activate our E2E helper plugins to facilitate server-side interaction.
 wp plugin activate filter-setter
+wp plugin activate process-waiting-actions
 
 # initialize pretty permalinks
 wp rewrite structure /%postname%/
 
-# Activate our Enable Experimental Features utility.
-wp plugin activate enable-experimental-features
+# Activate our helper APIs plugin.
+wp plugin activate test-helper-apis

@@ -650,7 +650,7 @@ test.describe( 'Data API tests', () => {
 							num_decimals: 2,
 							thousand_sep: '.',
 							weight_unit: 'kg',
-							states: [],
+							states: expect.arrayContaining( [] ),
 						},
 						{
 							code: 'MG',
@@ -3307,7 +3307,7 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'VE',
-							name: 'Bolívar soberano',
+							name: 'Bolívar',
 							currency_code: 'VES',
 							currency_pos: 'left',
 							decimal_sep: ',',

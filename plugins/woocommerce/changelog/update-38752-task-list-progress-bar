@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Update the default setting for the task list progress bar from 0 to 0.25, which gives the progress better visual context when no tasks have been completed.

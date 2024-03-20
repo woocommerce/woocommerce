@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Updates smoke-test-daily.yml workflow to correctly remove additional test execution as previous revert PR #39889 missed a step
-

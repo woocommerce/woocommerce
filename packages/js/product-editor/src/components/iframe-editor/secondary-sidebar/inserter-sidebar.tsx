@@ -38,7 +38,7 @@ export default function InserterSidebar() {
 		const { getBlockRootClientId } = select( blockEditorStore );
 
 		return {
-			rootClientId: getBlockRootClientId(),
+			rootClientId: getBlockRootClientId( '' ),
 		};
 	} );
 

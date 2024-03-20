@@ -14,7 +14,7 @@ import WooIcon from '../../assets/images/woo-icon.svg';
 import { MARKETPLACE_HOST } from '../constants';
 
 const refundPolicyTitle = createInterpolateElement(
-	__( '30 day <a>money back guarantee</a>', 'woocommerce' ),
+	__( '30-day <a>money-back guarantee</a>', 'woocommerce' ),
 	{
 		// eslint-disable-next-line jsx-a11y/anchor-has-content
 		a: <a href={ MARKETPLACE_HOST + '/refund-policy/' } />,

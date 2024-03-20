@@ -4,32 +4,40 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect } from '@wordpress/element';
-
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from '@wordpress/element';
+import { useQuery } from '@woocommerce/navigation';
 import { useSelect, useDispatch } from '@wordpress/data';
-// @ts-ignore No types for this exist yet.
-import { Button, __experimentalHStack as HStack } from '@wordpress/components';
+import {
+	// @ts-ignore No types for this exist yet.
+	__experimentalHStack as HStack,
+	// @ts-ignore No types for this exist yet.
+	__experimentalUseNavigator as useNavigator,
+	Button,
+	Spinner,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-ignore No types for this exist yet.
 import { store as blockEditorStore } from '@wordpress/block-editor';
-
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-ignore No types for this exist yet.
 import { store as noticesStore } from '@wordpress/notices';
 // @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
 import { useEntitiesSavedStatesIsDirty as useIsDirty } from '@wordpress/editor';
+import { recordEvent } from '@woocommerce/tracks';
+// @ts-ignore No types for this exist yet.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
-
-const { useLocation } = unlock( routerPrivateApis );
+import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -37,18 +45,24 @@ const PUBLISH_ON_SAVE_ENTITIES = [
 		name: 'wp_navigation',
 	},
 ];
+let shouldTriggerSave = true;
 
 export const SaveHub = () => {
-	const saveNoticeId = 'site-edit-save-notice';
-	const { params } = useLocation();
+	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
-
+	const [ isResolving, setIsResolving ] = useState< boolean >( false );
+	const navigator = useNavigator();
+	const { resetHighlightedBlockClientId } = useContext(
+		HighlightedBlockContext
+	);
+	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
 		useDispatch( blockEditorStore );
 
-	const { createSuccessNotice, createErrorNotice, removeNotice } =
-		useDispatch( noticesStore );
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore The types for this are incorrect.
+	const { createErrorNotice } = useDispatch( noticesStore );
 
 	const {
 		dirtyEntityRecords,
@@ -89,97 +103,108 @@ export const SaveHub = () => {
 		__experimentalSaveSpecifiedEntityEdits: saveSpecifiedEntityEdits,
 	} = useDispatch( coreStore );
 
-	useEffect( () => {
-		dirtyEntityRecords.forEach( ( entity ) => {
-			/* This is a hack to reset the entity record when the user navigates away from editing page to main page.
-			This is needed because Gutenberg does not provide a way to reset the entity record. Replace this when we have a better way to do this.
-			We will need to add different conditions here when we implement editing for other entities.
-			 */
-
-			if (
-				entity.kind === 'root' &&
-				entity.name === 'site' &&
-				entity.property
-			) {
-				// Reset site icon edit
-				editEntityRecord(
-					'root',
-					'site',
-					undefined,
-					{
-						[ entity.property ]: undefined,
-					},
-					{ undoIgnore: true }
-				);
+	const save = useCallback( async () => {
+		for ( const { kind, name, key, property } of dirtyEntityRecords ) {
+			if ( kind === 'root' && name === 'site' ) {
+				await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
+					property,
+				] );
 			} else {
-				editEntityRecord(
-					entity.kind,
-					entity.name,
-					entity.key,
-					{
-						selection: undefined,
-						blocks: undefined,
-						content: undefined,
-					},
-					{ undoIgnore: true }
-				);
-			}
-		} );
-		// Only run when path changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ params.path ] );
+				if (
+					PUBLISH_ON_SAVE_ENTITIES.some(
+						( typeToPublish ) =>
+							typeToPublish.kind === kind &&
+							typeToPublish.name === name
+					)
+				) {
+					editEntityRecord( kind, name, key, {
+						status: 'publish',
+					} );
+				}
 
-	const save = async () => {
-		removeNotice( saveNoticeId );
+				await saveEditedEntityRecord( kind, name, key );
+				__unstableMarkLastChangeAsPersistent();
+			}
+		}
+	}, [
+		dirtyEntityRecords,
+		editEntityRecord,
+		saveEditedEntityRecord,
+		saveSpecifiedEntityEdits,
+		__unstableMarkLastChangeAsPersistent,
+	] );
+
+	const isMainScreen = urlParams.path === '/customize-store/assembler-hub';
+
+	// Trigger a save when the editor is loaded and there are unsaved changes in main screen. This is needed to ensure FE is displayed correctly because some patterns have dynamic attributes that only generate in Editor.
+	useEffect( () => {
+		if ( isEditorLoading ) {
+			return;
+		}
+
+		if ( ! isMainScreen ) {
+			shouldTriggerSave = false;
+			return;
+		}
+
+		if ( shouldTriggerSave && isDirty ) {
+			save();
+			shouldTriggerSave = false;
+		}
+	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
+
+	const onClickSaveButton = async () => {
+		const source = `${ urlParams.path.replace(
+			'/customize-store/assembler-hub/',
+			''
+		) }`;
+		recordEvent( 'customize_your_store_assembler_hub_save_click', {
+			source,
+		} );
 
 		try {
-			for ( const { kind, name, key, property } of dirtyEntityRecords ) {
-				if ( kind === 'root' && name === 'site' ) {
-					await saveSpecifiedEntityEdits( 'root', 'site', undefined, [
-						property,
-					] );
-				} else {
-					if (
-						PUBLISH_ON_SAVE_ENTITIES.some(
-							( typeToPublish ) =>
-								typeToPublish.kind === kind &&
-								typeToPublish.name === name
-						)
-					) {
-						editEntityRecord( kind, name, key, {
-							status: 'publish',
-						} );
-					}
-
-					await saveEditedEntityRecord( kind, name, key );
-					__unstableMarkLastChangeAsPersistent();
-				}
-			}
-
-			createSuccessNotice( __( 'Site updated.', 'woocommerce' ), {
-				type: 'snackbar',
-				id: saveNoticeId,
-			} );
+			await save();
+			resetHighlightedBlockClientId();
+			navigator.goToParent();
 		} catch ( error ) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore The types for this are incorrect.
 			createErrorNotice(
 				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
 			);
 		}
 	};
 
+	const onDone = async () => {
+		recordEvent( 'customize_your_store_assembler_hub_done_click' );
+		setIsResolving( true );
+
+		try {
+			await save();
+			sendEvent( 'FINISH_CUSTOMIZATION' );
+		} catch ( error ) {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore The types for this are incorrect.
+			createErrorNotice(
+				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
+			);
+			setIsResolving( false );
+		}
+	};
+
 	const renderButton = () => {
-		if ( params.path === '/customize-store' ) {
+		if ( isMainScreen ) {
 			return (
 				<Button
 					variant="primary"
-					onClick={ () => {
-						sendEvent( 'FINISH_CUSTOMIZATION' );
-					} }
+					onClick={ onDone }
 					className="edit-site-save-hub__button"
+					disabled={ isResolving || isEditorLoading }
+					aria-disabled={ isResolving }
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
-					{ __( 'Done', 'woocommerce' ) }
+					{ isResolving ? <Spinner /> : __( 'Done', 'woocommerce' ) }
 				</Button>
 			);
 		}
@@ -194,15 +219,14 @@ export const SaveHub = () => {
 		return (
 			<Button
 				variant="primary"
-				onClick={ save }
-				isBusy={ isSaving }
+				onClick={ onClickSaveButton }
 				disabled={ isDisabled }
 				aria-disabled={ isDisabled }
 				className="edit-site-save-hub__button"
 				// @ts-ignore No types for this exist yet.
 				__next40pxDefaultSize
 			>
-				{ label }
+				{ isSaving ? <Spinner /> : label }
 			</Button>
 		);
 	};

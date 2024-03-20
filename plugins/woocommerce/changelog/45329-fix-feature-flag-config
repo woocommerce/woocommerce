@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Updates `watch` command to build development feature configs
+

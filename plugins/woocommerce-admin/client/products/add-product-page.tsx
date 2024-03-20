@@ -16,7 +16,6 @@ import {
 import { ProductForm } from './product-form';
 import { ProductTourContainer } from './tour';
 import './add-edit-product-page.scss';
-import './fills';
 
 const AddProductPage: React.FC = () => {
 	const { isLoading } = useSelect( ( select: WCDataSelector ) => {

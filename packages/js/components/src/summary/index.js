@@ -49,7 +49,9 @@ const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 	return (
 		<Dropdown
 			className="woocommerce-summary"
-			position="bottom"
+			popoverProps={ {
+				placement: 'bottom',
+			} }
 			headerTitle={ label }
 			renderToggle={ ( { isOpen, onToggle } ) =>
 				cloneElement( selected, { onToggle, isOpen } )

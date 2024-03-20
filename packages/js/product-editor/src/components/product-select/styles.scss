@@ -1,0 +1,41 @@
+.woocommerce-product-select {
+	&__menu {
+		&-loading {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: $grid-unit;
+			height: $grid-unit-60 + 2px;
+		}
+
+		&-item {
+			display: flex;
+			align-items: center;
+			padding: $grid-unit;
+			gap: $grid-unit + $grid-unit-05;
+
+			&-image {
+				flex-shrink: 0;
+			}
+
+			&-content {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+
+			&-title {
+				color: $gray-900;
+			}
+
+			&-description {
+				color: $gray-700;
+				font-size: 11px;
+			}
+		}
+	}
+
+	.woocommerce-experimental-select-control__combo-box-wrapper {
+		margin-bottom: 0;
+	}
+}

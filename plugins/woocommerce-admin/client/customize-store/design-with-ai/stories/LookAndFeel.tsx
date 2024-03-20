@@ -7,7 +7,13 @@ import { WithCustomizeYourStoreLayout } from './WithCustomizeYourStoreLayout';
 
 export const LookAndFeelPage = () => (
 	<LookAndFeel
-		context={ {} as designWithAiStateMachineContext }
+		context={
+			{
+				lookAndFeel: {
+					choice: '',
+				},
+			} as designWithAiStateMachineContext
+		}
 		sendEvent={ () => {} }
 	/>
 );

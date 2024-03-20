@@ -61,7 +61,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( new WC_Order(), self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertStringContainsString(
-			'href="https://woocommerce.com/mobile?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_promote_app&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
+			'href="https://woo.com/mobile?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_promote_app&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -77,7 +77,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertStringContainsString(
-			'href="https://woocommerce.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '&#038;utm_campaign=deeplinks_orders_details&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
+			'href="https://woo.com/mobile/orders/details?blog_id=' . self::BLOG_ID . '&#038;order_id=' . self::ORDER_ID . '&#038;utm_campaign=deeplinks_orders_details&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -93,7 +93,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, self::BLOG_ID, $now, self::DOMAIN );
 
 		$this->assertStringContainsString(
-			'href="https://woocommerce.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
+			'href="https://woo.com/mobile/payments?blog_id=' . self::BLOG_ID . '&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=' . self::BLOG_ID,
 			$mobile_message
 		);
 	}
@@ -113,7 +113,7 @@ class MobileMessagingHandlerTest extends \WC_Unit_Test_Case {
 		$mobile_message = MobileMessagingHandler::prepare_mobile_message( $ipp_eligible_order, null, $now, self::DOMAIN );
 
 		$this->assertStringContainsString(
-			'href="https://woocommerce.com/mobile/payments?blog_id=0&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=0',
+			'href="https://woo.com/mobile/payments?blog_id=0&#038;utm_campaign=deeplinks_payments&#038;utm_medium=email&#038;utm_source=' . self::DOMAIN . '&#038;utm_term=0',
 			$mobile_message
 		);
 	}

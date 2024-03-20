@@ -27,21 +27,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 const onboarding = getAdminSetting( 'onboarding', {} );
 
-const Loader = ( props ) => {
-	if ( props.isLoading ) {
-		return (
-			<div
-				className="woocommerce-admin__industry__spinner"
-				style={ { textAlign: 'center' } }
-			>
-				<Spinner />
-			</div>
-		);
-	}
-
-	return <Industry { ...props } />;
-};
-
 class Industry extends Component {
 	constructor( props ) {
 		const profileItems = get( props, 'profileItems', {} );
@@ -312,6 +297,21 @@ class Industry extends Component {
 		);
 	}
 }
+
+const Loader = ( props ) => {
+	if ( props.isLoading ) {
+		return (
+			<div
+				className="woocommerce-admin__industry__spinner"
+				style={ { textAlign: 'center' } }
+			>
+				<Spinner />
+			</div>
+		);
+	}
+
+	return <Industry { ...props } />;
+};
 
 export default compose(
 	withSelect( ( select ) => {

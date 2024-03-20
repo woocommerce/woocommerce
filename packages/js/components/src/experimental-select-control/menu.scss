@@ -17,13 +17,14 @@
 }
 .woocommerce-experimental-select-control__popover-menu {
 	.components-popover__content {
-		max-height: 300px;
-		overflow-y: scroll;
+		overflow: hidden;
 	}
 }
 .woocommerce-experimental-select-control__popover-menu-container {
 	margin: 0;
 	width: 100%;
+	max-height: 300px;
+	overflow-y: scroll;
 
 	> .category-field-dropdown__item:not(:first-child) {
 		.category-field-dropdown__item-content {

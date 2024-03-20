@@ -19,6 +19,7 @@ import { SaveDraftButtonProps } from '../../save-draft-button';
 
 export function useSaveDraft( {
 	productStatus,
+	productType = 'product',
 	disabled,
 	onClick,
 	onSaveSuccess,
@@ -30,17 +31,18 @@ export function useSaveDraft( {
 } ): Button.ButtonProps {
 	const [ productId ] = useEntityProp< number >(
 		'postType',
-		'product',
+		productType,
 		'id'
 	);
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
+			// @ts-expect-error There are no types for this.
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
 				'postType',
-				'product',
+				productType,
 				productId
 			);
 
@@ -48,7 +50,7 @@ export function useSaveDraft( {
 				isDisabled: isSaving,
 				hasEdits: hasEditsForEntityRecord< boolean >(
 					'postType',
-					'product',
+					productType,
 					productId
 				),
 			};
@@ -56,7 +58,7 @@ export function useSaveDraft( {
 		[ productId ]
 	);
 
-	const { isValidating, validate } = useValidations();
+	const { isValidating, validate } = useValidations< Product >();
 
 	const ariaDisabled =
 		disabled ||
@@ -64,6 +66,7 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
+	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
@@ -76,14 +79,15 @@ export function useSaveDraft( {
 		}
 
 		try {
-			await validate();
+			await validate( { status: 'draft' } );
 
-			await editEntityRecord( 'postType', 'product', productId, {
+			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
+			// @ts-expect-error There are no types for this.
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
-				'product',
+				productType,
 				productId,
 				{
 					throwOnError: true,

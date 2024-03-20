@@ -11,7 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -125,29 +124,8 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 			)
 		);
-
-		/*
-		 * This is a temporary solution to override /jetpack/v4/connection/data endpoint
-		 * registered by Jetpack Connection when Jetpack is not installed.
-		 *
-		 * For more details, see https://github.com/woocommerce/woocommerce/issues/38979
-		 */
-		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null && wp_is_mobile() ) {
-			register_rest_route(
-				'jetpack/v4',
-				'/connection/data',
-				array(
-					array(
-						'methods'             => 'GET',
-						'permission_callback' => '__return_true',
-						'callback'            => function() {
-							return new WP_REST_Response( null, 404 );
-						},
-					),
-				),
-				true
-			);
-		}
+		add_action( 'woocommerce_plugins_install_error', array( $this, 'log_plugins_install_error' ), 10, 4 );
+		add_action( 'woocommerce_plugins_install_api_error', array( $this, 'log_plugins_install_api_error' ), 10, 2 );
 	}
 
 	/**
@@ -410,5 +388,42 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 			),
 		);
+	}
+
+	public function log_plugins_install_error( $slug, $api, $result, $upgrader ) {
+		$properties = array(
+			'error_message'         => sprintf(
+			/* translators: %s: plugin slug (example: woocommerce-services) */
+				__(
+					'The requested plugin `%s` could not be installed.',
+					'woocommerce'
+				),
+				$slug
+			),
+			'type'				    => 'plugin_info_api_error',
+			'slug'                  => $slug,
+			'api_version'           => $api->version,
+			'api_download_link'     => $api->download_link,
+			'upgrader_skin_message' => implode( ',', $upgrader->skin->get_upgrade_messages() ),
+			'result'                => is_wp_error( $result ) ? $result->get_error_message() : 'null',
+		);
+		wc_admin_record_tracks_event( 'coreprofiler_install_plugin_error', $properties );
+	}
+
+	public function log_plugins_install_api_error( $slug, $api ) {
+		$properties = array(
+			'error_message'     => sprintf(
+			// translators: %s: plugin slug (example: woocommerce-services).
+				__(
+					'The requested plugin `%s` could not be installed. Plugin API call failed.',
+					'woocommerce'
+				),
+				$slug
+			),
+			'type'              => 'plugin_install_error',
+			'api_error_message' => $api->get_error_message(),
+			'slug'              => $slug,
+		);
+		wc_admin_record_tracks_event( 'coreprofiler_install_plugin_error', $properties );
 	}
 }

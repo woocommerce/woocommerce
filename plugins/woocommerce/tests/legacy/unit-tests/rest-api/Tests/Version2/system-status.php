@@ -110,14 +110,22 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_system_status_info_environment() {
 		$this->skip_on_php_8_1();
 
+		$store_id = get_option( \WC_Install::STORE_ID_OPTION, null );
+		if ( empty( $store_id ) ) {
+			$store_id = 'a1b2c3d4-e5f6-a1b2-c3d4-a1b2c3d4e5f6';
+			update_option( \WC_Install::STORE_ID_OPTION, $store_id );
+		}
+
 		$environment = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['environment'];
 
 		// Make sure all expected data is present.
-		$this->assertEquals( 32, count( $environment ) );
+		$this->assertEquals( 33, count( $environment ) );
 
 		// Test some responses to make sure they match up.
 		$this->assertEquals( get_option( 'home' ), $environment['home_url'] );
 		$this->assertEquals( get_option( 'siteurl' ), $environment['site_url'] );
+		$this->assertEquals( get_option( \WC_Install::STORE_ID_OPTION, null ), $environment['store_id'] );
+		$this->assertEquals( $store_id, $environment['store_id'] );
 		$this->assertEquals( WC()->version, $environment['version'] );
 	}
 
@@ -236,7 +244,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
 		$this->assertArrayHasKey( 'database', $properties );
 		$this->assertArrayHasKey( 'active_plugins', $properties );
@@ -244,6 +252,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'settings', $properties );
 		$this->assertArrayHasKey( 'security', $properties );
 		$this->assertArrayHasKey( 'pages', $properties );
+		$this->assertArrayHasKey( 'logging', $properties );
 	}
 
 	/**

@@ -20,6 +20,7 @@ class WC_Shop_Customizer {
 		add_action( 'customize_register', array( $this, 'add_sections' ) );
 		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
 		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
+		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
 	}
 
@@ -58,9 +59,34 @@ class WC_Shop_Customizer {
 	}
 
 	/**
-	 * CSS styles to improve our form.
+	 * CSS styles to disable the Checkout section, when the default checkout page contains the
+	 * Checkout block, and to enhance form visuals.
 	 */
 	public function add_styles() {
+		if ( $this->has_block_checkout() ) {
+			?>
+			<style type="text/css">
+				li#accordion-section-woocommerce_checkout {
+					pointer-events: none;
+				}
+
+				li#accordion-section-woocommerce_checkout .accordion-section-title {
+					background: #f1f1f1;
+				}
+
+				ul#sub-accordion-panel-woocommerce .notice {
+					border-color: #007cba;
+					border-bottom: 0;
+					border-right: 0;
+					border-top: 0;
+					margin-top: 0;
+					padding-bottom: 10px;
+					padding-top: 10px;
+				}
+			</style>
+			<?php
+		}
+
 		?>
 		<style type="text/css">
 			.woocommerce-cropping-control {
@@ -249,6 +275,32 @@ class WC_Shop_Customizer {
 			} );
 		</script>
 		<?php
+
+		if ( $this->has_block_checkout() ) {
+			$message = sprintf(
+				/* translators: %s: Link to the editor page with the Checkout block. */
+				__( 'Checkout can be customized <a href="%s">in the Editor</a> with your active theme.', 'woocommerce' ),
+				admin_url( 'post.php?post=' . get_option( 'woocommerce_checkout_page_id' ) . '&action=edit' )
+			);
+			?>
+			<script type="text/javascript">
+				jQuery( document ).ready( function( $ ) {
+					const message = <?php echo wp_json_encode( $message ); ?>;
+					$( "#sub-accordion-panel-woocommerce" ).append( "<li class='notice notice-info'>" + message + "</li>" );
+				} );
+			</script>
+			<?php
+		}
+
+	}
+
+	/**
+	 * Enqueue scripts for the customizer.
+	 */
+	public function enqueue_scripts() {
+		$handle = 'custom-notice';
+		wp_register_script( $handle, false, array( 'customize-controls' ), WC_VERSION, false );
+		wp_enqueue_script( $handle );
 	}
 
 	/**
@@ -270,6 +322,7 @@ class WC_Shop_Customizer {
 	 * @return string
 	 */
 	public function sanitize_default_catalog_orderby( $value ) {
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$options = apply_filters(
 			'woocommerce_default_catalog_orderby_options',
 			array(
@@ -432,6 +485,7 @@ class WC_Shop_Customizer {
 			)
 		);
 
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$wp_customize->add_control(
 			'woocommerce_default_catalog_orderby',
 			array(
@@ -525,8 +579,10 @@ class WC_Shop_Customizer {
 	private function add_product_images_section( $wp_customize ) {
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
 			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
 			$regen_description = __( 'After publishing your changes, new image sizes will be generated automatically.', 'woocommerce' );
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && is_multisite() ) {
 			/* translators: 1: tools URL 2: regen thumbs url */
 			$regen_description = sprintf( __( 'After publishing your changes, new image sizes may not be shown until you regenerate thumbnails. You can do this from the <a href="%1$s" target="_blank">tools section in WooCommerce</a> or by using a plugin such as <a href="%2$s" target="_blank">Regenerate Thumbnails</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-status&tab=tools' ), 'https://en-gb.wordpress.org/plugins/regenerate-thumbnails/' );
@@ -883,11 +939,21 @@ class WC_Shop_Customizer {
 	public function has_terms_and_conditions_page_id() {
 		return wc_terms_and_conditions_page_id() > 0;
 	}
+
+	/**
+	 * Weather or not the checkout page contains the Checkout block.
+	 *
+	 * @return bool
+	 */
+	private function has_block_checkout() {
+		$post = get_post( get_option( 'woocommerce_checkout_page_id' ) );
+		return strpos( $post->post_content, '<!-- wp:woocommerce/checkout' ) !== false;
+	}
 }
 
 global $pagenow;
 if (
-	$pagenow === 'customize.php' ||
+	'customize.php' === $pagenow ||
 	isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	! wc_current_theme_is_fse_theme()
 ) {

@@ -76,8 +76,34 @@ const recordTracksSkipBusinessLocationCompleted = () => {
 	} );
 };
 
+const recordTracksIsEmailChanged = (
+	context: CoreProfilerStateMachineContext,
+	event: BusinessInfoEvent
+) => {
+	let emailSource, isEmailChanged;
+	if ( context.onboardingProfile.store_email ) {
+		emailSource = 'onboarding_profile_store_email'; // from previous entry
+		isEmailChanged =
+			event.payload.storeEmailAddress !==
+			context.onboardingProfile.store_email;
+	} else if ( context.currentUserEmail ) {
+		emailSource = 'current_user_email'; // from currentUser
+		isEmailChanged =
+			event.payload.storeEmailAddress !== context.currentUserEmail;
+	} else {
+		emailSource = 'was_empty';
+		isEmailChanged = event.payload.storeEmailAddress?.length > 0;
+	}
+
+	recordEvent( 'coreprofiler_email_marketing', {
+		opt_in: event.payload.isOptInMarketing,
+		email_field_prefilled_source: emailSource,
+		email_field_modified: isEmailChanged,
+	} );
+};
+
 const recordTracksBusinessInfoCompleted = (
-	_context: CoreProfilerStateMachineContext,
+	context: CoreProfilerStateMachineContext,
 	event: Extract< BusinessInfoEvent, { type: 'BUSINESS_INFO_COMPLETED' } >
 ) => {
 	recordEvent( 'coreprofiler_step_complete', {
@@ -92,8 +118,8 @@ const recordTracksBusinessInfoCompleted = (
 			) === -1,
 		industry: event.payload.industry,
 		store_location_previously_set:
-			_context.onboardingProfile.is_store_country_set || false,
-		geolocation_success: _context.geolocatedLocation !== undefined,
+			context.onboardingProfile.is_store_country_set || false,
+		geolocation_success: context.geolocatedLocation !== undefined,
 		geolocation_overruled: event.payload.geolocationOverruled,
 	} );
 };
@@ -128,11 +154,21 @@ const recordFailedPluginInstallations = (
 	_context: unknown,
 	_event: PluginsInstallationCompletedWithErrorsEvent
 ) => {
+	const failedExtensions = _event.payload.errors.map(
+		( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
+	);
+
 	recordEvent( 'coreprofiler_store_extensions_installed_and_activated', {
 		success: false,
-		failed_extensions: _event.payload.errors.map(
-			( error: PluginInstallError ) => getPluginTrackKey( error.plugin )
-		),
+		failed_extensions: failedExtensions,
+	} );
+
+	_event.payload.errors.forEach( ( error: PluginInstallError ) => {
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: false,
+			extension: getPluginTrackKey( error.plugin ),
+			error_message: error.error,
+		} );
 	} );
 };
 
@@ -158,9 +194,15 @@ const recordSuccessfulPluginInstallation = (
 	};
 
 	for ( const installedPlugin of installationCompletedResult.installedPlugins ) {
-		trackData[
-			'install_time_' + getPluginTrackKey( installedPlugin.plugin )
-		] = getTimeFrame( installedPlugin.installTime );
+		const pluginKey = getPluginTrackKey( installedPlugin.plugin );
+		const installTime = getTimeFrame( installedPlugin.installTime );
+		trackData[ 'install_time_' + pluginKey ] = installTime;
+
+		recordEvent( 'coreprofiler_store_extension_installed_and_activated', {
+			success: true,
+			extension: pluginKey,
+			install_time: installTime,
+		} );
 	}
 
 	recordEvent(
@@ -180,4 +222,5 @@ export default {
 	recordFailedPluginInstallations,
 	recordSuccessfulPluginInstallation,
 	recordTracksPluginsInstallationRequest,
+	recordTracksIsEmailChanged,
 };

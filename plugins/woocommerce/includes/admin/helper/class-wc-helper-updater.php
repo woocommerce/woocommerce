@@ -1,6 +1,6 @@
 <?php
 /**
- * The update helper for WooCommerce.com plugins.
+ * The update helper for Woo.com plugins.
  *
  * @class WC_Helper_Updater
  * @package WooCommerce\Admin\Helper
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Helper_Updater Class
  *
  * Contains the logic to fetch available updates and hook into Core's update
- * routines to serve WooCommerce.com-provided packages.
+ * routines to serve Woo.com-provided packages.
  */
 class WC_Helper_Updater {
 
@@ -68,24 +68,28 @@ class WC_Helper_Updater {
 				$item['package'] = 'woocommerce-com-expired-' . $plugin['_product_id'];
 			}
 
-			if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
-				$transient->response[ $filename ] = (object) $item;
-				unset( $transient->no_update[ $filename ] );
-			} else {
-				$transient->no_update[ $filename ] = (object) $item;
-				unset( $transient->response[ $filename ] );
+			if ( $transient instanceof stdClass ) {
+				if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
+					$transient->response[ $filename ] = (object) $item;
+					unset( $transient->no_update[ $filename ] );
+				} else {
+					$transient->no_update[ $filename ] = (object) $item;
+					unset( $transient->response[ $filename ] );
+				}
 			}
 		}
 
-		$translations = self::get_translations_update_data();
-		$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
+		if ( $transient instanceof stdClass ) {
+			$translations            = self::get_translations_update_data();
+			$transient->translations = array_merge( isset( $transient->translations ) ? $transient->translations : array(), $translations );
+		}
 
 		return $transient;
 	}
 
 	/**
 	 * Runs on pre_set_site_transient_update_themes, provides custom
-	 * packages for WooCommerce.com-hosted extensions.
+	 * packages for Woo.com-hosted extensions.
 	 *
 	 * @param object $transient The update_themes transient object.
 	 *
@@ -512,7 +516,7 @@ class WC_Helper_Updater {
 		return new WP_Error(
 			'woocommerce_subscription_expired',
 			sprintf(
-				// translators: %s: URL of WooCommerce.com subscriptions tab.
+				// translators: %s: URL of Woo.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
 				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
 			)

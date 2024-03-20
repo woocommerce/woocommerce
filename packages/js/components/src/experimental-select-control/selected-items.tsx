@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import { createElement } from '@wordpress/element';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -43,7 +44,7 @@ export const SelectedItems = < ItemType, >( {
 			<div className={ classes }>
 				{ items
 					.map( ( item ) => {
-						return getItemLabel( item );
+						return decodeEntities( getItemLabel( item ) );
 					} )
 					.join( ', ' ) }
 			</div>

@@ -30,10 +30,14 @@ import {
 	Extension,
 	GeolocationResponse,
 	PLUGINS_STORE_NAME,
+	SETTINGS_STORE_NAME,
+	USER_STORE_NAME,
+	WCUser,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -66,6 +70,8 @@ import {
 import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
+import { getCountryCode } from '~/dashboard/utils';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -95,6 +101,8 @@ export type BusinessInfoEvent = {
 		industry?: IndustryChoice;
 		storeLocation: CountryStateOption[ 'key' ];
 		geolocationOverruled: boolean;
+		isOptInMarketing: boolean;
+		storeEmailAddress: string;
 	};
 };
 
@@ -135,6 +143,8 @@ export type OnboardingProfile = {
 	selling_platforms: SellingPlatform[] | null;
 	skip?: boolean;
 	is_store_country_set: boolean | null;
+	store_email?: string;
+	is_agree_marketing?: boolean;
 };
 
 export type PluginsPageSkippedEvent = {
@@ -191,6 +201,7 @@ export type CoreProfilerStateMachineContext = {
 	persistBusinessInfoRef?: ReturnType< typeof spawn >;
 	spawnUpdateOnboardingProfileOptionRef?: ReturnType< typeof spawn >;
 	spawnGeolocationRef?: ReturnType< typeof spawn >;
+	currentUserEmail: string | undefined;
 };
 
 const getAllowTrackingOption = async () =>
@@ -302,6 +313,29 @@ const handleOnboardingProfileOption = assign( {
 			sellingOnlineAnswer,
 			sellingPlatforms,
 		};
+	},
+} );
+
+const getCurrentUserEmail = async () => {
+	const currentUser: WCUser< 'email' > = await resolveSelect(
+		USER_STORE_NAME
+	).getCurrentUser();
+	return currentUser?.email;
+};
+
+const assignCurrentUserEmail = assign( {
+	currentUserEmail: (
+		_context,
+		event: DoneInvokeEvent< string | undefined >
+	) => {
+		if (
+			event.data &&
+			event.data.length > 0 &&
+			event.data !== 'wordpress@example.com' // wordpress default prefilled email address
+		) {
+			return event.data;
+		}
+		return undefined;
 	},
 } );
 
@@ -418,6 +452,49 @@ const updateBusinessLocation = ( countryAndState: string ) => {
 	} );
 };
 
+const updateStoreCurrency = async ( countryAndState: string ) => {
+	const { general: settings = {} } = await resolveSelect(
+		SETTINGS_STORE_NAME
+	).getSettings( 'general' );
+
+	const countryCode = getCountryCode( countryAndState ) as string;
+	const { currencySymbols = {}, localeInfo = {} } = getAdminSetting(
+		'onboarding',
+		{}
+	);
+	const currencySettings = CurrencyFactory().getDataForCountry(
+		countryCode,
+		localeInfo,
+		currencySymbols
+	) as {
+		code: string;
+		symbolPosition: string;
+		thousandSeparator: string;
+		decimalSeparator: string;
+		precision: string;
+	};
+
+	if ( Object.keys( currencySettings ).length === 0 ) {
+		return;
+	}
+
+	return dispatch( SETTINGS_STORE_NAME ).updateAndPersistSettingsForGroup(
+		'general',
+		{
+			general: {
+				...settings,
+				woocommerce_currency: currencySettings.code,
+				woocommerce_currency_pos: currencySettings.symbolPosition,
+				woocommerce_price_thousand_sep:
+					currencySettings.thousandSeparator,
+				woocommerce_price_decimal_sep:
+					currencySettings.decimalSeparator,
+				woocommerce_price_num_decimals: currencySettings.precision,
+			},
+		}
+	);
+};
+
 const assignStoreLocation = assign( {
 	businessInfo: (
 		context: CoreProfilerStateMachineContext,
@@ -442,6 +519,9 @@ const updateBusinessInfo = async (
 	const refreshedOnboardingProfile = ( await resolveSelect(
 		OPTIONS_STORE_NAME
 	).getOption( 'woocommerce_onboarding_profile' ) ) as OnboardingProfile;
+
+	await updateStoreCurrency( event.payload.storeLocation );
+
 	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		blogname: event.payload.storeName,
 		woocommerce_default_country: event.payload.storeLocation,
@@ -449,6 +529,11 @@ const updateBusinessInfo = async (
 			...refreshedOnboardingProfile,
 			is_store_country_set: true,
 			industry: [ event.payload.industry ],
+			is_agree_marketing: event.payload.isOptInMarketing,
+			store_email:
+				event.payload.storeEmailAddress.length > 0
+					? event.payload.storeEmailAddress
+					: null,
 		},
 	} );
 };
@@ -523,7 +608,7 @@ const getPlugins = async () => {
 	);
 };
 
-/** Special callback that is used to trigger a navigation event if the user uses the browser's back or foward buttons */
+/** Special callback that is used to trigger a navigation event if the user uses the browser's back or forward buttons */
 const browserPopstateHandler = () => ( sendBack: Sender< AnyEventObject > ) => {
 	const popstateHandler = () => {
 		sendBack( 'EXTERNAL_URL_UPDATE' );
@@ -594,6 +679,7 @@ const coreProfilerMachineActions = {
 	handleCountries,
 	handleOnboardingProfileOption,
 	assignOnboardingProfile,
+	assignCurrentUserEmail,
 	persistBusinessInfo,
 	spawnUpdateOnboardingProfileOption,
 	redirectToWooHome,
@@ -607,6 +693,7 @@ const coreProfilerMachineServices = {
 	getCountries,
 	getGeolocation,
 	getOnboardingProfileOption,
+	getCurrentUserEmail,
 	getPlugins,
 	browserPopstateHandler,
 	updateBusinessInfo,
@@ -643,6 +730,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		loader: {},
 		onboardingProfile: {} as OnboardingProfile,
 		jetpackAuthUrl: undefined,
+		currentUserEmail: undefined,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -976,6 +1064,28 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							},
 						},
+						currentUserEmail: {
+							initial: 'fetching',
+							states: {
+								fetching: {
+									invoke: {
+										src: 'getCurrentUserEmail',
+										onDone: {
+											target: 'done',
+											actions: [
+												'assignCurrentUserEmail',
+											],
+										},
+										onError: {
+											target: 'done',
+										},
+									},
+								},
+								done: {
+									type: 'final',
+								},
+							},
+						},
 					},
 					// onDone is reached when child parallel states fo fetching are resolved (reached final states)
 					onDone: {
@@ -996,7 +1106,10 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 					on: {
 						BUSINESS_INFO_COMPLETED: {
 							target: 'postBusinessInfo',
-							actions: [ 'recordTracksBusinessInfoCompleted' ],
+							actions: [
+								'recordTracksBusinessInfoCompleted',
+								'recordTracksIsEmailChanged',
+							],
 						},
 					},
 				},
@@ -1075,9 +1188,14 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 											context.businessInfo
 												.location as string
 										);
+									const currencyUpdate = updateStoreCurrency(
+										context.businessInfo.location as string
+									);
+
 									return Promise.all( [
 										skipped,
 										businessLocation,
+										currencyUpdate,
 									] );
 								},
 								onDone: {
@@ -1086,7 +1204,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							},
 						},
 						// Although we don't need to wait 3 seconds for the following states
-						// We will dispaly 20% and 80% progress for 1.5 seconds each
+						// We will display 20% and 80% progress for 1.5 seconds each
 						// for the sake of user experience.
 						progress20: {
 							entry: assign( {
@@ -1437,11 +1555,15 @@ export const CoreProfilerController = ( {
 				hasJetpackSelected: ( context ) => {
 					return (
 						context.pluginsSelected.find(
-							( plugin ) => plugin === 'jetpack'
+							( plugin ) =>
+								plugin === 'jetpack' ||
+								plugin === 'jetpack-boost'
 						) !== undefined ||
 						context.pluginsAvailable.find(
 							( plugin: Extension ) =>
-								plugin.key === 'jetpack' && plugin.is_activated
+								( plugin.key === 'jetpack' ||
+									plugin.key === 'jetpack-boost' ) &&
+								plugin.is_activated
 						) !== undefined
 					);
 				},

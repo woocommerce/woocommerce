@@ -8,6 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import CRUD_ACTIONS from './crud-actions';
 import { IdQuery, IdType, ItemQuery } from './types';
+import { getResourceName } from '../utils';
 
 /**
  * Get a REST path given a template path and URL params.
@@ -223,18 +224,7 @@ export const cleanQuery = (
  * @param args Arguments for the request.
  * @return Key to identify the request.
  */
-export const getRequestIdentifier = ( name: string, ...args: unknown[] ) => {
-	const suffix = JSON.stringify(
-		args.map( ( arg ) => {
-			if ( typeof arg === 'object' && arg !== null ) {
-				return JSON.stringify( arg, Object.keys( arg ).sort() );
-			}
-			return arg;
-		} )
-	).replace( /\\"/g, '"' );
-
-	return name + '/' + suffix;
-};
+export const getRequestIdentifier = getResourceName;
 
 /**
  * Get a generic action name from a resource action name if one exists.

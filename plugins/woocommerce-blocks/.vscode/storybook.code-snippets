@@ -1,0 +1,40 @@
+{
+	"Storybook Story": {
+		"prefix": [ "storybook", "sbs" ],
+		"body": [
+			"/**",
+			" * External dependencies",
+			" */",
+			"import type { Story, Meta } from '@storybook/react';",
+			"",
+			"/**",
+			" * Internal dependencies",
+			" */",
+			"import ${1:${TM_DIRECTORY/.*\\/(.*)\\/.*$/${1:/pascalcase}/}}, { ${2:${TM_DIRECTORY/.*\\/(.*)\\/.*$/${1:/pascalcase}/}Props} } from '..';",
+			"",
+			"export default {",
+			"\ttitle: 'WooCommerce Blocks/${3|@base-components,editor-components,woocommerce,Checkout Blocks|}/${1}',",
+			"\tcomponent: ${1},",
+			"} as Meta< ${2} >;",
+			"",
+			"const Template: Story< ${2} > = ( args ) => (",
+			"\t<${1} { ...args } />",
+			");",
+			"",
+			"export const Default = Template.bind( {} );",
+			"Default.args = {};",
+			""
+		],
+		"description": "Scaffolds a Storybook story",
+		"scope": "typescript, typescriptreact"
+	},
+	"Storybook Story from Template": {
+		"prefix": [ "sbt" ],
+		"body": [
+			"export const ${1:MyStory} = Template.bind( {} );",
+			"$1.args = {",
+			"\t$2",
+			"};"
+		]
+	}
+}

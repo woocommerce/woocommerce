@@ -407,7 +407,7 @@ jQuery( function( $ ) {
 						var $form = $( 'form.checkout' );
 
 						// Remove notices from all sources
-						$( '.woocommerce-error, .woocommerce-message' ).remove();
+						$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 
 						// Add new errors returned by this event
 						if ( data.messages ) {
@@ -572,7 +572,7 @@ jQuery( function( $ ) {
 			return false;
 		},
 		submit_error: function( error_message ) {
-			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
+			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 			wc_checkout_form.$checkout_form.prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
 			wc_checkout_form.$checkout_form.removeClass( 'processing' ).unblock();
 			wc_checkout_form.$checkout_form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).trigger( 'blur' );
@@ -617,8 +617,9 @@ jQuery( function( $ ) {
 			});
 
 			var data = {
-				security:		wc_checkout_params.apply_coupon_nonce,
-				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
+				security: wc_checkout_params.apply_coupon_nonce,
+				coupon_code: $form.find('input[name="coupon_code"]').val(),
+				billing_email: wc_checkout_form.$checkout_form.find('input[name="billing_email"]').val()
 			};
 
 			$.ajax({
@@ -626,7 +627,7 @@ jQuery( function( $ ) {
 				url:		wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'apply_coupon' ),
 				data:		data,
 				success:	function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					$form.removeClass( 'processing' ).unblock();
 
 					if ( code ) {
@@ -666,7 +667,7 @@ jQuery( function( $ ) {
 				url:     wc_checkout_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_coupon' ),
 				data:    data,
 				success: function( code ) {
-					$( '.woocommerce-error, .woocommerce-message' ).remove();
+					$( '.woocommerce-error, .woocommerce-message, .is-error, .is-success' ).remove();
 					container.removeClass( 'processing' ).unblock();
 
 					if ( code ) {

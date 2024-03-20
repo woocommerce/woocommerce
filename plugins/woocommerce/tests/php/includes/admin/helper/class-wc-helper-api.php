@@ -16,7 +16,7 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the url method returns the correct WooCommerce.com path.
+	 * Test that the url method returns the correct Woo.com path.
 	 */
 	public function test_api_url() {
 		$url = WC_Helper_API::url( '/test-path' );
