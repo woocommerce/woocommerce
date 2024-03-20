@@ -1897,7 +1897,7 @@ function wc_get_rounding_precision() {
 
 	/**
 	 * Filter the rounding precision for internal WC calculations. This is different from the number of decimals used for display.
-	 * Generally, this filter can be used to decrease the precision, but if you choose to decrease, there maybe side effects such off by one rounding errors for certain tax rate combinations.
+	 * Generally, this filter can be used to decrease the precision, but if you choose to decrease, there maybe side effects such as off by one rounding errors for certain tax rate combinations.
 	 *
 	 * @since 8.9.0
 	 *
