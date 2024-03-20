@@ -1084,9 +1084,9 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $children[2], $match );
 
 		// Test trying to get a variation of a variation.
-		$variation_product = wc_get_product( $children[0] );
-		$match = $data_store->find_matching_product_variation(
-			$variation_product,
+		$variation = wc_get_product( $children[0] );
+		$match     = $data_store->find_matching_product_variation(
+			$variation,
 			array(
 				'attribute_pa_size' => 'small',
 			)
