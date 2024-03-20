@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix double scroll bar in pre-publish panel #45671

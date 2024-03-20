@@ -21,6 +21,8 @@ import {
 import { preventLeavingProductForm } from './prevent-leaving-product-form';
 import { hasAttributesUsedForVariations } from './has-attributes-used-for-variations';
 import { isValidEmail } from './validate-email';
+import { handlePrompt } from './handle-prompt';
+import { handleConfirm } from './handle-confirm';
 
 export * from './create-ordered-children';
 export * from './date';
@@ -45,6 +47,8 @@ export {
 	getProductTitle,
 	getProductVariationTitle,
 	getTruncatedProductVariationTitle,
+	handleConfirm,
+	handlePrompt,
 	hasAttributesUsedForVariations,
 	isValidEmail,
 	preventLeavingProductForm,
