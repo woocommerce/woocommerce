@@ -35,10 +35,10 @@ export function VisibilitySection( { productType }: VisibilitySectionProps ) {
 		if ( postPassword !== '' ) {
 			return __( 'Password protected', 'woocommerce' );
 		}
-		if ( catalogVisibility === 'visible' ) {
-			return __( 'Public', 'woocommerce' );
+		if ( catalogVisibility === 'hidden' ) {
+			return __( 'Hidden', 'woocommerce' );
 		}
-		return __( 'Hidden', 'woocommerce' );
+		return __( 'Public', 'woocommerce' );
 	}
 
 	return (
