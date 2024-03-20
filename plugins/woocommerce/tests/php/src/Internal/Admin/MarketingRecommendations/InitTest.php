@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ShippingPartnerSuggestions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\DefaultMarketingRecommendations;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\MarketingRecommendationsDataSourcePoller;

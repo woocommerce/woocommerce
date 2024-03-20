@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1075,7 +1076,7 @@ class WC_Admin_Addons {
 		// Check for existence of promotions and evaluate out if we should show them.
 		if ( ! empty( $promotions ) ) {
 			foreach ( $promotions as $promo_id => $promotion ) {
-				$evaluator = new PromotionRuleEngine\RuleEvaluator();
+				$evaluator = new RuleEvaluator();
 				$passed    = $evaluator->evaluate( $promotion->rules );
 				if ( ! $passed ) {
 					unset( $promotions[ $promo_id ] );
