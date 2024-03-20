@@ -55,6 +55,9 @@ export const SidebarNavigationScreenHomepage = () => {
 	);
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
+			if ( pattern === selectedPattern ) {
+				return;
+			}
 			setSelectedPattern( pattern );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
@@ -62,7 +65,7 @@ export const SidebarNavigationScreenHomepage = () => {
 			);
 			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern, scroll ]
+		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
 	);
 
 	const homePatterns = useMemo( () => {
