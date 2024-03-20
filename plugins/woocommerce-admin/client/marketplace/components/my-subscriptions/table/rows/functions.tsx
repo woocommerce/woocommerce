@@ -134,7 +134,12 @@ function getVersion( subscription: Subscription ): string | JSX.Element {
 	}
 
 	if ( subscription.local.version && subscription.version ) {
-		return <Update subscription={ subscription } wooUpdateManagerActive={wccomSettings?.wooUpdateManagerActive}/>;
+		return (
+			<Update
+				subscription={ subscription }
+				wooUpdateManagerActive={ wccomSettings?.wooUpdateManagerActive }
+			/>
+		);
 	}
 
 	if ( subscription.version ) {
