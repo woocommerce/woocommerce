@@ -14,6 +14,7 @@ import {
 } from '@woocommerce/admin-layout';
 import { getSetting } from '@woocommerce/settings';
 import { Text, useSlot } from '@woocommerce/experimental';
+import { getScreenFromPath, isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -100,9 +101,11 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
+	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
 	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
 		useLaunchYourStore();
-	const showLaunchYourStoreStatus = launchYourStoreEnabled && ! isLoading;
+	const showLaunchYourStoreStatus =
+		isHomescreen && launchYourStoreEnabled && ! isLoading;
 
 	return (
 		<div className={ className } ref={ headerElement }>
