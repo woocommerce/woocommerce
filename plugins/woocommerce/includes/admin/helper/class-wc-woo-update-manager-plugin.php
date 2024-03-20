@@ -97,7 +97,7 @@ class WC_Woo_Update_Manager_Plugin {
 				return;
 			}
 
-			include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-installed.php';
+			include __DIR__ . '/views/html-notice-woo-updater-not-installed.php';
 			return;
 		}
 
@@ -105,7 +105,7 @@ class WC_Woo_Update_Manager_Plugin {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-woo-updater-not-activated.php';
+		include __DIR__ . '/views/html-notice-woo-updater-not-activated.php';
 	}
 
 	/**

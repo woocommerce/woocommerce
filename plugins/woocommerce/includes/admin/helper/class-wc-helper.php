@@ -54,15 +54,15 @@ class WC_Helper {
 	 * Include supporting helper classes.
 	 */
 	protected static function includes() {
-		include_once dirname( __FILE__ ) . '/class-wc-helper-options.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-api.php';
-		include_once dirname( __FILE__ ) . '/class-wc-woo-update-manager-plugin.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
-		include_once dirname( __FILE__ ) . '/class-wc-plugin-api-updater.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-subscriptions-api.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-orders-api.php';
+		include_once __DIR__ . '/class-wc-helper-options.php';
+		include_once __DIR__ . '/class-wc-helper-api.php';
+		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
+		include_once __DIR__ . '/class-wc-helper-updater.php';
+		include_once __DIR__ . '/class-wc-plugin-api-updater.php';
+		include_once __DIR__ . '/class-wc-helper-compat.php';
+		include_once __DIR__ . '/class-wc-helper-admin.php';
+		include_once __DIR__ . '/class-wc-helper-subscriptions-api.php';
+		include_once __DIR__ . '/class-wc-helper-orders-api.php';
 	}
 
 	/**
@@ -833,7 +833,7 @@ class WC_Helper {
 						)
 					)
 					: '',
-				'wum-installed' =>      WC_Woo_Update_Manager_Plugin::is_plugin_installed() ? '1' : '0',
+				'wum-installed'      => WC_Woo_Update_Manager_Plugin::is_plugin_installed() ? '1' : '0',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);

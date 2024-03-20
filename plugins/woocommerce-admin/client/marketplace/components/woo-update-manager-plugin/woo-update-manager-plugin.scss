@@ -30,7 +30,7 @@
 		.components-notice__content {
 			align-items: center;
 			gap: $grid-unit-15;
-			padding: 0px;
+			padding: 0;
 			margin-left: 12px;
 		}
 
@@ -53,7 +53,7 @@
 
 .woocommerce-marketplace__discover {
 	.woocommerce-marketplace__woo-update-manager-plugin__notices {
-		margin-bottom: 0px;
+		margin-bottom: 0;
 	}
 }
 
