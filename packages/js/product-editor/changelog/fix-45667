@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace the Draft tag with a Scheduled tag in the product header
