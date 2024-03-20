@@ -45,7 +45,7 @@ class WC_Admin_Tests_Notes_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( $note->get_type(), $read_note->get_type() );
 		$this->assertEquals( $note->get_name(), $read_note->get_name() );
 		$this->assertEquals( $note->get_source(), $read_note->get_source() );
-		$this->assertEquals( $note->get_is_snoozable(), '0' !== $read_note->get_is_snoozable() );
+		$this->assertEquals( $note->get_is_snoozable(), false !== $read_note->get_is_snoozable() );
 		$this->assertEquals( $note->get_layout(), $read_note->get_layout() );
 		$this->assertEquals( $note->get_image(), $read_note->get_image() );
 		$this->assertEquals( $note->get_actions(), $read_note->get_actions() );

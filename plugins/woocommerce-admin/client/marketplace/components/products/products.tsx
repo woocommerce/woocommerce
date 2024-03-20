@@ -12,6 +12,7 @@ import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -68,6 +69,14 @@ export default function Products( props: ProductsProps ) {
 		page: 'wc-admin',
 		path: '/customize-store/design',
 	} );
+	const assemblerHubUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/assembler-hub',
+	} );
+
+	const customizeStoreTask = useSelect( ( select ) => {
+		return select( ONBOARDING_STORE_NAME ).getTask( 'customize-store' );
+	}, [] );
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
 	const showAllButton = props.showAllButton ?? false;
@@ -155,6 +164,8 @@ export default function Products( props: ProductsProps ) {
 						onClick={ () => {
 							if ( ! isDefaultTheme ) {
 								setIsModalOpen( true );
+							} else if ( customizeStoreTask?.isComplete ) {
+								window.location.href = assemblerHubUrl;
 							} else {
 								window.location.href = customizeStoreDesignUrl;
 							}
