@@ -22,7 +22,7 @@ class Hydration {
 	 *
 	 * @var array
 	 */
-	protected $cached_store_notices = [];
+	protected $cached_store_notices = array();
 
 	/**
 	 * Constructor.
@@ -42,7 +42,7 @@ class Hydration {
 	 */
 	public function get_rest_api_response_data( $path = '' ) {
 		if ( ! str_starts_with( $path, '/wc/store' ) ) {
-			return [];
+			return array();
 		}
 
 		// Allow-list only store API routes. No other request can be hydrated for safety.
@@ -85,8 +85,8 @@ class Hydration {
 			}
 		} else {
 			// Preload the request and add it to the array. It will be $preloaded_requests['path']  and contain 'body' and 'headers'.
-			$preloaded_requests = rest_preload_api_request( [], $path );
-			$preloaded_data     = $preloaded_requests[ $path ] ?? [];
+			$preloaded_requests = rest_preload_api_request( array(), $path );
+			$preloaded_data     = $preloaded_requests[ $path ] ?? array();
 		}
 
 		$this->restore_cached_store_notices();
@@ -116,7 +116,7 @@ class Hydration {
 			$schema_controller->get( $controller_class::SCHEMA_TYPE, $controller_class::SCHEMA_VERSION )
 		);
 
-		$controller_args = is_callable( array( $controller, 'get_args' ) ) ? $controller->get_args() : [];
+		$controller_args = is_callable( array( $controller, 'get_args' ) ) ? $controller->get_args() : array();
 
 		if ( empty( $controller_args ) ) {
 			return false;
@@ -136,21 +136,37 @@ class Hydration {
 			return false;
 		}
 
-		$response = call_user_func_array( $handler['callback'], array( $request ) );
+		/**
+		 * Similar to WP core's `rest_dispatch_request` filter, this allows plugin to override hydrating the request.
+		 * Allows backward compatibility with the `rest_dispatch_request` filter by providing the same arguments.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param mixed            $hydration_result Result of the hydration. If not null, this will be used as the response.
+		 * @param WP_REST_Request  $request          Request used to generate the response.
+		 * @param string           $path             Request path matched for the request..
+		 * @param array            $handler          Route handler used for the request.
+		 */
+		$hydration_result = apply_filters( 'woocommerce_hydration_dispatch_request', null, $request, $path, $handler );
+
+		if ( null !== $hydration_result ) {
+			$response = $hydration_result;
+		} else {
+			$response = call_user_func_array( $handler['callback'], array( $request ) );
+		}
 
 		/**
-		 * For backward compatibility with WC 8.6 and earlier, we manually call this filter that is otherwise called by WP's REST API. This provides the opportunity for 3PD plugins to hook into and change the response data.
-		 * Note that altering the Store API final response is something we discourage and won't ultimately support. This will be deprecated in favor of better, more integrated solutions.
-		 * See `rest_request_before_callbacks` filter in WP core's `class-wp-rest-server.php`.
+		 * Similar to WP core's `rest_request_after_callbacks` filter, this allows to modify the response after it has been generated.
+		 * Allows backward compatibility with the `rest_request_after_callbacks` filter by providing the same arguments.
 		 *
-		 * @since 8.7.0
+		 * @since 8.9.0
 		 *
 		 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
 		 *                                                                   Usually a WP_REST_Response or WP_Error.
 		 * @param array                                            $handler  Route handler used for the request.
 		 * @param WP_REST_Request                                  $request  Request used to generate the response.
 		 */
-		$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
+		$response = apply_filters( 'woocommerce_hydration_request_after_callbacks', $response, $handler, $request );
 
 		return $response;
 	}
@@ -180,7 +196,7 @@ class Hydration {
 	 * Disable the nonce check temporarily.
 	 */
 	protected function disable_nonce_check() {
-		add_filter( 'woocommerce_store_api_disable_nonce_check', [ $this, 'disable_nonce_check_callback' ] );
+		add_filter( 'woocommerce_store_api_disable_nonce_check', array( $this, 'disable_nonce_check_callback' ) );
 	}
 
 	/**
@@ -195,7 +211,7 @@ class Hydration {
 	 * Restore the nonce check.
 	 */
 	protected function restore_nonce_check() {
-		remove_filter( 'woocommerce_store_api_disable_nonce_check', [ $this, 'disable_nonce_check_callback' ] );
+		remove_filter( 'woocommerce_store_api_disable_nonce_check', array( $this, 'disable_nonce_check_callback' ) );
 	}
 
 	/**
@@ -217,6 +233,6 @@ class Hydration {
 			return;
 		}
 		WC()->session->set( 'wc_notices', $this->cached_store_notices );
-		$this->cached_store_notices = [];
+		$this->cached_store_notices = array();
 	}
 }
