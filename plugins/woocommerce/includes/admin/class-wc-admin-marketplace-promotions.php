@@ -15,9 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const TRANSIENT_NAME        = 'woocommerce_marketplace_promotions';
-	const SCHEDULED_ACTION_HOOK = 'woocommerce_marketplace_fetch_promotions';
-	const PROMOTIONS_API_URL    = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
+	const TRANSIENT_NAME            = 'woocommerce_marketplace_promotions';
+	const SCHEDULED_ACTION_HOOK     = 'woocommerce_marketplace_fetch_promotions';
+	const PROMOTIONS_API_URL        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
+	const SCHEDULED_ACTION_INTERVAL = 12 * HOUR_IN_SECONDS;
+
 	/**
 	 * The user's locale, for example en_US.
 	 *
@@ -76,7 +78,7 @@ class WC_Admin_Marketplace_Promotions {
 	public static function schedule_promotion_fetch() {
 		// Schedule the action twice a day using Action Scheduler.
 		if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
-			as_schedule_recurring_action( time(), 12 * HOUR_IN_SECONDS, self::SCHEDULED_ACTION_HOOK );
+			as_schedule_recurring_action( time(), self::SCHEDULED_ACTION_INTERVAL, self::SCHEDULED_ACTION_HOOK );
 		}
 	}
 
