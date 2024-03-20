@@ -60,6 +60,12 @@ export class LocalPickupUtils {
 		await this.saveLocalPickupSettings();
 	}
 
+	async setTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
+		await this.saveLocalPickupSettings();
+	}
+
 	async disableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
