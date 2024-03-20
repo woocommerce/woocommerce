@@ -14,7 +14,7 @@ trait BlockHooksTrait {
 	 * @param string                   $position      Position of the block insertion point.
 	 * @param string                   $anchor_block  The block acting as the anchor for the inserted block.
 	 * @param \WP_Block_Template|array $context       Where the block is embedded.
-	 * @since $VID:$
+	 * @since 8.6.0
 	 * @return array An array of block slugs hooked into a given context.
 	 */
 	public function register_hooked_block( $hooked_blocks, $position, $anchor_block, $context ) {
