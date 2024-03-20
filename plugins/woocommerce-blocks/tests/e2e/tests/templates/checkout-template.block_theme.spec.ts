@@ -61,7 +61,7 @@ test.describe( 'Test the checkout template', async () => {
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart();
-		await admin.page.goto( permalink, { waitUntil: 'load' } );
+		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
 			admin.page

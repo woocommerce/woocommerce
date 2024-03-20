@@ -25,6 +25,7 @@ test.describe( 'Single Product Template', async () => {
 
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
+		editor,
 		editorUtils,
 		page,
 	} ) => {
@@ -33,11 +34,11 @@ test.describe( 'Single Product Template', async () => {
 			testData.templateName,
 			testData.templateType
 		);
-		await editorUtils.editor.insertBlock( {
+		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 		await page.goto( testData.permalink );
 
 		// Verify edits are visible in the frontend.

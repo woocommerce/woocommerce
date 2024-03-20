@@ -160,6 +160,7 @@ export class CheckoutPage {
 	 */
 	async waitForCheckoutToFinishUpdating() {
 		await this.page.evaluate( 'document.activeElement.blur()' );
+
 		await this.page.waitForFunction( () => {
 			return (
 				! window.wp.data
@@ -182,6 +183,18 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
+		await this.page
+			.waitForRequest(
+				( request ) => {
+					return request.url().includes( 'batch' );
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is just in case there's a debounced request
+				// still to be made, e.g. from checking "Can a truck fit down
+				// your road?" field.
+			} );
 		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
@@ -286,9 +299,9 @@ export class CheckoutPage {
 		const billingForm = this.page.getByRole( 'group', {
 			name: 'Billing address',
 		} );
-		const companyInputField = billingForm.getByLabel( 'Company' );
 
-		if ( await companyInputField.isVisible() ) {
+		if ( customerBillingDetails.company ) {
+			const companyInputField = billingForm.getByLabel( 'Company' );
 			await companyInputField.fill( customerBillingDetails.company );
 		}
 
@@ -301,9 +314,6 @@ export class CheckoutPage {
 		const city = billingForm.getByLabel( 'City' );
 		const phone = billingForm.getByLabel( 'Phone' );
 
-		// Using locator here since the label of this form changes depending on the country.
-		const postcode = billingForm.locator( '#billing-postcode' );
-
 		await email.fill( customerBillingDetails.email );
 		await firstName.fill( customerBillingDetails.firstname );
 		await lastName.fill( customerBillingDetails.lastname );
@@ -313,21 +323,25 @@ export class CheckoutPage {
 		await city.fill( customerBillingDetails.city );
 		await phone.fill( customerBillingDetails.phone );
 
-		let state = billingForm.getByLabel( 'State', {
-			exact: true,
-		} );
-
-		if ( ! ( await state.isVisible() ) ) {
-			state = billingForm.getByLabel( 'Province', {
+		if ( customerBillingDetails.state ) {
+			const state = billingForm.getByLabel( 'State', {
 				exact: true,
 			} );
+			const province = billingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
+			const county = billingForm.getByLabel( 'County' );
+
+			await state
+				.or( province )
+				.or( county )
+				.fill( customerBillingDetails.state );
 		}
 
-		if ( await state.isVisible() ) {
-			await state.fill( customerBillingDetails.state );
-		}
-
-		if ( await postcode.isVisible() ) {
+		if ( customerBillingDetails.postcode ) {
+			// Using locator here since the label of this form changes depending
+			// on the country.
+			const postcode = billingForm.locator( '#billing-postcode' );
 			await postcode.fill( customerBillingDetails.postcode );
 		}
 
@@ -336,9 +350,6 @@ export class CheckoutPage {
 			const field = billingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
-
-		// Blur active field to trigger customer address update.
-		await this.page.evaluate( 'document.activeElement.blur()' );
 	}
 
 	async fillShippingDetails(
@@ -349,9 +360,9 @@ export class CheckoutPage {
 		const shippingForm = this.page.getByRole( 'group', {
 			name: 'Shipping address',
 		} );
-		const companyInputField = shippingForm.getByLabel( 'Company' );
 
-		if ( await companyInputField.isVisible() ) {
+		if ( customerShippingDetails.company ) {
+			const companyInputField = shippingForm.getByLabel( 'Company' );
 			await companyInputField.fill( customerShippingDetails.company );
 		}
 
@@ -363,9 +374,6 @@ export class CheckoutPage {
 		const city = shippingForm.getByLabel( 'City' );
 		const phone = shippingForm.getByLabel( 'Phone' );
 
-		// Using locator here since the label of this form changes depending on the country.
-		const postcode = shippingForm.locator( '#shipping-postcode' );
-
 		await firstName.fill( customerShippingDetails.firstname );
 		await lastName.fill( customerShippingDetails.lastname );
 		await country.fill( customerShippingDetails.country );
@@ -374,21 +382,25 @@ export class CheckoutPage {
 		await city.fill( customerShippingDetails.city );
 		await phone.fill( customerShippingDetails.phone );
 
-		let state = shippingForm.getByLabel( 'State', {
-			exact: true,
-		} );
-
-		if ( ! ( await state.isVisible() ) ) {
-			state = shippingForm.getByLabel( 'Province', {
+		if ( customerShippingDetails.state ) {
+			const state = shippingForm.getByLabel( 'State', {
 				exact: true,
 			} );
+			const province = shippingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
+			const county = shippingForm.getByLabel( 'County' );
+
+			await state
+				.or( province )
+				.or( county )
+				.fill( customerShippingDetails.state );
 		}
 
-		if ( await state.isVisible() ) {
-			await state.fill( customerShippingDetails.state );
-		}
-
-		if ( await postcode.isVisible() ) {
+		if ( customerShippingDetails.postcode ) {
+			// Using locator here since the label of this form changes depending
+			// on the country.
+			const postcode = shippingForm.locator( '#shipping-postcode' );
 			await postcode.fill( customerShippingDetails.postcode );
 		}
 
@@ -415,10 +427,6 @@ export class CheckoutPage {
 			) )
 		) {
 			await shipping.click();
-			await this.page.waitForResponse( ( request ) => {
-				const url = request.url();
-				return url.includes( 'wc/store/v1/batch' );
-			} );
 			await this.page.waitForFunction( () => {
 				return ! window.wp.data
 					.select( 'wc/store/cart' )

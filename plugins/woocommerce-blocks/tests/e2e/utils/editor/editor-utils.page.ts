@@ -298,18 +298,6 @@ export class EditorUtils {
 		await this.page.getByText( option ).click();
 	}
 
-	async saveTemplate() {
-		const waitForResponse = this.editor.page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/templates/' ) ||
-				response.url().includes( 'wp-json/wp/v2/template-parts/' )
-		);
-
-		await this.editor.saveSiteEditorEntities();
-
-		await waitForResponse;
-	}
-
 	async closeWelcomeGuideModal() {
 		const isModalOpen = await this.page
 			.getByRole( 'dialog', { name: 'Welcome to the site editor' } )

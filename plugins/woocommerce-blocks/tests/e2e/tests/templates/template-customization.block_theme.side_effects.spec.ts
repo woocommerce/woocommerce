@@ -5,7 +5,6 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import {
 	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
-	cli,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -30,27 +29,25 @@ for ( const testData of testToRun ) {
 		} );
 
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
-			admin,
-			frontendUtils,
-			editorUtils,
 			page,
+			admin,
+			editor,
+			requestUtils,
+			editorUtils,
+			frontendUtils,
 		} ) => {
 			// Edit the WooCommerce default template
 			await editorUtils.visitTemplateEditor(
 				testData.templateName,
 				testData.templateType
 			);
-			await editorUtils.editor.insertBlock( {
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await cli(
-				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_WITH_TEMPLATES_SLUG }`
-			);
-
-			await page.waitForTimeout( 2000 );
+			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
 			// Edit the theme template. The theme template is not
 			// directly available from the UI, because the customized
@@ -64,7 +61,7 @@ for ( const testData of testToRun ) {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( { frontendUtils, page } );
@@ -92,9 +89,7 @@ for ( const testData of testToRun ) {
 			).toBeVisible();
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 
-			await cli(
-				`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
-			);
+			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 		} );
 	} );
 }

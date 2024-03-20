@@ -15,19 +15,16 @@ test.describe( 'Single Product Template', () => {
 	test.beforeEach( async ( { admin, page } ) => {
 		await admin.visitAdminPage( `/post-new.php?post_type=product` );
 
-		const input = page.locator( '#title' );
-		await input.fill( product.name );
+		await page.getByLabel( 'Product name' ).fill( product.name );
 		await page.getByRole( 'button', { name: 'Edit visibility' } ).click();
+		await page.getByLabel( 'Password protected' ).check();
+		await page.getByLabel( 'Password:' ).fill( product.password );
+		// Ideally, submit button should have a disabled attribute, which would
+		// make Playwright auto-wait until it's enabled.
+		await page.locator( '#publish:not(.disabled)' ).click();
 
-		await page.locator( '#visibility-radio-password' ).click();
-		await page.locator( '#post_password' ).fill( product.password );
-		await page.waitForResponse( ( response ) =>
-			response.url().includes( 'admin-ajax.php' )
-		);
-		await page.locator( '#publish.button-primary' ).click();
-		await page.waitForSelector(
-			'#woocommerce-product-updated-message-view-product__link'
-		);
+		await page.getByRole( 'link', { name: 'View Product' } ).waitFor();
+
 		const url = new URL( page.url() );
 		const queryParams = new URLSearchParams( url.search );
 		id = queryParams.get( 'post' );

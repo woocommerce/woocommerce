@@ -366,8 +366,11 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Additional order information',
 				} )
 				.getByLabel( 'How did you hear about us?' )
-				.fill( '' );
+				.click();
 			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Additional order information',
+				} )
 				.locator(
 					'ul.components-form-token-field__suggestions-list > li'
 				)

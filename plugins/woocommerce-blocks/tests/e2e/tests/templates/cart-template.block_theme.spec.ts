@@ -52,7 +52,7 @@ test.describe( 'Test the cart template', async () => {
 	} );
 
 	test( 'Admin bar edit site link opens site editor', async ( { admin } ) => {
-		await admin.page.goto( permalink, { waitUntil: 'load' } );
+		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
 			admin.page
