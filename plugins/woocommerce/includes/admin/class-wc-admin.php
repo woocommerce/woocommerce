@@ -39,9 +39,6 @@ class WC_Admin {
 		if ( isset( $_GET['page'] ) && 'wc-addons' === $_GET['page'] ) {
 			add_filter( 'admin_body_class', array( 'WC_Admin_Addons', 'filter_admin_body_classes' ) );
 		}
-
-		// Fetch list of promotions from Woo.com for WooCommerce admin UI. We need to fire earlier than admin_init so we can filter menu items.
-		add_action( 'woocommerce_init', array( 'WC_Admin_Marketplace_Promotions', 'init_marketplace_promotions' ) );
 	}
 
 	/**
@@ -80,9 +77,6 @@ class WC_Admin {
 		// Marketplace suggestions & related REST API.
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
-
-		// Marketplace promotions.
-		include_once __DIR__ . '/class-wc-admin-marketplace-promotions.php';
 	}
 
 	/**
