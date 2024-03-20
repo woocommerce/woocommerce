@@ -15,7 +15,7 @@ import {
 } from '../types';
 import { designWithNoAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
-import { AssembleHubLoader } from '../design-with-ai/pages';
+import { AssembleHubLoader } from './pages/ApiCallLoader';
 
 export type DesignWithoutAiComponent = typeof AssembleHubLoader;
 export type DesignWithoutAiComponentMeta = {
@@ -30,15 +30,18 @@ export const DesignWithNoAiController = ( {
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
-	const [ , , service ] = useMachine( designWithNoAiStateMachineDefinition, {
-		devTools: process.env.NODE_ENV === 'development',
-		parent: parentMachine,
-		context: {
-			...designWithNoAiStateMachineDefinition.context,
-			isFontLibraryAvailable:
-				parentContext?.isFontLibraryAvailable ?? false,
-		},
-	} );
+	const [ , send, service ] = useMachine(
+		designWithNoAiStateMachineDefinition,
+		{
+			devTools: process.env.NODE_ENV === 'development',
+			parent: parentMachine,
+			context: {
+				...designWithNoAiStateMachineDefinition.context,
+				isFontLibraryAvailable:
+					parentContext?.isFontLibraryAvailable ?? false,
+			},
+		}
+	);
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
@@ -59,7 +62,11 @@ export const DesignWithNoAiController = ( {
 	return (
 		<>
 			<div className={ `woocommerce-design-without-ai__container` }>
-				{ CurrentComponent ? <CurrentComponent /> : <div /> }
+				{ CurrentComponent ? (
+					<CurrentComponent sendEvent={ send } />
+				) : (
+					<div />
+				) }
 			</div>
 		</>
 	);

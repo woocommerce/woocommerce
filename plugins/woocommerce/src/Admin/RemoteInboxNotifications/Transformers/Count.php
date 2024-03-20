@@ -2,40 +2,27 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
-use stdClass;
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 
 /**
  * Count elements in Array or Countable object.
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
+ *
+ * @deprecated 8.8.0
  */
-class Count implements TransformerInterface {
+class Count extends DeprecatedClassFacade {
 	/**
-	 *  Count elements in Array or Countable object.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param array|Countable $value an array to count.
-	 * @param stdClass|null   $arguments arguments.
-	 * @param string|null     $default default value.
-	 *
-	 * @return number
+	 * @var string
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = null ) {
-		if ( ! is_array( $value ) && ! $value instanceof \Countable ) {
-			return $default;
-		}
-
-		return count( $value );
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayColumn';
 
 	/**
-	 * Validate Transformer arguments.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param stdClass|null $arguments arguments to validate.
-	 *
-	 * @return mixed
+	 * @var string
 	 */
-	public function validate( stdClass $arguments = null ) {
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

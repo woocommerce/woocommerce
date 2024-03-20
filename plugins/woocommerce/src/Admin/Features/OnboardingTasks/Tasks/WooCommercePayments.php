@@ -34,7 +34,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up WooPayments', 'woocommerce' );
+		return __( 'Get paid with WooPayments', 'woocommerce' );
 	}
 
 	/**
@@ -83,18 +83,6 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Additional info.
-	 *
-	 * @return string
-	 */
-	public function get_additional_info() {
-		return __(
-			'Accept credit/debit cards and other popular payment methods with no setup or monthly fees — and manage payments right from your store dashboard.',
-			'woocommerce'
-		);
-	}
-
-	/**
 	 * Task completion.
 	 *
 	 * @return bool
@@ -121,7 +109,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin was requested during onboarding.
+	 * Check if the WooPayments plugin was requested during onboarding.
 	 *
 	 * @return bool
 	 */
@@ -135,7 +123,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin is installed.
+	 * Check if the WooPayments plugin is installed.
 	 *
 	 * @return bool
 	 */
@@ -145,7 +133,16 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments is connected.
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return bool
+	 */
+	public static function is_wcpay_active() {
+		return class_exists( '\WC_Payments' );
+	}
+
+	/**
+	 * Check if WooPayments is connected.
 	 *
 	 * @return bool
 	 */
@@ -161,7 +158,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments needs setup.
+	 * Check if WooPayments needs setup.
 	 * Errored data or payments not enabled.
 	 *
 	 * @return bool

@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
@@ -163,7 +167,9 @@ export default function Products( props: ProductsProps ) {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+					redirectToCYSFlow={ () => {
+						window.location.href = customizeStoreDesignUrl;
+					} }
 				/>
 			) }
 			<ProductListContent
@@ -173,6 +179,34 @@ export default function Products( props: ProductsProps ) {
 				searchTerm={ props.searchTerm }
 				category={ category }
 			/>
+			{ props.type === 'theme' && (
+				<div
+					className={
+						'woocommerce-marketplace__browse-wp-theme-directory'
+					}
+				>
+					<b>
+						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
+					</b>
+					{ createInterpolateElement(
+						__(
+							' Browse the <a>WordPress.org theme directory</a> to discover more.',
+							'woocommerce'
+						),
+						{
+							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content
+								<a
+									href={
+										ADMIN_URL +
+										'theme-install.php?search=e-commerce'
+									}
+								/>
+							),
+						}
+					) }
+				</div>
+			) }
 			{ showAllButton && (
 				<Button
 					className={ viewAllButonClassName }

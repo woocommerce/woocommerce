@@ -18,7 +18,7 @@ export class PaymentsSetup extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&task=payments';
 
 	async isDisplayed(): Promise< void > {
-		await waitForElementByText( 'h1', 'Set up payments' );
+		await waitForElementByText( 'h1', 'Get paid' );
 	}
 
 	async possiblyCloseHelpModal(): Promise< void > {

@@ -3,11 +3,11 @@
  * SimpleProductTemplate
  */
 
-namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\DownloadableProductTrait;
+use WC_Tax;
 
 /**
  * Simple Product Template.
@@ -231,72 +231,6 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'woocommerce'
 					),
 					'property' => 'short_description',
-				),
-			)
-		);
-
-		// This is needed until hide conditions can be applied to core blocks.
-		$pricing_conditional_wrapper = $basic_details->add_block(
-			array(
-				'id'             => 'product-pricing-conditional-wrapper',
-				'blockName'      => 'woocommerce/conditional',
-				'order'          => 30,
-				'hideConditions' => array(
-					array(
-						'expression' => 'editedProduct.type === "grouped"',
-					),
-				),
-			)
-		);
-
-		$pricing_wrapper  = Features::is_enabled( 'product-grouped' ) ? $pricing_conditional_wrapper : $basic_details;
-		$pricing_columns  = $pricing_wrapper->add_block(
-			array(
-				'id'        => 'product-pricing-columns',
-				'blockName' => 'core/columns',
-				'order'     => 30,
-			)
-		);
-		$pricing_column_1 = $pricing_columns->add_block(
-			array(
-				'id'         => 'product-pricing-column-1',
-				'blockName'  => 'core/column',
-				'order'      => 10,
-				'attributes' => array(
-					'templateLock' => 'all',
-				),
-			)
-		);
-		$pricing_column_1->add_block(
-			array(
-				'id'         => 'product-regular-price',
-				'blockName'  => 'woocommerce/product-regular-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'name'  => 'regular_price',
-					'label' => __( 'List price', 'woocommerce' ),
-					/* translators: PricingTab: This is a link tag to the pricing tab. */
-					'help'  => __( 'Manage more settings in <PricingTab>Pricing.</PricingTab>', 'woocommerce' ),
-				),
-			)
-		);
-		$pricing_column_2 = $pricing_columns->add_block(
-			array(
-				'id'         => 'product-pricing-column-2',
-				'blockName'  => 'core/column',
-				'order'      => 20,
-				'attributes' => array(
-					'templateLock' => 'all',
-				),
-			)
-		);
-		$pricing_column_2->add_block(
-			array(
-				'id'         => 'product-sale-price',
-				'blockName'  => 'woocommerce/product-sale-price-field',
-				'order'      => 10,
-				'attributes' => array(
-					'label' => __( 'Sale price', 'woocommerce' ),
 				),
 			)
 		);
@@ -615,6 +549,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 	 * Adds the pricing group blocks to the template.
 	 */
 	private function add_pricing_group_blocks() {
+		$is_calc_taxes_enabled = wc_tax_enabled();
+
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$pricing_group->add_block(
 			array(
@@ -670,6 +606,12 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
+					'help'  => $is_calc_taxes_enabled ? null : sprintf(
+					/* translators: %1$s: store settings link opening tag. %2$s: store settings link closing tag.*/
+						__( 'Per your %1$sstore settings%2$s, taxes are not enabled.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=general' ) . '" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
 				),
 			)
 		);
@@ -700,74 +642,98 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'     => 20,
 			)
 		);
-		$product_pricing_section->add_block(
-			array(
-				'id'         => 'product-sale-tax',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 30,
-				'attributes' => array(
-					'title'    => __( 'Charge sales tax on', 'woocommerce' ),
-					'property' => 'tax_status',
-					'options'  => array(
-						array(
-							'label' => __( 'Product and shipping', 'woocommerce' ),
-							'value' => 'taxable',
-						),
-						array(
-							'label' => __( 'Only shipping', 'woocommerce' ),
-							'value' => 'shipping',
-						),
-						array(
-							'label' => __( "Don't charge tax", 'woocommerce' ),
-							'value' => 'none',
-						),
-					),
-				),
-			)
-		);
-		$pricing_advanced_block = $product_pricing_section->add_block(
-			array(
-				'id'         => 'product-pricing-advanced',
-				'blockName'  => 'woocommerce/product-collapsible',
-				'order'      => 40,
-				'attributes' => array(
-					'toggleText'       => __( 'Advanced', 'woocommerce' ),
-					'initialCollapsed' => true,
-					'persistRender'    => true,
-				),
-			)
-		);
-		$pricing_advanced_block->add_block(
-			array(
-				'id'         => 'product-tax-class',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 10,
-				'attributes' => array(
-					'title'       => __( 'Tax class', 'woocommerce' ),
-					'description' => sprintf(
-					/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-						__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
-						'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
-						'</a>'
-					),
-					'property'    => 'tax_class',
-					'options'     => array(
-						array(
-							'label' => __( 'Standard', 'woocommerce' ),
-							'value' => '',
-						),
-						array(
-							'label' => __( 'Reduced rate', 'woocommerce' ),
-							'value' => 'reduced-rate',
-						),
-						array(
-							'label' => __( 'Zero rate', 'woocommerce' ),
-							'value' => 'zero-rate',
+
+		if ( $is_calc_taxes_enabled ) {
+			$product_pricing_section->add_block(
+				array(
+					'id'         => 'product-sale-tax',
+					'blockName'  => 'woocommerce/product-radio-field',
+					'order'      => 30,
+					'attributes' => array(
+						'title'    => __( 'Charge sales tax on', 'woocommerce' ),
+						'property' => 'tax_status',
+						'options'  => array(
+							array(
+								'label' => __( 'Product and shipping', 'woocommerce' ),
+								'value' => 'taxable',
+							),
+							array(
+								'label' => __( 'Only shipping', 'woocommerce' ),
+								'value' => 'shipping',
+							),
+							array(
+								'label' => __( "Don't charge tax", 'woocommerce' ),
+								'value' => 'none',
+							),
 						),
 					),
-				),
-			)
+				)
+			);
+			$pricing_advanced_block = $product_pricing_section->add_block(
+				array(
+					'id'         => 'product-pricing-advanced',
+					'blockName'  => 'woocommerce/product-collapsible',
+					'order'      => 40,
+					'attributes' => array(
+						'toggleText'       => __( 'Advanced', 'woocommerce' ),
+						'initialCollapsed' => true,
+						'persistRender'    => true,
+					),
+				)
+			);
+			$pricing_advanced_block->add_block(
+				array(
+					'id'         => 'product-tax-class',
+					'blockName'  => 'woocommerce/product-select-field',
+					'order'      => 10,
+					'attributes' => array(
+						'label'    => __( 'Tax class', 'woocommerce' ),
+						'help'     => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
+							'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
+						'property' => 'tax_class',
+						'options'  => self::get_tax_classes(),
+					),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Get the tax classes as select options.
+	 *
+	 * @param string $post_type The post type.
+	 * @return array Array of options.
+	 */
+	public static function get_tax_classes( $post_type = 'product' ) {
+		$tax_classes = array();
+
+		if ( 'product_variation' === $post_type ) {
+			$tax_classes[] = array(
+				'label' => __( 'Same as main product', 'woocommerce' ),
+				'value' => 'parent',
+			);
+		}
+
+		// Add standard class.
+		$tax_classes[] = array(
+			'label' => __( 'Standard rate', 'woocommerce' ),
+			'value' => '',
 		);
+
+		$classes = WC_Tax::get_tax_rate_classes();
+
+		foreach ( $classes as $tax_class ) {
+			$tax_classes[] = array(
+				'label' => $tax_class->name,
+				'value' => $tax_class->slug,
+			);
+		}
+
+		return $tax_classes;
 	}
 
 	/**
