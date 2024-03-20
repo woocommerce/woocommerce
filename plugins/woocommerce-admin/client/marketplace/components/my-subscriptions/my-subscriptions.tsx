@@ -25,6 +25,7 @@ import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
+import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -54,7 +55,10 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) => ! subscription.subscription_installed
+		( subscription: Subscription ) =>
+			! subscription.subscription_installed &&
+			wccomSettings?.wooUpdateManagerPluginSlug !==
+				subscription.product_slug
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
@@ -67,12 +71,12 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
 					{ __(
-						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your Woo.com subscriptions will appear here.',
+						"Connect your store to Woo.com using the Woo.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
 						'woocommerce'
 					) }
 				</p>
 				<Button href={ connectUrl() } variant="primary">
-					{ __( 'Connect Account', 'woocommerce' ) }
+					{ __( 'Connect your store', 'woocommerce' ) }
 				</Button>
 			</div>
 		);
@@ -84,6 +88,7 @@ export default function MySubscriptions(): JSX.Element {
 			<section className="woocommerce-marketplace__my-subscriptions__notices">
 				<Notices />
 			</section>
+			<PluginInstallNotice />
 			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div className="woocommerce-marketplace__my-subscriptions__header-content">

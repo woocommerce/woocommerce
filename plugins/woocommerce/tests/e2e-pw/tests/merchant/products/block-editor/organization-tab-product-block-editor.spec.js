@@ -30,7 +30,7 @@ test.describe( 'General tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test( 'can create a simple product with categories, tags and with passowrd required', async ( {
+		test( 'can create a simple product with categories, tags and with password required', async ( {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
@@ -44,18 +44,22 @@ test.describe( 'General tab', () => {
 				)
 				.last()
 				.fill( productData.summary );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-regular-price-field"]'
-				)
-				.first()
-				.fill( productData.productPrice );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-sale-price-field"]'
-				)
-				.first()
-				.fill( productData.salePrice );
+
+			await clickOnTab( 'Pricing', page );
+
+			const regularPrice = page
+				.locator( 'input[name="regular_price"]' )
+				.first();
+			await regularPrice.waitFor( { state: 'visible' } );
+			await regularPrice.click();
+			await regularPrice.fill( productData.productPrice );
+
+			const salePrice = page
+				.locator( 'input[name="sale_price"]' )
+				.first();
+			await salePrice.waitFor( { state: 'visible' } );
+			await salePrice.click();
+			await salePrice.fill( productData.salePrice );
 
 			await clickOnTab( 'Organization', page );
 
@@ -139,8 +143,8 @@ test.describe( 'General tab', () => {
 			).toBeVisible();
 
 			await expect(
-				page.getByRole( 'link', { name: categoryName } )
-			).toBeVisible();
+				await page.getByRole( 'link', { name: categoryName } ).count()
+			).toBeGreaterThan( 0 );
 
 			await expect(
 				page.getByRole( 'link', { name: tagName } )

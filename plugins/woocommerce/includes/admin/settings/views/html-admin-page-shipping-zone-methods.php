@@ -5,6 +5,9 @@
  * @package WooCommerce\Admin\Shipping
  */
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Blocks\Shipping\ShippingController;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -15,7 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<span class="wc-shipping-zone-name"><?php echo esc_html( $zone->get_zone_name() ? $zone->get_zone_name() : __( 'Zone', 'woocommerce' ) ); ?></span>
 </h2>
 
-<?php do_action( 'woocommerce_shipping_zone_before_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_before_methods_table', $zone );
+?>
 
 <table class="form-table wc-shipping-zone-settings">
 	<tbody>
@@ -90,7 +96,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</tbody>
 </table>
 
-<?php do_action( 'woocommerce_shipping_zone_after_methods_table', $zone ); ?>
+<?php
+// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
+?>
 
 <p class="submit">
 	<button type="submit" name="submit" id="submit" class="button button-primary button-large wc-shipping-zone-method-save" value="<?php esc_attr_e( 'Save changes', 'woocommerce' ); ?>" disabled><?php esc_html_e( 'Save changes', 'woocommerce' ); ?></button>
@@ -198,6 +207,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 							$methods_placed_in_order = array_merge( $methods_placed_in_order, array_values( $methods ) );
 
 							foreach ( $methods_placed_in_order as $method ) {
+								if ( CartCheckoutUtils::is_checkout_block_default() && ! ShippingController::is_legacy_local_pickup_active() && 'local_pickup' === $method->id ) {
+									continue;
+								}
+
 								if ( ! $method->supports( 'shipping-zones' ) ) {
 									continue;
 								}
@@ -214,7 +227,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
-							echo '</div>'
+
+							if ( CartCheckoutUtils::is_checkout_block_default() ) {
+								echo '<p class="wc-shipping-legacy-local-pickup-help-text-container">';
+
+								if ( ShippingController::is_legacy_local_pickup_active() ) {
+									printf(
+										wp_kses(
+										/* translators: %s: Local pickup settings page URL. */
+											__( 'Explore a new enhanced delivery method that allows you to easily offer one or more pickup locations to your customers in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											array( 'a' => array( 'href' => array() ) )
+										),
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+									);
+
+								} else {
+									printf(
+										wp_kses(
+										/* translators: %s: Local pickup settings page URL. */
+											__( 'Local pickup: Set up pickup locations in the <a href="%s">Local pickup settings page</a>.', 'woocommerce' ),
+											array( 'a' => array( 'href' => array() ) )
+										),
+										esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+									);
+								}
+
+								echo '</p>';
+							}
+
+							echo '</div>';
+
 							?>
 						</fieldset>
 					</form>

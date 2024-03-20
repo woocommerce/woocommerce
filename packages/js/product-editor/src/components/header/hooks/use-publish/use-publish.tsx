@@ -4,6 +4,7 @@
 import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
+import { isInTheFuture } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 import type { Product } from '@woocommerce/data';
 
@@ -28,10 +29,16 @@ export function usePublish< T = Product >( {
 	const { isValidating, isDirty, isPublishing, publish } =
 		useProductManager( productType );
 
-	const [ status, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
 		productType,
 		'status'
+	);
+
+	const [ editedDate ] = useEntityProp< string >(
+		'postType',
+		productType,
+		'date_created_gmt'
 	);
 
 	const isBusy = isPublishing || isValidating;
@@ -53,7 +60,7 @@ export function usePublish< T = Product >( {
 	function getButtonText() {
 		if (
 			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-			status === 'future'
+			isInTheFuture( editedDate )
 		) {
 			return __( 'Schedule', 'woocommerce' );
 		}
