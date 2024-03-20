@@ -136,6 +136,9 @@ class PluginInstaller implements RegisterHooksInterface {
 		$result = array( 'messages' => $skin->get_upgrade_messages() );
 
 		if ( $install_ok ) {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
 			$plugin_name    = $upgrader->plugin_info();
 			$plugin_version = get_plugins()[ $plugin_name ]['Version'];
 

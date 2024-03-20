@@ -1204,6 +1204,9 @@ class WC_Install {
 		$plugin_name = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
 
 		wp_clean_plugins_cache();
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
 		if ( isset( get_plugins()[ $plugin_name ] ) ) {
 			if ( ! ( get_site_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
 				// The plugin was installed manually so let's not interfere.
