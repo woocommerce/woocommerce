@@ -252,19 +252,34 @@ class Checkout extends AbstractBlock {
 	 * @return void
 	 */
 	public function update_local_pickup_title( $post_id, $post ) {
+		if ( empty( $post->post_status ) || 'inherit' === $post->post_status  ) {
+			// This is not a proper save action, maybe an autosave, so don't continue.
+			return;
+		}
+
+		// Check if we are editing the checkout page and that it contains a Checkout block.
 		// Cast to string for Checkout page ID comparison because get_option can return it as a string, so better to compare both values as strings.
-		if ( false === has_block( 'woocommerce/checkout', $post ) || (string) get_option( 'woocommerce_checkout_page_id' ) !== (string) $post_id ) {
+		if ( ! empty( $post->post_type ) && 'wp_template' !== $post->post_type && ( false === has_block( 'woocommerce/checkout', $post ) || (string) get_option( 'woocommerce_checkout_page_id' ) !== (string) $post_id ) ) {
+			return;
+		}
+
+		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && $post->post_name !== 'page-checkout' && $post->post_type === 'wp_template' ) || false === has_block( 'woocommerce/checkout', $post ) ) {
 			return;
 		}
 		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
+
 		if ( ! isset( $pickup_location_settings['title'] ) ) {
 			return;
 		}
+
+		if ( empty( $post->post_content ) ) {
+			return;
+		}
+
 		$post_blocks = parse_blocks( $post->post_content );
 		$title = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
 		if ( $title ) {
 			$pickup_location_settings['title'] = $title;
-
 			update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
 		}
 	}
