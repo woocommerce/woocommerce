@@ -5,6 +5,8 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -133,7 +135,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'autoload' => false,
 				),
 
-				array(
+				Features::is_enabled( 'launch-your-store' ) ? array(
 					'title'    => __( 'Coming soon', 'woocommerce' ),
 					'desc'     => __( 'TBD', 'woocommerce' ),
 					'id'       => 'woocommerce_coming_soon_page_id',
@@ -150,8 +152,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					),
 					'desc_tip' => true,
 					'autoload' => false,
-				),
-
+				) : array(),
 
 				array(
 					'type' => 'sectionend',
