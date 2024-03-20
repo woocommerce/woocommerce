@@ -276,18 +276,18 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	* Return the markup for a menu item bubble with a given text and optional additional attributes.
-	*
-	* @param string $bubble_text Text of bubble.
-	* @param array $attributes Optional. Additional attributes for the bubble, such as class or style.
-	*
-	* @return string
+	 * Return the markup for a menu item bubble with a given text and optional additional attributes.
+	 *
+	 * @param string $bubble_text Text of bubble.
+	 * @param array $attributes Optional. Additional attributes for the bubble, such as class or style.
+	 *
+	 * @return string
 	 */
 	private static function append_bubble( $bubble_text, $attributes = [] ) {
-		$default_attributes = [
+		$default_attributes = array(
 			'class' => 'awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge',
 			'style' => '',
-		];
+		);
 
 		$attributes = wp_parse_args( $attributes, $default_attributes );
 		$class_attr = ! empty( $attributes['class'] ) ? sprintf( 'class="%s"', esc_attr( $attributes['class'] ) ) : '';
