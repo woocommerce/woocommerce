@@ -228,8 +228,6 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 								echo '<div id=' . esc_attr( $method->id ) . '-description class="wc-shipping-zone-method-input-help-text"><span>' . wp_kses_post( wpautop( $method->get_method_description() ) ) . '</span></div>';
 							}
 
-							echo '</div>';
-
 							if ( CartCheckoutUtils::is_checkout_block_default() ) {
 								echo '<p class="wc-shipping-legacy-local-pickup-help-text-container">';
 
@@ -256,6 +254,8 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 
 								echo '</p>';
 							}
+
+							echo '</div>';
 
 							?>
 						</fieldset>
