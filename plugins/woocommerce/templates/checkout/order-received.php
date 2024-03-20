@@ -12,7 +12,7 @@
  *
  * @see https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.3.0
+ * @version 8.9.0
  *
  * @var WC_Order|false $order
  */
