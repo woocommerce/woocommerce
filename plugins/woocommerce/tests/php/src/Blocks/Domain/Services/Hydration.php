@@ -42,9 +42,18 @@ class Hydration extends TestCase {
 
 		$request_callback_filter_called = false;
 		add_filter(
-			'rest_request_after_callbacks',
+			'woocommerce_hydration_request_after_callbacks',
 			function ( $response ) use ( &$request_callback_filter_called ) {
 				$request_callback_filter_called = true;
+				return $response;
+			}
+		);
+
+		$dispatch_filter_called = false;
+		add_filter(
+			'woocommerce_hydration_dispatch_request',
+			function ( $response ) use ( &$dispatch_filter_called ) {
+				$dispatch_filter_called = true;
 				return $response;
 			}
 		);
@@ -53,6 +62,7 @@ class Hydration extends TestCase {
 
 		$this->assertFalse( $api_loaded );
 		$this->assertTrue( $request_callback_filter_called );
+		$this->assertTrue( $dispatch_filter_called );
 
 		$this->assertArrayHasKey( 'body', $response );
 		$this->assertArrayHasKey( 'headers', $response );
