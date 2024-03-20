@@ -125,7 +125,7 @@ export function Header( {
 
 	function getVisibilityTags() {
 		const tags = [];
-		if ( productStatus === 'draft' || productStatus === 'future' ) {
+		if ( productStatus === 'draft' ) {
 			tags.push(
 				<Tag
 					key={ 'draft-tag' }
@@ -133,8 +133,16 @@ export function Header( {
 				/>
 			);
 		}
+		if ( productStatus === 'future' ) {
+			tags.push(
+				<Tag
+					key={ 'scheduled-tag' }
+					label={ __( 'Scheduled', 'woocommerce' ) }
+				/>
+			);
+		}
 		if (
-			( productStatus !== 'future' && catalogVisibility === 'hidden' ) ||
+			( productStatus !== 'future' && catalogVisibility !== 'visible' ) ||
 			( isVariation && productStatus === 'private' )
 		) {
 			tags.push(
@@ -249,7 +257,8 @@ export function Header( {
 
 					<PublishButton
 						productType={ productType }
-						prePublish={ showPrepublishChecks }
+						isPrePublishPanelVisible={ showPrepublishChecks }
+						isMenuButton
 					/>
 
 					<WooHeaderItem.Slot name="product" />

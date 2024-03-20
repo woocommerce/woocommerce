@@ -26,6 +26,7 @@ export function SchedulePublishModal( {
 	className,
 	onCancel,
 	onSchedule,
+	isScheduling,
 	...props
 }: SchedulePublishModalProps ) {
 	const [ date, setDate ] = useState< string | undefined >(
@@ -77,6 +78,8 @@ export function SchedulePublishModal( {
 				</Button>
 				<Button
 					variant="primary"
+					isBusy={ isScheduling }
+					disabled={ isScheduling }
 					onClick={ () => onSchedule?.( date ) }
 				>
 					{ __( 'Schedule', 'woocommerce' ) }

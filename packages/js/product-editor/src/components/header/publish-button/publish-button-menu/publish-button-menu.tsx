@@ -26,7 +26,7 @@ export function PublishButtonMenu( {
 	postType,
 	...props
 }: PublishButtonMenuProps ) {
-	const { isScheduled, schedule, date, formattedDate } =
+	const { isScheduling, isScheduled, schedule, date, formattedDate } =
 		useProductScheduled( postType );
 	const [ showScheduleModal, setShowScheduleModal ] = useState<
 		'schedule' | 'edit' | undefined
@@ -62,6 +62,7 @@ export function PublishButtonMenu( {
 				<SchedulePublishModal
 					postType={ postType }
 					value={ showScheduleModal === 'edit' ? date : undefined }
+					isScheduling={ isScheduling }
 					onCancel={ () => setShowScheduleModal( undefined ) }
 					onSchedule={ scheduleProduct }
 				/>
