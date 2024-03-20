@@ -2,12 +2,17 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useContext, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -64,6 +69,14 @@ export default function Products( props: ProductsProps ) {
 		page: 'wc-admin',
 		path: '/customize-store/design',
 	} );
+	const assemblerHubUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
+		page: 'wc-admin',
+		path: '/customize-store/assembler-hub',
+	} );
+
+	const customizeStoreTask = useSelect( ( select ) => {
+		return select( ONBOARDING_STORE_NAME ).getTask( 'customize-store' );
+	}, [] );
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
 	const showAllButton = props.showAllButton ?? false;
@@ -151,6 +164,8 @@ export default function Products( props: ProductsProps ) {
 						onClick={ () => {
 							if ( ! isDefaultTheme ) {
 								setIsModalOpen( true );
+							} else if ( customizeStoreTask?.isComplete ) {
+								window.location.href = assemblerHubUrl;
 							} else {
 								window.location.href = customizeStoreDesignUrl;
 							}
@@ -173,6 +188,34 @@ export default function Products( props: ProductsProps ) {
 				searchTerm={ props.searchTerm }
 				category={ category }
 			/>
+			{ props.type === 'theme' && (
+				<div
+					className={
+						'woocommerce-marketplace__browse-wp-theme-directory'
+					}
+				>
+					<b>
+						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
+					</b>
+					{ createInterpolateElement(
+						__(
+							' Browse the <a>WordPress.org theme directory</a> to discover more.',
+							'woocommerce'
+						),
+						{
+							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content
+								<a
+									href={
+										ADMIN_URL +
+										'theme-install.php?search=e-commerce'
+									}
+								/>
+							),
+						}
+					) }
+				</div>
+			) }
 			{ showAllButton && (
 				<Button
 					className={ viewAllButonClassName }

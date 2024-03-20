@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 register_woocommerce_admin_test_helper_rest_route(
 	'/remote-spec-validator/validate',

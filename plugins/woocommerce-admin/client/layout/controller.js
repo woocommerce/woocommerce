@@ -87,7 +87,7 @@ const CustomizeStore = lazy( () =>
 );
 
 const LaunchStore = lazy( () =>
-	import( /* webpackChunkName: "launch-store" */ '../launch-store' )
+	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';

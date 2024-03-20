@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Validate coupons with email restrictions upfront and change user's feedback when a coupon is not valid for the user.
