@@ -14,6 +14,7 @@
 		display: inline-block;
 		float: none;
 		margin-right: 4px;
+		margin-bottom: 10px;
 		vertical-align: middle;
 
 		.qty {
@@ -22,4 +23,8 @@
 			text-align: center;
 		}
 	}
+}
+
+.woocommerce div.product .wc-block-add-to-cart-form form.cart button.single_add_to_cart_button {
+	margin-bottom: 10px;
 }
