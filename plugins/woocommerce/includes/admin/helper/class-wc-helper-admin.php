@@ -49,13 +49,17 @@ class WC_Helper_Admin {
 		);
 
 		$settings['wccomHelper'] = array(
-			'isConnected'            => WC_Helper::is_site_connected(),
-			'connectURL'             => self::get_connection_url(),
-			'userEmail'              => $auth_user_email,
-			'userAvatar'             => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
-			'storeCountry'           => wc_get_base_location()['country'],
-			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
-			'installedProducts'      => $installed_products,
+			'isConnected'                => WC_Helper::is_site_connected(),
+			'connectURL'                 => self::get_connection_url(),
+			'userEmail'                  => $auth_user_email,
+			'userAvatar'                 => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
+			'storeCountry'               => wc_get_base_location()['country'],
+			'inAppPurchaseURLParams'     => WC_Admin_Addons::get_in_app_purchase_url_params(),
+			'installedProducts'          => $installed_products,
+			'wooUpdateManagerInstalled'  => WC_Woo_Update_Manager_Plugin::is_plugin_installed(),
+			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
+			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
+			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 		);
 
 		return $settings;
