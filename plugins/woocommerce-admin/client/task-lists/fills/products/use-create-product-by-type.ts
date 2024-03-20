@@ -50,7 +50,7 @@ export const useCreateProductByType = () => {
 			if ( data && data.id ) {
 				return classicEditor
 					? getAdminLink(
-							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true`
+							`post.php?post=${ data.id }&action=edit&wc_onboarding_active_task=products&tutorial=true&tutorial_type=${ type }`
 					  )
 					: getNewPath( {}, '/product/' + data.id, {} );
 			}

@@ -66,6 +66,9 @@ class PluginInstaller implements RegisterHooksInterface {
 	 * - 'date', ISO-formatted installation date.
 	 * - 'metadata', as supplied (except the 'plugin_name' key) and only if not empty.
 	 *
+	 * If the plugin is already in the process of being installed (can happen in multisite), the returned array
+	 * will contain only one key: 'already_installing', with a value of true.
+	 *
 	 * @param string $plugin_url URL or file path of the plugin to install.
 	 * @param array  $metadata Metadata to store if the installation succeeds.
 	 * @return array Information about the installation result.
@@ -73,9 +76,24 @@ class PluginInstaller implements RegisterHooksInterface {
 	 */
 	public function install_plugin( string $plugin_url, array $metadata = array() ): array {
 		$this->installing_plugin = true;
+
+		$plugins_being_installed = get_site_option( 'woocommerce_autoinstalling_plugins', array() );
+		if ( in_array( $plugin_url, $plugins_being_installed, true ) ) {
+			return array( 'already_installing' => true );
+		}
+		$plugins_being_installed[] = $plugin_url;
+		update_site_option( 'woocommerce_autoinstalling_plugins', $plugins_being_installed );
+
 		try {
 			return $this->install_plugin_core( $plugin_url, $metadata );
 		} finally {
+			$plugins_being_installed = array_diff( $plugins_being_installed, array( $plugin_url ) );
+			if ( empty( $plugins_being_installed ) ) {
+				delete_site_option( 'woocommerce_autoinstalling_plugins' );
+			} else {
+				update_site_option( 'woocommerce_autoinstalling_plugins', $plugins_being_installed );
+			}
+
 			$this->installing_plugin = false;
 		}
 	}
@@ -118,6 +136,9 @@ class PluginInstaller implements RegisterHooksInterface {
 		$result = array( 'messages' => $skin->get_upgrade_messages() );
 
 		if ( $install_ok ) {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
 			$plugin_name    = $upgrader->plugin_info();
 			$plugin_version = get_plugins()[ $plugin_name ]['Version'];
 
@@ -130,14 +151,16 @@ class PluginInstaller implements RegisterHooksInterface {
 				$plugin_data['metadata'] = $metadata;
 			}
 
+			$auto_installed_plugins                 = get_site_option( 'woocommerce_autoinstalled_plugins', array() );
+			$auto_installed_plugins[ $plugin_name ] = $plugin_data;
+			update_site_option( 'woocommerce_autoinstalled_plugins', $auto_installed_plugins );
+
 			$post_install = function () use ( $plugin_name, $plugin_version, $installed_by, $plugin_url, $plugin_data ) {
-				$auto_installed_plugins                 = get_option( 'woocommerce_autoinstalled_plugins', array() );
-				$auto_installed_plugins[ $plugin_name ] = $plugin_data;
-				$log_context                            = array(
+				$log_context = array(
 					'source'        => 'plugin_auto_installs',
 					'recorded_data' => $plugin_data,
 				);
-				update_option( 'woocommerce_autoinstalled_plugins', $auto_installed_plugins );
+
 				wc_get_logger()->info( "Plugin $plugin_name v{$plugin_version} installed by $installed_by, source: $plugin_url", $log_context );
 			};
 		} else {
@@ -151,37 +174,23 @@ class PluginInstaller implements RegisterHooksInterface {
 			};
 		}
 
-		$this->run_callback_in_all_sites( $post_install );
+		if ( is_multisite() ) {
+			// We log the install in the main site, unless the main site doesn't have WooCommerce installed;
+			// in that case we fallback to logging in the current site.
+			switch_to_blog( get_main_site_id() );
+			if ( self::woocommerce_is_active_in_current_site() ) {
+				$post_install();
+				restore_current_blog();
+			} else {
+				restore_current_blog();
+				$post_install();
+			}
+		} else {
+			$post_install();
+		}
 
 		$result['install_ok'] = $install_ok ?? false;
 		return $result;
-	}
-
-	/**
-	 * Run a callback in each existing site (if multisite) or just once (if single site).
-	 *
-	 * @param callable $callback The callback to run.
-	 */
-	private static function run_callback_in_all_sites( callable $callback ) {
-		if ( ! is_multisite() ) {
-			$callback();
-			return;
-		}
-
-		foreach ( get_sites() as $site ) {
-			switch_to_blog( $site->blog_id );
-
-			if ( ! self::woocommerce_is_active_in_current_site() ) {
-				restore_current_blog();
-				continue;
-			}
-
-			try {
-				$callback();
-			} finally {
-				restore_current_blog();
-			}
-		}
 	}
 
 	/**
@@ -221,7 +230,7 @@ class PluginInstaller implements RegisterHooksInterface {
 			return;
 		}
 
-		$auto_installed_plugins_info = get_option( 'woocommerce_autoinstalled_plugins', array() );
+		$auto_installed_plugins_info = get_site_option( 'woocommerce_autoinstalled_plugins', array() );
 		$current_plugin_info         = $auto_installed_plugins_info[ $plugin_file ] ?? null;
 		if ( is_null( $current_plugin_info ) || $current_plugin_info['version'] !== $plugin_data['Version'] ) {
 			return;
@@ -270,7 +279,7 @@ class PluginInstaller implements RegisterHooksInterface {
 			return;
 		}
 
-		$auto_installed_plugins = get_option( 'woocommerce_autoinstalled_plugins' );
+		$auto_installed_plugins = get_site_option( 'woocommerce_autoinstalled_plugins' );
 		if ( ! $auto_installed_plugins ) {
 			return;
 		}
@@ -291,9 +300,9 @@ class PluginInstaller implements RegisterHooksInterface {
 		$new_auto_installed_plugins = array_diff_key( $auto_installed_plugins, array_flip( $updated_auto_installed_plugin_names ) );
 
 		if ( empty( $new_auto_installed_plugins ) ) {
-			delete_option( 'woocommerce_autoinstalled_plugins' );
+			delete_site_option( 'woocommerce_autoinstalled_plugins' );
 		} else {
-			update_option( 'woocommerce_autoinstalled_plugins', $new_auto_installed_plugins );
+			update_site_option( 'woocommerce_autoinstalled_plugins', $new_auto_installed_plugins );
 		}
 	}
 }
