@@ -15,7 +15,7 @@ jobs:
     # which projects have changed and what kind of change occurred. This lets us build the
     # matrices that we can use to run CI tasks only on the projects that need them.
     name: 'Build Project Jobs'
-    runs-on: woo-ci-runner
+    runs-on: ['ubuntu-20.04','woo-ci-runner']
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
@@ -41,7 +41,7 @@ jobs:
             child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
   project-lint-jobs:
     name: 'Lint - ${{ matrix.projectName }}'
-    runs-on: woo-ci-runner
+    runs-on: ['ubuntu-20.04','woo-ci-runner']
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
@@ -63,7 +63,7 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
   project-test-jobs:
     name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
-    runs-on: woo-ci-runner
+    runs-on: ['ubuntu-20.04','woo-ci-runner']
     needs: 'project-jobs'
     if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
     strategy:
@@ -95,7 +95,7 @@ jobs:
     # using a job that runs after all the others and either passes or fails based
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
-    runs-on: woo-ci-runner
+    runs-on: ['ubuntu-20.04','woo-ci-runner']
     needs: [ 
       'project-jobs',
       'project-lint-jobs',
