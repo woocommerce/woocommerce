@@ -179,7 +179,7 @@ class WC_Helper_Updater {
 			printf(
 				wp_kses(
 					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install Woo Update Manager</a> to update.', 'woocommerce' ),
+					__( ' <a href="%1$s">Install Woo.com Update Manager</a> to update.', 'woocommerce' ),
 					array(
 						'a' => array(
 							'href' => array(),
@@ -192,7 +192,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate Woo Update Manager to update.', 'woocommerce' );
+			echo esc_html_e( ' Activate Woo.com Update Manager to update.', 'woocommerce' );
 		}
 	}
 
