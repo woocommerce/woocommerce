@@ -163,7 +163,8 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		await page.reload();
 
 		// verify that added shipping methods are present
-		// there is issue in blocks: #1234 unable to verify the shipping methods
+		// there is issue in blocks: #45747 unable to verify the shipping methods
+		// please uncomment below when the issue is resolved
 		// await expect( page.getByLabel( 'Free shipping' ) ).toBeVisible();
 		// await expect( page.getByLabel( 'Local pickup' ) ).toBeVisible();
 		// await expect( page.getByLabel( 'Flat rate' ) ).toBeVisible();
