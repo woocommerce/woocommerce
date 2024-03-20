@@ -22,7 +22,7 @@ final class StoreApi {
 	public function init() {
 		add_action(
 			'rest_api_init',
-			function() {
+			function () {
 				self::container()->get( Legacy::class )->init();
 				self::container()->get( RoutesController::class )->register_all_routes();
 			}
@@ -30,7 +30,7 @@ final class StoreApi {
 		// Runs on priority 11 after rest_api_default_filters() which is hooked at 10.
 		add_action(
 			'rest_api_init',
-			function() {
+			function () {
 				self::container()->get( Authentication::class )->init();
 			},
 			11
@@ -38,8 +38,8 @@ final class StoreApi {
 
 		add_action(
 			'woocommerce_blocks_pre_get_routes_from_namespace',
-			function( $routes, $namespace, $context ) {
-				if ( 'wc/store/v1' !== $namespace ) {
+			function ( $routes, $ns ) {
+				if ( 'wc/store/v1' !== $ns ) {
 					return $routes;
 				}
 
@@ -51,7 +51,7 @@ final class StoreApi {
 				return $routes;
 			},
 			10,
-			3
+			2
 		);
 	}
 
