@@ -12,6 +12,7 @@ import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,7 +27,6 @@ import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { MARKETPLACE_ITEMS_PER_PAGE } from '../constants';
 import { ADMIN_URL } from '~/utils/admin-settings';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 interface ProductsProps {
 	categorySelector?: boolean;
