@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -20,7 +21,6 @@ import {
 	useProductStepChange,
 } from './use-product-step-change';
 import { useTrackPublishButton } from './use-track-publish-button';
-import { applyFilters } from '@wordpress/hooks';
 
 const getTourConfig = ( {
 	isExcerptEditorTmceActive,
