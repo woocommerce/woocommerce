@@ -147,6 +147,13 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
+			await page
+				.locator( '.woocommerce-product-publish-panel__header' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
+
 			const element = page.locator( 'div.components-snackbar__content' );
 			if ( Array.isArray( element ) ) {
 				await expect( await element[ 0 ].innerText() ).toMatch(
