@@ -124,12 +124,12 @@ class RoutesController {
 	 * @return string[] List of route paths.
 	 */
 	public function get_all_routes( $version = 'v1', $controller = false ) {
-		$routes = [];
+		$routes = array();
 
 		foreach ( $this->routes[ $version ] as $key => $route_class ) {
 
 			if ( ! method_exists( $route_class, 'get_path_regex' ) ) {
-				throw new \Exception( "{$route_class} route does not have a get_path_regex method" );
+				throw new \Exception( esc_html( "{$route_class} route does not have a get_path_regex method" ) );
 			}
 
 			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::get_path_regex();

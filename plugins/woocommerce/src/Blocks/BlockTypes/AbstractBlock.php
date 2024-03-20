@@ -473,7 +473,7 @@ abstract class AbstractBlock {
 		 */
 		$routes = apply_filters(
 			'woocommerce_blocks_pre_get_routes_from_namespace',
-			[],
+			array(),
 			$namespace,
 			'view'
 		);
