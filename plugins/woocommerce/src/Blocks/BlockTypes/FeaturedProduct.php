@@ -22,7 +22,7 @@ class FeaturedProduct extends FeaturedItem {
 		$id = absint( $attributes['productId'] ?? 0 );
 
 		$product = wc_get_product( $id );
-		if ( ! $product ) {
+		if ( ! $product || $product->get_status() == 'draft' ) {
 			return null;
 		}
 
