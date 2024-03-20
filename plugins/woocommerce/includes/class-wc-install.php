@@ -1506,7 +1506,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_code varchar(200) NOT NULL,
   location_type varchar(40) NOT NULL,
   PRIMARY KEY  (location_id),
-  KEY location_id (location_id),
+  KEY zone_id (zone_id),
   KEY location_type_code (location_type(10),location_code(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
