@@ -18,13 +18,32 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 		return null;
 	}
 
+	const localWooPluginsCount = ( wccomSettings?.localWooPlugins || [] )
+		.length;
+	let description = '';
+
+	if ( localWooPluginsCount > 0 ) {
+		description = description.concat(
+			__(
+				'Your store might be at risk as you are running old versions of Woo plugins.',
+				'woocommerce'
+			)
+		);
+
+		description = description.concat( ' ' );
+	}
+
+	description = description.concat(
+		__(
+			'<strong>Connect your store to Woo.com</strong> to get updates and streamlined support for your subscriptions.',
+			'woocommerce'
+		)
+	);
+
 	return (
 		<Notice
 			id="woo-connect-notice"
-			description={ __(
-				'<strong>Connect your store to Woo.com</strong> to get updates and streamlined support for your subscriptions.',
-				'woocommerce'
-			) }
+			description={ description }
 			isDismissible={ true }
 			variant="error"
 		>

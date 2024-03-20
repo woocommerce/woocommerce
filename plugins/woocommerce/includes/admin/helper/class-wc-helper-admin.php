@@ -48,6 +48,8 @@ class WC_Helper_Admin {
 			$installed_products
 		);
 
+		$local_woo_plugins = array_keys( WC_Helper::get_local_woo_plugins() );
+
 		$settings['wccomHelper'] = array(
 			'isConnected'            => WC_Helper::is_site_connected(),
 			'connectURL'             => self::get_connection_url(),
@@ -56,6 +58,7 @@ class WC_Helper_Admin {
 			'storeCountry'           => wc_get_base_location()['country'],
 			'inAppPurchaseURLParams' => WC_Admin_Addons::get_in_app_purchase_url_params(),
 			'installedProducts'      => $installed_products,
+			'localWooPlugins'        => $local_woo_plugins,
 		);
 
 		return $settings;
