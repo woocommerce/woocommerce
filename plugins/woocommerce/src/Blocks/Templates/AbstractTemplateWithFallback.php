@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -18,16 +17,6 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	 * @var string
 	 */
 	public $fallback_template;
-
-	/**
-	 * Template part functionality is only initialized when using a theme that supports template parts.
-	 */
-	public function __construct() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
-			BlockTemplatesRegistry::register_template( $this );
-			$this->init();
-		}
-	}
 
 	/**
 	 * Initialization method.
@@ -108,22 +97,6 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 			}
 		}
 
-		if ( count( $posts ) > 0 ) {
-			$template           = _build_block_template_result_from_post( $posts[0] );
-			$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
-			$template_file_path = $directory . '/' . $this->fallback_template . '.html';
-			$theme_slug         = wp_get_theme()->get_stylesheet();
-
-			// Add fallback content when creating the page.
-			if ( $template->id === $theme_slug . '//' . self::SLUG && ( ! isset( $template->content ) || '' === $template->content ) ) {
-				$fallback_template_content = file_get_contents( $template_file_path );
-				$template->content         = BlockTemplateUtils::inject_theme_attribute_in_content( $fallback_template_content );
-				// Remove the term description block from the archive-product template
-				// as the Product Catalog/Shop page doesn't have a description.
-				$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
-			}
-		}
-
 		return $template;
 	}
 
@@ -137,56 +110,14 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	 * @param array $templates Templates that match the pages_template_hierarchy.
 	 */
 	public function template_hierarchy( $templates ) {
-		if ( $this->is_active_template() ) {
-			array_unshift( $templates, $this->fallback_template );
-			array_unshift( $templates, self::SLUG );
-
-			// Make it searching for a template returns the default WooCommerce template.
-			add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
+		$index = array_search( static::SLUG, $templates );
+		if (
+			false !== $index && (
+				! array_key_exists( $index + 1, $templates ) || $templates[ $index + 1 ] !== $this->fallback_template
+			) ) {
+			array_splice( $templates, $index + 1, 0, 'archive-product' );
 		}
+
 		return $templates;
 	}
-
-	/**
-	 * Add the block template objects to be used.
-	 *
-	 * @param array  $query_result Array of template objects.
-	 * @param array  $query Optional. Arguments to retrieve templates.
-	 * @param string $template_type wp_template or wp_template_part.
-	 * @return array
-	 */
-	public function add_block_templates( $query_result, $query, $template_type ) {
-		// Is it's not the same slug, do nothing.
-		if ( isset( $query['slug__in'] ) && ! in_array( self::SLUG, $query['slug__in'], true ) ) {
-			return $query_result;
-		}
-		// If it's not the same template type, do nothing.
-		if ( 'wp_template' !== $template_type ) {
-			return $query_result;
-		}
-		// If the theme has the template, do nothing.
-		if ( BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
-			return $query_result;
-		}
-		$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
-		$template_file_path = $directory . '/' . $this->fallback_template . '.html';
-		// If template is in DB, do nothing.
-		if ( count( $query_result ) > 0 ) {
-			return $query_result;
-		}
-
-		$template_object = BlockTemplateUtils::create_new_block_template_object( $template_file_path, 'wp_template', self::SLUG, true );
-		$template        = BlockTemplateUtils::build_template_result_from_file( $template_object, 'wp_template' );
-		$query_result[]  = $template;
-
-		return $query_result;
-	}
-
-	/**
-	 * Should return true on pages/endpoints/routes where the template should be shown.
-	 *
-	 * @return boolean
-	 */
-	abstract protected function is_active_template();
-
 }

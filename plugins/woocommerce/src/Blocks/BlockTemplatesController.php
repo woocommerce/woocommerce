@@ -26,7 +26,6 @@ class BlockTemplatesController {
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
 
 		if ( wc_current_theme_is_fse_theme() ) {
@@ -114,32 +113,6 @@ class BlockTemplatesController {
 			}
 		}
 		return function_exists( '\gutenberg_render_block_core_template_part' ) ? \gutenberg_render_block_core_template_part( $attributes ) : \render_block_core_template_part( $attributes );
-	}
-
-	/**
-	 * Adds the `archive-product` template to the `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute`
-	 * templates to be able to fall back to it.
-	 *
-	 * @param array $template_hierarchy A list of template candidates, in descending order of priority.
-	 */
-	public function add_archive_product_to_eligible_for_fallback_templates( $template_hierarchy ) {
-		$template_slugs = array_map(
-			'_strip_template_file_suffix',
-			$template_hierarchy
-		);
-
-		$templates_eligible_for_fallback = array_filter(
-			$template_slugs,
-			function ( $template_slug ) {
-				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug );
-			}
-		);
-
-		if ( count( $templates_eligible_for_fallback ) > 0 ) {
-			$template_hierarchy[] = ProductCatalogTemplate::SLUG;
-		}
-
-		return $template_hierarchy;
 	}
 
 	/**
