@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add remaining tests to cover merchant checkout block flow / milestone
