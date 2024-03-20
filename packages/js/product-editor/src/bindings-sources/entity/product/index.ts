@@ -13,18 +13,18 @@ import type {
 	BindingUseSourceProps,
 	BlockProps,
 } from '../../../bindings/types';
-import { WooEntitySourceArgs } from './types';
+import type { WooCommerceEntityProductSourceArgs } from './types';
 
 /**
  * React custom hook to bind a source to a block.
  *
- * @param {BlockProps}          blockProps - The block props.
- * @param {WooEntitySourceArgs} sourceArgs - The source args.
+ * @param {BlockProps}                         blockProps - The block props.
+ * @param {WooCommerceEntityProductSourceArgs} sourceArgs - The source args.
  * @return {BindingUseSourceProps} The source value and setter.
  */
 const useSource = (
 	blockProps: BlockProps,
-	sourceArgs: WooEntitySourceArgs
+	sourceArgs: WooCommerceEntityProductSourceArgs
 ): BindingUseSourceProps => {
 	if ( typeof sourceArgs === 'undefined' ) {
 		throw new Error( 'The "args" argument is required.' );
@@ -86,4 +86,4 @@ export default {
 	label: __( 'Product Entity', 'woocommerce' ),
 	useSource,
 	lockAttributesEditing: true,
-} as BindingSourceHandlerProps< WooEntitySourceArgs >;
+} as BindingSourceHandlerProps< WooCommerceEntityProductSourceArgs >;
