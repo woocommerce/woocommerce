@@ -1082,5 +1082,22 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $children[2], $match );
+
+		// Invalid attributes should not cause a fatal error.
+		$callback = function( $atts ) {
+			$atts['invalid']  = 'invalid attribute';
+			$atts['invalid2'] = 'another invalid attribute';
+			return $atts;
+		};
+
+		add_filter( 'woocommerce_product_get_attributes', $callback );
+		$match = $data_store->find_matching_product_variation(
+			$product,
+			array(
+				'attribute_pa_size' => 'large',
+			)
+		);
+		$this->assertEquals( $children[1], $match );
+		remove_filter( 'woocommerce_product_get_attributes', $callback );
 	}
 }

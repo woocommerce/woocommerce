@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Ensure the product get_attributes method only returns valid attribute objects in its array
+Avoid fatal error in `find_matching_product_variation` method if an attribute is not an instance of WC_Product_Attribute

@@ -1105,7 +1105,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Get attributes to match in meta.
 		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute->get_variation() ) {
+			if ( ! $attribute instanceof WC_Product_Attribute || ! $attribute->get_variation() ) {
 				continue;
 			}
 			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );
