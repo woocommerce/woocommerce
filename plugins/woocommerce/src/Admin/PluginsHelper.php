@@ -567,10 +567,22 @@ class PluginsHelper {
 		$notice_string .= sprintf(
 			/* translators: %s: Connect page URL */
 			__( '<a href="%s">Connect your store</a> to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
-			$connect_page_url
+			esc_url( $connect_page_url )
 		);
+		echo '<script type="text/javascript">
+				jQuery( document ).ready( function() {
+					const wooConnectNoticeSelector = ".woo-connect-notice";
+					jQuery( wooConnectNoticeSelector ).on( "click", "button.notice-dismiss", function() {
+						localStorage.setItem("woo-connect-notice-dismissed", "true");
+					});
 
-		echo '<div class="notice notice-error is-dismissible">
+					if ( localStorage.getItem("woo-connect-notice-dismissed") === "true" ) {
+						jQuery( wooConnectNoticeSelector ).remove();
+					}
+				});
+			</script>';
+
+		echo '<div class="woo-connect-notice notice notice-error is-dismissible">
 	    		<p class="widefat">' . wp_kses_post( $notice_string ) . '</p>
 	    	</div>';
 	}
