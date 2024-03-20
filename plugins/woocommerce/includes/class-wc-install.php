@@ -1218,7 +1218,7 @@ class WC_Install {
 			$install_ok = true;
 		} else {
 			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
-				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.1.0.1.zip',
+				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
 				array(
 					'info_link' => 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
 				)
