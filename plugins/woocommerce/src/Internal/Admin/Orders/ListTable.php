@@ -982,7 +982,7 @@ class ListTable extends WP_List_Table {
 	 *
 	 * @return string Edit link for the order.
 	 */
-	private function get_order_edit_link( WC_Order $order ) : string {
+	private function get_order_edit_link( WC_Order $order ): string {
 		return $this->page_controller->get_edit_url( $order->get_id() );
 	}
 
@@ -1352,7 +1352,7 @@ class ListTable extends WP_List_Table {
 			}
 
 			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1380,7 +1380,7 @@ class ListTable extends WP_List_Table {
 
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1403,7 +1403,7 @@ class ListTable extends WP_List_Table {
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1423,7 +1423,7 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1545,6 +1545,11 @@ class ListTable extends WP_List_Table {
 											{{{ data.formatted_billing_address }}}
 										<# } else { #>
 											<a href="{{ data.shipping_address_map_url }}" target="_blank">{{{ data.formatted_shipping_address }}}</a>
+										<# } #>
+
+										<# if ( data.data.shipping.phone ) { #>
+											<strong><?php esc_html_e( 'Phone', 'woocommerce' ); ?></strong>
+											<a href="tel:{{ data.data.shipping.phone }}">{{ data.data.shipping.phone }}</a>
 										<# } #>
 
 										<# if ( data.shipping_via ) { #>
