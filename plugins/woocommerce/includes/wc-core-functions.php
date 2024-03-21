@@ -1903,7 +1903,7 @@ function wc_get_rounding_precision() {
 	 *
 	 * @param int $precision The number of decimals to round to.
 	 */
-	return apply_filters( 'woocommerce_wc_get_rounding_precision', $precision );
+	return apply_filters( 'woocommerce_internal_rounding_precision', $precision );
 }
 
 /**
