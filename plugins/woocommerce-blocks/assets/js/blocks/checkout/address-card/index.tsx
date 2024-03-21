@@ -41,11 +41,22 @@ const AddressCard = ( {
 		[ address?.country, fieldConfig ]
 	);
 
+	const orderedName = addressFields
+		.filter(
+			( field ) =>
+				field?.key === 'last_name' || field?.key === 'first_name'
+		)
+		.sort( ( field1, field2 ) => field1?.index - field2?.index )
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore - Ignoring because we know the keys are valid address keys (and if they're not we have optional chaining anyway).
+		.map( ( field ) => address?.[ field.key ] )
+		.join( ' ' );
+
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span className="wc-block-components-address-card__address-section">
-					{ address.first_name + ' ' + address.last_name }
+					{ orderedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
 					{ [
