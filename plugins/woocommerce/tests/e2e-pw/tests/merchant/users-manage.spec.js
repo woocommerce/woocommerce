@@ -18,8 +18,8 @@ const test = baseTest.extend( {
 		await use( user );
 
 		// Use wp api instead, because the wc api incorrectly returns 400 instead of 404 if the user is already deleted.
-		// To avoid test failure in case of 400, an exception needs to be added required in the validateStatus api definition,
-		// which is not ideal, because we want 400 errors to be thrown
+		// To avoid test failure in case of 400, an exception is required in the validateStatus api definition,
+		// which is not ideal because we want 400 errors to be thrown
 		await wpApi.delete( `/wp-json/wp/v2/users/${ user.id }`, {
 			data: {
 				force: true,
