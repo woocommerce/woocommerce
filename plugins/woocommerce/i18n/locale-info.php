@@ -3781,7 +3781,7 @@ return array(
 		'dimension_unit' => 'cm',
 		'direction'      => 'ltr',
 		'default_locale' => 'es_VE',
-		'name'           => 'Bolívar soberano',
+		'name'           => 'Bolívar',
 		'singular'       => 'Venezuelan bolívar',
 		'plural'         => 'Venezuelan bolívars',
 		'short_symbol'   => null,

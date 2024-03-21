@@ -34,7 +34,7 @@ class WooCommercePayments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Set up WooPayments', 'woocommerce' );
+		return __( 'Get paid with WooPayments', 'woocommerce' );
 	}
 
 	/**
@@ -83,32 +83,13 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Additional info.
-	 *
-	 * @return string
-	 */
-	public function get_additional_info() {
-		if ( WCPayPromotionInit::is_woopay_eligible() ) {
-			return __(
-				'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> (including WooPay <a href="https://wordpress.com/tos/#more-woopay-specifically" target="_blank">merchant terms</a>) and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
-				'woocommerce'
-			);
-		}
-
-		return __(
-			'By using WooPayments you agree to be bound by our <a href="https://wordpress.com/tos/" target="_blank">Terms of Service</a> and acknowledge that you have read our <a href="https://automattic.com/privacy/" target="_blank">Privacy Policy</a>',
-			'woocommerce'
-		);
-	}
-
-	/**
 	 * Task completion.
 	 *
 	 * @return bool
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::is_connected();
+			$this->is_complete_result = self::is_connected() && ! self::is_account_partially_onboarded();
 		}
 
 		return $this->is_complete_result;
@@ -128,7 +109,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin was requested during onboarding.
+	 * Check if the WooPayments plugin was requested during onboarding.
 	 *
 	 * @return bool
 	 */
@@ -142,7 +123,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin is installed.
+	 * Check if the WooPayments plugin is installed.
 	 *
 	 * @return bool
 	 */
@@ -152,7 +133,16 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments is connected.
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return bool
+	 */
+	public static function is_wcpay_active() {
+		return class_exists( '\WC_Payments' );
+	}
+
+	/**
+	 * Check if WooPayments is connected.
 	 *
 	 * @return bool
 	 */
@@ -161,6 +151,23 @@ class WooCommercePayments extends Task {
 			$wc_payments_gateway = \WC_Payments::get_gateway();
 			return method_exists( $wc_payments_gateway, 'is_connected' )
 				? $wc_payments_gateway->is_connected()
+				: false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if WooPayments needs setup.
+	 * Errored data or payments not enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_account_partially_onboarded() {
+		if ( class_exists( '\WC_Payments' ) ) {
+			$wc_payments_gateway = \WC_Payments::get_gateway();
+			return method_exists( $wc_payments_gateway, 'is_account_partially_onboarded' )
+				? $wc_payments_gateway->is_account_partially_onboarded()
 				: false;
 		}
 

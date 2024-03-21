@@ -759,7 +759,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function check_cart_item_stock() {
 		$error                    = new WP_Error();
 		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : 0;
+		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
 		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
@@ -1573,10 +1573,30 @@ class WC_Cart extends WC_Legacy_Cart {
 				return false;
 			}
 			$country_fields = WC()->countries->get_address_fields( $country, 'shipping_' );
-			if ( isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && ! $this->get_customer()->get_shipping_state() ) {
+			/**
+			 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a state.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_state Whether to use the state field. Default true.
+			 */
+			$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
+			$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+			if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() ) {
 				return false;
 			}
-			if ( isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && ! $this->get_customer()->get_shipping_postcode() ) {
+			/**
+			 * Filter to not require shipping postcode for shipping calculation, even if it is required at checkout.
+			 * This can be used to allow shipping calculations to be done without a postcode.
+			 *
+			 * @since 8.4.0
+			 *
+			 * @param bool $show_postcode Whether to use the postcode field. Default true.
+			 */
+			$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
+			$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+			if ( $postcode_enabled && $postcode_required && ! $this->get_customer()->get_shipping_postcode() ) {
 				return false;
 			}
 		}

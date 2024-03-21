@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Changed Tax task completion criteria so that it considers both boolean and stringly typed values as expected

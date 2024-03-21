@@ -44,8 +44,9 @@ interface PluginsInstallLogger {
 	/**
 	 * Called when all plugins are processed.
 	 *
+	 * @param array $data return data from install_plugins().
 	 * @return mixed
 	 */
-	public function complete();
+	public function complete( $data = array() );
 }
 

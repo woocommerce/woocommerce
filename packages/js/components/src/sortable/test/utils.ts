@@ -47,7 +47,7 @@ describe( 'isBefore', () => {
 				} ),
 			},
 		} as unknown;
-		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeTruthy();
+		expect( isBefore( event as DragEvent< HTMLDivElement > ) ).toBeTruthy();
 	} );
 
 	it( 'should return true when the element is placed lower in the page', () => {
@@ -60,7 +60,7 @@ describe( 'isBefore', () => {
 				} ),
 			},
 		} as unknown;
-		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeTruthy();
+		expect( isBefore( event as DragEvent< HTMLDivElement > ) ).toBeTruthy();
 	} );
 
 	it( 'should return false when the cursor is more than half way down', () => {
@@ -73,7 +73,7 @@ describe( 'isBefore', () => {
 				} ),
 			},
 		} as unknown;
-		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeFalsy();
+		expect( isBefore( event as DragEvent< HTMLDivElement > ) ).toBeFalsy();
 	} );
 
 	it( 'should return false when the element is lower in the page', () => {
@@ -86,7 +86,7 @@ describe( 'isBefore', () => {
 				} ),
 			},
 		} as unknown;
-		expect( isBefore( event as DragEvent< HTMLLIElement > ) ).toBeFalsy();
+		expect( isBefore( event as DragEvent< HTMLDivElement > ) ).toBeFalsy();
 	} );
 
 	it( 'should return false when the cursor is over the right half of the element', () => {
@@ -100,7 +100,7 @@ describe( 'isBefore', () => {
 			},
 		} as unknown;
 		expect(
-			isBefore( event as DragEvent< HTMLLIElement >, true )
+			isBefore( event as DragEvent< HTMLDivElement >, true )
 		).toBeFalsy();
 	} );
 
@@ -115,7 +115,7 @@ describe( 'isBefore', () => {
 			},
 		} as unknown;
 		expect(
-			isBefore( event as DragEvent< HTMLLIElement >, true )
+			isBefore( event as DragEvent< HTMLDivElement >, true )
 		).toBeTruthy();
 	} );
 
@@ -130,7 +130,7 @@ describe( 'isBefore', () => {
 			},
 		} as unknown;
 		expect(
-			isBefore( event as DragEvent< HTMLLIElement >, true )
+			isBefore( event as DragEvent< HTMLDivElement >, true )
 		).toBeTruthy();
 	} );
 } );

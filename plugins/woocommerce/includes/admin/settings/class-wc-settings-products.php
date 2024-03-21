@@ -378,7 +378,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc'     => sprintf(
 					// translators: Link to WooCommerce Docs.
 						__( "If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='%s'>Digital/Downloadable Product Handling</a> guide.", 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'
+						'https://woo.com/document/digital-downloadable-product-handling#nginx-setting'
 					),
 					'options'  => array(
 						'force'     => __( 'Force downloads', 'woocommerce' ),
@@ -396,7 +396,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip'      => sprintf(
 						/* translators: %1$s is a link to the WooCommerce documentation. */
 						__( 'If the "Force Downloads" or "X-Accel-Redirect/X-Sendfile" download method is selected but does not work, the system will use the "Redirect" method as a last resort. <a href="%1$s">See this guide</a> for more details.', 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling/'
+						'https://woo.com/document/digital-downloadable-product-handling/'
 					),
 					'checkboxgroup' => 'start',
 					'autoload'      => false,
@@ -442,7 +442,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'desc_tip' => sprintf(
 					// translators: Link to WooCommerce Docs.
 						__( "Not required if your download directory is protected. <a href='%s'>See this guide</a> for more details. Files already uploaded will not be affected.", 'woocommerce' ),
-						'https://docs.woocommerce.com/document/digital-downloadable-product-handling#unique-string'
+						'https://woo.com/document/digital-downloadable-product-handling#unique-string'
 					),
 				),
 

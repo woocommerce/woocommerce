@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add filter woocommerce_hpos_enable_sync_on_read to disable sync on read with HPOS sync enabled.

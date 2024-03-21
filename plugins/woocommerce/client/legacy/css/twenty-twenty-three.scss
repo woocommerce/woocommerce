@@ -1,29 +1,7 @@
 /**
 * Fonts
 */
-@font-face {
-	font-family: star;
-	src: url(../fonts/star.eot);
-	src:
-		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/star.woff) format("woff"),
-		url(../fonts/star.ttf) format("truetype"),
-		url(../fonts/star.svg#star) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: WooCommerce;
-	src: url(../fonts/WooCommerce.eot);
-	src:
-		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
-		url(../fonts/WooCommerce.woff) format("woff"),
-		url(../fonts/WooCommerce.ttf) format("truetype"),
-		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
-	font-weight: 400;
-	font-style: normal;
-}
+@import "fonts";
 
 @import "mixins";
 @import "animation";
@@ -440,7 +418,7 @@
 		height: 1em;
 		line-height: 1;
 		width: 5.4rem;
-		font-family: star;
+		font-family: WooCommerce;
 		font-style: normal;
 		color: var(--wp--preset--color--contrast);
 		margin: 1rem auto 0.7rem auto;
@@ -538,13 +516,6 @@
 			}
 		}
 	}
-
-	// Highlights for specific info, e.g. on the My Account > Orders > Order X: Order ___ was placed on ____
-	mark {
-		font-weight: bold;
-		background-color: transparent;
-	}
-
 }
 
 // Description/Additional info/Reviews tabs.
@@ -976,20 +947,6 @@ ul.wc-tabs {
 	// Adds a tiny bit of vertical spacing on the Thank you (after checkout) page.
 	.woocommerce-order > * {
 		margin-bottom: var(--wp--style--block-gap);
-	}
-
-	// Improves the presentation of order overview (order #, date, email, etc, not the line items) on the Thank you page.
-	ul.woocommerce-order-overview {
-
-		li {
-			display: inline;
-			text-transform: uppercase;
-
-			strong {
-				text-transform: none;
-				display: block;
-			}
-		}
 	}
 
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.

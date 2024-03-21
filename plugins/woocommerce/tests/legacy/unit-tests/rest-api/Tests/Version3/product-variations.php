@@ -535,6 +535,54 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test generating variations with default values.
+	 *
+	 * @since 8.2.0
+	 */
+	public function test_generate_new_variations_with_default_values() {
+		wp_set_current_user( $this->user );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$children  = $product->get_children();
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+		foreach ( $existing_variations as $existing_variation ) {
+			$existing_variation->delete( true );
+		}
+		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
+		$color_attribute      = new WC_Product_Attribute();
+		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
+		$color_attribute->set_name( $color_attribute_data['attribute_taxonomy'] );
+		$color_attribute->set_options( $color_attribute_data['term_ids'] );
+		$color_attribute->set_position( 1 );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$attributes   = $product->get_attributes();
+		$attributes[] = $color_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Set stock to true.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'default_values' => array(
+			'regular_price' => '4.99'
+		) ) );
+		$response  = $this->server->dispatch( $request );
+		
+		$variation = $response->get_data();
+		$product   = wc_get_product( $product->get_id() );
+		$children  = $product->get_children();
+
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 6, $variation['count'] );
+		$this->assertEquals( 6, count( $children ) );
+		foreach ( $existing_variations as $existing_variation ) {
+			$this->assertEquals( '4.99', $existing_variation->get_regular_price() );
+		}
+	}
+
+	/**
 	 * Test updating a variation stock.
 	 *
 	 * @since 3.5.0
@@ -669,5 +717,68 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$product   = wc_get_product( $product->get_id() );
 		// Removed four.
 		$this->assertEquals( 2, count( $product->get_children() ) );
+	}
+
+	/**
+	 * Test getting variations with an attributes filter.
+	 *
+	 * @since 8.1.0
+	 */
+	public function test_get_variations_with_attributes_filter() {
+		wp_set_current_user( $this->user );
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$color_attribute_data = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_attribute( 'color', array( 'red', 'blue', 'yellow' ) );
+		$color_attribute      = new WC_Product_Attribute();
+		$color_attribute->set_id( $color_attribute_data['attribute_id'] );
+		$color_attribute->set_name( $color_attribute_data['attribute_taxonomy'] );
+		$color_attribute->set_options( $color_attribute_data['term_ids'] );
+		$color_attribute->set_position( 1 );
+		$color_attribute->set_visible( true );
+		$color_attribute->set_variation( true );
+		$local_attribute      = new WC_Product_Attribute();
+		$local_attribute->set_id( 0 );
+		$local_attribute->set_name( 'Local' );
+		$local_attribute->set_options( array( 'Local1', 'Local2', 'Local3' ) );
+		$local_attribute->set_visible( true );
+		$local_attribute->set_variation( true );
+		$attributes   = array();
+		$attributes[] = $color_attribute;
+		$attributes[] = $local_attribute;
+		$product->set_attributes( $attributes );
+		$product->save();
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params( array( 'delete' => true ) );
+		$response   = $this->server->dispatch( $request );
+
+		// Filter by single global attribute.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params( array( 'attributes' => array(
+			array( 'attribute' => 'pa_color', 'term' => 'red' )
+		) ) );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 3, count( $variations ) );
+
+		// Filter by global and local attribute.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params( array( 'attributes' => array(
+			array( 'attribute' => 'pa_color', 'term' => 'red' ),
+			array( 'attribute' => 'local', 'term' => 'Local1' ),
+		) ) );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $variations ) );
+
+		// Filter local attribute.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params( array( 'attributes' => array(
+			array( 'attribute' => 'local', 'term' => 'Local1' ),
+		) ) );
+		$response   = $this->server->dispatch( $request );
+		$variations = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 3, count( $variations ) );
 	}
 }

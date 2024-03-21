@@ -58,7 +58,13 @@ export type Campaign = {
 	cost: {
 		value: string;
 		currency: string;
-	};
+		formatted: string;
+	} | null;
+	sales: {
+		value: string;
+		currency: string;
+		formatted: string;
+	} | null;
 };
 
 export type CampaignsPage = {
@@ -66,10 +72,18 @@ export type CampaignsPage = {
 	error?: ApiFetchError;
 };
 
-export type CampaignsState = {
-	perPage?: number;
-	pages?: Record< number, CampaignsPage >;
+export type CampaignsMeta = {
 	total?: number;
+};
+
+export type CampaignsState = {
+	pages: Record< string, CampaignsPage >;
+	meta: CampaignsMeta;
+};
+
+export type CampaignsPagination = {
+	campaignsPage: CampaignsPage | null;
+	meta: CampaignsMeta;
 };
 
 export type CampaignType = {

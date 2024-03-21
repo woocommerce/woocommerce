@@ -10,13 +10,11 @@ Install the module
 pnpm install @woocommerce/components --save
 ```
 
-View [the full Component documentation](https://woocommerce.github.io/woocommerce-admin/#/components/) for usage information.
-
 ## Usage
 
 ```jsx
 /**
- * Woocommerce dependencies
+ * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
 
@@ -41,7 +39,7 @@ If you are using these components in a project that uses Jest for testing, you m
 Cannot find module '@woocommerce/settings' from 'node_modules/@woocommerce/experimental/node_modules/@woocommerce/navigation/build/index.js'
 ```
 
-To fix this, you will need to mock the `@woocommerce/settings` because it's an alias that points to the `window.wcSettings`, which in turn comes from and is maintained by the [WC Blocks](https://github.com/woocommerce/woocommerce-blocks) package, the front-end code for this is located [here](https://href.li/?https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/assets/js/settings/shared).
+To fix this, you will need to mock the `@woocommerce/settings` because it's an alias that points to the `window.wcSettings`, which in turn comes from and is maintained by the [WC Blocks](https://github.com/woocommerce/woocommerce-blocks) package, the front-end code for this is located [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/tree/trunk/assets/js/settings/shared).
 
 This can be done by adding the following to your Jest config:
 

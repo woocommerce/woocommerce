@@ -546,7 +546,7 @@ class WC_Meta_Box_Product_Data {
 						'width'             => isset( $_POST['variable_width'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_width'][ $i ] ) ) : '',
 						'height'            => isset( $_POST['variable_height'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_height'][ $i ] ) ) : '',
 						'shipping_class_id' => isset( $_POST['variable_shipping_class'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_shipping_class'][ $i ] ) ) : null,
-						'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? wc_clean( wp_unslash( $_POST['variable_tax_class'][ $i ] ) ) : null,
+						'tax_class'         => isset( $_POST['variable_tax_class'][ $i ] ) ? sanitize_title( wp_unslash( $_POST['variable_tax_class'][ $i ] ) ) : null,
 					)
 				);
 

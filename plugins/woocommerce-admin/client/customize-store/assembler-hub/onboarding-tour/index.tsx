@@ -4,21 +4,66 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
 export * from './use-onboarding-tour';
+import { FlowType } from '~/customize-store/types';
 
 type OnboardingTourProps = {
 	onClose: () => void;
+	skipTour: () => void;
+	takeTour: () => void;
 	showWelcomeTour: boolean;
-	setShowWelcomeTour: ( show: boolean ) => void;
+	setIsResizeHandleVisible: ( isVisible: boolean ) => void;
+	flowType: FlowType.AIOnline | FlowType.noAI;
+};
+
+const getLabels = ( flowType: FlowType.AIOnline | FlowType.noAI ) => {
+	switch ( flowType ) {
+		case FlowType.AIOnline:
+			return {
+				heading: __(
+					'Welcome to your AI-generated store!',
+					'woocommerce'
+				),
+				descriptions: {
+					desktop: __(
+						'This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what’s possible.',
+						'woocommerce'
+					),
+				},
+			};
+		case FlowType.noAI:
+			return {
+				heading: __(
+					"Discover what's possible with the store designer",
+					'woocommerce'
+				),
+				descriptions: {
+					desktop: __(
+						"Start designing your store, including adding your logo, changing color schemes, and choosing layouts. To help you get started, we've added some layouts for you to customize. Take a quick tour to discover what's possible.",
+						'woocommerce'
+					),
+				},
+			};
+	}
 };
 
 export const OnboardingTour = ( {
 	onClose,
-	setShowWelcomeTour,
+	skipTour,
+	takeTour,
+	flowType,
 	showWelcomeTour,
+	setIsResizeHandleVisible,
 }: OnboardingTourProps ) => {
 	const [ placement, setPlacement ] =
 		useState< TourKitTypes.WooConfig[ 'placement' ] >( 'left' );
+
+	const { heading, descriptions } = getLabels( flowType );
 
 	if ( showWelcomeTour ) {
 		return (
@@ -62,16 +107,8 @@ export const OnboardingTour = ( {
 								primaryButton: {
 									text: __( 'Take a tour', 'woocommerce' ),
 								},
-								descriptions: {
-									desktop: __(
-										"This is where you can start customizing the look and feel of your store, including adding your logo, and changing colors and layouts. Take a quick tour to discover what's possible.",
-										'woocommerce'
-									),
-								},
-								heading: __(
-									'Welcome to your AI-generated store!',
-									'woocommerce'
-								),
+								descriptions,
+								heading,
 								skipButton: {
 									isVisible: true,
 								},
@@ -83,9 +120,10 @@ export const OnboardingTour = ( {
 					],
 					closeHandler: ( _steps, _currentStepIndex, source ) => {
 						if ( source === 'done-btn' ) {
-							setShowWelcomeTour( false );
+							// Click on "Take a tour" button
+							takeTour();
 						} else {
-							onClose();
+							skipTour();
 						}
 					},
 				} }
@@ -119,9 +157,11 @@ export const OnboardingTour = ( {
 					callbacks: {
 						onPreviousStep: () => {
 							setPlacement( 'left' );
+							setIsResizeHandleVisible( true );
 						},
 						onNextStep: () => {
 							setPlacement( 'right-start' );
+							setIsResizeHandleVisible( false );
 						},
 					},
 					popperModifiers: [
@@ -132,7 +172,7 @@ export const OnboardingTour = ( {
 							requires: [ 'computeStyles' ],
 							fn: ( { state } ) => {
 								state.styles.arrow.transform =
-									'translate3d(0px, 114.4px, 0)';
+									'translate3d(0px, 96px, 0)';
 							},
 						},
 						{
@@ -146,7 +186,7 @@ export const OnboardingTour = ( {
 									[ key: string ]: unknown;
 								} ) => {
 									if ( placement === 'left' ) {
-										return [ -15, 35 ];
+										return [ 0, 20 ];
 									}
 									return [ 52, 16 ];
 								},
@@ -196,7 +236,19 @@ export const OnboardingTour = ( {
 						},
 					},
 				],
-				closeHandler: onClose,
+				closeHandler: ( _steps, _currentStepIndex, source ) => {
+					if ( source === 'done-btn' ) {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_complete'
+						);
+					} else {
+						recordEvent(
+							'customize_your_store_assembler_hub_tour_close'
+						);
+					}
+
+					onClose();
+				},
 			} }
 		></TourKit>
 	);

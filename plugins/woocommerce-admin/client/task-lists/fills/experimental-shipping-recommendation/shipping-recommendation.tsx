@@ -20,7 +20,7 @@ import { redirectToWCSSettings } from './utils';
 /**
  * Plugins required to automate shipping.
  */
-const AUTOMATION_PLUGINS = [ 'jetpack', 'woocommerce-services' ];
+const AUTOMATION_PLUGINS = [ 'woocommerce-services' ];
 
 export const ShippingRecommendation: React.FC<
 	TaskProps & ShippingRecommendationProps
@@ -94,12 +94,7 @@ export const ShippingRecommendation: React.FC<
 		},
 		{
 			key: 'plugins',
-			label: pluginsToActivate.includes( 'woocommerce-services' )
-				? __(
-						'Install Jetpack and WooCommerce Shipping',
-						'woocommerce'
-				  )
-				: __( 'Install Jetpack', 'woocommerce' ),
+			label: __( 'Install WooCommerce Shipping', 'woocommerce' ),
 			description: __(
 				'Enable shipping label printing and discounted rates',
 				'woocommerce'
@@ -126,7 +121,7 @@ export const ShippingRecommendation: React.FC<
 					{ __( 'Complete task', 'woocommerce' ) }
 				</Button>
 			) : (
-				<Connect onConnect={ redirect } />
+				<Connect />
 			),
 		},
 	];

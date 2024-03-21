@@ -56,7 +56,12 @@
 @media screen and (min-width: $break-small) {
 	.woocommerce-marketplace {
 		&__header-account-modal {
-			max-width: 350px;
+			max-width: $modal-min-width;
+
+			&.has-size-medium {
+				max-width: $modal-width-medium;
+				width: 100%;
+			}
 		}
 	}
 }

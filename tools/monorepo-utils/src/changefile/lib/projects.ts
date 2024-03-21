@@ -120,7 +120,7 @@ export const getTouchedFilePaths = async (
  *
  * @param {Array<string>} touchedFiles         List of files changed in a PR. touchedFiles
  * @param {Array<string>} changeloggerProjects List of projects that have Jetpack changelogger enabled.
- * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Object.<string, string>} Paths to projects that have files changed in a PR keyed by the project name.
  */
 export const getTouchedChangeloggerProjectsPathsMappedToProjects = (
 	touchedFiles: Array< string >,
@@ -142,14 +142,19 @@ export const getTouchedChangeloggerProjectsPathsMappedToProjects = (
 			);
 		}
 	);
-	return touchedProjectPathsRequiringChangelog.map( ( project ) => {
+
+	const projectPaths = {};
+	for ( const projectPath of touchedProjectPathsRequiringChangelog ) {
+		let project = projectPath;
 		if ( project.includes( 'plugins/' ) ) {
-			return project.replace( 'plugins/', '' );
+			project = project.replace( 'plugins/', '' );
 		} else if ( project.includes( 'packages/js/' ) ) {
-			return project.replace( 'packages/js/', '@woocommerce/' );
+			project = project.replace( 'packages/js/', '@woocommerce/' );
 		}
-		return project;
-	} );
+
+		projectPaths[ project ] = projectPath;
+	}
+	return projectPaths;
 };
 
 /**
@@ -175,7 +180,7 @@ export const getAllProjectPaths = async ( tmpRepoPath: string ) => {
  * @param {string} fileName    changelog file name
  * @param {string} baseOwner   PR base owner
  * @param {string} baseName    PR base name
- * @return {Array<string>} List of projects that have Jetpack changelogger enabled and have files changed in a PR.
+ * @return {Object.<string, string>} Paths to projects that have files changed in a PR keyed by the project name.
  */
 export const getTouchedProjectsRequiringChangelog = async (
 	tmpRepoPath: string,

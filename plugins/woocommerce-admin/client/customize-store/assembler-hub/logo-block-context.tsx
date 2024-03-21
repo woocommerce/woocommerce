@@ -4,18 +4,9 @@
 import { createContext } from '@wordpress/element';
 
 export const LogoBlockContext = createContext< {
-	logoBlock: {
-		clientId: string | null;
-		isLoading: boolean;
-	};
-	setLogoBlock: ( newBlock: {
-		clientId: string | null;
-		isLoading: boolean;
-	} ) => void;
+	logoBlockIds: Array< string >;
+	setLogoBlockIds: ( clientIds: Array< string > ) => void;
 } >( {
-	logoBlock: {
-		clientId: null,
-		isLoading: false,
-	},
-	setLogoBlock: () => {},
+	logoBlockIds: [],
+	setLogoBlockIds: () => {},
 } );

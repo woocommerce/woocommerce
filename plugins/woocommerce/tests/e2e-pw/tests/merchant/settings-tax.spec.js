@@ -193,7 +193,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Save changes
 		await page.locator( 'text=Save changes' ).click();
-		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
+		await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
 
 		// Verity that there are 2 rates
 		await expect( page.locator( '#rates tr' ) ).toHaveCount( 2 );
@@ -206,7 +206,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 
 		// Save changes
 		await page.locator( 'text=Save changes' ).click();
-		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
+		await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
 
 		// Verify that there is 1 tax rate left
 		await expect( page.locator( '#rates tr' ) ).toHaveCount( 1 );
@@ -220,7 +220,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		await page.locator( '[value="CA State Tax"]' ).click();
 		await page.locator( '.wc_tax_rates a.remove_tax_rates' ).click();
 		await page.locator( 'text=Save changes' ).click();
-		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
+		await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
 	} );
 
 	test( 'can remove tax classes', async ( { page } ) => {
@@ -232,7 +232,7 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		// Remove "Fancy" tax class
 		await page.locator( '#woocommerce_tax_classes' ).fill( '' );
 		await page.locator( 'text=Save changes' ).click();
-		await expect( page.locator( '.blockOverlay' ) ).not.toBeVisible();
+		await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
 
 		// Verify that settings have been saved
 		await expect( page.locator( 'div.updated.inline' ) ).toContainText(

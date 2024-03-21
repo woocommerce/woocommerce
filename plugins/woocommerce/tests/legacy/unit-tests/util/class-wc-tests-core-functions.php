@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 /**
  * Core function unit tests.
@@ -281,11 +282,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_get_log_file_path() {
-		$log_dir     = trailingslashit( WC_LOG_DIR );
-		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
-		$date_suffix = date( 'Y-m-d', time() ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+		$this->setExpectedDeprecated( 'wc_get_log_file_path' );
 
-		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', wc_get_log_file_path( 'unit-tests' ) );
+		$log_dir   = LoggingUtil::get_log_directory();
+		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
+		$file_id   = LoggingUtil::generate_log_file_id( 'unit-tests', null, time() );
+		$hash      = LoggingUtil::generate_log_file_hash( $file_id );
+
+		$this->assertEquals( $log_dir . $file_id . '-' . $hash . '.log', wc_get_log_file_path( 'unit-tests' ) );
 	}
 
 	/**
@@ -744,6 +748,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wc_get_log_file_name() {
+		$this->setExpectedDeprecated( 'wc_get_log_file_name' );
 		$this->assertNotEmpty( wc_get_log_file_name( 'test' ) );
 	}
 

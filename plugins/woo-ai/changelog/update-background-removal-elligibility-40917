@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Only initializing background removal when JP connection present.

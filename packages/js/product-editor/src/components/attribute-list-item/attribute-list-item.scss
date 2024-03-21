@@ -1,5 +1,4 @@
-.woocommerce-add-attribute-list-item,
-.woocommerce-attribute-list-item {
+.woocommerce-add-attribute-list-item {
 	min-height: 82px;
 	padding: 0 $gap-large;
 
@@ -10,24 +9,15 @@
 
 .woocommerce-attribute-list-item {
 	display: grid;
-	grid-template-columns: 24px 26% auto 90px;
+	background: none;
+	border: none;
+	padding: 0;
+	grid-template-columns: 1fr 2fr 16 * $grid-unit;
+	min-height: 9 * $grid-unit;
+	padding: $grid-unit + $grid-unit-05 0;
 
-	&:last-child {
-		margin-bottom: -1px;
-	}
-
-	&__options {
-		display: flex;
-		flex-direction: row;
-		gap: $gap-smallest;
-	}
-
-	&__option-chip {
-		padding: $gap-smallest $gap-smaller;
-		gap: 2px;
-
-		background: $gray-100;
-		border-radius: 2px;
+	&:not(:last-child) {
+		border-bottom: 1px solid $gray-200;
 	}
 
 	&__actions {
@@ -52,7 +42,9 @@
 
 		&-icon {
 			color: $gray-600;
+			cursor: help;
 		}
+
 		&-help-icon {
 			position: absolute;
 			right: -2px;

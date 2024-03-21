@@ -72,7 +72,7 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( $non_admin_user );
 		$download = new WC_Product_Download();
 		$download->set_file( $podcast_url );
-		$this->expectExceptionMessage( 'cannot be used: it is not located in an approved directory' );
+		$this->expectExceptionMessage( 'is not located within an approved directory' );
 		$download->check_is_valid();
 	}
 
@@ -127,5 +127,60 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 		// and so the filepath will not validate.
 		$this->expectException( 'Error' );
 		$download_directories->check_is_valid();
+	}
+
+	/**
+	 * We should use the same error message when rejecting files that do not exist as when we we reject
+	 * files in an unapproved directory, otherwise we are leaking information about the possible existence
+	 * of system files.
+	 *
+	 * @return void
+	 */
+	public function test_error_messages_do_not_leak_file_existence(): void {
+		/** @var Download_Directories $download_directories */
+		$download_directories = wc_get_container()->get( Download_Directories::class );
+		$download_directories->set_mode( Download_Directories::MODE_ENABLED );
+
+		wp_set_current_user(
+			$this->factory->user->create(
+				array(
+					'user_login' => uniqid(),
+					'role'       => 'editor',
+				)
+			)
+		);
+
+		$test_file = ABSPATH . 'wp-content/uploads/empty.png';
+		file_put_contents( $test_file, '' );
+		$this->assertTrue( file_exists( $test_file ), 'Confirms that our test files exists.' );
+
+
+		// Ensure the final test fails in the event exceptions are not raised later in the test.
+		$file_does_not_exist = new Exception( '1' );
+		$invalid_directory   = new Exception( '2' );
+
+		$download = new WC_Product_Download();
+		$download->set_file( $test_file );
+
+		try {
+			$download->check_is_valid();
+		} catch ( Exception $invalid_directory ) {
+			// Do nothing here: we simply wish to capture the exception.
+		}
+
+		unlink( $test_file );
+		$this->assertFalse( file_exists( $test_file ), 'Confirms that our test file no longer exists.' );
+
+		try {
+			$download->check_is_valid();
+		} catch ( Exception $file_does_not_exist ) {
+			// Do nothing here: we simply wish to capture the exception.
+		}
+
+		$this->assertEquals(
+			$invalid_directory->getMessage(),
+			$file_does_not_exist->getMessage(),
+			'We use the same error message when the file does not exist as when the directory is invalid.'
+		);
 	}
 }

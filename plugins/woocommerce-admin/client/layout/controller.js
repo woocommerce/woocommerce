@@ -35,6 +35,11 @@ const EditProductPage = lazy( () =>
 		/* webpackChunkName: "edit-product-page" */ '../products/edit-product-page'
 	)
 );
+const ProductVariationPage = lazy( () =>
+	import(
+		/* webpackChunkName: "edit-product-page" */ '../products/product-variation-page'
+	)
+);
 const ProductPage = lazy( () =>
 	import( /* webpackChunkName: "product-page" */ '../products/product-page' )
 );
@@ -79,6 +84,10 @@ const WCPaymentsWelcomePage = lazy( () =>
 
 const CustomizeStore = lazy( () =>
 	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
+);
+
+const LaunchStore = lazy( () =>
+	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
 );
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
@@ -266,7 +275,10 @@ export const getPages = () => {
 
 	if ( window.wcAdminFeatures[ 'product-variation-management' ] ) {
 		pages.push( {
-			container: EditProductPage,
+			container: ProductVariationPage,
+			layout: {
+				header: false,
+			},
 			path: '/product/:productId/variation/:variationId',
 			breadcrumbs: [
 				[ '/edit-product', __( 'Product', 'woocommerce' ) ],
@@ -324,6 +336,32 @@ export const getPages = () => {
 				...initialBreadcrumbs,
 				__( 'Customize Your Store', 'woocommerce' ),
 			],
+			layout: {
+				header: false,
+				footer: true,
+				showNotices: true,
+				showStoreAlerts: false,
+				showPluginArea: false,
+			},
+			capability: 'manage_woocommerce',
+		} );
+	}
+
+	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
+		pages.push( {
+			container: LaunchStore,
+			path: '/launch-your-store/*',
+			breadcrumbs: [
+				...initialBreadcrumbs,
+				__( 'Launch Your Store', 'woocommerce' ),
+			],
+			layout: {
+				header: false,
+				footer: true,
+				showNotices: true,
+				showStoreAlerts: false,
+				showPluginArea: false,
+			},
 			capability: 'manage_woocommerce',
 		} );
 	}
@@ -443,8 +481,19 @@ export const Controller = ( { ...props } ) => {
 
 	window.wpNavMenuUrlUpdate( query );
 	window.wpNavMenuClassChange( page, url );
+
+	function getFallback() {
+		return page.fallback ? (
+			<page.fallback />
+		) : (
+			<div className="woocommerce-layout__loading">
+				<Spinner />
+			</div>
+		);
+	}
+
 	return (
-		<Suspense fallback={ <Spinner /> }>
+		<Suspense fallback={ getFallback() }>
 			<page.container
 				params={ params }
 				path={ url }

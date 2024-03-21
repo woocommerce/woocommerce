@@ -105,12 +105,6 @@ p.demo_store,
 		@include clearfix();
 		margin: 0 0 1em;
 		padding: 0;
-		font-size: 0.92em;
-		color: $subtext;
-
-		a {
-			color: $subtext;
-		}
 	}
 
 	.quantity .qty {
@@ -133,8 +127,6 @@ p.demo_store,
 
 		span.price,
 		p.price {
-			color: $highlight;
-			font-size: 1.25em;
 
 			ins {
 				background: inherit;
@@ -150,14 +142,6 @@ p.demo_store,
 
 		p.stock {
 			font-size: 0.92em;
-		}
-
-		.stock {
-			color: $highlight;
-		}
-
-		.out-of-stock {
-			color: red;
 		}
 
 		.woocommerce-product-rating {
@@ -605,7 +589,6 @@ p.demo_store,
 		}
 
 		.price {
-			color: $highlight;
 			display: block;
 			font-weight: normal;
 			margin-bottom: 0.5em;
@@ -755,11 +738,6 @@ p.demo_store,
 					background: 0;
 					border: 0;
 
-					.meta {
-						color: $subtext;
-						font-size: 0.75em;
-					}
-
 					img.avatar {
 						float: left;
 						position: absolute;
@@ -826,7 +804,7 @@ p.demo_store,
 		line-height: 1;
 		font-size: 1em;
 		width: 5.4em;
-		font-family: "star";
+		font-family: WooCommerce;
 
 		&::before {
 			content: "\73\73\73\73\73";
@@ -1432,7 +1410,85 @@ p.demo_store,
 		}
 	}
 
+	.woocommerce-customer-details .addresses,
+	.woocommerce-customer-details .additional-fields {
+		margin-bottom: 2em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	.addresses .wc-block-components-additional-fields-list {
+		margin: 0;
+		padding: 0;
+
+		dt {
+			margin: 0;
+			padding: 0;
+			font-style: normal;
+			font-weight: bold;
+			display: inline;
+
+			&::after {
+				content: ": ";
+			}
+
+			&::before {
+				content: "";
+				display: block;
+			}
+		}
+
+		dd {
+			margin: 0;
+			padding: 0;
+			font-style: normal;
+			display: inline;
+		}
+	}
+
+	.wc-block-order-confirmation-additional-fields-wrapper .wc-block-components-additional-fields-list {
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		padding: 0;
+		display: grid;
+		grid-template-columns: 1fr max-content;
+
+		dt {
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			font-style: normal;
+			font-weight: bold;
+			padding: 1rem;
+			box-sizing: border-box;
+			margin: 0 !important;
+
+			&::after {
+				display: none;
+			}
+
+			&:last-of-type {
+				border-bottom: 0;
+			}
+		}
+
+		dd {
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+			padding: 1rem;
+			box-sizing: border-box;
+			text-align: right;
+			margin: 0 !important;
+
+			&:last-of-type {
+				border-bottom: 0;
+			}
+		}
+	}
+
 	.woocommerce-customer-details {
+
+		.woocommerce-column__title {
+			margin-top: 0;
+		}
 
 		address {
 			font-style: normal;
@@ -1444,12 +1500,16 @@ p.demo_store,
 			width: 100%;
 			border-radius: 5px;
 			padding: 6px 12px;
+			box-sizing: border-box;
 		}
 
 		.woocommerce-customer-details--phone,
 		.woocommerce-customer-details--email {
-			margin-bottom: 0;
 			padding-left: 1.5em;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
 		}
 
 		.woocommerce-customer-details--phone::before {
@@ -1656,6 +1716,7 @@ p.demo_store,
  */
 .woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
 :where(body:not(.woocommerce-block-theme-has-button-styles)) .woocommerce {
+
 	a.button,
 	button.button,
 	input.button,
@@ -1745,6 +1806,49 @@ p.demo_store,
 		}
 	}
 }
+
+/**
+ * WooCommerce specific styles for legacy themes.
+ */
+.woocommerce:where(body:not(.woocommerce-uses-block-theme)) {
+
+	.woocommerce-breadcrumb {
+
+		font-size: 0.92em;
+		color: $subtext;
+
+		a {
+			color: $subtext;
+		}
+	}
+
+	div.product {
+
+		span.price,
+		p.price {
+			color: $highlight;
+			font-size: 1.25em;
+		}
+
+		.stock {
+			color: $highlight;
+		}
+
+		.out-of-stock {
+			color: red;
+		}
+	}
+
+	ul.products li.product .price {
+		color: $highlight;
+	}
+
+	#reviews #comments ol.commentlist li .meta {
+		color: $subtext;
+		font-size: 0.75em;
+	}
+}
+
 
 .woocommerce-no-js {
 

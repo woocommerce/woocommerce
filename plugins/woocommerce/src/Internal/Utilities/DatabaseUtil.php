@@ -52,7 +52,7 @@ class DatabaseUtil {
 
 		foreach ( $dbdelta_output as $table_name => $result ) {
 			if ( "Created table $table_name" === $result ) {
-				$created_tables[] = $table_name;
+				$created_tables[] = str_replace( '(', '', $table_name );
 			}
 		}
 

@@ -13,3 +13,4 @@
 *.tsx   text    eol=lf
 *.css   text    eol=lf
 *.scss  text    eol=lf
+*.flf   text    eol=lf

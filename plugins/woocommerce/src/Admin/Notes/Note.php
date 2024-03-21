@@ -339,7 +339,7 @@ class Note extends \WC_Data {
 	 * Get deleted status.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return array
+	 * @return bool
 	 */
 	public function get_is_deleted( $context = 'view' ) {
 		return $this->get_prop( 'is_deleted', $context );
@@ -349,7 +349,7 @@ class Note extends \WC_Data {
 	 * Get is_read status.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return array
+	 * @return bool
 	 */
 	public function get_is_read( $context = 'view' ) {
 		return $this->get_prop( 'is_read', $context );

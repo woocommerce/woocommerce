@@ -165,7 +165,7 @@ class OrderHelper {
 
 		// Confirm things are really correct.
 		$wc_data_store = WC_Data_Store::load( 'order' );
-		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled );
+		assert( is_a( $wc_data_store->get_current_class_name(), OrdersTableDataStore::class, true ) === $enabled, 'data store\'s classname is "' . $wc_data_store->get_current_class_name() . '", but $enabled is "' . ( $enabled ? 'true' : 'false' ) . '"' );
 	}
 
 	/**

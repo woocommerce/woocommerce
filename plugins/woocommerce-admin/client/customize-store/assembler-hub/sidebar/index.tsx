@@ -13,10 +13,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalUseNavigator as useNavigator,
 } from '@wordpress/components';
-// @ts-ignore No types for this exist yet.
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 
 /**
  * Internal dependencies
@@ -27,12 +23,16 @@ import { SidebarNavigationScreenTypography } from './sidebar-navigation-screen-t
 import { SidebarNavigationScreenHeader } from './sidebar-navigation-screen-header';
 import { SidebarNavigationScreenHomepage } from './sidebar-navigation-screen-homepage';
 import { SidebarNavigationScreenFooter } from './sidebar-navigation-screen-footer';
-import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
+// import { SidebarNavigationScreenPages } from './sidebar-navigation-screen-pages';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
 
 import { SaveHub } from './save-hub';
-
-const { useLocation, useHistory } = unlock( routerPrivateApis );
+import {
+	addHistoryListener,
+	getQuery,
+	updateQueryString,
+	useQuery,
+} from '@woocommerce/navigation';
 
 function isSubset(
 	subset: {
@@ -48,18 +48,27 @@ function isSubset(
 }
 
 function useSyncPathWithURL() {
-	const history = useHistory();
-	const { params: urlParams } = useLocation();
-	const { location: navigatorLocation, params: navigatorParams } =
-		useNavigator();
+	const urlParams = useQuery();
+	const {
+		location: navigatorLocation,
+		params: navigatorParams,
+		goTo,
+	} = useNavigator();
 	const isMounting = useRef( true );
 
 	useEffect(
 		() => {
-			// The navigatorParams are only initially filled properly when the
-			// navigator screens mount. so we ignore the first synchronisation.
+			// The navigatorParams are only initially filled properly after the
+			// navigator screens mounts. so we don't do the query string update initially.
+			// however we also do want to add an event listener for popstate so that we can
+			// update the navigator when the user navigates using the browser back button
 			if ( isMounting.current ) {
 				isMounting.current = false;
+				addHistoryListener( ( event: PopStateEvent ) => {
+					if ( event.type === 'popstate' ) {
+						goTo( ( getQuery() as Record< string, string > ).path );
+					}
+				} );
 				return;
 			}
 
@@ -73,7 +82,7 @@ function useSyncPathWithURL() {
 					...urlParams,
 					...newUrlParams,
 				};
-				history.push( updatedParams );
+				updateQueryString( {}, updatedParams.path );
 			}
 
 			updateUrlParams( {
@@ -97,28 +106,29 @@ function SidebarScreens() {
 	useSyncPathWithURL();
 	return (
 		<>
-			<NavigatorScreen path="/customize-store">
+			<NavigatorScreen path="/customize-store/assembler-hub">
 				<SidebarNavigationScreenMain />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/color-palette">
+			<NavigatorScreen path="/customize-store/assembler-hub/color-palette">
 				<SidebarNavigationScreenColorPalette />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/typography">
+			<NavigatorScreen path="/customize-store/assembler-hub/typography">
 				<SidebarNavigationScreenTypography />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/header">
+			<NavigatorScreen path="/customize-store/assembler-hub/header">
 				<SidebarNavigationScreenHeader />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/homepage">
+			<NavigatorScreen path="/customize-store/assembler-hub/homepage">
 				<SidebarNavigationScreenHomepage />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/footer">
+			<NavigatorScreen path="/customize-store/assembler-hub/footer">
 				<SidebarNavigationScreenFooter />
 			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/pages">
+			{ /* TODO: Implement pages sidebar in Phrase 2 */ }
+			{ /* <NavigatorScreen path="/customize-store/assembler-hub/pages">
 				<SidebarNavigationScreenPages />
-			</NavigatorScreen>
-			<NavigatorScreen path="/customize-store/logo">
+			</NavigatorScreen> */ }
+			<NavigatorScreen path="/customize-store/assembler-hub/logo">
 				<SidebarNavigationScreenLogo />
 			</NavigatorScreen>
 		</>
@@ -126,8 +136,10 @@ function SidebarScreens() {
 }
 
 function Sidebar() {
-	const { params: urlParams } = useLocation();
-	const initialPath = useRef( urlParams.path ?? '/customize-store' );
+	const urlParams = getQuery() as Record< string, string >;
+	const initialPath = useRef(
+		urlParams.path ?? '/customize-store/assembler-hub'
+	);
 	return (
 		<>
 			<NavigatorProvider
@@ -135,8 +147,8 @@ function Sidebar() {
 				initialPath={ initialPath.current }
 			>
 				<SidebarScreens />
+				<SaveHub />
 			</NavigatorProvider>
-			<SaveHub />
 		</>
 	);
 }

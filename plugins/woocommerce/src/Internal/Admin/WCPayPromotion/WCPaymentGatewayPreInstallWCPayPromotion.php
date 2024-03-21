@@ -36,6 +36,34 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 		$this->method_description = $wc_pay_spec->content;
 		$this->has_fields         = false;
 
+		// Set the promotion pseudo-gateway support features.
+		// If the promotion spec provides the supports property, use it.
+		if ( property_exists( $wc_pay_spec, 'supports' ) ) {
+			$this->supports = $wc_pay_spec->supports;
+		} else {
+			// Otherwise, use the default supported features in line with WooPayments ones.
+			// We include all features here, even if some of them are behind settings, since this is for info only.
+			$this->supports = array(
+				// Regular features.
+				'products',
+				'refunds',
+				// Subscriptions features.
+				'subscriptions',
+				'multiple_subscriptions',
+				'subscription_cancellation',
+				'subscription_reactivation',
+				'subscription_suspension',
+				'subscription_amount_changes',
+				'subscription_date_changes',
+				'subscription_payment_method_change_admin',
+				'subscription_payment_method_change_customer',
+				'subscription_payment_method_change',
+				// Saved cards features.
+				'tokenization',
+				'add_payment_method',
+			);
+		}
+
 		// Get setting values.
 		$this->enabled = false;
 

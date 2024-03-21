@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Allow built in payment method descriptions to contain HTML when rendered on the block checkout.

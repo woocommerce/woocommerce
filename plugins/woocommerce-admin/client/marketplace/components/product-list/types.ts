@@ -1,6 +1,11 @@
+export type SearchAPIJSONType = {
+	products: Array< SearchAPIProductType >;
+};
+
 export type SearchAPIProductType = {
 	title: string;
 	image: string;
+	type: ProductType;
 	excerpt: string;
 	link: string;
 	demo_url: string;
@@ -14,11 +19,16 @@ export type SearchAPIProductType = {
 	vendor_name: string;
 	vendor_url: string;
 	icon: string;
+	is_installable: boolean;
 };
 
 export interface Product {
 	id?: number;
+	slug?: string;
+	position?: number;
 	title: string;
+	image: string;
+	type: ProductType;
 	description: string;
 	vendorName: string;
 	vendorUrl: string;
@@ -28,4 +38,29 @@ export interface Product {
 	productType?: string;
 	averageRating?: number | null;
 	reviewsCount?: number | null;
+	label?: string;
+	primary_color?: string;
+	group?: string;
+	searchTerm?: string;
+	category?: string;
+	isInstallable: boolean;
+}
+
+export interface ProductTracksData {
+	position?: number;
+	label?: string;
+	group?: string;
+	searchTerm?: string;
+	category?: string;
+}
+
+export enum ProductType {
+	theme = 'theme',
+	extension = 'extension',
+}
+
+export enum SearchResultType {
+	theme = 'theme',
+	extension = 'extension',
+	all = 'all',
 }

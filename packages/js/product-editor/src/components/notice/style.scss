@@ -10,4 +10,10 @@
 	&.info {
 		background-color: #f0f6fc;
 	}
+	&.is-dismissible {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
 }
+

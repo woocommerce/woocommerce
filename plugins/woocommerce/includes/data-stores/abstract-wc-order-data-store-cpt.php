@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -316,7 +317,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				/**
 				 * Fires immediately after an order is trashed.
 				 *
-				 * @since
+				 * @since 2.7.0
 				 *
 				 * @param int      $order_id ID of the order that has been trashed.
 				 */
@@ -707,6 +708,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @param WC_Abstract_Order $order Order object.
 	 */
 	protected function update_order_meta_from_object( $order ) {
+		global $wpdb;
+
 		if ( is_null( $order->get_meta() ) ) {
 			return;
 		}
@@ -715,17 +718,42 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		foreach ( $order->get_meta_data() as $meta_data ) {
 			if ( isset( $existing_meta_data[ $meta_data->key ] ) ) {
-				// We don't know if the meta is single or array, so we assume it to be array.
+				// We don't know if the meta is single or array, so we assume it to be an array.
 				$meta_value = is_array( $meta_data->value ) ? $meta_data->value : array( $meta_data->value );
+
 				if ( $existing_meta_data[ $meta_data->key ] === $meta_value ) {
 					unset( $existing_meta_data[ $meta_data->key ] );
 					continue;
 				}
 
-				unset( $existing_meta_data[ $meta_data->key ] );
-				delete_post_meta( $order->get_id(), $meta_data->key );
+				if ( is_array( $existing_meta_data[ $meta_data->key ] ) ) {
+					$value_index = array_search( maybe_serialize( $meta_data->value ), $existing_meta_data[ $meta_data->key ], true );
+					if ( false !== $value_index ) {
+						unset( $existing_meta_data[ $meta_data->key ][ $value_index ] );
+						if ( 0 === count( $existing_meta_data[ $meta_data->key ] ) ) {
+							unset( $existing_meta_data[ $meta_data->key ] );
+						}
+						continue;
+					}
+				}
 			}
-			add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			if ( is_object( $meta_data->value ) && '__PHP_Incomplete_Class' === get_class( $meta_data->value ) ) {
+				$meta_value = maybe_serialize( $meta_data->value );
+				$result     = $wpdb->insert(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id'    => $order->get_id(),
+						'meta_key'   => $meta_data->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					),
+					array( '%d', '%s', '%s' )
+				);
+				wp_cache_delete( $order->get_id(), 'post_meta' );
+				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID %d: "%s"', $order->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			} else {
+				add_post_meta( $order->get_id(), $meta_data->key, $meta_data->value, false );
+			}
 		}
 
 		// Find remaining meta that was deleted from the order but still present in the associated post.
@@ -737,7 +765,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		foreach ( $keys_to_delete as $meta_key ) {
-			delete_post_meta( $order->get_id(), $meta_key );
+			if ( isset( $existing_meta_data[ $meta_key ] ) ) {
+				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
+					delete_post_meta( $order->get_id(), $meta_key, maybe_unserialize( $meta_value ) );
+				}
+			}
 		}
 
 		$this->update_post_meta( $order );

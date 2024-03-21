@@ -21,9 +21,7 @@ export function SetListPriceMenuItem( {
 	return (
 		<MenuItem
 			onClick={ () => {
-				const ids = Array.isArray( selection )
-					? selection.map( ( { id } ) => id )
-					: selection.id;
+				const ids = selection.map( ( { id } ) => id );
 
 				recordEvent( 'product_variations_menu_pricing_select', {
 					source: TRACKS_SOURCE,
@@ -37,18 +35,12 @@ export function SetListPriceMenuItem( {
 							action: 'list_price_set',
 							variation_id: ids,
 						} );
-						if ( Array.isArray( selection ) ) {
-							onChange(
-								selection.map( ( { id } ) => ( {
-									id,
-									regular_price: value,
-								} ) )
-							);
-						} else {
-							onChange( {
+						onChange(
+							selection.map( ( { id } ) => ( {
+								id,
 								regular_price: value,
-							} );
-						}
+							} ) )
+						);
 					},
 				} );
 				onClose();

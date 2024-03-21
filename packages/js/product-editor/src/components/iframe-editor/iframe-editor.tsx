@@ -6,6 +6,13 @@ import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
+import classNames from 'classnames';
+import { isWpVersion } from '@woocommerce/settings';
+import {
+	store as preferencesStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/preferences';
+// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	BlockEditorProvider,
 	BlockInspector,
@@ -31,31 +38,50 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
+import { store as productEditorUiStore } from '../../store/product-editor-ui';
+import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
 
 type IframeEditorProps = {
-	closeModal?: () => void;
 	initialBlocks?: BlockInstance[];
 	onChange?: ( blocks: BlockInstance[] ) => void;
 	onClose?: () => void;
 	onInput?: ( blocks: BlockInstance[] ) => void;
 	settings?: Partial< EditorSettings & EditorBlockListSettings > | undefined;
+	showBackButton?: boolean;
 };
 
 export function IframeEditor( {
-	closeModal = () => {},
-	initialBlocks = [],
 	onChange = () => {},
 	onClose,
 	onInput = () => {},
 	settings: __settings,
+	showBackButton = false,
 }: IframeEditorProps ) {
 	const [ resizeObserver ] = useResizeObserver();
-	const [ blocks, setBlocks ] = useState< BlockInstance[] >( initialBlocks );
-	const [ temporalBlocks, setTemporalBlocks ] =
-		useState< BlockInstance[] >( initialBlocks );
+	const [ temporalBlocks, setTemporalBlocks ] = useState< BlockInstance[] >(
+		[]
+	);
+
+	// Pick the blocks from the store.
+	const blocks: BlockInstance[] = useSelect( ( select ) => {
+		return select( productEditorUiStore ).getModalEditorBlocks();
+	}, [] );
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
+
+	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
+		useDispatch( productEditorUiStore );
+
 	const { appendEdit } = useEditorHistory( {
 		setBlocks,
 	} );
+
 	const {
 		appendEdit: tempAppendEdit,
 		hasRedo,
@@ -79,6 +105,14 @@ export function IframeEditor( {
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
+	const { hasFixedToolbar } = useSelect( ( select ) => {
+		// @ts-expect-error These selectors are available in the block data store.
+		const { get: getPreference } = select( preferencesStore );
+		return {
+			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
+		};
+	}, [] );
+
 	useEffect( () => {
 		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -87,6 +121,9 @@ export function IframeEditor( {
 	}, [] );
 
 	const settings = __settings || parentEditorSettings;
+
+	const inlineFixedBlockToolbar =
+		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
 
 	return (
 		<div className="woocommerce-iframe-editor">
@@ -107,7 +144,8 @@ export function IframeEditor( {
 				<BlockEditorProvider
 					settings={ {
 						...settings,
-						hasFixedToolbar: true,
+						hasFixedToolbar:
+							hasFixedToolbar || ! inlineFixedBlockToolbar,
 						templateLock: false,
 					} }
 					value={ blocks }
@@ -127,21 +165,28 @@ export function IframeEditor( {
 						onSave={ () => {
 							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
+							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
-							closeModal();
+							onClose?.();
 						} }
 						onCancel={ () => {
 							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
-							closeModal();
+							onClose?.();
 						} }
 					/>
 					<div className="woocommerce-iframe-editor__main">
 						<SecondarySidebar />
 						<BlockTools
-							className={ 'woocommerce-iframe-editor__content' }
+							className={ classNames(
+								'woocommerce-iframe-editor__content',
+								{
+									'old-fixed-toolbar-shown':
+										! inlineFixedBlockToolbar,
+								}
+							) }
 							onClick={ (
 								event: React.MouseEvent<
 									HTMLDivElement,
@@ -157,7 +202,7 @@ export function IframeEditor( {
 							{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 							{ /* @ts-ignore */ }
 							<BlockEditorKeyboardShortcuts.Register />
-							{ onClose && (
+							{ showBackButton && onClose && (
 								<BackButton
 									onClick={ () => {
 										setTimeout( onClose, 550 );

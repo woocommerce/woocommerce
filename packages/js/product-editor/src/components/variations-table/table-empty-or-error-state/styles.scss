@@ -1,0 +1,30 @@
+.woocommerce-variations-table-error-or-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border-radius: 2px;
+	border: 1px solid $gray-300;
+	padding: $grid-unit-40;
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: auto;
+
+	&__message {
+		color: $gray-900;
+		font-size: 13px;
+		font-weight: 600;
+		line-height: 16px;
+		margin: $grid-unit-50 + 2 0 $grid-unit-15 + 2 0;
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		.is-link {
+			text-decoration: none;
+		}
+	}
+}

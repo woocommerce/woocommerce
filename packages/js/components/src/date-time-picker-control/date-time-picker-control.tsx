@@ -50,6 +50,7 @@ export type DateTimePickerControlProps = {
 	placeholder?: string;
 	help?: string | null;
 	onChangeDebounceWait?: number;
+	popoverProps?: Record< string, boolean | string >;
 } & Omit< React.HTMLAttributes< HTMLInputElement >, 'onChange' >;
 
 export const DateTimePickerControl = forwardRef(
@@ -68,6 +69,7 @@ export const DateTimePickerControl = forwardRef(
 			help,
 			className = '',
 			onChangeDebounceWait = 500,
+			popoverProps = {},
 			...props
 		}: DateTimePickerControlProps,
 		ref: Ref< HTMLInputElement >
@@ -141,8 +143,7 @@ export const DateTimePickerControl = forwardRef(
 		const formatDateTimeForDisplay = useCallback(
 			( dateTime: Moment ) => {
 				return dateTime.isValid()
-					? // @ts-expect-error TODO - fix this type error with moment
-					  formatDate( displayFormat, dateTime.local() )
+					? formatDate( displayFormat, dateTime.local() )
 					: dateTime.creationData().input?.toString() || '';
 			},
 			[ displayFormat ]
@@ -265,7 +266,11 @@ export const DateTimePickerControl = forwardRef(
 		}, [ onBlur ] );
 
 		const callOnBlurIfDropdownIsNotOpening = useCallback( ( willOpen ) => {
-			if ( ! willOpen && typeof onBlurRef.current === 'function' ) {
+			if (
+				! willOpen &&
+				typeof onBlurRef.current === 'function' &&
+				inputControl.current
+			) {
 				// in case the component is blurred before a debounced
 				// change has been processed, immediately set the input string
 				// to the current value of the input field, so that
@@ -349,6 +354,7 @@ export const DateTimePickerControl = forwardRef(
 					anchor: inputControl.current,
 					className: 'woocommerce-date-time-picker-control__popover',
 					placement: 'bottom-start',
+					...popoverProps,
 				} }
 				renderContent={ () => {
 					const Picker = isDateOnlyPicker

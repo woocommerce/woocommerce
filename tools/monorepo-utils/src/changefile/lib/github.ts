@@ -22,7 +22,7 @@ export const getPullRequestData = async (
 	const isCommunityPR = isCommunityPullRequest( prData, owner, name );
 	const headOwner = isCommunityPR ? prData.head.repo.owner.login : owner;
 	const branch = prData.head.ref;
-	const fileName = branch.replace( /\//g, '-' );
+	const fileName = `${ prNumber }-${ branch.replace( /\//g, '-' ) }`;
 	const prBody = prData.body;
 	const head = prData.head.sha;
 	const base = prData.base.sha;
@@ -120,7 +120,12 @@ export const getChangelogMessage = ( body: string ) => {
 		Logger.error( 'No changelog message found' );
 	}
 
-	return match[ 3 ].trim();
+	let message = match[ 3 ].trim();
+
+	// Newlines break the formatting of the changelog, so we replace them with spaces.
+	message = message.replace( /\r\n|\n/g, ' ' );
+
+	return message;
 };
 
 /**
@@ -133,7 +138,12 @@ export const getChangelogComment = ( body: string ) => {
 	const commentRegex = /#### Comment ?(<!--(.*)-->)?(.*)<\/details>/gms;
 	const match = commentRegex.exec( body );
 
-	return match ? match[ 3 ].trim() : '';
+	let comment = match ? match[ 3 ].trim() : '';
+
+	// Newlines break the formatting of the changelog, so we replace them with spaces.
+	comment = comment.replace( /\r\n|\n/g, ' ' );
+
+	return comment;
 };
 
 /**

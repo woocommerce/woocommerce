@@ -15,7 +15,7 @@ export type ImageGalleryWrapperProps = {
 	allowDragging?: boolean;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onDragOver?: DragEventHandler< HTMLLIElement >;
+	onDragOver?: DragEventHandler< HTMLDivElement >;
 	updateOrderedChildren?: ( items: ImageGalleryChild[] ) => void;
 };
 

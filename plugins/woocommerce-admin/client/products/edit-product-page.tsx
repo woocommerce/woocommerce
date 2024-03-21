@@ -22,7 +22,6 @@ import { ProductForm } from './product-form';
 import { ProductFormLayout } from './layout/product-form-layout';
 import { ProductVariationForm } from './product-variation-form';
 import './add-edit-product-page.scss';
-import './fills';
 
 const EditProductPage: React.FC = () => {
 	const { productId, variationId } = useParams();

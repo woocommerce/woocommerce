@@ -5,6 +5,7 @@
 		box-sizing: content-box;
 		display: flex;
 		gap: 24px;
+		overflow-y: auto;
 	}
 
 	&__tab-button {
@@ -17,6 +18,7 @@
 		height: 48px;
 		line-height: 16px;
 		padding: 0;
+		white-space: nowrap;
 
 		&:focus:not(:disabled) {
 			box-shadow: none;

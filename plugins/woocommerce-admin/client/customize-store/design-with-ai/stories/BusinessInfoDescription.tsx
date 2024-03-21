@@ -7,7 +7,13 @@ import { WithCustomizeYourStoreLayout } from './WithCustomizeYourStoreLayout';
 
 export const BusinessInfoDescriptionPage = () => (
 	<BusinessInfoDescription
-		context={ {} as designWithAiStateMachineContext }
+		context={
+			{
+				businessInfoDescription: {
+					descriptionText: '',
+				},
+			} as designWithAiStateMachineContext
+		}
 		sendEvent={ () => {} }
 	/>
 );

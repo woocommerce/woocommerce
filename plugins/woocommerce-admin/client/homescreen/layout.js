@@ -97,6 +97,19 @@ export const Layout = ( {
 	const shouldStickColumns = isWideViewport.current && twoColumns;
 	const shouldShowMobileAppModal = query.mobileAppModal ?? false;
 
+	const renderTaskList = () => {
+		return (
+			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
+				{ activeSetupTaskList && isDashboardShown && (
+					<>
+						<ProgressTitle taskListId={ activeSetupTaskList } />
+					</>
+				) }
+				<TaskLists query={ query } />
+			</Suspense>
+		);
+	};
+
 	const renderColumns = () => {
 		return (
 			<>
@@ -112,7 +125,7 @@ export const Layout = ( {
 						/>
 					) }
 					{ shouldShowWCPayFeature && <WooHomescreenWCPayFeature /> }
-					{ <ActivityPanel /> }
+					{ isTaskListHidden && <ActivityPanel /> }
 					{ hasTaskList && renderTaskList() }
 					<InboxPanel />
 				</Column>
@@ -121,19 +134,6 @@ export const Layout = ( {
 					{ shouldShowStoreLinks && <StoreManagementLinks /> }
 				</Column>
 			</>
-		);
-	};
-
-	const renderTaskList = () => {
-		return (
-			<Suspense fallback={ <TasksPlaceholder query={ query } /> }>
-				{ activeSetupTaskList && isDashboardShown && (
-					<>
-						<ProgressTitle taskListId={ activeSetupTaskList } />
-					</>
-				) }
-				<TaskLists query={ query } />
-			</Suspense>
 		);
 	};
 

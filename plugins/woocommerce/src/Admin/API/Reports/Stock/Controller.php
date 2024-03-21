@@ -93,7 +93,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$result = $query->query( $query_args );
 
 		$total_posts = $query->found_posts;
-		if ( $total_posts < 1 ) {
+		if ( $total_posts < 1 && isset( $query_args['paged'] ) && absint( $query_args['paged'] ) > 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['paged'] );
 			$count_query = new \WP_Query();

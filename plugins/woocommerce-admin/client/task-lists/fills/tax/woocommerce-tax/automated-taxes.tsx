@@ -33,8 +33,7 @@ export const AutomatedTaxes: React.FC<
 			<p>
 				{ interpolateComponents( {
 					mixedString: __(
-						'{{strong}}Jetpack{{/strong}} and {{strong}}WooCommerce Tax{{/strong}} ' +
-							'can automate your sales tax calculations for you.',
+						'{{strong}}WooCommerce Tax{{/strong}} can automate your sales tax calculations for you.',
 						'woocommerce'
 					),
 					components: {

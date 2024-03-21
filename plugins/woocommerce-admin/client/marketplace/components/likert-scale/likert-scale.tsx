@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -52,7 +52,7 @@ export default function LikertScale( props: LikertScaleProps ): JSX.Element {
 		},
 	];
 
-	const classes = classnames( 'woocommerce-marketplace__likert-scale', {
+	const classes = classNames( 'woocommerce-marketplace__likert-scale', {
 		'validation-failed': validationFailed,
 	} );
 

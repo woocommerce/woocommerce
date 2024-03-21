@@ -1,0 +1,70 @@
+{
+	"title": "Payment Gateway Suggestions",
+	"type": "array",
+	"required": ["id", "title", "content", "image", "image_72x72", "external_link", "is_visible"],
+	"additionalProperties": false,
+	"items": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string"
+			},
+			"title": {
+				"type": "string"
+			},
+			"content": {
+				"type": "string"
+			},
+			"image": {
+				"type": "string"
+			},
+			"image_72x72": {
+				"type": "string"
+			},
+			"plugins": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"external_link": {
+				"type": "string"
+			},
+			"is_visible": {
+				"oneOf": [
+					{"type": "boolean"},
+					{
+						"type": "array",
+						"items": {
+							"anyOf": [
+								{"$ref": "./shared/rules.json"}
+							]
+						}
+					}
+				]
+			},
+			"category_other": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"category_additional": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"recommendation_priority": {
+				"type": ["integer", "null"]
+			},
+			"is_offline": {
+				"type": "boolean"
+			}
+		}
+	},
+	"definitions": {
+		"operations": {"$ref": "./shared/operations.json"},
+		"rules": {"$ref": "./shared/rules.json"}
+	}
+}

@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use Jetpack_Gutenberg;
 
 /**
  * Customize Your Store Task
@@ -15,7 +16,13 @@ class CustomizeStore extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
+
+		add_action( 'show_admin_bar', array( $this, 'possibly_hide_wp_admin_bar' ) );
+
+		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
+		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
 	}
 
 	/**
@@ -73,16 +80,31 @@ class CustomizeStore extends Task {
 	}
 
 	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store' );
+	}
+
+
+	/**
 	 * Possibly add site editor scripts.
 	 */
 	public function possibly_add_site_editor_scripts() {
-		$is_customize_store_pages = (
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$is_wc_admin_page = (
 			isset( $_GET['page'] ) &&
 			'wc-admin' === $_GET['page'] &&
-			isset( $_GET['path'] ) &&
-			str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' )
+			isset( $_GET['path'] )
 		);
-		if ( ! $is_customize_store_pages ) {
+
+		$is_assembler_hub     = $is_wc_admin_page && str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/assembler-hub' );
+		$is_transitional_page = $is_wc_admin_page && str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store/transitional' );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! ( $is_assembler_hub || $is_transitional_page ) ) {
 			return;
 		}
 
@@ -182,5 +204,37 @@ class CustomizeStore extends Task {
 		 * @since 8.0.3
 		*/
 		do_action( 'enqueue_block_editor_assets' );
+
+		// Load Jetpack's block editor assets because they are not enqueued by default.
+		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
+			Jetpack_Gutenberg::enqueue_block_editor_assets();
+		}
+	}
+
+	/**
+	 * Appends a small style to hide admin bar
+	 *
+	 * @param bool $show Whether to show the admin bar.
+	 */
+	public function possibly_hide_wp_admin_bar( $show ) {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
+			return false;
+		}
+		return $show;
+	}
+
+	/**
+	 * Runs script and add styles to remove unwanted elements and hide scrollbar
+	 * when users are viewing with ?cys-hide-admin-bar=true.
+	 *
+	 * @return void
+	 */
+	public function possibly_remove_unwanted_ui_elements() {
+		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
+			echo '
+			<style type="text/css">
+				body { overflow: hidden; }
+			</style>';
+		}
 	}
 }

@@ -31,6 +31,7 @@ const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 			value: key,
 			label: ORDER_STATUSES[ key ],
 			description: sprintf(
+				/* translators: %s: non-refunded order statuses to exclude */
 				__( 'Exclude the %s status from reports', 'woocommerce' ),
 				ORDER_STATUSES[ key ]
 			),
@@ -64,6 +65,7 @@ const orderStatusOptions = [
 				value: key,
 				label: key,
 				description: sprintf(
+					/* translators: %s: unregistered order statuses to exclude */
 					__( 'Exclude the %s status from reports', 'woocommerce' ),
 					key
 				),

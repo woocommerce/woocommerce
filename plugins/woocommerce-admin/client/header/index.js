@@ -14,6 +14,7 @@ import {
 } from '@woocommerce/admin-layout';
 import { getSetting } from '@woocommerce/settings';
 import { Text, useSlot } from '@woocommerce/experimental';
+import { getScreenFromPath, isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -21,6 +22,10 @@ import { Text, useSlot } from '@woocommerce/experimental';
 import './style.scss';
 import useIsScrolled from '../hooks/useIsScrolled';
 import { TasksReminderBar, useActiveSetupTasklist } from '../task-lists';
+import {
+	LaunchYourStoreStatus,
+	useLaunchYourStore,
+} from '../launch-your-store';
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
@@ -29,7 +34,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
 	const pageTitle = sections.slice( -1 )[ 0 ];
-	const isScrolled = useIsScrolled();
+	const { isScrolled } = useIsScrolled();
 	let debounceTimer = null;
 
 	const className = classnames( 'woocommerce-layout__header', {
@@ -50,7 +55,7 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				return;
 			}
 
-			wpBody.style.marginTop = `${ headerElement.current.offsetHeight }px`;
+			wpBody.style.marginTop = `${ headerElement.current.clientHeight }px`;
 		}, 200 );
 	};
 
@@ -96,6 +101,12 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
+	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
+	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
+		useLaunchYourStore();
+	const showLaunchYourStoreStatus =
+		isHomescreen && launchYourStoreEnabled && ! isLoading;
+
 	return (
 		<div className={ className } ref={ headerElement }>
 			{ activeSetupList && (
@@ -110,7 +121,11 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				/>
 
 				<Text
-					className={ `woocommerce-layout__header-heading` }
+					className={ `woocommerce-layout__header-heading ${
+						showLaunchYourStoreStatus
+							? ''
+							: 'woocommerce-layout__header-left-align'
+					}` }
 					as="h1"
 				>
 					{ decodeEntities(
@@ -123,6 +138,13 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 						)
 					) }
 				</Text>
+
+				{ showLaunchYourStoreStatus && (
+					<LaunchYourStoreStatus
+						comingSoon={ comingSoon }
+						storePagesOnly={ storePagesOnly }
+					/>
+				) }
 
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
 			</div>

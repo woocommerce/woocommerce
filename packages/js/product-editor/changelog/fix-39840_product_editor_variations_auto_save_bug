@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix bug where the form was dirty still after adding product variations for the first time.
