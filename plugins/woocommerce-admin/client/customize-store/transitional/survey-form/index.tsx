@@ -124,7 +124,7 @@ export const SurveyForm = ( {
 					<h4>
 						{ __(
 							'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience?',
-							'woocommer,c,,,,e'
+							'woocommerce'
 						) }
 						<span>*</span>
 					</h4>
