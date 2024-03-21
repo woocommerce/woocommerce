@@ -26,18 +26,18 @@ export function AddImageMenuItem( {
 	onClose,
 }: VariationActionsMenuItemProps ) {
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
+	const ids = selection.map( ( { id } ) => id );
 
 	function handleMediaUploadSelect(
-		value: {
+		uploadedImage: {
 			id?: number;
 		} & Record< string, string >
 	) {
-		const ids = selection.map( ( { id } ) => id );
-		const uploadedImage = mapUploadImageToImage(
-			value
+		const image = mapUploadImageToImage(
+			uploadedImage
 		) as ProductVariationImage;
 
-		recordEvent( 'product_variations_menu_add_image', {
+		recordEvent( 'product_variations_menu_add_image_update', {
 			source: TRACKS_SOURCE,
 			action: 'add_image_to_variation',
 			variation_id: ids,
@@ -46,7 +46,7 @@ export function AddImageMenuItem( {
 		onChange(
 			selection.map( ( { id } ) => ( {
 				id,
-				image: uploadedImage,
+				image,
 			} ) )
 		);
 		onClose();
@@ -54,6 +54,11 @@ export function AddImageMenuItem( {
 
 	function uploadFilesClickHandler( openMediaUploadModal: () => void ) {
 		return function handleUploadFilesClick() {
+			recordEvent( 'product_variations_menu_add_image_select', {
+				source: TRACKS_SOURCE,
+				action: 'add_image_to_variation',
+				variation_id: ids,
+			} );
 			openMediaUploadModal();
 			setUploadFilesModalOpen( true );
 		};
