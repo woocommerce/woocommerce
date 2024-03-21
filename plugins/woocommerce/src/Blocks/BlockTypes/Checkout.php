@@ -42,7 +42,7 @@ class Checkout extends AbstractBlock {
 			}
 		);
 
-		add_action( 'save_post', [ $this, 'update_local_pickup_title' ], 10, 2 );
+		add_action( 'save_post', array( $this, 'update_local_pickup_title' ), 10, 2 );
 	}
 
 	/**
@@ -350,7 +350,7 @@ class Checkout extends AbstractBlock {
 
 		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
 		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
-		$this->asset_data_registry->add( 'localPickupText', wc_clean( $pickup_location_settings['title'] ) ??  __( 'Local Pickup', 'woocommerce' ), true );
+		$this->asset_data_registry->add( 'localPickupText', wc_clean( $pickup_location_settings['title'] ) ?? __( 'Local Pickup', 'woocommerce' ), true );
 
 		$is_block_editor = $this->is_block_editor();
 
