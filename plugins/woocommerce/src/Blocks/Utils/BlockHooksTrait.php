@@ -32,14 +32,6 @@ trait BlockHooksTrait {
 			$active_theme_name = wp_get_theme()->get( 'Name' );
 		}
 
-		/**
-		 * A list of pattern slugs to exclude from auto-insert (useful when
-		 * there are patterns that have a very specific location for the block)
-		 *
-		 * @since 8.4.0
-		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked', 'blockbase/header-centered' ) );
-
 		if ( $context ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
 
@@ -98,7 +90,6 @@ trait BlockHooksTrait {
 		$content = '' === $content && $context instanceof \WP_Block_Template ? $context->content : $content;
 		$content = '' === $content && $context instanceof \WP_Post ? $context->post_content : $content;
 		return $content;
-
 	}
 
 	/**
@@ -137,11 +128,10 @@ trait BlockHooksTrait {
 
 	/**
 	 * Returns whether the pattern is excluded or not
-   *
-   * @since 8.5.0
+	 *
+	 * @since 8.5.0
 	 *
 	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @param array                    $pattern_exclude_list List of pattern slugs to exclude.
 	 * @return boolean
 	 */
 	protected function pattern_is_excluded( $context ) {
