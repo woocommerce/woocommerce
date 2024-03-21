@@ -48,7 +48,7 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
 		add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 	}
 
