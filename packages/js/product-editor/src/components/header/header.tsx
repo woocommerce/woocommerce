@@ -142,7 +142,7 @@ export function Header( {
 			);
 		}
 		if (
-			( productStatus !== 'future' && catalogVisibility !== 'visible' ) ||
+			( productStatus !== 'future' && catalogVisibility === 'hidden' ) ||
 			( isVariation && productStatus === 'private' )
 		) {
 			tags.push(

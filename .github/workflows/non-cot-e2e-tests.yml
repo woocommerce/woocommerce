@@ -1,6 +1,9 @@
 name: Run tests against PR in an environment with HPOS disabled
 on:
-    pull_request:
+    push:
+      branches:
+        - 'trunk'
+        - 'release/*'
     workflow_dispatch:
 
 concurrency:
@@ -65,20 +68,6 @@ jobs:
                   path: ${{ env.ALLURE_RESULTS_DIR }}
                   retention-days: 1
                   compression-level: 9
-
-    e2e-tests-success:
-        name: Evaluate e2e tests results
-        runs-on: ubuntu-latest
-        needs: non-hpos-e2e-tests-run
-        if: ${{ always() }}
-        steps:
-            - run: |
-                  result="${{ needs.non-hpos-e2e-tests-run.result }}"
-                  if [[ $result != "success" && $result != "skipped" ]]; then
-                    echo "One or more e2e tests have failed!"
-                  exit 1
-                  fi
-                  echo "e2e tests have completed successfully."
 
     merge-reports:
         name: Merge e2e test reports
