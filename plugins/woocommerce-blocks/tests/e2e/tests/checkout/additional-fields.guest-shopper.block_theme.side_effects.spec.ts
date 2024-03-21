@@ -166,9 +166,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
 
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByRole( 'group', {
@@ -177,9 +175,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
 
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
