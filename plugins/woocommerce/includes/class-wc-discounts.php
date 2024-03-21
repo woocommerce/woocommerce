@@ -333,7 +333,7 @@ class WC_Discounts {
 
 			$items_to_apply[] = $item_to_apply;
 		}
-		return $items_to_apply;
+		return apply_filters( 'woocommerce_coupon_get_items_to_apply', $items_to_apply, $coupon, $this );
 	}
 
 	/**
