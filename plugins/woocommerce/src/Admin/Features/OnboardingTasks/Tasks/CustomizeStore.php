@@ -36,9 +36,9 @@ class CustomizeStore extends Task {
 	 * @return void
 	 */
 	public function mark_task_as_complete_on_global_style_changes( $post_id, $post, $update ) {
-		$post_content = $post->post_content;
+		$post_content = $post instanceof \WP_Post ?? $post->post_content;
 
-		if ( '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post_content ) {
+		if ( $post_content && '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post_content ) {
 			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 		}
 	}
