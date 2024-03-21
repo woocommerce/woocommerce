@@ -7,7 +7,7 @@
  */
 // @ts-ignore No types for this exist yet.
 import { BlockEditorProvider } from '@wordpress/block-editor';
-import { memo, useMemo } from '@wordpress/element';
+import { memo } from '@wordpress/element';
 import { BlockInstance } from '@wordpress/blocks';
 /**
  * Internal dependencies
@@ -30,10 +30,7 @@ export const BlockPreview = ( {
 	onChange?: ChangeHandler | undefined;
 	useSubRegistry?: boolean;
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
-	const renderedBlocks = useMemo( () => {
-		const _blocks = Array.isArray( blocks ) ? blocks : [ blocks ];
-		return _blocks;
-	}, [ blocks ] );
+	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
 
 	return (
 		<BlockEditorProvider

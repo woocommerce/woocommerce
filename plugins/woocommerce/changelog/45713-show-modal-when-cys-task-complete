@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Go to the assembler when clicking to the "Design you own" button if the theme was already customized in the assembler.

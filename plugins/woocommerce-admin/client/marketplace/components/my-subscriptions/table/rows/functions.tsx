@@ -25,6 +25,7 @@ import {
 	subscribeUrl,
 } from '../../../../utils/functions';
 import { MARKETPLACE_COLLABORATION_PATH } from '../../../constants';
+import { getAdminSetting } from '../../../../../utils/admin-settings';
 
 type StatusBadge = {
 	text: string;
@@ -126,12 +127,19 @@ function getStatusBadge( subscription: Subscription ): StatusBadge | false {
 }
 
 function getVersion( subscription: Subscription ): string | JSX.Element {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
 	if ( subscription.local.version === subscription.version ) {
 		return <Version span={ subscription.local.version } />;
 	}
 
 	if ( subscription.local.version && subscription.version ) {
-		return <Update subscription={ subscription } />;
+		return (
+			<Update
+				subscription={ subscription }
+				wooUpdateManagerActive={ wccomSettings?.wooUpdateManagerActive }
+			/>
+		);
 	}
 
 	if ( subscription.version ) {

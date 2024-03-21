@@ -79,7 +79,6 @@ export const SurveyForm = ( {
 
 	const disableSendButton =
 		rating === 0 ||
-		feedbackText === '' ||
 		( ! isStreamlineChecked &&
 			! isDislikeThemesChecked &&
 			! isThemeNoMatchChecked &&
@@ -188,7 +187,6 @@ export const SurveyForm = ( {
 						'Did you find anything confusing, irrelevant, or not useful?',
 						'woocommerce'
 					) }
-					<span>*</span>
 				</h4>
 				<TextareaControl
 					value={ feedbackText }

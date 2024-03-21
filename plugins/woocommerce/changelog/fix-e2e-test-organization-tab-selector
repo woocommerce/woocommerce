@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix organization tab e2e tests #45692
