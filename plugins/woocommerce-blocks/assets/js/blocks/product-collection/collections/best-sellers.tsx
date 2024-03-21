@@ -16,7 +16,6 @@ import {
 	CoreCollectionNames,
 	CoreFilterNames,
 	HandlePreviewStateArgs,
-	PreviewState,
 } from '../types';
 
 const collection = {

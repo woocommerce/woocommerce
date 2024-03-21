@@ -20,7 +20,7 @@ import topRated from './top-rated';
 import bestSellers from './best-sellers';
 import onSale from './on-sale';
 import featured from './featured';
-import registerProductCollection from './registerProductCollection';
+import registerProductCollection from './register-product-collection';
 
 const collections: BlockVariation[] = [
 	productCollection,
