@@ -84,6 +84,9 @@ export function AddImageMenuItem( {
 			onSelect={ handleMediaUploadSelect }
 			modalClass={ MODAL_CLASS_NAME }
 			allowedTypes={ DEFAULT_ALLOWED_MEDIA_TYPES }
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore disabled prop exists
+			mode={ 'upload' }
 			multiple={ false }
 			render={ ( { open } ) => (
 				<MenuItem onClick={ uploadFilesClickHandler( open ) }>
