@@ -40,7 +40,7 @@ class CustomizeStore extends Task {
 	 */
 	public function mark_task_as_complete( $post_id, $post, $update ) {
 		if ( $post instanceof \WP_Post ) {
-			$is_cys_complete = ( $post->post_content !== '{"version": 2, "isGlobalStylesUserThemeJSON": true }' || in_array( $post->post_type, [ 'wp_template', 'wp_template_part' ] ) );
+			$is_cys_complete = $post->post_content !== '{"version": 2, "isGlobalStylesUserThemeJSON": true }' || in_array( $post->post_type, [ 'wp_template', 'wp_template_part' ] );
 
 			if ( $is_cys_complete ) {
 				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
