@@ -156,4 +156,25 @@ trait BlockHooksTrait {
 		}
 		return in_array( $pattern_slug, $pattern_exclude_list, true );
 	}
+
+	/**
+	 * Returns parsed block from content
+	 *
+	 * @since 8.5.0
+	 *
+	 * @param string                   $block_name The block name to search for.
+	 * @param array|\WP_Block_Template $context Where the block is embedded.
+	 * @return array|null
+	 */
+	protected function get_block( $block_name, $context ) {
+		$pattern = '/<!--\s*' . $block_name . '\s*({.*?})\s*\/-->/s';
+		$content = $this->get_context_content( $context );
+		preg_match( $pattern, $content, $matches );
+
+		if ( isset( $matches[0] ) ) {
+			return parse_blocks( $matches[0] )[0];
+		}
+
+		return null;
+	}
 }

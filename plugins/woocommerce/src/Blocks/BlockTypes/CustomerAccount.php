@@ -29,8 +29,9 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected $hooked_block_placements = array(
 		array(
-			'position' => 'last_child',
+			'position' => 'after',
 			'anchor'   => 'core/navigation',
+			'area'     => 'header',
 			'callback' => 'should_unhook_block',
 		),
 	);
@@ -48,46 +49,43 @@ class CustomerAccount extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 11, 4 );
+		add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+	}
+
+	/**
+	 * Callback for the Block Hooks API to modify the attributes of the hooked block.
+	 *
+	 * @param array|null                      $parsed_hooked_block The parsed block array for the given hooked block type, or null to suppress the block.
+	 * @param string                          $hooked_block_type   The hooked block type name.
+	 * @param string                          $relative_position   The relative position of the hooked block.
+	 * @param array                           $parsed_anchor_block The anchor block, in parsed block array format.
+	 * @param WP_Block_Template|WP_Post|array $context             The block template, template part, `wp_navigation` post type,
+	 *                                                             or pattern that the anchor block belongs to.
+	 * @return array|null
+	 */
+	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
+		return $parsed_hooked_block;
 	}
 
 	/**
 	 * Callback for the Block Hooks API to determine if the block should be auto-inserted.
-	 * This code is specific to how hooked blocks is used in the context of the core/navigation block.
 	 *
 	 * @param array                             $hooked_blocks An array of block slugs hooked into a given context.
 	 * @param string                            $position      Position of the block insertion point.
 	 * @param string                            $anchor_block  The block acting as the anchor for the inserted block.
 	 * @param array|\WP_Post|\WP_Block_Template $context       Where the block is embedded.
 	 *
-	 * @return bool
+	 * @return array
 	 */
 	protected function should_unhook_block( $hooked_blocks, $position, $anchor_block, $context ) {
 		$block_name      = $this->namespace . '/' . $this->block_name;
 		$block_is_hooked = in_array( $block_name, $hooked_blocks, true );
-		$content         = $this->get_context_content( $context );
+		$active_theme    = wp_get_theme()->get( 'Name' );
 
-		// If the context contains the my account permalink or the core/page-list block (which includes the my account link),
-		// and the block is hooked, unhook it.
-		if ( (
-			false !== strpos( $content, get_permalink( wc_get_page_id( 'myaccount' ) ) ) ||
-			false !== strpos( $content, 'wp:page-list' )
-			) &&
-			isset( $context->ID ) &&
-			$block_is_hooked
-		) {
-			// Get the existing ignored hooked blocks.
-			$existing_ignored_hooked_blocks = get_post_meta( $context->ID, '_wp_ignored_hooked_blocks', true );
-			$existing_ignored_hooked_blocks = ! empty( $existing_ignored_hooked_blocks ) ? json_decode( $existing_ignored_hooked_blocks, true ) : array();
+		$exclude_themes = array( 'Twenty Twenty-Two', 'Twenty Twenty-Three' );
 
-			// If the block is already ignored, return early and let the algorithm take care of the rest.
-			if ( in_array( $block_name, $existing_ignored_hooked_blocks, true ) ) {
-				return $hooked_blocks;
-			}
-
-			// This is required to keep parity with the editor in the event that the user removes
-			// the "My account" link we need to prevent the block from being hooked on the frontend.
-			$ignored_hooked_blocks = array_unique( array_merge( array( $block_name ), $existing_ignored_hooked_blocks ) );
-			update_post_meta( $context->ID, '_wp_ignored_hooked_blocks', wp_json_encode( $ignored_hooked_blocks ) );
+		if ( $block_is_hooked && in_array( $active_theme, $exclude_themes, true ) ) {
 			$key = array_search( $block_name, $hooked_blocks, true );
 			unset( $hooked_blocks[ $key ] );
 		}
