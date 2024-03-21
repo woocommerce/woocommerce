@@ -268,6 +268,22 @@ export class CheckoutPage {
 		}
 	}
 
+	async waitForCustomerDataUpdate() {
+		// Wait for data to start updating.
+		await this.page.waitForFunction( () => {
+			return !! window.wp.data
+				.select( 'wc/store/cart' )
+				.isCustomerDataUpdating();
+		} );
+
+		// Wait for data to finish updating
+		await this.page.waitForFunction( () => {
+			return ! window.wp.data
+				.select( 'wc/store/cart' )
+				.isCustomerDataUpdating();
+		} );
+	}
+
 	async editShippingDetails() {
 		const editButton = this.page.locator(
 			'.wc-block-checkout__shipping-fields .wc-block-components-address-address-wrapper:not(.is-editing) .wc-block-components-address-card__edit'
