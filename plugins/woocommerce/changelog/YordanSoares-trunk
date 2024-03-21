@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add filter to control rounding precision in internal calculations.
