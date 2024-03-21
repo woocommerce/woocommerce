@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Exports handlePrompt from @woocommerce/product-editor for use by extensions expanding the variation quick update menu. Also introduces handleConfirm and exposes it also

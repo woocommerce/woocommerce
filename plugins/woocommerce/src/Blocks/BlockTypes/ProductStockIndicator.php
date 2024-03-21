@@ -84,7 +84,7 @@ class ProductStockIndicator extends AbstractBlock {
 			return $content;
 		}
 
-		$post_id = $block->context['postId'];
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
 		if ( ! $product ) {

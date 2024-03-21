@@ -125,11 +125,19 @@ export function Header( {
 
 	function getVisibilityTags() {
 		const tags = [];
-		if ( productStatus === 'draft' || productStatus === 'future' ) {
+		if ( productStatus === 'draft' ) {
 			tags.push(
 				<Tag
 					key={ 'draft-tag' }
 					label={ __( 'Draft', 'woocommerce' ) }
+				/>
+			);
+		}
+		if ( productStatus === 'future' ) {
+			tags.push(
+				<Tag
+					key={ 'scheduled-tag' }
+					label={ __( 'Scheduled', 'woocommerce' ) }
 				/>
 			);
 		}
@@ -249,7 +257,8 @@ export function Header( {
 
 					<PublishButton
 						productType={ productType }
-						prePublish={ showPrepublishChecks }
+						isPrePublishPanelVisible={ showPrepublishChecks }
+						isMenuButton
 					/>
 
 					<WooHeaderItem.Slot name="product" />
