@@ -130,6 +130,26 @@
 					}
 				},
 				{
+					"name": "PHP WP: nightly",
+					"command": "test:php:env",
+					"optional": true,
+					"changes": [
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"wpVersion": "nightly"
+						}
+					}
+				},
+				{
 					"name": "PHP WP: latest - 1",
 					"command": "test:php:env",
 					"changes": [
