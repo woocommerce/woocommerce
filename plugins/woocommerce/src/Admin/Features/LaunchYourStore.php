@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Admin\Features;
 
+use Automattic\WooCommerce\Admin\PageController;
+
 /**
  * Takes care of Launch Your Store related actions.
  */
@@ -48,16 +50,22 @@ class LaunchYourStore {
 	 * @return void
 	 */
 	public function maybe_create_coming_soon_page( $current_screen ) {
-		// phpcs:ignore
-		$is_welcome_page = isset( $_GET['path'] ) && '/setup-wizard' === $_GET['path'];
-		$page_id_option  = get_option( 'woocommerce_coming_soon_page_id', false );
-		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_welcome_page && ! $page_id_option ) {
+		$option_name    = 'woocommerce_coming_soon_page_id';
+		$current_page   = PageController::get_instance()->get_current_page();
+		$is_home        = isset( $current_page['id'] ) && 'woocommerce-home' === $current_page['id'];
+		$page_id_option = get_option( $option_name, false );
+		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_home && ! $page_id_option ) {
 			wc_create_page(
 				esc_sql( _x( 'Coming Soon', 'Page slug', 'woocommerce' ) ),
-				'woocommerce_coming_soon_page_id',
+				$option_name,
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
 				'tbd',
 			);
+			// wc_create_page doesn't create options with autoload = yes.
+			// Since we'll querying the option on WooCommerce home,
+			// we should update the option to set autoload to yes.
+			$page_id_option = get_option( $option_name );
+			update_option( $option_name, $page_id_option, true );
 		}
 	}
 }
