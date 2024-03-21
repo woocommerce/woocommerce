@@ -280,6 +280,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
