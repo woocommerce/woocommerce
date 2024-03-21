@@ -134,7 +134,8 @@ class PostsRedirectionController {
 		$redirect_from_types   = wc_get_order_types( 'admin-menu' );
 		$redirect_from_types[] = 'shop_order_placehold';
 
-		$order_type = get_post_type( $post_id ) ?: OrderUtil::get_order_type( $post_id );
+		$post_type  = get_post_type( $post_id );
+		$order_type = $post_type ? $post_type : OrderUtil::get_order_type( $post_id );
 		if ( ! in_array( $order_type, $redirect_from_types, true ) || ! isset( $_GET['action'] ) ) {
 			return;
 		}
