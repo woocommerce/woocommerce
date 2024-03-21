@@ -52,6 +52,40 @@ const AddressCard = ( {
 		.map( ( field ) => address?.[ field.key ] )
 		.join( ' ' );
 
+	const orderedAddressFields = addressFields
+		.filter(
+			( field ) =>
+				field?.key !== 'last_name' && field?.key !== 'first_name'
+		)
+		.sort( ( field1, field2 ) => field1?.index - field2?.index )
+		.map( ( field ) => {
+			// Skip fields that we don't want to display.
+			if (
+				! [
+					'address_1',
+					'address_2',
+					'city',
+					'state',
+					'postcode',
+				].includes( field.key )
+			) {
+				return false;
+			}
+			if (
+				! field.hidden &&
+				field.key === 'state' &&
+				ALLOWED_STATES[ address.country ][ address.state ]
+			) {
+				return ALLOWED_STATES[ address.country ][ address.state ];
+			}
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore - Ignoring because we know the keys are valid address keys (and if they're not we have optional chaining anyway).
+			return ! field.hidden && address?.[ field.key ];
+		} )
+		.filter( Boolean );
+
+	const country = ALLOWED_COUNTRIES?.[ address.country ] || address.country;
+
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
@@ -59,16 +93,7 @@ const AddressCard = ( {
 					{ orderedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
-					{ [
-						address.address_1,
-						! fieldConfig.address_2.hidden && address.address_2,
-						address.city,
-						address.state,
-						address.postcode,
-						ALLOWED_COUNTRIES[ address.country ]
-							? ALLOWED_COUNTRIES[ address.country ]
-							: address.country,
-					]
+					{ [ ...orderedAddressFields, country ]
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
 							<span key={ `address-` + index }>{ field }</span>
