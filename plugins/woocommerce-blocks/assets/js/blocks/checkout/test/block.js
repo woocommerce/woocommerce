@@ -35,7 +35,6 @@ import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 
 import { defaultCartState } from '../../../data/cart/default-state';
-import { allSettings } from '../../../settings/shared/settings-init';
 
 import Checkout from '../block';
 
