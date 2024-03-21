@@ -82,7 +82,7 @@ export function Edit( {
 							id={ stockQuantityId }
 							name="stock_quantity"
 							ref={ stockQuantityRef }
-							label={ __( 'Available quantity', 'woocommerce' ) }
+							label={ __( 'Available stock', 'woocommerce' ) }
 							value={ stockQuantity }
 							onChange={ setStockQuantity }
 							onBlur={ validateStockQuantity }

@@ -366,7 +366,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => array(
-					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
+					'label'        => __( 'Track inventory', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
 					'disabledCopy' => sprintf(
