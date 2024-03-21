@@ -70,7 +70,9 @@ baseTest.describe( 'Products > Delete Product', () => {
 		product,
 	} ) => {
 		await test.step( 'Navigate to products list page', async () => {
-			await page.goto( `wp-admin/edit.php?post_type=product` );
+			await page.goto(
+				`wp-admin/edit.php?post_type=product&s=${ product.name }`
+			);
 		} );
 
 		await test.step( 'Move product to trash', async () => {

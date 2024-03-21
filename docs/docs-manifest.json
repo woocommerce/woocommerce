@@ -350,7 +350,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "7f5777df46d83e49b024ae205111e0a0960d8c53466d351a8744999d256cb0c0",
+          "hash": "14deebc3eaaf821ade3f84b5b16d154b36b4cceae59b04b6cb18f6ba9588fa56",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -386,7 +386,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "238d7b7d6b52bbf1840bf2e264d0724cde220f6dab343e7620fee1a7fd715c08",
+          "hash": "e5fd467caece98bb1d18a5d150c375b2c575cb956980a7054b89b3cfcfbcdae9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93",
           "links": {
@@ -458,7 +458,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "6b3af5e8e96294df9625e843654adddcf97b26c81ec43b47c41be2b2ad835783",
+          "hash": "6c97092279436171fa847119ea8813a35b8ad7b8784bc3c993236648687064c1",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -870,6 +870,13 @@
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
         },
         {
+          "post_title": "Template structure & Overriding templates via a theme",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
+          "hash": "faf1f9d46a5115cb3c573d61474e7e7b3ba473568956c87aca6a45be8f205b37",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+        },
+        {
           "post_title": "How to set up and use a child theme",
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
@@ -1004,7 +1011,7 @@
           "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
           "menu_title": "Payments Onboarding and Setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
-          "hash": "b627aa75171e4ba4a7f9802a09df2de4026b1496ca2c448693abf010480ec0eb",
+          "hash": "aa2429f5322cb3f4e2168117e7c42cd3a090fc2665c6e09264a0d69c03216c9c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
           "id": "9e100f5d1c5e52bb337a294456f75cd60929d9e3"
         },
@@ -1012,7 +1019,7 @@
           "post_title": "User Experience Guidelines - Payment Button Style",
           "menu_title": "Payment Button Style",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-style.md",
-          "hash": "ddaf6af31bbbba2e03feb852b650ac442d7937c7437464eeef1418c4c421939e",
+          "hash": "f302ec65394f21436f5886263f95aa8b24f7b3dc67a65ce7f6c0704923337612",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-style.md",
           "id": "83d869cec0b2268ae30a6517c7c8f424de284cad"
         },
@@ -1020,7 +1027,7 @@
           "post_title": "User Experience Guidelines - Payment Button Size and Anatomy",
           "menu_title": "Payment Button Size",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-size.md",
-          "hash": "bec66a7aae90a2995d948f27510a12978f48676cf440fc3ac5c07db9f9d9de4b",
+          "hash": "f369880a1e4cc0841820c1ec690aac46ac4629cd105f8405f18d755a2346ba8e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-size.md",
           "id": "0920df1611e1b1b3e2f33c810a8f8e8ae09dd67c"
         },
@@ -1028,7 +1035,7 @@
           "post_title": "User Experience Guidelines - Payment Button Layout",
           "menu_title": "Payment Button Layout",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
-          "hash": "59b75f884b59d42f4950543a255afa4297e6aeec918fa86b57cfbe56a79461cc",
+          "hash": "c1a2014232650e5dcf2a37288df2c7a552a6e69e4919dd3ce27c71ff28175c2c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
           "id": "96caecc340794e5c80af271e5cc844e0b3d80a04"
         }
@@ -1175,7 +1182,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "b928cc77a9ff6bfb023b35f16989a0cdfb5e1a4877679aa61e894e9d0318d4eb",
+          "hash": "a926ff45642539e0edc6b4e3dfeba4b31c2d01082700af132a2e8d56cfa25ec5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -1196,7 +1203,7 @@
           "menu_title": "Frequently Asked Questions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/cli-faq.md",
-          "hash": "f33cd9e92983e4351b7d3df23290391b6815673dd02b2843b23b4babb02c06a4",
+          "hash": "cdf02b0a30693f3659f26a774953cb56c85e0319c9472447a4b9563ac3d9b2a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/cli-faq.md",
           "id": "86857f8924e3bd3fe6fdcc06cd8f4351f5e6f4c1"
         }
@@ -1204,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "494b0c55a9312202c17bf17b4e50f1f574790788c1606be4c61c99ad479b279a"
+  "hash": "514bc14b1dd1c31a5aa6e3f47fe9fb61fb9dd28db4e475c2397f5f409ce06cf0"
 }

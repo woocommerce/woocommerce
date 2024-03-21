@@ -36,6 +36,20 @@ export const assignThemeData = assign<
 	},
 } );
 
+export const assignActiveTheme = assign<
+	customizeStoreStateMachineContext,
+	customizeStoreStateMachineEvents
+>( {
+	intro: ( context, event ) => {
+		const activeTheme = (
+			event as DoneInvokeEvent< {
+				activeTheme: string;
+			} >
+		 ).data.activeTheme;
+		return { ...context.intro, activeTheme };
+	},
+} );
+
 export const recordTracksDesignWithAIClicked = () => {
 	recordEvent( 'customize_your_store_intro_design_with_ai_click' );
 };

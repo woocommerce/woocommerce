@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: "Upload files" quick update menu for variations does not crash variations list.
