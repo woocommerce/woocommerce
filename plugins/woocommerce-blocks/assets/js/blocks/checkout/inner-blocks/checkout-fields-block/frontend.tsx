@@ -10,7 +10,7 @@ const FrontendBlock = ( {
 	children,
 	className,
 }: {
-	children: JSX.Element;
+	children: JSX.Element[];
 	className?: string;
 } ): JSX.Element => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
