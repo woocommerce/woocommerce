@@ -247,12 +247,12 @@ class Checkout extends AbstractBlock {
 	/**
 	 * Update the local pickup title in WooCommerce Settings when the checkout page containing a Checkout block is saved.
 	 *
-	 * @param $post_id int  The post ID.
-	 * @param $post    WP_Post The post object.
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post    The post object.
 	 * @return void
 	 */
 	public function update_local_pickup_title( $post_id, $post ) {
-		if ( empty( $post->post_status ) || 'inherit' === $post->post_status  ) {
+		if ( empty( $post->post_status ) || 'inherit' === $post->post_status ) {
 			// This is not a proper save action, maybe an autosave, so don't continue.
 			return;
 		}
@@ -263,10 +263,10 @@ class Checkout extends AbstractBlock {
 			return;
 		}
 
-		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && $post->post_name !== 'page-checkout' && $post->post_type === 'wp_template' ) || false === has_block( 'woocommerce/checkout', $post ) ) {
+		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && 'page-checkout' !== $post->post_name && 'wp_template' === $post->post_type ) || false === has_block( 'woocommerce/checkout', $post ) ) {
 			return;
 		}
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
+		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', array() );
 
 		if ( ! isset( $pickup_location_settings['title'] ) ) {
 			return;
@@ -277,7 +277,7 @@ class Checkout extends AbstractBlock {
 		}
 
 		$post_blocks = parse_blocks( $post->post_content );
-		$title = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
+		$title       = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
 		if ( $title ) {
 			$pickup_location_settings['title'] = $title;
 			update_option( 'woocommerce_pickup_location_settings', $pickup_location_settings );
@@ -287,7 +287,7 @@ class Checkout extends AbstractBlock {
 	/**
 	 * Recurse through the blocks to find the shipping methods block, then get the value of the localPickupText attribute from it.
 	 *
-	 * @param $blocks array The block(s) to search for the local pickup text.
+	 * @param array $blocks The block(s) to search for the local pickup text.
 	 * @return void|string  The local pickup text if found, otherwise void.
 	 */
 	private function find_local_pickup_text_in_checkout_block( $blocks ) {
@@ -295,7 +295,7 @@ class Checkout extends AbstractBlock {
 			return;
 		}
 		foreach ( $blocks as $block ) {
-			if ( ! empty ( $block['blockName'] ) && 'woocommerce/checkout-shipping-method-block' === $block['blockName'] ) {
+			if ( ! empty( $block['blockName'] ) && 'woocommerce/checkout-shipping-method-block' === $block['blockName'] ) {
 				if ( ! empty( $block['attrs']['localPickupText'] ) ) {
 					return $block['attrs']['localPickupText'];
 				}
