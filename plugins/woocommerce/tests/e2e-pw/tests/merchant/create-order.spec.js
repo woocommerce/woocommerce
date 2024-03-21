@@ -43,6 +43,7 @@ let simpleProductId,
 	subProductAId,
 	subProductBId,
 	groupedProductId,
+	customerId,
 	orderId;
 
 test.describe( 'WooCommerce Orders > Add new order', () => {
@@ -158,6 +159,54 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			.then( ( response ) => {
 				groupedProductId = response.data.id;
 			} );
+		// create a customer
+		await api
+			.post( 'customers', {
+				email: 'sideshowbob@example.com',
+				first_name: 'Sideshow',
+				last_name: 'Bob',
+				username: 'sideshowbob',
+				billing: {
+					first_name: 'Sideshow',
+					last_name: 'Bob',
+					company: 'Die Bart Die',
+					address_1: '123 Fake St',
+					address_2: '',
+					city: 'Springfield',
+					state: 'FL',
+					postcode: '12345',
+					country: 'US',
+					email: 'sideshowbob@example.com',
+					phone: '555-555-5556',
+				},
+				shipping: {
+					first_name: 'Sideshow',
+					last_name: 'Bob',
+					company: 'Die Bart Die',
+					address_1: '321 Fake St',
+					address_2: '',
+					city: 'Springfield',
+					state: 'FL',
+					postcode: '12345',
+					country: 'US',
+				},
+			} )
+			.then( ( response ) => {
+				customerId = response.data.id;
+			} );
+	} );
+
+	test.afterEach( async ( { baseURL } ) => {
+		const api = new wcApi( {
+			url: baseURL,
+			consumerKey: process.env.CONSUMER_KEY,
+			consumerSecret: process.env.CONSUMER_SECRET,
+			version: 'wc/v3',
+		} );
+		// clean up order after each test
+		if ( orderId && orderId !== '' ) {
+			await api.delete( `orders/${ orderId }`, { force: true } );
+		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -200,11 +249,170 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await api.put( 'settings/general/woocommerce_calc_taxes', {
 			value: 'no',
 		} );
+		// clean up customer
+		await api.delete( `customers/${ customerId }`, { force: true } );
+	} );
 
-		// if we're only running the second test, there's no orderId created
-		if ( orderId ) {
-			await api.delete( `orders/${ orderId }`, { force: true } );
-		}
+	test( 'can create a simple guest order', async ( { page } ) => {
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+
+		// get order ID from the page
+		const orderText = await page
+			.locator( 'h2.woocommerce-order-data__heading' )
+			.textContent();
+		orderId = orderText.match( /([0-9])\w+/ );
+		orderId = orderId[ 0 ].toString();
+
+		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
+
+		// Enter billing information
+		await page
+			.getByRole( 'heading', { name: 'Billing Edit' } )
+			.getByRole( 'link' )
+			.click();
+		await page
+			.getByRole( 'textbox', { name: 'First name' } )
+			.fill( 'Bart' );
+		await page
+			.getByRole( 'textbox', { name: 'Last name' } )
+			.fill( 'Simpson' );
+		await page
+			.getByRole( 'textbox', { name: 'Company' } )
+			.fill( 'Kwik-E-Mart' );
+		await page
+			.getByRole( 'textbox', { name: 'Address line 1' } )
+			.fill( '742 Evergreen Terrace' );
+		await page
+			.getByRole( 'textbox', { name: 'City' } )
+			.fill( 'Springfield' );
+		await page.getByRole( 'textbox', { name: 'Postcode' } ).fill( '12345' );
+		await page
+			.getByRole( 'textbox', { name: 'Select an option…' } )
+			.click();
+		await page.getByRole( 'option', { name: 'Florida' } ).click();
+		await page
+			.getByRole( 'textbox', { name: 'Email address' } )
+			.fill( 'elbarto@example.com' );
+		await page
+			.getByRole( 'textbox', { name: 'Phone' } )
+			.fill( '555-555-5555' );
+		await page
+			.getByRole( 'textbox', { name: 'Transaction ID' } )
+			.fill( '1234567890' );
+
+		// Enter shipping information
+		await page
+			.getByRole( 'heading', { name: 'Shipping Edit' } )
+			.getByRole( 'link' )
+			.click();
+		page.on( 'dialog', ( dialog ) => dialog.accept() );
+		await page
+			.getByRole( 'link', { name: 'Copy billing address' } )
+			.click();
+		await page
+			.getByPlaceholder( 'Customer notes about the order' )
+			.fill( 'Only asked for a slushie' );
+
+		// Add a product
+		await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+		await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
+		await page.getByText( 'Search for a product…' ).click();
+		await page.locator( 'span > .select2-search__field' ).fill( 'Simple' );
+		await page.getByRole( 'option', { name: simpleProductName } ).click();
+		await page
+			.getByRole( 'row', { name: '×Add new order simple product' } )
+			.getByPlaceholder( '1' )
+			.fill( '2' );
+		await page.locator( '#btn-ok' ).click();
+
+		// Create the order
+		await page.getByRole( 'button', { name: 'Create' } ).click();
+		await expect( page.locator( 'div.notice-success' ) ).toContainText(
+			'Order updated.'
+		);
+
+		// Confirm the details
+		await expect(
+			page.getByText(
+				'Billing Edit Load billing address Bart SimpsonKwik-E-Mart742 Evergreen'
+			)
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				'Shipping Edit Load shipping address Copy billing address Bart SimpsonKwik-E-'
+			)
+		).toBeVisible();
+		await expect(
+			page
+				.locator( 'table' )
+				.filter( { hasText: 'Paid: $200.00 March 21,' } )
+		).toBeVisible();
+	} );
+
+	test( 'can create an order for an existing customer', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+
+		// get order ID from the page
+		const orderText = await page
+			.locator( 'h2.woocommerce-order-data__heading' )
+			.textContent();
+		orderId = orderText.match( /([0-9])\w+/ );
+		orderId = orderId[ 0 ].toString();
+
+		// Select customer
+		await page.getByText( 'Guest' ).click();
+		await page.getByRole( 'combobox' ).nth( 4 ).fill( 'sideshowbob@' );
+		await page.getByRole( 'option', { name: 'Sideshow Bob' } ).click();
+
+		// Add a product
+		await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+		await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
+		await page.getByText( 'Search for a product…' ).click();
+		await page.locator( 'span > .select2-search__field' ).fill( 'Simple' );
+		await page.getByRole( 'option', { name: simpleProductName } ).click();
+		await page
+			.getByRole( 'row', { name: '×Add new order simple product' } )
+			.getByPlaceholder( '1' )
+			.fill( '2' );
+		await page.locator( '#btn-ok' ).click();
+
+		// Create the order
+		await page.getByRole( 'button', { name: 'Create' } ).click();
+		await expect( page.locator( 'div.notice-success' ) ).toContainText(
+			'Order updated.'
+		);
+
+		// Confirm the details
+		await expect(
+			page.getByText(
+				'Billing Edit Load billing address Sideshow BobDie Bart Die123 Fake'
+			)
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				'Shipping Edit Load shipping address Copy billing address Sideshow BobDie Bart'
+			)
+		).toBeVisible();
+
+		// View customer profile
+		await page.getByRole( 'link', { name: 'Profile →' } ).click();
+		await expect(
+			page.getByRole( 'heading', { name: 'Edit User sideshowbob' } )
+		).toBeVisible();
+
+		// Go back to the order
+		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page
+			.getByRole( 'link', {
+				name: 'View other orders',
+			} )
+			.click();
+		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
+			'Orders'
+		);
+		await expect( page.getByRole( 'row' ) ).toHaveCount( 3 ); // 1 order and header and footer rows
 	} );
 
 	test( 'can create new order', async ( { page } ) => {
@@ -244,6 +452,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test( 'can create new complex order with multiple product types & tax classes', async ( {
 		page,
 	} ) => {
+		orderId = '';
 		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
 
 		// open modal for adding line items
@@ -255,7 +464,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
-			.type( simpleProductName );
+			.pressSequentially( simpleProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
@@ -266,7 +475,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		await page
 			.locator( '.select2-search--dropdown' )
 			.getByRole( 'combobox' )
-			.type( variableProductName );
+			.pressSequentially( variableProductName );
 		await page
 			.locator(
 				'li.select2-results__option.select2-results__option--highlighted'
