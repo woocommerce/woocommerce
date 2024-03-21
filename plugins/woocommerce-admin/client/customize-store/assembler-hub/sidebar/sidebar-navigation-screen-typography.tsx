@@ -164,7 +164,7 @@ export const SidebarNavigationScreenTypography = () => {
 										'woocommerce-customize-store__opt-in-usage-tracking-modal'
 									}
 									title={ __(
-										'Opt in to usage tracking',
+										'Get more fonts',
 										'woocommerce'
 									) }
 									onRequestClose={ closeModal }
@@ -174,7 +174,7 @@ export const SidebarNavigationScreenTypography = () => {
 										className="core-profiler__checkbox"
 										label={ interpolateComponents( {
 											mixedString: __(
-												'I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
+												'I would like to get store updates, including new fonts, on an ongoing basis. In doing so, I agree to share my data to tailor my store setup experience, get more relevant content, and help make WooCommerce better for everyone. You can opt out at any time in WooCommerce settings. {{link}}Learn more about usage tracking{{/link}}.',
 												'woocommerce'
 											),
 											components: {
