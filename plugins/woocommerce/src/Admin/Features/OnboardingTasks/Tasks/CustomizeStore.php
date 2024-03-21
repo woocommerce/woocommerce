@@ -30,7 +30,7 @@ class CustomizeStore extends Task {
 	}
 
 	/**
-	 * Mark task the CYS task as complete whenever the user updates their global styles.
+	 * Mark the CYS task as complete whenever the user updates their global styles.
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post Post object.
