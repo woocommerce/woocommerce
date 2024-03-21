@@ -91,12 +91,7 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
-		handlePreviewState: (
-			previewState: PreviewState,
-			setPreviewState: React.Dispatch<
-				React.SetStateAction< PreviewState >
-			>
-		) => void;
+		handlePreviewState?: HandlePreviewState;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -145,7 +140,17 @@ export enum CoreFilterNames {
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
 
+/**
+ * Preview state
+ */
 export interface PreviewState {
 	isPreview: boolean;
 	previewMessage: string;
 }
+
+export interface HandlePreviewStateArgs {
+	previewState: PreviewState;
+	setPreviewState: React.Dispatch< React.SetStateAction< PreviewState > >;
+}
+
+export type HandlePreviewState = ( args: HandlePreviewStateArgs ) => void;

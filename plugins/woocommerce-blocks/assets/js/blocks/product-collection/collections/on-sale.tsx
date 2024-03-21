@@ -12,7 +12,12 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+import {
+	CoreCollectionNames,
+	CoreFilterNames,
+	HandlePreviewStateArgs,
+	PreviewState,
+} from '../types';
 
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
@@ -59,8 +64,26 @@ const innerBlocks: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 ];
 
+/**
+ * This is Async operation example to handle preview state.
+ * I am just using setTimeout to simulate async operation, but it could be
+ * any async operation like fetching data from server or doing a polling in every 5 seconds.
+ */
+const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
+	setTimeout( () => {
+		setPreviewState( {
+			isPreview: true,
+			previewMessage: __(
+				'Custom tooltip for on sale collection.',
+				'woocommerce'
+			),
+		} );
+	}, 5000 );
+};
+
 export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	handlePreviewState,
 };

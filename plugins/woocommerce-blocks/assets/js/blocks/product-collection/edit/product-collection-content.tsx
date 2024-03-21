@@ -20,9 +20,10 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const ProductCollectionContent = (
-	props: ProductCollectionEditComponentProps
-) => {
+const ProductCollectionContent = ( {
+	handlePreviewState,
+	...props
+}: ProductCollectionEditComponentProps ) => {
 	// I have implemented this internal state to handle the preview state.
 	// As you can see it contains isPreview and previewMessage.
 	// - isPreview is a boolean to check if the block is in preview mode.
@@ -32,11 +33,15 @@ const ProductCollectionContent = (
 		previewMessage: '',
 	} );
 	useEffect( () => {
-		// This is where we call the function provided by the 3PDs.
-		// We are passing the previewState and setPreviewState as arguments.
-		// 3PDs will be able to update the state based on their own logic.
-		props.handlePreviewState( previewState, setPreviewState );
-	}, [ previewState, props ] );
+		// Allow collections to handle preview state.
+		handlePreviewState?.( {
+			previewState,
+			setPreviewState,
+		} );
+
+		// We want this to run only once, adding deps will cause performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
@@ -82,8 +87,6 @@ const ProductCollectionContent = (
 	if ( typeof attributes?.query?.inherit !== 'boolean' ) {
 		return null;
 	}
-
-	console.log( 'previewState.isPreview', previewState );
 
 	return (
 		<div { ...blockProps }>
