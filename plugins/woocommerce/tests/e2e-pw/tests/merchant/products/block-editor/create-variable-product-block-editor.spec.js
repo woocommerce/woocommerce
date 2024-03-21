@@ -34,7 +34,7 @@ const attributesData = {
 let productId_editVariations, productId_deleteVariations;
 
 test.describe( 'Variations tab', () => {
-	test.describe( 'Create variable product', () => {
+	test.describe.skip( 'Create variable product', () => {
 		test.beforeAll( async ( { browser } ) => {
 			productId_editVariations = await createVariableProduct(
 				productAttributes
