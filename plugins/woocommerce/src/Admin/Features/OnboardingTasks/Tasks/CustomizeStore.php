@@ -23,22 +23,39 @@ class CustomizeStore extends Task {
 
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
+
 		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_on_global_style_changes' ), 10, 3 );
+		add_action( 'save_post', array( $this, 'mark_task_as_completed_when_updating_templates' ), 10, 3 );
 	}
 
 	/**
 	 * Mark task the CYS task as complete whenever the user updates their global styles.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post Post object.
-	 * @param bool $update Whether this is an existing post being updated.
+	 * @param bool     $update Whether this is an existing post being updated.
 	 *
 	 * @return void
 	 */
 	public function mark_task_as_complete_on_global_style_changes( $post_id, $post, $update ) {
-		$post_content = $post instanceof \WP_Post ?? $post->post_content;
+		$post_content = $post instanceof \WP_Post ? $post->post_content : null;
 
 		if ( $post_content && '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post_content ) {
+			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+		}
+	}
+
+
+	/**
+	 * Save function for custom templates.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function mark_task_as_completed_when_updating_templates( $post_id ) {
+		$post_type = get_post_type( $post_id );
+
+		if ( 'wp_template' === $post_type || 'wp_template_part' === $post_type ) {
 			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
 		}
 	}
@@ -139,7 +156,7 @@ class CustomizeStore extends Task {
 		// Default to is-fullscreen-mode to avoid jumps in the UI.
 		add_filter(
 			'admin_body_class',
-			static function( $classes ) {
+			static function ( $classes ) {
 				return "$classes is-fullscreen-mode";
 			}
 		);
