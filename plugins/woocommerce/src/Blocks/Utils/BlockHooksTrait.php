@@ -136,8 +136,8 @@ trait BlockHooksTrait {
 	 */
 	protected function pattern_is_excluded( $context ) {
 		/**
-		 * A list of pattern slugs to exclude from auto-insert (useful when
-		 * there are patterns that have a very specific location for the block)
+		 * A list of pattern slugs to exclude from auto-insert (useful when there are patterns that have a very specific location for the block)
+		 * Note: The patterns that are currently excluded are the ones that don't work well with the mini-cart block or customer-account block.
 		 *
 		 * @since 8.5.0
 		 */
