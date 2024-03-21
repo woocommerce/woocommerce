@@ -1,5 +1,6 @@
 const base = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { admin } = require( '../test-data/data' );
 
 exports.test = base.test.extend( {
 	api: async ( { baseURL }, use ) => {
@@ -28,5 +29,20 @@ exports.test = base.test.extend( {
 
 		await use( wcAdminApi );
 	},
+
+	wpApi: async ( { baseURL }, use ) => {
+		const wpApi = await base.request.newContext( {
+			baseURL,
+			extraHTTPHeaders: {
+				Authorization: `Basic ${ Buffer.from(
+					`${ admin.username }:${ admin.password }`
+				).toString( 'base64' ) }`,
+				cookie: '',
+			},
+		} );
+
+		await use( wpApi );
+	},
 } );
+
 exports.expect = base.expect;

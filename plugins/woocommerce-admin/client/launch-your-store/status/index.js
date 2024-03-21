@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, moreVertical } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
+import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import classnames from 'classnames';
 
@@ -21,6 +22,9 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 		: __( 'Coming soon', 'woocommerce' );
 	const liveText = __( 'Live', 'woocommerce' );
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
+	const launchYourStoreLink = new URL(
+		getAdminLink( getNewPath( {}, '/launch-your-store', {} ) )
+	);
 	return (
 		<div className="woocommerce-lys-status">
 			<div className="woocommerce-lys-status-pill-wrapper">
@@ -55,12 +59,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 									) }
 								</MenuItem>
 								{ isComingSoon && (
-									<MenuItem
-										href={ getAdminLink(
-											// For now, waiting on the actual link.
-											'admin.php?page=wc-settings'
-										) }
-									>
+									<MenuItem href={ launchYourStoreLink.href }>
 										{ __(
 											'Customize "Coming soon" page',
 											'woocommerce'

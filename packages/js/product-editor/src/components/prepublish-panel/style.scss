@@ -52,7 +52,12 @@
 	}
 
 	&__content {
-		min-height: calc( 100% - #{ $header-height + 220px } );
+		// Ensure the pre-publish panel content accounts for the header and footer height.
+		min-height: calc( 100% - #{ $header-height + 222px } );
+		.editor-post-publish-panel__link {
+			font-weight: 400;
+   			 padding-left: $gap-smallest;
+		}
 	}
 
 	&__footer {
