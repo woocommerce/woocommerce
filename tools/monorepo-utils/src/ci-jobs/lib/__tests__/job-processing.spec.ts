@@ -115,6 +115,43 @@ describe( 'Job Processing', () => {
 			expect( promise ).rejects.toThrow();
 		} );
 
+		it( 'should pass along the optional value in lint command', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								command: 'test-lint <baseRef>',
+								optional: false,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint test-base-ref',
+				optional: false,
+			} );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
 		it( 'should not trigger a lint job that has already been created', async () => {
 			const jobs = await createJobsForChanges(
 				{
@@ -375,6 +412,53 @@ describe( 'Job Processing', () => {
 					shouldCreate: false,
 					envVars: {},
 				},
+			} );
+		} );
+
+		it( 'should pass along optional value in test command', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd <baseRef>',
+								optional: true,
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 1 );
+			expect( jobs[ `${ testType }Test` ] ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd test-base-ref',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				optional: true,
 			} );
 		} );
 

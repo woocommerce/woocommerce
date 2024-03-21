@@ -144,6 +144,7 @@ describe( 'Config', () => {
 							makeRe( '/src/**/*.{js,jsx,ts,tsx}' ),
 						],
 						command: 'foo',
+						optional: false,
 					},
 				],
 			} );
@@ -224,6 +225,88 @@ describe( 'Config', () => {
 				],
 			} );
 		} );
+
+		it( 'should return default optional value for jobs', () => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						lint: {
+							changes: [],
+							command: 'foo',
+						},
+						tests: [
+							{
+								name: 'default',
+								changes: [],
+								command: 'foo',
+							},
+						],
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Lint,
+						optional: false,
+					},
+					{
+						type: JobType.Test,
+						optional: false,
+					},
+				],
+			} );
+		} );
+
+		it.each( [
+			[ true, true ],
+			[ false, false ],
+		] )( 'should parse config with optional values', ( input, result ) => {
+			const parsed = parseCIConfig( {
+				name: 'foo',
+				config: {
+					ci: {
+						lint: {
+							changes: '/src/**/*.{js,jsx,ts,tsx}',
+							command: 'foo',
+							optional: input,
+						},
+					},
+				},
+			} );
+
+			expect( parsed ).toMatchObject( {
+				jobs: [
+					{
+						type: JobType.Lint,
+						optional: result,
+					},
+				],
+			} );
+		} );
+
+		it.each( [ [ 'bad', 1, undefined ] ] )(
+			'should error for config with invalid optional values',
+			( input ) => {
+				const expectation = () => {
+					parseCIConfig( {
+						name: 'foo',
+						config: {
+							ci: {
+								lint: {
+									changes: [],
+									command: 'some command',
+									optional: input,
+								},
+							},
+						},
+					} );
+				};
+				expect( expectation ).toThrow();
+			}
+		);
 
 		it.each( testTypes )(
 			'should parse test config with expected testType',
