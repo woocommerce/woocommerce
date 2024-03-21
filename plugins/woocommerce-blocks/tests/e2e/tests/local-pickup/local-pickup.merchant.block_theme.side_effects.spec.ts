@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { Notice } from '@wordpress/notices';
 
 /**
  * Internal dependencies
