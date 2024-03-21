@@ -24,7 +24,7 @@
 		"product-external-affiliate": true,
 		"product-grouped": true,
 		"product-linked": true,
-		"product-pre-publish-modal": false,
+		"product-pre-publish-modal": true,
 		"product-custom-fields": false,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
