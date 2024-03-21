@@ -19,6 +19,7 @@ interface LintJob {
 	projectName: string;
 	projectPath: string;
 	command: string;
+	optional: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ interface TestJob {
 	command: string;
 	testEnv: TestJobEnv;
 	shardNumber: number;
+	optional: boolean;
 }
 
 /**
@@ -153,6 +155,7 @@ function createLintJob(
 		projectName,
 		projectPath,
 		command: replaceCommandVars( config.command, options ),
+		optional: config.optional,
 	};
 }
 
@@ -229,6 +232,7 @@ async function createTestJob(
 			envVars: {},
 		},
 		shardNumber,
+		optional: config.optional,
 	};
 
 	// We want to make sure that we're including the configuration for

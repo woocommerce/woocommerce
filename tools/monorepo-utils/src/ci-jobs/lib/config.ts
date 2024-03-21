@@ -181,10 +181,19 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
 
 	validateCommandVars( raw.command );
 
+	let optional = false;
+	if ( raw.optional ) {
+		if ( typeof raw.optional !== 'boolean' ) {
+			throw new ConfigError( 'The "optional" option must be a boolean.' );
+		}
+		optional = raw.optional;
+	}
+
 	return {
 		type: null,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
+		optional,
 	};
 }
 

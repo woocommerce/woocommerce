@@ -911,6 +911,7 @@ describe( 'Job Processing', () => {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
 				},
 				{
 					type: JobType.Test,
@@ -935,6 +936,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						optional: false,
 					},
 					{
 						projectName: 'test',
@@ -946,6 +948,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						optional: false,
 					},
 				] )
 			);
@@ -965,6 +968,7 @@ describe( 'Job Processing', () => {
 							shouldCreate: false,
 							envVars: {},
 						},
+						optional: false,
 					},
 					{
 						type: JobType.Test,
@@ -987,6 +991,7 @@ describe( 'Job Processing', () => {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
 				} );
 			}
 		);
