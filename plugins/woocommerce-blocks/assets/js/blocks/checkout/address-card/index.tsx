@@ -2,12 +2,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES } from '@woocommerce/block-settings';
+import {
+	ALLOWED_COUNTRIES,
+	ADDRESS_FORM_KEYS,
+} from '@woocommerce/block-settings';
 import type {
 	CartShippingAddress,
 	CartBillingAddress,
 } from '@woocommerce/types';
 import { FormFieldsConfig } from '@woocommerce/settings';
+import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -25,6 +30,17 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
+	// Use the form preparation logic here to determine display order for the address card.
+	const addressFields = useMemo(
+		() =>
+			prepareFormFields(
+				ADDRESS_FORM_KEYS,
+				fieldConfig,
+				address?.country
+			),
+		[ address?.country, fieldConfig ]
+	);
+
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
