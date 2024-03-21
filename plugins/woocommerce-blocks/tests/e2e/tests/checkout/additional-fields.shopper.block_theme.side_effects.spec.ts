@@ -265,11 +265,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				}
 			);
 
-			const batchRequest = checkoutPageObject.page.waitForResponse(
-				( response ) => {
-					return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-				}
-			);
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
 			// fields until we recreate the Combobox component. This is because the aria-label includes the value so getting
@@ -286,13 +282,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
-			await batchRequest;
 
-			const batchRequest2 = checkoutPageObject.page.waitForResponse(
-				( response ) => {
-					return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-				}
-			);
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
@@ -308,7 +299,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'super-wide' );
 
-			await batchRequest2;
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )
@@ -381,6 +372,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				)
 				.first()
 				.click();
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.placeOrder();
 
