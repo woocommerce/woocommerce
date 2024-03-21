@@ -23,6 +23,24 @@ class CustomizeStore extends Task {
 
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
+		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_on_global_style_changes' ), 10, 3 );
+	}
+
+	/**
+	 * Mark task the CYS task as complete whenever the user updates their global styles.
+	 *
+	 * @param int $post_id Post ID.
+	 * @param \WP_Post $post Post object.
+	 * @param bool $update Whether this is an existing post being updated.
+	 *
+	 * @return void
+	 */
+	public function mark_task_as_complete_on_global_style_changes( $post_id, $post, $update ) {
+		$post_content = $post->post_content;
+
+		if ( '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post_content ) {
+			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+		}
 	}
 
 	/**
