@@ -91,9 +91,6 @@ describe( 'Testing cart', () => {
 				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
 					return Promise.resolve( JSON.stringify( previewCart ) );
 				}
-				if ( req.url.match( /wc\/store\/v1\/checkout/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
 				return Promise.resolve( '' );
 			} );
 			// need to clear the store resolution state between tests.
