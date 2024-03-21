@@ -104,8 +104,6 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_promotions->get_error_message() );
-
-			return;
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $raw_promotions );
@@ -116,20 +114,18 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-
-			return;
 		}
 
 		$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ), true );
-		if ( empty( $promotions ) || ! is_array( $promotions ) ) {
+		if ( ! is_array( $promotions ) ) {
+			$promotions = array();
+
 			/**
 			 * Allows connection error to be handled.
 			 *
 			 * @since 8.7
 			 */
-			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-
-			return;
+			do_action( 'woocommerce_page_wc-addons_connection_error', 'Malformed response' );
 		}
 		// phpcs:enable WordPress.NamingConventions.ValidHookName.UseUnderscores
 
