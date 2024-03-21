@@ -217,9 +217,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'autoFocus' => true,
 					'metadata'  => array(
 						'bindings' => array(
-							'value' => array (
+							'value' => array(
 								'source' => 'woocommerce/entity-product',
-								'args'   => array (
+								'args'   => array(
 									'prop' => 'name',
 								),
 							),
