@@ -24,8 +24,9 @@ class CustomizeStore extends Task {
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
 
-		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_on_global_style_changes' ), 10, 3 );
-		add_action( 'save_post', array( $this, 'mark_task_as_completed_when_updating_templates' ), 10, 3 );
+		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete' ), 10, 3 );
+		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete' ), 10, 3 );
+		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete' ), 10, 3 );
 	}
 
 	/**
@@ -37,26 +38,13 @@ class CustomizeStore extends Task {
 	 *
 	 * @return void
 	 */
-	public function mark_task_as_complete_on_global_style_changes( $post_id, $post, $update ) {
-		$post_content = $post instanceof \WP_Post ? $post->post_content : null;
+	public function mark_task_as_complete( $post_id, $post, $update ) {
+		if ( $post instanceof \WP_Post ) {
+			$is_cys_complete = ( $post->post_content !== '{"version": 2, "isGlobalStylesUserThemeJSON": true }' || in_array( $post->post_type, [ 'wp_template', 'wp_template_part' ] ) );
 
-		if ( $post_content && '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post_content ) {
-			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
-		}
-	}
-
-
-	/**
-	 * Save function for custom templates.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return void
-	 */
-	public function mark_task_as_completed_when_updating_templates( $post_id ) {
-		$post_type = get_post_type( $post_id );
-
-		if ( 'wp_template' === $post_type || 'wp_template_part' === $post_type ) {
-			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+			if ( $is_cys_complete ) {
+				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+			}
 		}
 	}
 
