@@ -8,9 +8,9 @@ import path from 'path';
 const TEMPLATE_PATH = path.join( __dirname, './active-filters.handlebars' );
 
 const test = base.extend< {
-	defaultBlockPostPage: Post;
+	defaultBlockPost: Post;
 } >( {
-	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			{ title: 'Active Filters Block' },
 			TEMPLATE_PATH,
@@ -25,10 +25,10 @@ const test = base.extend< {
 test.describe( 'Filter by Attributes Block - with All products Block', () => {
 	test( 'should show correct attrs count (color=blue|query_type_color=or)', async ( {
 		page,
-		defaultBlockPostPage,
+		defaultBlockPost,
 	} ) => {
 		await page.goto(
-			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or`
+			`${ defaultBlockPost.link }?filter_color=blue&query_type_color=or`
 		);
 
 		// Check if the page has loaded successfully.
@@ -48,10 +48,10 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue,gray|query_type_color=or)', async ( {
 		page,
-		defaultBlockPostPage,
+		defaultBlockPost,
 	} ) => {
 		await page.goto(
-			`${ defaultBlockPostPage.link }?filter_color=blue,gray&query_type_color=or`
+			`${ defaultBlockPost.link }?filter_color=blue,gray&query_type_color=or`
 		);
 
 		// Check if the page has loaded successfully.
@@ -71,10 +71,10 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 
 	test( 'should show correct attrs count (color=blue|query_type_color=or|min_price=15|max_price=40)', async ( {
 		page,
-		defaultBlockPostPage,
+		defaultBlockPost,
 	} ) => {
 		await page.goto(
-			`${ defaultBlockPostPage.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
+			`${ defaultBlockPost.link }?filter_color=blue&query_type_color=or&min_price=15&max_price=40`
 		);
 
 		// Check if the page has loaded successfully.

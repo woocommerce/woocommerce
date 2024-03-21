@@ -7,6 +7,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 /**
  * Internal dependencies
  */
+import { SectionActions } from '../../../components/block-slot-fill';
 import { CustomFields } from '../../../components/custom-fields';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { CustomFieldsBlockAttributes } from './types';
@@ -18,7 +19,11 @@ export function Edit( {
 
 	return (
 		<div { ...blockProps }>
-			<CustomFields />
+			<CustomFields
+				renderActionButtonsWrapper={ ( buttons ) => (
+					<SectionActions>{ buttons }</SectionActions>
+				) }
+			/>
 		</div>
 	);
 }

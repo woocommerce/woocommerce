@@ -1,3 +1,5 @@
+@import "./create-modal/style.scss";
+@import "./edit-modal/style.scss";
 @import "./empty-state/style.scss";
 
 .woocommerce-product-custom-fields {
@@ -22,12 +24,13 @@
 		&-datacell {
 			padding-top: $grid-unit-30;
 			padding-bottom: $grid-unit-30;
+			overflow: hidden;
 
 			&:last-child {
 				display: flex;
 				align-items: center;
 				justify-content: flex-end;
-				padding: 0;
+				padding: 0 2px 0 0;
 				gap: $grid-unit;
 			}
 		}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix guest user handling in failing Side Effects E2E tests

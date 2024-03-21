@@ -316,6 +316,7 @@
 			.components-form-toggle:not(.is-checked) {
 				.components-form-toggle__track {
 					background-color: $gray-600;
+					border-color: $gray-600;
 				}
 			}
 

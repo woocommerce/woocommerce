@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 /**
  * Specs data source poller class for payment gateway suggestions.
@@ -18,7 +18,7 @@ class PaymentGatewaySuggestionsDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/suggestions.json',
+		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/suggestions.json',
 	);
 
 	/**

@@ -128,7 +128,6 @@ export const Layout = () => {
 				>
 					<Transitional
 						sendEvent={ sendEvent }
-						editor={ editor }
 						isWooExpress={ isWooExpress() }
 						isSurveyOpen={ isSurveyOpen }
 						setSurveyOpen={ setSurveyOpen }
@@ -143,6 +142,7 @@ export const Layout = () => {
 	}
 
 	return (
+		// This causes the editor to re-render when the logo block ids change. Maybe we can find a better way to do this.
 		<LogoBlockContext.Provider
 			value={ {
 				logoBlockIds,

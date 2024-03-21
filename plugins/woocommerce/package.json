@@ -93,6 +93,7 @@
 					"name": "PHP",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -109,6 +110,7 @@
 					"name": "PHP 8.0",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -128,6 +130,7 @@
 					"name": "PHP WP: latest - 1",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",
@@ -147,6 +150,7 @@
 					"name": "PHP WP: latest - 2",
 					"command": "test:php:env",
 					"changes": [
+						"client/admin/config/*.json",
 						"composer.lock",
 						"includes/**/*.php",
 						"patterns/**/*.php",

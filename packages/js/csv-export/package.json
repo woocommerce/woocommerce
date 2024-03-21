@@ -49,8 +49,7 @@
 	},
 	"dependencies": {
 		"@types/node": "^16.18.68",
-		"browser-filesaver": "^1.1.1",
-		"moment": "^2.29.4"
+		"browser-filesaver": "^1.1.1"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.23.5",

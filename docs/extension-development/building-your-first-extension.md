@@ -7,22 +7,22 @@ tags: how-to
 
 This guide will teach you how to use [create-woo-extension](https://www.npmjs.com/package/@woocommerce/create-woo-extension) to scaffold a WooCommerce extension. There are various benefits to using create-woo-extension over manually creating one from scratch, including:
 
-There’s less boilerplate code to write, and less dependencies to manually setup
+There's less boilerplate code to write, and less dependencies to manually setup
 Modern features such as Blocks are automatically supported 
 Unit testing, linting, and Prettier IDE configuration are ready to use
 
-Once your extension is set up, we’ll show you how to instantly spin up a development environment using [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
+Once your extension is set up, we'll show you how to instantly spin up a development environment using [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
 
 ## Requirements
 
-Before getting started, you’ll need the following tools installed on your device:
+Before getting started, you'll need the following tools installed on your device:
 
 
 - [Node.js](https://nodejs.org/en/learn/getting-started/how-to-install-nodejs) with NPM
 - [Docker](https://docs.docker.com/engine/install/) (must be running to use wp-env)
 - [Composer](https://getcomposer.org/doc/00-intro.md)
 
-This guide also presumes you’re familiar with working with the command line.
+This guide also presumes you're familiar with working with the command line.
 
 ## Bootstrapping Your Extension
 
@@ -33,29 +33,29 @@ Open your terminal and run
  @woocommerce/create-woo-extension my-extension-name
 ```
 
-If you’d like to set a custom extension name, you can replace `my-extension-name` with any slug. Please note that your slug must not have any spaces.
+If you'd like to set a custom extension name, you can replace `my-extension-name` with any slug. Please note that your slug must not have any spaces.
 
 If you see a prompt similar to Need to install the following packages: `@wordpress/create-block@4.34.0. Ok to proceed?`, press `Y`.
 
 
-Once the package finishes generating your extension, navigate into the extension’s folder using 
+Once the package finishes generating your extension, navigate into the extension's folder using 
 
 ```sh
  cd my-extension-name
 ```
 
-You should then install your extension’s dependencies using `npm install`  and build it using `npm run build`.
+You should then install your extension's dependencies using `npm install`  and build it using `npm run build`.
 
 Congratulations! You just spun up a WooCommerce extension! Your extension will have the following file structure:
 
 - `my-extension-name`
     - `block.json` - contains metadata used to register your custom blocks with WordPress. Learn more.
-    - `build` - the built version of your extension which is generated using npm run build. You shouldn’t directly modify any of the files in this folder.
+    - `build` - the built version of your extension which is generated using npm run build. You shouldn't directly modify any of the files in this folder.
     - `composer.json` - contains a list of your PHP dependencies which is referenced by Composer.
     - `composer.lock` - this file allows you to control when and how to update these dependencies
     - `includes` - The primary purpose of an "includes" folder in PHP development is to store reusable code or files that need to be included or required in multiple parts of a project. This is a PHP developer convention.
     - `languages` - contains POT files that are used to localize your plugin.
-    - `my-extension-name.php` - your plugin’s entry point that registers your plugin with WordPress.
+    - `my-extension-name.php` - your plugin's entry point that registers your plugin with WordPress.
     - `node-modules` - help you form the building blocks of your application and write more structured code
     - `package.json` - is considered the heart of a Node project. It records metadata, and installs functional dependencies, runs scripts, and defines the entry point of your application.
     - `README.md` - An introduction and instructional overview of your application. Any special instructions, updates from the author, and details about the application can be written in text here.
@@ -67,20 +67,20 @@ Congratulations! You just spun up a WooCommerce extension! Your extension will h
 
 ## Setting Up a Developer Environment
 
-We recommend using `wp-env` to spin up local development environments. You can [learn more about wp-env here](https://make.wordpress.org/core/2020/03/03/wp-env-simple-local-environments-for-wordpress/). If you don’t already have wp-env installed locally, you can install it using 
+We recommend using `wp-env` to spin up local development environments. You can [learn more about wp-env here](https://make.wordpress.org/core/2020/03/03/wp-env-simple-local-environments-for-wordpress/). If you don't already have wp-env installed locally, you can install it using 
 `npm -g i @wordpress/env`.
 
-Once you’ve installed `wp-env`, and while still inside your `my-extension-name` folder, run `wp-env` start. After a few seconds, a test WordPress site with your WooCommerce and your extension installed will be running on `localhost:8888`.
+Once you've installed `wp-env`, and while still inside your `my-extension-name` folder, run `wp-env` start. After a few seconds, a test WordPress site with your WooCommerce and your extension installed will be running on `localhost:8888`.
 
-If you didn’t set a custom name for your extension, you can visit [here](http://localhost:8888/wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name) to see the settings page generated by /src/index.js. The default username/password combination for `wp-env` is `admin` / `password`.
+If you didn't set a custom name for your extension, you can visit [here](http://localhost:8888/wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name) to see the settings page generated by /src/index.js. The default username/password combination for `wp-env` is `admin` / `password`.
 
 ## Next Steps
 
-Now that you’ve bootstrapped your extension, it’s time to add some features! Here’s some simple ones you could include:
+Now that you've bootstrapped your extension, it's time to add some features! Here's some simple ones you could include:
 
 [How to add a custom field to simple and variable products](https://developer.woo.com/docs/how-to-add-a-custom-field-to-simple-and-variable-products/)
 
 ## Reference
 
 [Visit @woocommerce/create-woo-extension on NPM for package reference](https://www.npmjs.com/package/@woocommerce/create-woo-extension)
-[Check out wp-env’s command reference to learn more about advanced functionality](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#command-reference)
+[Check out wp-env's command reference to learn more about advanced functionality](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/#command-reference)

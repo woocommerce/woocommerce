@@ -136,13 +136,13 @@ wc_get_logger()->info(
 
 ### When _not_ to use logging
 
-* To let a developer know that they’re using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
+* To let a developer know that they're using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
 
 ### Best practices
 
-* Rather than using the `WC_Logger`‘s `log()` method directly, it’s better to use one of the wrapper methods that’s specific to the log level. E.g. `info()` or `error()`.
-* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren’t familiar with the codebase.
-* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what’s happening, since they may not speak the same language as the site owner.
+* Rather than using the `WC_Logger`‘s `log()` method directly, it's better to use one of the wrapper methods that's specific to the log level. E.g. `info()` or `error()`.
+* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren't familiar with the codebase.
+* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what's happening, since they may not speak the same language as the site owner.
 * Ideally, each log entry message should be a single line (i.e. no line breaks within the message string). Additional lines or extra data should be put in the context array.
 * Avoid outputting structured data in the message string. Put it in a key in the context array instead. The logger will handle converting it to JSON and making it legible in the log viewer.
 * If you need to include a stack trace, let the logger generate it for you.

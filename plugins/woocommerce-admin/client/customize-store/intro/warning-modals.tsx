@@ -194,3 +194,54 @@ export const StartOverWarningModal = ( {
 		</Modal>
 	);
 };
+
+export const ThemeSwitchWarningModal = ( {
+	setIsModalOpen,
+	redirectToCYSFlow,
+}: {
+	setIsModalOpen: ( arg0: boolean ) => void;
+	redirectToCYSFlow: () => void;
+} ) => {
+	return (
+		<Modal
+			className={
+				'woocommerce-customize-store__theme-switch-warning-modal'
+			}
+			title={ __(
+				'Are you sure you want to design a new theme?',
+				'woocommerce'
+			) }
+			onRequestClose={ () => setIsModalOpen( false ) }
+			shouldCloseOnClickOutside={ false }
+		>
+			<p>
+				{ __(
+					'Your active theme will be changed and you could lose any changes you’ve made to it.',
+					'woocommerce'
+				) }
+			</p>
+			<div className="woocommerce-customize-store__theme-switch-warning-modal-footer">
+				<Button
+					onClick={ () => {
+						setIsModalOpen( false );
+					} }
+					variant="link"
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</Button>
+				<Button
+					onClick={ () => {
+						setIsModalOpen( false );
+						recordEvent(
+							'customize_your_store_agree_to_theme_switch_click'
+						);
+						redirectToCYSFlow();
+					} }
+					variant="primary"
+				>
+					{ __( 'Design a new theme', 'woocommerce' ) }
+				</Button>
+			</div>
+		</Modal>
+	);
+};

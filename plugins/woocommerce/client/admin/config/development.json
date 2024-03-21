@@ -5,7 +5,7 @@
 		"product-block-editor": true,
 		"coupons": true,
 		"core-profiler": true,
-		"customize-store": false,
+		"customize-store": true,
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
@@ -38,6 +38,6 @@
 		"wc-pay-promotion": true,
 		"wc-pay-welcome-page": true,
 		"async-product-editor-category-field": true,
-		"launch-your-store": false
+		"launch-your-store": true
 	}
 }

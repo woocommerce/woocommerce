@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
 use WP_Block_Editor_Context;
 
@@ -393,7 +393,8 @@ class Init {
 					$hidden = get_user_meta( $object['id'], $attr, true );
 
 					if ( is_array( $hidden ) ) {
-						return $hidden;
+						// Ensures to always return a string array.
+						return array_values( $hidden );
 					}
 
 					return array( 'postcustom' );

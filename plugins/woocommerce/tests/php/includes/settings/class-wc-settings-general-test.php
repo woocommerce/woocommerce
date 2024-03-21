@@ -101,8 +101,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		$currencies       = $currency_setting['options'];
 
 		$expected = array(
-			'c1' => 'Currency 1 (symbol for c1)',
-			'c2' => 'Currency 2 (symbol for c2)',
+			'c1' => 'Currency 1 (symbol for c1) — c1',
+			'c2' => 'Currency 2 (symbol for c2) — c2',
 		);
 
 		$this->assertEquals( $expected, $currencies );

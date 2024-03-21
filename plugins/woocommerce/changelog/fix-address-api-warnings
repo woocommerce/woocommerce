@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Prevent warnings when checking out with additional checkout fields

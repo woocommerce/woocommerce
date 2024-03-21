@@ -49,8 +49,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 */
 	public function render_block_template() {
 		if (
-			! is_embed() && is_checkout() &&
-			! BlockTemplateUtils::theme_has_template( self::SLUG )
+			! is_embed() && is_checkout()
 		) {
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

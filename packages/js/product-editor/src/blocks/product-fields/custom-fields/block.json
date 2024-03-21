@@ -21,7 +21,5 @@
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
-	},
-	"usesContext": [ "postType" ],
-	"editorStyle": "file:./editor.css"
+	}
 }

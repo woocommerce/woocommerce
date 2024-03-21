@@ -2,14 +2,14 @@
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Contributors](#contributors)
-- [Internal developers](#internal-developers)
-- [Third-party developers](#third-party-developers)
-- [Designers](#designers)
-- [Developer Resources](#developer-resources)
-	- [Tools](#tools)
-	- [Articles](#articles)
-	- [Tutorials](#tutorials)
+-   [Contributors](#contributors)
+-   [Internal developers](#internal-developers)
+-   [Third-party developers](#third-party-developers)
+-   [Designers](#designers)
+-   [Developer Resources](#developer-resources)
+    -   [Tools](#tools)
+    -   [Articles](#articles)
+    -   [Tutorials](#tutorials)
 
 The WooCommerce Blocks Handbook provides documentation for designers and developers on how to extend or contribute to blocks, and how internal developers should handle new releases.
 
@@ -152,4 +152,3 @@ The following tutorials from [developer.woo.com](https://developer.woo.com/categ
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
 
 <!-- /FEEDBACK -->
-

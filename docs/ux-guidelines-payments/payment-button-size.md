@@ -16,7 +16,7 @@ Height for payment buttons ranges from 40px (Small) to 56px (Large). The default
 Payment buttons consist of up to three elements: a button component, payment logo, and optional label.
 [Anatomy.png]
 
-Don’t place any text outside the surface area of the button.
+Don't place any text outside the surface area of the button.
 
 ![Cart layout 2](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Cart-layout-2.png)
 
@@ -40,7 +40,7 @@ Make payment buttons the same size, no bigger or smaller than other payment butt
 
 ### Button width
 
-Use the same width size for all payment buttons. Don’t make the width larger or smaller than other payment buttons.
+Use the same width size for all payment buttons. Don't make the width larger or smaller than other payment buttons.
 
 ![button width.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Button-width.png)
 
@@ -50,13 +50,13 @@ Buttons have a minimum width to ensure readability.
 
 ![Layout and spacing-2.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Layout-and-spacing-2.png)
 
-Follow the minimum width of each payment button size. Don’t squeeze payment buttons in a single line.
+Follow the minimum width of each payment button size. Don't squeeze payment buttons in a single line.
 
 ![Minimum width.png](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/Minimum-width.png)
 
 ### Button Shape
 
-Use the same corner radius for all payment buttons. Don’t make the corner radius larger or smaller than other payment buttons.
+Use the same corner radius for all payment buttons. Don't make the corner radius larger or smaller than other payment buttons.
 
 - Default corner radius: 4px
 - Maximum corner radius: ½ button height
