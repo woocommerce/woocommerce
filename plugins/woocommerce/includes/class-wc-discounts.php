@@ -339,6 +339,7 @@ class WC_Discounts {
 		 *
 		 * This filter allows you to modify the items that a coupon will be applied to before the discount calculations take place.
 		 *
+		 * @since 8.8.0
 		 * @param array            $items_to_apply The items that the coupon will be applied to.
 		 * @param WC_Coupon        $coupon The coupon object.
 		 * @param WC_Discounts     $this The discounts instance.
