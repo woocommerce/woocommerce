@@ -67,8 +67,6 @@ const ProductCollectionContent = (
 				queryId = attributes.queryId;
 			}
 
-			console.log( queryId );
-
 			setAttributes( {
 				...DEFAULT_ATTRIBUTES,
 				query: {
