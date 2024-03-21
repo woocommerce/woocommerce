@@ -81,13 +81,15 @@ class CustomerAccount extends AbstractBlock {
 	protected function should_unhook_block( $hooked_blocks, $position, $anchor_block, $context ) {
 		$block_name      = $this->namespace . '/' . $this->block_name;
 		$block_is_hooked = in_array( $block_name, $hooked_blocks, true );
-		$active_theme    = wp_get_theme()->get( 'Name' );
 
-		$exclude_themes = array( 'Twenty Twenty-Two', 'Twenty Twenty-Three' );
+		if ( $block_is_hooked ) {
+			$active_theme   = wp_get_theme()->get( 'Name' );
+			$exclude_themes = array( 'Twenty Twenty-Two', 'Twenty Twenty-Three' );
 
-		if ( $block_is_hooked && in_array( $active_theme, $exclude_themes, true ) ) {
-			$key = array_search( $block_name, $hooked_blocks, true );
-			unset( $hooked_blocks[ $key ] );
+			if ( in_array( $active_theme, $exclude_themes, true ) ) {
+				$key = array_search( $block_name, $hooked_blocks, true );
+				unset( $hooked_blocks[ $key ] );
+			}
 		}
 
 		return $hooked_blocks;
