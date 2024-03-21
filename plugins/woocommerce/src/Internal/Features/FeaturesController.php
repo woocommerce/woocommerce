@@ -701,6 +701,10 @@ class FeaturesController {
 				continue;
 			}
 
+			if ( 'new_navigation' === $id && 'yes' !== get_option( $this->feature_enable_option_name( $id ), 'no' ) ) {
+				continue;
+			}
+
 			if ( isset( $features[ $id ]['disable_ui'] ) && $features[ $id ]['disable_ui'] ) {
 				continue;
 			}
@@ -765,25 +769,15 @@ class FeaturesController {
 			$disabled = true;
 			$desc_tip = __( 'WooCommerce Admin has been disabled', 'woocommerce' );
 		} elseif ( 'new_navigation' === $feature_id ) {
-			$disabled = ! $this->feature_is_enabled( $feature_id );
-
-			if ( $disabled ) {
-				$update_text = sprintf(
-					// translators: 1: line break tag.
-					__( '%1$s The development of this feature is currently on hold.', 'woocommerce' ),
-					'<br/>'
-				);
-			} else {
-				$update_text = sprintf(
-					// translators: 1: line break tag.
-					__(
-						'%1$s This navigation will soon become unavailable while we make necessary improvements.
-			             If you turn it off now, you will not be able to turn it back on.',
-						'woocommerce'
-					),
-					'<br/>'
-				);
-			}
+			$update_text = sprintf(
+				// translators: 1: line break tag.
+				__(
+					'%1$s This navigation will soon become unavailable while we make necessary improvements.
+									If you turn it off now, you will not be able to turn it back on.',
+					'woocommerce'
+				),
+				'<br/>'
+			);
 
 			$needs_update = version_compare( get_bloginfo( 'version' ), '5.6', '<' );
 			if ( $needs_update && current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
