@@ -24,11 +24,6 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-// In order to prevent collisions, we're going to offset the queryID of blocks
-// in patterns. Take care to check the offset so that we only do this
-// once when the block is added to the page..
-const PATTERN_QUERY_ID_OFFSET = 10000;
-
 const ProductCollectionContent = (
 	props: ProductCollectionEditComponentProps
 ) => {
@@ -69,17 +64,10 @@ const ProductCollectionContent = (
 				'core/block'
 			);
 			if ( blockParents.length > 0 ) {
-				// We use an offset to identify instances in patterns so that
-				// we know whether or not the ID needs to be initialized.
-				if ( attributes.queryId >= PATTERN_QUERY_ID_OFFSET ) {
-					queryId = attributes.queryId;
-				} else {
-					queryId =
-						PATTERN_QUERY_ID_OFFSET +
-						// Randomize the queryId to avoid potential collisions.
-						Math.floor( Math.random() * 1000000 );
-				}
+				queryId = attributes.queryId;
 			}
+
+			console.log( queryId );
 
 			setAttributes( {
 				...DEFAULT_ATTRIBUTES,
