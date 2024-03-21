@@ -59,7 +59,7 @@ const GeneralSettings = () => {
 					<StyledNotice status="warning" isDismissible={ false }>
 						{ createInterpolateElement(
 							__(
-								'Enabling this will produce duplicate options at checkout. Remove the local pickup shipping method from your <a>shipping zones</a>.',
+								"By enabling Local Pickup with more valuable features for your store, it's recommended that you remove the legacy Local Pickup option from your <a>shipping zones</a>.",
 								'woocommerce'
 							),
 							{
@@ -67,8 +67,6 @@ const GeneralSettings = () => {
 									// eslint-disable-next-line jsx-a11y/anchor-has-content
 									<a
 										href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping` }
-										target="_blank"
-										rel="noopener noreferrer"
 									/>
 								),
 							}

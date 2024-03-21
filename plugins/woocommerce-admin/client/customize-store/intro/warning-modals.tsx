@@ -197,10 +197,10 @@ export const StartOverWarningModal = ( {
 
 export const ThemeSwitchWarningModal = ( {
 	setIsModalOpen,
-	customizeStoreDesignUrl,
+	redirectToCYSFlow,
 }: {
 	setIsModalOpen: ( arg0: boolean ) => void;
-	customizeStoreDesignUrl: string;
+	redirectToCYSFlow: () => void;
 } ) => {
 	return (
 		<Modal
@@ -231,11 +231,11 @@ export const ThemeSwitchWarningModal = ( {
 				</Button>
 				<Button
 					onClick={ () => {
-						window.location.href = customizeStoreDesignUrl;
 						setIsModalOpen( false );
 						recordEvent(
 							'customize_your_store_agree_to_theme_switch_click'
 						);
+						redirectToCYSFlow();
 					} }
 					variant="primary"
 				>

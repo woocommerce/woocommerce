@@ -67,10 +67,7 @@ test.describe.serial( 'Disable block product editor', () => {
 		} catch ( e ) {}
 
 		// turn off block product editor from the header
-		await page
-			.locator( '.components-dropdown-menu' )
-			.getByRole( 'button', { name: 'Options' } )
-			.click();
+		await page.locator( 'button[aria-label="Options"]' ).click();
 		await page
 			.getByRole( 'menuitem', {
 				name: 'Turn off the new product form',
