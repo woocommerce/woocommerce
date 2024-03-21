@@ -196,7 +196,7 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
   
   evaluate-project-jobs:
-    # In order to add a required status check we need a consistent job that we can grab onto.
+    # To add a required status check, we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
     # rely on any specific job being present. We can get around this limitation by
     # using a job that runs after all the others and either passes or fails based
@@ -208,7 +208,8 @@ jobs:
       'project-lint-jobs',
       'project-default-test-jobs',
       'project-e2e-test-jobs',
-      'project-api-test-jobs'
+      'project-api-test-jobs',
+      'project-performance-test-jobs'
     ]
     if: ${{ always() }}
     steps:
