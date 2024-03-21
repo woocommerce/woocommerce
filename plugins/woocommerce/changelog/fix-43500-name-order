@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Ensure the name and address are ordered according to the clocale in the customer card in the checkout block
