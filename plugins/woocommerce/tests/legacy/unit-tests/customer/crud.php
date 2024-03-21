@@ -400,6 +400,18 @@ class WC_Tests_CustomerCRUD extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting the default location with no default address set but specific countries allowed.
+	 */
+	public function test_default_location_with_specific_allowed_countries() {
+		delete_option( 'woocommerce_default_customer_address' );
+		update_option( 'woocommerce_allowed_countries', 'specific' );
+		update_option( 'woocommerce_specific_allowed_countries', array( 'DE', 'AT', 'CH' ) );
+		$customer_default_location = wc_get_customer_default_location();
+		$this->assertEquals( 'DE', $customer_default_location['country'] );
+		$this->assertEquals( '', $customer_default_location['state'] );
+	}
+
+	/**
 	 * Test setting a customer's location (multiple address fields at once)
 	 * @since 3.0.0
 	 */
