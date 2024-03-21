@@ -11,8 +11,8 @@ import { Button } from '@wordpress/components';
  */
 import type {
 	ProductCollectionAttributes,
-	ProductCollectionEditComponentProps,
 	ProductCollectionQuery,
+	ProductCollectionEditComponentProps,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
@@ -32,8 +32,8 @@ const ProductCollectionContent = ( {
 		isPreview: false,
 		previewMessage: '',
 	} );
+	// Running handlePreviewState callback function provided by Collection, if it exists.
 	useEffect( () => {
-		// Allow collections to handle preview state.
 		handlePreviewState?.( {
 			previewState,
 			setPreviewState,
