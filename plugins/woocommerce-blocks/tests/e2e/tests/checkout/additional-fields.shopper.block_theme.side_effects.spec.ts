@@ -265,8 +265,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				}
 			);
 
-			await checkoutPageObject.waitForCustomerDataUpdate();
-
 			// Fill select fields "manually" (Not part of "fillInCheckoutWithTestData"). This is a workaround for select
 			// fields until we recreate the Combobox component. This is because the aria-label includes the value so getting
 			// by label alone is not reliable unless we know the value.
@@ -283,8 +281,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
 
-			await checkoutPageObject.waitForCustomerDataUpdate();
-
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
 				.getByRole( 'group', {
@@ -298,7 +294,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'super-wide' );
-
 			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
