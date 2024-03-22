@@ -82,8 +82,15 @@ describe( 'formatAddress', () => {
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'John Doe',
-				address:
-					'WooCommerce, 123 Yonge St, Apt 1, Toronto, Ontario, M5B1M4, Canada',
+				address: [
+					'WooCommerce',
+					'123 Yonge St',
+					'Apt 1',
+					'Toronto',
+					'Ontario',
+					'M5B1M4',
+					'Canada',
+				],
 			},
 		],
 		// Switch name so it's not the first thing.
@@ -92,8 +99,15 @@ describe( 'formatAddress', () => {
 			'{company}\n{name}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'John Doe',
-				address:
-					'WooCommerce, 123 Yonge St, Apt 1, Toronto, Ontario, M5B1M4, Canada',
+				address: [
+					'WooCommerce',
+					'123 Yonge St',
+					'Apt 1',
+					'Toronto',
+					'Ontario',
+					'M5B1M4',
+					'Canada',
+				],
 			},
 		],
 		// Try with upper case name.
@@ -102,8 +116,15 @@ describe( 'formatAddress', () => {
 			'{company}\n{name_upper}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'JOHN DOE',
-				address:
-					'WooCommerce, 123 Yonge St, Apt 1, Toronto, Ontario, M5B1M4, Canada',
+				address: [
+					'WooCommerce',
+					'123 Yonge St',
+					'Apt 1',
+					'Toronto',
+					'Ontario',
+					'M5B1M4',
+					'Canada',
+				],
 			},
 		],
 		// Try with upper case first name and regular last name.
@@ -112,8 +133,15 @@ describe( 'formatAddress', () => {
 			'{company}\n{last_name} {first_name_upper}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'Doe JOHN',
-				address:
-					'WooCommerce, 123 Yonge St, Apt 1, Toronto, Ontario, M5B1M4, Canada',
+				address: [
+					'WooCommerce',
+					'123 Yonge St',
+					'Apt 1',
+					'Toronto',
+					'Ontario',
+					'M5B1M4',
+					'Canada',
+				],
 			},
 		],
 		// Try with regular first name and upper case last name.
@@ -122,8 +150,15 @@ describe( 'formatAddress', () => {
 			'{company}\n{last_name} {first_name_upper}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'Doe JOHN',
-				address:
-					'WooCommerce, 123 Yonge St, Apt 1, Toronto, Ontario, M5B1M4, Canada',
+				address: [
+					'WooCommerce',
+					'123 Yonge St',
+					'Apt 1',
+					'Toronto',
+					'Ontario',
+					'M5B1M4',
+					'Canada',
+				],
 			},
 		],
 		// Try with upper case values.
@@ -132,8 +167,15 @@ describe( 'formatAddress', () => {
 			'{company_upper}\n{name}\n{address_1_upper}\n{address_2_upper}\n{city_upper}\n{state_upper}\n{postcode_upper}\n{country_upper}',
 			{
 				name: 'John Doe',
-				address:
-					'WOOCOMMERCE, 123 YONGE ST, APT 1, TORONTO, ONTARIO, M5B1M4, CANADA',
+				address: [
+					'WOOCOMMERCE',
+					'123 YONGE ST',
+					'APT 1',
+					'TORONTO',
+					'ONTARIO',
+					'M5B1M4',
+					'CANADA',
+				],
 			},
 		],
 		// Try with missing values.
@@ -142,7 +184,13 @@ describe( 'formatAddress', () => {
 			'{company_upper}\n{name}\n\n\n{address_2_upper}\n{city_upper}\n{postcode_upper}\n{country_upper}',
 			{
 				name: 'John Doe',
-				address: 'WOOCOMMERCE, APT 1, TORONTO, M5B1M4, CANADA',
+				address: [
+					'WOOCOMMERCE',
+					'APT 1',
+					'TORONTO',
+					'M5B1M4',
+					'CANADA',
+				],
 			},
 		],
 		// Try with an empty string.
@@ -151,7 +199,7 @@ describe( 'formatAddress', () => {
 			'',
 			{
 				name: '',
-				address: '',
+				address: [],
 			},
 		],
 		// Try with a badly mangled string.
@@ -160,8 +208,12 @@ describe( 'formatAddress', () => {
 			'{company_uppe}\n{name}\n\n\naddress_2_upper!\n{city_upper}£postcode_upper}\n{country_upper',
 			{
 				name: 'John Doe',
-				address:
-					'{company_uppe}, address_2_upper!, TORONTO£postcode_upper}, {country_upper',
+				address: [
+					'{company_uppe}',
+					'address_2_upper!',
+					'TORONTO£postcode_upper}',
+					'{country_upper',
+				],
 			},
 		],
 		// Test empty address values.
@@ -182,7 +234,7 @@ describe( 'formatAddress', () => {
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: '',
-				address: 'WooCommerce',
+				address: [ 'WooCommerce' ],
 			},
 		],
 		// Test partial address values.
@@ -203,7 +255,7 @@ describe( 'formatAddress', () => {
 			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
 			{
 				name: 'Jon',
-				address: 'WooCommerce, Toronto',
+				address: [ 'WooCommerce', 'Toronto' ],
 			},
 		],
 	] )(
@@ -211,7 +263,7 @@ describe( 'formatAddress', () => {
 		( address, format, expected ) => {
 			const formattedAddress = formatAddress( address, format );
 			expect( formattedAddress.name ).toBe( expected.name );
-			expect( formattedAddress.address ).toBe( expected.address );
+			expect( formattedAddress.address ).toEqual( expected.address );
 		}
 	);
 } );
