@@ -625,8 +625,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 	} );
 
 	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
-																							  page,
-																						  } ) => {
+		page,
+	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -671,7 +671,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 		await expect(
 			page.getByText(
-				'Please enter a valid email to use coupon code "email-restricted".'
+				'Please enter a valid email at checkout to use coupon code "email-restricted".'
 			)
 		).toBeVisible();
 	} );
