@@ -32,7 +32,7 @@ const ProductCollectionContent = ( {
 		isPreview: false,
 		previewMessage: '',
 	} );
-	// Running handlePreviewState callback function provided by Collection, if it exists.
+	// Running handlePreviewState function provided by Collection, if it exists.
 	useEffect( () => {
 		handlePreviewState?.( {
 			setPreviewState,
