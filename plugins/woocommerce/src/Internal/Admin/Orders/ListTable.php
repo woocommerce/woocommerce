@@ -1352,7 +1352,7 @@ class ListTable extends WP_List_Table {
 			}
 
 			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			++$changed;
+			$changed++;
 		}
 
 		return $changed;
