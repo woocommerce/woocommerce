@@ -95,8 +95,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
-	console.log( context.flowType );
+
 	const isDefaultTheme = activeTheme === 'twentytwentyfour';
+
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';

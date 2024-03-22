@@ -152,7 +152,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 		).toBeVisible();
 	} );
 
-	test.only( 'it shows the "no AI" banner, when the task is completed and the theme is not the default', async ( {
+	test( 'it shows the "no AI" banner, when the task is completed and the theme is not the default', async ( {
 		page,
 		baseURL,
 	} ) => {
