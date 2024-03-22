@@ -253,6 +253,7 @@ class Checkout extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
+		$this->asset_data_registry->add( 'addressFormats', WC()->countries->get_address_formats(), true );
 		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
