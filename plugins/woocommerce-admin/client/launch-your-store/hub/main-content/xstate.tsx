@@ -26,7 +26,7 @@ export type MainContentMachineEvents =
 	| { type: 'SHOW_LOADING' };
 
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
-	return createQueryParamsListener( 'content' )( sendBack );
+	return createQueryParamsListener( 'content', sendBack );
 } );
 export const mainContentMachine = setup( {
 	types: {} as {
@@ -36,9 +36,9 @@ export const mainContentMachine = setup( {
 	actions: {
 		updateQueryParams: (
 			_,
-			{ sidebar, content }: { sidebar?: string; content?: string }
+			params: { sidebar?: string; content?: string }
 		) => {
-			updateQueryParams( { sidebar, content } );
+			updateQueryParams( params );
 		},
 	},
 	guards: {
@@ -80,12 +80,6 @@ export const mainContentMachine = setup( {
 		},
 		sitePreview: {
 			id: 'sitePreview',
-			entry: [
-				{
-					type: 'updateQueryParams',
-					params: { content: 'site-preview' },
-				},
-			],
 			meta: {
 				component: SitePreviewPage,
 			},

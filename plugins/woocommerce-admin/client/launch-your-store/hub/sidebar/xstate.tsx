@@ -30,7 +30,7 @@ export type SidebarMachineEvents =
 	| { type: 'LAUNCH_STORE_SUCCESS' };
 
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
-	return createQueryParamsListener( 'sidebar' )( sendBack );
+	return createQueryParamsListener( 'sidebar', sendBack );
 } );
 
 export const sidebarMachine = setup( {
@@ -57,9 +57,9 @@ export const sidebarMachine = setup( {
 		),
 		updateQueryParams: (
 			_,
-			{ sidebar, content }: { sidebar?: string; content?: string }
+			params: { sidebar?: string; content?: string }
 		) => {
-			updateQueryParams( { sidebar, content } );
+			updateQueryParams( params );
 		},
 	},
 	guards: {
@@ -116,12 +116,6 @@ export const sidebarMachine = setup( {
 				},
 				launchYourStoreHub: {
 					tags: 'sidebar-visible',
-					entry: [
-						{
-							type: 'updateQueryParams',
-							params: { sidebar: 'hub' },
-						},
-					],
 					meta: {
 						component: LaunchYourStoreHubSidebar,
 					},
