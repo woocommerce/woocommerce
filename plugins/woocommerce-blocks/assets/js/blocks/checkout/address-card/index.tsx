@@ -34,7 +34,7 @@ const AddressCard = ( {
 		'addressFormats',
 		{}
 	);
-	let formatToUse = 'default';
+	let formatToUse = addressFormats?.default || '';
 	if ( objectHasProp( addressFormats, address?.country ) ) {
 		formatToUse = addressFormats[ address.country ];
 	}
