@@ -34,7 +34,7 @@ const ProductCollectionPlaceholder = (
 
 	const onCollectionClick = ( collectionName: CollectionName ) => {
 		recordEvent(
-			'blocks_product_collection_placeholder_collection_choose',
+			'blocks_product_collection_collection_chosen_from_placeholder',
 			{
 				collection: collectionName,
 				location: tracksLocation,
