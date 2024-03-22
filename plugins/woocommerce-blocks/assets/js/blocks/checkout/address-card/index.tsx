@@ -30,8 +30,6 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const formattedCountry = getFormattedCountry( address );
-	const formattedState = getFormattedState( address );
 	const addressFormats = getSetting< Record< string, string > >(
 		'addressFormats',
 		{}
