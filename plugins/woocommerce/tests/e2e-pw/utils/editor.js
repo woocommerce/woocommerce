@@ -10,8 +10,8 @@ const closeWelcomeModal = async ( { page } ) => {
 };
 
 const disableWelcomeModal = async ( { page } ) => {
-	await page.waitForLoadState();
-	await page.waitForFunction( () => window?.wp?.data );
+	await page.waitForLoadState( 'networkidle' );
+	// await page.waitForFunction( () => window?.wp?.data );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
 		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
