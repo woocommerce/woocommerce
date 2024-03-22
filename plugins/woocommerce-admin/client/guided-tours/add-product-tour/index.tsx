@@ -289,6 +289,7 @@ export const ProductTour = () => {
 		},
 		onNextStepHandler: ( stepIndex ) => {
 			const stepName = tourConfig.steps[ stepIndex ].meta.name;
+			tourConfig.steps?.[ stepIndex + 1 ].meta.onBeforeStep?.();
 
 			// This records all "next" steps and ignores the final "publish" step.
 			recordEvent( 'walkthrough_product_step_completed', {

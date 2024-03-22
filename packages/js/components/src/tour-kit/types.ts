@@ -33,6 +33,7 @@ export interface WooStep extends Step {
 			text?: string;
 			isVisible?: boolean;
 		};
+		onBeforeStep?: () => void;
 	};
 	/** Auto apply the focus state for the element. Default to null */
 	focusElement?: {
