@@ -65,6 +65,12 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	public function modify_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
 		$parsed_hooked_block['attrs']['displayStyle'] = 'icon_only';
+
+		/*
+		* The Mini Cart block (which is hooked into the header) has a margin of 0.5em on the left side.
+		* We want to match that margin for the Customer Account block so it looks consistent.
+		*/
+		$parsed_hooked_block['attrs']['style']['spacing']['margin']['left'] = '0.5em';
 		return $parsed_hooked_block;
 	}
 
@@ -123,9 +129,11 @@ class CustomerAccount extends AbstractBlock {
 			),
 		);
 
+		$label_markup = self::ICON_ONLY === $attributes['displayStyle'] ? '' : '<span class="label">' . wp_kses( $this->render_label( $attributes ), array() ) . '</span>';
+
 		return "<div class='wp-block-woocommerce-customer-account " . esc_attr( $classes_and_styles['classes'] ) . "' style='" . esc_attr( $classes_and_styles['styles'] ) . "'>
 			<a href='" . esc_attr( $account_link ) . "'>
-				" . wp_kses( $this->render_icon( $attributes ), $allowed_svg ) . "<span class='label'>" . wp_kses( $this->render_label( $attributes ), array() ) . '</span>
+				" . wp_kses( $this->render_icon( $attributes ), $allowed_svg ) . $label_markup . '
 			</a>
 		</div>';
 	}

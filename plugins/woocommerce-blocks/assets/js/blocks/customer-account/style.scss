@@ -31,7 +31,10 @@
 		.icon {
 			height: em(16px);
 			width: em(16px);
-			margin-right: em(5px);
+		}
+
+		.label {
+			margin-left: em(5px);
 		}
 
 		.wc-block-customer-account__account-icon {
