@@ -81,7 +81,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await expect( products ).toHaveCount( 9 );
 	} );
 
-	test.only( 'should show only products that match the filter', async ( {
+	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -116,7 +116,6 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 
 		const img = allProductsBlock.locator( 'img' ).first();
-		await page.pause();
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
