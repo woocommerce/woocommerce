@@ -75,7 +75,6 @@ class ShippingController {
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
-		add_filter( 'wc_shipping_enabled', array( $this, 'force_shipping_enabled' ), 100, 1 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
 
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
@@ -97,19 +96,6 @@ class ShippingController {
 			return 'no';
 		}
 		return $value;
-	}
-
-	/**
-	 * Force shipping to be enabled if the Checkout block is in use on the Checkout page.
-	 *
-	 * @param boolean $enabled Whether shipping is currently enabled.
-	 * @return boolean Whether shipping should continue to be enabled/disabled.
-	 */
-	public function force_shipping_enabled( $enabled ) {
-		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
-			return true;
-		}
-		return $enabled;
 	}
 
 	/**
