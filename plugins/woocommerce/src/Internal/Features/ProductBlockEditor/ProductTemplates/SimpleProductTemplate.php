@@ -600,10 +600,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$pricing_column_1->add_block(
 			array(
-				'id'         => 'product-pricing-regular-price',
-				'blockName'  => 'woocommerce/product-regular-price-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'                => 'product-pricing-regular-price',
+				'blockName'         => 'woocommerce/product-regular-price-field',
+				'order'             => 10,
+				'attributes'        => array(
 					'name'  => 'regular_price',
 					'label' => __( 'List price', 'woocommerce' ),
 					'help'  => $is_calc_taxes_enabled ? null : sprintf(
@@ -632,10 +632,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$pricing_column_2->add_block(
 			array(
-				'id'         => 'product-pricing-sale-price',
-				'blockName'  => 'woocommerce/product-sale-price-field',
-				'order'      => 10,
-				'attributes' => array(
+				'id'                => 'product-pricing-sale-price',
+				'blockName'         => 'woocommerce/product-sale-price-field',
+				'order'             => 10,
+				'attributes'        => array(
 					'label' => __( 'Sale price', 'woocommerce' ),
 				),
 				'disableConditions' => array(
@@ -788,9 +788,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'        => 'product-sku-field',
-				'blockName' => 'woocommerce/product-sku-field',
-				'order'     => 10,
+				'id'                => 'product-sku-field',
+				'blockName'         => 'woocommerce/product-sku-field',
+				'order'             => 10,
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -802,10 +802,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$manage_stock = 'yes' === get_option( 'woocommerce_manage_stock' );
 		$product_inventory_inner_section->add_block(
 			array(
-				'id'             => 'product-track-stock',
-				'blockName'      => 'woocommerce/product-toggle-field',
-				'order'          => 20,
-				'attributes'     => array(
+				'id'                => 'product-track-stock',
+				'blockName'         => 'woocommerce/product-toggle-field',
+				'order'             => 20,
+				'attributes'        => array(
 					'label'        => __( 'Track inventory', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => ! $manage_stock,
@@ -816,7 +816,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					) : null,
 				),
-				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions'    => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
@@ -858,10 +858,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		}
 		$product_inventory_section->add_block(
 			array(
-				'id'             => 'product-stock-status',
-				'blockName'      => 'woocommerce/product-radio-field',
-				'order'          => 10,
-				'attributes'     => array(
+				'id'                => 'product-stock-status',
+				'blockName'         => 'woocommerce/product-radio-field',
+				'order'             => 10,
+				'attributes'        => array(
 					'title'    => __( 'Stock status', 'woocommerce' ),
 					'property' => 'stock_status',
 					'options'  => array(
@@ -879,7 +879,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						),
 					),
 				),
-				'hideConditions' => $product_stock_status_hide_conditions,
+				'hideConditions'    => $product_stock_status_hide_conditions,
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -1059,9 +1059,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 		$product_fee_and_dimensions_section->add_block(
 			array(
-				'id'        => 'product-shipping-class',
-				'blockName' => 'woocommerce/product-shipping-class-field',
-				'order'     => 10,
+				'id'                => 'product-shipping-class',
+				'blockName'         => 'woocommerce/product-shipping-class-field',
+				'order'             => 10,
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
