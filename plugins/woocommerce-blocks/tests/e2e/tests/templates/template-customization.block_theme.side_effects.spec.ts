@@ -21,9 +21,6 @@ for ( const testData of testToRun ) {
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.beforeAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
 		test.afterAll( async ( { requestUtils } ) => {
 			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
