@@ -3,9 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { ALLOWED_COUNTRIES, ALLOWED_STATES } from '@woocommerce/block-settings';
-import type {
-	CartShippingAddress,
-	CartBillingAddress,
+import {
+	type CartShippingAddress,
+	type CartBillingAddress,
+	isObject,
+	isString,
 } from '@woocommerce/types';
 import { FormFieldsConfig } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -26,14 +28,13 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const formattedCountry =
-		typeof ALLOWED_COUNTRIES[ address.country ] === 'string'
-			? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
-			: '';
+	const formattedCountry = isString( ALLOWED_COUNTRIES[ address.country ] )
+		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
+		: '';
 
 	const formattedState =
-		typeof ALLOWED_STATES[ address.country ] === 'object' &&
-		typeof ALLOWED_STATES[ address.country ][ address.state ] === 'string'
+		isObject( ALLOWED_STATES[ address.country ] ) &&
+		isString( ALLOWED_STATES[ address.country ][ address.state ] )
 			? decodeEntities(
 					ALLOWED_STATES[ address.country ][ address.state ]
 			  )
