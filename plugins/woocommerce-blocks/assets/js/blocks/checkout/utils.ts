@@ -35,5 +35,25 @@ export const getFormattedCountry = (
 		: address.country;
 };
 
+/**
+ * Extract the name format from the parent address format.
+ */
+export const extractName = ( format: string ): string => {
+	// Name can be a few different formats:
+	const nameTokens = [
+		'{name}',
+		'{name_upper}',
+		'{first_name} {last_name}',
+		'{last_name} {first_name}',
+		'{first_name_upper} {last_name_upper}',
+		'{last_name_upper} {first_name_upper}',
+		'{first_name} {last_name_upper}',
+		'{first_name_upper} {last_name}',
+		'{last_name} {first_name_upper}',
+		'{last_name_upper} {first_name}',
+	];
+	return nameTokens.find( ( token ) => format.indexOf( token ) >= 0 ) || '';
+};
+
 
 export const reloadPage = (): void => void window.location.reload( true );
