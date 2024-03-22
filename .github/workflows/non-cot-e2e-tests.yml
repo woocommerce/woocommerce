@@ -1,6 +1,5 @@
 name: Run tests against PR in an environment with HPOS disabled
 on:
-    pull_request:
     push:
       branches:
         - 'trunk'
