@@ -35,7 +35,6 @@ const ProductCollectionContent = ( {
 	// Running handlePreviewState callback function provided by Collection, if it exists.
 	useEffect( () => {
 		handlePreviewState?.( {
-			previewState,
 			setPreviewState,
 		} );
 

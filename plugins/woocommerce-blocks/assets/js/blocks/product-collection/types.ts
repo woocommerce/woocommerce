@@ -149,7 +149,6 @@ export interface PreviewState {
 }
 
 export interface HandlePreviewStateArgs {
-	previewState: PreviewState;
 	setPreviewState: React.Dispatch< React.SetStateAction< PreviewState > >;
 }
 
