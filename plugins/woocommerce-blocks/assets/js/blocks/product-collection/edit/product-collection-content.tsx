@@ -20,10 +20,7 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const ProductCollectionContent = ( {
-	handlePreviewState,
-	...props
-}: ProductCollectionEditComponentProps ) => {
+const usePreviewState = ( handlePreviewState ) => {
 	// I have implemented this internal state to handle the preview state.
 	// As you can see it contains isPreview and previewMessage.
 	// - isPreview is a boolean to check if the block is in preview mode.
@@ -32,6 +29,7 @@ const ProductCollectionContent = ( {
 		isPreview: false,
 		previewMessage: '',
 	} );
+
 	// Running handlePreviewState function provided by Collection, if it exists.
 	useEffect( () => {
 		handlePreviewState?.( {
@@ -41,6 +39,15 @@ const ProductCollectionContent = ( {
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
+
+	return [ previewState, setPreviewState ];
+};
+
+const ProductCollectionContent = ( {
+	handlePreviewState,
+	...props
+}: ProductCollectionEditComponentProps ) => {
+	const [ previewState ] = usePreviewState( handlePreviewState );
 
 	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
