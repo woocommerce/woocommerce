@@ -18,7 +18,7 @@ const steps = [
 	'Opening the doors',
 ];
 
-test.describe.skip( 'Assembler - Loading Page', () => {
+test.describe( 'Assembler - Loading Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'should display loading screen and steps on first run', async ( {
