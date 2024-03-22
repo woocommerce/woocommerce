@@ -8,11 +8,7 @@ import {
 	objectHasProp,
 } from '@woocommerce/types';
 import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
-import {
-	formatAddress,
-	getFormattedCountry,
-	getFormattedState,
-} from '@woocommerce/blocks/checkout/utils';
+import { formatAddress } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -34,6 +30,7 @@ const AddressCard = ( {
 		'addressFormats',
 		{}
 	);
+
 	let formatToUse = addressFormats?.default || '';
 	if ( objectHasProp( addressFormats, address?.country ) ) {
 		formatToUse = addressFormats[ address.country ];
