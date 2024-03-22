@@ -798,6 +798,8 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
+
+		$manage_stock = 'yes' === get_option( 'woocommerce_manage_stock' );
 		$product_inventory_inner_section->add_block(
 			array(
 				'id'             => 'product-track-stock',
@@ -806,19 +808,24 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes'     => array(
 					'label'        => __( 'Track inventory', 'woocommerce' ),
 					'property'     => 'manage_stock',
-					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
-					'disabledCopy' => sprintf(
+					'disabled'     => ! $manage_stock,
+					'disabledCopy' => ! $manage_stock ? sprintf(
 						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
 						__( 'Per your %1$sstore settings%2$s, inventory management is <strong>disabled</strong>.', 'woocommerce' ),
 						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=products&section=inventory' ) . '" target="_blank" rel="noreferrer">',
 						'</a>'
-					),
+					) : null,
 				),
 				'hideConditions' => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
 				) : null,
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
 			)
 		);
 		$product_inventory_quantity_hide_conditions = array(
