@@ -25,6 +25,10 @@ for ( const testData of testToRun ) {
 			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
 
+		test.beforeEach( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( testData.templateType );
+		} );
+
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
@@ -45,7 +49,6 @@ for ( const testData of testToRun ) {
 			await editor.saveSiteEditorEntities();
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
-			await page.waitForTimeout( 1000 );
 
 			// Edit the theme template. The theme template is not
 			// directly available from the UI, because the customized
@@ -80,6 +83,8 @@ for ( const testData of testToRun ) {
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
+
+			await page.waitForTimeout( 1000 );
 			await testData.visitPage( { frontendUtils, page } );
 
 			await expect(
@@ -88,7 +93,6 @@ for ( const testData of testToRun ) {
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 
 			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
-			await page.waitForTimeout( 1000 );
 		} );
 	} );
 }
