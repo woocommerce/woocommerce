@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Using ActionScheduler to schedule fetching of in-app marketplace promotions.

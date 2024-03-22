@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+CYS - Fix the failed to load resource error in the CYS whenever the current active theme is not TT4

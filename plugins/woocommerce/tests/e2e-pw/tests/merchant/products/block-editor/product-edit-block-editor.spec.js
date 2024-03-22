@@ -37,8 +37,6 @@ test( 'can update the general information of a product', async ( {
 		name: `Product ${ Date.now() }`,
 		description: `Updated description for the awesome product ${ Date.now() }`,
 		short_description: `Updated summary for the awesome product ${ Date.now() }`,
-		regularPrice: '100.05',
-		salePrice: '99.05',
 	};
 
 	const nameTextbox = page.getByLabel( 'Name' ).getByRole( 'textbox' );
@@ -48,20 +46,9 @@ test( 'can update the general information of a product', async ( {
 	const descriptionTextbox = page
 		.getByLabel( 'Block: Product description' )
 		.getByRole( 'textbox' );
-	const listPriceTextbox = page.getByRole( 'textbox', {
-		name: 'List price',
-	} );
-	const salePriceTextbox = page.getByRole( 'textbox', {
-		name: 'Sale price',
-	} );
 
 	await test.step( 'edit the product name', async () => {
 		await nameTextbox.fill( updatedProduct.name );
-	} );
-
-	await test.step( 'edit the product price', async () => {
-		await listPriceTextbox.fill( updatedProduct.regularPrice );
-		await salePriceTextbox.fill( updatedProduct.salePrice );
 	} );
 
 	await test.step( 'edit the product description and summary', async () => {
@@ -91,12 +78,5 @@ test( 'can update the general information of a product', async ( {
 		await expect
 			.soft( descriptionTextbox )
 			.toHaveText( updatedProduct.description );
-
-		await expect
-			.soft( listPriceTextbox )
-			.toHaveValue( updatedProduct.regularPrice );
-		await expect
-			.soft( salePriceTextbox )
-			.toHaveValue( updatedProduct.salePrice );
 	} );
 } );

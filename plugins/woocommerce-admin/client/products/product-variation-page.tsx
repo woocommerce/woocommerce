@@ -5,7 +5,6 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalVariationSwitcherFooter as VariationSwitcherFooter,
@@ -24,8 +23,6 @@ import { MoreMenuFill } from './fills/product-block-editor-fills';
 import { useProductVariationEntityRecord } from './hooks/use-product-variation-entity-record';
 import { DeleteVariationMenuItem } from './fills/more-menu-items';
 import './product-page.scss';
-
-declare const productBlockEditorSettings: ProductEditorSettings;
 
 productApiFetchMiddleware();
 
@@ -81,11 +78,7 @@ export default function ProductPage() {
 
 	return (
 		<>
-			<Editor
-				product={ variation }
-				productType="product_variation"
-				settings={ productBlockEditorSettings || {} }
-			/>
+			<Editor product={ variation } productType="product_variation" />
 			<WooFooterItem order={ 0 }>
 				<>
 					<VariationSwitcherFooter

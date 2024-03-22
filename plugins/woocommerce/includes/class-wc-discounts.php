@@ -940,6 +940,50 @@ class WC_Discounts {
 	}
 
 	/**
+	 * Ensure coupon is valid for allowed emails or throw exception.
+	 *
+	 * @since  8.6.0
+	 * @throws Exception Error message.
+	 * @param  WC_Coupon $coupon Coupon data.
+	 * @return bool
+	 */
+	protected function validate_coupon_allowed_emails( $coupon ) {
+
+		$restrictions = $coupon->get_email_restrictions();
+
+		if ( ! is_array( $restrictions ) || empty( $restrictions ) ) {
+			return true;
+		}
+
+		$user         = wp_get_current_user();
+		$check_emails = array( $user->get_billing_email(), $user->get_email() );
+
+		if ( $this->object instanceof WC_Cart ) {
+			$check_emails[] = $this->object->get_customer()->get_billing_email();
+		} elseif ( $this->object instanceof WC_Order ) {
+			$check_emails[] = $this->object->get_billing_email();
+		}
+
+		$check_emails = array_unique(
+			array_filter(
+				array_map(
+					'strtolower',
+					array_map(
+						'sanitize_email',
+						$check_emails
+					)
+				)
+			)
+		);
+
+		if ( ! WC()->cart->is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
+			throw new Exception( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ), WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the object subtotal
 	 *
 	 * @return int
@@ -981,10 +1025,11 @@ class WC_Discounts {
 	 * - 113: Excluded products.
 	 * - 114: Excluded categories.
 	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
+	 * @param WC_Coupon $coupon Coupon data.
+	 *
 	 * @return bool|WP_Error
+	 * @throws Exception Error message.
+	 * @since  3.2.0
 	 */
 	public function is_coupon_valid( $coupon ) {
 		try {
@@ -998,9 +1043,10 @@ class WC_Discounts {
 			$this->validate_coupon_product_categories( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
+			$this->validate_coupon_allowed_emails( $coupon );
 
 			if ( ! apply_filters( 'woocommerce_coupon_is_valid', true, $coupon, $this ) ) {
-				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), 100 );
+				throw new Exception( __( 'Coupon is not valid.', 'woocommerce' ), WC_Coupon::E_WC_COUPON_INVALID_FILTERED );
 			}
 		} catch ( Exception $e ) {
 			/**
@@ -1012,14 +1058,23 @@ class WC_Discounts {
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
+			$additional_data = array(
+				'status' => 400,
+			);
+
+			$context_coupon_errors = $coupon->get_context_based_coupon_errors( $e->getCode() );
+
+			if ( ! empty( $context_coupon_errors ) ) {
+				$additional_data['details'] = $context_coupon_errors;
+			}
+
 			return new WP_Error(
 				'invalid_coupon',
 				$message,
-				array(
-					'status' => 400,
-				)
+				$additional_data,
 			);
 		}
+
 		return true;
 	}
 }

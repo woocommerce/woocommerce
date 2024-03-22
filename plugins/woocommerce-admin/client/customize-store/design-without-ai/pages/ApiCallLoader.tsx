@@ -17,6 +17,7 @@ import {
 	createAugmentedSteps,
 	onIframeLoad,
 } from '~/customize-store/utils';
+import { DesignWithoutAIStateMachineEvents } from '../state-machine';
 
 const loaderSteps = [
 	{
@@ -103,10 +104,20 @@ export const ApiCallLoader = () => {
 	);
 };
 
-const AssemblerHub = () => {
+type SendEventFn = ( event: DesignWithoutAIStateMachineEvents ) => void;
+
+const AssemblerHub = ( { sendEvent }: { sendEvent: SendEventFn } ) => {
 	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
 	const iframe = useRef< HTMLIFrameElement >( null );
 	const [ isVisible, setIsVisible ] = useState( false );
+
+	useEffect( () => {
+		window.addEventListener( 'message', ( event ) => {
+			if ( event.data?.type === 'INSTALL_FONTS' ) {
+				sendEvent( { type: 'INSTALL_FONTS' } );
+			}
+		} );
+	}, [ sendEvent ] );
 
 	return (
 		<iframe
@@ -127,7 +138,11 @@ const AssemblerHub = () => {
 	);
 };
 
-export const AssembleHubLoader = () => {
+export const AssembleHubLoader = ( {
+	sendEvent,
+}: {
+	sendEvent: SendEventFn;
+} ) => {
 	// Show the last two steps of the loader so that the last frame is the shortest time possible
 	const augmentedSteps = createAugmentedSteps( loaderSteps.slice( -2 ), 10 );
 
@@ -160,7 +175,7 @@ export const AssembleHubLoader = () => {
 					progress={ progress || 0 }
 				/>
 			</Loader>
-			<AssemblerHub />
+			<AssemblerHub sendEvent={ sendEvent } />
 		</>
 	);
 };

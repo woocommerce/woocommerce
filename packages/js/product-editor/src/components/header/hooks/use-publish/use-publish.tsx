@@ -11,6 +11,7 @@ import type { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useProductManager } from '../../../../hooks/use-product-manager';
+import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
 
@@ -28,14 +29,17 @@ export function usePublish< T = Product >( {
 	const { isValidating, isDirty, isPublishing, publish } =
 		useProductManager( productType );
 
-	const [ status, , prevStatus ] = useEntityProp< Product[ 'status' ] >(
+	const [ , , prevStatus ] = useEntityProp< Product[ 'status' ] >(
 		'postType',
 		productType,
 		'status'
 	);
 
+	const { isScheduled } = useProductScheduled( productType );
+
 	const isBusy = isPublishing || isValidating;
-	const isDisabled = disabled || isBusy || ! isDirty;
+	const isDisabled =
+		prevStatus !== 'draft' && ( disabled || isBusy || ! isDirty );
 
 	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( isDisabled ) {
@@ -53,7 +57,7 @@ export function usePublish< T = Product >( {
 	function getButtonText() {
 		if (
 			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-			status === 'future'
+			isScheduled
 		) {
 			return __( 'Schedule', 'woocommerce' );
 		}

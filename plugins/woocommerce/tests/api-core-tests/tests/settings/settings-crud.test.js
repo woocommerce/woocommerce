@@ -225,9 +225,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 				expect.arrayContaining( [
 					expect.objectContaining( {
 						id: 'email_customer_invoice',
-						label: 'Customer invoice / Order details',
+						label: 'Order details',
 						description:
-							'Customer invoice emails can be sent to customers containing their order information and payment links.',
+							'Order detail emails can be sent to customers containing their order information and payment links.',
 						parent_id: 'email',
 						sub_groups: expect.arrayContaining( [] ),
 					} ),
@@ -1917,19 +1917,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						type: 'checkbox',
 						default: 'yes',
 						value: 'yes',
-					} ),
-				] )
-			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_navigation_enabled',
-						label: 'Navigation',
-						description: expect.stringContaining(
-							'Add the new WooCommerce navigation experience to the dashboard'
-						),
-						type: 'checkbox',
-						value: expect.any( String ),
 					} ),
 				] )
 			);

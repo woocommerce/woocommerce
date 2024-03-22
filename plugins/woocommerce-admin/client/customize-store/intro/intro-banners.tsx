@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import classNames from 'classnames';
 import { Button } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
@@ -17,7 +16,7 @@ import { useSelect } from '@wordpress/data';
  */
 import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
-import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
 
@@ -219,7 +218,11 @@ export const ThemeHasModsBanner = ( {
 	);
 };
 
-export const NoAIBanner = () => {
+export const NoAIBanner = ( {
+	redirectToCYSFlow,
+}: {
+	redirectToCYSFlow: () => void;
+} ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
 		stylesheet?: string;
@@ -230,10 +233,6 @@ export const NoAIBanner = () => {
 	}, [] );
 
 	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
-	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
-		page: 'wc-admin',
-		path: '/customize-store/design',
-	} );
 
 	return (
 		<>
@@ -249,7 +248,7 @@ export const NoAIBanner = () => {
 					if ( ! isDefaultTheme ) {
 						setIsModalOpen( true );
 					} else {
-						window.location.href = customizeStoreDesignUrl;
+						redirectToCYSFlow();
 					}
 				} }
 				showAIDisclaimer={ false }
@@ -257,7 +256,7 @@ export const NoAIBanner = () => {
 			{ isModalOpen && (
 				<ThemeSwitchWarningModal
 					setIsModalOpen={ setIsModalOpen }
-					customizeStoreDesignUrl={ customizeStoreDesignUrl }
+					redirectToCYSFlow={ redirectToCYSFlow }
 				/>
 			) }
 		</>

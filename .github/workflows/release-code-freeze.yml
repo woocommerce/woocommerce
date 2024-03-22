@@ -232,6 +232,32 @@ jobs:
                   name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.acceleratedVersion }}
                   path: plugins/woocommerce/woocommerce.zip
                   retention-days: 2
+                  
+    r2-upload-monthly:
+      name: Upload Beta to R2
+      runs-on: ubuntu-20.04
+      needs: [ code-freeze-prep, build-monthly ]
+      if: ${{ needs.code-freeze-prep.outputs.isTodayMonthlyFreeze == 'yes' }}
+      steps:
+          - id: download
+            uses: actions/download-artifact@v3
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1
+                path: download
+
+          - run: ls -lah ${{steps.download.outputs.download-path}}
+
+          - name: Upload release zip to Cloudflare R2 bucket
+            uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+            with:
+              r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+              r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+              r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+              r2-bucket: ${{ secrets.R2_BUCKET }}
+              source-dir: ${{ steps.download.outputs.download-path }}
+              destination-dir: ./monthly/                  
 
     slack-upload-monthly:
         name: Upload Beta to Slack
@@ -277,6 +303,32 @@ jobs:
               id: send-file-slack
               run : |
                   pnpm utils slack file "${{ secrets.CODE_FREEZE_BOT_TOKEN }}" "Here's the generated release build for ${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1" "${{ steps.download.outputs.download-path }}/woocommerce.zip" "${{ inputs.slackChannelOverride || secrets.WOO_RELEASE_SLACK_CHANNEL }}" --reply-ts ${{ needs.notify-slack.outputs.ts }} --filename "woocommerce.${{ needs.code-freeze-prep.outputs.monthlyVersion }}-beta.1.zip"
+
+    r2-upload-accelerated:
+      name: Upload Accelerated to R2
+      runs-on: ubuntu-20.04
+      needs: [ code-freeze-prep, build-a ]
+      if: ${{ needs.code-freeze-prep.outputs.isTodayAcceleratedFreeze == 'yes' }}
+      steps:
+          - id: download
+            uses: actions/download-artifact@v3
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                name: double-zipped-woocommerce.${{ needs.code-freeze-prep.outputs.acceleratedVersion }}
+                path: download
+
+          - run: ls -lah ${{steps.download.outputs.download-path}}
+
+          - name: Upload release zip to Cloudflare R2 bucket
+            uses: ryand56/r2-upload-action@de3eabc2e3137ce07bc3805af441df55f535c64b
+            with:
+              r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+              r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+              r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+              r2-bucket: ${{ secrets.R2_BUCKET }}
+              source-dir: ${{ steps.download.outputs.download-path }}
+              destination-dir: ./accelerated/
 
     slack-upload-accelerated:
         name: Upload Accelerated to Slack

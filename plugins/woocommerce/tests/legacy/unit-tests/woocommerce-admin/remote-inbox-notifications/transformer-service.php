@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArrayKeys;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerService;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayKeys;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\TransformerService;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_TransformerService

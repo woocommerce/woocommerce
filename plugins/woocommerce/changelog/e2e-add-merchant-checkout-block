@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add test for merchant checkout block
