@@ -185,6 +185,39 @@ describe( 'Testing cart', () => {
 			} )
 		).toBeInTheDocument();
 
+		// Testing the default address format
+		await act( () =>
+			dispatch( storeKey ).setShippingAddress( {
+				first_name: 'First Name GB',
+				last_name: 'Last Name GB',
+				company: '',
+				address_1: 'Address 1 GB',
+				address_2: '',
+				city: 'Liverpool',
+				state: 'Merseyside',
+				postcode: 'L1 0BP',
+				country: 'GB',
+				phone: '',
+			} )
+		);
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByText( 'Liverpool', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Merseyside', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'L1 0BP', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
