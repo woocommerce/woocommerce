@@ -18,6 +18,8 @@ import { store as coreStore } from '@wordpress/core-data';
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 import { recordEvent } from '@woocommerce/tracks';
+// @ts-expect-error Missing type in core-data.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
@@ -55,6 +57,9 @@ export const SidebarNavigationScreenHomepage = () => {
 	);
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
+			if ( pattern === selectedPattern ) {
+				return;
+			}
 			setSelectedPattern( pattern );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
@@ -62,8 +67,10 @@ export const SidebarNavigationScreenHomepage = () => {
 			);
 			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern, scroll ]
+		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
 	);
+
+	const isEditorLoading = useIsSiteEditorLoading();
 
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(
@@ -154,7 +161,11 @@ export const SidebarNavigationScreenHomepage = () => {
 			content={
 				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
-						{ isLoading ? (
+						{ /* This is necessary to fix this issue: https://github.com/woocommerce/woocommerce/issues/45711
+						  If the user switch the homepage while the editor is loading, header and footer could disappear.
+						  For more details check: https://github.com/woocommerce/woocommerce/pull/45735
+						  */ }
+						{ isLoading || isEditorLoading ? (
 							<span className="components-placeholder__preview">
 								<Spinner />
 							</span>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: stabilize product quick delete test

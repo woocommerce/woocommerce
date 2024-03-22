@@ -109,7 +109,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin was requested during onboarding.
+	 * Check if the WooPayments plugin was requested during onboarding.
 	 *
 	 * @return bool
 	 */
@@ -123,7 +123,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the plugin is installed.
+	 * Check if the WooPayments plugin is installed.
 	 *
 	 * @return bool
 	 */
@@ -133,7 +133,16 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments is connected.
+	 * Check if the WooPayments plugin is active.
+	 *
+	 * @return bool
+	 */
+	public static function is_wcpay_active() {
+		return class_exists( '\WC_Payments' );
+	}
+
+	/**
+	 * Check if WooPayments is connected.
 	 *
 	 * @return bool
 	 */
@@ -149,7 +158,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if WooCommerce Payments needs setup.
+	 * Check if WooPayments needs setup.
 	 * Errored data or payments not enabled.
 	 *
 	 * @return bool

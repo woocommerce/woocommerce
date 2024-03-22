@@ -617,8 +617,9 @@ jQuery( function( $ ) {
 			});
 
 			var data = {
-				security:		wc_checkout_params.apply_coupon_nonce,
-				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
+				security: wc_checkout_params.apply_coupon_nonce,
+				coupon_code: $form.find('input[name="coupon_code"]').val(),
+				billing_email: wc_checkout_form.$checkout_form.find('input[name="billing_email"]').val()
 			};
 
 			$.ajax({
