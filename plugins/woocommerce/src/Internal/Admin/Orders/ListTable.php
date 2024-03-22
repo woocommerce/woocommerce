@@ -1423,7 +1423,7 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
-				++$changed;
+				$changed++;
 			}
 		}
 
