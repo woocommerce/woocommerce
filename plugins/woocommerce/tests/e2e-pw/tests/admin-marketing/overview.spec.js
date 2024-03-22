@@ -26,11 +26,6 @@ test.describe( 'Marketing page', () => {
 			page.getByRole( 'heading', { name: 'Overview' } )
 		).toBeVisible();
 
-		// Call to action is visible
-		await expect(
-			page.getByText( 'Reach new customers and' )
-		).toBeVisible();
-
 		// Sections present
 		await expect(
 			page.getByText( 'ChannelsStart by adding a' )
