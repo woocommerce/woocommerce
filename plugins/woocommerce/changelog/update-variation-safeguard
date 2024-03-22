@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid trying to find a product variation of a product variation
