@@ -70,6 +70,7 @@ add_filter('woocommerce_product_template_csv_file_path', function($path) {
    return $newPath;
 });
 ```
+
 ## Conclusion
 
 With WooCommerce, extending the product type onboarding list is straightforward and offers significant flexibility for customizing the onboarding experience. By following the steps outlined in this tutorial, you can enhance your WooCommerce store and make the Add Products task more relevant and helpful to your specific needs.
