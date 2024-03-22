@@ -84,7 +84,7 @@ for ( const testData of testToRun ) {
 				testData.templateName
 			);
 
-			await page.waitForTimeout( 1000 );
+			await page.waitForTimeout( 5000 );
 			await testData.visitPage( { frontendUtils, page } );
 
 			await expect(
