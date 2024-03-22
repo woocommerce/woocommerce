@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	ALLOWED_COUNTRIES,
 	ALLOWED_STATES,
 	LOGIN_URL,
 } from '@woocommerce/block-settings';
@@ -24,6 +25,14 @@ export const getFormattedState = (
 		isString( ALLOWED_STATES[ address.country ][ address.state ] )
 		? decodeEntities( ALLOWED_STATES[ address.country ][ address.state ] )
 		: address.state;
+};
+
+export const getFormattedCountry = (
+	address: CartBillingAddress | CartShippingAddress
+): string => {
+	return isString( ALLOWED_COUNTRIES[ address.country ] )
+		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
+		: address.country;
 };
 
 
