@@ -4427,8 +4427,8 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       sass-loader:
-        specifier: 10.1.0
-        version: 10.1.0(sass@1.69.5)(webpack@5.88.2)
+        specifier: ^10.5.0
+        version: 10.5.0(sass@1.69.5)(webpack@5.88.2)
       storybook:
         specifier: ^7.6.4
         version: 7.6.4
@@ -46979,12 +46979,12 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /sass-loader@10.1.0(sass@1.69.5)(webpack@5.88.2):
-    resolution: {integrity: sha512-ZCKAlczLBbFd3aGAhowpYEy69Te3Z68cg8bnHHl6WnSCvnKpbM6pQrz957HWMa8LKVuhnD9uMplmMAHwGQtHeg==}
+  /sass-loader@10.5.0(sass@1.69.5)(webpack@5.88.2):
+    resolution: {integrity: sha512-VsU71W7VR6SChMJZUqtrfLeMSA8ns7QTHbnA7cfevtjb3c392mX93lr0Dmr4uU1ch5uIbEmfmHjdrDYcXXkQ7w==}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       fibers: '>= 3.1.0'
-      node-sass: ^4.0.0 || ^5.0.0
+      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
       sass: ^1.3.0
       webpack: ^4.36.0 || ^5.0.0
     peerDependenciesMeta:

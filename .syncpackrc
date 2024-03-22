@@ -265,6 +265,15 @@
 		},
 		{
 			"dependencies": [
+				"sass-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.5.0"
+		},
+		{
+			"dependencies": [
 				"simple-git"
 			],
 			"packages": [
