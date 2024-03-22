@@ -1,21 +1,17 @@
 <?php
 /**
- * WooCommerce Admin Helper Plugin Info
+ * Updates the Product API response from WP.org.
  *
+ * @class WC_Plugin_Api_Updater
  * @package WooCommerce\Admin\Helper
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Helper_Plugin_Info Class
- *
- * Provides the "View Information" core modals with data for Woo.com
- * hosted extensions.
+ * Class WC_Plugin_Api_Updater
  */
-class WC_Helper_Plugin_Info {
+class WC_Plugin_Api_Updater {
 
 	/**
 	 * Loads the class, runs on init.
@@ -38,7 +34,8 @@ class WC_Helper_Plugin_Info {
 		if ( 'plugin_information' !== $action ) {
 			return $response;
 		}
-		return self::maybe_override_products_api( $response, $action, $args );
+
+		return self::override_products_api_response( $response, $action, $args );
 	}
 
 	/**
@@ -52,7 +49,8 @@ class WC_Helper_Plugin_Info {
 		if ( 'theme_information' !== $action ) {
 			return $response;
 		}
-		return self::maybe_override_products_api( $response, $action, $args );
+
+		return self::override_products_api_response( $response, $action, $args );
 	}
 
 	/**
@@ -62,12 +60,12 @@ class WC_Helper_Plugin_Info {
 	 * @param string $action The requested action.
 	 * @param object $args Arguments passed to the API.
 	 */
-	public static function maybe_override_products_api( $response, $action, $args ) {
+	public static function override_products_api_response( $response, $action, $args ) {
 		if ( empty( $args->slug ) ) {
 			return $response;
 		}
 
-		// Only for slugs that start with woo-
+		// Only for slugs that start with woocommerce-com-.
 		if ( 0 !== strpos( $args->slug, 'woocommerce-com-' ) ) {
 			return $response;
 		}
@@ -105,4 +103,4 @@ class WC_Helper_Plugin_Info {
 	}
 }
 
-WC_Helper_Plugin_Info::load();
+WC_Plugin_Api_Updater::load();

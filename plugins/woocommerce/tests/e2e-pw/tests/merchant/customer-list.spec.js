@@ -169,13 +169,13 @@ baseTest.describe( 'Merchant > Customer List', () => {
 
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Username' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Last active' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Total spend' } )
-			).not.toBeVisible();
+			).toBeHidden();
 
 			// show the columns again
 			await page
@@ -201,7 +201,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 		} );
 
-		test.step( 'Download the customer list', async () => {
+		await test.step( 'Download the customer list', async () => {
 			const downloadPromise = page.waitForEvent( 'download' );
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
@@ -249,7 +249,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 1 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'button', {
 					name: `${ customers[ 0 ].first_name } ${ customers[ 0 ].last_name } Single Customer`,
@@ -319,7 +319,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 0 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );
