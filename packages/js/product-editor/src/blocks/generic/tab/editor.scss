@@ -4,19 +4,6 @@
 	}
 }
 
-.wp-block-woocommerce-product-tab {
-	padding-left: calc( 2 * $gap );
-	padding-right: calc( 2 * $gap );
-
-	@include breakpoint(">782px") {
-		padding-left: 0;
-		padding-right: 0;
-		max-width: 650px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-}
-
 .woocommerce-product-tabs {
 	.wp-block-woocommerce-product-tab__button:focus:not( :disabled ) {
 		box-shadow: none;

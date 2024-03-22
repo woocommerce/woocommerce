@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent possible type error during install routine.

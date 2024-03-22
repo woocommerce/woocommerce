@@ -48,10 +48,15 @@ describe( 'Transitional', () => {
 
 		expect(
 			screen.getByRole( 'button', {
-				name: /Preview store/i,
+				name: /View store/i,
 			} )
 		).toBeInTheDocument();
 
+		expect(
+			screen.getByRole( 'button', {
+				name: /Go to Products/i,
+			} )
+		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', {
 				name: /Go to the Editor/i,
@@ -65,14 +70,14 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record an event when clicking on "Preview store" button', () => {
+	it( 'should record an event when clicking on "View store" button', () => {
 		window.open = jest.fn();
 		// @ts-ignore
 		render( <Transitional { ...props } /> );
 
 		screen
 			.getByRole( 'button', {
-				name: /Preview store/i,
+				name: /View store/i,
 			} )
 			.click();
 

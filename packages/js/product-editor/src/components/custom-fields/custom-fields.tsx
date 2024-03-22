@@ -4,6 +4,7 @@
 import { Button } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { closeSmall } from '@wordpress/icons';
 import classNames from 'classnames';
 
 /**
@@ -21,16 +22,16 @@ export function CustomFields( {
 	renderActionButtonsWrapper = ( buttons ) => buttons,
 	...props
 }: CustomFieldsProps ) {
-	const { customFields, addCustomFields, updateCustomField } =
-		useCustomFields();
+	const {
+		customFields,
+		addCustomFields,
+		updateCustomField,
+		removeCustomField,
+	} = useCustomFields();
 
 	const [ showCreateModal, setShowCreateModal ] = useState( false );
 	const [ selectedCustomField, setSelectedCustomField ] =
 		useState< Metadata< string > >();
-
-	if ( customFields.length === 0 ) {
-		return <EmptyState />;
-	}
 
 	function handleAddNewButtonClick() {
 		setShowCreateModal( true );
@@ -41,6 +42,14 @@ export function CustomFields( {
 	) {
 		return function handleCustomFieldEditButtonClick() {
 			setSelectedCustomField( customField );
+		};
+	}
+
+	function customFieldRemoveButtonClickHandler(
+		customField: Metadata< string >
+	) {
+		return function handleCustomFieldRemoveButtonClick() {
+			removeCustomField( customField );
 		};
 	}
 
@@ -70,46 +79,61 @@ export function CustomFields( {
 				</Button>
 			) }
 
-			<table
-				{ ...props }
-				className={ classNames(
-					'woocommerce-product-custom-fields__table',
-					className
-				) }
-			>
-				<thead>
-					<tr className="woocommerce-product-custom-fields__table-row">
-						<th>{ __( 'Name', 'woocommerce' ) }</th>
-						<th>{ __( 'Value', 'woocommerce' ) }</th>
-						<th>{ __( 'Actions', 'woocommerce' ) }</th>
-					</tr>
-				</thead>
-				<tbody>
-					{ customFields.map( ( customField ) => (
-						<tr
-							className="woocommerce-product-custom-fields__table-row"
-							key={ customField.id ?? customField.key }
-						>
-							<td className="woocommerce-product-custom-fields__table-datacell">
-								{ customField.key }
-							</td>
-							<td className="woocommerce-product-custom-fields__table-datacell">
-								{ customField.value }
-							</td>
-							<td className="woocommerce-product-custom-fields__table-datacell">
-								<Button
-									variant="tertiary"
-									onClick={ customFieldEditButtonClickHandler(
-										customField
-									) }
-								>
-									{ __( 'Edit', 'woocommerce' ) }
-								</Button>
-							</td>
+			{ customFields.length === 0 ? (
+				<EmptyState />
+			) : (
+				<table
+					{ ...props }
+					className={ classNames(
+						'woocommerce-product-custom-fields__table',
+						className
+					) }
+				>
+					<thead>
+						<tr className="woocommerce-product-custom-fields__table-row">
+							<th>{ __( 'Name', 'woocommerce' ) }</th>
+							<th>{ __( 'Value', 'woocommerce' ) }</th>
+							<th>{ __( 'Actions', 'woocommerce' ) }</th>
 						</tr>
-					) ) }
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{ customFields.map( ( customField ) => (
+							<tr
+								className="woocommerce-product-custom-fields__table-row"
+								key={ customField.id ?? customField.key }
+							>
+								<td className="woocommerce-product-custom-fields__table-datacell">
+									{ customField.key }
+								</td>
+								<td className="woocommerce-product-custom-fields__table-datacell">
+									{ customField.value }
+								</td>
+								<td className="woocommerce-product-custom-fields__table-datacell">
+									<Button
+										variant="tertiary"
+										onClick={ customFieldEditButtonClickHandler(
+											customField
+										) }
+									>
+										{ __( 'Edit', 'woocommerce' ) }
+									</Button>
+
+									<Button
+										icon={ closeSmall }
+										onClick={ customFieldRemoveButtonClickHandler(
+											customField
+										) }
+										aria-label={ __(
+											'Remove custom field',
+											'woocommerce'
+										) }
+									/>
+								</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			) }
 
 			{ showCreateModal && (
 				<CreateModal

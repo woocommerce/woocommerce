@@ -7,7 +7,7 @@
 import { store as blockEditorStore } from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 // @ts-expect-error No types for this exist yet.
@@ -15,7 +15,14 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { useQuery } from '@woocommerce/navigation';
 // @ts-expect-error No types for this exist yet.
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-import { useCallback, useContext, useMemo } from '@wordpress/element';
+import {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+} from '@wordpress/element';
+// @ts-expect-error No types for this exist yet.
+import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 
 /**
  * Internal dependencies
@@ -78,8 +85,18 @@ export const BlockEditorContainer = () => {
 		[]
 	);
 
+	// This is necessary to avoid this issue: https://github.com/woocommerce/woocommerce/issues/45593
+	// Related PR: https://github.com/woocommerce/woocommerce/pull/45600
+	const { templateType } = useSelect( ( select ) => {
+		const { getEditedPostType } = unlock( select( editSiteStore ) );
+
+		return {
+			templateType: getEditedPostType(),
+		};
+	}, [] );
+
 	const [ blocks, , onChange ] = useEditorBlocks(
-		'wp_template',
+		templateType,
 		currentTemplate?.id ?? ''
 	);
 
@@ -147,36 +164,51 @@ export const BlockEditorContainer = () => {
 
 	const opacityClass = 'preview-opacity';
 
-	const renderedBlocks = useMemo(
-		() =>
-			blocks.map( ( block ) => {
+	const clientIds = blocks.map( ( block ) => block.clientId );
+
+	// @ts-expect-error No types for this exist yet.
+	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	useEffect( () => {
+		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(
+			( acc, clientId ) => {
 				if (
 					! isHighlighting ||
-					block.clientId === highlightedBlockClientId
+					clientId === highlightedBlockClientId
 				) {
 					return {
-						...block,
-						attributes: {
-							...block.attributes,
-							className: block.attributes.className?.replace(
-								opacityClass,
-								''
-							),
-						},
+						blockIdToHighlight: clientId,
+						restOfBlockIds: acc.restOfBlockIds,
 					};
 				}
 
 				return {
-					...block,
-					attributes: {
-						...block.attributes,
-						className:
-							block.attributes.className + ` ${ opacityClass }`,
-					},
+					blockIdToHighlight: acc.blockIdToHighlight,
+					restOfBlockIds: [ ...acc.restOfBlockIds, clientId ],
 				};
-			} ),
-		[ blocks, highlightedBlockClientId, isHighlighting ]
-	);
+			},
+			{
+				blockIdToHighlight: null,
+				restOfBlockIds: [],
+			} as {
+				blockIdToHighlight: string | null;
+				restOfBlockIds: string[];
+			}
+		);
+
+		updateBlockAttributes( blockIdToHighlight, {
+			className: '',
+		} );
+
+		updateBlockAttributes( restOfBlockIds, {
+			className: ` ${ opacityClass }`,
+		} );
+	}, [
+		clientIds,
+		highlightedBlockClientId,
+		isHighlighting,
+		updateBlockAttributes,
+	] );
 
 	const isScrollable = useMemo(
 		() =>
@@ -190,7 +222,7 @@ export const BlockEditorContainer = () => {
 
 	return (
 		<BlockEditor
-			renderedBlocks={ renderedBlocks }
+			renderedBlocks={ blocks }
 			isScrollable={ isScrollable }
 			onChange={ onChange }
 			settings={ settings }

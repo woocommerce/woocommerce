@@ -9,7 +9,14 @@ relative_path=${script_dir#$head_dir/}
 # Generate the child themes zip files before running the tests.
 # By doing so, we ensure that the zip files are up-to-date.
 themes_dir="$script_dir/themes"
-themes=("storefront-child" "twentytwentyfour-child")
+themes=(
+	"storefront-child__block-notices-filter"
+	"storefront-child__block-notices-template"
+	"storefront-child__classic-notices-template"
+	"twentytwentyfour-child__block-notices-filter"
+	"twentytwentyfour-child__block-notices-template"
+	"twentytwentyfour-child__classic-notices-template"
+)
 for theme in "${themes[@]}"; do
     # Define the path to the theme directory and the zip file.
     theme_dir="$themes_dir/$theme"
