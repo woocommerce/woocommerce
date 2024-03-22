@@ -23,6 +23,29 @@ class CustomizeStore extends Task {
 
 		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
 		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
+
+		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete' ), 10, 3 );
+		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete' ), 10, 3 );
+		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete' ), 10, 3 );
+	}
+
+	/**
+	 * Mark the CYS task as complete whenever the user updates their global styles.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post Post object.
+	 * @param bool     $update Whether this is an existing post being updated.
+	 *
+	 * @return void
+	 */
+	public function mark_task_as_complete( $post_id, $post, $update ) {
+		if ( $post instanceof \WP_Post ) {
+			$is_cys_complete = '{"version": 2, "isGlobalStylesUserThemeJSON": true }' !== $post->post_content || in_array( $post->post_type, array( 'wp_template', 'wp_template_part' ), true );
+
+			if ( $is_cys_complete ) {
+				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+			}
+		}
 	}
 
 	/**
@@ -121,7 +144,7 @@ class CustomizeStore extends Task {
 		// Default to is-fullscreen-mode to avoid jumps in the UI.
 		add_filter(
 			'admin_body_class',
-			static function( $classes ) {
+			static function ( $classes ) {
 				return "$classes is-fullscreen-mode";
 			}
 		);

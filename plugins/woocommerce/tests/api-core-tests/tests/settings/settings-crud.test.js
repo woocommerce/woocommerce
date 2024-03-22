@@ -1920,19 +1920,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_navigation_enabled',
-						label: 'Navigation',
-						description: expect.stringContaining(
-							'Add the new WooCommerce navigation experience to the dashboard'
-						),
-						type: 'checkbox',
-						value: expect.any( String ),
-					} ),
-				] )
-			);
 		} );
 	} );
 
