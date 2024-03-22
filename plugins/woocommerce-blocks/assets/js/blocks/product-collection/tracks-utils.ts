@@ -37,7 +37,24 @@ export const useTracksLocation = ( templateSlug: string ) => {
 	}, [] );
 
 	if ( postType === 'wp_template' ) {
-		return templateSlugToTemplateMap[ templateSlug ] || Locations.OTHER;
+		const template = templateSlugToTemplateMap[ templateSlug ];
+
+		if ( template ) {
+			return template;
+		}
+
+		if ( templateSlug.includes( 'single-product' ) ) {
+			return Locations.SINGLE_PRODUCT;
+		}
+
+		if (
+			templateSlug.includes( 'taxonomy-product_cat' ) ||
+			templateSlug.includes( 'taxonomy-product_tag' )
+		) {
+			return Locations.PRODUCT_ARCHIVE;
+		}
+
+		return Locations.OTHER;
 	}
 
 	if ( postType === Locations.PAGE || postType === Locations.POST ) {
