@@ -378,6 +378,20 @@ const getFrontConfig = ( options = {} ) => {
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
+					commons: {
+						test: /[\\/]node_modules[\\/](?:@wordpress[\\/](?:components|icons)|@ariakit[\\/](?:react|react-core|core)|dompurify|stylis|@floating-ui|@emotion|react-number-format|react-transition-group|postcode-validator|react-property|dom-handler)[\\/]/,
+						//  will get frontend suffix appended.
+						name: 'wc-blocks-vendors',
+						chunks: ( chunk ) => {
+							return (
+								chunk.name === 'cart' ||
+								chunk.name === 'checkout' ||
+								chunk.name === 'blocks-checkout' ||
+								chunk.name === 'blocks-components'
+							);
+						},
+						enforce: true,
+					},
 					...getCacheGroups(),
 					'base-components': {
 						test: /\/assets\/js\/base\/components\//,

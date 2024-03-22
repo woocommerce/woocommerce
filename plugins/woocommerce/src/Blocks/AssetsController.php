@@ -61,8 +61,9 @@ final class AssetsController {
 		// The price package is shared externally so has no blocks prefix.
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
-		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', array() );
-		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', array() );
+		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
+		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocksCheckout-frontend.js', array( 'wc-blocks-vendors-frontend' ) );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocksComponents-frontend.js', array( 'wc-blocks-vendors-frontend' ) );
 
 		// Register the interactivity components here for now.
 		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );
@@ -206,7 +207,7 @@ final class AssetsController {
 			$this->get_script_dependency_src_array( $script_data['dependencies'] )
 		);
 		return array_map(
-			function( $src ) {
+			function ( $src ) {
 				return array(
 					'href' => $src,
 					'as'   => 'script',
@@ -226,7 +227,7 @@ final class AssetsController {
 		$wp_scripts = wp_scripts();
 		return array_reduce(
 			$dependencies,
-			function( $src, $handle ) use ( $wp_scripts ) {
+			function ( $src, $handle ) use ( $wp_scripts ) {
 				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
 					$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
 					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
