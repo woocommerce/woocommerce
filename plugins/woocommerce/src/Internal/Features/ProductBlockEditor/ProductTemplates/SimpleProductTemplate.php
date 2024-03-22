@@ -638,6 +638,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'label' => __( 'Sale price', 'woocommerce' ),
 				),
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
 			)
 		);
 		$product_pricing_section->add_block(
