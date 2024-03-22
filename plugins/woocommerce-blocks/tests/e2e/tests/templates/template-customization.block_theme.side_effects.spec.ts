@@ -25,10 +25,6 @@ for ( const testData of testToRun ) {
 			await requestUtils.deleteAllTemplates( testData.templateType );
 		} );
 
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
-
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,
@@ -85,7 +81,6 @@ for ( const testData of testToRun ) {
 				testData.templateName
 			);
 
-			await page.waitForTimeout( 5000 );
 			await testData.visitPage( { frontendUtils, page } );
 
 			await expect(
