@@ -1616,13 +1616,11 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensures an error is returned when required fields in Contact are missing.
 	 */
 	public function test_place_order_required_contact_field() {
-		$this->markTestSkipped( 'Additional fields aren\'t validated due to a bug #45496.' );
-		$id    = 'plugin-namespace/my-required-contact-field';
-		$label = 'My Required Field';
+		$id = 'plugin-namespace/my-required-contact-field';
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
-				'label'    => $label,
+				'label'    => 'My Required Field',
 				'location' => 'contact',
 				'type'     => 'text',
 				'required' => true,
@@ -1668,8 +1666,7 @@ class AdditionalFields extends MockeryTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
-		// Error should be updated once we got this working.
-		$this->assertEquals( \sprintf( 'There was a problem with the provided shipping address: %s is required', $label ), $data['message'], print_r( $data, true ) );
+		$this->assertEquals( \sprintf( '%s is not of type string.', $id ), $data['data']['params']['additional_fields'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 

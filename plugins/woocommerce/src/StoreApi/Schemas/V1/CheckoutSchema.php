@@ -383,12 +383,14 @@ class CheckoutSchema extends AbstractSchema {
 		$fields                  = $this->sanitize_additional_fields( $fields );
 		$additional_field_schema = $this->get_additional_fields_schema();
 
-		// Validate individual properties first.
-		foreach ( $fields as $key => $field_value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
+		// Loop over the schema instead of the fields. This is to ensure missing fields are validated.
+		foreach ( $additional_field_schema as $key => $schema ) {
+			if ( ! isset( $fields[ $key ] ) && ! $schema['required'] ) {
+				// Optional fields can go missing.
 				continue;
 			}
-			$result = rest_validate_value_from_schema( $field_value, $additional_field_schema[ $key ], $key );
+			$field_value = $fields[ $key ];
+			$result      = rest_validate_value_from_schema( $field_value, $schema, $key );
 
 			// Only allow custom validation on fields that pass the schema validation.
 			if ( true === $result ) {
@@ -422,6 +424,6 @@ class CheckoutSchema extends AbstractSchema {
 			}
 		}
 
-		return $errors->has_errors( $errors ) ? $errors : true;
+		return $errors->has_errors() ? $errors : true;
 	}
 }
