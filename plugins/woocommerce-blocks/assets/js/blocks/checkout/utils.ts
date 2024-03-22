@@ -7,6 +7,10 @@ import {
 	LOGIN_URL,
 } from '@woocommerce/block-settings';
 import { getSetting } from '@woocommerce/settings';
+import {
+	CartBillingAddress,
+	CartShippingAddress,
+} from '@woocommerce/type-defs/cart';
 import { isObject, isString } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -55,5 +59,72 @@ export const extractName = ( format: string ): string => {
 	return nameTokens.find( ( token ) => format.indexOf( token ) >= 0 ) || '';
 };
 
+/**
+ * Format an address for display in the address card.
+ */
+export const formatAddress = (
+	address: CartBillingAddress | CartShippingAddress,
+	format: string
+): { name: string; address: string } => {
+	const nameFormat = extractName( format );
+
+	const addressFormatWithoutName = format.replace( `${ nameFormat }\n`, '' );
+
+	const addressTokens = [
+		[ '{company}', address?.company || '' ],
+		[ '{address_1}', address?.address_1 || '' ],
+		[ '{address_2}', address?.address_2 || '' ],
+		[ '{city}', address?.city || '' ],
+		[ '{state}', getFormattedState( address ) ],
+		[ '{postcode}', address?.postcode || '' ],
+		[ '{country}', getFormattedCountry( address ) ],
+		[ '{company_upper}', ( address?.company || '' ).toUpperCase() ],
+		[ '{address_1_upper}', ( address?.address_1 || '' ).toUpperCase() ],
+		[ '{address_2_upper}', ( address?.address_2 || '' ).toUpperCase() ],
+		[ '{city_upper}', ( address?.city || '' ).toUpperCase() ],
+		[ '{state_upper}', getFormattedState( address ).toUpperCase() ],
+		[ '{state_code}', address?.state || '' ],
+		[ '{postcode_upper}', ( address?.postcode || '' ).toUpperCase() ],
+		[ '{country_upper}', getFormattedCountry( address ).toUpperCase() ],
+	];
+	const nameTokens = [
+		[
+			'{name}',
+			address?.first_name +
+				// Only include the space if the first name was present.
+				( address?.first_name && address?.last_name ? ' ' : '' ) +
+				address?.last_name,
+		],
+		[
+			'{name_upper}',
+			(
+				address?.first_name +
+				// Only include the space if the first name was present.
+				( address?.first_name && address?.last_name ? ' ' : '' ) +
+				address?.last_name
+			).toUpperCase(),
+		],
+		[ '{first_name}', address?.first_name || '' ],
+		[ '{last_name}', address?.last_name || '' ],
+		[ '{first_name_upper}', ( address?.first_name || '' ).toUpperCase() ],
+		[ '{last_name_upper}', ( address?.last_name || '' ).toUpperCase() ],
+	];
+	let parsedName = nameFormat;
+
+	nameTokens.forEach( ( [ token, value ] ) => {
+		parsedName = parsedName.replace( token, value );
+	} );
+
+	let parsedAddress = addressFormatWithoutName;
+	addressTokens.forEach( ( [ token, value ] ) => {
+		parsedAddress = parsedAddress.replace( token, value );
+	} );
+	parsedAddress = parsedAddress
+		.split( /\n+/ ) // This regex prevents multiple empty spaces in an address.
+		.join( ', ' )
+		.replace( /^,\s|,\s$/g, '' );
+
+	return { name: parsedName, address: parsedAddress };
+};
 
 export const reloadPage = (): void => void window.location.reload( true );
