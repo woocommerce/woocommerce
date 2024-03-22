@@ -74,7 +74,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 		);
 	} );
 
-	test( 'it shows the offline banner when the network is offline', async ( {
+	test( 'it shows the "offline banner" when the network is offline', async ( {
 		page,
 		context,
 	} ) => {
@@ -164,7 +164,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 				'yes'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updat,ed', error );
+			console.log( 'Store completed option not updated', error );
 		}
 		await activateTheme( 'twentytwentythree' );
 
