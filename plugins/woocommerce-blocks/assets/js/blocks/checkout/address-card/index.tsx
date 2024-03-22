@@ -5,9 +5,11 @@ import { __ } from '@wordpress/i18n';
 import {
 	type CartShippingAddress,
 	type CartBillingAddress,
+	objectHasProp,
 } from '@woocommerce/types';
-import { FormFieldsConfig } from '@woocommerce/settings';
+import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
 import {
+	formatAddress,
 	getFormattedCountry,
 	getFormattedState,
 } from '@woocommerce/blocks/checkout/utils';
@@ -30,22 +32,27 @@ const AddressCard = ( {
 } ): JSX.Element | null => {
 	const formattedCountry = getFormattedCountry( address );
 	const formattedState = getFormattedState( address );
+	const addressFormats = getSetting< Record< string, string > >(
+		'addressFormats',
+		{}
+	);
+	let formatToUse = 'default';
+	if ( objectHasProp( addressFormats, address?.country ) ) {
+		formatToUse = addressFormats[ address.country ];
+	}
+	const { name: formattedName, address: formattedAddress } = formatAddress(
+		address,
+		formatToUse
+	);
 
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span className="wc-block-components-address-card__address-section">
-					{ address.first_name + ' ' + address.last_name }
+					{ formattedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
-					{ [
-						address.address_1,
-						! fieldConfig.address_2.hidden && address.address_2,
-						address.city,
-						formattedState,
-						address.postcode,
-						formattedCountry,
-					]
+					{ formattedAddress
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
 							<span key={ `address-` + index }>{ field }</span>
