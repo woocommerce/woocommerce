@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: re-enable all e2e tests
