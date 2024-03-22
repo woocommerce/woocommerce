@@ -880,6 +880,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					),
 				),
 				'hideConditions' => $product_stock_status_hide_conditions,
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
 			)
 		);
 
