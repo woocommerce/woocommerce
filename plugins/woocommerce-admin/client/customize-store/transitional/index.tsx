@@ -153,7 +153,7 @@ export const Transitional = ( {
 								variant="link"
 								onClick={ () => {
 									recordEvent(
-										'customize_your_store_transitional_editor_click'
+										'customize_your_store_transitional_product_list_click'
 									);
 									navigateOrParent(
 										window,

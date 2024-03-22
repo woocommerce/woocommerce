@@ -58,7 +58,6 @@ class CartApplyCoupon extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
-		$cart        = $this->cart_controller->get_cart_instance();
 		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
 		try {
@@ -67,6 +66,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 		}
 
+		$cart = $this->cart_controller->get_cart_instance();
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
 	}
 }
