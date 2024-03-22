@@ -42,7 +42,8 @@ export function usePublish< T = Product >( {
 	);
 
 	const isBusy = isPublishing || isValidating;
-	const isDisabled = disabled || isBusy || ! isDirty;
+	const isDisabled =
+		prevStatus !== 'draft' && ( disabled || isBusy || ! isDirty );
 
 	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( isDisabled ) {
