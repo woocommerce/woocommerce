@@ -3,7 +3,8 @@
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -19,9 +20,35 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const ProductCollectionContent = (
-	props: ProductCollectionEditComponentProps
-) => {
+const usePreviewState = ( handlePreviewState ) => {
+	// I have implemented this internal state to handle the preview state.
+	// As you can see it contains isPreview and previewMessage.
+	// - isPreview is a boolean to check if the block is in preview mode.
+	// - previewMessage is a string to display the preview message in tooltip.
+	const [ previewState, setPreviewState ] = useState( {
+		isPreview: false,
+		previewMessage: '',
+	} );
+
+	// Running handlePreviewState function provided by Collection, if it exists.
+	useEffect( () => {
+		handlePreviewState?.( {
+			setPreviewState,
+		} );
+
+		// We want this to run only once, adding deps will cause performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
+	return [ previewState, setPreviewState ];
+};
+
+const ProductCollectionContent = ( {
+	handlePreviewState,
+	...props
+}: ProductCollectionEditComponentProps ) => {
+	const [ previewState ] = usePreviewState( handlePreviewState );
+
 	const { attributes, setAttributes } = props;
 	const { queryId } = attributes;
 
@@ -69,6 +96,24 @@ const ProductCollectionContent = (
 
 	return (
 		<div { ...blockProps }>
+			{ previewState.isPreview && (
+				<Button
+					variant="primary"
+					size="small"
+					style={ {
+						position: 'absolute',
+						top: 0,
+						right: 0,
+						zIndex: 1000,
+					} }
+					showTooltip
+					label={ previewState.previewMessage }
+					className="wc-block-product-collection__preview-button"
+				>
+					Preview
+				</Button>
+			) }
+
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />

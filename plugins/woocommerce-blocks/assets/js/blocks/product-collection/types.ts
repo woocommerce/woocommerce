@@ -91,6 +91,7 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		handlePreviewState?: HandlePreviewState;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -138,3 +139,21 @@ export enum CoreFilterNames {
 
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
+
+/**
+ * Preview state
+ */
+export interface PreviewState {
+	isPreview: boolean;
+	previewMessage: string;
+}
+
+/**
+ * For now it only has one property, but it can be extended in the future to pass
+ * more information to the preview state handler.
+ */
+export interface HandlePreviewStateArgs {
+	setPreviewState: React.Dispatch< React.SetStateAction< PreviewState > >;
+}
+
+export type HandlePreviewState = ( args: HandlePreviewStateArgs ) => void;

@@ -6,7 +6,6 @@ import {
 	// @ts-expect-error Type definition is missing
 	store as blocksStore,
 	type BlockVariation,
-	registerBlockVariation,
 	BlockAttributes,
 } from '@wordpress/blocks';
 
@@ -21,6 +20,7 @@ import topRated from './top-rated';
 import bestSellers from './best-sellers';
 import onSale from './on-sale';
 import featured from './featured';
+import registerProductCollection from './register-product-collection';
 
 const collections: BlockVariation[] = [
 	productCollection,
@@ -40,7 +40,7 @@ export const registerCollections = () => {
 			return blockAttrs.collection === variationAttributes.collection;
 		};
 
-		registerBlockVariation( blockJson.name, {
+		registerProductCollection( {
 			isActive,
 			...collection,
 		} );
