@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Disable the fields that are not required in variable products because they are set in each variation
