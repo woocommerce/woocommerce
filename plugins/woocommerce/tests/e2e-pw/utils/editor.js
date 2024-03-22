@@ -10,7 +10,7 @@ const closeWelcomeModal = async ( { page } ) => {
 };
 
 const disableWelcomeModal = async ( { page } ) => {
-	await page.waitForLoadState( 'networkidle' );
+	await page.waitForLoadState( 'domcontentloaded' );
 	// await page.waitForFunction( () => window?.wp?.data );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
