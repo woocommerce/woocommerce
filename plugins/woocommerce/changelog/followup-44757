@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Experimental: Fix: Regression introduced in #44757 that breaks the inspector setting of the new attribute filter block.
