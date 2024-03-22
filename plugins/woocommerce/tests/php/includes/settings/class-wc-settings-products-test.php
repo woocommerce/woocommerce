@@ -101,6 +101,7 @@ class WC_Settings_Products_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_review_rating_verification_required' => 'checkbox',
 			'woocommerce_enable_review_rating'             => 'checkbox',
 			'woocommerce_review_rating_required'           => 'checkbox',
+			'woocommerce_coming_soon_page_id'              => 'single_select_page_with_search'
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
