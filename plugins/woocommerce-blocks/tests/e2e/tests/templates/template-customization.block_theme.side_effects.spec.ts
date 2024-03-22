@@ -45,6 +45,7 @@ for ( const testData of testToRun ) {
 			await editor.saveSiteEditorEntities();
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
+			await page.waitForTimeout( 1000 );
 
 			// Edit the theme template. The theme template is not
 			// directly available from the UI, because the customized
@@ -87,6 +88,7 @@ for ( const testData of testToRun ) {
 			await expect( page.getByText( userText ) ).toHaveCount( 0 );
 
 			await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+			await page.waitForTimeout( 1000 );
 		} );
 	} );
 }
