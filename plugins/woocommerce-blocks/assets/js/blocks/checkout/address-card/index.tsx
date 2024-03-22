@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES, ALLOWED_STATES } from '@woocommerce/block-settings';
 import {
 	type CartShippingAddress,
 	type CartBillingAddress,
-	isObject,
-	isString,
 } from '@woocommerce/types';
 import { FormFieldsConfig } from '@woocommerce/settings';
-import { decodeEntities } from '@wordpress/html-entities';
+import {
+	getFormattedCountry,
+	getFormattedState,
+} from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -28,17 +28,8 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const formattedCountry = isString( ALLOWED_COUNTRIES[ address.country ] )
-		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
-		: '';
-
-	const formattedState =
-		isObject( ALLOWED_STATES[ address.country ] ) &&
-		isString( ALLOWED_STATES[ address.country ][ address.state ] )
-			? decodeEntities(
-					ALLOWED_STATES[ address.country ][ address.state ]
-			  )
-			: address.state;
+	const formattedCountry = getFormattedCountry( address );
+	const formattedState = getFormattedState( address );
 
 	return (
 		<div className="wc-block-components-address-card">
