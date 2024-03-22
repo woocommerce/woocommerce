@@ -53,7 +53,7 @@ test.describe( 'Variations tab', () => {
 			'The block product editor is not being tested'
 		);
 
-		test.only( 'can create a variation option and publish the product', async ( {
+		test( 'can create a variation option and publish the product', async ( {
 			page,
 		} ) => {
 			await page.goto( NEW_EDITOR_ADD_PRODUCT_URL );
