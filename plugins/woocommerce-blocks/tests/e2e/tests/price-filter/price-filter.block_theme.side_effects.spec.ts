@@ -16,8 +16,8 @@ const blockData: BlockData< {
 		frontend: {},
 		editor: {},
 	},
-	urlSearchParamWhenFilterIsApplied: '?max_price=10',
-	endpointAPI: 'max_price=1000',
+	urlSearchParamWhenFilterIsApplied: '?max_price=5',
+	endpointAPI: 'max_price=500',
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
@@ -108,7 +108,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		// await page.pause();
 
 		await maxPriceInput.dblclick();
-		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 
 		const allProductsBlock = await frontendUtils.getBlockByName(
@@ -183,7 +183,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 
 		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 		await page.waitForURL( ( url ) =>
 			url

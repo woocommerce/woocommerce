@@ -36,6 +36,9 @@ const userText = 'Hello World in the page';
 
 templates.forEach( async ( template ) => {
 	test.describe( 'Page Content Wrapper', async () => {
+		test.beforeAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( 'wp_template' );
+		} );
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
 			admin,
 			page,
