@@ -8,11 +8,13 @@ import {
 } from '@wordpress/block-editor';
 import { Placeholder } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import CollectionChooser, { applyCollection } from './collection-chooser';
+import { useTracksLocation } from '../tracks-utils';
 import type {
 	CollectionName,
 	ProductCollectionEditComponentProps,
@@ -23,13 +25,23 @@ const ProductCollectionPlaceholder = (
 	props: ProductCollectionEditComponentProps
 ) => {
 	const blockProps = useBlockProps();
-	const { clientId } = props;
+	const { clientId, context } = props;
+
 	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
+	const tracksLocation = useTracksLocation( context.templateSlug );
 
-	const onCollectionClick = ( collectionName: CollectionName ) =>
+	const onCollectionClick = ( collectionName: CollectionName ) => {
+		recordEvent(
+			'blocks_product_collection_placeholder_collection_choose',
+			{
+				collection: collectionName,
+				location: tracksLocation,
+			}
+		);
 		applyCollection( collectionName, clientId, replaceBlock );
+	};
 
 	return (
 		<div { ...blockProps }>
