@@ -65,7 +65,7 @@ export const extractName = ( format: string ): string => {
 export const formatAddress = (
 	address: CartBillingAddress | CartShippingAddress,
 	format: string
-): { name: string; address: string } => {
+): { name: string; address: string[] } => {
 	const nameFormat = extractName( format );
 
 	const addressFormatWithoutName = format.replace( `${ nameFormat }\n`, '' );
@@ -119,12 +119,13 @@ export const formatAddress = (
 	addressTokens.forEach( ( [ token, value ] ) => {
 		parsedAddress = parsedAddress.replace( token, value );
 	} );
-	parsedAddress = parsedAddress
-		.split( /\n+/ ) // This regex prevents multiple empty spaces in an address.
-		.join( ', ' )
-		.replace( /^,\s|,\s$/g, '' );
+	const addressParts = parsedAddress
+		.replace( /^,\s|,\s$/g, '' )
+		.replace( /\n{2,}/, '\n' )
+		.split( '\n' )
+		.filter( Boolean );
 
-	return { name: parsedName, address: parsedAddress };
+	return { name: parsedName, address: addressParts };
 };
 
 export const reloadPage = (): void => void window.location.reload( true );
