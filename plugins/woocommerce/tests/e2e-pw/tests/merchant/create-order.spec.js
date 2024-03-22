@@ -343,9 +343,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 			)
 		).toBeVisible();
 		await expect(
-			page
-				.locator( 'table' )
-				.filter( { hasText: 'Paid: $200.00 March 21,' } )
+			page.locator( 'table' ).filter( { hasText: 'Paid: $200.00' } )
 		).toBeVisible();
 	} );
 
