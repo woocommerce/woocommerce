@@ -248,7 +248,7 @@
 		"postcss": "8.4.32",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.0",
-		"prettier": "npm:wp-prettier@2.6.2",
+		"prettier": "npm:wp-prettier@^2.8.5",
 		"progress-bar-webpack-plugin": "2.1.0",
 		"promptly": "3.2.0",
 		"puppeteer": "17.1.3",
