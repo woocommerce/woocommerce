@@ -791,6 +791,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'        => 'product-sku-field',
 				'blockName' => 'woocommerce/product-sku-field',
 				'order'     => 10,
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
 			)
 		);
 		$product_inventory_inner_section->add_block(
