@@ -1062,6 +1062,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'id'        => 'product-shipping-class',
 				'blockName' => 'woocommerce/product-shipping-class-field',
 				'order'     => 10,
+				'disableConditions' => array(
+					array(
+						'expression' => 'editedProduct.type === "variable"',
+					),
+				),
 			)
 		);
 		$product_fee_and_dimensions_section->add_block(
