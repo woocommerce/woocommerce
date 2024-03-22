@@ -57,6 +57,27 @@ global.wcSettings = {
 				state: { label: 'Province' },
 			},
 		},
+		JP: {
+			allowBilling: true,
+			allowShipping: true,
+			states: {
+				JP28: 'Hyogo',
+			},
+			locale: {
+				last_name: { priority: 10 },
+				first_name: { priority: 20 },
+				postcode: {
+					priority: 65,
+				},
+				state: {
+					label: 'Prefecture',
+					priority: 66,
+				},
+				city: { priority: 67 },
+				address_1: { priority: 68 },
+				address_2: { priority: 69 },
+			},
+		},
 		GB: {
 			states: {},
 			allowBilling: true,
