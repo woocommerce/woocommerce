@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Adds a `onBeforeStep` callback to the product tour
