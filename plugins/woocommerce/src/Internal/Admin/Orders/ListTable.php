@@ -1403,7 +1403,7 @@ class ListTable extends WP_List_Table {
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
-				++$changed;
+				$changed++;
 			}
 		}
 
