@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { ReactElement } from 'react';
 import classnames from 'classnames';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
@@ -10,7 +11,7 @@ const FrontendBlock = ( {
 	children,
 	className,
 }: {
-	children: JSX.Element;
+	children: ReactElement[];
 	className?: string;
 } ): JSX.Element => {
 	const { dispatchCheckoutEvent } = useStoreEvents();
