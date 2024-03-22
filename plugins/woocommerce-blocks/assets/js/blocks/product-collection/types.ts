@@ -148,6 +148,10 @@ export interface PreviewState {
 	previewMessage: string;
 }
 
+/**
+ * For now it only has one property, but it can be extended in the future to pass
+ * more information to the preview state handler.
+ */
 export interface HandlePreviewStateArgs {
 	setPreviewState: React.Dispatch< React.SetStateAction< PreviewState > >;
 }
