@@ -1380,7 +1380,7 @@ class ListTable extends WP_List_Table {
 
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			++$changed;
+			$changed++;
 		}
 
 		return $changed;
