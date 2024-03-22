@@ -58,6 +58,7 @@ for ( const testData of testToRun ) {
 				postType: testData.templateType,
 			} );
 			await editorUtils.enterEditMode();
+			await editorUtils.waitForSiteEditorFinishLoading();
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
