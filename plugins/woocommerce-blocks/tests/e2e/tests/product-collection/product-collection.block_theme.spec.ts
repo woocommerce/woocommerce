@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import type { Request } from '@playwright/test';
+import type { Request, Locator } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -45,6 +45,108 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.productTitles ).toHaveCount( 9 );
 		await expect( pageObject.productPrices ).toHaveCount( 9 );
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
+	} );
+
+	test.describe( 'Renders correctly with all Product Elements', async () => {
+		const insertProductElements = async (
+			pageObject: ProductCollectionPage
+		) => {
+			// By default there are inner blocks:
+			// - woocommerce/product-image
+			// - core/post-title
+			// - woocommerce/product-price
+			// - woocommerce/product-button
+			// We're adding remaining ones
+			const productElements = [
+				{ name: 'woocommerce/product-rating', attributes: {} },
+				{ name: 'woocommerce/product-sku', attributes: {} },
+				{ name: 'woocommerce/product-stock-indicator', attributes: {} },
+				{ name: 'woocommerce/product-sale-badge', attributes: {} },
+				{
+					name: 'core/post-excerpt',
+					attributes: {
+						__woocommerceNamespace:
+							'woocommerce/product-collection/product-summary',
+					},
+				},
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_tag' },
+				},
+				{
+					name: 'core/post-terms',
+					attributes: { term: 'product_cat' },
+				},
+			];
+
+			await Promise.all(
+				productElements.map( async ( productElement ) => {
+					await pageObject.insertBlockInProductCollection(
+						productElement
+					);
+				} )
+			);
+		};
+
+		const verifyProductContent = async ( product: Locator ) => {
+			await expect( product ).toContainText( 'Beanie' ); // core/post-title
+			await expect( product ).toContainText(
+				'$20.00 Original price was: $20.00.$18.00Current price is: $18.00.'
+			); // woocommerce/product-price
+			await expect( product ).toContainText( 'woo-beanie' ); // woocommerce/product-sku
+			await expect( product ).toContainText( 'In stock' ); // woocommerce/product-stock-indicator
+			await expect( product ).toContainText(
+				'This is a simple product.'
+			); // core/post-excerpt
+			await expect( product ).toContainText( 'Accessories' ); // core/post-terms - product_cat
+			await expect( product ).toContainText( 'Recommended' ); // core/post-terms - product_tag
+			await expect( product ).toContainText( 'SaleProduct on sale' ); // woocommerce/product-sale-badge
+			await expect( product ).toContainText( 'Add to cart' ); // woocommerce/product-button
+		};
+
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
+		test( 'In a post', async ( { pageObject } ) => {
+			await pageObject.createNewPostAndInsertBlock();
+			await insertProductElements( pageObject );
+			await pageObject.publishAndGoToFrontend();
+
+			const product = pageObject.products.nth( 1 );
+
+			await verifyProductContent( product );
+		} );
+
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
+		test( 'In a Product Archive (Product Catalog)', async ( {
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.replaceProductsWithProductCollectionInTemplate(
+				'woocommerce/woocommerce//archive-product'
+			);
+			await insertProductElements( pageObject );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToProductCatalogFrontend();
+
+			const product = pageObject.products.nth( 1 );
+
+			await verifyProductContent( product );
+		} );
+
+		// Expects are collected in verifyProductContent function
+		// eslint-disable-next-line playwright/expect-expect
+		test( 'On a Home Page', async ( { pageObject, editor } ) => {
+			await pageObject.goToHomePageAndInsertCollection();
+
+			await insertProductElements( pageObject );
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToHomePageFrontend();
+
+			const product = pageObject.products.nth( 1 );
+
+			await verifyProductContent( product );
+		} );
 	} );
 
 	test.describe( 'Product Collection Sidebar Settings', () => {
@@ -200,10 +302,16 @@ test.describe( 'Product Collection', () => {
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Recommended',
 			] );
-			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 
 			await pageObject.publishAndGoToFrontend();
-			await expect( pageObject.productTitles ).toHaveText( [ 'Hoodie' ] );
+			await expect( pageObject.productTitles ).toHaveText( [
+				'Beanie',
+				'Hoodie',
+			] );
 		} );
 
 		test( 'Products can be filtered based on product attributes like color, size etc.', async ( {
@@ -316,7 +424,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test.describe( 'Sync with current template (former "Inherit query from template")', () => {
+		test.describe( 'Sync with current template', () => {
 			test( 'should not be visible on posts', async ( {
 				pageObject,
 			} ) => {
@@ -333,8 +441,10 @@ test.describe( 'Product Collection', () => {
 
 			test( 'should work as expected in Product Catalog template', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -385,10 +495,12 @@ test.describe( 'Product Collection', () => {
 
 			test( 'is enabled by default in 1st Product Collection and disabled in 2nd+', async ( {
 				pageObject,
+				editor,
 			} ) => {
 				// First Product Catalog
 				// Option should be visible & ENABLED by default
 				await pageObject.goToProductCatalogAndInsertCollection();
+				await editor.openDocumentSettingsSidebar();
 
 				const sidebarSettings =
 					await pageObject.locateSidebarSettings();
@@ -638,7 +750,7 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 
-		test( "Product Catalog Collection can be added in post and doesn't inherit query from template", async ( {
+		test( "Product Catalog Collection can be added in post and doesn't sync query with template", async ( {
 			pageObject,
 		} ) => {
 			await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
@@ -656,12 +768,14 @@ test.describe( 'Product Collection', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 		} );
 
-		test( 'Product Catalog Collection can be added in product archive and inherits query from template', async ( {
+		test( 'Product Catalog Collection can be added in product archive and syncs query with template', async ( {
 			pageObject,
+			editor,
 		} ) => {
 			await pageObject.goToProductCatalogAndInsertCollection(
 				'productCatalog'
 			);
+			await editor.openDocumentSettingsSidebar();
 
 			const sidebarSettings = await pageObject.locateSidebarSettings();
 			const input = sidebarSettings.locator(

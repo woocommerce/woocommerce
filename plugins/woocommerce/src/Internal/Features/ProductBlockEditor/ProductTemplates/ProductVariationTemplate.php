@@ -3,11 +3,10 @@
  * ProductVariationTemplate
  */
 
-namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\DownloadableProductTrait;
 
 /**
  * Product Variation Template.
@@ -195,6 +194,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	 * Adds the pricing group blocks to the template.
 	 */
 	private function add_pricing_group_blocks() {
+		$is_calc_taxes_enabled = wc_tax_enabled();
+
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
 		$pricing_group->add_block(
 			array(
@@ -252,6 +253,12 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'name'       => 'regular_price',
 					'label'      => __( 'Regular price', 'woocommerce' ),
 					'isRequired' => true,
+					'help'       => $is_calc_taxes_enabled ? null : sprintf(
+					/* translators: %1$s: store settings link opening tag. %2$s: store settings link closing tag.*/
+						__( 'Per your %1$sstore settings%2$s, taxes are not enabled.', 'woocommerce' ),
+						'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=general' ) . '" target="_blank" rel="noreferrer">',
+						'</a>'
+					),
 				),
 			)
 		);
@@ -283,41 +290,26 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 			)
 		);
 
-		$product_pricing_section->add_block(
-			array(
-				'id'         => 'product-tax-class',
-				'blockName'  => 'woocommerce/product-radio-field',
-				'order'      => 40,
-				'attributes' => array(
-					'title'       => __( 'Tax class', 'woocommerce' ),
-					'description' => sprintf(
-					/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
-						__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s.', 'woocommerce' ),
-						'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
-						'</a>'
+		if ( $is_calc_taxes_enabled ) {
+			$product_pricing_section->add_block(
+				array(
+					'id'         => 'product-tax-class',
+					'blockName'  => 'woocommerce/product-select-field',
+					'order'      => 40,
+					'attributes' => array(
+						'label'    => __( 'Tax class', 'woocommerce' ),
+						'help'     => sprintf(
+						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
+							__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
+							'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+							'</a>'
+						),
+						'property' => 'tax_class',
+						'options'  => SimpleProductTemplate::get_tax_classes( 'product_variation' ),
 					),
-					'property'    => 'tax_class',
-					'options'     => array(
-						array(
-							'label' => __( 'Same as main product', 'woocommerce' ),
-							'value' => 'parent',
-						),
-						array(
-							'label' => __( 'Standard', 'woocommerce' ),
-							'value' => '',
-						),
-						array(
-							'label' => __( 'Reduced rate', 'woocommerce' ),
-							'value' => 'reduced-rate',
-						),
-						array(
-							'label' => __( 'Zero rate', 'woocommerce' ),
-							'value' => 'zero-rate',
-						),
-					),
-				),
-			)
-		);
+				)
+			);
+		}
 	}
 
 	/**
@@ -374,7 +366,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'blockName'  => 'woocommerce/product-toggle-field',
 				'order'      => 20,
 				'attributes' => array(
-					'label'        => __( 'Track stock quantity for this product', 'woocommerce' ),
+					'label'        => __( 'Track inventory', 'woocommerce' ),
 					'property'     => 'manage_stock',
 					'disabled'     => 'yes' !== get_option( 'woocommerce_manage_stock' ),
 					'disabledCopy' => sprintf(

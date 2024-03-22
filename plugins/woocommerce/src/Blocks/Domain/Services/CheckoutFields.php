@@ -334,6 +334,26 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Deregister a checkout field.
+	 *
+	 * @param string $field_id The field ID.
+	 *
+	 * @internal
+	 */
+	public function deregister_checkout_field( $field_id ) {
+		if ( empty( $this->additional_fields[ $field_id ] ) ) {
+			return;
+		}
+
+		$location = $this->get_field_location( $field_id );
+
+		// Remove the field from the fields_locations array.
+		$this->fields_locations[ $location ] = array_diff( $this->fields_locations[ $location ], array( $field_id ) );
+
+		// Remove the field from the additional_fields array.
+		unset( $this->additional_fields[ $field_id ] );
+	}
+	/**
 	 * Validates the "base" options (id, label, location) and shows warnings if they're not supplied.
 	 *
 	 * @param array $options The options supplied during field registration.
@@ -381,13 +401,6 @@ class CheckoutFields {
 			return false;
 		}
 
-		// Hidden fields are not supported right now. They will be registered with hidden => false.
-		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
-			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
-		}
-
 		if ( ! empty( $options['type'] ) ) {
 			if ( ! in_array( $options['type'], $this->supported_field_types, true ) ) {
 				$message = sprintf(
@@ -411,6 +424,13 @@ class CheckoutFields {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The validate_callback must be a valid callback.' );
 			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
+		}
+
+		// Hidden fields are not supported right now. They will be registered with hidden => false.
+		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
+			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
+			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
 		}
 
 		return true;

@@ -3267,6 +3267,9 @@ importers:
       '@xstate/react':
         specifier: 3.2.1
         version: 3.2.1(@types/react@17.0.71)(react@17.0.2)(xstate@4.37.1)
+      '@xstate5/react':
+        specifier: npm:@xstate/react@4
+        version: /@xstate/react@4.1.0(@types/react@17.0.71)(react@17.0.2)(xstate@4.37.1)
       classnames:
         specifier: ^2.3.2
         version: 2.3.2
@@ -3324,6 +3327,9 @@ importers:
       xstate:
         specifier: 4.37.1
         version: 4.37.1
+      xstate5:
+        specifier: npm:xstate@^5.9.1
+        version: /xstate@5.9.1
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -3610,6 +3616,9 @@ importers:
       fork-ts-checker-webpack-plugin:
         specifier: ^8.0.0
         version: 8.0.0(typescript@5.3.3)(webpack@5.89.0)
+      fs-extra:
+        specifier: 11.1.1
+        version: 11.1.1
       jest:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
@@ -10925,7 +10934,7 @@ packages:
       '@jest/test-result': 26.6.2
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       exit: 0.1.2
@@ -11679,7 +11688,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       '@types/yargs': 15.0.19
       chalk: 4.1.2
 
@@ -18792,7 +18801,7 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       '@types/responselike': 1.0.3
 
   /@types/cheerio@0.22.35:
@@ -19292,7 +19301,7 @@ packages:
   /@types/responselike@1.0.3:
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
     dependencies:
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
 
   /@types/retry@0.12.0:
     resolution: {integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==}
@@ -19413,7 +19422,7 @@ packages:
   /@types/webpack@4.41.38:
     resolution: {integrity: sha512-oOW7E931XJU1mVfCnxCVgv8GLFL768pDO5u2Gzk82i8yTIgX6i7cntyZOkZYb/JtYM8252SN9bQp9tgkVDSsRw==}
     dependencies:
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       '@types/tapable': 1.0.12
       '@types/uglify-js': 3.17.4
       '@types/webpack-sources': 3.2.3
@@ -25097,6 +25106,23 @@ packages:
     peerDependenciesMeta:
       '@xstate/fsm':
         optional: true
+      xstate:
+        optional: true
+    dependencies:
+      react: 17.0.2
+      use-isomorphic-layout-effect: 1.1.2(@types/react@17.0.71)(react@17.0.2)
+      use-sync-external-store: 1.2.0(react@17.0.2)
+      xstate: 4.37.1
+    transitivePeerDependencies:
+      - '@types/react'
+    dev: false
+
+  /@xstate/react@4.1.0(@types/react@17.0.71)(react@17.0.2)(xstate@4.37.1):
+    resolution: {integrity: sha512-Fh89luCwuMXIVXIua67d8pNuVgdGpqke2jHfIIL+ZjkfNh6YFtPDSwNSZZDhdNUsOW1zZYSbtUzbC8MIUyTSHQ==}
+    peerDependencies:
+      react: ^17.0.2
+      xstate: ^5.6.2
+    peerDependenciesMeta:
       xstate:
         optional: true
     dependencies:
@@ -37449,7 +37475,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@types/graceful-fs': 4.1.9
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -38560,7 +38586,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 20.10.4
+      '@types/node': 16.18.68
       chalk: 4.1.2
       graceful-fs: 4.2.11
       is-ci: 2.0.0
@@ -52434,6 +52460,10 @@ packages:
 
   /xstate@4.37.1:
     resolution: {integrity: sha512-MuB7s01nV5vG2CzaBg2msXLGz7JuS+x/NBkQuZAwgEYCnWA8iQMiRz2VGxD3pcFjZAOih3fOgDD3kDaFInEx+g==}
+
+  /xstate@5.9.1:
+    resolution: {integrity: sha512-85edx7iMqRJSRlEPevDwc98EWDYUlT5zEQ54AXuRVR+G76gFbcVTAUdtAeqOVxy8zYnUr9FBB5114iK6enljjw==}
+    dev: false
 
   /xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}

@@ -208,6 +208,13 @@ global.wcSettings = {
 			index: 100,
 		},
 	},
+	checkoutData: {
+		order_id: 100,
+		status: 'checkout-draft',
+		order_key: 'wc_order_mykey',
+		order_number: '100',
+		customer_id: 1,
+	},
 };
 
 global.jQuery = () => ( {

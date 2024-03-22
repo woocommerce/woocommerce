@@ -265,6 +265,28 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Remove a given set of notices.
+	 *
+	 * An array of notice names or a regular expression string can be passed, in the later case
+	 * all the notices whose name matches the regular expression will be removed.
+	 *
+	 * @param array|string $names_array_or_regex An array of notice names, or a string representing a regular expression.
+	 * @param bool         $force_save Force saving inside this method instead of at the 'shutdown'.
+	 * @return void
+	 */
+	public static function remove_notices( $names_array_or_regex, $force_save = false ) {
+		if ( ! is_array( $names_array_or_regex ) ) {
+			$names_array_or_regex = array_filter( self::get_notices(), fn( $notice_name ) => 1 === preg_match( $names_array_or_regex, $notice_name ) );
+		}
+		self::set_notices( array_diff( self::get_notices(), $names_array_or_regex ) );
+
+		if ( $force_save ) {
+			// Adding early save to prevent more race conditions with notices.
+			self::store_notices();
+		}
+	}
+
+	/**
 	 * See if a notice is being shown.
 	 *
 	 * @param string $name Notice name.
@@ -391,7 +413,7 @@ class WC_Admin_Notices {
 					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
 
 					if ( $notice_html ) {
-						include dirname( __FILE__ ) . '/views/html-notice-custom.php';
+						include __DIR__ . '/views/html-notice-custom.php';
 					}
 				}
 			}
@@ -413,12 +435,12 @@ class WC_Admin_Notices {
 
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) {
-				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
+				include __DIR__ . '/views/html-notice-updating.php';
 			} else {
-				include dirname( __FILE__ ) . '/views/html-notice-update.php';
+				include __DIR__ . '/views/html-notice-update.php';
 			}
 		} else {
-			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
+			include __DIR__ . '/views/html-notice-updated.php';
 		}
 	}
 
@@ -463,7 +485,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $outdated ) {
-			include dirname( __FILE__ ) . '/views/html-notice-template-check.php';
+			include __DIR__ . '/views/html-notice-template-check.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -486,7 +508,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $enabled ) {
-			include dirname( __FILE__ ) . '/views/html-notice-legacy-shipping.php';
+			include __DIR__ . '/views/html-notice-legacy-shipping.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -502,7 +524,7 @@ class WC_Admin_Notices {
 			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
-				include dirname( __FILE__ ) . '/views/html-notice-no-shipping-methods.php';
+				include __DIR__ . '/views/html-notice-no-shipping-methods.php';
 			}
 
 			if ( $method_count > 0 ) {
@@ -515,7 +537,7 @@ class WC_Admin_Notices {
 	 * Notice shown when regenerating thumbnails background process is running.
 	 */
 	public static function regenerating_thumbnails_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-regenerating-thumbnails.php';
+		include __DIR__ . '/views/html-notice-regenerating-thumbnails.php';
 	}
 
 	/**
@@ -526,7 +548,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+		include __DIR__ . '/views/html-notice-secure-connection.php';
 	}
 
 	/**
@@ -541,7 +563,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
+		include __DIR__ . '/views/html-notice-regenerating-lookup-table.php';
 	}
 
 	/**
@@ -628,7 +650,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-maxmind-license-key.php';
+		include __DIR__ . '/views/html-notice-maxmind-license-key.php';
 	}
 
 	/**
@@ -642,7 +664,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-redirect-only-download.php';
+		include __DIR__ . '/views/html-notice-redirect-only-download.php';
 	}
 
 	/**
@@ -656,7 +678,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-unprotected.php';
+		include __DIR__ . '/views/html-notice-uploads-directory-is-unprotected.php';
 	}
 
 	/**
@@ -671,7 +693,7 @@ class WC_Admin_Notices {
 			self::remove_notice( 'base_tables_missing' );
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-base-table-missing.php';
+		include __DIR__ . '/views/html-notice-base-table-missing.php';
 	}
 
 	/**

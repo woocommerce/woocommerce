@@ -33,9 +33,12 @@ export function DownloadsMenuItem( {
 }: VariationActionsMenuItemProps ) {
 	const ids = selection.map( ( { id } ) => id );
 
-	const downloadsIds: number[] = selection[ 0 ].downloads.map(
-		( { id }: ProductDownload ) => Number.parseInt( id, 10 )
-	);
+	const downloadsIds: number[] =
+		selection?.length > 0
+			? selection[ 0 ].downloads.map( ( { id }: ProductDownload ) =>
+					Number.parseInt( id, 10 )
+			  )
+			: [];
 
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 

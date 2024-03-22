@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix section title styles in the pre-publish panel on WP 6.5 #45689

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { adminFile } from '@woocommerce/e2e-utils';
 import {
 	installPluginFromPHPFile,
 	uninstallPluginFromPHPFile,
@@ -24,7 +23,6 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Additional Checkout Fields', () => {
-	test.use( { storageState: adminFile } );
 	test.beforeAll( async () => {
 		await installPluginFromPHPFile(
 			`${ __dirname }/additional-checkout-fields-plugin.php`

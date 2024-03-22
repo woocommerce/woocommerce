@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Remove the ability to update Woo.com plugins that are not available under WordPress.org plugin directory
