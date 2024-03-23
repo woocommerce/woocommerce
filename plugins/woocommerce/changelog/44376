@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add aria labels to pagination elements for accessibility.
