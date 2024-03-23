@@ -380,8 +380,7 @@ const getFrontConfig = ( options = {} ) => {
 				automaticNameDelimiter: '--',
 				cacheGroups: {
 					commons: {
-						test: /[\\/]node_modules[\\/](?:@wordpress[\\/](?:components|icons)|@ariakit[\\/](?:react|react-core|core)|dompurify|stylis|@floating-ui|@emotion|react-number-format|react-transition-group|postcode-validator|react-property|dom-handler)[\\/]/,
-						//  will get frontend suffix appended.
+						test: /[\\/]node_modules[\\/]/,
 						name: 'wc-blocks-vendors',
 						chunks: 'all',
 					},
