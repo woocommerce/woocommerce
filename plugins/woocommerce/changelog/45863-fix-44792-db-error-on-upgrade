@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a database notice during upgrading from WooCommerce <4.0.0
