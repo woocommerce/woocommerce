@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add a `woocommerce_product_importer_read_file_row` hook to filter each row from an importing CSV file.

@@ -116,7 +116,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 						$row = array_map( array( $this, 'adjust_character_encoding' ), $row );
 					}
 
-					$this->raw_data[]                                 = $row;
+					$this->raw_data[]                                 = apply_filters( 'woocommerce_product_importer_read_file_row', $row, $this );
 					$this->file_positions[ count( $this->raw_data ) ] = ftell( $handle );
 
 					if ( ( $this->params['end_pos'] > 0 && ftell( $handle ) >= $this->params['end_pos'] ) || 0 === --$this->params['lines'] ) {
