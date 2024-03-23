@@ -328,6 +328,7 @@ const getFrontConfig = ( options = {} ) => {
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
 			filename: `[name]-frontend${ fileSuffix }.js`,
 			uniqueName: 'webpackWcBlocksJsonp',
+			library: [ 'wc', '[name]' ],
 		},
 		module: {
 			rules: [
@@ -341,7 +342,7 @@ const getFrontConfig = ( options = {} ) => {
 								[
 									'@wordpress/babel-preset-default',
 									{
-										modules: false,
+										// modules: false,
 										targets: {
 											browsers: [
 												'extends @wordpress/browserslist-config',
@@ -382,15 +383,7 @@ const getFrontConfig = ( options = {} ) => {
 						test: /[\\/]node_modules[\\/](?:@wordpress[\\/](?:components|icons)|@ariakit[\\/](?:react|react-core|core)|dompurify|stylis|@floating-ui|@emotion|react-number-format|react-transition-group|postcode-validator|react-property|dom-handler)[\\/]/,
 						//  will get frontend suffix appended.
 						name: 'wc-blocks-vendors',
-						chunks: ( chunk ) => {
-							return (
-								chunk.name === 'cart' ||
-								chunk.name === 'checkout' ||
-								chunk.name === 'blocks-checkout' ||
-								chunk.name === 'blocks-components'
-							);
-						},
-						enforce: true,
+						chunks: 'all',
 					},
 					...getCacheGroups(),
 					'base-components': {
