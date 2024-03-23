@@ -127,7 +127,17 @@ final class QuantityLimits {
 			);
 		}
 
-		return true;
+		/**
+		 * Filters the quantity validation for a cart item being updated via the Store API.
+		 *
+		 * @since 8.7.1
+		 *
+   		 * @param \WP_Error|true $valid True if the new quantity is valid, \WP_Error otherwise.
+		 * @param integer $quantity Quantity to validate.
+		 * @param \WC_Product|array $cart_item Cart item.
+		 * @return \WP_Error|true
+		 */
+		return apply_filters( 'woocommerce_store_api_validate_cart_item_quantity', true, $quantity, $cart_item );
 	}
 
 	/**
