@@ -279,24 +279,26 @@ class WC_Admin_Menus {
 		// Initialize our custom order array.
 		$woocommerce_menu_order = array();
 
-		// Get the index of our custom separator.
-		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
-
-		// Get index of product menu.
-		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order, true );
+		// Remove menu items that we will set manually.
+		$ignored_items = array(
+			array_search( 'separator-woocommerce', $menu_order, true ),
+			array_search( 'edit.php?post_type=product', $menu_order, true ),
+		);
 
 		// Loop through menu order and do some rearranging.
 		foreach ( $menu_order as $index => $item ) {
-
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
-				unset( $menu_order[ $woocommerce_separator ] );
-				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ), true ) ) {
-				$woocommerce_menu_order[] = $item;
+				continue;
 			}
+
+			if ( in_array( $index, $ignored_items, true ) ) {
+				continue;
+			}
+
+			$woocommerce_menu_order[] = $item;
 		}
 
 		// Return order.
