@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Ensure item name filtering via woocommerce_order_item_name works in includes/admin/meta-boxes/views/html-order-item.php
