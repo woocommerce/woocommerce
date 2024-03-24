@@ -11,6 +11,7 @@
  * WC requires at least: 6.7
  * WC tested up to: 7.0
  * Text Domain: woo-ai
+ * Requires Plugins: woocommerce
  *
  * @package Woo_AI
  */
