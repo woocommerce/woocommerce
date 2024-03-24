@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
-Comment: I don't think this warrants a changelog entry since I only updated the header.
+Comment: Updated the header to enable a new plugin dependency feature available in WP 6.5.
 
