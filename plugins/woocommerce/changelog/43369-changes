@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fixed a bug where text in the Totals section would overflow outside the section limits on lower resolutions.
