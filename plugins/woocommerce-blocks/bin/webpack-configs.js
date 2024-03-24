@@ -14,6 +14,8 @@ const CreateFileWebpack = require( 'create-file-webpack' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const webpack = require( 'webpack' );
+const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
 /**
  * Internal dependencies
@@ -40,6 +42,8 @@ const getSharedPlugins = ( {
 	checkCircularDeps = true,
 } ) =>
 	[
+		! isProduction && new webpack.HotModuleReplacementPlugin(),
+		! isProduction && new ReactRefreshWebpackPlugin(),
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
 					exclude: /node_modules/,
@@ -99,6 +103,8 @@ const getCoreConfig = ( options = {} ) => {
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								'@babel/plugin-proposal-optional-chaining',
 								'@babel/plugin-proposal-class-properties',
 							],
@@ -207,6 +213,8 @@ const getMainConfig = ( options = {} ) => {
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -351,6 +359,8 @@ const getFrontConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -468,6 +478,8 @@ const getPaymentsConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -575,6 +587,8 @@ const getExtensionsConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -682,6 +696,8 @@ const getSiteEditorConfig = ( options = {} ) => {
 								],
 							],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
@@ -827,6 +843,8 @@ const getStylingConfig = ( options = {} ) => {
 						options: {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
+								! isProduction &&
+									require.resolve( 'react-refresh/babel' ),
 								isProduction
 									? require.resolve(
 											'babel-plugin-transform-react-remove-prop-types'
