@@ -7,7 +7,7 @@
  * Author: WooCommerce
  * Author URI: https://woo.com/
  * Requires at least: 5.8
- * Tested up to: 6.3
+ * Tested up to: 6.5
  * WC requires at least: 6.7
  * WC tested up to: 7.0
  * Text Domain: woo-ai
