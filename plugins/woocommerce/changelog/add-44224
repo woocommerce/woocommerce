@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Remove Navigation setting when store isn't using it
