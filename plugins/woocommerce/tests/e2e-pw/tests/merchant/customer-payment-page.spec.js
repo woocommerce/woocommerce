@@ -79,9 +79,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 		await page.locator( 'label[for=order_status] > a' ).click();
 
 		// verify we landed on the customer payment page
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Pay for order'
-		);
+		await expect(
+			page.getByText( 'You are paying for a guest order.' )
+		).toBeVisible();
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
 			productName
 		);
@@ -101,14 +101,14 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 		await page.locator( 'button#place_order' ).click();
 
 		// Verify we landed on the order received page
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
 		await expect(
-			page.locator( 'li.woocommerce-order-overview__order.order' )
-		).toContainText( orderId.toString() );
+			page.getByText( 'Your order has been received' )
+		).toBeVisible();
 		await expect(
-			page.locator( 'span.woocommerce-Price-amount.amount >> nth=0' )
-		).toContainText( productPrice );
+			page.getByText( `Order number: ${ orderId }` )
+		).toBeVisible();
+		await expect(
+			await page.getByText( `Total: $${ productPrice }` ).count()
+		).toBeGreaterThan( 0 );
 	} );
 } );
