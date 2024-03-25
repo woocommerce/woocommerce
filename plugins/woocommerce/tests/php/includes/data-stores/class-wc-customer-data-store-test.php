@@ -226,4 +226,83 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '60.00', $actual_spent );
 	}
+
+	/**
+	 * Within a multisite network, the same order IDs can be re-used across multiple blogs. This test describes our
+	 * management of this problem, in relation to our caching of the last order placed by each user.
+	 *
+	 * To test this, we contrive a situation where two separate users place orders on different blogs within the same
+	 * network, and where those orders have the same ID. Then, ensure we don't expose information about one customer's
+	 * order to the other customer.
+	 */
+	public function test_get_last_customer_order() {
+		$this->skipWithoutMultisite();
+
+		$sut        = new WC_Customer_Data_Store();
+		$customer_1 = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
+		$customer_2 = WC_Helper_Customer::create_customer( 'test2', 'pass2', 'test2@example.com' );
+		$blog_1     = $this->make_network_site( '/site-1/' );
+		$blog_2     = $this->make_network_site( '/site-2/' );
+
+		// Create customer 1's first order on Blog 1, and prime the last_order cache.
+		switch_to_blog( $blog_1 );
+		$customer_1_order_1 = WC_Helper_Order::create_order( $customer_1->get_id() );
+		$sut->get_last_order( $customer_1 );
+
+		// Create customer 2's first order on Blog 2.
+		switch_to_blog( $blog_2 );
+		$customer_2_order = WC_Helper_Order::create_order( $customer_2->get_id() );
+
+		$this->assertEquals(
+			$customer_1_order_1->get_id(),
+			$customer_2_order->get_id(),
+			'Given the order of operations, we expect the last orders of customer 1 and customer 2 to share the same order ID.'
+		);
+
+		$this->assertFalse(
+			$sut->get_last_order( $customer_1 ),
+			'Customer 1 has not yet placed an order on Blog 2, so we should not be able to fetch their last order.'
+		);
+
+		$customer_1_order_2 = WC_Helper_Order::create_order( $customer_1->get_id() );
+		$this->assertEquals(
+			$customer_1_order_2->get_id(),
+			$sut->get_last_order( $customer_1 )->get_id(),
+			'Once Customer 1 places an order on Blog 2, we should be able to retrieve it.'
+		);
+
+		$this->assertEquals(
+			$customer_2_order->get_id(),
+			$sut->get_last_order( $customer_2 )->get_id(),
+			'We should be able to retrieve the last order placed by Customer 2 on Blog 2.'
+		);
+
+		wp_delete_site( $blog_1 );
+		wp_delete_site( $blog_2 );
+		restore_current_blog();
+	}
+
+	/**
+	 * Creates a new subsite on the network.
+	 *
+	 * This work is expensive, so should probably be moved to the bootstrap phase (if we detect the tests are running in
+	 * a multisite environment) and we can re-use the schema instead of recreating them. Currently, though, this is one
+	 * of the only areas where we require this.
+	 *
+	 * @param string $path Subsite blog path.
+	 *
+	 * @return int
+	 */
+	private function make_network_site( string $path ): int {
+		$blog_id = $this->factory->blog->create( array(
+			'path'   => $path,
+		) );
+
+		switch_to_blog( $blog_id );
+		WC_Install::install();
+		ActionScheduler_Store::instance()->init();
+		ActionScheduler_Logger::instance()->init();
+
+		return $blog_id;
+	}
 }

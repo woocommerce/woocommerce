@@ -340,6 +340,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
+		global $wpdb;
+		$last_order_key = $wpdb->get_blog_prefix() . '_last_order';
+
 		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filters the id of the last order from a given customer.
@@ -350,7 +353,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 */
 		$last_order_id = apply_filters(
 			'woocommerce_customer_get_last_order',
-			get_user_meta( $customer->get_id(), '_last_order', true ),
+			get_user_meta( $customer->get_id(), $last_order_key, true ),
 			$customer
 		);
 		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
@@ -385,7 +388,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			update_user_meta( $customer->get_id(), '_last_order', $last_order_id );
+			update_user_meta( $customer->get_id(), $last_order_key, $last_order_id );
 		}
 
 		if ( ! $last_order_id ) {
