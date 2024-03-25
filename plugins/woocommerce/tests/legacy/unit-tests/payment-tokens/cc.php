@@ -111,4 +111,16 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 		$this->assertEquals( '4321', $token->get_last4() );
 		$this->assertEquals( 3, $token->get_user_id() );
 	}
+
+	/**
+	 * Test get/set expiry year.
+	 * @since 2.6.0
+	 */
+	public function test_wc_payment_token_cc_co_branded_fields() {
+		$token = new WC_Payment_Token_CC();
+		$token->set_available_networks( array( 'visa', 'cartes_bancaires' ) );
+		$token->set_preferred_network( 'cartes_bancaires' );
+		$this->assertEquals( array( 'visa', 'cartes_bancaires' ), $token->get_available_networks() );
+		$this->assertEquals( 'cartes_bancaires', $token->get_preferred_network() );
+	}
 }
