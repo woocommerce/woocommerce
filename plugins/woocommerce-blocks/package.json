@@ -11,10 +11,6 @@
 		"wordpress",
 		"blocks"
 	],
-	"repository": {
-		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce.git"
-	},
 	"sideEffects": [
 		"*.css",
 		"*.scss",
@@ -41,6 +37,10 @@
 		"./assets/js/atomic/utils/blocks-registration-manager/index.ts",
 		"./packages/**/*.{tsx,ts,js}"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com:woocommerce/woocommerce.git"
+	},
 	"license": "GPL-3.0+",
 	"scripts": {
 		"analyze-bundles": "cross-env WP_BUNDLE_ANALYZER=1 pnpm run build",
