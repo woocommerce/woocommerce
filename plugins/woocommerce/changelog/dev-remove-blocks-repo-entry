@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-remove repository entry and cleanup in blocks package.json
+cleanup in blocks package.json

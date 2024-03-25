@@ -1,5 +1,6 @@
 {
 	"name": "@woocommerce/block-library",
+	"private": true,
 	"title": "WooCommerce Blocks",
 	"author": "Automattic",
 	"version": "11.8.0-dev",
@@ -10,6 +11,10 @@
 		"wordpress",
 		"blocks"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com:woocommerce/woocommerce.git"
+	},
 	"sideEffects": [
 		"*.css",
 		"*.scss",
