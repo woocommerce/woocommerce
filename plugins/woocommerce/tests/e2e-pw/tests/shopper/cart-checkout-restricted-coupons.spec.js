@@ -393,7 +393,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					billing: {
 						first_name: 'Marge',
 						last_name: 'Simpson',
-						email: 'marge@example.com',
+						email: 'marge.simpson@example.org',
 					},
 					line_items: [
 						{
@@ -661,7 +661,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page
 			.getByLabel( 'Email address' )
 			.first()
-			.fill( 'marge@example.com' );
+			.fill( 'marge.simpson@example.org' );
 
 		await page
 			.getByRole( 'link', { name: 'Click here to enter your code' } )
