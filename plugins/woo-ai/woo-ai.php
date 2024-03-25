@@ -9,7 +9,7 @@
  * Requires at least: 5.8
  * Tested up to: 6.5
  * WC requires at least: 6.7
- * WC tested up to: 7.0
+ * WC tested up to: 8.7
  * Text Domain: woo-ai
  * Requires Plugins: woocommerce
  *
