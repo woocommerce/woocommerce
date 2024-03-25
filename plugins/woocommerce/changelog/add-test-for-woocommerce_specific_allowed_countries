@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a test for the `woocommerce_specific_allowed_countries` option.
