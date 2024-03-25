@@ -17,6 +17,10 @@
 		},
 		"tooltip": {
 			"type": "string"
+		},
+		"disabled": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"supports": {
