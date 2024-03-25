@@ -43,6 +43,8 @@ class FilesystemUtil {
 			return true;
 		}
 
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
 		$method      = get_filesystem_method();
 		$initialized = false;
 

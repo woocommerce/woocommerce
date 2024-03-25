@@ -8,10 +8,11 @@ use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
 use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
 use WC_Admin_Settings;
 use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
-use WP_Filesystem_Base;
 
 /**
  * Settings class.
@@ -78,14 +79,13 @@ class Settings {
 
 			if ( true === $result ) {
 				// Create infrastructure to prevent listing contents of the logs directory.
-				require_once ABSPATH . 'wp-admin/includes/file.php';
-				global $wp_filesystem;
-				if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
-					WP_Filesystem();
+				try {
+					$filesystem = FilesystemUtil::get_wp_filesystem();
+					$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
+					$filesystem->put_contents( $dir . 'index.html', '' );
+				} catch ( Exception $exception ) {
+					// Creation failed.
 				}
-
-				$wp_filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
-				$wp_filesystem->put_contents( $dir . 'index.html', '' );
 			}
 		}
 
@@ -340,7 +340,7 @@ class Settings {
 		$table = "{$wpdb->prefix}woocommerce_log";
 
 		$location_info = sprintf(
-			// translators: %s is a location in the filesystem.
+			// translators: %s is the name of a table in the database.
 			__( 'Log entries are stored in this database table: %s', 'woocommerce' ),
 			"<code>$table</code>"
 		);
