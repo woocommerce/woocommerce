@@ -122,5 +122,6 @@ class WC_Tests_Payment_Token_CC extends WC_Unit_Test_Case {
 		$token->set_preferred_network( 'cartes_bancaires' );
 		$this->assertEquals( array( 'visa', 'cartes_bancaires' ), $token->get_available_networks() );
 		$this->assertEquals( 'cartes_bancaires', $token->get_preferred_network() );
+		$this->assertTrue( $token->is_co_branded() );
 	}
 }
