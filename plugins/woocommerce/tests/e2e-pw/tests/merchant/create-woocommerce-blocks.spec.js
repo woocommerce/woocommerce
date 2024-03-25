@@ -7,10 +7,12 @@ const allWooBlocksPageTitle = `Insert All Woo Blocks ${ Date.now() }`;
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
 
-// all blocks except:
-// default cart and checkout blocks
-// mini-cart, product price, product collection (beta)
+// all WooCommerce blocks except:
+// default cart and checkout blocks, mini-cart, product collection (beta)
 const blocks = [
+	{
+		name: 'Product Price',
+	},
 	{
 		name: 'Product Search',
 	},
