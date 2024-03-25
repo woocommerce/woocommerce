@@ -105,10 +105,10 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 		await expect(
-			page.locator( 'li.woocommerce-order-overview__order.order' )
-		).toContainText( orderId.toString() );
+			page.getByText( `Order number: ${ orderId }` )
+		).toBeVisible();
 		await expect(
-			page.locator( 'span.woocommerce-Price-amount.amount >> nth=0' )
-		).toContainText( productPrice );
+			await page.getByText( `Total: $${ productPrice }` ).count()
+		).toBeGreaterThan( 0 );
 	} );
 } );

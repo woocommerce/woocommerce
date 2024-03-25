@@ -85,9 +85,17 @@
   - team: mothra
   - team: ghidorah
 
+"plugins/woocommerce/src/Blocks/**/*":
+  - team: rubik
+  - team: woo-fse
+
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: mothra
   - team: ghidorah
+
+"plugins/woocommerce/src/StoreApi/**/*":
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce-admin/**/*":
   - team: mothra
