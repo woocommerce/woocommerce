@@ -79,9 +79,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 		await page.locator( 'label[for=order_status] > a' ).click();
 
 		// verify we landed on the customer payment page
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Pay for order'
-		);
+		await expect(
+			page.getByRole( 'button', { name: 'Pay for order' } )
+		).toBeVisible();
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
 			productName
 		);
@@ -101,9 +101,9 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 		await page.locator( 'button#place_order' ).click();
 
 		// Verify we landed on the order received page
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'Order received'
-		);
+		await expect(
+			page.getByText( 'Your order has been received' )
+		).toBeVisible();
 		await expect(
 			page.locator( 'li.woocommerce-order-overview__order.order' )
 		).toContainText( orderId.toString() );
