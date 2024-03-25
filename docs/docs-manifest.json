@@ -558,7 +558,7 @@
           "menu_title": "Contribute to WooCommerce Core",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
-          "hash": "a33495a16615dd9b6283500c872cdf4dd764530c8db496942b366cd66b56a542",
+          "hash": "b9c53ffb82b83dfe54c95c85a9f7c0127942087804f0490a2abfccb993ad3e2c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
           "id": "198a4d4a506d464737c356f86684676ad4a0c27b"
         }
@@ -1204,5 +1204,5 @@
       "categories": []
     }
   ],
-  "hash": "df1235f3f1d4b3d90c5b860711c04cb237108b9a50c750c434990feb4065fee2"
+  "hash": "f1bb14ff2aa8c9be096365b78633ace4696f6314cd298e0cb57104a73b507fac"
 }
