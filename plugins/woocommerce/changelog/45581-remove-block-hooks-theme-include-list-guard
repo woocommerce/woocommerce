@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Block Hooks: Run block hooks on all block themes instead of approved themes only.
