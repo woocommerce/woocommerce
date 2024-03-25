@@ -7,22 +7,6 @@ const { setOption } = require('../../utils/options');
 const CUSTOMIZE_STORE_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 
-const skipTestIfUndefined = () => {
-	const skipMessage = `Skipping this test on daily run. Environment not compatible.`;
-
-	test.skip(() => {
-		const shouldSkip = BASE_URL !== undefined;
-
-		if (shouldSkip) {
-			console.log(skipMessage);
-		}
-
-		return shouldSkip;
-	}, skipMessage);
-};
-
-skipTestIfUndefined();
-
 test.describe( 'Store owner can view the Intro page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -33,13 +17,6 @@ test.describe( 'Store owner can view the Intro page', () => {
 			baseURL,
 			'woocommerce_customize_store_onboarding_tour_hidden',
 			'yes'
-		);
-
-		await features.setFeatureFlag(
-			request,
-			baseURL,
-			'customize-store',
-			true
 		);
 
 		// Need a block enabled theme to test
@@ -60,8 +37,6 @@ test.describe( 'Store owner can view the Intro page', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await features.resetFeatureFlags( request, baseURL );
-
 		// Reset theme back to twentynineteen
 		await activateTheme( 'twentynineteen' );
 
