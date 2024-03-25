@@ -44,11 +44,26 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 							if ( has_action( 'woocommerce_account_payment_methods_column_' . $column_id ) ) {
 								do_action( 'woocommerce_account_payment_methods_column_' . $column_id, $method );
 							} elseif ( 'method' === $column_id ) {
+								if ( $method['method']['is_co_branded'] && count( $method['method']['networks'] ) > 1 ) {
+									$brands_label = implode(
+										' / ',
+										array_map(
+											function ( $network ) {
+												return esc_html( wc_get_credit_card_type_label( $network ) );
+											},
+											$method['method']['networks']
+										)
+									);
+									/* translators: %s: a credit card brand. */
+									$brands_label .= ' (' . sprintf( esc_html__( '%s preferred', 'woocommerce-gateway-stripe' ), esc_html( wc_get_credit_card_type_label( $method['method']['preferred_network'] ) ) ) . ')';
+								} else {
+									$brands_label = esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
+								}
 								if ( ! empty( $method['method']['last4'] ) ) {
 									/* translators: 1: credit card type 2: last 4 digits */
-									echo sprintf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) ), esc_html( $method['method']['last4'] ) );
+									echo sprintf( esc_html__( '%1$s ending in %2$s', 'woocommerce-gateway-stripe' ), $brands_label, esc_html( $method['method']['last4'] ) );
 								} else {
-									echo esc_html( wc_get_credit_card_type_label( $method['method']['brand'] ) );
+									echo $brands_label;
 								}
 							} elseif ( 'expires' === $column_id ) {
 								echo esc_html( $method['expires'] );

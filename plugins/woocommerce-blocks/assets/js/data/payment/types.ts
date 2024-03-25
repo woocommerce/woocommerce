@@ -23,6 +23,9 @@ export interface CustomerPaymentMethodConfiguration {
 	gateway: string;
 	brand: string;
 	last4: string;
+	isCoBranded?: boolean;
+	networks?: string[];
+	preferredNetwork?: string;
 }
 export interface SavedPaymentMethod {
 	method: CustomerPaymentMethodConfiguration;
