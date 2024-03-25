@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Bump eslint-import-resolver-typescript from 3.2.4 to 3.6.1
