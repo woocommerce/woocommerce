@@ -10,7 +10,7 @@ import {
 	createInterpolateElement,
 	useState,
 } from '@wordpress/element';
-import { closeSmall } from '@wordpress/icons';
+import { closeSmall, external } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ListItem, MediaUploader, Sortable } from '@woocommerce/components';
@@ -321,6 +321,16 @@ export function DownloadBlockEdit( {
 											>
 												{ __( 'Edit', 'woocommerce' ) }
 											</Button>
+										) }
+										{ ! isUploading && (
+											<Button
+												className='has-external-icon'
+												href={ download.file }
+												icon={ external }
+												label={ __( 'View file', 'woocommerce' ) }
+												variant='link'
+												target='_blank'
+											/>
 										) }
 										<Button
 											icon={ closeSmall }
