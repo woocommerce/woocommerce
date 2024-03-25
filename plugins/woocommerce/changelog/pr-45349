@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adjust the WC_Admin_Notices to support multisite setups
