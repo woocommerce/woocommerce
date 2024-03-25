@@ -169,9 +169,95 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			return;
 		}
 
-		$terms = get_terms( $taxonomy, array( 'hide_empty' => '1' ) );
+		// Length for this widget's transients in seconds.
+		$transient_length = 10;
 
-		if ( 0 === count( $terms ) ) {
+		// Ensure the transient name is not too long and includes the most unique data, located at the end of the string.
+		$terms_transient_name = substr( 'wp_layered_widget_terms_' . $this->id, -172 );
+
+		$terms = get_transient( $terms_transient_name );
+
+		// If transient is expired.
+		if ( false === $terms ) {
+
+			$terms = get_terms( $taxonomy, array( 'hide_empty' => '1' ) );
+
+			// Set the $terms variable to store in the transient.
+			if ( 0 === count( $terms ) ) {
+				$terms = array();
+			}
+
+			// Only include terms that are actually used (enabled) in variations.
+			$terms = array_filter( $terms, function( $term ) use ( $taxonomy, $transient_length ) {
+
+				$term_transient_name = 'wc_layered_widget_term_products _' . $term->term_taxonomy_id;
+
+				$products = get_transient( $term_transient_name );
+
+				// If transient is expired.
+				if ( false === $products ) {
+
+					// Get all (or a reasonably large number of) products with this term.
+					$term_query = new WP_Query (
+						array(
+							'post_type'      => 'product',
+							'post_status'    => 'publish',
+							'posts_per_page' => 250,
+							'no_found_rows'  => true,
+							'tax_query'      => array(
+								array(
+									'taxonomy' => $taxonomy,
+									'field'    => 'slug',
+									'terms'    => $term->slug,
+								),
+							),
+						)
+					);
+
+					// Rename for clarity.
+					$products = $term_query->posts;
+
+					// @todo Transient length.
+					set_transient( $term_transient_name, $products, $transient_length );
+				}
+
+				// Sanity check.
+				if ( empty( $products ) || ! is_array( $products ) ) {
+					// Don't include this term.
+					return false;
+				}
+
+				// Only include products that have enabled variations using this term.
+				$products = array_filter( $products, function( $product ) use ( $term, $taxonomy ) {
+					$product = wc_get_product( $product );
+
+					// Get available variations (that is, "enabled" variations).
+					$available_variations = $product->get_available_variations( 'objects' );
+
+					// Quick sanity check.
+					if ( ! is_array( $available_variations ) && ! empty( $available_variations ) ) {
+						// Don't include this product.
+						return false;
+					}
+
+					// Get an array of variation attributes specific to the taxonomy we're working with.
+					$available_variation_attribute_slugs = array_map( function( $variation ) use ( $taxonomy ) {
+						return $variation->get_attribute( $taxonomy );
+					}, $available_variations );
+
+					// If our term was found among the available variations, include it.
+					return in_array( $term->slug, $available_variation_attribute_slugs, true );
+				});
+
+				// If there are products found, include this term to be displayed.
+				return ! empty( $products );
+			});
+
+			// Store terms for quick retrieval later.
+			set_transient( $terms_transient_name, $terms, $transient_length );
+		}
+
+		if ( empty( $terms ) || ! is_array( $terms ) ) {
 			return;
 		}
 
