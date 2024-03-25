@@ -40,14 +40,8 @@ const blockData: BlockData = {
 	},
 };
 
-test.describe( 'Shopper → Account', () => {
-	// Become a logged out user.
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
+test.describe( 'Shopper → Account (guest user)', () => {
+	test.use( { storageState: guestFile } );
 
 	test.beforeAll( async ( { requestUtils } ) => {
 		await requestUtils.rest( {
@@ -337,7 +331,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Checkout block → Shipping', () => {
+test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => {
 	test.use( { storageState: customerFile } );
 
 	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
@@ -410,9 +404,7 @@ test.describe( 'Shopper → Checkout block → Shipping', () => {
 	} );
 } );
 
-// We only check if guest user can place an order because we already checked if logged in user can
-// place an order in the previous test
-test.describe( 'Shopper → Checkout block → Place Order', () => {
+test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can place order', async ( {
@@ -438,10 +430,10 @@ test.describe( 'Shopper → Checkout block → Place Order', () => {
 	} );
 } );
 
-test.describe( 'Checkout Form Errors', () => {
+test.describe( 'Checkout Form Errors (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
-	test( 'User can see errors when form is incomplete', async ( {
+	test( 'can see errors when form is incomplete', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -478,8 +470,7 @@ test.describe( 'Checkout Form Errors', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	// To make sure the company field is visible in the billing address form, we need to enable it in the editor.
-	test.beforeEach( async ( { editor, admin, editorUtils } ) => {
+	test( 'Enable company field', async ( { editor, admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
@@ -530,79 +521,82 @@ test.describe( 'Billing Address Form', () => {
 		phone: '',
 	};
 
-	test( 'Ensure billing is empty and shipping address is filled for guest user', async ( {
-		frontendUtils,
-		page,
-		checkoutPageObject,
-	} ) => {
-		await frontendUtils.logout();
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-		await checkoutPageObject.fillShippingDetails( shippingTestData );
-		await page.getByLabel( 'Use same address for billing' ).uncheck();
+	test.describe( 'Guest user', () => {
+		test.use( { storageState: guestFile } );
 
-		// Check shipping fields are filled.
-		for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			switch ( key ) {
-				case 'firstname':
-					await expect(
-						page.locator( '#shipping-first_name' )
-					).toHaveValue( value );
-					break;
-				case 'lastname':
-					await expect(
-						page.locator( '#shipping-last_name' )
-					).toHaveValue( value );
-					break;
-				case 'country':
-					await expect(
-						page.locator( '#shipping-country input' )
-					).toHaveValue( value );
-					break;
-				case 'addressfirstline':
-					await expect(
-						page.locator( '#shipping-address_1' )
-					).toHaveValue( value );
-					break;
-				case 'addresssecondline':
-					await expect(
-						page.locator( '#shipping-address_2' )
-					).toHaveValue( value );
-					break;
-				case 'state':
-					await expect(
-						page.locator( '#shipping-state input' )
-					).toHaveValue( value );
-					break;
-				default:
-					await expect(
-						page.locator( `#shipping-${ key }` )
-					).toHaveValue( value );
-			}
-		}
+		test( 'Ensure billing is empty and shipping address is filled', async ( {
+			frontendUtils,
+			page,
+			checkoutPageObject,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+			await checkoutPageObject.fillShippingDetails( shippingTestData );
+			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
-		// Check billing fields are empty.
-		for ( const [ key, value ] of Object.entries( billingTestData ) ) {
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			switch ( key ) {
-				case 'country':
-					await expect(
-						page.locator( '#billing-country input' )
-					).toHaveValue( value );
-					break;
-				case 'state':
-					await expect(
-						page.locator( '#billing-state input' )
-					).toHaveValue( value );
-					break;
-				default:
-					await expect(
-						page.locator( `#billing-${ key }` )
-					).toHaveValue( value );
+			// Check shipping fields are filled.
+			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				switch ( key ) {
+					case 'firstname':
+						await expect(
+							page.locator( '#shipping-first_name' )
+						).toHaveValue( value );
+						break;
+					case 'lastname':
+						await expect(
+							page.locator( '#shipping-last_name' )
+						).toHaveValue( value );
+						break;
+					case 'country':
+						await expect(
+							page.locator( '#shipping-country input' )
+						).toHaveValue( value );
+						break;
+					case 'addressfirstline':
+						await expect(
+							page.locator( '#shipping-address_1' )
+						).toHaveValue( value );
+						break;
+					case 'addresssecondline':
+						await expect(
+							page.locator( '#shipping-address_2' )
+						).toHaveValue( value );
+						break;
+					case 'state':
+						await expect(
+							page.locator( '#shipping-state input' )
+						).toHaveValue( value );
+						break;
+					default:
+						await expect(
+							page.locator( `#shipping-${ key }` )
+						).toHaveValue( value );
+				}
 			}
-		}
+
+			// Check billing fields are empty.
+			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
+				// eslint-disable-next-line playwright/no-conditional-in-test
+				switch ( key ) {
+					case 'country':
+						await expect(
+							page.locator( '#billing-country input' )
+						).toHaveValue( value );
+						break;
+					case 'state':
+						await expect(
+							page.locator( '#billing-state input' )
+						).toHaveValue( value );
+						break;
+					default:
+						await expect(
+							page.locator( `#billing-${ key }` )
+						).toHaveValue( value );
+				}
+			}
+		} );
 	} );
 } );

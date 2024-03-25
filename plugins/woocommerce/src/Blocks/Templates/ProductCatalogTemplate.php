@@ -55,9 +55,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 

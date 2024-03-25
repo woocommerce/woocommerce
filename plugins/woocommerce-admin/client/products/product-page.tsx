@@ -5,7 +5,6 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
@@ -25,8 +24,6 @@ import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
-
-declare const productBlockEditorSettings: ProductEditorSettings;
 
 productApiFetchMiddleware();
 
@@ -100,10 +97,7 @@ export default function ProductPage() {
 
 	return (
 		<>
-			<Editor
-				product={ product }
-				settings={ productBlockEditorSettings || {} }
-			/>
+			<Editor product={ product } />
 		</>
 	);
 }

@@ -78,9 +78,9 @@ const runTaskListTest = () => {
 
 			// Work around for https://github.com/woocommerce/woocommerce-admin/issues/6761
 			if ( taskListItems.length === 6 ) {
-				// Click on "Set up shipping" task to move to the next step
+				// Click on "Get your products shipped" task to move to the next step
 				const [ setupTaskListItem ] = await page.$x(
-					'//div[contains(text(),"Set up shipping")]'
+					'//div[contains(text(),"Get your products shipped")]'
 				);
 				await setupTaskListItem.click();
 

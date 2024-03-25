@@ -224,6 +224,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal
 						}
+						redirectToCYSFlow={ () =>
+							sendEvent( 'DESIGN_WITHOUT_AI' )
+						}
 						sendEvent={ sendEvent }
 					/>
 

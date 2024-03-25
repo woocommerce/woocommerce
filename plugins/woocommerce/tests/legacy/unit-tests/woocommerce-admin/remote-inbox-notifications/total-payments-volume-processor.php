@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotification
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TotalPaymentsVolumeProcessor;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\TotalPaymentsVolumeProcessor;
 use Automattic\WooCommerce\Admin\API\Reports\Revenue\Query as RevenueQuery;
 
 /**

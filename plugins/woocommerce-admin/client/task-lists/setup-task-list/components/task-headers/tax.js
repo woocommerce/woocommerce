@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import TimerImage from './timer.svg';
 import { WC_ASSET_URL } from '../../../../utils/admin-settings';
 
 const TaxHeader = ( { task, goToTask } ) => {
@@ -15,14 +14,14 @@ const TaxHeader = ( { task, goToTask } ) => {
 		<div className="woocommerce-task-header__contents-container">
 			<img
 				alt={ __( 'Tax illustration', 'woocommerce' ) }
-				src={ WC_ASSET_URL + 'images/task_list/tax-illustration.png' }
+				src={ WC_ASSET_URL + 'images/task_list/tax-illustration.svg' }
 				className="svg-background"
 			/>
 			<div className="woocommerce-task-header__contents">
-				<h1>{ __( 'Add your tax rates', 'woocommerce' ) }</h1>
+				<h1>{ __( 'Configure your tax settings', 'woocommerce' ) }</h1>
 				<p>
 					{ __(
-						'Set up tax rates manually or use WooCommerce Tax to automate your sales tax calculations for you.',
+						'Choose to set up your tax rates manually, or use one of our tax automation tools.',
 						'woocommerce'
 					) }
 				</p>
@@ -31,12 +30,8 @@ const TaxHeader = ( { task, goToTask } ) => {
 					isPrimary={ ! task.isComplete }
 					onClick={ goToTask }
 				>
-					{ __( 'Yes, please', 'woocommerce' ) }
+					{ __( 'Collect sales tax', 'woocommerce' ) }
 				</Button>
-				<p className="woocommerce-task-header__timer">
-					<img src={ TimerImage } alt="Timer" />{ ' ' }
-					<span>{ task.time }</span>
-				</p>
 			</div>
 		</div>
 	);

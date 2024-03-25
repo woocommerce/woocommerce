@@ -14,7 +14,7 @@ trait BlockHooksTrait {
 	 * @param string                   $position      Position of the block insertion point.
 	 * @param string                   $anchor_block  The block acting as the anchor for the inserted block.
 	 * @param \WP_Block_Template|array $context       Where the block is embedded.
-	 * @since $VID:$
+	 * @since 8.6.0
 	 * @return array An array of block slugs hooked into a given context.
 	 */
 	public function register_hooked_block( $hooked_blocks, $position, $anchor_block, $context ) {
@@ -36,20 +36,11 @@ trait BlockHooksTrait {
 		 * A list of pattern slugs to exclude from auto-insert (useful when
 		 * there are patterns that have a very specific location for the block)
 		 *
-		 * @since $VID:$
+		 * @since 8.4.0
 		 */
-		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked' ) );
+		$pattern_exclude_list = apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list', array( 'twentytwentytwo/header-centered-logo', 'twentytwentytwo/header-stacked', 'blockbase/header-centered' ) );
 
-		/**
-		 * A list of theme slugs to execute this with. This is a temporary
-		 * measure until improvements to the Block Hooks API allow for exposing
-		 * to all block themes.
-		 *
-		 * @since $VID:$
-		 */
-		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
-
-		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
+		if ( $context ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
 				if (
 					$placement['position'] === $position &&
@@ -73,7 +64,6 @@ trait BlockHooksTrait {
 	 * Checks if the provided context contains a the block already.
 	 *
 	 * @param array|\WP_Block_Template $context Where the block is embedded.
-	 * @since $VID:$
 	 * @return boolean
 	 */
 	protected function has_block_in_content( $context ) {
@@ -87,7 +77,6 @@ trait BlockHooksTrait {
 	 *
 	 * @param array|\WP_Block_Template $context Where the block is embedded.
 	 * @param string                   $area The area to check against before inserting.
-	 * @since $VID:$
 	 * @return boolean
 	 */
 	protected function is_template_part_or_pattern( $context, $area ) {
@@ -105,7 +94,6 @@ trait BlockHooksTrait {
 	 *
 	 * @param array|\WP_Block_Template $context Where the block is embedded.
 	 * @param array                    $pattern_exclude_list List of pattern slugs to exclude.
-	 * @since $VID:$
 	 * @return boolean
 	 */
 	protected function pattern_is_excluded( $context, $pattern_exclude_list = array() ) {

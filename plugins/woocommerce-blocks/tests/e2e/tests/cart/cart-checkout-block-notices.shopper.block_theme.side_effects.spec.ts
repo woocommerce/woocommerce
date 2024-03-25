@@ -5,7 +5,9 @@ import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import {
 	cli,
 	BLOCK_THEME_SLUG,
-	BLOCK_CHILD_THEME_SLUG,
+	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG,
+	BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG,
+	BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG,
 } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
@@ -22,7 +24,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-test.describe( 'Shopper → Block Notice Templates', () => {
+test.describe( 'Shopper → Notice Templates', () => {
 	test.beforeEach( async ( { wpCliUtils, frontendUtils } ) => {
 		const cartShortcodeID = await wpCliUtils.getPostIDByTitle(
 			'Cart Shortcode'
@@ -45,7 +47,7 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 		await frontendUtils.emptyCart();
 	} );
 
-	test( 'default templates are visible', async ( {
+	test( 'default block notice templates are visible', async ( {
 		frontendUtils,
 		page,
 	} ) => {
@@ -59,10 +61,9 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-success
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-success' )
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 
 		await page.reload();
@@ -75,10 +76,9 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-error
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-error' )
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
 		).toBeVisible();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
@@ -89,16 +89,18 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 			} )
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-success
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-success' )
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 	} );
 
-	test( 'custom templates are visible', async ( { frontendUtils, page } ) => {
+	test( 'custom block notice templates are visible by template overwrite', async ( {
+		frontendUtils,
+		page,
+	} ) => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_SLUG }`
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG }`
 		);
 
 		await frontendUtils.goToCartShortcode();
@@ -107,14 +109,65 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 
 		await expect(
 			page.getByText(
-				'BLOCK SUCCESS NOTICE - Coupon code applied successfully.'
+				'BLOCK SUCCESS NOTICE: Coupon code applied successfully.'
 			)
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-success
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-success' )
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'BLOCK ERROR NOTICE: Coupon code already applied!' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeVisible();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
+		await expect(
+			page.getByText( 'BLOCK INFO NOTICE: Your cart is currently empty.' )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the block notices, and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
+		);
+	} );
+
+	test( 'classic notice templates are visible by template overwrite', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG }`
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'CLASSIC SUCCESS NOTICE: Coupon code applied successfully.'
+			)
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes of the classic notices.
+		await expect(
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-message' )
 		).toBeVisible();
 
 		await page.reload();
@@ -123,28 +176,82 @@ test.describe( 'Shopper → Block Notice Templates', () => {
 
 		await expect(
 			page.getByText(
-				'BLOCK ERROR NOTICE - Coupon code already applied!'
+				'CLASSIC ERROR NOTICE: Coupon code already applied!'
 			)
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-error
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-error' )
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-error' )
 		).toBeVisible();
 
 		await page.getByLabel( 'Remove Polo from cart' ).click();
 
 		await expect(
 			page.getByText(
-				'BLOCK INFO NOTICE – Your cart is currently empty.'
+				'CLASSIC INFO NOTICE: Your cart is currently empty.'
 			)
 		).toBeVisible();
 
-		// We're explicitly checking for the following CSS classes here:
-		// .wc-block-components-notice-banner.is-success
+		// We're explicitly checking the CSS classes of the classic notices.
 		await expect(
-			page.locator( '.wc-block-components-notice-banner.is-success' )
+			page.locator( '.woocommerce-notices-wrapper .woocommerce-info' )
+		).toBeVisible();
+
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_THEME_SLUG }`
+		);
+	} );
+
+	test( 'default classic notice templates cannot be triggered by filter', async ( {
+		frontendUtils,
+		page,
+	} ) => {
+		await cli(
+			`npm run wp-env run tests-cli -- wp theme activate ${ BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG }`
+		);
+
+		await frontendUtils.goToCartShortcode();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'Coupon code applied successfully.', {
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'testcoupon' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText( 'Coupon code already applied!', {
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-error svg' )
+		).toBeVisible();
+
+		await page.getByLabel( 'Remove Polo from cart' ).click();
+
+		await expect(
+			page.getByText( 'Your cart is currently empty.', {
+				exact: true,
+			} )
+		).toBeVisible();
+
+		// We're explicitly checking the CSS classes and that the SVG is visible.
+		await expect(
+			page.locator( '.wc-block-components-notice-banner.is-success svg' )
 		).toBeVisible();
 
 		await cli(

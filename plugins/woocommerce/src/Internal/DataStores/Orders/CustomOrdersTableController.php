@@ -311,6 +311,10 @@ class CustomOrdersTableController {
 			return $value;
 		}
 
+		if ( $old_value === $value ) {
+			return $value;
+		}
+
 		$this->order_cache->flush();
 		if ( ! $this->data_synchronizer->check_orders_table_exists() ) {
 			$this->data_synchronizer->create_database_tables();

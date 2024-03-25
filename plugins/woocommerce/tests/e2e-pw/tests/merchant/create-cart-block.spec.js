@@ -63,7 +63,9 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 			page.getByRole( 'heading', { name: transformedCartBlockTitle } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
+			page.getByRole( 'heading', {
+				name: 'Your cart is currently empty!',
+			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
