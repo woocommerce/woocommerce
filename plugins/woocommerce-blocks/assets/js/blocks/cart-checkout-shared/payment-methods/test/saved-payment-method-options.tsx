@@ -60,6 +60,19 @@ mockedUseSelect.mockImplementation(
 										last4: '3456',
 									},
 								},
+								{
+									tokenId: 4,
+									expires: '1/2099',
+									method: {
+										brand: 'Visa',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '1001',
+										isCoBranded: true,
+										networks: [ 'Visa', 'Cartes bancaires' ],
+										preferredNetwork: 'Cartes bancaires',
+									},
+								},
 							],
 						};
 					},
@@ -104,6 +117,11 @@ describe( 'SavedPaymentMethodOptions', () => {
 		expect(
 			screen.queryByText( 'Visa ending in 3456 (expires 1/2099)' )
 		).not.toBeInTheDocument();
+
+		// Fourth saved token for can-pay-true-test-payment-method - co-branded credit card.
+		expect(
+			screen.getByText( 'Visa / Cartes bancaires ending in 1001 (expires 1/2099, Cartes bancaires preferred)' )
+		).toBeInTheDocument();
 	} );
 	it( "does not show saved methods when the method's canPay function returns false", () => {
 		registerPaymentMethod( {
