@@ -259,6 +259,32 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		);
 
 		$token->delete( true );
+
+		// Co-branded credit card.
+		$token = new WC_Payment_Token_CC();
+		$token->set_token( '1001' );
+		$token->set_gateway_id( 'bacs' );
+		$token->set_card_type( 'visa' );
+		$token->set_last4( '1001' );
+		$token->set_expiry_month( '12' );
+		$token->set_expiry_year( '2020' );
+		$token->set_available_networks( array( 'visa', 'cartes_bancaires' ) );
+		$token->set_preferred_network( 'cartes_bancaires' );
+		$token->save();
+
+		$this->assertEquals(
+			array(
+				'method'  => array(
+					'last4' => '1001',
+					'brand' => 'Visa / Cartes bancaires',
+				),
+				'expires' => '12/20',
+			),
+			wc_get_account_saved_payment_methods_list_item_cc( array(), $token )
+		);
+
+		$token->delete( true );
+
 	}
 
 	/**
