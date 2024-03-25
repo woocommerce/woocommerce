@@ -129,7 +129,7 @@ class CustomerAccount extends AbstractBlock {
 			),
 		);
 
-		$label_markup = self::ICON_ONLY === $attributes['displayStyle'] ? '' : '<span class="label">' . wp_kses( $this->render_label( $attributes ), array() ) . '</span>';
+		$label_markup = self::ICON_ONLY === $attributes['displayStyle'] ? '' : '<span class="label">' . wp_kses( $this->render_label(), array() ) . '</span>';
 
 		return "<div class='wp-block-woocommerce-customer-account " . esc_attr( $classes_and_styles['classes'] ) . "' style='" . esc_attr( $classes_and_styles['styles'] ) . "'>
 			<a href='" . esc_attr( $account_link ) . "'>
@@ -177,15 +177,9 @@ class CustomerAccount extends AbstractBlock {
 	/**
 	 * Gets the label to render depending on the displayStyle.
 	 *
-	 * @param array $attributes Block attributes.
-	 *
 	 * @return string Label to render on the block.
 	 */
-	private function render_label( $attributes ) {
-		if ( self::ICON_ONLY === $attributes['displayStyle'] ) {
-			return '';
-		}
-
+	private function render_label() {
 		return get_current_user_id()
 			? __( 'My Account', 'woocommerce' )
 			: __( 'Login', 'woocommerce' );
