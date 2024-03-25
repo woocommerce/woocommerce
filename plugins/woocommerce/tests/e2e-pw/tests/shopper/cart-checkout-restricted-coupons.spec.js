@@ -669,9 +669,11 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
+		await page.waitForLoadState( 'networkidle' );
+
 		await expect(
 			page.getByText(
-				'Please enter a valid email at checkout to use coupon code "email-restricted".'
+				'Please enter a valid email to use coupon code "email-restricted".'
 			)
 		).toBeVisible();
 	} );
