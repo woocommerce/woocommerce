@@ -14,6 +14,7 @@ import {
 	getTooltipValueFormat,
 	SETTINGS_STORE_NAME,
 	REPORTS_STORE_NAME,
+	isLeapYear,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -29,7 +30,12 @@ import { CurrencyContext } from '@woocommerce/currency';
  * Internal dependencies
  */
 import ReportError from '../report-error';
-import { getChartMode, getSelectedFilter, createDateFormatter } from './utils';
+import {
+	getChartMode,
+	getSelectedFilter,
+	createDateFormatter,
+	dataHasLeapYear,
+} from './utils';
 
 /**
  * Component that renders the chart in reports.
@@ -78,6 +84,14 @@ export class ReportChart extends Component {
 		return chartData;
 	}
 
+	// hasLeapYear() {
+	// 	const { primaryData, secondaryData } = this.props;
+
+	// 	return (
+	// 		dataHasLeapYear( primaryData ) || dataHasLeapYear( secondaryData )
+	// 	);
+	// }
+
 	getTimeChartData() {
 		const {
 			query,
@@ -91,10 +105,30 @@ export class ReportChart extends Component {
 			query,
 			defaultDateRange
 		);
-		const chartData = primaryData.data.intervals.map( function (
-			interval,
-			index
-		) {
+		// console.log(
+		// 	'Primary',
+		// 	primaryData.data.intervals,
+		// 	currentInterval,
+		// 	query,
+		// 	defaultDateRange
+		// );
+
+		const primaryDataHasLeapYear = dataHasLeapYear( primaryData );
+		const secondaryDataHasLeapYear = dataHasLeapYear( secondaryData );
+		const primaryDataIntervals = [ ...primaryData.data.intervals ];
+		const secondaryDataIntervals = [ ...secondaryData.data.intervals ];
+
+		// In time series, we need to add placeholder data and adjust subtotals in non-leap years
+		// to account for the extra day in leap years to ensure an accurate comparison.
+		if ( currentInterval === 'day' && secondaryDataHasLeapYear ) {
+			// Append data for the missing leap day so everything else is shifted to the right correctly.
+		} // Assume secondaryDataHasLeapYear is true if the secondary dataset includes a leap year
+
+		const chartData = [];
+
+		for ( let index = 0; index < primaryDataIntervals.length; index++ ) {
+			const interval = primaryDataIntervals[ index ];
+
 			const secondaryDate = getPreviousDate(
 				interval.date_start,
 				primary.after,
@@ -103,26 +137,148 @@ export class ReportChart extends Component {
 				currentInterval
 			);
 
-			const secondaryInterval = secondaryData.data.intervals[ index ];
-			return {
-				date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
+			let today = formatDate( 'Y-m-d\\TH:i:s', interval.date_start );
+			let primaryLabel = `${ primary.label } (${ primary.range })`;
+			let primaryLabelDate = interval.date_start;
+			let primaryValue = interval.subtotals[ selectedChart.key ] || 0;
+
+			const secondaryInterval = secondaryDataIntervals[ index ];
+			let secondaryLabel = `${ secondary.label } (${ secondary.range })`;
+			let secondaryLabelDate = secondaryDate.format(
+				'YYYY-MM-DD HH:mm:ss'
+			);
+			let secondaryValue =
+				( secondaryInterval &&
+					secondaryInterval.subtotals[ selectedChart.key ] ) ||
+				0;
+
+			if ( currentInterval === 'day' ) {
+				if ( primaryDataHasLeapYear ) {
+					const date = new Date( interval.date_start );
+					if (
+						isLeapYear( date.getFullYear() ) &&
+						date.getMonth() === 1 &&
+						date.getDate() === 29
+					) {
+						secondaryLabel = __(
+							'Leap day placeholder',
+							'woocommerce'
+						);
+						secondaryLabelDate = null;
+						secondaryValue = 0;
+
+						// Append data for the missing leap day so everything else is shifted to the right correctly.
+						secondaryDataIntervals.splice(
+							index,
+							0,
+							secondaryDataIntervals[ index ]
+						);
+					}
+				} else if ( secondaryDataHasLeapYear ) {
+					const date = new Date( secondaryInterval.date_start );
+					console.log('YES!! eap', date, secondaryInterval )
+					if (
+						isLeapYear( date.getFullYear() ) &&
+						date.getMonth() === 1 &&
+						date.getDate() === 28
+					) {
+						primaryLabel = __(
+							'Leap day placeholder',
+							'woocommerce'
+						);
+						primaryLabelDate = null;
+						primaryValue = 0;
+						// today = '2021-02-29T00:00:00';
+
+						// Append data for the missing leap day so everything else is shifted to the right correctly.
+						console.log('Before', primaryDataIntervals.length)
+						primaryDataIntervals.splice(
+							index + 1,
+							0,
+							primaryDataIntervals[ index ]
+						);
+
+						console.log(primaryDataIntervals.length)
+					}
+				}
+			}
+
+			chartData.push( {
+				date: today,
 				primary: {
-					label: `${ primary.label } (${ primary.range })`,
-					labelDate: interval.date_start,
-					value: interval.subtotals[ selectedChart.key ] || 0,
+					label: primaryLabel,
+					labelDate: primaryLabelDate,
+					value: primaryValue,
 				},
 				secondary: {
-					label: `${ secondary.label } (${ secondary.range })`,
-					labelDate: secondaryDate.format( 'YYYY-MM-DD HH:mm:ss' ),
-					value:
-						( secondaryInterval &&
-							secondaryInterval.subtotals[
-								selectedChart.key
-							] ) ||
-						0,
+					label: secondaryLabel,
+					labelDate: secondaryLabelDate,
+					value: secondaryValue,
 				},
-			};
-		} );
+			} );
+		}
+
+		console.log('Chart data', chartData)
+
+		// const chartData = primaryData.data.intervals.map( function (
+		// 	interval,
+		// 	index
+		// ) {
+		// 	const secondaryDate = getPreviousDate(
+		// 		interval.date_start,
+		// 		primary.after,
+		// 		secondary.after,
+		// 		query.compare,
+		// 		currentInterval
+		// 	);
+
+		// 	const secondaryInterval = secondaryDataIntervals[ index ];
+		// 	let secondaryLabel = `${ secondary.label } (${ secondary.range })`;
+		// 	let secondaryLabelDate = secondaryDate.format(
+		// 		'YYYY-MM-DD HH:mm:ss'
+		// 	);
+		// 	let secondaryValue =
+		// 		( secondaryInterval &&
+		// 			secondaryInterval.subtotals[ selectedChart.key ] ) ||
+		// 		0;
+
+		// 	if ( currentInterval === 'day' && primaryDataHasLeapYear ) {
+		// 		const date = new Date( interval.date_start );
+		// 		if (
+		// 			isLeapYear( date.getFullYear() ) &&
+		// 			date.getMonth() === 1 &&
+		// 			date.getDate() === 29
+		// 		) {
+		// 			secondaryLabel = __(
+		// 				'Leap day placeholder',
+		// 				'woocommerce'
+		// 			);
+		// 			secondaryLabelDate = null;
+		// 			secondaryValue = 0;
+
+		// 			// Append data for the missing leap day so everything else is shifted to the right correctly.
+		// 			secondaryDataIntervals.splice(
+		// 				index,
+		// 				0,
+		// 				secondaryDataIntervals[ index ]
+		// 			);
+		// 		}
+		// 	}
+
+		// 	return {
+		// 		date: formatDate( 'Y-m-d\\TH:i:s', interval.date_start ),
+		// 		primary: {
+		// 			label: `${ primary.label } (${ primary.range })`,
+		// 			labelDate: interval.date_start,
+		// 			value: interval.subtotals[ selectedChart.key ] || 0,
+		// 		},
+		// 		secondary: {
+		// 			label: secondaryLabel,
+		// 			labelDate: secondaryLabelDate,
+		// 			value: secondaryValue,
+		// 		},
+		// 	};
+		// } );
 
 		return chartData;
 	}
@@ -425,6 +581,18 @@ export default compose(
 			defaultDateRange,
 			fields,
 		} );
+
+		// console.log(
+		// 	'Hehehe',
+		// 	query,
+		// 	defaultDateRange,
+		// 	filters,
+		// 	reportStoreSelector,
+		// 	fields,
+		// 	primaryData,
+		// 	secondaryData
+		// );
+
 		return {
 			...newProps,
 			primaryData,

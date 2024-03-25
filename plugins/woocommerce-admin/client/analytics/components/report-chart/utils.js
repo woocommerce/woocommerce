@@ -4,6 +4,7 @@
 import { find, get } from 'lodash';
 import { flattenFilters } from '@woocommerce/navigation';
 import { format as formatDate } from '@wordpress/date';
+import { containsLeapYear } from '@woocommerce/data';
 
 export const DEFAULT_FILTER = 'all';
 
@@ -47,4 +48,17 @@ export function getChartMode( selectedFilter, query ) {
 
 export function createDateFormatter( format ) {
 	return ( date ) => formatDate( format, date );
+}
+
+export function dataHasLeapYear( data ) {
+	if ( data.data.intervals.length > 1 ) {
+		const start = data.data.intervals[ 0 ].date_start;
+		const end =
+			data.data.intervals[ data.data.intervals.length - 1 ].date_end;
+
+		if ( containsLeapYear( start, end ) ) {
+			return true;
+		}
+	}
+	return false;
 }
