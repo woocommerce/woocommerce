@@ -28,6 +28,7 @@ const SiteVisibility = () => {
 		privateLink: initialPrivateLink = false,
 	} = useLaunchYourStore();
 	const [ comingSoon, setComingSoon ] = useState( initialComingSoon );
+
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
 		initialStorePagesOnly
 	);
@@ -35,7 +36,7 @@ const SiteVisibility = () => {
 
 	useEffect( () => {
 		if ( ! isLoading ) {
-			setComingSoon( initialComingSoon );
+			setComingSoon( initialComingSoon ? initialComingSoon : 'no' );
 			setStorePagesOnly( initialStorePagesOnly );
 			setPrivateLink( initialPrivateLink );
 		}
