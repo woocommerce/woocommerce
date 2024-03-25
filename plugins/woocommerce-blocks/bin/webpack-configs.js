@@ -386,7 +386,11 @@ const getFrontConfig = ( options = {} ) => {
 					commons: {
 						test: /[\\/]node_modules[\\/]/,
 						name: 'wc-blocks-vendors',
-						chunks: 'all',
+						chunks: ( chunk ) => {
+							return (
+								chunk.name !== 'product-button-interactivity'
+							);
+						},
 						enforce: true,
 					},
 					...getCacheGroups(),
