@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
@@ -94,6 +95,8 @@ class Init {
 	 * Enqueue scripts needed for the product form block editor.
 	 */
 	public function enqueue_scripts() {
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-form-editor', true );
+
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
@@ -121,6 +124,8 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
+		wp_enqueue_style( 'wc-product-form-editor', WC()->plugin_url() . '/assets/client/admin/product-editor/style.css', array() );
+
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
