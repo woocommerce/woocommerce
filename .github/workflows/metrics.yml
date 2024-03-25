@@ -1,7 +1,6 @@
 name: Metrics Tracking
 
 on:
-    pull_request:
     push:
         branches: [trunk]
 
