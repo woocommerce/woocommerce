@@ -7,7 +7,9 @@ use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use WC_Unit_Test_Case;
 use WP_Filesystem_Base;
 
-
+/**
+ * FilesystemUtilTest class.
+ */
 class FilesystemUtilTest extends WC_Unit_Test_Case {
 	/**
 	 * Set up before running any tests.

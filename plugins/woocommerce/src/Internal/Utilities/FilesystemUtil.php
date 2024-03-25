@@ -15,7 +15,7 @@ class FilesystemUtil {
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
 	 *
 	 * @return WP_Filesystem_Base
-	 * @throws Exception
+	 * @throws Exception Thrown when the filesystem fails to initialize.
 	 */
 	public static function get_wp_filesystem(): WP_Filesystem_Base {
 		global $wp_filesystem;

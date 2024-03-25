@@ -83,7 +83,7 @@ class Settings {
 					$filesystem = FilesystemUtil::get_wp_filesystem();
 					$filesystem->put_contents( $dir . '.htaccess', 'deny from all' );
 					$filesystem->put_contents( $dir . 'index.html', '' );
-				} catch ( Exception $exception ) {
+				} catch ( Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 					// Creation failed.
 				}
 			}
