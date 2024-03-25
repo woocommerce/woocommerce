@@ -111,6 +111,11 @@ class Init extends RemoteSpecsEngine {
 	 * Go through the specs and run them.
 	 */
 	public static function get_promotions() {
+		// Hacky fix for footer error on upgrade/downgrade WC.
+		if ( ! class_exists( '\Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller' ) ) {
+			return array();
+		}
+
 		$locale = get_user_locale();
 
 		$specs   = self::get_specs();
