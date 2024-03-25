@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Replace empty customer names with 'Guest' in Customer Analytics screen
