@@ -4,7 +4,6 @@
 import { MouseEvent } from 'react';
 import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { isInTheFuture } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 import type { Product } from '@woocommerce/data';
 
@@ -12,6 +11,7 @@ import type { Product } from '@woocommerce/data';
  * Internal dependencies
  */
 import { useProductManager } from '../../../../hooks/use-product-manager';
+import { useProductScheduled } from '../../../../hooks/use-product-scheduled';
 import type { WPError } from '../../../../utils/get-product-error-message';
 import type { PublishButtonProps } from '../../publish-button';
 
@@ -35,14 +35,11 @@ export function usePublish< T = Product >( {
 		'status'
 	);
 
-	const [ editedDate ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'date_created_gmt'
-	);
+	const { isScheduled } = useProductScheduled( productType );
 
 	const isBusy = isPublishing || isValidating;
-	const isDisabled = disabled || isBusy || ! isDirty;
+	const isDisabled =
+		prevStatus !== 'draft' && ( disabled || isBusy || ! isDirty );
 
 	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( isDisabled ) {
@@ -60,7 +57,7 @@ export function usePublish< T = Product >( {
 	function getButtonText() {
 		if (
 			window.wcAdminFeatures[ 'product-pre-publish-modal' ] &&
-			isInTheFuture( editedDate )
+			isScheduled
 		) {
 			return __( 'Schedule', 'woocommerce' );
 		}

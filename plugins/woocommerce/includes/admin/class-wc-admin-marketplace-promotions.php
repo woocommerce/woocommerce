@@ -104,8 +104,6 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $raw_promotions->get_error_message() );
-
-			return;
 		}
 
 		$response_code = (int) wp_remote_retrieve_response_code( $raw_promotions );
@@ -116,20 +114,18 @@ class WC_Admin_Marketplace_Promotions {
 			 * @since 8.7
 			 */
 			do_action( 'woocommerce_page_wc-addons_connection_error', $response_code );
-
-			return;
 		}
 
 		$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ), true );
-		if ( empty( $promotions ) || ! is_array( $promotions ) ) {
+		if ( ! is_array( $promotions ) ) {
+			$promotions = array();
+
 			/**
 			 * Allows connection error to be handled.
 			 *
 			 * @since 8.7
 			 */
-			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
-
-			return;
+			do_action( 'woocommerce_page_wc-addons_connection_error', 'Malformed response' );
 		}
 		// phpcs:enable WordPress.NamingConventions.ValidHookName.UseUnderscores
 
@@ -266,7 +262,7 @@ class WC_Admin_Marketplace_Promotions {
 				&& $promotion['menu_item_id'] === $menu_item['id']
 			) {
 				$bubble_text                   = $promotion['content'][ self::$locale ] ?? ( $promotion['content']['en_US'] ?? __( 'Sale', 'woocommerce' ) );
-				$menu_items[ $index ]['title'] = $menu_item['title'] . self::append_bubble( $bubble_text );
+				$menu_items[ $index ]['title'] = self::append_bubble( $menu_item['title'], $bubble_text );
 
 				break;
 			}
@@ -276,26 +272,21 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	 * Return the markup for a menu item bubble with a given text and optional additional attributes.
+	 * Return the markup for a menu item bubble with a given text.
 	 *
-	 * @param string $bubble_text Text of bubble.
-	 * @param array  $attributes Optional. Additional attributes for the bubble, such as class or style.
+	 * @param string $menu_item_text Text of menu item we want to change.
+	 * @param string $bubble_text    Text of bubble.
 	 *
 	 * @return string
 	 */
-	private static function append_bubble( $bubble_text, $attributes = array() ) {
-		$default_attributes = array(
-			'class' => 'awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge',
-			'style' => '',
-		);
+	private static function append_bubble( string $menu_item_text, string $bubble_text ): string {
+		// Strip out update count bubble added by Marketplace::get_marketplace_update_count_html.
+		$menu_item_text = preg_replace( '|<span class="update-plugins count-[\d]+">[A-z0-9 <>="-]+</span>|', '', $menu_item_text );
 
-		$attributes = wp_parse_args( $attributes, $default_attributes );
-		$class_attr = ! empty( $attributes['class'] ) ? sprintf( 'class="%s"', esc_attr( $attributes['class'] ) ) : '';
-		$style_attr = ! empty( $attributes['style'] ) ? sprintf( 'style="%s"', esc_attr( $attributes['style'] ) ) : '';
-
-		$bubble_html = sprintf( ' <span %s %s>%s</span>', $class_attr, $style_attr, esc_html( $bubble_text ) );
-
-		return $bubble_html;
+		return $menu_item_text
+			. '<span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">'
+			. esc_html( $bubble_text )
+			. '</span>';
 	}
 
 	/**
