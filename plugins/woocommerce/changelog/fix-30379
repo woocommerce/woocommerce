@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip thumbnail regeneration when Photon Image CDN handles it externally.
