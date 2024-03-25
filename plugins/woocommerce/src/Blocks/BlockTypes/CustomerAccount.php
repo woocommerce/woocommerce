@@ -37,13 +37,6 @@ class CustomerAccount extends AbstractBlock {
 	);
 
 	/**
-	 * Excluded patterns for the block.
-	 *
-	 * @var array
-	 */
-	protected $hooked_block_excluded_patterns = array( 'woocommerce-blocks/footer-large-dark' );
-
-	/**
 	 * Initialize this block type.
 	 */
 	protected function initialize() {
