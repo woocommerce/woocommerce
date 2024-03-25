@@ -249,69 +249,47 @@ baseTest.describe( 'Products > Add Simple Product', () => {
 				await page.goto( permalink );
 
 				// Verify product name
-				await expect
-					.soft(
-						page.getByRole( 'heading', {
-							name: productData[ productType ].name,
-						} )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByRole( 'heading', {
+						name: productData[ productType ].name,
+					} )
+				).toBeVisible();
 
 				// Verify price
-				await expect
-					.soft(
-						page
-							.getByText(
-								productData[ productType ].regularPrice
-							)
-							.first()
-					)
-					.toBeVisible();
+				await expect(
+					page
+						.getByText( productData[ productType ].regularPrice )
+						.first()
+				).toBeVisible();
 
 				// Verify description
-				await expect
-					.soft(
-						page.getByText(
-							productData[ productType ].shortDescription
-						)
+				await expect(
+					page.getByText(
+						productData[ productType ].shortDescription
 					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByText( productData[ productType ].description )
-					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByText(
-							`SKU: ${ productData[ productType ].sku }`
-						)
-					)
-					.toBeVisible();
+				).toBeVisible();
+				await expect(
+					page.getByText( productData[ productType ].description )
+				).toBeVisible();
+				await expect(
+					page.getByText( `SKU: ${ productData[ productType ].sku }` )
+				).toBeVisible();
 
 				// Verify category
-				await expect
-					.soft(
-						page
-							.getByText( 'Category' )
-							.getByRole( 'link', { name: category.name } )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByText( `Category: ${ category.name }` )
+				).toBeVisible();
 
 				// Verify tags
-				await expect
-					.soft(
-						page.getByRole( 'link', { name: 'e2e', exact: true } )
-					)
-					.toBeVisible();
-				await expect
-					.soft(
-						page.getByRole( 'link', {
-							name: 'test products',
-							exact: true,
-						} )
-					)
-					.toBeVisible();
+				await expect(
+					page.getByRole( 'link', { name: 'e2e', exact: true } )
+				).toBeVisible();
+				await expect(
+					page.getByRole( 'link', {
+						name: 'test products',
+						exact: true,
+					} )
+				).toBeVisible();
 			} );
 
 			await test.step( 'shopper can add the product to cart', async () => {
