@@ -28,7 +28,6 @@ const SiteVisibility = () => {
 		privateLink: initialPrivateLink = false,
 	} = useLaunchYourStore();
 	const [ comingSoon, setComingSoon ] = useState( initialComingSoon );
-
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
 		initialStorePagesOnly
 	);
