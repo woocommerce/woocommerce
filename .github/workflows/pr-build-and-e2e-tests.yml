@@ -21,11 +21,7 @@ jobs:
             matrix:
                 shard:
                     [
-                        { number: 1, name: 1/5 },
-                        { number: 2, name: 2/5 },
-                        { number: 3, name: 3/5 },
-                        { number: 4, name: 4/5 },
-                        { number: 5, name: 5/5 },
+                        { number: 1, name: 1/1 },
                     ]
         permissions:
             contents: read
