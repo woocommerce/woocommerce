@@ -402,7 +402,7 @@ add_action(
 		}
 	},
 	10,
-	4
+	3
 );
 ```
 
@@ -524,11 +524,9 @@ add_action(
 				return $error;
 			},
 			10,
-			4
+			3
 		);
-	},
-	10,
-	4
+	}
 );
 
 add_action(

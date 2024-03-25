@@ -41,6 +41,12 @@
 			font-size: 12px;
 		}
 
+		.components-base-control__field {
+			div.text-control-with-affixes {
+				align-items: baseline;
+			}
+		}
+
 		.text-control-with-affixes__prefix,
 		.text-control-with-affixes__suffix {
 			font-size: 16px;
