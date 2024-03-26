@@ -16,6 +16,7 @@ import {
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from './use-product-attributes';
+import { useProduct } from './use-product';
 
 async function getDefaultVariationValues(
 	productId: number
@@ -58,6 +59,7 @@ export function useProductVariationsHelper() {
 		'product',
 		'id'
 	);
+	const { editProduct, saveProduct } = useProduct();
 	const [ _isGenerating, setIsGenerating ] = useState( false );
 
 	const { isGeneratingVariations, generateError } = useSelect(
@@ -117,6 +119,11 @@ export function useProductVariationsHelper() {
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).invalidateResolutionForStore();
 
+		await saveProduct( {
+			type: hasVariableAttribute ? 'variable' : 'simple',
+			default_attributes: defaultAttributes,
+		} );
+
 		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
 			.generateProductVariations< {
 				count: number;
@@ -126,28 +133,11 @@ export function useProductVariationsHelper() {
 					product_id: productId,
 				},
 				{
-					type: hasVariableAttribute ? 'variable' : 'simple',
-					attributes,
-					default_attributes: defaultAttributes,
-				},
-				{
 					delete: true,
 					default_values: defaultVariationValues,
 				}
 			)
 			.then( async ( response ) => {
-				// @ts-expect-error There are no types for this.
-				await dispatch( 'core' ).invalidateResolution(
-					'getEntityRecord',
-					[ 'postType', 'product', productId ]
-				);
-
-				await resolveSelect( 'core' ).getEntityRecord(
-					'postType',
-					'product',
-					productId
-				);
-
 				await dispatch(
 					EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 				).invalidateResolutionForStore();

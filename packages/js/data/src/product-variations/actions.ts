@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
-import { controls } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,7 +16,6 @@ import type {
 	GenerateRequest,
 } from './types';
 import CRUD_ACTIONS from './crud-actions';
-import { ProductAttribute, ProductDefaultAttribute } from '../products/types';
 
 export function generateProductVariationsError( key: IdType, error: unknown ) {
 	return {
@@ -44,13 +42,7 @@ export function generateProductVariationsSuccess( key: IdType ) {
 
 export const generateProductVariations = function* (
 	idQuery: IdQuery,
-	productData: {
-		type?: string;
-		attributes: ProductAttribute[];
-		default_attributes?: ProductDefaultAttribute[];
-	},
 	data: GenerateRequest,
-	saveAttributes = true
 ) {
 	const urlParameters = getUrlParameters(
 		WC_PRODUCT_VARIATIONS_NAMESPACE,
@@ -58,24 +50,6 @@ export const generateProductVariations = function* (
 	);
 	const { key } = parseId( idQuery, urlParameters );
 	yield generateProductVariationsRequest( key );
-
-	if ( saveAttributes ) {
-		try {
-			yield controls.dispatch(
-				'core',
-				'saveEntityRecord',
-				'postType',
-				'product',
-				{
-					id: urlParameters[ 0 ],
-					...productData,
-				}
-			);
-		} catch ( error ) {
-			yield generateProductVariationsError( key, error );
-			throw error;
-		}
-	}
 
 	try {
 		const result: Item = yield apiFetch( {
