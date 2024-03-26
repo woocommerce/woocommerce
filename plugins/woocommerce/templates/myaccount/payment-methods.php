@@ -49,19 +49,19 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 										' / ',
 										array_map(
 											function ( $network ) {
-												return esc_html( wc_get_credit_card_type_label( $network ) );
+												return wc_get_credit_card_type_label( $network );
 											},
 											$method['method']['networks']
 										)
 									);
 									/* translators: %s: a credit card brand. */
-									$brands_label .= ' (' . sprintf( esc_html__( '%s preferred', 'woocommerce' ), esc_html( wc_get_credit_card_type_label( $method['method']['preferred_network'] ) ) ) . ')';
+									$brands_label .= ' (' . sprintf( '%s preferred', wc_get_credit_card_type_label( $method['method']['preferred_network'] ) ) . ')';
 								} else {
 									$brands_label = wc_get_credit_card_type_label( $method['method']['brand'] );
 								}
 								if ( ! empty( $method['method']['last4'] ) ) {
 									/* translators: 1: credit card type 2: last 4 digits */
-									printf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), $brands_label, esc_html( $method['method']['last4'] ) );
+									printf( esc_html__( '%1$s ending in %2$s', 'woocommerce' ), esc_html( $brands_label ), esc_html( $method['method']['last4'] ) );
 								} else {
 									echo esc_html( $brands_label );
 								}
