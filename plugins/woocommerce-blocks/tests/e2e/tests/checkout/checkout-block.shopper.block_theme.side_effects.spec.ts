@@ -105,7 +105,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 	} );
 } );
 
-test.describe( 'shopper → Local pickup', () => {
+test.describe( 'Shopper → Local pickup', () => {
 	test.beforeEach( async ( { admin } ) => {
 		// Enable local pickup.
 		await admin.visitAdminPage(
@@ -204,7 +204,7 @@ test.describe( 'shopper → Local pickup', () => {
 	} );
 } );
 
-test.describe( 'Payment Methods', () => {
+test.describe( 'Shopper → Payment Methods', () => {
 	test( 'User can change payment methods', async ( {
 		frontendUtils,
 		page,
@@ -228,7 +228,7 @@ test.describe( 'Payment Methods', () => {
 	} );
 } );
 
-test.describe( 'Shipping and Billing Addresses', () => {
+test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	const billingTestData = {
 		firstname: 'John',
 		lastname: 'Doe',
@@ -331,7 +331,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => {
+test.describe( 'Shopper → Shipping (customer user)', () => {
 	test.use( { storageState: customerFile } );
 
 	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
@@ -404,7 +404,7 @@ test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => 
 	} );
 } );
 
-test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => {
+test.describe( 'Shopper → Place Guest Order', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can place order', async ( {
@@ -430,7 +430,89 @@ test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => 
 	} );
 } );
 
-test.describe( 'Checkout Form Errors (guest user)', () => {
+test.describe( 'Shopper → Place Virtual Order', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
+			data: { value: 'disabled' },
+		} );
+	} );
+
+	test.afterEach( async ( { requestUtils } ) => {
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
+			data: { value: 'all' },
+		} );
+	} );
+
+	test( 'can place a digital order when shipping is disabled', async ( {
+		checkoutPageObject,
+		frontendUtils,
+		localPickupUtils,
+		page,
+	} ) => {
+		await localPickupUtils.disableLocalPickup();
+
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await localPickupUtils.enableLocalPickup();
+	} );
+
+	test( 'can place a digital order when shipping is disabled, but Local Pickup is still enabled', async ( {
+		checkoutPageObject,
+		frontendUtils,
+		localPickupUtils,
+		page,
+	} ) => {
+		await localPickupUtils.enableLocalPickup();
+
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+	} );
+} );
+
+test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'can see errors when form is incomplete', async ( {

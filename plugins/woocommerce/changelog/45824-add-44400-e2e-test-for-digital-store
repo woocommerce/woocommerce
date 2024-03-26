@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add e2e tests for virtual orders
