@@ -3,6 +3,10 @@ name: Metrics Tracking
 on:
     push:
         branches: [trunk]
+        paths-ignore:
+          - 'docs/**'
+          - '**/changelog/**'
+          - '**/*.md'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
