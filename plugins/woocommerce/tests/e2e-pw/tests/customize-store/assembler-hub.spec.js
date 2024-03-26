@@ -29,23 +29,18 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
-		// In some environments the tour blocks clicking other elements.
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_customize_store_onboarding_tour_hidden',
-			'yes'
-		);
-
-		await features.setFeatureFlag(
-			request,
-			baseURL,
-			'customize-store',
-			true
-		);
-
-		// Need a block enabled theme to test
-		await activateTheme( 'twentytwentythree' );
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+			await activateTheme( 'twentytwentythree' );
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
 	} );
 
 	test.beforeEach( async ( { baseURL } ) => {
