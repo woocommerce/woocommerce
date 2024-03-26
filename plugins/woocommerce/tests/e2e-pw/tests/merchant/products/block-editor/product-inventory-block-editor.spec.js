@@ -91,7 +91,7 @@ test( 'can update stock status', async ( { page, product } ) => {
 
 test( 'can track stock quantity', async ( { page, product } ) => {
 	await test.step( 'enable track stock quantity', async () => {
-		await page.getByLabel( 'Track stock quantity for this' ).check();
+		await page.getByLabel( 'Track inventory' ).check();
 		// await closeTourModal( { page, timeout: 2000 } );
 		await page.getByRole( 'button', { name: 'Advanced' } ).click();
 		await page.getByLabel( "Don't allow purchases" ).check();

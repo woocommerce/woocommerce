@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { ActorRefFrom, sendTo, setup } from 'xstate5';
+import { ActorRefFrom, sendTo, setup, fromCallback } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -11,6 +12,7 @@ import classnames from 'classnames';
 import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import type { LaunchYourStoreComponentProps } from '..';
 import type { mainContentMachine } from '../main-content/xstate';
+import { updateQueryParams, createQueryParamsListener } from '../common';
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
@@ -20,11 +22,17 @@ export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
 };
 export type SidebarMachineEvents =
+	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'OPEN_EXTERNAL_URL'; url: string }
 	| { type: 'OPEN_WC_ADMIN_URL'; url: string }
 	| { type: 'OPEN_WC_ADMIN_URL_IN_CONTENT_AREA'; url: string }
 	| { type: 'LAUNCH_STORE' }
 	| { type: 'LAUNCH_STORE_SUCCESS' };
+
+const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
+	return createQueryParamsListener( 'sidebar', sendBack );
+} );
+
 export const sidebarMachine = setup( {
 	types: {} as {
 		context: SidebarMachineContext;
@@ -47,19 +55,57 @@ export const sidebarMachine = setup( {
 			( { context } ) => context.mainContentMachineRef,
 			{ type: 'SHOW_LOADING' }
 		),
+		updateQueryParams: (
+			_,
+			params: { sidebar?: string; content?: string }
+		) => {
+			updateQueryParams( params );
+		},
+	},
+	guards: {
+		hasSidebarLocation: (
+			_,
+			{ sidebarLocation }: { sidebarLocation: string }
+		) => {
+			const { sidebar } = getQuery() as { sidebar?: string };
+			return !! sidebar && sidebar === sidebarLocation;
+		},
+	},
+	actors: {
+		sidebarQueryParamListener,
 	},
 } ).createMachine( {
 	id: 'sidebar',
-	initial: 'init',
+	initial: 'navigate',
 	context: ( { input } ) => ( {
 		externalUrl: null,
 		mainContentMachineRef: input.mainContentMachineRef,
 	} ),
+	invoke: {
+		id: 'sidebarQueryParamListener',
+		src: 'sidebarQueryParamListener',
+	},
 	states: {
-		init: {
-			always: {
-				target: 'launchYourStoreHub',
-			},
+		navigate: {
+			always: [
+				{
+					guard: {
+						type: 'hasSidebarLocation',
+						params: { sidebarLocation: 'hub' },
+					},
+					target: 'launchYourStoreHub',
+				},
+				{
+					guard: {
+						type: 'hasSidebarLocation',
+						params: { sidebarLocation: 'launch-success' },
+					},
+					target: 'storeLaunchSuccessful',
+				},
+				{
+					target: 'launchYourStoreHub',
+				},
+			],
 		},
 		launchYourStoreHub: {
 			initial: 'preLaunchYourStoreHub',
@@ -91,7 +137,6 @@ export const sidebarMachine = setup( {
 					on: {
 						LAUNCH_STORE_SUCCESS: {
 							target: '#storeLaunchSuccessful',
-							actions: { type: 'showLaunchStoreSuccessPage' },
 						},
 					},
 				},
@@ -100,6 +145,16 @@ export const sidebarMachine = setup( {
 		storeLaunchSuccessful: {
 			id: 'storeLaunchSuccessful',
 			tags: 'fullscreen',
+			entry: [
+				{
+					type: 'updateQueryParams',
+					params: {
+						sidebar: 'launch-success',
+						content: 'launch-store-success',
+					},
+				},
+				{ type: 'showLaunchStoreSuccessPage' },
+			],
 		},
 		openExternalUrl: {
 			id: 'openExternalUrl',
@@ -108,6 +163,9 @@ export const sidebarMachine = setup( {
 		},
 	},
 	on: {
+		EXTERNAL_URL_UPDATE: {
+			target: '.navigate',
+		},
 		OPEN_EXTERNAL_URL: {
 			target: '#openExternalUrl',
 		},

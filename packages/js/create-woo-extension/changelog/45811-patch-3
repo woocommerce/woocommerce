@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fix a small typo in package.json homepage url.

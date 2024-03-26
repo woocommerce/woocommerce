@@ -292,18 +292,40 @@ class BlockTemplateUtils {
 	/**
 	 * Finds all nested template part file paths in a theme's directory.
 	 *
-	 * @param string $base_directory The theme's file path.
+	 * @param string $template_type wp_template or wp_template_part.
 	 * @return array $path_list A list of paths to all template part files.
 	 */
-	public static function get_template_paths( $base_directory ) {
-		$path_list = array();
-		if ( file_exists( $base_directory ) ) {
-			$nested_files      = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $base_directory ) );
-			$nested_html_files = new \RegexIterator( $nested_files, '/^.+\.html$/i', \RecursiveRegexIterator::GET_MATCH );
-			foreach ( $nested_html_files as $path => $file ) {
-				$path_list[] = $path;
-			}
-		}
+	public static function get_template_paths( $template_type ) {
+		$wp_template_filenames      = array(
+			'archive-product.html',
+			'order-confirmation.html',
+			'page-cart.html',
+			'page-checkout.html',
+			'product-search-results.html',
+			'single-product.html',
+			'taxonomy-product_attribute.html',
+			'taxonomy-product_cat.html',
+			'taxonomy-product_tag.html',
+		);
+		$wp_template_part_filenames = array(
+			'checkout-header.html',
+			'mini-cart.html',
+		);
+
+		/*
+		* This may return the blockified directory for wp_templates.
+		* At the moment every template file has a corresponding blockified file.
+		* If we decide to add a new template file that doesn't, we will need to update this logic.
+		*/
+		$directory = self::get_templates_directory( $template_type );
+
+		$path_list = array_map(
+			function ( $filename ) use ( $directory ) {
+				return $directory . DIRECTORY_SEPARATOR . $filename;
+			},
+			'wp_template' === $template_type ? $wp_template_filenames : $wp_template_part_filenames
+		);
+
 		return $path_list;
 	}
 

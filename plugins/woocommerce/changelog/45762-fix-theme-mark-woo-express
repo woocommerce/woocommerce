@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-CYS - Core: fix: not mark `Customize your store`  step as completed when the user switches theme
