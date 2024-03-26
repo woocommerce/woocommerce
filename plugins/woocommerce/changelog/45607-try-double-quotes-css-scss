@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Update stylelint configurations for linting to match `@wordpress` packages we consume.
+
