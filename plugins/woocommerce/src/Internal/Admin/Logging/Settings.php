@@ -292,6 +292,12 @@ class Settings {
 		$location_info = array();
 		$directory     = self::get_log_directory();
 
+		try {
+			FilesystemUtil::get_wp_filesystem();
+		} catch ( Exception $exception ) {
+			$location_info[] = __( '⚠️ The file system connection could not be initialized. You may want to switch to the database for log storage.', 'woocommerce' );
+		}
+
 		$location_info[] = sprintf(
 			// translators: %s is a location in the filesystem.
 			__( 'Log files are stored in this directory: %s', 'woocommerce' ),
