@@ -26,6 +26,13 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		}
 	} );
 
+	test.beforeEach( async ( { baseURL, pageObject } ) => {
+		await pageObject.setupSite( baseURL );
+		await pageObject.waitForLoadingScreenFinish();
+		const assembler = await pageObject.getAssembler();
+		await assembler.getByText( 'Choose your color palette' ).click();
+	} );
+
 	test( 'should be displayed', async ( { pageObject } ) => {
 		const assembler = await pageObject.getAssembler();
 
