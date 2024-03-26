@@ -39,7 +39,7 @@ test.describe( 'Store owner can view the Transitional page', () => {
 				'no'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 

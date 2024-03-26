@@ -1,6 +1,5 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { BASE_URL } = process.env;
-const { features } = require( '../../utils' );
 const { activateTheme } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
@@ -52,13 +51,11 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 				'no'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await features.resetFeatureFlags( request, baseURL );
-
 		// Reset theme back to twentynineteen
 		await activateTheme( 'twentynineteen' );
 
