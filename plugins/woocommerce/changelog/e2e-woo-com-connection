@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adds an e2e test to initiate a woo.com connection

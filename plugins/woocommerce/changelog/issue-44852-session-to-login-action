@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the `woocommerce_guest_session_to_user_id` action hook that fires when a guest session is migrated to a customer ID
