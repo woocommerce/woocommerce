@@ -27,7 +27,6 @@ const groupedProductsData = [
 	},
 ];
 
-test.describe.configure( { mode: 'serial' } );
 const productIds = [];
 
 test.describe( 'General tab', () => {
@@ -68,11 +67,10 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const groupedProductDropdown = page
+			await page
 				.locator( '.components-dropdown__content' )
 				.getByText( 'Grouped product' )
-				.first();
-			await groupedProductDropdown.click();
+				.click();
 
 			await page.waitForResponse(
 				( response ) =>
