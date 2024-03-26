@@ -81,6 +81,8 @@ class Init {
 
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 
+			add_filter( 'get_the_terms', array( $this, 'add_default_theme_terms' ), 10, 3 );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -234,9 +236,45 @@ class Init {
 			$this->product_templates
 		);
 
+		$product_forms = get_posts(
+			array(
+				'post_type'   => 'product_form',
+				'numberposts' => -1,
+				'post_status' => 'publish'
+			)
+		);
+		$editor_settings['productForms'] = array_map(
+			function( $product_form ) {
+				$template          = _build_block_template_result_from_post( $product_form );
+				// $template->content = do_blocks( $template->content );
+				return $template;
+			},
+			$product_forms
+		);
+
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
 		return get_block_editor_settings( $editor_settings, $block_editor_context );
+	}
+
+	/**
+	 * Temporary solution to allow using _build_block_template_result_from_post without a theme taxonomy.
+	 * @todo Look into including the taxonomy along with a template file during migration.
+	 */
+	public function add_default_theme_terms( $terms, $post_id, $taxonomy ) {
+		if ( 'wp_theme' !== $taxonomy || ! empty( $terms ) ) {
+			return $terms;
+		}
+
+		if ( 'product_form' !== get_post_type( $post_id ) ) {
+			return $terms;
+		}
+
+		return array(
+			(object) array(
+				'name' => 'woocommerce'
+			)
+		);
 	}
 
 	/**
