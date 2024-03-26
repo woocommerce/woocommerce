@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { dispatch, resolveSelect, useSelect } from '@wordpress/data';
-import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useMemo, useState } from '@wordpress/element';
 import { getNewPath, getPath, navigateTo } from '@woocommerce/navigation';
 import {
@@ -11,6 +10,8 @@ import {
 	ProductDefaultAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
+import { applyFilters } from '@wordpress/hooks';
+import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -58,6 +59,13 @@ export function useProductVariationsHelper() {
 		'product',
 		'id'
 	);
+
+	const { record: product } = useEntityRecord< Product >(
+		'postType',
+		'product',
+		productId
+	);
+
 	const [ _isGenerating, setIsGenerating ] = useState( false );
 
 	const { isGeneratingVariations, generateError } = useSelect(
@@ -117,6 +125,12 @@ export function useProductVariationsHelper() {
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).invalidateResolutionForStore();
 
+		const meta_data = applyFilters(
+			'woocommerce.product.variations.generate',
+			[],
+			product
+		);
+
 		return dispatch( EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME )
 			.generateProductVariations< {
 				count: number;
@@ -133,6 +147,7 @@ export function useProductVariationsHelper() {
 				{
 					delete: true,
 					default_values: defaultVariationValues,
+					meta_data,
 				}
 			)
 			.then( async ( response ) => {
