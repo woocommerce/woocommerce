@@ -75,123 +75,123 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		$additional_field_schema = $this->get_additional_fields_schema();
-		return [
-			'order_id'          => [
+		return array(
+			'order_id'          => array(
 				'description' => __( 'The order ID to process during checkout.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			],
-			'status'            => [
+			),
+			'status'            => array(
 				'description' => __( 'Order status. Payment providers will update this value after payment.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			],
-			'order_key'         => [
+			),
+			'order_key'         => array(
 				'description' => __( 'Order key used to check validity or protect access to certain order data.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			],
-			'order_number'      => [
+			),
+			'order_number'      => array(
 				'description' => __( 'Order number used for display.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			],
-			'customer_note'     => [
+			),
+			'customer_note'     => array(
 				'description' => __( 'Note added to the order by the customer during checkout.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'customer_id'       => [
+				'context'     => array( 'view', 'edit' ),
+			),
+			'customer_id'       => array(
 				'description' => __( 'Customer ID if registered. Will return 0 for guests.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			],
-			'billing_address'   => [
+			),
+			'billing_address'   => array(
 				'description' => __( 'Billing address.', 'woocommerce' ),
 				'type'        => 'object',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'properties'  => $this->billing_address_schema->get_properties(),
-				'arg_options' => [
-					'sanitize_callback' => [ $this->billing_address_schema, 'sanitize_callback' ],
-					'validate_callback' => [ $this->billing_address_schema, 'validate_callback' ],
-				],
+				'arg_options' => array(
+					'sanitize_callback' => array( $this->billing_address_schema, 'sanitize_callback' ),
+					'validate_callback' => array( $this->billing_address_schema, 'validate_callback' ),
+				),
 				'required'    => true,
-			],
-			'shipping_address'  => [
+			),
+			'shipping_address'  => array(
 				'description' => __( 'Shipping address.', 'woocommerce' ),
 				'type'        => 'object',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'properties'  => $this->shipping_address_schema->get_properties(),
-				'arg_options' => [
-					'sanitize_callback' => [ $this->shipping_address_schema, 'sanitize_callback' ],
-					'validate_callback' => [ $this->shipping_address_schema, 'validate_callback' ],
-				],
-			],
-			'payment_method'    => [
+				'arg_options' => array(
+					'sanitize_callback' => array( $this->shipping_address_schema, 'sanitize_callback' ),
+					'validate_callback' => array( $this->shipping_address_schema, 'validate_callback' ),
+				),
+			),
+			'payment_method'    => array(
 				'description' => __( 'The ID of the payment method being used to process the payment.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				// Validation may be based on cart contents which is not available here; this returns all enabled
 				// gateways. Further validation occurs during the request.
 				'enum'        => array_values( WC()->payment_gateways->get_payment_gateway_ids() ),
-			],
-			'create_account'    => [
+			),
+			'create_account'    => array(
 				'description' => __( 'Whether to create a new user account as part of order processing.', 'woocommerce' ),
 				'type'        => 'boolean',
-				'context'     => [ 'view', 'edit' ],
-			],
-			'payment_result'    => [
+				'context'     => array( 'view', 'edit' ),
+			),
+			'payment_result'    => array(
 				'description' => __( 'Result of payment processing, or false if not yet processed.', 'woocommerce' ),
 				'type'        => 'object',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-				'properties'  => [
-					'payment_status'  => [
+				'properties'  => array(
+					'payment_status'  => array(
 						'description' => __( 'Status of the payment returned by the gateway. One of success, pending, failure, error.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'string',
-					],
-					'payment_details' => [
+					),
+					'payment_details' => array(
 						'description' => __( 'An array of data being returned from the payment gateway.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'array',
-						'items'       => [
+						'items'       => array(
 							'type'       => 'object',
-							'properties' => [
-								'key'   => [
+							'properties' => array(
+								'key'   => array(
 									'type' => 'string',
-								],
-								'value' => [
+								),
+								'value' => array(
 									'type' => 'string',
-								],
-							],
-						],
-					],
-					'redirect_url'    => [
+								),
+							),
+						),
+					),
+					'redirect_url'    => array(
 						'description' => __( 'A URL to redirect the customer after checkout. This could be, for example, a link to the payment processors website.', 'woocommerce' ),
 						'readonly'    => true,
 						'type'        => 'string',
-					],
-				],
-			],
-			'additional_fields' => [
+					),
+				),
+			),
+			'additional_fields' => array(
 				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
 				'type'        => 'object',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'properties'  => $additional_field_schema,
-				'arg_options' => [
-					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
-					'validate_callback' => [ $this, 'validate_additional_fields' ],
-				],
+				'arg_options' => array(
+					'sanitize_callback' => array( $this, 'sanitize_additional_fields' ),
+					'validate_callback' => array( $this, 'validate_additional_fields' ),
+				),
 				'required'    => $this->schema_has_required_property( $additional_field_schema ),
-			],
+			),
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
-		];
+		);
 	}
 
 	/**
@@ -212,7 +212,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_checkout_response( \WC_Order $order, PaymentResult $payment_result = null ) {
-		return [
+		return array(
 			'order_id'          => $order->get_id(),
 			'status'            => $order->get_status(),
 			'order_key'         => $order->get_order_key(),
@@ -222,14 +222,14 @@ class CheckoutSchema extends AbstractSchema {
 			'billing_address'   => (object) $this->billing_address_schema->get_item_response( $order ),
 			'shipping_address'  => (object) $this->shipping_address_schema->get_item_response( $order ),
 			'payment_method'    => $order->get_payment_method(),
-			'payment_result'    => [
+			'payment_result'    => array(
 				'payment_status'  => $payment_result->status,
 				'payment_details' => $this->prepare_payment_details_for_response( $payment_result->payment_details ),
 				'redirect_url'    => $payment_result->redirect_url,
-			],
+			),
 			'additional_fields' => $this->get_additional_fields_response( $order ),
 			self::EXTENDING_KEY => $this->get_extended_data( self::IDENTIFIER ),
-		];
+		);
 	}
 
 	/**
@@ -243,11 +243,11 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	protected function prepare_payment_details_for_response( array $payment_details ) {
 		return array_map(
-			function( $key, $value ) {
-				return (object) [
+			function ( $key, $value ) {
+				return (object) array(
 					'key'   => $key,
 					'value' => $value,
-				];
+				);
 			},
 			array_keys( $payment_details ),
 			$payment_details
@@ -265,7 +265,7 @@ class CheckoutSchema extends AbstractSchema {
 			$this->additional_fields_controller->get_all_fields_from_order( $order ),
 			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer )
 		);
-		$response = [];
+		$response = array();
 
 		foreach ( $fields as $key => $value ) {
 			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
@@ -297,18 +297,18 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	protected function generate_additional_fields_schema( ...$args ) {
 		$additional_fields = array_merge( ...$args );
-		$schema            = [];
+		$schema            = array();
 		foreach ( $additional_fields as $key => $field ) {
-			$field_schema = [
+			$field_schema = array(
 				'description' => $field['label'],
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => array( 'view', 'edit' ),
 				'required'    => $field['required'],
-			];
+			);
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function( $option ) {
+					function ( $option ) {
 						return $option['value'];
 					},
 					$field['options']
@@ -333,7 +333,7 @@ class CheckoutSchema extends AbstractSchema {
 	protected function schema_has_required_property( $additional_fields_schema ) {
 		return array_reduce(
 			array_keys( $additional_fields_schema ),
-			function( $carry, $key ) use ( $additional_fields_schema ) {
+			function ( $carry, $key ) use ( $additional_fields_schema ) {
 				return $carry || $additional_fields_schema[ $key ]['required'];
 			},
 			false
@@ -352,7 +352,7 @@ class CheckoutSchema extends AbstractSchema {
 		$fields             = $sanitization_utils->wp_kses_array(
 			array_reduce(
 				array_keys( $fields ),
-				function( $carry, $key ) use ( $fields, $properties ) {
+				function ( $carry, $key ) use ( $fields, $properties ) {
 					if ( ! isset( $properties[ $key ] ) ) {
 						return $carry;
 					}
@@ -362,7 +362,7 @@ class CheckoutSchema extends AbstractSchema {
 					$carry[ $key ]  = $rest_sanitized;
 					return $carry;
 				},
-				[]
+				array()
 			)
 		);
 
@@ -389,7 +389,7 @@ class CheckoutSchema extends AbstractSchema {
 				// Optional fields can go missing.
 				continue;
 			}
-			$field_value = $fields[ $key ];
+			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
 			$result      = rest_validate_value_from_schema( $field_value, $schema, $key );
 
 			// Only allow custom validation on fields that pass the schema validation.

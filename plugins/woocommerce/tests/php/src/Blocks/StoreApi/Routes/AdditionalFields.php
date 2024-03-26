@@ -141,7 +141,8 @@ class AdditionalFields extends MockeryTestCase {
 	 * Unregister fields after testing.
 	 */
 	private function unregister_fields() {
-		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_column( $this->fields, 'id' ) );
+		$fields = $this->controller->get_additional_fields();
+		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_keys( $fields ) );
 	}
 
 	/**

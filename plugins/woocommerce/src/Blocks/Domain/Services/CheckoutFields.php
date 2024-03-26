@@ -38,7 +38,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
+	private $supported_field_types = array( 'text', 'select', 'checkbox' );
 
 	/**
 	 * Instance of the asset data registry.
@@ -532,13 +532,13 @@ class CheckoutFields {
 		// We check if attributes are valid. This is done to prevent too much nesting and also to allow field registration
 		// even if the attributes property is invalid. We can just skip it and register the field without attributes.
 		if ( empty( $attributes ) ) {
-			return [];
+			return array();
 		}
 
 		if ( ! is_array( $attributes ) || 0 === count( $attributes ) ) {
 			$message = sprintf( 'An invalid attributes value was supplied when registering field with id: "%s". %s', $id, 'Attributes must be a non-empty array.' );
 			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
-			return [];
+			return array();
 		}
 
 		// These are formatted in camelCase because React components expect them that way.
@@ -553,7 +553,7 @@ class CheckoutFields {
 
 		$valid_attributes = array_filter(
 			$attributes,
-			function( $_, $key ) use ( $allowed_attributes ) {
+			function ( $_, $key ) use ( $allowed_attributes ) {
 				return in_array( $key, $allowed_attributes, true ) || strpos( $key, 'aria-' ) === 0 || strpos( $key, 'data-' ) === 0;
 			},
 			ARRAY_FILTER_USE_BOTH
@@ -568,7 +568,7 @@ class CheckoutFields {
 
 		// Escape attributes to remove any malicious code and return them.
 		return array_map(
-			function( $value ) {
+			function ( $value ) {
 				return esc_attr( $value );
 			},
 			$valid_attributes
@@ -756,13 +756,13 @@ class CheckoutFields {
 
 			return array_filter(
 				$this->get_additional_fields(),
-				function( $key ) use ( $order_fields_keys ) {
+				function ( $key ) use ( $order_fields_keys ) {
 					return in_array( $key, $order_fields_keys, true );
 				},
 				ARRAY_FILTER_USE_KEY
 			);
 		}
-		return [];
+		return array();
 	}
 
 	/**
@@ -1095,7 +1095,7 @@ class CheckoutFields {
 		);
 		return array_filter(
 			$fields,
-			function( $key ) use ( $customer_fields_keys ) {
+			function ( $key ) use ( $customer_fields_keys ) {
 				if ( 0 === strpos( $key, '/billing/' ) ) {
 					$key = str_replace( '/billing/', '', $key );
 				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
@@ -1117,7 +1117,7 @@ class CheckoutFields {
 	public function filter_fields_for_location( $fields, $location ) {
 		return array_filter(
 			$fields,
-			function( $key ) use ( $location ) {
+			function ( $key ) use ( $location ) {
 				if ( 0 === strpos( $key, '/billing/' ) ) {
 					$key = str_replace( '/billing/', '', $key );
 				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
@@ -1138,7 +1138,7 @@ class CheckoutFields {
 	public function filter_fields_for_order_confirmation( $fields ) {
 		return array_filter(
 			$fields,
-			function( $field ) {
+			function ( $field ) {
 				return ! empty( $field['show_in_order_confirmation'] );
 			}
 		);
