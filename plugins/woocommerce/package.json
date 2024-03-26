@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.8.0",
+	"version": "8.9.0",
 	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
@@ -190,7 +190,7 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
 		"@wordpress/env": "^8.13.0",
-		"@wordpress/stylelint-config": "19.1.0",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",
 		"autoprefixer": "9.8.6",

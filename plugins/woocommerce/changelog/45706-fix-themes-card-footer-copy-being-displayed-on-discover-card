@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Ensure the "Didn’t find a theme you like" text and the "Design your own" banner are displayed exclusively at the bottom of the themes tab on WooCommerce > Extensions.
