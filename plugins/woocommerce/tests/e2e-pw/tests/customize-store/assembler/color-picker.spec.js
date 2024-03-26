@@ -1,5 +1,6 @@
-const { test: base, expect } = require( '@playwright/test' );
+const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
+const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -11,17 +12,18 @@ const test = base.extend( {
 test.describe( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		// await setOption(
-		// 	request,
-		// 	baseURL,
-		// 	'woocommerce_customize_store_onboarding_tour_hidden',
-		// 	'yes'
-		// );
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
-		await assembler.getByText( 'Choose your color palette' ).click();
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated', error );
+		}
 	} );
 
 	test( 'should be displayed', async ( { pageObject } ) => {
