@@ -38,6 +38,7 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 		case 'menu_order':
 		case 'name_num':
 		case 'parent':
+		case 'id':
 			$defaults['orderby'] = $orderby;
 			break;
 	}
