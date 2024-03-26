@@ -49,6 +49,7 @@ import './style.scss';
 import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -607,8 +608,10 @@ export const CustomizeStoreController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
 
 	useEffect( () => {

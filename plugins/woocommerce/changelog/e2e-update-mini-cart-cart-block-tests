@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: update mini cart and cart block tests and add new test to mini cart verifying max quantity

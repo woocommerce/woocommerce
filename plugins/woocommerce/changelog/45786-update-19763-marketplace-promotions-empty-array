@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fixes bug in the fetching of marketplace promotions, which means that an empty response from the API isn't saved in the promotions transient.
-
