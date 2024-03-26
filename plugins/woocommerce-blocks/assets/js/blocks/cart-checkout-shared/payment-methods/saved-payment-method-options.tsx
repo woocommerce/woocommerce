@@ -34,7 +34,7 @@ const getCcOrEcheckLabel = ( {
 	expires: string;
 } ): string => {
 	const networks = method.networks || [];
-	if (method.isCoBranded && networks.length > 1) {
+	if ( method.isCoBranded && networks.length > 1 ) {
 		return sprintf(
 			__( '%1$s ending in %2$s (expires %3$s, %4$s preferred)', 'woocommerce' ),
 			networks.join(' / '),
