@@ -1050,11 +1050,11 @@ class WC_Checkout {
 			return;
 		}
 
-		// Store Order ID in session so it can be re-used after payment failure.
+		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 
 		// We save the session early because if the payment gateway hangs
-		// the request will never finish, thus the session data will neved be saved,
+		// the request will never finish, thus the session data will never be saved,
 		// and this can lead to duplicate orders if the user submits the order again.
 		WC()->session->save_data();
 
@@ -1073,6 +1073,7 @@ class WC_Checkout {
 				exit;
 			}
 
+			// Using wp_send_json will gracefully handle any problem encoding data
 			wp_send_json( $result );
 		}
 	}
