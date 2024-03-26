@@ -36,7 +36,7 @@ class HtmlSanitizer {
 	 * Sanitizes a chunk of HTML, by following the same rules as `wp_kses_post()` but also allowing
 	 * the style element to be supplied.
 	 *
-	 * @param string $html
+	 * @param string $html The HTML to be sanitized.
 	 *
 	 * @return string
 	 */
