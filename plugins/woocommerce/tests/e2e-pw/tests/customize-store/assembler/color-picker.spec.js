@@ -1,5 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
+const { activateTheme } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -35,6 +36,14 @@ test.describe( 'Assembler -> Color Pickers', () => {
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'no'
 			);
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await activateTheme( 'twentynineteen' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
