@@ -124,9 +124,15 @@ export function useProductVariationsHelper() {
 		await dispatch(
 			EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
 		).invalidateResolutionForStore();
-
+		/**
+		 * Filters the meta_data array for generated variations.
+		 *
+		 * @filter woocommerce.product.variations.generate.meta_data
+		 * @param {Object} product Main product object.
+		 * @return {Object} meta_data array for variations.
+		 */
 		const meta_data = applyFilters(
-			'woocommerce.product.variations.generate',
+			'woocommerce.product.variations.generate.meta_data',
 			[],
 			product
 		);
