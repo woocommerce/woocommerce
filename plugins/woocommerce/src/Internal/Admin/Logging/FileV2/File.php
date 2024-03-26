@@ -64,7 +64,30 @@ class File {
 
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem instanceof WP_Filesystem_Direct ) {
+		$success = true;
+		if ( ! $wp_filesystem ) {
+			$constants = array(
+				'hostname'    => 'FTP_HOST',
+				'username'    => 'FTP_USER',
+				'password'    => 'FTP_PASS',
+				'public_key'  => 'FTP_PUBKEY',
+				'private_key' => 'FTP_PRIKEY',
+			);
+
+			$credentials = array();
+
+			// We provide credentials based on wp-config.php constants.
+			// Reference https://developer.wordpress.org/apis/wp-config-php/#wordpress-upgrade-constants.
+			foreach ( $constants as $key => $constant ) {
+				if ( defined( $constant ) ) {
+					$credentials[ $key ] = constant( $constant );
+				}
+			}
+
+			$success = WP_Filesystem( $credentials );
+		}
+
+		if ( ! $success || $wp_filesystem->errors->has_errors() ) {
 			WP_Filesystem();
 		}
 
