@@ -46,7 +46,7 @@ export const scanForTemplateChanges = async (
 
 		let lineNumber = 1;
 		let code = 'warning';
-		let message = 'This template may require a version bump!';
+		let message = `This template may require a version bump! Expected ${version}`;
 
 		for ( const l in lines ) {
 			const line = lines[ l ];
