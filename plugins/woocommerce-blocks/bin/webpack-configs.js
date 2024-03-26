@@ -330,7 +330,20 @@ const getFrontConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
-			filename: `[name]-frontend${ fileSuffix }.js`,
+			filename: ( pathData ) => {
+				// blocksCheckout and blocksComponents were moved from core bundle,
+				// retain their filenames to avoid breaking translations.
+				if (
+					pathData.chunk.name === 'blocksCheckout' ||
+					pathData.chunk.name === 'blocksComponents'
+				) {
+					return `${ paramCase(
+						pathData.chunk.name
+					) }${ fileSuffix }.js`;
+				}
+
+				return `[name]-frontend${ fileSuffix }.js`;
+			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',
 			library: [ 'wc', '[name]' ],
 		},

@@ -62,8 +62,8 @@ final class AssetsController {
 		$this->api->register_script( 'wc-price-format', 'assets/client/blocks/price-format.js', array(), false );
 
 		$this->api->register_script( 'wc-blocks-vendors-frontend', $this->api->get_block_asset_build_path( 'wc-blocks-vendors-frontend' ), array(), false );
-		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocksCheckout-frontend.js', array( 'wc-blocks-vendors-frontend' ) );
-		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocksComponents-frontend.js', array( 'wc-blocks-vendors-frontend' ) );
+		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js', array( 'wc-blocks-vendors-frontend' ) );
+		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js', array( 'wc-blocks-vendors-frontend' ) );
 
 		// Register the interactivity components here for now.
 		$this->api->register_script( 'wc-interactivity-dropdown', 'assets/client/blocks/wc-interactivity-dropdown.js', array() );
