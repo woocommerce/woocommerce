@@ -3,7 +3,7 @@
  */
 import { renderParentBlock } from '@woocommerce/atomic-utils';
 import Drawer from '@woocommerce/base-components/drawer';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { useStoreCart, useStoreEvents } from '@woocommerce/base-context/hooks';
 import {
 	getValidBlockAttributes,
 	translateJQueryEventToNative,
@@ -96,6 +96,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		}
 	} );
 
+	const { dispatchStoreEvent } = useStoreEvents();
 	const [ isOpen, setIsOpen ] = useState< boolean >( isInitiallyOpen );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
 	// slide in animation.
@@ -118,8 +119,10 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					overflow: 'hidden',
 					paddingRight: scrollBarWidth + 'px',
 				} );
+				dispatchStoreEvent( 'mini-cart-open' );
 			} else {
 				Object.assign( body.style, { overflow: '', paddingRight: 0 } );
+				dispatchStoreEvent( 'mini-cart-close' );
 			}
 		}
 	}, [ isOpen ] );
