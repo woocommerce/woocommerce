@@ -10,8 +10,8 @@ const closeWelcomeModal = async ( { page } ) => {
 };
 
 const disableWelcomeModal = async ( { page } ) => {
+	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
-	// await page.waitForFunction( () => window?.wp?.data );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
 		wp.data.select( 'core/edit-post' ).isFeatureActive( 'welcomeGuide' )
