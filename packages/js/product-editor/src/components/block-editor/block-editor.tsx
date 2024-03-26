@@ -52,9 +52,14 @@ import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
 
 function getLayoutTemplateId(
+	layoutTemplateId: string | undefined,
 	productTemplate: ProductTemplate | undefined,
 	postType: string
 ) {
+	if ( layoutTemplateId ) {
+		return layoutTemplateId;
+	}
+
 	if ( productTemplate?.layoutTemplateId ) {
 		return productTemplate.layoutTemplateId;
 	}
@@ -154,6 +159,11 @@ export function BlockEditor( {
 		{ postType }
 	);
 
+	const [ layoutTemplateId ] = useProductEntityProp< string >(
+		'meta_data.layout_template_id',
+		{ postType }
+	);
+
 	const { record: product } = useEntityRecord(
 		'postType',
 		postType,
@@ -166,7 +176,7 @@ export function BlockEditor( {
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
-		getLayoutTemplateId( productTemplate, postType )
+		getLayoutTemplateId( layoutTemplateId, productTemplate, postType )
 	);
 
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
