@@ -285,7 +285,7 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 					'brand'             => 'Visa',
 					'is_co_branded'     => true,
 					'networks'          => array( 'visa', 'cartes_bancaires' ),
-					'preferred_network' => 'cartes_bancaires'
+					'preferred_network' => 'cartes_bancaires',
 				),
 				'expires' => '12/20',
 			),
