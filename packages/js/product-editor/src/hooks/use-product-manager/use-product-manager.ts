@@ -72,16 +72,37 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
-			const { blocks, content, selection, ...editedProduct } = wpSelect(
-				'core'
+			const { blocks, content, selection, ...edits } =
 				// @ts-expect-error There are no types for this.
-			).getEditedEntityRecord( 'postType', postType, id );
+				wpSelect( 'core' ).getEntityRecordEdits(
+					'postType',
+					postType,
+					id
+				);
+
+			const entityConfigs =
+				// @ts-expect-error There are no types for this.
+				wpSelect( 'core' ).getEntitiesConfig( 'postType' );
+			const entityConfig = entityConfigs?.find(
+				// @ts-expect-error There are no types for this.
+				( config ) =>
+					config.kind === 'postType' && config.name === postType
+			);
+
+			if ( ! entityConfig ) {
+				throw new Error( 'Entity config not found' );
+			}
+
+			// DEFAULT_ENTITY_KEY is not exported from `@wordpress/core-data` so we
+			// hardcode 'id' as the fallback
+			const entityIdKey = entityConfig.key || 'id';
 
 			const savedProduct = await saveEntityRecord(
 				'postType',
 				postType,
 				{
-					...editedProduct,
+					...edits,
+					[ entityIdKey ]: id,
 					...extraProps,
 				},
 				// @ts-expect-error There are no types for this.
