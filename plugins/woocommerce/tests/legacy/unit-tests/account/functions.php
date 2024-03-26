@@ -284,7 +284,6 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		);
 
 		$token->delete( true );
-
 	}
 
 	/**
