@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Fix `is_read` value in Admin notes.

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Make sure backup posts are restored during sync when HPOS is enabled.

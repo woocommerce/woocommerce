@@ -115,6 +115,7 @@
 		"@babel/runtime": "^7.23.5",
 		"@octokit/core": "^3.6.0",
 		"@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
+		"@statelyai/inspect": "^0.2.5",
 		"@testing-library/dom": "8.11.3",
 		"@testing-library/jest-dom": "5.16.2",
 		"@testing-library/react": "12.1.3",

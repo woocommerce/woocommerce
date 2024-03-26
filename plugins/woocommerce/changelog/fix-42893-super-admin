@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure the is_super_admin REST field contains the correct value
