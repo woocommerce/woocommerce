@@ -210,9 +210,12 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'cc' => array(
 					array(
 						'method'     => array(
-							'gateway' => 'bacs',
-							'last4'   => '1234',
-							'brand'   => 'Mastercard',
+							'gateway'           => 'bacs',
+							'last4'             => '1234',
+							'brand'             => 'Mastercard',
+							'is_co_branded'     => false,
+							'networks'          => '',
+							'preferred_network' => '',
 						),
 						'expires'    => '12/20',
 						'is_default' => true,
@@ -252,6 +255,9 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				'method'  => array(
 					'last4' => '1234',
 					'brand' => 'Mastercard',
+					'is_co_branded' => false,
+					'networks' => null,
+					'preferred_network' => null,
 				),
 				'expires' => '12/20',
 			),
