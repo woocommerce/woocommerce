@@ -128,6 +128,12 @@ test.describe( 'General tab', () => {
 
 			await expect( textContent ).toMatch( 'Product type changed.' );
 
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wp-json/wc/v3/products/' ) &&
+					response.status() === 200
+			);
+
 			const title = page.locator( '.woocommerce-product-header__title' );
 
 			// Save product ID
@@ -138,6 +144,19 @@ test.describe( 'General tab', () => {
 
 			await expect( productId ).toBeDefined();
 			await expect( title ).toHaveText( productData.name );
+
+			await page.goto( `/?post_type=product&p=${ productId }` );
+
+			await expect(
+				page.getByRole( 'heading', { name: productData.name } )
+			).toBeVisible();
+
+			// await page.pause();
+			for ( const product of groupedProductsData ) {
+				await expect(
+					page.getByRole( 'link', { name: product.name } ).first()
+				).toBeVisible();
+			}
 		} );
 	} );
 } );
