@@ -489,22 +489,22 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			initial: 'fetchActiveThemeHasMods',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
-				fetchActiveThemeHasMods: {
+				fetchCustomizeStoreCompleted: {
 					invoke: {
-						src: 'fetchActiveThemeHasMods',
+						src: 'fetchCustomizeStoreCompleted',
 						onDone: {
-							actions: 'assignActiveThemeHasMods',
-							target: 'checkActiveThemeHasMods',
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
 						},
 					},
 				},
-				checkActiveThemeHasMods: {
+				checkCustomizeStoreCompleted: {
 					always: [
 						{
 							// Redirect to the "intro step" if the active theme has no modifications.
-							cond: 'activeThemeHasNoMods',
+							cond: 'customizeTaskIsNotCompleted',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
@@ -512,7 +512,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						{
 							// Otherwise, proceed to the next step.
-							cond: 'activeThemeHasMods',
+							cond: 'customizeTaskIsCompleted',
 							target: 'preTransitional',
 						},
 					],
@@ -629,6 +629,12 @@ export const CustomizeStoreController = ( {
 				},
 				activeThemeHasNoMods: ( _ctx ) => {
 					return ! _ctx.activeThemeHasMods;
+				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
 				},
 			},
 		} );
