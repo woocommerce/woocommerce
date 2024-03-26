@@ -197,7 +197,7 @@
 		"@wordpress/postcss-themes": "1.0.5",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "24.6.0",
-		"@wordpress/stylelint-config": "^20.0.3",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "10.4.14",
 		"axios": "0.27.2",
 		"babel-jest": "^29.7.0",
