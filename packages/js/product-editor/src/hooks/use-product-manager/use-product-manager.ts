@@ -72,7 +72,7 @@ export function useProductManager< T = Product >( postType: string ) {
 			await validate( extraProps );
 			const { saveEntityRecord } = dispatch( 'core' );
 
-			const { blocks, content, selection, ...edits } =
+			const { blocks, content, selection, ...editedProduct } =
 				// @ts-expect-error There are no types for this.
 				wpSelect( 'core' ).getEntityRecordEdits(
 					'postType',
@@ -101,7 +101,7 @@ export function useProductManager< T = Product >( postType: string ) {
 				'postType',
 				postType,
 				{
-					...edits,
+					...editedProduct,
 					[ entityIdKey ]: id,
 					...extraProps,
 				},
