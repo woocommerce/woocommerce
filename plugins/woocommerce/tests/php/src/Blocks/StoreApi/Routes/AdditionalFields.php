@@ -1315,7 +1315,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'value',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
 				),
 			)
 		);
@@ -1383,7 +1384,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'invalid',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'invalid',
 				),
 			)
 		);
@@ -1458,7 +1460,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'value',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
 				),
 			)
 		);
@@ -1533,7 +1536,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'invalid',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'invalid',
 				),
 			)
 		);
@@ -1597,7 +1601,9 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => array(),
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1659,7 +1665,9 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => array(),
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
