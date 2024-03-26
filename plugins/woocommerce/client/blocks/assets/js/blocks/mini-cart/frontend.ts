@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { doAction } from '@wordpress/hooks';
 import {
 	store,
 	getContext,
@@ -382,11 +383,17 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					doAction(
+						'experimental__woocommerce_blocks-mini-cart-open'
+					);
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					doAction(
+						'experimental__woocommerce_blocks-mini-cart-close'
+					);
 				}
 			},
 
