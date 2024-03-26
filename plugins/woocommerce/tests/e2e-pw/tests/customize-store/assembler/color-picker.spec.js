@@ -22,7 +22,21 @@ test.describe( 'Assembler -> Color Pickers', () => {
 				'yes'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
+		}
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'no'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 
@@ -88,19 +102,18 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			.first();
 
 		await colorPicker.click();
-		await expect( colorPicker ).toHaveClass( 'is-active' );
+		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
 	test( 'should active the save button when a color is picked', async ( {
 		pageObject,
-		page,
 	} ) => {
 		const assembler = await pageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			)
-			.first();
+			.nth( 2 );
 
 		await colorPicker.click();
 
@@ -118,7 +131,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			)
-			.first();
+			.nth( 2 );
 
 		await colorPicker.click();
 
@@ -127,7 +140,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		const waitResponse = page.waitForResponse(
 			( response ) =>
 				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status === 200
+				response.status() === 200
 		);
 
 		await saveButton.click();
