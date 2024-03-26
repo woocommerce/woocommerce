@@ -47,7 +47,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await assembler.getByText( 'Choose your color palette' ).click();
 	} );
 
-	test( 'should be displayed', async ( { pageObject } ) => {
+	test( 'Color pickers should be displayed', async ( { pageObject } ) => {
 		const assembler = await pageObject.getAssembler();
 
 		const colorPickers = assembler.locator(
@@ -56,7 +56,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( colorPickers ).toHaveCount( 18 );
 	} );
 
-	test( 'the click should trigger the update of colors on the site preview', async ( {
+	test( 'Picking a color should trigger an update of colors on the site preview', async ( {
 		pageObject,
 	}, testInfo ) => {
 		const assembler = await pageObject.getAssembler();
@@ -81,6 +81,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		for ( const colorPicker of colorPickers ) {
 			await colorPicker.waitFor();
 			await colorPicker.click();
+			// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 			await expect(
 				( await editor.locator( 'style' ).allInnerTexts() ).join( ',' )
 			).toMatchSnapshot( {
@@ -91,7 +92,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		}
 	} );
 
-	test( 'should be focused when a color is picked', async ( {
+	test( 'Color picker should be focused when a color is picked', async ( {
 		pageObject,
 	} ) => {
 		const assembler = await pageObject.getAssembler();
@@ -105,7 +106,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'should active the save button when a color is picked', async ( {
+	test( 'Picking a color should activate the save button', async ( {
 		pageObject,
 	} ) => {
 		const assembler = await pageObject.getAssembler();
@@ -122,7 +123,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( saveButton ).toBeEnabled();
 	} );
 
-	test( 'the save button should be disable when the user click save', async ( {
+	test( 'The Done button should be visible after clicking save', async ( {
 		pageObject,
 		page,
 	} ) => {
@@ -147,10 +148,10 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 		await waitResponse;
 
-		await expect( saveButton ).toBeDisabled();
+		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test( 'should the color palette applied on the frontend', async ( {
+	test( 'Selected color palette should be applied on the frontend', async ( {
 		pageObject,
 		page,
 		baseURL,
@@ -182,6 +183,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			.locator( '#global-styles-inline-css' )
 			.innerHTML();
 
+		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 		expect( style ).toMatchSnapshot( {
 			name: 'color-palette-frontend',
 		} );
