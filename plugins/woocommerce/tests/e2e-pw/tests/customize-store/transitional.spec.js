@@ -58,7 +58,7 @@ test.describe( 'Store owner can view the Transitional page', () => {
 		);
 	} );
 
-	test.only( 'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page', async ( {
+	test( 'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page', async ( {
 		page,
 		baseURL,
 	} ) => {
