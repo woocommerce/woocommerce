@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix an issue where the price filter was not applied when using the numeric inputs.
-

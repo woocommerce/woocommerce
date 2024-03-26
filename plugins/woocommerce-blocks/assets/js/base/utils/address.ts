@@ -3,9 +3,11 @@
  */
 import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import { isEmail } from '@wordpress/url';
-import type {
-	CartResponseBillingAddress,
-	CartResponseShippingAddress,
+import {
+	isString,
+	type CartResponseBillingAddress,
+	type CartResponseShippingAddress,
+	isObject,
 } from '@woocommerce/types';
 import { ShippingAddress, BillingAddress } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -149,14 +151,13 @@ export const formatShippingAddress = (
 	if ( Object.values( address ).length === 0 ) {
 		return null;
 	}
-	const formattedCountry =
-		typeof SHIPPING_COUNTRIES[ address.country ] === 'string'
-			? decodeEntities( SHIPPING_COUNTRIES[ address.country ] )
-			: '';
+	const formattedCountry = isString( SHIPPING_COUNTRIES[ address.country ] )
+		? decodeEntities( SHIPPING_COUNTRIES[ address.country ] )
+		: '';
 
 	const formattedState =
-		typeof SHIPPING_STATES[ address.country ] === 'object' &&
-		typeof SHIPPING_STATES[ address.country ][ address.state ] === 'string'
+		isObject( SHIPPING_STATES[ address.country ] ) &&
+		isString( SHIPPING_STATES[ address.country ][ address.state ] )
 			? decodeEntities(
 					SHIPPING_STATES[ address.country ][ address.state ]
 			  )
