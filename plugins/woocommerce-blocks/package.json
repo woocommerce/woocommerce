@@ -199,7 +199,7 @@
 		"@wordpress/scripts": "24.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "10.4.14",
-		"axios": "0.27.2",
+		"axios": "0.28.0",
 		"babel-jest": "^29.7.0",
 		"babel-plugin-explicit-exports-references": "^1.0.2",
 		"babel-plugin-react-docgen": "4.2.1",
