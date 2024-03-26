@@ -2,10 +2,12 @@ const { test: base, expect, request } = require( '@playwright/test' );
 const { setOption } = require( '../../utils/options' );
 const { activateTheme } = require( '../../utils/themes' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
+const { features } = require( '../../utils' );
 
 const CUSTOMIZE_STORE_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 const TRANSITIONAL_URL = `${ CUSTOMIZE_STORE_URL }%2Ftransitional`;
+const INTRO_URL = `${ CUSTOMIZE_STORE_URL }%2Fintro`;
 
 const test = base.extend( {
 	pageObject: async ( { page }, use ) => {
@@ -54,6 +56,18 @@ test.describe( 'Store owner can view the Transitional page', () => {
 			'woocommerce_customize_store_onboarding_tour_hidden',
 			'no'
 		);
+	} );
+
+	test.only( 'Accessing the transitional page when the CYS flow is not completed should redirect to the Intro page', async ( {
+		page,
+		baseURL,
+	} ) => {
+		await page.goto( TRANSITIONAL_URL );
+
+		const locator = page.locator( 'h1:visible' );
+		await expect( locator ).not.toHaveText( 'Your store looks great!' );
+
+		await expect( page.url() ).toBe( `${ baseURL }${ INTRO_URL }` );
 	} );
 
 	test( 'Clicking on "Done" in the assembler should go to the transitional page', async ( {

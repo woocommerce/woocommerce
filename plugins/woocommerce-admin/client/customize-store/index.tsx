@@ -489,8 +489,34 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchActiveThemeHasMods',
 			states: {
+				fetchActiveThemeHasMods: {
+					invoke: {
+						src: 'fetchActiveThemeHasMods',
+						onDone: {
+							actions: 'assignActiveThemeHasMods',
+							target: 'checkActiveThemeHasMods',
+						},
+					},
+				},
+				checkActiveThemeHasMods: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'activeThemeHasNoMods',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'activeThemeHasMods',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
