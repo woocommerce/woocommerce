@@ -149,7 +149,6 @@ test.describe( 'General tab', () => {
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
 
-			// await page.pause();
 			for ( const product of groupedProductsData ) {
 				await expect(
 					page.getByRole( 'link', { name: product.name } ).first()
