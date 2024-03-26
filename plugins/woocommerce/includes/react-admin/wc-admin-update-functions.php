@@ -45,6 +45,12 @@ function wc_admin_update_0201_order_status_index() {
 function wc_admin_update_0230_rename_gross_total() {
 	global $wpdb;
 
+	// The column might not exist, since this update function was moved from 230 to 400
+	// E.g. when updating from 250 to 800
+	if ( ! $wpdb->query( "SHOW COLUMNS FROM {$wpdb->prefix}wc_order_stats LIKE 'gross_total'" ) ) {
+		return;
+	}
+
 	// We first need to drop the new `total_sales` column, since dbDelta() will have created it.
 	$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats DROP COLUMN `total_sales`" );
 	// Then we can rename the existing `gross_total` column.
