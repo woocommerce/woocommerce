@@ -160,6 +160,7 @@ export class EditorUtils {
 	 * Toggles the global inserter.
 	 */
 	async toggleGlobalBlockInserter() {
+		( await this.page.locator( '' ).allInnerTexts() ).join( ',' );
 		// "Add block" selector is required to make sure performance comparison
 		// doesn't fail on older branches where we still had "Add block" as label.
 		await this.page.click(

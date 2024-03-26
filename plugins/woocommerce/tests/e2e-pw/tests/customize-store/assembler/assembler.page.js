@@ -33,4 +33,9 @@ export class AssemblerPage {
 		}
 		return this.page;
 	}
+
+	async getEditor() {
+		const assembler = await this.getAssembler();
+		return assembler.frameLocator( '[name="editor-canvas"]' );
+	}
 }
