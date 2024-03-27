@@ -135,6 +135,21 @@ const ExpressPaymentMethods = () => {
 	 * paymentMethodInterface itself also updates on most renders.
 	 */
 	const entries = Object.entries( paymentMethods );
+	let defaultListStyle = {};
+	let defaultStyle = {};
+	if ( entries.length === 2 ) {
+		defaultListStyle = {
+			width: '100%',
+			borderRadius: '20px',
+			overflow: 'hidden',
+		};
+		defaultStyle = {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			gap: '5px',
+		};
+	}
 	const content =
 		entries.length > 0 ? (
 			entries.map( ( [ id, paymentMethod ] ) => {
@@ -142,7 +157,11 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li key={ id } id={ `express-payment-method-${ id }` }>
+					<li
+						key={ id }
+						id={ `express-payment-method-${ id }` }
+						style={ defaultListStyle }
+					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),
@@ -162,7 +181,10 @@ const ExpressPaymentMethods = () => {
 
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ul className="wc-block-components-express-payment__event-buttons">
+			<ul
+				className="wc-block-components-express-payment__event-buttons"
+				style={ defaultStyle }
+			>
 				{ content }
 			</ul>
 		</PaymentMethodErrorBoundary>
