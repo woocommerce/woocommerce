@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Set 'live' as default when woocommerce_coming_soon is not available

@@ -35,7 +35,7 @@ const SiteVisibility = () => {
 
 	useEffect( () => {
 		if ( ! isLoading ) {
-			setComingSoon( initialComingSoon );
+			setComingSoon( initialComingSoon ? initialComingSoon : 'no' );
 			setStorePagesOnly( initialStorePagesOnly );
 			setPrivateLink( initialPrivateLink );
 		}
