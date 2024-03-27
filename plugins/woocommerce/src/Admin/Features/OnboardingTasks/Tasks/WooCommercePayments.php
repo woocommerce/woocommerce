@@ -103,8 +103,7 @@ class WooCommercePayments extends Task {
 	public function can_view() {
 		$payments = $this->task_list->get_task( 'payments' );
 
-		return ! $payments->is_complete() && // Do not re-display the task if the "add payments" task has already been completed.
-			self::is_installed() &&
+		return ! $payments->is_complete() && // Do not re-display the task if the general "Payments" task has already been completed.
 			self::is_supported();
 	}
 
@@ -175,7 +174,7 @@ class WooCommercePayments extends Task {
 	}
 
 	/**
-	 * Check if the store is in a supported country.
+	 * Check if the store is in a WooPayments supported country.
 	 *
 	 * @return bool
 	 */
