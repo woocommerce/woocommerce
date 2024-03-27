@@ -940,15 +940,71 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	/**
 	 * Test find_matching_product_variation.
 	 *
+	 * The following linter rule switches are required because the `return` in `$invalid_attributes_callback_strings` is wrongly being detected as breaking the declared return type here.
+	 * phpcs:disable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	 * @return void
+	 * phpcs:enable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	 */
 	public function test_find_matching_product_variation() {
+		// Create a fake logger to capture log entries.
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warnings = array();
+
+			public function warning( $message, $data = array() ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+
 		$product    = WC_Helper_Product::create_variation_product();
 		$data_store = WC_Data_Store::load( 'product' );
 		$children   = $product->get_children();
 
 		$match = $data_store->find_matching_product_variation( $product, array() );
 		$this->assertEquals( 0, $match );
+
+		/**
+		 * Simulate a filter that returns void for the product attributes.
+		 *
+		 * @param array      $attributes The product attributes.
+		 * @param WC_Product $product The product.
+		 * @return void
+		 */
+		$invalid_attributes_callback_void = function( $attributes, $product ) {};
+		add_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_void, 10, 2 );
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
+		// Check that the log entry was created.
+		$this->assertEquals( '`$product->get_attributes()` did not return an array in `find_matching_product_variation`', end( $fake_logger->warnings )['message'] );
+		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_void, 10 );
+
+		/**
+		 * Simulate a filter that returns an array of strings for the product attributes.
+		 *
+		 * @param array      $attributes The product attributes.
+		 * @param WC_Product $product The product.
+		 * @return array
+		 */
+		$invalid_attributes_callback_strings = function( $attributes, $product ) {
+			return array( 'invalid' );
+		};
+		add_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10, 2 );
+		$match = $data_store->find_matching_product_variation( $product, array() );
+		$this->assertEquals( 0, $match );
+		// Check that the log entry was created.
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `find_matching_product_variation`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
+		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
 
 		$match = $data_store->find_matching_product_variation(
 			$product,

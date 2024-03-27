@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+More defensive coding when using `$product->get_attributes()`.

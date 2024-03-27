@@ -8,6 +8,8 @@
  * @version  3.0.0
  */
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -151,7 +153,7 @@ class WC_Meta_Box_Product_Data {
 	 * @return bool
 	 */
 	private static function filter_variation_attributes( $attribute ) {
-		return true === $attribute->get_variation();
+		return is_a( $attribute, 'WC_Product_Attribute' ) && true === $attribute->get_variation();
 	}
 
 	/**
@@ -293,8 +295,13 @@ class WC_Meta_Box_Product_Data {
 	private static function prepare_set_attributes( $all_attributes, $key_prefix = 'attribute_', $index = null ) {
 		$attributes = array();
 
-		if ( $all_attributes ) {
+		if ( is_array( $all_attributes ) ) {
 			foreach ( $all_attributes as $attribute ) {
+				if ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
+					$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+					$logger->warning( sprintf( 'found a product attribute that is not a `WC_Product_Attribute` in `prepare_set_attributes`: "%s", type %s', var_export( $attribute, true ), gettype( $attribute ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+					continue;
+				}
 				if ( $attribute->get_variation() ) {
 					$attribute_key = sanitize_title( $attribute->get_name() );
 

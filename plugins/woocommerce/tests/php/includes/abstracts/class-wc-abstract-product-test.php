@@ -221,4 +221,74 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $product->is_on_sale() );
 		$this->assertEquals( $product->get_regular_price(), $product->get_price() );
 	}
+
+	/**
+	 * @testDox Test the `has_attributes` and `update_attributes` methods to ensure invalid attributes are handled gracefully.
+	 */
+	public function test_invalid_attributes() {
+		// `WC_Meta_Box_Product_Data` uses the `$post` and `$product_object` globals. phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		global $post, $product_object;
+		// Create a fake logger to capture log entries.
+		// phpcs:disable Squiz.Commenting
+		$fake_logger = new class() {
+			public $warnings = array();
+
+			public function warning( $message, $data = array() ) {
+				$this->warnings[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_get_logger' => function() use ( $fake_logger ) {
+					return $fake_logger;
+				},
+			)
+		);
+		$product = WC_Helper_Product::create_variation_product();
+		$product->save();
+
+		$this->assertTrue( $product->has_attributes() );
+
+		/**
+		 * Simulate a filter that returns an array of strings for the product attributes.
+		 *
+		 * @param array      $attributes The product attributes.
+		 * @param WC_Product $product The product.
+		 * @return array
+		 */
+		$invalid_attributes_callback_strings = function( $attributes, $product ) {
+			return array( 'invalid' );
+		};
+		add_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10, 2 );
+
+		$this->assertFalse( $product->has_attributes() );
+		// Check that the log entry was created.
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `has_attributes`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
+
+		// This triggers an error in `WC_Product_Data_Store_CPT::update_attributes` when not handled gracefully.
+		$product = WC_Helper_Product::create_variation_product();
+		$this->assertNotNull( $product );
+		$this->assertFalse( $product->has_attributes() );
+
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$post           = get_post( $product->get_id() );
+		$product_object = $product;
+		ob_start();
+		WC_Meta_Box_Product_Data::output_variations();
+		$ob_content = ob_get_contents();
+		ob_end_clean();
+		// We just need to make sure that the `update_attributes` method does not throw an error.
+		$this->assertEquals( '<div id="variable_product_options"', substr( $ob_content, 0, 34 ) );
+
+		$_POST['variable_post_id'] = array( wp_list_pluck( $product->get_available_variations(), 'variation_id' ) );
+		WC_Meta_Box_Product_Data::save_variations( $product->get_id(), get_post( $product->get_id() ) );
+		// Check that the log entry was created.
+		$this->assertEquals( 'found a product attribute that is not a `WC_Product_Attribute` in `prepare_set_attributes`: "\'invalid\'", type string', end( $fake_logger->warnings )['message'] );
+
+		remove_filter( 'woocommerce_product_get_attributes', $invalid_attributes_callback_strings, 10 );
+	}
 }
