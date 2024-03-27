@@ -1007,11 +1007,11 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = substr_replace( $postcode, ' ', 4, 0 );
 			break;
 		case 'LV':
-			$postcode = preg_replace( '/^(LV)?-?(.+)$/', 'LV-${2}', $postcode );
+			$postcode = preg_replace( '/^(LV)?-?(\d+)$/', 'LV-${2}', $postcode );
 			break;
 		case 'CZ':
 		case 'SK':
-			$postcode = ltrim( preg_replace( "/^($country)?-?(.+)$/", '${1}-${2}', $postcode ), '-' );
+			$postcode = ltrim( preg_replace( "/^($country)?-?(\d+)$/", '${1}-${2}', $postcode ), '-' );
 			$postcode = substr_replace( $postcode, ' ', - 2, 0 );
 			break;
 		case 'DK':
