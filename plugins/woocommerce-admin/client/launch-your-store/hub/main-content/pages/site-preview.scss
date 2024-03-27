@@ -14,19 +14,17 @@
 		overflow-y: auto;
 	}
 
-	.launch-store-site-preview-site_spinner {
+	.launch-store-site-preview-site__loading-overlay {
+		border-radius: 20px;
 		position: absolute;
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		height: 100%;
-		width: 100%;
-	}
-
-	&.is-loading {
-		.launch-store-site__preview-site-iframe {
-			@include placeholder();
-		}
+		z-index: 1;
+		background-color: #fff;
+		opacity: 0.9;
+		height: calc(100% - 32px);
+		width: calc(100% - 16px);
 	}
 
 	@media screen and (max-width: $break-small) {
