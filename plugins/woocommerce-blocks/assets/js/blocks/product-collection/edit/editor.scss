@@ -96,3 +96,13 @@ $max-button-width: calc((100% - #{ $total-gap-width }) / #{ $max-columns });
 		text-align: end;
 	}
 }
+
+.editor-styles-wrapper .wp-block-woocommerce-product-collection .wp-block-post-title {
+	a:where(:not(.wp-element-button)) {
+		&:hover {
+			text-decoration: none;
+		}
+
+		cursor: default;
+	}
+}
