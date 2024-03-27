@@ -14,6 +14,7 @@ import { sanitizeHTML } from '../../utils/sanitize-html';
 export interface LabelProps {
 	id?: string;
 	label: string;
+	labelId?: string;
 	required?: boolean;
 	note?: string;
 	tooltip?: string;
@@ -23,14 +24,13 @@ export interface LabelProps {
 export const Label: React.FC< LabelProps > = ( {
 	id,
 	label,
+	labelId,
 	required,
 	tooltip,
 	note,
 	onClick,
 } ) => {
 	let labelElement: JSX.Element | string = label;
-
-	const labelId = id ? `${ id }__label` : undefined;
 
 	if ( required ) {
 		if ( note?.length ) {

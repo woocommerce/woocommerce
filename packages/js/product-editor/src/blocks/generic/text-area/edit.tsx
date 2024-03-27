@@ -114,6 +114,7 @@ export function TextAreaBlockEdit( {
 					<Label
 						id={ labelWrapperId }
 						label={ label || '' }
+						labelId={ labelId }
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
