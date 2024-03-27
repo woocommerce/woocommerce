@@ -82,6 +82,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Error message.
+	 *
+	 * @var string
+	 */
+	protected $error_message;
+
+	/**
 	 * Sorting.
 	 *
 	 * Used by `get_coupons_from_cart` to sort coupons.

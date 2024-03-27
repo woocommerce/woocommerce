@@ -129,7 +129,7 @@
 	</rule>
 
 	<!-- Temporary -->
-	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
+	<rule ref="Universal.Arrays.DisallowShortArraySyntax.Found">
 		<exclude-pattern>src/Blocks/</exclude-pattern>
 		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>
