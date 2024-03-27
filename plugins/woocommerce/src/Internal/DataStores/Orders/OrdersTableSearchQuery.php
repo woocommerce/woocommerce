@@ -52,7 +52,7 @@ class OrdersTableSearchQuery {
 	 * @return array Array of search filters.
 	 */
 	private function sanitize_search_filters( string $search_filter ) : array {
-		$available_filters = array(
+		$core_filters = array(
 			'order_id',
 			'customer_email',
 			'customers', // customers also searches in meta.
@@ -60,9 +60,9 @@ class OrdersTableSearchQuery {
 		);
 
 		if ( 'all' === $search_filter || '' === $search_filter ) {
-			return $available_filters;
+			return $core_filters;
 		} else {
-			return array_intersect( $available_filters, array( $search_filter ) );
+			return array( $search_filter );
 		}
 	}
 
