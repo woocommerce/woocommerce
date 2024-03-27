@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	Fragment,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Card, CardFooter, CardBody } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
@@ -42,9 +46,14 @@ export const WCPayBannerText: React.VFC< {
 				lineHeight="28px"
 				padding="0 20px 0 0"
 			>
-				{ __(
-					'Payments made simple, designed exclusively for WooCommerce stores.',
-					'woocommerce'
+				{ createInterpolateElement(
+					__(
+						'Payments made simple, designed exclusively<br/>for WooCommerce stores.',
+						'woocommerce'
+					),
+					{
+						br: <br />,
+					}
 				) }
 			</Text>
 			{ actionButton }
