@@ -52,8 +52,7 @@ export function TextAreaBlockEdit( {
 		'wp-block-woocommerce-product-content-field__content'
 	);
 
-	const labelWrapperId = contentId.toString() + '__label-wrapper';
-	const labelId = labelWrapperId + '__label';
+	const labelId = contentId.toString() + '__label';
 
 	// `property` attribute is required.
 	if ( ! property ) {
@@ -117,7 +116,6 @@ export function TextAreaBlockEdit( {
 				id={ contentId.toString() }
 				label={
 					<Label
-						id={ labelWrapperId }
 						label={ label || '' }
 						labelId={ labelId }
 						required={ required }

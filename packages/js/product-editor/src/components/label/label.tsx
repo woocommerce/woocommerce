@@ -12,7 +12,6 @@ import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export interface LabelProps {
-	id?: string;
 	label: string;
 	labelId?: string;
 	required?: boolean;
@@ -22,7 +21,6 @@ export interface LabelProps {
 }
 
 export const Label: React.FC< LabelProps > = ( {
-	id,
 	label,
 	labelId,
 	required,
@@ -80,7 +78,7 @@ export const Label: React.FC< LabelProps > = ( {
 	}
 
 	return (
-		<div id={ id } className="woocommerce-product-form-label__label">
+		<div className="woocommerce-product-form-label__label">
 			{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
 			<span id={ labelId } onClick={ onClick }>
 				{ labelElement }
