@@ -147,6 +147,26 @@ if ( isExperimentalBuild() ) {
 					),
 				},
 			},
+			{
+				name: 'product-filter-taxonomy',
+				title: __( 'Product Filter: Taxonomy (Beta)', 'woocommerce' ),
+				description: __(
+					'Enable customers to filter the product collection by selecting one or more taxonomy, such as category.',
+					'woocommerce'
+				),
+				attributes: {
+					filterType: 'taxonomy-filter',
+					heading: __( 'Filter by Taxonomy', 'woocommerce' ),
+				},
+				icon: {
+					src: (
+						<Icon
+							icon={ category }
+							className="wc-block-editor-components-block-icon"
+						/>
+					),
+				},
+			},
 		],
 		transforms: {
 			from: [

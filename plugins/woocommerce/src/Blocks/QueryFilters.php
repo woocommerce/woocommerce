@@ -15,6 +15,57 @@ final class QueryFilters {
 	 */
 	public function init() {
 		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
+		add_filter( 'query_vars', function( $query_vars ) {
+			$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ), 'public' => true ) );
+			$product_taxonomies = array_filter(
+				$product_taxonomies,
+				function( $item ) {
+					// We can use better check to filter product attribute out. This is just for demo.
+					return strpos( $item, 'pa_' ) !== 0;
+				}
+			);
+			foreach ($product_taxonomies as $taxonomy ) {
+				$query_vars[] = "filter_{$taxonomy}";
+			}
+			return $query_vars;
+		} );
+		add_filter( 'woocommerce_product_query_tax_query', function( $tax_query ) {
+			$chosen_terms = array();
+			if ( ! empty( $_GET ) ) {
+				foreach ( $_GET as $key => $value ) {
+					if ( 0 === strpos( $key, 'filter_' ) ) {
+						$taxonomy     = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
+						$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();
+
+						if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) ) {
+							continue;
+						}
+
+						$query_type                              = ! empty( $_GET[ 'query_type_' . $taxonomy ] ) && in_array( $_GET[ 'query_type_' . $taxonomy ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $_GET[ 'query_type_' . $taxonomy ] ) ) : '';
+						$chosen_terms[ $taxonomy ]['terms']      = array_map( 'sanitize_title', $filter_terms ); // Ensures correct encoding.
+						$chosen_terms[ $taxonomy ]['query_type'] = $query_type ? $query_type : 'or';
+					}
+				}
+			}
+
+			$_tax_query = array();
+
+			if( count( $chosen_terms ) > 1 ) {
+				$_tax_query['relation'] = 'AND';
+			}
+			foreach( $chosen_terms as $taxonomy => $data ) {
+				$_tax_query[] = array(
+					'taxonomy'         => $taxonomy,
+					'field'            => 'slug',
+					'terms'            => $data['terms'],
+					'operator'         => 'and' === $data['query_type'] ? 'AND' : 'IN',
+					'include_children' => false,
+				);
+			}
+			$tax_query[] = $_tax_query;
+
+			return $tax_query;
+		} );
 	}
 
 	/**
@@ -194,6 +245,46 @@ final class QueryFilters {
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
 
 		return array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+	}
+
+	/**
+	 * Get taxonomy counts for the current products.
+	 *
+	 * @param array  $query_vars The WP_Query arguments.
+	 * @param string $taxonomy_to_count   Taxonomy name.
+	 * @return array termId=>count pairs.
+	 */
+	public function get_taxonomy_counts( $query_vars, $taxonomy_to_count ) {
+		global $wpdb;
+
+		add_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10, 2 );
+		add_filter( 'posts_pre_query', '__return_empty_array' );
+
+		$query_vars['no_found_rows']  = true;
+		$query_vars['posts_per_page'] = -1;
+		$query_vars['fields']         = 'ids';
+		$query                        = new \WP_Query();
+
+		$query->query( $query_vars );
+		$product_query_sql = $query->request;
+
+		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
+		remove_filter( 'posts_pre_query', '__return_empty_array' );
+
+		$taxonomies_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $taxonomy_to_count ) ) . '")';
+		$attribute_count_sql     = "
+			SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, term_taxonomy.term_taxonomy_id  as term_count_id
+			FROM {$wpdb->term_relationships} AS term_relationships
+			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+			WHERE term_relationships.object_id IN ( {$product_query_sql} )
+			{$taxonomies_to_count_sql}
+			GROUP BY term_taxonomy.term_taxonomy_id
+		";
+
+		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
+		$results = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
+
+		return $results;
 	}
 
 	/**
