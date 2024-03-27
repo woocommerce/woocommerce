@@ -11,6 +11,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
+import { useCopyToClipboard } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -47,25 +48,21 @@ const SiteVisibility = () => {
 		);
 	};
 
-	const copyToClipboard = ( textToCopy ) => {
-		if ( window?.navigator.clipboard && window.isSecureContext ) {
-			window?.navigator.clipboard.writeText( textToCopy );
-		} else {
-			const textArea = document.createElement( 'textarea' );
-			textArea.value = textToCopy;
-			textArea.style.position = 'absolute';
-			textArea.style.left = '-999999px';
-			document.body.prepend( textArea );
-			textArea.select();
-			document.execCommand( 'copy' );
-		}
-	};
+	const ref = useCopyToClipboard( getPrivateLink, () => {
+		setCopyLinkText( copied );
+		setTimeout( () => {
+			setCopyLinkText( copyLink );
+		}, 2000 );
+	} );
 
 	useEffect( () => {
 		if ( ! isLoading ) {
 			setComingSoon( initialComingSoon );
 			setStorePagesOnly( initialStorePagesOnly );
 			setPrivateLink( initialPrivateLink );
+			document
+				.querySelectorAll( '.site-visibility-settings-slotfill label' )
+				.forEach( ( label ) => label.removeAttribute( 'for' ) );
 		}
 	}, [ isLoading ] );
 
@@ -162,18 +159,7 @@ const SiteVisibility = () => {
 								{ privateLink === 'yes' && (
 									<div className="site-visibility-settings-slotfill-private-link">
 										{ getPrivateLink() }
-										<Button
-											onClick={ () => {
-												copyToClipboard(
-													getPrivateLink()
-												);
-												setCopyLinkText( copied );
-												setTimeout( () => {
-													setCopyLinkText( copyLink );
-												}, 2000 );
-											} }
-											variant="link"
-										>
+										<Button ref={ ref } variant="link">
 											{ copyLinkText }
 										</Button>
 									</div>
