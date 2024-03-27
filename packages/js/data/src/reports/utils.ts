@@ -628,3 +628,24 @@ export function getReportTableData< T extends ReportItemsEndpoint >(
 
 	return { ...response, items };
 }
+
+export function isLeapYear( year: number ) {
+	return ( year % 4 === 0 && year % 100 !== 0 ) || year % 400 === 0;
+}
+
+export function containsLeapYear( startDate: string, endDate: string ) {
+	// Parse the input dates to get the years
+	const startYear = new Date( startDate ).getFullYear();
+	const endYear = new Date( endDate ).getFullYear();
+
+	// Check each year in the range
+	for ( let year = startYear; year <= endYear; year++ ) {
+		if ( isLeapYear( year ) ) {
+			console.log( `${ year } is a leap year.` );
+			return true; // Found a leap year, no need to continue
+		}
+	}
+
+	console.log( 'No leap years found.' );
+	return false; // No leap years in the range
+}
