@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { useStoreCart, useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
@@ -26,11 +26,19 @@ import './style.scss';
 const reloadPage = () => void window.location.reload( true );
 
 const Cart = ( { children, attributes = {} } ) => {
-	const { cartIsLoading } = useStoreCart();
+	const cart = useStoreCart();
 	const { hasDarkControls } = attributes;
 
+	const { dispatchStoreEvent } = useStoreEvents();
+
+	// Ignore changes to dispatchStoreEvent callback so this is ran on first mount only.
+	useEffect( () => {
+		dispatchStoreEvent( 'cart-render', { cart } );
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
 	return (
-		<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
+		<LoadingMask showSpinner={ true } isLoading={ cart.cartIsLoading }>
 			<CartBlockContext.Provider
 				value={ {
 					hasDarkControls,

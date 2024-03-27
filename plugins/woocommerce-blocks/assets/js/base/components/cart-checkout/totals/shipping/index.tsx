@@ -4,7 +4,7 @@
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { useStoreCart, useStoreEvents } from '@woocommerce/base-context/hooks';
 import { TotalsItem } from '@woocommerce/blocks-components';
 import type { Currency } from '@woocommerce/types';
 import { ShippingVia } from '@woocommerce/base-components/cart-checkout/totals/shipping/shipping-via';
@@ -56,6 +56,7 @@ export const TotalsShipping = ( {
 		shippingRates,
 		isLoadingRates,
 	} = useStoreCart();
+	const { dispatchStoreEvent } = useStoreEvents();
 	const totalShippingValue = getTotalShippingValue( values );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
 	const showShippingCalculatorForm =
@@ -137,6 +138,7 @@ export const TotalsShipping = ( {
 			{ showShippingCalculatorForm && (
 				<ShippingCalculator
 					onUpdate={ () => {
+						dispatchStoreEvent( 'calculate-shipping' );
 						setIsShippingCalculatorOpen( false );
 					} }
 					onCancel={ () => {
