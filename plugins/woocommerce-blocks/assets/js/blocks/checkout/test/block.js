@@ -165,10 +165,12 @@ describe( 'Testing cart', () => {
 	} );
 
 	it( 'Ensures checkbox labels have unique IDs', async () => {
-		// Set required settings
-		allSettings.checkoutAllowsGuest = true;
-		allSettings.checkoutAllowsSignup = true;
-		dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 0 );
+		await act( async () => {
+			// Set required settings
+			allSettings.checkoutAllowsGuest = true;
+			allSettings.checkoutAllowsSignup = true;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 0 );
+		} );
 
 		// Render the CheckoutBlock
 		render( <CheckoutBlock /> );
@@ -186,9 +188,11 @@ describe( 'Testing cart', () => {
 		const uniqueIds = new Set( ids );
 		expect( uniqueIds.size ).toBe( ids.length );
 
-		// Restore initial settings
-		allSettings.checkoutAllowsGuest = undefined;
-		allSettings.checkoutAllowsSignup = undefined;
-		dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		await act( async () => {
+			// Restore initial settings
+			allSettings.checkoutAllowsGuest = undefined;
+			allSettings.checkoutAllowsSignup = undefined;
+			dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 1 );
+		} );
 	} );
 } );
