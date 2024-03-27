@@ -68,12 +68,12 @@ mockedUseSelect.mockImplementation(
 										gateway:
 											'can-pay-true-test-payment-method',
 										last4: '1001',
-										isCoBranded: true,
+										is_co_branded: true,
 										networks: [
 											'Visa',
 											'Cartes Bancaires',
 										],
-										preferredNetwork: 'Cartes Bancaires',
+										preferred_network: 'Cartes Bancaires',
 									},
 								},
 							],
