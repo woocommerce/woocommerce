@@ -71,6 +71,7 @@ class WC_Validation {
 				break;
 			case 'ES':
 			case 'FI':
+			case 'EE':			
 			case 'FR':
 			case 'IT':
 				$valid = (bool) preg_match( '/^([0-9]{5})$/i', $postcode );
