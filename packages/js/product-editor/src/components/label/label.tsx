@@ -17,6 +17,7 @@ export interface LabelProps {
 	required?: boolean;
 	note?: string;
 	tooltip?: string;
+	onClick?: ( event: React.MouseEvent ) => void;
 }
 
 export const Label: React.FC< LabelProps > = ( {
@@ -25,8 +26,11 @@ export const Label: React.FC< LabelProps > = ( {
 	required,
 	tooltip,
 	note,
+	onClick,
 } ) => {
 	let labelElement: JSX.Element | string = label;
+
+	const labelId = id ? `${ id }__label` : undefined;
 
 	if ( required ) {
 		if ( note?.length ) {
@@ -77,7 +81,10 @@ export const Label: React.FC< LabelProps > = ( {
 
 	return (
 		<div id={ id } className="woocommerce-product-form-label__label">
-			{ labelElement }
+			{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
+			<span id={ labelId } onClick={ onClick }>
+				{ labelElement }
+			</span>
 
 			{ tooltip && (
 				<Tooltip

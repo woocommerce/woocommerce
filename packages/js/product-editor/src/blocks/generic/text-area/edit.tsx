@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { LegacyRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement } from '@wordpress/element';
+import { createElement, useRef } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
@@ -51,7 +52,8 @@ export function TextAreaBlockEdit( {
 		'wp-block-woocommerce-product-content-field__content'
 	);
 
-	const labelId = contentId.toString() + '__label';
+	const labelWrapperId = contentId.toString() + '__label-wrapper';
+	const labelId = labelWrapperId + '__label';
 
 	// `property` attribute is required.
 	if ( ! property ) {
@@ -79,6 +81,12 @@ export function TextAreaBlockEdit( {
 		setAttributes( { direction: value } );
 	}
 
+	const richTextRef = useRef< HTMLParagraphElement >( null );
+
+	function focusRichText() {
+		richTextRef.current?.focus();
+	}
+
 	const blockControlsBlockProps = { group: 'block' };
 
 	const isRichTextMode = mode === 'rich-text';
@@ -104,17 +112,21 @@ export function TextAreaBlockEdit( {
 				id={ contentId.toString() }
 				label={
 					<Label
-						id={ labelId }
+						id={ labelWrapperId }
 						label={ label || '' }
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore onClick exists on Label
+						onClick={ isRichTextMode ? focusRichText : undefined }
 					/>
 				}
 				help={ help }
 			>
 				{ isRichTextMode && (
 					<RichText
+						ref={ richTextRef as unknown as LegacyRef< 'p' > }
 						id={ contentId.toString() }
 						aria-labelledby={ labelId }
 						identifier="content"
