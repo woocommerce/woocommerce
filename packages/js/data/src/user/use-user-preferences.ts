@@ -158,6 +158,8 @@ export const useUserPreferences = () => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
 			// Polyfill saveUser() - wrapper of saveEntityRecord.
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore
 			saveUser = async ( userToSave: {
 				id: number;
 				woocommerce_meta: { [ key: string ]: boolean };
