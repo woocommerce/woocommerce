@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Improve handling of express checkout: Now, error messages for specific express payment methods won't affect the functionality of others.

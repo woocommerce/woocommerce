@@ -142,16 +142,21 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li key={ id } id={ `express-payment-method-${ id }` }>
-						{ cloneElement( expressPaymentMethod, {
-							...paymentMethodInterface,
-							onClick: onExpressPaymentClick( id ),
-							onClose: onExpressPaymentClose,
-							onError: onExpressPaymentError,
-							setExpressPaymentError:
-								deprecatedSetExpressPaymentError,
-						} ) }
-					</li>
+					<PaymentMethodErrorBoundary
+						key={ id }
+						isEditor={ isEditor }
+					>
+						<li key={ id } id={ `express-payment-method-${ id }` }>
+							{ cloneElement( expressPaymentMethod, {
+								...paymentMethodInterface,
+								onClick: onExpressPaymentClick( id ),
+								onClose: onExpressPaymentClose,
+								onError: onExpressPaymentError,
+								setExpressPaymentError:
+									deprecatedSetExpressPaymentError,
+							} ) }
+						</li>
+					</PaymentMethodErrorBoundary>
 				) : null;
 			} )
 		) : (
@@ -161,11 +166,9 @@ const ExpressPaymentMethods = () => {
 		);
 
 	return (
-		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ul className="wc-block-components-express-payment__event-buttons">
-				{ content }
-			</ul>
-		</PaymentMethodErrorBoundary>
+		<ul className="wc-block-components-express-payment__event-buttons">
+			{ content }
+		</ul>
 	);
 };
 

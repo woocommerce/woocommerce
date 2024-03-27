@@ -85,20 +85,23 @@ const StoreNoticesContainer = ( {
 	if ( suppressNotices ) {
 		return null;
 	}
+	const snackbarNotices: NoticeType[] = [];
+	const storeNotices: NoticeType[] = [];
+
+	notices.forEach( ( notice ) => {
+		if ( notice.type === 'snackbar' ) {
+			snackbarNotices.push( notice );
+		} else {
+			storeNotices.push( notice );
+		}
+	} );
 
 	return (
 		<>
-			<StoreNotices
-				className={ className }
-				notices={ notices.filter(
-					( notice ) => notice.type === 'default'
-				) }
-			/>
+			<StoreNotices className={ className } notices={ storeNotices } />
 			<SnackbarNotices
 				className={ className }
-				notices={ notices.filter(
-					( notice ) => notice.type === 'snackbar'
-				) }
+				notices={ snackbarNotices }
 			/>
 		</>
 	);
