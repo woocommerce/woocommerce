@@ -172,6 +172,10 @@ const Block = ( {
 		'shippingCostRequiresAddress',
 		false
 	);
+	const localPickupTextFromSettings = getSetting< string >(
+		'localPickupText',
+		localPickupText || defaultLocalPickupText
+	);
 
 	return (
 		<RadioGroup
@@ -197,7 +201,7 @@ const Block = ( {
 				multiple={ shippingRates.length > 1 }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
-				toggleText={ localPickupText || defaultLocalPickupText }
+				toggleText={ localPickupTextFromSettings }
 			/>
 		</RadioGroup>
 	);
