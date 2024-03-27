@@ -87,7 +87,7 @@ const getCoreConfig = ( options = {} ) => {
 			path: path.resolve( __dirname, '../build/' ),
 			library: [ 'wc', '[name]' ],
 			libraryTarget: 'this',
-			uniqueName: 'webpackWcBlocksJsonp',
+			uniqueName: 'webpackWcBlocksCoreJsonp',
 		},
 		module: {
 			rules: [
@@ -114,7 +114,9 @@ const getCoreConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Core' } ),
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Core',
+			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
 			new CreateFileWebpack( {
 				path: './',
@@ -195,7 +197,7 @@ const getMainConfig = ( options = {} ) => {
 			filename: `[name]${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
 			libraryTarget: 'this',
-			uniqueName: 'webpackWcBlocksJsonp',
+			uniqueName: 'webpackWcBlocksMainJsonp',
 		},
 		module: {
 			rules: [
@@ -262,7 +264,9 @@ const getMainConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Main' } ),
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Main',
+			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
 			new CopyWebpackPlugin( {
 				patterns: [
@@ -326,8 +330,22 @@ const getFrontConfig = ( options = {} ) => {
 			// translations which we must avoid.
 			// @see https://github.com/Automattic/jetpack/pull/20926
 			chunkFilename: `[name]-frontend${ fileSuffix }.js?ver=[contenthash]`,
-			filename: `[name]-frontend${ fileSuffix }.js`,
-			uniqueName: 'webpackWcBlocksJsonp',
+			filename: ( pathData ) => {
+				// blocksCheckout and blocksComponents were moved from core bundle,
+				// retain their filenames to avoid breaking translations.
+				if (
+					pathData.chunk.name === 'blocksCheckout' ||
+					pathData.chunk.name === 'blocksComponents'
+				) {
+					return `${ paramCase(
+						pathData.chunk.name
+					) }${ fileSuffix }.js`;
+				}
+
+				return `[name]-frontend${ fileSuffix }.js`;
+			},
+			uniqueName: 'webpackWcBlocksFrontendJsonp',
+			library: [ 'wc', '[name]' ],
 		},
 		module: {
 			rules: [
@@ -378,20 +396,17 @@ const getFrontConfig = ( options = {} ) => {
 				minSize: 200000,
 				automaticNameDelimiter: '--',
 				cacheGroups: {
-					...getCacheGroups(),
-					'base-components': {
-						test: /\/assets\/js\/base\/components\//,
-						name( module, chunks, cacheGroupKey ) {
-							const moduleFileName = module
-								.identifier()
-								.split( '/' )
-								.reduceRight( ( item ) => item );
-							const allChunksNames = chunks
-								.map( ( item ) => item.name )
-								.join( '~' );
-							return `${ cacheGroupKey }-${ allChunksNames }-${ moduleFileName }`;
+					commons: {
+						test: /[\\/]node_modules[\\/]/,
+						name: 'wc-blocks-vendors',
+						chunks: ( chunk ) => {
+							return (
+								chunk.name !== 'product-button-interactivity'
+							);
 						},
+						enforce: true,
 					},
+					...getCacheGroups(),
 				},
 			},
 			minimizer: [
@@ -413,7 +428,9 @@ const getFrontConfig = ( options = {} ) => {
 			],
 		},
 		plugins: [
-			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Frontend' } ),
+			...getSharedPlugins( {
+				bundleAnalyzerReportTitle: 'Frontend',
+			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
 		],
 		resolve: {
@@ -767,7 +784,7 @@ const getStylingConfig = ( options = {} ) => {
 			filename: `[name]-style${ fileSuffix }.js`,
 			library: [ 'wc', 'blocks', '[name]' ],
 			libraryTarget: 'this',
-			uniqueName: 'webpackWcBlocksJsonp',
+			uniqueName: 'webpackWcBlocksStylingJsonp',
 		},
 		optimization: {
 			splitChunks: {
