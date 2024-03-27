@@ -129,12 +129,12 @@ test.describe( 'Assembler -> Footers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const style = await page
+		const footerHTML = await page
 			.locator( 'footer' )
 			.innerHTML();
 
 		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( style ).toMatchSnapshot( {
+		expect( footerHTML ).toMatchSnapshot( {
 			name: 'cys-selected-footer',
 		} );
 	} );
