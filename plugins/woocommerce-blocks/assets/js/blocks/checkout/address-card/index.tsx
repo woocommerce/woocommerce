@@ -2,15 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES, ALLOWED_STATES } from '@woocommerce/block-settings';
 import {
 	type CartShippingAddress,
 	type CartBillingAddress,
-	isObject,
-	isString,
+	objectHasProp,
 } from '@woocommerce/types';
-import { FormFieldsConfig } from '@woocommerce/settings';
-import { decodeEntities } from '@wordpress/html-entities';
+import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
+import { formatAddress } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -28,33 +26,28 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const formattedCountry = isString( ALLOWED_COUNTRIES[ address.country ] )
-		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
-		: '';
+	const addressFormats = getSetting< Record< string, string > >(
+		'addressFormats',
+		{}
+	);
 
-	const formattedState =
-		isObject( ALLOWED_STATES[ address.country ] ) &&
-		isString( ALLOWED_STATES[ address.country ][ address.state ] )
-			? decodeEntities(
-					ALLOWED_STATES[ address.country ][ address.state ]
-			  )
-			: address.state;
+	let formatToUse = addressFormats?.default || '';
+	if ( objectHasProp( addressFormats, address?.country ) ) {
+		formatToUse = addressFormats[ address.country ];
+	}
+	const { name: formattedName, address: formattedAddress } = formatAddress(
+		address,
+		formatToUse
+	);
 
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span className="wc-block-components-address-card__address-section">
-					{ address.first_name + ' ' + address.last_name }
+					{ formattedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
-					{ [
-						address.address_1,
-						! fieldConfig.address_2.hidden && address.address_2,
-						address.city,
-						formattedState,
-						address.postcode,
-						formattedCountry,
-					]
+					{ formattedAddress
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
 							<span key={ `address-` + index }>{ field }</span>

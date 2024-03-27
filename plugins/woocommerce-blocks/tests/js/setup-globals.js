@@ -4,6 +4,12 @@ require( '@wordpress/data' );
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
+	addressFormats: {
+		default:
+			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
+		JP: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
+		CA: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
+	},
 	shippingMethodsExist: true,
 	currency: {
 		code: 'USD',
@@ -55,6 +61,27 @@ global.wcSettings = {
 			locale: {
 				postcode: { label: 'Postal code' },
 				state: { label: 'Province' },
+			},
+		},
+		JP: {
+			allowBilling: true,
+			allowShipping: true,
+			states: {
+				JP28: 'Hyogo',
+			},
+			locale: {
+				last_name: { priority: 10 },
+				first_name: { priority: 20 },
+				postcode: {
+					priority: 65,
+				},
+				state: {
+					label: 'Prefecture',
+					priority: 66,
+				},
+				city: { priority: 67 },
+				address_1: { priority: 68 },
+				address_2: { priority: 69 },
 			},
 		},
 		GB: {
