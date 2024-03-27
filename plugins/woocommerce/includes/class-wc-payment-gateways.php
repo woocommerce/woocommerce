@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use WooCommerce\Gateways\WC_Payment_Method_Type_Duplicates_Finder;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -333,6 +334,25 @@ All at %6$s
 		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
 	}
 
+	/**
+	 * Find duplicates across all enabled gateways.
+	 *
+	 * @return array Array of duplicate gateway names.
+	 */
+	public function find_duplicate_enabled_gateways() {	
+		$enabled_gateways = $this->get_available_payment_gateways();
+
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-detector.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-gateway-duplicates-finder-static-list.php';
+		require_once WC_ABSPATH . 'includes/gateways/class-wc-payment-method-type-duplicates-finder.php';
+
+		// Currently using the improved version to detect duplicates based on the payment method type from the gateway class.
+		// Feel free to inject WC_Gateway_Duplicates_Finder_Static_List instead to test the static list implementation.
+		$duplicates_finder = new WC_Gateway_Duplicates_Service( new WC_Payment_Method_Type_Duplicates_Finder() );
+		$duplicates = $duplicates_finder->detect_duplicates($enabled_gateways);
+		return $duplicates;
+	}
+	
 	/**
 	 * Callback for array filter. Returns true if gateway is of correct type.
 	 *
