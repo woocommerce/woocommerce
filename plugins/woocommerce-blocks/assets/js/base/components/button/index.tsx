@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { Button as AriakitButton } from '@ariakit/react';
+import { forwardRef } from '@wordpress/element';
 import { Button as WPButton } from 'wordpress-components';
 import type { Button as WPButtonType } from '@wordpress/components';
 import classNames from 'classnames';
@@ -66,5 +68,44 @@ const Button = ( {
 		</WPButton>
 	);
 };
+
+const ButtonV2 = forwardRef( ( props: ButtonProps, ref ) => {
+	const {
+		className,
+		showSpinner = false,
+		children,
+		variant = 'contained',
+		...rest
+	} = props;
+	const buttonClassName = classNames(
+		'wc-block-components-button',
+		'wp-element-button',
+		className,
+		variant,
+		{
+			'wc-block-components-button--loading': showSpinner,
+		}
+	);
+
+	// if ( rest.href ) {
+	// 	return (
+	// 		<AriakitButton render= className={ buttonClassName } { ...rest }>
+	// 			{ showSpinner && <Spinner /> }
+	// 			<span className="wc-block-components-button__text">
+	// 				{ children }
+	// 			</span>
+	// 		</AriakitButton>
+	// 	);
+	// }
+
+	return (
+		<AriakitButton ref={ ref } className={ buttonClassName } { ...rest }>
+			{ showSpinner && <Spinner /> }
+			<span className="wc-block-components-button__text">
+				{ children }
+			</span>
+		</AriakitButton>
+	);
+} );
 
 export default Button;
