@@ -24,27 +24,25 @@ const PlaceOrderButton = ( {
 	} = useCheckoutSubmit();
 
 	return (
-		<>
-			<Button
-				className={ classnames(
-					'wc-block-components-checkout-place-order-button',
-					{
-						'wc-block-components-checkout-place-order-button--full-width':
-							fullWidth,
-					}
-				) }
-				onClick={ onSubmit }
-				disabled={
-					isCalculating ||
-					isDisabled ||
-					waitingForProcessing ||
-					waitingForRedirect
+		<Button
+			className={ classnames(
+				'wc-block-components-checkout-place-order-button',
+				{
+					'wc-block-components-checkout-place-order-button--full-width':
+						fullWidth,
 				}
-				showSpinner={ waitingForProcessing }
-			>
-				{ waitingForRedirect ? <Icon icon={ check } /> : label }
-			</Button>
-		</>
+			) }
+			onClick={ onSubmit }
+			disabled={
+				isCalculating ||
+				isDisabled ||
+				waitingForProcessing ||
+				waitingForRedirect
+			}
+			showSpinner={ waitingForProcessing }
+		>
+			{ waitingForRedirect ? <Icon icon={ check } /> : label }
+		</Button>
 	);
 };
 
