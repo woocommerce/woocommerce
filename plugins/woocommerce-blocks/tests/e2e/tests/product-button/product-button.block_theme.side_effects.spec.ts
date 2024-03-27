@@ -13,6 +13,9 @@ import {
 import { blockData, handleAddToCartAjaxSetting } from './utils';
 
 test.describe( `${ blockData.name } Block`, () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+	} );
 	test.beforeEach( async ( { frontendUtils, storeApiUtils } ) => {
 		await storeApiUtils.cleanCart();
 		await frontendUtils.goToShop();
@@ -60,6 +63,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			state: 'detached',
 		} );
 		await block.click();
+		await expect( block.locator( 'loading' ) ).toBeHidden();
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
 		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 

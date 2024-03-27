@@ -143,8 +143,8 @@ const test = base.extend<
 		};
 	}
 >( {
-	admin: async ( { page, pageUtils }, use ) => {
-		await use( new Admin( { page, pageUtils } ) );
+	admin: async ( { page, pageUtils, editor }, use ) => {
+		await use( new Admin( { page, pageUtils, editor } ) );
 	},
 	editor: async ( { page }, use ) => {
 		await use( new Editor( { page } ) );
@@ -158,8 +158,6 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
-
-		await page.close();
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
