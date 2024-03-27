@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class ProductCategoryTemplate extends AbstractTemplate {
+class ProductCategoryTemplate extends AbstractTemplateWithFallback {
 
 	/**
 	 * The slug of the template.
@@ -29,6 +29,7 @@ class ProductCategoryTemplate extends AbstractTemplate {
 	 * Initialization method.
 	 */
 	public function init() {
+		parent::init();
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
 	}
 
