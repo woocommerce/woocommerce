@@ -258,7 +258,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
 	test.beforeEach(
-		async ( { editor, frontendUtils, admin, editorUtils } ) => {
+		async ( { editor, frontendUtils, admin, editorUtils, page } ) => {
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//page-checkout',
 				postType: 'wp_template',
@@ -270,7 +270,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 					'  [data-type="woocommerce/checkout-shipping-address-block"]'
 			);
 
-			const checkbox = editor.page.getByRole( 'checkbox', {
+			const checkbox = page.getByRole( 'checkbox', {
 				name: 'Company',
 				exact: true,
 			} );
@@ -286,31 +286,33 @@ test.describe( 'Shipping and Billing Addresses', () => {
 		}
 	);
 
-	test.afterEach( async ( { frontendUtils, admin, editorUtils, editor } ) => {
-		await frontendUtils.emptyCart();
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
-			postType: 'wp_template',
-		} );
-		await editorUtils.enterEditMode();
-		await editor.openDocumentSettingsSidebar();
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				'  [data-type="woocommerce/checkout-shipping-address-block"]'
-		);
-		const checkbox = editor.page.getByRole( 'checkbox', {
-			name: 'Company',
-			exact: true,
-		} );
-		await checkbox.uncheck();
-		await expect( checkbox ).not.toBeChecked();
-		await expect(
-			editor.canvas.locator(
-				'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
-			)
-		).toBeHidden();
-		await editorUtils.saveSiteEditorEntities();
-	} );
+	test.afterEach(
+		async ( { frontendUtils, admin, editorUtils, editor, page } ) => {
+			await frontendUtils.emptyCart();
+			await admin.visitSiteEditor( {
+				postId: 'woocommerce/woocommerce//page-checkout',
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editor.openDocumentSettingsSidebar();
+			await editor.selectBlocks(
+				blockSelectorInEditor +
+					'  [data-type="woocommerce/checkout-shipping-address-block"]'
+			);
+			const checkbox = page.getByRole( 'checkbox', {
+				name: 'Company',
+				exact: true,
+			} );
+			await checkbox.uncheck();
+			await expect( checkbox ).not.toBeChecked();
+			await expect(
+				editor.canvas.locator(
+					'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
+				)
+			).toBeHidden();
+			await editorUtils.saveSiteEditorEntities();
+		}
+	);
 
 	test( 'User can add postcodes for different countries', async ( {
 		frontendUtils,

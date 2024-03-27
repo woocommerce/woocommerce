@@ -116,16 +116,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				editor.page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -145,16 +138,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPageNotOnSale, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPageNotOnSale );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -191,16 +177,9 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadge.x - blockData.margin
 			).toEqual( editorBoundingClientRect.productSaleBadgeContainer.x );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -245,16 +224,9 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadgeContainer.right
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -295,16 +267,9 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadgeContainer.right
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
