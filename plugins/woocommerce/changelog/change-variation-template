@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Change ProductVariationTemplate methods to protected
+
+
