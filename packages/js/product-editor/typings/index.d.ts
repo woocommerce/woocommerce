@@ -19,4 +19,9 @@ declare module '@wordpress/core-data' {
 		prop: string,
 		id?: string
 	): [ T, ( value: T ) => void, T ];
+	function useEntityRecord< T = unknown >(
+		kind: string,
+		name: string,
+		id: number | string
+	): { record: T };
 }

@@ -17,7 +17,11 @@ import type {
 	GenerateRequest,
 } from './types';
 import CRUD_ACTIONS from './crud-actions';
-import { ProductAttribute, ProductDefaultAttribute } from '../products/types';
+import {
+	Product,
+	ProductAttribute,
+	ProductDefaultAttribute,
+} from '../products/types';
 
 export function generateProductVariationsError( key: IdType, error: unknown ) {
 	return {
@@ -48,6 +52,7 @@ export const generateProductVariations = function* (
 		type?: string;
 		attributes: ProductAttribute[];
 		default_attributes?: ProductDefaultAttribute[];
+		meta_data?: Product[ 'meta_data' ];
 	},
 	data: GenerateRequest,
 	saveAttributes = true
