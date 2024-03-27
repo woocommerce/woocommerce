@@ -14,6 +14,7 @@ use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
+use WC_Helper;
 use WP_Error;
 use WP_Upgrader;
 
@@ -35,6 +36,7 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 	}
 
 	/**
@@ -530,6 +532,59 @@ class PluginsHelper {
 		);
 
 		return self::get_action_data( $actions );
+	}
+
+	/**
+	 * Show notices to connect to woo.com for unconnected store in the plugin list.
+	 *
+	 * @return void
+	 */
+	public static function maybe_show_connect_notice_in_plugin_list() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		$notice_string = '';
+
+		if ( count( WC_Helper::get_local_woo_plugins() ) > 0 ) {
+			$notice_string .= __( 'Your store might be at risk as you are running old versions of Woo plugins.', 'woocommerce' );
+			$notice_string .= ' ';
+		}
+
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		$notice_string .= sprintf(
+			/* translators: %s: Connect page URL */
+			__( '<a href="%s">Connect your store</a> to Woo.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			esc_url( $connect_page_url )
+		);
+		echo '<script type="text/javascript">
+				jQuery( document ).ready( function() {
+					const wooConnectNoticeSelector = ".woo-connect-notice";
+					jQuery( wooConnectNoticeSelector ).on( "click", "button.notice-dismiss", function() {
+						localStorage.setItem("woo-connect-notice-dismissed", "true");
+					});
+
+					if ( localStorage.getItem("woo-connect-notice-dismissed") === "true" ) {
+						jQuery( wooConnectNoticeSelector ).remove();
+					}
+				});
+			</script>';
+
+		echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $notice_string ) . '</p>
+	    	</div>';
 	}
 
 }
