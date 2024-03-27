@@ -71,9 +71,9 @@ mockedUseSelect.mockImplementation(
 										isCoBranded: true,
 										networks: [
 											'Visa',
-											'Cartes bancaires',
+											'Cartes Bancaires',
 										],
-										preferredNetwork: 'Cartes bancaires',
+										preferredNetwork: 'Cartes Bancaires',
 									},
 								},
 							],
@@ -124,7 +124,7 @@ describe( 'SavedPaymentMethodOptions', () => {
 		// Fourth saved token for can-pay-true-test-payment-method - co-branded credit card.
 		expect(
 			screen.getByText(
-				'Visa / Cartes bancaires ending in 1001 (expires 1/2099, Cartes bancaires preferred)'
+				'Visa / Cartes Bancaires ending in 1001 (expires 1/2099, Cartes Bancaires preferred)'
 			)
 		).toBeInTheDocument();
 	} );

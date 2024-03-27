@@ -403,11 +403,11 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 	}
 
 	$card_type                           = $payment_token->get_card_type();
-	$networks							 = $payment_token->get_available_networks();
+	$networks                            = $payment_token->get_available_networks();
 	$item['method']['last4']             = $payment_token->get_last4();
 	$item['method']['brand']             = ( ! empty( $card_type ) ? wc_get_credit_card_brand_friendly_name( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
 	$item['method']['is_co_branded']     = $payment_token->is_co_branded();
-	$item['method']['networks']          = ( ! empty( $networks ) ? array_map( function ( $brand ) { return wc_get_credit_card_brand_friendly_name( $brand ); }, $networks ) : $networks );
+	$item['method']['networks']          = ( ! empty( $networks ) ? array_map( 'wc_get_credit_card_brand_friendly_name', $networks ) : $networks );
 	$item['method']['preferred_network'] = wc_get_credit_card_brand_friendly_name( $payment_token->get_preferred_network() );
 	$item['expires']                     = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
