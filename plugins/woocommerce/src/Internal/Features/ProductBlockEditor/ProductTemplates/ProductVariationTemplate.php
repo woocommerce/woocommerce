@@ -64,7 +64,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the group blocks to the template.
 	 */
-	private function add_group_blocks() {
+	protected function add_group_blocks() {
 		$this->add_group(
 			array(
 				'id'         => $this::GROUP_IDS['GENERAL'],
@@ -106,7 +106,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the general group blocks to the template.
 	 */
-	private function add_general_group_blocks() {
+	protected function add_general_group_blocks() {
 		$general_group = $this->get_group_by_id( $this::GROUP_IDS['GENERAL'] );
 		$general_group->add_block(
 			array(
@@ -193,7 +193,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the pricing group blocks to the template.
 	 */
-	private function add_pricing_group_blocks() {
+	protected function add_pricing_group_blocks() {
 		$is_calc_taxes_enabled = wc_tax_enabled();
 
 		$pricing_group = $this->get_group_by_id( $this::GROUP_IDS['PRICING'] );
@@ -315,7 +315,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the inventory group blocks to the template.
 	 */
-	private function add_inventory_group_blocks() {
+	protected function add_inventory_group_blocks() {
 		$inventory_group = $this->get_group_by_id( $this::GROUP_IDS['INVENTORY'] );
 		$inventory_group->add_block(
 			array(
@@ -425,7 +425,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 	/**
 	 * Adds the shipping group blocks to the template.
 	 */
-	private function add_shipping_group_blocks() {
+	protected function add_shipping_group_blocks() {
 		$shipping_group = $this->get_group_by_id( $this::GROUP_IDS['SHIPPING'] );
 		$shipping_group->add_block(
 			array(
