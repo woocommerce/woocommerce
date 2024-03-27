@@ -17,7 +17,7 @@ runs:
     steps:
         - name: Construct payload from all blocks
           id: payload
-          uses: actions/github-script@v6
+          uses: actions/github-script@v7
           env:
               RELEASE_VERSION: ${{ inputs.release-version }}
               BLOCKS_DIR: ${{ inputs.blocks-dir }}
