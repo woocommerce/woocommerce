@@ -1,12 +1,18 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme } = require( '../../../utils/themes' );
+const { CustomizeStorePage } = require( '../customize-store.page' );
 const { setOption } = require( '../../../utils/options' );
+const { encodeCredentials } = require( '../../../utils' );
 
 const test = base.extend( {
-	pageObject: async ( { page }, use ) => {
-		const pageObject = new AssemblerPage( { page } );
-		await use( pageObject );
+	assemblerPageObject: async ( { page }, use ) => {
+		const assemblerPageObject = new AssemblerPage( { page } );
+		await use( assemblerPageObject );
+	},
+	customizeStorePageObject: async ( use ) => {
+		const assemblerPageObject = new CustomizeStorePage( { request } );
+		await use( assemblerPageObject );
 	},
 } );
 
@@ -28,6 +34,25 @@ const pickImage = async ( assembler ) => {
 		.click();
 };
 
+const resetLogo = async ( baseURL ) => {
+	const apiContext = await request.newContext( {
+		baseURL,
+		extraHTTPHeaders: {
+			Authorization: `Basic ${ encodeCredentials(
+				'admin',
+				'password'
+			) }`,
+			cookie: '',
+		},
+	} );
+
+	await apiContext.post( '/wp-json/wc-admin-test-helper/tools/reset-cys', {
+		data: {
+			site_logo: null,
+		},
+	} );
+};
+
 test.describe( 'Assembler -> Logo Picker', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
@@ -45,7 +70,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		}
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
+	test.afterAll( async ( { baseURL, customizeStorePageObject } ) => {
 		try {
 			// In some environments the tour blocks clicking other elements.
 			await setOption(
@@ -61,32 +86,37 @@ test.describe( 'Assembler -> Logo Picker', () => {
 				'no'
 			);
 
+			await resetLogo( baseURL );
+
+			await customizeStorePageObject.resetCustomizeStoreChanges(
+				baseURL
+			);
 			await activateTheme( 'twentynineteen' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
+	test.beforeEach( async ( { baseURL, assemblerPageObject } ) => {
+		await assemblerPageObject.setupSite( baseURL );
+		await assemblerPageObject.waitForLoadingScreenFinish();
+		const assembler = await assemblerPageObject.getAssembler();
 		await assembler.getByText( 'Add your logo' ).click();
 	} );
 
-	test( 'Logo Picker is empty', async ( { pageObject } ) => {
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
+	test( 'Logo Picker is empty', async ( { assemblerPageObject } ) => {
+		const assembler = await assemblerPageObject.getAssembler();
+		const editor = await assemblerPageObject.getEditor();
 
 		await expect( getLogoLocator( editor ) ).toBeHidden();
 		await expect( getEmptyLogoPickerLocator( assembler ) ).toBeVisible();
 	} );
 
 	test( 'Picking an image should trigger an update of the site preview', async ( {
-		pageObject,
+		assemblerPageObject,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
+		const assembler = await assemblerPageObject.getAssembler();
+		const editor = await assemblerPageObject.getEditor();
 
 		const emptyLogoPicker = getEmptyLogoPickerLocator( assembler );
 
@@ -99,11 +129,11 @@ test.describe( 'Assembler -> Logo Picker', () => {
 	} );
 
 	test( 'Selected image should be applied on the frontend', async ( {
-		pageObject,
+		assemblerPageObject,
 		page,
 		baseURL,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPageObject.getAssembler();
 
 		const emptyLogoPicker = getEmptyLogoPickerLocator( assembler );
 
