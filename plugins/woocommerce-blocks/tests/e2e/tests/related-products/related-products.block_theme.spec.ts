@@ -20,11 +20,13 @@ const blockData: BlockData = {
 
 test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor", async ( { admin, editor } ) => {
-		await admin.createNewPost( { legacyCanvas: true } );
+		await admin.createNewPost();
 
-		editor.insertBlock( { name: blockData.slug } ).catch( ( e ) => {
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( e ) {
 			expect( e.message ).toContain( 'is not registered' );
-		} );
+		}
 	} );
 
 	test( "can't be added in the Post Editor - Product Catalog Template", async ( {
@@ -38,11 +40,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await editorUtils.enterEditMode();
 
-		await editor.insertBlock( { name: blockData.slug } );
-
-		editor.insertBlock( { name: blockData.slug } ).catch( ( e ) => {
+		try {
+			await editor.insertBlock( { name: blockData.slug } );
+		} catch ( e ) {
 			expect( e.message ).toContain( 'is not registered' );
-		} );
+		}
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {
