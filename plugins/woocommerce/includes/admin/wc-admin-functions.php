@@ -338,6 +338,7 @@ function wc_save_order_items( $order_id, $items ) {
 					$qty_change_order_notes[] = $item->get_name() . ' &ndash; ' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'];
 				}
 				$item->delete();
+				$order->set_date_modified( time() );
 				continue;
 			}
 
@@ -380,6 +381,10 @@ function wc_save_order_items( $order_id, $items ) {
 			/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 			do_action( 'woocommerce_before_save_order_item', $item );
 			/* phpcs: enable */
+
+			if ( count( $item->get_changes() ) > 0 ) {
+				$order->set_date_modified( time() );
+			}
 
 			$item->save();
 
@@ -441,11 +446,13 @@ function wc_save_order_items( $order_id, $items ) {
 				}
 			}
 
+			if ( count( $item->get_changes() ) > 0 ) {
+				$order->set_date_modified( time() );
+			}
+
 			$item->save();
 		}
 	}
-
-	$order = wc_get_order( $order_id );
 
 	if ( ! empty( $qty_change_order_notes ) ) {
 		/* translators: %s item name. */
