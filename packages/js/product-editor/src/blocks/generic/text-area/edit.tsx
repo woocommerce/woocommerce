@@ -153,6 +153,7 @@ export function TextAreaBlockEdit( {
 				{ isPlainTextMode && (
 					<TextareaControl
 						ref={ textAreaRef }
+						aria-labelledby={ labelId }
 						value={ content || '' }
 						onChange={ setContent }
 						placeholder={ placeholder }
