@@ -184,7 +184,7 @@ function wc_clear_cart_after_payment() {
 		}
 	}
 
-	if ( WC()->session->order_awaiting_payment > 0 ) {
+	if ( is_object( WC()->session ) && WC()->session->order_awaiting_payment > 0 ) {
 		$order = wc_get_order( WC()->session->order_awaiting_payment );
 
 		if ( $order instanceof WC_Order && $order->get_id() > 0 ) {
