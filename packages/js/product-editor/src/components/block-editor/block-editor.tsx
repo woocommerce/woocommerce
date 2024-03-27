@@ -215,7 +215,6 @@ export function BlockEditor( {
 		if ( ! productForm ) {
 			return;
 		}
-		console.log( parse( productForm.content.raw ) );
 
 		onChange( parse( productForm.content.raw ), {} );
 
@@ -276,15 +275,13 @@ export function BlockEditor( {
 					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
 					{ /* @ts-ignore No types for this exist yet. */ }
 					<BlockEditorKeyboardShortcuts.Register />
-					<BlockTools>
-						<ObserveTyping>
-							{ isEditorLoading ? (
-								<LoadingState />
-							) : (
-								<BlockList className="woocommerce-product-block-editor__block-list" />
-							) }
-						</ObserveTyping>
-					</BlockTools>
+					<ObserveTyping>
+						{ isEditorLoading ? (
+							<LoadingState />
+						) : (
+							<BlockList className="woocommerce-product-block-editor__block-list" />
+						) }
+					</ObserveTyping>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
 					<PostTypeContext.Provider value={ context.postType! }>
 						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
