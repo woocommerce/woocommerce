@@ -74,10 +74,16 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
+			await page
+				.locator( '.woocommerce-product-publish-panel__header' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
 
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
@@ -119,10 +125,16 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
+			await page
+				.locator( '.woocommerce-product-publish-panel__header' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
 
-			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 
 		test( 'can a shopper add the simple product to the cart', async ( {

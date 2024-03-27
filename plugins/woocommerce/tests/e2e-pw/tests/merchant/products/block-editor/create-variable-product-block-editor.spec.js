@@ -94,45 +94,19 @@ test.describe( 'Variations tab', () => {
 
 			await expect( attributeColumn ).toHaveValue( 'Size' );
 
-			await page
-				.locator( '//input[@placeholder="Search or create value"]' )
-				.fill( attributesData.options[ 0 ] );
+			for ( const option of attributesData.options ) {
+				await page
+					.locator(
+						'.woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
+					)
+					.fill( option );
 
-			await page
-				.locator( `text=Create "${ attributesData.options[ 0 ] }"` )
-				.click();
+				await page.locator( `text=Create "${ option }"` ).click();
 
-			await expect(
-				page.getByText( attributesData.options[ 0 ] ).first()
-			).toBeVisible();
-
-			await page
-				.locator(
-					'.woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-				)
-				.fill( attributesData.options[ 1 ] );
-
-			await page
-				.locator( `text=Create "${ attributesData.options[ 1 ] }"` )
-				.click();
-
-			await expect(
-				page.getByText( attributesData.options[ 1 ] ).first()
-			).toBeVisible();
-
-			await page
-				.locator(
-					'.woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-				)
-				.fill( attributesData.options[ 2 ] );
-
-			await page
-				.locator( `text=Create "${ attributesData.options[ 2 ] }"` )
-				.click();
-
-			await expect(
-				page.getByText( attributesData.options[ 2 ] ).first()
-			).toBeVisible();
+				await expect(
+					page.locator( '.woocommerce-attribute-term-field' )
+				).toContainText( option );
+			}
 
 			await page
 				.locator( '.woocommerce-new-attribute-modal__buttons' )
@@ -172,6 +146,13 @@ test.describe( 'Variations tab', () => {
 					name: 'Publish',
 				} )
 				.click();
+
+			// await page
+			// 	.locator( '.woocommerce-product-publish-panel__header' )
+			// 	.getByRole( 'button', {
+			// 		name: 'Publish',
+			// 	} )
+			// 	.click();
 
 			const element = page.locator( 'div.components-snackbar__content' );
 			if ( Array.isArray( element ) ) {

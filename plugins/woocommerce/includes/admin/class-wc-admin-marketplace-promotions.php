@@ -15,8 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Marketplace_Promotions {
 
-	const TRANSIENT_NAME        = 'woocommerce_marketplace_promotions';
-	const SCHEDULED_ACTION_HOOK = 'woocommerce_marketplace_fetch_promotions';
+	const TRANSIENT_NAME            = 'woocommerce_marketplace_promotions';
+	const SCHEDULED_ACTION_HOOK     = 'woocommerce_marketplace_fetch_promotions';
+	const PROMOTIONS_API_URL        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
+	const SCHEDULED_ACTION_INTERVAL = 12 * HOUR_IN_SECONDS;
+
 	/**
 	 * The user's locale, for example en_US.
 	 *
@@ -26,69 +29,72 @@ class WC_Admin_Marketplace_Promotions {
 
 	/**
 	 * On all admin pages, schedule an action to fetch promotions data.
-	 * Add menu badge to WooCommerce Extensions item if the promotions
-	 * API requests one.
+	 * Shows notice and adds menu badge to WooCommerce Extensions item
+	 * if the promotions API requests them.
+	 *
+	 * WC_Admin calls this method when it is instantiated during
+	 * is_admin requests.
 	 *
 	 * @return void
 	 */
-	public static function init_marketplace_promotions() {
+	public static function init() {
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+
+		/**
+		 * Filter to suppress the requests for and showing of marketplace promotions.
+		 *
+		 * @since 8.8
+		 */
+		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
+			add_action( 'init', array( __CLASS__, 'clear_scheduled_event' ), 13 );
+
+			return;
+		}
+
 		// Add the callback for our scheduled action.
 		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
 			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
 		}
 
-		if ( self::is_admin_page() ) {
-			// Schedule the action twice a day, starting now.
-			if ( false === wp_next_scheduled( self::SCHEDULED_ACTION_HOOK ) ) {
-				wp_schedule_event( time(), 'twicedaily', self::SCHEDULED_ACTION_HOOK );
-			}
-
-			self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
-			self::maybe_show_bubble_promotions();
+		if ( is_admin() ) {
+			add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ), 12 );
 		}
 
-		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
-	}
-
-	/**
-	 * Check if the request is for an admin page, and not ajax.
-	 * We may want to add a menu bubble to WooCommerce Extensions
-	 * on any admin page, as the user may view the WooCommerce flyout
-	 * menu.
-	 *
-	 * @return bool
-	 */
-	private static function is_admin_page(): bool {
 		if (
-			( defined( 'DOING_AJAX' ) && DOING_AJAX )
-			|| ! is_admin()
+			defined( 'DOING_AJAX' ) && DOING_AJAX
+			|| defined( 'DOING_CRON' ) && DOING_CRON
+			|| defined( 'WP_CLI' ) && WP_CLI
 		) {
-			return false;
+			return;
 		}
 
-		return true;
+		self::$locale = ( self::$locale ?? get_user_locale() ) ?? 'en_US';
+		self::maybe_show_bubble_promotions();
 	}
 
 	/**
-	 * Get promotions to show in the Woo in-app marketplace.
-	 * Only run on selected pages in the main WooCommerce menu in wp-admin.
-	 * Loads promotions in transient with one day life.
+	 * Schedule the action to fetch promotions data.
+	 */
+	public static function schedule_promotion_fetch() {
+		// Schedule the action twice a day using Action Scheduler.
+		if ( false === as_has_scheduled_action( self::SCHEDULED_ACTION_HOOK ) ) {
+			as_schedule_recurring_action( time(), self::SCHEDULED_ACTION_INTERVAL, self::SCHEDULED_ACTION_HOOK );
+		}
+	}
+
+	/**
+	 * Get promotions to show in the Woo in-app marketplace and load them into a transient
+	 * with a 12-hour life. Run as a recurring scheduled action.
 	 *
 	 * @return void
 	 */
 	public static function fetch_marketplace_promotions() {
-		$url        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
-		$promotions = get_transient( self::TRANSIENT_NAME );
-
-		if ( false !== $promotions ) {
-			return;
-		}
-
+		// Fetch promotions from the API.
 		$fetch_options  = array(
 			'auth'    => true,
 			'country' => true,
 		);
-		$raw_promotions = WC_Admin_Addons::fetch( $url, $fetch_options );
+		$raw_promotions = WC_Admin_Addons::fetch( self::PROMOTIONS_API_URL, $fetch_options );
 
 		// phpcs:disable WordPress.NamingConventions.ValidHookName.UseUnderscores
 		if ( is_wp_error( $raw_promotions ) ) {
@@ -111,21 +117,21 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		$promotions = json_decode( wp_remote_retrieve_body( $raw_promotions ), true );
-		if ( empty( $promotions ) || ! is_array( $promotions ) ) {
+		if ( ! is_array( $promotions ) ) {
+			$promotions = array();
+
 			/**
 			 * Allows connection error to be handled.
 			 *
 			 * @since 8.7
 			 */
-			do_action( 'woocommerce_page_wc-addons_connection_error', 'Empty or malformed response' );
+			do_action( 'woocommerce_page_wc-addons_connection_error', 'Malformed response' );
 		}
 		// phpcs:enable WordPress.NamingConventions.ValidHookName.UseUnderscores
 
-		if ( $promotions ) {
-			// Filter out any expired promotions.
-			$promotions = self::get_active_promotions( $promotions );
-			set_transient( self::TRANSIENT_NAME, $promotions, DAY_IN_SECONDS );
-		}
+		// Filter out any expired promotions.
+		$active_promotions = self::get_active_promotions( $promotions );
+		set_transient( self::TRANSIENT_NAME, $active_promotions, 12 * HOUR_IN_SECONDS );
 	}
 
 	/**
@@ -246,7 +252,7 @@ class WC_Admin_Marketplace_Promotions {
 	 *
 	 * @return array
 	 */
-	public static function filter_marketplace_menu_items( $menu_items, $promotion = array() ) {
+	public static function filter_marketplace_menu_items( $menu_items, $promotion = array() ): array {
 		if ( ! isset( $promotion['menu_item_id'] ) || ! isset( $promotion['content'] ) ) {
 			return $menu_items;
 		}
@@ -256,7 +262,7 @@ class WC_Admin_Marketplace_Promotions {
 				&& $promotion['menu_item_id'] === $menu_item['id']
 			) {
 				$bubble_text                   = $promotion['content'][ self::$locale ] ?? ( $promotion['content']['en_US'] ?? __( 'Sale', 'woocommerce' ) );
-				$menu_items[ $index ]['title'] = $menu_item['title'] . self::append_bubble( $bubble_text );
+				$menu_items[ $index ]['title'] = self::append_bubble( $menu_item['title'], $bubble_text );
 
 				break;
 			}
@@ -268,12 +274,19 @@ class WC_Admin_Marketplace_Promotions {
 	/**
 	 * Return the markup for a menu item bubble with a given text.
 	 *
-	 * @param string $bubble_text Text of bubble.
+	 * @param string $menu_item_text Text of menu item we want to change.
+	 * @param string $bubble_text    Text of bubble.
 	 *
 	 * @return string
 	 */
-	private static function append_bubble( $bubble_text ) {
-		return ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">' . esc_html( $bubble_text ) . '</span>';
+	private static function append_bubble( string $menu_item_text, string $bubble_text ): string {
+		// Strip out update count bubble added by Marketplace::get_marketplace_update_count_html.
+		$menu_item_text = preg_replace( '|<span class="update-plugins count-[\d]+">[A-z0-9 <>="-]+</span>|', '', $menu_item_text );
+
+		return $menu_item_text
+			. '<span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">'
+			. esc_html( $bubble_text )
+			. '</span>';
 	}
 
 	/**
@@ -282,7 +295,11 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function clear_scheduled_event() {
-		$timestamp = wp_next_scheduled( self::SCHEDULED_ACTION_HOOK );
-		wp_unschedule_event( $timestamp, self::SCHEDULED_ACTION_HOOK );
+		as_unschedule_all_actions( self::SCHEDULED_ACTION_HOOK );
 	}
+}
+
+// Fetch list of promotions from Woo.com for WooCommerce admin UI.
+if ( ! has_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ) ) ) {
+	add_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ), 11 );
 }

@@ -526,18 +526,9 @@
           "menu_title": "Developer tools",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "0c63cb8213a7bb64295f7321afc9fce5c8e12c3b860e7bb885fe66ac7a71d661",
+          "hash": "ef24e32109d66f96a990fea7a5eb32f9e0b98ae7ca766dcae12244449956997b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
-        },
-        {
-          "post_title": "WooCommerce developer resources",
-          "menu_title": "Developer resources",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "ec2c30bd0d73eb26e636da9d9d3468eb3bc453213099edcc73468a74407e600c",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
-          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
         {
           "post_title": "Resources for debugging",
@@ -561,6 +552,15 @@
           "links": {
             "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
           }
+        },
+        {
+          "post_title": "Contributing to WooCommerce Core",
+          "menu_title": "Contribute to WooCommerce Core",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "hash": "b9c53ffb82b83dfe54c95c85a9f7c0127942087804f0490a2abfccb993ad3e2c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "id": "198a4d4a506d464737c356f86684676ad4a0c27b"
         }
       ],
       "categories": []
@@ -868,6 +868,13 @@
           "hash": "9fe6d28bc71057d7f35574d3b719b33a2a1e4ebdd7e098e8f1ed29219626faf8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/theme-design-ux-guidelines.md",
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
+        },
+        {
+          "post_title": "Template structure & Overriding templates via a theme",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
+          "hash": "faf1f9d46a5115cb3c573d61474e7e7b3ba473568956c87aca6a45be8f205b37",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
         },
         {
           "post_title": "How to set up and use a child theme",
@@ -1204,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "54c558ffb682cee4ce5f81069690e47439b174cffac8e4d0950d014145dcad9e"
+  "hash": "f1bb14ff2aa8c9be096365b78633ace4696f6314cd298e0cb57104a73b507fac"
 }

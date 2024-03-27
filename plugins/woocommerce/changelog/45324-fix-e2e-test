@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Revert "[e2e tests blocks] Configure the number of shards for each matrix project"
-
