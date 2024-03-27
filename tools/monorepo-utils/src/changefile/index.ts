@@ -15,6 +15,7 @@ import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
 	shouldAutomateChangelog,
+	shouldAutomateNoChangelog,
 	getChangelogDetails,
 	getChangelogDetailsError,
 } from './lib/github';
@@ -58,12 +59,21 @@ const program = new Command( 'changefile' )
 
 			Logger.endTask();
 
-			if ( ! shouldAutomateChangelog( prBody ) ) {
+			const autoChangelog = shouldAutomateChangelog( prBody );
+			const autoNoChangelog = shouldAutomateNoChangelog( prBody );
+
+			if ( ! autoChangelog && ! autoNoChangelog ) {
 				Logger.notice(
-					`PR #${ prNumber } does not have the "Automatically create a changelog entry from the details" checkbox checked. No changelog will be created.`
+					`PR #${ prNumber } does not have the "Automatically create a changelog entry from the details" or the "This Pull Request does not require a changelog entry" checkbox checked. No changelog will be created.`
 				);
 
 				process.exit( 0 );
+			}
+
+			if ( autoChangelog && autoNoChangelog ) {
+				Logger.error(
+					`PR #${ prNumber } has both the "Automatically create a changelog entry from the details" and the "This Pull Request does not require a changelog entry" checkboxes checked. These options are mutually exclusive and only one may be selected.`
+				);
 			}
 
 			const details = getChangelogDetails( prBody );

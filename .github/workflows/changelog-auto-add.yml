@@ -29,5 +29,5 @@ jobs:
 
             - name: Generate Changelog File
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_TOKEN: ${{ secrets.PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
               run: pnpm utils changefile ${{github.event.number || inputs.prNumber}} -o ${{ github.repository_owner }}
