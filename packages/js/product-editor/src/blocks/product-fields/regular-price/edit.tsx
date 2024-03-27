@@ -3,6 +3,7 @@
  */
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { InspectorControls } from '@wordpress/block-editor';
 import { Product } from '@woocommerce/data';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
@@ -10,6 +11,9 @@ import { createElement, useEffect } from '@wordpress/element';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	BaseControl,
+	PanelBody,
+	TextControl,
+	ToggleControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
@@ -28,9 +32,10 @@ export function Edit( {
 	attributes,
 	clientId,
 	context,
+	setAttributes,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, isRequired, tooltip, disabled } = attributes;
+	const { label, help = '', isRequired, tooltip, disabled } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -124,6 +129,38 @@ export function Edit( {
 					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+					<TextControl
+						label={ __( 'Label', 'woocommerce' ) }
+						value={ label }
+						onChange={ ( newValue ) =>
+							setAttributes( { label: newValue } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Help', 'woocommerce' ) }
+						value={ help }
+						onChange={ ( newValue ) =>
+							setAttributes( { help: newValue } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Tooltip', 'woocommerce' ) }
+						value={ tooltip || '' }
+						onChange={ ( newValue ) =>
+							setAttributes( { tooltip: newValue } )
+						}
+					/>
+					<ToggleControl
+						label={ __( 'Required', 'woocommerce' ) }
+						checked={ isRequired }
+						onChange={ ( newValue ) =>
+							setAttributes( { isRequired: newValue } )
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
 		</div>
 	);
 }

@@ -55,6 +55,7 @@ const wpAdminScripts = [
 	'onboarding-product-import-notice',
 	'onboarding-tax-notice',
 	'print-shipping-label-banner',
+	'product-form-editor',
 	'beta-features-tracking-modal',
 	'payment-method-promotions',
 	'onboarding-load-sample-products-notice',

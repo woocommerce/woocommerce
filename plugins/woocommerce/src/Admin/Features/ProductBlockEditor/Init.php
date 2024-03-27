@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
 use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
@@ -80,6 +81,10 @@ class Init {
 
 			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 
+			add_filter( 'get_the_terms', array( $this, 'add_default_theme_terms' ), 10, 3 );
+
+			add_filter( 'block_editor_settings_all', array( $this, 'remove_default_editor_styles' ), 10, 2 );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -91,9 +96,28 @@ class Init {
 	}
 
 	/**
+	 * Remove the editor styles that override admin styles of various blocks.
+	 *
+	 * @param array $editor_settings Editor settings.
+	 * @param array $editor_content  Editor context.
+	 * @return array Editor settings.
+	 */
+	public function remove_default_editor_styles( $editor_settings, $editor_context ) {
+		if ( $editor_context->post && 'product_form' !== $editor_context->post->post_type ) {
+			return $editor_settings;
+		}
+
+		$editor_settings["styles"] = array();
+	
+		return $editor_settings;
+	}
+
+	/**
 	 * Enqueue scripts needed for the product form block editor.
 	 */
 	public function enqueue_scripts() {
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'product-form-editor', true );
+
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
@@ -121,6 +145,8 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
+		wp_enqueue_style( 'wc-product-form-editor', WC()->plugin_url() . '/assets/client/admin/product-editor/style.css', array() );
+
 		if ( ! PageController::is_admin_or_embed_page() ) {
 			return;
 		}
@@ -229,9 +255,45 @@ class Init {
 			$this->product_templates
 		);
 
+		$product_forms = get_posts(
+			array(
+				'post_type'   => 'product_form',
+				'numberposts' => -1,
+				'post_status' => 'publish'
+			)
+		);
+		$editor_settings['productForms'] = array_map(
+			function( $product_form ) {
+				$template          = _build_block_template_result_from_post( $product_form );
+				// $template->content = do_blocks( $template->content );
+				return $template;
+			},
+			$product_forms
+		);
+
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
 		return get_block_editor_settings( $editor_settings, $block_editor_context );
+	}
+
+	/**
+	 * Temporary solution to allow using _build_block_template_result_from_post without a theme taxonomy.
+	 * @todo Look into including the taxonomy along with a template file during migration.
+	 */
+	public function add_default_theme_terms( $terms, $post_id, $taxonomy ) {
+		if ( 'wp_theme' !== $taxonomy || ! empty( $terms ) ) {
+			return $terms;
+		}
+
+		if ( 'product_form' !== get_post_type( $post_id ) ) {
+			return $terms;
+		}
+
+		return array(
+			(object) array(
+				'name' => 'woocommerce'
+			)
+		);
 	}
 
 	/**
