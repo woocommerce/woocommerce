@@ -92,9 +92,11 @@ html.interface-interface-skeleton__html-container {
 }
 
 body {
-	background-color: $white;
+	.is-product-editor {
+		background-color: $white;
 
-	&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
-		min-height: calc(100vh - 96px);
+		&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
+			min-height: calc(100vh - 96px);
+		}
 	}
 }

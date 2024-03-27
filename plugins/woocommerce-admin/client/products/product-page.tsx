@@ -33,6 +33,7 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
+		document.body.classList.add( 'is-product-editor' );
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -74,6 +75,7 @@ export default function ProductPage() {
 		const unregisterBlocks = initBlocks();
 
 		return () => {
+			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-more-menu' );
 			unregisterBlocks();
 		};
