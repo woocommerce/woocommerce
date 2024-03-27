@@ -5,12 +5,20 @@
 
 namespace Automattic\WooCommerce\Internal\DataStores;
 
+use Automattic\WooCommerce\Caching\WPCacheEngine;
+
 /**
  * Implements functions similar to WP's add_metadata(), get_metadata(), and friends using a custom table.
  *
  * @see WC_Data_Store_WP For an implementation using WP's metadata functions and tables.
  */
 abstract class CustomMetaDataStore {
+
+	/**
+	 * Returns the cache group to store cached data in.
+	 * @return string
+	 */
+	abstract protected function get_cache_group();
 
 	/**
 	 * Returns the name of the table used for storage.
@@ -53,31 +61,20 @@ abstract class CustomMetaDataStore {
 	/**
 	 * Returns an array of meta for an object.
 	 *
-	 * @param  WC_Data $object WC_Data object.
+	 * @param  \WC_Data $object WC_Data object.
 	 * @return array
 	 */
 	public function read_meta( &$object ) {
-		global $wpdb;
+		$raw_meta_data = $this->get_meta_data_for_object_ids( array( $object->get_id() ) );
 
-		$db_info = $this->get_db_info();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$raw_meta_data = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT {$db_info['meta_id_field']} AS meta_id, meta_key, meta_value FROM {$db_info['table']} WHERE {$db_info['object_id_field']} = %d ORDER BY meta_id",
-				$object->get_id()
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		return $raw_meta_data;
+		return $raw_meta_data[ $object->get_id() ] ?: array();
 	}
 
 	/**
 	 * Deletes meta based on meta ID.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing at least ->id).
+	 * @param  \WC_Data  $object WC_Data object.
+	 * @param  \stdClass $meta (containing at least ->id).
 	 *
 	 * @return bool
 	 */
@@ -91,7 +88,14 @@ abstract class CustomMetaDataStore {
 		$db_info = $this->get_db_info();
 		$meta_id = absint( $meta->id );
 
-		return (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id ) );
+		$successful = (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id, $db_info['object_id_field'] => $object->get_id() ) );
+		if ( $successful ) {
+			/** @var $cache_engine WPCacheEngine */
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+		}
+
+		return $successful;
 	}
 
 	/**
@@ -122,14 +126,20 @@ abstract class CustomMetaDataStore {
 		);
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
-		return $result ? (int) $wpdb->insert_id : false;
+		$insert_id = $result ? (int) $wpdb->insert_id : false;
+		if ( $insert_id !== false ) {
+			/** @var $cache_engine WPCacheEngine */
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+		}
+		return $insert_id;
 	}
 
 	/**
 	 * Update meta.
 	 *
-	 * @param  WC_Data  $object WC_Data object.
-	 * @param  stdClass $meta (containing ->id, ->key and ->value).
+	 * @param  \WC_Data  $object WC_Data object.
+	 * @param  \stdClass $meta (containing ->id, ->key and ->value).
 	 *
 	 * @return bool
 	 */
@@ -147,17 +157,21 @@ abstract class CustomMetaDataStore {
 		);
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
-		$db_info = $this->get_db_info();
-
 		$result = $wpdb->update(
-			$db_info['table'],
+			$this->get_table_name(),
 			$data,
-			array( $db_info['meta_id_field'] => $meta->id ),
+			array( $this->get_meta_id_field() => $meta->id, $this->get_object_id_field() => $object->get_id() ),
 			'%s',
 			'%d'
 		);
 
-		return 1 === $result;
+		$is_successful = 1 === $result;
+		if ( $is_successful ) {
+			/** @var $cache_engine WPCacheEngine */
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+		}
+		return $is_successful;
 	}
 
 	/**
@@ -261,6 +275,45 @@ abstract class CustomMetaDataStore {
 		}
 
 		return $wpdb->get_col( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared.
+	}
+
+
+	public function get_meta_data_for_object_ids( array $ids ): array {
+		global $wpdb;
+
+		/** @var $cache_engine WPCacheEngine */
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$meta_data = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
+		$meta_data = array_filter( $meta_data );
+		$uncached_order_ids = array_diff( $ids, array_keys( $meta_data ) );
+
+		if ( empty( $uncached_order_ids ) ) {
+			return $meta_data;
+		}
+
+		$id_placeholder   = implode( ', ', array_fill( 0, count( $uncached_order_ids ), '%d' ) );
+		$meta_table = $this->get_table_name();
+		$object_id_column = $this->get_object_id_field();
+		$meta_rows        = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, $object_id_column as object_id, meta_key, meta_value FROM $meta_table WHERE $object_id_column in ( $id_placeholder )",
+				$ids
+			)
+		);
+
+		foreach ( $meta_rows as $meta_row ) {
+			if ( ! isset( $meta_data[ $meta_row->object_id ] ) ) {
+				$meta_data[ $meta_row->object_id ] = array();
+			}
+			$meta_data[ $meta_row->object_id ][] = (object) array(
+				'meta_id'    => $meta_row->id,
+				'meta_key'   => $meta_row->meta_key,
+				'meta_value' => $meta_row->meta_value,
+			);
+		}
+		$cache_engine->cache_objects( $meta_data, 0, $this->get_cache_group() );
+
+		return $meta_data;
 	}
 
 }

@@ -11,7 +11,7 @@ class WPCacheEngine implements CacheEngine {
 	/**
 	 * Retrieves an object cached under a given key.
 	 *
-	 * @param string $key They key under which the object to retrieve is cached.
+	 * @param string $key The key under which the object to retrieve is cached.
 	 * @param string $group The group under which the object is cached.
 	 *
 	 * @return array|object|null The cached object, or null if there's no object cached under the passed key.
@@ -20,6 +20,40 @@ class WPCacheEngine implements CacheEngine {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
 		$value        = wp_cache_get( $prefixed_key, $group );
 		return false === $value ? null : $value;
+	}
+
+	/**
+	 * Retrieves a set of objects cached under the given keys.
+	 *
+	 * @param string[] $keys The keys under which the object to retrieve is cached.
+	 * @param string   $group The group under which the object is cached.
+	 *
+	 * @return array The cached array of objects keyed by the given keys, values will be null for any non-cached keys.
+	 */
+	public function get_cached_objects( array $keys, string $group = '' ) {
+		$prefix = self::get_cache_prefix($group);
+		$key_map = array_combine(
+			$keys,
+			array_map(
+				function ( $key ) use ( $prefix ) {
+					return $prefix . $key;
+				},
+				$keys
+			)
+		);
+
+		$cached_values = wp_cache_get_multiple( array_values( $key_map ), $group );
+		$return_values = array();
+		foreach ( $key_map as $key => $prefixed_key ) {
+			if ( isset( $cached_values[ $prefixed_key ] ) && $cached_values[ $prefixed_key ] !== false ) {
+				$return_values[ $key ] = $cached_values[ $prefixed_key ];
+			} else {
+				$return_values[ $key ] = null;
+
+			}
+		}
+
+		return $return_values;
 	}
 
 	/**
@@ -35,6 +69,32 @@ class WPCacheEngine implements CacheEngine {
 	public function cache_object( string $key, $object, int $expiration, string $group = '' ): bool {
 		$prefixed_key = self::get_prefixed_key( $key, $group );
 		return false !== wp_cache_set( $prefixed_key, $object, $group, $expiration );
+	}
+
+	/**
+	 * Caches an object under a given key, and with a given expiration.
+	 *
+	 * @param array $objects The objects to cache keyed by the key to cache under.
+	 * @param int   $expiration Expiration for the cached object, in seconds.
+	 * @param string $group The group under which the object will be cached.
+	 *
+	 * @return array Array of return values, grouped by key. Each value is either
+	 *                true on success, or false on failure
+	 */
+	public function cache_objects( array $objects, int $expiration, string $group = '' ): array {
+		$prefix = self::get_cache_prefix( $group );
+
+		return array_combine(
+			array_map(
+				function ( $key ) use ( $prefix ) {
+					return $prefix . $key;
+				},
+				array_keys( $objects )
+			),
+			$objects,
+		);
+
+		return wp_cache_set_multiple( $objects, $group, $expiration );
 	}
 
 	/**
