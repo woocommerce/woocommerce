@@ -1634,10 +1634,16 @@ class ListTable extends WP_List_Table {
 			'products'       => __( 'Products', 'woocommerce' ),
 			'all'            => __( 'All', 'woocommerce' ),
 		);
+
+		$options = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
+		$selected = $_REQUEST['search-filter'] ?? $_COOKIE['wc-search-filter-hpos-admin'] ?? 'all';
+		if( $_COOKIE['wc-search-filter-hpos-admin'] !== $selected ) {
+			wc_setcookie( 'wc-search-filter-hpos-admin', $selected );
+		}
 		?>
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
-				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? 'all' ) ) ); ?>><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $selected ) ) ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php
 			}
 	}
