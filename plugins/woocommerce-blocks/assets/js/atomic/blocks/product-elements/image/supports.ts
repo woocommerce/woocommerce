@@ -11,6 +11,9 @@ import { __experimentalGetSpacingClassesAndStyles as getSpacingClassesAndStyles 
 
 export const supports = {
 	html: false,
+	dimensions: {
+		aspectRatio: true
+	},
 	...( isFeaturePluginBuild() && {
 		__experimentalBorder: {
 			radius: true,
