@@ -263,6 +263,7 @@ export function BlockEditor( {
 					setSelectedProductFormId( parseInt( value, 10 ) )
 				}
 				disabled={ ! productForms }
+				className="woocommerce-product-block-editor__product-type-selector"
 			/>
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider

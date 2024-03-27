@@ -188,6 +188,12 @@
 }
 
 .woocommerce-product-block-editor {
+	&__product-type-selector {
+		max-width: 650px;
+		margin: 0 auto;
+		margin-bottom: $gap-large;
+	}
+
 	.block-editor-block-list__layout.is-root-container.is-loading {
 		.wp-block-woocommerce-product-section__heading-title {
 			@include placeholder();
