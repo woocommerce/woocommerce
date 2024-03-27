@@ -25,6 +25,14 @@ baseTest.describe( 'Products > Delete Product', () => {
 				} );
 			}
 		},
+		page: async ( { page, wcAdminApi }, use ) => {
+			// Disable the task list reminder bar, it can interfere with the quick actions
+			await wcAdminApi.post( 'options', {
+				woocommerce_task_list_reminder_bar_hidden: 'yes',
+			} );
+
+			await use( page );
+		},
 	} );
 
 	test( 'can delete a product from edit view', async ( {

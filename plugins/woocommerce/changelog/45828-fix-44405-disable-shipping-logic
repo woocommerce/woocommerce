@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+Fix a bug that prevented placing an order when shipping is disabled, but Local Pickup is still enabled.

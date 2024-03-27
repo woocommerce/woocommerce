@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix issue preventing some blocks from being direct children of the Single Product block.
