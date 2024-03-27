@@ -59,16 +59,16 @@ class LaunchYourStore {
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer -->
 		
-		<!-- wp:heading {"level":1} -->
-		<h1 class="wp-block-heading">Great things coming soon</h1>
+		<!-- wp:heading {"textAlign":"center","level":1} -->
+		<h1 class="wp-block-heading has-text-align-center">Great things coming soon</h1>
 		<!-- /wp:heading -->
 		
 		<!-- wp:spacer {"height":"10px"} -->
 		<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer -->
 		
-		<!-- wp:paragraph -->
-		<p>Something big is brewing! Our store is in the works - Launching shortly!</p>
+		<!-- wp:paragraph {"align":"center"} -->
+		<p class="has-text-align-center">Something big is brewing! Our store is in the works - Launching shortly!</p>
 		<!-- /wp:paragraph -->
 		
 		<!-- wp:spacer -->
