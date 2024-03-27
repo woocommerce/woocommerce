@@ -5,6 +5,7 @@ import {
 	createSlotFill,
 	ToggleControl,
 	RadioControl,
+	Button,
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
@@ -26,12 +27,39 @@ const SiteVisibility = () => {
 		comingSoon: initialComingSoon = false,
 		storePagesOnly: initialStorePagesOnly = false,
 		privateLink: initialPrivateLink = false,
+		shareKey,
 	} = useLaunchYourStore();
 	const [ comingSoon, setComingSoon ] = useState( initialComingSoon );
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
 		initialStorePagesOnly
 	);
 	const [ privateLink, setPrivateLink ] = useState( initialPrivateLink );
+
+	const copyLink = __( 'Copy link', 'woocommerce' );
+	const copied = __( 'Copied!', 'woocommerce' );
+	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
+
+	const getPrivateLink = () => {
+		return (
+			window?.wcSettings?.homeUrl +
+			( storePagesOnly === 'yes' ? 'store?woo-share=' : '?woo-share=' ) +
+			shareKey
+		);
+	};
+
+	const copyToClipboard = ( textToCopy ) => {
+		if ( window?.navigator.clipboard && window.isSecureContext ) {
+			window?.navigator.clipboard.writeText( textToCopy );
+		} else {
+			const textArea = document.createElement( 'textarea' );
+			textArea.value = textToCopy;
+			textArea.style.position = 'absolute';
+			textArea.style.left = '-999999px';
+			document.body.prepend( textArea );
+			textArea.select();
+			document.execCommand( 'copy' );
+		}
+	};
 
 	useEffect( () => {
 		if ( ! isLoading ) {
@@ -131,6 +159,25 @@ const SiteVisibility = () => {
 										'woocommerce'
 									) }
 								</p>
+								{ privateLink === 'yes' && (
+									<div className="site-visibility-settings-slotfill-private-link">
+										{ getPrivateLink() }
+										<Button
+											onClick={ () => {
+												copyToClipboard(
+													getPrivateLink()
+												);
+												setCopyLinkText( copied );
+												setTimeout( () => {
+													setCopyLinkText( copyLink );
+												}, 2000 );
+											} }
+											variant="link"
+										>
+											{ copyLinkText }
+										</Button>
+									</div>
+								) }
 							</>
 						}
 						checked={ privateLink === 'yes' }
