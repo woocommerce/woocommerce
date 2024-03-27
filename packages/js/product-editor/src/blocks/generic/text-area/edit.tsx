@@ -145,6 +145,7 @@ export function TextAreaBlockEdit( {
 						allowedFormats={ allowedFormats }
 						placeholder={ placeholder }
 						required={ required }
+						aria-required={ required }
 						disabled={ disabled }
 						onBlur={ hideToolbar }
 					/>
