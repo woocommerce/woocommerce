@@ -553,8 +553,10 @@ class OrderController {
 			return;
 		}
 
+		$valid_methods = array_keys( WC()->shipping()->get_shipping_methods() );
+
 		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
-			if ( false === $chosen_shipping_method ) {
+			if ( false === $chosen_shipping_method || ! in_array( current( explode( ':', $chosen_shipping_method ) ), $valid_methods, true ) ) {
 				throw new RouteException(
 					'woocommerce_rest_invalid_shipping_option',
 					__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
