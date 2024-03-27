@@ -5,10 +5,42 @@ on:
     branches:
       - 'trunk'
       - 'release/*'
+  workflow_dispatch:
+    inputs:
+      pr_simulate:
+        description: 'Would you like to run CI on a pull request? If so, enter the PR number here. If blank, the entire suite will be run.'
+        type: string
+        default: ''
 concurrency:
   group: '${{ github.workflow }}-${{ github.ref }}'
   cancel-in-progress: true
 jobs:
+  dispatch-handler:
+    name: 'Handle dispatched workflow'
+    runs-on: 'ubuntu-20.04'
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_simulate }}
+    outputs:
+      head: ${{ steps.pr-info.outputs.head }}
+      base: ${{ steps.pr-info.outputs.base }}
+    steps:
+      - uses: actions/github-script@v6
+        name: 'Grab PR info.'
+        id: 'pr-info'
+        env:
+          PR: ${{ inputs.pr_simulate }}
+        with:
+          retries: 3
+          script: |
+            if ( ! process.env.PR ) {
+              return;
+            }
+            const PR = await github.rest.pulls.get( {
+              pull_number: process.env.PR,
+              repo: context.repo.repo,
+              owner: context.repo.owner,
+            } );
+            core.setOutput( 'head', PR.data.head.ref );
+            core.setOutput( 'base', PR.data.base.ref );
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
     # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
@@ -16,6 +48,12 @@ jobs:
     # matrices that we can use to run CI tasks only on the projects that need them.
     name: 'Build Project Jobs'
     runs-on: 'ubuntu-20.04'
+    needs: 'dispatch-handler'
+    # Because forks of this repository may want to skip running this CI automatically, but still
+    # be able to run it via workflow_dispatch, if the SKIP_CI variable is truthy and we're not
+    # running from a workflow_dispatch, we'll skip generating the project matrix and any jobs.
+    # Because dispatch-handler may be skipped, we need the always() here.
+    if: ${{ always() && ( github.event_name == 'workflow_dispatch' || ! vars.SKIP_CI ) }}
     outputs:
       lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
       test-jobs: ${{ steps.project-jobs.outputs.test-jobs }}
@@ -24,6 +62,8 @@ jobs:
         name: 'Checkout'
         with:
           fetch-depth: 0
+          # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
+          ref: ${{ needs.dispatch-handler.outputs.head }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         with:
@@ -31,9 +71,12 @@ jobs:
       - uses: actions/github-script@v6
         name: 'Build Matrix'
         id: 'project-jobs'
+        env:
+          PR_SIM: ${{ needs.dispatch-handler.outputs.base }}
         with:
           script: |
-            let baseRef = ${{ toJson( github.base_ref ) }};
+            let prSim = process.env.PR_SIM;
+            let baseRef = prSim || ${{ toJson( github.base_ref ) }};
             if ( baseRef ) {
               baseRef = `--base-ref origin/${ baseRef }`;
             }
@@ -42,8 +85,12 @@ jobs:
   project-lint-jobs:
     name: 'Lint - ${{ matrix.projectName }}'
     runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
+    needs: [
+      'project-jobs',
+      'dispatch-handler'
+    ]
+    # Because dispatch-handler may be skipped, we need the always() here.
+    if: ${{ always() && needs.project-jobs.outputs.lint-jobs && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -53,6 +100,8 @@ jobs:
         name: 'Checkout'
         with:
           fetch-depth: 0
+          # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
+          ref: ${{ needs.dispatch-handler.outputs.head }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         id: 'setup-monorepo'
@@ -64,8 +113,12 @@ jobs:
   project-test-jobs:
     name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
     runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs: [
+      'project-jobs',
+      'dispatch-handler'
+    ]
+    # Because dispatch-handler may be skipped, we need the always() here.
+    if: ${{ always() && needs.project-jobs.outputs.test-jobs && needs.project-jobs.outputs.test-jobs != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +128,8 @@ jobs:
         name: 'Checkout'
         with:
           fetch-depth: 0
+          # If the workflow wasn't triggered by dispatch, this will be empty and use defaults.
+          ref: ${{ needs.dispatch-handler.outputs.head }}
       - uses: './.github/actions/setup-woocommerce-monorepo'
         name: 'Setup Monorepo'
         id: 'setup-monorepo'
