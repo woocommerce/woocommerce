@@ -117,8 +117,8 @@ test.describe( 'Cart Block page', () => {
 			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
-		).toBeVisible();
+			await page.getByText( 'Your cart is currently empty!' ).count()
+		).toBeGreaterThan( 0 );
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
 		).toBeVisible();
@@ -160,30 +160,27 @@ test.describe( 'Cart Block page', () => {
 		await expect(
 			page.getByRole( 'heading', { name: 'You may be interested in…' } )
 		).toBeVisible();
+		await page
+			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 1”` )
+			.click();
 		await expect(
-			page.getByRole( 'link', {
-				name: `${ simpleProductName } Cross-Sell 1`,
-				exact: true,
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'link', {
-				name: `${ simpleProductName } Cross-Sell 2`,
-				exact: true,
-			} )
+			page
+				.locator( '.wc-block-cart-items' )
+				.getByText( `${ simpleProductName } Cross-Sell 1` )
 		).toBeVisible();
 		await page
-			.getByRole( 'link', {
-				name: `${ simpleProductName } Cross-Sell 1`,
-				exact: true,
-			} )
+			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 2”` )
 			.click();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await expect(
+			page
+				.locator( '.wc-block-cart-items' )
+				.getByText( `${ simpleProductName } Cross-Sell 2` )
+		).toBeVisible();
+
 		await page.goto( cartBlockPageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
-		await page.locator( '.add_to_cart_button' ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'You may be interested in…' } )
 		).toBeHidden();

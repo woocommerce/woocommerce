@@ -2,8 +2,8 @@
 
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
-echo -e 'Activate twentynineteen theme \n'
-wp-env run tests-cli wp theme activate twentynineteen
+echo -e 'Activate default theme \n'
+wp-env run tests-cli wp theme activate twentytwentythree
 
 echo -e 'Update URL structure \n'
 wp-env run tests-cli wp rewrite structure '/%postname%/' --hard

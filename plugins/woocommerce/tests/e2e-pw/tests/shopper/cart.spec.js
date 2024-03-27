@@ -70,6 +70,12 @@ test.describe( 'Cart page', () => {
 		} );
 	} );
 
+	async function goToShopPageAndAddProductToCart( page, prodName ) {
+		await page.goto( '/shop/?orderby=date' );
+		await page.getByLabel( `Add to cart: “${ prodName }”` ).click();
+		await page.waitForLoadState( 'networkidle' );
+	}
+
 	test( 'should display no item in the cart', async ( { page } ) => {
 		await page.goto( '/cart/' );
 		await expect(
@@ -80,11 +86,7 @@ test.describe( 'Cart page', () => {
 	test( 'should add the product to the cart from the shop page', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page
-			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await goToShopPageAndAddProductToCart( page, productName );
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
@@ -97,14 +99,7 @@ test.describe( 'Cart page', () => {
 	} ) => {
 		let qty = 2;
 		while ( qty-- ) {
-			// (load the shop in case redirection enabled)
-			await page.goto( '/shop/?orderby=date' );
-			await page
-				.locator(
-					`a[data-product_id='${ productId }'][href*=add-to-cart]`
-				)
-				.click();
-			await page.waitForLoadState( 'networkidle' );
+			await goToShopPageAndAddProductToCart( page, productName );
 		}
 
 		await page.goto( '/cart/' );
@@ -114,11 +109,7 @@ test.describe( 'Cart page', () => {
 	test( 'should update quantity when updated via quantity input', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page
-			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await goToShopPageAndAddProductToCart( page, productName );
 
 		await page.goto( '/cart/' );
 		await page.locator( 'input.qty' ).fill( '2' );
@@ -132,11 +123,7 @@ test.describe( 'Cart page', () => {
 	test( 'should remove the item from the cart when remove is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page
-			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await goToShopPageAndAddProductToCart( page, productName );
 		await page.goto( '/cart/' );
 
 		// make sure that the product is in the cart
@@ -146,19 +133,18 @@ test.describe( 'Cart page', () => {
 
 		await page.locator( 'a.remove' ).click();
 
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
+		await expect(
+			page.getByText( `“${ productName }” removed` )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Your cart is currently empty' )
+		).toBeVisible();
 	} );
 
 	test( 'should update subtotal in cart totals when adding product to the cart', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page
-			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await goToShopPageAndAddProductToCart( page, productName );
 
 		await page.goto( '/cart/' );
 		await expect( page.locator( '.cart-subtotal .amount' ) ).toContainText(
@@ -176,11 +162,7 @@ test.describe( 'Cart page', () => {
 	test( 'should go to the checkout page when "Proceed to Checkout" is clicked', async ( {
 		page,
 	} ) => {
-		await page.goto( '/shop/?orderby=date' );
-		await page
-			.locator( `a[data-product_id='${ productId }'][href*=add-to-cart]` )
-			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await goToShopPageAndAddProductToCart( page, productName );
 
 		await page.goto( '/cart/' );
 
@@ -195,20 +177,20 @@ test.describe( 'Cart page', () => {
 		// add same product to cart twice time
 		for ( let i = 1; i < 3; i++ ) {
 			await page.goto( `/shop/?add-to-cart=${ productId }` );
-			await page.waitForLoadState( 'networkidle' );
 			await expect(
-				page.locator( '.woocommerce-message' )
-			).toContainText(
-				`“${ productName }” has been added to your cart.`
-			);
+				page.getByText(
+					`“${ productName }” has been added to your cart.`
+				)
+			).toBeVisible();
 		}
 
 		// add the same product the third time
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
-		await expect( page.locator( '.woocommerce-error' ) ).toContainText(
-			'You cannot add that amount to the cart — we have 2 in stock and you already have 2 in your cart.'
-		);
+		await expect(
+			page.getByText(
+				'You cannot add that amount to the cart — we have 2 in stock and you already have 2 in your cart.'
+			)
+		).toBeVisible();
 		await page.goto( '/cart/' );
 
 		// attempt to increase quantity over quantity limit
@@ -243,16 +225,14 @@ test.describe( 'Cart page', () => {
 			.getByLabel( `Remove ${ productName } cross-sell 1 from cart` )
 			.click();
 		await expect(
-			page.locator( '.woocommerce-message' )
-		).toContainText( `“${ productName } cross-sell 1” removed.` );
+			page.getByText( `“${ productName } cross-sell 1” removed.` )
+		).toBeVisible();
 		await page
 			.getByLabel( `Remove ${ productName } cross-sell 2 from cart` )
 			.click();
 		await expect(
-			page
-				.locator( '.woocommerce-message' )
-				.first()
-		).toContainText( `“${ productName } cross-sell 2” removed.` );
+			page.getByText( `“${ productName } cross-sell 2” removed.` )
+		).toBeVisible();
 
 		// check if you see now cross-sell products
 		await page.reload();
