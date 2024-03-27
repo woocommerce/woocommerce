@@ -10,7 +10,7 @@ const test = base.extend( {
 		const assemblerPageObject = new AssemblerPage( { page } );
 		await use( assemblerPageObject );
 	},
-	customizeStorePageObject: async ( use ) => {
+	customizeStorePageObject: async ( {}, use ) => {
 		const assemblerPageObject = new CustomizeStorePage( { request } );
 		await use( assemblerPageObject );
 	},
