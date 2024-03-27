@@ -19,8 +19,8 @@ const collection = {
 	title: __( 'Featured', 'woocommerce' ),
 	icon: ( <Icon icon={ starFilled } /> ) as BlockIcon,
 	description: __( 'Showcase your featured products.', 'woocommerce' ),
-	keywords: [ 'product collection' ],
-	scope: [],
+	keywords: [ 'product collection', 'products' ],
+	scope: [ 'inserter' ],
 };
 
 const attributes = {

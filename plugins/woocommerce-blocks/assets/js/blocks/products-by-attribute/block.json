@@ -5,6 +5,7 @@
 	"keywords": [ "WooCommerce" ],
 	"description": "Display a grid of products with selected attributes.",
 	"supports": {
+		"inserter": false,
 		"align": [ "wide", "full" ],
 		"html": false
 	},

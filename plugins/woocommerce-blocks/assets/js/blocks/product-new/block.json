@@ -5,6 +5,7 @@
 	"keywords": [ "WooCommerce" ],
 	"description": "Display a grid of your newest products.",
 	"supports": {
+		"inserter": false,
 		"align": [ "wide", "full" ],
 		"html": false
 	},
