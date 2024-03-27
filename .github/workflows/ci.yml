@@ -283,7 +283,6 @@ jobs:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
-            WORKFLOW_NAME=publish-test-reports-pr.yml
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f e2e_artifact=e2e-test-report \
@@ -357,7 +356,6 @@ jobs:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
-            WORKFLOW_NAME=publish-test-reports-pr.yml
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f api_artifact=api-test-report \
