@@ -175,8 +175,6 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 					)
 				) }
 				<ProductMetadata
-					shortDescription={ shortDescription }
-					fullDescription={ fullDescription }
 					itemData={ itemData }
 					variation={ variation }
 				/>
