@@ -15,6 +15,7 @@
 		"marketing": true,
 		"minified-js": true,
 		"mobile-app-banner": true,
+		"modular-products": true,
 		"navigation": true,
 		"new-product-management-experience": false,
 		"onboarding": true,
