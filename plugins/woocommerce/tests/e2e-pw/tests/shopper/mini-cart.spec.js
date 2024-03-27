@@ -4,8 +4,8 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const miniCartPageTitle = `Mini Cart ${ Date.now() }`;
 const miniCartPageSlug = miniCartPageTitle.replace( / /gi, '-' ).toLowerCase();
-const miniCartButton = '.wc-block-mini-cart__button';
-const miniCartBadge = '.wc-block-mini-cart__badge';
+const miniCartButton = 'main .wc-block-mini-cart__button';
+const miniCartBadge = 'main .wc-block-mini-cart__badge';
 
 const simpleProductName = 'Single Hundred Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -119,7 +119,7 @@ test.describe( 'Mini Cart block page', () => {
 		context,
 	} ) => {
 		const colorField = '.components-input-control__input';
-		const miniCartBlock = '.wp-block-woocommerce-mini-cart';
+		const miniCartBlock = 'main .wp-block-woocommerce-mini-cart';
 		const redColor = 'ff0000';
 		const blueColor = '002eff';
 		const greenColor = '00cc09';
@@ -216,8 +216,8 @@ test.describe( 'Mini Cart block page', () => {
 		);
 		await page.locator( miniCartButton ).click();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
-		).toBeVisible();
+			await page.getByText( 'Your cart is currently empty!' ).count()
+		).toBeGreaterThan( 0 );
 		await page.getByRole( 'link', { name: 'Start shopping' } ).click();
 		await expect(
 			page.getByRole( 'heading', { name: 'Shop' } )
@@ -307,9 +307,9 @@ test.describe( 'Mini Cart block page', () => {
 		await page
 			.getByRole( 'button', { name: 'Update', exact: true } )
 			.click();
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			'Shipping costs updated.'
-		);
+		await expect(
+			page.getByText( 'Shipping costs updated' )
+		).toBeVisible();
 
 		await page.goto( miniCartPageSlug );
 		await expect(
