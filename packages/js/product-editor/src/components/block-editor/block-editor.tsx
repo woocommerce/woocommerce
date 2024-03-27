@@ -160,7 +160,7 @@ export function BlockEditor( {
 	);
 
 	const [ layoutTemplateId ] = useProductEntityProp< string >(
-		'meta_data.layout_template_id',
+		'meta_data._layout_template_id',
 		{ postType }
 	);
 
