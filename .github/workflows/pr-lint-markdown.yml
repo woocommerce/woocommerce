@@ -15,7 +15,7 @@ jobs:
 
             - name: Get repo changed files
               id: repo-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                   files: |
                       **/*.md
@@ -24,14 +24,14 @@ jobs:
 
             - name: Get docs changed files
               id: docs-changed-files
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                 files: |
                   docs/**/*.md
 
             - name: Get docs manifest
               id: docs-manifest
-              uses: tj-actions/changed-files@v37
+              uses: tj-actions/changed-files@v41
               with:
                 files: |
                   docs/docs-manifest.json
