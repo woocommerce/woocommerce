@@ -1,6 +1,5 @@
 .woocommerce-recommended-payments-banner {
 	margin: 0 15px 10px 0;
-	min-width: 750px;
 	animation: isLoaded;
 	animation-duration: 250ms;
 
@@ -29,10 +28,11 @@
 
 	.woocommerce-recommended-payments-banner__image_container {
 		display: flex;
+		padding-left: 15px;
+		min-width: 200px;
 	}
 
 	.woocommerce-recommended-payments-banner__text_container {
-		width: 28%;
 		margin-inline: 24px;
 
 		a {
@@ -46,9 +46,10 @@
 
 	.woocommerce-recommended-payments-banner__footer {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
-		padding: 20px 0 30px 0;
+		padding: 20px 15px 30px;
 
 		p {
 			color: #757575;
