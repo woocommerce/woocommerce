@@ -431,7 +431,7 @@ test.describe( 'Shopper → Place Guest Order', () => {
 } );
 
 test.describe( 'Shopper → Place Virtual Order', () => {
-	test.beforeEach( async ( { requestUtils } ) => {
+	test.beforeAll( async ( { requestUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
 			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
@@ -439,7 +439,7 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 		} );
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
+	test.afterAll( async ( { requestUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
 			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
