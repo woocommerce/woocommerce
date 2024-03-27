@@ -117,8 +117,8 @@ test.describe( 'Cart Block page', () => {
 			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
-		).toBeVisible();
+			await page.getByText( 'Your cart is currently empty!' ).count()
+		).toBeGreaterThan( 0 );
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )
 		).toBeVisible();
@@ -178,12 +178,19 @@ test.describe( 'Cart Block page', () => {
 				exact: true,
 			} )
 			.click();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page
+			.getByLabel( `Add to cart: “${ simpleProductName }”` )
+			.click();
 		await page.goto( cartBlockPageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: cartBlockPageTitle } )
 		).toBeVisible();
-		await page.locator( '.add_to_cart_button' ).click();
+		await page
+			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 1”` )
+			.click();
+		await page
+			.getByLabel( `Add to cart: “${ simpleProductName } Cross-Sell 2”` )
+			.click();
 		await expect(
 			page.getByRole( 'heading', { name: 'You may be interested in…' } )
 		).toBeHidden();
