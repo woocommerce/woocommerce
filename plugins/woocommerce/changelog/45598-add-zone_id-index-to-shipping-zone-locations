@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Add index to zone_id column for woocommerce_shipping_zone_locations

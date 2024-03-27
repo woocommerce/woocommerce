@@ -49,6 +49,15 @@ class LaunchYourStore extends Task {
 	}
 
 	/**
+	 * Action URL.
+	 *
+	 * @return string
+	 */
+	public function get_action_url() {
+		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Flaunch-your-store' );
+	}
+
+	/**
 	 * Task completion.
 	 *
 	 * @return bool

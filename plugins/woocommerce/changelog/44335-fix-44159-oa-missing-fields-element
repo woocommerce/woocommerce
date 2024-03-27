@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move the rendering of Order Attribution inputs fully to JS. Support multiple instances on the same page.
