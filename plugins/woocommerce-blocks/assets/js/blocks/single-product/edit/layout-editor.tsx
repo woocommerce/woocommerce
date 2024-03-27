@@ -25,6 +25,8 @@ import {
  */
 import { DEFAULT_INNER_BLOCKS, ALLOWED_INNER_BLOCKS } from '../constants';
 import metadata from '../block.json';
+import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../../product-query/variations/elements/product-title';
+import { VARIATION_NAME as PRODUCT_SUMMARY_VARIATION_NAME } from '../../product-query/variations/elements/product-summary';
 
 interface LayoutEditorProps {
 	isLoading: boolean;
@@ -48,6 +50,74 @@ const LayoutEditor = ( {
 			false
 		);
 	}, [ clientId, replaceInnerBlocks ] );
+
+	const defaultTemplate = () => {
+		if ( ! isLoading && product ) {
+			return [
+				[
+					'core/columns',
+					{},
+					[
+						[
+							'core/column',
+							{},
+							[
+								[
+									'core/image',
+									{
+										url: product?.images[ 0 ].src,
+										metadata: {
+											bindings: {
+												url: {
+													source: 'woo/data-binding',
+													args: {
+														key: 'product',
+														postId: product.id,
+													},
+												},
+											},
+										},
+									},
+								],
+							],
+						],
+						[
+							'core/column',
+							{},
+							[
+								[
+									'core/post-title',
+									{
+										headingLevel: 2,
+										isLink: true,
+										__woocommerceNamespace:
+											PRODUCT_TITLE_VARIATION_NAME,
+									},
+								],
+								[
+									'woocommerce/product-rating',
+									{ isDescendentOfSingleProductBlock: true },
+								],
+								[
+									'woocommerce/product-price',
+									{ isDescendentOfSingleProductBlock: true },
+								],
+								[
+									'core/post-excerpt',
+									{
+										__woocommerceNamespace:
+											PRODUCT_SUMMARY_VARIATION_NAME,
+									},
+								],
+								[ 'woocommerce/add-to-cart-form' ],
+								[ 'woocommerce/product-meta' ],
+							],
+						],
+					],
+				],
+			];
+		}
+	};
 
 	return (
 		<InnerBlockLayoutContextProvider
@@ -82,7 +152,7 @@ const LayoutEditor = ( {
 						value={ { postId: product?.id, postType: 'product' } }
 					>
 						<InnerBlocks
-							template={ DEFAULT_INNER_BLOCKS }
+							template={ defaultTemplate() }
 							allowedBlocks={ ALLOWED_INNER_BLOCKS }
 							templateLock={ false }
 						/>
