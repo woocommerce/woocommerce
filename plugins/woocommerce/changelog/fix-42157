@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the broken contract in the StoreAPI and the bug in the price clauses causing the incorrect filter counts.

@@ -91,12 +91,49 @@ class ProductCollectionData extends AbstractRoute {
 		}
 
 		if ( ! empty( $request['calculate_attribute_counts'] ) ) {
-			foreach ( $request['calculate_attribute_counts'] as $attributes_to_count ) {
-				if ( ! isset( $attributes_to_count['taxonomy'] ) ) {
-					continue;
-				}
+			$taxonomy__or_queries  = [];
+			$taxonomy__and_queries = [];
 
-				$counts = $filters->get_attribute_counts( $request, $attributes_to_count['taxonomy'] );
+			foreach ( $request['calculate_attribute_counts'] as $attributes_to_count ) {
+				if ( ! empty( $attributes_to_count['taxonomy'] ) ) {
+					if ( empty( $attributes_to_count['query_type'] ) || 'or' === $attributes_to_count['query_type'] ) {
+						$taxonomy__or_queries[] = $attributes_to_count['taxonomy'];
+					} else {
+						$taxonomy__and_queries[] = $attributes_to_count['taxonomy'];
+					}
+				}
+			}
+
+			$data['attribute_counts'] = [];
+			// Or type queries need special handling because the attribute, if set, needs removing from the query first otherwise counts would not be correct.
+			if ( $taxonomy__or_queries ) {
+				foreach ( $taxonomy__or_queries as $taxonomy ) {
+					$filter_request    = clone $request;
+					$filter_attributes = $filter_request->get_param( 'attributes' );
+
+					if ( ! empty( $filter_attributes ) ) {
+						$filter_attributes = array_filter(
+							$filter_attributes,
+							function( $query ) use ( $taxonomy ) {
+								return $query['attribute'] !== $taxonomy;
+							}
+						);
+					}
+
+					$filter_request->set_param( 'attributes', $filter_attributes );
+					$counts = $filters->get_attribute_counts( $filter_request, [ $taxonomy ] );
+
+					foreach ( $counts as $key => $value ) {
+						$data['attribute_counts'][] = (object) [
+							'term'  => $key,
+							'count' => $value,
+						];
+					}
+				}
+			}
+
+			if ( $taxonomy__and_queries ) {
+				$counts = $filters->get_attribute_counts( $request, $taxonomy__and_queries );
 
 				foreach ( $counts as $key => $value ) {
 					$data['attribute_counts'][] = (object) [
@@ -132,31 +169,31 @@ class ProductCollectionData extends AbstractRoute {
 		$params = ( new Products( $this->schema_controller, $this->schema ) )->get_collection_params();
 
 		$params['calculate_price_range'] = [
-			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woocommerce' ),
+			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woo-gutenberg-products-block' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
 
 		$params['calculate_stock_status_counts'] = [
-			'description' => __( 'If true, calculates stock counts for products in the collection.', 'woocommerce' ),
+			'description' => __( 'If true, calculates stock counts for products in the collection.', 'woo-gutenberg-products-block' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
 
 		$params['calculate_attribute_counts'] = [
-			'description' => __( 'If requested, calculates attribute term counts for products in the collection.', 'woocommerce' ),
+			'description' => __( 'If requested, calculates attribute term counts for products in the collection.', 'woo-gutenberg-products-block' ),
 			'type'        => 'array',
 			'items'       => [
 				'type'       => 'object',
 				'properties' => [
 					'taxonomy'   => [
-						'description' => __( 'Taxonomy name.', 'woocommerce' ),
+						'description' => __( 'Taxonomy name.', 'woo-gutenberg-products-block' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'query_type' => [
-						'description' => __( 'Filter condition	 being performed which may affect counts. Valid values include "and" and "or".', 'woocommerce' ),
+						'description' => __( 'Filter condition	 being performed which may affect counts. Valid values include "and" and "or".', 'woo-gutenberg-products-block' ),
 						'type'        => 'string',
 						'enum'        => [ 'and', 'or' ],
 						'context'     => [ 'view', 'edit' ],
@@ -168,7 +205,7 @@ class ProductCollectionData extends AbstractRoute {
 		];
 
 		$params['calculate_rating_counts'] = [
-			'description' => __( 'If true, calculates rating counts for products in the collection.', 'woocommerce' ),
+			'description' => __( 'If true, calculates rating counts for products in the collection.', 'woo-gutenberg-products-block' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
