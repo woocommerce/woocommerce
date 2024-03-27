@@ -26,6 +26,13 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		innerBlockAreas.CART_ORDER_SUMMARY
 	);
 	const defaultTemplate = [
+		[
+			'woocommerce/cart-order-summary-heading-block',
+			{
+				content: __( 'Cart totals', 'woocommerce' ),
+			},
+			[],
+		],
 		[ 'woocommerce/cart-order-summary-coupon-form-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-subtotal-block', {}, [] ],
 		[ 'woocommerce/cart-order-summary-fee-block', {}, [] ],
