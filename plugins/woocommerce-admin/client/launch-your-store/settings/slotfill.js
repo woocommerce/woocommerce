@@ -17,38 +17,46 @@ import { useCopyToClipboard } from '@wordpress/compose';
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
-import { useLaunchYourStore } from '../use-launch-your-store';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const SiteVisibility = () => {
-	const {
-		isLoading,
-		comingSoon: initialComingSoon = false,
-		storePagesOnly: initialStorePagesOnly = false,
-		privateLink: initialPrivateLink = false,
-		shareKey,
-	} = useLaunchYourStore();
-	const [ comingSoon, setComingSoon ] = useState( initialComingSoon );
-	const [ storePagesOnly, setStorePagesOnly ] = useState(
-		initialStorePagesOnly
+	const shareKey =
+		window?.wcSettings?.admin?.siteVisibilitySettings
+			?.woocommerce_share_key;
+
+	const [ comingSoon, setComingSoon ] = useState(
+		window?.wcSettings?.admin?.siteVisibilitySettings
+			?.woocommerce_coming_soon
 	);
-	const [ privateLink, setPrivateLink ] = useState( initialPrivateLink );
+	const [ storePagesOnly, setStorePagesOnly ] = useState(
+		window?.wcSettings?.admin?.siteVisibilitySettings
+			?.woocommerce_store_pages_only
+	);
+	const [ privateLink, setPrivateLink ] = useState(
+		window?.wcSettings?.admin?.siteVisibilitySettings
+			?.woocommerce_private_link
+	);
 
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
 	const getPrivateLink = () => {
-		return (
-			window?.wcSettings?.homeUrl +
-			( storePagesOnly === 'yes' ? 'store?woo-share=' : '?woo-share=' ) +
-			shareKey
-		);
+		if ( storePagesOnly === 'yes' ) {
+			return (
+				window?.wcSettings?.admin?.siteVisibilitySettings
+					?.shop_permalink +
+				'?woo-share=' +
+				shareKey
+			);
+		}
+
+		return window?.wcSettings?.homeUrl + '?woo-share=' + shareKey;
 	};
 
-	const ref = useCopyToClipboard( getPrivateLink, () => {
+	const copyClipboardRef = useCopyToClipboard( getPrivateLink, () => {
 		setCopyLinkText( copied );
 		setTimeout( () => {
 			setCopyLinkText( copyLink );
@@ -56,21 +64,14 @@ const SiteVisibility = () => {
 	} );
 
 	useEffect( () => {
-		if ( ! isLoading ) {
-			setComingSoon( initialComingSoon );
-			setStorePagesOnly( initialStorePagesOnly );
-			setPrivateLink( initialPrivateLink );
-			document
-				.querySelectorAll( '.site-visibility-settings-slotfill label' )
-				.forEach( ( label ) => label.removeAttribute( 'for' ) );
-		}
-	}, [ isLoading ] );
+		document
+			.querySelectorAll( '.site-visibility-settings-slotfill label' )
+			.forEach( ( label ) => label.removeAttribute( 'for' ) );
+	}, [] );
 
 	return (
 		<div
-			className={ classNames( 'site-visibility-settings-slotfill', {
-				placeholder: isLoading,
-			} ) }
+			className={ classNames( 'site-visibility-settings-slotfill', {} ) }
 		>
 			<input
 				type="hidden"
@@ -159,7 +160,10 @@ const SiteVisibility = () => {
 								{ privateLink === 'yes' && (
 									<div className="site-visibility-settings-slotfill-private-link">
 										{ getPrivateLink() }
-										<Button ref={ ref } variant="link">
+										<Button
+											ref={ copyClipboardRef }
+											variant="link"
+										>
 											{ copyLinkText }
 										</Button>
 									</div>
