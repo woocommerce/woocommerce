@@ -117,8 +117,6 @@ export function TextAreaBlockEdit( {
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore onClick exists on Label
 						onClick={ isRichTextMode ? focusRichText : undefined }
 					/>
 				}
