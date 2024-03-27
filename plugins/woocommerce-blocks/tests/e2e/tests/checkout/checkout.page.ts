@@ -160,6 +160,7 @@ export class CheckoutPage {
 	 */
 	async waitForCheckoutToFinishUpdating() {
 		await this.page.evaluate( 'document.activeElement.blur()' );
+
 		await this.page.waitForFunction( () => {
 			return (
 				! window.wp.data
@@ -182,6 +183,18 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
+		await this.page
+			.waitForRequest(
+				( request ) => {
+					return request.url().includes( 'batch' );
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is just in case there's a debounced request
+				// still to be made, e.g. from checking "Can a truck fit down
+				// your road?" field.
+			} );
 		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
@@ -353,9 +366,6 @@ export class CheckoutPage {
 			const field = billingForm.getByLabel( label, { exact: true } );
 			await field.fill( value );
 		}
-
-		// Blur active field to trigger customer address update.
-		await this.page.keyboard.press( 'Escape' );
 	}
 
 	async fillShippingDetails(

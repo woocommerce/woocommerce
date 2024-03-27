@@ -80,7 +80,7 @@ test.describe( 'WooCommerce Merchant Flow: Orders > Customer Payment Page', () =
 
 		// verify we landed on the customer payment page
 		await expect(
-			page.getByText( 'You are paying for a guest order.' )
+			page.getByRole( 'button', { name: 'Pay for order' } )
 		).toBeVisible();
 		await expect( page.locator( 'td.product-name' ) ).toContainText(
 			productName
