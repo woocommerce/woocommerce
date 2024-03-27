@@ -1,0 +1,47 @@
+
+<div class="wp-block-group alignfull wc-blocks-pattern-footer-large wc-blocks-footer-pattern is-layout-flow wp-container-core-group-layout-18 wp-block-group-is-layout-flow" style="padding-top:40px;padding-right:40px;padding-bottom:40px;padding-left:40px">
+<div class="wp-block-columns alignwide is-layout-flex wp-container-core-columns-layout-6 wp-block-columns-is-layout-flex" style="padding-right:0px;padding-left:0px">
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="padding-right:50px;flex-basis:60%">
+<div class="wp-block-group is-vertical is-layout-flex wp-container-core-group-layout-16 wp-block-group-is-layout-flex">
+
+
+<h5 class="wp-block-heading" style="margin-top:40px;text-transform:none">Join the community</h5>
+
+
+
+<p style="margin-bottom:40px">Learn about new products and discounts</p>
+
+
+
+<ul class="wp-block-social-links has-small-icon-size is-style-logos-only is-layout-flex wp-container-core-social-links-layout-2 wp-block-social-links-is-layout-flex"><li class="wp-social-link wp-social-link-facebook  wp-block-social-link"><a href="https://www.facebook.com" class="wp-block-social-link-anchor"><svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M12 2C6.5 2 2 6.5 2 12c0 5 3.7 9.1 8.4 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3v7C18.3 21.1 22 17 22 12c0-5.5-4.5-10-10-10z"></path></svg><span class="wp-block-social-link-label screen-reader-text">Facebook</span></a></li>
+
+<li class="wp-social-link wp-social-link-x  wp-block-social-link"><a href="https://www.x.com" class="wp-block-social-link-anchor"><svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M13.982 10.622 20.54 3h-1.554l-5.693 6.618L8.745 3H3.5l6.876 10.007L3.5 21h1.554l6.012-6.989L15.868 21h5.245l-7.131-10.378Zm-2.128 2.474-.697-.997-5.543-7.93H8l4.474 6.4.697.996 5.815 8.318h-2.387l-4.745-6.787Z"></path></svg><span class="wp-block-social-link-label screen-reader-text">X</span></a></li>
+
+<li class="wp-social-link wp-social-link-instagram  wp-block-social-link"><a href="https://www.instagram.com" class="wp-block-social-link-anchor"><svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M12,4.622c2.403,0,2.688,0.009,3.637,0.052c0.877,0.04,1.354,0.187,1.671,0.31c0.42,0.163,0.72,0.358,1.035,0.673 c0.315,0.315,0.51,0.615,0.673,1.035c0.123,0.317,0.27,0.794,0.31,1.671c0.043,0.949,0.052,1.234,0.052,3.637 s-0.009,2.688-0.052,3.637c-0.04,0.877-0.187,1.354-0.31,1.671c-0.163,0.42-0.358,0.72-0.673,1.035 c-0.315,0.315-0.615,0.51-1.035,0.673c-0.317,0.123-0.794,0.27-1.671,0.31c-0.949,0.043-1.233,0.052-3.637,0.052 s-2.688-0.009-3.637-0.052c-0.877-0.04-1.354-0.187-1.671-0.31c-0.42-0.163-0.72-0.358-1.035-0.673 c-0.315-0.315-0.51-0.615-0.673-1.035c-0.123-0.317-0.27-0.794-0.31-1.671C4.631,14.688,4.622,14.403,4.622,12 s0.009-2.688,0.052-3.637c0.04-0.877,0.187-1.354,0.31-1.671c0.163-0.42,0.358-0.72,0.673-1.035 c0.315-0.315,0.615-0.51,1.035-0.673c0.317-0.123,0.794-0.27,1.671-0.31C9.312,4.631,9.597,4.622,12,4.622 M12,3 C9.556,3,9.249,3.01,8.289,3.054C7.331,3.098,6.677,3.25,6.105,3.472C5.513,3.702,5.011,4.01,4.511,4.511 c-0.5,0.5-0.808,1.002-1.038,1.594C3.25,6.677,3.098,7.331,3.054,8.289C3.01,9.249,3,9.556,3,12c0,2.444,0.01,2.751,0.054,3.711 c0.044,0.958,0.196,1.612,0.418,2.185c0.23,0.592,0.538,1.094,1.038,1.594c0.5,0.5,1.002,0.808,1.594,1.038 c0.572,0.222,1.227,0.375,2.185,0.418C9.249,20.99,9.556,21,12,21s2.751-0.01,3.711-0.054c0.958-0.044,1.612-0.196,2.185-0.418 c0.592-0.23,1.094-0.538,1.594-1.038c0.5-0.5,0.808-1.002,1.038-1.594c0.222-0.572,0.375-1.227,0.418-2.185 C20.99,14.751,21,14.444,21,12s-0.01-2.751-0.054-3.711c-0.044-0.958-0.196-1.612-0.418-2.185c-0.23-0.592-0.538-1.094-1.038-1.594 c-0.5-0.5-1.002-0.808-1.594-1.038c-0.572-0.222-1.227-0.375-2.185-0.418C14.751,3.01,14.444,3,12,3L12,3z M12,7.378 c-2.552,0-4.622,2.069-4.622,4.622S9.448,16.622,12,16.622s4.622-2.069,4.622-4.622S14.552,7.378,12,7.378z M12,15 c-1.657,0-3-1.343-3-3s1.343-3,3-3s3,1.343,3,3S13.657,15,12,15z M16.804,6.116c-0.596,0-1.08,0.484-1.08,1.08 s0.484,1.08,1.08,1.08c0.596,0,1.08-0.484,1.08-1.08S17.401,6.116,16.804,6.116z"></path></svg><span class="wp-block-social-link-label screen-reader-text">Instagram</span></a></li>
+
+<li class="wp-social-link wp-social-link-twitch  wp-block-social-link"><a href="https://www.twitch.com" class="wp-block-social-link-anchor"><svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M16.499,8.089h-1.636v4.91h1.636V8.089z M12,8.089h-1.637v4.91H12V8.089z M4.228,3.178L3,6.451v13.092h4.499V22h2.456 l2.454-2.456h3.681L21,14.636V3.178H4.228z M19.364,13.816l-2.864,2.865H12l-2.453,2.453V16.68H5.863V4.814h13.501V13.816z"></path></svg><span class="wp-block-social-link-label screen-reader-text">Twitch</span></a></li></ul>
+</div>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow" style="padding-top:0px;flex-basis:20%"></div>
+
+
+
+<div class="wp-block-column is-vertically-aligned-top is-layout-flow wp-container-core-column-layout-17 wp-block-column-is-layout-flow" style="flex-basis:20%"></div>
+
+
+
+<div class="wp-block-column is-vertically-aligned-top is-layout-flow wp-container-core-column-layout-18 wp-block-column-is-layout-flow" style="flex-basis:20%"><nav class=" is-vertical wp-block-navigation is-layout-flex wp-container-core-navigation-layout-2 wp-block-navigation-is-layout-flex" aria-label="Navigation"><ul class="wp-block-page-list"><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/cart/">Cart</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/checkout/">Checkout</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/my-account/">My account</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/sample-page/">Sample Page</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/shop/">Shop</a></li></ul></nav></div>
+</div>
+
+
+
+<div class="wp-block-group alignfull is-content-justification-center is-layout-flex wp-container-core-group-layout-17 wp-block-group-is-layout-flex" style="padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"><h1 style="font-style:normal;font-weight:700;" class="wp-block-site-title"><a href="http://localhost:8086" target="_self" rel="home" aria-current="page">WooCommerce Core E2E Test Suite</a></h1>
+
+
+<p class="has-text-align-center">
+			Powered by <a href="https://wordpress.org" target="_blank" rel="noreferrer nofollow noopener">WordPress</a> with <a href="https://woocommerce.com" target="_blank" rel="noreferrer nofollow noopener">WooCommerce</a>		</p>
+</div>
+</div>
