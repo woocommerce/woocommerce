@@ -82,9 +82,14 @@ export function TextAreaBlockEdit( {
 	}
 
 	const richTextRef = useRef< HTMLParagraphElement >( null );
+	const textAreaRef = useRef< HTMLTextAreaElement >( null );
 
 	function focusRichText() {
 		richTextRef.current?.focus();
+	}
+
+	function focusTextArea() {
+		textAreaRef.current?.focus();
 	}
 
 	const blockControlsBlockProps = { group: 'block' };
@@ -118,7 +123,9 @@ export function TextAreaBlockEdit( {
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
-						onClick={ isRichTextMode ? focusRichText : undefined }
+						onClick={
+							isRichTextMode ? focusRichText : focusTextArea
+						}
 					/>
 				}
 				help={ help }
@@ -147,6 +154,7 @@ export function TextAreaBlockEdit( {
 
 				{ isPlainTextMode && (
 					<TextareaControl
+						ref={ textAreaRef }
 						value={ content || '' }
 						onChange={ setContent }
 						placeholder={ placeholder }
