@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Removed count from is_array check to fix Analytics comparison filter. [#45939](https://github.com/woocommerce/woocommerce/pull/45939)
 * Fix - Product Editor pages do not pass global settings into Editor. Product Editor is responsible for loading settings itself. [#45490](https://github.com/woocommerce/woocommerce/pull/45490)
 * Fix - Fix issue where no text would be displayed if no shipping methods are available in the cart/checkout [#45249](https://github.com/woocommerce/woocommerce/pull/45249)
 * Fix - Products Stock Indicator and Sale Badge: prevent fatal when block were used in a homepage [#45135](https://github.com/woocommerce/woocommerce/pull/45135)
