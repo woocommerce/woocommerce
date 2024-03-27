@@ -28,7 +28,7 @@ const SiteVisibility = () => {
 
 	const [ comingSoon, setComingSoon ] = useState(
 		window?.wcSettings?.admin?.siteVisibilitySettings
-			?.woocommerce_coming_soon
+			?.woocommerce_coming_soon || 'no'
 	);
 	const [ storePagesOnly, setStorePagesOnly ] = useState(
 		window?.wcSettings?.admin?.siteVisibilitySettings
