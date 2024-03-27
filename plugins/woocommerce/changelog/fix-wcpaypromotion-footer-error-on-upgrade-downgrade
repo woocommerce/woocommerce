@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatals from DataSourcePoller call when downgrade or upgrade WC
