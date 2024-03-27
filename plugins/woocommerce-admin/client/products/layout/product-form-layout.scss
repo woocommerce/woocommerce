@@ -36,13 +36,13 @@ $product-form-tabs-height: 56px;
 		border-top: 1px solid $gray-400;
 		padding: 0 var(--large-gap) 0 var(--large-gap);
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			top: $adminbar-height-mobile + $header-height;
 			width: 100%;
 			left: 0;
 		}
 
-		@include breakpoint( '782px-960px' ) {
+		@include breakpoint( "782px-960px" ) {
 			width: calc(100% - 36px);
 			left: 36px;
 		}
@@ -65,7 +65,7 @@ $product-form-tabs-height: 56px;
 		}
 
 		&:disabled,
-		&[aria-disabled='true'] {
+		&[aria-disabled="true"] {
 			// We need tooltips at full opacity so only child elements have reduced opacity.
 			opacity: 1;
 

@@ -1,5 +1,5 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint('<782px') {
+	@include breakpoint("<782px") {
 		padding-top: 0 !important;
 	}
 

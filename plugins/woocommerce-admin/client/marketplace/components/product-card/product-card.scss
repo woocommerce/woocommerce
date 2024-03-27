@@ -1,4 +1,4 @@
-@import '../../stylesheets/_variables.scss';
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
 	&__product-card {
@@ -152,7 +152,7 @@
 			/* Use the ::after trick to make the whole card clickable: */
 			&::after {
 				bottom: 0;
-				content: '';
+				content: "";
 				left: 0;
 				position: absolute;
 				right: 0;
