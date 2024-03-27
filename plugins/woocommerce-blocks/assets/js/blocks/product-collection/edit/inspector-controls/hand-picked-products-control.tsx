@@ -35,7 +35,13 @@ function useProducts() {
 	);
 
 	useEffect( () => {
-		getProducts( { selected: [] } ).then( ( results ) => {
+		getProducts( {
+			selected: [],
+			queryArgs: {
+				// Fetch all products.
+				per_page: 0,
+			},
+		} ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
