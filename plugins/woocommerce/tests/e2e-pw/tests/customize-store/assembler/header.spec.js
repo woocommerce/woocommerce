@@ -129,10 +129,10 @@ test.describe( 'Assembler -> headers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const style = await page.locator( 'header' ).innerHTML();
+		const headerHTML = await page.locator( 'header' ).innerHTML();
 
 		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( style ).toMatchSnapshot( {
+		expect( headerHTML ).toMatchSnapshot( {
 			name: 'cys-selected-header',
 		} );
 	} );
