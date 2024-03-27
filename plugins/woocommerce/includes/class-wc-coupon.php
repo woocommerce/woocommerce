@@ -86,7 +86,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @var string
 	 */
-	private $error_message;
+	protected $error_message;
 
 	/**
 	 * Sorting.
