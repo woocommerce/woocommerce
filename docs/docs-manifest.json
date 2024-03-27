@@ -642,7 +642,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "e94d3333e6ec94f6bf430ef0ea19a52142a1c60592060e527712bfd701487b72",
+          "hash": "554f98a5f642022a45d29f9ced5c9f960b842188b389be338499470360009cf6",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -1211,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "f1bb14ff2aa8c9be096365b78633ace4696f6314cd298e0cb57104a73b507fac"
+  "hash": "724a3c915312998d95fa8369e0d1743feb910cff68c80d0e39dd6f3381d8e759"
 }
