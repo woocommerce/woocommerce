@@ -42,7 +42,10 @@ export const Label: React.FC< LabelProps > = ( {
 						</span>
 					),
 					required: (
-						<span className="woocommerce-product-form-label__required">
+						<span
+							aria-hidden="true"
+							className="woocommerce-product-form-label__required"
+						>
 							{ /* translators: field 'required' indicator */ }
 							{ __( '*', 'woocommerce' ) }
 						</span>
@@ -55,7 +58,10 @@ export const Label: React.FC< LabelProps > = ( {
 				{
 					label: <span>{ label }</span>,
 					required: (
-						<span className="woocommerce-product-form-label__required">
+						<span
+							aria-hidden="true"
+							className="woocommerce-product-form-label__required"
+						>
 							{ /* translators: field 'required' indicator */ }
 							{ __( '*', 'woocommerce' ) }
 						</span>
