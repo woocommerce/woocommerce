@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 use WP_Query;
 use WC_Tax;
 
@@ -45,7 +46,6 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
-
 	/**
 	 * Initialize this block type.
 	 *
@@ -76,6 +76,9 @@ class ProductCollection extends AbstractBlock {
 		// Extend allowed `collection_params` for the REST API.
 		add_filter( 'rest_product_collection_params', array( $this, 'extend_rest_query_allowed_params' ), 10, 1 );
 
+		// Provide location context into block's context.
+		add_filter( 'render_block_context', array( $this, 'provide_location_context_for_inner_blocks' ), 11, 1 );
+
 		// Interactivity API: Add navigation directives to the product collection block.
 		add_filter( 'render_block_woocommerce/product-collection', array( $this, 'enhance_product_collection_with_interactivity' ), 10, 2 );
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
@@ -85,6 +88,71 @@ class ProductCollection extends AbstractBlock {
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
+	}
+
+	/**
+	 * Provides the location context to each inner block of the product collection block.
+	 * Hint: Only blocks using the 'query' context will be affected.
+	 *
+	 * The sourceData structure depends on the context type as follows:
+	 * - site:    [ ]
+	 * - order:   [ 'orderId'    => int ]
+	 * - cart:    [ 'productIds' => int[] ]
+	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
+	 * - product: [ 'productId'  => int ]
+	 *
+	 * @see ProductCollectionUtils::parse_global_location_context()
+	 *
+	 * @example array(
+	 *   'type'       => 'product',
+	 *   'sourceData' => array( 'productId' => 123 ),
+	 * )
+	 *
+	 * @param array $context  The block context.
+	 * @return array $context {
+	 *     The context including the product collection location context.
+	 *
+	 *     @type array $productCollectionLocation {
+	 *         @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
+	 *         @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
+	 *     }
+	 * }
+	 */
+	public function provide_location_context_for_inner_blocks( $context ) {
+		// Run only on frontend.
+		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
+		if ( is_admin() || \WC()->is_rest_api_request() ) {
+			return $context;
+		}
+
+		// Target only product collection's inner blocks that use the 'query' context.
+		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
+			return $context;
+		}
+
+		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+		$context['productCollectionLocation'] = $is_in_single_product ? array(
+			'type'       => 'product',
+			'sourceData' => array(
+				'productId' => absint( $context['postId'] ),
+			),
+		) : $this->get_location_context();
+
+		return $context;
+	}
+
+	/**
+	 * Get the global location context.
+	 * Serve as a runtime cache for the location context.
+	 *
+	 * @return array The location context as described in self::update_context().
+	 */
+	private function get_location_context() {
+		static $location_context = null;
+		if ( null === $location_context ) {
+			$location_context = ProductCollectionUtils::parse_global_location_context();
+		}
+		return $location_context;
 	}
 
 	/**
