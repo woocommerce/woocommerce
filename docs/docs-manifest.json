@@ -458,11 +458,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-<<<<<<< HEAD
-          "hash": "6c97092279436171fa847119ea8813a35b8ad7b8784bc3c993236648687064c1",
-=======
-          "hash": "9595eb683dee58617439093a077a1bcf2ed27e1c2be85485dc627a34015180cc",
->>>>>>> edcf294144 (Adds updated manifest.json file)
+          "hash": "d1ad51948f0391f342e968fcf3889dda234a64b8256090061b7b6db074b0a6e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -1215,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "f1bb14ff2aa8c9be096365b78633ace4696f6314cd298e0cb57104a73b507fac"
+  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
 }
