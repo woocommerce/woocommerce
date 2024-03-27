@@ -41,6 +41,8 @@ export class AssemblerPage {
 	 */
 	async getEditor() {
 		const assembler = await this.getAssembler();
-		return assembler.frameLocator( '[name="editor-canvas"]' );
+		return assembler.frameLocator(
+			'[name="editor-canvas"]:not(.global-styles-variation-container__iframe)'
+		);
 	}
 }

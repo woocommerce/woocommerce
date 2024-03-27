@@ -1,8 +1,7 @@
 {
+	"core": "https://wordpress.org/wordpress-6.5-RC3.zip",
 	"phpVersion": "7.4",
-	"plugins": [
-		"."
-	],
+	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
