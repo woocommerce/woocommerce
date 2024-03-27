@@ -21,7 +21,6 @@ class LaunchYourStore {
 	 * Save values submitted from WooCommerce -> Settings -> General.
 	 *
 	 * @return void
-	 *
 	 */
 	public function save_site_visibility_options() {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
