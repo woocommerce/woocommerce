@@ -33,4 +33,14 @@ export class AssemblerPage {
 		}
 		return this.page;
 	}
+
+	/**
+	 * Get the editor frame locator.
+	 *
+	 * @return {Promise<import('playwright').FrameLocator>} The editor frame locator.
+	 */
+	async getEditor() {
+		const assembler = await this.getAssembler();
+		return assembler.frameLocator( '[name="editor-canvas"]' );
+	}
 }
