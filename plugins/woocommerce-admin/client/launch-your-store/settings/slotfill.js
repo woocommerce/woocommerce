@@ -70,9 +70,7 @@ const SiteVisibility = () => {
 	}, [] );
 
 	return (
-		<div
-			className={ classNames( 'site-visibility-settings-slotfill', {} ) }
-		>
+		<div className="site-visibility-settings-slotfill">
 			<input
 				type="hidden"
 				value={ comingSoon }
