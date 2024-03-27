@@ -83,6 +83,8 @@ class Init {
 
 			add_filter( 'get_the_terms', array( $this, 'add_default_theme_terms' ), 10, 3 );
 
+			add_filter( 'block_editor_settings_all', array( $this, 'remove_default_editor_styles' ), 10, 2 );
+
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
 
@@ -91,6 +93,23 @@ class Init {
 
 			$this->register_product_templates();
 		}
+	}
+
+	/**
+	 * Remove the editor styles that override admin styles of various blocks.
+	 *
+	 * @param array $editor_settings Editor settings.
+	 * @param array $editor_content  Editor context.
+	 * @return array Editor settings.
+	 */
+	public function remove_default_editor_styles( $editor_settings, $editor_context ) {
+		if ( $editor_context->post && 'product_form' !== $editor_context->post->post_type ) {
+			return $editor_settings;
+		}
+
+		$editor_settings["styles"] = array();
+	
+		return $editor_settings;
 	}
 
 	/**
