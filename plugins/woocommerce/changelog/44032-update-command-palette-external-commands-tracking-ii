@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add tracking to non-WooCommerce commands in the Command Palette.
