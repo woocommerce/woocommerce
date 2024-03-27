@@ -180,7 +180,17 @@
 						"--shard=4/5", 
 						"--shard=5/5"
 					],
-					"changes": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/e2e-pw/**"
+					],
 					"testEnv": {
 						"start": "env:test"
 					}
@@ -189,7 +199,17 @@
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
-					"changes": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/api-core-tests/**"
+					],
 					"testEnv": {
 						"start": "env:test"
 					}
@@ -198,7 +218,17 @@
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
-					"changes": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/performance/**"
+					],
 					"testEnv": {
 						"start": "env:perf"
 					}
