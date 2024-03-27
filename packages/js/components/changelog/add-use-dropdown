@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update experimental select control to use dropdown hooks and improve extensibility

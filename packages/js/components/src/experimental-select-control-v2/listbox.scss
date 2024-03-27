@@ -1,0 +1,24 @@
+.woocommerce-experimental-select-control {
+	&__listbox {
+		position: absolute;
+		width: 100%;
+		top: 100%;
+		left: 0;
+		margin-top: 8px;
+	}
+}
+.woocommerce-experimental-select-control__popover-listbox {
+	background: $studio-white;
+	border: 1px solid $studio-gray-5;
+	border-radius: 3px;
+	display: none;
+	&.is-open.has-results {
+		display: block;
+	}
+
+	&-container {
+		margin: 0;
+		max-height: 300px;
+		overflow-y: auto;
+	}
+}
