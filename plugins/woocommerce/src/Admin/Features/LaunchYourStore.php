@@ -53,6 +53,30 @@ class LaunchYourStore {
 		}
 	}
 
+	public function get_coming_soon_content() {
+		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group"><!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer -->
+		
+		<!-- wp:heading {"level":1} -->
+		<h1 class="wp-block-heading">Great things coming soon</h1>
+		<!-- /wp:heading -->
+		
+		<!-- wp:spacer {"height":"10px"} -->
+		<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer -->
+		
+		<!-- wp:paragraph -->
+		<p>Something big is brewing! Our store is in the works - Launching shortly!</p>
+		<!-- /wp:paragraph -->
+		
+		<!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer --></div>
+		<!-- /wp:group -->';
+	}
+
 	/**
 	 * Add `coming soon` page when it hasn't been created yet.
 	 *
@@ -66,12 +90,14 @@ class LaunchYourStore {
 		$is_home        = isset( $current_page['id'] ) && 'woocommerce-home' === $current_page['id'];
 		$page_id_option = get_option( $option_name, false );
 		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_home && ! $page_id_option ) {
-			wc_create_page(
+			$page_id = wc_create_page(
 				esc_sql( _x( 'Coming Soon', 'Page slug', 'woocommerce' ) ),
 				$option_name,
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
-				'tbd',
+				$this->get_coming_soon_content(),
 			);
+			// Make sure the page uses the no-title template.
+			update_post_meta( $page_id, '_wp_page_template', 'page-no-title' );
 			// wc_create_page doesn't create options with autoload = yes.
 			// Since we'll querying the option on WooCommerce home,
 			// we should update the option to set autoload to yes.
