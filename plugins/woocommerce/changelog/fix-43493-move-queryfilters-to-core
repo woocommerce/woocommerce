@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add new services provider: ProductQueryFiltersServicesProvider to generate filter post clauses and calculate filter data.

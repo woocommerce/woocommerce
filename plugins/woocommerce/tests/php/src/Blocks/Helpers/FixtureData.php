@@ -177,7 +177,7 @@ class FixtureData {
 			$result = term_exists( $term, $attribute->slug );
 
 			if ( ! $result ) {
-				$result               = wp_insert_term(
+				$result = wp_insert_term(
 					$term,
 					$attribute->slug,
 					array(
@@ -185,10 +185,9 @@ class FixtureData {
 						'description' => 'Description of ' . $term,
 					)
 				);
-				$return['term_ids'][] = $result['term_id'];
-			} else {
-				$return['term_ids'][] = $result['term_id'];
 			}
+
+			$return['term_ids'][] = intval( $result['term_id'] );
 		}
 
 		return $return;
