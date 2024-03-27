@@ -4,8 +4,9 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
-import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
+import { CART_STORE_KEY, CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import { default as fetchMock } from 'jest-fetch-mock';
+import { allSettings } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -33,9 +34,7 @@ import Fee from '../inner-blocks/checkout-order-summary-fee/frontend';
 import Discount from '../inner-blocks/checkout-order-summary-discount/frontend';
 import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
-
 import { defaultCartState } from '../../../data/cart/default-state';
-
 import Checkout from '../block';
 
 jest.mock( '@wordpress/compose', () => ( {
@@ -94,8 +93,8 @@ describe( 'Testing cart', () => {
 				return Promise.resolve( '' );
 			} );
 			// need to clear the store resolution state between tests.
-			dispatch( storeKey ).invalidateResolutionForStore();
-			dispatch( storeKey ).receiveCart( defaultCartState.cartData );
+			dispatch( CART_STORE_KEY ).invalidateResolutionForStore();
+			dispatch( CART_STORE_KEY ).receiveCart( defaultCartState.cartData );
 		} );
 	} );
 
@@ -103,7 +102,7 @@ describe( 'Testing cart', () => {
 		fetchMock.resetMocks();
 	} );
 
-	it( 'renders checkout if there are items in the cart', async () => {
+	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
@@ -163,5 +162,27 @@ describe( 'Testing cart', () => {
 		).toBeInTheDocument();
 
 		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Ensures checkbox labels have unique IDs', async () => {
+		allSettings.checkoutAllowsGuest = true;
+		allSettings.checkoutAllowsSignup = true;
+		dispatch( CHECKOUT_STORE_KEY ).__internalSetCustomerId( 0 );
+
+		// Render the CheckoutBlock
+		render( <CheckoutBlock /> );
+
+		// Wait for the component to fully load, assuming fetch calls or state updates
+		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+
+		// Query for all checkboxes
+		const checkboxes = screen.getAllByRole( 'checkbox' );
+
+		// Extract IDs from checkboxes
+		const ids = checkboxes.map( ( checkbox ) => checkbox.id );
+
+		// Ensure all IDs are unique
+		const uniqueIds = new Set( ids );
+		expect( uniqueIds.size ).toBe( ids.length );
 	} );
 } );
