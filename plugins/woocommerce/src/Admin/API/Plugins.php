@@ -151,7 +151,12 @@ class Plugins extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'connect_jetpack' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'permission_callback' => function() {
+						if ( ! current_user_can( 'manage_woocommerce' ) ) {
+							return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage Jetpack connections.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+						}
+						return true;
+					},
 				),
 				'schema' => array( $this, 'get_connect_schema' ),
 			)
