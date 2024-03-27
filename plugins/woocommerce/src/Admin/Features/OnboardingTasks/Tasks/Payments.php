@@ -105,6 +105,11 @@ class Payments extends Task {
 	public function get_action_url() {
 		// Check if the WooPayments plugin is active and the store is supported.
 		if ( WooCommercePayments::is_supported() && WooCommercePayments::is_wcpay_active() ) {
+			// If WooPayments is connected, point to the WooPayments overview page.
+			if ( WooCommercePayments::is_connected() ) {
+				return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/overview' ) );
+			}
+
 			// Point to the WooPayments Connect page.
 			return add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=/payments/connect' ) );
 		}
