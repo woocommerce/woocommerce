@@ -1615,6 +1615,8 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( $api_refund ) {
 				if ( WC()->payment_gateways() ) {
 					$payment_gateways = WC()->payment_gateways->payment_gateways();
+				} else {
+					$payment_gateways = array();
 				}
 
 				$order = wc_get_order( $order_id );
