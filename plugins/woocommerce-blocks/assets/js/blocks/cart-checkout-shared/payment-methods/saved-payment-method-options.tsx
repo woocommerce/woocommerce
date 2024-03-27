@@ -34,7 +34,7 @@ const getCcOrEcheckLabel = ( {
 	expires: string;
 } ): string => {
 	const networks = method.networks || [];
-	if ( method.isCoBranded && networks.length > 1 ) {
+	if ( method.is_co_branded && networks.length > 1 ) {
 		return sprintf(
 			/* translators: %1$s is referring to the credit card brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date, %4$s is referring to the preferred network. */
 			__(
@@ -44,7 +44,7 @@ const getCcOrEcheckLabel = ( {
 			networks.join( ' / ' ),
 			method.last4,
 			expires,
-			method.preferredNetwork
+			method.preferred_network
 		);
 	}
 	return sprintf(
