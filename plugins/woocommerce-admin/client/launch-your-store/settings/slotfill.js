@@ -17,6 +17,7 @@ import classNames from 'classnames';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import { useLaunchYourStore } from '../use-launch-your-store';
 import './style.scss';
+import { recordEvent } from '@woocommerce/tracks';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -73,6 +74,9 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'yes' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'coming_soon',
+						} );
 					} }
 					options={ [
 						{
@@ -116,6 +120,9 @@ const SiteVisibility = () => {
 							setStorePagesOnly(
 								storePagesOnly === 'yes' ? 'no' : 'yes'
 							);
+							recordEvent(
+								'site_visibility_restrict_store_pages_only'
+							);
 						} }
 					/>
 					<ToggleControl
@@ -138,6 +145,7 @@ const SiteVisibility = () => {
 							setPrivateLink(
 								privateLink === 'yes' ? 'no' : 'yes'
 							);
+							recordEvent( 'site_visibility_share_private_link' );
 						} }
 					/>
 				</div>
@@ -146,6 +154,9 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'no' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'live',
+						} );
 					} }
 					options={ [
 						{
