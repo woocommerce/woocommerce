@@ -22,12 +22,10 @@ function useProductMetadata( options?: Options ) {
 	const thisId = useEntityId( 'postType', postType );
 	const id = options?.id || thisId;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	const { isLoading, meta_data } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
 			const { meta_data: metadata }: Product = getEditedEntityRecord(

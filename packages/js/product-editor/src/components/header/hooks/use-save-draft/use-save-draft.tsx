@@ -37,7 +37,6 @@ export function useSaveDraft( {
 
 	const { hasEdits, isDisabled } = useSelect(
 		( select ) => {
-			// @ts-expect-error There are no types for this.
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
 			const isSaving = isSavingEntityRecord< boolean >(
@@ -66,7 +65,6 @@ export function useSaveDraft( {
 		( productStatus !== 'publish' && ! hasEdits ) ||
 		isValidating;
 
-	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
 	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
@@ -84,7 +82,7 @@ export function useSaveDraft( {
 			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
-			// @ts-expect-error There are no types for this.
+
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				productType,

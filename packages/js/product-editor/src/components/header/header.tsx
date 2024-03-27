@@ -95,6 +95,8 @@ export function Header( {
 			} );
 	}, [ sidebarWidth ] );
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
 	const isVariation = lastPersistedProduct?.parent_id > 0;
 
 	const [ selectedImage ] = useEntityProp< Image | Image[] | null >(
@@ -183,6 +185,8 @@ export function Header( {
 										);
 										const url = getNewPath(
 											{ tab: 'variations' },
+											// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+											// @ts-ignore
 											`/product/${ lastPersistedProduct?.parent_id }`
 										);
 										navigateTo( { url } );
@@ -225,14 +229,20 @@ export function Header( {
 					<h1 className="woocommerce-product-header__title">
 						{ isVariation ? (
 							<>
+								{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+								{ /* @ts-ignore */ }
 								{ lastPersistedProduct?.name }
 								<span className="woocommerce-product-header__variable-product-id">
-									# { lastPersistedProduct?.id }
+									{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
+									{ /* @ts-ignore */ }#{ ' ' }
+									{ lastPersistedProduct?.id }
 								</span>
 							</>
 						) : (
 							getHeaderTitle(
 								editedProductName,
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore
 								lastPersistedProduct?.name
 							)
 						) }
@@ -246,12 +256,16 @@ export function Header( {
 					{ ! isVariation && (
 						<SaveDraftButton
 							productType={ productType }
+							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+							// @ts-ignore
 							productStatus={ lastPersistedProduct?.status }
 						/>
 					) }
 
 					<PreviewButton
 						productType={ productType }
+						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+						// @ts-ignore
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
