@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 /**
  * Internal dependencies
@@ -23,11 +24,14 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	show_badge?: boolean;
+	badge_text_to_render?: string;
 }
 
 interface Tabs {
 	[ key: string ]: Tab;
 }
+const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
 const tabs: Tabs = {
 	search: {
@@ -49,6 +53,8 @@ const tabs: Tabs = {
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
+		show_badge: ! wccomSettings?.isConnected,
+		badge_text_to_render: '1',
 	},
 };
 
@@ -115,6 +121,7 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
+					{ tabs[ tabKey ]?.show_badge && (<span className="awaiting-mod"> {tabs[ tabKey ]?.badge_text_to_render} </span>)}
 				</Button>
 			)
 		);
