@@ -412,8 +412,9 @@ test.describe
 		} );
 
 		await test.step( 'Go back to the dashboard and confirm that the task is marked as complete', async () => {
-			// hate doing this, but it's the only thing I could get to work
-			await page.waitForTimeout( 12000 );
+			await page.waitForSelector(
+				'.cys-fullscreen-iframe[style="opacity: 1;"]'
+			);
 			await page
 				.frameLocator( 'iframe[title="assembler-hub"]' )
 				.getByLabel( 'Back' )
