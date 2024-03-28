@@ -242,7 +242,7 @@ jobs:
           echo "All jobs have completed successfully."
 
   e2e-test-reports:
-    name: 'e2e test reporting'
+    name: 'Report e2e tests results'
     needs: [ project-e2e-test-jobs ]
     if: ${{ ! cancelled() && needs.project-e2e-test-jobs.result != 'skipped' }}
     runs-on: ubuntu-latest
@@ -308,7 +308,7 @@ jobs:
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
 
   api-test-reports:
-    name: 'API test reports - send workflow dispatch'
+    name: 'Report API tests results'
     needs: [ project-api-test-jobs ]
     if: ${{ ! cancelled() && needs.project-api-test-jobs.result != 'skipped'}}
     runs-on: ubuntu-latest
