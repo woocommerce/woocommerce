@@ -121,7 +121,11 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
-					{ tabs[ tabKey ]?.show_badge && (<span className="awaiting-mod"> {tabs[ tabKey ]?.badge_text_to_render} </span>)}
+					{ tabs[ tabKey ]?.show_badge && (
+						<span className="awaiting-mod">
+							{ tabs[ tabKey ]?.badge_text_to_render }
+						</span>
+					) }
 				</Button>
 			)
 		);
