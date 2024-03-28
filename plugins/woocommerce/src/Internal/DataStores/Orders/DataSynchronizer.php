@@ -761,7 +761,7 @@ ORDER BY orders.id ASC
 			}
 		}
 
-		if ( 0 === $this->get_total_pending_count() ) {
+		if ( $this->is_in_sync() ) {
 			$this->cleanup_synchronization_state();
 			$this->order_cache_controller->maybe_restore_orders_cache_usage();
 		}

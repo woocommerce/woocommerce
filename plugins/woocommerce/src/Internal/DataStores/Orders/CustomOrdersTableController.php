@@ -325,8 +325,7 @@ class CustomOrdersTableController {
 			return 'no';
 		}
 
-		$sync_is_pending = 0 !== $this->data_synchronizer->get_current_orders_pending_sync_count();
-		if ( $sync_is_pending && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
+		if ( ! $this->data_synchronizer->is_in_sync() && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
 
@@ -454,7 +453,7 @@ class CustomOrdersTableController {
 
 		$get_disabled = function() {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
-			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
+			$sync_complete        = $this->data_synchronizer->is_in_sync();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
 			if ( count( array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] ) ) > 0 ) {
