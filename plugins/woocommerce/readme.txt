@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Removed count from is_array check to fix Analytics comparison filter. [#45939](https://github.com/woocommerce/woocommerce/pull/45939)
 * Fix - Add a filter to adjust the 50 terms limitation in the product edit page. [#45506](https://github.com/woocommerce/woocommerce/pull/45506)
 * Fix - Add block preview to Product Filter: Attribute (Beta) block [#45558](https://github.com/woocommerce/woocommerce/pull/45558)
 * Fix - Add some safeguards against programmatic removal of orders due to sync when HPOS is active. [#45330](https://github.com/woocommerce/woocommerce/pull/45330)
