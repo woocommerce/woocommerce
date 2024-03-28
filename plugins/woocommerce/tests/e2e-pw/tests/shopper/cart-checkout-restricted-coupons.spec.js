@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const includedProductName = 'Included test product';
@@ -322,6 +323,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			}
 			// failed because we're over 200 dollars
 			await page.goto( '/checkout/' );
+			await page.pause();
 			await expect(
 				page.getByText(
 					'There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.'
@@ -720,11 +722,9 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
-		const newOrderId = await page
-			.locator( 'li.woocommerce-order-overview__order > strong' )
-			.textContent();
+		const newOrderId = getOrderIdFromUrl( page );
 
 		// try to order a second time, but should get an error
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );

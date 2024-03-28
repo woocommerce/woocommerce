@@ -7,6 +7,7 @@ const {
 	fillShippingCheckoutBlocks,
 	fillBillingCheckoutBlocks,
 } = require( '../../utils/checkout' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
 const newAccountEmail = 'marge-test-account@example.com';
@@ -29,13 +30,6 @@ let guestOrderId1,
 	newAccountOrderId,
 	productId,
 	shippingZoneId;
-
-function getOrderIdFromUrl( page ) {
-	const regex = /order-received\/(\d+)/;
-	const match = page.url().match( regex )[ 1 ];
-	console.log( `Order ID: ${ match }` );
-	return match;
-}
 
 test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
