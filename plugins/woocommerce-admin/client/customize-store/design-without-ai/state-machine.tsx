@@ -165,7 +165,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 										invoke: {
 											src: 'installAndActivateTheme',
 											onDone: {
-												target: 'success',
+												target: 'setupStore',
 											},
 											onError: {
 												actions:
@@ -173,7 +173,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											},
 										},
 									},
-									success: {
+									setupStore: {
 										type: 'parallel',
 										states: {
 											assembleSite: {
