@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix: Suppress deprecated warning when applying a coupon on Cart in PHP > 8.0
-
