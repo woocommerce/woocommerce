@@ -147,7 +147,7 @@ class ShippingController {
 				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
 					$settings[ $index ]['desc'] = sprintf(
 						/* translators: %s: URL to the documentation. */
-						__( 'Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>.', 'woocommerce' ),
+						__( 'Hide shipping costs until an address is entered (Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>)', 'woocommerce' ),
 						'https://woo.com/document/woocommerce-blocks-local-pickup/'
 					);
 					$settings[ $index ]['disabled'] = true;
