@@ -1352,7 +1352,7 @@ class ListTable extends WP_List_Table {
 			}
 
 			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1380,7 +1380,7 @@ class ListTable extends WP_List_Table {
 
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1403,7 +1403,7 @@ class ListTable extends WP_List_Table {
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1423,7 +1423,7 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1635,9 +1635,17 @@ class ListTable extends WP_List_Table {
 			'all'            => __( 'All', 'woocommerce' ),
 		);
 
-		$options = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
-		$selected = $_REQUEST['search-filter'] ?? $_COOKIE['wc-search-filter-hpos-admin'] ?? 'all';
-		if( $_COOKIE['wc-search-filter-hpos-admin'] !== $selected ) {
+		/**
+		 * Filters the search filters available in the admin order search. Can be used to add new or remove existing filters.
+		 * When adding new filters, `woocommerce_hpos_generate_where_for_search_filter` should also be used to generate the WHERE clause for the new filter
+		 *
+		 * @since 8.9.0.
+		 *
+		 * @param $options array List of available filters.
+		 */
+		$options  = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
+		$selected = sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? $_COOKIE['wc-search-filter-hpos-admin'] ?? 'all' ) );
+		if ( $_COOKIE['wc-search-filter-hpos-admin'] !== $selected ) {
 			wc_setcookie( 'wc-search-filter-hpos-admin', $selected );
 		}
 		?>
