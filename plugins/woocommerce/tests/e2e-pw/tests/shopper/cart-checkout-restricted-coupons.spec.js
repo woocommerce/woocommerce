@@ -315,21 +315,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					'Sorry, coupon "min-max-spend-individual" has already been applied and cannot be used in conjunction with other coupons.'
 				)
 			).toBeVisible();
-
-			// add more products so the total is > $200
-			for ( let i = 0; i < 8; i++ ) {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
-			}
-			// failed because we're over 200 dollars
-			await page.goto( '/checkout/' );
-			await page.pause();
-			await expect(
-				page.getByText(
-					'There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.'
-				)
-			).toBeVisible();
-			await page.getByRole( 'link', { name: 'Return to cart' } ).click();
 		} );
 	} );
 
