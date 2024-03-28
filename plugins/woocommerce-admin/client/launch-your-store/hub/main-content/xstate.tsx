@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { fromCallback, setup } from 'xstate5';
+import { assign, fromCallback, setup } from 'xstate5';
 import React from 'react';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -9,13 +9,25 @@ import { getQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { LoadingPage } from './pages/loading';
-import { LaunchYourStoreSuccess } from './pages/launch-store-success';
 import { SitePreviewPage } from './pages/site-preview';
 import type { LaunchYourStoreComponentProps } from '..';
-import { createQueryParamsListener, updateQueryParams } from '../common';
+import {
+	createQueryParamsListener,
+	updateQueryParams,
+	redirectToWooHome,
+} from '../common';
+import {
+	services as transitionalServices,
+	events as transitionalEvents,
+	actions as transitionalActions,
+	LaunchYourStoreSuccess,
+} from './pages/launch-store-success';
 
 export type MainContentMachineContext = {
-	placeholder?: string; // remove this when we have some types to put here
+	transitionalScreen: {
+		hasLoadedCompleteOption: boolean;
+		hasCompleteSurvey: boolean;
+	};
 };
 
 export type MainContentComponentProps = LaunchYourStoreComponentProps & {
@@ -23,7 +35,9 @@ export type MainContentComponentProps = LaunchYourStoreComponentProps & {
 };
 export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_SUCCESS' }
-	| { type: 'SHOW_LOADING' };
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'SHOW_LOADING' }
+	| transitionalEvents;
 
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'content', sendBack );
@@ -40,6 +54,7 @@ export const mainContentMachine = setup( {
 		) => {
 			updateQueryParams( params );
 		},
+		redirectToWooHome,
 	},
 	guards: {
 		hasContentLocation: (
@@ -52,11 +67,18 @@ export const mainContentMachine = setup( {
 	},
 	actors: {
 		contentQueryParamListener,
+		fetchSurveyCompletedOption:
+			transitionalServices.fetchSurveyCompletedOption,
 	},
 } ).createMachine( {
 	id: 'mainContent',
 	initial: 'navigate',
-	context: {},
+	context: {
+		transitionalScreen: {
+			hasLoadedCompleteOption: false,
+			hasCompleteSurvey: false,
+		},
+	},
 	states: {
 		navigate: {
 			always: [
@@ -86,6 +108,14 @@ export const mainContentMachine = setup( {
 		},
 		launchStoreSuccess: {
 			id: 'launchStoreSuccess',
+			invoke: {
+				src: 'fetchSurveyCompletedOption',
+				onDone: {
+					actions: assign(
+						transitionalActions.assignHasCompleteSurvey
+					),
+				},
+			},
 			entry: [
 				{
 					type: 'updateQueryParams',
@@ -94,6 +124,14 @@ export const mainContentMachine = setup( {
 			],
 			meta: {
 				component: LaunchYourStoreSuccess,
+			},
+			on: {
+				COMPLETE_SURVEY: {
+					actions: assign( transitionalActions.assignCompleteSurvey ),
+				},
+				GO_BACK_TO_HOME: {
+					actions: 'redirectToWooHome',
+				},
 			},
 		},
 		loading: {
