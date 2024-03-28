@@ -465,11 +465,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 		}
 
 		$order_post_types = wc_get_order_types( 'cot-migration' );
-
-		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
-
-		$orders_table = $this->data_store::get_orders_table_name();
-
 		if ( empty( $order_post_types ) ) {
 			$this->error_logger->debug(
 				sprintf(
@@ -482,76 +477,90 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQL.NotPrepared --
-		// -- $order_post_type_placeholder, $orders_table, self::PLACEHOLDER_ORDER_POST_TYPE are all safe to use in queries.
-		if ( ! $this->get_table_exists() ) {
-			$count = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
-					$order_post_types
-				)
-			);
-			return $count;
-		}
-
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			$missing_orders_count_sql = $wpdb->prepare(
-				"
-SELECT COUNT(1) FROM $wpdb->posts posts
-RIGHT JOIN $orders_table orders ON posts.ID=orders.id
-WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
- AND orders.status NOT IN ( 'auto-draft' )
- AND orders.type IN ($order_post_type_placeholder)",
-				$order_post_types
-			);
-			$operator                 = '>';
-		} else {
-			$missing_orders_count_sql = $wpdb->prepare(
-				"
-SELECT COUNT(1) FROM $wpdb->posts posts
-LEFT JOIN $orders_table orders ON posts.ID=orders.id
-WHERE
-  posts.post_type in ($order_post_type_placeholder)
-  AND posts.post_status != 'auto-draft'
-  AND orders.id IS NULL",
-				$order_post_types
-			);
-
-			$operator = '<';
-		}
-
-		$sql = $wpdb->prepare(
-			"
-SELECT(
-	($missing_orders_count_sql)
-	+
-	(SELECT COUNT(1) FROM (
-		SELECT orders.id FROM $orders_table orders
-		JOIN $wpdb->posts posts on posts.ID = orders.id
-		WHERE
-		  posts.post_type IN ($order_post_type_placeholder)
-		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-	) x)
-) count",
-			$order_post_types
-		);
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- queries are already prepared.
+		$pending_count  = 0;
+		$pending_count += (int) $wpdb->get_var( $this->get_sql_for_count_query( 'out-of-sync' ) );
+		$pending_count += (int) $wpdb->get_var( $this->get_sql_for_count_query( 'deleted' ) );
 		// phpcs:enable
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$pending_count = (int) $wpdb->get_var( $sql );
-
-		$deleted_from_table = $this->get_current_deletion_record_meta_value();
-
-		$deleted_count  = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT count(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key=%s AND meta_value=%s",
-				array( self::DELETED_RECORD_META_KEY, $deleted_from_table )
-			)
-		);
-		$pending_count += $deleted_count;
 
 		wp_cache_set( 'woocommerce_hpos_pending_sync_count', $pending_count );
 		return $pending_count;
+	}
+
+	/**
+	 * Builds SQL queries to verify sync status between datastores.
+	 *
+	 * @since 8.9.0
+	 *
+	 * @param string $query_type Which query to construct. Use 'out-of-sync' (for missing or out of sync orders) and 'deleted' (for orders deleted from the current datastore).
+	 * @param string $result     Either 'count' to obtain a query that counts orders or 'bool' for a query that only checks if out of sync orders exist (uses `SELECT 1`).
+	 * @return string The prepared SQL query.
+	 */
+	private function get_sql_for_count_query( string $query_type = 'out-of-sync', string $result = 'count' ): string {
+		global $wpdb;
+
+		$order_post_types            = wc_get_order_types( 'cot-migration' );
+		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
+		$orders_table                = $this->data_store::get_orders_table_name();
+
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared
+
+		switch ( $query_type ) {
+			case 'out-of-sync':
+				if ( ! $this->get_table_exists() ) {
+					$sql = $wpdb->prepare(
+						"
+						SELECT COUNT(1) FROM {$wpdb->posts} p WHERE p.post_type IN ({$order_post_type_placeholder})
+						",
+						$order_post_types
+					);
+				} elseif ( $this->custom_orders_table_is_authoritative() ) {
+					$sql = $wpdb->prepare(
+						"
+						SELECT COUNT(1) FROM {$orders_table} o LEFT JOIN {$wpdb->posts} p ON p.ID = o.id
+						WHERE o.status != 'auto-draft'
+						AND o.type IN ({$order_post_type_placeholder})
+						AND (p.ID IS NULL OR p.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "' OR o.date_updated_gmt > p.post_modified_gmt)
+						",
+						$order_post_types
+					);
+				} else {
+					$sql = $wpdb->prepare(
+						"
+						SELECT COUNT(1) FROM {$wpdb->posts} o LEFT JOIN {$orders_table} p ON p.ID = o.id
+						WHERE p.post_status != 'auto-draft'
+						AND p.post_type IN ({$order_post_type_placeholder})
+						AND (o.id IS NULL OR o.date_updated_gmt < p.post_modified_gmt)
+						",
+						$order_post_types
+					);
+				}
+
+				break;
+
+			case 'deleted':
+				$sql = $wpdb->prepare(
+					"SELECT COUNT(1) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key = %s AND meta_value = %s",
+					self::DELETED_RECORD_META_KEY,
+					$this->get_current_deletion_record_meta_value()
+				);
+
+				break;
+			default:
+				break;
+		}
+
+		// phpcs:enable
+
+		if ( 'bool' === $result ) {
+			$sql  = str_replace( array( 'COUNT(1)', 'COUNT(*)' ), '1', $sql );
+			$sql .= ' LIMIT 1';
+		}
+
+		return $sql;
+	}
+
+
 	}
 
 	/**
