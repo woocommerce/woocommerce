@@ -7,8 +7,17 @@ export class AssemblerPage {
 	async setupSite( baseUrl ) {
 		const DESIGN_URL =
 			baseUrl +
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fdesign';
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fintro';
+
 		await this.page.goto( DESIGN_URL );
+		await this.page.waitForResponse( ( res ) =>
+			res.url().includes( '?_wp-find-template' )
+		);
+		await this.page.getByText( 'Start designing' ).click();
+
+		await this.page
+			.getByRole( 'button', { name: 'Design a new theme' } )
+			.click();
 	}
 
 	async waitForLoadingScreenFinish() {
