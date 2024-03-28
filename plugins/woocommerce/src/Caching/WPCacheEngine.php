@@ -84,7 +84,7 @@ class WPCacheEngine implements CacheEngine {
 	public function cache_objects( array $objects, int $expiration, string $group = '' ): array {
 		$prefix = self::get_cache_prefix( $group );
 
-		return array_combine(
+		$objects = array_combine(
 			array_map(
 				function ( $key ) use ( $prefix ) {
 					return $prefix . $key;
