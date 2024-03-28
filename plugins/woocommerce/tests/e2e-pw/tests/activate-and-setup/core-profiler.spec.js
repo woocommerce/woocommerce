@@ -448,6 +448,11 @@ test.describe
 				.getByRole( 'button', { name: 'Add your products' } )
 				.click();
 			await page
+				.getByRole( 'button', {
+					name: 'Or add your products from scratch',
+				} )
+				.click();
+			await page
 				.getByRole( 'menuitem', { name: 'Physical product' } )
 				.click();
 			await expect(
@@ -535,21 +540,11 @@ test.describe
 	test( 'Extended task list visible', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 
-		await expect(
-			page
-				.locator( 'div' )
-				.filter( { hasText: /^Things to do next1$/ } )
-				.first()
-		).toBeVisible();
+		await expect( page.getByText( 'Things to do next' ) ).toBeVisible();
 
 		await page.getByRole( 'button', { name: 'Task List Options' } ).click();
 		await page.getByRole( 'button', { name: 'Hide this' } ).click();
 
-		await expect(
-			page
-				.locator( 'div' )
-				.filter( { hasText: /^Things to do next1$/ } )
-				.first()
-		).not.toBeVisible();
+		await expect( page.getByText( 'Things to do next' ) ).not.toBeVisible();
 	} );
 } );
