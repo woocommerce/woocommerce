@@ -101,6 +101,13 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private $batch_processing_controller;
 
 	/**
+	 * Whether datastores are in sync or not (cached value).
+	 *
+	 * @var null|bool
+	 */
+	private $is_in_sync_cached = null;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -560,7 +567,26 @@ class DataSynchronizer implements BatchProcessorInterface {
 		return $sql;
 	}
 
+	/**
+	 * Checks whether datastores are in sync.
+	 *
+	 * @since 8.9.0
+	 *
+	 * @return bool TRUE if datastores are in sync, FALSE otherwise.
+	 */
+	public function is_in_sync(): bool {
+		global $wpdb;
 
+		if ( is_null( $this->is_in_sync_cached ) ) {
+			foreach ( array( 'out-of-sync', 'deleted' ) as $query_type ) {
+				if ( ! empty( $wpdb->get_var( $this->get_sql_for_count_query( $query_type, 'bool' ) ) ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query is already prepared.
+					$this->is_in_sync_cached = false;
+					break;
+				}
+			}
+		}
+
+		return $this->is_in_sync_cached;
 	}
 
 	/**
@@ -697,6 +723,8 @@ ORDER BY orders.id ASC
 	 */
 	public function cleanup_synchronization_state() {
 		delete_option( 'woocommerce_initial_orders_pending_sync_count' ); // In case it existed from other times.
+		wp_cache_delete( 'woocommerce_hpos_orders_in_sync' );
+		$this->is_in_sync_cached = null;
 	}
 
 	/**
