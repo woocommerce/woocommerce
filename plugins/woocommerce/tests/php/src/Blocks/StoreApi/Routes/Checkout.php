@@ -65,7 +65,13 @@ class Checkout extends MockeryTestCase {
 		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
 
 		$fixtures = new FixtureData();
-		$fixtures->shipping_add_flat_rate();
+
+		// Add a flat rate to the default zone.
+		$flat_rate    = WC()->shipping()->get_shipping_methods()['flat_rate'];
+		$default_zone = \WC_Shipping_Zones::get_zone( 0 );
+		$default_zone->add_shipping_method( $flat_rate->id );
+		$default_zone->save();
+
 		$fixtures->payments_enable_bacs();
 		$this->products = array(
 			$fixtures->get_simple_product(
@@ -95,6 +101,13 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
+		$default_zone     = \WC_Shipping_Zones::get_zone( 0 );
+		$shipping_methods = $default_zone->get_shipping_methods();
+		foreach ( $shipping_methods as $method ) {
+			$default_zone->delete_shipping_method( $method->instance_id );
+		}
+		$default_zone->save();
+
 		global $wp_rest_server;
 		$wp_rest_server = null;
 	}
