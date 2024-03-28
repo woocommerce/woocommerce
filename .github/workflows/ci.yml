@@ -241,8 +241,8 @@ jobs:
           fi
           echo "All jobs have completed successfully."
 
-  publish-e2e-test-reports:
-    name: 'Publish e2e test reports'
+  e2e-test-reports:
+    name: 'e2e test reports - send workflow dispatch'
     needs: [ project-e2e-test-jobs ]
     if: ${{ ! cancelled() }}
     runs-on: ubuntu-latest
@@ -313,8 +313,8 @@ jobs:
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
 
-  publish-api-test-reports:
-    name: 'Publish API test reports'
+  api-test-reports:
+    name: 'API test reports - send workflow dispatch'
     needs: [ project-api-test-jobs ]
     if: ${{ ! cancelled() }}
     runs-on: ubuntu-latest
