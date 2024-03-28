@@ -187,6 +187,7 @@ class WC_AJAX {
 		$ajax_private_events = array(
 			'order_add_meta',
 			'order_delete_meta',
+			'settings_hpos_setting_messages',
 		);
 
 		foreach ( $ajax_private_events as $ajax_event ) {
@@ -3647,6 +3648,15 @@ class WC_AJAX {
 	 */
 	private static function check_locked_orders( $response, $data ) {
 		return wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\Orders\EditLock::class )->check_locked_orders_ajax( $response, $data );
+	}
+
+	/**
+	 * Used to calculate HPOS sync status via AJAX and report it on the settings screen.
+	 *
+	 * @return void
+	 */
+	private static function settings_hpos_setting_messages() {
+		wc_get_container()->get( Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class )->setting_messages_ajax();
 	}
 
 }

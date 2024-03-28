@@ -261,5 +261,18 @@
 				available_payment_methods: payment_methods,
 			} );
 		} );
+
+		var $hpos_setting_messages = $( '.woocommerce_page_wc-settings .wc-settings-row-woocommerce_custom_orders_table_data_sync_enabled p.description' );
+		if ( 0 !== $hpos_setting_messages.length ) {
+			$.get(
+				ajaxurl,
+				{ action: 'woocommerce_settings_hpos_setting_messages' },
+				function( response ) {
+					$hpos_setting_messages.html( response );
+				},
+				'html'
+			);
+		}
+
 	} );
 } )( jQuery, woocommerce_settings_params, wp );
