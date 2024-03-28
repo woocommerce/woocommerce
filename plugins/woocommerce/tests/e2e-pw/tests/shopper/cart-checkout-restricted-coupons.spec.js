@@ -393,7 +393,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					billing: {
 						first_name: 'Marge',
 						last_name: 'Simpson',
-						email: 'marge@example.com',
+						email: 'marge.simpson@example.org',
 					},
 					line_items: [
 						{
@@ -625,8 +625,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 	} );
 
 	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
-																							  page,
-																						  } ) => {
+		page,
+	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -661,13 +661,15 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page
 			.getByLabel( 'Email address' )
 			.first()
-			.fill( 'marge@example.com' );
+			.fill( 'marge.simpson@example.org' );
 
 		await page
 			.getByRole( 'link', { name: 'Click here to enter your code' } )
 			.click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page.getByText(

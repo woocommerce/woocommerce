@@ -34,8 +34,11 @@ const templates = [
 ];
 const userText = 'Hello World in the page';
 
-test.describe( 'Page Content Wrapper', async () => {
-	templates.forEach( async ( template ) => {
+templates.forEach( async ( template ) => {
+	test.describe( 'Page Content Wrapper', async () => {
+		test.beforeAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( 'wp_template' );
+		} );
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
 			admin,
 			page,
@@ -43,8 +46,7 @@ test.describe( 'Page Content Wrapper', async () => {
 			frontendUtils,
 		} ) => {
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
-			page.getByLabel( `“${ template.title }” (Edit)` ).click();
-			await editorUtils.closeWelcomeGuideModal();
+			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();
@@ -53,6 +55,7 @@ test.describe( 'Page Content Wrapper', async () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
+
 			await editorUtils.updatePost();
 
 			// Verify edits are in the template when viewed from the frontend.
@@ -61,8 +64,7 @@ test.describe( 'Page Content Wrapper', async () => {
 
 			// Clean up the paragraph block added before.
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
-			page.getByLabel( `“${ template.title }” (Edit)` ).click();
-			await editorUtils.closeWelcomeGuideModal();
+			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();

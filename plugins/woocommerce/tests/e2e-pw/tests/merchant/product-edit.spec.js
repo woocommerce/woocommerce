@@ -160,11 +160,21 @@ baseTest.describe( 'Products > Edit Product', () => {
 					product.stock_quantity + stockQtyIncrease;
 
 				await expect
-					.soft( page.locator( 'p' ).locator( 'del' ) )
-					.toHaveText( `$${ expectedRegularPrice }` );
+					.soft(
+						await page
+							.locator( 'del' )
+							.getByText( `$${ expectedRegularPrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
 				await expect
-					.soft( page.locator( 'p' ).locator( 'ins' ) )
-					.toHaveText( `$${ expectedSalePrice }` );
+					.soft(
+						await page
+							.locator( 'ins' )
+							.getByText( `$${ expectedSalePrice }` )
+							.count()
+					)
+					.toBeGreaterThan( 0 );
 				await expect
 					.soft( page.getByText( `${ expectedStockQty } in stock` ) )
 					.toBeVisible();

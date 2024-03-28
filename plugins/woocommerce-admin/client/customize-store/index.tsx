@@ -489,8 +489,34 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
+				fetchCustomizeStoreCompleted: {
+					invoke: {
+						src: 'fetchCustomizeStoreCompleted',
+						onDone: {
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
+						},
+					},
+				},
+				checkCustomizeStoreCompleted: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'customizeTaskIsNotCompleted',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'customizeTaskIsCompleted',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
@@ -603,6 +629,12 @@ export const CustomizeStoreController = ( {
 				},
 				activeThemeHasNoMods: ( _ctx ) => {
 					return ! _ctx.activeThemeHasMods;
+				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
 				},
 			},
 		} );

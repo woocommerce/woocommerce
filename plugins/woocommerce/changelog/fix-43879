@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Don't load REST API when generating possible routes.
