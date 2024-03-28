@@ -8,6 +8,7 @@ const userKey = USER_KEY ?? 'admin';
  *
  * @group api
  * @group customers
+ *
  */
 test.describe( 'Customers API tests: CRUD', () => {
 	let customerId;
