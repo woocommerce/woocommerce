@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 
+use Automattic\WooCommerce\Tests\Blocks\StoreApi\MockSessionHandler;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 
 /**
@@ -323,6 +324,11 @@ class Checkout extends MockeryTestCase {
 	 * Check that accounts are created on request.
 	 */
 	public function test_checkout_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -374,12 +380,20 @@ class Checkout extends MockeryTestCase {
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
 		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
 	 * Test account creation options.
 	 */
 	public function test_checkout_do_not_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -428,12 +442,20 @@ class Checkout extends MockeryTestCase {
 
 		$this->assertEquals( $status, 200 );
 		$this->assertEquals( $data['customer_id'], 0 );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
 	 * Test account creation options.
 	 */
 	public function test_checkout_force_create_account() {
+		// We need to replace the WC_Session with a mock because this test relies on cookies being set which
+		// is not easy with PHPUnit. This is a simpler approach.
+		$old_session  = WC()->session;
+		WC()->session = new MockSessionHandler();
+
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -484,6 +506,9 @@ class Checkout extends MockeryTestCase {
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
 		$this->assertEquals( $customer->user_email, 'testaccount@test.com' );
+
+		// Return WC_Session to original state.
+		WC()->session = $old_session;
 	}
 
 	/**
