@@ -766,7 +766,7 @@ test.describe( 'Checkout Block page', () => {
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
 		await expect(
 			page.getByText(
-				/Log in here to view your order | log in to your account to view this order/
+				/Log in here to view your order|log in to your account to view this order/
 			)
 		).toBeVisible();
 
