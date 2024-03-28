@@ -168,7 +168,7 @@ class OrderController {
 	 */
 	public function validate_order_before_payment( \WC_Order $order ) {
 		$needs_shipping          = wc()->cart->needs_shipping();
-		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods' );
+		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods', [ '' ] );
 
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
