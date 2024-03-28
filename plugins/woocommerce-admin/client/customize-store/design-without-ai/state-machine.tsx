@@ -59,12 +59,7 @@ const installFontFamiliesState = {
 					target: 'success',
 				},
 				onError: {
-					actions: [
-						'redirectToIntroWithError',
-						( context, event ) => {
-							console.log( event );
-						},
-					],
+					actions: 'redirectToIntroWithError',
 				},
 			},
 		},
