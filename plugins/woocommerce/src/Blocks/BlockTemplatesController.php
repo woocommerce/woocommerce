@@ -234,9 +234,10 @@ class BlockTemplatesController {
 		list( $template_id, $template_slug ) = $template_name_parts;
 
 		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
+		if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+			$registered_template = BlockTemplateUtils::get_template( $template_slug );
+			$template_path       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+			$template_object     = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
 
@@ -441,7 +442,7 @@ class BlockTemplatesController {
 				continue;
 			}
 
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $already_found_templates ) ) {
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_db( $template_slug, $already_found_templates ) ) {
 				$template              = clone BlockTemplateUtils::get_fallback_template_from_db( $template_slug, $already_found_templates );
 				$template_id           = explode( '//', $template->id );
 				$template->id          = $template_id[0] . '//' . $template_slug;
@@ -453,9 +454,10 @@ class BlockTemplatesController {
 			}
 
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
-			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
+			if ( BlockTemplateUtils::template_is_eligible_for_fallback_from_theme( $template_slug ) ) {
+				$registered_template = BlockTemplateUtils::get_template( $template_slug );
+				$template_file       = BlockTemplateUtils::get_theme_template_path( $registered_template->fallback_template );
+				$templates[]         = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
 

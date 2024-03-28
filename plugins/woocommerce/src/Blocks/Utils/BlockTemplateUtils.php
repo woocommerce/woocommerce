@@ -518,10 +518,10 @@ class BlockTemplateUtils {
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
+	public static function template_is_eligible_for_fallback( $template_slug ) {
 		$registered_template = self::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
+			return isset( $registered_template->fallback_template );
 		}
 		return false;
 	}
@@ -533,16 +533,18 @@ class BlockTemplateUtils {
 	 * @param array  $db_templates Templates that have already been found on the db.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_db( $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
+	public static function template_is_eligible_for_fallback_from_db( $template_slug, $db_templates ) {
+		$eligible_for_fallback = self::template_is_eligible_for_fallback( $template_slug );
 		if ( ! $eligible_for_fallback ) {
 			return false;
 		}
 
+		$registered_template = self::get_template( $template_slug );
+
 		$array_filter = array_filter(
 			$db_templates,
-			function ( $template ) use ( $template_slug ) {
-				return ProductCatalogTemplate::SLUG === $template->slug;
+			function ( $template ) use ( $registered_template ) {
+				return isset( $registered_template->fallback_template ) && $registered_template->fallback_template === $template->slug;
 			}
 		);
 
@@ -557,13 +559,15 @@ class BlockTemplateUtils {
 	 * @return boolean|object
 	 */
 	public static function get_fallback_template_from_db( $template_slug, $db_templates ) {
-		$eligible_for_fallback = self::template_is_eligible_for_product_archive_fallback( $template_slug );
+		$eligible_for_fallback = self::template_is_eligible_for_fallback( $template_slug );
 		if ( ! $eligible_for_fallback ) {
 			return false;
 		}
 
+		$registered_template = self::get_template( $template_slug );
+
 		foreach ( $db_templates as $template ) {
-			if ( ProductCatalogTemplate::SLUG === $template->slug ) {
+			if ( $registered_template->fallback_template === $template->slug ) {
 				return $template;
 			}
 		}
@@ -580,10 +584,12 @@ class BlockTemplateUtils {
 	 * @param string $template_slug Slug to check for fallbacks.
 	 * @return boolean
 	 */
-	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
-		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
+	public static function template_is_eligible_for_fallback_from_theme( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
+
+		return self::template_is_eligible_for_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
+			&& self::theme_has_template( $registered_template->fallback_template );
 	}
 
 	/**
