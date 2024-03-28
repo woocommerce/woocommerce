@@ -294,7 +294,6 @@ jobs:
             gh workflow run publish-test-reports-trunk-merge.yml \
               -f run_id=$RUN_ID \
               -f artifact=e2e-test-report \
-              -f pr_number='0' \
               -f test_type="e2e" \
               --repo woocommerce/woocommerce-test-reports
           fi
