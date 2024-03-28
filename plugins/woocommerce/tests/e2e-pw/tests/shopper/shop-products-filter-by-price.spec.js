@@ -70,7 +70,6 @@ test.describe( 'Filter items in the shop by product price', () => {
 	test( 'filter products by prices on the created page', async ( {
 		page,
 	} ) => {
-		await expect( 1 ).toBe( 2 );
 		const sortingProductsDropdown = '.wc-block-sort-select__select';
 
 		// go to create a new page with filtering products by price

@@ -300,7 +300,7 @@ jobs:
           fi
           
       - name: 'Send Slack notification'
-        if: github.event_name != 'push'
+        if: github.event_name != 'pull_request'
         uses: automattic/action-test-results-to-slack@v0.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
