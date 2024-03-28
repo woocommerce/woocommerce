@@ -3,8 +3,11 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load', () => {
 	test( 'Load the home page', async ( { page } ) => {
 		await page.goto( '/' );
-		const title = page.locator( 'h1.site-title' );
-		await expect( title ).toHaveText( 'WooCommerce Core E2E Test Suite' );
+		await expect(
+			page.getByRole( 'heading', {
+				name: 'WooCommerce Core E2E Test Suite',
+			} )
+		).toBeVisible();
 	} );
 
 	test.describe( 'Sign in as admin', () => {
@@ -13,8 +16,9 @@ test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load'
 		} );
 		test( 'Load wp-admin', async ( { page } ) => {
 			await page.goto( '/wp-admin' );
-			const title = page.locator( 'div.wrap > h1' );
-			await expect( title ).toHaveText( 'Dashboard' );
+			await expect(
+				page.getByRole( 'heading', { name: 'Dashboard' } )
+			).toBeVisible();
 		} );
 	} );
 
@@ -24,8 +28,9 @@ test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load'
 		} );
 		test( 'Load customer my account page', async ( { page } ) => {
 			await page.goto( '/my-account' );
-			const title = page.locator( 'h1.entry-title' );
-			await expect( title ).toHaveText( 'My account' );
+			await expect(
+				page.getByRole( 'heading', { name: 'My account' } )
+			).toBeVisible();
 		} );
 	} );
 } );
