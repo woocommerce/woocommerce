@@ -1,14 +1,65 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
 import classnames from 'classnames';
+import { createInterpolateElement, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { Link } from '@woocommerce/components';
+// @ts-ignore No types for this exist yet.
+import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
+import {
+	Button,
+	// @ts-ignore No types for this exist yet.
+	__unstableMotion as motion,
+	// @ts-ignore No types for this exist yet.
+	__experimentalItemGroup as ItemGroup,
+	// @ts-ignore No types for this exist yet.
+	__experimentalHeading as Heading,
+	ToggleControl,
+} from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
 import type { SidebarComponentProps } from '../xstate';
+import { SidebarContainer } from './sidebar-container';
+import { taskCompleteIcon, taskIcons } from './icons';
+import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	props
 ) => {
+	const {
+		context: { tasklist, removeTestOrders: removeTestOrdersContext },
+	} = props;
+	const sidebarDescription = createInterpolateElement(
+		__(
+			'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to <WCSettingsLink>WooCommerce | Settings | General.</WCSettingsLink>',
+			'woocommerce'
+		),
+		{
+			WCSettingsLink: (
+				<Link
+					onClick={ () => {
+						props.sendEventToSidebar( {
+							type: 'OPEN_WC_ADMIN_URL',
+							url: 'admin.php?page=wc-settings&tab=general',
+						} );
+					} }
+					href=""
+				/>
+			),
+		}
+	);
+
+	const hasIncompleteTasks =
+		tasklist && ! tasklist.tasks.every( ( task ) => task.isComplete );
+
+	const [ removeTestOrders, setRemoveTestOrder ] = useState(
+		removeTestOrdersContext ?? true
+	);
+
 	return (
 		<div
 			className={ classnames(
@@ -16,25 +67,97 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				props.className
 			) }
 		>
-			<p>Sidebar</p>
-			<button
-				onClick={ () => {
-					props.sendEventToSidebar( { type: 'LAUNCH_STORE' } );
-					// when we send LAUNCH_STORE to the sidebar machine, the sidebar machine sends the appropriate event to the main content machine to show the launching state
-				} }
+			<motion.div
+				className="edit-site-layout__header-container"
+				animate={ 'view' }
 			>
-				Launch Store
-			</button>
-			<button
-				onClick={ () => {
-					props.sendEventToSidebar( {
-						type: 'OPEN_EXTERNAL_URL',
-						url: 'https://example.com',
-					} );
-				} }
+				<SiteHub
+					as={ motion.div }
+					variants={ {
+						view: { x: 0 },
+					} }
+					isTransparent={ false }
+					className="edit-site-layout__hub"
+				/>
+			</motion.div>
+			<SidebarContainer
+				title="Launch Your Store"
+				description={ sidebarDescription }
 			>
-				Open external URL
-			</button>
+				<div className="edit-site-sidebar-navigation-screen-essential-tasks__group-header">
+					<Heading level={ 2 }>
+						{ __( 'Essential Tasks', 'woocommerce' ) }
+					</Heading>
+				</div>
+				<ItemGroup className="edit-site-sidebar-navigation-screen-essential-tasks__group">
+					{ tasklist &&
+						hasIncompleteTasks &&
+						tasklist.tasks.map( ( task ) => (
+							<SidebarNavigationItem
+								className={ classnames( task.id, {
+									'is-complete': task.isComplete,
+								} ) }
+								icon={
+									task.isComplete
+										? taskCompleteIcon
+										: taskIcons[ task.id ]
+								}
+								withChevron
+								key={ task.id }
+								onClick={ () => {
+									props.sendEventToSidebar( {
+										type: 'TASK_CLICKED',
+										task,
+									} );
+								} }
+							>
+								{ task.title }
+							</SidebarNavigationItem>
+						) ) }
+					{ tasklist && ! hasIncompleteTasks && (
+						<SidebarNavigationItem
+							className="all-tasks-complete"
+							icon={ taskCompleteIcon }
+						>
+							{ __(
+								'Fantastic job! Your store is ready to go — no pending tasks to complete.',
+								'woocommerce'
+							) }
+						</SidebarNavigationItem>
+					) }
+				</ItemGroup>
+				<div className="edit-site-sidebar-navigation-screen-test-data__group-header">
+					<Heading level={ 2 }>
+						{ __( 'Test data', 'woocommerce' ) }
+					</Heading>
+				</div>
+				<ItemGroup className="edit-site-sidebar-navigation-screen-remove-test-data__group">
+					<ToggleControl
+						label={ __( 'Remove 20 test orders', 'woocommerce' ) }
+						checked={ removeTestOrders }
+						onChange={ setRemoveTestOrder }
+					/>
+					<p>
+						{ __(
+							'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
+							'woocommerce'
+						) }
+					</p>
+				</ItemGroup>
+				<ItemGroup className="edit-site-sidebar-navigation-screen-launch-store-button__group">
+					<Button
+						variant="primary"
+						onClick={ () => {
+							props.sendEventToSidebar( {
+								type: 'LAUNCH_STORE',
+								removeTestOrders,
+							} );
+						} }
+					>
+						Launch Store
+					</Button>
+				</ItemGroup>
+			</SidebarContainer>
 		</div>
 	);
 };
