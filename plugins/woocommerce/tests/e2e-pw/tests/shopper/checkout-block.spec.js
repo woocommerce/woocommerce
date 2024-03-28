@@ -30,6 +30,13 @@ let guestOrderId1,
 	productId,
 	shippingZoneId;
 
+function getOrderIdFromUrl( page ) {
+	const regex = /order-received\/(\d+)/;
+	const match = page.url().match( regex )[ 1 ];
+	console.log( `Order ID: ${ match }` );
+	return match;
+}
+
 test.describe( 'Checkout Block page', () => {
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -369,16 +376,11 @@ test.describe( 'Checkout Block page', () => {
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		guestOrderId2 = await orderReceivedText
-			.split( /(\s+)/ )[ 6 ]
-			.toString();
+		guestOrderId2 = getOrderIdFromUrl( page );
 
 		// go again to the checkout to verify details
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
@@ -613,16 +615,11 @@ test.describe( 'Checkout Block page', () => {
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		guestOrderId1 = await orderReceivedText
-			.split( /(\s+)/ )[ 6 ]
-			.toString();
+		guestOrderId1 = getOrderIdFromUrl( page );
 
 		// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
 		// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
@@ -630,7 +627,7 @@ test.describe( 'Checkout Block page', () => {
 		await page.context().clearCookies();
 		await page.reload();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
@@ -642,29 +639,31 @@ test.describe( 'Checkout Block page', () => {
 		);
 		await page.reload();
 		await expect(
-			page.locator( 'form.woocommerce-verify-email p:nth-child(3)' )
-		).toContainText( /verify the email address associated with the order/ );
+			page.getByText(
+				/confirm the email address linked to the order | verify the email address associated /
+			)
+		).toBeVisible();
 
 		// Supplying an email address other than the actual order billing email address will take them back to the same
 		// page with an error message.
-		await page.fill( '#email', 'incorrect@email.address' );
-		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await page
+			.getByLabel( 'Email address' )
+			.fill( 'incorrect@email.address' );
+		await page.getByRole( 'button', { name: /Verify|Confirm/ } ).click();
 		await expect(
-			page.locator( 'form.woocommerce-verify-email p:nth-child(4)' )
-		).toContainText( /verify the email address associated with the order/ );
+			page.getByText(
+				/confirm the email address linked to the order | verify the email address associated /
+			)
+		).toBeVisible();
 		await expect(
-			page
-				.getByRole( 'alert' )
-				.getByText(
-					'We were unable to verify the email address you provided. Please try again.'
-				)
+			page.getByText( 'We were unable to verify the email address' )
 		).toBeVisible();
 
 		// However if they supply the *correct* billing email address, they should see the order received page again.
-		await page.fill( '#email', guestEmail );
-		await page.locator( 'form.woocommerce-verify-email button' ).click();
+		await page.getByLabel( 'Email address' ).fill( guestEmail );
+		await page.getByRole( 'button', { name: /Verify|Confirm/ } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		await page.goto( 'wp-login.php' );
@@ -754,16 +753,11 @@ test.describe( 'Checkout Block page', () => {
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		customerOrderId = await orderReceivedText
-			.split( /(\s+)/ )[ 6 ]
-			.toString();
+		customerOrderId = getOrderIdFromUrl( page );
 
 		// Effect a log out/simulate a new browsing session by dropping all cookies.
 		await page.context().clearCookies();
@@ -771,9 +765,9 @@ test.describe( 'Checkout Block page', () => {
 
 		// Now we are logged out, return to the confirmation page: we should be asked to log back in.
 		await expect(
-			page
-				.locator( '.woocommerce-info' )
-				.getByText( 'Please log in to your account to view this order' )
+			page.getByText(
+				/Log in here to view your order | log in to your account to view this order/
+			)
 		).toBeVisible();
 
 		// Switch to admin user.
@@ -835,14 +829,11 @@ test.describe( 'Checkout Block page', () => {
 		// place an order
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
 
 		// get order ID from the page
-		const orderReceivedText = await page
-			.locator( '.woocommerce-order-overview__order.order' )
-			.textContent();
-		newAccountOrderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
+		newAccountOrderId = getOrderIdFromUrl( page );
 
 		// confirms that an account was created
 		await page.goto( '/my-account/' );
