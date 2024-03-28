@@ -21,6 +21,7 @@ class OrderControllerTests extends TestCase {
 
 		$this->expectException( RouteException::class );
 		$class->validate_selected_shipping_methods( true, array( false ) );
+		$class->validate_selected_shipping_methods( true, null );
 	}
 
 	/**
