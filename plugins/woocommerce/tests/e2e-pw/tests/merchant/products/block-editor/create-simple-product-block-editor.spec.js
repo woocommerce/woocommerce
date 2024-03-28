@@ -144,22 +144,23 @@ test.describe( 'General tab', () => {
 			await expect(
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
-			const productPriceElements = await page
-				.locator( '.summary .woocommerce-Price-amount' )
-				.all();
 
-			let foundProductPrice = false;
-			let foundSalePrice = false;
-			for ( const element of productPriceElements ) {
-				const textContent = await element.innerText();
-				if ( textContent.includes( productData.productPrice ) ) {
-					foundProductPrice = true;
-				}
-				if ( textContent.includes( productData.salePrice ) ) {
-					foundSalePrice = true;
-				}
-			}
-			await expect( foundProductPrice && foundSalePrice ).toBeTruthy();
+			await expect
+				.soft(
+					await page
+						.locator( 'del' )
+						.getByText( `$${ productData.productPrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
+			await expect
+				.soft(
+					await page
+						.locator( 'ins' )
+						.getByText( `$${ productData.salePrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
 
 			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
