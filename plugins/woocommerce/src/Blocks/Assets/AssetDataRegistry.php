@@ -302,7 +302,7 @@ class AssetDataRegistry {
 	 *
 	 * @throws InvalidArgumentException  Only throws when site is in debug mode. Always logs the error.
 	 */
-	public function add( $key, $data, $check_key_exists = false ) {
+	public function add( $key, $data, $check_key_exists = true ) {
 		if ( $check_key_exists && $this->exists( $key ) ) {
 			return;
 		}
