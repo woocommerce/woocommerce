@@ -59,7 +59,12 @@ const installFontFamiliesState = {
 					target: 'success',
 				},
 				onError: {
-					actions: 'redirectToIntroWithError',
+					actions: [
+						'redirectToIntroWithError',
+						( context, event ) => {
+							console.log( event );
+						},
+					],
 				},
 			},
 		},
@@ -156,7 +161,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							// @todo: Move the current component in a common folder or create a new one dedicated to this flow.
 							component: ApiCallLoader,
 						},
-						type: 'parallel',
+						initial: 'installAndActivateTheme',
 						states: {
 							installAndActivateTheme: {
 								initial: 'pending',
@@ -173,65 +178,72 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											},
 										},
 									},
-									success: { type: 'final' },
-								},
-							},
-							assembleSite: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'assembleSite',
-											onDone: {
-												target: 'success',
+									success: {
+										type: 'parallel',
+										states: {
+											assembleSite: {
+												initial: 'pending',
+												states: {
+													pending: {
+														invoke: {
+															src: 'assembleSite',
+															onDone: {
+																target: 'success',
+															},
+															onError: {
+																actions:
+																	'redirectToIntroWithError',
+															},
+														},
+													},
+													success: {
+														type: 'final',
+													},
+												},
 											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
+											createProducts: {
+												initial: 'pending',
+												states: {
+													pending: {
+														invoke: {
+															src: 'createProducts',
+															onDone: {
+																target: 'success',
+															},
+															onError: {
+																actions:
+																	'redirectToIntroWithError',
+															},
+														},
+													},
+													success: {
+														type: 'final',
+													},
+												},
+											},
+											installFontFamilies: {
+												initial:
+													installFontFamiliesState.initial,
+												states: {
+													checkFontLibrary:
+														installFontFamiliesState
+															.states
+															.checkFontLibrary,
+													pending:
+														installFontFamiliesState
+															.states.pending,
+													success: {
+														type: 'final',
+													},
+												},
 											},
 										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
-							createProducts: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'createProducts',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
+										onDone: {
+											target: '#designWithoutAI.showAssembleHub',
 										},
 									},
-									success: {
-										type: 'final',
-									},
 								},
 							},
-							installFontFamilies: {
-								initial: installFontFamiliesState.initial,
-								states: {
-									checkFontLibrary:
-										installFontFamiliesState.states
-											.checkFontLibrary,
-									pending:
-										installFontFamiliesState.states.pending,
-									success: {
-										type: 'final',
-									},
-								},
-							},
-						},
-						onDone: {
-							target: '#designWithoutAI.showAssembleHub',
 						},
 					},
 				},
