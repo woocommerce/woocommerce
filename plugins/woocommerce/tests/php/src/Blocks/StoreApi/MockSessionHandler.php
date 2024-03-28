@@ -13,6 +13,8 @@ final class MockSessionHandler extends WC_Session_Handler {
 
 	/**
 	 * Setup cookie and customer ID.
+	 *
+	 * @param bool $set Should the session cookie be set.
 	 */
 	public function init_session_cookie( $set = true ) {
 		$to_hash           = $this->_customer_id . '|' . $this->_session_expiration;
