@@ -4,7 +4,7 @@ test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load'
 	test( 'Load the home page', async ( { page } ) => {
 		await page.goto( '/' );
 		await expect(
-			page.getByRole( 'heading', {
+			page.getByRole( 'banner' ).getByRole( 'heading', {
 				name: 'WooCommerce Core E2E Test Suite',
 			} )
 		).toBeVisible();
