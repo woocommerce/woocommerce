@@ -244,7 +244,7 @@ jobs:
   publish-e2e-test-reports:
     name: 'Publish e2e test reports'
     needs: [ project-e2e-test-jobs ]
-    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
+    if: ${{ ! cancelled() }}
     runs-on: ubuntu-latest
 
     steps:
@@ -316,7 +316,7 @@ jobs:
   publish-api-test-reports:
     name: 'Publish API test reports'
     needs: [ project-api-test-jobs ]
-    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
+    if: ${{ ! cancelled() }}
     runs-on: ubuntu-latest
 
     steps:
