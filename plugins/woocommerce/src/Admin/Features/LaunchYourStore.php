@@ -40,21 +40,41 @@ class LaunchYourStore {
 				update_option( $name, wp_unslash( $_POST[ $name ] ) );
 			}
 		}
+
+		// if woocommerce_coming_soon is being updated, attempt to create coming soon page.
+		if (
+			isset( $_POST['woocommerce_coming_soon'] )
+			&& in_array( $_POST['woocommerce_coming_soon'], $options['woocommerce_coming_soon'], true )
+		) {
+			$this->create_coming_soon_page();
+		}
 	}
 
 	/**
-	 * Add `coming soon` page when it hasn't been created yet.
+	 * Check to see if we should create `coming soon` page on WooCommerce Home
 	 *
 	 * @param WP_Screen $current_screen Current screen object.
 	 *
 	 * @return void
 	 */
 	public function maybe_create_coming_soon_page( $current_screen ) {
+		$current_page = PageController::get_instance()->get_current_page();
+		$is_home      = isset( $current_page['id'] ) && 'woocommerce-home' === $current_page['id'];
+		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_home ) {
+			$this->create_coming_soon_page();
+		}
+	}
+
+	/**
+	 * Create `coming soon` page when it hasn't been created yet.
+	 *
+	 * @return void
+	 */
+	public function create_coming_soon_page() {
 		$option_name    = 'woocommerce_coming_soon_page_id';
-		$current_page   = PageController::get_instance()->get_current_page();
-		$is_home        = isset( $current_page['id'] ) && 'woocommerce-home' === $current_page['id'];
 		$page_id_option = get_option( $option_name, false );
-		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_home && ! $page_id_option ) {
+
+		if ( ! $page_id_option ) {
 			wc_create_page(
 				esc_sql( _x( 'Coming Soon', 'Page slug', 'woocommerce' ) ),
 				$option_name,
