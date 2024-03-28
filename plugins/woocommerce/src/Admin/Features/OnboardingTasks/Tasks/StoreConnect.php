@@ -41,7 +41,7 @@ class StoreConnect extends Task {
 	 * @return string
 	 */
 	public function get_time() {
-		return __( '2 minutes', 'woocommerce' );
+		return '';
 	}
 
 	/**
