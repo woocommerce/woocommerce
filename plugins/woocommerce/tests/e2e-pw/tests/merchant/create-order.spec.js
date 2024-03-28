@@ -361,7 +361,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 
 		// Select customer
 		await page.getByText( 'Guest' ).click();
-		await page.getByRole( 'combobox' ).nth( 4 ).fill( 'sideshowbob@' );
+		await page
+			.locator( 'input[aria-owns="select2-customer_user-results"]' )
+			.fill( 'sideshowbob@' );
 		await page.getByRole( 'option', { name: 'Sideshow Bob' } ).click();
 
 		// Add a product

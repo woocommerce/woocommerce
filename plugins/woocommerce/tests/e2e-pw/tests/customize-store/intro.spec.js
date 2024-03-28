@@ -1,8 +1,8 @@
-const { test, expect, request } = require('@playwright/test');
+const { test, expect, request } = require( '@playwright/test' );
 const { BASE_URL } = process.env;
-const { features } = require('../../utils');
-const { activateTheme } = require('../../utils/themes');
-const { setOption } = require('../../utils/options');
+const { features } = require( '../../utils' );
+const { activateTheme } = require( '../../utils/themes' );
+const { setOption } = require( '../../utils/options' );
 
 const CUSTOMIZE_STORE_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
@@ -32,7 +32,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 				'no'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 
@@ -87,7 +87,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 				'yes'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 		await page.goto( CUSTOMIZE_STORE_URL );
 

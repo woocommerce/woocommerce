@@ -14,7 +14,6 @@ test.describe( 'Test the order confirmation template', async () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
 		await expect(
 			page
