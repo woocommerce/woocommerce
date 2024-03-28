@@ -156,7 +156,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 							// @todo: Move the current component in a common folder or create a new one dedicated to this flow.
 							component: ApiCallLoader,
 						},
-						type: 'parallel',
+						initial: 'installAndActivateTheme',
 						states: {
 							installAndActivateTheme: {
 								initial: 'pending',
@@ -165,7 +165,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 										invoke: {
 											src: 'installAndActivateTheme',
 											onDone: {
-												target: 'success',
+												target: 'setupStore',
 											},
 											onError: {
 												actions:
@@ -173,65 +173,72 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 											},
 										},
 									},
-									success: { type: 'final' },
-								},
-							},
-							assembleSite: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'assembleSite',
-											onDone: {
-												target: 'success',
+									setupStore: {
+										type: 'parallel',
+										states: {
+											assembleSite: {
+												initial: 'pending',
+												states: {
+													pending: {
+														invoke: {
+															src: 'assembleSite',
+															onDone: {
+																target: 'success',
+															},
+															onError: {
+																actions:
+																	'redirectToIntroWithError',
+															},
+														},
+													},
+													success: {
+														type: 'final',
+													},
+												},
 											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
+											createProducts: {
+												initial: 'pending',
+												states: {
+													pending: {
+														invoke: {
+															src: 'createProducts',
+															onDone: {
+																target: 'success',
+															},
+															onError: {
+																actions:
+																	'redirectToIntroWithError',
+															},
+														},
+													},
+													success: {
+														type: 'final',
+													},
+												},
+											},
+											installFontFamilies: {
+												initial:
+													installFontFamiliesState.initial,
+												states: {
+													checkFontLibrary:
+														installFontFamiliesState
+															.states
+															.checkFontLibrary,
+													pending:
+														installFontFamiliesState
+															.states.pending,
+													success: {
+														type: 'final',
+													},
+												},
 											},
 										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
-							createProducts: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'createProducts',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
+										onDone: {
+											target: '#designWithoutAI.showAssembleHub',
 										},
 									},
-									success: {
-										type: 'final',
-									},
 								},
 							},
-							installFontFamilies: {
-								initial: installFontFamiliesState.initial,
-								states: {
-									checkFontLibrary:
-										installFontFamiliesState.states
-											.checkFontLibrary,
-									pending:
-										installFontFamiliesState.states.pending,
-									success: {
-										type: 'final',
-									},
-								},
-							},
-						},
-						onDone: {
-							target: '#designWithoutAI.showAssembleHub',
 						},
 					},
 				},
