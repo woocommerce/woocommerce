@@ -9,10 +9,18 @@ export class AssemblerPage {
 			baseUrl +
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store%2Fintro';
 
-		await this.page.goto( DESIGN_URL );
-		await this.page.waitForResponse( ( res ) =>
-			res.url().includes( '?_wp-find-template' )
+		const waitForThemeResponse = this.page.waitForResponse( ( response ) =>
+			response.url().includes( 'wp-json/wp/v2/themes' )
 		);
+
+		const waitForTemplateResponse = this.page.waitForResponse(
+			( response ) => response.url().includes( '?_wp-find-template=true' )
+		);
+
+		await this.page.goto( DESIGN_URL );
+
+		await Promise.all( [ waitForThemeResponse, waitForTemplateResponse ] );
+
 		await this.page.getByText( 'Start designing' ).click();
 
 		await this.page
