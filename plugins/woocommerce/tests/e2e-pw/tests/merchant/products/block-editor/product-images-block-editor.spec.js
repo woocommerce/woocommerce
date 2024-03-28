@@ -203,7 +203,7 @@ test( 'can remove an image', async ( { page, productWithGallery } ) => {
 		// Verify image in store frontend
 		await page.goto( productWithGallery.permalink );
 		await expect(
-			page.locator( `#product-${ productWithGallery.id } ol img` )
+			page.locator( '.woocommerce-product-gallery ol img' )
 		).toHaveCount( initialImagesCount - 1 );
 	} );
 } );

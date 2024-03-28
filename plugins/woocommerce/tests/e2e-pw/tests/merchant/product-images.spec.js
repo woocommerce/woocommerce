@@ -222,7 +222,7 @@ baseTest.describe( 'Products > Product Images', () => {
 			await page.goto( productWithImage.permalink );
 			await expect(
 				page
-					.locator( `#product-${ productWithImage.id } ol img` )
+					.locator( `.woocommerce-product-gallery ol img` )
 					.nth( images.length ),
 				'all gallery images should be visible'
 			).toBeVisible(); // +1 for the featured image
@@ -259,7 +259,7 @@ baseTest.describe( 'Products > Product Images', () => {
 		await test.step( 'Verify product gallery', async () => {
 			// Verify gallery in store frontend
 			await page.goto( productWithGallery.permalink );
-			const selector = `#product-${ productWithGallery.id } ol img`;
+			const selector = `.woocommerce-product-gallery ol img`;
 			await expect(
 				page.locator( selector ).nth( imagesCount - 1 ),
 				'gallery images should be visible'
