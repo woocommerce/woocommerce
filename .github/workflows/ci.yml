@@ -280,20 +280,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RUN_ID: ${{ github.run_id }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f e2e_artifact=e2e-test-report \
               -f pr_number=$PR_NUMBER \
-              -f commit_sha=$COMMIT_SHA \
+              -f commit_sha=$GITHUB_SHA \
               -f s3_root=public \
               --repo woocommerce/woocommerce-test-reports
           else
             gh workflow run publish-test-reports-trunk-merge.yml \
               -f run_id=$RUN_ID \
               -f artifact=e2e-test-report \
+              -f pr_number=$PR_NUMBER \
+              -f commit_sha=$GITHUB_SHA \
               -f test_type="e2e" \
               --repo woocommerce/woocommerce-test-reports
           fi
@@ -352,21 +353,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RUN_ID: ${{ github.run_id }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f api_artifact=api-test-report \
               -f pr_number=$PR_NUMBER \
-              -f commit_sha=$COMMIT_SHA \
+              -f commit_sha=$GITHUB_SHA \
               -f s3_root=public \
               --repo woocommerce/woocommerce-test-reports
           else
             gh workflow run publish-test-reports-trunk-merge.yml \
               -f run_id=$RUN_ID \
               -f artifact=api-test-report \
-              -f pr_number='' \
+              -f pr_number=$PR_NUMBER \
+              -f commit_sha=$GITHUB_SHA \
               -f test_type="api" \
               --repo woocommerce/woocommerce-test-reports
           fi
