@@ -536,8 +536,14 @@ class Checkout extends MockeryTestCase {
 	 * Test checkout without valid shipping methods.
 	 */
 	public function test_checkout_invalid_shipping_method() {
-		$fixtures = new FixtureData();
-		$fixtures->shipping_disable_flat_rate();
+		WC()->cart->calculate_totals();
+		WC()->session->set( 'chosen_shipping_methods', array( '' ) );
+
+		global $wpdb;
+		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$wpdb->update( "{$wpdb->prefix}woocommerce_shipping_zone_methods", array( 'is_enabled' => '0' ), array( 'instance_id' => absint( $shipping_method->instance_id ) ) );
+		}
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -579,7 +585,5 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 400, $status, print_r( $data, true ) );
 		$this->assertEquals( 'woocommerce_rest_invalid_shipping_option', $data['code'], print_r( $data, true ) );
 		$this->assertEquals( 'Sorry, this order requires a shipping option.', $data['message'], print_r( $data, true ) );
-
-		$fixtures->shipping_add_flat_rate();
 	}
 }
