@@ -26,10 +26,4 @@
 		height: calc(100% - 32px);
 		width: calc(100% - 16px);
 	}
-
-	@media screen and (max-width: $break-small) {
-		.launch-store-site__preview-site-iframe {
-			display: none;
-		}
-	}
 }
