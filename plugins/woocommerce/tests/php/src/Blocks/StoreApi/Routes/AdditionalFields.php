@@ -141,7 +141,8 @@ class AdditionalFields extends MockeryTestCase {
 	 * Unregister fields after testing.
 	 */
 	private function unregister_fields() {
-		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_column( $this->fields, 'id' ) );
+		$fields = $this->controller->get_additional_fields();
+		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_keys( $fields ) );
 	}
 
 	/**
@@ -1315,7 +1316,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'value',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
 				),
 			)
 		);
@@ -1383,7 +1385,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'invalid',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'invalid',
 				),
 			)
 		);
@@ -1458,7 +1461,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'value',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
 				),
 			)
 		);
@@ -1533,7 +1537,8 @@ class AdditionalFields extends MockeryTestCase {
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(
-					$id => 'invalid',
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'invalid',
 				),
 			)
 		);
@@ -1597,7 +1602,9 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => array(),
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
@@ -1616,13 +1623,11 @@ class AdditionalFields extends MockeryTestCase {
 	 * Ensures an error is returned when required fields in Contact are missing.
 	 */
 	public function test_place_order_required_contact_field() {
-		$this->markTestSkipped( 'Additional fields aren\'t validated due to a bug #45496.' );
-		$id    = 'plugin-namespace/my-required-contact-field';
-		$label = 'My Required Field';
+		$id = 'plugin-namespace/my-required-contact-field';
 		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
-				'label'    => $label,
+				'label'    => 'My Required Field',
 				'location' => 'contact',
 				'type'     => 'text',
 				'required' => true,
@@ -1661,15 +1666,16 @@ class AdditionalFields extends MockeryTestCase {
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
-				'additional_fields' => array(),
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+				),
 			)
 		);
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status(), print_r( $data, true ) );
-		// Error should be updated once we got this working.
-		$this->assertEquals( \sprintf( 'There was a problem with the provided shipping address: %s is required', $label ), $data['message'], print_r( $data, true ) );
+		$this->assertEquals( \sprintf( '%s is not of type string.', $id ), $data['data']['params']['additional_fields'], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 

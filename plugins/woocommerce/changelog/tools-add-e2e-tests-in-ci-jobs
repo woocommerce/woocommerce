@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+CI: adds e2e tests into ci-jobs and ci.yml
