@@ -119,23 +119,19 @@ export const useGetLocation = < T, >(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore No types for this selector exist yet
 			const { getBlockParentsByBlockName } = select( blockEditorStore );
-			const isInBlock = ( parentBlockName: string ) =>
-				getBlockParentsByBlockName( clientId, parentBlockName ).length >
-				0;
-
-			const isInSingleProductBlock = isInBlock(
-				'woocommerce/single-product'
-			);
-			const isInMiniCartBlock = isInBlock(
-				'woocommerce/mini-cart-contents'
-			);
-			const isInCartBlock = isInBlock( 'woocommerce/cart' );
-			const isInCheckoutBlock = isInBlock( 'woocommerce/checkout' );
+			const isInBlocks = ( parentBlockNames: string[] ) =>
+				getBlockParentsByBlockName( clientId, parentBlockNames )
+					.length > 0;
 
 			return {
-				isInSingleProductBlock,
-				isInSomeCartCheckoutBlock:
-					isInMiniCartBlock || isInCartBlock || isInCheckoutBlock,
+				isInSingleProductBlock: isInBlocks( [
+					'woocommerce/single-product',
+				] ),
+				isInSomeCartCheckoutBlock: isInBlocks( [
+					'woocommerce/cart',
+					'woocommerce/checkout',
+					'woocommerce/mini-cart-contents',
+				] ),
 			};
 		},
 		[ clientId ]
