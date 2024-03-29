@@ -51,6 +51,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
+		"@automattic/jetpack-ai-client": "^0.10.1",
 		"@wordpress/api-fetch": "wp-6.0",
 		"@wordpress/compose": "wp-6.0",
 		"@wordpress/core-data": "wp-6.0",
