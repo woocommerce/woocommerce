@@ -375,7 +375,7 @@ class Checkout extends MockeryTestCase {
 		$status   = $response->get_status();
 		$data     = $response->get_data();
 
-		$this->assertEquals( $status, 200 );
+		$this->assertEquals( $status, 200, print_r( $data, true ) );
 		$this->assertTrue( $data['customer_id'] > 0 );
 
 		$customer = get_user_by( 'id', $data['customer_id'] );
