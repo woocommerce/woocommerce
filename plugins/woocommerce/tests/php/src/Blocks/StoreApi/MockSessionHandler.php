@@ -59,8 +59,8 @@ class MockSessionHandler extends WC_Session_Handler {
 			);
 
 			$this->mock_cache[ $this->_customer_id ] = $this->_data;
-			$this->_dirty = false;
-			//  Ignoring the below because this is how it is in the parent class.
+			$this->_dirty                            = false;
+			// Ignoring the below because this is how it is in the parent class.
 			// phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
 			if ( get_current_user_id() != $old_session_key && ! is_object( get_user_by( 'id', $old_session_key ) ) ) {
 				$this->delete_session( $old_session_key );
