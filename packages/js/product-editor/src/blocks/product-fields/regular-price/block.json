@@ -36,5 +36,6 @@
 		"lock": false
 	},
 	"usesContext": [ "postType" ],
-	"editorStyle": "file:./editor.css"
+	"editorStyle": "file:./editor.css",
+	"viewScript": "file:./view.js"
 }
