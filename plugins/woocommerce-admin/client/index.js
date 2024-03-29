@@ -93,7 +93,13 @@ if ( appRoot ) {
 		window.wcAdminFeatures &&
 		window.wcAdminFeatures[ 'launch-your-store' ] === true
 	) {
-		registerSiteVisibilitySlotFill();
+		const urlParams = new URLSearchParams( window.location.search );
+		if (
+			urlParams.get( 'tab' ) === 'general' ||
+			! urlParams.get( 'tab' )
+		) {
+			registerSiteVisibilitySlotFill();
+		}
 	}
 }
 
