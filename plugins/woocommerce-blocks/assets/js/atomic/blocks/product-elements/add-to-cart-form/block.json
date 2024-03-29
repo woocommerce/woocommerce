@@ -9,9 +9,8 @@
 			"default": false
 		}
 	},
-	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": ["postId"],
+	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 2,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

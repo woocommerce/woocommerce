@@ -8,7 +8,6 @@
 			"type": "string"
 		}
 	},
-	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [ "woocommerce/single-product" ],
 	"textdomain": "woocommerce",
