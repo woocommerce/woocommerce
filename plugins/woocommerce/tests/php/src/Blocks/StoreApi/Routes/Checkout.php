@@ -396,7 +396,6 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
-
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -459,7 +458,6 @@ class Checkout extends MockeryTestCase {
 		$old_session  = WC()->session;
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
-
 
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
