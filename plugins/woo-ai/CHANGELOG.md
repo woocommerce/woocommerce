@@ -3,11 +3,11 @@
 ## [0.6](https://github.com/woocommerce/woocommerce/releases/tag/0.6) - 2024-03-29 
 
 -   Patch - Woo AI - Fix z-index issue with Background Removal Spotlight.
--   Patch - add composer install to changelog script'
--   Patch - update references to woocommerce.com to now reference woo.com
--   Minor - Add React Testing Library and a basic test to the Woo AI plugin.
+-   Patch - Add composer install to changelog script.
+-   Patch - Update references to woocommerce.com to now reference woo.com.
+-   Minor - Add React Testing Library and tests to the Woo AI plugin.
 -   Patch - Fix Woo AI webpack build configuration.
--   Patch - Only initializing background removal when JP connection present.
+-   Patch - Only initialize background removal when Jetpack connection is present.
 -   Patch - Update / tweak a few more links in docs and comments.
 
 ## [0.5](https://github.com/woocommerce/woocommerce/releases/tag/0.5) - 2023-10-19 
