@@ -121,7 +121,7 @@ class OrdersTableSearchQuery {
 		}
 
 		/**
-		 * Filter to support adding a new search filter.
+		 * Filter to support adding a custom order search filter.
 		 * Provide a JOIN clause for a new search filter. This should be used along with `woocommerce_hpos_admin_search_filters`
 		 * to declare a new custom filter, and `woocommerce_hpos_generate_where_for_search_filter` to generate the WHERE
 		 * clause.
