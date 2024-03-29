@@ -151,7 +151,13 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 1.2: SPECIFIC PRODUCT
+	 * Case 1.2: BLOCK LEVEL: GENERIC CART
+	 * Cart, Checkout or Mini Cart blocks - block scope is more important than template
+	 */
+
+	if ( isInSomeCartCheckoutBlock ) {
+		return createLocationObject( 'cart' );
+	}
 	 * Specific Single Product template - take product ID from taxononmy
 	 */
 
