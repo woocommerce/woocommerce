@@ -328,6 +328,7 @@ class Checkout extends MockeryTestCase {
 		// is not easy with PHPUnit. This is a simpler approach.
 		$old_session  = WC()->session;
 		WC()->session = new MockSessionHandler();
+		WC()->session->init();
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -393,6 +394,8 @@ class Checkout extends MockeryTestCase {
 		// is not easy with PHPUnit. This is a simpler approach.
 		$old_session  = WC()->session;
 		WC()->session = new MockSessionHandler();
+		WC()->session->init();
+
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
@@ -455,6 +458,8 @@ class Checkout extends MockeryTestCase {
 		// is not easy with PHPUnit. This is a simpler approach.
 		$old_session  = WC()->session;
 		WC()->session = new MockSessionHandler();
+		WC()->session->init();
+
 
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
