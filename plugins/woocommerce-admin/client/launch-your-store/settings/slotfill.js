@@ -18,6 +18,7 @@ import { useCopyToClipboard } from '@wordpress/compose';
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
+import { recordEvent } from '@woocommerce/tracks';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -91,6 +92,9 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'yes' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'coming_soon',
+						} );
 					} }
 					options={ [
 						{
@@ -130,9 +134,15 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ storePagesOnly === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setStorePagesOnly(
 								storePagesOnly === 'yes' ? 'no' : 'yes'
+							);
+							recordEvent(
+								'site_visibility_restrict_store_pages_only_toggle',
+								{
+									enabled,
+								}
 							);
 						} }
 					/>
@@ -155,6 +165,11 @@ const SiteVisibility = () => {
 										<Button
 											ref={ copyClipboardRef }
 											variant="link"
+											onClick={ () => {
+												recordEvent(
+													'site_visibility_private_link_copy'
+												);
+											} }
 										>
 											{ copyLinkText }
 										</Button>
@@ -163,9 +178,15 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ privateLink === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setPrivateLink(
 								privateLink === 'yes' ? 'no' : 'yes'
+							);
+							recordEvent(
+								'site_visibility_share_private_link_toggle',
+								{
+									enabled,
+								}
 							);
 						} }
 					/>
@@ -175,6 +196,9 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'no' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'live',
+						} );
 					} }
 					options={ [
 						{

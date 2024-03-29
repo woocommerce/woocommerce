@@ -37,12 +37,19 @@ class LaunchYourStore {
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
 		);
 
+		$at_least_one_saved = false;
+
 		foreach ( $options as $name => $option ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( isset( $_POST[ $name ] ) && in_array( $_POST[ $name ], $option, true ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				update_option( $name, wp_unslash( $_POST[ $name ] ) );
+				$at_least_one_saved = true;
 			}
+		}
+
+		if ( $at_least_one_saved ) {
+			wc_admin_record_tracks_event( 'site_visibility_saved' );
 		}
 	}
 
