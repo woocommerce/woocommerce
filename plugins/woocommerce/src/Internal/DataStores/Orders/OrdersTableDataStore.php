@@ -1882,6 +1882,10 @@ FROM $order_meta_table
 		$this->update_address_index_meta( $order, $changes );
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
+
+		/** @var $cache_engine WPCacheEngine */
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$cache_engine->delete_cached_object( $order->get_id(), $this->get_cache_group() );
 	}
 
 	/**
