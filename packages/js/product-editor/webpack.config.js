@@ -33,7 +33,32 @@ module.exports = {
 	},
 	module: {
 		parser: webpackConfig.parser,
-		rules: webpackConfig.rules,
+		rules: [
+			...webpackConfig.rules,
+			{
+				test: /\.m?(j|t)sx?$/,
+				exclude: /node_modules/,
+				use: [
+					{
+						loader: require.resolve( 'babel-loader' ),
+						options: {
+							// Babel uses a directory within local node_modules
+							// by default. Use the environment variable option
+							// to enable more persistent caching.
+							cacheDirectory:
+								process.env.BABEL_CACHE_DIRECTORY || true,
+							babelrc: false,
+							configFile: false,
+							presets: [
+								require.resolve(
+									'@wordpress/babel-preset-default'
+								),
+							],
+						},
+					},
+				],
+			},
+		],
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
