@@ -340,6 +340,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -402,6 +405,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -423,6 +428,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -482,6 +490,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -503,6 +513,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -564,6 +577,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -613,7 +628,7 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Test checkout without valid shipping methods.
+	 * Test checkout without valid shipping methods .
 	 */
 	public function test_checkout_invalid_shipping_method() {
 		global $wpdb;
