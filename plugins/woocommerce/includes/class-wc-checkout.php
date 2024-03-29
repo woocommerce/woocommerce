@@ -614,6 +614,7 @@ class WC_Checkout {
 						'taxes'        => array(
 							'total' => $shipping_rate->taxes,
 						),
+						'tax_status'   => $shipping_rate->tax_status,
 					)
 				);
 

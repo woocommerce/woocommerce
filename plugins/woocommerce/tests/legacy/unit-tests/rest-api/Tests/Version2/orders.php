@@ -78,16 +78,16 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	public function test_get_item_with_line_items_meta_data() {
 		wp_set_current_user( $this->user );
 
-		$site_level_attribute_id = wc_create_attribute( array( 'name' => 'Site Level Color' ) );
+		$site_level_attribute_id   = wc_create_attribute( array( 'name' => 'Site Level Color' ) );
 		$site_level_attribute_slug = wc_attribute_taxonomy_name_by_id( $site_level_attribute_id );
 
 		// Register the attribute so that wp_insert_term will be successful.
 		register_taxonomy( $site_level_attribute_slug, array( 'product' ), array() );
 
 		$site_level_term_insertion_result = wp_insert_term( 'Site Level Value - Blue', $site_level_attribute_slug );
-		$site_level_term = get_term( $site_level_term_insertion_result['term_id'] );
+		$site_level_term                  = get_term( $site_level_term_insertion_result['term_id'] );
 
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
 		$variation = wc_get_product( $product->get_children()[0] );
 
 		$line_item = new WC_Order_Item_Product();
@@ -99,7 +99,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$order->save();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() ) );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( $order->get_id(), $data['id'] );
@@ -272,6 +272,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 			'total_tax'    => wc_format_decimal( $shipping->get_total_tax(), '' ),
 			'taxes'        => array(),
 			'meta_data'    => $shipping->get_meta_data(),
+			'tax_status'   => $shipping->get_tax_status(),
 		);
 		$this->assertEquals( $expected, $data['shipping_lines'][0] );
 	}
@@ -520,8 +521,8 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 			array(
 				'line_items' => array(
 					array(
-						'id' => $item->get_id(),
-						'quantity'   => 10,
+						'id'       => $item->get_id(),
+						'quantity' => 10,
 					),
 				),
 			)
@@ -782,8 +783,8 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_order_line_items_schema() {
 		wp_set_current_user( $this->user );
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v2/orders/' . $order->get_id() );
+		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v2/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
 
 		$data = $response->get_data();
