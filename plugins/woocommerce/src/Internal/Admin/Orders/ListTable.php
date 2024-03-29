@@ -1643,10 +1643,11 @@ class ListTable extends WP_List_Table {
 		 *
 		 * @param $options array List of available filters.
 		 */
-		$options  = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
-		$selected = sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? $_COOKIE['wc-search-filter-hpos-admin'] ?? 'all' ) );
-		if ( $_COOKIE['wc-search-filter-hpos-admin'] !== $selected ) {
-			wc_setcookie( 'wc-search-filter-hpos-admin', $selected );
+		$options       = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
+		$saved_setting = get_user_setting( 'wc-search-filter-hpos-admin', 'all' );
+		$selected      = sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? $saved_setting ) );
+		if ( $saved_setting !== $selected ) {
+			set_user_setting( 'wc-search-filter-hpos-admin', $selected );
 		}
 		?>
 		<select name="search-filter" id="order-search-filter">
