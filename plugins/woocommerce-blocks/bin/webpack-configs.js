@@ -8,6 +8,10 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const {
+	defaultRequestToExternal,
+	defaultRequestToHandle,
+} = require( '@wordpress/dependency-extraction-webpack-plugin/lib/util' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const CreateFileWebpack = require( 'create-file-webpack' );
@@ -38,6 +42,9 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	requestToExternalFn = requestToExternal,
+	requestToHandleFn = requestToHandle,
+	dewpFallbackToDefault = true,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -58,8 +65,9 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			useDefaults: dewpFallbackToDefault,
+			requestToExternal: requestToExternalFn,
+			requestToHandle: requestToHandleFn,
 		} ),
 	].filter( Boolean );
 
@@ -928,6 +936,19 @@ const getInteractivityAPIConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'WP directives',
 				checkCircularDeps: false,
+				requestToExternalFn: ( request ) => {
+					if ( request === '@wordpress/interactivity' ) {
+						return undefined;
+					}
+					return defaultRequestToExternal( request );
+				},
+				requestToHandleFn: ( request ) => {
+					if ( request === '@wordpress/interactivity' ) {
+						return undefined;
+					}
+					return defaultRequestToHandle( request );
+				},
+				dewpFallbackToDefault: false,
 			} ),
 			new ProgressBarPlugin(
 				getProgressBarPluginConfig( 'WP directives' )
