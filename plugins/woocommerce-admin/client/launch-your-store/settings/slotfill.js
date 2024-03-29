@@ -63,12 +63,6 @@ const SiteVisibility = () => {
 		}, 2000 );
 	} );
 
-	useEffect( () => {
-		document
-			.querySelectorAll( '.site-visibility-settings-slotfill label' )
-			.forEach( ( label ) => label.removeAttribute( 'for' ) );
-	}, [] );
-
 	return (
 		<div className="site-visibility-settings-slotfill">
 			<input
