@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"title": "Product Rating Stars",
 	"description": "Display the average rating of a product with stars",
+	"category": "woocommerce-product-elements",
 	"attributes": {
 		"productId": {
 			"type": "number",
