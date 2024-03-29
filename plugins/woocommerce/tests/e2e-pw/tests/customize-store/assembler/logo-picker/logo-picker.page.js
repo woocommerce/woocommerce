@@ -8,18 +8,32 @@ export class LogoPickerPage {
 		this.request = request;
 	}
 
+	/**
+	 *
+	 * @param {(import('@playwright/test').Page | import('@playwright/test').FrameLocator)} assemblerLocator
+	 * @return {import('@playwright/test').Locator} Locator for the logo picker when no logo is set
+	 */
 	getEmptyLogoPickerLocator( assemblerLocator ) {
 		return assemblerLocator.locator(
 			'.block-library-site-logo__inspector-upload-container'
 		);
 	}
 
+	/**
+	 *
+	 * @param {(import('@playwright/test').Page | import('@playwright/test').FrameLocator)} assemblerLocator
+	 * @return {import('@playwright/test').Locator} Locator for the logo picker when a logo is set
+	 */
 	getLogoPickerLocator( assemblerLocator ) {
 		return assemblerLocator.locator(
 			'.woocommerce-customize-store__sidebar-logo-container'
 		);
 	}
 
+	/**
+	 * @param {(import('@playwright/test').Page | import('@playwright/test').FrameLocator)} editorOrPageLocator
+	 * @return {import('@playwright/test').Locator} Locator for the logo in the editor or page
+	 */
 	getLogoLocator( editorOrPageLocator ) {
 		return editorOrPageLocator.locator( 'header img.custom-logo' );
 	}

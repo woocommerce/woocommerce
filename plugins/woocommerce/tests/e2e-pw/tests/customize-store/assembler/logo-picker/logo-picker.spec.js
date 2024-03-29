@@ -95,6 +95,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		logoPickerPageObject,
 	} ) => {
 		const assembler = await assemblerPageObject.getAssembler();
+		const editor = await assemblerPageObject.getEditor();
 
 		const imageWidth = assembler.getByText( 'Image width' );
 		const linkLogoToHomepage = assembler.getByText(
@@ -116,7 +117,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 			logoPickerPageObject.getLogoPickerLocator( assembler )
 		).toBeVisible();
 		await expect(
-			logoPickerPageObject.getLogoLocator( assembler )
+			logoPickerPageObject.getLogoLocator( editor )
 		).toBeVisible();
 		await expect( assembler.getByText( 'Save' ) ).toBeEnabled();
 
@@ -215,18 +216,20 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		page,
 		baseURL,
 		logoPickerPageObject,
+		assemblerPageObject,
 	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
 		const emptyLogoPicker =
-			logoPickerPageObject.getEmptyLogoPickerLocator();
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 
 		await emptyLogoPicker.click();
-		await logoPickerPageObject.pickImage();
-		await logoPickerPageObject.saveLogoSettings();
+		await logoPickerPageObject.pickImage( assembler );
+		await logoPickerPageObject.saveLogoSettings( assembler );
 
 		await page.goto( baseURL );
 
 		await expect(
-			logoPickerPageObject.getLogoLocator( this.page )
+			logoPickerPageObject.getLogoLocator( page )
 		).toBeVisible();
 	} );
 } );
