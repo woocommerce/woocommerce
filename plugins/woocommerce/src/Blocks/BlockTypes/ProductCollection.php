@@ -97,8 +97,6 @@ class ProductCollection extends AbstractBlock {
 	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
 	 * - product: [ 'productId'  => int ]
 	 *
-	 * @see ProductCollectionUtils::parse_global_location_context()
-	 *
 	 * @example array(
 	 *   'type'       => 'product',
 	 *   'sourceData' => array( 'productId' => 123 ),
@@ -141,7 +139,9 @@ class ProductCollection extends AbstractBlock {
 	 * Get the global location context.
 	 * Serve as a runtime cache for the location context.
 	 *
-	 * @return array The location context as described in self::update_context().
+	 * @see ProductCollectionUtils::parse_global_location_context()
+	 *
+	 * @return array The location context.
 	 */
 	private function get_location_context() {
 		static $location_context = null;
