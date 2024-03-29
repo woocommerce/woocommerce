@@ -228,6 +228,10 @@ const webpackConfig = {
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
+					if ( request === '@wordpress/interactivity' ) {
+						return null;
+					}
+
 					if ( request === '@wordpress/components/build/ui' ) {
 						// The external wp.components does not include ui components, so we need to skip requesting to external here.
 						return null;
@@ -236,6 +240,11 @@ const webpackConfig = {
 					if ( request.startsWith( '@wordpress/edit-site' ) ) {
 						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
 						// We use the edit-site components in the customize store.
+						return null;
+					}
+				},
+				requestToExternalModule( request ) {
+					if ( request === '@wordpress/interactivity' ) {
 						return null;
 					}
 				},

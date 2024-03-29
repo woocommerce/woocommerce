@@ -65,6 +65,7 @@
 		"@wordpress/html-entities": "wp-6.0",
 		"@wordpress/i18n": "wp-6.0",
 		"@wordpress/icons": "wp-6.0",
+		"@wordpress/interactivity": "^5.3.0",
 		"@wordpress/interface": "wp-6.0",
 		"@wordpress/keyboard-shortcuts": "wp-6.0",
 		"@wordpress/keycodes": "wp-6.0",
