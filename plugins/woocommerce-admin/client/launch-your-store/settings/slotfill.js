@@ -134,12 +134,15 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ storePagesOnly === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setStorePagesOnly(
 								storePagesOnly === 'yes' ? 'no' : 'yes'
 							);
 							recordEvent(
-								'site_visibility_restrict_store_pages_only'
+								'site_visibility_restrict_store_pages_only_toggle',
+								{
+									enabled,
+								}
 							);
 						} }
 					/>
@@ -162,6 +165,11 @@ const SiteVisibility = () => {
 										<Button
 											ref={ copyClipboardRef }
 											variant="link"
+											onClick={ () => {
+												recordEvent(
+													'site_visibility_private_link_copy'
+												);
+											} }
 										>
 											{ copyLinkText }
 										</Button>
@@ -170,11 +178,16 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ privateLink === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setPrivateLink(
 								privateLink === 'yes' ? 'no' : 'yes'
 							);
-							recordEvent( 'site_visibility_share_private_link' );
+							recordEvent(
+								'site_visibility_share_private_link_toggle',
+								{
+									enabled,
+								}
+							);
 						} }
 					/>
 				</div>
