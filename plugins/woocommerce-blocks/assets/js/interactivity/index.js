@@ -4,7 +4,9 @@
  * External dependencies
  */
 
-import { privateApis } from '@wordpress/interactivity/build';
+import { privateApis } from '@wordpress/interactivity';
+
+console.log( privateApis );
 
 /**
  * Internal dependencies
