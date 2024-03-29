@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
-import { parse } from '@wordpress/blocks';
+import { doAction } from '@wordpress/hooks';
 import { SelectControl } from '@wordpress/components';
 import {
 	createElement,
+	RawHTML,
 	useMemo,
 	useLayoutEffect,
 	useEffect,
@@ -12,27 +13,11 @@ import {
 } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
-import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockContextProvider,
-	BlockEditorKeyboardShortcuts,
-	BlockEditorProvider,
-	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockTools,
-	ObserveTyping,
-} from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityBlockEditor,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityRecord,
@@ -44,13 +29,11 @@ import {
 import useProductEntityProp from '../../hooks/use-product-entity-prop';
 import { useConfirmUnsavedProductChanges } from '../../hooks/use-confirm-unsaved-product-changes';
 import { useProductTemplate } from '../../hooks/use-product-template';
-import { PostTypeContext } from '../../contexts/post-type-context';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
-import { LoadingState } from './loading-state';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -69,7 +52,6 @@ function getLayoutTemplateId(
 }
 
 export function BlockEditor( {
-	context,
 	postType,
 	productId,
 	setIsEditorLoading,
@@ -174,22 +156,18 @@ export function BlockEditor( {
 		getLayoutTemplateId( productTemplate, postType )
 	);
 
-	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
-		'postType',
-		postType,
-		{ id: productId }
-	);
-
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const productForms = useSelect( ( select ) => {
-		return select( 'core' ).getEntityRecords( 'postType', 'product_form', {
-			per_page: -1,
-		} );
+		return (
+			select( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
 	}, [] );
 
 	useEffect( () => {
-		if ( selectedProductFormId || ! productForms ) {
+		if ( selectedProductFormId || ! productForms.length ) {
 			return;
 		}
 
@@ -204,7 +182,7 @@ export function BlockEditor( {
 		productId === -1;
 
 	useLayoutEffect( () => {
-		if ( isEditorLoading || ! productForms ) {
+		if ( isEditorLoading || ! productForms.length ) {
 			return;
 		}
 
@@ -215,8 +193,6 @@ export function BlockEditor( {
 		if ( ! productForm ) {
 			return;
 		}
-
-		onChange( parse( productForm.content.raw ), {} );
 
 		updateEditorSettings( {
 			...settings,
@@ -234,6 +210,24 @@ export function BlockEditor( {
 		//
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ selectedProductFormId, settings, productId, productForms ] );
+
+	const selectedProductForm = productForms.find(
+		( productForm ) => productForm.id === selectedProductFormId
+	);
+
+
+	useEffect( () => {
+		if ( ! selectedProductForm ) {
+			return;
+		}
+		setTimeout( () => {
+			// @ts-ignore
+			wp.hooks.doAction(
+				'woocommerce_product_form_init',
+				selectedProductForm
+			);
+		}, 1 );
+	}, [ selectedProductForm ] );
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect( ( select ) => {
@@ -265,31 +259,11 @@ export function BlockEditor( {
 				disabled={ ! productForms }
 				className="woocommerce-product-block-editor__product-type-selector"
 			/>
-			<BlockContextProvider value={ context }>
-				<BlockEditorProvider
-					value={ blocks }
-					onInput={ onInput }
-					onChange={ onChange }
-					settings={ settings }
-					useSubRegistry={ false }
-				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
-					<BlockEditorKeyboardShortcuts.Register />
-					<ObserveTyping>
-						{ isEditorLoading ? (
-							<LoadingState />
-						) : (
-							<BlockList className="woocommerce-product-block-editor__block-list" />
-						) }
-					</ObserveTyping>
-					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }
-					<PostTypeContext.Provider value={ context.postType! }>
-						{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-						<PluginArea scope="woocommerce-product-block-editor" />
-					</PostTypeContext.Provider>
-				</BlockEditorProvider>
-			</BlockContextProvider>
+			{ selectedProductForm && (
+				<RawHTML key={ selectedProductForm.id }>
+					{ selectedProductForm.content.rendered }
+				</RawHTML>
+			) }
 		</div>
 	);
 }
