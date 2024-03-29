@@ -75,7 +75,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		}
 	);
 
-	test( 'Logo Picker is empty', async ( {
+	test( 'Logo Picker should be empty initially', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
 	} ) => {
@@ -90,7 +90,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		).toBeVisible();
 	} );
 
-	test( 'Picking an image should trigger an update of the site preview', async ( {
+	test( 'Selecting an image should update the site preview', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
 	} ) => {
@@ -110,7 +110,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
 
 		await emptyLogoPicker.click();
-		await logoPickerPageObject.pickImage();
+		await logoPickerPageObject.pickImage( assembler );
 		await expect( emptyLogoPicker ).toBeHidden();
 		await expect(
 			logoPickerPageObject.getLogoPickerLocator( assembler )
@@ -126,7 +126,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await assembler.getByText( 'Save' ).click();
 	} );
 
-	test( 'Changing the width of image should trigger an update of the site preview', async ( {
+	test( 'Changing the image width should update the site preview and the frontend', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
 		baseURL,
@@ -153,7 +153,39 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await expect( imageFrontend ).toHaveAttribute( 'width', '100' );
 	} );
 
-	test( 'Enabling the "use as site icon", the image will be used as site icon', async ( {
+	test( 'Clicking the Delete button should remove the selected image', async ( {
+		assemblerPageObject,
+		logoPickerPageObject,
+	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
+		const emptyLogoPicker =
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+
+		await emptyLogoPicker.click();
+		await logoPickerPageObject.pickImage( assembler );
+		const emptyLogoLocator =
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+		await expect( emptyLogoLocator ).toBeHidden();
+		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByText( 'Delete' ).click();
+		await expect( emptyLogoLocator ).toBeVisible();
+	} );
+
+	test( 'Clicking the replace image should open the media gallery', async ( {
+		assemblerPageObject,
+		logoPickerPageObject,
+	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
+		const emptyLogoPicker =
+			logoPickerPageObject.getEmptyLogoPickerLocator( assembler );
+		await emptyLogoPicker.click();
+		await logoPickerPageObject.pickImage( assembler );
+		await assembler.getByLabel( 'Options' ).click();
+		await assembler.getByText( 'Replace' ).click();
+		await expect( assembler.getByText( 'Media Library' ) ).toBeVisible();
+	} );
+
+	test( 'Enabling the "use as site icon" option should set the image as the site icon', async ( {
 		assemblerPageObject,
 		logoPickerPageObject,
 		page,
@@ -179,7 +211,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await expect( isAValidResponse ).toBeTrue();
 	} );
 
-	test( 'Selected image should be applied on the frontend', async ( {
+	test( 'The selected image should be visible on the frontend', async ( {
 		page,
 		baseURL,
 		logoPickerPageObject,
