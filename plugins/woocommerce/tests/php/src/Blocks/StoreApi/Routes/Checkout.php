@@ -320,6 +320,7 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 	}
+
 	/**
 	 * Check that accounts are created on request.
 	 */
@@ -391,6 +392,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -461,6 +464,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -533,6 +538,8 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
