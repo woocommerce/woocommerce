@@ -31,12 +31,12 @@ declare global {
  */
 
 export async function requestJetpackToken() {
-	const { token, blogId } = await requestJwt();
+	const { token, blogId, expire } = await requestJwt();
 	if ( ! token ) {
 		throw createExtendedError(
 			'Error fetching new token',
 			'token_fetch_error'
 		);
 	}
-	return { token, blogId };
+	return { token, blogId, expire };
 }
