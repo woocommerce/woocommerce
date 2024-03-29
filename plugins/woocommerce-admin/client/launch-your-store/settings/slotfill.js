@@ -159,22 +159,6 @@ const SiteVisibility = () => {
 										'woocommerce'
 									) }
 								</p>
-								{ privateLink === 'yes' && (
-									<div className="site-visibility-settings-slotfill-private-link">
-										{ getPrivateLink() }
-										<Button
-											ref={ copyClipboardRef }
-											variant="link"
-											onClick={ () => {
-												recordEvent(
-													'site_visibility_private_link_copy'
-												);
-											} }
-										>
-											{ copyLinkText }
-										</Button>
-									</div>
-								) }
 							</>
 						}
 						checked={ privateLink === 'yes' }
@@ -191,6 +175,22 @@ const SiteVisibility = () => {
 						} }
 					/>
 				</div>
+				{ privateLink === 'yes' && (
+					<div className="site-visibility-settings-slotfill-private-link">
+						{ getPrivateLink() }
+						<Button
+							ref={ copyClipboardRef }
+							variant="link"
+							onClick={ () => {
+								recordEvent(
+									'site_visibility_private_link_copy'
+								);
+							} }
+						>
+							{ copyLinkText }
+						</Button>
+					</div>
+				) }
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
 				<RadioControl
