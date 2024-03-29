@@ -200,6 +200,7 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 			.getByRole( 'textbox', { name: 'Add title' } )
 			.fill( allWooBlocksPageTitle );
 
+		// add all WC blocks and verify them as added into page
 		for ( let i = 0; i < blocks.length; i++ ) {
 			// click title field for block inserter to show up
 			await page.getByRole( 'textbox', { name: 'Add title' } ).click();
@@ -220,6 +221,32 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 					.click();
 			}
 
+			// verify added blocks into page
+			await expect(
+				page
+					.getByRole( 'document', {
+						name: `Block: ${ blocks[ i ].name }`,
+						exact: true,
+					} )
+					.first()
+			).toBeVisible();
+		}
+
+		// save and publish the page
+		await page
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await page
+			.getByRole( 'region', { name: 'Editor publish' } )
+			.getByRole( 'button', { name: 'Publish', exact: true } )
+			.click();
+		await expect(
+			page.getByText( `${ allWooBlocksPageTitle } is now live.` )
+		).toBeVisible();
+
+		// check all blocks inside the page after publishing
+		// except the product price due to invisibility and false-positive
+		for ( let i = 1; i < blocks.length; i++ ) {
 			// verify added blocks into page
 			await expect(
 				page
