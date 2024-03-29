@@ -54,6 +54,15 @@ class StoreConnect extends Task {
 	}
 
 	/**
+	 * Always dismissable.
+	 *
+	 * @return bool
+	 */
+	public function is_dismissable() {
+		return true;
+	}
+
+	/**
 	 * Action URL.
 	 *
 	 * @return string
