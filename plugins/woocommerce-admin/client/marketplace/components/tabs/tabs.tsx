@@ -6,7 +6,6 @@ import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
-import { getAdminSetting } from '../../../utils/admin-settings';
 
 /**
  * Internal dependencies
@@ -15,6 +14,7 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export interface TabsProps {
 	additionalClassNames?: Array< string > | undefined;
