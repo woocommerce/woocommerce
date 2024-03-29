@@ -2304,6 +2304,19 @@ FROM $order_meta_table
 		$order_table     = self::get_orders_table_name();
 		$order_parent_id = $order->get_parent_id();
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$child_order_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM $order_table WHERE parent_order_id=%d",
+				$order->get_id()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		if ( empty( $child_order_ids ) ) {
+			return;
+		}
+
 		if ( $this->legacy_proxy->call_function( 'is_post_type_hierarchical', $order->get_type() ) ) {
 			$wpdb->update(
 				$order_table,
@@ -2312,16 +2325,15 @@ FROM $order_meta_table
 				array( '%d' ),
 				array( '%d' )
 			);
-		} else {
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$child_order_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT id FROM $order_table WHERE parent_order_id=%d",
-					$order->get_id()
-				)
-			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+			/** @var $cache_engine WPCacheEngine */
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$cache_group  = $this->get_cache_group();
+			foreach ( $child_order_ids as $child_order_id ) {
+				$cache_engine->delete_cached_object( $child_order_id, $cache_group );
+			}
+
+		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
 				if ( $child_order ) {
@@ -2494,6 +2506,10 @@ FROM $order_meta_table
 			);
 			$order_cache->remove( $order_id );
 		}
+
+		/** @var $cache_engine WPCacheEngine */
+		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+		$cache_engine->delete_cached_object( $order_id, $this->get_cache_group() );
 	}
 
 	/**
@@ -3089,6 +3105,9 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
+			/** @var $cache_engine WPCacheEngine */
+			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+			$cache_engine->delete_cached_object( $order->get_id(), $this->get_cache_group() );
 		}
 
 		return false;

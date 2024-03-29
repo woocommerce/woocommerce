@@ -2363,6 +2363,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
 
+		/** @var $order WC_Abstract_Legacy_Order */
 		list($order, $refund) = $this->create_order_with_refund();
 		$order_id             = $order->get_id();
 		$refund_id            = $refund->get_id();
@@ -2571,6 +2572,14 @@ class OrdersTableDataStoreTests extends HposTestCase {
 				array( 'parent_order_id' => '%d' ),
 				array( 'id' => '%d' ),
 			);
+
+			/**
+			 * We have to clear the cache after a direct DB update.
+			 * @todo A better API should be used here.
+			 */
+			/** @var $cache_engine \Automattic\WooCommerce\Caching\WPCacheEngine */
+			$cache_engine       = wc_get_container()->get( \Automattic\WooCommerce\Caching\WPCacheEngine::class );
+			$cache_engine->delete_cached_object( $refund->get_id(), 'orders_data' );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -3353,7 +3362,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->set_date_modified( time() + 1 );
+		$order->add_meta_data( 'extra_meta_key', 'standard_meta', true ); // trigger a meta cache purge
 		$order->save();
 
 		// Test fetching an order with meta data containing an object of a non-existent class.
