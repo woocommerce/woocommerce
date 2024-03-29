@@ -561,9 +561,6 @@ class Checkout extends MockeryTestCase {
 	 * Test checkout without valid shipping methods.
 	 */
 	public function test_checkout_invalid_shipping_method() {
-		WC()->cart->calculate_totals();
-		WC()->session->set( 'chosen_shipping_methods', array( '' ) );
-
 		global $wpdb;
 		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
 		foreach ( $shipping_methods as $shipping_method ) {
