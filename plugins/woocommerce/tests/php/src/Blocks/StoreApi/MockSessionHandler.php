@@ -290,7 +290,7 @@ class MockSessionHandler extends WC_Session_Handler {
 		}
 
 		// Try to get it from the cache, it will return false if not present or if object cache not in use.
-		$value = $this->mock_cache[ $customer_id ];
+		$value = empty( $this->mock_cache[ $customer_id ] ) ? false : $this->mock_cache[ $customer_id ];
 
 		if ( false === $value ) {
 			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM $this->_table WHERE session_key = %s", $customer_id ) ); // @codingStandardsIgnoreLine.
