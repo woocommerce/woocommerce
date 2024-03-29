@@ -114,23 +114,30 @@ export const useGetLocation = < T, >(
 		getEntitySlug,
 	] );
 
-	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
-		( select ) => ( {
-			isInSingleProductBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/single-product'
-				).length > 0,
-			isInMiniCartBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/mini-cart-contents'
-				).length > 0,
-		} ),
+	const { isInSingleProductBlock, isInSomeCartCheckoutBlock } = useSelect(
+		( select ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore No types for this selector exist yet
+			const { getBlockParentsByBlockName } = select( blockEditorStore );
+			const isInBlock = ( parentBlockName: string ) =>
+				getBlockParentsByBlockName( clientId, parentBlockName ).length >
+				0;
+
+			const isInSingleProductBlock = isInBlock(
+				'woocommerce/single-product'
+			);
+			const isInMiniCartBlock = isInBlock(
+				'woocommerce/mini-cart-contents'
+			);
+			const isInCartBlock = isInBlock( 'woocommerce/cart' );
+			const isInCheckoutBlock = isInBlock( 'woocommerce/checkout' );
+
+			return {
+				isInSingleProductBlock,
+				isInSomeCartCheckoutBlock:
+					isInMiniCartBlock || isInCartBlock || isInCheckoutBlock,
+			};
+		},
 		[ clientId ]
 	);
 
