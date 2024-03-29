@@ -208,7 +208,7 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await logoPickerPageObject.saveLogoSettings( assembler );
 		await waitForResponse;
 
-		await expect( isAValidResponse ).toBeTrue();
+		await expect( isAValidResponse ).toBe( true );
 	} );
 
 	test( 'The selected image should be visible on the frontend', async ( {
