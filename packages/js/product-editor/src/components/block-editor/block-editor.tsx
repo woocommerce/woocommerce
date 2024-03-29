@@ -5,6 +5,7 @@ import { parse } from '@wordpress/blocks';
 import { SelectControl } from '@wordpress/components';
 import {
 	createElement,
+	RawHTML,
 	useMemo,
 	useLayoutEffect,
 	useEffect,
@@ -22,9 +23,6 @@ import {
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
 	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
 // It doesn't seem to notice the External dependency block whn @ts-ignore is added.
@@ -51,6 +49,9 @@ import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import { interactivityStore } from './interactivity-store';
+
+console.log( interactivityStore.state );
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -183,13 +184,15 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const productForms = useSelect( ( select ) => {
-		return select( 'core' ).getEntityRecords( 'postType', 'product_form', {
-			per_page: -1,
-		} );
+		return (
+			select( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
 	}, [] );
 
 	useEffect( () => {
-		if ( selectedProductFormId || ! productForms ) {
+		if ( selectedProductFormId || ! productForms.length ) {
 			return;
 		}
 
@@ -204,7 +207,7 @@ export function BlockEditor( {
 		productId === -1;
 
 	useLayoutEffect( () => {
-		if ( isEditorLoading || ! productForms ) {
+		if ( isEditorLoading || ! productForms.length ) {
 			return;
 		}
 
@@ -265,6 +268,21 @@ export function BlockEditor( {
 				disabled={ ! productForms }
 				className="woocommerce-product-block-editor__product-type-selector"
 			/>
+			{ productForms.map( ( productForm ) => {
+				return (
+					<div
+						data-wp-interactive='{ "namespace": "myPlugin" }'
+						data-wp-context='{ "myColor" : "red", "myBgColor": "yellow" }'
+						key={ productForm.id }
+						// data-wp-context={ `{ "product":  ${ JSON.stringify(
+						// 	product
+						// ) } }` }
+					>
+						<RawHTML>{ productForm.content.rendered }</RawHTML>
+					</div>
+				);
+			} ) }
+
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }

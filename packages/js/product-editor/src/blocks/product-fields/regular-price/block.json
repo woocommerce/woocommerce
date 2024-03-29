@@ -33,8 +33,10 @@
 		"multiple": true,
 		"reusable": true,
 		"inserter": true,
-		"lock": false
+		"lock": false,
+		"interactivity": true
 	},
+	"viewScriptModule": "file:./view.js",
 	"usesContext": [ "postType" ],
 	"editorStyle": "file:./editor.css"
 }
