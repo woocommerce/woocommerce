@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Database\Migrations\CustomOrderTable;
 
+use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -103,6 +104,14 @@ class PostsToOrdersMigrationController {
 
 		if ( $using_transactions ) {
 			$this->commit_transaction();
+		}
+
+		/** @var $cache_engine WPCacheEngine */
+		// @todo - this needs a better API to interface with.
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		foreach ($order_post_ids as $order_post_id) {
+			$cache_engine->delete_cached_object( $order_post_id, 'orders_data' );
+			$cache_engine->delete_cached_object( $order_post_id, 'orders_meta' );
 		}
 
 	}
