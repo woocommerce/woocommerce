@@ -53,7 +53,13 @@ class MockSessionHandler extends WC_Session_Handler {
 	}
 
 	/**
-	 * Setup cookie and customer ID.
+	 * @var array A mock cache replacement for wp_cache.
+	 */
+	private $mock_cache;
+
+	/**
+	 * Sets the session cookie on-demand - see parent method. Instead of using wc_setcookie, we set the cookie directly
+	 * due to PHPUnit running tests in a single context, cookies cannot be sent in a response.
 	 *
 	 * @since 3.6.0
 	 */
