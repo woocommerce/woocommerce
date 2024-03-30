@@ -1,0 +1,26 @@
+diff --git a/build/constants.js b/build/constants.js
+index 45f6610c5f7704fabb3915547e04b483a035fb13..89f25a6f456c9759ef70c04f9362b50ca64598aa 100644
+--- a/build/constants.js
++++ b/build/constants.js
+@@ -4,5 +4,5 @@ Object.defineProperty(exports, "__esModule", {
+   value: true
+ });
+ exports.directivePrefix = void 0;
+-const directivePrefix = exports.directivePrefix = 'wp';
++const directivePrefix = exports.directivePrefix = 'wc';
+ //# sourceMappingURL=constants.js.map
+diff --git a/build-module/constants.js b/build-module/constants.js
+index 7157a81efadc236c32bf5efb20282ec7e94b72b3..475fdb180e716ce0e89f6bcf37c85314b8775769 100644
+--- a/build-module/constants.js
++++ b/build-module/constants.js
+@@ -1,2 +1,2 @@
+-export const directivePrefix = 'wp';
++export const directivePrefix = 'wc';
+ //# sourceMappingURL=constants.js.map
+diff --git a/src/constants.js b/src/constants.js
+index 669e94263fb9cac21ebf7965b3f78a94726b59e8..5a2db36426006fe48d3c2c999e2f23724b02bd68 100644
+--- a/src/constants.js
++++ b/src/constants.js
+@@ -1 +1 @@
+-export const directivePrefix = 'wp';
++export const directivePrefix = 'wc';
