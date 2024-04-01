@@ -32,7 +32,7 @@ Help text that appears below the field, providing additional guidance to the use
 
 Indicates that the field is required.
 
-### readOnly
+### disabled
 
 -   **Type:** `Boolean`
 -   **Required:** `No`
