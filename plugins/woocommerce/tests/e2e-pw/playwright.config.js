@@ -23,6 +23,7 @@ const config = {
 	retries: CI ? 2 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
+	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
 	reporter: [
 		[ 'list' ],
 		[

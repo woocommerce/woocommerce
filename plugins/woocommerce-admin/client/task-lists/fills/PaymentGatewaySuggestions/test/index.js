@@ -127,7 +127,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect(
 			container
 				.querySelector(
-					'.woocommerce-recommended-payments__header-heading'
+					'.woocommerce-recommended-payments-banner__footer'
 				)
 				.textContent.includes( 'WooPayments' )
 		).toBe( true );

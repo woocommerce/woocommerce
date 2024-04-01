@@ -28,7 +28,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'id' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(

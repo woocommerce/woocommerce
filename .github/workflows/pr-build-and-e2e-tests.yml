@@ -1,9 +1,9 @@
 name: Run tests against PR
 on:
     workflow_dispatch:
-    pull_request:
-        paths-ignore:
-            - '**/changelog/**'
+    #pull_request:
+        #paths-ignore:
+            #- '**/changelog/**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -35,7 +35,7 @@ jobs:
         outputs:
             E2E_GRAND_TOTAL: ${{ steps.count_e2e_total.outputs.E2E_GRAND_TOTAL }}
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -87,12 +87,12 @@ jobs:
         if: ${{ always() }}
         steps:
             - run: |
-                result="${{ needs.e2e-tests-run.result }}"
-                if [[ $result != "success" && $result != "skipped" ]]; then
-                  echo "One or more e2e tests have failed!"
-                exit 1
-                fi
-                echo "e2e tests have completed successfully."
+                  result="${{ needs.e2e-tests-run.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "One or more e2e tests have failed!"
+                  exit 1
+                  fi
+                  echo "e2e tests have completed successfully."
 
     merge-reports:
         name: Merge e2e test reports
@@ -105,7 +105,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -140,14 +140,14 @@ jobs:
 
     api-tests-run:
         name: Runs API tests.
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/test-results/allure-report
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -196,11 +196,11 @@ jobs:
     k6-tests-run:
         name: Runs k6 Performance tests
         if: github.event.pull_request.user.login != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -234,7 +234,7 @@ jobs:
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
             )
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [api-tests-run, merge-reports]
         permissions:
             contents: read
@@ -251,7 +251,7 @@ jobs:
                   mkdir -p output
 
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   path: repo
 
@@ -269,7 +269,7 @@ jobs:
 
             - name: Prepare test summary
               id: prepare-test-summary
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               env:
                   API_SUMMARY_PATH: ${{ github.workspace }}/artifacts/api/allure-report/widgets/summary.json
                   E2E_PW_SUMMARY_PATH: ${{ github.workspace }}/artifacts/e2e/allure-report/widgets/summary.json
@@ -282,7 +282,7 @@ jobs:
                       return await script( { core } )
 
             - name: Find PR comment by github-actions[bot]
-              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+              uses: peter-evans/find-comment@d5fe37641ad8451bdd80312415672ba26c86575e
               id: find-comment
               with:
                   issue-number: ${{ github.event.pull_request.number }}
@@ -290,7 +290,7 @@ jobs:
                   body-includes: Test Results Summary
 
             - name: Create or update PR comment
-              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043
               with:
                   comment-id: ${{ steps.find-comment.outputs.comment-id }}
                   issue-number: ${{ github.event.pull_request.number }}
@@ -307,7 +307,7 @@ jobs:
               contains( needs.*.result, 'success' ) ||
               contains( needs.*.result, 'failure' )
             )
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         needs: [api-tests-run, merge-reports, k6-tests-run]
         env:
             GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}

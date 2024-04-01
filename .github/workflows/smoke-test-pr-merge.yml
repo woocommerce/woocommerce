@@ -1,8 +1,9 @@
 name: Run tests against trunk after PR merge
 on:
-    pull_request:
-        types:
-            - closed
+  workflow_dispatch: 
+    #pull_request:
+        #types:
+            #- closed
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true
@@ -11,7 +12,7 @@ permissions: {}
 jobs:
     api:
         name: Run API tests
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         if: (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'trunk')
         permissions:
             contents: read
@@ -21,15 +22,15 @@ jobs:
             ARTIFACT_NAME: api-pr-merge-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
         steps:
             - name: Checkout merge commit on trunk
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.pull_request.merge_commit_sha }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
@@ -75,7 +76,7 @@ jobs:
     e2e:
         name: Run E2E tests
         needs: [api]
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         env:
@@ -83,15 +84,15 @@ jobs:
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
             ARTIFACT_NAME: e2e-pr-merge-${{ github.event.pull_request.number }}-run-${{ github.run_number }}
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.pull_request.merge_commit_sha }}
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
-                install: '@woocommerce/plugin-woocommerce...'
-                build: '@woocommerce/plugin-woocommerce'
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
             - name: Setup local test environment
               uses: ./.github/actions/tests/setup-local-test-environment
@@ -139,27 +140,35 @@ jobs:
                   test-type: E2E
 
     k6:
-        name: Run k6 Performance tests
-        needs: [api]
-        runs-on: ubuntu-20.04
+        name: Runs k6 Performance tests
+        if: (github.event.pull_request.user.login != 'github-actions[bot]') && (github.event.pull_request.merged == true) && (github.event.pull_request.base.ref == 'trunk')
+        runs-on: ubuntu-latest
         permissions:
             contents: read
         steps:
-            - uses: actions/checkout@v3
-              with:
-                  ref: ${{ github.event.pull_request.merge_commit_sha }}
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
-
-            - name: Setup local test environment
-              uses: ./.github/actions/tests/setup-local-test-environment
               with:
-                  test-type: k6
+                  install: '@woocommerce/plugin-woocommerce...'
+                  build: '@woocommerce/plugin-woocommerce'
 
-            - name: Run k6 performance tests
-              id: run-k6-composite-action
-              uses: './.github/actions/tests/run-k6-tests'
+            - name: Load docker images and start containers.
+              working-directory: plugins/woocommerce
+              env:
+                  ENABLE_HPOS: 0
+              run: |
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:dev
+                  pnpm --filter=@woocommerce/plugin-woocommerce env:performance-init
+
+            - name: Install k6
+              run: |
+                  curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1
+
+            - name: Run k6 tests
+              run: |
+                  ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-pr-requests.js
 
             - name: Send Slack alert on test failure
               if: failure() && steps.run-k6-composite-action.conclusion == 'failure'

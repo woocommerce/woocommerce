@@ -14,7 +14,7 @@
  *
  * @see https://woo.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.6.0
+ * @version 8.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ $calculator_text          = '';
 <tr class="woocommerce-shipping-totals shipping">
 	<th><?php echo wp_kses_post( $package_name ); ?></th>
 	<td data-title="<?php echo esc_attr( $package_name ); ?>">
-		<?php if ( isset( $available_methods ) && is_array( $available_methods ) ) : ?>
+		<?php if ( ! empty( $available_methods ) && is_array( $available_methods ) ) : ?>
 			<ul id="shipping_method" class="woocommerce-shipping-methods">
 				<?php foreach ( $available_methods as $method ) : ?>
 					<li>

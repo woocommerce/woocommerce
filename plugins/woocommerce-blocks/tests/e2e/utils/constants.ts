@@ -7,8 +7,14 @@ export const BLOCK_THEME_WITH_TEMPLATES_SLUG = 'theme-with-woo-templates';
 export const BLOCK_THEME_WITH_TEMPLATES_NAME = 'Theme with Woo Templates';
 export const BLOCK_THEME_SLUG = 'twentytwentyfour';
 export const BLOCK_THEME_NAME = 'Twenty Twenty-Four';
+export const BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG = `${ BLOCK_THEME_SLUG }-child__block-notices-filter`;
+export const BLOCK_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ BLOCK_THEME_SLUG }-child__block-notices-template`;
+export const BLOCK_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ BLOCK_THEME_SLUG }-child__classic-notices-template`;
 export const CLASSIC_THEME_SLUG = 'storefront';
 export const CLASSIC_THEME_NAME = 'Storefront';
+export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_FILTER_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-filter`;
+export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__block-notices-template`;
+export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices-template`;
 export const BASE_URL = 'http://localhost:8889';
 
 export const WP_ARTIFACTS_PATH =

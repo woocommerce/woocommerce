@@ -1,16 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
-use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 
 /**
  * BlockTypesController class.
@@ -27,42 +19,15 @@ class BlockTemplatesController {
 	const TEMPLATES_ROOT_DIR = 'templates';
 
 	/**
-	 * Package instance.
-	 *
-	 * @var Package
-	 */
-	private $package;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param Package $package An instance of Package.
-	 */
-	public function __construct( Package $package ) {
-		$this->package = $package;
-
-		$feature_gating                                 = $package->feature();
-		$is_block_templates_controller_refactor_enabled = $feature_gating->is_block_templates_controller_refactor_enabled();
-
-		// This feature is gated for WooCommerce versions 6.0.0 and above.
-		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '6.0.0', '>=' ) && ! $is_block_templates_controller_refactor_enabled ) {
-			$this->init();
-		}
-	}
-
-	/**
 	 * Initialization method.
 	 */
-	protected function init() {
-		add_filter( 'default_wp_template_part_areas', array( $this, 'register_mini_cart_template_part_area' ), 10, 1 );
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+	public function init() {
 		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
-		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 1 );
+		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
-		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
 
 		if ( wc_current_theme_is_fse_theme() ) {
@@ -70,13 +35,13 @@ class BlockTemplatesController {
 			// This render_callback wrapper allows us to add support for plugin-housed template parts.
 			add_filter(
 				'block_type_metadata_settings',
-				function( $settings, $metadata ) {
+				function ( $settings, $metadata ) {
 					if (
 						isset( $metadata['name'], $settings['render_callback'] ) &&
 						'core/template-part' === $metadata['name'] &&
-						in_array( $settings['render_callback'], [ 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ], true )
+						in_array( $settings['render_callback'], array( 'render_block_core_template_part', 'gutenberg_render_block_core_template_part' ), true )
 					) {
-						$settings['render_callback'] = [ $this, 'render_woocommerce_template_part' ];
+						$settings['render_callback'] = array( $this, 'render_woocommerce_template_part' );
 					}
 					return $settings;
 				},
@@ -88,13 +53,13 @@ class BlockTemplatesController {
 			// @see https://core.trac.wordpress.org/ticket/58366 for more info.
 			add_filter(
 				'block_type_metadata_settings',
-				function( $settings, $metadata ) {
+				function ( $settings, $metadata ) {
 					if (
 						isset( $metadata['name'], $settings['render_callback'] ) &&
 						'core/shortcode' === $metadata['name']
 					) {
 						$settings['original_render_callback'] = $settings['render_callback'];
-						$settings['render_callback']          = function( $attributes, $content ) use ( $settings ) {
+						$settings['render_callback']          = function ( $attributes, $content ) use ( $settings ) {
 							// The shortcode has already been rendered, so look for the cart/checkout HTML.
 							if ( strstr( $content, 'woocommerce-cart-form' ) || strstr( $content, 'wc-empty-cart-message' ) || strstr( $content, 'woocommerce-checkout-form' ) ) {
 								// Return early before wpautop runs again.
@@ -126,30 +91,13 @@ class BlockTemplatesController {
 					$current_screen = get_current_screen();
 
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), [ wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ], true ) ) {
+					if ( $current_screen && 'page' === $current_screen->id && ! empty( $_GET['post'] ) && in_array( absint( $_GET['post'] ), array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ), true ) ) {
 						wp_add_inline_style( 'wc-blocks-editor-style', '.edit-post-post-template { display: none; }' );
 					}
 				},
 				10
 			);
 		}
-	}
-
-	/**
-	 * Add Mini-Cart to the default template part areas.
-	 *
-	 * @param array $default_area_definitions An array of supported area objects.
-	 * @return array The supported template part areas including the Mini-Cart one.
-	 */
-	public function register_mini_cart_template_part_area( $default_area_definitions ) {
-		$mini_cart_template_part_area = [
-			'area'        => 'mini-cart',
-			'label'       => __( 'Mini-Cart', 'woocommerce' ),
-			'description' => __( 'The Mini-Cart template allows shoppers to see their cart items and provides access to the Cart and Checkout pages.', 'woocommerce' ),
-			'icon'        => 'mini-cart',
-			'area_tag'    => 'mini-cart',
-		];
-		return array_merge( $default_area_definitions, [ $mini_cart_template_part_area ] );
 	}
 
 	/**
@@ -201,7 +149,7 @@ class BlockTemplatesController {
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( 'archive-product', $slug ),
+			'post_name__in' => array( ProductCatalogTemplate::SLUG, $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -222,7 +170,7 @@ class BlockTemplatesController {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && 'archive-product' === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && ProductCatalogTemplate::SLUG === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
@@ -253,11 +201,13 @@ class BlockTemplatesController {
 
 		$templates_eligible_for_fallback = array_filter(
 			$template_slugs,
-			array( BlockTemplateUtils::class, 'template_is_eligible_for_product_archive_fallback' )
+			function ( $template_slug ) {
+				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug );
+			}
 		);
 
 		if ( count( $templates_eligible_for_fallback ) > 0 ) {
-			$template_hierarchy[] = 'archive-product';
+			$template_hierarchy[] = ProductCatalogTemplate::SLUG;
 		}
 
 		return $template_hierarchy;
@@ -305,7 +255,7 @@ class BlockTemplatesController {
 
 		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-			$template_path   = BlockTemplateUtils::get_theme_template_path( 'archive-product' );
+			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
 			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
@@ -351,9 +301,11 @@ class BlockTemplatesController {
 	 * Add the template title and description to WooCommerce templates.
 	 *
 	 * @param WP_Block_Template|null $block_template The found block template, or null if there isn't one.
+	 * @param string                 $id             Template unique identifier (example: 'theme_slug//template_slug').
+	 * @param array                  $template_type  Template type: 'wp_template' or 'wp_template_part'.
 	 * @return WP_Block_Template|null
 	 */
-	public function add_block_template_details( $block_template ) {
+	public function add_block_template_details( $block_template, $id, $template_type ) {
 		if ( ! $block_template ) {
 			return $block_template;
 		}
@@ -362,6 +314,9 @@ class BlockTemplatesController {
 		}
 		if ( ! $block_template->description ) {
 			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
+		}
+		if ( ! $block_template->area || 'uncategorized' === $block_template->area ) {
+			$block_template->area = BlockTemplateUtils::get_block_template_area( $block_template->slug, $template_type );
 		}
 		return $block_template;
 	}
@@ -406,9 +361,7 @@ class BlockTemplatesController {
 
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if ( 'custom' !== $template_file->source ) {
-				$template = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
-			} else {
+			if ( 'custom' === $template_file->source ) {
 				$query_result[] = $template_file;
 				continue;
 			}
@@ -424,6 +377,7 @@ class BlockTemplatesController {
 				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
 			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
 			if ( $should_include ) {
+				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 				$query_result[] = $template;
 			}
 		}
@@ -443,42 +397,15 @@ class BlockTemplatesController {
 		 * templates that aren't listed in theme.json.
 		 */
 		$query_result = array_map(
-			function( $template ) {
-				if ( str_contains( $template->slug, 'single-product' ) ) {
-					// We don't want to add the compatibility layer on the Editor Side.
-					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
-					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.
-					if ( ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
-						// Add the product class to the body. We should move this to a more appropriate place.
-						add_filter(
-							'body_class',
-							function( $classes ) {
-								return array_merge( $classes, wc_get_product_class() );
-							}
-						);
-
-						global $product;
-
-						if ( ! $product instanceof \WC_Product ) {
-							$product_id = get_the_ID();
-							if ( $product_id ) {
-								wc_setup_product_data( $product_id );
-							}
-						}
-
-						if ( post_password_required() ) {
-							$template->content = SingleProductTemplate::add_password_form( $template->content );
-						} else {
-							$template->content = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
-						}
-					}
-				}
-
+			function ( $template ) use ( $template_type ) {
 				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
 					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
 				}
 				if ( ! $template->description ) {
 					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
+				}
+				if ( ! $template->area || 'uncategorized' === $template->area ) {
+					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
 				}
 
 				return $template;
@@ -513,16 +440,10 @@ class BlockTemplatesController {
 	 * @return array Templates from the WooCommerce blocks plugin directory.
 	 */
 	public function get_block_templates_from_woocommerce( $slugs, $already_found_templates, $template_type = 'wp_template' ) {
-		$directory      = BlockTemplateUtils::get_templates_directory( $template_type );
-		$template_files = BlockTemplateUtils::get_template_paths( $directory );
+		$template_files = BlockTemplateUtils::get_template_paths( $template_type );
 		$templates      = array();
 
 		foreach ( $template_files as $template_file ) {
-			// Skip the Product Gallery template part, as it is not supposed to be exposed at this point.
-			if ( str_contains( $template_file, 'templates/parts/product-gallery.html' ) ) {
-				continue;
-			}
-
 			// Skip the template if it's blockified, and we should only use classic ones.
 			if ( ! BlockTemplateUtils::should_use_blockified_product_grid_templates() && strpos( $template_file, 'blockified' ) !== false ) {
 				continue;
@@ -564,7 +485,7 @@ class BlockTemplatesController {
 
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-				$template_file = BlockTemplateUtils::get_theme_template_path( 'archive-product' );
+				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
 				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
@@ -572,7 +493,7 @@ class BlockTemplatesController {
 			// At this point the template only exists in the Blocks filesystem, if is a taxonomy-product_cat/tag/attribute.html template
 			// let's use the archive-product.html template from Blocks.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
-				$template_file = $this->get_template_path_from_woocommerce( 'archive-product' );
+				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
 				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
 				continue;
 			}
@@ -632,109 +553,6 @@ class BlockTemplatesController {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
-	 */
-	public function render_block_template() {
-		if ( is_embed() || ! BlockTemplateUtils::supports_block_templates() ) {
-			return;
-		}
-
-		if (
-			is_singular( 'product' ) && $this->block_template_is_available( 'single-product' )
-		) {
-			global $post;
-
-			$valid_slugs = [ 'single-product' ];
-			if ( 'product' === $post->post_type && $post->post_name ) {
-				$valid_slugs[] = 'single-product-' . $post->post_name;
-			}
-			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			if ( ! BlockTemplateUtils::theme_has_template( 'single-product' ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
-		} elseif (
-			( is_product_taxonomy() && is_tax( 'product_cat' ) ) && $this->block_template_is_available( 'taxonomy-product_cat' )
-		) {
-			$templates = get_block_templates( array( 'slug__in' => array( 'taxonomy-product_cat' ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			if ( ! BlockTemplateUtils::theme_has_template( 'taxonomy-product_cat' ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
-		} elseif (
-			( is_product_taxonomy() && is_tax( 'product_tag' ) ) && $this->block_template_is_available( 'taxonomy-product_tag' )
-		) {
-			$templates = get_block_templates( array( 'slug__in' => array( 'taxonomy-product_tag' ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			if ( ! BlockTemplateUtils::theme_has_template( 'taxonomy-product_tag' ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
-		} elseif ( is_post_type_archive( 'product' ) && is_search() ) {
-			$templates = get_block_templates( array( 'slug__in' => array( ProductSearchResultsTemplate::SLUG ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			if ( ! BlockTemplateUtils::theme_has_template( ProductSearchResultsTemplate::SLUG ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
-		} elseif (
-			( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) && $this->block_template_is_available( 'archive-product' )
-		) {
-			$templates = get_block_templates( array( 'slug__in' => array( 'archive-product' ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			if ( ! BlockTemplateUtils::theme_has_template( 'archive-product' ) ) {
-				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-			}
-		} elseif (
-			is_cart() &&
-			! BlockTemplateUtils::theme_has_template( CartTemplate::get_slug() ) && $this->block_template_is_available( CartTemplate::get_slug() )
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		} elseif (
-			is_checkout() &&
-			! BlockTemplateUtils::theme_has_template( CheckoutTemplate::get_slug() ) && $this->block_template_is_available( CheckoutTemplate::get_slug() )
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		} else {
-			$queried_object = get_queried_object();
-			if ( is_null( $queried_object ) ) {
-				return;
-			}
-
-			if ( isset( $queried_object->taxonomy ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) && $this->block_template_is_available( ProductAttributeTemplate::SLUG )
-			) {
-				$templates = get_block_templates( array( 'slug__in' => array( ProductAttributeTemplate::SLUG ) ) );
-
-				if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-					add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-				}
-
-				if ( ! BlockTemplateUtils::theme_has_template( ProductAttributeTemplate::SLUG ) ) {
-					add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Remove the template panel from the Sidebar of the Shop page because
 	 * the Site Editor handles it.
 	 *
@@ -758,25 +576,5 @@ class BlockTemplatesController {
 		}
 
 		return $is_support;
-	}
-
-	/**
-	 * Update the product archive title to "Shop".
-	 *
-	 * @param string $post_type_name Post type 'name' label.
-	 * @param string $post_type      Post type.
-	 *
-	 * @return string
-	 */
-	public function update_product_archive_title( $post_type_name, $post_type ) {
-		if (
-			function_exists( 'is_shop' ) &&
-			is_shop() &&
-			'product' === $post_type
-		) {
-			return __( 'Shop', 'woocommerce' );
-		}
-
-		return $post_type_name;
 	}
 }

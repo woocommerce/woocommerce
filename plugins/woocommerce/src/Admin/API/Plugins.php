@@ -592,25 +592,22 @@ class Plugins extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Returns a URL that can be used to by WCPay to verify business details with Stripe.
+	 * Returns a URL that can be used to by WCPay to verify business details.
 	 *
 	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_wcpay() {
-		if ( ! class_exists( 'WC_Payments_Account' ) ) {
+		if ( ! class_exists( 'WC_Payments' ) ) {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		$args = WooCommercePayments::is_account_partially_onboarded() ? [
-			'wcpay-login' => '1',
-			'_wpnonce'    => wp_create_nonce( 'wcpay-login' ),
-		] : [
-			'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
-			'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
-		];
+		// Redirect to the WooPayments overview page if the merchant started onboarding (aka WooPayments is already connected).
+		// Redirect to the WooPayments connect page if they haven't started onboarding.
+		$path = WooCommercePayments::is_connected() ? '/payments/overview' : '/payments/connect';
 
+		// Point to the WooPayments Connect page rather than straight to the onboarding flow.
 		return( array(
-			'connectUrl' => add_query_arg( $args, admin_url() ),
+			'connectUrl' => add_query_arg( 'from', 'WCADMIN_PAYMENT_TASK', admin_url( 'admin.php?page=wc-admin&path=' . $path ) ),
 		) );
 	}
 

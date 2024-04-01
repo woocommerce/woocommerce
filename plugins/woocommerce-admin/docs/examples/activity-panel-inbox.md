@@ -60,6 +60,7 @@ Here’s a short example plugin that adds a new activity panel inbox note on plu
  * Version: 1.0.1
  */
 
+use Automattic\WooCommerce\Admin\Notes\Notes as Notes;
 use Automattic\WooCommerce\Admin\Notes\Note as Note;
 
 class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
@@ -107,8 +108,6 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 			'activated_formatted' => $activated_time_formatted,
 		) );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_layout('plain');
-		$note->set_image('');
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'wapi-example-plugin-one' );
 		$note->set_layout('plain');
@@ -131,7 +130,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 	 * Removes any notes this plugin created.
 	 */
 	public static function remove_activity_panel_inbox_notes() {
-		if ( ! class_exists( 'Notes' ) ) {
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Notes\Notes' ) ) {
 			return;
 		}
 
@@ -148,6 +147,7 @@ function wapi_example_one_deactivate() {
 	WooCommerce_Activity_Panel_Inbox_Example_Plugin_One::remove_activity_panel_inbox_notes();
 }
 register_deactivation_hook( __FILE__, 'wapi_example_one_deactivate' );
+
 ```
 
 ### Updating Inbox Items
@@ -165,6 +165,9 @@ Here’s a short example plugin that updates an activity panel inbox note:
  * Text Domain: wapi-example-plugin-two
  * Version: 1.0.0
  */
+ 
+use Automattic\WooCommerce\Admin\Notes\Notes as Notes;
+use Automattic\WooCommerce\Admin\Notes\Note as Note;
 
 class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 	const NOTE_NAME = 'wapi-example-plugin-two';
@@ -173,7 +176,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 	 * Adds a note to the merchant' inbox.
 	 */
 	public static function add_or_update_activity_panel_inbox_note() {
-		if ( ! class_exists( 'Notes' ) ) {
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Notes\Notes' ) ) {
 			return;
 		}
 
@@ -205,8 +208,6 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 		) );
 
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-		$note->set_layout('plain');
-		$note->set_image('');
 		$note->set_name( self::NOTE_NAME );
 		$note->set_layout('plain');
 		$note->set_image('');
@@ -219,7 +220,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two {
 	 * Removes any notes this plugin created.
 	 */
 	public static function remove_activity_panel_inbox_notes() {
-		if ( ! class_exists( 'Notes' ) ) {
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Notes\Notes' ) ) {
 			return;
 		}
 
@@ -236,6 +237,7 @@ function wapi_example_two_deactivate() {
 	WooCommerce_Activity_Panel_Inbox_Example_Plugin_Two::remove_activity_panel_inbox_notes();
 }
 register_deactivation_hook( __FILE__, 'wapi_example_two_deactivate' );
+
 ```
 
 #### Using the REST API

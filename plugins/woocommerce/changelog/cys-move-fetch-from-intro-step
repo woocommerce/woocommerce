@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-CYS - Move checking if the current active theme has modifications to the assembler-hub step instead of the intro step

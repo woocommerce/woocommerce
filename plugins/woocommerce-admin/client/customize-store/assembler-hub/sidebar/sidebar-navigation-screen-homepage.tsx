@@ -13,10 +13,13 @@ import {
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
 import { Spinner } from '@wordpress/components';
-
+// @ts-expect-error No types for this exist yet.
+import { store as coreStore } from '@wordpress/core-data';
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
 import { recordEvent } from '@woocommerce/tracks';
+// @ts-expect-error Missing type in core-data.
+import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
 /**
  * Internal dependencies
@@ -30,6 +33,7 @@ import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
+import { useSelect } from '@wordpress/data';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -40,9 +44,22 @@ export const SidebarNavigationScreenHomepage = () => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
-	const [ blocks, , onChange ] = useEditorBlocks();
+	const currentTemplate = useSelect(
+		( select ) =>
+			// @ts-expect-error No types for this exist yet.
+			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
+		[]
+	);
+
+	const [ blocks, , onChange ] = useEditorBlocks(
+		'wp_template',
+		currentTemplate.id
+	);
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
+			if ( pattern === selectedPattern ) {
+				return;
+			}
 			setSelectedPattern( pattern );
 			onChange(
 				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
@@ -50,8 +67,10 @@ export const SidebarNavigationScreenHomepage = () => {
 			);
 			scroll();
 		},
-		[ blocks, onChange, setSelectedPattern, scroll ]
+		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
 	);
+
+	const isEditorLoading = useIsSiteEditorLoading();
 
 	const homePatterns = useMemo( () => {
 		return Object.entries( homeTemplates ).map(
@@ -80,18 +99,23 @@ export const SidebarNavigationScreenHomepage = () => {
 			return;
 		}
 
-		const homeBlocks = blocks.slice( 1, -1 );
-		const _currentSelectedPattern = homePatterns.find( ( pattern ) => {
-			if ( homeBlocks.length !== pattern.blocks.length ) {
+		const currentSelectedPattern = homePatterns.find( ( patterns ) => {
+			//'blocks' contains all blocks in the template, including the
+			// header and footer blocks, while the 'patterns.blocks' does
+			// not. For that reason we are removing the first and last
+			// blocks from the 'blocks' to be able to compare then
+			const homeBlocks = blocks.slice( 1, blocks.length - 1 );
+
+			if ( patterns.blocks.length !== homeBlocks.length ) {
 				return false;
 			}
+
 			return homeBlocks.every(
-				( block, index ) => block.name === pattern.blocks[ index ].name
+				( block, i ) => block.name === patterns.blocks[ i ].name
 			);
 		} );
 
-		setSelectedPattern( _currentSelectedPattern );
-
+		setSelectedPattern( currentSelectedPattern );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
 	}, [ blocks, homePatterns ] );
 
@@ -100,14 +124,14 @@ export const SidebarNavigationScreenHomepage = () => {
 
 	const title = aiOnline
 		? __( 'Change your homepage', 'woocommerce' )
-		: __( 'Design your homepage', 'woocommerce' );
+		: __( 'Choose your homepage', 'woocommerce' );
 	const sidebarMessage = aiOnline
 		? __(
 				'Based on the most successful stores in your industry and location, our AI tool has recommended this template for your business. Prefer a different layout? Choose from the templates below now, or later via the <EditorLink>Editor</EditorLink>.',
 				'woocommerce'
 		  )
 		: __(
-				'Based on the most successful stores, we recommend this layout for your business. Prefer something different? Choose from the templates below now, or continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
+				'Create an engaging homepage by selecting one of our pre-designed layouts. You can continue customizing this page, including the content, later via the <EditorLink>Editor</EditorLink>.',
 				'woocommerce'
 		  );
 
@@ -137,7 +161,11 @@ export const SidebarNavigationScreenHomepage = () => {
 			content={
 				<div className="woocommerce-customize-store__sidebar-homepage-content">
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-homepage">
-						{ isLoading ? (
+						{ /* This is necessary to fix this issue: https://github.com/woocommerce/woocommerce/issues/45711
+						  If the user switch the homepage while the editor is loading, header and footer could disappear.
+						  For more details check: https://github.com/woocommerce/woocommerce/pull/45735
+						  */ }
+						{ isLoading || isEditorLoading ? (
 							<span className="components-placeholder__preview">
 								<Spinner />
 							</span>

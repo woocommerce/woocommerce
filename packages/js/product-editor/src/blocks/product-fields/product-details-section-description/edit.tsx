@@ -42,6 +42,7 @@ import type {
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
+import * as wooIcons from '../../../icons';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -176,9 +177,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		if ( /^https?:\/\//.test( iconId ) ) {
 			icon = <img src={ iconId } alt={ alt } />;
 		} else {
-			if ( ! ( iconId in icons ) ) return undefined;
+			if ( ! ( iconId in icons || iconId in wooIcons ) ) return undefined;
 
-			icon = icons[ iconId as never ];
+			icon = icons[ iconId as never ] || wooIcons[ iconId as never ];
 		}
 
 		return <Icon icon={ icon } size={ 24 } />;

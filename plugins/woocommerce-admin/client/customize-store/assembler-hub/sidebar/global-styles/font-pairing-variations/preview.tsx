@@ -91,6 +91,7 @@ export const FontPairingVariationPreview = () => {
 	const defaultHeight = isDesktop
 		? FONT_PREVIEW_LARGE_HEIGHT
 		: FONT_PREVIEW_HEIGHT;
+
 	const ratio = width ? width / defaultWidth : 1;
 	const normalizedHeight = Math.ceil( defaultHeight * ratio );
 	const externalFontFamilies = fontFamilies.filter(

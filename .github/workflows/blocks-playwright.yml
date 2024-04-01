@@ -1,18 +1,23 @@
 name: Run Blocks Playwright Tests
+
 on:
     pull_request:
         paths:
+            - '.github/workflows/blocks-playwright.yml' # This file
             - 'plugins/woocommerce-blocks/**'
             - 'plugins/woocommerce/src/Blocks/**'
             - 'plugins/woocommerce/templates/**'
             - 'plugins/woocommerce/patterns/**'
+    # Allow manually triggering the workflow.
+    workflow_dispatch:
+
 
 env:
     FORCE_COLOR: 1
 
 jobs:
-    PlaywrightE2ETests:
-        name: Playwright E2E tests - ${{ matrix.config.name }}
+    e2e:
+        name: ${{ matrix.config.name }} [${{ matrix.shards.name }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
@@ -22,16 +27,16 @@ jobs:
             fail-fast: false
             matrix:
                 config:
-                    - name: Normal
+                    - name: Default (Block) Theme
                       file: playwright.config.ts
                       resultPath: test-results
-                    - name: Classic
+                    - name: Classic Theme
                       file: playwright.classic-theme.config.ts
                       resultPath: test-results-classic-theme
-                    - name: SideEffects
+                    - name: Side Effects
                       file: playwright.side-effects.config.ts
                       resultPath: test-results-side-effects
-                    - name: BlockThemeWithTemplates
+                    - name: Block Theme With Templates
                       file: playwright.block-theme-with-templates.config.ts
                       resultPath: test-results-block-theme-with-templates
                 shards:

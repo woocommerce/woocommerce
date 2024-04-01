@@ -764,6 +764,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'slotfill_placeholder':
+						?>
+						<div
+							id="<?php echo esc_attr( $value['id'] ); ?>"
+							class="<?php echo esc_attr( $value['class'] ); ?>"
+						>
+						</div>
+						<?php
+						break;
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );

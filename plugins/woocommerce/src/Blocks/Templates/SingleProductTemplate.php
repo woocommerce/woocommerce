@@ -1,12 +1,116 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+
 /**
  * SingleProductTemplae class.
  *
  * @internal
  */
-class SingleProductTemplate {
+class SingleProductTemplate extends AbstractTemplate {
+
+	/**
+	 * The slug of the template.
+	 *
+	 * @var string
+	 */
+	const SLUG = 'single-product';
+
+	/**
+	 * Initialization method.
+	 */
+	public function init() {
+		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+		add_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11, 3 );
+	}
+
+	/**
+	 * Returns the title of the template.
+	 *
+	 * @return string
+	 */
+	public function get_template_title() {
+		return _x( 'Single Product', 'Template name', 'woocommerce' );
+	}
+
+	/**
+	 * Returns the description of the template.
+	 *
+	 * @return string
+	 */
+	public function get_template_description() {
+		return __( 'Displays a single product.', 'woocommerce' );
+	}
+
+	/**
+	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 */
+	public function render_block_template() {
+		if ( ! is_embed() && is_singular( 'product' ) ) {
+			global $post;
+
+			$valid_slugs = [ self::SLUG ];
+			if ( 'product' === $post->post_type && $post->post_name ) {
+				$valid_slugs[] = 'single-product-' . $post->post_name;
+			}
+			$templates = get_block_templates( array( 'slug__in' => $valid_slugs ) );
+
+			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			}
+
+			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+		}
+	}
+
+	/**
+	 * Add the block template objects to be used.
+	 *
+	 * @param array  $query_result Array of template objects.
+	 * @param array  $query Optional. Arguments to retrieve templates.
+	 * @param string $template_type wp_template or wp_template_part.
+	 * @return array
+	 */
+	public function update_single_product_content( $query_result, $query, $template_type ) {
+		$query_result = array_map(
+			function( $template ) {
+				if ( str_contains( $template->slug, self::SLUG ) ) {
+					// We don't want to add the compatibility layer on the Editor Side.
+					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
+					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.
+					if ( ( ! is_admin() && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) && ! BlockTemplateUtils::template_has_legacy_template_block( $template ) ) {
+						// Add the product class to the body. We should move this to a more appropriate place.
+						add_filter(
+							'body_class',
+							function( $classes ) {
+								return array_merge( $classes, wc_get_product_class() );
+							}
+						);
+
+						global $product;
+
+						if ( ! $product instanceof \WC_Product ) {
+							$product_id = get_the_ID();
+							if ( $product_id ) {
+								wc_setup_product_data( $product_id );
+							}
+						}
+
+						if ( post_password_required() ) {
+							$template->content = $this->add_password_form( $template->content );
+						} else {
+							$template->content = SingleProductTemplateCompatibility::add_compatibility_layer( $template->content );
+						}
+					}
+				}
+				return $template;
+			},
+			$query_result
+		);
+		return $query_result;
+	}
 
 	/**
 	 * Replace the first single product template block with the password form. Remove all other single product template blocks.

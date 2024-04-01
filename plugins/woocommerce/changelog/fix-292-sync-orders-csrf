@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adds a nonce check to the HPOS order sync tool.

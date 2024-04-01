@@ -350,7 +350,7 @@
         {
           "post_title": "Logging in WooCommerce",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/logging.md",
-          "hash": "2cb0d0d594481127d144a95ccf8ca8ca826711dbf25a42fdc69a75c7d200d99f",
+          "hash": "14deebc3eaaf821ade3f84b5b16d154b36b4cceae59b04b6cb18f6ba9588fa56",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/logging.md",
           "id": "c684e2efba45051a4e1f98eb5e6ef6bab194f25c"
         },
@@ -386,7 +386,7 @@
           "menu_title": "Implement merchant onboarding",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/handling-merchant-onboarding.md",
-          "hash": "238d7b7d6b52bbf1840bf2e264d0724cde220f6dab343e7620fee1a7fd715c08",
+          "hash": "e5fd467caece98bb1d18a5d150c375b2c575cb956980a7054b89b3cfcfbcdae9",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/handling-merchant-onboarding.md",
           "id": "89fe15dc232379f546852822230c334d3d940b93",
           "links": {
@@ -458,7 +458,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "0b72a7c7a844459c971f10ade3f56e5c172d6f4fe5902f733972aaf7fc2121cb",
+          "hash": "d1ad51948f0391f342e968fcf3889dda234a64b8256090061b7b6db074b0a6e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -517,7 +517,7 @@
           "menu_title": "Development environment setup",
           "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "f3f91c7e2d2676d39f30cf2245e02c044de704894b358a78a086507a0d37ae2c",
+          "hash": "5e877a4283be4264c7fc37b7e8dbf8c08224a82c65bab0e02cd08f3ca895cd4d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
@@ -526,18 +526,9 @@
           "menu_title": "Developer tools",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "0c63cb8213a7bb64295f7321afc9fce5c8e12c3b860e7bb885fe66ac7a71d661",
+          "hash": "ef24e32109d66f96a990fea7a5eb32f9e0b98ae7ca766dcae12244449956997b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
-        },
-        {
-          "post_title": "WooCommerce developer resources",
-          "menu_title": "Developer resources",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "ec2c30bd0d73eb26e636da9d9d3468eb3bc453213099edcc73468a74407e600c",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
-          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
         {
           "post_title": "Resources for debugging",
@@ -561,6 +552,15 @@
           "links": {
             "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
           }
+        },
+        {
+          "post_title": "Contributing to WooCommerce Core",
+          "menu_title": "Contribute to WooCommerce Core",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "hash": "b9c53ffb82b83dfe54c95c85a9f7c0127942087804f0490a2abfccb993ad3e2c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "id": "198a4d4a506d464737c356f86684676ad4a0c27b"
         }
       ],
       "categories": []
@@ -870,6 +870,13 @@
           "id": "ec1f05ca7c14ed81a52553fa1c3f1045df5f6a4f"
         },
         {
+          "post_title": "Template structure & Overriding templates via a theme",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/theme-development/template-structure.md",
+          "hash": "faf1f9d46a5115cb3c573d61474e7e7b3ba473568956c87aca6a45be8f205b37",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/theme-development/template-structure.md",
+          "id": "34bfebec9fc45e680976814928a7b8a1778af14e"
+        },
+        {
           "post_title": "How to set up and use a child theme",
           "menu_title": "Set up and use a child theme",
           "tags": "how-to",
@@ -914,11 +921,6 @@
           "id": "c2fde53e1dc3efbded3cfe1fb4df27136a3799a4"
         }
       ],
-      "categories": []
-    },
-    {
-      "category_slug": "utilities",
-      "category_title": "Utilities",
       "categories": []
     },
     {
@@ -993,7 +995,7 @@
           "post_title": "WooCommerce Extension Guidelines - Accessibility",
           "menu_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-extensions/accessibility.md",
-          "hash": "3b8d43390d349279d984ae750e95a3cbb9c4f9b39177325bb7e95ba5505d839a",
+          "hash": "b147dbdb658b941e7bd45bec21f68ca83667915a1ba51f0d4b0e856899d0202d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-extensions/accessibility.md",
           "id": "e085da13824f41a311b3eeb391386a1c2f67da32"
         }
@@ -1009,7 +1011,7 @@
           "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
           "menu_title": "Payments Onboarding and Setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
-          "hash": "b627aa75171e4ba4a7f9802a09df2de4026b1496ca2c448693abf010480ec0eb",
+          "hash": "aa2429f5322cb3f4e2168117e7c42cd3a090fc2665c6e09264a0d69c03216c9c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
           "id": "9e100f5d1c5e52bb337a294456f75cd60929d9e3"
         },
@@ -1017,7 +1019,7 @@
           "post_title": "User Experience Guidelines - Payment Button Style",
           "menu_title": "Payment Button Style",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-style.md",
-          "hash": "ddaf6af31bbbba2e03feb852b650ac442d7937c7437464eeef1418c4c421939e",
+          "hash": "f302ec65394f21436f5886263f95aa8b24f7b3dc67a65ce7f6c0704923337612",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-style.md",
           "id": "83d869cec0b2268ae30a6517c7c8f424de284cad"
         },
@@ -1025,7 +1027,7 @@
           "post_title": "User Experience Guidelines - Payment Button Size and Anatomy",
           "menu_title": "Payment Button Size",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-size.md",
-          "hash": "bec66a7aae90a2995d948f27510a12978f48676cf440fc3ac5c07db9f9d9de4b",
+          "hash": "f369880a1e4cc0841820c1ec690aac46ac4629cd105f8405f18d755a2346ba8e",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-size.md",
           "id": "0920df1611e1b1b3e2f33c810a8f8e8ae09dd67c"
         },
@@ -1033,7 +1035,7 @@
           "post_title": "User Experience Guidelines - Payment Button Layout",
           "menu_title": "Payment Button Layout",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
-          "hash": "59b75f884b59d42f4950543a255afa4297e6aeec918fa86b57cfbe56a79461cc",
+          "hash": "c1a2014232650e5dcf2a37288df2c7a552a6e69e4919dd3ce27c71ff28175c2c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payment-button-layout.md",
           "id": "96caecc340794e5c80af271e5cc844e0b3d80a04"
         }
@@ -1154,7 +1156,7 @@
           "post_title": "WooCommerce Theme Guidelines - Accessibility",
           "menu_title": "Accessibility",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
-          "hash": "a63ee4e8317dc4a6de2798730a81925ed9afeeaf894c4de24b7b751de9ad5ac6",
+          "hash": "28c3931662bd44b20704f47b6c176491d4e47bf2af056ffb2558765fb081ca01",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-themes/theme-accessibility.md",
           "id": "9004b7f3768b6781dae24484c5aaad365bd21b12"
         }
@@ -1180,7 +1182,7 @@
           "menu_title": "Commands",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/wc-cli-commands.md",
-          "hash": "b928cc77a9ff6bfb023b35f16989a0cdfb5e1a4877679aa61e894e9d0318d4eb",
+          "hash": "a926ff45642539e0edc6b4e3dfeba4b31c2d01082700af132a2e8d56cfa25ec5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/wc-cli-commands.md",
           "id": "73d6bc6468d23a9e93d16d574399105b143e43af"
         },
@@ -1201,7 +1203,7 @@
           "menu_title": "Frequently Asked Questions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/wc-cli/cli-faq.md",
-          "hash": "f33cd9e92983e4351b7d3df23290391b6815673dd02b2843b23b4babb02c06a4",
+          "hash": "cdf02b0a30693f3659f26a774953cb56c85e0319c9472447a4b9563ac3d9b2a4",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/wc-cli/cli-faq.md",
           "id": "86857f8924e3bd3fe6fdcc06cd8f4351f5e6f4c1"
         }
@@ -1209,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "a485b51014a2262571751ae495976ca40aa8ffd4fddc7ee8ca8171ee51bd8984"
+  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
 }

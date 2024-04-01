@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove property type hints in TransientFilesEngine and ReceiptRenderingEngine

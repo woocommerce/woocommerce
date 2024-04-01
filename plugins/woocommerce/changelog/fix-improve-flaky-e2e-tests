@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix a couple of flaky e2e tests

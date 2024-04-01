@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 
 const transformedCartBlockTitle = `Transformed Cart ${ Date.now() }`;
 const transformedCartBlockSlug = transformedCartBlockTitle
@@ -13,7 +13,7 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 		// go to create a new page
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		// fill page title
 		await page
@@ -63,7 +63,9 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 			page.getByRole( 'heading', { name: transformedCartBlockTitle } )
 		).toBeVisible();
 		await expect(
-			page.getByText( 'Your cart is currently empty!' )
+			page.getByRole( 'heading', {
+				name: 'Your cart is currently empty!',
+			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: 'Browse store' } )

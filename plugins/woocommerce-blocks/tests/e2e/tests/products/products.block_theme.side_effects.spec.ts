@@ -67,7 +67,7 @@ test.describe( `${ blockData.name } Block `, () => {
 			postType: 'wp_template',
 		} );
 
-		await editor.canvas.click( 'body' );
+		await editor.canvas.locator( 'body' ).click();
 
 		const block = await editorUtils.getBlockByName( blockData.name );
 		await editor.selectBlocks( block );
@@ -95,7 +95,7 @@ test.describe( `${ blockData.name } Block `, () => {
 			postType: 'wp_template',
 		} );
 
-		await editor.canvas.click( 'body' );
+		await editor.canvas.locator( 'body' ).click();
 
 		const block = await editorUtils.getBlockByName( blockData.name );
 		await editor.selectBlocks( block );
@@ -138,7 +138,7 @@ for ( const {
 				postType: 'wp_template',
 			} );
 
-			await editor.canvas.click( 'body' );
+			await editor.canvas.locator( 'body' ).click();
 			const block = await editorUtils.getBlockByName( blockData.name );
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			const clientId = ( await block.getAttribute( 'data-block' ) ) ?? '';
@@ -152,16 +152,9 @@ for ( const {
 				parentClientId
 			);
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( frontendPage, {
-				waitUntil: 'load',
-			} );
+			await page.goto( frontendPage );
 
 			const classicProducts = await getProductsNameFromClassicTemplate(
 				page

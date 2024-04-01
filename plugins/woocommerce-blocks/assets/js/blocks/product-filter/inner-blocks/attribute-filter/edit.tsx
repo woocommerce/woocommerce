@@ -35,6 +35,7 @@ import { getAttributeFromId } from './utils';
 import { Inspector } from './components/inspector-controls';
 import { AttributeCheckboxList } from './components/attribute-checkbox-list';
 import { AttributeDropdown } from './components/attribute-dropdown';
+import { attributeOptionsPreview } from './constants';
 import './style.scss';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
@@ -178,6 +179,23 @@ const Edit = ( props: EditProps ) => {
 		setIsEditing( ! isEditing );
 	}, [ isEditing ] );
 
+	if ( isPreview ) {
+		return (
+			<Wrapper
+				onClickToolbarEdit={ toggleEditing }
+				isEditing={ isEditing }
+				blockProps={ blockProps }
+			>
+				<Disabled>
+					<AttributeCheckboxList
+						showCounts={ showCounts }
+						attributeTerms={ attributeOptionsPreview }
+					/>
+				</Disabled>
+			</Wrapper>
+		);
+	}
+
 	// Block rendering starts.
 	if ( Object.keys( ATTRIBUTES ).length === 0 )
 		return (
@@ -241,18 +259,13 @@ const Edit = ( props: EditProps ) => {
 			</Wrapper>
 		);
 
-	const inspectorProps = {
-		...props,
-		setAttributeId,
-	};
-
 	return (
 		<Wrapper
 			onClickToolbarEdit={ toggleEditing }
 			isEditing={ isEditing }
 			blockProps={ blockProps }
 		>
-			<Inspector { ...inspectorProps } />
+			<Inspector { ...props } />
 			<Disabled>
 				{ displayStyle === 'dropdown' ? (
 					<AttributeDropdown

@@ -8,10 +8,10 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
 const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
 
 const test = base.extend< {
-	dropdownBlockPostPage: Post;
-	defaultBlockPostPage: Post;
+	dropdownBlockPost: Post;
+	defaultBlockPost: Post;
 } >( {
-	defaultBlockPostPage: async ( { requestUtils }, use ) => {
+	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,
@@ -22,7 +22,7 @@ const test = base.extend< {
 		await requestUtils.deletePost( testingPost.id );
 	},
 
-	dropdownBlockPostPage: async ( { requestUtils }, use ) => {
+	dropdownBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
 			{ title: 'Product Filter Stock Status Block' },
 			TEMPLATE_PATH,
@@ -42,9 +42,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 	test.describe( 'With default display style', () => {
 		test( 'renders a checkbox list with the available stock statuses', async ( {
 			page,
-			defaultBlockPostPage,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPostPage.link );
+			await page.goto( defaultBlockPost.link );
 
 			const stockStatuses = page.locator(
 				'.wc-block-components-checkbox__label'
@@ -57,9 +57,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 
 		test( 'filters the list of products by selecting a stock status', async ( {
 			page,
-			defaultBlockPostPage,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( defaultBlockPostPage.link );
+			await page.goto( defaultBlockPost.link );
 
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
@@ -76,9 +76,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 	test.describe( 'With dropdown display style', () => {
 		test( 'a dropdown is displayed with the available stock statuses', async ( {
 			page,
-			dropdownBlockPostPage,
+			dropdownBlockPost,
 		} ) => {
-			await page.goto( dropdownBlockPostPage.link );
+			await page.goto( dropdownBlockPost.link );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'

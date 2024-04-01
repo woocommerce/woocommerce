@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\RemoteFreeExtensions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFreeExtensions;
 use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\DefaultFreeExtensions;

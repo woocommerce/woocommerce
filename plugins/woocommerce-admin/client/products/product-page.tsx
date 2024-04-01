@@ -5,7 +5,6 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
@@ -26,8 +25,6 @@ import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrappe
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
-declare const productBlockEditorSettings: ProductEditorSettings;
-
 productApiFetchMiddleware();
 
 export default function ProductPage() {
@@ -36,6 +33,7 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
+		document.body.classList.add( 'is-product-editor' );
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -77,6 +75,7 @@ export default function ProductPage() {
 		const unregisterBlocks = initBlocks();
 
 		return () => {
+			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-more-menu' );
 			unregisterBlocks();
 		};
@@ -100,10 +99,7 @@ export default function ProductPage() {
 
 	return (
 		<>
-			<Editor
-				product={ product }
-				settings={ productBlockEditorSettings || {} }
-			/>
+			<Editor product={ product } />
 		</>
 	);
 }

@@ -95,6 +95,20 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await expect(
 			page.locator( 'td.column-subject >> nth=1' )
 		).toContainText( `[${ storeName }]: New order #${ newOrderId }` );
+
+		// look at order email contents
+		await page.getByRole( 'button', { name: 'View log' } ).last().click();
+
+		await expect(
+			page.getByText( 'Receiver wordpress@example.com' )
+		).toBeVisible();
+		await expect(
+			page.getByText( 'Subject [WooCommerce Core E2E' )
+		).toBeVisible();
+		await page.getByRole( 'link', { name: 'json' } ).click();
+		await expect(
+			page.locator( '#wp-mail-logging-modal-content-body-content' )
+		).toContainText( 'You’ve received the following order from  :' );
 	} );
 
 	test( 'can receive completed email', async ( { page, baseURL } ) => {
@@ -136,24 +150,24 @@ test.describe( 'Merchant > Order Action emails received', () => {
 		await page.locator( emailContentJson ).click();
 
 		// Verify that the message includes an order processing confirmation
-		await expect(
-			page.locator( emailContent )
-		).toContainText( 'We have finished processing your order.' );
+		await expect( page.locator( emailContent ) ).toContainText(
+			'We have finished processing your order.'
+		);
 
 		// Verify that the email address is the correct one
-		await expect(
-			page.locator( emailContent )
-		).toContainText( customerBilling.email );
+		await expect( page.locator( emailContent ) ).toContainText(
+			customerBilling.email
+		);
 
 		// Verify that the email contains the order ID
-		await expect(
-			page.locator( emailContent )
-		).toContainText( `[Order #${ completedOrderId.toString() }]` );
+		await expect( page.locator( emailContent ) ).toContainText(
+			`[Order #${ completedOrderId.toString() }]`
+		);
 
 		// Verify that the email contains a "Thanks" note
-		await expect(
-			page.locator( emailContent )
-		).toContainText( 'Thanks for shopping with us' );
+		await expect( page.locator( emailContent ) ).toContainText(
+			'Thanks for shopping with us'
+		);
 	} );
 
 	test( 'can receive cancelled order email', async ( { page, baseURL } ) => {
@@ -237,7 +251,7 @@ test.describe( 'Merchant > Order Action emails received', () => {
 				.getByRole( 'row' )
 				.filter( { hasText: customerBilling.email } )
 				.filter( {
-					hasText: `Invoice for order #${ orderId } on ${ storeName }`,
+					hasText: `Details for order #${ orderId } on ${ storeName }`,
 				} )
 		).toBeVisible();
 	} );

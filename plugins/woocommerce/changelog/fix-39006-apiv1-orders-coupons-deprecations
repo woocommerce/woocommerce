@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Updates REST API V1 (though it generally should no longer be used) to prevent the emission of various deprecation notices.

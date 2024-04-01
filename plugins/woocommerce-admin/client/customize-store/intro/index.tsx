@@ -74,6 +74,7 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
+			activeTheme,
 			themeData,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
@@ -95,6 +96,8 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 
+	const isDefaultTheme = activeTheme === 'twentytwentyfour';
+
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
@@ -104,6 +107,11 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
+			bannerStatus = FlowType.noAI;
+			break;
+		case context.flowType === FlowType.noAI &&
+			customizeStoreTaskCompleted &&
+			! isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -215,6 +223,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					<BannerComponent
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal
+						}
+						redirectToCYSFlow={ () =>
+							sendEvent( 'DESIGN_WITHOUT_AI' )
 						}
 						sendEvent={ sendEvent }
 					/>

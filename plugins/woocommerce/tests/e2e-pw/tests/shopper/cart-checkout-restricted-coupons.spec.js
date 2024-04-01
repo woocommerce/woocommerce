@@ -393,7 +393,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					billing: {
 						first_name: 'Marge',
 						last_name: 'Simpson',
-						email: 'marge@example.com',
+						email: 'marge.simpson@example.org',
 					},
 					line_items: [
 						{
@@ -624,22 +624,30 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		} );
 	} );
 
-	test( 'coupon cannot be used by any customer (email restricted)', async ( {
+	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
+		page,
+	} ) => {
+		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
+		await page.waitForLoadState( 'networkidle' );
+
+		await page.goto( '/cart/' );
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await expect(
+			page.getByText(
+				'Please enter a valid email at checkout to use coupon code "email-restricted".'
+			)
+		).toBeVisible();
+	} );
+
+	test( 'coupon cannot be used by any customer on checkout (email restricted)', async ( {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		// succeeded so far because we don't know who the customr is
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).first().fill( 'Marge' );
 		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
@@ -653,12 +661,19 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page
 			.getByLabel( 'Email address' )
 			.first()
-			.fill( 'marge@example.com' );
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
+			.fill( 'marge.simpson@example.org' );
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page.getByText(
-				'Sorry, it seems the coupon "email-restricted" is not yours - it has now been removed from your order.'
+				'Please enter a valid email to use coupon code "email-restricted".'
 			)
 		).toBeVisible();
 	} );
@@ -678,14 +693,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).first().fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
@@ -700,6 +707,16 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			.getByLabel( 'Email address' )
 			.first()
 			.fill( 'homer@example.com' );
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
+
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
@@ -714,15 +731,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( '/checkout/' );
-		await page
-			.getByRole( 'link', { name: 'Click here to enter your code' } )
-			.click();
-		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
-		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-		// succeeded so far because we don't know who the customr is
-		await expect(
-			page.getByText( 'Coupon code applied successfully.' )
-		).toBeVisible();
 
 		await page.getByLabel( 'First name' ).first().fill( 'Homer' );
 		await page.getByLabel( 'Last name' ).first().fill( 'Simpson' );
@@ -737,6 +745,16 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			.getByLabel( 'Email address' )
 			.first()
 			.fill( 'homer@example.com' );
+
+		await page
+			.getByRole( 'link', { name: 'Click here to enter your code' } )
+			.click();
+		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
+		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+		await expect(
+			page.getByText( 'Coupon code applied successfully.' )
+		).toBeVisible();
+
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(

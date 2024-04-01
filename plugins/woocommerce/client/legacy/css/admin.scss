@@ -2786,6 +2786,17 @@ ul.wc_coupon_list_block {
 	}
 }
 
+#order_custom #postcustomstuff {
+	.add-custom-field {
+		padding: 12px 8px 8px;
+	}
+
+	.submit {
+		border: 0 none;
+		float: none;
+	}
+}
+
 #side-sortables #woocommerce-order-downloads {
 	.buttons,
 	.select2-container {
@@ -4264,8 +4275,8 @@ table.wc_shipping {
 		}
 	}
 
-	.wc-shipping-zone-method-input-help-text-container {
-		min-height: 40px;
+	.wc-shipping-legacy-local-pickup-help-text-container {
+		margin: 1.5em 0;
 	}
 
 	.wc-shipping-zone-method-input-help-text {

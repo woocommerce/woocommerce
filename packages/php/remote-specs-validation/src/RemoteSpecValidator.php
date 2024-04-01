@@ -16,8 +16,20 @@ class RemoteSpecValidator {
 	 */
 	private $schema;
 
-	public function __construct( $json_schema_path ) {
-		$this->schema = json_decode( file_get_contents( $json_schema_path ) );
+	private static $supported_bundles = [
+		'remote-inbox-notification' => 'remote-inbox-notification.json',
+		'wc-pay-promotions'   => 'wc-pay-promotions.json',
+		'shipping-partner-suggestions' => 'shipping-partner-suggestions.json',
+		'payment-gateway-suggestions' => 'payment-gateway-suggestions.json',
+		'obw-free-extensions' => 'obw-free-extensions.json',
+	];
+
+	public function __construct( $json_schema_string ) {
+		$this->schema = $json_schema_string;
+	}
+
+	public static function create_from_file( $json_schema_path ) {
+		return new self( json_decode( file_get_contents( $json_schema_path ) ) );
 	}
 
 	/**
@@ -28,20 +40,16 @@ class RemoteSpecValidator {
 	 * @throws \InvalidArgumentException If the bundle is not supported.
 	 */
 	public static function create_from_bundle( $bundle ) {
-		$supported_bundles = [
-			'remote-inbox-notification' => 'remote-inbox-notification.json',
-			'wc-pay-promotions'   => 'wc-pay-promotions.json',
-			'shipping-partner-suggestions' => 'shipping-partner-suggestions.json',
-			'payment-gateway-suggestions' => 'payment-gateway-suggestions.json',
-			'obw-free-extensions' => 'obw-free-extensions.json',
-		];
+		return new self( static::get_bundle_json( $bundle ) );
+	}
 
-		if ( ! array_key_exists( $bundle, $supported_bundles ) ) {
+	public static function get_bundle_json( $bundle) {
+		if ( ! array_key_exists( $bundle, static::$supported_bundles ) ) {
 			throw new \InvalidArgumentException( "Unsupported bundle: $bundle. ".
-				"Supported bundles are: " . implode( ', ', array_keys( $supported_bundles ) ) );
+			                                     "Supported bundles are: " . implode( ', ', array_keys( static::$supported_bundles ) ) );
 		}
 
-		return new self( __DIR__ . "/../bundles/{$supported_bundles[$bundle]}" );
+		return file_get_contents( __DIR__ . "/../bundles/" . static::$supported_bundles[ $bundle ] );
 	}
 
 	/**

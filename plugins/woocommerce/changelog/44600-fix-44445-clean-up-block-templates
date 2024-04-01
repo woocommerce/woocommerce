@@ -1,3 +1,0 @@
-Significance: patch
-Type: update
-Comment: Clean up block templates after running e2e tests.

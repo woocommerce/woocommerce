@@ -74,10 +74,18 @@ class OrderAttribution {
 
 		$this->format_meta_data( $meta );
 
+		// No more details if there is only the origin value - this is for unknown source types.
+		$has_more_details = array( 'origin' ) !== array_keys( $meta );
+
+		// For direct, web admin, or mobile app orders, also don't show more details.
+		$simple_sources = array( 'typein', 'admin', 'mobile_app' );
+		if ( isset( $meta['source_type'] ) && in_array( $meta['source_type'], $simple_sources, true ) ) {
+			$has_more_details = false;
+		}
+
 		$template_data = array(
 			'meta'             => $meta,
-			// Only show more details toggle if there is more than just the origin.
-			'has_more_details' => array( 'origin' ) !== array_keys( $meta ),
+			'has_more_details' => $has_more_details,
 		);
 		wc_get_template( 'order/attribution-details.php', $template_data );
 	}

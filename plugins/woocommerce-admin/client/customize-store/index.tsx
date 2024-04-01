@@ -46,9 +46,10 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners } from './utils';
+import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -57,6 +58,7 @@ export type customizeStoreStateMachineEvents =
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
@@ -83,9 +85,15 @@ const redirectToWooHome = () => {
 };
 
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	window.location.href =
-		_context?.intro?.themeData?._links?.browse_all?.href ??
-		getAdminLink( 'themes.php' );
+	if ( isWooExpress() ) {
+		window.location.href =
+			_context?.intro?.themeData?._links?.browse_all?.href ??
+			getAdminLink( 'themes.php' );
+	} else {
+		window.location.href = getAdminLink(
+			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+		);
+	}
 };
 
 const markTaskComplete = async () => {
@@ -174,6 +182,14 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		src: 'browserPopstateHandler',
 	},
 	on: {
+		GO_BACK_TO_DESIGN_WITH_AI: {
+			target: 'designWithAi',
+			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
+		},
+		GO_BACK_TO_DESIGN_WITHOUT_AI: {
+			target: 'intro',
+			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
 		},
@@ -187,6 +203,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				{ type: 'assignNoAIFlowError' },
 				{ type: 'updateQueryStep', step: 'intro' },
 			],
+		},
+		INSTALL_FONTS: {
+			target: 'designWithoutAi.installFonts',
 		},
 	},
 	states: {
@@ -292,6 +311,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 									target: 'success',
 									actions: [
 										'assignThemeData',
+										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
 									],
@@ -346,6 +366,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 				designWithoutAi: {
 					entry: [ { type: 'updateQueryStep', step: 'design' } ],
+					meta: {
+						component: DesignWithoutAi,
+					},
+				},
+				// This state is used to install fonts and then redirect to the assembler hub.
+				installFonts: {
+					entry: [
+						{
+							type: 'updateQueryStep',
+							step: 'design/install-fonts',
+						},
+					],
 					meta: {
 						component: DesignWithoutAi,
 					},
@@ -454,17 +486,37 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				FINISH_CUSTOMIZATION: {
 					target: '.postAssemblerHub',
 				},
-				GO_BACK_TO_DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				GO_BACK_TO_DESIGN_WITHOUT_AI: {
-					target: 'intro',
-				},
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
+				fetchCustomizeStoreCompleted: {
+					invoke: {
+						src: 'fetchCustomizeStoreCompleted',
+						onDone: {
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
+						},
+					},
+				},
+				checkCustomizeStoreCompleted: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'customizeTaskIsNotCompleted',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'customizeTaskIsCompleted',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
@@ -529,6 +581,9 @@ declare global {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
 			activeThemeHasMods: boolean | undefined;
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => void;
 		};
 	}
 }
@@ -575,13 +630,41 @@ export const CustomizeStoreController = ( {
 				activeThemeHasNoMods: ( _ctx ) => {
 					return ! _ctx.activeThemeHasMods;
 				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
+
+	useEffect( () => {
+		if ( isIframe( window ) ) {
+			return;
+		}
+		window.__wcCustomizeStore = {
+			...window.__wcCustomizeStore,
+			// This is needed because the iframe loads the entire Customize Store app.
+			// This means that the iframe instance will have different state machines
+			// than the parent window.
+			// Check https://github.com/woocommerce/woocommerce/issues/45278 for more details.
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => send( typeEvent ),
+		};
+	}, [ send ] );
+
+	window.__wcCustomizeStore = {
+		...window.__wcCustomizeStore,
+	};
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>

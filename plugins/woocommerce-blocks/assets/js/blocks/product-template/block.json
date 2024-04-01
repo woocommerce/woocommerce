@@ -8,7 +8,6 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"usesContext": [
-		"id",
 		"queryId",
 		"query",
 		"queryContext",

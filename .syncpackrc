@@ -30,7 +30,27 @@
 			]
 		},
 		{
-			"dependencies": [ "**" ],
+			"dependencies": [
+				"@actions/*",
+				"@automattic/*",
+				"@babel/*",
+				"@bartekbp/*",
+				"@octokit/*",
+				"@storybook/*",
+				"@testing-library/*",
+				"@types/*",
+				"@typescript-eslint/*",
+				"@woocommerce/*",
+				"@wordpress/*",
+				"babel*",
+				"eslint*",
+				"glob*",
+				"jest*",
+				"postcss*",
+				"react*",
+				"typescript",
+				"webpack*"
+			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
@@ -99,6 +119,24 @@
 				"**"
 			],
 			"pinVersion": "^8.55.0"
+		},
+		{
+			"dependencies": [
+				"github-label-sync"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.1"
+		},
+		{
+			"dependencies": [
+				"@playwright/test"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^1.40.1"
 		},
 		{
 			"dependencies": [
@@ -215,6 +253,15 @@
 				"**"
 			],
 			"pinVersion": "^8.4.32"
+		},
+		{
+			"dependencies": [
+				"simple-git"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^3.21.0"
 		},
 		{
 			"dependencies": [

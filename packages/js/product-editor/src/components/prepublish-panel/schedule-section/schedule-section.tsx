@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { PanelBody } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
@@ -13,22 +12,15 @@ import {
 /**
  * Internal dependencies
  */
-import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { useProductScheduled } from '../../../hooks/use-product-scheduled';
 import { isSiteSettingsTime12HourFormatted } from '../../../utils';
 import { ScheduleSectionProps } from './types';
 
 export function ScheduleSection( { postType }: ScheduleSectionProps ) {
-	const [ productId ] = useProductEntityProp< number >( 'id' );
-	const { schedule, date, formattedDate } = useProductScheduled( postType );
-
-	// @ts-expect-error There are no types for this.
-	const { editEntityRecord } = useDispatch( 'core' );
+	const { setDate, date, formattedDate } = useProductScheduled( postType );
 
 	async function handlePublishDateTimePickerChange( value: string | null ) {
-		await schedule( ( product ) => {
-			return editEntityRecord( 'postType', postType, productId, product );
-		}, value ?? undefined );
+		await setDate( value ?? undefined );
 	}
 
 	return (

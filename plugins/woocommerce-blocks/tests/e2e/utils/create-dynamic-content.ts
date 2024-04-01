@@ -43,7 +43,13 @@ const createPost = async (
 	requestUtils: RequestUtils,
 	payload: CreatePostPayload
 ) => {
-	const post = await requestUtils.createPost( payload );
+	// The underlying createPost method passes the payload as URI params, triggering URI too long errors
+	// if you pass long blog post content.
+	const post = await requestUtils.rest( {
+		method: 'POST',
+		path: `/wp/v2/posts`,
+		data: { ...payload },
+	} );
 	posts.push( post.id );
 	return post;
 };

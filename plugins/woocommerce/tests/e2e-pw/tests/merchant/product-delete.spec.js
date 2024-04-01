@@ -1,4 +1,4 @@
-const { test: baseTest, expect } = require( '../../fixtures' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 
 baseTest.describe( 'Products > Delete Product', () => {
 	const test = baseTest.extend( {
@@ -24,6 +24,14 @@ baseTest.describe( 'Products > Delete Product', () => {
 					force: true,
 				} );
 			}
+		},
+		page: async ( { page, wcAdminApi }, use ) => {
+			// Disable the task list reminder bar, it can interfere with the quick actions
+			await wcAdminApi.post( 'options', {
+				woocommerce_task_list_reminder_bar_hidden: 'yes',
+			} );
+
+			await use( page );
 		},
 	} );
 
@@ -70,7 +78,9 @@ baseTest.describe( 'Products > Delete Product', () => {
 		product,
 	} ) => {
 		await test.step( 'Navigate to products list page', async () => {
-			await page.goto( `wp-admin/edit.php?post_type=product` );
+			await page.goto(
+				`wp-admin/edit.php?post_type=product&s=${ product.name }`
+			);
 		} );
 
 		await test.step( 'Move product to trash', async () => {

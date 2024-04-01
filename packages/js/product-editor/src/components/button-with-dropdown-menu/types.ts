@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import type {
+	Dropdown,
 	// @ts-expect-error no exported member.
 	DropdownOption,
 } from '@wordpress/components';
@@ -44,4 +45,5 @@ export type ButtonWithDropdownMenuProps = Omit<
 	defaultOpen?: boolean;
 	controls?: DropdownOption[];
 	popoverProps?: PopoverProps;
+	renderMenu?( props: Dropdown.RenderProps ): React.ReactElement;
 };

@@ -8,25 +8,9 @@ test.describe( 'Single Product template', async () => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 
-	test( 'shows password form in products protected with password', async ( {
-		page,
-	} ) => {
-		// Sunglasses are defined as requiring password in /bin/scripts/products.sh.
-		await page.goto( '/product/sunglasses/' );
-		await expect(
-			page.getByText( 'This content is password protected.' ).first()
-		).toBeVisible();
-
-		// Verify after introducing the password, the page is visible.
-		await page.getByLabel( 'Password:' ).fill( 'password' );
-		await page.getByRole( 'button', { name: 'Enter' } ).click();
-		await expect(
-			page.getByRole( 'link', { name: 'Description' } )
-		).toBeVisible();
-	} );
-
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
+		editor,
 		editorUtils,
 		page,
 	} ) => {
@@ -54,15 +38,14 @@ test.describe( 'Single Product template', async () => {
 		await page
 			.getByRole( 'option', { name: testData.productName } )
 			.click();
-		await editorUtils.closeWelcomeGuideModal();
 		await page.getByLabel( 'Fallback content' ).click();
 
 		// Edit the template.
-		await editorUtils.editor.insertBlock( {
+		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 
 		// Verify edits are visible.
 		await page.goto( testData.permalink );

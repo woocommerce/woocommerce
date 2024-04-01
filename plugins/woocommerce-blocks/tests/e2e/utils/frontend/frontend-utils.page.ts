@@ -13,8 +13,12 @@ export class FrontendUtils {
 		this.requestUtils = requestUtils;
 	}
 
-	async getBlockByName( name: string ) {
-		return this.page.locator( `[data-block-name="${ name }"]` );
+	async getBlockByName( name: string, parentSelector?: string ) {
+		let selector = `[data-block-name="${ name }"]`;
+		if ( parentSelector ) {
+			selector = `${ parentSelector } [data-block-name="${ name }"]`;
+		}
+		return this.page.locator( selector );
 	}
 
 	async getBlockByClassWithParent( blockClass: string, parentName: string ) {
@@ -48,10 +52,18 @@ export class FrontendUtils {
 		await this.page.goto( '/checkout', {
 			waitUntil: 'domcontentloaded',
 		} );
+
+		await this.page.waitForSelector( '#email' );
 	}
 
 	async goToCart() {
 		await this.page.goto( '/cart', {
+			waitUntil: 'commit',
+		} );
+	}
+
+	async goToCartShortcode() {
+		await this.page.goto( '/cart-shortcode', {
 			waitUntil: 'commit',
 		} );
 	}
@@ -66,15 +78,6 @@ export class FrontendUtils {
 		await this.page.goto( '/shop', {
 			waitUntil: 'commit',
 		} );
-	}
-
-	async logout() {
-		await this.page.goto( '/my-account', {
-			waitUntil: 'domcontentloaded',
-		} );
-		await this.page.click(
-			'.woocommerce-MyAccount-navigation-link--customer-logout a'
-		);
 	}
 
 	async emptyCart() {

@@ -48,7 +48,7 @@ Uncheck the box here to turn off all logging. This is not recommended in most ci
 
 Out-of-the-box, WooCommerce has two different log storage methods available:
 
-* **File system** - Log entries are recorded to files. Files are differentiated by the `source` value for the log entry (see the "Adding logs" section below), and by the current date. The files are stored in `wp-content/uploads/wc-logs`, but this can be changed by defining the `WC_LOG_DIR` constant in your `wp-config.php` file with a custom path. Log files can be up to 5 MB in size, after which the log file will rotate.
+* **File system** - Log entries are recorded to files. Files are differentiated by the `source` value for the log entry (see the "Adding logs" section below), and by the current date. The files are stored in the `wc-logs` subdirectory of the site's `uploads` directory. A custom directory can be defined using the `woocommerce_log_directory` filter hook. Log files can be up to 5 MB in size, after which the log file will rotate.
 * **Database** - Log entries are recorded to the database, in the `{$wpdb->prefix}woocommerce_log` table.
 
 If you change this setting, and you already have some log entries, those entries will not be migrated to the other storage method, but neither will they be deleted.
@@ -136,13 +136,13 @@ wc_get_logger()->info(
 
 ### When _not_ to use logging
 
-* To let a developer know that they’re using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
+* To let a developer know that they're using a method or API incorrectly. This can lead to a large volume of useless log entries, especially if it will get triggered on every page request. Better to give them immediate feedback in the form of an error or exception (e.g. `wc_doing_it_wrong()`).
 
 ### Best practices
 
-* Rather than using the `WC_Logger`‘s `log()` method directly, it’s better to use one of the wrapper methods that’s specific to the log level. E.g. `info()` or `error()`.
-* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren’t familiar with the codebase.
-* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what’s happening, since they may not speak the same language as the site owner.
+* Rather than using the `WC_Logger`‘s `log()` method directly, it's better to use one of the wrapper methods that's specific to the log level. E.g. `info()` or `error()`.
+* Write a message that is a complete, coherent sentence. This will make it more useful for people who aren't familiar with the codebase.
+* Log messages should not be translatable (see the discussion about this in the comments). Keeping the message in English makes it easier to search for solutions based on the message contents, and also makes it easier for Happiness Engineers to understand what's happening, since they may not speak the same language as the site owner.
 * Ideally, each log entry message should be a single line (i.e. no line breaks within the message string). Additional lines or extra data should be put in the context array.
 * Avoid outputting structured data in the message string. Put it in a key in the context array instead. The logger will handle converting it to JSON and making it legible in the log viewer.
 * If you need to include a stack trace, let the logger generate it for you.

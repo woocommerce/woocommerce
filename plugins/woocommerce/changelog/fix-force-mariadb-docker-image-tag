@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Workaround for fixing broken wp-env test environment. Force mariadb image tag.

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\{ LogHandlerFileV2, Settings };
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\{ File, FileController };
 use WC_Unit_Test_Case;
 
@@ -66,7 +66,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private static function delete_all_log_files(): void {
-		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$files = glob( Settings::get_log_directory() . '*.log' );
 		foreach ( $files as $file ) {
 			unlink( $file );
 		}
@@ -82,7 +82,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->write_to_file( $source, $content );
 		$this->assertTrue( $result );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 1, $paths );
 
 		$path = reset( $paths );
@@ -108,12 +108,12 @@ class FileControllerTest extends WC_Unit_Test_Case {
 			'other2' => 'unit-testing-' . gmdate( 'Y-m-d', strtotime( '-2 days' ) ) . '-' . $hash . '.log',
 		);
 		foreach ( $existing_files as $filename ) {
-			$path     = Constants::get_constant( 'WC_LOG_DIR' ) . $filename;
+			$path     = Settings::get_log_directory() . $filename;
 			$resource = fopen( $path, 'a' );
 			fclose( $resource );
 		}
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 3, $paths );
 
 		$source  = 'unit-testing';
@@ -122,10 +122,10 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->write_to_file( $source, $content, $time );
 		$this->assertTrue( $result );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 3, $paths );
 
-		$target_path = Constants::get_constant( 'WC_LOG_DIR' ) . $existing_files['target'];
+		$target_path = Settings::get_log_directory() . $existing_files['target'];
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$actual_content = file_get_contents( $target_path );
 		$this->assertEquals( $content . "\n", $actual_content );
@@ -136,7 +136,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_write_to_file_needs_rotation() {
 		$time = time();
-		$path = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . wp_hash( 'cheddar' ) . '.log';
+		$path = Settings::get_log_directory() . 'unit-testing-' . gmdate( 'Y-m-d', $time ) . '-' . wp_hash( 'cheddar' ) . '.log';
 
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 200 ) . "\n";
@@ -144,7 +144,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		fwrite( $resource, $existing_content );
 		fclose( $resource );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 1, $paths );
 
 		// Set the file size low to induce log rotation.
@@ -157,7 +157,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->write_to_file( $source, $new_content, $time );
 		$this->assertTrue( $result );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 2, $paths );
 
 		foreach ( $paths as $path ) {
@@ -248,7 +248,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	public function test_get_files_by_id() {
 		// Create a log file with an accompanying rotation.
 		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
-		$file1_path = glob( Constants::get_constant( 'WC_LOG_DIR' ) . '*.log' );
+		$file1_path = glob( Settings::get_log_directory() . '*.log' );
 		$file1      = new File( reset( $file1_path ) );
 		$file1->rotate();
 		$this->handler->handle( time(), 'debug', '1', array( 'source' => 'unit-testing1' ) );
@@ -297,8 +297,8 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 * @testdox The get_file_rotations method should return an associative array of File instances.
 	 */
 	public function test_get_file_rotations() {
-		$target_file_path = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
-		$other_file_path  = Constants::get_constant( 'WC_LOG_DIR' ) . 'other-test-file.log';
+		$target_file_path = Settings::get_log_directory() . 'test-file.log';
+		$other_file_path  = Settings::get_log_directory() . 'other-test-file.log';
 
 		$oldest_file = new File( $target_file_path );
 		$oldest_file->write( 'test' );
@@ -315,7 +315,7 @@ class FileControllerTest extends WC_Unit_Test_Case {
 		$other_file = new File( $other_file_path );
 		$other_file->write( 'test' );
 
-		$paths = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
+		$paths = glob( Settings::get_log_directory() . '*.log' );
 		$this->assertCount( 4, $paths );
 
 		$file_id   = 'test-file';
@@ -415,17 +415,17 @@ class FileControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_log_directory_size(): void {
 		// Non-log files that should be in the log directory.
-		$htaccess = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . '.htaccess' );
-		$index    = wp_filesize( Constants::get_constant( 'WC_LOG_DIR' ) . 'index.html' );
+		$htaccess = wp_filesize( Settings::get_log_directory() . '.htaccess' );
+		$index    = wp_filesize( Settings::get_log_directory() . 'index.html' );
 
-		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-1.log';
+		$path             = Settings::get_log_directory() . 'unit-testing-1.log';
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 200 );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite
 		fwrite( $resource, $existing_content );
 		fclose( $resource );
 
-		$path             = Constants::get_constant( 'WC_LOG_DIR' ) . 'unit-testing-2.log';
+		$path             = Settings::get_log_directory() . 'unit-testing-2.log';
 		$resource         = fopen( $path, 'a' );
 		$existing_content = random_bytes( 300 );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fwrite

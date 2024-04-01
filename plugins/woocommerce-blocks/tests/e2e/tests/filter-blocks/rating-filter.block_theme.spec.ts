@@ -1,18 +1,37 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import path from 'path';
+
+const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
+
+const test = base.extend< {
+	defaultBlockPost: Post;
+} >( {
+	defaultBlockPost: async ( { requestUtils }, use ) => {
+		const testingPost = await requestUtils.createPostFromTemplate(
+			{ title: 'Active Filters Block' },
+			TEMPLATE_PATH,
+			{}
+		);
+
+		await use( testingPost );
+		await requestUtils.deletePost( testingPost.id );
+	},
+} );
 
 test.describe( 'Product Filter: Rating Filter Block', async () => {
 	test.describe( 'frontend', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( '/product-filters-rating-block/' );
+			await page.goto( defaultBlockPost.link );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
-			const count = await ratingStars.count();
-			expect( count ).toBe( 2 );
+			await expect( ratingStars ).toHaveCount( 2 );
 
 			//  See bin/scripts/parallel/reviews.sh for reviews data.
 			await expect( ratingStars.nth( 0 ) ).toHaveAttribute(
@@ -27,8 +46,9 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 
 		test( 'Selecting a checkbox filters down the products', async ( {
 			page,
+			defaultBlockPost,
 		} ) => {
-			await page.goto( '/product-filters-rating-block/' );
+			await page.goto( defaultBlockPost.link );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/
@@ -38,13 +58,11 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 
 			// wait for navigation
 			await page.waitForURL(
-				'/product-filters-rating-block/?rating_filter=1'
+				( url ) => url.searchParams.get( 'rating_filter' ) === '1'
 			);
 
 			const products = page.locator( '.wc-block-product' );
-			const productCount = await products.count();
-
-			expect( productCount ).toBe( 1 );
+			await expect( products ).toHaveCount( 1 );
 		} );
 	} );
 } );

@@ -5,7 +5,6 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
 export interface ProductCollectionAttributes {
-	id: string;
 	query: ProductCollectionQuery;
 	queryId: number;
 	queryContext: [
@@ -23,6 +22,7 @@ export interface ProductCollectionAttributes {
 	 * Contain the list of attributes that should be included in the queryContext
 	 */
 	queryContextIncludes: string[];
+	forcePageReload: boolean;
 }
 
 export enum LayoutOptions {
@@ -100,9 +100,13 @@ export type TProductCollectionOrderBy =
 	| 'popularity'
 	| 'rating';
 
+export type ProductCollectionSetAttributes = (
+	attrs: Partial< ProductCollectionAttributes >
+) => void;
+
 export type DisplayLayoutControlProps = {
 	displayLayout: ProductCollectionDisplayLayout;
-	setAttributes: ( attrs: Partial< ProductCollectionAttributes > ) => void;
+	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;

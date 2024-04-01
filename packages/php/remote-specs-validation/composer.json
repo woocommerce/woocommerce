@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/remote-specs-validation",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Remote specs testing suite",
 	"type": "library",
 	"license": "GPL-3.0-or-later",

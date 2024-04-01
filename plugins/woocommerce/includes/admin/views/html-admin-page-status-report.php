@@ -120,8 +120,14 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					/* Translators: %1$s: Log directory, %2$s: Log directory constant */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . esc_html( $environment['log_directory'] ) . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
+					printf(
+						'<mark class="error"><span class="dashicons dashicons-warning"></span> %s</mark>',
+						sprintf(
+							// Translators: %s: Log directory path.
+							esc_html__( 'To allow logging, make %s writable.', 'woocommerce' ),
+							'<code>' . esc_html( $environment['log_directory'] ) . '</code>'
+						)
+					);
 				}
 				?>
 			</td>

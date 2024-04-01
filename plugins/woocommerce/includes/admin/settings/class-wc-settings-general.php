@@ -36,7 +36,7 @@ class WC_Settings_General extends WC_Settings_Page {
 		$currency_code_options = get_woocommerce_currencies();
 
 		foreach ( $currency_code_options as $code => $name ) {
-			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
+			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
 		}
 
 		$settings =
@@ -215,6 +215,11 @@ class WC_Settings_General extends WC_Settings_Page {
 				array(
 					'type' => 'sectionend',
 					'id'   => 'general_options',
+				),
+
+				array(
+					'id'   => 'wc_settings_general_site_visibility_slotfill',
+					'type' => 'slotfill_placeholder',
 				),
 
 				array(

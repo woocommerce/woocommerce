@@ -26,6 +26,7 @@ declare global {
 			'product-grouped': boolean;
 			'product-linked': boolean;
 			'product-pre-publish-modal': boolean;
+			'product-custom-fields': boolean;
 			'remote-inbox-notifications': boolean;
 			'remote-free-extensions': boolean;
 			settings: boolean;

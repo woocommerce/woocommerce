@@ -2,40 +2,27 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers;
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
-use stdClass;
+use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
 
 /**
  * Search array value by one of its key.
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
+ *
+ * @deprecated 8.8.0
  */
-class ArrayValues implements TransformerInterface {
+class ArrayValues extends DeprecatedClassFacade {
 	/**
-	 * Search array value by one of its key.
+	 * The name of the non-deprecated class that this facade covers.
 	 *
-	 * @param mixed         $value a value to transform.
-	 * @param stdClass|null $arguments arguments.
-	 * @param string|null   $default default value.
-	 *
-	 * @return mixed
+	 * @var string
 	 */
-	public function transform( $value, stdClass $arguments = null, $default = array() ) {
-		if ( ! is_array( $value ) ) {
-			return $default;
-		}
-
-		return array_values( $value );
-	}
+	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayColumn';
 
 	/**
-	 * Validate Transformer arguments.
+	 * The version that this class was deprecated in.
 	 *
-	 * @param stdClass|null $arguments arguments to validate.
-	 *
-	 * @return mixed
+	 * @var string
 	 */
-	public function validate( stdClass $arguments = null ) {
-		return true;
-	}
+	protected static $deprecated_in_version = '8.8.0';
 }

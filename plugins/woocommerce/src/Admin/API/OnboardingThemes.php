@@ -249,6 +249,9 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$in_app_purchase_params               = \WC_Admin_Addons::get_in_app_purchase_url_params();
+		$in_app_purchase_params['wccom-back'] = rawurlencode( '/wp-admin/admin.php?page=wc-admin&path=/customize-store' );
+
 		$core_themes = array(
 			array(
 				'name'           => 'Twenty Twenty-Four',
@@ -283,29 +286,92 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 			array(
 				'name'           => 'Highline',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#211f1d',
+						'secondary' => '#211f1d',
+					),
+					array(
+						'title'     => 'Additional color',
+						'primary'   => '#aaaaaa',
+						'secondary' => '#aaaaaa',
+					),
+					array(
+						'title'     => 'Accent Background',
+						'primary'   => '#b04b3c',
+						'secondary' => '#b04b3c',
+					),
+					array(
+						'title'     => 'Secondary Background',
+						'primary'   => '#dabfa1',
+						'secondary' => '#dabfa1',
+					),
+				),
+				'total_palettes' => 9,
 				'slug'           => 'highline',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2023/12/Featured-image-538x403-1.png',
-				'link_url'       => 'https://woo.com/products/highline/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/highline/' ),
 			),
 			array(
 				'name'           => 'Luminate',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Primary',
+						'primary'   => '#242a2e',
+						'secondary' => '#242a2e',
+					),
+					array(
+						'title'     => 'Lite',
+						'primary'   => '#f6f5f2',
+						'secondary' => '#f6f5f2',
+					),
+					array(
+						'title'     => 'Grey',
+						'primary'   => '#a5a5a5',
+						'secondary' => '#a5a5a5',
+					),
+					array(
+						'title'     => 'Lite Grey',
+						'primary'   => '#e4e4e1',
+						'secondary' => '#e4e4e1',
+					),
+				),
+				'total_palettes' => 5,
 				'slug'           => 'luminate',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/07/Featured-image-538x403-2.png',
-				'link_url'       => 'https://woo.com/products/luminate/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/luminate/' ),
 			),
 			array(
 				'name'           => 'Nokul',
 				'price'          => '$79/year',
-				'color_palettes' => array(),
-				'total_palettes' => 0,
+				'color_palettes' => array(
+					array(
+						'title'     => 'Foreground and background',
+						'primary'   => '#000000',
+						'secondary' => '#f1eee2',
+					),
+					array(
+						'title'     => 'Foreground and secondary',
+						'primary'   => '#000000',
+						'secondary' => '#999999',
+					),
+					array(
+						'title'     => 'Foreground and accent',
+						'primary'   => '#000000',
+						'secondary' => '#d82f16',
+					),
+					array(
+						'title'     => 'Primary and background',
+						'primary'   => '#d9d0bf',
+						'secondary' => '#f1eee2',
+					),
+				),
+				'total_palettes' => 6,
 				'slug'           => 'nokul',
 				'thumbnail_url'  => 'https://woo.com/wp-content/uploads/2022/11/Product-logo.jpg',
-				'link_url'       => 'https://woo.com/products/nokul/',
+				'link_url'       => add_query_arg( $in_app_purchase_params, 'https://woo.com/products/nokul/' ),
 			),
 		);
 
