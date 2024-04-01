@@ -29,11 +29,11 @@ const Cart = ( { children, attributes = {} } ) => {
 	const cart = useStoreCart();
 	const { hasDarkControls } = attributes;
 
-	const { dispatchStoreEvent } = useStoreEvents();
+	const { dispatchCheckoutEvent } = useStoreEvents();
 
-	// Ignore changes to dispatchStoreEvent callback so this is ran on first mount only.
+	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
 	useEffect( () => {
-		dispatchStoreEvent( 'cart-render', { cart } );
+		dispatchCheckoutEvent('cart-render');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 

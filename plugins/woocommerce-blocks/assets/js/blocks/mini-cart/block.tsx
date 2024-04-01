@@ -96,7 +96,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		}
 	} );
 
-	const { dispatchStoreEvent } = useStoreEvents();
+	const { dispatchCheckoutEvent } = useStoreEvents();
 	const [ isOpen, setIsOpen ] = useState< boolean >( isInitiallyOpen );
 	// We already rendered the HTML drawer placeholder, so we want to skip the
 	// slide in animation.
@@ -119,10 +119,10 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					overflow: 'hidden',
 					paddingRight: scrollBarWidth + 'px',
 				} );
-				dispatchStoreEvent( 'mini-cart-open' );
+				dispatchCheckoutEvent( 'mini-cart-open' );
 			} else {
 				Object.assign( body.style, { overflow: '', paddingRight: 0 } );
-				dispatchStoreEvent( 'mini-cart-close' );
+				dispatchCheckoutEvent( 'mini-cart-close' );
 			}
 		}
 	}, [ isOpen ] );
