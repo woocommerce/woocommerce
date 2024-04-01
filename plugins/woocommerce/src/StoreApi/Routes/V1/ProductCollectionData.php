@@ -169,31 +169,31 @@ class ProductCollectionData extends AbstractRoute {
 		$params = ( new Products( $this->schema_controller, $this->schema ) )->get_collection_params();
 
 		$params['calculate_price_range'] = [
-			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'If true, calculates the minimum and maximum product prices for the collection.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
 
 		$params['calculate_stock_status_counts'] = [
-			'description' => __( 'If true, calculates stock counts for products in the collection.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'If true, calculates stock counts for products in the collection.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
 
 		$params['calculate_attribute_counts'] = [
-			'description' => __( 'If requested, calculates attribute term counts for products in the collection.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'If requested, calculates attribute term counts for products in the collection.', 'woocommerce' ),
 			'type'        => 'array',
 			'items'       => [
 				'type'       => 'object',
 				'properties' => [
 					'taxonomy'   => [
-						'description' => __( 'Taxonomy name.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Taxonomy name.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'query_type' => [
-						'description' => __( 'Filter condition	 being performed which may affect counts. Valid values include "and" and "or".', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Filter condition	 being performed which may affect counts. Valid values include "and" and "or".', 'woocommerce' ),
 						'type'        => 'string',
 						'enum'        => [ 'and', 'or' ],
 						'context'     => [ 'view', 'edit' ],
@@ -205,7 +205,7 @@ class ProductCollectionData extends AbstractRoute {
 		];
 
 		$params['calculate_rating_counts'] = [
-			'description' => __( 'If true, calculates rating counts for products in the collection.', 'woo-gutenberg-products-block' ),
+			'description' => __( 'If true, calculates rating counts for products in the collection.', 'woocommerce' ),
 			'type'        => 'boolean',
 			'default'     => false,
 		];
