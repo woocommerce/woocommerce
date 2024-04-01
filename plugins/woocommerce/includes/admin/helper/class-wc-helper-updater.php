@@ -159,8 +159,7 @@ class WC_Helper_Updater {
 			$filename = $plugin['_filename'];
 			if ( WC_Helper::is_site_connected() ) {
 				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
-			}
-			else {
+			} else {
 				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ), 10, 2 );
 			}
 		}
@@ -467,8 +466,7 @@ class WC_Helper_Updater {
 					'authenticated' => true,
 				)
 			);
-		}
-		else {
+		} else {
 			$request = WC_Helper_API::post(
 				'update-check-public',
 				array(
