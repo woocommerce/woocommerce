@@ -167,7 +167,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 							} );
 						} }
 					>
-						Launch Store
+						{ __( 'Launch Store', 'woocommerce' ) }
 					</Button>
 				</ItemGroup>
 			</SidebarContainer>
