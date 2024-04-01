@@ -532,6 +532,28 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * @param array $object_ids
+	 *
+	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
+	 *                if the contents were not deleted.
+	 */
+	public function delete_cache_for_objects( array $object_ids ): array {
+		/** @var $cache_engine WPCacheEngine */
+		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
+		$return_values = array();
+		foreach ( $object_ids as $object_id ) {
+			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
+		}
+		$successfully_deleted_cache_object_ids = array_keys( array_filter( $return_values ) );
+		$cache_deletion_results = $this->data_store_meta->delete_cache_for_objects( $successfully_deleted_cache_object_ids ) ;
+		foreach ( $cache_deletion_results as $object_id => $meta_cache_was_deleted ) {
+			$return_values[ $object_id ] = $return_values[ $object_id ] && $meta_cache_was_deleted;
+		}
+		return $return_values;
+	}
+
+
+	/**
 	 * Helper function to get alias for order table, this is used in select query.
 	 *
 	 * @return string Alias.
@@ -1883,9 +1905,7 @@ FROM $order_meta_table
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
-		/** @var $cache_engine WPCacheEngine */
-		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
-		$cache_engine->delete_cached_object( $order->get_id(), $this->get_cache_group() );
+		$this->delete_cache_for_objects( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2326,13 +2346,7 @@ FROM $order_meta_table
 				array( '%d' )
 			);
 
-			/** @var $cache_engine WPCacheEngine */
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$cache_group  = $this->get_cache_group();
-			foreach ( $child_order_ids as $child_order_id ) {
-				$cache_engine->delete_cached_object( $child_order_id, $cache_group );
-			}
-
+			$this->delete_cache_for_objects( $child_order_ids );
 		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
@@ -2390,9 +2404,7 @@ FROM $order_meta_table
 			wp_trash_post( $order->get_id() );
 		}
 
-		/** @var $cache_engine WPCacheEngine */
-		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
-		$cache_engine->delete_cached_object( $order->get_id(), $this->get_cache_group() );
+		$this->delete_cache_for_objects( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2507,9 +2519,7 @@ FROM $order_meta_table
 			$order_cache->remove( $order_id );
 		}
 
-		/** @var $cache_engine WPCacheEngine */
-		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-		$cache_engine->delete_cached_object( $order_id, $this->get_cache_group() );
+		$this->delete_cache_for_objects( array( $order_id ) );
 	}
 
 	/**
@@ -3105,9 +3115,7 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
-			/** @var $cache_engine WPCacheEngine */
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$cache_engine->delete_cached_object( $order->get_id(), $this->get_cache_group() );
+			$this->delete_cache_for_objects( array( $order->get_id() ) );
 		}
 
 		return false;

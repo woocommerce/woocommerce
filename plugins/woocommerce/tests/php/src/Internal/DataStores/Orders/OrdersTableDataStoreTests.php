@@ -2573,13 +2573,8 @@ class OrdersTableDataStoreTests extends HposTestCase {
 				array( 'id' => '%d' ),
 			);
 
-			/**
-			 * We have to clear the cache after a direct DB update.
-			 * @todo A better API should be used here.
-			 */
-			/** @var $cache_engine \Automattic\WooCommerce\Caching\WPCacheEngine */
-			$cache_engine       = wc_get_container()->get( \Automattic\WooCommerce\Caching\WPCacheEngine::class );
-			$cache_engine->delete_cached_object( $refund->get_id(), 'orders_data' );
+			// We have to clear the cache after a direct DB update.
+			$this->sut->delete_cache_for_objects( ( array( $refund->get_id() ) ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,

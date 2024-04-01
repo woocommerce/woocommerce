@@ -90,9 +90,7 @@ abstract class CustomMetaDataStore {
 
 		$successful = (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id, $db_info['object_id_field'] => $object->get_id() ) );
 		if ( $successful ) {
-			/** @var $cache_engine WPCacheEngine */
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+			$this->delete_cache_for_objects( array( $object->get_id() ) );
 		}
 
 		return $successful;
@@ -128,9 +126,7 @@ abstract class CustomMetaDataStore {
 
 		$insert_id = $result ? (int) $wpdb->insert_id : false;
 		if ( $insert_id !== false ) {
-			/** @var $cache_engine WPCacheEngine */
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+			$this->delete_cache_for_objects( array( $object->get_id() ) );
 		}
 		return $insert_id;
 	}
@@ -167,9 +163,7 @@ abstract class CustomMetaDataStore {
 
 		$is_successful = 1 === $result;
 		if ( $is_successful ) {
-			/** @var $cache_engine WPCacheEngine */
-			$cache_engine = wc_get_container()->get( WPCacheEngine::class );
-			$cache_engine->delete_cached_object( $object->get_id(), $this->get_cache_group() );
+			$this->delete_cache_for_objects( array( $object->get_id() ) );
 		}
 		return $is_successful;
 	}
@@ -316,4 +310,19 @@ abstract class CustomMetaDataStore {
 		return $meta_data;
 	}
 
+	/**
+	 * @param array $object_ids
+	 *
+	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
+	 *                if the contents were not deleted.
+	 */
+	public function delete_cache_for_objects( array $object_ids ): array {
+		/** @var $cache_engine WPCacheEngine */
+		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
+		$return_values = array();
+		foreach ( $object_ids as $object_id ) {
+			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
+		}
+		return $return_values;
+	}
 }
