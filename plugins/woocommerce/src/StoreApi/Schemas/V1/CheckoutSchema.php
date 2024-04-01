@@ -410,7 +410,7 @@ class CheckoutSchema extends AbstractSchema {
 
 		foreach ( $locations as $location ) {
 			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
-			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location );
+			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location, 'additional' );
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );

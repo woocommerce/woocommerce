@@ -73,7 +73,9 @@ class CheckoutFieldsAdmin {
 	 * @param \WC_Order $order The order to update the field for.
 	 */
 	public function update_callback( $key, $value, $order ) {
-		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, false );
+		list( $group, $key ) = explode( '/', $key, 2 );
+		$group               = $this->checkout_fields_controller->get_group_name( $group );
+		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, $group, false );
 	}
 
 	/**
@@ -123,7 +125,7 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', '', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'additional', $context );
 
 		return array_merge(
 			$fields,
@@ -148,7 +150,7 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', '', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', 'additional', $context );
 
 		return array_merge(
 			$fields,

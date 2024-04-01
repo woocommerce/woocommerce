@@ -89,8 +89,8 @@ class CheckoutFieldsFrontend {
 	 */
 	public function render_order_additional_fields( $order ) {
 		$fields = array_merge(
-			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', '', 'view' ),
-			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', '', 'view' ),
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'additional', 'view' ),
+			$this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', 'additional', 'view' ),
 		);
 
 		if ( ! $fields ) {
@@ -207,11 +207,11 @@ class CheckoutFieldsFrontend {
 
 		// Persist individual additional fields to customer.
 		foreach ( $field_values as $key => $value ) {
-			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer );
+			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer, 'additional' );
 		}
 
 		// Validate all fields for this location.
-		$location_validation = $this->checkout_fields_controller->validate_fields_for_location( $field_values, 'contact' );
+		$location_validation = $this->checkout_fields_controller->validate_fields_for_location( $field_values, 'contact', 'additional' );
 
 		if ( is_wp_error( $location_validation ) && $location_validation->has_errors() ) {
 			wc_add_notice( $location_validation->get_error_message(), 'error' );
@@ -286,7 +286,7 @@ class CheckoutFieldsFrontend {
 
 		// Persist individual additional fields to customer.
 		foreach ( $field_values as $key => $value ) {
-			$this->checkout_fields_controller->persist_field_for_customer( "/{$address_type}/{$key}", $value, $customer );
+			$this->checkout_fields_controller->persist_field_for_customer( $key, $value, $customer, $address_type );
 		}
 
 		// Validate all fields for this location.

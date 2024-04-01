@@ -199,10 +199,10 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		// We save them one by one, and we add the group prefix.
 		foreach ( $additional_shipping_values as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_customer( "/shipping/{$key}", $value, $customer );
+			$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'shipping' );
 		}
 		foreach ( $additional_billing_values as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_customer( "/billing/{$key}", $value, $customer );
+			$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'billing' );
 		}
 
 		wc_do_deprecated_action(
