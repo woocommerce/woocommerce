@@ -51,11 +51,12 @@ export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	false
 );
 
-type CountryData = {
+export type CountryData = {
 	allowBilling: boolean;
 	allowShipping: boolean;
 	states: Record< string, string >;
 	locale: Record< string, LocaleSpecificFormField >;
+	format?: string;
 };
 
 type FieldsLocations = {
