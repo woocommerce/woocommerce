@@ -123,7 +123,7 @@ class ProductCollectionData extends AbstractRoute {
 					if ( ! empty( $filter_attributes ) ) {
 						$filter_attributes = array_filter(
 							$filter_attributes,
-							function( $query ) use ( $taxonomy ) {
+							function ( $query ) use ( $taxonomy ) {
 								return $query['attribute'] !== $taxonomy;
 							}
 						);
