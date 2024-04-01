@@ -14,6 +14,8 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
+import sanitizeHTML from '../../../lib/sanitize-html';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
 	additionalClassNames?: Array< string > | undefined;
@@ -23,6 +25,7 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	showUpdateCount?: boolean;
 }
 
 interface Tabs {
@@ -49,6 +52,7 @@ const tabs: Tabs = {
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
+		showUpdateCount: true,
 	},
 };
 
@@ -73,11 +77,14 @@ const getVisibleTabs = ( selectedTab: string ) => {
 
 	return currentVisibleTabs;
 };
+
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const updateCount = wccomSettings?.wooUpdateCount ?? 0;
 
 	const onTabClick = ( tabKey: string ) => {
 		if ( tabKey === selectedTab ) {
@@ -115,6 +122,14 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
+					{ tabs[ tabKey ]?.showUpdateCount && updateCount > 0 && (
+						<span
+							className="woocommerce-marketplace__update-count"
+							dangerouslySetInnerHTML={ sanitizeHTML(
+								'<span>' + updateCount + '</span>'
+							) }
+						></span>
+					) }
 				</Button>
 			)
 		);
