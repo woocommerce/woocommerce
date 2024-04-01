@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Gracefully handle posts to HPOS redirect when backup post no longer exists.

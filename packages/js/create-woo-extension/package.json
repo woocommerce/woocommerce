@@ -20,7 +20,7 @@
 	"scripts": {
 		"changelog": "composer install && composer exec -- changelogger"
 	},
-	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extensionv#readme",
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension#readme",
 	"devDependencies": {
 		"wireit": "0.14.3"
 	}

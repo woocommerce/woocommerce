@@ -1,4 +1,4 @@
-@import 'node_modules/@wordpress/base-styles/colors.native';
+@import "node_modules/@wordpress/base-styles/colors.native";
 // By using CSS variables, we can switch the spacing rhythm using a single media query.
 :root {
 	--large-gap: 40px;
@@ -61,7 +61,7 @@
 
 body.woocommerce-admin-page {
 	.components-button.is-primary {
-		&:not(:disabled):not([aria-disabled='true']):hover {
+		&:not(:disabled):not([aria-disabled="true"]):hover {
 			color: $studio-white;
 		}
 	}
@@ -69,7 +69,7 @@ body.woocommerce-admin-page {
 	.components-snackbar .components-button.is-tertiary {
 		color: $studio-white;
 
-		&:not(:disabled):not([aria-disabled='true']):hover {
+		&:not(:disabled):not([aria-disabled="true"]):hover {
 			color: $studio-white;
 		}
 	}

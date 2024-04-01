@@ -98,15 +98,19 @@ test.describe( 'Cart performance', () => {
 		while ( i-- ) {
 			const start = performance.now();
 
-			await page.click(
-				'button.wc-block-components-quantity-selector__button--plus'
-			);
-			const response = await page.waitForResponse(
+			const responsePromise = page.waitForResponse(
 				( responseFromWait ) =>
 					responseFromWait.url().includes( '/wc/store/v1/batch' ) &&
 					responseFromWait.status() === 207
 			);
-			await expect( response.ok() ).toBeTruthy();
+
+			await page.click(
+				'button.wc-block-components-quantity-selector__button--plus'
+			);
+
+			const response = await responsePromise;
+
+			expect( response.ok() ).toBeTruthy();
 
 			const end = performance.now();
 			timesForResponse.push( end - start );
@@ -136,17 +140,20 @@ test.describe( 'Cart performance', () => {
 			const start = performance.now();
 
 			await page.fill( '[aria-label="Enter code"]', 'test_coupon' );
-			await page.click(
-				'button.wc-block-components-totals-coupon__button'
-			);
 
-			const response = await page.waitForResponse(
+			const responsePromise = page.waitForResponse(
 				( responseFromWait ) =>
 					responseFromWait.url().includes( '/wc/store/v1/batch' ) &&
 					responseFromWait.status() === 207
 			);
 
-			await expect( response.ok() ).toBeTruthy();
+			await page.click(
+				'button.wc-block-components-totals-coupon__button'
+			);
+
+			const response = await responsePromise;
+
+			expect( response.ok() ).toBeTruthy();
 
 			const end = performance.now();
 			timesForResponse.push( end - start );

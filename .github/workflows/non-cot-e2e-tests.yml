@@ -73,7 +73,7 @@ jobs:
         name: Merge e2e test reports
         # Merge reports after playwright-tests, even if some shards have failed
         if: always()
-        needs: [e2e-tests-success]
+        needs: [non-hpos-e2e-tests-run]
 
         runs-on: ubuntu-latest
         env:

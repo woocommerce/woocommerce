@@ -121,10 +121,9 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
-
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
