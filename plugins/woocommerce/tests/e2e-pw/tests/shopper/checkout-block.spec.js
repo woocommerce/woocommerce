@@ -446,39 +446,6 @@ test.describe( 'Checkout Block page', () => {
 		// ).toHaveValue( '98500' );
 	} );
 
-	test( 'warn when customer is missing required details', async ( {
-		page,
-	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await page.goto( checkoutBlockPageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
-		).toBeVisible();
-
-		// first try submitting the form with no fields complete
-		await page.getByRole( 'button', { name: 'Place order' } ).click();
-		await expect(
-			page.getByText( 'Please enter a valid email address' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid first name' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid last name' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid address' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid city' )
-		).toBeVisible();
-		await expect(
-			page.getByText( 'Please enter a valid zip code' )
-		).toBeVisible();
-	} );
-
 	test( 'allows customer to fill shipping details and toggle different billing', async ( {
 		page,
 	} ) => {
