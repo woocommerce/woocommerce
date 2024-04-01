@@ -157,8 +157,45 @@ class WC_Helper_Updater {
 	public static function setup_update_plugins_messages() {
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$filename = $plugin['_filename'];
-			add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			if ( WC_Helper::is_site_connected() ) {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			}
+			else {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ), 10, 2 );
+			}
 		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to Woo.com for unconnected stores
+	 *
+	 * @param object $plugin_data An array of plugin metadata.
+	 * @param object $response  An object of metadata about the available plugin update.
+	 *
+	 * @return void.
+	 */
+	public static function add_connect_woocom_plugin_message( $plugin_data, $response ) {
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		printf(
+			wp_kses(
+			/* translators: 1: Woo Update Manager plugin install URL */
+				__( ' <a href="%1$s">Connect your store</a> to Woo.com to update.', 'woocommerce' ),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
+			esc_url( $connect_page_url ),
+		);
 	}
 
 	/**
@@ -422,13 +459,23 @@ class WC_Helper_Updater {
 			'errors'   => array(),
 		);
 
-		$request = WC_Helper_API::post(
-			'update-check',
-			array(
-				'body'          => wp_json_encode( array( 'products' => $payload ) ),
-				'authenticated' => true,
-			)
-		);
+		if ( WC_Helper::is_site_connected() ) {
+			$request = WC_Helper_API::post(
+				'update-check',
+				array(
+					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'authenticated' => true,
+				)
+			);
+		}
+		else {
+			$request = WC_Helper_API::post(
+				'update-check-public',
+				array(
+					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+				)
+			);
+		}
 
 		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
