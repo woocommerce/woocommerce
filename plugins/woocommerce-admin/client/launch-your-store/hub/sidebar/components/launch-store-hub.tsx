@@ -38,7 +38,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 		<Button
 			onClick={ () => {
 				props.sendEventToSidebar( {
-					type: 'POP_BROWSER_STACK' // go back to previous URL
+					type: 'POP_BROWSER_STACK', // go back to previous URL
 				} );
 			} }
 		>
