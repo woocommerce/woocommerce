@@ -252,8 +252,9 @@ class Checkout extends AbstractBlock {
 	 * @return void
 	 */
 	public function update_local_pickup_title( $post_id, $post ) {
+
+		// This is not a proper save action, maybe an autosave, so don't continue.
 		if ( empty( $post->post_status ) || 'inherit' === $post->post_status ) {
-			// This is not a proper save action, maybe an autosave, so don't continue.
 			return;
 		}
 
