@@ -51,6 +51,7 @@ global.wcSettings = {
 				postcode: { priority: 65 },
 				state: { required: false, hidden: true },
 			},
+			format: '{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}',
 		},
 		CA: {
 			states: {
@@ -62,6 +63,7 @@ global.wcSettings = {
 				postcode: { label: 'Postal code' },
 				state: { label: 'Province' },
 			},
+			format: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
 		},
 		JP: {
 			allowBilling: true,
@@ -83,6 +85,7 @@ global.wcSettings = {
 				address_1: { priority: 68 },
 				address_2: { priority: 69 },
 			},
+			format: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
 		},
 		GB: {
 			states: {},
