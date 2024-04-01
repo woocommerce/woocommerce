@@ -37,10 +37,13 @@ const usePreviewState = ( handlePreviewState ) => {
 
 	// Running handlePreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		handlePreviewState?.( {
+		const cleanup = handlePreviewState?.( {
 			setPreviewState,
 		} );
 
+		if ( cleanup ) {
+			return cleanup;
+		}
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
