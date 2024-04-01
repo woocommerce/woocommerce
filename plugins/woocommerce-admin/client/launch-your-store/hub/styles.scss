@@ -110,15 +110,17 @@
 						}
 
 						.edit-site-sidebar-navigation-screen__title {
-							font-size: 1rem;
-							color: $gray-900;
-							text-overflow: ellipsis;
 							flex-grow: 1;
-							white-space: nowrap;
-							font-style: normal;
-							font-weight: 600;
-							line-height: 24px; /* 150% */
 							padding: 0;
+							button {
+								font-size: 1rem;
+								color: $gray-900;
+								text-overflow: ellipsis;
+								white-space: nowrap;
+								font-style: normal;
+								font-weight: 600;
+								line-height: 24px; /* 150% */
+							}
 						}
 
 						.edit-site-sidebar-navigation-screen__description {
