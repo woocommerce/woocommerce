@@ -61,7 +61,7 @@ class Marketplace {
 			array(
 				'id'         => 'woocommerce-marketplace',
 				'parent'     => 'woocommerce',
-				'title'      => __( 'Extensions', 'woocommerce' ) . self::get_marketplace_update_count_html(),
+				'title'      => __( 'Extensions', 'woocommerce' ) . WC_Helper_Updater::get_updates_count_html(),
 				'page_title' => __( 'Extensions', 'woocommerce' ),
 				'path'       => '/extensions',
 			),
@@ -73,40 +73,6 @@ class Marketplace {
 		 * @since 8.0
 		 */
 		return apply_filters( 'woocommerce_marketplace_menu_items', $marketplace_pages );
-	}
-
-	/**
-	 * Get marketplace update count considering the status of Woo Update Manager.
-	 *
-	 * @return int
-	 */
-	public static function get_marketplace_update_count() {
-		$count = WC_Helper_Updater::get_updates_count();
-		if ( empty( $count ) ) {
-			$count = 0;
-		}
-
-		$count = intval( $count );
-		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			++$count;
-		}
-
-		return $count;
-	}
-
-	/**
-	 * Create the menu bubble for extensions menu based on number of updates available.
-	 *
-	 * @return string
-	 */
-	private static function get_marketplace_update_count_html() {
-		$count = self::get_marketplace_update_count();
-
-		if ( 0 === $count ) {
-			return '';
-		}
-
-		return sprintf( ' <span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
 	}
 
 	/**

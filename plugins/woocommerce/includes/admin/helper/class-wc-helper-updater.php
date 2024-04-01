@@ -312,7 +312,7 @@ class WC_Helper_Updater {
 		*/
 		$active_for_translations = array_filter(
 			$active_woo_plugins,
-			function( $plugin ) use ( $plugins ) {
+			function ( $plugin ) use ( $plugins ) {
 				/**
 				 * Filters the plugins that are subscribed to the automatic translations updates.
 				 *
@@ -476,7 +476,7 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
@@ -487,7 +487,7 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $theme['Version'], $update_data[ $theme['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
@@ -501,12 +501,10 @@ class WC_Helper_Updater {
 	 * @return string Updates count markup, empty string if no updates avairable.
 	 */
 	public static function get_updates_count_html() {
-		$count = self::get_updates_count();
-		if ( ! $count ) {
-			return '';
-		}
-
+		$count      = self::get_updates_count() ?? 0;
+		$count      = WC_Woo_Update_Manager_Plugin::increment_update_count_for_woo_update_manager( $count );
 		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+
 		return $count_html;
 	}
 
