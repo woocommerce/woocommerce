@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { doAction } from '@wordpress/hooks';
+import { select } from '@wordpress/data';
 import {
 	store,
 	getContext,
@@ -37,6 +38,12 @@ import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	doAction( `experimental__woocommerce_blocks-checkout-${ eventName }`, {
+		storeCart: select( 'wc/store/cart' ).getCartData(),
+	} );
+};
 
 const {
 	currency,
@@ -383,17 +390,13 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
-					doAction(
-						'experimental__woocommerce_blocks-mini-cart-open'
-					);
+					dispatchCheckoutEvent( 'mini-cart-open' );
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
-					doAction(
-						'experimental__woocommerce_blocks-mini-cart-close'
-					);
+					dispatchCheckoutEvent( 'mini-cart-close' );
 				}
 			},
 
