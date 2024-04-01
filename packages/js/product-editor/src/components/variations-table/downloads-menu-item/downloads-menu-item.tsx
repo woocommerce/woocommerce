@@ -33,9 +33,12 @@ export function DownloadsMenuItem( {
 }: VariationActionsMenuItemProps ) {
 	const ids = selection.map( ( { id } ) => id );
 
-	const downloadsIds: number[] = selection[ 0 ].downloads.map(
-		( { id }: ProductDownload ) => Number.parseInt( id, 10 )
-	);
+	const downloadsIds: number[] =
+		selection?.length > 0
+			? selection[ 0 ].downloads.map( ( { id }: ProductDownload ) =>
+					Number.parseInt( id, 10 )
+			  )
+			: [];
 
 	const [ uploadFilesModalOpen, setUploadFilesModalOpen ] = useState( false );
 
@@ -133,10 +136,13 @@ export function DownloadsMenuItem( {
 			renderToggle={ ( { isOpen, onToggle } ) => (
 				<MenuItem
 					onClick={ () => {
-						recordEvent( 'product_variations_menu_shipping_click', {
-							source: TRACKS_SOURCE,
-							variation_id: ids,
-						} );
+						recordEvent(
+							'product_variations_menu_downloads_click',
+							{
+								source: TRACKS_SOURCE,
+								variation_id: ids,
+							}
+						);
 						onToggle();
 					} }
 					aria-expanded={ isOpen }

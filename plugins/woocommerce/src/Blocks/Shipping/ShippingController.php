@@ -55,7 +55,7 @@ class ShippingController {
 		if ( is_admin() ) {
 			$this->asset_data_registry->add(
 				'countryStates',
-				function() {
+				function () {
 					return WC()->countries->get_states();
 				},
 				true
@@ -64,9 +64,9 @@ class ShippingController {
 
 		$this->asset_data_registry->add( 'collectableMethodIds', array( 'Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils', 'get_local_pickup_method_ids' ), true );
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
-		add_action( 'rest_api_init', [ $this, 'register_settings' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'admin_scripts' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'hydrate_client_settings' ] );
+		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'hydrate_client_settings' ) );
 		add_action( 'woocommerce_load_shipping_methods', array( $this, 'register_local_pickup' ) );
 		add_filter( 'woocommerce_local_pickup_methods', array( $this, 'register_local_pickup_method' ) );
 		add_filter( 'woocommerce_order_hide_shipping_address', array( $this, 'hide_shipping_address_for_local_pickup' ), 10 );
@@ -75,7 +75,6 @@ class ShippingController {
 		add_filter( 'pre_update_option_woocommerce_pickup_location_settings', array( $this, 'flush_cache' ) );
 		add_filter( 'pre_update_option_pickup_location_pickup_locations', array( $this, 'flush_cache' ) );
 		add_filter( 'woocommerce_shipping_settings', array( $this, 'remove_shipping_settings' ) );
-		add_filter( 'wc_shipping_enabled', array( $this, 'force_shipping_enabled' ), 100, 1 );
 		add_filter( 'woocommerce_order_shipping_to_display', array( $this, 'show_local_pickup_details' ), 10, 2 );
 
 		// This is required to short circuit `show_shipping` from class-wc-cart.php - without it, that function
@@ -100,29 +99,16 @@ class ShippingController {
 	}
 
 	/**
-	 * Force shipping to be enabled if the Checkout block is in use on the Checkout page.
-	 *
-	 * @param boolean $enabled Whether shipping is currently enabled.
-	 * @return boolean Whether shipping should continue to be enabled/disabled.
-	 */
-	public function force_shipping_enabled( $enabled ) {
-		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
-			return true;
-		}
-		return $enabled;
-	}
-
-	/**
 	 * Inject collection details onto the order received page.
 	 *
-	 * @param string    $return Return value.
+	 * @param string    $return_value Return value.
 	 * @param \WC_Order $order Order object.
 	 * @return string
 	 */
-	public function show_local_pickup_details( $return, $order ) {
+	public function show_local_pickup_details( $return_value, $order ) {
 		// Confirm order is valid before proceeding further.
 		if ( ! $order instanceof \WC_Order ) {
-			return $return;
+			return $return_value;
 		}
 
 		$shipping_method_ids = ArrayUtil::select( $order->get_shipping_methods(), 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
@@ -130,7 +116,7 @@ class ShippingController {
 
 		// Ensure order used pickup location method, otherwise bail.
 		if ( 'pickup_location' !== $shipping_method_id ) {
-			return $return;
+			return $return_value;
 		}
 
 		$shipping_method = current( $order->get_shipping_methods() );
@@ -139,7 +125,7 @@ class ShippingController {
 		$address         = $shipping_method->get_meta( 'pickup_address' );
 
 		if ( ! $address ) {
-			return $return;
+			return $return_value;
 		}
 
 		return sprintf(
@@ -159,7 +145,11 @@ class ShippingController {
 		if ( CartCheckoutUtils::is_checkout_block_default() && $this->local_pickup_enabled ) {
 			foreach ( $settings as $index => $setting ) {
 				if ( 'woocommerce_shipping_cost_requires_address' === $setting['id'] ) {
-					$settings[ $index ]['desc']    .= ' (' . __( 'Not available when using WooCommerce Blocks Local Pickup', 'woocommerce' ) . ')';
+					$settings[ $index ]['desc'] = sprintf(
+						/* translators: %s: URL to the documentation. */
+						__( 'Hide shipping costs until an address is entered (Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>)', 'woocommerce' ),
+						'https://woo.com/document/woocommerce-blocks-local-pickup/'
+					);
 					$settings[ $index ]['disabled'] = true;
 					$settings[ $index ]['value']    = 'no';
 					break;
@@ -177,86 +167,86 @@ class ShippingController {
 		register_setting(
 			'options',
 			'woocommerce_pickup_location_settings',
-			[
+			array(
 				'type'         => 'object',
 				'description'  => 'WooCommerce Local Pickup Method Settings',
-				'default'      => [],
-				'show_in_rest' => [
+				'default'      => array(),
+				'show_in_rest' => array(
 					'name'   => 'pickup_location_settings',
-					'schema' => [
+					'schema' => array(
 						'type'       => 'object',
 						'properties' => array(
-							'enabled'    => [
+							'enabled'    => array(
 								'description' => __( 'If enabled, this method will appear on the block based checkout.', 'woocommerce' ),
 								'type'        => 'string',
-								'enum'        => [ 'yes', 'no' ],
-							],
-							'title'      => [
+								'enum'        => array( 'yes', 'no' ),
+							),
+							'title'      => array(
 								'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 								'type'        => 'string',
-							],
-							'tax_status' => [
+							),
+							'tax_status' => array(
 								'description' => __( 'If a cost is defined, this controls if taxes are applied to that cost.', 'woocommerce' ),
 								'type'        => 'string',
-								'enum'        => [ 'taxable', 'none' ],
-							],
-							'cost'       => [
+								'enum'        => array( 'taxable', 'none' ),
+							),
+							'cost'       => array(
 								'description' => __( 'Optional cost to charge for local pickup.', 'woocommerce' ),
 								'type'        => 'string',
-							],
+							),
 						),
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 		register_setting(
 			'options',
 			'pickup_location_pickup_locations',
-			[
+			array(
 				'type'         => 'array',
 				'description'  => 'WooCommerce Local Pickup Locations',
-				'default'      => [],
-				'show_in_rest' => [
+				'default'      => array(),
+				'show_in_rest' => array(
 					'name'   => 'pickup_locations',
-					'schema' => [
+					'schema' => array(
 						'type'  => 'array',
-						'items' => [
+						'items' => array(
 							'type'       => 'object',
 							'properties' => array(
-								'name'    => [
+								'name'    => array(
 									'type' => 'string',
-								],
-								'address' => [
+								),
+								'address' => array(
 									'type'       => 'object',
 									'properties' => array(
-										'address_1' => [
+										'address_1' => array(
 											'type' => 'string',
-										],
-										'city'      => [
+										),
+										'city'      => array(
 											'type' => 'string',
-										],
-										'state'     => [
+										),
+										'state'     => array(
 											'type' => 'string',
-										],
-										'postcode'  => [
+										),
+										'postcode'  => array(
 											'type' => 'string',
-										],
-										'country'   => [
+										),
+										'country'   => array(
 											'type' => 'string',
-										],
+										),
 									),
-								],
-								'details' => [
+								),
+								'details' => array(
 									'type' => 'string',
-								],
-								'enabled' => [
+								),
+								'enabled' => array(
 									'type' => 'boolean',
-								],
+								),
 							),
-						],
-					],
-				],
-			]
+						),
+					),
+				),
+			)
 		);
 	}
 
@@ -264,16 +254,16 @@ class ShippingController {
 	 * Hydrate client settings
 	 */
 	public function hydrate_client_settings() {
-		$locations = get_option( 'pickup_location_pickup_locations', [] );
+		$locations = get_option( 'pickup_location_pickup_locations', array() );
 
-		$formatted_pickup_locations = [];
+		$formatted_pickup_locations = array();
 		foreach ( $locations as $location ) {
-			$formatted_pickup_locations[] = [
+			$formatted_pickup_locations[] = array(
 				'name'    => $location['name'],
 				'address' => $location['address'],
 				'details' => $location['details'],
 				'enabled' => wc_string_to_bool( $location['enabled'] ),
-			];
+			);
 		}
 
 		$has_legacy_pickup = false;
@@ -303,7 +293,7 @@ class ShippingController {
 		}
 
 		$settings = array(
-			'pickupLocationSettings' => get_option( 'woocommerce_pickup_location_settings', [] ),
+			'pickupLocationSettings' => get_option( 'woocommerce_pickup_location_settings', array() ),
 			'pickupLocations'        => $formatted_pickup_locations,
 			'readonlySettings'       => array(
 				'hasLegacyPickup' => $has_legacy_pickup,
@@ -325,7 +315,7 @@ class ShippingController {
 	 * Load admin scripts.
 	 */
 	public function admin_scripts() {
-		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', [], true );
+		$this->asset_api->register_script( 'wc-shipping-method-pickup-location', 'assets/client/blocks/wc-shipping-method-pickup-location.js', array(), true );
 	}
 
 	/**
@@ -387,8 +377,8 @@ class ShippingController {
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && in_array( $chosen_method_id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
-			$pickup_locations = get_option( 'pickup_location_pickup_locations', [] );
-			$pickup_location  = $pickup_locations[ $chosen_method_instance ] ?? [];
+			$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
+			$pickup_location  = $pickup_locations[ $chosen_method_instance ] ?? array();
 
 			if ( isset( $pickup_location['address'], $pickup_location['address']['country'] ) && ! empty( $pickup_location['address']['country'] ) ) {
 				$address = array(
@@ -417,8 +407,8 @@ class ShippingController {
 		// Check all packages for an instance of a collectable shipping method.
 		$valid_packages = array_filter(
 			$packages,
-			function( $package ) {
-				$shipping_method_ids = ArrayUtil::select( $package['rates'] ?? [], 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+			function ( $package ) {
+				$shipping_method_ids = ArrayUtil::select( $package['rates'] ?? array(), 'get_method_id', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 				return ! empty( array_intersect( LocalPickupUtils::get_local_pickup_method_ids(), $shipping_method_ids ) );
 			}
 		);
@@ -426,14 +416,14 @@ class ShippingController {
 		// Remove pickup location from rates arrays.
 		if ( count( $valid_packages ) !== count( $packages ) ) {
 			$packages = array_map(
-				function( $package ) {
+				function ( $package ) {
 					if ( ! is_array( $package['rates'] ) ) {
-						$package['rates'] = [];
+						$package['rates'] = array();
 						return $package;
 					}
 					$package['rates'] = array_filter(
 						$package['rates'],
-						function( $rate ) {
+						function ( $rate ) {
 							return ! in_array( $rate->get_method_id(), LocalPickupUtils::get_local_pickup_method_ids(), true );
 						}
 					);
@@ -478,7 +468,7 @@ class ShippingController {
 			'pickup_locations_enabled' => count(
 				array_filter(
 					$locations,
-					function( $location ) {
+					function ( $location ) {
 						return $location['enabled']; }
 				)
 			),
@@ -487,5 +477,30 @@ class ShippingController {
 		WC_Tracks::record_event( $event_name, $data );
 
 		return $served;
+	}
+
+	/**
+	 * Check if legacy local pickup is activated in any of the shipping zones or in the Rest of the World zone.
+	 *
+	 * @since 8.8.0
+	 *
+	 * @return bool
+	 */
+	public static function is_legacy_local_pickup_active() {
+		$rest_of_the_world                          = \WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
+		$shipping_zones                             = \WC_Shipping_Zones::get_zones();
+		$rest_of_the_world_data                     = $rest_of_the_world->get_data();
+		$rest_of_the_world_data['shipping_methods'] = $rest_of_the_world->get_shipping_methods();
+		array_unshift( $shipping_zones, $rest_of_the_world_data );
+
+		foreach ( $shipping_zones as $zone ) {
+			foreach ( $zone['shipping_methods'] as $method ) {
+				if ( 'local_pickup' === $method->id && $method->is_enabled() ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

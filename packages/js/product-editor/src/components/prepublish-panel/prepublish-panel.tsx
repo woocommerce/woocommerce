@@ -10,6 +10,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { closeSmall } from '@wordpress/icons';
 import classnames from 'classnames';
 import type { Product } from '@woocommerce/data';
+import { isInTheFuture } from '@wordpress/date';
 
 /**
  * Internal dependencies
@@ -30,10 +31,10 @@ export function PrepublishPanel( {
 		'woocommerce'
 	),
 }: PrepublishPanelProps ) {
-	const [ editedDate, , date ] = useEntityProp< string >(
+	const [ editedDate ] = useEntityProp< string >(
 		'postType',
 		productType,
-		'date_created'
+		'date_created_gmt'
 	);
 
 	const [ productStatus, , prevStatus ] = useEntityProp<
@@ -47,7 +48,7 @@ export function PrepublishPanel( {
 			? productStatus === 'publish'
 			: true;
 
-	if ( editedDate !== date ) {
+	if ( isInTheFuture( editedDate ) ) {
 		title = __( 'Are you ready to schedule this product?', 'woocommerce' );
 		description = __(
 			'Your product will be published at the specified date and time.',

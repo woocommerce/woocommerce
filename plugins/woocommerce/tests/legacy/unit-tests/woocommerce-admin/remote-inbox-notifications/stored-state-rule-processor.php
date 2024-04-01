@@ -5,8 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\StoredStateRuleProcessor;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_StoredStateRuleProcessor

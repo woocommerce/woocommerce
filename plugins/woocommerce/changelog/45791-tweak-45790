@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+WC_Discount: Add a filter for the items to apply coupons array.

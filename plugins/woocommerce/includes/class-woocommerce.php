@@ -39,7 +39,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.8.0';
+	public $version = '8.9.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -679,6 +679,10 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
+		}
+
+		if ( $this->is_request( 'admin' ) || $this->is_request( 'cron' ) ) {
+			include_once WC_ABSPATH . 'includes/admin/class-wc-admin-marketplace-promotions.php';
 		}
 
 		// We load frontend includes in the post editor, because they may be invoked via pre-loading of blocks.

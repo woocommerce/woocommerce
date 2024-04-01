@@ -78,5 +78,9 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 export const ALLOWED_INNER_BLOCKS = [
 	'core/columns',
 	'core/column',
+	'core/post-title',
+	'core/post-excerpt',
+	'woocommerce/add-to-cart-form',
+	'woocommerce/product-meta',
 	...Object.keys( getBlockMap( metadata.name ) ),
 ];

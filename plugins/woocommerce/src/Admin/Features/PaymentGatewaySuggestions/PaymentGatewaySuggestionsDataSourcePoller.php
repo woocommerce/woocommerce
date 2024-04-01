@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions;
 
-use Automattic\WooCommerce\Admin\DataSourcePoller;
+use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 
 /**
  * Specs data source poller class for payment gateway suggestions.

@@ -30,16 +30,6 @@ test.describe( 'Payment setup task', () => {
 		} );
 	} );
 
-	test( 'Can visit the WooPayments Connect page instead of setup task for supported countries', async ( {
-		page,
-	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( 'text=Get paid' ).click();
-		await expect(
-			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'WooPayments' );
-	} );
-
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {

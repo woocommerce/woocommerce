@@ -51,7 +51,7 @@
 	.woocommerce-customize-store__transitional-heading {
 		color: $gray-900;
 		text-align: center;
-		font-feature-settings: 'clig' off, 'liga' off;
+		font-feature-settings: "clig" off, "liga" off;
 		font-size: 32px;
 		font-style: normal;
 		font-weight: 400;
@@ -82,9 +82,8 @@
 	}
 
 	.woocommerce-customize-store__transitional-main-actions {
-		margin: 20px 0 0;
 		display: flex;
-		gap: 20px;
+		gap: 40px;
 		flex-direction: row;
 
 		@media only screen and (max-width: 600px) {
@@ -134,9 +133,10 @@
 .woocommerce-ai-survey-modal {
 	max-height: 100%;
 	max-width: 620px;
+	color: var(--gutenberg-gray-900, #1e1e1e);
 
 	.components-modal__header {
-		padding: 32px 32px 24px 32px;
+		padding: 32px 32px 8px 32px;
 
 		.components-modal__header-heading {
 			font-size: 20px;
@@ -147,14 +147,30 @@
 	}
 
 	.components-modal__content {
-		padding-top: 0;
-		padding-bottom: 16px;
+		padding: 0 0 16px;
+	}
+
+
+	hr {
+		margin-top: 24px;
+		margin-bottom: 16px;
+		color: var(--gutenberg-gray-100, #f0f0f0);
+		border-bottom: 0;
 	}
 }
 
 .woocommerce-ai-survey-form {
+	.content {
+		padding-left: 32px;
+		padding-right: 32px;
+
+		hr {
+			margin: 20px 0;
+		}
+	}
+
 	.woocommerce-ai-survey-form__description {
-		margin: 0 0 12px;
+		margin: 0 0 24px;
 		font-size: 13px;
 		font-style: normal;
 		font-weight: 400;
@@ -194,14 +210,13 @@
 		}
 	}
 
-	hr {
-		color: var(--gutenberg-gray-100, #f0f0f0);
-		margin: 20px 0;
-	}
+	.components-checkbox-control__input-container {
+		margin-right: 16px;
 
-	.components-checkbox-control__input {
-		border: 1px solid $gray-600;
-		border-radius: 2px;
+		.components-checkbox-control__input {
+			border: 1px solid $gray-600;
+			border-radius: 2px;
+		}
 	}
 
 	.components-checkbox-control:last-child {
@@ -212,6 +227,8 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 12px;
+		padding-left: 32px;
+		padding-right: 32px;
 
 		.components-button {
 			padding: 8px 16px;

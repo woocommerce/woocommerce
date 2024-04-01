@@ -82,6 +82,13 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	protected $cache_group = 'coupons';
 
 	/**
+	 * Error message.
+	 *
+	 * @var string
+	 */
+	protected $error_message;
+
+	/**
 	 * Sorting.
 	 *
 	 * Used by `get_coupons_from_cart` to sort coupons.
@@ -944,20 +951,27 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Converts one of the WC_Coupon message/error codes to a message string and.
 	 * displays the message/error.
 	 *
-	 * @param int $msg_code Message/error code.
+	 * @param int    $msg_code Message/error code.
+	 * @param string $notice_type Notice type.
 	 */
-	public function add_coupon_message( $msg_code ) {
-		$msg = $msg_code < 200 ? $this->get_coupon_error( $msg_code ) : $this->get_coupon_message( $msg_code );
+	public function add_coupon_message( $msg_code, $notice_type = 'success' ) {
+		if ( $msg_code < 200 ) {
+			$msg         = $this->get_coupon_error( $msg_code );
+			$notice_type = 'error';
+		} else {
+			$msg = $this->get_coupon_message( $msg_code );
+		}
 
-		if ( ! $msg ) {
+		if ( empty( $msg ) ) {
 			return;
 		}
 
-		if ( $msg_code < 200 ) {
-			wc_add_notice( $msg, 'error' );
-		} else {
-			wc_add_notice( $msg );
+		// Since coupon validation is done multiple times (e.g. to ensure a valid cart), we need to check for dupes.
+		if ( wc_has_notice( $msg, $notice_type ) ) {
+			return;
 		}
+
+		wc_add_notice( $msg, $notice_type );
 	}
 
 	/**
@@ -1001,8 +1015,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is invalid - it has now been removed from your order.', 'woocommerce' ), esc_html( $this->get_code() ) );
 				break;
 			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
-				/* translators: %s: coupon code */
-				$err = sprintf( __( 'Sorry, it seems the coupon "%s" is not yours - it has now been removed from your order.', 'woocommerce' ), esc_html( $this->get_code() ) );
+				// We check for supplied billing email. On shortcode, this will be present for checkout requests.
+				$billing_email = \Automattic\WooCommerce\Utilities\ArrayUtil::get_value_or_default( $_POST, 'billing_email' ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				if ( ! is_null( $billing_email ) ) {
+					/* translators: %s: coupon code */
+					$err = sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+				} else {
+					/* translators: %s: coupon code */
+					$err = sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) );
+				}
 				break;
 			case self::E_WC_COUPON_ALREADY_APPLIED:
 				$err = __( 'Coupon code already applied!', 'woocommerce' );
@@ -1151,5 +1172,27 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_discount_type( $info[2] ?? 'fixed_cart' );
 		$this->set_amount( $info[3] ?? 0 );
 		$this->set_free_shipping( $info[4] ?? false );
+	}
+
+	/**
+	 * Returns alternate error messages based on context (eg. Cart and Checkout).
+	 *
+	 * @param int $err_code Message/error code.
+	 *
+	 * @return array Context based alternate error messages.
+	 */
+	public function get_context_based_coupon_errors( $err_code = null ) {
+
+		switch ( $err_code ) {
+			case self::E_WC_COUPON_NOT_YOURS_REMOVED:
+				return array(
+					/* translators: %s: coupon code */
+					'cart'     => sprintf( __( 'Please enter a valid email at checkout to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
+					/* translators: %s: coupon code */
+					'checkout' => sprintf( __( 'Please enter a valid email to use coupon code "%s".', 'woocommerce' ), esc_html( $this->get_code() ) ),
+				);
+			default:
+				return array();
+		}
 	}
 }
