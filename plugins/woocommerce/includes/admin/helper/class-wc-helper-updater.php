@@ -168,9 +168,6 @@ class WC_Helper_Updater {
 	/**
 	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to Woo.com for unconnected stores
 	 *
-	 * @param object $plugin_data An array of plugin metadata.
-	 * @param object $response  An object of metadata about the available plugin update.
-	 *
 	 * @return void.
 	 */
 	public static function add_connect_woocom_plugin_message() {
