@@ -162,7 +162,7 @@ test.describe( 'General tab', () => {
 				)
 				.toBeGreaterThan( 0 );
 
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 			await expect(
 				page.locator( 'td[data-title=Product]' ).first()
