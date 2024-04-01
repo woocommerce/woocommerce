@@ -470,7 +470,7 @@ class WC_Helper_Updater {
 			$request = WC_Helper_API::post(
 				'update-check-public',
 				array(
-					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'body' => wp_json_encode( array( 'products' => $payload ) ),
 				)
 			);
 		}
