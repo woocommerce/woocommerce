@@ -147,7 +147,7 @@ class ProductQueryFilters {
 		}
 
 		$attributes_to_count     = array_map(
-			function( $attribute ) {
+			function ( $attribute ) {
 				$attribute = wc_sanitize_taxonomy_name( $attribute );
 				return esc_sql( $attribute );
 			},
