@@ -44,7 +44,8 @@ export type SidebarMachineEvents =
 	| { type: 'OPEN_WC_ADMIN_URL'; url: string }
 	| { type: 'OPEN_WC_ADMIN_URL_IN_CONTENT_AREA'; url: string }
 	| { type: 'LAUNCH_STORE'; removeTestOrders: boolean }
-	| { type: 'LAUNCH_STORE_SUCCESS' };
+	| { type: 'LAUNCH_STORE_SUCCESS' }
+	| { type: 'POP_BROWSER_STACK' };
 
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
@@ -118,6 +119,9 @@ export const sidebarMachine = setup( {
 			if ( event.type === 'OPEN_WC_ADMIN_URL' ) {
 				navigateTo( { url: event.url } );
 			}
+		},
+		windowHistoryBack: () => {
+			window.history.back();
 		},
 	},
 	guards: {
@@ -240,6 +244,9 @@ export const sidebarMachine = setup( {
 		},
 		OPEN_WC_ADMIN_URL: {
 			actions: 'openWcAdminUrl',
+		},
+		POP_BROWSER_STACK: {
+			actions: 'windowHistoryBack',
 		},
 		OPEN_WC_ADMIN_URL_IN_CONTENT_AREA: {},
 	},

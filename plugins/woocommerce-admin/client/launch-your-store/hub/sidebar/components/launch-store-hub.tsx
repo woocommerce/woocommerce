@@ -33,6 +33,19 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	const {
 		context: { tasklist, removeTestOrders: removeTestOrdersContext },
 	} = props;
+
+	const sidebarTitle = (
+		<Button
+			onClick={ () => {
+				props.sendEventToSidebar( {
+					type: 'POP_BROWSER_STACK' // go back to previous URL
+				} );
+			} }
+		>
+			{ __( 'Launch Your Store', 'woocommerce' ) }
+		</Button>
+	);
+
 	const sidebarDescription = createInterpolateElement(
 		__(
 			'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to <WCSettingsLink>WooCommerce | Settings | General.</WCSettingsLink>',
@@ -81,7 +94,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				/>
 			</motion.div>
 			<SidebarContainer
-				title="Launch Your Store"
+				title={ sidebarTitle }
 				description={ sidebarDescription }
 			>
 				<div className="edit-site-sidebar-navigation-screen-essential-tasks__group-header">

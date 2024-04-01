@@ -16,13 +16,14 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
 
 export type SidebarContainerProps = {
-	title: string;
+	title: React.ReactNode;
 	description?: React.ReactNode;
 	footer?: React.ReactNode;
 	children: React.ReactNode;
@@ -34,6 +35,11 @@ export const SidebarContainer = ( {
 	children,
 }: SidebarContainerProps ) => {
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
+
+	const hasOnClick = (
+		el: React.ReactNode
+	): el is React.ReactElement< { onClick: () => void } > =>
+		React.isValidElement( el ) && typeof el.props.onClick === 'function';
 
 	return (
 		<>
@@ -53,7 +59,11 @@ export const SidebarContainer = ( {
 					className="edit-site-sidebar-navigation-screen__title-icon"
 				>
 					<SidebarButton
-						onClick={ () => {} }
+						onClick={
+							hasOnClick( title ) // inherit onClick from title, if it exists
+								? title.props.onClick
+								: undefined
+						}
 						icon={ chevronIcon }
 						label={ __( 'Back', 'woocommerce' ) }
 						showTooltip={ false }
