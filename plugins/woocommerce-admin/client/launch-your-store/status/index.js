@@ -18,8 +18,8 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isStorePagesOnly =
 		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
 	const comingSoonText = isStorePagesOnly
-		? __( 'Coming soon - Store pages only', 'woocommerce' )
-		: __( 'Coming soon', 'woocommerce' );
+		? __( 'Store coming soon', 'woocommerce' )
+		: __( 'Site coming soon', 'woocommerce' );
 	const liveText = __( 'Live', 'woocommerce' );
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
 	const launchYourStoreLink = new URL(
