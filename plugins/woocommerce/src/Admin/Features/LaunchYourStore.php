@@ -14,7 +14,9 @@ class LaunchYourStore {
 	public function __construct() {
 		add_action( 'woocommerce_update_options_general', array( $this, 'save_site_visibility_options' ) );
 		add_action( 'current_screen', array( $this, 'maybe_create_coming_soon_page' ) );
-		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
+		if ( is_admin() ) {
+			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
+		}
 	}
 
 	/**
