@@ -164,7 +164,7 @@ describe( 'Testing cart', () => {
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
 		await act( () =>
-			dispatch( storeKey ).setShippingAddress( {
+			dispatch( CART_STORE_KEY ).setShippingAddress( {
 				first_name: 'First Name JP',
 				last_name: 'Last Name JP',
 				company: '',
@@ -187,7 +187,7 @@ describe( 'Testing cart', () => {
 
 		// Testing the default address format
 		await act( () =>
-			dispatch( storeKey ).setShippingAddress( {
+			dispatch( CART_STORE_KEY ).setShippingAddress( {
 				first_name: 'First Name GB',
 				last_name: 'Last Name GB',
 				company: '',
