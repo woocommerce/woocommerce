@@ -43,7 +43,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editor.canvas.click( 'body' );
+		await editorUtils.enterEditMode();
 
 		const block = await editorUtils.getBlockByName(
 			'woocommerce/checkout-shipping-method-block'
@@ -79,7 +79,8 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
 		} );
-		await editor.canvas.click( 'body' );
+		await editorUtils.enterEditMode();
+
 		await expect(
 			editor.canvas.getByText( 'Edited from settings page' )
 		).toBeVisible();
