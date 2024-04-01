@@ -5,7 +5,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	type CartShippingAddress,
 	type CartBillingAddress,
+	type CountryData,
 	objectHasProp,
+	isString,
 } from '@woocommerce/types';
 import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
 import { formatAddress } from '@woocommerce/blocks/checkout/utils';
@@ -26,14 +28,23 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const addressFormats = getSetting< Record< string, string > >(
-		'addressFormats',
+	const countryData = getSetting< Record< string, CountryData > >(
+		'countryData',
 		{}
 	);
 
-	let formatToUse = addressFormats?.default || '';
-	if ( objectHasProp( addressFormats, address?.country ) ) {
-		formatToUse = addressFormats[ address.country ];
+	let formatToUse = getSetting< string >(
+		'defaultAddressFormat',
+		'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}'
+	);
+
+	if (
+		objectHasProp( countryData, address?.country ) &&
+		objectHasProp( countryData[ address.country ], 'format' ) &&
+		isString( countryData[ address.country ].format )
+	) {
+		// `as string` is fine here because we check if it's a string above.
+		formatToUse = countryData[ address.country ].format as string;
 	}
 	const { name: formattedName, address: formattedAddress } = formatAddress(
 		address,
