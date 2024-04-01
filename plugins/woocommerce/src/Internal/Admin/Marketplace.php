@@ -76,11 +76,11 @@ class Marketplace {
 	}
 
 	/**
-	 * Create the menu bubble for extensions menu based on number of updates available.
+	 * Get marketplace update count considering the status of Woo Update Manager.
 	 *
-	 * @return string
+	 * @return int
 	 */
-	private static function get_marketplace_update_count_html() {
+	public static function get_marketplace_update_count() {
 		$count = WC_Helper_Updater::get_updates_count();
 		if ( empty( $count ) ) {
 			$count = 0;
@@ -90,6 +90,17 @@ class Marketplace {
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			++$count;
 		}
+
+		return $count;
+	}
+
+	/**
+	 * Create the menu bubble for extensions menu based on number of updates available.
+	 *
+	 * @return string
+	 */
+	private static function get_marketplace_update_count_html() {
+		$count = self::get_marketplace_update_count();
 
 		if ( 0 === $count ) {
 			return '';
@@ -107,7 +118,7 @@ class Marketplace {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
-		};
+		}
 
 		if ( ! isset( $_GET['path'] ) || '/extensions' !== $_GET['path'] ) {
 			return;
