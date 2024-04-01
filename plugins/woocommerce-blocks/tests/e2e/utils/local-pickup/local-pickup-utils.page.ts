@@ -72,12 +72,6 @@ export class LocalPickupUtils {
 		await this.saveLocalPickupSettings();
 	}
 
-	async setTitle( title: string ) {
-		await this.openLocalPickupSettings();
-		await this.page.getByLabel( 'Title' ).fill( title );
-		await this.saveLocalPickupSettings();
-	}
-
 	async disableLocalPickupCosts() {
 		await this.openLocalPickupSettings();
 
@@ -85,6 +79,12 @@ export class LocalPickupUtils {
 			.getByLabel( 'Add a price for customers who choose local pickup' )
 			.uncheck();
 
+		await this.saveLocalPickupSettings();
+	}
+
+	async setLocalPickupTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
 		await this.saveLocalPickupSettings();
 	}
 

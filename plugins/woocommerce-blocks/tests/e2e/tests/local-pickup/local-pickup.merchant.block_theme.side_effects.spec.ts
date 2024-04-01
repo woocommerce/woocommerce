@@ -27,7 +27,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test.afterEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.deleteLocations();
-		await localPickupUtils.setTitle( 'Local Pickup' );
+		await localPickupUtils.setLocalPickupTitle( 'Local Pickup' );
 	} );
 
 	test( 'Updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
@@ -70,7 +70,9 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		);
 
 		// Now update the title via local pickup settings and check it reflects in the site editor and front end.
-		await localPickupUtils.setTitle( 'Edited from settings page' );
+		await localPickupUtils.setLocalPickupTitle(
+			'Edited from settings page'
+		);
 		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
