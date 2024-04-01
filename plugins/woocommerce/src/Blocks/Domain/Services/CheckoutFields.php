@@ -52,21 +52,21 @@ class CheckoutFields {
 	 *
 	 * @var string
 	 */
-	const BILLING_FIELDS_KEY = '_additional_billing_fields';
+	const BILLING_FIELDS_PREFIX = '_wc_billing/';
 
 	/**
 	 * Shipping fields meta key.
 	 *
 	 * @var string
 	 */
-	const SHIPPING_FIELDS_KEY = '_additional_shipping_fields';
+	const SHIPPING_FIELDS_PREFIX = '_wc_shipping/';
 
 	/**
 	 * Additional fields meta key.
 	 *
 	 * @var string
 	 */
-	const ADDITIONAL_FIELDS_KEY = '_additional_fields';
+	const ADDITIONAL_FIELDS_PREFIX = '_wc_additional/';
 
 	/**
 	 * Sets up core fields.
@@ -246,7 +246,30 @@ class CheckoutFields {
 	 * @return array
 	 */
 	public function add_session_meta_keys( $keys ) {
-		return array_merge( $keys, array( self::BILLING_FIELDS_KEY, self::SHIPPING_FIELDS_KEY, self::ADDITIONAL_FIELDS_KEY ) );
+		$meta_keys = array();
+		try {
+			foreach ( $this->get_additional_fields() as $field_key => $field ) {
+				if ( 'address' === $field['location'] ) {
+					$meta_keys[] = self::BILLING_FIELDS_PREFIX . $field_key;
+					$meta_keys[] = self::SHIPPING_FIELDS_PREFIX . $field_key;
+				} else {
+					$meta_keys[] = self::ADDITIONAL_FIELDS_PREFIX . $field_key;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error(
+				sprintf(
+					'Error adding session meta keys for checkout fields. %s',
+					esc_attr( $e->getMessage() )
+				),
+				E_USER_WARNING
+			);
+
+			return $keys;
+		}
+
+		return array_merge( $keys, $meta_keys );
 	}
 
 	/**
@@ -272,7 +295,7 @@ class CheckoutFields {
 			return new WP_Error(
 				'woocommerce_blocks_checkout_field_required',
 				sprintf(
-					// translators: %s is field key.
+				// translators: %s is field key.
 					__( 'The field %s is required.', 'woocommerce' ),
 					$field['id']
 				)
@@ -822,7 +845,7 @@ class CheckoutFields {
 			return new WP_Error(
 				'woocommerce_blocks_checkout_field_invalid',
 				\sprintf(
-					// translators: % is field key.
+				// translators: % is field key.
 					__( 'The field %s is invalid.', 'woocommerce' ),
 					$key
 				)
@@ -833,7 +856,7 @@ class CheckoutFields {
 			return new WP_Error(
 				'woocommerce_blocks_checkout_field_invalid_location',
 				\sprintf(
-					// translators: %1$s is field key, %2$s location.
+				// translators: %1$s is field key, %2$s location.
 					__( 'The field %1$s is invalid for the location %2$s.', 'woocommerce' ),
 					$key,
 					$location
@@ -846,7 +869,7 @@ class CheckoutFields {
 			return new WP_Error(
 				'woocommerce_blocks_checkout_field_required',
 				\sprintf(
-					// translators: %s is field key.
+				// translators: %s is field key.
 					__( 'The field %s is required.', 'woocommerce' ),
 					$key
 				)
@@ -868,20 +891,34 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Returns true if the given key is a valid customer field.
+	 *
+	 * Customer fields are fields saved to the customer data, like address and contact fields.
+	 *
+	 * @param string $key The field key.
+	 *
+	 * @return bool True if the field is valid, false otherwise.
+	 */
+	public function is_customer_field( $key ) {
+		return array_key_exists( $key, array_merge( $this->get_address_fields_keys(), $this->get_contact_fields_keys() ) );
+	}
+
+	/**
 	 * Persists a field value for a given order. This would also optionally set the field value on the customer object if the order is linked to a registered customer.
 	 *
 	 * @param string   $key The field key.
 	 * @param mixed    $value The field value.
 	 * @param WC_Order $order The order to persist the field for.
+	 * @param string   $group The group to persist the field for (shipping|billing|additional).
 	 * @param bool     $set_customer Whether to set the field value on the customer or not.
 	 *
 	 * @return void
 	 */
-	public function persist_field_for_order( $key, $value, $order, $set_customer = true ) {
-		$this->set_array_meta( $key, $value, $order );
+	public function persist_field_for_order( $key, $value, $order, $group = 'additional', $set_customer = true ) {
+		$this->set_array_meta( $key, $value, $order, $group );
 		if ( $set_customer && $order->get_customer_id() ) {
 			$customer = new WC_Customer( $order->get_customer_id() );
-			$this->persist_field_for_customer( $key, $value, $customer );
+			$this->persist_field_for_customer( $key, $value, $customer, $group );
 		}
 	}
 
@@ -891,11 +928,12 @@ class CheckoutFields {
 	 * @param string      $key The field key.
 	 * @param mixed       $value The field value.
 	 * @param WC_Customer $customer The customer to persist the field for.
+	 * @param string      $group The group to persist the field for (shipping|billing|additional).
 	 *
 	 * @return void
 	 */
-	public function persist_field_for_customer( $key, $value, $customer ) {
-		$this->set_array_meta( $key, $value, $customer );
+	public function persist_field_for_customer( $key, $value, $customer, $group = 'additional' ) {
+		$this->set_array_meta( $key, $value, $customer, $group );
 	}
 
 	/**
@@ -903,33 +941,15 @@ class CheckoutFields {
 	 *
 	 * @param string               $key The field key.
 	 * @param mixed                $value The field value.
-	 * @param WC_Customer|WC_Order $object The object to set the field value for.
+	 * @param WC_Customer|WC_Order $wc_object The object to set the field value for.
+	 * @param string               $group The group to set the field value for (shipping|billing|additional).
 	 *
 	 * @return void
 	 */
-	private function set_array_meta( $key, $value, $object ) {
-		$meta_key = '';
-
-		if ( 0 === strpos( $key, '/billing/' ) ) {
-			$meta_key = self::BILLING_FIELDS_KEY;
-			$key      = str_replace( '/billing/', '', $key );
-		} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
-			$meta_key = self::SHIPPING_FIELDS_KEY;
-			$key      = str_replace( '/shipping/', '', $key );
-		} else {
-			$meta_key = self::ADDITIONAL_FIELDS_KEY;
-		}
-
-		$meta_data = $object->get_meta( $meta_key, true );
-
-		if ( ! is_array( $meta_data ) ) {
-			$meta_data = [];
-		}
-
-		$meta_data[ $key ] = $value;
-
+	private function set_array_meta( $key, $value, $wc_object, $group ) {
+		$meta_key = $this->get_group_key( $group ) . $key;
 		// Replacing all meta using `add_meta_data`. For some reason `update_meta_data` causes duplicate keys.
-		$object->add_meta_data( $meta_key, $meta_data, true );
+		$wc_object->add_meta_data( $meta_key, $value, true );
 	}
 
 	/**
@@ -937,11 +957,11 @@ class CheckoutFields {
 	 *
 	 * @param string      $key The field key.
 	 * @param WC_Customer $customer The customer to get the field value for.
-	 * @param string      $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string      $group The group to get the field value for (shipping|billing|additional).
 	 *
 	 * @return mixed The field value.
 	 */
-	public function get_field_from_customer( $key, $customer, $group = '' ) {
+	public function get_field_from_customer( $key, $customer, $group = 'additional' ) {
 		return $this->get_field_from_object( $key, $customer, $group );
 	}
 
@@ -950,11 +970,11 @@ class CheckoutFields {
 	 *
 	 * @param string   $field The field key.
 	 * @param WC_Order $order The order to get the field value for.
-	 * @param string   $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param string   $group The group to get the field value for (shipping|billing|additional).
 	 *
 	 * @return mixed The field value.
 	 */
-	public function get_field_from_order( $field, $order, $group = '' ) {
+	public function get_field_from_order( $field, $order, $group = 'additional' ) {
 		return $this->get_field_from_object( $field, $order, $group );
 	}
 
@@ -962,153 +982,126 @@ class CheckoutFields {
 	 * Returns a field value for a given object.
 	 *
 	 * @param string               $key The field key.
-	 * @param WC_Customer|WC_Order $object The customer to get the field value for.
-	 * @param string               $group The group to get the field value for (shipping|billing|'') in which '' refers to the additional group.
+	 * @param WC_Customer|WC_Order $wc_object The customer to get the field value for.
+	 * @param string               $group The group to get the field value for (shipping|billing|additional).
 	 *
 	 * @return mixed The field value.
 	 */
-	private function get_field_from_object( $key, $object, $group = '' ) {
-		$meta_key = '';
-		if ( 0 === strpos( $key, '/billing/' ) || 'billing' === $group ) {
-			$meta_key = self::BILLING_FIELDS_KEY;
-			$key      = str_replace( '/billing/', '', $key );
-		} elseif ( 0 === strpos( $key, '/shipping/' ) || 'shipping' === $group ) {
-			$meta_key = self::SHIPPING_FIELDS_KEY;
-			$key      = str_replace( '/shipping/', '', $key );
-		} else {
-			$meta_key = self::ADDITIONAL_FIELDS_KEY;
-		}
+	private function get_field_from_object( $key, $wc_object, $group = 'additional' ) {
+		$meta_key = $this->get_group_key( $group ) . $key;
 
-		$meta_data = $object->get_meta( $meta_key, true );
+		$meta_data = $wc_object->get_meta( $meta_key, true );
 
-		if ( ! is_array( $meta_data ) ) {
+		if ( ! $meta_data ) {
 			return '';
 		}
 
-		if ( ! isset( $meta_data[ $key ] ) ) {
-			return '';
-		}
-
-		return $meta_data[ $key ];
+		return $meta_data;
 	}
 
 	/**
-	 * Returns an array of all fields values for a given customer.
+	 * Returns an array of all fields values for a given customer in a group.
 	 *
 	 * @param WC_Customer $customer The customer to get the fields for.
+	 * @param string      $group The group to get the fields for (shipping|billing|additional).
 	 * @param bool        $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
-	public function get_all_fields_from_customer( $customer, $all = false ) {
-		$meta_data = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+	public function get_all_fields_from_customer( $customer, $group = 'additional', $all = false ) {
+		$meta_data = [];
+
+		$prefix = $this->get_group_key( $group );
 
 		if ( $customer instanceof WC_Customer ) {
-			$meta_data['billing']    = $customer->get_meta( self::BILLING_FIELDS_KEY, true );
-			$meta_data['shipping']   = $customer->get_meta( self::SHIPPING_FIELDS_KEY, true );
-			$meta_data['additional'] = $customer->get_meta( self::ADDITIONAL_FIELDS_KEY, true );
+			// Get all customer meta regardless of key.
+			$meta = $customer->get_meta_data();
+			foreach ( $meta as $meta_data_object ) {
+				// Check if key starts with a prefix.
+				if ( 0 === \strpos( $meta_data_object->key, $prefix ) ) {
+					$key = \str_replace( $prefix, '', $meta_data_object->key );
+					if ( ! $all && ! $this->is_field( $key ) ) {
+						continue;
+					}
+					$meta_data[ $key ] = $meta_data_object->value;
+				}
+			}
 		}
-		return $this->format_meta_data( $meta_data, $all );
+
+		return $meta_data;
 	}
 
 	/**
 	 * Returns an array of all fields values for a given order.
 	 *
 	 * @param WC_Order $order The order to get the fields for.
+	 * @param string   $group The group to get the fields for (shipping|billing|additional).
 	 * @param bool     $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
-	public function get_all_fields_from_order( $order, $all = false ) {
-		$meta_data = [
-			'billing'    => [],
-			'shipping'   => [],
-			'additional' => [],
-		];
+	public function get_all_fields_from_order( $order, $group = 'additional', $all = false ) {
+		$meta_data = [];
+
+		$prefix = $this->get_group_key( $group );
 
 		if ( $order instanceof WC_Order ) {
-			$meta_data['billing']    = $order->get_meta( self::BILLING_FIELDS_KEY, true );
-			$meta_data['shipping']   = $order->get_meta( self::SHIPPING_FIELDS_KEY, true );
-			$meta_data['additional'] = $order->get_meta( self::ADDITIONAL_FIELDS_KEY, true );
+			// Get all order meta regardless of key.
+			$meta = $order->get_meta_data();
+			foreach ( $meta as $meta_data_object ) {
+				// Check if key starts with a prefix.
+				if ( 0 === \strpos( $meta_data_object->key, $prefix ) ) {
+					$key = \str_replace( $prefix, '', $meta_data_object->key );
+					if ( ! $all && ! $this->is_field( $key ) ) {
+						continue;
+					}
+					$meta_data[ $key ] = $meta_data_object->value;
+				}
+			}
 		}
-		return $this->format_meta_data( $meta_data, $all );
+
+		return $meta_data;
 	}
 
 	/**
-	 * Returns an array of all fields values for a given meta object. It would add the billing or shipping prefix to the keys.
+	 * Copies additional fields from an order to a customer.
 	 *
-	 * @param array $meta The meta data to format.
-	 * @param bool  $all Whether to return all fields or only the ones that are still registered. Default false.
-	 *
-	 * @return array An array of fields.
+	 * @param WC_Order    $order The order to sync the fields for.
+	 * @param WC_Customer $customer The customer to sync the fields for.
 	 */
-	private function format_meta_data( $meta, $all = false ) {
-		$billing_fields    = $meta['billing'] ?? [];
-		$shipping_fields   = $meta['shipping'] ?? [];
-		$additional_fields = $meta['additional'] ?? [];
+	public function sync_customer_additional_fields_with_order( $order, $customer ) {
+		$groups = [ 'billing', 'shipping', 'additional' ];
+		foreach ( $groups as $group ) {
+			$order_additional_fields = $this->get_all_fields_from_order( $order, $group, true );
 
-		$fields = [];
-
-		if ( is_array( $billing_fields ) ) {
-			foreach ( $billing_fields as $key => $value ) {
-				if ( ! $all && ! $this->is_field( $key ) ) {
-					continue;
+			// Sync customer additional fields with order additional fields.
+			foreach ( $order_additional_fields as $key => $value ) {
+				if ( $this->is_customer_field( $key ) ) {
+					$this->persist_field_for_customer( $key, $value, $customer, $group );
 				}
-				$fields[ '/billing/' . $key ] = $value;
 			}
 		}
-
-		if ( is_array( $shipping_fields ) ) {
-			foreach ( $shipping_fields as $key => $value ) {
-				if ( ! $all && ! $this->is_field( $key ) ) {
-					continue;
-				}
-				$fields[ '/shipping/' . $key ] = $value;
-			}
-		}
-
-		if ( is_array( $additional_fields ) ) {
-			foreach ( $additional_fields as $key => $value ) {
-				if ( ! $all && ! $this->is_field( $key ) ) {
-					continue;
-				}
-				$fields[ $key ] = $value;
-			}
-		}
-
-		return $fields;
 	}
 
 	/**
-	 * From a set of fields, returns only the ones that should be saved to the customer.
-	 * For now, this only supports fields in address location.
+	 * Copies additional fields from a customer to an order.
 	 *
-	 * @param array $fields The fields to filter.
-	 * @return array The filtered fields.
+	 * @param WC_Order    $order The order to sync the fields for.
+	 * @param WC_Customer $customer The customer to sync the fields for.
 	 */
-	public function filter_fields_for_customer( $fields ) {
-		$customer_fields_keys = array_merge(
-			$this->get_address_fields_keys(),
-			$this->get_contact_fields_keys(),
-		);
-		return array_filter(
-			$fields,
-			function ( $key ) use ( $customer_fields_keys ) {
-				if ( 0 === strpos( $key, '/billing/' ) ) {
-					$key = str_replace( '/billing/', '', $key );
-				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
-					$key = str_replace( '/shipping/', '', $key );
-				}
-				return in_array( $key, $customer_fields_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-	}
+	public function sync_order_additional_fields_with_customer( $order, $customer ) {
+		$groups = [ 'billing', 'shipping', 'additional' ];
+		foreach ( $groups as $group ) {
+			$customer_additional_fields = $this->get_all_fields_from_customer( $customer, $group, true );
 
+			// Sync order additional fields with customer additional fields.
+			foreach ( $customer_additional_fields as $key => $value ) {
+				if ( $this->is_field( $key ) ) {
+					$this->persist_field_for_order( $key, $value, $order, $group );
+				}
+			}
+		}
+	}
 	/**
 	 * From a set of fields, returns only the ones for a given location.
 	 *
@@ -1120,11 +1113,6 @@ class CheckoutFields {
 		return array_filter(
 			$fields,
 			function ( $key ) use ( $location ) {
-				if ( 0 === strpos( $key, '/billing/' ) ) {
-					$key = str_replace( '/billing/', '', $key );
-				} elseif ( 0 === strpos( $key, '/shipping/' ) ) {
-					$key = str_replace( '/shipping/', '', $key );
-				}
 				return $this->is_field( $key ) && $this->get_field_location( $key ) === $location;
 			},
 			ARRAY_FILTER_USE_KEY
@@ -1195,5 +1183,21 @@ class CheckoutFields {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Returns a group meta prefix based on its name.
+	 *
+	 * @param string $group The group name (billing|shipping|additional).
+	 * @return string The group meta prefix.
+	 */
+	private function get_group_key( $group ) {
+		if ( 'billing' === $group ) {
+			return self::BILLING_FIELDS_PREFIX;
+		}
+		if ( 'shipping' === $group ) {
+			return self::SHIPPING_FIELDS_PREFIX;
+		}
+		return self::ADDITIONAL_FIELDS_PREFIX;
 	}
 }

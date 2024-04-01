@@ -44,25 +44,13 @@ class ShippingAddressSchema extends AbstractAddressSchema {
 
 			if ( $address instanceof \WC_Order ) {
 				// get additional fields from order.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address );
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address, 'shipping' );
 			} elseif ( $address instanceof \WC_Customer ) {
 				// get additional fields from customer.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address );
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address, 'shipping' );
 			}
 
-			$additional_address_fields = array_reduce(
-				array_keys( $additional_address_fields ),
-				function( $carry, $key ) use ( $additional_address_fields ) {
-					if ( 0 === strpos( $key, '/shipping/' ) ) {
-						$value         = $additional_address_fields[ $key ];
-						$key           = str_replace( '/shipping/', '', $key );
-						$carry[ $key ] = $value;
-					}
-					return $carry;
-				},
-				[]
-			);
-			$address_object            = array_merge(
+			$address_object = array_merge(
 				[
 					'first_name' => $address->get_shipping_first_name(),
 					'last_name'  => $address->get_shipping_last_name(),

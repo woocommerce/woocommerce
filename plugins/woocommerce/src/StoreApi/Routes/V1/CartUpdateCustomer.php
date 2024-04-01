@@ -244,20 +244,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$billing_country = $customer->get_billing_country();
 		$billing_state   = $customer->get_billing_state();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
-
-		$additional_fields = array_reduce(
-			array_keys( $additional_fields ),
-			function( $carry, $key ) use ( $additional_fields ) {
-				if ( 0 === strpos( $key, '/billing/' ) ) {
-					$value         = $additional_fields[ $key ];
-					$key           = str_replace( '/billing/', '', $key );
-					$carry[ $key ] = $value;
-				}
-				return $carry;
-			},
-			array()
-		);
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer, 'billing' );
 
 		/**
 		 * There's a bug in WooCommerce core in which not having a state ("") would result in us validating against the store's state.
@@ -293,20 +280,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array
 	 */
 	protected function get_customer_shipping_address( \WC_Customer $customer ) {
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer, 'shipping' );
 
-		$additional_fields = array_reduce(
-			array_keys( $additional_fields ),
-			function( $carry, $key ) use ( $additional_fields ) {
-				if ( 0 === strpos( $key, '/shipping/' ) ) {
-					$value         = $additional_fields[ $key ];
-					$key           = str_replace( '/shipping/', '', $key );
-					$carry[ $key ] = $value;
-				}
-				return $carry;
-			},
-			array()
-		);
 		return array_merge(
 			[
 				'first_name' => $customer->get_shipping_first_name(),

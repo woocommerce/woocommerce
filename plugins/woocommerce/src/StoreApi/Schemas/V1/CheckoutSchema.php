@@ -261,20 +261,12 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields   = wp_parse_args(
-			$this->additional_fields_controller->get_all_fields_from_order( $order ),
-			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer )
+		$fields = wp_parse_args(
+			$this->additional_fields_controller->get_all_fields_from_order( $order, 'additional' ),
+			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer, 'additional' )
 		);
-		$response = [];
 
-		foreach ( $fields as $key => $value ) {
-			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
-				continue;
-			}
-			$response[ $key ] = $value;
-		}
-
-		return $response;
+		return $fields;
 	}
 
 	/**

@@ -103,25 +103,13 @@ class BillingAddressSchema extends AbstractAddressSchema {
 
 			if ( $address instanceof \WC_Order ) {
 				// get additional fields from order.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address );
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address, 'billing' );
 			} elseif ( $address instanceof \WC_Customer ) {
 				// get additional fields from customer.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address );
+				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address, 'billing' );
 			}
 
-			$additional_address_fields = array_reduce(
-				array_keys( $additional_address_fields ),
-				function( $carry, $key ) use ( $additional_address_fields ) {
-					if ( 0 === strpos( $key, '/billing/' ) ) {
-						$value         = $additional_address_fields[ $key ];
-						$key           = str_replace( '/billing/', '', $key );
-						$carry[ $key ] = $value;
-					}
-					return $carry;
-				},
-				[]
-			);
-			$address_object            = \array_merge(
+			$address_object = \array_merge(
 				[
 					'first_name' => $address->get_billing_first_name(),
 					'last_name'  => $address->get_billing_last_name(),
