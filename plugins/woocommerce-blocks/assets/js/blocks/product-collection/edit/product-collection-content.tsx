@@ -7,7 +7,7 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useLayoutEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 
@@ -36,7 +36,7 @@ const usePreviewState = ( handlePreviewState ) => {
 	} );
 
 	// Running handlePreviewState function provided by Collection, if it exists.
-	useEffect( () => {
+	useLayoutEffect( () => {
 		handlePreviewState?.( {
 			setPreviewState,
 		} );
