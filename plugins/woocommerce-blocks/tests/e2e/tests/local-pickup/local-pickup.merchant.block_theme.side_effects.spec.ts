@@ -27,9 +27,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test.afterEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.deleteLocations();
-		await localPickupUtils.disableLocalPickupCosts();
 		await localPickupUtils.setTitle( 'Local Pickup' );
-		await localPickupUtils.enableLocalPickup();
 	} );
 
 	test( 'Updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
