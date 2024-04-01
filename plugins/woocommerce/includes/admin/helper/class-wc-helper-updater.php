@@ -160,7 +160,7 @@ class WC_Helper_Updater {
 			if ( WC_Helper::is_site_connected() ) {
 				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
 			} else {
-				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ), 10, 2 );
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ) );
 			}
 		}
 	}
@@ -173,7 +173,7 @@ class WC_Helper_Updater {
 	 *
 	 * @return void.
 	 */
-	public static function add_connect_woocom_plugin_message( $plugin_data, $response ) {
+	public static function add_connect_woocom_plugin_message() {
 		$connect_page_url = add_query_arg(
 			array(
 				'page' => 'wc-admin',
