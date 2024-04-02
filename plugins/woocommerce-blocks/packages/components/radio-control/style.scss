@@ -5,13 +5,19 @@
 	margin: em($gap) 0;
 	margin-top: 0;
 	padding: 0 0 0 em($gap-larger);
-
 	position: relative;
 	cursor: pointer;
 
 	&:last-child {
 		margin-bottom: 0;
 	}
+}
+label.wc-block-components-radio-control__option-checked-option-highlighted {
+	box-shadow: 0 0 0 1.5px currentColor inset;
+	border-radius: 4px;
+	border: 1px solid transparent;
+	border-left: 0;
+	border-right: 0;
 }
 
 .wc-block-components-radio-control__option-layout {
