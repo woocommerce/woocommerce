@@ -55,7 +55,7 @@ export function PublishButton( {
 
 			maybeShowFeedbackBar();
 
-			if ( prevStatus === 'auto-draft' ) {
+			if ( prevStatus === 'auto-draft' || prevStatus === 'draft' ) {
 				const url = getNewPath( {}, `/product/${ savedProduct.id }` );
 				navigateTo( { url } );
 			}
