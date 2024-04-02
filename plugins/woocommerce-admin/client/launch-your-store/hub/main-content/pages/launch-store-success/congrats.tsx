@@ -12,6 +12,7 @@ import { Link, ConfettiAnimation } from '@woocommerce/components';
 import { isInteger } from 'lodash';
 import { closeSmall } from '@wordpress/icons';
 import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
+import { useCopyToClipboard } from '@wordpress/compose';
 import {
 	Button,
 	TextareaControl,
@@ -21,14 +22,8 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 
-/**
- * Internal dependencies
- */
-import { ADMIN_URL } from '~/utils/admin-settings';
-
 import './style.scss';
-
-export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
+import { WhatsNext } from './whatsnext';
 
 export const Congrats = ( {
 	hasCompleteSurvey,
@@ -41,6 +36,8 @@ export const Congrats = ( {
 	goToHome: () => void;
 	completeSurvey: () => void;
 } ) => {
+	const copyLink = __( 'Copy link', 'woocommerce' );
+	const copied = __( 'Copied!', 'woocommerce' );
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const urlObject = new URL( homeUrl );
 	let hostname: string = urlObject?.hostname;
@@ -54,8 +51,16 @@ export const Congrats = ( {
 	const [ emojiValue, setEmojiValue ] = useState< number | null >( null );
 	const [ feedbackText, setFeedbackText ] = useState< string >( '' );
 	const [ isShowThanks, setIsShowThanks ] = useState< boolean >( false );
+	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
 
 	const shouldShowComment = isInteger( emojiValue );
+
+	const copyClipboardRef = useCopyToClipboard( homeUrl, () => {
+		setCopyLinkText( copied );
+		setTimeout( () => {
+			setCopyLinkText( copyLink );
+		}, 2000 );
+	} );
 
 	const sendData = () => {
 		const emojis = {
@@ -107,14 +112,14 @@ export const Congrats = ( {
 							<Button
 								className=""
 								variant="secondary"
+								ref={ copyClipboardRef }
 								onClick={ () => {
 									recordEvent(
 										'launch_you_store_congrats_copy_store_link_click'
 									);
-									// TODO: copy link
 								} }
 							>
-								{ __( 'Copy link', 'woocommerce' ) }
+								{ copyLinkText }
 							</Button>
 							<Button
 								className=""
@@ -258,85 +263,7 @@ export const Congrats = ( {
 				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
 					{ __( "What's next?", 'woocommerce' ) }
 				</h2>
-				<div className="woocommerce-launch-store__congrats-main-actions">
-					<div className="woocommerce-launch-store__congrats-action">
-						<div className="woocommerce-launch-store__congrats-action__content">
-							<h3>
-								{ __( 'Add your products', 'woocommerce' ) }
-							</h3>
-							<p>
-								{ __(
-									'Start stocking your virtual shelves by adding or importing your products, or edit the sample products.',
-									'woocommerce'
-								) }
-							</p>
-							<Button
-								variant="link"
-								onClick={ () => {
-									recordEvent(
-										'launch_you_store_congrats_product_list_click'
-									);
-									location.href = `${ ADMIN_URL }edit.php?post_type=product`;
-								} }
-							>
-								{ __( 'Go to Products', 'woocommerce' ) }
-							</Button>
-						</div>
-					</div>
-
-					<div className="woocommerce-launch-store__congrats-action">
-						<div className="woocommerce-launch-store__congrats-action__content">
-							<h3>
-								{ __( 'Fine-tune your design', 'woocommerce' ) }
-							</h3>
-							<p>
-								{ __(
-									'Head to the Editor to change your images and text, add more pages, and make any further customizations.',
-									'woocommerce'
-								) }
-							</p>
-							<Button
-								variant="link"
-								onClick={ () => {
-									recordEvent(
-										'launch_you_store_congrats_editor_click'
-									);
-									location.href = `${ ADMIN_URL }site-editor.php`;
-								} }
-							>
-								{ __( 'Go to the Editor', 'woocommerce' ) }
-							</Button>
-						</div>
-					</div>
-
-					<div className="woocommerce-launch-store__congrats-action">
-						<div className="woocommerce-launch-store__congrats-action__content">
-							<h3>
-								{ __(
-									'Continue setting up your store',
-									'woocommerce'
-								) }
-							</h3>
-							<p>
-								{ __(
-									'Go back to the Home screen to complete your store setup and start selling',
-									'woocommerce'
-								) }
-							</p>
-							<Button
-								variant="link"
-								onClick={ () => {
-									recordEvent(
-										'launch_you_store_congrats_home_click'
-									);
-									goToHome();
-								} }
-							>
-								{ __( 'Back to Home', 'woocommerce' ) }
-							</Button>
-						</div>
-					</div>
-				</div>
+				<WhatsNext goToHome={ goToHome } />
 			</div>
 		</div>
 	);
