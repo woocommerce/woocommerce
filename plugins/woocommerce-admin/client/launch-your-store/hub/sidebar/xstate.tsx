@@ -70,9 +70,9 @@ const getLysTasklist = async () => {
 	) as string[];
 	return {
 		...tasklist[ 0 ],
-		tasks: ( tasklist[ 0 ].tasks = tasklist[ 0 ].tasks.filter( ( task ) =>
+		tasks: tasklist[ 0 ].tasks.filter( ( task ) =>
 			visibleTasks.includes( task.id )
-		) ),
+		),
 	};
 };
 
