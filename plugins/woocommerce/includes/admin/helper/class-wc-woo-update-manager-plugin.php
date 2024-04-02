@@ -109,25 +109,6 @@ class WC_Woo_Update_Manager_Plugin {
 	}
 
 	/**
-	 * Adjust update counter if Woo.com Update Manager is not installed.
-	 *
-	 * @param int $count number of updates available excluding Woo.com Update Manager.
-	 * @return int
-	 */
-	public static function increment_update_count_for_woo_update_manager( int $count ): int {
-
-		if ( ! WC_Helper::is_site_connected() ) {
-			return 1;
-		}
-
-		if ( ! self::is_plugin_installed() || ! self::is_plugin_active() ) {
-			++$count;
-		}
-
-		return $count;
-	}
-
-	/**
 	 * Check if the installation notice has been dismissed.
 	 *
 	 * @return bool
