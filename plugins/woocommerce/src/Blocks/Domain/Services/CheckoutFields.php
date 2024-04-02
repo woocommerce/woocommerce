@@ -950,6 +950,11 @@ class CheckoutFields {
 	 */
 	private function set_array_meta( string $key, $value, WC_Data $wc_object, string $group ) {
 		$meta_key = self::get_group_key( $group ) . $key;
+
+		// Convert boolean values to strings because Data Stores will skip false values.
+		if ( is_bool( $value ) ) {
+			$value = $value ? '1' : '0';
+		}
 		// Replacing all meta using `add_meta_data`. For some reason `update_meta_data` causes duplicate keys.
 		$wc_object->add_meta_data( $meta_key, $value, true );
 	}
@@ -994,7 +999,7 @@ class CheckoutFields {
 
 		$meta_data = $wc_object->get_meta( $meta_key, true );
 
-		if ( ! $meta_data ) {
+		if ( '' === $meta_data || null === $meta_data ) {
 			return '';
 		}
 
