@@ -995,15 +995,18 @@ function wc_get_image_size( $image_size ) {
  * Queue some JavaScript code to be output in the footer.
  *
  * @param string $code Code.
+ * @param string $handle Handle (optional). Will be generated automatically if not given.
  */
-function wc_enqueue_js( $code ) {
+function wc_enqueue_js( $code, $handle = '' ) {
 	global $wc_queued_js;
 
 	if ( empty( $wc_queued_js ) ) {
-		$wc_queued_js = '';
+		$wc_queued_js = [];
 	}
 
-	$wc_queued_js .= "\n" . $code . "\n";
+	$handle = $handle ?: uniqid( microtime(), true );
+
+	$wc_queued_js[ $handle ] = $code;
 }
 
 /**
@@ -1013,6 +1016,18 @@ function wc_print_js() {
 	global $wc_queued_js;
 
 	if ( ! empty( $wc_queued_js ) ) {
+
+		/**
+		 * Filters the queued JS code chunks.
+		 *
+		 * @since 8.8.0
+		 * @param array<string, string> $wc_queued_js An array of queued code chunks, keyed by their unique handles.
+		 */
+		$wc_queued_js = apply_filters( 'woocommerce_queued_js_chunks', $wc_queued_js );
+
+		// Concatenate the chunks together
+		$wc_queued_js = "\n" . implode( "\n", $wc_queued_js ) . "\n";
+
 		// Sanitize.
 		$wc_queued_js = wp_check_invalid_utf8( $wc_queued_js );
 		$wc_queued_js = preg_replace( '/&#(x)?0*(?(1)27|39);?/i', "'", $wc_queued_js );
@@ -1021,7 +1036,9 @@ function wc_print_js() {
 		$js = "<!-- WooCommerce JavaScript -->\n<script type=\"text/javascript\">\njQuery(function($) { $wc_queued_js });\n</script>\n";
 
 		/**
-		 * Queued jsfilter.
+		 * Filters the final queued JS code.
+		 *
+		 * This filter includes code from all queued JS chunks in one long string.
 		 *
 		 * @since 2.6.0
 		 * @param string $js JavaScript code.
