@@ -232,6 +232,10 @@ class Authentication {
 			return self::validate_ip( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? 'unresolved_ip' ) ) );
 		}
 
+		if ( array_key_exists( 'HTTP_CF_CONNECTING_IP', $_SERVER ) ) {
+			return self::validate_ip( sanitize_text_field( wp_unslash( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) );
+		}
+
 		if ( array_key_exists( 'HTTP_X_REAL_IP', $_SERVER ) ) {
 			return self::validate_ip( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) ) );
 		}
