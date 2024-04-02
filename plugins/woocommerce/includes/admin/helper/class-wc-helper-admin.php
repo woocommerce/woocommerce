@@ -62,7 +62,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'wooUpdateCount'             => WC_Woo_Update_Manager_Plugin::increment_update_count_for_woo_update_manager( WC_Helper_Updater::get_updates_count() ),
+			'wooUpdateCount'             => WC_Woo_Update_Manager_Plugin::increment_update_count_for_woo_update_manager( WC_Helper_Updater::get_updates_count() ?? 0 ),
 		);
 
 		return $settings;

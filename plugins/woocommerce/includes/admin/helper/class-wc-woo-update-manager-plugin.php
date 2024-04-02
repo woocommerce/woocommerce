@@ -115,7 +115,12 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return int
 	 */
 	public static function increment_update_count_for_woo_update_manager( int $count ): int {
-		if ( ! self::is_plugin_installed() || ! self::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
+
+		if ( ! WC_Helper::is_site_connected() ) {
+			return 1;
+		}
+
+		if ( ! self::is_plugin_installed() || ! self::is_plugin_active() ) {
 			++$count;
 		}
 
