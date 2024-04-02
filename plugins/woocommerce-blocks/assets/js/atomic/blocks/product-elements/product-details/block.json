@@ -4,6 +4,7 @@
 	"icon": "info",
 	"title": "Product Details",
 	"description": "Display a product's description, attributes, and reviews.",
+	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true,
