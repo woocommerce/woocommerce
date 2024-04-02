@@ -341,7 +341,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_last_order( &$customer ) {
 		global $wpdb;
-		$last_order_key = $wpdb->get_blog_prefix() . '_last_order';
+		$last_order_key = 'wc_last_order_' . rtrim( $wpdb->get_blog_prefix(), '_' );
 
 		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
