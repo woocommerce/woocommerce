@@ -2441,3 +2441,20 @@ body:not(.search-results) .twentysixteen .entry-summary {
 	background: inherit;
 	color: inherit;
 }
+
+#coming-soon-footer-banner {
+	width: 100%;
+	height: 56px;
+	background: #fff;
+	position: fixed;
+	display: flex;
+	font-size: 13px;
+	bottom: 0;
+	justify-content: center;
+	align-items: center;
+	border-top: 1px solid #dcdcdc;
+	a {
+		color: #3858E9;
+		text-decoration: none;
+	}
+}

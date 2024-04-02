@@ -13,8 +13,12 @@ export class FrontendUtils {
 		this.requestUtils = requestUtils;
 	}
 
-	async getBlockByName( name: string ) {
-		return this.page.locator( `[data-block-name="${ name }"]` );
+	async getBlockByName( name: string, parentSelector?: string ) {
+		let selector = `[data-block-name="${ name }"]`;
+		if ( parentSelector ) {
+			selector = `${ parentSelector } [data-block-name="${ name }"]`;
+		}
+		return this.page.locator( selector );
 	}
 
 	async getBlockByClassWithParent( blockClass: string, parentName: string ) {

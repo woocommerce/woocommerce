@@ -16,6 +16,7 @@ import {
 import { designWithNoAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import { AssembleHubLoader } from './pages/ApiCallLoader';
+import { useXStateInspect } from '~/xstate';
 
 export type DesignWithoutAiComponent = typeof AssembleHubLoader;
 export type DesignWithoutAiComponentMeta = {
@@ -30,10 +31,11 @@ export const DesignWithNoAiController = ( {
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
+	const { versionEnabled } = useXStateInspect();
 	const [ , send, service ] = useMachine(
 		designWithNoAiStateMachineDefinition,
 		{
-			devTools: process.env.NODE_ENV === 'development',
+			devTools: versionEnabled === 'V4',
 			parent: parentMachine,
 			context: {
 				...designWithNoAiStateMachineDefinition.context,

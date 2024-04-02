@@ -17,7 +17,6 @@
 
 	.interface-interface-skeleton {
 		background-color: $white;
-		position: static;
 	}
 
 	.interface-interface-skeleton__sidebar,
@@ -44,11 +43,11 @@
 		position: fixed;
 		width: calc(100% - $admin-menu-width);
 		left: $admin-menu-width;
-		@include breakpoint( '<960px' ) {
+		@include breakpoint( "<960px" ) {
 			left: $admin-menu-width-collapsed;
 			width: calc(100% - $admin-menu-width-collapsed);
 		}
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			left: 0;
 			width: 100%;
 		}
@@ -64,7 +63,7 @@
 
 	.interface-interface-skeleton__header {
 		top: $adminbar-height;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			top: $adminbar-height-mobile;
 		}
 	}
@@ -83,7 +82,7 @@
 }
 
 html.interface-interface-skeleton__html-container {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		position: inherit;
 	}
 	.woocommerce-layout__footer.at-bottom {
@@ -93,9 +92,11 @@ html.interface-interface-skeleton__html-container {
 }
 
 body {
-	background-color: $white;
+	.is-product-editor {
+		background-color: $white;
 
-	&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
-		min-height: calc(100vh - 96px);
+		&.woocommerce-admin-page.woocommerce_page_wc-admin #wpbody-content {
+			min-height: calc(100vh - 96px);
+		}
 	}
 }

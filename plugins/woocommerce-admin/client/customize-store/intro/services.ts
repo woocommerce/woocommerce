@@ -72,6 +72,16 @@ export const fetchActiveThemeHasMods = async () => {
 	return { activeThemeHasMods };
 };
 
+export const fetchCustomizeStoreCompleted = async () => {
+	const task = await resolveSelect( ONBOARDING_STORE_NAME ).getTask(
+		'customize-store'
+	);
+
+	return {
+		customizeStoreTaskCompleted: task?.isComplete,
+	};
+};
+
 export const fetchIntroData = async () => {
 	const currentTemplatePromise =
 		// @ts-expect-error No types for this exist yet.

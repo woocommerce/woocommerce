@@ -458,7 +458,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "6c97092279436171fa847119ea8813a35b8ad7b8784bc3c993236648687064c1",
+          "hash": "d1ad51948f0391f342e968fcf3889dda234a64b8256090061b7b6db074b0a6e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -517,7 +517,7 @@
           "menu_title": "Development environment setup",
           "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "f3f91c7e2d2676d39f30cf2245e02c044de704894b358a78a086507a0d37ae2c",
+          "hash": "5e877a4283be4264c7fc37b7e8dbf8c08224a82c65bab0e02cd08f3ca895cd4d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
@@ -526,18 +526,9 @@
           "menu_title": "Developer tools",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-tools.md",
-          "hash": "0c63cb8213a7bb64295f7321afc9fce5c8e12c3b860e7bb885fe66ac7a71d661",
+          "hash": "ef24e32109d66f96a990fea7a5eb32f9e0b98ae7ca766dcae12244449956997b",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-tools.md",
           "id": "2ed3659ae0153c8fb3252c417bb0eb43ea60f862"
-        },
-        {
-          "post_title": "WooCommerce developer resources",
-          "menu_title": "Developer resources",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/developer-resources.md",
-          "hash": "ec2c30bd0d73eb26e636da9d9d3468eb3bc453213099edcc73468a74407e600c",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/developer-resources.md",
-          "id": "77008656b040d376b7cea7b3c7cc8860c6aec70e"
         },
         {
           "post_title": "Resources for debugging",
@@ -561,6 +552,15 @@
           "links": {
             "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
           }
+        },
+        {
+          "post_title": "Contributing to WooCommerce Core",
+          "menu_title": "Contribute to WooCommerce Core",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "hash": "b9c53ffb82b83dfe54c95c85a9f7c0127942087804f0490a2abfccb993ad3e2c",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
+          "id": "198a4d4a506d464737c356f86684676ad4a0c27b"
         }
       ],
       "categories": []
@@ -1211,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "514bc14b1dd1c31a5aa6e3f47fe9fb61fb9dd28db4e475c2397f5f409ce06cf0"
+  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
 }
