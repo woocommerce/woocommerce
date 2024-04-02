@@ -29,6 +29,7 @@ export enum innerBlockAreas {
 	MINI_CART_ITEMS = 'woocommerce/mini-cart-items-block',
 	MINI_CART_FOOTER = 'woocommerce/mini-cart-footer-block',
 	CART_ORDER_SUMMARY = 'woocommerce/cart-order-summary-block',
+	CART_ORDER_SUMMARY_TOTALS = 'woocommerce/cart-order-summary-totals-block',
 	CHECKOUT_ORDER_SUMMARY = 'woocommerce/checkout-order-summary-block',
 }
 
