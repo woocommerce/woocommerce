@@ -53,7 +53,7 @@ class LaunchYourStore {
 		}
 	}
 
-	public function get_coming_soon_content() {
+	public function get_store_only_coming_soon_content() {
 		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group"><!-- wp:spacer -->
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
@@ -77,6 +77,22 @@ class LaunchYourStore {
 		<!-- /wp:group -->';
 	}
 
+	public function get_entire_site_coming_soon_content() {
+		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group"><!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer -->
+		
+		<!-- wp:heading {"textAlign":"center","level":1} -->
+		<h1 class="wp-block-heading has-text-align-center">Pardon our dust!We\'re working on something amazing -- check back soon!</h1>
+		<!-- /wp:heading -->
+		
+		<!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer --></div>
+		<!-- /wp:group -->';
+	}
+
 	/**
 	 * Add `coming soon` page when it hasn't been created yet.
 	 *
@@ -90,12 +106,12 @@ class LaunchYourStore {
 		$is_home        = isset( $current_page['id'] ) && 'woocommerce-home' === $current_page['id'];
 		$page_id_option = get_option( $option_name, false );
 		if ( $current_screen && 'woocommerce_page_wc-admin' === $current_screen->id && $is_home && ! $page_id_option ) {
-			$store_pages_only = get_option( 'woocommerce_store_pages_only', 'no' );
+			$store_pages_only = 'yes' === get_option( 'woocommerce_store_pages_only', 'no' );
 			$page_id = wc_create_page(
 				esc_sql( _x( 'Coming Soon', 'Page slug', 'woocommerce' ) ),
 				$option_name,
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
-				$this->get_coming_soon_content( $store_pages_only ),
+				$store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content(),
 			);
 			// Make sure the page uses the no-title template.
 			update_post_meta( $page_id, '_wp_page_template', 'page-no-title' );
