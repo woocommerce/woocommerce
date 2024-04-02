@@ -1,33 +1,5 @@
 .wc-block-components-shipping-rates-control__package {
 	margin: 0;
-	position: relative;
-
-	&:after {
-		content: "";
-		top: 0;
-		right: 0;
-		pointer-events: none;
-		bottom: 0;
-		position: absolute;
-		border: 1px solid rgba(17, 17, 17, 0.11);
-		width: 100%;
-		box-sizing: border-box;
-		border-bottom: 0;
-	}
-
-	&.wc-block-components-shipping-rates-control__package--first-selected {
-		&:after {
-			border-top: 0;
-			margin-top: 2px;
-		}
-	}
-
-	&.wc-block-components-shipping-rates-control__package--last-selected {
-		&:after {
-			border-bottom: 0;
-			margin-bottom: 2px;
-		}
-	}
 
 	.wc-block-components-radio-control__option-checked-option-highlighted + .wc-block-components-radio-control__option:not(.wc-block-components-radio-control__option-checked-option-highlighted) {
 		border-top: 0;
