@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove pointer cursor and underline on hover for the product collection product title in the editor

@@ -26,7 +26,7 @@ class LaunchYourStore extends Task {
 	 * @return string
 	 */
 	public function get_id() {
-		return 'launch_your_store';
+		return 'launch-your-store';
 	}
 
 	/**
