@@ -12,7 +12,12 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+import {
+	CoreCollectionNames,
+	CoreFilterNames,
+	HandlePreviewStateArgs,
+} from '../types';
+import { ProductCollectionConfig } from './register-product-collection';
 
 const collection = {
 	name: CoreCollectionNames.FEATURED,
@@ -56,8 +61,29 @@ const innerBlocks: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 ];
 
+/**
+ * To change preview from true to false after 5 seconds.
+ */
+const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
+	const timeoutID = setTimeout( () => {
+		setPreviewState( {
+			isPreview: false,
+			previewMessage: '',
+		} );
+	}, 5000 );
+
+	return () => clearTimeout( timeoutID );
+};
+
 export default {
 	...collection,
 	attributes,
 	innerBlocks,
-};
+	preview: {
+		handlePreviewState,
+		initialState: {
+			isPreview: true,
+			previewMessage: 'This is in preview mode',
+		},
+	},
+} as ProductCollectionConfig;

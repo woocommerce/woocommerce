@@ -34,9 +34,9 @@ const useHandlePreviewState = (
 	previewState?: PreviewState,
 	handlePreviewState?: HandlePreviewState
 ) => {
-	const setPreviewState = ( previewState: PreviewState ) => {
+	const setPreviewState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
-			previewState,
+			previewState: newPreviewState,
 		} );
 	};
 
@@ -52,11 +52,12 @@ const useHandlePreviewState = (
 		}
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ previewState?.isPreview, previewState?.previewMessage ] );
+	}, [] );
 };
 
 const ProductCollectionContent = ( {
 	handlePreviewState,
+	initialPreviewState,
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes, setAttributes } = props;
@@ -113,8 +114,10 @@ const ProductCollectionContent = ( {
 				},
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
-				// Always reset preview state on initialization.
-				previewState: DEFAULT_ATTRIBUTES.previewState as PreviewState,
+				// If initialPreviewState is provided, use it, otherwise use default preview state.
+				previewState:
+					initialPreviewState ||
+					( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
 			} );
 		},
 		// This hook is only needed on initialization and sets default attributes.

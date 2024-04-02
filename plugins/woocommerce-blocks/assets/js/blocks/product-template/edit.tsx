@@ -161,10 +161,6 @@ const ProductTemplateEdit = (
 		__unstableLayoutClassNames,
 	} = props;
 	const location = useGetLocation( props.context, props.clientId );
-	console.log(
-		'productCollectionPreviewState',
-		productCollectionPreviewState
-	);
 
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] =
@@ -214,7 +210,7 @@ const ProductTemplateEdit = (
 			 * If the block is in preview mode, we don't need to apply any filters
 			 * i.e. We can display some random products as they are in database.
 			 */
-			if ( ! productCollectionPreviewState.isPreview ) {
+			if ( ! productCollectionPreviewState?.isPreview ) {
 				query = {
 					postType,
 					offset: perPage ? perPage * ( page - 1 ) + offset : 0,
@@ -259,9 +255,6 @@ const ProductTemplateEdit = (
 					query.per_page = loopShopPerPage;
 				}
 			}
-
-			console.log( 'getEntityRecords', getEntityRecords );
-
 			return {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
@@ -269,9 +262,10 @@ const ProductTemplateEdit = (
 					// This will allow us to generate random products but this method will be
 					// problematic when there are no products in DB, but I don't think that should be part
 					// of 1st PR itself.
-					...( ! productCollectionPreviewState.isPreview && {
+					...( ! productCollectionPreviewState?.isPreview && {
 						...restQueryArgs,
 					} ),
+					testing: 'testing',
 					location,
 					productCollectionQueryContext,
 				} ),
@@ -295,7 +289,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
-			productCollectionPreviewState.isPreview,
+			productCollectionPreviewState?.isPreview,
 		]
 	);
 	const blockContexts = useMemo(

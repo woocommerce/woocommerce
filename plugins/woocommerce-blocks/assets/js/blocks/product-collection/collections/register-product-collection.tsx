@@ -11,11 +11,18 @@ import type { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import blockJson from '../block.json';
-import { HandlePreviewStateArgs, ProductCollectionAttributes } from '../types';
+import {
+	HandlePreviewState,
+	PreviewState,
+	ProductCollectionAttributes,
+} from '../types';
 
 // Extends BlockVariation to include an optional handlePreviewState function for preview management.
-interface ProductCollectionConfig extends BlockVariation {
-	handlePreviewState?: HandlePreviewStateArgs;
+export interface ProductCollectionConfig extends BlockVariation {
+	preview?: {
+		handlePreviewState?: HandlePreviewState;
+		initialState?: PreviewState;
+	};
 }
 
 /**
@@ -24,7 +31,7 @@ interface ProductCollectionConfig extends BlockVariation {
  * @param {ProductCollectionConfig} blockVariationArgs - The configuration for the product collection, potentially including a handlePreviewState function.
  */
 const registerProductCollection = ( {
-	handlePreviewState,
+	preview: { handlePreviewState, initialState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
 	// Don't add filter if handlePreviewState is not provided.
@@ -43,6 +50,7 @@ const registerProductCollection = ( {
 					<BlockEdit
 						{ ...props }
 						handlePreviewState={ handlePreviewState }
+						initialPreviewState={ initialState }
 					/>
 				);
 			};
@@ -55,6 +63,10 @@ const registerProductCollection = ( {
 
 	registerBlockVariation( blockJson.name, {
 		...blockVariationArgs,
+		attributes: {
+			...blockVariationArgs.attributes,
+			previewState: initialState,
+		},
 	} );
 };
 

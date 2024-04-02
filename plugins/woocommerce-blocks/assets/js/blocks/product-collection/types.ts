@@ -93,6 +93,7 @@ export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
 		handlePreviewState?: HandlePreviewState;
+		initialPreviewState?: PreviewState;
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
@@ -154,7 +155,7 @@ export interface PreviewState {
  * more information to the preview state handler.
  */
 export interface HandlePreviewStateArgs {
-	previewState: PreviewState;
+	previewState?: PreviewState;
 	setPreviewState: ( previewState: PreviewState ) => void;
 }
 

@@ -40,11 +40,7 @@
 			"default": false
 		},
 		"previewState": {
-			"type": "object",
-			"default": {
-				"isPreview": false,
-				"previewMessage": ""
-			}
+			"type": "object"
 		}
 	},
 	"providesContext": {
