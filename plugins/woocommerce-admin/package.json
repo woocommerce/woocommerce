@@ -42,7 +42,7 @@
 		]
 	},
 	"dependencies": {
-		"@automattic/components": "^2.0.1",
+		"@automattic/components": "^2.1.0",
 		"@automattic/explat-client": "^0.0.5",
 		"@automattic/explat-client-react-helpers": "^0.0.6",
 		"@automattic/interpolate-components": "^1.2.1",
