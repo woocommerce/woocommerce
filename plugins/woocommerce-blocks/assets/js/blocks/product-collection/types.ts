@@ -91,6 +91,9 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		context: {
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';
