@@ -8,7 +8,7 @@
 // /**
 //  * Internal dependencies
 //  */
-// import { Transitional } from '../transitional';
+// import { Congrats } from '../congrats';
 
 // jest.mock( '../../assembler-hub/site-hub', () => ( {
 // 	__esModule: true,
@@ -27,7 +27,7 @@
 
 // jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
-// describe( 'Transitional', () => {
+// describe( 'Congrats', () => {
 // 	let props: {
 // 		sendEvent: jest.Mock;
 // 	};
@@ -38,9 +38,9 @@
 // 		};
 // 	} );
 
-// 	it( 'should render Transitional page', () => {
+// 	it( 'should render Congrats page', () => {
 // 		// @ts-ignore
-// 		render( <Transitional { ...props } /> );
+// 		render( <Congrats { ...props } /> );
 
 // 		expect(
 // 			screen.getByText( /Your store looks great!/i )
@@ -73,7 +73,7 @@
 // 	it( 'should record an event when clicking on "View store" button', () => {
 // 		window.open = jest.fn();
 // 		// @ts-ignore
-// 		render( <Transitional { ...props } /> );
+// 		render( <Congrats { ...props } /> );
 
 // 		screen
 // 			.getByRole( 'button', {
@@ -82,7 +82,7 @@
 // 			.click();
 
 // 		expect( recordEvent ).toHaveBeenCalledWith(
-// 			'customize_your_store_transitional_preview_store_click'
+// 			'customize_your_store_congrats_preview_store_click'
 // 		);
 // 	} );
 
@@ -95,7 +95,7 @@
 // 		};
 
 // 		// @ts-ignore
-// 		render( <Transitional { ...props } /> );
+// 		render( <Congrats { ...props } /> );
 
 // 		screen
 // 			.getByRole( 'button', {
@@ -104,13 +104,13 @@
 // 			.click();
 
 // 		expect( recordEvent ).toHaveBeenCalledWith(
-// 			'customize_your_store_transitional_editor_click'
+// 			'customize_your_store_congrats_editor_click'
 // 		);
 // 	} );
 
 // 	it( 'should send GO_BACK_TO_HOME event when clicking on "Back to Home" button', () => {
 // 		// @ts-ignore
-// 		render( <Transitional { ...props } /> );
+// 		render( <Congrats { ...props } /> );
 
 // 		screen
 // 			.getByRole( 'button', {
@@ -122,7 +122,7 @@
 // 			type: 'GO_BACK_TO_HOME',
 // 		} );
 // 		expect( recordEvent ).toHaveBeenCalledWith(
-// 			'customize_your_store_transitional_home_click'
+// 			'customize_your_store_congrats_home_click'
 // 		);
 // 	} );
 // } );

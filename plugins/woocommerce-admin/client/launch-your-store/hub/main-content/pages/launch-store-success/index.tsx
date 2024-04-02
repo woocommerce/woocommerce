@@ -8,7 +8,7 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import type { MainContentComponentProps } from '../../xstate';
-import { Transitional } from './transitional';
+import { Congrats } from './congrats';
 export * as actions from './actions';
 export * as services from './services';
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
@@ -22,7 +22,7 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 		props.sendEventToMainContent( { type: 'COMPLETE_SURVEY' } );
 	};
 
-	if ( ! props.context.transitionalScreen.hasLoadedCompleteOption ) {
+	if ( ! props.context.congratsScreen.hasLoadedCompleteOption ) {
 		return <Spinner></Spinner>;
 	}
 
@@ -33,14 +33,14 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 				props.className
 			) }
 		>
-			<Transitional
+			<Congrats
 				hasCompleteSurvey={
-					props.context.transitionalScreen.hasCompleteSurvey
+					props.context.congratsScreen.hasCompleteSurvey
 				}
 				isWooExpress={ false }
 				goToHome={ goToHome }
 				completeSurvey={ completeSurvey }
-			></Transitional>
+			></Congrats>
 		</div>
 	);
 };

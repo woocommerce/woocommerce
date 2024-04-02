@@ -8,16 +8,16 @@ import {
 } from '@woocommerce/components';
 
 export const EXPERIMENTAL_WC_CYS_TRANSITIONAL_PAGE_SECONDARY_BUTTON_SLOT_NAME =
-	'customize_your_store_transitional_page_secondary_button';
+	'customize_your_store_congrats_page_secondary_button';
 
 /**
- * Create a Fill for extensions to add a secondary button to the transitional page.
+ * Create a Fill for extensions to add a secondary button to the congrats page.
  *
  * @slotFill WooCYSSecondaryButton
  * @scope woocommerce-admin
  * @example
  * const MyButton = () => (
- * 	<Fill name="__experimental_customize_your_store_transitional_page_secondary_button">
+ * 	<Fill name="__experimental_customize_your_store_congrats_page_secondary_button">
  * 		<Button className="woocommerce-experiments-button-slotfill">
  * 				Slotfill goes in here!
  *    </Button>

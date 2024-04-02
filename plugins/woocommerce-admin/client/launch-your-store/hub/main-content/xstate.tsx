@@ -17,14 +17,14 @@ import {
 	redirectToWooHome,
 } from '../common';
 import {
-	services as transitionalServices,
-	events as transitionalEvents,
-	actions as transitionalActions,
+	services as congratsServices,
+	events as congratsEvents,
+	actions as congratsActions,
 	LaunchYourStoreSuccess,
 } from './pages/launch-store-success';
 
 export type MainContentMachineContext = {
-	transitionalScreen: {
+	congratsScreen: {
 		hasLoadedCompleteOption: boolean;
 		hasCompleteSurvey: boolean;
 	};
@@ -37,7 +37,7 @@ export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_SUCCESS' }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'SHOW_LOADING' }
-	| transitionalEvents;
+	| congratsEvents;
 
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'content', sendBack );
@@ -67,14 +67,13 @@ export const mainContentMachine = setup( {
 	},
 	actors: {
 		contentQueryParamListener,
-		fetchSurveyCompletedOption:
-			transitionalServices.fetchSurveyCompletedOption,
+		fetchSurveyCompletedOption: congratsServices.fetchSurveyCompletedOption,
 	},
 } ).createMachine( {
 	id: 'mainContent',
 	initial: 'navigate',
 	context: {
-		transitionalScreen: {
+		congratsScreen: {
 			hasLoadedCompleteOption: false,
 			hasCompleteSurvey: false,
 		},
@@ -111,9 +110,7 @@ export const mainContentMachine = setup( {
 			invoke: {
 				src: 'fetchSurveyCompletedOption',
 				onDone: {
-					actions: assign(
-						transitionalActions.assignHasCompleteSurvey
-					),
+					actions: assign( congratsActions.assignHasCompleteSurvey ),
 				},
 			},
 			entry: [
@@ -127,7 +124,7 @@ export const mainContentMachine = setup( {
 			},
 			on: {
 				COMPLETE_SURVEY: {
-					actions: assign( transitionalActions.assignCompleteSurvey ),
+					actions: assign( congratsActions.assignCompleteSurvey ),
 				},
 				GO_BACK_TO_HOME: {
 					actions: 'redirectToWooHome',

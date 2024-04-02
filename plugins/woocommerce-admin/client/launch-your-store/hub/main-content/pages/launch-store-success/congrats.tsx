@@ -30,7 +30,7 @@ import './style.scss';
 
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
 
-export const Transitional = ( {
+export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
 	goToHome,
@@ -68,7 +68,7 @@ export const Transitional = ( {
 		const emoji_value = emojiValue
 			? emojis[ emojiValue as keyof typeof emojis ]
 			: 'none';
-		recordEvent( 'launch_your_store_transitional_survey_complete', {
+		recordEvent( 'launch_your_store_congrats_survey_complete', {
 			emoji: emoji_value,
 			feedback: feedbackText,
 		} );
@@ -78,7 +78,7 @@ export const Transitional = ( {
 	};
 
 	return (
-		<div className="woocommerce-launch-store__transitional">
+		<div className="woocommerce-launch-store__congrats">
 			<ConfettiAnimation delay={ 1000 } />
 			<motion.div
 				variants={ {
@@ -87,21 +87,21 @@ export const Transitional = ( {
 				isTransparent={ false }
 				className="edit-site-layout__hub"
 			/>
-			<div className="woocommerce-launch-store__transitional-content">
-				<h1 className="woocommerce-launch-store__transitional-heading">
+			<div className="woocommerce-launch-store__congrats-content">
+				<h1 className="woocommerce-launch-store__congrats-heading">
 					{ __(
 						'Congratulations! Your store is now live',
 						'woocommerce'
 					) }
 				</h1>
-				<h2 className="woocommerce-launch-store__transitional-subheading">
+				<h2 className="woocommerce-launch-store__congrats-subheading">
 					{ __(
 						"You've successfully launched your store and are ready to start selling! We can't wait to see your business grow.",
 						'woocommerce'
 					) }
 				</h2>
-				<div className="woocommerce-launch-store__transitional-midsection-container">
-					<div className="woocommerce-launch-store__transitional-visit-store">
+				<div className="woocommerce-launch-store__congrats-midsection-container">
+					<div className="woocommerce-launch-store__congrats-visit-store">
 						<p className="store-name">{ hostname }</p>
 						<div className="buttons-container">
 							<Button
@@ -109,7 +109,7 @@ export const Transitional = ( {
 								variant="secondary"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_transitional_copy_store_link_click'
+										'launch_you_store_congrats_copy_store_link_click'
 									);
 									// TODO: copy link
 								} }
@@ -121,7 +121,7 @@ export const Transitional = ( {
 								variant="primary"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_transitional_preview_store_click'
+										'launch_you_store_congrats_preview_store_click'
 									);
 									window.open( homeUrl, '_blank' );
 								} }
@@ -134,9 +134,9 @@ export const Transitional = ( {
 					{ isShowSurvey && <hr className="separator" /> }
 
 					{ isShowSurvey && (
-						<div className="woocommerce-launch-store__transitional-survey">
+						<div className="woocommerce-launch-store__congrats-survey">
 							{ isShowThanks ? (
-								<div className="woocommerce-launch-store__transitional-thanks">
+								<div className="woocommerce-launch-store__congrats-thanks">
 									<p className="thanks-copy">
 										🙌{ ' ' }
 										{ __(
@@ -162,8 +162,8 @@ export const Transitional = ( {
 									></Button>
 								</div>
 							) : (
-								<div className="woocommerce-launch-store__transitional-section_1">
-									<div className="woocommerce-launch-store__transitional-survey__selection">
+								<div className="woocommerce-launch-store__congrats-section_1">
+									<div className="woocommerce-launch-store__congrats-survey__selection">
 										<CustomerFeedbackSimple
 											label={ __(
 												'How was the experience of launching your store?',
@@ -176,7 +176,7 @@ export const Transitional = ( {
 										/>
 									</div>
 									{ shouldShowComment && (
-										<div className="woocommerce-launch-store__transitional-survey__comment">
+										<div className="woocommerce-launch-store__congrats-survey__comment">
 											<label
 												className="comment-label"
 												htmlFor="launch-your-store-comment"
@@ -224,8 +224,8 @@ export const Transitional = ( {
 								</div>
 							) }
 							{ shouldShowComment && ! isShowThanks && (
-								<div className="woocommerce-launch-store__transitional-section_2">
-									<div className="woocommerce-launch-store__transitional-buttons">
+								<div className="woocommerce-launch-store__congrats-section_2">
+									<div className="woocommerce-launch-store__congrats-buttons">
 										<Button
 											className=""
 											variant="tertiary"
@@ -241,8 +241,8 @@ export const Transitional = ( {
 											onClick={ () => {
 												recordEvent(
 													isWooExpress
-														? 'launch_you_store_transitional_survey_click'
-														: 'launch_you_store_on_core_transitional_survey_click'
+														? 'launch_you_store_congrats_survey_click'
+														: 'launch_you_store_on_core_congrats_survey_click'
 												);
 												sendData();
 											} }
@@ -255,12 +255,12 @@ export const Transitional = ( {
 						</div>
 					) }
 				</div>
-				<h2 className="woocommerce-launch-store__transitional-main-actions-title">
+				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
 					{ __( "What's next?", 'woocommerce' ) }
 				</h2>
-				<div className="woocommerce-launch-store__transitional-main-actions">
-					<div className="woocommerce-launch-store__transitional-action">
-						<div className="woocommerce-launch-store__transitional-action__content">
+				<div className="woocommerce-launch-store__congrats-main-actions">
+					<div className="woocommerce-launch-store__congrats-action">
+						<div className="woocommerce-launch-store__congrats-action__content">
 							<h3>
 								{ __( 'Add your products', 'woocommerce' ) }
 							</h3>
@@ -274,7 +274,7 @@ export const Transitional = ( {
 								variant="link"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_transitional_product_list_click'
+										'launch_you_store_congrats_product_list_click'
 									);
 									location.href = `${ ADMIN_URL }edit.php?post_type=product`;
 								} }
@@ -284,8 +284,8 @@ export const Transitional = ( {
 						</div>
 					</div>
 
-					<div className="woocommerce-launch-store__transitional-action">
-						<div className="woocommerce-launch-store__transitional-action__content">
+					<div className="woocommerce-launch-store__congrats-action">
+						<div className="woocommerce-launch-store__congrats-action__content">
 							<h3>
 								{ __( 'Fine-tune your design', 'woocommerce' ) }
 							</h3>
@@ -299,7 +299,7 @@ export const Transitional = ( {
 								variant="link"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_transitional_editor_click'
+										'launch_you_store_congrats_editor_click'
 									);
 									location.href = `${ ADMIN_URL }site-editor.php`;
 								} }
@@ -309,8 +309,8 @@ export const Transitional = ( {
 						</div>
 					</div>
 
-					<div className="woocommerce-launch-store__transitional-action">
-						<div className="woocommerce-launch-store__transitional-action__content">
+					<div className="woocommerce-launch-store__congrats-action">
+						<div className="woocommerce-launch-store__congrats-action__content">
 							<h3>
 								{ __(
 									'Continue setting up your store',
@@ -327,7 +327,7 @@ export const Transitional = ( {
 								variant="link"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_transitional_home_click'
+										'launch_you_store_congrats_home_click'
 									);
 									goToHome();
 								} }

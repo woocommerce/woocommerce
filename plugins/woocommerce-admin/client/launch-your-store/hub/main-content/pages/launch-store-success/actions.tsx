@@ -11,7 +11,7 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import type { MainContentMachineContext } from '../../../main-content/xstate';
 
 export const assignHasCompleteSurvey = {
-	transitionalScreen: ( {
+	congratsScreen: ( {
 		context,
 		event,
 	}: {
@@ -19,7 +19,7 @@ export const assignHasCompleteSurvey = {
 		event: DoneActorEvent;
 	} ) => {
 		return {
-			...context.transitionalScreen,
+			...context.congratsScreen,
 			hasLoadedCompleteOption: true,
 			hasCompleteSurvey: event.output === 'yes',
 		};
@@ -27,17 +27,13 @@ export const assignHasCompleteSurvey = {
 };
 
 export const assignCompleteSurvey = {
-	transitionalScreen: ( {
-		context,
-	}: {
-		context: MainContentMachineContext;
-	} ) => {
+	congratsScreen: ( { context }: { context: MainContentMachineContext } ) => {
 		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 			woocommerce_admin_launch_your_store_survey_completed: 'yes',
 		} );
 
 		return {
-			...context.transitionalScreen,
+			...context.congratsScreen,
 			hasCompleteSurvey: true,
 		};
 	},
