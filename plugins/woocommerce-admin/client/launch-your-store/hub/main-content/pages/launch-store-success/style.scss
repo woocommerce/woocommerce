@@ -1,6 +1,6 @@
 .launch-store-success-page__container {
 	background: #fff;
-	background-image: url("./images/ellipse1.svg");
+	background-image: url('./images/ellipse-background.svg');
 	background-repeat: no-repeat;
 	background-position: 50% 0;
 }
@@ -22,7 +22,7 @@
 			display: flex;
 			gap: 8px;
 
-			Button {
+			button {
 				flex: 1;
 			}
 		}
@@ -110,7 +110,7 @@
 	.woocommerce-launch-store__transitional-midsection-container {
 		margin: 50px 0;
 		border: 1px solid #dcdcde;
-		background: #ffffff;
+		background: #fff;
 		border-radius: 4px;
 		max-width: 100%;
 		width: 650px;
@@ -224,8 +224,8 @@
 
 	.woocommerce-launch-store__transitional-survey__comment {
 		display: flex;
-    flex-direction: column;
-    gap: 8px;
+		flex-direction: column;
+		gap: 8px;
 		color: rgb(30, 30, 30);
 
 		.comment-label {
