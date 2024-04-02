@@ -24,34 +24,47 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
-	showUpdateCount?: boolean;
+	showUpdateCount: boolean;
+	updateCount: number;
 }
 
 interface Tabs {
 	[ key: string ]: Tab;
 }
 
+const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
+
 const tabs: Tabs = {
 	search: {
 		name: 'search',
 		title: __( 'Search results', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	extensions: {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	themes: {
 		name: 'themes',
 		title: __( 'Themes', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
 		showUpdateCount: true,
+		updateCount: wooUpdateCount,
 	},
 };
 
@@ -82,8 +95,6 @@ const renderTabs = (
 	visibleTabs: Tabs
 ) => {
 	const { selectedTab, setSelectedTab } = marketplaceContextValue;
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-	const updateCount = wccomSettings?.wooUpdateCount ?? 0;
 
 	const onTabClick = ( tabKey: string ) => {
 		if ( tabKey === selectedTab ) {
@@ -121,11 +132,12 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
-					{ tabs[ tabKey ]?.showUpdateCount && updateCount > 0 && (
-						<span className="woocommerce-marketplace__update-count">
-							<span> { updateCount } </span>
-						</span>
-					) }
+					{ tabs[ tabKey ]?.showUpdateCount &&
+						tabs[ tabKey ]?.updateCount > 0 && (
+							<span className="woocommerce-marketplace__update-count">
+								<span> { tabs[ tabKey ]?.updateCount } </span>
+							</span>
+						) }
 				</Button>
 			)
 		);
