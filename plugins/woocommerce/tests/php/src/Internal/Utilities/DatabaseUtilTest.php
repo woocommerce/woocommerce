@@ -3,6 +3,7 @@
  * Tests for the DatabaseUtil utility.
  */
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
 /**
@@ -56,5 +57,31 @@ class DatabaseUtilTest extends WC_Unit_Test_Case {
 		$this->assertEmpty(
 			$this->sut->get_index_columns( $wpdb->prefix . 'wc_product_meta_lookup', 'invalid_index_name' )
 		);
+	}
+
+	/**
+	 * @test Test that we are able to create FTS index on order address table.
+	 */
+	public function test_create_fts_index_order_address_table() {
+		$db = wc_get_container()->get( DataSynchronizer::class );
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$db->create_database_tables();
+		// Add back removed filter.
+		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->assertFalse( $this->sut->fts_index_on_order_address_table_exists() );
+		$this->sut->create_fts_index_order_address_table();
+		$this->assertTrue( $this->sut->fts_index_on_order_address_table_exists() );
+	}
+
+	/**
+	 * @test Test that we are able to create FTS index on order item table.
+	 */
+	public function test_create_fts_index_order_item_table() {
+		$this->assertFalse( $this->sut->fts_index_on_order_item_table_exists() );
+		$this->sut->create_fts_index_order_item_table();
+		$this->assertTrue( $this->sut->fts_index_on_order_item_table_exists() );
 	}
 }
