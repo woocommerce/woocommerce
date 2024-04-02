@@ -81,13 +81,6 @@ class BlockRegistry {
 	private static $instance = null;
 
 	/**
-	 * Registered blocks.
-	 *
-	 * @var array
-	 */
-	private $registered_blocks = [];
-
-	/**
 	 * Get the singleton instance.
 	 */
 	public static function get_instance(): BlockRegistry {
@@ -104,28 +97,6 @@ class BlockRegistry {
 	protected function __construct() {
 		add_filter( 'block_categories_all', array( $this, 'register_categories' ), 10, 2 );
 		$this->register_product_blocks();
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_block_views' ) );
-	}
-
-	/**
-	 * Register the block views in the admin area.
-	 *
-	 * @todo These could be fetched dynamically to improve performance.
-	 */
-	public function register_block_views() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
-			return;
-		}
-
-		foreach ( $this->registered_blocks as $block ) {
-			if ( ! empty( $block->view_script_handles ) ) {
-				foreach ( $block->view_script_handles as $view_script_handle ) {
-					// global $wp_scripts;
-					// wp_die(print_r($wp_scripts));
-					wp_enqueue_script( $view_script_handle );
-				}
-			}
-		}
 	}
 
 	/**
@@ -143,10 +114,10 @@ class BlockRegistry {
 	 */
 	private function register_product_blocks() {
 		foreach ( self::PRODUCT_FIELDS_BLOCKS as $block_name ) {
-			$this->registered_blocks[] = $this->register_block( $block_name, self::PRODUCT_FIELDS_BLOCKS_DIR );
+			$this->register_block( $block_name, self::PRODUCT_FIELDS_BLOCKS_DIR );
 		}
 		foreach ( self::GENERIC_BLOCKS as $block_name ) {
-			$this->registered_blocks[] = $this->register_block( $block_name, self::GENERIC_BLOCKS_DIR );
+			$this->register_block( $block_name, self::GENERIC_BLOCKS_DIR );
 		}
 	}
 

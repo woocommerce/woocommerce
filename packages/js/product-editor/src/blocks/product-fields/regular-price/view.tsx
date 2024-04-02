@@ -23,16 +23,6 @@ import { sanitizeHTML } from '../../../utils/sanitize-html';
 import type { ProductEditorBlockEditProps } from '../../../types';
 import type { SalePriceBlockAttributes } from './types';
 
-// type ViewProps = {
-// 	clientId: string;
-// 	label: string;
-// 	help?: string;
-// 	isRequired?: boolean;
-// 	tooltip?: string;
-// 	disabled?: boolean;
-// 	postType: string;
-// };
-
 export function View( {
 	attributes,
 	clientId,
