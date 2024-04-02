@@ -9,6 +9,7 @@ import { useRef, useState } from '@wordpress/element';
 import { getCompletion, createExtendedError } from '../utils/';
 
 type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
+type ResponseFormat = 'json_object' | 'text';
 
 export type UseCompletionError = Error & { code?: string; cause?: Error };
 
@@ -62,7 +63,8 @@ export const useCompletion = ( {
 
 	const requestCompletion = async (
 		prompt: string,
-		featureOverride?: string
+		featureOverride?: string,
+		responseFormat?: ResponseFormat
 	) => {
 		if (
 			! window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive
@@ -89,7 +91,8 @@ export const useCompletion = ( {
 		try {
 			const suggestionsSource = await getCompletion(
 				prompt,
-				completionFeature
+				completionFeature,
+				responseFormat ?? 'text'
 			);
 
 			setCompletionActive( true );
