@@ -57,8 +57,7 @@ class ShippingController {
 				'countryStates',
 				function () {
 					return WC()->countries->get_states();
-				},
-				true
+				}
 			);
 		}
 
