@@ -9,6 +9,8 @@ import { useCallback, useMemo } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
+import { CART_STORE_KEY } from '@woocommerce/block-data';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -27,10 +29,10 @@ export const ShippingRatesControlPackage = ( {
 	showItems,
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate, isSelectingRate } = useShippingData();
-	const multiplePackages =
-		document.querySelectorAll(
-			'.wc-block-components-shipping-rates-control__package'
-		).length > 1;
+	const multiplePackages = useSelect(
+		( select ) =>
+			select( CART_STORE_KEY )?.getCartData()?.shippingRates?.length > 1
+	);
 
 	// If showItems is not set, we check if we have multiple packages.
 	// We sometimes don't want to show items even if we have multiple packages.
