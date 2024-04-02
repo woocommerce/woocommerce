@@ -1,6 +1,20 @@
 .wc-block-components-shipping-rates-control__package {
 	margin: 0;
-	border-bottom: 1px solid $universal-border-light;
+	position: relative;
+
+	&:after {
+		content: "";
+		top: 0;
+		right: 0;
+		pointer-events: none;
+		bottom: 0;
+		position: absolute;
+		border: 1px solid rgba(17, 17, 17, 0.11);
+		width: 100%;
+		box-sizing: border-box;
+		border-bottom: 0;
+	}
+
 
 	&.wc-block-components-panel {
 		margin-bottom: 0;
