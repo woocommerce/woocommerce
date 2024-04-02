@@ -312,7 +312,7 @@ class WC_Helper_Updater {
 		*/
 		$active_for_translations = array_filter(
 			$active_woo_plugins,
-			function( $plugin ) use ( $plugins ) {
+			function ( $plugin ) use ( $plugins ) {
 				/**
 				 * Filters the plugins that are subscribed to the automatic translations updates.
 				 *
@@ -476,7 +476,7 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
@@ -487,11 +487,30 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $theme['Version'], $update_data[ $theme['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
 		set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
+
+		return $count;
+	}
+
+	/**
+	 * Get the update count to based on the status of the site.
+	 *
+	 * @return int
+	 */
+	public static function get_updates_count_based_on_site_status() {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return 1;
+		}
+
+		$count = self::get_updates_count() ?? 0;
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+			++$count;
+		}
+
 		return $count;
 	}
 
@@ -501,12 +520,9 @@ class WC_Helper_Updater {
 	 * @return string Updates count markup, empty string if no updates avairable.
 	 */
 	public static function get_updates_count_html() {
-		$count = self::get_updates_count();
-		if ( ! $count ) {
-			return '';
-		}
-
+		$count      = self::get_updates_count_based_on_site_status();
 		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+
 		return $count_html;
 	}
 
