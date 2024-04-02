@@ -1,10 +1,11 @@
 {
 	"name": "@woocommerce/block-library",
+	"private": true,
 	"title": "WooCommerce Blocks",
 	"author": "Automattic",
 	"version": "11.8.0-dev",
 	"description": "WooCommerce blocks for the Gutenberg editor.",
-	"homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
+	"homepage": "https://github.com/woocommerce/woocommerce/plugins/woocommerce-blocks/",
 	"keywords": [
 		"woocommerce",
 		"wordpress",
@@ -38,7 +39,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
+		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
@@ -342,12 +343,6 @@
 		"*.md": [
 			"pnpm run lint:md:docs"
 		]
-	},
-	"changelog": {
-		"labelPrefix": "type:",
-		"skipLabel": "skip-changelog",
-		"defaultPrefix": "dev",
-		"repo": "woocommerce/woocommerce-gutenberg-products-block"
 	},
 	"files": [
 		"build",

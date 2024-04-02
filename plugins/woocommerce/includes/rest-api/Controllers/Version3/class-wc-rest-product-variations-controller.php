@@ -1121,8 +1121,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$response          = array();
 		$product           = wc_get_product( $product_id );
 		$default_values    = isset( $request['default_values'] ) ? $request['default_values'] : array();
+		$meta_data         = isset( $request['meta_data'] ) ? $request['meta_data'] : array();
 		$data_store        = $product->get_data_store();
-		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values );
+		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values, $meta_data );
 
 		if ( isset( $request['delete'] ) && $request['delete'] ) {
 			$deleted_count             = $this->delete_unmatched_product_variations( $product );
