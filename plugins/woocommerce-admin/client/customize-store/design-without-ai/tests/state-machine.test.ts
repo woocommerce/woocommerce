@@ -152,9 +152,6 @@ describe( 'Design Without AI state machine', () => {
 					assembleSite: assembleSiteMock,
 					createProducts: createProductsMock,
 				},
-				actions: {
-					redirectToAssemblerHub: jest.fn(),
-				},
 			} );
 
 			const state = machine.getInitialState( initialState );
@@ -163,18 +160,27 @@ describe( 'Design Without AI state machine', () => {
 
 			await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore'
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.pending'
 				);
 			} );
 
-			await actor.stop();
-
 			expect( installAndActivateThemeMock ).toHaveBeenCalled();
+
+			const finalState = await waitFor( actor, ( currentState ) => {
+				return currentState.matches(
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.success'
+				);
+			} );
+
+			expect(
+				finalState.matches(
+					'preAssembleSite.preApiCallLoader.installAndActivateTheme.success'
+				)
+			).toBeTruthy();
 		} );
 
 		it( 'should invoke `redirectToIntroWithError` when `assembleSite` service fails', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.installAndActivateTheme';
+			const initialState = 'preAssembleSite.assembleSite';
 
 			const assembleSiteMock = jest.fn( () => Promise.reject() );
 			const createProductsMock = jest.fn( () => {
@@ -205,7 +211,7 @@ describe( 'Design Without AI state machine', () => {
 
 			await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore'
+					'preAssembleSite.assembleSite.pending'
 				);
 			} );
 
@@ -214,8 +220,7 @@ describe( 'Design Without AI state machine', () => {
 		} );
 
 		it( 'should invoke `assembleSite` service', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.installAndActivateTheme';
+			const initialState = 'preAssembleSite.assembleSite';
 
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
 			const installAndActivateThemeMock = jest.fn( () =>
@@ -242,24 +247,18 @@ describe( 'Design Without AI state machine', () => {
 
 			const actor = interpret( machine ).start( state );
 
-			await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.assembleSite.success'
-				);
-			} );
-
-			expect( assembleSiteMock ).toHaveBeenCalled();
-
 			const finalState = await waitFor( actor, ( currentState ) => {
 				return currentState.matches( 'showAssembleHub' );
 			} );
+
+			expect( assembleSiteMock ).toHaveBeenCalled();
 
 			expect( finalState.matches( 'showAssembleHub' ) ).toBeTruthy();
 		} );
 
 		it( 'should invoke `redirectToIntroWithError` when `createProducts` service fails', async () => {
 			const initialState =
-				'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts';
+				'preAssembleSite.preApiCallLoader.createProducts';
 
 			const createProductsMock = jest.fn( () => Promise.reject() );
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
@@ -286,7 +285,7 @@ describe( 'Design Without AI state machine', () => {
 
 			await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts.pending'
+					'preAssembleSite.preApiCallLoader.createProducts.pending'
 				);
 			} );
 
@@ -296,7 +295,7 @@ describe( 'Design Without AI state machine', () => {
 
 		it( 'should invoke `createProducts` service', async () => {
 			const initialState =
-				'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts';
+				'preAssembleSite.preApiCallLoader.createProducts';
 
 			const createProductsMock = jest.fn( () =>
 				Promise.resolve( {
@@ -316,7 +315,7 @@ describe( 'Design Without AI state machine', () => {
 
 			await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts.pending'
+					'preAssembleSite.preApiCallLoader.createProducts.pending'
 				);
 			} );
 
@@ -324,13 +323,13 @@ describe( 'Design Without AI state machine', () => {
 
 			const finalState = await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts.success'
+					'preAssembleSite.preApiCallLoader.createProducts.success'
 				);
 			} );
 
 			expect(
 				finalState.matches(
-					'preAssembleSite.preApiCallLoader.installAndActivateTheme.setupStore.createProducts.success'
+					'preAssembleSite.preApiCallLoader.createProducts.success'
 				)
 			).toBeTruthy();
 		} );
