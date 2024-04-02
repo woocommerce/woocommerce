@@ -716,6 +716,9 @@ importers:
       '@wordpress/viewport':
         specifier: ^4.20.0
         version: 4.20.0(react@17.0.2)
+      canvas-confetti:
+        specifier: ^1.9.2
+        version: 1.9.2
       classnames:
         specifier: ^2.3.2
         version: 2.3.2
@@ -837,6 +840,9 @@ importers:
       '@testing-library/user-event':
         specifier: 13.5.0
         version: 13.5.0(@testing-library/dom@8.11.3)
+      '@types/canvas-confetti':
+        specifier: ^1.6.4
+        version: 1.6.4
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -18823,6 +18829,10 @@ packages:
       '@types/node': 16.18.68
       '@types/responselike': 1.0.3
 
+  /@types/canvas-confetti@1.6.4:
+    resolution: {integrity: sha512-fNyZ/Fdw/Y92X0vv7B+BD6ysHL4xVU5dJcgzgxLdGbn8O3PezZNIJpml44lKM0nsGur+o/6+NZbZeNTt00U1uA==}
+    dev: true
+
   /@types/cheerio@0.22.35:
     resolution: {integrity: sha512-yD57BchKRvTV+JD53UZ6PD8KWY5g5rvvMLRnZR3EQBCZXiDT/HR+pKpMzFGlWNhFrXlo7VPZXtKvIEwZkAWOIA==}
     dependencies:
@@ -28005,6 +28015,10 @@ packages:
 
   /caniuse-lite@1.0.30001568:
     resolution: {integrity: sha512-vSUkH84HontZJ88MiNrOau1EBrCqEQYgkC5gIySiDlpsm8sGVrhU7Kx4V6h0tnqaHzIHZv08HlJIwPbL4XL9+A==}
+
+  /canvas-confetti@1.9.2:
+    resolution: {integrity: sha512-6Xi7aHHzKwxZsem4mCKoqP6YwUG3HamaHHAlz1hTNQPCqXhARFpSXnkC9TWlahHY5CG6hSL5XexNjxK8irVErg==}
+    dev: false
 
   /capital-case@1.0.4:
     resolution: {integrity: sha512-ds37W8CytHgwnhGGTi88pcPyR15qoNkOpYwmMMfnWqqWgESapLqvDx6huFjQ5vqWSn2Z06173XNA7LtMOeUh1A==}
