@@ -123,12 +123,9 @@ const renderTabs = (
 				>
 					{ tabs[ tabKey ]?.title }
 					{ tabs[ tabKey ]?.showUpdateCount && updateCount > 0 && (
-						<span
-							className="woocommerce-marketplace__update-count"
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								'<span>' + updateCount + '</span>'
-							) }
-						></span>
+						<span className="woocommerce-marketplace__update-count">
+							<span> { updateCount } </span>
+						</span>
 					) }
 				</Button>
 			)
