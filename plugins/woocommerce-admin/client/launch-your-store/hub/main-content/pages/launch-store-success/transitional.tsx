@@ -7,6 +7,11 @@
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
+import { createInterpolateElement, useState } from '@wordpress/element';
+import { Link, ConfettiAnimation } from '@woocommerce/components';
+import { isInteger } from 'lodash';
+import { closeSmall } from '@wordpress/icons';
+import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
 import {
 	Button,
 	TextareaControl,
@@ -16,8 +21,6 @@ import {
 	__unstableMotion as motion,
 } from '@wordpress/components';
 
-import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
-
 /**
  * Internal dependencies
  */
@@ -25,10 +28,6 @@ import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
-import { createInterpolateElement, useState } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
-import { isInteger } from 'lodash';
-import { closeSmall } from '@wordpress/icons';
 
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
 
@@ -81,6 +80,7 @@ export const Transitional = ( {
 
 	return (
 		<div className="woocommerce-launch-store__transitional">
+			<ConfettiAnimation delay={ 1000 } />
 			<motion.div
 				variants={ {
 					view: { x: 0 },
