@@ -114,8 +114,8 @@ class LaunchYourStore {
 			return false;
 		}
 
-		$link = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
-		$rest_url = rest_url('wc-admin/launch-your-store/dismiss-coming-soon-banner');
+		$link       = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
+		$rest_url   = rest_url( 'wc-admin/launch-your-store/dismiss-coming-soon-banner' );
 		$rest_nonce = wp_create_nonce( 'wp_rest' );
 
 		$text = sprintf(
