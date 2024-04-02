@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
-import { doAction } from '@wordpress/hooks';
 import { SelectControl } from '@wordpress/components';
+import { useCallback } from 'react';
 import {
 	createElement,
-	RawHTML,
 	useMemo,
 	useLayoutEffect,
 	useEffect,
@@ -34,6 +33,7 @@ import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
+import { getRenderedBlockView } from '../../utils/get-rendered-block-view';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -215,18 +215,18 @@ export function BlockEditor( {
 		( productForm ) => productForm.id === selectedProductFormId
 	);
 
-
-	useEffect( () => {
+	const ProductForm = useCallback( () => {
 		if ( ! selectedProductForm ) {
-			return;
+			return <div>Loading</div>;
 		}
-		setTimeout( () => {
-			// @ts-ignore
-			wp.hooks.doAction(
-				'woocommerce_product_form_init',
-				selectedProductForm
-			);
-		}, 1 );
+
+		const container = document.createElement( 'div' );
+		container.innerHTML = selectedProductForm.content.rendered;
+		return (
+			<div className="woocommerce-product-block-editor__product-form">
+				{ getRenderedBlockView( container ) }
+			</div>
+		);
 	}, [ selectedProductForm ] );
 
 	// Check if the Modal editor is open from the store.
@@ -259,11 +259,7 @@ export function BlockEditor( {
 				disabled={ ! productForms }
 				className="woocommerce-product-block-editor__product-type-selector"
 			/>
-			{ selectedProductForm && (
-				<RawHTML key={ selectedProductForm.id }>
-					{ selectedProductForm.content.rendered }
-				</RawHTML>
-			) }
+			<ProductForm />
 		</div>
 	);
 }
