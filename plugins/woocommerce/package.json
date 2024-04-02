@@ -28,8 +28,10 @@
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
-		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm env:dev",
+		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm env:dev && pnpm playwright install chromium",
 		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm env:dev",
+		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
+		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -48,6 +50,7 @@
 		"test:api": "API_TEST_REPORT_DIR=\"$PWD/tests/api\" pnpm exec wc-api-tests test api",
 		"test:api-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/api-core-tests/playwright.config.js",
 		"test:e2e-pw": "USE_WP_ENV=1 pnpm playwright test --config=tests/e2e-pw/playwright.config.js",
+		"test:perf": "./k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:env:start": "pnpm env:test",
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
@@ -165,6 +168,70 @@
 							"wpVersion": "latest-2"
 						}
 					}
+				},
+				{
+					"name": "Core e2e tests",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5", 
+						"--shard=3/5", 
+						"--shard=4/5", 
+						"--shard=5/5"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core API tests",
+					"testType": "api",
+					"command": "test:api-pw",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/api-core-tests/**"
+					],
+					"testEnv": {
+						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core Performance tests (K6)",
+					"testType": "performance",
+					"command": "test:perf",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/performance/**"
+					],
+					"testEnv": {
+						"start": "env:perf"
+					}
 				}
 			]
 		}
@@ -190,7 +257,7 @@
 		"@wordpress/babel-preset-default": "3.0.2",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
 		"@wordpress/env": "^8.13.0",
-		"@wordpress/stylelint-config": "19.1.0",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.25.0",
 		"allure-playwright": "^2.9.2",
 		"autoprefixer": "9.8.6",

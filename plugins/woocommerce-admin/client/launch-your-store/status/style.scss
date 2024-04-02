@@ -24,12 +24,19 @@
 		color: #005c12;
 
 		&::before {
-			content: '';
+			content: "";
 			width: 6px;
 			height: 6px;
 			border-radius: 3px;
 			background-color: #005c12;
 			margin-right: 4px;
+		}
+	}
+}
+.woocommerce-lys-status-popover {
+	.components-menu-item__item {
+		svg {
+			margin-right: 8px;
 		}
 	}
 }

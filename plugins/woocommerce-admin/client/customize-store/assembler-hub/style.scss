@@ -61,6 +61,7 @@
 }
 
 .woocommerce-customize-store__step-assemblerHub,
+.woocommerce-customize-store__step-transitionalScreen,
 .woocommerce-customize-store__step-intro {
 	a {
 		text-decoration: none;
@@ -336,7 +337,7 @@
 				margin: 0;
 			}
 
-			input[type='number'] {
+			input[type="number"] {
 				-moz-appearance: textfield;
 			}
 
@@ -629,7 +630,7 @@
 		box-shadow: none !important;
 	}
 
-	.tour-kit-frame__container[data-popper-placement^='left'] {
+	.tour-kit-frame__container[data-popper-placement^="left"] {
 		& > .tour-kit-frame__arrow {
 			right: -5px;
 			&::before {
@@ -639,7 +640,7 @@
 		}
 	}
 
-	.tour-kit-frame__container[data-popper-placement^='right'] {
+	.tour-kit-frame__container[data-popper-placement^="right"] {
 		& > .tour-kit-frame__arrow {
 			&::before {
 				border-bottom: 1px solid var(--gutenberg-gray-300, #ddd);
@@ -648,7 +649,7 @@
 		}
 	}
 
-	.tour-kit-frame__container[data-popper-placement^='top'] {
+	.tour-kit-frame__container[data-popper-placement^="top"] {
 		& > .tour-kit-frame__arrow {
 			&::before {
 				border-bottom: 1px solid var(--gutenberg-gray-300, #ddd);
@@ -657,7 +658,7 @@
 		}
 	}
 
-	.tour-kit-frame__container[data-popper-placement^='bottom'] {
+	.tour-kit-frame__container[data-popper-placement^="bottom"] {
 		& > .tour-kit-frame__arrow {
 			&::before {
 				border-top: 1px solid var(--gutenberg-gray-300, #ddd);
@@ -748,7 +749,7 @@
 
 	animation: 0.5s ease 1s edit-site-canvas-spinner__fade-in-animation;
 	animation-fill-mode: forwards;
-	@include reduce-motion('animation');
+	@include reduce-motion("animation");
 
 	circle {
 		stroke: rgba($black, 0.3);

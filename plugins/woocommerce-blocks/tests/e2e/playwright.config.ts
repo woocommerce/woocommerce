@@ -43,6 +43,7 @@ const config: ExtendedPlaywrightTestConfig = {
 		viewport: { width: 1280, height: 720 },
 		storageState: STORAGE_STATE_PATH,
 		actionTimeout: 10_000,
+		navigationTimeout: 10_000,
 	},
 	projects: [
 		{
