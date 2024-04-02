@@ -54,6 +54,12 @@ class LaunchYourStore {
 		}
 	}
 
+	/**
+	 * Update the contents of the coming soon page on settings change. Do not update if the post request
+	 * doesn't change the store pages only setting, if the setting is unchanged, or if the page has been edited.
+	 *
+	 * @return void
+	 */
 	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
 		// If the post request does'nt contain the store pages only parameter, return.
 		if ( ! isset( $next_store_pages_only ) ) {
@@ -92,6 +98,11 @@ class LaunchYourStore {
 		}
 	}
 
+	/**
+	 * Create a pattern for the store only coming soon page.
+	 *
+	 * @return string
+	 */
 	public function get_store_only_coming_soon_content() {
 		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group"><!-- wp:spacer -->
@@ -116,6 +127,11 @@ class LaunchYourStore {
 		<!-- /wp:group -->';
 	}
 
+	/**
+	 * Create a pattern for the entire site coming soon page.
+	 *
+	 * @return string
+	 */
 	public function get_entire_site_coming_soon_content() {
 		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group"><!-- wp:spacer -->
