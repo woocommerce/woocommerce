@@ -27,10 +27,16 @@ declare global {
 /**
  * Request a token from the Jetpack site to use with the API
  *
+ * @deprecated Use `requestJwt` from `@automattic/jetpack-ai-client` instead.
+ *
  * @return {Promise<{token: string, blogId: string}>} The token and the blogId
  */
 
 export async function requestJetpackToken() {
+	// eslint-disable-next-line no-console
+	console.warn(
+		'Warning: requestJetpackToken is deprecated. Use requestJwt from @automattic/jetpack-ai-client instead.'
+	);
 	const { token, blogId, expire } = await requestJwt();
 	if ( ! token ) {
 		throw createExtendedError(
