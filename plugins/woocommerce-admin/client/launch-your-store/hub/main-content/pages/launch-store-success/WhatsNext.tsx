@@ -13,82 +13,66 @@ import { Button } from '@wordpress/components';
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
 
+const marketing = {
+	title: __( 'Promote your products', 'woocommerce' ),
+	description: __(
+		'Grow your customer base by promoting your products to millions of engaged shoppers.',
+		'woocommerce'
+	),
+	link: `${ ADMIN_URL }edit.php?post_type=product`,
+	linkText: __( 'Promote products', 'woocommerce' ),
+	trackEvent: 'launch_you_store_congrats_marketing_click',
+};
+
+const payments = {
+	title: __( 'Provide more ways to pay', 'woocommerce' ),
+	description: __(
+		'Give your shoppers more ways to pay by adding additional payment methods to your store.',
+		'woocommerce'
+	),
+	link: `${ ADMIN_URL }site-editor.php`,
+	linkText: __( 'Add payment methods', 'woocommerce' ),
+	trackEvent: 'launch_you_store_congrats_payments_click',
+};
+
+const extensions = {
+	title: __( 'Power up your store', 'woocommerce' ),
+	description: __(
+		'Add extra features and functionality to your store with Woo extensions.',
+		'woocommerce'
+	),
+	link: `${ ADMIN_URL }site-editor.php`,
+	linkText: __( 'Add extensions', 'woocommerce' ),
+	trackEvent: 'launch_you_store_congrats_extensions_click',
+};
+
+const getList = () => {
+	return [ marketing, payments, extensions ];
+};
+
 export const WhatsNext = ( { goToHome }: { goToHome: () => void } ) => {
 	return (
 		<div className="woocommerce-launch-store__congrats-main-actions">
-			<div className="woocommerce-launch-store__congrats-action">
-				<div className="woocommerce-launch-store__congrats-action__content">
-					<h3>{ __( 'Add your products', 'woocommerce' ) }</h3>
-					<p>
-						{ __(
-							'Start stocking your virtual shelves by adding or importing your products, or edit the sample products.',
-							'woocommerce'
-						) }
-					</p>
-					<Button
-						variant="link"
-						onClick={ () => {
-							recordEvent(
-								'launch_you_store_congrats_product_list_click'
-							);
-							location.href = `${ ADMIN_URL }edit.php?post_type=product`;
-						} }
-					>
-						{ __( 'Go to Products', 'woocommerce' ) }
-					</Button>
+			{ getList().map( ( item, index ) => (
+				<div
+					className="woocommerce-launch-store__congrats-action"
+					key={ index }
+				>
+					<div className="woocommerce-launch-store__congrats-action__content">
+						<h3>{ item.title }</h3>
+						<p>{ item.description }</p>
+						<Button
+							variant="link"
+							onClick={ () => {
+								recordEvent( item.trackEvent );
+								location.href = item.link;
+							} }
+						>
+							{ item.linkText }
+						</Button>
+					</div>
 				</div>
-			</div>
-
-			<div className="woocommerce-launch-store__congrats-action">
-				<div className="woocommerce-launch-store__congrats-action__content">
-					<h3>{ __( 'Fine-tune your design', 'woocommerce' ) }</h3>
-					<p>
-						{ __(
-							'Head to the Editor to change your images and text, add more pages, and make any further customizations.',
-							'woocommerce'
-						) }
-					</p>
-					<Button
-						variant="link"
-						onClick={ () => {
-							recordEvent(
-								'launch_you_store_congrats_editor_click'
-							);
-							location.href = `${ ADMIN_URL }site-editor.php`;
-						} }
-					>
-						{ __( 'Go to the Editor', 'woocommerce' ) }
-					</Button>
-				</div>
-			</div>
-
-			<div className="woocommerce-launch-store__congrats-action">
-				<div className="woocommerce-launch-store__congrats-action__content">
-					<h3>
-						{ __(
-							'Continue setting up your store',
-							'woocommerce'
-						) }
-					</h3>
-					<p>
-						{ __(
-							'Go back to the Home screen to complete your store setup and start selling',
-							'woocommerce'
-						) }
-					</p>
-					<Button
-						variant="link"
-						onClick={ () => {
-							recordEvent(
-								'launch_you_store_congrats_home_click'
-							);
-							goToHome();
-						} }
-					>
-						{ __( 'Back to Home', 'woocommerce' ) }
-					</Button>
-				</div>
-			</div>
+			) ) }
 		</div>
 	);
 };
