@@ -76,6 +76,7 @@ const PackageRates = ( {
 					setSelectedOption( value );
 					onSelectRate( value );
 				} }
+				highlightChecked={ true }
 				disabled={ disabled }
 				selected={ selectedOption }
 				options={ rates.map( renderOption ) }

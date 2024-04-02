@@ -57,6 +57,7 @@ const RadioControlAccordion = ( {
 						key={ option.value }
 					>
 						<RadioControlOption
+							highlightChecked={ highlightChecked }
 							name={ `radio-control-${ radioControlId }` }
 							checked={ checked }
 							option={ option }
