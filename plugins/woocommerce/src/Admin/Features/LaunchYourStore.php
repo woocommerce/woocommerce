@@ -37,8 +37,9 @@ class LaunchYourStore {
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
 		);
 
+		$this->possibly_update_coming_soon_page_content( $_POST[ 'woocommerce_store_pages_only' ] );
+		
 		$at_least_one_saved = false;
-
 		foreach ( $options as $name => $option ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( isset( $_POST[ $name ] ) && in_array( $_POST[ $name ], $option, true ) ) {
@@ -50,6 +51,32 @@ class LaunchYourStore {
 
 		if ( $at_least_one_saved ) {
 			wc_admin_record_tracks_event( 'site_visibility_saved' );
+		}
+	}
+
+	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
+		if ( ! isset( $next_store_pages_only ) ) {
+			return;
+		}
+
+		$option_name = 'woocommerce_store_pages_only';
+		$current_store_pages_only = get_option( $option_name, null );
+
+		if ( $current_store_pages_only && $current_store_pages_only === $next_store_pages_only ) {
+			return;
+		}
+
+
+		$page_id  = get_option( 'woocommerce_coming_soon_page_id' );
+		
+		if ( $page_id ) {
+			$page_content = 'yes' === $next_store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content();
+			wp_update_post(
+				array(
+					'ID'           => $page_id,
+					'post_content' => $page_content,
+				)
+			);
 		}
 	}
 
@@ -84,7 +111,7 @@ class LaunchYourStore {
 		<!-- /wp:spacer -->
 		
 		<!-- wp:heading {"textAlign":"center","level":1} -->
-		<h1 class="wp-block-heading has-text-align-center">Pardon our dust!We\'re working on something amazing -- check back soon!</h1>
+		<h1 class="wp-block-heading has-text-align-center">Pardon our dust! We\'re working on something amazing -- check back soon!</h1>
 		<!-- /wp:heading -->
 		
 		<!-- wp:spacer -->
