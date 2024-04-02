@@ -1,0 +1,61 @@
+<?php
+/**
+ * REST API Coupons Controller
+ *
+ * Handles requests to /coupons/*
+ */
+
+namespace Automattic\WooCommerce\Admin\API;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Coupons controller.
+ *
+ * @internal
+ */
+class LaunchYourStore {
+
+	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc-admin';
+
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'launch-your-store';
+
+	/**
+	 * Register routes.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/dismiss-coming-soon-banner',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'dismiss_coming_soon_banner' ),
+					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
+				),
+			)
+		);
+	}
+
+	public function must_be_shop_manager_or_admin() {
+		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	public function dismiss_coming_soon_banner() {
+		update_option( 'woocommerce_coming_soon_banner_dismissed', 'yes' );
+		return true;
+	}
+}

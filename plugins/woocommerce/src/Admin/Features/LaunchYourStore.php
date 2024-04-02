@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -94,6 +95,9 @@ class LaunchYourStore {
 			return false;
 		}
 
+		if ( get_option( 'woocommerce_coming_soon_banner_dismissed' ) === 'yes' ) {
+			return false;
+		}
 		// User must be an admin or editor.
 		// phpcs:ignore
 		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
@@ -105,20 +109,27 @@ class LaunchYourStore {
 			return false;
 		}
 
+		$store_pages_only = get_option( 'woocommerce_store_pages_only' ) === 'yes';
+		if ( $store_pages_only && ! WCAdminHelper::is_store_page() ) {
+			return false;
+		}
+
 		$link = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
+		$rest_url = rest_url('wc-admin/launch-your-store/dismiss-coming-soon-banner');
+		$rest_nonce = wp_create_nonce( 'wp_rest' );
 
 		$text = sprintf(
 			// translators: no need to translate it. It's a link.
 			__(
 				"
-			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>.
+			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>
 		",
 				'woocommerce'
 			),
 			$link
 		);
 		// phpcs:ignore
-		echo "<div id='coming-soon-footer-banner'>$text</div>";
+		echo "<div id='coming-soon-footer-banner'>$text<a class='coming-soon-footer-banner-dismiss' data-rest-url='$rest_url' data-rest-nonce='$rest_nonce'></a></div>";
 	}
 
 	/**
