@@ -55,12 +55,15 @@ export const Congrats = ( {
 
 	const shouldShowComment = isInteger( emojiValue );
 
-	const copyClipboardRef = useCopyToClipboard( homeUrl, () => {
-		setCopyLinkText( copied );
-		setTimeout( () => {
-			setCopyLinkText( copyLink );
-		}, 2000 );
-	} );
+	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
+		homeUrl,
+		() => {
+			setCopyLinkText( copied );
+			setTimeout( () => {
+				setCopyLinkText( copyLink );
+			}, 2000 );
+		}
+	);
 
 	const sendData = () => {
 		const emojis = {
