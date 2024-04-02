@@ -56,19 +56,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		delete_option( 'wp_object_cache_key_prefix_the_type' );
-		remove_all_filters( 'wc_object_cache_get_engine' );
-		remove_all_filters( 'woocommerce_after_serializing_the_type_for_caching' );
-		remove_all_actions( 'woocommerce_after_removing_the_type_from_cache' );
-		remove_all_actions( 'woocommerce_after_flushing_the_type_cache' );
-
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox 'get_object_type' returns the object type defined by the cache class.
 	 */
 	public function test_get_object_type() {
@@ -131,16 +118,6 @@ class ObjectCacheTest extends \WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'Invalid expiration value, must be ObjectCache::DEFAULT_EXPIRATION or a value between 1 and ObjectCache::MAX_EXPIRATION' );
 
 		$this->sut->set( array( 'foo' ), 'the_id', $expiration );
-	}
-
-	/**
-	 * @testdox 'set' returns false if the cache engine's caching method fails.
-	 */
-	public function try_set_when_cache_engine_fails() {
-		$this->cache_engine->caching_succeeds = false;
-
-		$result = $this->sut->set( array( 'foo' ), 'the_id' );
-		$this->assertFalse( $result );
 	}
 
 	/**
