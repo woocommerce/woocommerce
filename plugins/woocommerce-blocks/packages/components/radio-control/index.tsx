@@ -17,6 +17,7 @@ const RadioControl = ( {
 	onChange,
 	options = [],
 	disabled = false,
+	highlightChecked = false,
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );
 	const radioControlId = id || instanceId;
@@ -34,6 +35,7 @@ const RadioControl = ( {
 		>
 			{ options.map( ( option ) => (
 				<RadioControlOption
+					highlightChecked={ highlightChecked }
 					key={ `${ radioControlId }-${ option.value }` }
 					name={ `radio-control-${ radioControlId }` }
 					checked={ option.value === selected }

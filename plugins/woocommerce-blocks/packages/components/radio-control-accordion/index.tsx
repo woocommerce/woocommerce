@@ -22,6 +22,8 @@ export interface RadioControlAccordionProps {
 		content: JSX.Element;
 	} >;
 	selected: string | null;
+	// Should the selected option be highlighted with a border?
+	highlightChecked?: boolean;
 }
 
 const RadioControlAccordion = ( {
@@ -31,6 +33,7 @@ const RadioControlAccordion = ( {
 	selected,
 	onChange,
 	options = [],
+	highlightChecked = false,
 }: RadioControlAccordionProps ): JSX.Element | null => {
 	const radioControlId = id || instanceId;
 

@@ -15,6 +15,7 @@ const Option = ( {
 	onChange,
 	option,
 	disabled = false,
+	highlightChecked = false,
 }: RadioControlOptionProps ): JSX.Element => {
 	const { value, label, description, secondaryLabel, secondaryDescription } =
 		option;
