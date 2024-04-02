@@ -902,7 +902,7 @@ class CheckoutFields {
 	 * @return bool True if the field is valid, false otherwise.
 	 */
 	public function is_customer_field( $key ) {
-		return array_key_exists( $key, array_merge( $this->get_address_fields_keys(), $this->get_contact_fields_keys() ) );
+		return in_array( $key, array_intersect(array_merge( $this->get_address_fields_keys(), $this->get_contact_fields_keys() ), array_keys($this->additional_fields)) );
 	}
 
 	/**
