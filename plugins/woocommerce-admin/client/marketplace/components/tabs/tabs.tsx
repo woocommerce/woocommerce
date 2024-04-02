@@ -14,7 +14,6 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
-import sanitizeHTML from '../../../lib/sanitize-html';
 import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
