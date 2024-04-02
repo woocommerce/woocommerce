@@ -42,11 +42,7 @@ function toggle_feature( $request ) {
 		return new WP_REST_Response( $features, 204 );
 	}
 
-	if ( isset( $custom_feature_values[ $feature_name ] ) ) {
-		unset( $custom_feature_values[ $feature_name ] );
-	} else {
-		$custom_feature_values[ $feature_name ] = ! $features[ $feature_name ];
-	}
+	$custom_feature_values[ $feature_name ] = ! $features[ $feature_name ];
 
 	update_option( OPTION_NAME_PREFIX, $custom_feature_values );
 	return new WP_REST_Response( get_features(), 200 );
