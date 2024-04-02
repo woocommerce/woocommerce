@@ -8,7 +8,7 @@ import { Spinner } from '@woocommerce/components';
  * Internal dependencies
  */
 import type { MainContentComponentProps } from '../../xstate';
-import { Congrats } from './congrats';
+import { Congrats } from './Congrats';
 export * as actions from './actions';
 export * as services from './services';
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };

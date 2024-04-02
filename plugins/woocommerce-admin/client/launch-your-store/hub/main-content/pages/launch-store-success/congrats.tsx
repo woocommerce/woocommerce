@@ -23,7 +23,7 @@ import {
 } from '@wordpress/components';
 
 import './style.scss';
-import { WhatsNext } from './whatsnext';
+import { WhatsNext } from './WhatsNext';
 
 export const Congrats = ( {
 	hasCompleteSurvey,
