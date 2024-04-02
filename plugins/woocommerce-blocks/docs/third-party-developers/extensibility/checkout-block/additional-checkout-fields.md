@@ -92,6 +92,7 @@ Additional fields are saved to individual meta keys in both the customer meta an
 For address fields, 2 values are saved, one for shipping, and one for billing. For most cases, the billing value will be the same as shipping, but customers might opt-in to insert 2 different values.
 
 For contact and additional fields, only one value is saved per field.
+
 ### Helper methods
 
 `CheckoutFields` provides a couple of functions to access values from both customers and orders, those are `get_field_from_customer` and `get_field_from_order`
@@ -133,12 +134,14 @@ Values are still persisted to the guest customer session, as long as the session
 For logged-in customers, the value is only persisted once they place an order, accessing a logged-in customer during the place order lifecycle will return null or stale data.
 
 If you're at a place order hook, doing this will return previous data (not the currently inserted one):
+
 ```php
 $customer = new WC_Customer( $order->customer_id ); // Or new WC_Customer( 1234 )
 $my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
 ```
 
 Instead, always reach to the latest data if you want to run some extra validation/data-moving:
+
 ```php
 $customer = wc()->customer // This will return the current customer with its session.
 $my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
@@ -168,10 +171,12 @@ While not recommended, you can use the direct meta key to access certain values,
 Values are saved under a predefined prefix, this is needed to able to query fields without knowing which ID the field was registered under, for a field with key `'my-plugin-namespace/my-field'`, it's meta key will be:
 
 The following if it's an address field:
+
 - `_wc_billing/my-plugin-namespace/my-field`
 - `_wc_shipping/my-plugin-namespace/my-field`
 
 Or the following if it's a contact/additional field:
+
 - `_wc_additional/my-plugin-namespace/my-field`.
 
 Those prefixes are part of `CheckoutFields` class, and can be accessed using the following constants:
