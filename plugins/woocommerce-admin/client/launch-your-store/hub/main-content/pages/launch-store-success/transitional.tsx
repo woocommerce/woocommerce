@@ -24,7 +24,6 @@ import {
 /**
  * Internal dependencies
  */
-// import { SiteHub } from '../assembler-hub/site-hub';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 import './style.scss';
