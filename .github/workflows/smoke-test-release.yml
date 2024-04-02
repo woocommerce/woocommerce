@@ -219,7 +219,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/allure-report
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -397,7 +397,7 @@ jobs:
             E2E_ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/test-results/e2e/allure-results
             E2E_WP_LATEST_X_ARTIFACT: E2E test on wp-env with WordPress L-1 (run ${{ github.run_number }})-${{ matrix.shard.number }}
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
@@ -630,7 +630,7 @@ jobs:
             API_WP_PRERELEASE_ARTIFACT: API test on wp-env with WordPress beta or RC (run ${{ github.run_number }})
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
               with:
