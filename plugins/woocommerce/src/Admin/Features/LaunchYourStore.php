@@ -68,22 +68,25 @@ class LaunchYourStore {
 			return;
 		}
 
-		$page_id   = get_option( 'woocommerce_coming_soon_page_id' );
-		$revisions = wp_get_post_revisions( $page_id );
-
-		// If the page has revisions, do not modify the content and return.
-		if ( count( $revisions ) > 1 ) {
+		$page_id              = get_option( 'woocommerce_coming_soon_page_id' );
+		$page                 = get_post( $page_id );
+		$original_page_content = 'yes' === $current_store_pages_only 
+				? $this->get_store_only_coming_soon_content() 
+				: $this->get_entire_site_coming_soon_content();
+		
+		// If the page exists and the content is not the same as the original content, its been edited from its original state. Return early to respect any changes.
+		if ( $page && $page->post_content !== $original_page_content ) {
 			return;
 		}
 		
 		if ( $page_id ) {
-			$page_content = 'yes' === $next_store_pages_only 
+			$next_page_content = 'yes' === $next_store_pages_only 
 				? $this->get_store_only_coming_soon_content() 
 				: $this->get_entire_site_coming_soon_content();
 			wp_update_post(
 				array(
 					'ID'           => $page_id,
-					'post_content' => $page_content,
+					'post_content' => $next_page_content,
 				)
 			);
 		}
