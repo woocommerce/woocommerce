@@ -37,33 +37,29 @@ test.describe( 'Product Filter: Price Filter Block', async () => {
 				'.wp-block-woocommerce-product-filter-price-content-left-input'
 			);
 			const minPriceInput = leftInputContainer.locator( '.min' );
-			const minPriceInputValue = await minPriceInput.inputValue();
 
-			expect( minPriceInputValue ).toBe( '$20' );
+			await expect( minPriceInput ).toHaveValue( '$20' );
 
 			// Min price slider thumb
 			const priceSlider = page.locator(
 				'.wp-block-woocommerce-product-filter-price-content-price-range-slider'
 			);
 			const minPriceThumb = priceSlider.locator( 'input[name="min"]' );
-			const minPriceThumbValue = await minPriceThumb.inputValue();
 
-			expect( minPriceThumbValue ).toBe( '20' );
+			await expect( minPriceThumb ).toHaveValue( '20' );
 
 			// Max price input field
 			const rightInputContainer = page.locator(
 				'.wp-block-woocommerce-product-filter-price-content-right-input'
 			);
 			const maxPriceInput = rightInputContainer.locator( '.max' );
-			const maxPriceInputValue = await maxPriceInput.inputValue();
 
-			expect( maxPriceInputValue ).toBe( '$67' );
+			await expect( maxPriceInput ).toHaveValue( '$67' );
 
 			// Max price slider thumb
 			const maxPriceThumb = priceSlider.locator( 'input[name="max"]' );
-			const maxPriceThumbValue = await maxPriceThumb.inputValue();
 
-			expect( maxPriceThumbValue ).toBe( '67' );
+			await expect( maxPriceThumb ).toHaveValue( '67' );
 		} );
 
 		test( 'Changes in the price input field triggers price slider updates', async ( {
@@ -81,18 +77,16 @@ test.describe( 'Product Filter: Price Filter Block', async () => {
 			const minPriceInput = leftInputContainer.locator( '.min' );
 			await minPriceInput.fill( '30' );
 			await minPriceInput.blur();
-			const minPriceInputValue = await minPriceInput.inputValue();
 
-			expect( minPriceInputValue ).toBe( '$30' );
+			await expect( minPriceInput ).toHaveValue( '$30' );
 
 			// Min price slider thumb
 			const priceSlider = page.locator(
 				'.wp-block-woocommerce-product-filter-price-content-price-range-slider'
 			);
 			const minPriceThumb = priceSlider.locator( 'input[name="min"]' );
-			const minPriceThumbValue = await minPriceThumb.inputValue();
 
-			expect( minPriceThumbValue ).toBe( '30' );
+			await expect( minPriceThumb ).toHaveValue( '30' );
 
 			// Max price input field
 			const rightInputContainer = page.locator(
@@ -101,15 +95,13 @@ test.describe( 'Product Filter: Price Filter Block', async () => {
 			const maxPriceInput = rightInputContainer.locator( '.max' );
 			await maxPriceInput.fill( '80' );
 			await maxPriceInput.blur();
-			const maxPriceInputValue = await maxPriceInput.inputValue();
 
-			expect( maxPriceInputValue ).toBe( '$80' );
+			await expect( maxPriceInput ).toHaveValue( '$80' );
 
 			// Max price slider thumb
 			const maxPriceThumb = priceSlider.locator( 'input[name="max"]' );
-			const maxPriceThumbValue = await maxPriceThumb.inputValue();
 
-			expect( maxPriceThumbValue ).toBe( '80' );
+			await expect( maxPriceThumb ).toHaveValue( '80' );
 		} );
 
 		test( 'Price input field rejects min price higher than max price', async ( {
