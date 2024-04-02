@@ -13,16 +13,15 @@ import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function WoocomConnectNotice(): JSX.Element | null {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const noticeType = wccomSettings?.woocomConnectNoticeType || 'none';
 
-	if ( wccomSettings?.isConnected ) {
+	if ( noticeType === 'none' ) {
 		return null;
 	}
 
-	const localWooPluginsCount = ( wccomSettings?.localWooPlugins || [] )
-		.length;
 	let description = '';
 
-	if ( localWooPluginsCount > 0 ) {
+	if ( noticeType === 'long' ) {
 		description = description.concat(
 			__(
 				'Your store might be at risk as you are running old versions of Woo plugins.',

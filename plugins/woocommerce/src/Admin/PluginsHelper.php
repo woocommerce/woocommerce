@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
 use Plugin_Upgrader;
 use WC_Helper;
+use WC_Helper_Updater;
 use WP_Error;
 use WP_Upgrader;
 
@@ -544,13 +545,15 @@ class PluginsHelper {
 			return;
 		}
 
-		if ( WC_Helper::is_site_connected() ) {
+		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+
+		if ( 'none' === $notice_type ) {
 			return;
 		}
 
 		$notice_string = '';
 
-		if ( count( WC_Helper::get_local_woo_plugins() ) > 0 ) {
+		if ( 'long' === $notice_type ) {
 			$notice_string .= __( 'Your store might be at risk as you are running old versions of Woo plugins.', 'woocommerce' );
 			$notice_string .= ' ';
 		}

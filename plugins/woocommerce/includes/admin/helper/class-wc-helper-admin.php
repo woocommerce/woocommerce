@@ -48,7 +48,7 @@ class WC_Helper_Admin {
 			$installed_products
 		);
 
-		$local_woo_plugins = array_keys( WC_Helper::get_local_woo_plugins() );
+		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
 
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
@@ -62,7 +62,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerActive'     => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
-			'localWooPlugins'            => $local_woo_plugins,
+			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 		);
 
 		return $settings;
