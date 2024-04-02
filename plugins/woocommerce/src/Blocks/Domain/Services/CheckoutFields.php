@@ -952,7 +952,6 @@ class CheckoutFields {
 		$meta_key = $this->get_group_key( $group ) . $key;
 		// Replacing all meta using `add_meta_data`. For some reason `update_meta_data` causes duplicate keys.
 		$wc_object->add_meta_data( $meta_key, $value, true );
-		$wc_object->save_meta_data();
 	}
 
 	/**
