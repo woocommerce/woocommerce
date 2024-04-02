@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix a bug where saved payment methods were not rendered correctly in the heckout block
+Fix a bug where saved payment methods were not rendered correctly in the Checkout block

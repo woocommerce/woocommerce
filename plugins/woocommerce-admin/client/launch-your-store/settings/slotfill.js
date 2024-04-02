@@ -80,10 +80,10 @@ const SiteVisibility = () => {
 				value={ privateLink }
 				name="woocommerce_private_link"
 			/>
-			<h2>{ __( 'Site Visibility', 'woocommerce' ) }</h2>
+			<h2>{ __( 'Site visibility', 'woocommerce' ) }</h2>
 			<p className="site-visibility-settings-slotfill-description">
 				{ __(
-					"Set your site to coming soon or live you're ready to launch",
+					'Manage how your site appears to visitors.',
 					'woocommerce'
 				) }
 			</p>
@@ -185,7 +185,10 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ __( 'Your site is visible to everyone.', 'woocommerce' ) }
+					{ __(
+						'Your entire site is visible to everyone.',
+						'woocommerce'
+					) }
 				</p>
 			</div>
 		</div>

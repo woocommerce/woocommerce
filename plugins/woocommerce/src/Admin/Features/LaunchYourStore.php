@@ -14,7 +14,10 @@ class LaunchYourStore {
 	public function __construct() {
 		add_action( 'woocommerce_update_options_general', array( $this, 'save_site_visibility_options' ) );
 		add_action( 'current_screen', array( $this, 'maybe_create_coming_soon_page' ) );
-		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
+		if ( is_admin() ) {
+			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
+		}
+		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 	}
 
 	/**
@@ -78,6 +81,10 @@ class LaunchYourStore {
 	 * @return mixed
 	 */
 	public function preload_settings( $settings ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
 		$current_screen  = get_current_screen();
 		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
 
@@ -92,5 +99,39 @@ class LaunchYourStore {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Add 'coming soon' banner on the frontend when the following conditions met.
+	 *
+	 * - User must be either an admin or store editor (must be logged in).
+	 * - 'woocommerce_coming_soon' option value must be 'yes'
+	 */
+	public function maybe_add_coming_soon_banner_on_frontend() {
+		// User must be an admin or editor.
+		// phpcs:ignore
+		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
+			return false;
+		}
+
+		// 'woocommerce_coming_soon' must be 'yes'
+		if ( get_option( 'woocommerce_coming_soon', 'no' ) !== 'yes' ) {
+			return false;
+		}
+
+		$link = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
+
+		$text = sprintf(
+			// translators: no need to translate it. It's a link.
+			__(
+				"
+			This page is in \"Coming soon\" mode and is only visible to you and those who have permission. To make it public to everyone,&nbsp;<a href='%s'>change visibility settings</a>.
+		",
+				'woocommerce'
+			),
+			$link
+		);
+		// phpcs:ignore
+		echo "<div id='coming-soon-footer-banner'>$text</div>";
 	}
 }
