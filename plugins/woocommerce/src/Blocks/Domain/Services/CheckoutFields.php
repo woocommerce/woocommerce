@@ -902,7 +902,7 @@ class CheckoutFields {
 	 * @return bool True if the field is valid, false otherwise.
 	 */
 	public function is_customer_field( $key ) {
-		return in_array( $key, array_intersect( array_merge( $this->get_address_fields_keys(), $this->get_contact_fields_keys() ), array_keys( $this->additional_fields ) ) );
+		return in_array( $key, array_intersect( array_merge( $this->get_address_fields_keys(), $this->get_contact_fields_keys() ), array_keys( $this->additional_fields ) ), true );
 	}
 
 	/**
@@ -949,7 +949,7 @@ class CheckoutFields {
 	 * @return void
 	 */
 	private function set_array_meta( string $key, $value, WC_Data $wc_object, string $group ) {
-		$meta_key = $this->get_group_key( $group ) . $key;
+		$meta_key = self::get_group_key( $group ) . $key;
 		// Replacing all meta using `add_meta_data`. For some reason `update_meta_data` causes duplicate keys.
 		$wc_object->add_meta_data( $meta_key, $value, true );
 	}
@@ -959,7 +959,7 @@ class CheckoutFields {
 	 *
 	 * @param string      $key The field key.
 	 * @param WC_Customer $customer The customer to get the field value for.
-	 * @param string      $group The group to get the field value for (shipping|billing|additional).
+	 * @param string      $group The group to get the field value for (shipping|billing|additional) and defaults to additional.
 	 *
 	 * @return mixed The field value.
 	 */
@@ -972,7 +972,7 @@ class CheckoutFields {
 	 *
 	 * @param string   $field The field key.
 	 * @param WC_Order $order The order to get the field value for.
-	 * @param string   $group The group to get the field value for (shipping|billing|additional).
+	 * @param string   $group The group to get the field value for (shipping|billing|additional) and defaults to additional.
 	 *
 	 * @return mixed The field value.
 	 */
@@ -990,7 +990,7 @@ class CheckoutFields {
 	 * @return mixed The field value.
 	 */
 	private function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'additional' ) {
-		$meta_key = $this->get_group_key( $group ) . $key;
+		$meta_key = self::get_group_key( $group ) . $key;
 
 		$meta_data = $wc_object->get_meta( $meta_key, true );
 
@@ -1013,7 +1013,7 @@ class CheckoutFields {
 	public function get_all_fields_from_customer( WC_Customer $customer, string $group = 'additional', bool $all = false ) {
 		$meta_data = [];
 
-		$prefix = $this->get_group_key( $group );
+		$prefix = self::get_group_key( $group );
 
 		if ( $customer instanceof WC_Customer ) {
 			// Get all customer meta regardless of key.
@@ -1045,7 +1045,7 @@ class CheckoutFields {
 	public function get_all_fields_from_order( WC_Order $order, string $group = 'additional', bool $all = false ) {
 		$meta_data = [];
 
-		$prefix = $this->get_group_key( $group );
+		$prefix = self::get_group_key( $group );
 
 		if ( $order instanceof WC_Order ) {
 			// Get all order meta regardless of key.
@@ -1193,7 +1193,7 @@ class CheckoutFields {
 	 * @param string $group_name The group name (billing|shipping|additional).
 	 * @return string The group meta prefix.
 	 */
-	public function get_group_key( $group_name ) {
+	public static function get_group_key( $group_name ) {
 		if ( 'billing' === $group_name ) {
 			return self::BILLING_FIELDS_PREFIX;
 		}
@@ -1209,7 +1209,7 @@ class CheckoutFields {
 	 * @param string $group_key The group name (_wc_billing|_wc_shipping|_wc_additional).
 	 * @return string The group meta prefix.
 	 */
-	public function get_group_name( $group_key ) {
+	public static function get_group_name( $group_key ) {
 		if ( 0 === \strpos( self::BILLING_FIELDS_PREFIX, $group_key ) ) {
 			return 'billing';
 		}

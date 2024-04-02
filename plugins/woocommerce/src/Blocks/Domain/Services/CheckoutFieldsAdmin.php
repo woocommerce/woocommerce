@@ -74,7 +74,7 @@ class CheckoutFieldsAdmin {
 	 */
 	public function update_callback( $key, $value, $order ) {
 		list( $group, $key ) = explode( '/', $key, 2 );
-		$group               = $this->checkout_fields_controller->get_group_name( $group );
+		$group               = CheckoutFields::get_group_name( $group );
 		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, $group, false );
 	}
 
