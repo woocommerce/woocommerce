@@ -291,7 +291,6 @@ abstract class CustomMetaDataStore {
 	public function get_meta_data_for_object_ids( array $ids ): array {
 		global $wpdb;
 
-		/** @var $cache_engine WPCacheEngine */
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
 		$meta_data          = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
 		$meta_data          = array_filter( $meta_data );
@@ -304,13 +303,14 @@ abstract class CustomMetaDataStore {
 		$id_placeholder   = implode( ', ', array_fill( 0, count( $uncached_order_ids ), '%d' ) );
 		$meta_table = $this->get_table_name();
 		$object_id_column = $this->get_object_id_field();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $object_id_column and $meta_table is hardcoded. IDs are prepared above.
 		$meta_rows        = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $object_id_column and $meta_table is hardcoded. IDs are prepared above.
 			$wpdb->prepare(
 				"SELECT id, $object_id_column as object_id, meta_key, meta_value FROM $meta_table WHERE $object_id_column in ( $id_placeholder )",
 				$ids
 			)
 		);
+		// phpcs:enable
 
 		foreach ( $meta_rows as $meta_row ) {
 			if ( ! isset( $meta_data[ $meta_row->object_id ] ) ) {
@@ -328,13 +328,14 @@ abstract class CustomMetaDataStore {
 	}
 
 	/**
-	 * @param array $object_ids
+	 * Delete cached meta data for the given object_ids.
+	 *
+	 * @param array $object_ids The object_ids to delete cache for.
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.
 	 */
 	public function delete_cache_for_objects( array $object_ids ): array {
-		/** @var $cache_engine WPCacheEngine */
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
 		foreach ( $object_ids as $object_id ) {
