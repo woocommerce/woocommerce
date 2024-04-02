@@ -222,6 +222,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Using ActionScheduler to schedule fetching of in-app marketplace promotions. [#45628](https://github.com/woocommerce/woocommerce/pull/45628)
 * Fix - [CYS] Fix the intro path when exiting the assembler. [#44771](https://github.com/woocommerce/woocommerce/pull/44771)
 * Fix - [CYS] Improve logic to ensure that the font is active. [#45385](https://github.com/woocommerce/woocommerce/pull/45385)
+* Add - Displays a red badge on in-app My Subscriptions tab if Woo.com Update Manager is not installed or activated [#46088](https://github.com/woocommerce/woocommerce/pull/46088)
 * Add - <!-- Add a changelog message here --  Add launch_your_store feature flag [#45231](https://github.com/woocommerce/woocommerce/pull/45231)
 * Add - Add a filter to allow modifying the attribute term name in the Active Product Filters widget. [#40734](https://github.com/woocommerce/woocommerce/pull/40734)
 * Add - Add Always show pre-publish checks checkbox #44595 [#44595](https://github.com/woocommerce/woocommerce/pull/44595)
