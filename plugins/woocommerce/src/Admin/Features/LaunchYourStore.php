@@ -104,13 +104,16 @@ class LaunchYourStore {
 	 * @return string
 	 */
 	public function get_store_only_coming_soon_content() {
-		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
+		$heading = __( 'Great things coming soon', 'woocommerce' );
+		$subheading = __( 'Something big is brewing! Our store is in the works - Launching shortly!', 'woocommerce' );
+		
+		return sprintf( '<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group"><!-- wp:spacer -->
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer -->
 		
 		<!-- wp:heading {"textAlign":"center","level":1} -->
-		<h1 class="wp-block-heading has-text-align-center">Great things coming soon</h1>
+		<h1 class="wp-block-heading has-text-align-center">%s</h1>
 		<!-- /wp:heading -->
 		
 		<!-- wp:spacer {"height":"10px"} -->
@@ -118,13 +121,13 @@ class LaunchYourStore {
 		<!-- /wp:spacer -->
 		
 		<!-- wp:paragraph {"align":"center"} -->
-		<p class="has-text-align-center">Something big is brewing! Our store is in the works - Launching shortly!</p>
+		<p class="has-text-align-center">%s</p>
 		<!-- /wp:paragraph -->
 		
 		<!-- wp:spacer -->
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer --></div>
-		<!-- /wp:group -->';
+		<!-- /wp:group -->', $heading, $subheading );
 	}
 
 	/**
@@ -133,19 +136,21 @@ class LaunchYourStore {
 	 * @return string
 	 */
 	public function get_entire_site_coming_soon_content() {
-		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
+		$heading = __( 'Pardon our dust! We\'re working on something amazing -- check back soon!', 'woocommerce' );
+		
+		return sprintf('<!-- wp:group {"layout":{"type":"constrained"}} -->
 		<div class="wp-block-group"><!-- wp:spacer -->
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer -->
 		
 		<!-- wp:heading {"textAlign":"center","level":1} -->
-		<h1 class="wp-block-heading has-text-align-center">Pardon our dust! We\'re working on something amazing -- check back soon!</h1>
+		<h1 class="wp-block-heading has-text-align-center">%s</h1>
 		<!-- /wp:heading -->
 		
 		<!-- wp:spacer -->
 		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 		<!-- /wp:spacer --></div>
-		<!-- /wp:group -->';
+		<!-- /wp:group -->', $heading);
 	}
 
 	/**
