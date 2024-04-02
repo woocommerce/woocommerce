@@ -68,7 +68,7 @@ abstract class CustomMetaDataStore {
 	public function read_meta( &$object ) {
 		$raw_meta_data = $this->get_meta_data_for_object_ids( array( $object->get_id() ) );
 
-		return !empty( $raw_meta_data[ $object->get_id() ] ) ? $raw_meta_data[ $object->get_id() ] : array();
+		return isset( $raw_meta_data[ $object->get_id() ] ) ? (array) $raw_meta_data[ $object->get_id() ] : array();
 	}
 
 	/**
@@ -93,7 +93,7 @@ abstract class CustomMetaDataStore {
 			$db_info['table'],
 			array(
 				$db_info['meta_id_field']   => $meta_id,
-				$db_info['object_id_field'] => $object->get_id()
+				$db_info['object_id_field'] => $object->get_id(),
 			)
 		);
 		if ( $successful ) {
@@ -301,10 +301,11 @@ abstract class CustomMetaDataStore {
 		}
 
 		$id_placeholder   = implode( ', ', array_fill( 0, count( $uncached_order_ids ), '%d' ) );
-		$meta_table = $this->get_table_name();
+		$meta_table       = $this->get_table_name();
 		$object_id_column = $this->get_object_id_field();
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $object_id_column and $meta_table is hardcoded. IDs are prepared above.
-		$meta_rows        = $wpdb->get_results(
+		$meta_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, $object_id_column as object_id, meta_key, meta_value FROM $meta_table WHERE $object_id_column in ( $id_placeholder )",
 				$ids

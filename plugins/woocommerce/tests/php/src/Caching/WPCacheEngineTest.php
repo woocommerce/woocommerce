@@ -59,7 +59,7 @@ class WPCacheEngineTest extends \WC_Unit_Test_Case {
 
 		$this->sut->cache_objects(
 			[
-				$key => $cached_obj,
+				$key  => $cached_obj,
 				$key2 => $object_to_cache2
 			],
 			HOUR_IN_SECONDS,
@@ -72,11 +72,11 @@ class WPCacheEngineTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $object_to_cache2->prop1, $cached_obj2->prop1 );
 		$this->assertEquals( $object_to_cache2->prop2, $cached_obj2->prop2 );
 
-		$cached_objects = $this->sut->get_cached_objects([$key, $key2], $group);
-		$this->assertArrayHasKey($key, $cached_objects);
+		$cached_objects = $this->sut->get_cached_objects( [ $key, $key2 ], $group );
+		$this->assertArrayHasKey( $key, $cached_objects );
 		$this->assertEquals( $object_to_cache->prop1, $cached_objects[ $key ]->prop1 );
 		$this->assertEquals( $object_to_cache->prop2, $cached_objects[ $key ]->prop2 );
-		$this->assertArrayHasKey($key2, $cached_objects);
+		$this->assertArrayHasKey( $key2, $cached_objects );
 		$this->assertEquals( $object_to_cache2->prop1, $cached_objects[ $key2 ]->prop1 );
 		$this->assertEquals( $object_to_cache2->prop2, $cached_objects[ $key2 ]->prop2 );
 	}

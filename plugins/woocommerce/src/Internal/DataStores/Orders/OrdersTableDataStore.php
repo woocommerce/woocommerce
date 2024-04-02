@@ -539,7 +539,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Delete cached order data for the given object_ids.
 	 *
-	 * @param array $object_ids
+	 * @param array $object_ids The IDs of the orders to remove cache.
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.

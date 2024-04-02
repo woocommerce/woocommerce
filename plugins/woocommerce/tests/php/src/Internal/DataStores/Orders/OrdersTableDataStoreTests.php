@@ -3357,7 +3357,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->add_meta_data( 'extra_meta_key', 'standard_meta', true ); // trigger a meta cache purge
+		$order->add_meta_data( 'extra_meta_key', 'standard_meta', true ); // Trigger a meta cache purge since the above was a direct DB write.
 		$order->save();
 
 		// Test fetching an order with meta data containing an object of a non-existent class.

@@ -15,6 +15,7 @@ class OrdersTableDataStoreMeta extends CustomMetaDataStore {
 
 	/**
 	 * Returns the cache group to store cached data in.
+	 *
 	 * @return string
 	 */
 	protected function get_cache_group() {

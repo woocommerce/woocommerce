@@ -182,7 +182,7 @@ class LegacyDataHandlerTests extends WC_Unit_Test_Case {
 
 		// Backfill to the destination.
 		$this->sut->backfill_order_to_datastore( $order->get_id(), $source_data_store, $destination_data_store );
-		
+
 		// Confirm data is now the same.
 		$order_from_dest = $this->sut->get_order_from_datastore( $order->get_id(), $destination_data_store );
 		$this->assertEquals( $order_from_source->get_billing_first_name(), $order_from_dest->get_billing_first_name() );
