@@ -173,7 +173,7 @@ class LaunchYourStore {
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
 				$store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content(),
 			);
-			// Make sure the page uses the no-title template.
+			// Make sure the page uses the no-title template. This only works for Twenty twenty-four and is temporary.
 			update_post_meta( $page_id, '_wp_page_template', 'page-no-title' );
 			// wc_create_page doesn't create options with autoload = yes.
 			// Since we'll querying the option on WooCommerce home,
