@@ -32,7 +32,7 @@ const Option = ( {
 						checked,
 				},
 				{
-					'wc-block-components-radio-control__option-checked-option-highlighted':
+					'wc-block-components-radio-control__option--checked-option-highlighted':
 						checked && highlightChecked,
 				}
 			) }
