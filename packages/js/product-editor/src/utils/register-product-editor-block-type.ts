@@ -56,6 +56,12 @@ export function registerProductEditorBlockType<
 		usesContext: augmentUsesContext( metadata.usesContext ),
 	};
 
+	// @ts-ignore No type for this propety yet.
+	if ( ! settings.view ) {
+		// @ts-ignore No type for this propety yet.
+		settings.view = settings.edit;
+	}
+
 	return registerWooBlockType(
 		{
 			name,
