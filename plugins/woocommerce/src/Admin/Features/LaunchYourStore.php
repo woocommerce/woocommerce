@@ -53,34 +53,28 @@ class LaunchYourStore {
 		}
 	}
 
-	// public function get_coming_soon_content() {
-	// 	return '<!-- wp:group {"layout":{"type":"constrained"}} -->
-	// 	<div class="wp-block-group"><!-- wp:spacer -->
-	// 	<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-	// 	<!-- /wp:spacer -->
+	public function get_coming_soon_content() {
+		return '<!-- wp:group {"layout":{"type":"constrained"}} -->
+		<div class="wp-block-group"><!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer -->
 		
-	// 	<!-- wp:heading {"textAlign":"center","level":1} -->
-	// 	<h1 class="wp-block-heading has-text-align-center">Great things coming soon</h1>
-	// 	<!-- /wp:heading -->
+		<!-- wp:heading {"textAlign":"center","level":1} -->
+		<h1 class="wp-block-heading has-text-align-center">Great things coming soon</h1>
+		<!-- /wp:heading -->
 		
-	// 	<!-- wp:spacer {"height":"10px"} -->
-	// 	<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
-	// 	<!-- /wp:spacer -->
+		<!-- wp:spacer {"height":"10px"} -->
+		<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer -->
 		
-	// 	<!-- wp:paragraph {"align":"center"} -->
-	// 	<p class="has-text-align-center">Something big is brewing! Our store is in the works - Launching shortly!</p>
-	// 	<!-- /wp:paragraph -->
+		<!-- wp:paragraph {"align":"center"} -->
+		<p class="has-text-align-center">Something big is brewing! Our store is in the works - Launching shortly!</p>
+		<!-- /wp:paragraph -->
 		
-	// 	<!-- wp:spacer -->
-	// 	<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-	// 	<!-- /wp:spacer --></div>
-	// 	<!-- /wp:group -->';
-	// }
-
-	public function get_coming_soon_content( $store_pages_only ) {
-		return '<!-- wp:woocommerce/coming-soon -->
-		<div class="wp-block-woocommerce-coming-soon"><div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div><h1 class="wp-block-heading has-text-align-center">Great things coming soon</h1><div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div><p class="has-text-align-center">Something big is brewing! Our store is in the works - Launching shortly!</p><div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div></div>
-		<!-- /wp:woocommerce/coming-soon -->';
+		<!-- wp:spacer -->
+		<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+		<!-- /wp:spacer --></div>
+		<!-- /wp:group -->';
 	}
 
 	/**
