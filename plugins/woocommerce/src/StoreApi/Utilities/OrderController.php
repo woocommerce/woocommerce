@@ -168,7 +168,7 @@ class OrderController {
 	 */
 	public function validate_order_before_payment( \WC_Order $order ) {
 		$needs_shipping          = wc()->cart->needs_shipping();
-		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods' );
+		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods', [] );
 
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
@@ -549,18 +549,30 @@ class OrderController {
 	 * @param array   $chosen_shipping_methods Array of shipping methods.
 	 */
 	public function validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods = array() ) {
-		if ( ! $needs_shipping || ! is_array( $chosen_shipping_methods ) ) {
+		if ( ! $needs_shipping ) {
 			return;
 		}
 
+		$exception = new RouteException(
+			'woocommerce_rest_invalid_shipping_option',
+			__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
+			400,
+			array()
+		);
+
+		if ( ! is_array( $chosen_shipping_methods ) || empty( $chosen_shipping_methods ) ) {
+			throw $exception;
+		}
+
+		$valid_methods = array_keys( WC()->shipping()->get_shipping_methods() );
+
 		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
-			if ( false === $chosen_shipping_method ) {
-				throw new RouteException(
-					'woocommerce_rest_invalid_shipping_option',
-					__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
-					400,
-					array()
-				);
+			if (
+				false === $chosen_shipping_method ||
+				! is_string( $chosen_shipping_method ) ||
+				! in_array( current( explode( ':', $chosen_shipping_method ) ), $valid_methods, true )
+			) {
+				throw $exception;
 			}
 		}
 	}
