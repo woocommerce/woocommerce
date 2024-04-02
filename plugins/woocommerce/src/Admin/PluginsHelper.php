@@ -574,12 +574,25 @@ class PluginsHelper {
 		);
 		echo '<script type="text/javascript">
 				jQuery( document ).ready( function() {
+					// hide the notice when the customer clicks the dismiss button up until 1 month, then it will be shown again.
 					const wooConnectNoticeSelector = ".woo-connect-notice";
+
 					jQuery( wooConnectNoticeSelector ).on( "click", "button.notice-dismiss", function() {
-						localStorage.setItem("woo-connect-notice-dismissed", "true");
+						localStorage.setItem("woo-connect-notice-dismissed", (new Date() ).toString() );
 					});
 
-					if ( localStorage.getItem("woo-connect-notice-dismissed") === "true" ) {
+					let shouldHideNotice = false;
+
+					const savedDismissedDate = localStorage.getItem("woo-connect-notice-dismissed");
+					const parsedDismissedDate = new Date(savedDismissedDate);
+					const aMonthAgo = new Date();
+					aMonthAgo.setMonth(aMonthAgo.getMonth() - 1);
+
+					if ( savedDismissedDate && ( aMonthAgo.valueOf() < parsedDismissedDate.valueOf() ) ) {
+						shouldHideNotice = true;
+					}
+
+					if ( shouldHideNotice ) {
 						jQuery( wooConnectNoticeSelector ).remove();
 					}
 				});
