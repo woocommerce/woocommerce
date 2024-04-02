@@ -230,11 +230,6 @@ export const Transitional = ( {
 											className=""
 											variant="tertiary"
 											onClick={ () => {
-												recordEvent(
-													isWooExpress
-														? 'launch_you_store_transitional_survey_click'
-														: 'launch_you_store_on_core_transitional_survey_click'
-												);
 												setEmojiValue( null );
 											} }
 										>

@@ -33,7 +33,7 @@ export const assignCompleteSurvey = {
 		context: MainContentMachineContext;
 	} ) => {
 		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_admin_customize_store_survey_completed: 'yes',
+			woocommerce_admin_launch_your_store_survey_completed: 'yes',
 		} );
 
 		return {

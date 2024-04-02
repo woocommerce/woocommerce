@@ -11,6 +11,11 @@
 	width: 100vw;
 	height: 100vh;
 
+	// Temporary
+	.edit-site-layout__hub {
+		margin-top: 64px;
+	}
+
 	.woocommerce-launch-store__transitional-content {
 		display: flex;
 		flex-direction: column;
@@ -62,7 +67,7 @@
 		font-style: normal;
 		font-weight: 500;
 		line-height: 24px; /* 120% */
-		margin-top: 100px;
+		margin-top: 50px;
 		margin-bottom: 40px;
 	}
 
