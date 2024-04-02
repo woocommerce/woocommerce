@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Label, Panel } from '@woocommerce/blocks-components';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
@@ -104,6 +104,12 @@ export const ShippingRatesControlPackage = ( {
 		disabled: isSelectingRate,
 	};
 
+	const selectedOptionNumber = useMemo( () => {
+		return packageData?.shipping_rates?.findIndex(
+			( rate ) => rate?.selected
+		);
+	}, [ packageData?.shipping_rates ] );
+
 	if ( shouldBeCollapsible ) {
 		return (
 			<Panel
@@ -135,6 +141,16 @@ export const ShippingRatesControlPackage = ( {
 				{
 					'wc-block-components-shipping-rates-control__package--disabled':
 						isSelectingRate,
+				},
+				{
+					'wc-block-components-shipping-rates-control__package--first-selected':
+						! isSelectingRate && selectedOptionNumber === 0,
+				},
+				{
+					'wc-block-components-shipping-rates-control__package--last-selected':
+						! isSelectingRate &&
+						selectedOptionNumber ===
+							packageData?.shipping_rates?.length - 1,
 				}
 			) }
 		>
