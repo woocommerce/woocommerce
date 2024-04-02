@@ -106,7 +106,7 @@ class LaunchYourStore {
 	public function maybe_add_coming_soon_banner_on_frontend() {
 		// User must be an admin or editor.
 		// phpcs:ignore
-		if ( ! current_user_can( 'editor' ) && ! current_user_can( 'administrator' ) ) {
+		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
 			return false;
 		}
 
