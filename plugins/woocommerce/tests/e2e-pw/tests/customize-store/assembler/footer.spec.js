@@ -139,18 +139,11 @@ test.describe( 'Assembler -> Footers', () => {
 		} );
 	} );
 
-	test.only( 'Picking a footer should trigger an update on the site preview', async ( {
+	test( 'Picking a footer should trigger an update on the site preview', async ( {
 		assemblerPage,
 	}, testInfo ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const editor = await assemblerPage.getEditor();
-		testInfo.snapshotSuffix = '';
-
-		const footers = [
-			'wc-blocks-pattern-footer-with-3-menus',
-			'wc-blocks-pattern-footer-simple-menu',
-			'wc-blocks-pattern-footer-large',
-		];
 
 		await assembler
 			.locator( '.block-editor-block-patterns-list__list-item' )
@@ -167,14 +160,30 @@ test.describe( 'Assembler -> Footers', () => {
 			await footerPicker.waitFor();
 			await footerPicker.click();
 
+			const footerPickerClass = await footerPicker
+				.frameLocator( 'iframe' )
+				.locator( '.wc-blocks-footer-pattern' )
+				.getAttribute( 'class' );
+
+			const expectedFooterClass = extractFooterClass( footerPickerClass );
+
 			const footerPattern = await editor.locator(
 				`footer div.wc-blocks-footer-pattern`
 			);
-			const footerClasses = await footerPattern.getAttribute( 'class' );
 
-			await expect( footerClasses ).toContain( footers[ index ] );
+			await expect(
+				await footerPattern.getAttribute( 'class' )
+			).toContain( expectedFooterClass );
 
 			index++;
 		}
 	} );
 } );
+
+const extractFooterClass = ( footerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-footer\S*/;
+
+	const match = footerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
