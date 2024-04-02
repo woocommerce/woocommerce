@@ -1142,6 +1142,8 @@ WHERE
 			return array();
 		}
 
+		$order_rows =  $this->get_order_data_for_ids($order_ids);
+		
 		$orders_table          = self::get_orders_table_name();
 		$order_ids_placeholder = implode( ', ', array_fill( 0, count( $order_ids ), '%d' ) );
 

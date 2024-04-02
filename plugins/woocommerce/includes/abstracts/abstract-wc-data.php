@@ -635,7 +635,6 @@ abstract class WC_Data {
 			$cache_key = $this->get_meta_cache_key();
 		}
 
-		// @todo For COT orders, we cache meta in the MetaDataStore - we may need to bypass or remove this caching.
 		if ( ! $force_read ) {
 			if ( ! empty( $this->cache_group ) ) {
 				$cached_meta  = wp_cache_get( $cache_key, $this->cache_group );

@@ -16,6 +16,7 @@ abstract class CustomMetaDataStore {
 
 	/**
 	 * Returns the cache group to store cached data in.
+	 *
 	 * @return string
 	 */
 	abstract protected function get_cache_group();
@@ -67,7 +68,7 @@ abstract class CustomMetaDataStore {
 	public function read_meta( &$object ) {
 		$raw_meta_data = $this->get_meta_data_for_object_ids( array( $object->get_id() ) );
 
-		return $raw_meta_data[ $object->get_id() ] ?: array();
+		return !empty( $raw_meta_data[ $object->get_id() ] ) ? $raw_meta_data[ $object->get_id() ] : array();
 	}
 
 	/**
@@ -88,7 +89,13 @@ abstract class CustomMetaDataStore {
 		$db_info = $this->get_db_info();
 		$meta_id = absint( $meta->id );
 
-		$successful = (bool) $wpdb->delete( $db_info['table'], array( $db_info['meta_id_field'] => $meta_id, $db_info['object_id_field'] => $object->get_id() ) );
+		$successful = (bool) $wpdb->delete(
+			$db_info['table'],
+			array(
+				$db_info['meta_id_field']   => $meta_id,
+				$db_info['object_id_field'] => $object->get_id()
+			)
+		);
 		if ( $successful ) {
 			$this->delete_cache_for_objects( array( $object->get_id() ) );
 		}
@@ -125,7 +132,7 @@ abstract class CustomMetaDataStore {
 		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_value,WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
 		$insert_id = $result ? (int) $wpdb->insert_id : false;
-		if ( $insert_id !== false ) {
+		if ( false !== $insert_id ) {
 			$this->delete_cache_for_objects( array( $object->get_id() ) );
 		}
 		return $insert_id;
@@ -156,7 +163,10 @@ abstract class CustomMetaDataStore {
 		$result = $wpdb->update(
 			$this->get_table_name(),
 			$data,
-			array( $this->get_meta_id_field() => $meta->id, $this->get_object_id_field() => $object->get_id() ),
+			array(
+				$this->get_meta_id_field()   => $meta->id,
+				$this->get_object_id_field() => $object->get_id(),
+			),
 			'%s',
 			'%d'
 		);
@@ -271,14 +281,20 @@ abstract class CustomMetaDataStore {
 		return $wpdb->get_col( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared.
 	}
 
-
+	/**
+	 * Return order meta data for multiple IDs. Results are cached.
+	 *
+	 * @param array $ids List of order IDs.
+	 *
+	 * @return \stdClass[] DB Order objects or error.
+	 */
 	public function get_meta_data_for_object_ids( array $ids ): array {
 		global $wpdb;
 
 		/** @var $cache_engine WPCacheEngine */
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
-		$meta_data = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
-		$meta_data = array_filter( $meta_data );
+		$meta_data          = $cache_engine->get_cached_objects( $ids, $this->get_cache_group() );
+		$meta_data          = array_filter( $meta_data );
 		$uncached_order_ids = array_diff( $ids, array_keys( $meta_data ) );
 
 		if ( empty( $uncached_order_ids ) ) {
@@ -289,6 +305,7 @@ abstract class CustomMetaDataStore {
 		$meta_table = $this->get_table_name();
 		$object_id_column = $this->get_object_id_field();
 		$meta_rows        = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $object_id_column and $meta_table is hardcoded. IDs are prepared above.
 			$wpdb->prepare(
 				"SELECT id, $object_id_column as object_id, meta_key, meta_value FROM $meta_table WHERE $object_id_column in ( $id_placeholder )",
 				$ids
@@ -301,8 +318,8 @@ abstract class CustomMetaDataStore {
 			}
 			$meta_data[ $meta_row->object_id ][] = (object) array(
 				'meta_id'    => $meta_row->id,
-				'meta_key'   => $meta_row->meta_key,
-				'meta_value' => $meta_row->meta_value,
+				'meta_key'   => $meta_row->meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => $meta_row->meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			);
 		}
 		$cache_engine->cache_objects( $meta_data, 0, $this->get_cache_group() );

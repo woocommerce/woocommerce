@@ -31,7 +31,7 @@ class WPCacheEngine implements CacheEngine {
 	 * @return array The cached array of objects keyed by the given keys, values will be null for any non-cached keys.
 	 */
 	public function get_cached_objects( array $keys, string $group = '' ) {
-		$prefix = self::get_cache_prefix($group);
+		$prefix  = self::get_cache_prefix( $group );
 		$key_map = array_combine(
 			$keys,
 			array_map(
@@ -45,7 +45,7 @@ class WPCacheEngine implements CacheEngine {
 		$cached_values = wp_cache_get_multiple( array_values( $key_map ), $group );
 		$return_values = array();
 		foreach ( $key_map as $key => $prefixed_key ) {
-			if ( isset( $cached_values[ $prefixed_key ] ) && $cached_values[ $prefixed_key ] !== false ) {
+			if ( isset( $cached_values[ $prefixed_key ] ) && false !== $cached_values[ $prefixed_key ] ) {
 				$return_values[ $key ] = $cached_values[ $prefixed_key ];
 			} else {
 				$return_values[ $key ] = null;
@@ -74,8 +74,8 @@ class WPCacheEngine implements CacheEngine {
 	/**
 	 * Caches an object under a given key, and with a given expiration.
 	 *
-	 * @param array $objects The objects to cache keyed by the key to cache under.
-	 * @param int   $expiration Expiration for the cached object, in seconds.
+	 * @param array  $objects The objects to cache keyed by the key to cache under.
+	 * @param int    $expiration Expiration for the cached object, in seconds.
 	 * @param string $group The group under which the object will be cached.
 	 *
 	 * @return array Array of return values, grouped by key. Each value is either
