@@ -183,11 +183,14 @@ test.describe( 'Assembler -> Homepage', () => {
 			.locator(
 				'//header/following-sibling::*[following-sibling::footer]'
 			)
-			.innerHTML();
+			.all();
 
-		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( homepageHTML ).toMatchSnapshot( {
-			name: 'cys-selected-homepage-frontend',
-		} );
+		let index = 0;
+		for ( const element of homepageHTML ) {
+			await expect( await element.innerHTML() ).toMatchSnapshot( {
+				name: `selected-homepage-blocks-frontend-${ index }`,
+			} );
+			index++;
+		}
 	} );
 } );
