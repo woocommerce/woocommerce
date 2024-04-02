@@ -200,11 +200,13 @@ baseTest.describe( 'Products > Related products', () => {
 
 		await updateProduct( page );
 
-		await test.step( 'verify the up-sell in the store frontend', async () => {
+		await test.step( 'verify the cross-sell in the store frontend', async () => {
 			await page.goto( products.main.permalink );
 
 			// add to cart and view proceed to checkout
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add to cart', exact: true } )
+				.click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 
 			// check for cross-sells
@@ -255,7 +257,9 @@ baseTest.describe( 'Products > Related products', () => {
 			await page.goto( products.main.permalink );
 
 			// add to cart and view proceed to checkout
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add to cart', exact: true } )
+				.click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 
 			// check for cross-sells
