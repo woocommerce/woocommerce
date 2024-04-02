@@ -21,6 +21,7 @@ import {
 	LocalPickupUtils,
 	MiniCartUtils,
 	WPCLIUtils,
+	cli,
 } from '@woocommerce/e2e-utils';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 
@@ -158,6 +159,12 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
+
+		console.time( 'DB reset time' );
+		await cli(
+			'cat wp_e2e_backup.sql | docker exec -i $(docker ps -aqf name=tests-mysql) mysql -u root -ppassword tests-wordpress'
+		);
+		console.timeEnd( 'DB reset time' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
