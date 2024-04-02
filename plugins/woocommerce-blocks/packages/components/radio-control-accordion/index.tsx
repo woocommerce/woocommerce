@@ -8,6 +8,7 @@ import { withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { RadioControlOption } from '../radio-control';
+import { useMemo } from '@wordpress/element';
 
 export interface RadioControlAccordionProps {
 	className?: string;
@@ -37,6 +38,10 @@ const RadioControlAccordion = ( {
 }: RadioControlAccordionProps ): JSX.Element | null => {
 	const radioControlId = id || instanceId;
 
+	const selectedOptionNumber = useMemo( () => {
+		return options.findIndex( ( option ) => option.value === selected );
+	}, [ options, selected ] );
+
 	if ( ! options.length ) {
 		return null;
 	}
@@ -44,6 +49,12 @@ const RadioControlAccordion = ( {
 		<div
 			className={ classnames(
 				'wc-block-components-radio-control',
+				{
+					'wc-block-components-radio-control--highlight-checked':
+						highlightChecked,
+					'wc-block-components-radio-control--highlight-checked--first-selected':
+						highlightChecked && selectedOptionNumber === 0,
+				},
 				className
 			) }
 		>
