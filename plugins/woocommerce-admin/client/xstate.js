@@ -27,7 +27,7 @@ async function enableXStateV4Inspect() {
  */
 let XStateV5Inspect;
 async function enableXStateV5Inspect() {
-	const { createBrowserInspector } = await import( '@statelyai/inspect' );
+	const { createBrowserInspector } = require( '@statelyai/inspect' );
 	XStateV5Inspect = createBrowserInspector;
 	// eslint-disable-next-line no-console
 	console.log(
@@ -55,7 +55,11 @@ if ( isDevelopmentEnvironment && isXStateInspectEnabled ) {
 
 export const useXStateInspect = ( machineVersion ) => {
 	let xstateV5Inspector;
-	if ( isXStateV5InspectEnabled && machineVersion === 'V5' ) {
+	if (
+		isDevelopmentEnvironment &&
+		isXStateV5InspectEnabled &&
+		machineVersion === 'V5'
+	) {
 		xstateV5Inspector = XStateV5Inspect().inspect;
 	}
 
