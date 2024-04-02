@@ -36,6 +36,23 @@
 			margin-bottom: 2px;
 		}
 	}
+
+	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option {
+		border-top: 0;
+	}
+
+	.wc-block-components-radio-control__option {
+		border-bottom: 0;
+		border-top: 1px solid $universal-border-light;
+
+		&:first-child {
+			border-top: 1px solid transparent;
+		}
+
+		&:last-child {
+			border-bottom: 1px solid $universal-border-light;;
+		}
+	}
 }
 
 .wc-block-components-radio-control__option {
