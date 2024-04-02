@@ -8,6 +8,8 @@ import { registerProductEditorBlockType } from '../../../utils';
  */
 import blockConfiguration from './block.json';
 import { SectionBlockEdit } from './edit';
+import Save from './save';
+import { View } from './view';
 
 const { name, ...metadata } = blockConfiguration;
 
@@ -16,6 +18,8 @@ export { metadata, name };
 export const settings = {
 	example: {},
 	edit: SectionBlockEdit,
+	save: Save,
+	view: View,
 };
 
 export function init() {
