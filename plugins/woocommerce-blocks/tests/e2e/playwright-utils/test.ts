@@ -160,11 +160,11 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		console.time( 'DB reset time' );
+		console.time( 'Database reset time' );
 		await cli(
 			'cat wp_e2e_backup.sql | docker exec -i $(docker ps -aqf name=tests-mysql) mysql -u root -ppassword tests-wordpress'
 		);
-		console.timeEnd( 'DB reset time' );
+		console.timeEnd( 'Database reset time' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );

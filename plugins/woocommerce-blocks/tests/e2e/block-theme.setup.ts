@@ -21,4 +21,10 @@ setup( 'Sets up the block theme', async () => {
 
 	expect( cliOutput.stdout ).toContain( 'Success: Rewrite structure set' );
 	expect( cliOutput.stdout ).toContain( 'Success: Rewrite rules flushed' );
+
+	console.time( 'Database dump time' );
+	await cli(
+		'docker exec $(docker ps -aqf name=tests-mysql) mysqldump --column-statistics=0 -u root -ppassword tests-wordpress > wp_e2e_backup.sql'
+	);
+	console.timeEnd( 'Database dump time' );
 } );

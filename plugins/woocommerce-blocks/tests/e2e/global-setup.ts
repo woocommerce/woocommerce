@@ -96,7 +96,6 @@ async function globalSetup() {
 		total: '└ Total time',
 		authentication: '├ Authentication time',
 		attributes: '├ Attributes preparation time',
-		dbdump: '├ Database dump time',
 	};
 
 	console.log( 'Running global setup...' );
@@ -120,12 +119,6 @@ async function globalSetup() {
 	console.time( timers.attributes );
 	await prepareAttributes();
 	console.timeEnd( timers.attributes );
-
-	console.time( timers.dbdump );
-	await cli(
-		'docker exec $(docker ps -aqf name=tests-mysql) mysqldump --column-statistics=0 -u root -ppassword tests-wordpress > wp_e2e_backup.sql'
-	);
-	console.timeEnd( timers.dbdump );
 
 	await requestContext.dispose();
 	console.timeEnd( timers.total );
