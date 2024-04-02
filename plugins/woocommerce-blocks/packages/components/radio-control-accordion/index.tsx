@@ -53,7 +53,13 @@ const RadioControlAccordion = ( {
 				const checked = option.value === selected;
 				return (
 					<div
-						className="wc-block-components-radio-control-accordion-option"
+						className={ classnames(
+							'wc-block-components-radio-control-accordion-option',
+							{
+								'wc-block-components-radio-control-accordion-option__checked-option-highlighted':
+									checked && highlightChecked,
+							}
+						) }
 						key={ option.value }
 					>
 						<RadioControlOption
