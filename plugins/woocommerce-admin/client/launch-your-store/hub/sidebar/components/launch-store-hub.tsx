@@ -5,7 +5,7 @@
  */
 import classnames from 'classnames';
 import { createInterpolateElement, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
@@ -31,7 +31,11 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	props
 ) => {
 	const {
-		context: { tasklist, removeTestOrders: removeTestOrdersContext },
+		context: {
+			tasklist,
+			removeTestOrders: removeTestOrdersContext,
+			testOrderCount,
+		},
 	} = props;
 
 	const sidebarTitle = (
@@ -139,24 +143,35 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 						</SidebarNavigationItem>
 					) }
 				</ItemGroup>
-				<div className="edit-site-sidebar-navigation-screen-test-data__group-header">
-					<Heading level={ 2 }>
-						{ __( 'Test data', 'woocommerce' ) }
-					</Heading>
-				</div>
-				<ItemGroup className="edit-site-sidebar-navigation-screen-remove-test-data__group">
-					<ToggleControl
-						label={ __( 'Remove 20 test orders', 'woocommerce' ) }
-						checked={ removeTestOrders }
-						onChange={ setRemoveTestOrder }
-					/>
-					<p>
-						{ __(
-							'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
-							'woocommerce'
-						) }
-					</p>
-				</ItemGroup>
+				{ testOrderCount > 0 && (
+					<>
+						<div className="edit-site-sidebar-navigation-screen-test-data__group-header">
+							<Heading level={ 2 }>
+								{ __( 'Test data', 'woocommerce' ) }
+							</Heading>
+						</div>
+						<ItemGroup className="edit-site-sidebar-navigation-screen-remove-test-data__group">
+							<ToggleControl
+								label={ sprintf(
+									// translators: %d is the number of test orders
+									__(
+										'Remove %d test orders',
+										'woocommerce'
+									),
+									testOrderCount
+								) }
+								checked={ removeTestOrders }
+								onChange={ setRemoveTestOrder }
+							/>
+							<p>
+								{ __(
+									'Remove test orders and associated data, including analytics and transactions, once your store goes live. ',
+									'woocommerce'
+								) }
+							</p>
+						</ItemGroup>
+					</>
+				) }
 				<ItemGroup className="edit-site-sidebar-navigation-screen-launch-store-button__group">
 					<Button
 						variant="primary"

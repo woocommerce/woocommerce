@@ -32,6 +32,7 @@ export type SidebarMachineContext = {
 	externalUrl: string | null;
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
 	tasklist?: TaskListType;
+	testOrderCount: number;
 	removeTestOrders?: boolean;
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
@@ -142,6 +143,7 @@ export const sidebarMachine = setup( {
 	initial: 'navigate',
 	context: ( { input } ) => ( {
 		externalUrl: null,
+		testOrderCount: 0,
 		mainContentMachineRef: input.mainContentMachineRef,
 	} ),
 	invoke: {
