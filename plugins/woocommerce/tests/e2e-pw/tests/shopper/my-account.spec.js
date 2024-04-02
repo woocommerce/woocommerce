@@ -1,61 +1,41 @@
 const { test, expect } = require( '@playwright/test' );
 const { customer } = require( '../../test-data/data' );
 
-const pages = [
-	[ 'Orders', 'my-account/orders' ],
-	[ 'Downloads', 'my-account/downloads' ],
-	[ 'Addresses', 'my-account/edit-address' ],
-	[ 'Account details', 'my-account/edit-account' ],
-];
+const pages = [ 'Orders', 'Downloads', 'Addresses', 'Account details' ];
 
 test.describe( 'My account page', () => {
 	test.use( { storageState: process.env.CUSTOMERSTATE } );
 
-	test( 'allows customer to login', async ( { page } ) => {
+	test( 'allows customer to login and navigate', async ( { page } ) => {
 		await page.goto( 'my-account/' );
 
-		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-			'My account'
-		);
 		await expect(
-			page.locator( 'div.woocommerce-MyAccount-content > p >> nth=0' )
-		).toContainText( `${ customer.first_name } ${ customer.last_name }` );
+			page.getByRole( 'heading', { name: 'My account' } )
+		).toBeVisible();
+		await expect(
+			page.getByText(
+				`Hello ${ customer.first_name } ${ customer.last_name }`
+			)
+		).toBeVisible();
 
-		// assert that navigation is visible
-		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link--dashboard' )
-		).toContainText( 'Dashboard' );
-		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link--orders' )
-		).toContainText( 'Orders' );
-		await expect(
-			page.locator( '.woocommerce-MyAccount-navigation-link--downloads' )
-		).toContainText( 'Downloads' );
-		await expect(
-			page.locator(
-				'.woocommerce-MyAccount-navigation-link--edit-address'
-			)
-		).toContainText( 'Addresses' );
-		await expect(
-			page.locator(
-				'.woocommerce-MyAccount-navigation-link--edit-account'
-			)
-		).toContainText( 'Account details' );
-		await expect(
-			page.locator(
-				'.woocommerce-MyAccount-navigation-link--customer-logout'
-			)
-		).toContainText( 'Log out' );
-	} );
+		for ( const accountPage of pages ) {
+			await test.step( `customer can navigate to ${ accountPage } page`, async () => {
+				await page
+					.getByRole( 'link', { name: accountPage, exact: true } )
+					.click();
+				await expect(
+					page.getByRole( 'heading', { name: accountPage } )
+				).toBeVisible();
+			} );
+		}
 
-	for ( let i = 0; i < pages.length; i++ ) {
-		test( `allows customer to see ${ pages[ i ][ 0 ] } page`, async ( {
-			page,
-		} ) => {
-			await page.goto( pages[ i ][ 1 ] );
-			await expect( page.locator( 'h1.entry-title' ) ).toContainText(
-				pages[ i ][ 0 ]
-			);
+		await test.step( `customer can log out`, async () => {
+			await page
+				.getByRole( 'link', { name: 'Log out', exact: true } )
+				.click();
+			await expect(
+				page.getByRole( 'heading', { name: 'Login' } )
+			).toBeVisible();
 		} );
-	}
+	} );
 } );
