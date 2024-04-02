@@ -93,7 +93,7 @@
 	@include font-size(small);
 	display: block;
 	list-style: none;
-	margin: 0;
+	margin: 0 0 $gap-small 0;
 	padding: 0;
 }
 
