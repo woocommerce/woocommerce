@@ -4,7 +4,6 @@
 import { Page } from '@playwright/test';
 import { Admin } from '@wordpress/e2e-test-utils-playwright';
 import { cli } from '@woocommerce/e2e-utils';
-import { Notice } from '@wordpress/notices';
 
 type Location = {
 	name: string;
