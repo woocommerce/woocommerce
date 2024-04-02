@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Cloudflare is widely used with WooCommerce sites and this speeds up and makes geolocation more reliable.
+
