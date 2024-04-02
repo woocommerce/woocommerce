@@ -55,22 +55,31 @@ class LaunchYourStore {
 	}
 
 	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
+		// If the post request does'nt contain the store pages only parameter, return.
 		if ( ! isset( $next_store_pages_only ) ) {
 			return;
 		}
 
-		$option_name = 'woocommerce_store_pages_only';
+		$option_name              = 'woocommerce_store_pages_only';
 		$current_store_pages_only = get_option( $option_name, null );
 
+		// If the current and next store pages only values are the same, return.
 		if ( $current_store_pages_only && $current_store_pages_only === $next_store_pages_only ) {
 			return;
 		}
 
+		$page_id   = get_option( 'woocommerce_coming_soon_page_id' );
+		$revisions = wp_get_post_revisions( $page_id );
 
-		$page_id  = get_option( 'woocommerce_coming_soon_page_id' );
+		// If the page has revisions, do not modify the content and return.
+		if ( count( $revisions ) > 1 ) {
+			return;
+		}
 		
 		if ( $page_id ) {
-			$page_content = 'yes' === $next_store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content();
+			$page_content = 'yes' === $next_store_pages_only 
+				? $this->get_store_only_coming_soon_content() 
+				: $this->get_entire_site_coming_soon_content();
 			wp_update_post(
 				array(
 					'ID'           => $page_id,
