@@ -4,9 +4,9 @@ const { activateTheme } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
-	pageObject: async ( { page }, use ) => {
-		const pageObject = new AssemblerPage( { page } );
-		await use( pageObject );
+	assemblerPage: async ( { page }, use ) => {
+		const assemblerPage = new AssemblerPage( { page } );
+		await use( assemblerPage );
 	},
 } );
 
@@ -49,15 +49,17 @@ test.describe( 'Assembler -> Footers', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
+	test.beforeEach( async ( { baseURL, assemblerPage } ) => {
+		await assemblerPage.setupSite( baseURL );
+		await assemblerPage.waitForLoadingScreenFinish();
+		const assembler = await assemblerPage.getAssembler();
 		await assembler.getByText( 'Choose your footer' ).click();
 	} );
 
-	test( 'Available footers should be displayed', async ( { pageObject } ) => {
-		const assembler = await pageObject.getAssembler();
+	test( 'Available footers should be displayed', async ( {
+		assemblerPage,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
 
 		const footers = assembler.locator(
 			'.block-editor-block-patterns-list__list-item'
@@ -67,9 +69,9 @@ test.describe( 'Assembler -> Footers', () => {
 	} );
 
 	test( 'The selected footer should be focused when is clicked', async ( {
-		pageObject,
+		assemblerPage,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const footer = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 2 );
@@ -79,10 +81,10 @@ test.describe( 'Assembler -> Footers', () => {
 	} );
 
 	test( 'The Done button should be visible after clicking save', async ( {
-		pageObject,
+		assemblerPage,
 		page,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const footer = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 2 );
@@ -104,12 +106,12 @@ test.describe( 'Assembler -> Footers', () => {
 	} );
 
 	test( 'Selected footer should be applied on the frontend', async ( {
-		pageObject,
+		assemblerPage,
 		page,
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const footer = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 2 );
@@ -129,9 +131,7 @@ test.describe( 'Assembler -> Footers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const footerHTML = await page
-			.locator( 'footer' )
-			.innerHTML();
+		const footerHTML = await page.locator( 'footer' ).innerHTML();
 
 		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 		expect( footerHTML ).toMatchSnapshot( {
