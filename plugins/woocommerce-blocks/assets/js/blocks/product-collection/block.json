@@ -38,6 +38,13 @@
 		"forcePageReload": {
 			"type": "boolean",
 			"default": false
+		},
+		"previewState": {
+			"type": "object",
+			"default": {
+				"isPreview": false,
+				"previewMessage": ""
+			}
 		}
 	},
 	"providesContext": {
@@ -45,7 +52,8 @@
 		"query": "query",
 		"displayLayout": "displayLayout",
 		"queryContextIncludes": "queryContextIncludes",
-		"collection": "collection"
+		"collection": "collection",
+		"productCollectionPreviewState": "previewState"
 	},
 	"supports": {
 		"align": [ "wide", "full" ],

@@ -69,15 +69,30 @@ const innerBlocks: InnerBlockTemplate[] = [
  * any async operation like fetching data from server or doing a polling in every 5 seconds.
  */
 const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
-	setTimeout( () => {
+	let result = false;
+	let timeoutID: NodeJS.Timeout;
+	const tmpFn = () => {
+		result = ! result;
 		setPreviewState( {
-			isPreview: true,
+			isPreview: result,
 			previewMessage: __(
 				'Custom tooltip for on sale collection.',
 				'woocommerce'
 			),
 		} );
+
+		timeoutID = setTimeout( () => {
+			tmpFn();
+		}, 5000 );
+	};
+
+	timeoutID = setTimeout( () => {
+		tmpFn();
 	}, 5000 );
+
+	return () => {
+		clearTimeout( timeoutID );
+	};
 };
 
 export default {

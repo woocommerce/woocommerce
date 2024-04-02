@@ -23,6 +23,7 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
+	previewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -153,7 +154,10 @@ export interface PreviewState {
  * more information to the preview state handler.
  */
 export interface HandlePreviewStateArgs {
-	setPreviewState: React.Dispatch< React.SetStateAction< PreviewState > >;
+	previewState: PreviewState;
+	setPreviewState: ( previewState: PreviewState ) => void;
 }
 
-export type HandlePreviewState = ( args: HandlePreviewStateArgs ) => void;
+export type HandlePreviewState = (
+	args: HandlePreviewStateArgs
+) => void | ( () => void );

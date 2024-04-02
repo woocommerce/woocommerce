@@ -156,10 +156,15 @@ const ProductTemplateEdit = (
 				shrinkColumns: false,
 			},
 			queryContextIncludes = [],
+			productCollectionPreviewState,
 		},
 		__unstableLayoutClassNames,
 	} = props;
 	const location = useGetLocation( props.context, props.clientId );
+	console.log(
+		'productCollectionPreviewState',
+		productCollectionPreviewState
+	);
 
 	const [ { page } ] = queryContext;
 	const [ activeBlockContextId, setActiveBlockContextId ] =
@@ -201,52 +206,72 @@ const ProductTemplateEdit = (
 					_fields: [ 'id' ],
 					slug: templateSlug.replace( 'category-', '' ),
 				} );
-			const query: Record< string, unknown > = {
+			let query: Record< string, unknown > = {
 				postType,
-				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
-				order,
-				orderby: orderBy,
 			};
-			// There is no need to build the taxQuery if we inherit.
-			if ( taxQuery && ! inherit ) {
-				// We have to build the tax query for the REST API and use as
-				// keys the taxonomies `rest_base` with the `term ids` as values.
-				const builtTaxQuery = Object.entries( taxQuery ).reduce(
-					( accumulator, [ taxonomySlug, terms ] ) => {
-						const taxonomy = taxonomies?.find(
-							( { slug } ) => slug === taxonomySlug
-						);
-						if ( taxonomy?.rest_base ) {
-							accumulator[ taxonomy?.rest_base ] = terms;
-						}
-						return accumulator;
-					},
-					{}
-				);
-				if ( !! Object.keys( builtTaxQuery ).length ) {
-					Object.assign( query, builtTaxQuery );
+
+			/**
+			 * If the block is in preview mode, we don't need to apply any filters
+			 * i.e. We can display some random products as they are in database.
+			 */
+			if ( ! productCollectionPreviewState.isPreview ) {
+				query = {
+					postType,
+					offset: perPage ? perPage * ( page - 1 ) + offset : 0,
+					order,
+					orderby: orderBy,
+				};
+
+				// There is no need to build the taxQuery if we inherit.
+				if ( taxQuery && ! inherit ) {
+					// We have to build the tax query for the REST API and use as
+					// keys the taxonomies `rest_base` with the `term ids` as values.
+					const builtTaxQuery = Object.entries( taxQuery ).reduce(
+						( accumulator, [ taxonomySlug, terms ] ) => {
+							const taxonomy = taxonomies?.find(
+								( { slug } ) => slug === taxonomySlug
+							);
+							if ( taxonomy?.rest_base ) {
+								accumulator[ taxonomy?.rest_base ] = terms;
+							}
+							return accumulator;
+						},
+						{}
+					);
+					if ( !! Object.keys( builtTaxQuery ).length ) {
+						Object.assign( query, builtTaxQuery );
+					}
+				}
+				if ( perPage ) {
+					query.per_page = perPage;
+				}
+				if ( search ) {
+					query.search = search;
+				}
+				if ( exclude?.length ) {
+					query.exclude = exclude;
+				}
+				// If `inherit` is truthy, adjust conditionally the query to create a better preview.
+				if ( inherit ) {
+					if ( templateCategory ) {
+						query.categories = templateCategory[ 0 ]?.id;
+					}
+					query.per_page = loopShopPerPage;
 				}
 			}
-			if ( perPage ) {
-				query.per_page = perPage;
-			}
-			if ( search ) {
-				query.search = search;
-			}
-			if ( exclude?.length ) {
-				query.exclude = exclude;
-			}
-			// If `inherit` is truthy, adjust conditionally the query to create a better preview.
-			if ( inherit ) {
-				if ( templateCategory ) {
-					query.categories = templateCategory[ 0 ]?.id;
-				}
-				query.per_page = loopShopPerPage;
-			}
+
+			console.log( 'getEntityRecords', getEntityRecords );
+
 			return {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
-					...restQueryArgs,
+					// POC: Example of how to exclude query params based on preview state.
+					// This will allow us to generate random products but this method will be
+					// problematic when there are no products in DB, but I don't think that should be part
+					// of 1st PR itself.
+					...( ! productCollectionPreviewState.isPreview && {
+						...restQueryArgs,
+					} ),
 					location,
 					productCollectionQueryContext,
 				} ),
@@ -270,6 +295,7 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
+			productCollectionPreviewState.isPreview,
 		]
 	);
 	const blockContexts = useMemo(

@@ -73,6 +73,10 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,
+	previewState: {
+		isPreview: false,
+		previewMessage: '',
+	},
 };
 
 export const getDefaultQuery = (

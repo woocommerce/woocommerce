@@ -18,6 +18,8 @@ import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
+	PreviewState,
+	HandlePreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
@@ -25,19 +27,23 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const usePreviewState = ( handlePreviewState ) => {
-	// I have implemented this internal state to handle the preview state.
-	// As you can see it contains isPreview and previewMessage.
-	// - isPreview is a boolean to check if the block is in preview mode.
-	// - previewMessage is a string to display the preview message in tooltip.
-	const [ previewState, setPreviewState ] = useState( {
-		isPreview: false,
-		previewMessage: '',
-	} );
+const useHandlePreviewState = (
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void,
+	previewState?: PreviewState,
+	handlePreviewState?: HandlePreviewState
+) => {
+	const setPreviewState = ( previewState: PreviewState ) => {
+		setAttributes( {
+			previewState,
+		} );
+	};
 
 	// Running handlePreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
 		const cleanup = handlePreviewState?.( {
+			previewState: previewState as PreviewState,
 			setPreviewState,
 		} );
 
@@ -46,18 +52,20 @@ const usePreviewState = ( handlePreviewState ) => {
 		}
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
-
-	return [ previewState, setPreviewState ];
+	}, [ previewState?.isPreview, previewState?.previewMessage ] );
 };
 
 const ProductCollectionContent = ( {
 	handlePreviewState,
 	...props
 }: ProductCollectionEditComponentProps ) => {
-	const [ previewState ] = usePreviewState( handlePreviewState );
-
 	const { clientId, attributes, setAttributes } = props;
+
+	useHandlePreviewState(
+		setAttributes,
+		attributes.previewState,
+		handlePreviewState
+	);
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -105,6 +113,8 @@ const ProductCollectionContent = ( {
 				},
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
+				// Always reset preview state on initialization.
+				previewState: DEFAULT_ATTRIBUTES.previewState as PreviewState,
 			} );
 		},
 		// This hook is only needed on initialization and sets default attributes.
@@ -123,7 +133,7 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ previewState.isPreview && (
+			{ attributes.previewState?.isPreview && (
 				<Button
 					variant="primary"
 					size="small"
@@ -134,7 +144,7 @@ const ProductCollectionContent = ( {
 						zIndex: 1000,
 					} }
 					showTooltip
-					label={ previewState.previewMessage }
+					label={ attributes.previewState?.previewMessage }
 					className="wc-block-product-collection__preview-button"
 				>
 					Preview

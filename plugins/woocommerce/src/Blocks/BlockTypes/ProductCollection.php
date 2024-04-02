@@ -84,7 +84,6 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
-
 	}
 
 	/**
@@ -369,6 +368,8 @@ class ProductCollection extends AbstractBlock {
 		if ( ! $is_product_collection_block ) {
 			return $args;
 		}
+
+		error_log( 'ProductCollection::update_rest_query_in_editor' );
 
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
