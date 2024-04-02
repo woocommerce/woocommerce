@@ -78,6 +78,10 @@ class LaunchYourStore {
 	 * @return mixed
 	 */
 	public function preload_settings( $settings ) {
+		if ( ! is_admin() ) {
+			return $settings;
+		}
+
 		$current_screen  = get_current_screen();
 		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
 
