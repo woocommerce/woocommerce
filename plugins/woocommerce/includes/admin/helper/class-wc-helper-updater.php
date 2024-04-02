@@ -422,13 +422,22 @@ class WC_Helper_Updater {
 			'errors'   => array(),
 		);
 
-		$request = WC_Helper_API::post(
-			'update-check',
-			array(
-				'body'          => wp_json_encode( array( 'products' => $payload ) ),
-				'authenticated' => true,
-			)
-		);
+		if ( WC_Helper::is_site_connected() ) {
+			$request = WC_Helper_API::post(
+				'update-check',
+				array(
+					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'authenticated' => true,
+				)
+			);
+		} else {
+			$request = WC_Helper_API::post(
+				'update-check-public',
+				array(
+					'body' => wp_json_encode( array( 'products' => $payload ) ),
+				)
+			);
+		}
 
 		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
