@@ -297,13 +297,17 @@ class AssetDataRegistry {
 	 * @param string  $key              The key used to reference the data being registered. This should use camelCase.
 	 * @param mixed   $data             If not a function, registered to the registry as is. If a function, then the
 	 *                                  callback is invoked right before output to the screen.
-	 * @param boolean $check_key_exists If set to true, duplicate data will be ignored if the key exists.
+	 * @param boolean $check_key_exists Deprecated. If set to true, duplicate data will be ignored if the key exists.
 	 *                                  If false, duplicate data will cause an exception.
 	 *
 	 * @throws InvalidArgumentException  Only throws when site is in debug mode. Always logs the error.
 	 */
-	public function add( $key, $data, $check_key_exists = true ) {
-		if ( $check_key_exists && $this->exists( $key ) ) {
+	public function add( $key, $data, $check_key_exists = false ) {
+		if ( $check_key_exists ) {
+			_deprecated_argument( 'Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::add()', '8.9', 'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default' );
+		}
+
+		if ( $this->exists( $key ) ) {
 			return;
 		}
 		try {
