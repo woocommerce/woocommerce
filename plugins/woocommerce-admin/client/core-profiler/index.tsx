@@ -72,6 +72,7 @@ import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
 import { getCountryCode } from '~/dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useXStateInspect } from '~/xstate';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -1571,8 +1572,10 @@ export const CoreProfilerController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib

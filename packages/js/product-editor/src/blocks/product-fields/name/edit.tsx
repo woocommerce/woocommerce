@@ -43,7 +43,7 @@ import { ProductEditorBlockEditProps } from '../../../types';
 import { AUTO_DRAFT_NAME } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
-export function Edit( {
+export function NameBlockEdit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {

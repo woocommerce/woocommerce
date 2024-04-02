@@ -32,6 +32,12 @@ export class LocalPickupUtils {
 
 	async saveLocalPickupSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
+
+		// Wait for the snackbar to appear with the success notice showing.
+		await this.page
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( 'Local Pickup settings have been saved.' )
+			.isVisible();
 	}
 
 	async enableLocalPickup() {
@@ -67,6 +73,12 @@ export class LocalPickupUtils {
 			.getByLabel( 'Add a price for customers who choose local pickup' )
 			.uncheck();
 
+		await this.saveLocalPickupSettings();
+	}
+
+	async setLocalPickupTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
 		await this.saveLocalPickupSettings();
 	}
 

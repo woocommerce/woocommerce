@@ -2,12 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES } from '@woocommerce/block-settings';
-import type {
-	CartShippingAddress,
-	CartBillingAddress,
+import { ALLOWED_COUNTRIES, ALLOWED_STATES } from '@woocommerce/block-settings';
+import {
+	type CartShippingAddress,
+	type CartBillingAddress,
+	isObject,
+	isString,
 } from '@woocommerce/types';
 import { FormFieldsConfig } from '@woocommerce/settings';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -25,6 +28,18 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
+	const formattedCountry = isString( ALLOWED_COUNTRIES[ address.country ] )
+		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
+		: '';
+
+	const formattedState =
+		isObject( ALLOWED_STATES[ address.country ] ) &&
+		isString( ALLOWED_STATES[ address.country ][ address.state ] )
+			? decodeEntities(
+					ALLOWED_STATES[ address.country ][ address.state ]
+			  )
+			: address.state;
+
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
@@ -36,11 +51,9 @@ const AddressCard = ( {
 						address.address_1,
 						! fieldConfig.address_2.hidden && address.address_2,
 						address.city,
-						address.state,
+						formattedState,
 						address.postcode,
-						ALLOWED_COUNTRIES[ address.country ]
-							? ALLOWED_COUNTRIES[ address.country ]
-							: address.country,
+						formattedCountry,
 					]
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
