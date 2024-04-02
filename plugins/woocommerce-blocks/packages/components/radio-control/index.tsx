@@ -3,13 +3,14 @@
  */
 import classnames from 'classnames';
 import { useInstanceId } from '@wordpress/compose';
+import { useMemo } from '@wordpress/element';
+
 /**
  * Internal dependencies
  */
 import RadioControlOption from './option';
 import type { RadioControlProps } from './types';
 import './style.scss';
-import { useMemo } from '@wordpress/element';
 
 const RadioControl = ( {
 	className = '',
