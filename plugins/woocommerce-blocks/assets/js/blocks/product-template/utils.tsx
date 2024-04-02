@@ -114,28 +114,31 @@ export const useGetLocation = < T, >(
 		getEntitySlug,
 	] );
 
-	const { isInSingleProductBlock, isInMiniCartBlock } = useSelect(
-		( select ) => ( {
-			isInSingleProductBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/single-product'
-				).length > 0,
-			isInMiniCartBlock:
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore No types for this selector exist yet
-				select( blockEditorStore ).getBlockParentsByBlockName(
-					clientId,
-					'woocommerce/mini-cart-contents'
-				).length > 0,
-		} ),
+	const { isInSingleProductBlock, isInSomeCartCheckoutBlock } = useSelect(
+		( select ) => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-ignore No types for this selector exist yet
+			const { getBlockParentsByBlockName } = select( blockEditorStore );
+			const isInBlocks = ( parentBlockNames: string[] ) =>
+				getBlockParentsByBlockName( clientId, parentBlockNames )
+					.length > 0;
+
+			return {
+				isInSingleProductBlock: isInBlocks( [
+					'woocommerce/single-product',
+				] ),
+				isInSomeCartCheckoutBlock: isInBlocks( [
+					'woocommerce/cart',
+					'woocommerce/checkout',
+					'woocommerce/mini-cart-contents',
+				] ),
+			};
+		},
 		[ clientId ]
 	);
 
 	/**
-	 * Case 1.1: SPECIFIC PRODUCT
+	 * Case 1.1: BLOCK LEVEL: SPECIFIC PRODUCT
 	 * Single Product block - take product ID from context
 	 */
 
@@ -144,7 +147,16 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 1.2: SPECIFIC PRODUCT
+	 * Case 1.2: BLOCK LEVEL: GENERIC CART
+	 * Cart, Checkout or Mini Cart blocks - block scope is more important than template
+	 */
+
+	if ( isInSomeCartCheckoutBlock ) {
+		return createLocationObject( 'cart' );
+	}
+
+	/**
+	 * Case 2.1: TEMPLATES: SPECIFIC PRODUCT
 	 * Specific Single Product template - take product ID from taxononmy
 	 */
 
@@ -155,7 +167,7 @@ export const useGetLocation = < T, >(
 	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
 
 	/**
-	 * Case 1.3: GENERIC PRODUCT
+	 * Case 2.2: TEMPLATES: GENERIC PRODUCT
 	 * Generic Single Product template
 	 */
 
@@ -168,7 +180,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.1: SPECIFIC TAXONOMY
+	 * Case 2.3: TEMPLATES: SPECIFIC TAXONOMY
 	 * Specific Category template - take category ID from
 	 */
 
@@ -180,7 +192,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.2: SPECIFIC TAXONOMY
+	 * Case 2.4: TEMPLATES: SPECIFIC TAXONOMY
 	 * Specific Tag template
 	 */
 
@@ -192,7 +204,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.3: GENERIC TAXONOMY
+	 * Case 2.5: TEMPLATES: GENERIC TAXONOMY
 	 * Generic Taxonomy template
 	 */
 
@@ -230,21 +242,20 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 3: GENERIC CART
-	 * Cart/Checkout templates or Mini Cart
+	 * Case 2.6: TEMPLATES: GENERIC CART
+	 * Cart/Checkout templates
 	 */
 
-	const isInCartContext =
+	const isInCartCheckoutTemplate =
 		templateSlug === templateSlugs.cart ||
-		templateSlug === templateSlugs.checkout ||
-		isInMiniCartBlock;
+		templateSlug === templateSlugs.checkout;
 
-	if ( isInCartContext ) {
+	if ( isInCartCheckoutTemplate ) {
 		return createLocationObject( 'cart' );
 	}
 
 	/**
-	 * Case 4: GENERIC ORDER
+	 * Case 2.7: TEMPLATES: GENERIC ORDER
 	 * Order Confirmation template
 	 */
 
@@ -257,7 +268,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 5: GENERIC
+	 * Case 3: GENERIC
 	 * All other cases
 	 */
 

@@ -1,5 +1,5 @@
 {
-	"core": "https://wordpress.org/wordpress-6.5-RC3.zip",
+	"core": "https://wordpress.org/wordpress-6.5-RC4.zip",
 	"plugins": [
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",

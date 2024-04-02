@@ -1201,7 +1201,7 @@ class WC_Helper {
 	public static function get_subscription_install_url( $product_key, $product_slug ) {
 		$install_url = add_query_arg(
 			array(
-				'product-key' => $product_key,
+				'product-key' => rawurlencode( $product_key ),
 			),
 			self::get_install_base_url() . "{$product_slug}/"
 		);
