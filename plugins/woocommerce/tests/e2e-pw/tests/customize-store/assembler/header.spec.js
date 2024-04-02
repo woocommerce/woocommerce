@@ -4,9 +4,9 @@ const { activateTheme } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
-	pageObject: async ( { page }, use ) => {
-		const pageObject = new AssemblerPage( { page } );
-		await use( pageObject );
+	assemblerPage: async ( { page }, use ) => {
+		const assemblerPage = new AssemblerPage( { page } );
+		await use( assemblerPage );
 	},
 } );
 
@@ -49,15 +49,17 @@ test.describe( 'Assembler -> headers', () => {
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
+	test.beforeEach( async ( { baseURL, assemblerPage } ) => {
+		await assemblerPage.setupSite( baseURL );
+		await assemblerPage.waitForLoadingScreenFinish();
+		const assembler = await assemblerPage.getAssembler();
 		await assembler.getByText( 'Choose your header' ).click();
 	} );
 
-	test( 'Available headers should be displayed', async ( { pageObject } ) => {
-		const assembler = await pageObject.getAssembler();
+	test( 'Available headers should be displayed', async ( {
+		assemblerPage,
+	} ) => {
+		const assembler = await assemblerPage.getAssembler();
 
 		const headers = assembler.locator(
 			'.block-editor-block-patterns-list__list-item'
@@ -67,9 +69,9 @@ test.describe( 'Assembler -> headers', () => {
 	} );
 
 	test( 'The selected header should be focused when is clicked', async ( {
-		pageObject,
+		assemblerPage,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const header = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 2 );
@@ -79,10 +81,10 @@ test.describe( 'Assembler -> headers', () => {
 	} );
 
 	test( 'The Done button should be visible after clicking save', async ( {
-		pageObject,
+		assemblerPage,
 		page,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const header = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 2 );
@@ -103,13 +105,13 @@ test.describe( 'Assembler -> headers', () => {
 		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test( 'Selected header should be applied on the frontend', async ( {
-		pageObject,
+	test( 'The selected header should be applied on the frontend', async ( {
+		assemblerPage,
 		page,
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPage.getAssembler();
 		const header = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
 			.nth( 1 );
@@ -136,4 +138,52 @@ test.describe( 'Assembler -> headers', () => {
 			name: 'cys-selected-header',
 		} );
 	} );
+
+	test.only( 'Picking a header should trigger an update on the site preview', async ( {
+		assemblerPage,
+	}, testInfo ) => {
+		const assembler = await assemblerPage.getAssembler();
+		const editor = await assemblerPage.getEditor();
+
+		await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.waitFor( {
+				strict: false,
+			} );
+
+		const headerPickers = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.all();
+
+		let index = 0;
+		for ( const headerPicker of headerPickers ) {
+			await headerPicker.waitFor();
+			await headerPicker.click();
+
+			const headerPickerClass = await headerPicker
+				.frameLocator( 'iframe' )
+				.locator( '.wc-blocks-header-pattern' )
+				.getAttribute( 'class' );
+
+			const expectedHeaderClass = extractHeaderClass( headerPickerClass );
+
+			const headerPattern = await editor.locator(
+				`header div.wc-blocks-header-pattern`
+			);
+
+			await expect(
+				await headerPattern.getAttribute( 'class' )
+			).toContain( expectedHeaderClass );
+
+			index++;
+		}
+	} );
 } );
+
+const extractHeaderClass = ( headerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-header\S*/;
+
+	const match = headerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
