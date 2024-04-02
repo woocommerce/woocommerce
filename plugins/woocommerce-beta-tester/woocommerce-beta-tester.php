@@ -139,3 +139,5 @@ add_action(
 
 // Initialize the live branches feature.
 require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-live-branches.php';
+// Initialize the admin features as early as possible.
+require_once dirname( __FILE__ ) . '/includes/class-wc-beta-tester-admin-features.php';
