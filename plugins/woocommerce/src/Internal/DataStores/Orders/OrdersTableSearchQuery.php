@@ -202,8 +202,8 @@ class OrdersTableSearchQuery {
 
 		if ( 'transaction_id' === $search_filter ) {
 			return $wpdb->prepare(
-				"`$order_table`.transaction_id = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-				$wpdb->esc_like( $this->search_term )
+				"`$order_table`.transaction_id LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
