@@ -1,5 +1,5 @@
-@import '@wordpress/base-styles/_colors.native.scss';
-@import '../../stylesheets/_variables.scss';
+@import "@wordpress/base-styles/_colors.native.scss";
+@import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace__woo-update-manager-plugin__notices {
 	.components-notice {
@@ -12,7 +12,7 @@
 		position: relative;
 
 		&::before {
-			content: '';
+			content: "";
 			display: block;
 			width: 4px;
 			height: 100%;

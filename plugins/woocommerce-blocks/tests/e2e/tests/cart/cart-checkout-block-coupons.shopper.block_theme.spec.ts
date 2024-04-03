@@ -98,6 +98,10 @@ test.describe( 'Shopper → Coupon', () => {
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
+		await expect(
+			page.getByLabel( 'Remove coupon "single-use-coupon"' )
+		).toBeVisible();
+
 		await checkoutPageObject.fillInCheckoutWithTestData();
 		await checkoutPageObject.placeOrder();
 

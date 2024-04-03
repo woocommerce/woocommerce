@@ -1,7 +1,7 @@
-@import './shared.scss';
+@import "./shared.scss";
 
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		padding-top: 0 !important;
 	}
 }
@@ -26,14 +26,14 @@
 
 	--color-error: #cc1818; // used by some @automattic/components
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		padding: 0 20px;
 	}
 
 	.woocommerce-profiler-button-container {
 		width: 100%;
 		max-width: 404px;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			position: absolute;
 			bottom: 20px;
 			padding: 0 20px;
@@ -133,7 +133,7 @@
 	padding-top: 110px;
 	flex: 1;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		padding-top: 70px;
 	}
 
@@ -148,7 +148,7 @@
 		background: url(./assets/images/welcome-desktop.svg) no-repeat center
 			center;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			margin-bottom: 40px;
 			background: url(./assets/images/welcome-mobile.svg) no-repeat
 				center center;
@@ -167,7 +167,7 @@
 		font-size: 14px;
 		font-weight: normal;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			width: 100%;
 			margin-top: auto;
 		}
@@ -178,7 +178,7 @@
 		display: flex;
 		justify-content: center;
 
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			margin: 16px auto 20px;
 		}
 
@@ -338,7 +338,7 @@
 	}
 	.woocommerce-profiler-heading__subtitle {
 		margin: 12px 0 48px 0 !important;
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			margin-top: 12px !important;
 		}
 	}
@@ -384,12 +384,12 @@
 	}
 
 	.woocommerce-profiler-plugins-continue-button-container {
-		@include breakpoint( '<782px' ) {
+		@include breakpoint( "<782px" ) {
 			width: 100%;
 		}
 
 		.woocommerce-profiler-plugins-continue-button {
-			@include breakpoint( '<782px' ) {
+			@include breakpoint( "<782px" ) {
 				width: 100%;
 			}
 		}
@@ -542,7 +542,7 @@
 			padding-right: 0;
 			color: $gray-900;
 
-			@include breakpoint( '<782px' ) {
+			@include breakpoint( "<782px" ) {
 				margin-bottom: 100px;
 			}
 

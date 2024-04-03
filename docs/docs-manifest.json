@@ -458,7 +458,7 @@
           "menu_title": "Build your first extension",
           "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/building-your-first-extension.md",
-          "hash": "6c97092279436171fa847119ea8813a35b8ad7b8784bc3c993236648687064c1",
+          "hash": "d1ad51948f0391f342e968fcf3889dda234a64b8256090061b7b6db074b0a6e5",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
         },
@@ -517,7 +517,7 @@
           "menu_title": "Development environment setup",
           "tags": "tutorial, setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/development-environment.md",
-          "hash": "f3f91c7e2d2676d39f30cf2245e02c044de704894b358a78a086507a0d37ae2c",
+          "hash": "5e877a4283be4264c7fc37b7e8dbf8c08224a82c65bab0e02cd08f3ca895cd4d",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/development-environment.md",
           "id": "9080572a3904349c44c565ca7e1bef1212c58757"
         },
@@ -1211,5 +1211,5 @@
       "categories": []
     }
   ],
-  "hash": "f1bb14ff2aa8c9be096365b78633ace4696f6314cd298e0cb57104a73b507fac"
+  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
 }

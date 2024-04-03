@@ -180,8 +180,7 @@ describe( 'Design Without AI state machine', () => {
 		} );
 
 		it( 'should invoke `redirectToIntroWithError` when `assembleSite` service fails', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.assembleSite';
+			const initialState = 'preAssembleSite.assembleSite';
 
 			const assembleSiteMock = jest.fn( () => Promise.reject() );
 			const createProductsMock = jest.fn( () => {
@@ -212,7 +211,7 @@ describe( 'Design Without AI state machine', () => {
 
 			await waitFor( actor, ( currentState ) => {
 				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.assembleSite.pending'
+					'preAssembleSite.assembleSite.pending'
 				);
 			} );
 
@@ -221,8 +220,7 @@ describe( 'Design Without AI state machine', () => {
 		} );
 
 		it( 'should invoke `assembleSite` service', async () => {
-			const initialState =
-				'preAssembleSite.preApiCallLoader.assembleSite';
+			const initialState = 'preAssembleSite.assembleSite';
 
 			const assembleSiteMock = jest.fn( () => Promise.resolve() );
 			const installAndActivateThemeMock = jest.fn( () =>
@@ -240,31 +238,22 @@ describe( 'Design Without AI state machine', () => {
 					createProducts: createProductsMock,
 					installAndActivateTheme: installAndActivateThemeMock,
 				},
+				actions: {
+					redirectToAssemblerHub: jest.fn(),
+				},
 			} );
 
 			const state = machine.getInitialState( initialState );
 
 			const actor = interpret( machine ).start( state );
 
-			await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.assembleSite.pending'
-				);
+			const finalState = await waitFor( actor, ( currentState ) => {
+				return currentState.matches( 'showAssembleHub' );
 			} );
 
 			expect( assembleSiteMock ).toHaveBeenCalled();
 
-			const finalState = await waitFor( actor, ( currentState ) => {
-				return currentState.matches(
-					'preAssembleSite.preApiCallLoader.assembleSite.success'
-				);
-			} );
-
-			expect(
-				finalState.matches(
-					'preAssembleSite.preApiCallLoader.assembleSite.success'
-				)
-			).toBeTruthy();
+			expect( finalState.matches( 'showAssembleHub' ) ).toBeTruthy();
 		} );
 
 		it( 'should invoke `redirectToIntroWithError` when `createProducts` service fails', async () => {
