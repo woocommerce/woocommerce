@@ -254,11 +254,8 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
-
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
-			add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
-		}
+		add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -318,6 +315,10 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
+		if ( ! Feature::is_enabled( 'launch-your-store' ) ) {
+			return;
+		}
+
 		$is_new_install = current_action() === 'woocommerce_newly_installed';
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
@@ -431,7 +432,6 @@ final class WooCommerce {
 		 * The SSR in the name is preserved for bw compatibility, as this was initially used in System Status Report.
 		 */
 		$this->define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
-
 	}
 
 	/**
@@ -1023,7 +1023,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the activated plugin.
 	 */
 	public function activated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
 			set_transient( 'woocommerce_activated_plugin', $filename );
@@ -1039,7 +1039,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the deactivated plugin.
 	 */
 	public function deactivated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
 	}
