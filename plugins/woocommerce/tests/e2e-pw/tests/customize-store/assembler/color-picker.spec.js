@@ -102,9 +102,14 @@ test.skip( 'Assembler -> Color Pickers', () => {
 		for ( const colorPicker of colorPickers ) {
 			await colorPicker.waitFor();
 			await colorPicker.click();
+			const styles = await editor.locator( 'style' ).allInnerTexts();
+			const stylesWithoutEditorStyles = styles.filter(
+				( css ) => ! css.includes( '.editor-styles-wrapper' )
+			);
+
 			// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 			await expect(
-				( await editor.locator( 'style' ).allInnerTexts() ).join( ',' )
+				stylesWithoutEditorStyles.join( ',' )
 			).toMatchSnapshot( {
 				name: 'color-palette-' + index,
 			} );
