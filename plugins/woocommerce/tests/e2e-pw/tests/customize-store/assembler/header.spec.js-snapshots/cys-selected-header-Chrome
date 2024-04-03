@@ -1,12 +1,11 @@
 
-<div class="wp-block-group alignfull wc-blocks-pattern-header-minimal wc-blocks-header-pattern sticky-header is-content-justification-space-between is-nowrap is-layout-flex wp-container-core-group-layout-3 wp-block-group-is-layout-flex" style="margin-top:0px;margin-bottom:0px;padding-top:24px;padding-right:40px;padding-bottom:24px;padding-left:40px">
-<div class="wp-block-group is-nowrap is-layout-flex wp-container-core-group-layout-1 wp-block-group-is-layout-flex">
-
-<h1 style="font-style:normal;font-weight:700;" class="wp-block-site-title"><a href="http://localhost:8086" target="_self" rel="home" aria-current="page">WooCommerce Core E2E Test Suite</a></h1></div>
+<div class="wp-block-group alignfull wc-blocks-pattern-header-essential wc-blocks-header-pattern is-content-justification-space-between is-nowrap is-layout-flex wp-container-core-group-is-layout-4 wp-block-group-is-layout-flex" style="padding-top:40px;padding-right:40px;padding-bottom:40px;padding-left:40px">
+<div class="wp-block-group is-nowrap is-layout-flex wp-container-core-group-is-layout-1 wp-block-group-is-layout-flex"></div>
 
 
 
-<div class="wp-block-group is-content-justification-right is-nowrap is-layout-flex wp-container-core-group-layout-2 wp-block-group-is-layout-flex"><div data-block-name="woocommerce/mini-cart" class="wc-block-mini-cart wp-block-woocommerce-mini-cart " style="" data-cart-totals="{&quot;total_items&quot;:&quot;0&quot;,&quot;total_items_tax&quot;:&quot;0&quot;,&quot;total_fees&quot;:&quot;0&quot;,&quot;total_fees_tax&quot;:&quot;0&quot;,&quot;total_discount&quot;:&quot;0&quot;,&quot;total_discount_tax&quot;:&quot;0&quot;,&quot;total_shipping&quot;:null,&quot;total_shipping_tax&quot;:null,&quot;total_price&quot;:&quot;0&quot;,&quot;total_tax&quot;:&quot;0&quot;,&quot;tax_lines&quot;:[],&quot;currency_code&quot;:&quot;USD&quot;,&quot;currency_symbol&quot;:&quot;$&quot;,&quot;currency_minor_unit&quot;:2,&quot;currency_decimal_separator&quot;:&quot;.&quot;,&quot;currency_thousand_separator&quot;:&quot;,&quot;,&quot;currency_prefix&quot;:&quot;$&quot;,&quot;currency_suffix&quot;:&quot;&quot;}" data-cart-items-count="0">
+<div class="wp-block-group is-nowrap is-layout-flex wp-container-core-group-is-layout-3 wp-block-group-is-layout-flex">
+<div class="wp-block-group is-nowrap is-layout-flex wp-container-core-group-is-layout-2 wp-block-group-is-layout-flex"><div data-block-name="woocommerce/mini-cart" class="wc-block-mini-cart wp-block-woocommerce-mini-cart " style="" data-cart-totals="{&quot;total_items&quot;:&quot;0&quot;,&quot;total_items_tax&quot;:&quot;0&quot;,&quot;total_fees&quot;:&quot;0&quot;,&quot;total_fees_tax&quot;:&quot;0&quot;,&quot;total_discount&quot;:&quot;0&quot;,&quot;total_discount_tax&quot;:&quot;0&quot;,&quot;total_shipping&quot;:null,&quot;total_shipping_tax&quot;:null,&quot;total_price&quot;:&quot;0&quot;,&quot;total_tax&quot;:&quot;0&quot;,&quot;tax_lines&quot;:[],&quot;currency_code&quot;:&quot;USD&quot;,&quot;currency_symbol&quot;:&quot;$&quot;,&quot;currency_minor_unit&quot;:2,&quot;currency_decimal_separator&quot;:&quot;.&quot;,&quot;currency_thousand_separator&quot;:&quot;,&quot;,&quot;currency_prefix&quot;:&quot;$&quot;,&quot;currency_suffix&quot;:&quot;&quot;}" data-cart-items-count="0">
 			<button class="wc-block-mini-cart__button" aria-label="0 items in cart, total price of $0.00">
 		<span class="wc-block-mini-cart__quantity-badge">
 			<svg class="wc-block-mini-cart__icon" width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -51,26 +50,27 @@
 			</div>
 		</div>
 
-<nav class="is-responsive items-justified-left wp-block-navigation is-content-justification-left is-layout-flex wp-container-core-navigation-layout-1 wp-block-navigation-is-layout-flex" aria-label="Navigation" data-wp-interactive="" data-wp-context="{&quot;core&quot;:{&quot;navigation&quot;:{&quot;overlayOpenedBy&quot;:[],&quot;type&quot;:&quot;overlay&quot;,&quot;roleAttribute&quot;:&quot;&quot;,&quot;ariaLabel&quot;:&quot;Menu&quot;}}}"><button aria-haspopup="true" aria-label="Open menu" class="wp-block-navigation__responsive-container-open always-shown" data-wp-on--click="actions.core.navigation.openMenuOnClick" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5"></rect><rect x="4" y="15" width="16" height="1.5"></rect></svg></button>
-			<div class="wp-block-navigation__responsive-container hidden-by-default" style="" id="modal-1" data-wp-class--has-modal-open="selectors.core.navigation.isMenuOpen" data-wp-class--is-menu-open="selectors.core.navigation.isMenuOpen" data-wp-effect="effects.core.navigation.initMenu" data-wp-on--keydown="actions.core.navigation.handleMenuKeydown" data-wp-on--focusout="actions.core.navigation.handleMenuFocusout" tabindex="-1">
-				<div class="wp-block-navigation__responsive-close" tabindex="-1">
-					<div class="wp-block-navigation__responsive-dialog" data-wp-bind--aria-modal="selectors.core.navigation.ariaModal" data-wp-bind--aria-label="selectors.core.navigation.ariaLabel" data-wp-bind--role="selectors.core.navigation.roleAttribute" data-wp-effect="effects.core.navigation.focusFirstElement">
-							<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" data-wp-on--click="actions.core.navigation.closeMenuOnClick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
-						<div class="wp-block-navigation__responsive-container-content" id="modal-1-content">
-							<ul class="wp-block-page-list"><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/cart/">Cart</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/checkout/">Checkout</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/my-account/">My account</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/sample-page/">Sample Page</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/shop/">Shop</a></li></ul>
-						</div>
-					</div>
-				</div>
-			</div></nav>
-
-<div data-block-name="woocommerce/customer-account" class="wp-block-woocommerce-customer-account " style="">
+<div data-block-name="woocommerce/customer-account" data-display-style="icon_only" data-icon-class="wc-block-customer-account__account-icon" class="wp-block-woocommerce-customer-account " style="">
 			<a href="http://localhost:8086/my-account/">
-				<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+				<svg class="wc-block-customer-account__account-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
 			<path d="M8.00009 8.34785C10.3096 8.34785 12.1819 6.47909 12.1819 4.17393C12.1819 1.86876 10.3096 0 8.00009 0C5.69055
 				 	0 3.81824 1.86876 3.81824 4.17393C3.81824 6.47909 5.69055 8.34785 8.00009 8.34785ZM0.333496 15.6522C0.333496
 				  	15.8444 0.489412 16 0.681933 16H15.3184C15.5109 16 15.6668 15.8444 15.6668 15.6522V14.9565C15.6668 12.1428
 				   	13.7821 9.73911 10.0912 9.73911H5.90931C2.21828 9.73911 0.333645 12.1428 0.333645 14.9565L0.333496 15.6522Z" fill="currentColor"></path>
-		</svg><span class="label">My Account</span>
+		</svg>
 			</a>
 		</div></div>
+
+
+<nav class="is-responsive wp-block-navigation is-layout-flex wp-container-core-navigation-is-layout-1 wp-block-navigation-is-layout-flex" aria-label="Navigation" data-wp-interactive="core/navigation" data-wp-context="{&quot;overlayOpenedBy&quot;:{&quot;click&quot;:false,&quot;hover&quot;:false,&quot;focus&quot;:false},&quot;type&quot;:&quot;overlay&quot;,&quot;roleAttribute&quot;:&quot;&quot;,&quot;ariaLabel&quot;:&quot;Menu&quot;}"><button aria-haspopup="dialog" aria-label="Open menu" class="wp-block-navigation__responsive-container-open " data-wp-on--click="actions.openMenuOnClick" data-wp-on--keydown="actions.handleMenuKeydown"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="7.5" width="16" height="1.5"></rect><rect x="4" y="15" width="16" height="1.5"></rect></svg></button>
+				<div class="wp-block-navigation__responsive-container" style="" id="modal-1" data-wp-class--has-modal-open="state.isMenuOpen" data-wp-class--is-menu-open="state.isMenuOpen" data-wp-watch="callbacks.initMenu" data-wp-on--keydown="actions.handleMenuKeydown" data-wp-on--focusout="actions.handleMenuFocusout" tabindex="-1">
+					<div class="wp-block-navigation__responsive-close" tabindex="-1">
+						<div class="wp-block-navigation__responsive-dialog" data-wp-bind--aria-modal="state.ariaModal" data-wp-bind--aria-label="state.ariaLabel" data-wp-bind--role="state.roleAttribute">
+							<button aria-label="Close menu" class="wp-block-navigation__responsive-container-close" data-wp-on--click="actions.closeMenuOnClick"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+							<div class="wp-block-navigation__responsive-container-content" data-wp-watch="callbacks.focusFirstElement" id="modal-1-content">
+								<ul class="wp-block-navigation__container is-responsive wp-block-navigation"><ul class="wp-block-page-list"><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/cart/">Cart</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/checkout/">Checkout</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/my-account/">My account</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/sample-page/">Sample Page</a></li><li class="wp-block-pages-list__item wp-block-navigation-item open-on-hover-click"><a class="wp-block-pages-list__item__link wp-block-navigation-item__content" href="http://localhost:8086/shop/">Shop</a></li></ul></ul>
+							</div>
+						</div>
+					</div>
+				</div></nav></div>
 </div>

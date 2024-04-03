@@ -139,7 +139,7 @@ test.describe( 'Assembler -> headers', () => {
 		} );
 	} );
 
-	test.only( 'Picking a header should trigger an update on the site preview', async ( {
+	test( 'Picking a header should trigger an update on the site preview', async ( {
 		assemblerPage,
 	}, testInfo ) => {
 		const assembler = await assemblerPage.getAssembler();
