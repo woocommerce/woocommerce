@@ -1,6 +1,5 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { BASE_URL } = process.env;
-const { features } = require( '../../utils' );
+const { test: base, expect, request } = require( '@playwright/test' );
+const { AssemblerPage } = require( './assembler/assembler.page' );
 const { activateTheme } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
@@ -9,43 +8,29 @@ const ASSEMBLER_HUB_URL =
 const CUSTOMIZE_STORE_URL =
 	'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store';
 
-const skipTestIfUndefined = () => {
-	const skipMessage = `Skipping this test on daily run. Environment not compatible.`;
-
-	test.skip( () => {
-		const shouldSkip = BASE_URL !== undefined;
-
-		if ( shouldSkip ) {
-			console.log( skipMessage );
-		}
-
-		return shouldSkip;
-	}, skipMessage );
-};
-
-skipTestIfUndefined();
+const test = base.extend( {
+	assemblerPageObject: async ( { page }, use ) => {
+		const pageObject = new AssemblerPage( { page } );
+		await use( pageObject );
+	},
+} );
 
 test.describe( 'Store owner can view Assembler Hub for store customization', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
-		// In some environments the tour blocks clicking other elements.
-		await setOption(
-			request,
-			baseURL,
-			'woocommerce_customize_store_onboarding_tour_hidden',
-			'yes'
-		);
-
-		await features.setFeatureFlag(
-			request,
-			baseURL,
-			'customize-store',
-			true
-		);
-
-		// Need a block enabled theme to test
-		await activateTheme( 'twentytwentythree' );
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+			await activateTheme( 'twentytwentythree' );
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
 	} );
 
 	test.beforeEach( async ( { baseURL } ) => {
@@ -57,13 +42,11 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 				'no'
 			);
 		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
+			console.log( 'Store completed option not updated' );
 		}
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await features.resetFeatureFlags( request, baseURL );
-
 		// Reset theme back to twentynineteen
 		await activateTheme( 'twentynineteen' );
 
@@ -87,17 +70,18 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 
 	test( 'Can view the Assembler Hub page when the theme is already customized', async ( {
 		page,
+		assemblerPageObject,
 	} ) => {
 		await page.goto( CUSTOMIZE_STORE_URL );
 		await page.click( 'text=Start designing' );
 		await page
 			.getByRole( 'button', { name: 'Design a new theme' } )
 			.click();
-
-		await page.waitForURL( ASSEMBLER_HUB_URL );
-
-		await page.goto( ASSEMBLER_HUB_URL );
-		await expect( page.locator( "text=Let's get creative" ) ).toBeVisible();
+		await assemblerPageObject.waitForLoadingScreenFinish();
+		const assembler = await assemblerPageObject.getAssembler();
+		await expect(
+			assembler.locator( "text=Let's get creative" )
+		).toBeVisible();
 	} );
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {

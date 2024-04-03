@@ -2967,8 +2967,8 @@ importers:
         specifier: wp-6.0
         version: 6.6.1(react@17.0.2)
       '@wordpress/env':
-        specifier: ^8.13.0
-        version: 8.13.0
+        specifier: ^9.0.7
+        version: 9.7.0
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -3070,8 +3070,8 @@ importers:
         specifier: wp-6.4
         version: 0.10.13(@playwright/test@1.40.1)(typescript@5.3.3)
       '@wordpress/env':
-        specifier: ^8.13.0
-        version: 8.13.0
+        specifier: ^9.0.7
+        version: 9.7.0
       '@wordpress/stylelint-config':
         specifier: ^21.36.0
         version: 21.36.0(postcss@8.4.32)(stylelint@13.13.1)
@@ -3819,8 +3819,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
       '@wordpress/env':
-        specifier: ^8.13.0
-        version: 8.13.0
+        specifier: ^9.0.7
+        version: 9.7.0
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -4211,8 +4211,8 @@ importers:
         specifier: 10.12.0
         version: 10.12.0(jest@29.7.0)(puppeteer-core@21.6.0)
       '@wordpress/e2e-test-utils-playwright':
-        specifier: wp-6.4
-        version: 0.10.13(@playwright/test@1.40.1)(typescript@5.3.2)
+        specifier: wp-6.5
+        version: 0.19.2(@playwright/test@1.40.1)(typescript@5.3.2)
       '@wordpress/e2e-tests':
         specifier: ^4.9.2
         version: 4.9.2(@swc/core@1.3.100)(esbuild@0.18.20)(eslint-import-resolver-typescript@3.2.4)(eslint-import-resolver-webpack@0.13.2)(jest@29.7.0)(puppeteer-core@21.6.0)(puppeteer@17.1.3)(react-dom@16.14.0)(react@17.0.2)(typescript@5.3.2)
@@ -4609,8 +4609,8 @@ importers:
   tools/compare-perf:
     dependencies:
       '@wordpress/env':
-        specifier: ^8.13.0
-        version: 8.13.0
+        specifier: ^9.0.7
+        version: 9.7.0
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -20836,6 +20836,15 @@ packages:
       '@wordpress/i18n': 4.47.0
       '@wordpress/url': 3.48.0
 
+  /@wordpress/api-fetch@6.51.0:
+    resolution: {integrity: sha512-9jPBMk/TEBR9DFQxCcHvCq7YQJzbFMyDH56vKeYNN0q+hvlJ2Ju2CWVFfsQ4mCSCGBJAblcBxZ7F2D3H4JQJ/A==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@wordpress/i18n': 4.54.0
+      '@wordpress/url': 3.55.0
+    dev: true
+
   /@wordpress/autop@3.16.0:
     resolution: {integrity: sha512-cepLM41mF1h7f2JIU12XhLLfep1R0DNkI0gM2GoVzp0DlM0qSnJVuU93R75wTnR0OTija0cVVPUovt+gBWIR2Q==}
     engines: {node: '>=12'}
@@ -22838,29 +22847,6 @@ packages:
       lodash: 4.17.21
     dev: false
 
-  /@wordpress/e2e-test-utils-playwright@0.10.13(@playwright/test@1.40.1)(typescript@5.3.2):
-    resolution: {integrity: sha512-5zqIsG6Nn6N0DBlK9GyvYKxUrK7dEBHFInRnIqqfimWAQmz07iBCJU34njs9lQi+/GzKfXS+2XgBI7dDQnbfwQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      '@playwright/test': '>=1'
-    dependencies:
-      '@playwright/test': 1.40.1
-      '@wordpress/api-fetch': 6.44.0
-      '@wordpress/keycodes': 3.47.0
-      '@wordpress/url': 3.48.0
-      change-case: 4.1.2
-      form-data: 4.0.0
-      get-port: 5.1.1
-      lighthouse: 10.4.0(typescript@5.3.2)
-      mime: 3.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - typescript
-      - utf-8-validate
-    dev: true
-
   /@wordpress/e2e-test-utils-playwright@0.10.13(@playwright/test@1.40.1)(typescript@5.3.3):
     resolution: {integrity: sha512-5zqIsG6Nn6N0DBlK9GyvYKxUrK7dEBHFInRnIqqfimWAQmz07iBCJU34njs9lQi+/GzKfXS+2XgBI7dDQnbfwQ==}
     engines: {node: '>=12'}
@@ -22876,6 +22862,30 @@ packages:
       get-port: 5.1.1
       lighthouse: 10.4.0(typescript@5.3.3)
       mime: 3.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - typescript
+      - utf-8-validate
+    dev: true
+
+  /@wordpress/e2e-test-utils-playwright@0.19.2(@playwright/test@1.40.1)(typescript@5.3.2):
+    resolution: {integrity: sha512-pB/WsJwtbKLrKEhdr8HEmjThP6XGuFJmEHfxSm76l/S5Hc0dzhFHAYojk3iu0VEZMUlgppUNYfXTab8JTCkwBA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      '@playwright/test': '>=1'
+    dependencies:
+      '@playwright/test': 1.40.1
+      '@wordpress/api-fetch': 6.51.0
+      '@wordpress/keycodes': 3.54.0
+      '@wordpress/url': 3.55.0
+      change-case: 4.1.2
+      form-data: 4.0.0
+      get-port: 5.1.1
+      lighthouse: 10.4.0(typescript@5.3.2)
+      mime: 3.0.0
+      web-vitals: 3.5.2
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -22948,7 +22958,7 @@ packages:
       jest: '>=24'
       puppeteer: '>=1.19.0'
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.23.5
       '@wordpress/keycodes': 2.19.3
       '@wordpress/url': 2.22.2(react-native@0.73.0)
       jest: 29.7.0(@types/node@16.18.68)
@@ -23348,25 +23358,6 @@ packages:
       react: 17.0.2
       react-dom: 18.2.0(react@17.0.2)
 
-  /@wordpress/env@8.13.0:
-    resolution: {integrity: sha512-rtrrBO22DnbLsdBlsGqlMQrjz1dZfbwGnxyKev+gFd1rSfmLs+1F8L89RHOx9vsGPixl5uRwoU/qgYo7Hf1NVQ==}
-    hasBin: true
-    dependencies:
-      chalk: 4.1.2
-      copy-dir: 1.3.0
-      docker-compose: 0.22.2
-      extract-zip: 1.7.0
-      got: 11.8.6
-      inquirer: 7.3.3
-      js-yaml: 3.14.1
-      ora: 4.1.1
-      rimraf: 3.0.2
-      simple-git: 3.21.0
-      terminal-link: 2.1.1
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - supports-color
-
   /@wordpress/env@8.2.0:
     resolution: {integrity: sha512-MGf2TJD6MbBjDn/+feGAcXnh6ct9Y/aCjIZTtbMI+b+pXAPh0RzR7Q5D6KMgKUNcGeL6nNQmEUUSSPuzV2UWfQ==}
     hasBin: true
@@ -23386,6 +23377,25 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@wordpress/env@9.7.0:
+    resolution: {integrity: sha512-99VaR3VEZlBsaX30Hx3wKyAWOrtZW/FPZsK5urY4UZbP7kRSlwvIQZdxEs7S17gYOrA72tDg7O4uXsX+IRyQDQ==}
+    hasBin: true
+    dependencies:
+      chalk: 4.1.2
+      copy-dir: 1.3.0
+      docker-compose: 0.24.7
+      extract-zip: 1.7.0
+      got: 11.8.6
+      inquirer: 7.3.3
+      js-yaml: 3.14.1
+      ora: 4.1.1
+      rimraf: 3.0.2
+      simple-git: 3.21.0
+      terminal-link: 2.1.1
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - supports-color
 
   /@wordpress/escape-html@1.12.2:
     resolution: {integrity: sha512-FabgSwznhdaUwe6hr1CsGpgxQbzqEoGevv73WIL1B9GvlZ6csRWodgHfWh4P6fYqpzxFL4WYB8wPJ1PdO32XFA==}
@@ -23633,6 +23643,13 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
 
+  /@wordpress/hooks@3.54.0:
+    resolution: {integrity: sha512-ciLUJCH/xIxtwZI5ADts0RT6te6Lye1Qx/7saBC6qQ8CDdaO6+bvVm8Up4dWG60CZ8UQe/+9QSss2xIkOxgY3w==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.23.6
+    dev: true
+
   /@wordpress/hooks@3.6.1:
     resolution: {integrity: sha512-4sIngmH64M1jzcprfkffo1GHsQbd/QNbTweq6cSPIJNorKfE63Inf59NQ6r0pq6+Nz+cuq64eMz5v4eyngjZ/A==}
     engines: {node: '>=12'}
@@ -23694,6 +23711,19 @@ packages:
       memize: 2.1.0
       sprintf-js: 1.1.3
       tannin: 1.2.0
+
+  /@wordpress/i18n@4.54.0:
+    resolution: {integrity: sha512-gSKBopBN9rY9GhNy3CXLK3n4D5viuBTObvcu3blu4SFqkHl+Ws1Gx0tHbpypfV80ESrOyMXHJIAqWgBD8d4Hew==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@wordpress/hooks': 3.54.0
+      gettext-parser: 1.4.0
+      memize: 2.1.0
+      sprintf-js: 1.1.3
+      tannin: 1.2.0
+    dev: true
 
   /@wordpress/i18n@4.6.1:
     resolution: {integrity: sha512-hdi+hyEzIqZhEFSmiwApTCfsu5qRpFDSKzpPf5uJbCeCGcY/BVB2m8kh7E0M5Ltva9Hct/4AKR34bR6bm9INFA==}
@@ -24103,6 +24133,14 @@ packages:
       '@babel/runtime': 7.23.5
       '@wordpress/i18n': 4.47.0
       change-case: 4.1.2
+
+  /@wordpress/keycodes@3.54.0:
+    resolution: {integrity: sha512-perPl0Hoq9Kp2hNSe5t7U68is2EljRA6sE6wQ50pqrgTJ1IMk9x8fLa/osRtC7B9AXmGlxKcbIn5i9rlsopN6Q==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.23.6
+      '@wordpress/i18n': 4.54.0
+    dev: true
 
   /@wordpress/keycodes@3.6.1:
     resolution: {integrity: sha512-bqKk3zaJ2tN0hYBhrrgajKnsFMnahQT3FxR5fvqA6e1jVeRAntve3ILUUNTW3lKjmZpKXUaYs7fVrCbRNa4q3A==}
@@ -25304,6 +25342,14 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.6
       remove-accents: 0.5.0
+
+  /@wordpress/url@3.55.0:
+    resolution: {integrity: sha512-xAN/VxImq+KG8PDV7i3HtmPR6Y4LFb7lc0CvBxlHkwv2/PF+vu+1IZYMzj2kCiOvDYrue82n/5rE+Em0+l31aA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@babel/runtime': 7.23.6
+      remove-accents: 0.5.0
+    dev: true
 
   /@wordpress/url@3.7.1:
     resolution: {integrity: sha512-wX/Uck/If+/b8nLhB3UazLMlG7s6jjHv7isG/+/QCaJ01cf/VXXg8x6bRWnoB84ObhwBbBiM4rDTperge7+elg==}
@@ -30774,6 +30820,13 @@ packages:
   /docker-compose@0.22.2:
     resolution: {integrity: sha512-iXWb5+LiYmylIMFXvGTYsjI1F+Xyx78Jm/uj1dxwwZLbWkUdH6yOXY5Nr3RjbYX15EgbGJCq78d29CmWQQQMPg==}
     engines: {node: '>= 6.0.0'}
+    dev: true
+
+  /docker-compose@0.24.7:
+    resolution: {integrity: sha512-CdHl9n0S4+bl4i6MaxDQHNjqB1FdvuDirrDTzPKmdiMpheQqCjgsny0GZ2VhvN7qHTY0833lRlKWZgrkn1i6cg==}
+    engines: {node: '>= 6.0.0'}
+    dependencies:
+      yaml: 2.3.4
 
   /doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
@@ -45662,6 +45715,7 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
       scheduler: 0.19.1
+    bundledDependencies: false
 
   /react-dom@17.0.2(react@17.0.2):
     resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==}
@@ -46219,6 +46273,7 @@ packages:
       react-is: 16.13.1
       scheduler: 0.19.1
     dev: true
+    bundledDependencies: false
 
   /react-test-renderer@17.0.2(react@17.0.2):
     resolution: {integrity: sha512-yaQ9cB89c17PUb0x6UfWRs7kQCorVdHlutU1boVPEsB8IDZH6n9tHxMacc3y0JoXOJUsZb/t/Mb8FUWMKaM7iQ==}
@@ -51655,6 +51710,10 @@ packages:
 
   /web-namespaces@1.1.4:
     resolution: {integrity: sha512-wYxSGajtmoP4WxfejAPIr4l0fVh+jeMXZb08wNc0tMg6xsfZXj3cECqIK0G7ZAqUq0PP8WlMDtaOGVBTAWztNw==}
+    dev: true
+
+  /web-vitals@3.5.2:
+    resolution: {integrity: sha512-c0rhqNcHXRkY/ogGDJQxZ9Im9D19hDihbzSQJrsioex+KnFgmMzBiy57Z1EjkhX/+OjyBpclDCzz2ITtjokFmg==}
     dev: true
 
   /webidl-conversions@3.0.1:
