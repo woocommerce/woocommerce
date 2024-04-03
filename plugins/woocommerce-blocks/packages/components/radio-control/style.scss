@@ -1,17 +1,46 @@
 .wc-block-components-radio-control--highlight-checked {
 	position: relative;
 
-	label.wc-block-components-radio-control__option--checked-option-highlighted {
-		box-shadow: 0 0 0 1.5px currentColor inset;
-		border-radius: 4px;
-		border: 1px solid transparent;
-		border-left: 0;
-		border-right: 0;
-	}
+	div.wc-block-components-radio-control-accordion-option {
+		position: relative;
 
 		&:after {
-			content: "";
+			content: '';
+			background: $universal-border-light;
+			height: 1px;
+			right: 1px;
+			left: 1px;
 			top: 0;
+			position: absolute;
+		}
+
+		&:last-child:after {
+			content: '';
+			background: $universal-border-light;
+			height: 1px;
+			right: 1px;
+			left: 1px;
+			bottom: 0;
+			position: absolute;
+		}
+
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option:after {
+			display: none;
+		}
+	}
+
+	label.wc-block-components-radio-control__option--checked-option-highlighted,
+	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
+		box-shadow: 0 0 0 1.5px currentColor inset;
+		border-radius: 4px;
+	}
+
+	// Defines a border around the radio control. Cannot be done with normal CSS borders because when selecting an item
+	// the selected item needs its own borders with a radius, so we get a double border, or incorrect looking styling with
+	// overlaps under the selected item's border (due to its border-radius).
+	&:after {
+		content: "";
+		top: 0;
 			right: 0;
 			bottom: 0;
 			left: 0;
