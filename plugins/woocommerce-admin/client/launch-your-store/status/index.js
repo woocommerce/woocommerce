@@ -15,7 +15,11 @@ import { useState } from '@wordpress/element';
 import './style.scss';
 import { SiteVisibilityTour } from '../tour';
 
-export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
+export const LaunchYourStoreStatus = ( {
+	comingSoon,
+	storePagesOnly,
+	tourDismissed,
+} ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
 	const isStorePagesOnly =
 		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
@@ -30,7 +34,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const [ showTour, setShowTour ] = useState( true );
 	return (
 		<div className="woocommerce-lys-status">
-			{ showTour && (
+			{ tourDismissed !== 'yes' && showTour && (
 				<SiteVisibilityTour
 					onClose={ () => {
 						setShowTour( false );
