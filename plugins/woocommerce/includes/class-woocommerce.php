@@ -315,7 +315,7 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
-		if ( ! Feature::is_enabled( 'launch-your-store' ) ) {
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
 			return;
 		}
 
