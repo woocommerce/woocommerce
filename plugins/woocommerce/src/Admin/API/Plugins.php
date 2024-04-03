@@ -601,9 +601,9 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooPayments plugin.', 'woocommerce' ), 500 );
 		}
 
-		// Redirect to the WooPayments overview page if the merchant started onboarding but left KYC immediately.
-		// Redirect to the connect page if they haven't started onboarding.
-		$path = WooCommercePayments::is_account_partially_onboarded() ? '/payments/overview' : '/payments/connect';
+		// Redirect to the WooPayments overview page if the merchant started onboarding (aka WooPayments is already connected).
+		// Redirect to the WooPayments connect page if they haven't started onboarding.
+		$path = WooCommercePayments::is_connected() ? '/payments/overview' : '/payments/connect';
 
 		// Point to the WooPayments Connect page rather than straight to the onboarding flow.
 		return( array(

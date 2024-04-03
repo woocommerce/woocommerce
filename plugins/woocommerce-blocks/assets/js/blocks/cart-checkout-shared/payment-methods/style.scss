@@ -189,6 +189,8 @@
 	.wc-block-components-radio-control__option:first-child,
 	.wc-block-components-radio-control__option:last-child {
 		margin: 0;
+		padding-bottom: em($gap);
+		padding-top: em($gap);
 	}
 
 	.wc-block-components-radio-control__option-checked {
@@ -209,10 +211,6 @@
 	.wc-block-components-radio-control-accordion-option
 	.wc-block-components-radio-control__option {
 		border-width: 0;
-	}
-	.wc-block-components-radio-control-accordion-option {
-		padding-bottom: $gap;
-		padding-top: $gap;
 	}
 
 	.wc-block-components-radio-control-accordion-option:first-child::after {
