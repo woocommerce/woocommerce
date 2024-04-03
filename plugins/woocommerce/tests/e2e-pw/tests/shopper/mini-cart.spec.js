@@ -175,7 +175,9 @@ test.describe( 'Mini Cart block page', () => {
 		// customize font size and weight
 		await page.getByLabel( 'Large', { exact: true } ).click();
 		await page.getByRole( 'button', { name: 'Font weight' } ).click();
-		await page.getByRole( 'option' ).filter( { hasText: 'Black' } ).click();
+		await page
+			.getByRole( 'option', { name: 'Black', exact: true } )
+			.click();
 
 		// publish created mini cart page
 		await page
