@@ -40,7 +40,7 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 		$settings =
 			array(
 				array(
-					'id'   => 'wc_settings_general_site_visibility_slotfill',
+					'id'   => 'wc_settings_site_visibility_slotfill',
 					'type' => 'slotfill_placeholder',
 				),
 			);
