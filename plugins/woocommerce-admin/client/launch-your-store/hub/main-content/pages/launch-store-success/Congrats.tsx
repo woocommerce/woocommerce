@@ -22,17 +22,19 @@ import './style.scss';
 import WooLogo from '~/core-profiler/components/navigation/woologo';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
+export type CongratsProps = {
+	hasCompleteSurvey: boolean;
+	isWooExpress: boolean;
+	completeSurvey: () => void;
+	children?: React.ReactNode;
+};
+
 export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
 	completeSurvey,
 	children,
-}: {
-	hasCompleteSurvey: boolean;
-	isWooExpress: boolean;
-	completeSurvey: () => void;
-	children: React.ReactNode;
-} ) => {
+}: CongratsProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const homeUrl: string = getSetting( 'homeUrl', '' );
