@@ -369,7 +369,14 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
-		error_log( 'ProductCollection::update_rest_query_in_editor' );
+		// Is this a preview request?
+		// If yes, short-circuit the query and return the preview query.
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		if ( 'true' === $is_preview ) {
+			error_log( 'ProductCollection: Preview mode' );
+			return $this->get_preview_query_args( $args, $request );
+		}
 
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
@@ -530,6 +537,33 @@ class ProductCollection extends AbstractBlock {
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
+	}
+
+	/**
+	 * Update the query based on collection name if it's a preview request.
+	 * For example, For On-sale collection, in preview mode we should always show
+	 * the products that are on sale, even if we want to show random products in
+	 * preview mode.
+	 *
+	 * @param array           $args    Query args.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_preview_query_args( $args, $request ) {
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$collection_name                  = $product_collection_query_context['collection'] ?? '';
+
+		$collection_query = array();
+
+		if ( 'woocommerce/product-collection/featured' === $collection_name ) {
+			$collection_query = $this->get_featured_query( true );
+		} elseif ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+			$collection_query = $this->get_on_sale_products_query( true );
+		}
+
+		$args = $this->merge_queries( $args, $collection_query );
+		// print $args
+		error_log( print_r( $args, true ) );
+		return $args;
 	}
 
 	/**

@@ -97,8 +97,10 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
-		handlePreviewState?: HandlePreviewState;
-		initialPreviewState?: PreviewState;
+		preview: {
+			initialState?: PreviewState;
+			handlePreviewState?: HandlePreviewState;
+		};
 		context: {
 			templateSlug: string;
 		};
@@ -163,6 +165,7 @@ export interface PreviewState {
  * more information to the preview state handler.
  */
 export interface HandlePreviewStateArgs {
+	previewState?: PreviewState;
 	setPreviewState: ( previewState: PreviewState ) => void;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;

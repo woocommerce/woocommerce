@@ -69,6 +69,7 @@ const handlePreviewState = ( {
 	attributes: currentAttributes,
 	location,
 }: HandlePreviewStateArgs ) => {
+	// handlePreviewState has access to the current attributes and location.
 	console.log( 'handlePreviewState' );
 	console.log( currentAttributes, location );
 

@@ -71,8 +71,7 @@ const useHandlePreviewState = ( {
 };
 
 const ProductCollectionContent = ( {
-	handlePreviewState,
-	initialPreviewState,
+	preview: { handlePreviewState, initialState: initialPreviewState } = {},
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes, setAttributes } = props;

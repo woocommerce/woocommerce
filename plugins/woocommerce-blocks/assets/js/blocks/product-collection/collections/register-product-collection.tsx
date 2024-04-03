@@ -49,8 +49,7 @@ const registerProductCollection = ( {
 				return (
 					<BlockEdit
 						{ ...props }
-						handlePreviewState={ handlePreviewState }
-						initialPreviewState={ initialState }
+						preview={ { handlePreviewState, initialState } }
 					/>
 				);
 			};
