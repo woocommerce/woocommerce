@@ -48,7 +48,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 				steps: [
 					{
 						referenceElements: {
-							desktop: `.woocommerce-lys-status-pill`,
+							desktop: '.woocommerce-lys-status-pill',
 						},
 						meta: {
 							name: 'set-your-store-visibility',
