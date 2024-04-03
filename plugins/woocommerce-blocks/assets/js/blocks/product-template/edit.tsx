@@ -3,7 +3,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { memo, useMemo, useState } from '@wordpress/element';
+import { memo, useEffect, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -15,7 +15,11 @@ import {
 } from '@wordpress/block-editor';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
+import {
+	LayoutOptions,
+	ProductCollectionAttributes,
+	ProductCollectionLayout,
+} from '@woocommerce/blocks/product-collection/types';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
@@ -32,9 +36,12 @@ const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
-		{ className: 'wc-block-product' },
+		{
+			className: 'wc-block-product',
+		},
 		{ __unstableDisableLayoutClassNames: true }
 	);
+
 	return <li { ...innerBlocksProps } />;
 };
 
@@ -128,6 +135,7 @@ const ProductContent = withProduct(
 const ProductTemplateEdit = (
 	props: BlockEditProps< {
 		clientId: string;
+		layout: ProductCollectionLayout;
 	} > & {
 		context: ProductCollectionAttributes;
 		__unstableLayoutClassNames: string;
@@ -150,14 +158,11 @@ const ProductTemplateEdit = (
 			},
 			queryContext = [ { page: 1 } ],
 			templateSlug,
-			displayLayout: { type: layoutType, columns, shrinkColumns } = {
-				type: 'flex',
-				columns: 3,
-				shrinkColumns: false,
-			},
+			templateLayout,
 			queryContextIncludes = [],
 		},
 		__unstableLayoutClassNames,
+		setAttributes,
 	} = props;
 	const location = useGetLocation( props.context, props.clientId );
 
@@ -281,20 +286,14 @@ const ProductTemplateEdit = (
 		[ products ]
 	);
 
-	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
-	let customClassName = '';
-	if ( hasLayoutFlex ) {
-		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
-		const staticGrid = `is-flex-container columns-${ columns }`;
-
-		customClassName = shrinkColumns ? dynamicGrid : staticGrid;
-	}
+	useEffect( () => {
+		setAttributes( { layout: templateLayout } );
+	}, [ setAttributes, templateLayout ] );
 
 	const blockProps = useBlockProps( {
 		className: classnames(
 			__unstableLayoutClassNames,
-			'wc-block-product-template',
-			customClassName
+			'wc-block-product-template'
 		),
 	} );
 

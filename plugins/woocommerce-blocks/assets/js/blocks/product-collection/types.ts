@@ -13,7 +13,7 @@ export interface ProductCollectionAttributes {
 		}
 	];
 	templateSlug: string;
-	displayLayout: ProductCollectionDisplayLayout;
+	templateLayout: ProductCollectionLayout;
 	tagName: string;
 	convertedFromProducts: boolean;
 	collection?: string;
@@ -26,15 +26,22 @@ export interface ProductCollectionAttributes {
 }
 
 export enum LayoutOptions {
-	GRID = 'flex',
-	STACK = 'list',
+	GRID = 'grid',
+	STACK = 'default',
 }
 
-export interface ProductCollectionDisplayLayout {
-	type: LayoutOptions;
-	columns: number;
-	shrinkColumns: boolean;
+export interface ProductCollectionLayoutGrid {
+	type: LayoutOptions.GRID;
+	columnCount: number;
 }
+
+export interface ProductCollectionLayoutStack {
+	type: LayoutOptions.STACK;
+}
+
+export type ProductCollectionLayout =
+	| ProductCollectionLayoutGrid
+	| ProductCollectionLayoutStack;
 
 export enum ETimeFrameOperator {
 	IN = 'in',
@@ -107,8 +114,8 @@ export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >
 ) => void;
 
-export type DisplayLayoutControlProps = {
-	displayLayout: ProductCollectionDisplayLayout;
+export type TemplateLayoutControlProps = {
+	templateLayout: ProductCollectionLayout;
 	setAttributes: ProductCollectionSetAttributes;
 };
 export type QueryControlProps = {

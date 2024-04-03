@@ -19,7 +19,11 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
+import {
+	TemplateLayoutControlProps,
+	LayoutOptions,
+	ProductCollectionLayout,
+} from '../../types';
 
 const getHelpText = ( layoutOptions: LayoutOptions ) => {
 	switch ( layoutOptions ) {
@@ -37,35 +41,34 @@ const getHelpText = ( layoutOptions: LayoutOptions ) => {
 
 const DEFAULT_VALUE = LayoutOptions.GRID;
 
-const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
-	const { type, columns, shrinkColumns } = props.displayLayout;
-	const setDisplayLayout = ( displayLayout: LayoutOptions ) => {
+const LayoutOptionsControl = ( props: TemplateLayoutControlProps ) => {
+	const { type: layoutType } = props.templateLayout;
+	const setTemplateLayout = ( newLayoutType: LayoutOptions ) => {
 		props.setAttributes( {
-			displayLayout: {
-				type: displayLayout,
-				columns,
-				shrinkColumns,
-			},
+			templateLayout: {
+				...props.templateLayout,
+				type: newLayoutType,
+			} as ProductCollectionLayout,
 		} );
 	};
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'Layout', 'woocommerce' ) }
-			hasValue={ () => type !== DEFAULT_VALUE }
+			hasValue={ () => layoutType !== DEFAULT_VALUE }
 			isShownByDefault
 			onDeselect={ () => {
-				setDisplayLayout( LayoutOptions.GRID );
+				setTemplateLayout( LayoutOptions.GRID );
 			} }
 		>
 			<ToggleGroupControl
 				label={ __( 'Layout', 'woocommerce' ) }
 				isBlock
 				onChange={ ( value: LayoutOptions ) => {
-					setDisplayLayout( value );
+					setTemplateLayout( value );
 				} }
-				help={ getHelpText( type ) }
-				value={ type }
+				help={ getHelpText( layoutType ) }
+				value={ layoutType }
 			>
 				<ToggleGroupControlOption
 					value={ LayoutOptions.STACK }

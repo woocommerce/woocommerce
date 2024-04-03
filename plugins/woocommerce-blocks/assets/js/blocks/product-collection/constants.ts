@@ -18,8 +18,9 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	ProductCollectionQuery,
-	ProductCollectionDisplayLayout,
+	ProductCollectionLayout,
 	LayoutOptions,
+	ProductCollectionLayoutGrid,
 } from './types';
 import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 import { VARIATION_NAME as PRODUCT_TITLE_ID } from './variations/elements/product-title';
@@ -66,10 +67,9 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
-	displayLayout: {
+	templateLayout: {
 		type: LayoutOptions.GRID,
-		columns: 3,
-		shrinkColumns: true,
+		columnCount: 3,
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,
@@ -84,13 +84,13 @@ export const getDefaultQuery = (
 	inherit: getDefaultValueOfInheritQueryFromTemplate(),
 } );
 
-export const getDefaultDisplayLayout = () =>
-	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+export const getDefaultTemplateLayout = () =>
+	DEFAULT_ATTRIBUTES.templateLayout as ProductCollectionLayoutGrid;
 
 export const getDefaultSettings = (
 	currentAttributes: ProductCollectionAttributes
 ): Partial< ProductCollectionAttributes > => ( {
-	displayLayout: getDefaultDisplayLayout(),
+	templateLayout: getDefaultTemplateLayout(),
 	query: getDefaultQuery( currentAttributes.query ),
 } );
 

@@ -72,9 +72,9 @@ const ProductCollectionInspectorControls = (
 		[ props ]
 	);
 
-	const displayControlProps = {
+	const layoutControlProps = {
 		setAttributes: props.setAttributes,
-		displayLayout: props.attributes.displayLayout,
+		templateLayout: props.attributes.templateLayout,
 	};
 
 	const queryControlProps = {
@@ -93,11 +93,12 @@ const ProductCollectionInspectorControls = (
 					props.setAttributes( defaultSettings );
 				} }
 			>
+				<LayoutOptionsControl { ...layoutControlProps } />
+				<ColumnsControl { ...layoutControlProps } />
 				{ showInheritQueryControls && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
-				<LayoutOptionsControl { ...displayControlProps } />
-				<ColumnsControl { ...displayControlProps } />
+
 				{ showOrderControl && (
 					<OrderByControl { ...queryControlProps } />
 				) }

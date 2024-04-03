@@ -18,7 +18,7 @@
 		"tagName": {
 			"type": "string"
 		},
-		"displayLayout": {
+		"templateLayout": {
 			"type": "object"
 		},
 		"convertedFromProducts": {
@@ -43,7 +43,7 @@
 	"providesContext": {
 		"queryId": "queryId",
 		"query": "query",
-		"displayLayout": "displayLayout",
+		"templateLayout": "templateLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection"
 	},
@@ -52,7 +52,6 @@
 		"align": [ "wide", "full" ],
 		"anchor": true,
 		"html": false,
-		"__experimentalLayout": true,
 		"interactivity": true
 	}
 }

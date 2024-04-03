@@ -11,7 +11,7 @@
 		"queryId",
 		"query",
 		"queryContext",
-		"displayLayout",
+		"templateLayout",
 		"templateSlug",
 		"postId",
 		"queryContextIncludes",
@@ -23,7 +23,7 @@
 		"html": false,
 		"align": [ "wide", "full" ],
 		"anchor": true,
-		"__experimentalLayout": {
+		"layout": {
 			"allowEditing": false
 		},
 		"color": {
