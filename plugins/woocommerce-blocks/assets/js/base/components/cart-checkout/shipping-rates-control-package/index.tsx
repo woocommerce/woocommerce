@@ -27,6 +27,8 @@ export const ShippingRatesControlPackage = ( {
 	showItems,
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate, isSelectingRate } = useShippingData();
+
+	// We have no built-in way of checking if other extensions have added packages e.g. if subscriptions has added them.
 	const multiplePackages =
 		document.querySelectorAll(
 			'.wc-block-components-shipping-rates-control__package'
