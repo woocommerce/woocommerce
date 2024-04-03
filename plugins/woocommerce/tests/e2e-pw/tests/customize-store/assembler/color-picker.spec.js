@@ -77,7 +77,7 @@ test.skip( 'Assembler -> Color Pickers', () => {
 		await expect( colorPickers ).toHaveCount( 18 );
 	} );
 
-	test.only( 'Picking a color should trigger an update of colors on the site preview', async ( {
+	test( 'Picking a color should trigger an update of colors on the site preview', async ( {
 		assemblerPageObject,
 	}, testInfo ) => {
 		const assembler = await assemblerPageObject.getAssembler();
