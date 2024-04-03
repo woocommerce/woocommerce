@@ -79,6 +79,10 @@ export const mainContentMachine = setup( {
 			activePlugins: [],
 		},
 	},
+	invoke: {
+		id: 'contentQueryParamListener',
+		src: 'contentQueryParamListener',
+	},
 	states: {
 		navigate: {
 			always: [
