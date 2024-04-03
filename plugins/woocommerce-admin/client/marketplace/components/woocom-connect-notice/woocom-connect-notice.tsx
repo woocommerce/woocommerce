@@ -19,6 +19,26 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 		return null;
 	}
 
+	const lastDismissed = localStorage.getItem(
+		'woo-connect-notice-dismissed'
+	);
+	const parsedDismissedDate = new Date( lastDismissed || '' );
+	const aMonthAgo = new Date();
+	aMonthAgo.setMonth( aMonthAgo.getMonth() - 1 );
+
+	// try to re-show the notice if it was dismissed more than a month ago.
+	// removing these 2 local storage items will make the notice reappear.
+	if (
+		lastDismissed === null ||
+		isNaN( parsedDismissedDate.valueOf() ) ||
+		aMonthAgo.valueOf() > parsedDismissedDate.valueOf()
+	) {
+		localStorage.removeItem(
+			'wc-marketplaceNoticeClosed-woo-connect-notice'
+		);
+		localStorage.removeItem( 'woo-connect-notice-dismissed' );
+	}
+
 	let description = '';
 
 	if ( noticeType === 'long' ) {
@@ -45,6 +65,12 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 			description={ description }
 			isDismissible={ true }
 			variant="error"
+			onClose={ () => {
+				localStorage.setItem(
+					'woo-connect-notice-dismissed',
+					new Date().toString()
+				);
+			} }
 		>
 			<Button href={ connectUrl() } variant="secondary">
 				{ __( 'Connect', 'woocommerce' ) }
