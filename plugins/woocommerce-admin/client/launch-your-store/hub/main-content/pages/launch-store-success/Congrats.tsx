@@ -13,17 +13,15 @@ import { isInteger } from 'lodash';
 import { closeSmall } from '@wordpress/icons';
 import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
 import { useCopyToClipboard } from '@wordpress/compose';
-import {
-	Button,
-	TextareaControl,
-	Icon,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	__unstableMotion as motion,
-} from '@wordpress/components';
+import { Button, TextareaControl, Icon, Dashicon } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
 import './style.scss';
 import { WhatsNext } from './WhatsNext';
+import WooLogo from '~/core-profiler/components/navigation/woologo';
+import { ADMIN_URL } from '~/utils/admin-settings';
 
 export const Congrats = ( {
 	hasCompleteSurvey,
@@ -88,13 +86,19 @@ export const Congrats = ( {
 	return (
 		<div className="woocommerce-launch-store__congrats">
 			<ConfettiAnimation delay={ 1000 } />
-			<motion.div
-				variants={ {
-					view: { x: 0 },
-				} }
-				isTransparent={ false }
-				className="edit-site-layout__hub"
-			/>
+			<div className="woocommerce-launch-store__congrats-header-container">
+				<span className="woologo">
+					<WooLogo />
+				</span>
+				<Button
+					href={ ADMIN_URL + 'admin.php?page=wc-admin' }
+					className="back-to-home-button"
+					variant="link"
+				>
+					<Dashicon icon="arrow-left-alt2"></Dashicon>
+					<span>{ __( 'Back to Home', 'woocommerce' ) }</span>
+				</Button>
+			</div>
 			<div className="woocommerce-launch-store__congrats-content">
 				<h1 className="woocommerce-launch-store__congrats-heading">
 					{ __(

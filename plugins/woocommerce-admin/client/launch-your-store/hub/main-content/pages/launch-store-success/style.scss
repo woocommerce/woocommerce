@@ -10,9 +10,39 @@
 	width: 100vw;
 	height: 100vh;
 
-	// Temporary
-	.edit-site-layout__hub {
-		margin-top: 64px;
+	.woocommerce-launch-store__congrats-header-container {
+		min-height: 64px;
+		display: flex;
+		align-items: center;
+		justify-content: left;
+
+		.woologo {
+			padding-top: 8px;
+
+			svg {
+				margin-left: 38px;
+				margin-right: 24px;
+				width: 38px;
+				height: 23px;
+			}
+		}
+
+		.back-to-home-button {
+			padding: 0;
+			height: 24px;
+			text-decoration: none;
+
+			.dashicon {
+				padding-right: 22px;
+			}
+			span {
+				color: #3c434a;
+				font-size: 14px;
+				line-height: 20px;
+				letter-spacing: -0.15px;
+				font-weight: 500;
+			}
+		}
 	}
 
 	.woocommerce-launch-store__congrats-content {
