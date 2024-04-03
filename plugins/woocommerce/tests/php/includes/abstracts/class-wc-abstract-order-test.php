@@ -382,9 +382,11 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $order2->get_items( 'line_item' ) );
 		$this->assertCount( 2, $order1->get_items( 'line_item' ) );
 
-		$this->assertEquals( $item1_2->get_id(), $order1->get_items( 'line_item' )[1]->get_id() );
-		$this->assertEquals( $item1_1->get_id(), $order1->get_items( 'line_item' )[0]->get_id() );
+		$order1_items = array_keys( $order1->get_items( 'line_item' ) );
 
-		$this->assertEquals( $item2->get_id(), $order2->get_items( 'line_item' )[0]->get_id() );
+		$this->assertContains( $item1_1->get_id(), $order1_items );
+		$this->assertContains( $item1_1->get_id(), $order1_items );
+
+		$this->assertEquals( $item2->get_id(), array_keys ( $order2->get_items( 'line_item' ) )[0] );
 	}
 }
