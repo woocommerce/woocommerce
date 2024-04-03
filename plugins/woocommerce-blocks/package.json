@@ -190,7 +190,7 @@
 		"@wordpress/e2e-test-utils-playwright": "wp-6.5",
 		"@wordpress/e2e-tests": "^4.9.2",
 		"@wordpress/element": "5.22.0",
-		"@wordpress/env": "8.2.0",
+		"@wordpress/env": "^9.7.0",
 		"@wordpress/html-entities": "3.24.0",
 		"@wordpress/i18n": "4.45.0",
 		"@wordpress/is-shallow-equal": "4.24.0",

@@ -4220,8 +4220,8 @@ importers:
         specifier: 5.22.0
         version: 5.22.0
       '@wordpress/env':
-        specifier: 8.2.0
-        version: 8.2.0
+        specifier: ^9.7.0
+        version: 9.7.0
       '@wordpress/html-entities':
         specifier: 3.24.0
         version: 3.24.0
@@ -23134,13 +23134,13 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@wordpress/env@8.2.0:
-    resolution: {integrity: sha512-MGf2TJD6MbBjDn/+feGAcXnh6ct9Y/aCjIZTtbMI+b+pXAPh0RzR7Q5D6KMgKUNcGeL6nNQmEUUSSPuzV2UWfQ==}
+  /@wordpress/env@9.7.0:
+    resolution: {integrity: sha512-99VaR3VEZlBsaX30Hx3wKyAWOrtZW/FPZsK5urY4UZbP7kRSlwvIQZdxEs7S17gYOrA72tDg7O4uXsX+IRyQDQ==}
     hasBin: true
     dependencies:
       chalk: 4.1.2
       copy-dir: 1.3.0
-      docker-compose: 0.22.2
+      docker-compose: 0.24.7
       extract-zip: 1.7.0
       got: 11.8.6
       inquirer: 7.3.3
@@ -30508,6 +30508,13 @@ packages:
   /docker-compose@0.22.2:
     resolution: {integrity: sha512-iXWb5+LiYmylIMFXvGTYsjI1F+Xyx78Jm/uj1dxwwZLbWkUdH6yOXY5Nr3RjbYX15EgbGJCq78d29CmWQQQMPg==}
     engines: {node: '>= 6.0.0'}
+
+  /docker-compose@0.24.7:
+    resolution: {integrity: sha512-CdHl9n0S4+bl4i6MaxDQHNjqB1FdvuDirrDTzPKmdiMpheQqCjgsny0GZ2VhvN7qHTY0833lRlKWZgrkn1i6cg==}
+    engines: {node: '>= 6.0.0'}
+    dependencies:
+      yaml: 2.3.4
+    dev: true
 
   /doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
