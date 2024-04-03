@@ -3,7 +3,6 @@
  */
 import {
 	getHistory,
-	getNewPath,
 	getQuery,
 	updateQueryString,
 } from '@woocommerce/navigation';
@@ -69,9 +68,4 @@ export const updateQueryParams = (
 	if ( Object.keys( changes ).length > 0 ) {
 		updateQueryString( changes );
 	}
-};
-
-export const redirectToWooHome = () => {
-	const url = getNewPath( {}, '/', {} );
-	window.location.href = url;
 };

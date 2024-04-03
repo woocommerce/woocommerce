@@ -12,7 +12,7 @@ import type { MainContentComponentProps } from '../../xstate';
 import { Congrats } from './Congrats';
 export * as actions from './actions';
 export * as services from './services';
-export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
+export type events = { type: 'COMPLETE_SURVEY' };
 import { WhatsNext } from './WhatsNext';
 
 export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {

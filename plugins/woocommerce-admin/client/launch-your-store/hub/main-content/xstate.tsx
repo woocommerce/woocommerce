@@ -134,9 +134,6 @@ export const mainContentMachine = setup( {
 				COMPLETE_SURVEY: {
 					actions: assign( congratsActions.assignCompleteSurvey ),
 				},
-				GO_BACK_TO_HOME: {
-					actions: 'redirectToWooHome',
-				},
 			},
 		},
 		loading: {

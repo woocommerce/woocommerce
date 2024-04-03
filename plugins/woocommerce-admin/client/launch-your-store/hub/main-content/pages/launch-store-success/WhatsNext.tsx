@@ -26,7 +26,7 @@ type Action = {
 	trackEvent: string;
 };
 
-const getList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
+const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 	const actions: Action[] = [];
 	const pick = ( action: Action, condition: boolean ) => {
 		if ( actions.length < 3 && condition ) {
@@ -141,7 +141,7 @@ export const WhatsNext = ( {
 	allTasklists,
 }: WhatsNextProps ) => {
 	const actions = useMemo( () => {
-		return getList( { activePlugins, allTasklists } );
+		return getActionsList( { activePlugins, allTasklists } );
 	}, [ activePlugins, allTasklists ] );
 
 	return (
