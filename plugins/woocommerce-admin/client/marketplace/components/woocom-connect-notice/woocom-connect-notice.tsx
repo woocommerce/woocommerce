@@ -12,6 +12,7 @@ import Notice from '~/marketplace/components/notice/notice';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function WoocomConnectNotice(): JSX.Element | null {
+	const localStorageKey = 'woo-connect-notice-marketplace-dismissed';
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const noticeType = wccomSettings?.woocomConnectNoticeType || 'none';
 
@@ -19,9 +20,7 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 		return null;
 	}
 
-	const lastDismissed = localStorage.getItem(
-		'woo-connect-notice-dismissed'
-	);
+	const lastDismissed = localStorage.getItem( localStorageKey );
 	const parsedDismissedDate = new Date( lastDismissed || '' );
 	const aMonthAgo = new Date();
 	aMonthAgo.setMonth( aMonthAgo.getMonth() - 1 );
@@ -36,7 +35,7 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 		localStorage.removeItem(
 			'wc-marketplaceNoticeClosed-woo-connect-notice'
 		);
-		localStorage.removeItem( 'woo-connect-notice-dismissed' );
+		localStorage.removeItem( localStorageKey );
 	}
 
 	let description = '';
@@ -66,10 +65,7 @@ export default function WoocomConnectNotice(): JSX.Element | null {
 			isDismissible={ true }
 			variant="error"
 			onClose={ () => {
-				localStorage.setItem(
-					'woo-connect-notice-dismissed',
-					new Date().toString()
-				);
+				localStorage.setItem( localStorageKey, new Date().toString() );
 			} }
 		>
 			<Button href={ connectUrl() } variant="secondary">
