@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Coupons controller.
+ * Launch Your Store controller.
  *
  * @internal
  */
