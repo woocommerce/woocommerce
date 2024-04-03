@@ -19,11 +19,8 @@
 			position: absolute;
 		}
 
-		&:last-child::after {
-			bottom: 0;
-			position: absolute;
-		}
-
+		// The first child doesn't need a fake border-top because it's handled by its parent's border-top. This stops
+		// a double border.
 		&:first-child::after {
 			display: none;
 		}
