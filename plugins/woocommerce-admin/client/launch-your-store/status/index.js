@@ -7,11 +7,13 @@ import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import classnames from 'classnames';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import { SiteVisibilityTour } from '../tour';
 
 export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
@@ -25,8 +27,16 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const launchYourStoreLink = new URL(
 		getAdminLink( getNewPath( {}, '/launch-your-store', {} ) )
 	);
+	const [ showTour, setShowTour ] = useState( true );
 	return (
 		<div className="woocommerce-lys-status">
+			{ showTour && (
+				<SiteVisibilityTour
+					onClose={ () => {
+						setShowTour( false );
+					} }
+				/>
+			) }
 			<div className="woocommerce-lys-status-pill-wrapper">
 				<Dropdown
 					className="woocommerce-lys-status-dropdown"

@@ -1,0 +1,53 @@
+.woocommerce-lys-homescreen-status-tour-kit {
+	color: #1E1E1E;
+
+	.woocommerce-tour-kit-step {
+		border-radius: 8px;
+		border: 1px solid #dcdcdc;
+
+		/* Shadow / Popover */
+		box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
+		width: 257px;
+	}
+	.tour-kit-frame__container {
+		box-shadow: none;
+		background: none;
+	}
+
+	.components-elevation {
+		display: none;
+	}
+
+	.woocommerce-tour-kit-step__body {
+		background-image: url('./header-image.svg');
+		background-repeat: no-repeat;
+		background-position-x: center;
+		background-position-y: 5px;
+	}
+	.woocommerce-tour-kit-step-navigation {
+		display: none;
+	}
+	h2 {
+		padding-top: 100px;
+		font-size: 14px;
+		line-height: 24px;
+	}
+	p.woocommerce-tour-kit-step__description {
+		font-size: 13px;
+		line-height: 18px;
+		margin-top: 8px;
+	}
+	.tour-kit-frame__arrow::before {
+		box-shadow: none !important;
+	}
+
+	.tour-kit-frame__container[data-popper-placement^="bottom"] {
+		& > .tour-kit-frame__arrow {
+			background: #fff;
+			&::before {
+				border-top: 1px solid var(--gutenberg-gray-300, #ddd);
+				border-left: 1px solid var(--gutenberg-gray-300, #ddd);
+			}
+		}
+	}
+}
