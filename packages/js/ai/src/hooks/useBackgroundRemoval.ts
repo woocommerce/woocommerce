@@ -3,12 +3,12 @@
  */
 import { useState } from 'react';
 import apiFetch from '@wordpress/api-fetch';
+import { requestJwt } from '@automattic/jetpack-ai-client';
 
 /**
  * Internal dependencies
  */
 import { createExtendedError } from '../utils/create-extended-error';
-import { requestJetpackToken } from '../utils/requestJetpackToken';
 
 export type BackgroundRemovalParams = {
 	imageFile: File;
@@ -27,7 +27,7 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 	const fetchImage = async ( params: BackgroundRemovalParams ) => {
 		setLoading( true );
 		const { imageFile } = params;
-		const { token } = await requestJetpackToken();
+		const { token } = await requestJwt();
 
 		if ( ! token ) {
 			throw createExtendedError( 'Invalid token', 'invalid_jwt' );
@@ -70,7 +70,9 @@ export const useBackgroundRemoval = (): BackgroundRemovalResponse => {
 			} );
 
 			const blob = await (
-				response as { blob: () => Promise< Blob > }
+				response as {
+					blob: () => Promise< Blob >;
+				}
 			 ).blob();
 			setImageData( blob );
 			return blob;
