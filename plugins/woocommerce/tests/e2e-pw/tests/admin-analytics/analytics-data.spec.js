@@ -607,77 +607,77 @@ test.describe( 'Analytics-related tests', () => {
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'menuitem', {
+				name: 'Items sold 110 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
 				name: 'Net sales $1,229.30 No change from Previous year:',
 			} )
 		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average order value $122.93 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average items per order 11 No change from Previous year:',
-			} )
-		).toBeVisible();
-
-		// apply some filters
-		await page.getByRole( 'button', { name: 'All orders' } ).click();
-		await page.getByText( 'Advanced filters' ).click();
-
-		await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
-		await page.getByRole( 'button', { name: 'Order Status' } ).click();
-		await page
-			.getByLabel( 'Select an order status filter match' )
-			.selectOption( 'Is' );
-		await page
-			.getByLabel( 'Select an order status', { exact: true } )
-			.selectOption( 'Failed' );
-		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
-
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Orders 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Net sales $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average order value $0.00 No change from Previous year:',
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'menuitem', {
-				name: 'Average items per order 0 No change from Previous year:',
-			} )
-		).toBeVisible();
-
-		await page
-			.getByLabel( 'Select an order status', { exact: true } )
-			.selectOption( 'Completed' );
-		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
 		await expect(
 			page.getByRole( 'menuitem', {
 				name: 'Orders 10 No change from Previous year:',
 			} )
 		).toBeVisible();
+
+		// apply some filters
+		await page.getByRole( 'button', { name: 'All products' } ).click();
+		await page.getByText( 'Single product' ).click();
+
+		// Search for single product
+		await page
+			.getByPlaceholder( 'Type to search for a product' )
+			.last()
+			.fill( 'Variable Product' );
+
+		await page.getByRole( 'option', { name: 'Variable Product' } ).click();
+
 		await expect(
 			page.getByRole( 'menuitem', {
-				name: 'Net sales $1,229.30 No change from Previous year:',
+				name: 'Items sold 40 No change from Previous year:',
 			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'menuitem', {
-				name: 'Average order value $122.93 No change from Previous year:',
+				name: 'Net sales $260.00 No change from Previous year:',
 			} )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'menuitem', {
-				name: 'Average items per order 11 No change from Previous year:',
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+
+		await page.getByText( 'All variations' ).click();
+
+		// Search for single product
+		await expect(
+			page.getByRole( 'button', { name: 'Single variation' } )
+		).toBeVisible();
+		await page.getByRole( 'button', { name: 'Single variation' } ).click();
+		await page
+			.getByPlaceholder( 'Type to search for a variation' )
+			.last()
+			.fill( 'Blue' );
+
+		await page
+			.getByRole( 'option', { name: 'Variable Product - Blue' } )
+			.click();
+
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Items sold 30 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $180.00 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
 			} )
 		).toBeVisible();
 	} );
