@@ -53,37 +53,32 @@ function TaxonomyControls( {
 		return null;
 	}
 
-	return (
-		<ToolsPanelItem
-			label={ __( 'Taxonomies', 'woocommerce' ) }
-			hasValue={ () =>
-				Object.values( taxQuery || {} ).some(
-					( terms ) => !! terms.length
-				)
-			}
-			onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
-		>
-			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
-				const termIds = taxQuery?.[ taxonomy.slug ] || [];
-				const handleChange = ( newTermIds: number[] ) =>
-					setQueryAttribute( {
-						taxQuery: {
-							...taxQuery,
-							[ taxonomy.slug ]: newTermIds,
-						},
-					} );
+	return taxonomies.map( ( taxonomy: Taxonomy ) => {
+		const termIds = taxQuery?.[ taxonomy.slug ] || [];
+		const handleChange = ( newTermIds: number[] ) =>
+			setQueryAttribute( {
+				taxQuery: {
+					...taxQuery,
+					[ taxonomy.slug ]: newTermIds,
+				},
+			} );
 
-				return (
-					<TaxonomyItem
-						key={ taxonomy.slug }
-						taxonomy={ taxonomy }
-						termIds={ termIds }
-						onChange={ handleChange }
-					/>
-				);
-			} ) }
-		</ToolsPanelItem>
-	);
+		return (
+			<ToolsPanelItem
+				key={ taxonomy.slug }
+				label={ taxonomy.name }
+				hasValue={ () => termIds.length }
+				onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
+			>
+				<TaxonomyItem
+					key={ taxonomy.slug }
+					taxonomy={ taxonomy }
+					termIds={ termIds }
+					onChange={ handleChange }
+				/>
+			</ToolsPanelItem>
+		);
+	} );
 }
 
 export default TaxonomyControls;
