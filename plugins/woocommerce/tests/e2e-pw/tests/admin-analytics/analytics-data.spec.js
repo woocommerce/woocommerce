@@ -585,6 +585,103 @@ test.describe( 'Analytics-related tests', () => {
 		).toBeVisible();
 	} );
 
+	test( 'use filter by single product on products report', async ( {
+		page,
+	} ) => {
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
+		);
+
+		// FTUX tour on first run through
+		try {
+			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
+		} catch ( e ) {
+			console.log( 'Tour was not visible, skipping.' );
+		}
+
+		// no filters applied
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $1,229.30 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average order value $122.93 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average items per order 11 No change from Previous year:',
+			} )
+		).toBeVisible();
+
+		// apply some filters
+		await page.getByRole( 'button', { name: 'All orders' } ).click();
+		await page.getByText( 'Advanced filters' ).click();
+
+		await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
+		await page.getByRole( 'button', { name: 'Order Status' } ).click();
+		await page
+			.getByLabel( 'Select an order status filter match' )
+			.selectOption( 'Is' );
+		await page
+			.getByLabel( 'Select an order status', { exact: true } )
+			.selectOption( 'Failed' );
+		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
+
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 0 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $0.00 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average order value $0.00 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average items per order 0 No change from Previous year:',
+			} )
+		).toBeVisible();
+
+		await page
+			.getByLabel( 'Select an order status', { exact: true } )
+			.selectOption( 'Completed' );
+		await page.getByRole( 'link', { name: 'Filter', exact: true } ).click();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $1,229.30 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average order value $122.93 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Average items per order 11 No change from Previous year:',
+			} )
+		).toBeVisible();
+	} );
+
 	test( 'analytics settings', async ( { page } ) => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fsettings'
