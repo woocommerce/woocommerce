@@ -54,6 +54,9 @@ const RadioControlAccordion = ( {
 						highlightChecked,
 					'wc-block-components-radio-control--highlight-checked--first-selected':
 						highlightChecked && selectedOptionNumber === 0,
+					'wc-block-components-radio-control--highlight-checked--last-selected':
+						highlightChecked &&
+						selectedOptionNumber === options.length - 1,
 				},
 				className
 			) }
