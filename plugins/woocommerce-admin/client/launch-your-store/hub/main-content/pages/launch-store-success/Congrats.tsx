@@ -20,7 +20,6 @@ import { Button, TextareaControl, Icon, Dashicon } from '@wordpress/components';
  */
 import './style.scss';
 import WooLogo from '~/core-profiler/components/navigation/woologo';
-import { ADMIN_URL } from '~/utils/admin-settings';
 import { navigateTo } from '@woocommerce/navigation';
 
 export type CongratsProps = {
