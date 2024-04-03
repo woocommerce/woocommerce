@@ -64,7 +64,14 @@ const innerBlocks: InnerBlockTemplate[] = [
 /**
  * To change preview from true to false after 5 seconds.
  */
-const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
+const handlePreviewState = ( {
+	setPreviewState,
+	attributes: currentAttributes,
+	location,
+}: HandlePreviewStateArgs ) => {
+	console.log( 'handlePreviewState' );
+	console.log( currentAttributes, location );
+
 	const timeoutID = setTimeout( () => {
 		setPreviewState( {
 			isPreview: false,

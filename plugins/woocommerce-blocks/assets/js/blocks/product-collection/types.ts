@@ -4,6 +4,11 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import { WooCommerceBlockLocation } from '../product-template/utils';
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -158,8 +163,9 @@ export interface PreviewState {
  * more information to the preview state handler.
  */
 export interface HandlePreviewStateArgs {
-	previewState?: PreviewState;
 	setPreviewState: ( previewState: PreviewState ) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
 }
 
 export type HandlePreviewState = (

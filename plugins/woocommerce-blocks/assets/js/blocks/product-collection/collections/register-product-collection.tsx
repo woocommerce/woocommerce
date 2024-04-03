@@ -36,7 +36,7 @@ const registerProductCollection = ( {
 }: ProductCollectionConfig ) => {
 	// Don't add filter if handlePreviewState is not provided.
 	if ( handlePreviewState ) {
-		// This HOC adds a handlePreviewState prop to BlockEdit
+		// This HOC adds a handlePreviewState & initialPreviewState to the BlockEdit component's props.
 		const withHandlePreviewState =
 			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 			( props: BlockEditProps< ProductCollectionAttributes > ) => {

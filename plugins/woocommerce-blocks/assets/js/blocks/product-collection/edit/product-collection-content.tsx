@@ -7,9 +7,13 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect, useState, useLayoutEffect } from '@wordpress/element';
+import { useEffect, useLayoutEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import {
+	WooCommerceBlockLocation,
+	useGetLocation,
+} from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
@@ -27,13 +31,19 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const useHandlePreviewState = (
+const useHandlePreviewState = ( {
+	setAttributes,
+	location,
+	handlePreviewState,
+	attributes,
+}: {
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
-	) => void,
-	previewState?: PreviewState,
-	handlePreviewState?: HandlePreviewState
-) => {
+	) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+	handlePreviewState?: HandlePreviewState | undefined;
+} ) => {
 	const setPreviewState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
 			previewState: newPreviewState,
@@ -42,9 +52,14 @@ const useHandlePreviewState = (
 
 	// Running handlePreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
+		if ( ! handlePreviewState ) {
+			return;
+		}
+
 		const cleanup = handlePreviewState?.( {
-			previewState: previewState as PreviewState,
 			setPreviewState,
+			location,
+			attributes,
 		} );
 
 		if ( cleanup ) {
@@ -61,12 +76,13 @@ const ProductCollectionContent = ( {
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes, setAttributes } = props;
-
-	useHandlePreviewState(
+	const location = useGetLocation( props.context, props.clientId );
+	useHandlePreviewState( {
+		handlePreviewState,
 		setAttributes,
-		attributes.previewState,
-		handlePreviewState
-	);
+		location,
+		attributes,
+	} );
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
