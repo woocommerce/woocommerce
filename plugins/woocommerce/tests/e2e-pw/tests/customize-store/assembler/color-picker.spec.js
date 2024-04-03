@@ -16,7 +16,8 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Color Pickers', () => {
+// These tests will be fixed by https://github.com/woocommerce/woocommerce/pull/46127.
+test.skip( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
