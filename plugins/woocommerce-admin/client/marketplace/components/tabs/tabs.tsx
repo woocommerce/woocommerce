@@ -14,6 +14,7 @@ import './tabs.scss';
 import { DEFAULT_TAB_KEY, MARKETPLACE_PATH } from '../constants';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 import { MarketplaceContextType } from '../../contexts/types';
+import { getAdminSetting } from '../../../utils/admin-settings';
 
 export interface TabsProps {
 	additionalClassNames?: Array< string > | undefined;
@@ -23,32 +24,47 @@ interface Tab {
 	name: string;
 	title: string;
 	href?: string;
+	showUpdateCount: boolean;
+	updateCount: number;
 }
 
 interface Tabs {
 	[ key: string ]: Tab;
 }
 
+const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+const wooUpdateCount = wccomSettings?.wooUpdateCount ?? 0;
+
 const tabs: Tabs = {
 	search: {
 		name: 'search',
 		title: __( 'Search results', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	discover: {
 		name: 'discover',
 		title: __( 'Discover', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	extensions: {
 		name: 'extensions',
 		title: __( 'Browse', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	themes: {
 		name: 'themes',
 		title: __( 'Themes', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
 	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
+		showUpdateCount: true,
+		updateCount: wooUpdateCount,
 	},
 };
 
@@ -73,6 +89,7 @@ const getVisibleTabs = ( selectedTab: string ) => {
 
 	return currentVisibleTabs;
 };
+
 const renderTabs = (
 	marketplaceContextValue: MarketplaceContextType,
 	visibleTabs: Tabs
@@ -115,6 +132,12 @@ const renderTabs = (
 					key={ tabKey }
 				>
 					{ tabs[ tabKey ]?.title }
+					{ tabs[ tabKey ]?.showUpdateCount &&
+						tabs[ tabKey ]?.updateCount > 0 && (
+							<span className="woocommerce-marketplace__update-count">
+								<span> { tabs[ tabKey ]?.updateCount } </span>
+							</span>
+						) }
 				</Button>
 			)
 		);

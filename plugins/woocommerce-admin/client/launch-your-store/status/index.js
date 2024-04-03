@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, moreVertical } from '@wordpress/icons';
+import { Icon, moreVertical, edit, cog } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
@@ -18,8 +18,8 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isStorePagesOnly =
 		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
 	const comingSoonText = isStorePagesOnly
-		? __( 'Coming soon - Store pages only', 'woocommerce' )
-		: __( 'Coming soon', 'woocommerce' );
+		? __( 'Store coming soon', 'woocommerce' )
+		: __( 'Site coming soon', 'woocommerce' );
 	const liveText = __( 'Live', 'woocommerce' );
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
 	const launchYourStoreLink = new URL(
@@ -47,12 +47,13 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 					) }
 					renderContent={ () => (
 						<>
-							<MenuGroup>
+							<MenuGroup className="woocommerce-lys-status-popover">
 								<MenuItem
 									href={ getAdminLink(
 										'admin.php?page=wc-settings'
 									) }
 								>
+									<Icon icon={ cog } size={ 24 } />
 									{ __(
 										'Manage site visibility',
 										'woocommerce'
@@ -60,6 +61,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 								</MenuItem>
 								{ isComingSoon && (
 									<MenuItem href={ launchYourStoreLink.href }>
+										<Icon icon={ edit } size={ 24 } />
 										{ __(
 											'Customize "Coming soon" page',
 											'woocommerce'

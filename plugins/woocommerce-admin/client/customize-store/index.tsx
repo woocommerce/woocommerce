@@ -49,6 +49,7 @@ import './style.scss';
 import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -488,8 +489,34 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
+				fetchCustomizeStoreCompleted: {
+					invoke: {
+						src: 'fetchCustomizeStoreCompleted',
+						onDone: {
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
+						},
+					},
+				},
+				checkCustomizeStoreCompleted: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'customizeTaskIsNotCompleted',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'customizeTaskIsCompleted',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
@@ -603,12 +630,20 @@ export const CustomizeStoreController = ( {
 				activeThemeHasNoMods: ( _ctx ) => {
 					return ! _ctx.activeThemeHasMods;
 				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
+				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
 
 	useEffect( () => {

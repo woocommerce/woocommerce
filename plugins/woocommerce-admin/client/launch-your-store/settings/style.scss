@@ -8,6 +8,22 @@
 		opacity: 0.3;
 	}
 
+	.site-visibility-settings-slotfill-private-link {
+		padding: 8px 16px;
+		border-radius: 4px;
+		border: 1px solid #dcdcde;
+		background: #fff;
+		display: flex;
+		justify-content: space-between;
+		button {
+			text-decoration: none;
+			&:focus {
+				outline: none !important;
+				box-shadow: none;
+			}
+		}
+	}
+
 	.components-form-toggle {
 		.components-form-toggle__input:focus + .components-form-toggle__track {
 			box-shadow: none;
@@ -47,7 +63,7 @@
 		margin-bottom: 24px;
 	}
 
-	.components-radio-control__input[type='radio']:focus {
+	.components-radio-control__input[type="radio"]:focus {
 		outline: none;
 		box-shadow: none;
 	}

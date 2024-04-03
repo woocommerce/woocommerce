@@ -243,7 +243,7 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	protected function prepare_payment_details_for_response( array $payment_details ) {
 		return array_map(
-			function( $key, $value ) {
+			function ( $key, $value ) {
 				return (object) [
 					'key'   => $key,
 					'value' => $value,
@@ -308,7 +308,7 @@ class CheckoutSchema extends AbstractSchema {
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function( $option ) {
+					function ( $option ) {
 						return $option['value'];
 					},
 					$field['options']
@@ -333,7 +333,7 @@ class CheckoutSchema extends AbstractSchema {
 	protected function schema_has_required_property( $additional_fields_schema ) {
 		return array_reduce(
 			array_keys( $additional_fields_schema ),
-			function( $carry, $key ) use ( $additional_fields_schema ) {
+			function ( $carry, $key ) use ( $additional_fields_schema ) {
 				return $carry || $additional_fields_schema[ $key ]['required'];
 			},
 			false
@@ -352,7 +352,7 @@ class CheckoutSchema extends AbstractSchema {
 		$fields             = $sanitization_utils->wp_kses_array(
 			array_reduce(
 				array_keys( $fields ),
-				function( $carry, $key ) use ( $fields, $properties ) {
+				function ( $carry, $key ) use ( $fields, $properties ) {
 					if ( ! isset( $properties[ $key ] ) ) {
 						return $carry;
 					}
@@ -383,12 +383,15 @@ class CheckoutSchema extends AbstractSchema {
 		$fields                  = $this->sanitize_additional_fields( $fields );
 		$additional_field_schema = $this->get_additional_fields_schema();
 
-		// Validate individual properties first.
-		foreach ( $fields as $key => $field_value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
+		// Loop over the schema instead of the fields. This is to ensure missing fields are validated.
+		foreach ( $additional_field_schema as $key => $schema ) {
+			if ( ! isset( $fields[ $key ] ) && ! $schema['required'] ) {
+				// Optional fields can go missing.
 				continue;
 			}
-			$result = rest_validate_value_from_schema( $field_value, $additional_field_schema[ $key ], $key );
+
+			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
+			$result      = rest_validate_value_from_schema( $field_value, $schema, $key );
 
 			// Only allow custom validation on fields that pass the schema validation.
 			if ( true === $result ) {
@@ -422,6 +425,6 @@ class CheckoutSchema extends AbstractSchema {
 			}
 		}
 
-		return $errors->has_errors( $errors ) ? $errors : true;
+		return $errors->has_errors() ? $errors : true;
 	}
 }

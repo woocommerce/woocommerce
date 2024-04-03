@@ -1,0 +1,29 @@
+.launch-store-site-preview-page__container {
+	height: 100vh;
+	width: 100%;
+	padding: 16px 16px 16px 0;
+	position: relative;
+
+	.launch-store-site__preview-site-iframe {
+		display: block;
+		border: none;
+		width: 100%;
+		height: 100%;
+		border-radius: 20px;
+		box-shadow: 0 15px 20px 0 rgba(0, 0, 0, 0.04), 0 13px 15px 0 rgba(0, 0, 0, 0.03), 0 6px 10px 0 rgba(0, 0, 0, 0.02), 0 0 1px 0 rgba(0, 0, 0, 0.25);
+		overflow-y: auto;
+	}
+
+	.launch-store-site-preview-site__loading-overlay {
+		border-radius: 20px;
+		position: absolute;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 1;
+		background-color: #fff;
+		opacity: 0.9;
+		height: calc(100% - 32px);
+		width: calc(100% - 16px);
+	}
+}

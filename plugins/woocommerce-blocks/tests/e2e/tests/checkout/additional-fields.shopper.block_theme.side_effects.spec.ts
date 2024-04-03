@@ -280,9 +280,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
-			await checkoutPageObject.page.waitForResponse( ( response ) => {
-				return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
@@ -297,10 +295,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'super-wide' );
-
-			await checkoutPageObject.page.waitForResponse( ( response ) => {
-				return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )
@@ -366,13 +361,17 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Additional order information',
 				} )
 				.getByLabel( 'How did you hear about us?' )
-				.fill( '' );
+				.click();
 			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Additional order information',
+				} )
 				.locator(
 					'ul.components-form-token-field__suggestions-list > li'
 				)
 				.first()
 				.click();
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.placeOrder();
 
