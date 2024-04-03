@@ -9,6 +9,8 @@ import { useCallback, useMemo } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
+import { useSelect } from '@wordpress/data';
+import { CART_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -29,8 +31,14 @@ export const ShippingRatesControlPackage = ( {
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate, isSelectingRate } = useShippingData();
 
+	const internalPackageCount = useSelect(
+		( select ) =>
+			select( CART_STORE_KEY )?.getCartData()?.shippingRates?.length
+	);
+
 	// We have no built-in way of checking if other extensions have added packages e.g. if subscriptions has added them.
 	const multiplePackages =
+		internalPackageCount > 1 ||
 		document.querySelectorAll(
 			'.wc-block-components-shipping-rates-control__package'
 		).length > 1;
