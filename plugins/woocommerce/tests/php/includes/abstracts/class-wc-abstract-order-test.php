@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
  * Class WC_Abstract_Order.
  */
@@ -148,7 +149,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'wc_get_price_excluding_tax' => function( $product, $args = array() ) use ( &$product_passed_to_get_price, &$args_passed_to_get_price ) {
+				'wc_get_price_excluding_tax' => function ( $product, $args = array() ) use ( &$product_passed_to_get_price, &$args_passed_to_get_price ) {
 						$product_passed_to_get_price = $product;
 						$args_passed_to_get_price    = $args;
 
@@ -311,7 +312,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	public function test_cache_does_not_interferes_with_order_object() {
 		add_action(
 			'woocommerce_new_order',
-			function( $order_id ) {
+			function ( $order_id ) {
 				// this makes the cache store a specific order class instance, but it's quickly replaced by a generic one
 				// as we're in the middle of a save and this gets executed before the logic in WC_Abstract_Order.
 				$order = wc_get_order( $order_id );
@@ -358,7 +359,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$product1_for_order1 = WC_Helper_Product::create_simple_product();
 		$product2_for_order1 = WC_Helper_Product::create_simple_product();
-		$product_for_order2 = WC_Helper_Product::create_simple_product();
+		$product_for_order2  = WC_Helper_Product::create_simple_product();
 
 		$item1_1 = new WC_Order_Item_Product();
 		$item1_1->set_product( $product1_for_order1 );
@@ -387,6 +388,6 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertContains( $item1_1->get_id(), $order1_items );
 		$this->assertContains( $item1_1->get_id(), $order1_items );
 
-		$this->assertEquals( $item2->get_id(), array_keys ( $order2->get_items( 'line_item' ) )[0] );
+		$this->assertEquals( $item2->get_id(), array_keys( $order2->get_items( 'line_item' ) )[0] );
 	}
 }
