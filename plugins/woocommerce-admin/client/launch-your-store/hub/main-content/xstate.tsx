@@ -26,9 +26,10 @@ import {
 
 export type MainContentMachineContext = {
 	congratsScreen: {
-		hasLoadedCompleteOption: boolean;
+		hasLoadedCongratsData: boolean;
 		hasCompleteSurvey: boolean;
 		allTasklists: TaskListType[];
+		activePlugins: string[];
 	};
 };
 
@@ -70,17 +71,17 @@ export const mainContentMachine = setup( {
 	},
 	actors: {
 		contentQueryParamListener,
-		fetchSurveyCompletedOption: congratsServices.fetchSurveyCompletedOption,
-		getAllTasklists: congratsServices.getAllTasklists,
+		fetchCongratsData: congratsServices.fetchCongratsData,
 	},
 } ).createMachine( {
 	id: 'mainContent',
 	initial: 'navigate',
 	context: {
 		congratsScreen: {
-			hasLoadedCompleteOption: false,
+			hasLoadedCongratsData: false,
 			hasCompleteSurvey: false,
 			allTasklists: [],
+			activePlugins: [],
 		},
 	},
 	states: {
@@ -114,17 +115,9 @@ export const mainContentMachine = setup( {
 			id: 'launchStoreSuccess',
 			invoke: [
 				{
-					src: 'fetchSurveyCompletedOption',
+					src: 'fetchCongratsData',
 					onDone: {
-						actions: assign(
-							congratsActions.assignHasCompleteSurvey
-						),
-					},
-				},
-				{
-					src: 'getAllTasklists',
-					onDone: {
-						actions: assign( congratsActions.assignAllTasklists ),
+						actions: assign( congratsActions.assignCongratsData ),
 					},
 				},
 			],

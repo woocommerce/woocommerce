@@ -10,22 +10,6 @@ import { OPTIONS_STORE_NAME, TaskListType } from '@woocommerce/data';
  */
 import type { MainContentMachineContext } from '../../../main-content/xstate';
 
-export const assignHasCompleteSurvey = {
-	congratsScreen: ( {
-		context,
-		event,
-	}: {
-		context: MainContentMachineContext;
-		event: DoneActorEvent< string | null >;
-	} ) => {
-		return {
-			...context.congratsScreen,
-			hasLoadedCompleteOption: true,
-			hasCompleteSurvey: event.output === 'yes',
-		};
-	},
-};
-
 export const assignCompleteSurvey = {
 	congratsScreen: ( { context }: { context: MainContentMachineContext } ) => {
 		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
@@ -39,17 +23,24 @@ export const assignCompleteSurvey = {
 	},
 };
 
-export const assignAllTasklists = {
+export const assignCongratsData = {
 	congratsScreen: ( {
 		context,
 		event,
 	}: {
 		context: MainContentMachineContext;
-		event: DoneActorEvent< TaskListType[] >;
+		event: DoneActorEvent< {
+			surveyCompleted: string | null;
+			tasklists: TaskListType[];
+			activePlugins: string[];
+		} >;
 	} ) => {
 		return {
 			...context.congratsScreen,
-			allTasklists: event.output,
+			hasLoadedCongratsData: true,
+			hasCompleteSurvey: event.output.surveyCompleted === 'yes',
+			allTasklists: event.output.tasklists,
+			activePlugins: event.output.activePlugins,
 		};
 	},
 };

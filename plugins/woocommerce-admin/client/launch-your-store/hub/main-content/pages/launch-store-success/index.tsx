@@ -24,7 +24,7 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 	};
 
 	// Temporary spinner until data load is moved to loading screen or somewhere else.
-	if ( ! props.context.congratsScreen.hasLoadedCompleteOption ) {
+	if ( ! props.context.congratsScreen.hasLoadedCongratsData ) {
 		return (
 			<div className="spinner-container">
 				<Spinner></Spinner>
