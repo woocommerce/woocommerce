@@ -5,7 +5,6 @@
  * @package  WooCommerce\Admin
  */
 
-
 defined( 'ABSPATH' ) || exit;
 
 /**
