@@ -160,11 +160,12 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		console.time( 'Database reset time' );
-		await cli(
-			'cat wp_e2e_backup.sql | docker exec -i $(docker ps -aqf name=tests-mysql) mysql -u root -ppassword tests-wordpress'
+		console.time( 'Database import time' );
+		const cliOutput = await cli(
+			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
 		);
-		console.timeEnd( 'Database reset time' );
+		console.log( cliOutput.stdout );
+		console.timeEnd( 'Database import time' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );

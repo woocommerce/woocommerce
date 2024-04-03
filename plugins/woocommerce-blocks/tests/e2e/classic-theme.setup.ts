@@ -18,8 +18,11 @@ setup( 'Sets up the classic theme', async ( { admin } ) => {
 	).toBeVisible();
 
 	console.time( 'Database dump time' );
-	await cli(
-		'docker exec $(docker ps -aqf name=tests-mysql) mysqldump --column-statistics=0 -u root -ppassword tests-wordpress > wp_e2e_backup.sql'
+	const cliOutput = await cli(
+		'npm run wp-env run tests-cli wp db export blocks_e2e.sql '
 	);
+	console.log( cliOutput.stdout );
 	console.timeEnd( 'Database dump time' );
+
+	expect( cliOutput.stdout ).toContain( 'Success: Exported' );
 } );
