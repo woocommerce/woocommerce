@@ -32,12 +32,17 @@ export class LocalPickupUtils {
 
 	async saveLocalPickupSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
-
-		// Wait for the snackbar to appear with the success notice showing.
-		await this.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText( 'Local Pickup settings have been saved.' )
-			.isVisible();
+		await this.page.waitForFunction( () => {
+			return window.wp.data
+				.select( 'core/notices' )
+				.getNotices()
+				.some(
+					( notice: Notice ) =>
+						notice.status === 'success' &&
+						notice.content ===
+							'Local Pickup settings have been saved.'
+				);
+		} );
 	}
 
 	async enableLocalPickup() {
