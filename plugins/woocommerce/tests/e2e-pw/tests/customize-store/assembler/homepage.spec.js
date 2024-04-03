@@ -187,8 +187,8 @@ test.describe( 'Assembler -> Homepage', () => {
 
 		let index = 0;
 		for ( const element of homepageHTML ) {
-			await expect( await element ).toHaveScreenshot( {
-				name: `selected-homepage-blocks-frontend-${ index }.png`,
+			await expect( await element.innerHTML() ).toMatchSnapshot( {
+				name: `selected-homepage-blocks-frontend-${ index }`,
 			} );
 			index++;
 		}

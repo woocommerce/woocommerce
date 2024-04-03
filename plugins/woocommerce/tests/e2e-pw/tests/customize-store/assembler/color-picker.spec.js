@@ -103,8 +103,10 @@ test.skip( 'Assembler -> Color Pickers', () => {
 			await colorPicker.waitFor();
 			await colorPicker.click();
 			// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-			await expect( editor.locator( 'body' ) ).toHaveScreenshot( {
-				name: 'color-palette-' + index + '.png',
+			await expect(
+				( await editor.locator( 'style' ).allInnerTexts() ).join( ',' )
+			).toMatchSnapshot( {
+				name: 'color-palette-' + index,
 			} );
 
 			index++;
@@ -203,8 +205,8 @@ test.skip( 'Assembler -> Color Pickers', () => {
 			.innerHTML();
 
 		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		await expect( page ).toHaveScreenshot( {
-			name: 'color-palette-frontend.png',
+		expect( style ).toMatchSnapshot( {
+			name: 'color-palette-frontend',
 		} );
 	} );
 } );

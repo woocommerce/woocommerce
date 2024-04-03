@@ -1,0 +1,40 @@
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<div class="wp-block-cover has-custom-content-position is-position-bottom-center is-light has-white-color" style="padding-bottom:56px"><span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-1" alt="Placeholder image used to represent products being showcased in featured categories banner. 1 out of 3." src="http://localhost:8086/wp-content/plugins/woocommerce/assets/images/pattern-placeholders/tree-branch-plant-wood-leaf-flower.jpg" data-object-fit="cover"><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<h4 class="wp-block-heading has-text-align-center" style="margin-bottom:24px">Home decor</h4>
+
+
+
+<p class="has-text-align-center has-link-color wp-elements-94c34903eacc08d949eda20d1fa86f66" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
+					<a href="http://localhost:8086/shop/" data-type="link" data-id="http://localhost:8086/shop/">Shop Now</a>
+				</p>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<div class="wp-block-cover has-custom-content-position is-position-bottom-center is-light has-white-color" style="padding-bottom:56px"><span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-1" alt="Placeholder image used to represent products being showcased in featured categories banner. 2 out of 3." src="http://localhost:8086/wp-content/plugins/woocommerce/assets/images/pattern-placeholders/watch-hand-brand-jewellery-strap-platinum.jpg" data-object-fit="cover"><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<h4 class="wp-block-heading has-text-align-center" style="margin-bottom:24px">Retro photography</h4>
+
+
+
+<p class="has-text-align-center has-link-color wp-elements-94c34903eacc08d949eda20d1fa86f66" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
+					<a href="http://localhost:8086/shop/" data-type="link" data-id="http://localhost:8086/shop/">Shop Now</a>
+				</p>
+</div></div>
+</div>
+
+
+
+<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">
+<div class="wp-block-cover has-custom-content-position is-position-bottom-center is-light has-white-color" style="padding-bottom:56px"><span aria-hidden="true" class="wp-block-cover__background has-contrast-background-color has-background-dim-30 has-background-dim"></span><img class="wp-block-cover__image-background wp-image-1" alt="Placeholder image used to represent products being showcased in featured categories banner. 3 out of 3" src="http://localhost:8086/wp-content/plugins/woocommerce/assets/images/pattern-placeholders/white-vase-decoration-pattern-ceramic-lamp.jpg" data-object-fit="cover"><div class="wp-block-cover__inner-container is-layout-flow wp-block-cover-is-layout-flow">
+<h4 class="wp-block-heading has-text-align-center" style="margin-bottom:24px">Handmade gifts</h4>
+
+
+
+<p class="has-text-align-center has-link-color wp-elements-94c34903eacc08d949eda20d1fa86f66" style="margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0">
+					<a href="http://localhost:8086/shop/" data-type="link" data-id="http://localhost:8086/shop/">Shop Now</a>
+				</p>
+</div></div>
+</div>
