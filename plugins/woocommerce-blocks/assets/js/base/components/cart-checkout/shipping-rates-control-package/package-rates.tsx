@@ -13,7 +13,7 @@ import { usePrevious } from '@woocommerce/base-hooks';
  * Internal dependencies
  */
 import { renderPackageRateOption } from './render-package-rate-option';
-import type { PackageRateRenderOption } from '../shipping-rates-control-package';
+import type { PackageRateRenderOption } from '../shipping-rates-control-package/types';
 
 interface PackageRates {
 	onSelectRate: ( selectedRateId: string ) => void;
@@ -23,6 +23,8 @@ interface PackageRates {
 	noResultsMessage: JSX.Element;
 	selectedRate: CartShippingPackageShippingRate | undefined;
 	disabled?: boolean;
+	// Should the selected rate be highlighted.
+	highlightChecked?: boolean;
 }
 
 const PackageRates = ( {
@@ -33,6 +35,7 @@ const PackageRates = ( {
 	renderOption = renderPackageRateOption,
 	selectedRate,
 	disabled = false,
+	highlightChecked = false,
 }: PackageRates ): JSX.Element => {
 	const selectedRateId = selectedRate?.rate_id || '';
 	const previousSelectedRateId = usePrevious( selectedRateId );
@@ -76,7 +79,7 @@ const PackageRates = ( {
 					setSelectedOption( value );
 					onSelectRate( value );
 				} }
-				highlightChecked={ true }
+				highlightChecked={ highlightChecked }
 				disabled={ disabled }
 				selected={ selectedOption }
 				options={ rates.map( renderOption ) }
