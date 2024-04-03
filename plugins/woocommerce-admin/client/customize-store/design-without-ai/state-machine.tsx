@@ -176,26 +176,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							assembleSite: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'assembleSite',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
 							createProducts: {
 								initial: 'pending',
 								states: {
@@ -228,6 +208,28 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 										type: 'final',
 									},
 								},
+							},
+						},
+						onDone: {
+							target: 'assembleSite',
+						},
+					},
+					assembleSite: {
+						initial: 'pending',
+						states: {
+							pending: {
+								invoke: {
+									src: 'assembleSite',
+									onDone: {
+										target: 'success',
+									},
+									onError: {
+										actions: 'redirectToIntroWithError',
+									},
+								},
+							},
+							success: {
+								type: 'final',
 							},
 						},
 						onDone: {

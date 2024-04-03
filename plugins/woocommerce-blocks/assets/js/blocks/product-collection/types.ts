@@ -94,6 +94,9 @@ export type ProductCollectionEditComponentProps =
 		openCollectionSelectionModal: () => void;
 		handlePreviewState?: HandlePreviewState;
 		initialPreviewState?: PreviewState;
+		context: {
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

@@ -51,6 +51,7 @@
 		"collection": "collection",
 		"productCollectionPreviewState": "previewState"
 	},
+	"usesContext": [ "templateSlug" ],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,
