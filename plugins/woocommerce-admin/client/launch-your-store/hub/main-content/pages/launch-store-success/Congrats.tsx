@@ -21,6 +21,7 @@ import { Button, TextareaControl, Icon, Dashicon } from '@wordpress/components';
 import './style.scss';
 import WooLogo from '~/core-profiler/components/navigation/woologo';
 import { ADMIN_URL } from '~/utils/admin-settings';
+import { navigateTo } from '@woocommerce/navigation';
 
 export type CongratsProps = {
 	hasCompleteSurvey: boolean;
@@ -92,7 +93,9 @@ export const Congrats = ( {
 					<WooLogo />
 				</span>
 				<Button
-					href={ ADMIN_URL + 'admin.php?page=wc-admin' }
+					onClick={ () => {
+						navigateTo( { url: '/' } );
+					} }
 					className="back-to-home-button"
 					variant="link"
 				>

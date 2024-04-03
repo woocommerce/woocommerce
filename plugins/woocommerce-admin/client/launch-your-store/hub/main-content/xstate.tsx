@@ -12,11 +12,7 @@ import type { TaskListType } from '@woocommerce/data';
 import { LoadingPage } from './pages/loading';
 import { SitePreviewPage } from './pages/site-preview';
 import type { LaunchYourStoreComponentProps } from '..';
-import {
-	createQueryParamsListener,
-	updateQueryParams,
-	redirectToWooHome,
-} from '../common';
+import { createQueryParamsListener, updateQueryParams } from '../common';
 import {
 	services as congratsServices,
 	events as congratsEvents,
@@ -58,7 +54,6 @@ export const mainContentMachine = setup( {
 		) => {
 			updateQueryParams( params );
 		},
-		redirectToWooHome,
 	},
 	guards: {
 		hasContentLocation: (
