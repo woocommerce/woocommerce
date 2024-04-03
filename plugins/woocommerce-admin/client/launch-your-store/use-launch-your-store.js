@@ -3,7 +3,6 @@
  */
 import { useSelect } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { get } from 'lodash';
 
 export const useLaunchYourStore = () => {
 	const {
@@ -14,7 +13,6 @@ export const useLaunchYourStore = () => {
 		storePagesOnly,
 		privateLink,
 		shareKey,
-		tourDismissed,
 	} = useSelect( ( select ) => {
 		const { hasFinishedResolution, getOption } =
 			select( OPTIONS_STORE_NAME );
@@ -30,12 +28,7 @@ export const useLaunchYourStore = () => {
 			! hasFinishedResolution( 'getOption', [
 				'woocommerce_private_link',
 			] ) &&
-			! hasFinishedResolution( 'getOption', [
-				'woocommerce_share_key',
-			] ) &&
-			! hasFinishedResolution( 'getOption', [
-				'woocommerce_lys_tour_dismissed',
-			] );
+			! hasFinishedResolution( 'getOption', [ 'woocommerce_share_key' ] );
 
 		return {
 			isLoading: allOptionResolutionsFinished,
@@ -44,7 +37,6 @@ export const useLaunchYourStore = () => {
 			storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
 			privateLink: getOption( 'woocommerce_private_link' ),
 			shareKey: getOption( 'woocommerce_share_key' ),
-			tourDismissed: getOption( 'woocommerce_lys_tour_dismissed' ),
 			launchYourStoreEnabled:
 				window.wcAdminFeatures[ 'launch-your-store' ],
 		};
@@ -58,6 +50,5 @@ export const useLaunchYourStore = () => {
 		shareKey,
 		launchStatus,
 		launchYourStoreEnabled,
-		tourDismissed,
 	};
 };

@@ -14,12 +14,9 @@ import { useState } from '@wordpress/element';
  */
 import './style.scss';
 import { SiteVisibilityTour } from '../tour';
+import { useSiteVisibilityTour } from '../tour/use-site-visibility-tour';
 
-export const LaunchYourStoreStatus = ( {
-	comingSoon,
-	storePagesOnly,
-	tourDismissed,
-} ) => {
+export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
 	const isStorePagesOnly =
 		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
@@ -31,12 +28,14 @@ export const LaunchYourStoreStatus = ( {
 	const launchYourStoreLink = new URL(
 		getAdminLink( getNewPath( {}, '/launch-your-store', {} ) )
 	);
-	const [ showTour, setShowTour ] = useState( true );
+	const { showTour, setShowTour, onClose, shouldTourBeShown } =
+		useSiteVisibilityTour();
 	return (
 		<div className="woocommerce-lys-status">
-			{ tourDismissed !== 'yes' && showTour && (
+			{ shouldTourBeShown && showTour && (
 				<SiteVisibilityTour
 					onClose={ () => {
+						onClose();
 						setShowTour( false );
 					} }
 				/>
