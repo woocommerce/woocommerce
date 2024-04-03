@@ -106,45 +106,12 @@
 		} else {
 			// TODO: Fetch the list of feature flags dynamically from the API or something.
 			const featureFlags = [
-				'activity-panels',
-				'analytics',
 				'async-product-editor-category-field',
-				'core-profiler',
-				'coupons',
-				'customer-effort-score-tracks',
-				'customize-store',
-				'experimental-fashion-sample-products',
-				'homescreen',
-				'import-products-task',
 				'launch-your-store',
-				'marketing',
 				'minified-js',
-				'mobile-app-banner',
-				'navigation',
 				'new-product-management-experience',
-				'onboarding',
-				'onboarding-tasks',
-				'payment-gateway-suggestions',
-				'product-block-editor',
 				'product-custom-fields',
-				'product-external-affiliate',
-				'product-grouped',
-				'product-linked',
-				'product-pre-publish-modal',
-				'product-variation-management',
-				'product-virtual-downloadable',
-				'remote-free-extensions',
-				'remote-inbox-notifications',
 				'settings',
-				'shipping-label-banner',
-				'shipping-setting-tour',
-				'shipping-smart-defaults',
-				'store-alerts',
-				'subscriptions',
-				'transient-notices',
-				'wc-pay-promotion',
-				'wc-pay-welcome-page',
-				'woo-mobile-welcome',
 			];
 
 			const contents = `
@@ -236,7 +203,7 @@
 							],
 							33
 						) }
-						<h4>Enable additional feature flags if they are not already enabled</h4>
+						<h4>Enable additional feature flags</h4>
 						${ getOptionsList(
 							featureFlags.map( ( flag ) => ( {
 								label: flag,
