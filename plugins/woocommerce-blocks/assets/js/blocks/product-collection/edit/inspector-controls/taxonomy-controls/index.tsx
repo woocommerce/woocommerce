@@ -68,7 +68,7 @@ function TaxonomyControls( {
 				key={ taxonomy.slug }
 				label={ taxonomy.name }
 				hasValue={ () => termIds.length }
-				onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
+				onDeselect={ () => handleChange( [] ) }
 			>
 				<TaxonomyItem
 					key={ taxonomy.slug }
