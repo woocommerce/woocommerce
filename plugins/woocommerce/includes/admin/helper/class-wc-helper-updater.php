@@ -155,9 +155,10 @@ class WC_Helper_Updater {
 	 * @return void.
 	 */
 	public static function setup_update_plugins_messages() {
+		$is_site_connected = WC_Helper::is_site_connected();
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$filename = $plugin['_filename'];
-			if ( WC_Helper::is_site_connected() ) {
+			if ( $is_site_connected ) {
 				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
 			} else {
 				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ) );
