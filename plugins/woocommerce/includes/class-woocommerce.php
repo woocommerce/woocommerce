@@ -1023,7 +1023,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the activated plugin.
 	 */
 	public function activated_plugin( $filename ) {
-		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
+		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
 
 		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
 			set_transient( 'woocommerce_activated_plugin', $filename );
@@ -1039,7 +1039,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the deactivated plugin.
 	 */
 	public function deactivated_plugin( $filename ) {
-		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
+		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
 	}
