@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import { Spinner } from '@woocommerce/components';
-import { resolveSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -13,12 +13,9 @@ import { Congrats } from './Congrats';
 export * as actions from './actions';
 export * as services from './services';
 export type events = { type: 'GO_BACK_TO_HOME' } | { type: 'COMPLETE_SURVEY' };
+import { WhatsNext } from './WhatsNext';
 
 export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
-	const goToHome = () => {
-		props.sendEventToMainContent( { type: 'GO_BACK_TO_HOME' } );
-	};
-
 	const completeSurvey = () => {
 		props.sendEventToMainContent( { type: 'COMPLETE_SURVEY' } );
 	};
@@ -44,9 +41,16 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 					props.context.congratsScreen.hasCompleteSurvey
 				}
 				isWooExpress={ false }
-				goToHome={ goToHome }
 				completeSurvey={ completeSurvey }
-			></Congrats>
+			>
+				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
+					{ __( "What's next?", 'woocommerce' ) }
+				</h2>
+				<WhatsNext
+					activePlugins={ props.context.congratsScreen.activePlugins }
+					allTasklists={ props.context.congratsScreen.allTasklists }
+				/>
+			</Congrats>
 		</div>
 	);
 };

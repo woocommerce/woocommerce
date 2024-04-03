@@ -19,20 +19,19 @@ import { Button, TextareaControl, Icon, Dashicon } from '@wordpress/components';
  * Internal dependencies
  */
 import './style.scss';
-import { WhatsNext } from './WhatsNext';
 import WooLogo from '~/core-profiler/components/navigation/woologo';
 import { ADMIN_URL } from '~/utils/admin-settings';
 
 export const Congrats = ( {
 	hasCompleteSurvey,
 	isWooExpress,
-	goToHome,
 	completeSurvey,
+	children,
 }: {
 	hasCompleteSurvey: boolean;
 	isWooExpress: boolean;
-	goToHome: () => void;
 	completeSurvey: () => void;
+	children: React.ReactNode;
 } ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
@@ -267,10 +266,7 @@ export const Congrats = ( {
 						</div>
 					) }
 				</div>
-				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
-					{ __( "What's next?", 'woocommerce' ) }
-				</h2>
-				<WhatsNext goToHome={ goToHome } />
+				{ children }
 			</div>
 		</div>
 	);
