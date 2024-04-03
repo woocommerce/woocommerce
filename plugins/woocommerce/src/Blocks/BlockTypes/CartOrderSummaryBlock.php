@@ -52,6 +52,7 @@ class CartOrderSummaryBlock extends AbstractInnerBlock {
 				}
 			}
 		}
-		return $content;
+		// Remove empty lines
+		return preg_replace('/\n\n( *?)/i', '', $content);
 	}
 }
