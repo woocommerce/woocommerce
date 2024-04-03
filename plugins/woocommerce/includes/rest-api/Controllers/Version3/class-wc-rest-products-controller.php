@@ -69,14 +69,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the product.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'duplicate_product' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -84,14 +85,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Duplicate a product and returns the duplicated product.
+	 * Duplicate a product and returns the duplicated product. The product status is set to draft.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function duplicate_product( $request ) {
-		$product_id = $request->get_param( 'id' );
-		$product    = wc_get_product( $product_id );
+		$product = $this->prepare_object_for_database( $request );
 
 		if ( ! $product ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -103,17 +103,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return new WP_Error( 'woocommerce_rest_product_duplicate_error', $duplicated_product->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		// Get the data of the duplicated product.
-		$data = $duplicated_product->get_data();
-
 		/**
 		 * Filters the data of the duplicated product before it is returned by the REST API.
 		 *
 		 * @since 8.8.9
-		 * @param WP_Product $product The original product object.
 		 * @param WP_Product $duplicated_product The duplicated product object.
+		 * @param WP_Product $product            The original product object.
 		 */
-		$response_data = apply_filters( 'woocommerce_rest_duplicate_product_response', $product, $duplicated_product );
+		$duplicated_product = apply_filters( 'woocommerce_rest_duplicate_product_response', $duplicated_product, $product );
+		$response_data      = $duplicated_product->get_data();
 
 		return new WP_REST_Response( $response_data, 200 );
 	}
