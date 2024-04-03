@@ -2,7 +2,7 @@
 /**
  * REST API Launch Your Store Controller
  *
- * Handles requests to /coupons/*
+ * Handles requests to /launch-your-store/*
  */
 
 namespace Automattic\WooCommerce\Admin\API;
