@@ -143,12 +143,8 @@ export const ShippingRatesControlPackage = ( {
 				{
 					'wc-block-components-shipping-rates-control__package--disabled':
 						isSelectingRate,
-				},
-				{
 					'wc-block-components-shipping-rates-control__package--first-selected':
 						! isSelectingRate && selectedOptionNumber === 0,
-				},
-				{
 					'wc-block-components-shipping-rates-control__package--last-selected':
 						! isSelectingRate &&
 						selectedOptionNumber ===
