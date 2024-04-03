@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Temporary disable DataSourcePoller class deprecation message
