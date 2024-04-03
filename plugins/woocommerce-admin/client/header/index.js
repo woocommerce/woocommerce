@@ -102,13 +102,8 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 	}, [ isEmbedded, sections, siteTitle ] );
 
 	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
-	const {
-		isLoading,
-		launchYourStoreEnabled,
-		comingSoon,
-		storePagesOnly,
-		tourDismissed,
-	} = useLaunchYourStore();
+	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
+		useLaunchYourStore();
 	const showLaunchYourStoreStatus =
 		isHomescreen && launchYourStoreEnabled && ! isLoading;
 
@@ -148,7 +143,6 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 					<LaunchYourStoreStatus
 						comingSoon={ comingSoon }
 						storePagesOnly={ storePagesOnly }
-						tourDismissed={ tourDismissed }
 					/>
 				) }
 
