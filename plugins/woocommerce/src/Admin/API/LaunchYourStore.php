@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API Coupons Controller
+ * REST API Launch Your Store Controller
  *
  * Handles requests to /coupons/*
  */
