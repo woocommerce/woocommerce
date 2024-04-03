@@ -247,6 +247,7 @@ class WC_Install {
 		),
 		'8.7.0' => array(
 			'wc_update_870_prevent_listing_of_transient_files_directory',
+			'wc_update_870_add_lys_tour_option',
 		),
 	);
 

@@ -2667,3 +2667,7 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
 	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
 }
+
+function wc_update_870_add_lys_tour_option() {
+	update_option( 'woocommerce_lys_tour_dismissed', 'no');
+}
