@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useContext, useEffect, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
+import { Badge } from '@woocommerce/components';
 import classNames from 'classnames';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 
@@ -25,7 +26,7 @@ interface Tab {
 	title: string;
 	href?: string;
 	show_badge?: boolean;
-	badge_text_to_render?: string;
+	badge_text_to_render?: number;
 }
 
 interface Tabs {
@@ -54,7 +55,7 @@ const tabs: Tabs = {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
 		show_badge: ! wccomSettings?.isConnected,
-		badge_text_to_render: '1',
+		badge_text_to_render: 1,
 	},
 };
 
@@ -122,9 +123,11 @@ const renderTabs = (
 				>
 					{ tabs[ tabKey ]?.title }
 					{ tabs[ tabKey ]?.show_badge && (
-						<span className="awaiting-mod">
-							{ tabs[ tabKey ]?.badge_text_to_render }
-						</span>
+						<Badge
+							key={ `${ tabKey }-badge` }
+							className={ 'woocommerce-badge-color-red' }
+							count={  Number(tabs[ tabKey ]?.badge_text_to_render) }
+						/>
 					) }
 				</Button>
 			)
