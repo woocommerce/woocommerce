@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Updated PNPM
 
+cleanup in blocks package.json

@@ -322,6 +322,26 @@ class FixtureData {
 	}
 
 	/**
+	 * Disables the flat rate method.
+	 *
+	 * @param float $cost Optional. Cost of flat rate method.
+	 */
+	public function shipping_disable_flat_rate( $cost = 10 ) {
+		$flat_rate_settings = array(
+			'enabled'      => 'no',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => $cost,
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		update_option( 'woocommerce_flat_rate', array() );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+	}
+
+	/**
 	 * Enable bacs payment method.
 	 */
 	public function payments_enable_bacs() {
