@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/cart-order-summary-totals-block",
 	"version": "1.0.0",
-	"title": "Money yo",
+	"title": "Totals",
 	"description": "Shows the subtotal, fees, discounts, shipping and taxes.",
 	"category": "woocommerce",
 	"supports": {
