@@ -304,7 +304,7 @@ class AssetDataRegistry {
 	 */
 	public function add( $key, $data, $check_key_exists = false ) {
 		if ( $check_key_exists ) {
-			_deprecated_argument( 'Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::add()', '8.9', 'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default' );
+			wc_deprecated_argument( 'Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::add()', '8.9', 'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default' );
 		}
 
 		if ( $this->exists( $key ) ) {
@@ -424,18 +424,10 @@ class AssetDataRegistry {
 	 */
 	protected function add_data( $key, $data ) {
 		if ( ! is_string( $key ) ) {
-			if ( $this->debug() ) {
-				throw new InvalidArgumentException(
-					'Key for the data being registered must be a string'
-				);
-			}
+			trigger_error( __( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
 		}
 		if ( isset( $this->data[ $key ] ) ) {
-			if ( $this->debug() ) {
-				throw new InvalidArgumentException(
-					'Overriding existing data with an already registered key is not allowed'
-				);
-			}
+			trigger_error( __( 'Overriding existing data with an already registered key is not allowed', 'woocommerce' ), E_USER_WARNING );
 			return;
 		}
 		if ( \is_callable( $data ) ) {
