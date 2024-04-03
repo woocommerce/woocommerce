@@ -584,9 +584,9 @@ class PluginsHelper {
 					let shouldHideNotice = false;
 
 					const savedDismissedDate = localStorage.getItem("woo-connect-notice-dismissed");
-					const parsedDismissedDate = new Date(savedDismissedDate);
+					const parsedDismissedDate = new Date( savedDismissedDate || "" );
 					const aMonthAgo = new Date();
-					aMonthAgo.setMonth(aMonthAgo.getMonth() - 1);
+					aMonthAgo.setMonth( aMonthAgo.getMonth() - 1 );
 
 					if ( savedDismissedDate && ( aMonthAgo.valueOf() < parsedDismissedDate.valueOf() ) ) {
 						shouldHideNotice = true;
