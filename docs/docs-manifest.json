@@ -571,6 +571,13 @@
       "category_title": "High Performance Order Storage",
       "posts": [
         {
+          "post_title": "A large store's guide to enable HPOS on WooCommerce",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "hash": "3127a6befad4538edf8b005300885cf80254efa43080b96aeccf2b822b4015d4",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
+        },
+        {
           "post_title": "How to enable High Performance Order Storage",
           "menu_title": "Enable HPOS",
           "tags": "how-to",
@@ -1211,5 +1218,5 @@
       "categories": []
     }
   ],
-  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
+  "hash": "fdbfb12b9c7d1019c0acdbc50bd87e47d9c5bb81809603e7eeaf43ac2b72e8c0"
 }
