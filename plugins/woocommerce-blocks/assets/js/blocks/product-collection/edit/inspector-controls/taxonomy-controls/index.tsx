@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Taxonomy } from '@wordpress/core-data/src/entity-types';
-import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
