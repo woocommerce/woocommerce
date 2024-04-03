@@ -71,7 +71,12 @@ const deprecated = [
 				],
 			];
 		},
-		isEligible: () => true,
+		isEligible: ( attributes, innerBlocks ) => {
+			return ! innerBlocks.some(
+				( block ) =>
+					block.name === 'woocommerce/cart-order-summary-totals-block'
+			);
+		},
 	},
 ];
 
