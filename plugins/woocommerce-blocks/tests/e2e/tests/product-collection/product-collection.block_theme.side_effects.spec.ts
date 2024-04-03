@@ -258,7 +258,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product categories';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product categories' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Clothing',
 			] );
@@ -298,7 +298,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product tags';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product tags' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Recommended',
 			] );
