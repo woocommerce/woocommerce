@@ -25,7 +25,7 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'site-visibility';
-		$this->label = __( 'Site Visibility', 'woocommerce' );
+		$this->label = __( 'Site visibility', 'woocommerce' );
 
 		parent::__construct();
 	}
