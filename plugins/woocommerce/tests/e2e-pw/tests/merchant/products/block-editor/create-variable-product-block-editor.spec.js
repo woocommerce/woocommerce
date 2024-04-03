@@ -342,7 +342,15 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }&tab=variations`
 			);
 
-			await page.getByRole( 'button', { name: 'Edit' } ).first().click();
+			await page.waitForSelector(
+				'.woocommerce-product-variations__table-body > div'
+			);
+
+			await page
+				.locator( '.woocommerce-product-variations__table-body > div' )
+				.first()
+				.getByText( 'Edit' )
+				.click();
 
 			const notices = page.getByText(
 				'You’re editing details specific to this variation.'
