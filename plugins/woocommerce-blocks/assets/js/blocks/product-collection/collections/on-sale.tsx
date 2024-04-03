@@ -12,11 +12,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import {
-	CoreCollectionNames,
-	CoreFilterNames,
-	HandlePreviewStateArgs,
-} from '../types';
+import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.ON_SALE,
@@ -63,33 +59,19 @@ const innerBlocks: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 ];
 
-/**
- * This is Async operation example to handle preview state.
- * I am just using setTimeout to simulate async operation, but it could be
- * any async operation like fetching data from server or doing a polling in every 5 seconds.
- */
-const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
-	const timeoutID = setTimeout( () => {
-		setPreviewState( {
-			isPreview: false,
-			previewMessage: '',
-		} );
-	}, 5000 );
-
-	return () => {
-		clearTimeout( timeoutID );
-	};
-};
-
 export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	/**
+	 * Example of how to set initial state for the preview.
+	 * This is also useful when it doesn't require any async
+	 * operation to calculate preview state.
+	 */
 	preview: {
-		handlePreviewState,
 		initialState: {
 			isPreview: true,
-			previewMessage: 'On sale collection is in preview mode',
+			previewMessage: 'On sale Collection Preview',
 		},
 	},
 };

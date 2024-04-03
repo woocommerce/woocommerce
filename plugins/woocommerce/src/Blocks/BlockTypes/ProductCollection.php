@@ -374,7 +374,6 @@ class ProductCollection extends AbstractBlock {
 		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
 		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
 		if ( 'true' === $is_preview ) {
-			error_log( 'ProductCollection: Preview mode' );
 			return $this->get_preview_query_args( $args, $request );
 		}
 
@@ -540,10 +539,11 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Update the query based on collection name if it's a preview request.
-	 * For example, For On-sale collection, in preview mode we should always show
-	 * the products that are on sale, even if we want to show random products in
-	 * preview mode.
+	 * POC:
+	 *
+	 * Modifies the query arguments based on the collection name for preview requests.
+	 * For instance, for the 'On-sale' collection, products on sale should always be displayed in preview mode,
+	 * regardless of whether the intention is to display random products.
 	 *
 	 * @param array           $args    Query args.
 	 * @param WP_REST_Request $request Request.
@@ -561,8 +561,6 @@ class ProductCollection extends AbstractBlock {
 		}
 
 		$args = $this->merge_queries( $args, $collection_query );
-		// print $args
-		error_log( print_r( $args, true ) );
 		return $args;
 	}
 

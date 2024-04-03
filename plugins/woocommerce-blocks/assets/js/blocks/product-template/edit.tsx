@@ -156,7 +156,6 @@ const ProductTemplateEdit = (
 				shrinkColumns: false,
 			},
 			queryContextIncludes = [],
-			productCollectionPreviewState,
 		},
 		__unstableLayoutClassNames,
 	} = props;
@@ -202,17 +201,12 @@ const ProductTemplateEdit = (
 					_fields: [ 'id' ],
 					slug: templateSlug.replace( 'category-', '' ),
 				} );
-			let query: Record< string, unknown > = {
-				postType,
-			};
-
-			query = {
+			const query: Record< string, unknown > = {
 				postType,
 				offset: perPage ? perPage * ( page - 1 ) + offset : 0,
 				order,
 				orderby: orderBy,
 			};
-
 			// There is no need to build the taxQuery if we inherit.
 			if ( taxQuery && ! inherit ) {
 				// We have to build the tax query for the REST API and use as
@@ -249,7 +243,6 @@ const ProductTemplateEdit = (
 				}
 				query.per_page = loopShopPerPage;
 			}
-
 			return {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
@@ -278,7 +271,6 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
-			productCollectionPreviewState?.isPreview,
 		]
 	);
 	const blockContexts = useMemo(

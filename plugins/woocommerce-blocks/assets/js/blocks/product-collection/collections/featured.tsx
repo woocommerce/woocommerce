@@ -15,7 +15,7 @@ import {
 import {
 	CoreCollectionNames,
 	CoreFilterNames,
-	HandlePreviewStateArgs,
+	SetPreviewStateArgs,
 } from '../types';
 import { ProductCollectionConfig } from './register-product-collection';
 
@@ -62,19 +62,22 @@ const innerBlocks: InnerBlockTemplate[] = [
 ];
 
 /**
- * To change preview from true to false after 5 seconds.
+ * Example:
+ * - How to access attributes and location in the preview state.
+ * - How to use async operations
+ * - How to use cleanup function as a return value.
  */
-const handlePreviewState = ( {
-	setPreviewState,
+const setPreviewState = ( {
+	setState,
 	attributes: currentAttributes,
 	location,
-}: HandlePreviewStateArgs ) => {
-	// handlePreviewState has access to the current attributes and location.
-	console.log( 'handlePreviewState' );
+}: SetPreviewStateArgs ) => {
+	// setPreviewState has access to the current attributes and location.
+	console.log( 'setPreviewState' );
 	console.log( currentAttributes, location );
 
 	const timeoutID = setTimeout( () => {
-		setPreviewState( {
+		setState( {
 			isPreview: false,
 			previewMessage: '',
 		} );
@@ -88,7 +91,7 @@ export default {
 	attributes,
 	innerBlocks,
 	preview: {
-		handlePreviewState,
+		setPreviewState,
 		initialState: {
 			isPreview: true,
 			previewMessage: 'This is in preview mode',

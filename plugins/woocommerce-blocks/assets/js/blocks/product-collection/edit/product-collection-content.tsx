@@ -23,7 +23,7 @@ import type {
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
 	PreviewState,
-	HandlePreviewState,
+	SetPreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
@@ -31,10 +31,10 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const useHandlePreviewState = ( {
+const useSetPreviewState = ( {
 	setAttributes,
 	location,
-	handlePreviewState,
+	setPreviewState,
 	attributes,
 }: {
 	setAttributes: (
@@ -42,23 +42,23 @@ const useHandlePreviewState = ( {
 	) => void;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-	handlePreviewState?: HandlePreviewState | undefined;
+	setPreviewState?: SetPreviewState | undefined;
 } ) => {
-	const setPreviewState = ( newPreviewState: PreviewState ) => {
+	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
 			...attributes.previewState,
 			previewState: newPreviewState,
 		} );
 	};
 
-	// Running handlePreviewState function provided by Collection, if it exists.
+	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
-		if ( ! handlePreviewState ) {
+		if ( ! setPreviewState ) {
 			return;
 		}
 
-		const cleanup = handlePreviewState?.( {
-			setPreviewState,
+		const cleanup = setPreviewState?.( {
+			setState,
 			location,
 			attributes,
 		} );
@@ -72,14 +72,14 @@ const useHandlePreviewState = ( {
 };
 
 const ProductCollectionContent = ( {
-	preview: { handlePreviewState, initialState: initialPreviewState } = {},
+	preview: { setPreviewState, initialState: initialPreviewState } = {},
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
 	const location = useGetLocation( props.context, props.clientId );
-	useHandlePreviewState( {
-		handlePreviewState,
+	useSetPreviewState( {
+		setPreviewState,
 		setAttributes,
 		location,
 		attributes,

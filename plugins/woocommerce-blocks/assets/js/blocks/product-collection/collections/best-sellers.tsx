@@ -12,11 +12,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import {
-	CoreCollectionNames,
-	CoreFilterNames,
-	HandlePreviewStateArgs,
-} from '../types';
+import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.BEST_SELLERS,
@@ -61,24 +57,8 @@ const innerBlocks: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 ];
 
-/**
- * Example of how "Best Sellers" collection can handle preview state.
- * This is a example of sync operation, but it can be async.
- * See "On Sale" collection for async example.
- */
-const handlePreviewState = ( { setPreviewState }: HandlePreviewStateArgs ) => {
-	setPreviewState( {
-		isPreview: true,
-		previewMessage: __(
-			'Custom tooltip for best sellers collection.',
-			'woocommerce'
-		),
-	} );
-};
-
 export default {
 	...collection,
 	attributes,
 	innerBlocks,
-	handlePreviewState,
 };

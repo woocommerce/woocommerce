@@ -12,15 +12,15 @@ import type { BlockEditProps } from '@wordpress/blocks';
  */
 import blockJson from '../block.json';
 import {
-	HandlePreviewState,
+	SetPreviewState,
 	PreviewState,
 	ProductCollectionAttributes,
 } from '../types';
 
-// Extends BlockVariation to include an optional handlePreviewState function for preview management.
+// Extends BlockVariation to include an optional setPreviewState function for preview management.
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
-		handlePreviewState?: HandlePreviewState;
+		setPreviewState?: SetPreviewState;
 		initialState?: PreviewState;
 	};
 }
@@ -28,16 +28,16 @@ export interface ProductCollectionConfig extends BlockVariation {
 /**
  * Registers a product collection variation, optionally setting up a preview state handler.
  *
- * @param {ProductCollectionConfig} blockVariationArgs - The configuration for the product collection, potentially including a handlePreviewState function.
+ * @param {ProductCollectionConfig} blockVariationArgs - The configuration for the product collection, potentially including a setPreviewState function.
  */
 const registerProductCollection = ( {
-	preview: { handlePreviewState, initialState } = {},
+	preview: { setPreviewState, initialState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
-	// Don't add filter if handlePreviewState is not provided.
-	if ( handlePreviewState || initialState ) {
-		// This HOC adds a handlePreviewState & initialPreviewState to the BlockEdit component's props.
-		const withHandlePreviewState =
+	// Don't add filter if setPreviewState is not provided.
+	if ( setPreviewState || initialState ) {
+		// This HOC adds a setPreviewState & initialPreviewState to the BlockEdit component's props.
+		const withSetPreviewState =
 			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 			( props: BlockEditProps< ProductCollectionAttributes > ) => {
 				// If collection name does not match, return the original BlockEdit component.
@@ -45,18 +45,18 @@ const registerProductCollection = ( {
 					return <BlockEdit { ...props } />;
 				}
 
-				// Otherwise, inject the handlePreviewState function into the BlockEdit component's props.
+				// Otherwise, inject the setPreviewState & initialPreviewState props.
 				return (
 					<BlockEdit
 						{ ...props }
-						preview={ { handlePreviewState, initialState } }
+						preview={ { setPreviewState, initialState } }
 					/>
 				);
 			};
 		addFilter(
 			'editor.BlockEdit',
 			blockVariationArgs.name,
-			withHandlePreviewState
+			withSetPreviewState
 		);
 	}
 

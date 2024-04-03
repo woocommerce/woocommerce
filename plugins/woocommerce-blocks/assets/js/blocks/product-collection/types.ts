@@ -99,7 +99,7 @@ export type ProductCollectionEditComponentProps =
 		openCollectionSelectionModal: () => void;
 		preview: {
 			initialState?: PreviewState;
-			handlePreviewState?: HandlePreviewState;
+			setPreviewState?: SetPreviewState;
 		};
 		context: {
 			templateSlug: string;
@@ -164,13 +164,13 @@ export interface PreviewState {
  * For now it only has one property, but it can be extended in the future to pass
  * more information to the preview state handler.
  */
-export interface HandlePreviewStateArgs {
+export interface SetPreviewStateArgs {
 	previewState?: PreviewState;
-	setPreviewState: ( previewState: PreviewState ) => void;
+	setState: ( previewState: PreviewState ) => void;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
 }
 
-export type HandlePreviewState = (
-	args: HandlePreviewStateArgs
+export type SetPreviewState = (
+	args: SetPreviewStateArgs
 ) => void | ( () => void );
