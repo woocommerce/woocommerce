@@ -45,12 +45,6 @@ class WC_Settings_Site_Visibility extends WC_Settings_Page {
 				),
 			);
 
-		$settings = apply_filters( 'woocommerce_settings_pages', $settings );
-
-		if ( wc_site_is_https() ) {
-			unset( $settings['unforce_ssl_checkout'], $settings['force_ssl_checkout'] );
-		}
-
 		return $settings;
 	}
 }
