@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Verify cached order is valid before returning from OrderFactory
