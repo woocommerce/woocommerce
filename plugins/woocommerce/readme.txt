@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fixed an issue where orders could be placed when no shipping options were available [#46026](https://github.com/woocommerce/woocommerce/pull/46026)
 * Fix - Fix a bug where saved payment methods were not rendered correctly in the heckout block [#46019](https://github.com/woocommerce/woocommerce/pull/46019)
 * Fix - Removed count from is_array check to fix Analytics comparison filter. [#45939](https://github.com/woocommerce/woocommerce/pull/45939)
 * Fix - Add a filter to adjust the 50 terms limitation in the product edit page. [#45506](https://github.com/woocommerce/woocommerce/pull/45506)
