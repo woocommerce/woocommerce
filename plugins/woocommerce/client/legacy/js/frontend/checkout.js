@@ -501,13 +501,13 @@ jQuery( function( $ ) {
 							var maybe_valid_json = raw_response.match( /{"result.*}/ );
 
 							if ( null === maybe_valid_json ) {
-								console.log( 'Unable to fix malformed JSON' );
+								console.log( 'Unable to fix malformed JSON #1' );
 							} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
 								console.log( 'Fixed malformed JSON. Original:' );
 								console.log( raw_response );
 								raw_response = maybe_valid_json[0];
 							} else {
-								console.log( 'Unable to fix malformed JSON' );
+								console.log( 'Unable to fix malformed JSON #2' );
 							}
 						}
 
