@@ -531,6 +531,7 @@ class WC_Frontend_Scripts {
 				);
 				break;
 			case 'wc-checkout':
+				$i18n_checkout_error = 'Error processing checkout. Please check your <a href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">order history</a> and payment method charges before attempting to order again.';
 				$params = array(
 					'ajax_url'                  => WC()->ajax_url(),
 					'wc_ajax_url'               => WC_AJAX::get_endpoint( '%%endpoint%%' ),
@@ -541,7 +542,7 @@ class WC_Frontend_Scripts {
 					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
 					'is_checkout'               => is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
-					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please check your <a href="' . esc_url( wc_get_account_endpoint_url( 'orders' ) ) . '">order history</a> and payment method charges before attempting to order again.', 'woocommerce' ),
+					'i18n_checkout_error'       => esc_attr__( $i18n_checkout_error, 'woocommerce' ),
 				);
 				break;
 			case 'wc-address-i18n':

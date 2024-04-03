@@ -1073,7 +1073,7 @@ class WC_Checkout {
 				exit;
 			}
 
-			// Using wp_send_json will gracefully handle any problem encoding data
+			// Using wp_send_json will gracefully handle any problem encoding data.
 			wp_send_json( $result );
 		}
 	}
