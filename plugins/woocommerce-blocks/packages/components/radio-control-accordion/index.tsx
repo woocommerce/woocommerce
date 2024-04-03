@@ -3,12 +3,12 @@
  */
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { RadioControlOption } from '../radio-control';
-import { useMemo } from '@wordpress/element';
 
 export interface RadioControlAccordionProps {
 	className?: string;
