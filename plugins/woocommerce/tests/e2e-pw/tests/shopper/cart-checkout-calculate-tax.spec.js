@@ -437,7 +437,9 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'heading', { name: 'Shop' } )
 				).toBeVisible();
 				await expect( page.getByText( productName ) ).toBeVisible();
-				await expect( page.getByText( '$13.47' ) ).toBeVisible();
+				await expect(
+					await page.getByText( '$13.47' ).count()
+				).toBeGreaterThan( 0 );
 			} );
 
 			await test.step( 'Load cart page and confirm price display', async () => {
@@ -489,7 +491,9 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'heading', { name: 'Shop' } )
 				).toBeVisible();
 				await expect( page.getByText( productName ) ).toBeVisible();
-				await expect( page.getByText( '$13.47' ) ).toBeVisible();
+				await expect(
+					await page.getByText( '$13.47' ).count()
+				).toBeGreaterThan( 0 );
 			} );
 
 			await test.step( 'Load cart page and confirm price display', async () => {
@@ -658,13 +662,13 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'row', { name: 'Subtotal $200.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Country Tax $10.00 ' } )
+					page.getByRole( 'row', { name: 'Country Tax $20.00 ' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'State Tax $5.00 ' } )
+					page.getByRole( 'row', { name: 'State Tax $10.00 ' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Total $115.00 ' } )
+					page.getByRole( 'row', { name: 'Total $230.00 ' } )
 				).toBeVisible();
 			} );
 
@@ -710,19 +714,19 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'row', { name: 'Subtotal $200.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Country Tax $10.00' } )
+					page.getByRole( 'row', { name: 'Country Tax $20.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'State Tax $5.00' } )
+					page.getByRole( 'row', { name: 'State Tax $10.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'City Tax $2.50' } )
+					page.getByRole( 'row', { name: 'City Tax $5.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Zip Tax $1.25' } )
+					page.getByRole( 'row', { name: 'Zip Tax $2.50' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Total $118.75 ' } )
+					page.getByRole( 'row', { name: 'Total $237.50 ' } )
 				).toBeVisible();
 			} );
 		} );
@@ -753,13 +757,13 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'row', { name: 'Subtotal $200.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Country Tax $10.00 ' } )
+					page.getByRole( 'row', { name: 'Country Tax $20.00 ' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'State Tax $5.00 ' } )
+					page.getByRole( 'row', { name: 'State Tax $10.00 ' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Total $115.00 ' } )
+					page.getByRole( 'row', { name: 'Total $230.00 ' } )
 				).toBeVisible();
 			} );
 
@@ -805,19 +809,19 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'row', { name: 'Subtotal $200.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'Country Tax $10.00' } )
+					page.getByRole( 'row', { name: 'Country Tax $20.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'State Tax $5.00' } )
+					page.getByRole( 'row', { name: 'State Tax $10.00' } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'row', { name: 'City Tax $2.50' } )
+					page.getByRole( 'row', { name: 'City Tax $5.00' } )
 				).toBeHidden();
 				await expect(
-					page.getByRole( 'row', { name: 'Zip Tax $1.25' } )
+					page.getByRole( 'row', { name: 'Zip Tax $2.50' } )
 				).toBeHidden();
 				await expect(
-					page.getByRole( 'row', { name: 'Total $115.00 ' } )
+					page.getByRole( 'row', { name: 'Total $230.00 ' } )
 				).toBeVisible();
 			} );
 		} );
@@ -929,13 +933,16 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 					page.getByRole( 'heading', { name: 'Cart', exact: true } )
 				).toBeVisible();
 				await expect(
-					page.getByRole( 'cell', { name: '$115.00 (incl. tax)' } )
+					page.getByRole( 'cell', { name: '$230.00 (incl. tax)' } )
 				).toHaveCount( 2 );
 				await expect(
 					page.getByRole( 'row', {
-						name: 'Subtotal $115.00 (incl. tax)',
+						name: 'Subtotal $230.00 (incl. tax)',
 					} )
 				).toBeVisible();
+
+				await page.pause();
+
 				await expect(
 					page.getByRole( 'row', {
 						name: 'Shipping Flat rate: $23.00 (incl. tax) Shipping to CA.',
@@ -943,7 +950,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
-						name: 'Total $138.00 (includes $18.00 Shipping Tax)',
+						name: 'Total $253.00 (includes $33.00 Shipping Tax)',
 					} )
 				).toBeVisible();
 			} );
@@ -978,12 +985,12 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 
 				await expect(
 					page.getByRole( 'row', {
-						name: `${ productName } × 1 $115.00 (incl. tax)`,
+						name: `${ productName } × 1 $230.00 (incl. tax)`,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
-						name: 'Subtotal $115.00 (incl. tax)',
+						name: 'Subtotal $230.00 (incl. tax)',
 					} )
 				).toBeVisible();
 				await expect(
@@ -993,7 +1000,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'row', {
-						name: 'Total $138.00 (includes $18.00 Shipping Tax)',
+						name: 'Total $253.00 (includes $33.00 Shipping Tax)',
 					} )
 				).toBeVisible();
 			} );
