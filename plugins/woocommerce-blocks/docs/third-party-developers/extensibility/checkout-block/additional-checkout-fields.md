@@ -149,7 +149,7 @@ $my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_i
 
 #### Accessing all fields
 
-You can use `get_all_fields_from_customer` and `get_all_fields_from_order` to access all additional fields saved to an order or a customer.
+You can use `get_all_fields_from_object` to access all additional fields saved to an order or a customer.
 
 ```php
 use Automattic\WooCommerce\Blocks\Package;
@@ -157,9 +157,9 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
 $order = wc_get_order( 1234 );
 $checkout_fields = Package::container()->get( CheckoutFields::class );
-$order_additional_billing_fields = $checkout_fields->get_all_fields_from_order( $order, 'billing' );
-$order_additional_shipping_fields = $checkout_fields->get_field_from_order( $order, 'shipping' );
-$order_additional_fields = $checkout_fields->get_field_from_order( $order, 'additional' ); // Contact and Additional are saved in the same place under the additional group.
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' );
+$order_additional_shipping_fields = $checkout_fields->get_all_fields_from_object( $order, 'shipping' );
+$order_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'additional' ); // Contact and Additional are saved in the same place under the additional group.
 ```
 
 This will return an array of all values, it will only include fields currently registered, if you want to include fields no longer registered, you can pass a third `true` parameter.

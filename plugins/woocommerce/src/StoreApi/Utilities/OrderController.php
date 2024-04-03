@@ -381,7 +381,7 @@ class OrderController {
 		$address        = $order->get_address( $address_type );
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_order( $order, $address_type );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
 
 		$address = array_merge( $address, $additional_fields );
 

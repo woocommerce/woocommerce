@@ -101,13 +101,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 				$billing_state = '';
 			}
 
-			if ( $address instanceof \WC_Order ) {
-				// get additional fields from order.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_order( $address, 'billing' );
-			} elseif ( $address instanceof \WC_Customer ) {
-				// get additional fields from customer.
-				$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_customer( $address, 'billing' );
-			}
+			$additional_address_fields = $this->additional_fields_controller->get_all_fields_from_object( $address, 'billing' );
 
 			$address_object = \array_merge(
 				[

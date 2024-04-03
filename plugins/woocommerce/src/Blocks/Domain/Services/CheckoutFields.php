@@ -42,6 +42,13 @@ class CheckoutFields {
 	private $supported_field_types = [ 'text', 'select', 'checkbox' ];
 
 	/**
+	 * Groups of fields to be saved.
+	 *
+	 * @var array
+	 */
+	protected $groups = [ 'billing', 'shipping', 'additional' ];
+
+	/**
 	 * Instance of the asset data registry.
 	 *
 	 * @var AssetDataRegistry
@@ -999,7 +1006,7 @@ class CheckoutFields {
 
 		$meta_data = $wc_object->get_meta( $meta_key, true );
 
-		if ( '' === $meta_data || null === $meta_data ) {
+		if ( null === $meta_data ) {
 			return '';
 		}
 
@@ -1007,62 +1014,27 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of all fields values for a given customer in a group.
+	 * Returns an array of all fields values for a given object in a group.
 	 *
-	 * @param WC_Customer $customer The customer to get the fields for.
-	 * @param string      $group The group to get the fields for (shipping|billing|additional).
-	 * @param bool        $all Whether to return all fields or only the ones that are still registered. Default false.
+	 * @param WC_Data $wc_object The object or order to get the fields for.
+	 * @param string  $group The group to get the fields for (shipping|billing|additional).
+	 * @param bool    $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
-	public function get_all_fields_from_customer( WC_Customer $customer, string $group = 'additional', bool $all = false ) {
+	public function get_all_fields_from_object( WC_Data $wc_object, string $group = 'additional', bool $all = false ) {
 		$meta_data = [];
 
 		$prefix = self::get_group_key( $group );
 
-		if ( $customer instanceof WC_Customer ) {
-			// Get all customer meta regardless of key.
-			$meta = $customer->get_meta_data();
+		if ( $wc_object instanceof WC_Data ) {
+			$meta = $wc_object->get_meta_data();
 			foreach ( $meta as $meta_data_object ) {
-				// Check if key starts with a prefix.
 				if ( 0 === \strpos( $meta_data_object->key, $prefix ) ) {
 					$key = \str_replace( $prefix, '', $meta_data_object->key );
-					if ( ! $all && ! $this->is_field( $key ) ) {
-						continue;
+					if ( $all || $this->is_field( $key ) ) {
+						$meta_data[ $key ] = $meta_data_object->value;
 					}
-					$meta_data[ $key ] = $meta_data_object->value;
-				}
-			}
-		}
-
-		return $meta_data;
-	}
-
-	/**
-	 * Returns an array of all fields values for a given order.
-	 *
-	 * @param WC_Order $order The order to get the fields for.
-	 * @param string   $group The group to get the fields for (shipping|billing|additional).
-	 * @param bool     $all Whether to return all fields or only the ones that are still registered. Default false.
-	 *
-	 * @return array An array of fields.
-	 */
-	public function get_all_fields_from_order( WC_Order $order, string $group = 'additional', bool $all = false ) {
-		$meta_data = [];
-
-		$prefix = self::get_group_key( $group );
-
-		if ( $order instanceof WC_Order ) {
-			// Get all order meta regardless of key.
-			$meta = $order->get_meta_data();
-			foreach ( $meta as $meta_data_object ) {
-				// Check if key starts with a prefix.
-				if ( 0 === \strpos( $meta_data_object->key, $prefix ) ) {
-					$key = \str_replace( $prefix, '', $meta_data_object->key );
-					if ( ! $all && ! $this->is_field( $key ) ) {
-						continue;
-					}
-					$meta_data[ $key ] = $meta_data_object->value;
 				}
 			}
 		}
@@ -1077,9 +1049,8 @@ class CheckoutFields {
 	 * @param WC_Customer $customer The customer to sync the fields for.
 	 */
 	public function sync_customer_additional_fields_with_order( WC_Order $order, WC_Customer $customer ) {
-		$groups = [ 'billing', 'shipping', 'additional' ];
-		foreach ( $groups as $group ) {
-			$order_additional_fields = $this->get_all_fields_from_order( $order, $group, true );
+		foreach ( $this->groups as $group ) {
+			$order_additional_fields = $this->get_all_fields_from_object( $order, $group, true );
 
 			// Sync customer additional fields with order additional fields.
 			foreach ( $order_additional_fields as $key => $value ) {
@@ -1097,9 +1068,8 @@ class CheckoutFields {
 	 * @param WC_Customer $customer The customer to sync the fields for.
 	 */
 	public function sync_order_additional_fields_with_customer( WC_Order $order, WC_Customer $customer ) {
-		$groups = [ 'billing', 'shipping', 'additional' ];
-		foreach ( $groups as $group ) {
-			$customer_additional_fields = $this->get_all_fields_from_customer( $customer, $group, true );
+		foreach ( $this->groups as $group ) {
+			$customer_additional_fields = $this->get_all_fields_from_object( $customer, $group, true );
 
 			// Sync order additional fields with customer additional fields.
 			foreach ( $customer_additional_fields as $key => $value ) {

@@ -244,7 +244,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$billing_country = $customer->get_billing_country();
 		$billing_state   = $customer->get_billing_state();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer, 'billing' );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'billing' );
 
 		/**
 		 * There's a bug in WooCommerce core in which not having a state ("") would result in us validating against the store's state.
@@ -280,7 +280,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array
 	 */
 	protected function get_customer_shipping_address( \WC_Customer $customer ) {
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer, 'shipping' );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'shipping' );
 
 		return array_merge(
 			[
