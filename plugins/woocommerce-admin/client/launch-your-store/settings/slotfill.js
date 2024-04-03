@@ -12,13 +12,13 @@ import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import { recordEvent } from '@woocommerce/tracks';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
