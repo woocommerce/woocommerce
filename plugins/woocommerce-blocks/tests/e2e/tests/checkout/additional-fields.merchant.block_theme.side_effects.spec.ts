@@ -283,7 +283,9 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 
 		// Use Locator here because the select2 box is duplicated in shipping.
 		await admin.page
-			.locator( '[id="\\/billing\\/first-plugin-namespace\\/road-size"]' )
+			.locator(
+				'[id="\\_wc_billing\\/first-plugin-namespace\\/road-size"]'
+			)
 			.selectOption( 'wide' );
 
 		// Handle changing the contact fields.
@@ -329,7 +331,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 		// Use Locator here because the select2 box is duplicated in billing.
 		await admin.page
 			.locator(
-				'[id="\\/shipping\\/first-plugin-namespace\\/road-size"]'
+				'[id="\\_wc_shipping\\/first-plugin-namespace\\/road-size"]'
 			)
 			.selectOption( 'super-wide' );
 
