@@ -31,6 +31,8 @@
 		}
 	}
 
+	// Adds a "border" around the selected option. This is done with a box-shadow to prevent a double border on the left
+	// and right of the selected element, and top and bottom of the first/last elements.
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
 		box-shadow: 0 0 0 1.5px currentColor inset;
@@ -75,10 +77,10 @@
 	}
 
 	.wc-block-components-radio-control__option {
-		border: 1px solid transparent;
-		border-left: 0;
-		border-right: 0;
 
+		// Add a fake border to the top of each radio option. This is because using CSS borders would result in an
+		// overlap and two transparent borders combining to make a darker pixel. This fake border allows us to bring the
+		// border in by one pixel on each side to avoid the overlap.
 		&::after {
 			content: "";
 			background: $universal-border-light;
@@ -89,6 +91,7 @@
 			position: absolute;
 		}
 
+		// The first child doesn't need a fake border-top because it's handled by its parent's border-top.
 		&:first-child::after {
 			display: none;
 		}
