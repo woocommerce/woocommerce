@@ -4,8 +4,8 @@
 	div.wc-block-components-radio-control-accordion-option {
 		position: relative;
 
-		&:after {
-			content: '';
+		&::after {
+			content: "";
 			background: $universal-border-light;
 			height: 1px;
 			right: 1px;
@@ -14,17 +14,16 @@
 			position: absolute;
 		}
 
-		&:last-child:after {
-			content: '';
-			background: $universal-border-light;
-			height: 1px;
-			right: 1px;
-			left: 1px;
+		&:last-child::after {
 			bottom: 0;
 			position: absolute;
 		}
 
-		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option:after {
+		&:first-child::after {
+			display: none;
+		}
+
+		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option::after {
 			display: none;
 		}
 	}
@@ -38,7 +37,7 @@
 	// Defines a border around the radio control. Cannot be done with normal CSS borders because when selecting an item
 	// the selected item needs its own borders with a radius, so we get a double border, or incorrect looking styling with
 	// overlaps under the selected item's border (due to its border-radius).
-	&:after {
+	&::after {
 		content: "";
 		top: 0;
 		right: 0;
@@ -51,15 +50,17 @@
 		box-sizing: border-box;
 	}
 
-	&.wc-block-components-radio-control--highlight-checked--first-selected:after {
+	&.wc-block-components-radio-control--highlight-checked--first-selected::after {
 		border-top: 0;
+		margin-top: 2px;
 	}
 
-	&.wc-block-components-radio-control--highlight-checked--last-selected:after {
+	&.wc-block-components-radio-control--highlight-checked--last-selected::after {
+		margin-bottom: 2px;
 		border-bottom: 0;
 	}
 
-	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option:after {
+	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option::after {
 		display: none;
 	}
 
@@ -68,8 +69,8 @@
 		border-left: 0;
 		border-right: 0;
 
-		&:after {
-			content: '';
+		&::after {
+			content: "";
 			background: $universal-border-light;
 			height: 1px;
 			right: 1px;
@@ -78,7 +79,7 @@
 			position: absolute;
 		}
 
-		&:first-child:after {
+		&:first-child::after {
 			display: none;
 		}
 	}
