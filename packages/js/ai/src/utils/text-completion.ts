@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { requestJetpackToken } from './requestJetpackToken';
+import { ResponseFormat } from '../shared/types';
 
 /**
  * Leaving this here to make it easier to debug the streaming API calls for now
@@ -13,7 +14,7 @@ import { requestJetpackToken } from './requestJetpackToken';
 export async function getCompletion(
 	prompt: string,
 	feature: string,
-	responseFormat?: string
+	responseFormat?: ResponseFormat
 ) {
 	const { token } = await requestJetpackToken();
 

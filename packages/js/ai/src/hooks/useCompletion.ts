@@ -7,9 +7,7 @@ import { useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { getCompletion, createExtendedError } from '../utils/';
-
-type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
-type ResponseFormat = 'json_object' | 'text';
+import { ResponseFormat, StopReason } from '../shared/types';
 
 export type UseCompletionError = Error & { code?: string; cause?: Error };
 
