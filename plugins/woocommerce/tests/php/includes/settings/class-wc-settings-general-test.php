@@ -1,4 +1,4 @@
-wj<?php
+<?php
 /**
  * Class WC_Settings_General_Test file.
  *
