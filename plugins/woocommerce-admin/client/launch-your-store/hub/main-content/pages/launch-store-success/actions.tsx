@@ -3,7 +3,7 @@
  */
 import { DoneActorEvent } from 'xstate5';
 import { dispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, TaskListType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,7 +16,7 @@ export const assignHasCompleteSurvey = {
 		event,
 	}: {
 		context: MainContentMachineContext;
-		event: DoneActorEvent;
+		event: DoneActorEvent< string | null >;
 	} ) => {
 		return {
 			...context.congratsScreen,
@@ -35,6 +35,21 @@ export const assignCompleteSurvey = {
 		return {
 			...context.congratsScreen,
 			hasCompleteSurvey: true,
+		};
+	},
+};
+
+export const assignAllTasklists = {
+	congratsScreen: ( {
+		context,
+		event,
+	}: {
+		context: MainContentMachineContext;
+		event: DoneActorEvent< TaskListType[] >;
+	} ) => {
+		return {
+			...context.congratsScreen,
+			allTasklists: event.output,
 		};
 	},
 };

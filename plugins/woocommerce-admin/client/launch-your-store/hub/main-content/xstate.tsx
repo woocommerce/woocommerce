@@ -4,6 +4,7 @@
 import { assign, fromCallback, setup } from 'xstate5';
 import React from 'react';
 import { getQuery } from '@woocommerce/navigation';
+import type { TaskListType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,6 +28,7 @@ export type MainContentMachineContext = {
 	congratsScreen: {
 		hasLoadedCompleteOption: boolean;
 		hasCompleteSurvey: boolean;
+		allTasklists: TaskListType[];
 	};
 };
 
@@ -42,6 +44,7 @@ export type MainContentMachineEvents =
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'content', sendBack );
 } );
+
 export const mainContentMachine = setup( {
 	types: {} as {
 		context: MainContentMachineContext;
@@ -68,6 +71,7 @@ export const mainContentMachine = setup( {
 	actors: {
 		contentQueryParamListener,
 		fetchSurveyCompletedOption: congratsServices.fetchSurveyCompletedOption,
+		getAllTasklists: congratsServices.getAllTasklists,
 	},
 } ).createMachine( {
 	id: 'mainContent',
@@ -76,6 +80,7 @@ export const mainContentMachine = setup( {
 		congratsScreen: {
 			hasLoadedCompleteOption: false,
 			hasCompleteSurvey: false,
+			allTasklists: [],
 		},
 	},
 	states: {
@@ -107,12 +112,22 @@ export const mainContentMachine = setup( {
 		},
 		launchStoreSuccess: {
 			id: 'launchStoreSuccess',
-			invoke: {
-				src: 'fetchSurveyCompletedOption',
-				onDone: {
-					actions: assign( congratsActions.assignHasCompleteSurvey ),
+			invoke: [
+				{
+					src: 'fetchSurveyCompletedOption',
+					onDone: {
+						actions: assign(
+							congratsActions.assignHasCompleteSurvey
+						),
+					},
 				},
-			},
+				{
+					src: 'getAllTasklists',
+					onDone: {
+						actions: assign( congratsActions.assignAllTasklists ),
+					},
+				},
+			],
 			entry: [
 				{
 					type: 'updateQueryParams',
