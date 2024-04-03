@@ -7,7 +7,7 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect, useLayoutEffect } from '@wordpress/element';
+import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import {
@@ -46,6 +46,7 @@ const useHandlePreviewState = ( {
 } ) => {
 	const setPreviewState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
+			...attributes.previewState,
 			previewState: newPreviewState,
 		} );
 	};
@@ -74,6 +75,7 @@ const ProductCollectionContent = ( {
 	preview: { handlePreviewState, initialState: initialPreviewState } = {},
 	...props
 }: ProductCollectionEditComponentProps ) => {
+	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
 	const location = useGetLocation( props.context, props.clientId );
 	useHandlePreviewState( {
@@ -134,6 +136,8 @@ const ProductCollectionContent = ( {
 					initialPreviewState ||
 					( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
 			} );
+
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -146,6 +150,11 @@ const ProductCollectionContent = ( {
 	 * Default attributes are set in the useEffect above.
 	 */
 	if ( typeof attributes?.query?.inherit !== 'boolean' ) {
+		return null;
+	}
+
+	// Let's not render anything until default attributes are set.
+	if ( ! isInitialAttributesSet.current ) {
 		return null;
 	}
 
