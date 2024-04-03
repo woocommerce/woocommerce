@@ -1288,7 +1288,7 @@ class WC_Checkout {
 				 * since it could be empty see:
 				 * https://github.com/woocommerce/woocommerce/issues/24631
 				 */
-				die('ok');
+
 				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
 					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 				} else {
