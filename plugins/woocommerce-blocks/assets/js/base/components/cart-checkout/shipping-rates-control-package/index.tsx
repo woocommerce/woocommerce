@@ -25,6 +25,7 @@ export const ShippingRatesControlPackage = ( {
 	packageData,
 	collapsible,
 	showItems,
+	highlightChecked = false,
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate, isSelectingRate } = useShippingData();
 
@@ -104,6 +105,7 @@ export const ShippingRatesControlPackage = ( {
 		),
 		renderOption,
 		disabled: isSelectingRate,
+		highlightChecked,
 	};
 
 	const selectedOptionNumber = useMemo( () => {
