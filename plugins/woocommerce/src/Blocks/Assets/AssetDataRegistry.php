@@ -424,10 +424,12 @@ class AssetDataRegistry {
 	 */
 	protected function add_data( $key, $data ) {
 		if ( ! is_string( $key ) ) {
-			error_log( esc_html__( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( esc_html__( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
 		}
 		if ( isset( $this->data[ $key ] ) ) {
-			error_log( esc_html__( 'Overriding existing data with an already registered key is not allowed', 'woocommerce' ), E_USER_WARNING );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( esc_html__( 'Overriding existing data with an already registered key is not allowed', 'woocommerce' ), E_USER_WARNING );
 			return;
 		}
 		if ( \is_callable( $data ) ) {
