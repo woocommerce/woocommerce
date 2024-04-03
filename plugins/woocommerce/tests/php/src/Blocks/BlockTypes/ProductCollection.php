@@ -36,7 +36,7 @@ class ProductCollection extends \WP_UnitTestCase {
 					'search'                   => '',
 					'exclude'                  => array(),
 					'sticky'                   => '',
-					'inherit'                  => false,
+					'inherit'                  => true,
 					'isProductCollectionBlock' => true,
 					'woocommerceAttributes'    => array(),
 					'woocommerceStockStatus'   => array(
