@@ -16,7 +16,7 @@ abstract class DataSourcePoller extends RemoteSpecsDataSourcePoller {
 	 * Log a deprecation to the error log.
 	 */
 	private static function log_deprecation() {
-		// Temporarily disable deprecation message in logs since due to upgrade issues https://github.com/woocommerce/woocommerce/pull/45892.
+		// Temporarily disable deprecation message in logs due to upgrade issues https://github.com/woocommerce/woocommerce/pull/45892.
 		return;
 		error_log( // phpcs:ignore
 			sprintf(
