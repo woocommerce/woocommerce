@@ -267,7 +267,13 @@ class Checkout extends AbstractBlock {
 		if ( ( ! empty( $post->post_type ) && ! empty( $post->post_name ) && 'page-checkout' !== $post->post_name && 'wp_template' === $post->post_type ) || false === has_block( 'woocommerce/checkout', $post ) ) {
 			return;
 		}
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', array() );
+		$pickup_location_settings = get_option(
+			'woocommerce_pickup_location_settings',
+			[
+				'enabled' => false,
+				'title'   => __( 'Local Pickup', 'woocommerce' ),
+			]
+		);
 
 		if ( ! isset( $pickup_location_settings['title'] ) ) {
 			return;

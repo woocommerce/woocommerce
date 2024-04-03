@@ -13,7 +13,13 @@ class LocalPickupUtils {
 	 * @return bool True if local pickup is enabled.
 	 */
 	public static function is_local_pickup_enabled() {
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
+		$pickup_location_settings = get_option(
+			'woocommerce_pickup_location_settings',
+			[
+				'enabled' => false,
+				'title'   => __( 'Local Pickup', 'woocommerce' ),
+			]
+		);
 		return wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' );
 	}
 	/**

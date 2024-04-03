@@ -246,7 +246,13 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
 		$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones(), true );
 
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
+		$pickup_location_settings = get_option(
+			'woocommerce_pickup_location_settings',
+			[
+				'enabled' => false,
+				'title'   => __( 'Local Pickup', 'woocommerce' ),
+			]
+		);
 		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
 
 		// Hydrate the following data depending on admin or frontend context.
