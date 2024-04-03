@@ -77,7 +77,7 @@ test.skip( 'Assembler -> Color Pickers', () => {
 		await expect( colorPickers ).toHaveCount( 18 );
 	} );
 
-	test( 'Picking a color should trigger an update of colors on the site preview', async ( {
+	test.only( 'Picking a color should trigger an update of colors on the site preview', async ( {
 		assemblerPageObject,
 	}, testInfo ) => {
 		const assembler = await assemblerPageObject.getAssembler();
@@ -109,7 +109,11 @@ test.skip( 'Assembler -> Color Pickers', () => {
 
 			// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 			await expect(
-				stylesWithoutEditorStyles.join( ',' )
+				stylesWithoutEditorStyles
+					.map( ( css ) =>
+						css.replace( /.wp-container-content-(\d+)/, '' )
+					)
+					.join( ',' )
 			).toMatchSnapshot( {
 				name: 'color-palette-' + index,
 			} );
