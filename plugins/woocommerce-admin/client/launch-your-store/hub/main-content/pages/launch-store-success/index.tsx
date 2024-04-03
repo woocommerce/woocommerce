@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import { Spinner } from '@woocommerce/components';
+import { resolveSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -22,8 +23,13 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 		props.sendEventToMainContent( { type: 'COMPLETE_SURVEY' } );
 	};
 
+	// Temporary spinner until data load is moved to loading screen or somewhere else.
 	if ( ! props.context.congratsScreen.hasLoadedCompleteOption ) {
-		return <Spinner></Spinner>;
+		return (
+			<div className="spinner-container">
+				<Spinner></Spinner>
+			</div>
+		);
 	}
 
 	return (

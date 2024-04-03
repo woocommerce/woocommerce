@@ -4,6 +4,16 @@
 	background-position: 50% 0;
 }
 
+.launch-your-store-layout__content {
+	.spinner-container {
+		width: 100vw;
+		height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	}
+}
+
 .woocommerce-launch-store__congrats {
 	display: flex;
 	flex-direction: column;
