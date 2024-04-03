@@ -27,11 +27,11 @@
 		&.is-active {
 			border-color: var(--wp-admin-theme-color);
 		}
-		.awaiting-mod {
+		.woocommerce-badge-color-red {
 			display: inline-block;
 			vertical-align: top;
 			box-sizing: border-box;
-			margin: 1px 0 -1px 8px;
+			margin: 1px 0 -1px 10px;
 			padding: 0 5px;
 			min-width: 18px;
 			height: 18px;
