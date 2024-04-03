@@ -7,7 +7,6 @@ import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import classnames from 'classnames';
-import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
