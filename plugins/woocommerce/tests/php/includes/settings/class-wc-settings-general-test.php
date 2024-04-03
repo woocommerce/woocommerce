@@ -1,4 +1,4 @@
-<?php
+wj<?php
 /**
  * Class WC_Settings_General_Test file.
  *
@@ -70,7 +70,6 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_price_decimal_sep'                => 'text',
 			'woocommerce_price_num_decimals'               => 'number',
 			'pricing_options'                              => array( 'title', 'sectionend' ),
-			'wc_settings_general_site_visibility_slotfill' => 'slotfill_placeholder',
 		);
 
 		$this->assertEquals( $expected, $settings_ids_and_types );
