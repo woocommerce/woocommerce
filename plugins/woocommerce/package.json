@@ -103,7 +103,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
-						"tests/unit-tests/**/*.php"
+						"tests/legacy/unit-tests/**/*.php"
 					],
 					"testEnv": {
 						"start": "env:test"
