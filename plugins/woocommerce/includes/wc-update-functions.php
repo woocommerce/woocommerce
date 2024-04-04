@@ -2668,6 +2668,9 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
 }
 
+/**
+ * Add woocommerce_launch_your_store_tour_hidden.
+ */
 function wc_update_870_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_launch_your_store_tour_hidden', 'no');
+	update_option( 'woocommerce_launch_your_store_tour_hidden', 'no' );
 }
