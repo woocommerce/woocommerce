@@ -47,13 +47,24 @@ class LaunchYourStore {
 		);
 	}
 
+	/**
+	 * User must be either shop_manager or administrator.
+	 *
+	 * @return bool
+	 */
 	public function must_be_shop_manager_or_admin() {
-		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
+		// phpcs:ignore
+		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'administrator' ) ) {
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * Update woocommerce_coming_soon_banner_dismissed to 'yes'.
+	 *
+	 * @return bool|void
+	 */
 	public function dismiss_coming_soon_banner() {
 		$current_user_id = get_current_user_id();
 		// Abort if we don't have a user id for some reason.
