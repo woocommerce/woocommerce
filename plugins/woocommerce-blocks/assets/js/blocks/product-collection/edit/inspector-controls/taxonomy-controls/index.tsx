@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Taxonomy } from '@wordpress/core-data/src/entity-types';
+import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -53,7 +54,15 @@ function TaxonomyControls( {
 	}
 
 	return (
-		<>
+		<ToolsPanelItem
+			label={ __( 'Taxonomies', 'woocommerce' ) }
+			hasValue={ () =>
+				Object.values( taxQuery || {} ).some(
+					( terms ) => !! terms.length
+				)
+			}
+			onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
+		>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
 				const termIds = taxQuery?.[ taxonomy.slug ] || [];
 				const handleChange = ( newTermIds: number[] ) =>
@@ -65,22 +74,15 @@ function TaxonomyControls( {
 					} );
 
 				return (
-					<ToolsPanelItem
+					<TaxonomyItem
 						key={ taxonomy.slug }
-						label={ taxonomy.name }
-						hasValue={ () => termIds.length }
-						onDeselect={ () => handleChange( [] ) }
-					>
-						<TaxonomyItem
-							key={ taxonomy.slug }
-							taxonomy={ taxonomy }
-							termIds={ termIds }
-							onChange={ handleChange }
-						/>
-					</ToolsPanelItem>
+						taxonomy={ taxonomy }
+						termIds={ termIds }
+						onChange={ handleChange }
+					/>
 				);
 			} ) }
-		</>
+		</ToolsPanelItem>
 	);
 }
 
