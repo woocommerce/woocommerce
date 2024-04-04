@@ -17,16 +17,17 @@ import { QueryControlProps } from '../../types';
 const OnSaleControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
+	const deselectCallback = () => {
+		setQueryAttribute( { woocommerceOnSale: false } );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'On Sale', 'woocommerce' ) }
 			hasValue={ () => query.woocommerceOnSale === true }
 			isShownByDefault
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceOnSale: false,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<ToggleControl
 				label={ __( 'Show only products on sale', 'woocommerce' ) }
