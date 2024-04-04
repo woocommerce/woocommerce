@@ -215,6 +215,7 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 				{ subscription.is_shared &&
 					<StatusPopover
 						text={ __( 'Shared with you', 'woocommerce' ) }
+						level={ StatusLevel.Info }
 						explanation={
 							createInterpolateElement(
 								sprintf(
