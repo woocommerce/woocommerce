@@ -1,3 +1,9 @@
+---
+category_title: Testing
+category_slug: testing
+post_title: Testing
+---
+
 # Testing
 
 Properly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.
