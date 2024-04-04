@@ -15,7 +15,7 @@ import {
 	useRef,
 	forwardRef,
 } from '@wordpress/element';
-import { close } from '@wordpress/icons';
+import { close, Icon } from '@wordpress/icons';
 import {
 	useFocusReturn,
 	useFocusOnMount,
@@ -56,11 +56,12 @@ const CloseButtonPortal = ( {
 		? createPortal(
 				<Button
 					className="wc-block-components-drawer__close"
-					icon={ close }
 					onClick={ onClick }
-					label={ __( 'Close', 'woocommerce' ) }
-					showTooltip={ false }
-				/>,
+					removeTextWrap
+					name={ __( 'Close', 'woocommerce' ) }
+				>
+					<Icon icon={ close } />
+				</Button>,
 				closeButtonWrapper
 		  )
 		: null;
