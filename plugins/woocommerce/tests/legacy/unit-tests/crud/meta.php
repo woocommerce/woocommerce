@@ -108,7 +108,7 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$new_order = wc_get_order( $this->order_id );
 
 		// The original $order should have $original_meta_count + 1 item of meta - random.
-		$this->assertCount( $original_meta_count + 1, $order->get_meta_data(), 'Expected only 1 meta, found ' . print_r( $order->get_meta_data(), true ) );
+		$this->assertCount( $original_meta_count + 1, $order->get_meta_data() );
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $order->get_meta_data(), 'key' ) ) );
 
 		$expected_new_meta = OrderUtil::custom_orders_table_usage_is_enabled() ? 2 : 3;
