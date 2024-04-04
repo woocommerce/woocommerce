@@ -24,7 +24,10 @@ import {
 	renewUrl,
 	subscribeUrl,
 } from '../../../../utils/functions';
-import { MARKETPLACE_COLLABORATION_PATH } from '../../../constants';
+import {
+	MARKETPLACE_COLLABORATION_PATH,
+	MARKETPLACE_SHARING_PATH,
+} from '../../../constants';
 import { getAdminSetting } from '../../../../../utils/admin-settings';
 
 type StatusBadge = {
@@ -209,6 +212,35 @@ export function nameAndStatus( subscription: Subscription ): TableRow {
 						explanation={ statusBadge.explanation ?? '' }
 					/>
 				) }
+				{ subscription.is_shared &&
+					<StatusPopover
+						text={ __( 'Shared with you', 'woocommerce' ) }
+						explanation={
+							createInterpolateElement(
+								sprintf(
+									/* translators: %s is the email address of the user who shared the subscription. */
+									__( 'This subscription was shared by <email>%s</email>. <link>Learn more</link>.', 'woocommerce' ),
+									subscription.owner_email
+								),
+								{
+									email: (
+										<strong>
+											email
+										</strong>
+									),
+									link: (
+										<a
+											href={ MARKETPLACE_SHARING_PATH }
+											rel="nofollow noopener noreferrer"
+										>
+											Learn more
+										</a>
+									),
+								}
+							)
+						}
+					/>
+				}
 			</span>
 		</div>
 	);
