@@ -226,7 +226,7 @@ In additional any use of CDNs, cache settings, and themes used would also vary f
 
 ---
 
-### RequestHeaders
+### Request Headers
 
 Every HTTP requests tested includes the headers. 
 
