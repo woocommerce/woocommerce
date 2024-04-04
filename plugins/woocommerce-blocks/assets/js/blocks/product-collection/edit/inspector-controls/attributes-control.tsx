@@ -30,10 +30,16 @@ const AttributesControl = ( {
 		} )
 	);
 
+	const deselectCallback = () => {
+		setQueryAttribute( { woocommerceAttributes: [] } );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Product Attributes', 'woocommerce' ) }
 			hasValue={ () => !! woocommerceAttributes?.length }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<ProductAttributeTermControl
 				messages={ {
