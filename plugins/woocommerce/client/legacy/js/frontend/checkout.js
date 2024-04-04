@@ -560,8 +560,20 @@ jQuery( function( $ ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
+						// This is just a technical error fallback. i18_checkout_error is expected to be always defined and localized.
+						var errorMessage = errorThrown;
+
+						if (
+							typeof wc_checkout_params === 'object' &&
+							wc_checkout_params.hasOwnProperty( 'i18n_checkout_error' ) &&
+							typeof wc_checkout_params.i18n_checkout_error === 'string' &&
+							wc_checkout_params.i18n_checkout_error.trim() !== ''
+						) {
+							errorMessage = wc_checkout_params.i18n_checkout_error;
+						}
+
 						wc_checkout_form.submit_error(
-							'<div class="woocommerce-error">' + wc_checkout_params.i18n_checkout_error + '</div>'
+							'<div class="woocommerce-error">' + errorMessage + '</div>'
 						);
 					}
 				});
