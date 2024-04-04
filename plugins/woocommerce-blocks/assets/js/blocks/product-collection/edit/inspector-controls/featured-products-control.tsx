@@ -18,15 +18,18 @@ import { QueryControlProps } from '../../types';
 const FeaturedProductsControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			featured: false,
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Featured', 'woocommerce' ) }
 			hasValue={ () => query.featured === true }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					featured: false,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<BaseControl
 				id="product-collection-featured-products-control"
