@@ -51,7 +51,7 @@ class LocalPickupUtils {
 	public static function get_local_pickup_method_ids() {
 		$all_methods_supporting_local_pickup = array_reduce(
 			WC()->shipping()->get_shipping_methods(),
-			function( $methods, $method ) {
+			function ( $methods, $method ) {
 				if ( $method->supports( 'local-pickup' ) ) {
 					$methods[] = $method->id;
 				}
