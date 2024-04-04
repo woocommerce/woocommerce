@@ -28,15 +28,18 @@ const CreatedControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 	const { timeFrame } = query;
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			timeFrame: undefined,
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Created', 'woocommerce' ) }
 			hasValue={ () => timeFrame?.operator && timeFrame?.value }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					timeFrame: undefined,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<Flex direction="column" gap={ 3 }>
 				<FlexItem>
