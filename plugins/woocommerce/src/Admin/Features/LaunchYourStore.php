@@ -95,7 +95,12 @@ class LaunchYourStore {
 			return false;
 		}
 
-		if ( get_option( 'woocommerce_coming_soon_banner_dismissed' ) === 'yes' ) {
+		$current_user_id = get_current_user_id();
+		if ( ! $current_user_id ) {
+			return false;
+		}
+
+		if ( get_user_meta( $current_user_id, 'woocommerce_coming_soon_banner_dismissed', true ) === 'yes' ) {
 			return false;
 		}
 		// User must be an admin or editor.

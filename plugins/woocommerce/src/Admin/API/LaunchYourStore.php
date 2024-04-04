@@ -55,7 +55,14 @@ class LaunchYourStore {
 	}
 
 	public function dismiss_coming_soon_banner() {
-		update_option( 'woocommerce_coming_soon_banner_dismissed', 'yes' );
+		$current_user_id = get_current_user_id();
+		// Abort if we don't have a user id for some reason.
+		if ( ! $current_user_id ) {
+			return;
+		}
+
+		update_user_meta( $current_user_id, 'woocommerce_coming_soon_banner_dismissed', 'yes' );
+
 		return true;
 	}
 }
