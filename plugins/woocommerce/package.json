@@ -35,8 +35,11 @@
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
+		"lint:changes:branch:php": "pnpm lint:php:changes:branch",
 		"lint:lang:js": "eslint . --ext=js,ts",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
@@ -81,7 +84,7 @@
 		"build_step": "pnpm build:zip",
 		"ci": {
 			"lint": {
-				"command": "lint:php:changes:branch <baseRef>",
+				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
 					"includes/**/*.php",
