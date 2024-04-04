@@ -85,7 +85,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Duplicate a product and returns the duplicated product. The product status is set to draft.
+	 * Duplicate a product and returns the duplicated product.
+	 * The product status is set to "draft" and the name includes a "(copy)" at the end by default.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|WP_Error
