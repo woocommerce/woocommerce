@@ -140,7 +140,7 @@ $customer = new WC_Customer( $order->customer_id ); // Or new WC_Customer( 1234 
 $my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
 ```
 
-Instead, always reach to the latest data if you want to run some extra validation/data-moving:
+Instead, always access the latest data if you want to run some extra validation/data-moving:
 
 ```php
 $customer = wc()->customer // This will return the current customer with its session.
