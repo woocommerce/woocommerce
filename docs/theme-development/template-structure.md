@@ -9,7 +9,7 @@ visit [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/cour
 to learn about block theme development, and explore
 the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a
 new theme.  
-We are unable to provide support for customizations under our [Support Policy](http://woo.com/support-policy/). If you
+We are unable to provide support for customizations under our [Support Policy](http://woocommerce.com/support-policy/). If you
 need to further customize a snippet, or extend its functionality, we highly
 recommend [Codeable](https://codeable.io/?ref=z4Hnp), or a [Certified WooExpert](https://woo.com/experts/).
 

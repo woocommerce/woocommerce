@@ -24049,7 +24049,7 @@ index 33aece11c3..c25bf61119 100644
 - * Version: 2.0.5
 + * Version: 2.1.0
   * Author: WooCommerce
-  * Author URI: http://woo.com/
+  * Author URI: http://woocommerce.com/
 - * Requires at least: 4.4
 - * Tested up to: 5.8
 + * Requires at least: 5.8
