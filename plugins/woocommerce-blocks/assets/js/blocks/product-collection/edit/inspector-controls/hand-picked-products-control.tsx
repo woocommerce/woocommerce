@@ -115,15 +115,18 @@ const HandPickedProductsControl = ( {
 		return decodeEntities( product?.name ) || '';
 	};
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceHandPickedProducts: [],
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceHandPickedProducts: [],
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<FormTokenField
 				disabled={ ! productsMap.size }
