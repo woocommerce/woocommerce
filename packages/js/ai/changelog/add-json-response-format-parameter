@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add response format parameter for request completion method

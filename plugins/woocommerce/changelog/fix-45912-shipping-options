@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed an issue where orders could be placed when no shipping options were available
