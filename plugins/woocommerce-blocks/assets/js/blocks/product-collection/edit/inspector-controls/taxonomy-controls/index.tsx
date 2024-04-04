@@ -53,6 +53,8 @@ function TaxonomyControls( {
 		return null;
 	}
 
+	const deselectCallback = () => setQueryAttribute( { taxQuery: {} } );
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Taxonomies', 'woocommerce' ) }
@@ -61,7 +63,8 @@ function TaxonomyControls( {
 					( terms ) => !! terms.length
 				)
 			}
-			onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
 				const termIds = taxQuery?.[ taxonomy.slug ] || [];
