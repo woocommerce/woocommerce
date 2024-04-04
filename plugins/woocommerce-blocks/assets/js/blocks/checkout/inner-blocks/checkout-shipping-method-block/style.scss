@@ -18,18 +18,18 @@
 	gap: 4px;
 	padding: 16px 12px;
 	color: inherit;
-	background-color: transparent;
+	background-color: transparent !important;
 	border: none;
 	box-shadow: none !important;
 	outline: 1px solid $universal-border-light;
-	border-radius: $universal-border-radius;
+	border-radius: $universal-border-radius !important;
 	&.components-button:hover:not(:disabled),
 	&.components-button:focus:not(:disabled),
 	&:focus,
 	&:hover {
-		background-color: $universal-background;
+		background-color: $universal-background !important;
 		border-color: #d5d5d5;
-		color: #333;
+		color: #333 !important;
 	}
 	&.wc-block-checkout__shipping-method-option--selected {
 		outline: 1px solid $universal-border-strong;

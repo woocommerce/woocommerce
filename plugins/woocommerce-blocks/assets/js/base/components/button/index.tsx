@@ -31,6 +31,8 @@ export interface ButtonProps extends AriakitButtonProps {
 	 * Button variant
 	 */
 	variant?: 'text' | 'contained' | 'outlined';
+
+	removeTextWrap?: boolean;
 }
 
 /**
@@ -44,6 +46,9 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			showSpinner = false,
 			children,
 			variant = 'contained',
+			// To maintain backward compat we render a wrapper for button text by default,
+			// but you can opt in to removing it by setting removeTextWrap to true.
+			removeTextWrap = false,
 			...rest
 		} = props;
 
@@ -78,6 +83,14 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			);
 		}
 
+		const buttonChildren = removeTextWrap ? (
+			props.children
+		) : (
+			<span className="wc-block-components-button__text">
+				{ props.children }
+			</span>
+		);
+
 		return (
 			<AriakitButton
 				ref={ ref }
@@ -85,9 +98,7 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 				{ ...rest }
 			>
 				{ showSpinner && <Spinner /> }
-				<span className="wc-block-components-button__text">
-					{ children }
-				</span>
+				{ buttonChildren }
 			</AriakitButton>
 		);
 	}

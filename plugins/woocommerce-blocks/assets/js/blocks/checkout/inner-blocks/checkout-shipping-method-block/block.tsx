@@ -22,6 +22,7 @@ import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
 import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
+import Button from '../../../../base/components/button';
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
@@ -44,8 +45,9 @@ const LocalPickupSelector = ( {
 	multiple: boolean;
 } ) => {
 	return (
-		<Radio
+		<Button
 			value="pickup"
+			removeTextWrap={ true }
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -71,7 +73,7 @@ const LocalPickupSelector = ( {
 					maxRate={ rate.max }
 				/>
 			) }
-		</Radio>
+		</Button>
 	);
 };
 
@@ -128,8 +130,9 @@ const ShippingSelector = ( {
 		);
 
 	return (
-		<Radio
+		<Button
 			value="shipping"
+			removeTextWrap={ true }
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -149,7 +152,7 @@ const ShippingSelector = ( {
 				{ toggleText }
 			</span>
 			{ showPrice === true && Price }
-		</Radio>
+		</Button>
 	);
 };
 const Block = ( {
@@ -178,7 +181,7 @@ const Block = ( {
 	);
 
 	return (
-		<RadioGroup
+		<div
 			id="shipping-method"
 			className="wc-block-checkout__shipping-method-container"
 			label="options"
@@ -203,7 +206,7 @@ const Block = ( {
 				showIcon={ showIcon }
 				toggleText={ localPickupTextFromSettings }
 			/>
-		</RadioGroup>
+		</div>
 	);
 };
 
