@@ -91,27 +91,25 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function duplicate_product( $request ) {
-		$product = $this->prepare_object_for_database( $request );
+		$product_id = $request->get_param( 'id' );
+		$product    = wc_get_product( $product_id );
 
 		if ( ! $product ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		if ( 'simple' !== $product->get_type() ) {
+			$request['type'] = $product->get_type();
+		}
+
+		$updated_product    = $this->prepare_object_for_database( $request );
+		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
 			return new WP_Error( 'woocommerce_rest_product_duplicate_error', $duplicated_product->get_error_message(), array( 'status' => 400 ) );
 		}
 
-		/**
-		 * Filters the data of the duplicated product before it is returned by the REST API.
-		 *
-		 * @since 8.8.9
-		 * @param WP_Product $duplicated_product The duplicated product object.
-		 * @param WP_Product $product            The original product object.
-		 */
-		$duplicated_product = apply_filters( 'woocommerce_rest_duplicate_product_response', $duplicated_product, $product );
-		$response_data      = $duplicated_product->get_data();
+		$response_data = $duplicated_product->get_data();
 
 		return new WP_REST_Response( $response_data, 200 );
 	}
