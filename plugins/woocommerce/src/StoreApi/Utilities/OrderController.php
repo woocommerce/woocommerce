@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use \Exception;
+use Exception;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
@@ -79,7 +79,7 @@ class OrderController {
 		 */
 		add_filter(
 			'woocommerce_order_get_tax_location',
-			function( $location ) {
+			function ( $location ) {
 
 				if ( ! is_null( wc()->customer ) ) {
 
@@ -155,7 +155,7 @@ class OrderController {
 				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );
 			}
 			$customer->save();
-		};
+		}
 	}
 
 	/**
@@ -202,7 +202,7 @@ class OrderController {
 			try {
 				array_walk(
 					$validators,
-					function( $validator, $index, $params ) {
+					function ( $validator, $index, $params ) {
 						call_user_func_array( array( $this, $validator ), $params );
 					},
 					array( $coupon, $order )
@@ -397,7 +397,7 @@ class OrderController {
 		$address_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
 		$address_fields      = array_filter(
 			$fields,
-			function( $key ) use ( $address_fields_keys ) {
+			function ( $key ) use ( $address_fields_keys ) {
 				return in_array( $key, $address_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY

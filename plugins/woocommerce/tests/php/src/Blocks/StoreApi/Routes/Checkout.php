@@ -320,6 +320,7 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 	}
+
 	/**
 	 * Check that accounts are created on request.
 	 */
@@ -330,6 +331,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -384,6 +388,8 @@ class Checkout extends MockeryTestCase {
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -396,6 +402,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -447,6 +456,8 @@ class Checkout extends MockeryTestCase {
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -459,6 +470,9 @@ class Checkout extends MockeryTestCase {
 		WC()->session = new MockSessionHandler();
 		WC()->session->init();
 
+		// Save settings to reset them later.
+		$enable_guest_checkout = get_option( 'woocommerce_enable_guest_checkout' );
+		$enable_signup_login   = get_option( 'woocommerce_enable_signup_and_login_from_checkout' );
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
 
@@ -512,6 +526,8 @@ class Checkout extends MockeryTestCase {
 
 		// Return WC_Session to original state.
 		WC()->session = $old_session;
+		update_option( 'woocommerce_enable_guest_checkout', $enable_guest_checkout );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $enable_signup_login );
 	}
 
 	/**
@@ -561,7 +577,7 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Test checkout without valid shipping methods.
+	 * Test checkout without valid shipping methods .
 	 */
 	public function test_checkout_invalid_shipping_method() {
 		global $wpdb;
@@ -610,5 +626,95 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 400, $status, print_r( $data, true ) );
 		$this->assertEquals( 'woocommerce_rest_invalid_shipping_option', $data['code'], print_r( $data, true ) );
 		$this->assertEquals( 'Sorry, this order requires a shipping option.', $data['message'], print_r( $data, true ) );
+	}
+
+	/**
+	 * Ensures that taxes for shipping are skipped when its tax status is set to none.
+	 */
+	public function test_tax_calculation_with_untaxed_shipping() {
+		$default_customer_address = get_option( 'woocommerce_default_customer_address' );
+		$tax_based_on             = get_option( 'woocommerce_tax_based_on' );
+		$calc_taxes               = get_option( 'woocommerce_calc_taxes' );
+
+		get_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => 'bacs',
+				'extensions'       => array(
+					'extension_namespace' => array(
+						'extension_key' => true,
+					),
+				),
+			)
+		);
+
+		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$data                                     = $shipping_method->get_post_data();
+			$data['woocommerce_flat_rate_tax_status'] = 'none';
+			$shipping_method->set_post_data( $data );
+			$shipping_method->save();
+		}
+
+		// Ensures taxes are being skipped for shipping when its set to none.
+		$response = rest_get_server()->dispatch( $request );
+		$status   = $response->get_status();
+		$data     = $response->get_data();
+		$this->assertEquals( 200, $status, print_r( $data, true ) );
+
+		$order = wc_get_order( $data['order_id'] );
+		$this->assertEquals( 43.00, $order->get_total() );
+		$this->assertEquals( 3.00, $order->get_total_tax() );
+		$this->assertEquals( 0, $order->get_shipping_tax() );
+		$this->assertEquals( 10, $order->get_shipping_total() );
+
+		update_option( 'woocommerce_default_customer_address', $default_customer_address );
+		update_option( 'woocommerce_tax_based_on', $tax_based_on );
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		\WC_Tax::_delete_tax_rate( $tax );
 	}
 }
