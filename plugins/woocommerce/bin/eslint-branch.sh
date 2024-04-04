@@ -12,8 +12,6 @@ baseBranch=${1:-"trunk"}
 
 changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.js' '*ts' '*tsx')
 
-printf 'Changed files:\n%s' "$changedFiles"
-
 # Only complete this if changed files are detected.
 if [[ -z $changedFiles ]]; then
     echo "No changed files detected."
