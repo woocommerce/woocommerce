@@ -50,7 +50,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 							<MenuGroup className="woocommerce-lys-status-popover">
 								<MenuItem
 									href={ getAdminLink(
-										'admin.php?page=wc-settings'
+										'admin.php?page=wc-settings&tab=site-visibility'
 									) }
 								>
 									<Icon icon={ cog } size={ 24 } />
