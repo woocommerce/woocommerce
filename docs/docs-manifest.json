@@ -14,6 +14,23 @@
   ],
   "categories": [
     {
+      "category_slug": "beta-testing",
+      "category_title": "Beta Testing",
+      "posts": [
+        {
+          "category_title": "Beta Testing",
+          "category_slug": "Beta Testing",
+          "tags": "how-to",
+          "post_title": "Beta Testing New Features",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/beta-testing/beta-testing.md",
+          "hash": "1a78d319e7b1dfb6c43c1ca848ca001c0c7c48736e20d8a1813f7caaeaf78abc",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/beta-testing/beta-testing.md",
+          "id": "a54b0065664aabc84e01b564f1e055f339fac194"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nDiscover tutorials and guides for creating custom WooCommerce stores. This section is your toolkit for building advanced, modern online shops that meet the needs of merchants and customers alike.\n",
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
@@ -1218,5 +1235,5 @@
       "categories": []
     }
   ],
-  "hash": "1eaeab0efc6461662fd7b983b85dd17b2b803fcfe88e37b43ed6923589e88961"
+  "hash": "ac286b65bd2784775f7af6cf394f351b5af0e9381aa8f703a1d24432671452d4"
 }
