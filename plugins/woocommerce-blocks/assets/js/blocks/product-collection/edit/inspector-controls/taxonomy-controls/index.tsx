@@ -52,32 +52,36 @@ function TaxonomyControls( {
 		return null;
 	}
 
-	return taxonomies.map( ( taxonomy: Taxonomy ) => {
-		const termIds = taxQuery?.[ taxonomy.slug ] || [];
-		const handleChange = ( newTermIds: number[] ) =>
-			setQueryAttribute( {
-				taxQuery: {
-					...taxQuery,
-					[ taxonomy.slug ]: newTermIds,
-				},
-			} );
+	return (
+		<>
+			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
+				const termIds = taxQuery?.[ taxonomy.slug ] || [];
+				const handleChange = ( newTermIds: number[] ) =>
+					setQueryAttribute( {
+						taxQuery: {
+							...taxQuery,
+							[ taxonomy.slug ]: newTermIds,
+						},
+					} );
 
-		return (
-			<ToolsPanelItem
-				key={ taxonomy.slug }
-				label={ taxonomy.name }
-				hasValue={ () => termIds.length }
-				onDeselect={ () => handleChange( [] ) }
-			>
-				<TaxonomyItem
-					key={ taxonomy.slug }
-					taxonomy={ taxonomy }
-					termIds={ termIds }
-					onChange={ handleChange }
-				/>
-			</ToolsPanelItem>
-		);
-	} );
+				return (
+					<ToolsPanelItem
+						key={ taxonomy.slug }
+						label={ taxonomy.name }
+						hasValue={ () => termIds.length }
+						onDeselect={ () => handleChange( [] ) }
+					>
+						<TaxonomyItem
+							key={ taxonomy.slug }
+							taxonomy={ taxonomy }
+							termIds={ termIds }
+							onChange={ handleChange }
+						/>
+					</ToolsPanelItem>
+				);
+			} ) }
+		</>
+	);
 }
 
 export default TaxonomyControls;
