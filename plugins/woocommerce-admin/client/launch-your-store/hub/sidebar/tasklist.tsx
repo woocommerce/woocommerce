@@ -57,7 +57,7 @@ export const getLysTasklist = async () => {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 
 	/**
-	 * show tasks that fulfill all the following conditions:
+	 * Show tasks that fulfill all the following conditions:
 	 * 1. part of the whitelist of tasks to show in LYS
 	 * 2. either not completed or recently actioned
 	 */
