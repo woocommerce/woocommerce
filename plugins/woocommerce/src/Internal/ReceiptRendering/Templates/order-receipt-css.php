@@ -1,3 +1,4 @@
+<?php /* phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped */ ?>
 html { font-family: "Helvetica Neue", sans-serif; font-size: <?php echo $data['constants']['font_size']; ?>pt; }
 header { margin-top: <?php echo $data['constants']['margin']; ?>; }
 h1 { font-size: <?php echo $data['constants']['title_font_size']; ?>pt; font-weight: 500; text-align: center; }
