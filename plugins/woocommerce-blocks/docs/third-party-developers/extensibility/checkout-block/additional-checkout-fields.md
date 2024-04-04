@@ -95,7 +95,7 @@ For contact and additional fields, only one value is saved per field.
 
 ### Helper methods
 
-`CheckoutFields` provides a couple of functions to access values from both customers and orders, those are `get_field_from_customer` and `get_field_from_order`
+`CheckoutFields` provides a function to access values from both customers and orders, it's are `get_field_from_object`.
 
 To access a customer billing and/or shipping value:
 
@@ -106,8 +106,8 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 $field_id = 'my-plugin-namespace/my-field';
 $customer = wc()->customer; // Or new WC_Customer( $id )
 $checkout_fields = Package::container()->get( CheckoutFields::class );
-$my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
-$my_customer_shipping_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'shipping' );
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
+$my_customer_shipping_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'shipping' );
 ```
 
 To access an order field:
@@ -119,15 +119,15 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 $field_id = 'my-plugin-namespace/my-field';
 $order = wc_get_order( 1234 );
 $checkout_fields = Package::container()->get( CheckoutFields::class );
-$my_order_billing_field = $checkout_fields->get_field_from_order( $field_id, $order, 'billing' );
-$my_order_shipping_field = $checkout_fields->get_field_from_order( $field_id, $order, 'shipping' );
+$my_order_billing_field = $checkout_fields->get_field_from_object( $field_id, $order, 'billing' );
+$my_order_shipping_field = $checkout_fields->get_field_from_object( $field_id, $order, 'shipping' );
 ```
 
 After an order is placed, the data saved to the customer and the data saved to the order will be the same. Customers can change the values for _future_ orders, or from within their My Account page. If you're looking at a customer value at a specific point in time (i.e. when the order was placed), access it from the order object, if you're looking for the most up to date value regardless, access it from the customer object.
 
 #### Guest customers
 
-Values are still persisted to the guest customer session, as long as the session is valid, so is the value, this behaves the same as other guest values.
+When a guest customer places an order with additional fields, those fields will be saved to its session, so as long as the customer still has a valid session going, the values will always be there.
 
 #### Logged-in customers
 
@@ -137,14 +137,14 @@ If you're at a place order hook, doing this will return previous data (not the c
 
 ```php
 $customer = new WC_Customer( $order->customer_id ); // Or new WC_Customer( 1234 )
-$my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
 ```
 
 Instead, always access the latest data if you want to run some extra validation/data-moving:
 
 ```php
 $customer = wc()->customer // This will return the current customer with its session.
-$my_customer_billing_field = $checkout_fields->get_field_from_customer( $field_id, $customer, 'billing' );
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
 ```
 
 #### Accessing all fields
@@ -164,13 +164,20 @@ $order_additional_fields = $checkout_fields->get_all_fields_from_object( $order,
 
 This will return an array of all values, it will only include fields currently registered, if you want to include fields no longer registered, you can pass a third `true` parameter.
 
+```php
+
+$order = wc_get_order( 1234 );
+$checkout_fields = Package::container()->get( CheckoutFields::class );
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' ); // array( 'my-plugin-namespace/my-field' => 'my-value' );
+
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing', true  ); // array( 'my-plugin-namespace/my-field' => 'my-value', 'old-namespace/old-key' => 'old-value' );
+```
+
 ### Accessing values directly
 
 While not recommended, you can use the direct meta key to access certain values, this is useful for external engines or page/email builders who only provide access to meta values.
 
-Values are saved under a predefined prefix, this is needed to able to query fields without knowing which ID the field was registered under, for a field with key `'my-plugin-namespace/my-field'`, it's meta key will be:
-
-The following if it's an address field:
+Values are saved under a predefined prefix, this is needed to able to query fields without knowing which ID the field was registered under, for a field with key `'my-plugin-namespace/my-field'`, it's meta key will be the following if it's an address field:
 
 - `_wc_billing/my-plugin-namespace/my-field`
 - `_wc_shipping/my-plugin-namespace/my-field`
@@ -192,8 +199,20 @@ echo ( CheckoutFields::ADDITIONAL_FIELDS_PREFIX ); // _wc_additional/
 ```php
 CheckoutFields::get_group_name( "_wc_billing" ); // "billing"
 CheckoutFields::get_group_name( "_wc_billing/" ); // "billing"
+
 CheckoutFields::get_group_key( "shipping" ); // "_wc_shipping/"
 ```
+
+Use cases here would be to build the key name to access the meta directly:
+
+```php
+$key      = CheckoutFields::get_group_key( "additional" ) . 'my-plugin/is-opt-in';
+$opted_in = get_user_meta( 123, $key, true ) === "1" ? true : false;
+```
+
+#### Checkboxes values
+
+When accessing a checkbox values directly, it will either return `"1"` for true, `"0"` for false, or `""` if the value doesn't exist, only the provided functions will sanitize that to a boolean.
 
 ## Supported field types
 

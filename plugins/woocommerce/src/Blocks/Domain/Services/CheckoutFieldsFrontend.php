@@ -122,7 +122,7 @@ class CheckoutFieldsFrontend {
 
 		foreach ( $fields as $key => $field ) {
 			$value = $this->checkout_fields_controller->format_additional_field_value(
-				$this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type ),
+				$this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type ),
 				$field
 			);
 
@@ -160,8 +160,10 @@ class CheckoutFieldsFrontend {
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'contact' );
 
 		foreach ( $fields as $key => $field ) {
+			$field_key           = CheckoutFields::get_group_key( 'additional' ) . $key;
 			$form_field          = $field;
-			$form_field['value'] = $this->checkout_fields_controller->get_field_from_customer( $key, $customer, 'contact' );
+			$form_field['id']    = $field_key;
+			$form_field['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, 'contact' );
 
 			if ( 'select' === $field['type'] ) {
 				$form_field['options'] = array_column( $field['options'], 'label', 'value' );
@@ -189,12 +191,13 @@ class CheckoutFieldsFrontend {
 		$additional_fields = $this->checkout_fields_controller->get_fields_for_location( 'contact' );
 		$field_values      = array();
 
-		foreach ( $additional_fields as $key => $field ) {
-			if ( ! isset( $_POST[ $key ] ) ) {
+		foreach ( array_keys( $additional_fields ) as $key ) {
+			$post_key = CheckoutFields::get_group_key( 'additional' ) . $key;
+			if ( ! isset( $_POST[ $post_key ] ) ) {
 				continue;
 			}
 
-			$field_value = $this->checkout_fields_controller->sanitize_field( $key, wc_clean( wp_unslash( $_POST[ $key ] ) ) );
+			$field_value = $this->checkout_fields_controller->sanitize_field( $key, wc_clean( wp_unslash( $_POST[ $post_key ] ) ) );
 			$validation  = $this->checkout_fields_controller->validate_field( $key, $field_value );
 
 			if ( is_wp_error( $validation ) && $validation->has_errors() ) {
@@ -233,9 +236,9 @@ class CheckoutFieldsFrontend {
 		$fields   = $this->checkout_fields_controller->get_fields_for_location( 'address' );
 
 		foreach ( $fields as $key => $field ) {
-			$field_key                      = "/{$address_type}/{$key}";
+			$field_key                      = CheckoutFields::get_group_key( $address_type ) . $key;
 			$address[ $field_key ]          = $field;
-			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_customer( $key, $customer, $address_type );
+			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type );
 
 			if ( 'select' === $field['type'] ) {
 				$address[ $field_key ]['options'] = array_column( $field['options'], 'label', 'value' );
@@ -266,8 +269,8 @@ class CheckoutFieldsFrontend {
 		$additional_fields = $this->checkout_fields_controller->get_fields_for_location( 'address' );
 		$field_values      = array();
 
-		foreach ( $additional_fields as $key => $field ) {
-			$post_key = "/{$address_type}/{$key}";
+		foreach ( array_keys( $additional_fields ) as $key ) {
+			$post_key = CheckoutFields::get_group_key( $address_type ) . $key;
 
 			if ( ! isset( $_POST[ $post_key ] ) ) {
 				continue;

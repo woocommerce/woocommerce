@@ -969,42 +969,21 @@ class CheckoutFields {
 	/**
 	 * Returns a field value for a given object.
 	 *
-	 * @param string      $key The field key.
-	 * @param WC_Customer $customer The customer to get the field value for.
-	 * @param string      $group The group to get the field value for (shipping|billing|additional) and defaults to additional.
-	 *
-	 * @return mixed The field value.
-	 */
-	public function get_field_from_customer( string $key, WC_Customer $customer, string $group = 'additional' ) {
-		return $this->get_field_from_object( $key, $customer, $group );
-	}
-
-	/**
-	 * Returns a field value for a given order.
-	 *
-	 * @param string   $field The field key.
-	 * @param WC_Order $order The order to get the field value for.
-	 * @param string   $group The group to get the field value for (shipping|billing|additional) and defaults to additional.
-	 *
-	 * @return mixed The field value.
-	 */
-	public function get_field_from_order( string $field, WC_Order $order, string $group = 'additional' ) {
-		return $this->get_field_from_object( $field, $order, $group );
-	}
-
-	/**
-	 * Returns a field value for a given object.
-	 *
 	 * @param string               $key The field key.
-	 * @param WC_Customer|WC_Order $wc_object The customer to get the field value for.
+	 * @param WC_Customer|WC_Order $wc_object The customer or order to get the field value for.
 	 * @param string               $group The group to get the field value for (shipping|billing|additional).
 	 *
 	 * @return mixed The field value.
 	 */
-	private function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'additional' ) {
+	public function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'additional' ) {
 		$meta_key = self::get_group_key( $group ) . $key;
 
 		$meta_data = $wc_object->get_meta( $meta_key, true );
+
+		// We cast the value to a boolean if the field is a checkbox.
+		if ( $this->is_field( $key ) && 'checkbox' === $this->additional_fields[ $key ]['type'] ) {
+			return '1' === $meta_data;
+		}
 
 		if ( null === $meta_data ) {
 			return '';
@@ -1125,7 +1104,7 @@ class CheckoutFields {
 		$fields_with_values = [];
 
 		foreach ( $fields as $field_key => $field ) {
-			$value = $this->get_field_from_order( $field_key, $order, $group );
+			$value = $this->get_field_from_object( $field_key, $order, $group );
 
 			if ( '' === $value || null === $value ) {
 				continue;

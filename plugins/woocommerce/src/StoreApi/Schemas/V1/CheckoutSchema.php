@@ -268,6 +268,10 @@ class CheckoutSchema extends AbstractSchema {
 
 		$additional_field_schema = $this->get_additional_fields_schema();
 		foreach ( $fields as $key => $value ) {
+			if ( ! isset( $additional_field_schema[ $key ] ) ) {
+				unset( $fields[ $key ] );
+				continue;
+			}
 			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
 			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
 				$fields[ $key ] = (bool) $value;
