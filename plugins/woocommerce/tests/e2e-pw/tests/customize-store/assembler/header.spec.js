@@ -167,7 +167,7 @@ test.describe( 'Assembler -> headers', () => {
 
 			const expectedHeaderClass = extractHeaderClass( headerPickerClass );
 
-			const headerPattern = await editor.locator(
+			const headerPattern = editor.locator(
 				`header div.wc-blocks-header-pattern`
 			);
 
