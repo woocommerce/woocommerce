@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Skip capturing shipping taxes if the shipping method tax status is set to none.
