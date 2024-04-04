@@ -61,7 +61,7 @@ We also use existing options from WooCommerce Core or extensions like WooCommerc
 
 ## WooCommerce.com Connection
 
-During the profile wizard, merchants can select paid product type extensions (like WooCommerce Memberships) or a paid theme. To make installation easier and to finish purchasing, it is necessary to make a [WooCommerce.com connection](https://woo.com/document/managing-woocommerce-com-subscriptions/). We also prompt users to connect on the task list if they chose extensions in the profile wizard, but did not finish connecting.
+During the profile wizard, merchants can select paid product type extensions (like WooCommerce Memberships) or a paid theme. To make installation easier and to finish purchasing, it is necessary to make a [WooCommerce.com connection](https://woocommerce.com/document/managing-woocommerce-com-subscriptions/). We also prompt users to connect on the task list if they chose extensions in the profile wizard, but did not finish connecting.
 
 To make the connection from the new onboarding experience possible, we build our own connection endpoints [/wc-admin/plugins/request-wccom-connect](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L419-L476) and [/wc-admin/plugins/finish-wccom-connect](https://github.com/woocommerce/woocommerce/blob/feba6a8dcd55d4f5c7edc05478369c76df082293/plugins/woocommerce/src/Admin/API/Plugins.php#L478-L538).
 

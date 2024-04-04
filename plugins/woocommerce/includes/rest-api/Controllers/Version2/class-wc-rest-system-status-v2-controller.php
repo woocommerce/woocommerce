@@ -855,7 +855,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
 				$response = wp_safe_remote_get(
-					'https://woo.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 					)

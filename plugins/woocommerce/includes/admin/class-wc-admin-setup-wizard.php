@@ -350,7 +350,7 @@ class WC_Admin_Setup_Wizard {
 			<?php do_action( 'admin_head' ); ?>
 		</head>
 		<body class="wc-setup wp-core-ui <?php echo esc_attr( 'wc-setup-step__' . $this->step ); ?> <?php echo esc_attr( $wp_version_class ); ?>">
-		<h1 class="wc-logo"><a href="https://woo.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+		<h1 class="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 		<?php
 	}
 
@@ -443,7 +443,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 			<div class="wc-setup-step__new_onboarding-wrapper">
 				<p class="wc-setup-step__new_onboarding-welcome"><?php esc_html_e( 'Welcome to', 'woocommerce' ); ?></p>
-				<h1 class="wc-logo"><a href="https://woo.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
+				<h1 class="wc-logo"><a href="https://woocommerce.com/"><img src="<?php echo esc_url( WC()->plugin_url() ); ?>/assets/images/woocommerce_logo.png" alt="<?php esc_attr_e( 'WooCommerce', 'woocommerce' ); ?>" /></a></h1>
 				<p><?php esc_html_e( 'Get your store up and running more quickly with our new and improved setup experience', 'woocommerce' ); ?></p>
 
 				<form method="post" class="activate-new-onboarding">
@@ -630,7 +630,7 @@ class WC_Admin_Setup_Wizard {
 											),
 										)
 									),
-									'https://woo.com/usage-tracking/'
+									'https://woocommerce.com/usage-tracking/'
 								);
 							?>
 							</p>
@@ -1114,7 +1114,7 @@ class WC_Admin_Setup_Wizard {
 								)
 							),
 							esc_attr__( 'A live rate is the exact cost to ship an order, quoted directly from the shipping carrier.', 'woocommerce' ),
-							'https://woo.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/'
+							'https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/'
 						);
 						?>
 						</p>
@@ -1377,27 +1377,27 @@ class WC_Admin_Setup_Wizard {
 		$stripe_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Accept debit and credit cards in 135+ currencies, methods such as Alipay, and one-touch checkout with Apple Pay. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://woo.com/products/stripe/'
+			'https://woocommerce.com/products/stripe/'
 		) . '</p>';
 		$paypal_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Safe and secure payments using credit cards or your customer\'s PayPal account. <a href="%s" target="_blank">Learn more</a>.', 'woocommerce' ),
-			'https://woo.com/products/woocommerce-gateway-paypal-checkout/'
+			'https://woocommerce.com/products/woocommerce-gateway-paypal-checkout/'
 		) . '</p>';
 		$klarna_checkout_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Full checkout experience with pay now, pay later and slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woo.com/products/klarna-checkout/'
+			'https://woocommerce.com/products/klarna-checkout/'
 		) . '</p>';
 		$klarna_payments_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries. <a href="%s" target="_blank">Learn more about Klarna</a>.', 'woocommerce' ),
-			'https://woo.com/products/klarna-payments/ '
+			'https://woocommerce.com/products/klarna-payments/ '
 		) . '</p>';
 		$square_description = '<p>' . sprintf(
 			/* translators: %s: URL */
 			__( 'Securely accept credit and debit cards with one low rate, no surprise fees (custom rates available). Sell online and in store and track sales and inventory in one place. <a href="%s" target="_blank">Learn more about Square</a>.', 'woocommerce' ),
-			'https://woo.com/products/square/'
+			'https://woocommerce.com/products/square/'
 		) . '</p>';
 
 		return array(
@@ -1893,7 +1893,7 @@ class WC_Admin_Setup_Wizard {
 						'description' => sprintf(
 							/* translators: %s: theme name. */
 							__(
-								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woo.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
+								'Design your store with deep WooCommerce integration. If toggled on, we’ll install <a href="https://woocommerce.com/storefront/" target="_blank" rel="noopener noreferrer">Storefront</a>, and your current theme <em>%s</em> will be deactivated.',
 								'woocommerce'
 							),
 							$theme_name
@@ -2221,7 +2221,7 @@ class WC_Admin_Setup_Wizard {
 		WC_Admin_Notices::remove_notice( 'install', true );
 
 		$user_email = $this->get_current_user_email();
-		$docs_url   = 'https://woo.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
+		$docs_url   = 'https://woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text  = sprintf(
 			/* translators: %1$s: link to docs */
 			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),

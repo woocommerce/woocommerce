@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package WooCommerce
  */
 class WC_CLI_COM_Command {
-	const APPLICATION_PASSWORD_SECTION_URL = 'https://woo.com/my-account/#application-passwords';
+	const APPLICATION_PASSWORD_SECTION_URL = 'https://woocommerce.com/my-account/#application-passwords';
 
 	/**
 	 * Registers a commands for managing WooCommerce.com extensions.

@@ -37,7 +37,7 @@ class UnsecuredReportFiles {
 			sprintf(
 				/* translators: 1: opening analytics docs link tag. 2: closing link tag */
 				__( 'Files that may contain %1$sstore analytics%2$s reports were found in your uploads directory - we recommend assessing and deleting any such files.', 'woocommerce' ),
-				'<a href="https://woo.com/document/woocommerce-analytics/" target="_blank">',
+				'<a href="https://woocommerce.com/document/woocommerce-analytics/" target="_blank">',
 				'</a>'
 			)
 		);

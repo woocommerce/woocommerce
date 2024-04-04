@@ -8,7 +8,7 @@
 	<section>
 		<p><?php echo get_avatar( $auth_user_data['email'], 48 ); ?> <?php echo esc_html( $auth_user_data['email'] ); ?></p>
 		<div class="actions">
-			<a class="" href="https://woo.com/my-account/my-subscriptions/" target="_blank"><span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?></a>
+			<a class="" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'My Subscriptions', 'woocommerce' ); ?></a>
 			<a class="" href="<?php echo esc_url( $disconnect_url ); ?>"><span class="dashicons dashicons-no"></span> <?php esc_html_e( 'Disconnect', 'woocommerce' ); ?></a>
 		</div>
 	</section>

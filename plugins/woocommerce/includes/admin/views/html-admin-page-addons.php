@@ -131,12 +131,12 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</div>
 		<?php else : ?>
 			<?php /* translators: a url */ ?>
-			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woo.com/product-category/woocommerce-extensions/' ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woocommerce.com/product-category/woocommerce-extensions/' ); ?></p>
 		<?php endif; ?>
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>
 			<?php
-				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woo.com/products/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
+				$storefront_url = WC_Admin_Addons::add_in_app_purchase_url_params( 'https://woocommerce.com/products/storefront/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=wcaddon' );
 			?>
 			<div class="storefront">
 				<h2><?php esc_html_e( 'Looking for a WooCommerce theme?', 'woocommerce' ); ?></h2>

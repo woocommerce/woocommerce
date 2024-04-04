@@ -29,7 +29,7 @@ export default {
 
 export const External = () => {
 	return (
-		<Link href="https://woo.com" type="external" onClick={ logLinkClick }>
+		<Link href="https://woocommerce.com" type="external" onClick={ logLinkClick }>
 			WooCommerce.com
 		</Link>
 	);

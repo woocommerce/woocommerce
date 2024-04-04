@@ -38,7 +38,7 @@ We recognize that it can be time-consuming. This is why we try to avoid changing
 If you are looking for the default templates to use for updating, you want to use the latest version of WooCommerce. There are a few easy ways to get the templates:
 
 - Access the files via FTP if your current WooCommerce installation is up to date.
-- Find the templates per WooCommerce version in our [Template Structure documentation](https://woo.com/document/template-structure/).
+- Find the templates per WooCommerce version in our [Template Structure documentation](https://woocommerce.com/document/template-structure/).
 - Download the latest version from [the WordPress.org plugin page](https://wordpress.org/plugins/woocommerce/).
 - Download the latest release from [the GitHub repository](https://github.com/woocommerce/woocommerce/releases).
 

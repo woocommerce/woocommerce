@@ -58,7 +58,7 @@ class TrackingOptIn {
 		$note_content = sprintf(
 			$content_format,
 			'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) ) . '" target="_blank">',
-			'<a href="https://woo.com/usage-tracking?utm_medium=product" target="_blank">',
+			'<a href="https://woocommerce.com/usage-tracking?utm_medium=product" target="_blank">',
 			'</a>'
 		);
 

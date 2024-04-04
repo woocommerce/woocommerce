@@ -12,7 +12,7 @@ import { Link } from '..';
 describe( 'Link', () => {
 	it( 'should render `external` links', () => {
 		const { container } = render(
-			<Link href="https://woo.com" type="external">
+			<Link href="https://woocommerce.com" type="external">
 				WooCommerce.com
 			</Link>
 		);
@@ -20,7 +20,7 @@ describe( 'Link', () => {
 		expect( container.firstChild ).toMatchInlineSnapshot( `
 			<a
 			  data-link-type="external"
-			  href="https://woo.com"
+			  href="https://woocommerce.com"
 			>
 			  WooCommerce.com
 			</a>
@@ -84,7 +84,7 @@ describe( 'Link', () => {
 	it( 'should allow custom props to be passed through', () => {
 		const { container } = render(
 			<Link
-				href="https://woo.com"
+				href="https://woocommerce.com"
 				type="external"
 				className="foo"
 				target="bar"
@@ -97,7 +97,7 @@ describe( 'Link', () => {
 			<a
 			  class="foo"
 			  data-link-type="external"
-			  href="https://woo.com"
+			  href="https://woocommerce.com"
 			  target="bar"
 			>
 			  WooCommerce.com
@@ -114,7 +114,7 @@ describe( 'Link', () => {
 
 		render(
 			<Link
-				href="https://woo.com"
+				href="https://woocommerce.com"
 				type="external"
 				onClick={ clickHandler }
 			>

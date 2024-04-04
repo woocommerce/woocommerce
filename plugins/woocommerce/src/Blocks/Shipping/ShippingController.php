@@ -148,7 +148,7 @@ class ShippingController {
 					$settings[ $index ]['desc'] = sprintf(
 						/* translators: %s: URL to the documentation. */
 						__( 'Hide shipping costs until an address is entered (Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>)', 'woocommerce' ),
-						'https://woo.com/document/woocommerce-blocks-local-pickup/'
+						'https://woocommerce.com/document/woocommerce-blocks-local-pickup/'
 					);
 					$settings[ $index ]['disabled'] = true;
 					$settings[ $index ]['value']    = 'no';

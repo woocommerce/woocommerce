@@ -11,7 +11,7 @@ This is the client for WooCommerce + Gutenberg. This package serves as a space t
 
 ## Documentation
 
-To find out more about the blocks and how to use them, [check out the documentation on WooCommerce.com](https://woo.com/document/woocommerce-blocks/).
+To find out more about the blocks and how to use them, [check out the documentation on WooCommerce.com](https://woocommerce.com/document/woocommerce-blocks/).
 
 If you want to see what we're working on for future versions, or want to help out, read on.
 

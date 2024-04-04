@@ -128,27 +128,27 @@ You can switch between data stores freely to sync the data between the tables.
 
 -   If you select  **"WordPress Post Tables"**, the system will save the order data within  `_post`  and  `_postmeta`  tables. The order tables are not utilized in this scenario.
 
-![Select WordPress Post Tables](https://woo.com/wp-content/uploads/2023/10/image-18.png?w=650)
+![Select WordPress Post Tables](https://woocommerce.com/wp-content/uploads/2023/10/image-18.png?w=650)
 
 -   If you select  **"High-Performance Order Storage"**, the system will save the order data within the new WooCommerce order tables
 
-![Select High-Performance Order Storage](https://woo.com/wp-content/uploads/2023/10/image-19.png?w=650)
+![Select High-Performance Order Storage](https://woocommerce.com/wp-content/uploads/2023/10/image-19.png?w=650)
 
 -   If you select  **"WordPress Post Tables"** and **"Enable compatibility mode"**, the system will sync the order data between the posts/postmeta and the WooCommerce order tables.
 
-![Select WordPress Post Tables and Enable compatibility mode](https://woo.com/wp-content/uploads/2023/10/image-20.png?w=650)
+![Select WordPress Post Tables and Enable compatibility mode](https://woocommerce.com/wp-content/uploads/2023/10/image-20.png?w=650)
 
 
 ## Incompatible Plugins
 
 If you are using a plugin that is not compatible with High-Performance Order Storage, then the HPOS option will be disabled under  **WooCommerce > Settings > Advanced > Features**.
 
-![Incompatible plugin](https://woo.com/wp-content/uploads/2023/10/image-21.png?w=650)
+![Incompatible plugin](https://woocommerce.com/wp-content/uploads/2023/10/image-21.png?w=650)
 
 -   You can click on "**View and manage**" to review the list of incompatible plugins
 -   Or you can visit  `https://example.com/wp-admin/plugins.php?plugin_status=incompatible_with_feature&feature_id=custom_order_tables`  to review the list of incompatible plugins (please replace  `example.com`  with your site domain)
 
-![Plugins page](https://woo.com/wp-content/uploads/2023/10/image-22.png?w=650)
+![Plugins page](https://woocommerce.com/wp-content/uploads/2023/10/image-22.png?w=650)
 
 > **Note:** If you are using a third-party extension that isn't working properly with High-Performance Order Storage then please notify the developers of the extension and ask them to update their extension to add support for HPOS. It's up to the extension developers to add support for HPOS. We have [developer resources and documentation](https://developer.woo.com/2022/09/14/high-performance-order-storage-progress-report/)  available to help with their integration efforts.
 
@@ -159,7 +159,7 @@ If you encounter problems or if you need to continue working with plugins that a
 
 To do this, navigate to  **WooCommerce ▸ Settings ▸ Advanced ▸ Features**  and start by making sure that  **compatibility mode** is enabled. If it was not already enabled, you may find you need to wait for some time while order data is synchronized across data-stores.
 
-![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woo.com/wp-content/uploads/2023/10/hpos-feature-settings.png?w=650)
+![WooCommerce ▸ Settings ▸ Advanced ▸ Features Screen](https://woocommerce.com/wp-content/uploads/2023/10/hpos-feature-settings.png?w=650)
 
 Once synchronization has completed, you can select  **WordPress posts storage (legacy)**  as your preferred option. You can also disable compatibility mode at this point. Once you are ready to re-enable HPOS, simply follow the instructions posted at the  [start of this doc](https://github.com/woocommerce/woocommerce/blob/trunk/docs/high-performance-order-storage/#section-3). Finally, remember to save this page between changes!
 

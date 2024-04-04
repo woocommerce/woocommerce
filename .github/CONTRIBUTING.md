@@ -17,7 +17,7 @@ We use the `good first issue` label to mark issues that are suitable for new con
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
-If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woo.com/community-slack/).
+If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woocommerce.com/community-slack/).
 
 ## Getting started
 
@@ -53,6 +53,6 @@ If you are contributing code to our (Javascript-driven) Gutenberg blocks, please
 
 ## Feature Requests 🚀
 
-The best place to submit feature requests is over on our [dedicated feature request page](https://woo.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.
+The best place to submit feature requests is over on our [dedicated feature request page](https://woocommerce.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.
 
 Alternatively, if you wish to propose a straightforward technical enhancement that is unlikely to require much discussion, you can [open a new issue](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+) right here on GitHub and, for any that may require more discussion, consider syncing with us during office hours or publishing a thread on [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions).
