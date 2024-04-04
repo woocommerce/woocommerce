@@ -89,7 +89,7 @@ By default, this block will render as the last step in the Checkout form, howeve
 
 Additional fields are saved to individual meta keys in both the customer meta and order meta, you can access them using helper methods, or using the meta keys directly, we recommend using the helper methods, as they're less likely to change, can handle future migrations, and will support future enhancements (e.g. reading from different locations).
 
-For address fields, 2 values are saved, one for shipping, and one for billing. For most cases, the billing value will be the same as shipping, but customers might opt-in to insert 2 different values.
+For address fields, two values are saved: one for shipping, and one for billing. If the customer has selected 'Use same address for billing` then the values will be the same, but still saved independently of each other.
 
 For contact and additional fields, only one value is saved per field.
 
