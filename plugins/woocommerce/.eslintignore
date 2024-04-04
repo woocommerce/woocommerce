@@ -8,6 +8,6 @@
 /tests/performance/**
 /tests/api-core-tests/**
 /tests/e2e/**
+/tests/e2e-pw/**
 /tests/metrics/**
-/tests/**
 /vendor/**
