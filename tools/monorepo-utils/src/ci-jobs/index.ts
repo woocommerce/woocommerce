@@ -12,6 +12,7 @@ import { buildProjectGraph } from './lib/project-graph';
 import { getFileChanges } from './lib/file-changes';
 import { createJobsForChanges } from './lib/job-processing';
 import { isGithubCI } from '../core/environment';
+import { testTypes } from './lib/config';
 
 const program = new Command( 'ci-jobs' )
 	.description(
@@ -49,7 +50,13 @@ const program = new Command( 'ci-jobs' )
 
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
-			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
+
+			testTypes.forEach( ( type ) => {
+				setOutput(
+					`${ type }-test-jobs`,
+					JSON.stringify( jobs[ `${ type }Test` ] )
+				);
+			} );
 			return;
 		}
 
@@ -62,14 +69,16 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( 'No lint jobs to run.' );
 		}
 
-		if ( jobs.test.length > 0 ) {
-			Logger.notice( 'Test Jobs' );
-			for ( const job of jobs.test ) {
-				Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+		testTypes.forEach( ( type ) => {
+			if ( jobs[ `${ type }Test` ].length > 0 ) {
+				Logger.notice( `${ type } test Jobs` );
+				for ( const job of jobs[ `${ type }Test` ] ) {
+					Logger.notice( `-  ${ job.projectName } - ${ job.name }` );
+				}
+			} else {
+				Logger.notice( `No ${ type } test jobs to run.` );
 			}
-		} else {
-			Logger.notice( 'No test jobs to run.' );
-		}
+		} );
 	} );
 
 export default program;

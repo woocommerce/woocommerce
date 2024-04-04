@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: Fixes issue where saves would fail when certain extensions were installed.
