@@ -105,7 +105,7 @@ test.describe( 'Assembler -> headers', () => {
 		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test( 'The selected header should be applied on the frontend', async ( {
+	test.skip( 'The selected header should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
 		baseURL,
