@@ -5,9 +5,5 @@
 /bin/composer/**
 /client/**
 /includes/gateways/**
-/tests/performance/**
-/tests/api-core-tests/**
 /tests/e2e/**
-/tests/e2e-pw/**
-/tests/metrics/**
 /vendor/**
