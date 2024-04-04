@@ -162,9 +162,10 @@ class LegacyDataHandler {
 				throw new \Exception( esc_html( sprintf( __( '%d is not a valid order ID.', 'woocommerce' ), $order_id ) ) );
 			}
 
-		if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
-			// translators: %1 is an order ID.
-			throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
+			if ( ! $skip_checks && ! $this->is_order_newer_than_post( $order ) ) {
+				// translators: %1 is an order ID.
+				throw new \Exception( esc_html( sprintf( __( 'Data in posts table appears to be more recent than in HPOS tables. Compare order data with `wp wc hpos diff %1$d` and use `wp wc hpos backfill %1$d --from=posts --to=hpos` to fix.', 'woocommerce' ), $order_id ) ) );
+			}
 		}
 
 		// Delete all metadata.
