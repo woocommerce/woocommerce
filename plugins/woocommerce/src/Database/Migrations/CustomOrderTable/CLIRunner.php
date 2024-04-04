@@ -953,7 +953,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				break;
 			}
 
-			$failed_ids = array_diff( $failed_ids, $order_ids );
+			$order_ids = array_diff( $order_ids, $failed_ids ); // Do not reattempt IDs that have already failed.
 
 			foreach ( $order_ids as $order_id ) {
 				try {
