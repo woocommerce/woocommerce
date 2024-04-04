@@ -58,7 +58,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 							),
 							descriptions: {
 								desktop: __(
-									'Launch your store only when you’re ready to by switching between “Coming soon” and “Live” modes. Build excitement by creating a custom page visitors will see before you’re ready to go live. ',
+									'Launch your store only when you’re ready to by switching between “Coming soon” and “Live” modes. Build excitement by creating a custom page visitors will see before you’re ready to go live.',
 									'woocommerce'
 								),
 							},
