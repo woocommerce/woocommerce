@@ -11,39 +11,45 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	protected static $products = array();
 
 	/**
+	 * @var WC_Product_Variable
+	 */
+	protected static $variable_product = array();
+
+	/**
 	 * Create products for tests.
 	 *
 	 * @return void
 	 */
 	public static function wpSetUpBeforeClass() {
-		self::$products[] = WC_Helper_Product::create_simple_product(
+		self::$products[]       = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name' => 'Pancake',
 				'sku'  => 'pancake-1',
 			)
 		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
+		self::$products[]       = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name' => 'Waffle 1',
 				'sku'  => 'pancake-2',
 			)
 		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
+		self::$products[]       = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name' => 'French Toast',
 				'sku'  => 'waffle-2',
 			)
 		);
-		self::$products[] = WC_Helper_Product::create_simple_product(
+		self::$products[]       = WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name' => 'Waffle 3',
 				'sku'  => 'waffle-3',
 			)
 		);
+		self::$variable_product = WC_Helper_Product::create_variation_product();
 
 		foreach ( self::$products as $product ) {
 			$product->add_meta_data( 'test1', 'test1', true );
