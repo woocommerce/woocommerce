@@ -36,6 +36,12 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 const StockStatusControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceStockStatus: getDefaultStockStatuses(),
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Stock status', 'woocommerce' ) }
@@ -45,11 +51,8 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 					getDefaultStockStatuses()
 				)
 			}
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceStockStatus: getDefaultStockStatuses(),
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 			isShownByDefault
 		>
 			<FormTokenField
