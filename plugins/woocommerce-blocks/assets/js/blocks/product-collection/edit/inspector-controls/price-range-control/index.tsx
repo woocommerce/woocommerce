@@ -22,15 +22,18 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 
 	const value = query.priceRange;
 
+	const deselectCallback = () => {
+		setQueryAttribute( { priceRange: undefined } );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Price Range', 'woocommerce' ) }
 			hasValue={ () => {
 				return value?.min !== undefined || value?.max !== undefined;
 			} }
-			onDeselect={ () => {
-				setQueryAttribute( { priceRange: undefined } );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 			className="wc-block-product-price-range-control"
 		>
 			<BaseControl.VisualLabel>
