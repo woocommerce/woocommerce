@@ -12,7 +12,8 @@ import {
 import React from 'react';
 import classnames from 'classnames';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
-import { TaskListType, TaskType } from '@woocommerce/data';
+import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -29,6 +30,9 @@ export type SidebarMachineContext = {
 	tasklist?: TaskListType;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
+	launchStoreError?: {
+		message: string;
+	};
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
@@ -46,6 +50,17 @@ export type SidebarMachineEvents =
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
 } );
+
+const launchStoreAction = async () => {
+	const results = await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_coming_soon: 'no',
+		'launch-status': 'launched',
+	} );
+	if ( results.success ) {
+		return results;
+	}
+	throw new Error( JSON.stringify( results ) );
+};
 
 export const sidebarMachine = setup( {
 	types: {} as {
@@ -101,6 +116,7 @@ export const sidebarMachine = setup( {
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
+		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
 	},
 } ).createMachine( {
 	id: 'sidebar',
@@ -168,11 +184,20 @@ export const sidebarMachine = setup( {
 			initial: 'launching',
 			states: {
 				launching: {
-					tags: 'fullscreen',
-					entry: { type: 'showLoadingPage' },
-					on: {
-						LAUNCH_STORE_SUCCESS: {
+					invoke: {
+						src: 'updateLaunchStoreOptions',
+						onDone: {
 							target: '#storeLaunchSuccessful',
+						},
+						onError: {
+							actions: assign( {
+								launchStoreError: ( { event } ) => {
+									return {
+										message: JSON.stringify( event.error ), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+									};
+								},
+							} ),
+							target: '..launchYourStoreHub',
 						},
 					},
 				},

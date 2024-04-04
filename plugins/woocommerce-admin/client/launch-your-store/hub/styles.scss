@@ -228,6 +228,38 @@
 								button {
 									justify-content: center;
 								}
+
+								.components-spinner {
+									margin-bottom: 6px;
+								}
+
+								.launch-store-error-notice {
+									background: #fce2e4;
+									padding: $gap-small;
+									font-size: 13px;
+									font-style: normal;
+									font-weight: 400;
+									line-height: 24px;
+									color: $gray-900;
+									margin: 0;
+									margin-bottom: 16px;
+								
+									.components-notice__content {
+										margin: 0;
+									}
+								
+									.components-button {
+										padding: 0;
+										height: initial;
+										min-width: 24px;
+										min-height: 24px;
+
+										svg {
+											width: 16px;
+											fill: $gray-900;
+										}
+									}
+								}
 							}
 
 							.components-heading {
