@@ -14,6 +14,7 @@ export * as actions from './actions';
 export * as services from './services';
 export type events = { type: 'COMPLETE_SURVEY' };
 import { WhatsNext } from './WhatsNext';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 	const completeSurvey = () => {
@@ -40,7 +41,7 @@ export const LaunchYourStoreSuccess = ( props: MainContentComponentProps ) => {
 				hasCompleteSurvey={
 					props.context.congratsScreen.hasCompleteSurvey
 				}
-				isWooExpress={ false }
+				isWooExpress={ isWooExpress() }
 				completeSurvey={ completeSurvey }
 			>
 				<h2 className="woocommerce-launch-store__congrats-main-actions-title">
