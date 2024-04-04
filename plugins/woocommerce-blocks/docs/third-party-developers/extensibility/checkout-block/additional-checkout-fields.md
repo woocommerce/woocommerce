@@ -131,7 +131,7 @@ Values are still persisted to the guest customer session, as long as the session
 
 #### Logged-in customers
 
-For logged-in customers, the value is only persisted once they place an order, accessing a logged-in customer during the place order lifecycle will return null or stale data.
+For logged-in customers, the value is only persisted once they place an order. Accessing a logged-in customer object during the place order lifecycle will return null or stale data.
 
 If you're at a place order hook, doing this will return previous data (not the currently inserted one):
 
