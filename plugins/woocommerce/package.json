@@ -92,7 +92,8 @@
 					"src/**/*.php",
 					"templates/**/*.php",
 					"tests/php/**/*.php",
-					"tests/unit-tests/**/*.php"
+					"tests/unit-tests/**/*.php",
+					"tests/**/*.js"
 				]
 			},
 			"tests": [
