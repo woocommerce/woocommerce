@@ -558,7 +558,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'wccom_connected'                => array(
-							'description' => __( 'Is store connected to Woo.com?', 'woocommerce' ),
+							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,

@@ -1887,7 +1887,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 								'Allow usage of WooCommerce to be tracked',
 							type: 'checkbox',
 							default: 'no',
-							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woo.com/usage-tracking" target="_blank">Woo.com Usage Tracking Documentation</a>.',
+							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woo.com/usage-tracking" target="_blank">WooCommerce.com Usage Tracking Documentation</a>.',
 							value: 'no',
 						} ),
 					] )
@@ -1903,7 +1903,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						description: 'Display suggestions within WooCommerce',
 						type: 'checkbox',
 						default: 'yes',
-						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.',
+						tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
 						value: 'yes',
 					} ),
 				] )

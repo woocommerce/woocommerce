@@ -2224,7 +2224,7 @@ class WC_Admin_Setup_Wizard {
 		$docs_url   = 'https://woo.com/documentation/plugins/woocommerce/getting-started/?utm_source=setupwizard&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin';
 		$help_text  = sprintf(
 			/* translators: %1$s: link to docs */
-			__( 'Visit Woo.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
+			__( 'Visit WooCommerce.com to learn more about <a href="%1$s" target="_blank">getting started</a>.', 'woocommerce' ),
 			$docs_url
 		);
 		?>

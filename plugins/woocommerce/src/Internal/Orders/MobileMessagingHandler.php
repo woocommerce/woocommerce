@@ -182,7 +182,7 @@ class MobileMessagingHandler {
 	}
 
 	/**
-	 * Prepares array of parameters used by Woo.com for tracking.
+	 * Prepares array of parameters used by WooCommerce.com for tracking.
 	 *
 	 * @param string   $campaign name of the deep link campaign.
 	 * @param int|null $blog_id blog id of the current site.

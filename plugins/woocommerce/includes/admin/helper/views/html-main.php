@@ -21,9 +21,9 @@
 			<?php
 			printf(
 				wp_kses(
-					/* translators: Introduction to list of Woo.com extensions the merchant has subscriptions for. */
+					/* translators: Introduction to list of WooCommerce.com extensions the merchant has subscriptions for. */
 					__(
-						'Below is a list of extensions available on your Woo.com account. To receive extension updates please make sure the extension is installed, and its subscription activated and connected to your Woo.com account. Extensions can be activated from the <a href="%s">Plugins</a> screen.',
+						'Below is a list of extensions available on your WooCommerce.com account. To receive extension updates please make sure the extension is installed, and its subscription activated and connected to your WooCommerce.com account. Extensions can be activated from the <a href="%s">Plugins</a> screen.',
 						'woocommerce'
 					),
 					array(
@@ -190,7 +190,7 @@
 			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
-				<td colspan="3"><em><?php esc_html_e( 'Could not find any subscriptions on your Woo.com account', 'woocommerce' ); ?></td>
+				<td colspan="3"><em><?php esc_html_e( 'Could not find any subscriptions on your WooCommerce.com account', 'woocommerce' ); ?></td>
 			</tr>
 		<?php endif; ?>
 		</tbody>
@@ -198,7 +198,7 @@
 
 	<?php if ( ! empty( $no_subscriptions ) ) : ?>
 		<h2><?php esc_html_e( 'Installed Extensions without a Subscription', 'woocommerce' ); ?></h2>
-		<p>Below is a list of Woo.com products available on your site - but are either out-dated or do not have a valid subscription.</p>
+		<p>Below is a list of WooCommerce.com products available on your site - but are either out-dated or do not have a valid subscription.</p>
 
 		<table class="wp-list-table widefat fixed striped">
 			<?php /* Extensions without a subscription. */ ?>

@@ -457,7 +457,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'download_limit'     => 0,
 				'download_expiry'    => 0,
 				'product_url'        => 'https://woo.com/products/product-csv-import-suite/',
-				'button_text'        => 'Buy on Woo.com',
+				'button_text'        => 'Buy on WooCommerce.com',
 				'status'             => 'publish',
 				'raw_image_id'       => null,
 				'virtual'            => false,

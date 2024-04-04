@@ -44,7 +44,7 @@ class OnboardingSync {
 	}
 
 	/**
-	 * Send profile data to Woo.com.
+	 * Send profile data to WooCommerce.com.
 	 */
 	private function send_profile_data() {
 		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {

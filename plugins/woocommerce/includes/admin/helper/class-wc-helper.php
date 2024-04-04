@@ -616,14 +616,14 @@ class WC_Helper {
 
 			case 'helper-connected':
 				$notices[] = array(
-					'message' => __( 'You have successfully connected your store to Woo.com', 'woocommerce' ),
+					'message' => __( 'You have successfully connected your store to WooCommerce.com', 'woocommerce' ),
 					'type'    => 'updated',
 				);
 				break;
 
 			case 'helper-disconnected':
 				$notices[] = array(
-					'message' => __( 'You have successfully disconnected your store from Woo.com', 'woocommerce' ),
+					'message' => __( 'You have successfully disconnected your store from WooCommerce.com', 'woocommerce' ),
 					'type'    => 'updated',
 				);
 				break;
@@ -843,7 +843,7 @@ class WC_Helper {
 	}
 
 	/**
-	 * Return from Woo.com OAuth flow.
+	 * Return from WooCommerce.com OAuth flow.
 	 */
 	private static function _helper_auth_return() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -912,7 +912,7 @@ class WC_Helper {
 			WC_Tracker::send_tracking_data( true );
 		}
 
-		// If connecting through in-app purchase, redirects back to Woo.com
+		// If connecting through in-app purchase, redirects back to WooCommerce.com
 		// for product installation.
 		if ( ! empty( $_GET['wccom-install-url'] ) ) {
 			wp_redirect( wp_unslash( $_GET['wccom-install-url'] ) );
@@ -932,7 +932,7 @@ class WC_Helper {
 	}
 
 	/**
-	 * Disconnect from Woo.com, clear OAuth tokens.
+	 * Disconnect from WooCommerce.com, clear OAuth tokens.
 	 */
 	private static function _helper_auth_disconnect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'disconnect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

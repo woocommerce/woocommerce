@@ -26,7 +26,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"Power up your store by adding extra functionality with extensions or integrate your store with other software and services.<br/><br/>Here you'll find hundreds of trusted solutions for your store — all reviewed and approved by the Woo team.<br/><br/>You can also browse the Woo Marketplace at Woo.com.",
+							"Power up your store by adding extra functionality with extensions or integrate your store with other software and services.<br/><br/>Here you'll find hundreds of trusted solutions for your store — all reviewed and approved by the Woo team.<br/><br/>You can also browse the Woo Marketplace at WooCommerce.com.",
 							'woocommerce'
 						),
 						{
@@ -113,7 +113,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 				descriptions: {
 					desktop: createInterpolateElement(
 						__(
-							"All of your Woo Marketplace purchases can be found here, or on Woo.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! You're now ready to power up your store.",
+							"All of your Woo Marketplace purchases can be found here, or on WooCommerce.com.<br/><br/>Every purchase is backed by our <a1>30-day money-back guarantee</a1>, and includes <a2>email and live chat support</a2>.<br/><br/>That's it! You're now ready to power up your store.",
 							'woocommerce'
 						),
 						{

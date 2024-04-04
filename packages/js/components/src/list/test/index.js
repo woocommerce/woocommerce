@@ -16,7 +16,7 @@ describe( 'List', () => {
 			const clickHandler = jest.fn();
 			const listItems = [
 				{
-					title: 'Woo.com',
+					title: 'WooCommerce.com',
 					href: 'https://woo.com',
 				},
 				{
@@ -34,7 +34,7 @@ describe( 'List', () => {
 			const clickHandler = jest.fn();
 			const listItems = [
 				{
-					title: 'Woo.com',
+					title: 'WooCommerce.com',
 					href: 'https://woo.com',
 				},
 				{
@@ -65,7 +65,7 @@ describe( 'List', () => {
 					linkType: 'wc-admin',
 				},
 				{
-					title: 'Woo.com',
+					title: 'WooCommerce.com',
 					href: 'https://woo.com',
 					linkType: 'external',
 				},
@@ -86,7 +86,7 @@ describe( 'List', () => {
 					.dataset.linkType
 			).toBe( 'wc-admin' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Woo.com' } ).dataset
+				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } ).dataset
 					.linkType
 			).toBe( 'external' );
 			expect(
@@ -110,7 +110,7 @@ describe( 'List', () => {
 					listItemTag: 'marketing',
 				},
 				{
-					title: 'Woo.com',
+					title: 'WooCommerce.com',
 					href: 'https://woo.com',
 					linkType: 'external',
 					listItemTag: 'woo.com-site',
@@ -132,7 +132,7 @@ describe( 'List', () => {
 					.dataset.listItemTag
 			).toBe( 'marketing' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Woo.com' } ).dataset
+				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } ).dataset
 					.listItemTag
 			).toBe( 'woo.com-site' );
 			expect(

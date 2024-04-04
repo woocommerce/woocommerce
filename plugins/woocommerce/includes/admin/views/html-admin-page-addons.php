@@ -57,7 +57,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 				>
 					<?php
 					$count_html = WC_Helper_Updater::get_updates_count_html();
-					/* translators: %s: Woo.com Subscriptions tab count HTML. */
+					/* translators: %s: WooCommerce.com Subscriptions tab count HTML. */
 					echo ( wp_kses_post( sprintf( __( 'My Subscriptions %s', 'woocommerce' ), $count_html ) ) );
 					?>
 				</a>
@@ -131,7 +131,7 @@ $current_section_name = __( 'Browse Categories', 'woocommerce' );
 		</div>
 		<?php else : ?>
 			<?php /* translators: a url */ ?>
-			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on Woo.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woo.com/product-category/woocommerce-extensions/' ); ?></p>
+			<p><?php printf( wp_kses_post( __( 'Our catalog of WooCommerce Extensions can be found on WooCommerce.com here: <a href="%s">WooCommerce Extensions Catalog</a>', 'woocommerce' ) ), 'https://woo.com/product-category/woocommerce-extensions/' ); ?></p>
 		<?php endif; ?>
 
 		<?php if ( 'Storefront' !== $theme['Name'] && '_featured' !== $current_section ) : ?>

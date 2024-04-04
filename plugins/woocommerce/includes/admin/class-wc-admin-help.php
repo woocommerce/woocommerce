@@ -49,12 +49,12 @@ class WC_Admin_Help {
 					) . '</p>' .
 					'<p>' . sprintf(
 						/* translators: %s: Forum URL */
-						__( 'For further assistance with WooCommerce core, use the <a href="%1$s">community forum</a>. For help with premium extensions sold on Woo.com, <a href="%2$s">open a support request at Woo.com</a>.', 'woocommerce' ),
+						__( 'For further assistance with WooCommerce core, use the <a href="%1$s">community forum</a>. For help with premium extensions sold on WooCommerce.com, <a href="%2$s">open a support request at WooCommerce.com</a>.', 'woocommerce' ),
 						'https://wordpress.org/support/plugin/woocommerce',
 						'https://woo.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin'
 					) . '</p>' .
 					'<p>' . __( 'Before asking for help, we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woo.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'Woo.com support', 'woocommerce' ) . '</a></p>',
+					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woo.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'WooCommerce.com support', 'woocommerce' ) . '</a></p>',
 			)
 		);
 

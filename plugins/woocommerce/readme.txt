@@ -94,7 +94,7 @@ If you get stuck, you can ask for help in the [WooCommerce Support Forum](https:
 
 For assistance with paid extensions from the WooCommerce Marketplace: first, review our [self-service troubleshooting guide](https://woo.com/document/woocommerce-self-service-guide/). If the problem persists, kindly log a support ticket via [our helpdesk](https://woo.com/my-account/create-a-ticket/). Our dedicated Happiness Engineers aim to respond within 24 hours.
 
-= I’m having trouble logging in to Woo.com – what now? =
+= I’m having trouble logging in to WooCommerce.com – what now? =
 
 First, troubleshoot common login issues using this helpful [step-by-step guide](https://woo.com/document/log-into-woocommerce-com-with-wordpress-com/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing). Still not working? [Get in touch with us](https://woo.com/contact-us/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 

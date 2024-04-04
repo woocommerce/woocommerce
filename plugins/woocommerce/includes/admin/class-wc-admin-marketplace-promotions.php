@@ -248,7 +248,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * Adds a bubble to the menu item.
 	 *
 	 * @param array  $menu_items  Arrays representing items in nav menu.
-	 * @param ?array $promotion   Data about a promotion from the Woo.com API.
+	 * @param ?array $promotion   Data about a promotion from the WooCommerce.com API.
 	 *
 	 * @return array
 	 */
@@ -299,7 +299,7 @@ class WC_Admin_Marketplace_Promotions {
 	}
 }
 
-// Fetch list of promotions from Woo.com for WooCommerce admin UI.
+// Fetch list of promotions from WooCommerce.com for WooCommerce admin UI.
 if ( ! has_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ) ) ) {
 	add_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ), 11 );
 }

@@ -13,7 +13,7 @@ describe( 'Link', () => {
 	it( 'should render `external` links', () => {
 		const { container } = render(
 			<Link href="https://woo.com" type="external">
-				Woo.com
+				WooCommerce.com
 			</Link>
 		);
 
@@ -22,7 +22,7 @@ describe( 'Link', () => {
 			  data-link-type="external"
 			  href="https://woo.com"
 			>
-			  Woo.com
+			  WooCommerce.com
 			</a>
 		` );
 	} );
@@ -89,7 +89,7 @@ describe( 'Link', () => {
 				className="foo"
 				target="bar"
 			>
-				Woo.com
+				WooCommerce.com
 			</Link>
 		);
 
@@ -100,7 +100,7 @@ describe( 'Link', () => {
 			  href="https://woo.com"
 			  target="bar"
 			>
-			  Woo.com
+			  WooCommerce.com
 			</a>
 		` );
 	} );
@@ -118,11 +118,11 @@ describe( 'Link', () => {
 				type="external"
 				onClick={ clickHandler }
 			>
-				Woo.com
+				WooCommerce.com
 			</Link>
 		);
 
-		const testLink = screen.getByText( 'Woo.com' );
+		const testLink = screen.getByText( 'WooCommerce.com' );
 
 		fireEvent.click( testLink );
 

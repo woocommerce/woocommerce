@@ -43,7 +43,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
-			'woocommerce_com' => __( 'Woo.com', 'woocommerce' ),
+			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
 	}
 
@@ -343,12 +343,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the Woo.com section.
+	 * Get settings for the WooCommerce.com section.
 	 *
 	 * @return array
 	 */
 	protected function get_settings_for_woocommerce_com_section() {
-		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woo.com/usage-tracking', esc_html__( 'Woo.com Usage Tracking Documentation', 'woocommerce' ) );
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woo.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
 
 		$settings =
 			array(
@@ -382,7 +382,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Show Suggestions', 'woocommerce' ),
 					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
-					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from Woo.com. You will see a static list of extensions instead.', 'woocommerce' ),
+					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.', 'woocommerce' ),
 					'id'            => 'woocommerce_show_marketplace_suggestions',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',

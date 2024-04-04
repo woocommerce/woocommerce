@@ -49,7 +49,7 @@ class TrackingOptIn {
 			return;
 		}
 
-		/* translators: 1: open link to Woo.com settings, 2: open link to Woo.com tracking documentation, 3: close link tag. */
+		/* translators: 1: open link to WooCommerce.com settings, 2: open link to WooCommerce.com tracking documentation, 3: close link tag. */
 		$content_format = __(
 			'Gathering usage data allows us to improve WooCommerce. Your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. You can always visit the %1$sSettings%3$s and choose to stop sharing data. %2$sRead more%3$s about what data we collect.',
 			'woocommerce'

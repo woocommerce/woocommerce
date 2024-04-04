@@ -1015,7 +1015,7 @@ class WC_Admin_Addons {
 					wp_kses_post(
 						/* translators: a url */
 						__(
-							'To start growing your business, head over to <a href="%s">Woo.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
@@ -1547,7 +1547,7 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Make wp_safe_remote_get request to Woo.com endpoint.
+	 * Make wp_safe_remote_get request to WooCommerce.com endpoint.
 	 * Optionally pass user auth token, locale or country.
 	 *
 	 * @param string $url     URL to request.

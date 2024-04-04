@@ -16,7 +16,7 @@ export default function ActionsDropdownMenu( props: {
 } ) {
 	const controls = [
 		{
-			title: __( 'Manage on Woo.com', 'woocommerce' ),
+			title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
 			icon: <></>,
 			onClick: () => {
 				window.open(

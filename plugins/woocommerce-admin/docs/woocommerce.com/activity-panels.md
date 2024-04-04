@@ -18,7 +18,7 @@ On mobile devices, all of the panels get collapsed under the Woo logo.
 
 ![Inbox Activity Panel](images/activity-panels-inbox.png)
 
-This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, Woo.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day to day tasks of managing and optimizing a store.
+This Inbox Panel is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. It also displays insightful content that could help with the day to day tasks of managing and optimizing a store.
 
 ## Orders Panel
 
