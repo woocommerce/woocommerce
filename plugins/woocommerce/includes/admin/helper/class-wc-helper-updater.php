@@ -33,7 +33,7 @@ class WC_Helper_Updater {
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
 	public static function add_hook_for_modifying_update_notices() {
-		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
 	}
