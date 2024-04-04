@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { TourKit } from '@woocommerce/components';
+import { createInterpolateElement } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -57,9 +58,15 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 								'woocommerce'
 							),
 							descriptions: {
-								desktop: __(
-									'Launch your store only when you’re ready to by switching between “Coming soon” and “Live” modes. Build excitement by creating a custom page visitors will see before you’re ready to go live.',
-									'woocommerce'
+								desktop: createInterpolateElement(
+									__(
+										'Launch your store only when you’re ready to by switching between “Coming soon” and “Live” modes. Build excitement by creating a custom page visitors will see before you’re ready to go live. <link>Discover more</link>',
+										'woocommerce'
+									),
+									{
+										// eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid
+										link: <a href="#" target="_blank" />,
+									}
 								),
 							},
 						},
