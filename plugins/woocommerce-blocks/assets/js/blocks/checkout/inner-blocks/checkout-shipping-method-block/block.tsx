@@ -50,7 +50,7 @@ const LocalPickupSelector = ( {
 		<Button
 			role="radio"
 			value="pickup"
-			removeTextWrap={ true }
+			removeTextWrap
 			onClick={ onClick }
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
@@ -139,7 +139,7 @@ const ShippingSelector = ( {
 		<Button
 			role="radio"
 			onClick={ onClick }
-			removeTextWrap={ true }
+			removeTextWrap
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
