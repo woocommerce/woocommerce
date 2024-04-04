@@ -351,8 +351,8 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
-		$this->asset_data_registry->add( 'localPickupText', wc_clean( $pickup_location_settings['title'] ?? '' ) ?? __( 'Local Pickup', 'woocommerce' ), true );
+		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ), true );
+		$this->asset_data_registry->add( 'localPickupText', wc_clean( $pickup_location_settings['title'] ), true );
 
 		$is_block_editor = $this->is_block_editor();
 

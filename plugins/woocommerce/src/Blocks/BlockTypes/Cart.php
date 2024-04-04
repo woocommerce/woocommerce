@@ -248,7 +248,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones(), true );
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ), true );
+		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ), true );
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
