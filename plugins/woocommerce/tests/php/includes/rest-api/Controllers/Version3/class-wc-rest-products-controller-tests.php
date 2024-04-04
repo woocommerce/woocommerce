@@ -436,9 +436,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test the duplicate product endpoint with simple products.
 	 */
 	public function test_duplicate_simple_product() {
-		$product = self::$products[0];
-		$product->save();
-		$product_id = $product->get_id();
+		$product_id = self::$products[0]->get_id();
 
 		$request  = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
 		$response = $this->server->dispatch( $request );
@@ -446,11 +444,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response_data = $response->get_data();
 		$this->assertArrayHasKey( 'id', $response_data );
-		$this->assertNotEquals( $product_id, $response_data['id'] );
+		$this->assertNotEquals( self::$products[0], $response_data['id'] );
 
 		$duplicated_product = wc_get_product( $response_data['id'] );
-		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicated_product->get_name() );
-		$this->assertNotEquals( $product->get_sku(), $duplicated_product->get_sku() );
+		$this->assertEquals( self::$products[0]->get_name() . ' (Copy)', $duplicated_product->get_name() );
+		$this->assertNotEquals( self::$products[0]->get_sku(), $duplicated_product->get_sku() );
 		$this->assertEquals( 'draft', $duplicated_product->get_status() );
 	}
 
@@ -458,9 +456,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test the duplicate product endpoint with variable products.
 	 */
 	public function test_duplicate_variable_product() {
-		$product = self::$variable_product;
-		$product->save();
-		$product_id = $product->get_id();
+		$product_id = self::$variable_product->get_id();
 
 		$request  = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
 		$response = $this->server->dispatch( $request );
@@ -471,7 +467,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertNotEquals( $product_id, $response_data['id'] );
 
 		$duplicated_product = wc_get_product( $response_data['id'] );
-		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicated_product->get_name() );
+		$this->assertEquals( self::$variable_product->get_name() . ' (Copy)', $duplicated_product->get_name() );
 		$this->assertTrue( $duplicated_product->is_type( 'variable' ) );
 	}
 
@@ -479,9 +475,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test the duplicate product endpoint with extra args to also update the product.
 	 */
 	public function test_duplicate_product_with_extra_args() {
-		$product = self::$products[1];
-		$product->save();
-		$product_id = $product->get_id();
+		$product_id = self::$products[1]->get_id();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product_id . '/duplicate' );
 		$request->set_param( 'sku', 'new-sku' );
