@@ -34,8 +34,17 @@ export interface FormattedMonetaryAmountProps
 const currencyToNumberFormat = (
 	currency: FormattedMonetaryAmountProps[ 'currency' ]
 ) => {
+	const hasSimiliarSeparators =
+		currency?.thousandSeparator === currency?.decimalSeparator;
+	if ( hasSimiliarSeparators ) {
+		console.warn(
+			'Thousand separator and decimal separator are the same. This may cause formatting issues.'
+		);
+	}
 	return {
-		thousandSeparator: currency?.thousandSeparator,
+		thousandSeparator: hasSimiliarSeparators
+			? ''
+			: currency?.thousandSeparator,
 		decimalSeparator: currency?.decimalSeparator,
 		fixedDecimalScale: true,
 		prefix: currency?.prefix,
