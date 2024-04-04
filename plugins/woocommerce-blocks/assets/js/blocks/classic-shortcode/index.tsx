@@ -164,7 +164,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 			</Button>
 			<Button
 				variant="secondary"
-				href="https://woo.com/document/cart-checkout-blocks-status/"
+				href="woocommerce.com/document/cart-checkout-blocks-status/"
 				target="_blank"
 				tabIndex={ 0 }
 			>
@@ -202,7 +202,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 			a: (
 				// Suppress the warning as this <a> will be interpolated into the string with content.
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
-				<ExternalLink href="https://woo.com/document/cart-checkout-blocks-status/" />
+				<ExternalLink href="woocommerce.com/document/cart-checkout-blocks-status/" />
 			),
 		}
 	);

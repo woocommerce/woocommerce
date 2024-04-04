@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce Admin (Dashboard) Woo.com Extension Subscriptions Note Provider.
+ * WooCommerce Admin (Dashboard) WooCommerce.com Extension Subscriptions Note Provider.
  *
  * Adds notes to the merchant's inbox concerning Woo.com extension subscriptions.
  */
@@ -358,7 +358,7 @@ class WooSubscriptionsNotes {
 		$note->add_action(
 			'enable-autorenew',
 			__( 'Enable Autorenew', 'woocommerce' ),
-			'https://woo.com/my-account/my-subscriptions/?utm_medium=product'
+			'https://woocommerce.com/my-account/my-subscriptions/?utm_medium=product'
 		);
 		$note->set_content( $note_content );
 		$note->set_content_data( $note_content_data );

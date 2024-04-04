@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see https://woo.com/document/template-structure/
+ * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 3.5.0
  */
@@ -48,11 +48,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 
 	<?php endif; ?>
-	
+
 	<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
-	
+
 	<h3 id="order_review_heading"><?php esc_html_e( 'Your order', 'woocommerce' ); ?></h3>
-	
+
 	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 
 	<div id="order_review" class="woocommerce-checkout-review-order">

@@ -23,7 +23,7 @@ You can repeat the tests with both synchronization enabled and disabled.
 
 Remember that you can [toggle synchronization](https://woocommerce.com/document/high-performance-order-storage/#section-5) by going to **WooCommerce > Settings > Advanced > Features**, and toggling the “**Enable compatibility mode**” checkbox.
 
-![Toggle synchronization](https://woo.com/wp-content/uploads/2023/10/image-18.png)
+![Toggle synchronization](woocommerce.com/wp-content/uploads/2023/10/image-18.png)
 
 ### Review: Phase 1 Checklist**
 

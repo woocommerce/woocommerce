@@ -50,7 +50,7 @@ export const DiscoverTools = () => {
 					</div>
 					<Button
 						variant="tertiary"
-						href="https://woo.com/product-category/woocommerce-extensions/marketing-extensions/"
+						href="woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/"
 						onClick={ () => {
 							recordEvent( 'marketing_explore_more_extensions' );
 						} }

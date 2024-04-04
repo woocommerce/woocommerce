@@ -45,7 +45,7 @@ _Example usage in WC Blocks:_ Cart and Mini-Cart blocks (via the `useStoreCart()
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/dom-events.md)
 

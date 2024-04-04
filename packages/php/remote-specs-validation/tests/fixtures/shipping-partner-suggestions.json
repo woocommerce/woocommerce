@@ -5,46 +5,46 @@
 	"slug": "woocommerce-shipstation-integration",
 	"description": "Powerful yet easy-to-use solution:",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/shipstation-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/shipstation-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
 	  ]
 	},
 	"layout_row": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/shipstation-row.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/shipstation-row.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Print labels from Royal Mail, Parcel Force, DPD, and many more"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Shop for the best rates, in real-time"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Connect selling channels easily"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Advance automated workflows"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "30-days free trial"
 		}
 	  ]
@@ -82,20 +82,20 @@
 	"name": "Skydropx",
 	"slug": "skydropx-cotizador-y-envios",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/skydropx-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/skydropx-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
@@ -119,26 +119,26 @@
 	"slug": "",
 	"description": "",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/envia-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/envia-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
 	  ]
 	},
-	"learn_more_link": "https://woo.com/products/envia-shipping-and-fulfillment/",
+	"learn_more_link": "woocommerce.com/products/envia-shipping-and-fulfillment/",
 	"is_visible": [
 	  {
 		"type": "or",
@@ -186,51 +186,51 @@
 	"slug": "easyship-woocommerce-shipping-rates",
 	"description": "Simplified shipping with: ",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/easyship-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/easyship-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
 	  ]
 	},
 	"layout_row": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/easyship-row.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/easyship-row.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Highly discounted shipping rates"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Seamless order sync and label printing"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Branded tracking experience"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Built-in Tax & Duties paperwork"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Free Plan Available"
 		}
 	  ]
 	},
-	"learn_more_link": "https://woo.com/products/easyship-shipping-rates/",
+	"learn_more_link": "woocommerce.com/products/easyship-shipping-rates/",
 	"is_visible": [
 	  {
 		"type": "or",
@@ -269,46 +269,46 @@
 	"slug": "sendcloud-shipping",
 	"description": "All-in-one shipping tool:",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/sendcloud-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/sendcloud-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
 	  ]
 	},
 	"layout_row": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/sendcloud-row.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/sendcloud-row.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Print labels from 80+ carriers"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Process orders in just a few clicks"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Customize checkout options"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Self-service tracking & returns"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Start with a free plan"
 		}
 	  ]
@@ -372,46 +372,46 @@
 	"slug": "packlink-pro-shipping",
 	"description": "Optimize your full shipping process:",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/packlink-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/packlink-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/timer.svg",
 		  "title": "Save time",
 		  "description": "Automatically import order information to quickly print your labels."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Save money",
 		  "description": "Shop for the best shipping rates, and access pre-negotiated discounted rates."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/star.svg",
 		  "title": "Wow your shoppers",
 		  "description": "Keep your customers informed with tracking notifications."
 		}
 	  ]
 	},
 	"layout_row": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/packlink-row.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/packlink-row.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Automated, real-time order import"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Direct access to leading carriers"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Access competitive shipping prices"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Quickly bulk print labels"
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/check.svg",
 		  "description": "Free shipping platform"
 		}
 	  ]
@@ -455,26 +455,26 @@
 	"slug": "woocommerce-services",
 	"description": "Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.",
 	"layout_column": {
-	  "image": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/wcs-column.svg",
+	  "image": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/wcs-column.svg",
 	  "features": [
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/printer.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/printer.svg",
 		  "title": "Buy postage when you need it",
 		  "description": "No need to wonder where that stampbook went."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/paper.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/paper.svg",
 		  "title": "Print at home",
 		  "description": "Pick up an order, then just pay, print, package and post."
 		},
 		{
-		  "icon": "https://woo.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
+		  "icon": "woocommerce.com/wp-content/plugins/wccom-plugins/shipping-partner-suggestions/images/discount.svg",
 		  "title": "Discounted rates",
 		  "description": "Access discounted shipping rates with DHL and USPS."
 		}
 	  ]
 	},
-	"learn_more_link": "https://woo.com/products/shipping/",
+	"learn_more_link": "woocommerce.com/products/shipping/",
 	"is_visible": [
 	  {
 		"type": "or",

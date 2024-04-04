@@ -22,7 +22,7 @@ const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 const LearnMore = () => (
 	<Button
-		href="https://woo.com/document/setting-up-taxes-in-woocommerce/"
+		href="woocommerce.com/document/setting-up-taxes-in-woocommerce/"
 		target="_blank"
 	>
 		{ __( 'Learn more', 'woocommerce' ) }

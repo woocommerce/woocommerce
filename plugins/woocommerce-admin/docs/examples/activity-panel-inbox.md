@@ -52,10 +52,10 @@ Here’s a short example plugin that adds a new activity panel inbox note on plu
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin One
- * Plugin URI: https://woo.com/
+ * Plugin URI: woocommerce.com/
  * Description: An example plugin.
  * Author: Automattic
- * Author URI: https://woo.com/
+ * Author URI: woocommerce.com/
  * Text Domain: wapi-example-one
  * Version: 1.0.1
  */
@@ -158,10 +158,10 @@ Here’s a short example plugin that updates an activity panel inbox note:
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin Two
- * Plugin URI: https://woo.com/
+ * Plugin URI: woocommerce.com/
  * Description: An example plugin.
  * Author: Automattic
- * Author URI: https://woo.com/
+ * Author URI: woocommerce.com/
  * Text Domain: wapi-example-plugin-two
  * Version: 1.0.0
  */

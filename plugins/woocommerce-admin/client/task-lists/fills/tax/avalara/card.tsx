@@ -63,7 +63,7 @@ export const Card: React.FC< TaxChildProps > = ( { task } ) => {
 
 				window.open(
 					new URL(
-						'https://woo.com/products/woocommerce-avatax/'
+						'woocommerce.com/products/woocommerce-avatax/'
 					).toString(),
 					'_blank'
 				);

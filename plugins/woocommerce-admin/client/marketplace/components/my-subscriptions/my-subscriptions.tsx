@@ -39,7 +39,7 @@ export default function MySubscriptions(): JSX.Element {
 		{
 			a: (
 				<a
-					href="https://woo.com/my-account/my-subscriptions"
+					href="woocommerce.com/my-account/my-subscriptions"
 					target="_blank"
 					rel="nofollow noopener noreferrer"
 				>

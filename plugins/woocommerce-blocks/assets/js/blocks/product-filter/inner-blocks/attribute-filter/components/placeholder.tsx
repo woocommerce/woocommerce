@@ -46,7 +46,7 @@ export const NoAttributesPlaceholder = () => (
 		<Button
 			className="wc-block-attribute-filter__read_more_button"
 			variant="tertiary"
-			href="https://woo.com/document/managing-product-taxonomies/"
+			href="woocommerce.com/document/managing-product-taxonomies/"
 			target="_blank"
 		>
 			{ __( 'Learn more', 'woocommerce' ) }

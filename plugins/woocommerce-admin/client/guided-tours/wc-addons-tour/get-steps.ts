@@ -120,7 +120,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 							a1: createElement(
 								'a',
 								{
-									href: 'https://woo.com/refund-policy/',
+									href: 'woocommerce.com/refund-policy/',
 									'aria-label': __(
 										'Refund policy',
 										'woocommerce'
@@ -134,7 +134,7 @@ export const getSteps = (): TourKitTypes.WooStep[] => {
 							a2: createElement(
 								'a',
 								{
-									href: 'https://woo.com/my-account/create-a-ticket/',
+									href: 'woocommerce.com/my-account/create-a-ticket/',
 									'aria-label': __(
 										'Contact support',
 										'woocommerce'

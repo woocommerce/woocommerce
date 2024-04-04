@@ -2,7 +2,7 @@
 /**
  * Marketing Specs Handler
  *
- * Fetches the specifications for the marketing feature from Woo.com API.
+ * Fetches the specifications for the marketing feature from WooCommerce.com API.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Marketing;

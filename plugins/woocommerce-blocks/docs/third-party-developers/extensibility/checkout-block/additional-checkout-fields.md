@@ -38,7 +38,7 @@ A common use-case for developers and merchants is to add a new field to the Chec
 
 This document will outline the steps an extension should take to register some additional checkout fields.
 
-> [!NOTE]  
+> [!NOTE]
 > Additional Checkout fields is still in the testing phases, use it to test the API and leave feedback in this [public discussion.](https://github.com/woocommerce/woocommerce/discussions/42995)
 
 ## Available field locations
@@ -545,7 +545,7 @@ add_action(
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&projects=&template=suggestion-for-documentation-improvement-correction.md&title=%5BDOC-BUG%5D%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
 

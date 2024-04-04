@@ -28,7 +28,7 @@ describe( 'Proceed to checkout block', () => {
 	it( 'allows the link to be filtered', () => {
 		registerCheckoutFilters( 'test-extension', {
 			proceedToCheckoutButtonLink: () => {
-				return 'https://woo.com';
+				return 'woocommerce.com';
 			},
 		} );
 		render(
@@ -36,7 +36,7 @@ describe( 'Proceed to checkout block', () => {
 		);
 		const button = screen.getByText( 'Proceed to Checkout' );
 		const link = button.closest( 'a' );
-		expect( link?.href ).toBe( 'https://woo.com/' );
+		expect( link?.href ).toBe( 'woocommerce.com/' );
 	} );
 	it( 'does not allow incorrect types to be applied to either button label or button link', () => {
 		registerCheckoutFilters( 'test-extension', {

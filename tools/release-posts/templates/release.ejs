@@ -12,13 +12,13 @@
 
 <!-- wp:list -->
 <ul>
-  <% for ( const packageName in contributors ) { %>    
+  <% for ( const packageName in contributors ) { %>
     <% const {org, repo, contributors: packageContributors, totalCommits, baseRef, headRef} = contributors[packageName] %>
     <% if ( packageContributors ) { %>
       <li>
         <a target="_blank" href="https://github.com/<%= org %>/<%= repo %>/compare/<%= baseRef %>...<%= headRef %>">
           <%= totalCommits %> commits from <%= packageContributors.length %> contributors
-        </a> 
+        </a>
         in <%= packageName %>.
       </li>
     <% } %>
@@ -28,8 +28,8 @@
 
 <!-- wp:paragraph -->
 <p>
-  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating. 
-  You can check out <a href="https://woo.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
+  As always, we recommend creating a backup of your site and making sure that your theme and any other plugins are compatible before updating.
+  You can check out <a href="woocommerce.com/document/how-to-update-woocommerce/" target="_blank">this update guide</a> for more information.
 </p>
 <!-- /wp:paragraph -->
 
@@ -43,7 +43,7 @@
 
 <!-- wp:paragraph -->
 <p>
-  These are just some of the changes that are included in WooCommerce <%= displayVersion %>. 
+  These are just some of the changes that are included in WooCommerce <%= displayVersion %>.
   You can find the complete changelog for this release in the <a href="https://github.com/woocommerce/woocommerce/blob/release/<%= displayVersion %>/changelog.txt" target="_blank">changelog.txt file</a>.
 </p>
 <!-- /wp:paragraph -->

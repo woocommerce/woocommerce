@@ -25,7 +25,7 @@ Following is the structure of the JSON feed, including the different rules that 
 	"type": "info",
 	"status": "unactioned",
 	"is_snoozable": 0,
-	"source": "woo.com",
+	"source": "woocommerce.com",
 	"locales": [
 		<Locale>,
 		...

@@ -42,7 +42,7 @@ For stores with Stock Management enabled, the Stock panel will be displayed.
 
 The Stock Panel will show Products that are either Low in Stock or Out of stock.
 
-"Low in Stock" status is determined by a combination of the store setting and individual product settings. Consult the [Managing Products](https://woo.com/document/managing-products/#inventory-tab) documentation to learn more about managing product stock settings.
+"Low in Stock" status is determined by a combination of the store setting and individual product settings. Consult the [Managing Products](woocommerce.com/document/managing-products/#inventory-tab) documentation to learn more about managing product stock settings.
  
 ![Updating Stock from Activity Panel](images/activity-panels-stock-update.png)
 

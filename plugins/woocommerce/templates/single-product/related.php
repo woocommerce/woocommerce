@@ -10,7 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see         https://woo.com/document/template-structure/
+ * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
  * @version     3.9.0
  */
@@ -30,7 +30,7 @@ if ( $related_products ) : ?>
 			?>
 			<h2><?php echo esc_html( $heading ); ?></h2>
 		<?php endif; ?>
-		
+
 		<?php woocommerce_product_loop_start(); ?>
 
 			<?php foreach ( $related_products as $related_product ) : ?>

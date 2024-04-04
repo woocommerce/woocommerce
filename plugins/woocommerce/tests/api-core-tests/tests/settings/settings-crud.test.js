@@ -1011,7 +1011,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						id: 'woocommerce_file_download_method',
 						label: 'File download method',
 						description:
-							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://woo.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
+							"If you are using X-Accel-Redirect download method along with NGINX server, make sure that you have applied settings as described in <a href='https://woocommerce.com/document/digital-downloadable-product-handling#nginx-setting'>Digital/Downloadable Product Handling</a> guide.",
 						type: 'select',
 						default: 'force',
 						options: {
@@ -1887,7 +1887,7 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 								'Allow usage of WooCommerce to be tracked',
 							type: 'checkbox',
 							default: 'no',
-							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woo.com/usage-tracking" target="_blank">Woo.com Usage Tracking Documentation</a>.',
+							tip: 'To opt out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: <a href="https://woocommerce.com/usage-tracking" target="_blank">Woo.com Usage Tracking Documentation</a>.',
 							value: 'no',
 						} ),
 					] )
@@ -2103,9 +2103,9 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 							'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
 						type: 'textarea',
 						default:
-							'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
+							'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
 						tip: 'Text to appear below the main email content. Available placeholders: <code>{site_title}&lt;/code&gt;, &lt;code&gt;{site_address}&lt;/code&gt;, &lt;code&gt;{site_url}&lt;/code&gt;, &lt;code&gt;{order_date}&lt;/code&gt;, &lt;code&gt;{order_number}</code>',
-						value: 'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.',
+						value: 'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.',
 					} ),
 				] )
 			);

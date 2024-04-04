@@ -316,16 +316,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://woo.com/storefront/';
+			$url         = 'https://woocommerce.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
@@ -1019,7 +1019,7 @@ class WC_Admin_Addons {
 							'woocommerce'
 						)
 					),
-					'https://woo.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
 				);
 				?>
 			</p>

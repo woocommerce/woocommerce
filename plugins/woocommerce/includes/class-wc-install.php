@@ -2123,14 +2123,14 @@ $hpos_table_schema;
 		 *
 		 * @since 2.7.0
 		 */
-		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woo.com/documentation/plugins/woocommerce/' );
+		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woocommerce.com/documentation/plugins/woocommerce/' );
 
 		/**
 		 * The WooCommerce API documentation URL.
 		 *
 		 * @since 2.2.0
 		 */
-		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woo.com/wc-apidocs/' );
+		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woocommerce.com/wc-apidocs/' );
 
 		/**
 		 * The community WooCommerce support URL.
@@ -2144,7 +2144,7 @@ $hpos_table_schema;
 		 *
 		 * @since
 		 */
-		$support_url = apply_filters( 'woocommerce_support_url', 'https://woo.com/my-account/create-a-ticket/' );
+		$support_url = apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' );
 
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( $docs_url ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',

@@ -31,4 +31,4 @@ In extensions:
 - Use standard punctuation and avoid excessive exclamation marks.
 - Use American English.
 
-For more, read our [Grammar, Punctuation, and Capitalization guide](https://woo.com/document/grammar-punctuation-style-guide/).
+For more, read our [Grammar, Punctuation, and Capitalization guide](woocommerce.com/document/grammar-punctuation-style-guide/).

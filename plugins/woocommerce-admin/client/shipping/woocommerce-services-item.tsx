@@ -66,7 +66,7 @@ const WooCommerceServicesItem: React.FC< {
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woo.com/woocommerce-shipping/">
+					<ExternalLink href="woocommerce.com/woocommerce-shipping/">
 						{ __( 'Learn more', 'woocommerce' ) }
 					</ExternalLink>
 				</span>

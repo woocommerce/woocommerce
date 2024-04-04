@@ -135,7 +135,7 @@
 					</td>
 					<td class="wp-list-table__ext-actions">
 						<?php if ( ! $subscription['active'] && $subscription['maxed'] ) : ?>
-							<a class="button" href="https://woo.com/my-account/my-subscriptions/" target="_blank"><?php esc_html_e( 'Upgrade', 'woocommerce' ); ?></a>
+							<a class="button" href="https://woocommerce.com/my-account/my-subscriptions/" target="_blank"><?php esc_html_e( 'Upgrade', 'woocommerce' ); ?></a>
 						<?php elseif ( ! $subscription['local']['installed'] && ! $subscription['expired'] ) : ?>
 							<a class="button <?php echo empty( $subscription['download_primary'] ) ? 'button-secondary' : ''; ?>" href="<?php echo esc_url( $subscription['download_url'] ); ?>" target="_blank"><?php esc_html_e( 'Download', 'woocommerce' ); ?></a>
 						<?php elseif ( $subscription['active'] ) : ?>

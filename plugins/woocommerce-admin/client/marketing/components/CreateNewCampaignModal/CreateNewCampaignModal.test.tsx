@@ -29,7 +29,7 @@ jest.mock( '~/marketing/hooks', () => ( {
 
 const google = {
 	id: 'google-ads',
-	icon: 'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+	icon: 'woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
 	name: 'Google Ads',
 	description:
 		'Boost your product listings with a campaign that is automatically optimized to meet your goals.',
@@ -43,9 +43,9 @@ const pinterest = {
 	title: 'Pinterest for WooCommerce',
 	description:
 		'Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.',
-	url: 'https://woo.com/products/pinterest-for-woocommerce/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
+	url: 'woocommerce.com/products/pinterest-for-woocommerce/?utm_source=marketingtab&utm_medium=product&utm_campaign=wcaddons',
 	direct_install: true,
-	icon: 'https://woo.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/pinterest.svg',
+	icon: 'woocommerce.com/wp-content/plugins/wccom-plugins/marketing-tab-rest-api/icons/pinterest.svg',
 	product: 'pinterest-for-woocommerce',
 	plugin: 'pinterest-for-woocommerce/pinterest-for-woocommerce.php',
 	categories: [ 'marketing' ],

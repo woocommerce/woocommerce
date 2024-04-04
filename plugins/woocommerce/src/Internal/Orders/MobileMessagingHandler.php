@@ -106,7 +106,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_payments', $blog_id, $domain )
 			),
-			'https://woo.com/mobile/payments'
+			'https://woocommerce.com/mobile/payments'
 		);
 
 		return sprintf(
@@ -138,7 +138,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_orders_details', $blog_id, $domain )
 			),
-			'https://woo.com/mobile/orders/details'
+			'https://woocommerce.com/mobile/orders/details'
 		);
 
 		return sprintf(
@@ -168,7 +168,7 @@ class MobileMessagingHandler {
 				),
 				self::prepare_utm_parameters( 'deeplinks_promote_app', $blog_id, $domain )
 			),
-			'https://woo.com/mobile'
+			'https://woocommerce.com/mobile'
 		);
 		return sprintf(
 			/* translators: 1: opening link tag 2: closing link tag. */

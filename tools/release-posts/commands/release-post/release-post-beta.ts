@@ -199,7 +199,7 @@ const program = new Command()
 					finalReleaseDate,
 					lastReleasePostUrl:
 						lastReleasePost?.URL ||
-						'https://developer.woo.com/category/woocommerce-core-release-notes/',
+						'https://developer.woocommerce.com/category/woocommerce-core-release-notes/',
 				} );
 
 				if ( isOutputOnly ) {

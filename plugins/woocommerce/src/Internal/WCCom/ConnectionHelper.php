@@ -1,6 +1,6 @@
 <?php
 /**
- * Helpers for managing connection to Woo.com.
+ * Helpers for managing connection to WooCommerce.com.
  */
 
 namespace Automattic\WooCommerce\Internal\WCCom;

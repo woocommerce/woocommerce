@@ -20,7 +20,7 @@ export default function ActionsDropdownMenu( props: {
 			icon: <></>,
 			onClick: () => {
 				window.open(
-					'https://woo.com/my-account/my-subscriptions',
+					'woocommerce.com/my-account/my-subscriptions',
 					'_blank'
 				);
 			},

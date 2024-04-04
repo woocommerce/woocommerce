@@ -69,7 +69,7 @@ class OnboardingThemes {
 	}
 
 	/**
-	 * Sort themes returned from Woo.com
+	 * Sort themes returned from WooCommerce.com
 	 *
 	 * @param  array $themes Array of themes from Woo.com.
 	 * @return array

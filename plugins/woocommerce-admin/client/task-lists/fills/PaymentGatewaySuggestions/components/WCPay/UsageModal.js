@@ -38,7 +38,7 @@ export const UsageModal = () => {
 		components: {
 			link: (
 				<Link
-					href="https://woo.com/usage-tracking?utm_medium=product"
+					href="woocommerce.com/usage-tracking?utm_medium=product"
 					target="_blank"
 					type="external"
 				/>

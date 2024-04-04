@@ -44,7 +44,7 @@ class OnboardingSync {
 	}
 
 	/**
-	 * Send profile data to Woo.com.
+	 * Send profile data to WooCommerce.com.
 	 */
 	private function send_profile_data() {
 		if ( 'yes' !== get_option( 'woocommerce_allow_tracking', 'no' ) ) {
@@ -142,7 +142,7 @@ class OnboardingSync {
 			! $task_list ||
 			$task_list->is_hidden() ||
 			! isset( $_SERVER['HTTP_REFERER'] ) ||
-			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woo.com/checkout?utm_medium=product' ) // phpcs:ignore sanitization ok.
+			0 !== strpos( $_SERVER['HTTP_REFERER'], 'https://woocommerce.com/checkout?utm_medium=product' ) // phpcs:ignore sanitization ok.
 		) {
 			return;
 		}

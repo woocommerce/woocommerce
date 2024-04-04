@@ -12,10 +12,10 @@ body:
 
         While our goal is to address all the issues reported in this repository, GitHub should be treated as a place to report confirmed bugs only.
         - If you have a support request or custom code related question please follow one of the steps below:
-        - Review [WooCommerce Self-Service Guide](https://woo.com/document/woocommerce-self-service-guide/) to see if the solutions listed there apply to your case;
-        - If you are a paying customer of WooCommerce, contact WooCommerce support by [opening a ticket or starting a live chat](https://woo.com/contact-us/);
+        - Review [WooCommerce Self-Service Guide](woocommerce.com/document/woocommerce-self-service-guide/) to see if the solutions listed there apply to your case;
+        - If you are a paying customer of WooCommerce, contact WooCommerce support by [opening a ticket or starting a live chat](woocommerce.com/contact-us/);
         - Make a post on [WooCommerce community forum](https://wordpress.org/support/plugin/woocommerce/)
-        - To get help on custom code questions go to the [WooCommerce Community Slack](https://woo.com/community-slack/) and visit the `#developers` channel. 
+        - To get help on custom code questions go to the [WooCommerce Community Slack](woocommerce.com/community-slack/) and visit the `#developers` channel. 
 
         Make sure to look through the [existing `type: bug` issues](https://github.com/woocommerce/woocommerce/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+bug%22) to see whether your bug has already been submitted.
         Feel free to contribute to any existing issues.
@@ -71,7 +71,7 @@ body:
     attributes:
       label: WordPress Environment
       description: |
-        We use the [WooCommerce System Status Report](https://woo.com/document/understanding-the-woocommerce-system-status-report/) to help us evaluate the issue. 
+        We use the [WooCommerce System Status Report](woocommerce.com/document/understanding-the-woocommerce-system-status-report/) to help us evaluate the issue. 
         Without this report we won't be able to fully evaluate this issue.
       placeholder: |
         The System Status Report is found in your WordPress admin under **WooCommerce > Status**. 
@@ -89,7 +89,7 @@ body:
         You will then need to enable it one by one and test every time you do that in order to figure out which plugin is causing the issue.
       options:
         - label: I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.
-        - label: This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/products/storefront/).
+        - label: This bug happens with a default WordPress theme active, or [Storefront](woocommerce.com/products/storefront/).
         - label: I can reproduce this bug consistently using the steps above.
     validations:
       required: true

@@ -121,7 +121,7 @@ export const PricingSectionFills: React.FC< PricingSectionFillsType > = ( {
 							</span>
 							<Link
 								className="woocommerce-form-section__header-link"
-								href="https://woo.com/posts/how-to-price-products-strategies-expert-tips/"
+								href="woocommerce.com/posts/how-to-price-products-strategies-expert-tips/"
 								target="_blank"
 								type="external"
 								onClick={ () => {

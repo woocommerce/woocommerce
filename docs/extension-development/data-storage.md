@@ -22,6 +22,6 @@ If the data type is an entity with n units, consider a [post type](https://devel
 If the data is a means of sorting/categorizing an entity, consider a [taxonomy](https://developer.wordpress.org/taxonomy/). Taxonomies are a way of grouping things together.
 
 ## Logging
-Logs should be written to a file using the [WC_Logger](https://woo.com/wc-apidocs/class-WC_Logger.html) class. This is a simple and standardized way of recording events and errors for debugging purposes.
+Logs should be written to a file using the [WC_Logger](woocommerce.com/wc-apidocs/class-WC_Logger.html) class. This is a simple and standardized way of recording events and errors for debugging purposes.
 
 Remember, the best method of data storage depends on the nature of the data and how it will be used in your application.

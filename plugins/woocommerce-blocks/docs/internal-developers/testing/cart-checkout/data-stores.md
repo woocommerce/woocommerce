@@ -46,7 +46,7 @@ Go to: [https://github.com/woocommerce/woocommerce-gateway-stripe/blob/8ffd22aff
 
 ### Interaction with unusable payment methods
 
--   Install and activate [WooCommerce Bookings](https://woo.com/products/woocommerce-bookings/). Add a bookable product, ensure to add a cost to it on the edit product page, then:
+-   Install and activate [WooCommerce Bookings](woocommerce.com/products/woocommerce-bookings/). Add a bookable product, ensure to add a cost to it on the edit product page, then:
 -   Add a _normal_ (i.e. Beanie, Hoodie etc.) product to the cart and ensure you can check out successfully.
 -   Then add a bookable product, ensure you can check out successfully.
 

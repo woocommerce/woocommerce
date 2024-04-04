@@ -12,8 +12,8 @@
 The Checkout Block supports three methods of payments:
 
 -   Check Payment, found in WooCommerce payment section.
--   Stripe Credit Card payments, provided by [Stripe Gateway](https://woo.com/products/stripe/).
--   Express Payment methods, provided by [Stripe Gateway](https://woo.com/products/stripe/).
+-   Stripe Credit Card payments, provided by [Stripe Gateway](woocommerce.com/products/stripe/).
+-   Express Payment methods, provided by [Stripe Gateway](woocommerce.com/products/stripe/).
 
 To test Stripe and Express payment methods, you will need API keys, you can get them by creating a testing account in stripe.
 

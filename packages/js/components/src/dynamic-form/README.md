@@ -23,7 +23,7 @@ const initialValues = { firstName: '' };
 
 | Name          | Type     | Default   | Description                                                                                                                                                             |
 | ------------- | -------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fields`      | {} or [] | []        | An object to describe the structure and types of all fields, matching the structure returned by the [Settings API](https://woo.com/document/settings-api/) |
+| `fields`      | {} or [] | []        | An object to describe the structure and types of all fields, matching the structure returned by the [Settings API](woocommerce.com/document/settings-api/) |
 | `isBusy`      | Boolean  | false     | Boolean indicating busy state of submit button                                                                                                                          |
 | `onSubmit`    | Function | `noop`    | Function to call when a form is submitted with valid fields                                                                                                             |
 | `onChange`    | Function | `noop`    | Function to call when any values on the form are changed                                                                                                                |
@@ -32,7 +32,7 @@ const initialValues = { firstName: '' };
 
 ### Fields structure
 
-Please reference the [WordPress settings API documentation](https://woo.com/document/settings-api/) to better understand the structure expected for the fields property. This component accepts the object returned via the `settings` property when querying a gateway via the API, or simply the array provided by `Object.values(settings)`.
+Please reference the [WordPress settings API documentation](woocommerce.com/document/settings-api/) to better understand the structure expected for the fields property. This component accepts the object returned via the `settings` property when querying a gateway via the API, or simply the array provided by `Object.values(settings)`.
 
 ### Currently Supported Types
 

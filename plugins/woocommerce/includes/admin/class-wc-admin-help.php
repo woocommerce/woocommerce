@@ -45,16 +45,16 @@ class WC_Admin_Help {
 					'<p>' . sprintf(
 						/* translators: %s: Documentation URL */
 						__( 'Should you need help understanding, using, or extending WooCommerce, <a href="%s">please read our documentation</a>. You will find all kinds of resources including snippets, tutorials and much more.', 'woocommerce' ),
-						'https://woo.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin'
+						'https://woocommerce.com/documentation/plugins/woocommerce/?utm_source=helptab&utm_medium=product&utm_content=docs&utm_campaign=woocommerceplugin'
 					) . '</p>' .
 					'<p>' . sprintf(
 						/* translators: %s: Forum URL */
 						__( 'For further assistance with WooCommerce core, use the <a href="%1$s">community forum</a>. For help with premium extensions sold on Woo.com, <a href="%2$s">open a support request at Woo.com</a>.', 'woocommerce' ),
 						'https://wordpress.org/support/plugin/woocommerce',
-						'https://woo.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin'
+						'https://woocommerce.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin'
 					) . '</p>' .
 					'<p>' . __( 'Before asking for help, we recommend checking the system status page to identify any problems with your configuration.', 'woocommerce' ) . '</p>' .
-					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woo.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'Woo.com support', 'woocommerce' ) . '</a></p>',
+					'<p><a href="' . admin_url( 'admin.php?page=wc-status' ) . '" class="button button-primary">' . __( 'System status', 'woocommerce' ) . '</a> <a href="https://wordpress.org/support/plugin/woocommerce" class="button">' . __( 'Community forum', 'woocommerce' ) . '</a> <a href="https://woocommerce.com/my-account/create-a-ticket/?utm_source=helptab&utm_medium=product&utm_content=tickets&utm_campaign=woocommerceplugin" class="button">' . __( 'Woo.com support', 'woocommerce' ) . '</a></p>',
 			)
 		);
 
@@ -73,11 +73,11 @@ class WC_Admin_Help {
 
 		$screen->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:', 'woocommerce' ) . '</strong></p>' .
-			'<p><a href="https://woo.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="https://woocommerce.com/?utm_source=helptab&utm_medium=product&utm_content=about&utm_campaign=woocommerceplugin" target="_blank">' . __( 'About WooCommerce', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://wordpress.org/plugins/woocommerce/" target="_blank">' . __( 'WordPress.org project', 'woocommerce' ) . '</a></p>' .
 			'<p><a href="https://github.com/woocommerce/woocommerce/" target="_blank">' . __( 'GitHub project', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="https://woo.com/product-category/themes/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official themes', 'woocommerce' ) . '</a></p>' .
-			'<p><a href="https://woo.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official extensions', 'woocommerce' ) . '</a></p>'
+			'<p><a href="https://woocommerce.com/product-category/themes/?utm_source=helptab&utm_medium=product&utm_content=wcthemes&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official themes', 'woocommerce' ) . '</a></p>' .
+			'<p><a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=helptab&utm_medium=product&utm_content=wcextensions&utm_campaign=woocommerceplugin" target="_blank">' . __( 'Official extensions', 'woocommerce' ) . '</a></p>'
 		);
 	}
 }

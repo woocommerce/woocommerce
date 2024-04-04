@@ -17,7 +17,7 @@ describe( 'List', () => {
 			const listItems = [
 				{
 					title: 'Woo.com',
-					href: 'https://woo.com',
+					href: 'woocommerce.com',
 				},
 				{
 					title: 'Click me!',
@@ -35,7 +35,7 @@ describe( 'List', () => {
 			const listItems = [
 				{
 					title: 'Woo.com',
-					href: 'https://woo.com',
+					href: 'woocommerce.com',
 				},
 				{
 					title: 'Click me!',
@@ -66,7 +66,7 @@ describe( 'List', () => {
 				},
 				{
 					title: 'Woo.com',
-					href: 'https://woo.com',
+					href: 'woocommerce.com',
 					linkType: 'external',
 				},
 				{
@@ -111,7 +111,7 @@ describe( 'List', () => {
 				},
 				{
 					title: 'Woo.com',
-					href: 'https://woo.com',
+					href: 'woocommerce.com',
 					linkType: 'external',
 					listItemTag: 'woo.com-site',
 				},

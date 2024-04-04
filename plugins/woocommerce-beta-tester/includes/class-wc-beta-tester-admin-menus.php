@@ -49,7 +49,7 @@ A clear and concise description of what you expected to happen.
 
 **Isolating the problem (mark completed items with an [x]):**
 - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.
-- [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/storefront/).
+- [ ] This bug happens with a default WordPress theme active, or [Storefront](woocommerce.com/storefront/).
 - [ ] I can reproduce this bug consistently using the steps above.
 
 **WordPress Environment**

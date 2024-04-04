@@ -35,7 +35,7 @@ const createTestCampaign = ( programId: string ) => {
 		description: '',
 		cost: `USD 30`,
 		manageUrl: `https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/edit&programId=${ programId }`,
-		icon: 'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+		icon: 'woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
 		channelName: 'Google Listings and Ads',
 		channelSlug: 'google-listings-and-ads',
 	};
@@ -203,7 +203,7 @@ describe( 'Campaigns component', () => {
 					create_url:
 						'https://wc1.test/wp-admin/admin.php?page=wc-admin&path=/google/dashboard&subpath=/campaigns/create',
 					icon_url:
-						'https://woo.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
+						'woocommerce.com/wp-content/uploads/2021/06/woo-GoogleListingsAds-jworee.png',
 				},
 			],
 		} );

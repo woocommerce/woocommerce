@@ -16427,38 +16427,38 @@ index a27469c37c..b853bf7cd0 100644
  		{
  			title: __( 'Get Support', 'woocommerce' ),
 -			link:
--				'https://woo.com/my-account/create-a-ticket/?utm_medium=product',
-+			link: 'https://woo.com/my-account/create-a-ticket/?utm_medium=product',
+-				'woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
++			link: 'woocommerce.com/my-account/create-a-ticket/?utm_medium=product',
  		},
  		{
  			title: __( 'Home Screen', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/home-screen/?utm_medium=product',
-+			link: 'https://woo.com/document/home-screen/?utm_medium=product',
+-				'woocommerce.com/document/home-screen/?utm_medium=product',
++			link: 'woocommerce.com/document/home-screen/?utm_medium=product',
  		},
  		{
  			title: __( 'Inbox', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/home-screen/?utm_medium=product#section-2',
-+			link: 'https://woo.com/document/home-screen/?utm_medium=product#section-2',
+-				'woocommerce.com/document/home-screen/?utm_medium=product#section-2',
++			link: 'woocommerce.com/document/home-screen/?utm_medium=product#section-2',
  		},
  		{
  			title: __( 'Stats Overview', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/home-screen/?utm_medium=product#section-4',
-+			link: 'https://woo.com/document/home-screen/?utm_medium=product#section-4',
+-				'woocommerce.com/document/home-screen/?utm_medium=product#section-4',
++			link: 'woocommerce.com/document/home-screen/?utm_medium=product#section-4',
  		},
  		{
  			title: __( 'Store Management', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/home-screen/?utm_medium=product#section-5',
-+			link: 'https://woo.com/document/home-screen/?utm_medium=product#section-5',
+-				'woocommerce.com/document/home-screen/?utm_medium=product#section-5',
++			link: 'woocommerce.com/document/home-screen/?utm_medium=product#section-5',
  		},
  		{
  			title: __( 'Store Setup Checklist', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/woocommerce-setup-wizard?utm_medium=product#store-setup-checklist',
-+			link: 'https://woo.com/document/woocommerce-setup-wizard?utm_medium=product#store-setup-checklist',
+-				'woocommerce.com/document/woocommerce-setup-wizard?utm_medium=product#store-setup-checklist',
++			link: 'woocommerce.com/document/woocommerce-setup-wizard?utm_medium=product#store-setup-checklist',
  		},
  	];
  }
@@ -16467,8 +16467,8 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/woocommerce-blocks/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/woocommerce-blocks/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/woocommerce-blocks/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/woocommerce-blocks/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __(
@@ -16476,14 +16476,14 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/woocommerce-customizer/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/woocommerce-customizer/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/woocommerce-customizer/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/woocommerce-customizer/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'How to choose and change a theme', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/choose-change-theme/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/choose-change-theme/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/choose-change-theme/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/choose-change-theme/?utm_source=help_panel&utm_medium=product',
  		},
  	];
  }
@@ -16492,8 +16492,8 @@ index a27469c37c..b853bf7cd0 100644
  		activePlugins.includes( 'google-listings-and-ads' ) && {
  			title: __( 'Set up Google Listing & Ads', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/google-listings-and-ads/?utm_medium=product#get-started',
-+			link: 'https://woo.com/document/google-listings-and-ads/?utm_medium=product#get-started',
+-				'woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
++			link: 'woocommerce.com/document/google-listings-and-ads/?utm_medium=product#get-started',
  		},
  		activePlugins.includes( 'pinterest-for-woocommerce' ) && {
  			title: __( 'Set up Pinterest for WooCommerce', 'woocommerce' ),
@@ -16512,26 +16512,26 @@ index a27469c37c..b853bf7cd0 100644
  		{
  			title: __( 'Which Payment Option is Right for Me?', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/premium-payment-gateway-extensions/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.woocommerce_payments && {
  			title: __( 'WooCommerce Payments Start Up Guide', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/payments/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/payments/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/payments/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/payments/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.woocommerce_payments && {
  			title: __( 'WooCommerce Payments FAQs', 'woocommerce' ),
 -			link:
--				'https://woo.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/documentation/woocommerce-payments/woocommerce-payments-faqs/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.stripe && {
  			title: __( 'Stripe Setup and Configuration', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/stripe/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/stripe/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/stripe/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/stripe/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions[ 'ppcp-gateway' ] && {
  			title: __(
@@ -16539,50 +16539,50 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/2-0/woocommerce-paypal-payments/?utm_medium=product#section-3',
-+			link: 'https://woo.com/document/2-0/woocommerce-paypal-payments/?utm_medium=product#section-3',
+-				'woocommerce.com/document/2-0/woocommerce-paypal-payments/?utm_medium=product#section-3',
++			link: 'woocommerce.com/document/2-0/woocommerce-paypal-payments/?utm_medium=product#section-3',
  		},
  		paymentGatewaySuggestions.square_credit_card && {
  			title: __( 'Square - Get started', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/woocommerce-square/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/woocommerce-square/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/woocommerce-square/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/woocommerce-square/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.kco && {
  			title: __( 'Klarna - Introduction', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/klarna-checkout/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/klarna-checkout/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/klarna-checkout/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/klarna-checkout/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.klarna_payments && {
  			title: __( 'Klarna - Introduction', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/klarna-payments/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.payfast && {
  			title: __( 'PayFast Setup and Configuration', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/payfast-payment-gateway/?utm_source=help_panel&utm_medium=product',
  		},
  		paymentGatewaySuggestions.eway && {
  			title: __( 'Eway Setup and Configuration', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/eway/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/eway/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/eway/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/eway/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Direct Bank Transfer (BACS)', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/bacs/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/bacs/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/bacs/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/bacs/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Cash on Delivery', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/cash-on-delivery/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/cash-on-delivery/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/cash-on-delivery/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/cash-on-delivery/?utm_source=help_panel&utm_medium=product',
  		},
  	].filter( Boolean );
  }
@@ -16591,8 +16591,8 @@ index a27469c37c..b853bf7cd0 100644
  		{
  			title: __( 'Adding and Managing Products', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/managing-products/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/managing-products/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/managing-products/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/managing-products/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __(
@@ -16600,20 +16600,20 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/product-csv-importer-exporter/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/product-csv-importer-exporter/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/product-csv-importer-exporter/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/product-csv-importer-exporter/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Migrate products using Cart2Cart', 'woocommerce' ),
 -			link:
--				'https://woo.com/products/cart2cart/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/products/cart2cart/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/products/cart2cart/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/products/cart2cart/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Learn more about setting up products', 'woocommerce' ),
 -			link:
--				'https://woo.com/documentation/plugins/woocommerce/getting-started/setup-products/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/documentation/plugins/woocommerce/getting-started/setup-products/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/documentation/plugins/woocommerce/getting-started/setup-products/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/documentation/plugins/woocommerce/getting-started/setup-products/?utm_source=help_panel&utm_medium=product',
  		},
  	];
  }
@@ -16622,20 +16622,20 @@ index a27469c37c..b853bf7cd0 100644
  		{
  			title: __( 'Setting up Shipping Zones', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/setting-up-shipping-zones/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/setting-up-shipping-zones/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/setting-up-shipping-zones/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/setting-up-shipping-zones/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Core Shipping Options', 'woocommerce' ),
 -			link:
--				'https://woo.com/documentation/plugins/woocommerce/getting-started/shipping/core-shipping-options/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/documentation/plugins/woocommerce/getting-started/shipping/core-shipping-options/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/documentation/plugins/woocommerce/getting-started/shipping/core-shipping-options/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/documentation/plugins/woocommerce/getting-started/shipping/core-shipping-options/?utm_source=help_panel&utm_medium=product',
  		},
  		{
  			title: __( 'Product Shipping Classes', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/product-shipping-classes/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/product-shipping-classes/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/product-shipping-classes/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/product-shipping-classes/?utm_source=help_panel&utm_medium=product',
  		},
  		showWCS && {
  			title: __(
@@ -16643,8 +16643,8 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/woocommerce-shipping-and-tax/?utm_source=help_panel&utm_medium=product#section-3',
-+			link: 'https://woo.com/document/woocommerce-shipping-and-tax/?utm_source=help_panel&utm_medium=product#section-3',
+-				'woocommerce.com/document/woocommerce-shipping-and-tax/?utm_source=help_panel&utm_medium=product#section-3',
++			link: 'woocommerce.com/document/woocommerce-shipping-and-tax/?utm_source=help_panel&utm_medium=product#section-3',
  		},
  		{
  			title: __(
@@ -16652,8 +16652,8 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/plugins/woocommerce/getting-started/shipping/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/plugins/woocommerce/getting-started/shipping/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/plugins/woocommerce/getting-started/shipping/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/plugins/woocommerce/getting-started/shipping/?utm_source=help_panel&utm_medium=product',
  		},
  	].filter( Boolean );
  }
@@ -16662,8 +16662,8 @@ index a27469c37c..b853bf7cd0 100644
  		{
  			title: __( 'Setting up Taxes in WooCommerce', 'woocommerce' ),
 -			link:
--				'https://woo.com/document/setting-up-taxes-in-woocommerce/?utm_source=help_panel&utm_medium=product',
-+			link: 'https://woo.com/document/setting-up-taxes-in-woocommerce/?utm_source=help_panel&utm_medium=product',
+-				'woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_source=help_panel&utm_medium=product',
++			link: 'woocommerce.com/document/setting-up-taxes-in-woocommerce/?utm_source=help_panel&utm_medium=product',
  		},
  		showWCS && {
  			title: __(
@@ -16671,8 +16671,8 @@ index a27469c37c..b853bf7cd0 100644
  				'woocommerce'
  			),
 -			link:
--				'https://woo.com/document/woocommerce-services/?utm_source=help_panel&utm_medium=product#section-10',
-+			link: 'https://woo.com/document/woocommerce-services/?utm_source=help_panel&utm_medium=product#section-10',
+-				'woocommerce.com/document/woocommerce-services/?utm_source=help_panel&utm_medium=product#section-10',
++			link: 'woocommerce.com/document/woocommerce-services/?utm_source=help_panel&utm_medium=product#section-10',
  		},
  	].filter( Boolean );
  }
@@ -16681,8 +16681,8 @@ index a27469c37c..b853bf7cd0 100644
  	const genericDocsLink = {
  		title: __( 'WooCommerce Docs', 'woocommerce' ),
 -		link:
--			'https://woo.com/documentation/?utm_source=help_panel&utm_medium=product',
-+		link: 'https://woo.com/documentation/?utm_source=help_panel&utm_medium=product',
+-			'woocommerce.com/documentation/?utm_source=help_panel&utm_medium=product',
++		link: 'woocommerce.com/documentation/?utm_source=help_panel&utm_medium=product',
  	};
  	itemsByType.push( genericDocsLink );
  
@@ -19409,7 +19409,7 @@ index 0000000000..558e07be21
 +						'woocommerce'
 +					) }
 +					<br />
-+					<ExternalLink href="https://woo.com/woocommerce-shipping/">
++					<ExternalLink href="woocommerce.com/woocommerce-shipping/">
 +						{ __( 'Learn more', 'woocommerce' ) }
 +					</ExternalLink>
 +				</span>
@@ -20573,7 +20573,7 @@ index 894f567399..524ff50767 100644
 -					</Button>
 -				)
 +				<Button
-+					href="https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
++					href="woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 +					target="_blank"
 +					onClick={ trackSeeMore }
 +					isTertiary
@@ -22304,7 +22304,7 @@ index bb13b7a3e0..e4c4100c87 100644
 +								components: {
 +									link: (
 +										<Link
-+											href="https://woo.com/products/shipstation-integration?utm_medium=product"
++											href="woocommerce.com/products/shipstation-integration?utm_medium=product"
 +											target="_blank"
 +											type="external"
 +										/>
@@ -24155,7 +24155,7 @@ index 8cac777258..3bcac057a0 100644
 +```
  
  ## Documentation
- * [WooCommerce Documentation](https://woo.com/)
+ * [WooCommerce Documentation](woocommerce.com/)
 diff --git a/plugins/woocommerce/bin/composer/mozart/composer.lock b/plugins/woocommerce/bin/composer/mozart/composer.lock
 index 6c82f02706..d05f3d8113 100644
 --- a/plugins/woocommerce/bin/composer/mozart/composer.lock
@@ -25440,7 +25440,7 @@ index 0f71ac3831..d6502f2941 100644
 @@ -2,7 +2,7 @@
  	"name": "woocommerce/woocommerce",
  	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
- 	"homepage": "https://woo.com/",
+ 	"homepage": "woocommerce.com/",
 -	"version": "6.7.0",
 +	"version": "6.8.2",
  	"type": "wordpress-plugin",
@@ -32115,7 +32115,7 @@ index b9b8bf46f7..a519ce2614 100644
  							// phpcs:ignore -- ignoring the error since the value is harded.
  							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
 -							echo "<a id='settings-other-payment-methods' href='" . esc_url( admin_url( 'admin.php?page=wc-addons&section=payment-gateways' ) ) . "' target='_blank' class='components-button is-tertiary'>";
-+							echo "<a id='settings-other-payment-methods' href='https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
++							echo "<a id='settings-other-payment-methods' href='woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
  							// phpcs:ignore
  							echo $link_text;
  							// phpcs:ignore
@@ -36689,12 +36689,12 @@ index cc475239cf..e5e0a75056 100644
 +++ b/plugins/woocommerce/woocommerce.php
 @@ -3,7 +3,7 @@
   * Plugin Name: WooCommerce
-  * Plugin URI: https://woo.com/
+  * Plugin URI: woocommerce.com/
   * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
 - * Version: 6.7.0
 + * Version: 6.8.2
   * Author: Automattic
-  * Author URI: https://woo.com/
+  * Author URI: woocommerce.com/
   * Text Domain: woocommerce
 diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
 index 90c59db874..e8c302e806 100644
