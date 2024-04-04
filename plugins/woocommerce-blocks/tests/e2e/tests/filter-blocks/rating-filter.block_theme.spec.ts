@@ -12,7 +12,7 @@ const test = base.extend< {
 } >( {
 	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Active Filters Block' },
+			{ title: 'Product Filter: Rating Block' },
 			TEMPLATE_PATH,
 			{}
 		);

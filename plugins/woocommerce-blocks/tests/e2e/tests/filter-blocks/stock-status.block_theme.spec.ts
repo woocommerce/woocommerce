@@ -13,7 +13,7 @@ const test = base.extend< {
 } >( {
 	defaultBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter Stock Status Block' },
+			{ title: 'Product Filter: Stock Status Block' },
 			TEMPLATE_PATH,
 			{}
 		);
@@ -24,7 +24,7 @@ const test = base.extend< {
 
 	dropdownBlockPost: async ( { requestUtils }, use ) => {
 		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter Stock Status Block' },
+			{ title: 'Product Filter: Stock Status Block' },
 			TEMPLATE_PATH,
 			{
 				attributes: {
