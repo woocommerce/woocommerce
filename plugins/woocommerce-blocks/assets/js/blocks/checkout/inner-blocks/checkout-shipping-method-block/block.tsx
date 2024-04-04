@@ -36,6 +36,7 @@ const LocalPickupSelector = ( {
 	showIcon,
 	toggleText,
 	multiple,
+	onClick,
 }: {
 	checked: string;
 	rate: minMaxPrices;
@@ -43,11 +44,14 @@ const LocalPickupSelector = ( {
 	showIcon: boolean;
 	toggleText: string;
 	multiple: boolean;
+	onClick: () => void;
 } ) => {
 	return (
 		<Button
+			role="radio"
 			value="pickup"
 			removeTextWrap={ true }
+			onClick={ onClick }
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -83,6 +87,7 @@ const ShippingSelector = ( {
 	showPrice,
 	showIcon,
 	toggleText,
+	onClick,
 	shippingCostRequiresAddress = false,
 }: {
 	checked: string;
@@ -90,6 +95,7 @@ const ShippingSelector = ( {
 	showPrice: boolean;
 	showIcon: boolean;
 	shippingCostRequiresAddress: boolean;
+	onClick: () => void;
 	toggleText: string;
 } ) => {
 	const hasShippableRates = useSelect( ( select ) => {
@@ -131,7 +137,8 @@ const ShippingSelector = ( {
 
 	return (
 		<Button
-			value="shipping"
+			role="radio"
+			onClick={ onClick }
 			removeTextWrap={ true }
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
@@ -155,6 +162,7 @@ const ShippingSelector = ( {
 		</Button>
 	);
 };
+
 const Block = ( {
 	checked,
 	onChange,
@@ -184,12 +192,13 @@ const Block = ( {
 		<div
 			id="shipping-method"
 			className="wc-block-checkout__shipping-method-container"
-			label="options"
-			onChange={ onChange }
-			checked={ checked }
+			role="radiogroup"
 		>
 			<ShippingSelector
 				checked={ checked }
+				onClick={ () => {
+					onChange( 'shipping' );
+				} }
 				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
@@ -198,6 +207,9 @@ const Block = ( {
 			/>
 			<LocalPickupSelector
 				checked={ checked }
+				onClick={ () => {
+					onChange( 'pickup' );
+				} }
 				rate={ getLocalPickupPrices(
 					shippingRates[ 0 ]?.shipping_rates
 				) }
