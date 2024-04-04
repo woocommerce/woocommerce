@@ -107,10 +107,9 @@ const ProductCollectionInspectorControls = (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
-						setQueryAttribute( props, DEFAULT_FILTERS );
-						resetAllFilters.forEach( ( resetFilter ) =>
-							resetFilter()
-						);
+						resetAllFilters.forEach( ( resetFilter ) => {
+							resetFilter();
+						} );
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>
