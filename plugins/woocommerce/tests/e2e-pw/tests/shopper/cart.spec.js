@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
-const productName = 'Cart product test';
+const productName = 'Cart product test ' + Date.now();
 const productPrice = '13.99';
 const twoProductPrice = +productPrice * 2;
 const fourProductPrice = +productPrice * 4;
