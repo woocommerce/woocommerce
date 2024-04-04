@@ -14,7 +14,7 @@ class LocalPickupUtils {
 		$pickup_location_settings = get_option(
 			'woocommerce_pickup_location_settings',
 			[
-				'enabled' => false,
+				'enabled' => 'no',
 				'title'   => __( 'Local Pickup', 'woocommerce' ),
 			]
 		);
@@ -23,8 +23,8 @@ class LocalPickupUtils {
 			$pickup_location_settings['title'] = __( 'Local Pickup', 'woocommerce' );
 		}
 
-		if ( false !== $pickup_location_settings['enabled'] && empty( $pickup_location_settings['enabled'] ) ) {
-			$pickup_location_settings['enabled'] = false;
+		if ( empty( $pickup_location_settings['enabled'] ) ) {
+			$pickup_location_settings['enabled'] = 'no';
 		}
 
 		return $pickup_location_settings;
