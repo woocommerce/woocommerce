@@ -43,7 +43,6 @@ The majority of our feature flagging is blocks, this is a list of them:
 -   Collection Stock Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L300) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L101) | [JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/assets/js/blocks/collection-filters/inner-blocks/stock-filter/index.tsx#L15)).
 -   Collection Price Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L301) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L105)).
 -   Collection Attribute Filter ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/src/BlockTypesController.php#L302) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7e3c830739ab4c03ac35fabf69391414e1a3ceff/bin/webpack-entries.js#L109)).
--   ⚛️ Add to cart ([JS flag](https://github.com/woocommerce/woocommerce-blocks/blob/dfd2902bd8a247b5d048577db6753c5e901fc60f/assets/js/atomic/blocks/product-elements/add-to-cart/index.ts#L26-L29)).
 
 ## Features behind flags
 
