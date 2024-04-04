@@ -2671,6 +2671,6 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 /**
  * Add woocommerce_launch_your_store_tour_hidden.
  */
-function wc_update_870_add_launch_your_store_tour_option() {
+function wc_update_890_add_launch_your_store_tour_option() {
 	update_option( 'woocommerce_launch_your_store_tour_hidden', 'no' );
 }

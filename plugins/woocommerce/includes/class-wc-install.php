@@ -247,7 +247,9 @@ class WC_Install {
 		),
 		'8.7.0' => array(
 			'wc_update_870_prevent_listing_of_transient_files_directory',
-			'wc_update_870_add_launch_your_store_tour_option',
+		),
+		'8.9.0' => array(
+			'wc_update_890_add_launch_your_store_tour_option',
 		),
 	);
 
