@@ -80,9 +80,9 @@ admin_acc_login | set to true if site needs to use my account for admin login | 
 customer_username | username for customer user | yes `__ENV.C_USER`
 customer_password | password for customer user | yes `__ENV.C_PW`
 customer_user_id | user id for customer user | yes `__ENV.C_UID`
-cot_status | set to true if site is using order tables | yes `__ENV.COT`
+hpos_status | set to true if site is using order tables | yes `__ENV.HPOS`
 admin_orders_base_url | url part for order urls when posts table is used | no
-cot_admin_orders_base_url | url part for order urls when orders table is used | no
+hpos_admin_orders_base_url | url part for order urls when orders table is used | no
 addresses_customer_billing_* | billing address details for existing customer user | no
 addresses_guest_billing_* | billing address details for guest customer user | no
 payment_method | payment method (currently only `cod` supported) | no
