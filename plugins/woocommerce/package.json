@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.9.0",
+	"version": "8.8.0.40",
 	"homepage": "https://woo.com/",
 	"repository": {
 		"type": "git",
