@@ -314,7 +314,6 @@
 		"prop-types": "^15.8.1",
 		"react-number-format": "4.9.3",
 		"react-transition-group": "^4.4.5",
-		"reakit": "1.3.11",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
