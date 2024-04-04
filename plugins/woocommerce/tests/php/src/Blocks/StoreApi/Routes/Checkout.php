@@ -320,7 +320,6 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
 	}
-
 	/**
 	 * Check that accounts are created on request.
 	 */
@@ -613,7 +612,7 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
-	 * Test checkout without valid shipping methods .
+	 * Test checkout without valid shipping methods.
 	 */
 	public function test_checkout_invalid_shipping_method() {
 		global $wpdb;
@@ -675,6 +674,13 @@ class Checkout extends MockeryTestCase {
 		get_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$data                                     = $shipping_method->get_post_data();
+			$data['woocommerce_flat_rate_tax_status'] = 'none';
+			$shipping_method->set_post_data( $data );
+		}
 
 		$tax = \WC_Tax::_insert_tax_rate(
 			array(
