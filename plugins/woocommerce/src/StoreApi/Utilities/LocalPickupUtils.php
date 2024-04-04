@@ -41,7 +41,7 @@ class LocalPickupUtils {
 	 */
 	public static function is_local_pickup_enabled() {
 		$pickup_location_settings = self::get_local_pickup_settings();
-		return wc_string_to_bool( $pickup_location_settings['enabled'] );
+		return $pickup_location_settings['enabled'];
 	}
 	/**
 	 * Gets a list of payment method ids that support the 'local-pickup' feature.
