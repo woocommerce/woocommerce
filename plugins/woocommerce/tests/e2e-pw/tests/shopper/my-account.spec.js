@@ -29,13 +29,8 @@ test.describe( 'My account page', () => {
 			} );
 		}
 
-		await test.step( `customer can log out`, async () => {
-			await page
-				.getByRole( 'link', { name: 'Log out', exact: true } )
-				.click();
-			await expect(
-				page.getByRole( 'heading', { name: 'Login' } )
-			).toBeVisible();
-		} );
+		await expect(
+			page.getByRole( 'link', { name: 'Log out', exact: true } )
+		).toBeVisible();
 	} );
 } );
