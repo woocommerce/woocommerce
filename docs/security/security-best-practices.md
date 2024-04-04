@@ -44,7 +44,7 @@ Awareness and prevention of these common issues are crucial steps in securing yo
 Even without access to automated tools like the [Woo Quality Insights Toolkit (QIT)](https://qit.woo.com), manual testing remains a vital component of securing your WooCommerce store. Here are some guidelines on how developers can manually test their extensions for security vulnerabilities: 
 
 1. **Code Review**: Regularly review your code for security vulnerabilities, focusing on the areas where breaches commonly occur, such as user input fields and database queries. Code reviews should check against the [WordPress security criteria](https://developer.wordpress.org/apis/security/) mentioned above. 
-2. **Use Security Plugins**: Plugins like Wordfence, Sucuri, or iThemes Security provide an interface for manual security checks, including file integrity monitoring and malware scanning.
+2. **Use Security Plugins**: Plugins like Wordfence, Sucuri, or iThemes Security provide an interface for manual security checks, including file integrity monitoring and malware scanning. Additionally, tooling like [OWASP Zap](https://www.zaproxy.org/) or [GitHub Security Scanning](https://github.com/features/security/) can be used.
 3. **Testing Environments**: Utilize staging environments to test the security of new features or updates before deploying them live.
 
 ## Other Security Best Practices
