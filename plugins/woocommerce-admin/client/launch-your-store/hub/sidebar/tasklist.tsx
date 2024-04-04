@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -5,11 +7,15 @@ import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import { resolveSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
+import classnames from 'classnames';
+// @ts-ignore No types for this exist yet.
+import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 
 /**
  * Internal dependencies
  */
 import { createStorageUtils } from '~/utils/localStorage';
+import { taskCompleteIcon, taskIcons } from './components/icons';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -81,3 +87,31 @@ export function taskClickedAction( event: {
 		} );
 	}
 }
+
+export const CompletedTaskItem: React.FC< {
+	task: TaskType;
+	classNames?: string;
+} > = ( { task, classNames } ) => (
+	<SidebarNavigationItem
+		className={ classnames( task.id, 'is-complete', classNames ) }
+		icon={ taskCompleteIcon }
+		disabled={ true }
+	>
+		{ task.title }
+	</SidebarNavigationItem>
+);
+
+export const IncompleteTaskItem: React.FC< {
+	task: TaskType;
+	classNames?: string;
+	onClick: () => void;
+} > = ( { task, classNames, onClick } ) => (
+	<SidebarNavigationItem
+		className={ classnames( task.id, classNames ) }
+		icon={ taskIcons[ task.id ] }
+		withChevron
+		onClick={ onClick }
+	>
+		{ task.title }
+	</SidebarNavigationItem>
+);
