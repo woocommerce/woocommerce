@@ -69,7 +69,6 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 						<a
 							ref={ ref as ForwardedRef< HTMLAnchorElement > }
 							href={ props.href }
-							role="button"
 						>
 							{ showSpinner && <Spinner /> }
 							<span className="wc-block-components-button__text">
