@@ -10,7 +10,7 @@ We sometimes update the default templates when a new version of WooCommerce is r
 
 Starting in WooCommerce version 3.3, most themes look great with WooCommerce. 
 
-[Our developer-focused blog](https://developer.woo.com/blog/) will list any template file changes with each release. You may need to update templates yourself or contact the theme author for an update if:
+[Our developer-focused blog](https://developer.woocommerce.com/blog/) will list any template file changes with each release. You may need to update templates yourself or contact the theme author for an update if:
 
 - you are using a theme with older templates or an older version of WooCommerce, or
 - you modified templates or are using a child theme.

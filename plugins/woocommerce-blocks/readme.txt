@@ -49,7 +49,7 @@ Use this plugin if you want access to the bleeding edge of available blocks for 
 
 = Minimum Requirements =
 
-* Latest release versions of WordPress and WooCommerce ([read more here](https://developer.woo.com/2021/07/27/announcing-a-change-to-the-woocommerce-blocks-version-support-policy/))
+* Latest release versions of WordPress and WooCommerce ([read more here](https://developer.woocommerce.com/2021/07/27/announcing-a-change-to-the-woocommerce-blocks-version-support-policy/))
 * PHP version 7.3 or greater (PHP 7.4 or greater is recommended)
 * MySQL version 5.6 or greater
 

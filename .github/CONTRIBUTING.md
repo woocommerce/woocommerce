@@ -7,7 +7,7 @@ There are many ways to contribute to the project!
 - [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
 - Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
 - Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
-- Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woo.com/blog/).
+- Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woocommerce.com/blog/).
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 

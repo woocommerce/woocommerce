@@ -2,11 +2,11 @@
 
 Do you run a high-volume WooCommerce store? Are you about to embark on the task to enable High Performance Order Storage (HPOS) on said store? As we move more and more high-volume store to HPOS, we decided to document the guidelines for those of you who may be faced with this task.
 
-## Before you begin: [Get familiar with the HPOS project and related documentation](https://developer.woo.com/docs/category/hpos/)
+## Before you begin: [Get familiar with the HPOS project and related documentation](https://developer.woocommerce.com/docs/category/hpos/)
 
 1. [High-Performance Order Storage](https://woocommerce.com/document/high-performance-order-storage/)
 2. [High-Performance Order Storage Upgrade Recipe Book](https://github.com/woocommerce/woocommerce/wiki/High-Performance-Order-Storage-Upgrade-Recipe-Book)
-3. [High-Performance Order Storage: Backward Compatibility and Synchronization](https://developer.woo.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/)
+3. [High-Performance Order Storage: Backward Compatibility and Synchronization](https://developer.woocommerce.com/2022/09/29/high-performance-order-storage-backward-compatibility-and-synchronization/)
 
 ## Phase 1: Test out HPOS on a local development system
 

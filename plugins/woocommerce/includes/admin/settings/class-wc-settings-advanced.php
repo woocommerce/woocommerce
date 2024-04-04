@@ -421,7 +421,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 				'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
 				admin_url( 'admin.php?page=wc-status&tab=logs' ),
-				'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 			);
 		}
 

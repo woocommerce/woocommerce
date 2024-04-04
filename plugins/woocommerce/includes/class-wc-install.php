@@ -1226,7 +1226,7 @@ class WC_Install {
 			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
 				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
 				array(
-					'info_link' => 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
+					'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
 				)
 			);
 
@@ -1241,7 +1241,7 @@ class WC_Install {
 		}
 
 		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
-		$blog_post_url                = 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
+		$blog_post_url                = 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
 		$site_legacy_api_settings_url = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=legacy_api' );
 		$site_webhooks_settings_url   = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=webhooks' );
 		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
