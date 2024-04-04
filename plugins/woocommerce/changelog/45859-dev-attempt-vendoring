@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Introduce vendor bundling to the blocks cart and checkout pages to improve performance.

@@ -27,7 +27,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/data": "wp-6.0",
-		"@wordpress/env": "^8.13.0",
+		"@wordpress/env": "^9.0.7",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"babel-jest": "~27.5.1",
