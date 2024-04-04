@@ -716,6 +716,5 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_tax_based_on', $tax_based_on );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 		\WC_Tax::_delete_tax_rate( $tax );
-		$fixtures->shipping_add_flat_rate();
 	}
 }
