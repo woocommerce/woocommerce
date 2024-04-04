@@ -61,4 +61,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.
+As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.
