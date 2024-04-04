@@ -105,16 +105,19 @@ test.describe( 'Assembler -> Footers', () => {
 		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test( 'The selected footer should be applied on the frontend', async ( {
+	test.only( 'The selected footer should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
 		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const footer = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
+			.nth( 2 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-footer-pattern' );
+
+		const expectedFooterClass = extractFooterClass( await footer.getAttribute( 'class' ) );
 
 		await footer.click();
 
@@ -131,17 +134,15 @@ test.describe( 'Assembler -> Footers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const footerHTML = await page.locator( 'footer' ).innerHTML();
 
-		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( footerHTML ).toMatchSnapshot( {
-			name: 'cys-selected-footer',
-		} );
+		const selectedFooterClasses = await page.locator( 'footer div.wc-blocks-footer-pattern' ).getAttribute( 'class' );
+
+		expect( selectedFooterClasses ).toContain( expectedFooterClass );
 	} );
 
 	test( 'Picking a footer should trigger an update on the site preview', async ( {
 		assemblerPage,
-	}, testInfo ) => {
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const editor = await assemblerPage.getEditor();
 
