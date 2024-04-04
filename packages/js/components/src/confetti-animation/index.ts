@@ -4,7 +4,12 @@
 import confetti from 'canvas-confetti';
 import { useEffect } from '@wordpress/element';
 
-// Original source: https://github.com/Automattic/wp-calypso/blob/a39539547780871d0371a20fcf21c767a86a1010/packages/components/src/confetti/index.ts
+/**
+ * Note: This was copied over from https://github.com/Automattic/wp-calypso/blob/a39539547780871d0371a20fcf21c767a86a1010/packages/components/src/confetti/index.ts
+ * since there was problems with importing @automattic/components:2.1.0 due to versions of its dependencies breaking wc core.
+ * If we do not end up making further adjustments in this file that are not supported by the original implementation,
+ * we should consider replacing it with the npm package when we're able to.
+ */
 
 const COLORS = [
 	'#31CC9F',
