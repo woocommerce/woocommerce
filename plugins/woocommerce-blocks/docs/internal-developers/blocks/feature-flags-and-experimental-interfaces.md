@@ -30,8 +30,6 @@ We also use an `__experimental` prefix for any experimental interfaces. This is 
 
 The majority of our feature flagging is blocks, this is a list of them:
 
-### Feature plugin flag
-
 ### Experimental flag
 
 -   Product Gallery ([PHP flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/src/BlockTypesController.php#L234) | [webpack flag](https://github.com/woocommerce/woocommerce-blocks/blob/7f0d55d54885f436778f04a6389e92b8785d5c68/bin/webpack-entries.js#L53-L55) | [BlockTemplatesController](https://github.com/woocommerce/woocommerce-blocks/blob/211960f753d093f2f819273e130b34f893a784cd/src/BlockTemplatesController.php/#L467-L469)).
