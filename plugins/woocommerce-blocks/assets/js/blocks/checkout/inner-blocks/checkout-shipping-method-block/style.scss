@@ -38,6 +38,7 @@
 
 		&:focus {
 			outline: 1px solid $universal-border-strong;
+			background-color: $universal-background;
 		}
 	}
 }
