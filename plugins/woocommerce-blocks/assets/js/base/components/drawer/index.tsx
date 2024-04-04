@@ -58,7 +58,7 @@ const CloseButtonPortal = ( {
 					className="wc-block-components-drawer__close"
 					onClick={ onClick }
 					removeTextWrap
-					name={ __( 'Close', 'woocommerce' ) }
+					aria-label={ __( 'Close', 'woocommerce' ) }
 				>
 					<Icon icon={ close } />
 				</Button>,
