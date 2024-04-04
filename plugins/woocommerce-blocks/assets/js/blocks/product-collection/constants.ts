@@ -64,12 +64,15 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 	priceRange: undefined,
 };
 
+export const DEFAULT_LAYOUT_GRID_COLUMNS = 3;
+export const DEFAULT_LAYOUT_GRID_MINIMUM_COLUMN_WIDTH = '150px';
+
 export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 	query: DEFAULT_QUERY,
 	tagName: 'div',
 	templateLayout: {
 		type: LayoutOptions.GRID,
-		columnCount: 3,
+		columnCount: DEFAULT_LAYOUT_GRID_COLUMNS,
 	},
 	queryContextIncludes: [ 'collection' ],
 	forcePageReload: false,

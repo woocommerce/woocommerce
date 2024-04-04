@@ -32,7 +32,8 @@ export enum LayoutOptions {
 
 export interface ProductCollectionLayoutGrid {
 	type: LayoutOptions.GRID;
-	columnCount: number;
+	columnCount?: number;
+	minimumColumnWidth?: string;
 }
 
 export interface ProductCollectionLayoutStack {

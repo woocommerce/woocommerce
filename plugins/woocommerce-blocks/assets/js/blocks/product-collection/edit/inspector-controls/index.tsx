@@ -29,6 +29,7 @@ import {
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
+	LayoutOptions,
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
 import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
@@ -55,10 +56,12 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: BlockEditProps< ProductCollectionAttributes >
 ) => {
-	const { query, collection, hideControls } = props.attributes;
+	const { templateLayout, query, collection, hideControls } =
+		props.attributes;
 	const inherit = query?.inherit;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
+	const showColumnsControl = templateLayout.type === LayoutOptions.GRID;
 	const showQueryControls = inherit === false;
 	const showInheritQueryControls =
 		isEmpty( collection ) || shouldShowFilter( CoreFilterNames.INHERIT );
@@ -74,7 +77,7 @@ const ProductCollectionInspectorControls = (
 
 	const layoutControlProps = {
 		setAttributes: props.setAttributes,
-		templateLayout: props.attributes.templateLayout,
+		templateLayout,
 	};
 
 	const queryControlProps = {
@@ -94,7 +97,11 @@ const ProductCollectionInspectorControls = (
 				} }
 			>
 				<LayoutOptionsControl { ...layoutControlProps } />
-				<ColumnsControl { ...layoutControlProps } />
+
+				{ showColumnsControl && (
+					<ColumnsControl { ...layoutControlProps } />
+				) }
+
 				{ showInheritQueryControls && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
