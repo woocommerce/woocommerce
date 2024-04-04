@@ -27,6 +27,10 @@ class LocalPickupUtils {
 			$pickup_location_settings['enabled'] = 'no';
 		}
 
+		// All consumers of this turn it into a bool eventually. Doing it here removes the need for that.
+		$pickup_location_settings['enabled'] = wc_string_to_bool( $pickup_location_settings['enabled'] );
+		$pickup_location_settings['title']   = wc_clean( $pickup_location_settings['title'] );
+
 		return $pickup_location_settings;
 	}
 
