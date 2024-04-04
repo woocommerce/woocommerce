@@ -4,7 +4,6 @@ const test = baseTest.extend( {
 	storageState: process.env.ADMINSTATE,
 	products: async ( { api }, use ) => {
 		const products = [];
-		console.log( 'Test log statement' );
 
 		for ( let i = 0; i < 2; i++ ) {
 			await api
