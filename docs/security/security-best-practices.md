@@ -23,9 +23,9 @@ To follow this guide, you should have:
 
 We recommend that you maintain the following standards: 
 
-- **PHPCS**: The PHP Code Sniffer tool helps ensure your code adheres to specific coding standards, which can prevent common security issues. Extensions have no security issues when testing against PHPCS rules.
+- **PHPCS**: The PHP Code Sniffer tool helps ensure your code adheres to specific coding standards, which can prevent common security issues. Extensions shouldn't have any failure results against PHPCS.
 
-- **SemGrep**: Focuses on identifying patterns that may indicate security vulnerabilities, allowing developers to write more secure code. Extensions have no security issues when testing against SemGrep rules.
+- **SemGrep**: Focuses on identifying patterns that may indicate security vulnerabilities, allowing developers to write more secure code. Extensions shouldn't have any failure results against SemGrep.
 
 Understanding and implementing these standards can significantly reduce the risk of security vulnerabilities in your extensions and themes.
 
@@ -37,13 +37,13 @@ Several common security pitfalls can easily be avoided with vigilance and best p
 - **Cross-Site Scripting**: Sanitize all user input to prevent malicious code from being executed.
 - **File Inclusions**: Limit file inclusion to prevent unauthorized access to the file system.
 
-Awareness and prevention of these common issues are crucial steps in securing your WooCommerce store.
+Awareness and prevention of these common issues are crucial steps in securing your WooCommerce store. For more resources, we recommend reading the [WordPress security documentation](https://developer.wordpress.org/apis/security/).
 
 ## Manual Testing Guidelines
 
-Even without access to automated tools like QIT, manual testing remains a vital component of securing your WooCommerce store. Here are some guidelines on how developers can manually test their extensions for security vulnerabilities:
+Even without access to automated tools like the [Woo Quality Insights Toolkit (QIT)](https://qit.woo.com), manual testing remains a vital component of securing your WooCommerce store. Here are some guidelines on how developers can manually test their extensions for security vulnerabilities: 
 
-1. **Code Review**: Regularly review your code for security vulnerabilities, focusing on the areas where breaches commonly occur, such as user input fields and database queries.
+1. **Code Review**: Regularly review your code for security vulnerabilities, focusing on the areas where breaches commonly occur, such as user input fields and database queries. Code reviews should check against the [WordPress security criteria](https://developer.wordpress.org/apis/security/) mentioned above. 
 2. **Use Security Plugins**: Plugins like Wordfence, Sucuri, or iThemes Security provide an interface for manual security checks, including file integrity monitoring and malware scanning.
 3. **Testing Environments**: Utilize staging environments to test the security of new features or updates before deploying them live.
 
