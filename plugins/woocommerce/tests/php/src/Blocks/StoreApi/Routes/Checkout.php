@@ -675,13 +675,6 @@ class Checkout extends MockeryTestCase {
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
-		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
-		foreach ( $shipping_methods as $shipping_method ) {
-			$data                                     = $shipping_method->get_post_data();
-			$data['woocommerce_flat_rate_tax_status'] = 'none';
-			$shipping_method->set_post_data( $data );
-		}
-
 		$tax = \WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => '',
@@ -734,8 +727,13 @@ class Checkout extends MockeryTestCase {
 			)
 		);
 
-		$fixtures = new FixtureData();
-		$fixtures->shipping_disable_tax();
+		$shipping_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
+		foreach ( $shipping_methods as $shipping_method ) {
+			$data                                     = $shipping_method->get_post_data();
+			$data['woocommerce_flat_rate_tax_status'] = 'none';
+			$shipping_method->set_post_data( $data );
+			$shipping_method->save();
+		}
 
 		// Ensures taxes are being skipped for shipping when its set to none.
 		$response = rest_get_server()->dispatch( $request );
