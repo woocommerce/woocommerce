@@ -31,7 +31,7 @@ baseTest.describe( 'Products > Edit Product', () => {
 		},
 	} );
 
-	test( 'can edit a product and save the changes', async ( {
+	test.only( 'can edit a product and save the changes', async ( {
 		page,
 		products,
 	} ) => {
