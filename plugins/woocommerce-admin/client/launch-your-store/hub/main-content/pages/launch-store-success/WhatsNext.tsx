@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { Button } from '@wordpress/components';
-import { find } from 'lodash';
 import { useMemo } from '@wordpress/element';
 import type { TaskListType } from '@woocommerce/data';
 
@@ -34,19 +33,33 @@ const getActionsList = ( { activePlugins, allTasklists }: WhatsNextProps ) => {
 		}
 	};
 
-	const isMailChimpActivated =
-		activePlugins.indexOf( 'mailchimp-for-woocommerce' ) !== -1;
-	const setupTasks = find( allTasklists, { id: 'setup' } )?.tasks || [];
-	const extendedTasks = find( allTasklists, { id: 'extended' } )?.tasks || [];
+	const setupTasksCompletion = allTasklists
+		.find( ( { id } ) => id === 'setup' )
+		?.tasks?.reduce(
+			( acc: Record< string, boolean >, { id, isComplete } ) => {
+				acc[ id ] = isComplete || false;
+				return acc;
+			},
+			{}
+		);
 
-	const isMarketingTaskCompleted =
-		find( setupTasks, { id: 'marketing' } )?.isComplete || false;
+	const extendedTasksCompletion = allTasklists
+		.find( ( { id } ) => id === 'extended' )
+		?.tasks?.reduce(
+			( acc: Record< string, boolean >, { id, isComplete } ) => {
+				acc[ id ] = isComplete || false;
+				return acc;
+			},
+			{}
+		);
 
-	const isPaymentsTaskCompleted =
-		find( setupTasks, { id: 'payments' } )?.isComplete || false;
-
+	const isMarketingTaskCompleted = setupTasksCompletion?.marketing || false;
+	const isPaymentsTaskCompleted = setupTasksCompletion?.payments || false;
 	const isMobileTaskCompleted =
-		find( extendedTasks, { id: 'get-mobile-app' } )?.isComplete || false;
+		extendedTasksCompletion?.[ 'get-mobile-app' ] || false;
+	const isMailChimpActivated = activePlugins.includes(
+		'mailchimp-for-woocommerce'
+	);
 
 	const marketing = {
 		title: __( 'Promote your products', 'woocommerce' ),
