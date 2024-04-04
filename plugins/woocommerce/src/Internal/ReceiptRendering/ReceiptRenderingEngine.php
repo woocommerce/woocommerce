@@ -6,8 +6,8 @@ use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
-use \Exception;
-use \WC_Order;
+use Exception;
+use WC_Order;
 
 /**
  * This class generates printable order receipts as transient files (see src/Internal/TransientFiles).
@@ -87,10 +87,10 @@ class ReceiptRenderingEngine {
 	 * @param string|int|null $expiration_date GMT expiration date formatted as yyyy-mm-dd, or as a timestamp, or null for "tomorrow".
 	 * @param bool            $force_new If true, creates a new receipt file even if one already exists for the order.
 	 * @return string|null The file name of the new or already existing receipt file, null if an order id is passed and the order doesn't exist.
-	 * @throws \InvalidArgumentException Invalid expiration date (wrongly formatted, or it's a date in the past).
+	 * @throws InvalidArgumentException Invalid expiration date (wrongly formatted, or it's a date in the past).
 	 * @throws Exception The directory to store the file doesn't exist and can't be created.
 	 */
-	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ) : ?string {
+	public function generate_receipt( $order, $expiration_date = null, bool $force_new = false ): ?string {
 		if ( ! $order instanceof WC_Order ) {
 			$order = wc_get_order( $order );
 			if ( false === $order ) {
@@ -115,11 +115,77 @@ class ReceiptRenderingEngine {
 				)
 			);
 
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-		extract( $this->get_order_data( $order ) );
+		/**
+		 * Filter to customize the set of data that is used to render the receipt.
+		 * The formatted line items aren't included, use the woocommerce_printable_order_receipt_formatted_line_item
+		 * filter to customize those.
+		 *
+		 * See the value returned by the 'get_order_data' and 'get_woo_pay_data' methods for a reference of
+		 * the structure of the data.
+		 *
+		 * See the template file, Templates/order-receipt.php, for reference on how the data is used.
+		 *
+		 * @param array $data The original set of data.
+		 * @param WC_Order $order The order for which the receipt is being generated.
+		 * @returns array The updated set of data.
+		 *
+		 * @since 8.9.0
+		 */
+		$data = apply_filters( 'woocommerce_printable_order_receipt_data', $this->get_order_data( $order ), $order );
+
+		$formatted_line_items = array();
+		foreach ( $data['line_items'] as $line_item_data ) {
+			if ( isset( $line_item_data['quantity'] ) ) {
+				$formatted_line_item = "<td>${line_item_data['title']} × ${line_item_data['quantity']}</td><td>${line_item_data['amount']}</td>";
+			} else {
+				$formatted_line_item = "<td>${line_item_data['title']}</td><td>${line_item_data['amount']}</td>";
+			}
+
+			/**
+			 * Filter to customize the HTML that gets generated for each order line item in the receipt.
+			 * The returned HTML will be rendered inside a <tr> element which in turn goes into a <table> element.
+			 *
+			 * $line_item_data will contain the following keys:
+			 *
+			 * - type: One of 'product', 'subtotal', 'discount', 'fee', 'shipping_total', 'taxes_total', 'amount_paid'
+			 * - title
+			 * - amount (formatted with wc_price)
+			 * - item (only when type is 'product'), and instance of WC_Order_Item
+			 * - quantity (only when type is 'product')
+			 *
+			 * @param string $formatted_line_item The original HTML as a concatenation of <td> elements.
+			 * @param array $line_item_data The relevant data for the line item for which the table row is being generated.
+			 * @param WC_Order $order The order for which the receipt is being generated.
+			 * @return string The actual HTML to put inside the <tr> element corresponding to the line item in the table.
+			 *
+			 * @since 8.9.0
+			 */
+			$formatted_line_item    = apply_filters( 'woocommerce_printable_order_receipt_formatted_line_item', $formatted_line_item, $line_item_data, $order );
+			$formatted_line_items[] = $formatted_line_item;
+		}
+		$data['formatted_line_items'] = $formatted_line_items;
 
 		ob_start();
-		include __dir__ . '/Templates/order-receipt.php';
+		$css = include __DIR__ . '/Templates/order-receipt-css.php';
+		$css = ob_get_contents();
+		ob_end_clean();
+
+		/**
+		 * Filter to customize the CSS styles used to render the receipt.
+		 *
+		 * See Templates/order-receipt.php for guidance on the existing HTMl elements and their ids.
+		 * See Templates/order-receipt-css.php for the original CSS styles.
+		 *
+		 * @param string $css The original CSS styles to use.
+		 * @param WC_Order $order The order for which the receipt is being generated.
+		 * @return string The actual CSS styles that will be used.
+		 *
+		 * @since 8.9.0
+		 */
+		$data['css'] = apply_filters( 'woocommerce_printable_order_receipt_css', $css, $order );
+
+		ob_start();
+		include __DIR__ . '/Templates/order-receipt.php';
 		$rendered_template = ob_get_contents();
 		ob_end_clean();
 
@@ -197,6 +263,8 @@ class ReceiptRenderingEngine {
 					( wc_get_product( $line_item_product->get_parent_id() )->get_name() ) . '. ' . $line_item_product->get_attribute_summary() :
 					$line_item_product->get_name();
 			$line_items_info[] = array(
+				'type'     => 'product',
+				'item'     => $line_item,
 				'title'    => wp_kses( $line_item_title, array() ),
 				'quantity' => $line_item->get_quantity(),
 				'amount'   => wc_price( $line_item->get_subtotal(), $get_price_args ),
@@ -204,6 +272,7 @@ class ReceiptRenderingEngine {
 		}
 
 		$line_items_info[] = array(
+			'type'   => 'subtotal',
 			'title'  => __( 'Subtotal', 'woocommerce' ),
 			'amount' => wc_price( $order->get_subtotal(), $get_price_args ),
 		);
@@ -211,6 +280,7 @@ class ReceiptRenderingEngine {
 		$coupon_names = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		if ( ! empty( $coupon_names ) ) {
 			$line_items_info[] = array(
+				'type'   => 'discount',
 				/* translators: %s = comma-separated list of coupon codes */
 				'title'  => sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) ),
 				'amount' => wc_price( -$order->get_total_discount(), $get_price_args ),
@@ -220,6 +290,7 @@ class ReceiptRenderingEngine {
 		foreach ( $order->get_fees() as $fee ) {
 			$name              = $fee->get_name();
 			$line_items_info[] = array(
+				'type'   => 'fee',
 				'title'  => '' === $name ? __( 'Fee', 'woocommerce' ) : $name,
 				'amount' => wc_price( $fee->get_total(), $get_price_args ),
 			);
@@ -228,6 +299,7 @@ class ReceiptRenderingEngine {
 		$shipping_total = (float) $order->get_shipping_total();
 		if ( $shipping_total ) {
 			$line_items_info[] = array(
+				'type'   => 'shipping_total',
 				'title'  => __( 'Shipping', 'woocommerce' ),
 				'amount' => wc_price( $order->get_shipping_total(), $get_price_args ),
 			);
@@ -240,17 +312,20 @@ class ReceiptRenderingEngine {
 
 		if ( $total_taxes ) {
 			$line_items_info[] = array(
+				'type'   => 'taxes_total',
 				'title'  => __( 'Taxes', 'woocommerce' ),
 				'amount' => wc_price( $total_taxes, $get_price_args ),
 			);
 		}
 
 		$line_items_info[] = array(
+			'type'   => 'amount_paid',
 			'title'  => __( 'Amount Paid', 'woocommerce' ),
 			'amount' => wc_price( $order->get_total(), $get_price_args ),
 		);
 
 		return array(
+			'order'            => $order,
 			'constants'        => array(
 				'font_size'        => self::FONT_SIZE,
 				'margin'           => self::MARGIN,
@@ -340,11 +415,12 @@ class ReceiptRenderingEngine {
 		$card_svg = base64_encode( file_get_contents( __DIR__ . "/CardIcons/{$card_brand}.svg" ) );
 
 		return array(
-			'card_icon'    => $card_svg,
-			'card_last4'   => wp_kses( $card_data['last4'] ?? '', array() ),
-			'app_name'     => wp_kses( $card_data['receipt']['application_preferred_name'] ?? null, array() ),
-			'aid'          => wp_kses( $card_data['receipt']['dedicated_file_name'] ?? null, array() ),
-			'account_type' => wp_kses( $card_data['receipt']['account_type'] ?? null, array() ),
+			'payment_method' => 'woocommerce_payments',
+			'card_icon'      => $card_svg,
+			'card_last4'     => wp_kses( $card_data['last4'] ?? '', array() ),
+			'app_name'       => wp_kses( $card_data['receipt']['application_preferred_name'] ?? null, array() ),
+			'aid'            => wp_kses( $card_data['receipt']['dedicated_file_name'] ?? null, array() ),
+			'account_type'   => wp_kses( $card_data['receipt']['account_type'] ?? null, array() ),
 		);
 	}
 }
