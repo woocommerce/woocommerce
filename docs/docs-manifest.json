@@ -14,6 +14,23 @@
   ],
   "categories": [
     {
+      "category_slug": "beta-testing",
+      "category_title": "Beta Testing",
+      "posts": [
+        {
+          "category_title": "Beta Testing",
+          "category_slug": "Beta Testing",
+          "tags": "how-to",
+          "post_title": "Beta Testing New Features",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/beta-testing/beta-testing.md",
+          "hash": "1a78d319e7b1dfb6c43c1ca848ca001c0c7c48736e20d8a1813f7caaeaf78abc",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/beta-testing/beta-testing.md",
+          "id": "a54b0065664aabc84e01b564f1e055f339fac194"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nDiscover tutorials and guides for creating custom WooCommerce stores. This section is your toolkit for building advanced, modern online shops that meet the needs of merchants and customers alike.\n",
       "category_slug": "building-a-woo-store",
       "category_title": "Building a Woo Store",
@@ -155,7 +172,7 @@
       "categories": []
     },
     {
-      "content": "\nJoin the WooCommerce community of contributors. Find out how to build with WooCommerce and help enhance the Woo ecosystem.\n",
+      "content": "\nInterested in joining the Woo contributor community? The links in this doc summarize and direct you to the order of operations you will need to make your first contribution. If you are a seasoned WooCommerce developer, feel free to skip ahead and utilize the template links, or the reference docs and guides below.\n\n## Contributing to WooCommerce Core\n\nThe WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: \n\n- [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)\n- [WooCommerce Admin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin)\n- [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks) \n\n### Code of Conduct\n\nContributing to an open source project requires cooperation amongst individuals and organziations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.\n\n### Contributor Guidelines\n\nOur [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.\n\n- [Prerequisites and developer tools to get started](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#getting-started)\n- [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)\n- [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) \n\n### Templates, Bug Reports, and Feature Requests\n\n- [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)\n- [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)\n- [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)\n- [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)\n- [Feature requests](https://woo.com/feature-requests/woocommerce/)\n\n### Security\n\nSecurity and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.\n\nPlease report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).\n\n\n\n\n\n",
       "category_slug": "contributing",
       "category_title": "Contribute to Woo",
       "posts": [
