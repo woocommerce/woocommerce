@@ -105,7 +105,7 @@ test.describe( 'Assembler -> Footers', () => {
 		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test.only( 'The selected footer should be applied on the frontend', async ( {
+	test( 'The selected footer should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
 		baseURL,
