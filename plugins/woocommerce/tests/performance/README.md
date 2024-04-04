@@ -5,35 +5,31 @@ Automated k6 performance tests for WooCommerce. To be used for benchmarking perf
 ## Table of contents
 
 - [Pre-requisites](#pre-requisites)
-  - [Install k6](#install-k6)
+    - [Install k6](#install-k6)
 - [Configuration](#configuration)
-  - [Test Environment](#test-environment)
-  - [Config Variables](#config-variables)
-- [Scenarios](#scenarios)
+    - [Test Environment](#test-environment)
+    - [Config Variables](#config-variables)
 - [Running Tests](#running-tests)
-  - [Running Individual Tests](#running-individual-tests)
-  - [Running Scenarios](#running-scenarios)
-  - [Debugging Tests](#debugging-tests)
-  - [User Agent](#user-agent)
+    - [Running Individual Tests](#running-individual-tests)
+    - [Running Scenarios](#running-scenarios)
+    - [Debugging Tests](#debugging-tests)
+    - [User Agent](#user-agent)
 - [Results Output](#results-output)
-  - [Basic Results](#basic-results)
-  - [InfluxDB and Grafana](influxdb-and-grafana)
+    - [Basic Results](#basic-results)
+    - [InfluxDB and Grafana](influxdb-and-grafana)
 - [Writing Tests](#writing-tests)
-  - [Capturing Requests](#capturing-requests)
-  - [Static Assets](#static-assets)
-  - [Request Headers](#request-headers)
-  - [Correlation](#correlation)
-  - [Test Setup](#test-setup)
-  - [Cookies](#cookies)
-  - [Groups](#groups)
-  - [Checks](#checks)
-  - [Custom Metrics](#custom-metrics)
+    - [Capturing Requests](#capturing-requests)
+    - [Static Assets](#static-assets)
+    - [Request Headers](#request-headers)
+    - [Correlation](#correlation)
+    - [Groups](#groups)
+    - [Checks](#checks)
 - [Other Resources](#other-resources)
 
 ---
----
+
 ## Pre-requisites
----
+
 ### Install k6
 
 To install k6 on macOS using [Homebrew](https://brew.sh/)
@@ -47,9 +43,9 @@ Alternatively the k6 docker image can be used to execute tests.
 `docker pull loadimpact/k6`
 
 ---
----
+
 ## Configuration
----
+
 ### Test Environment
 
 Before using the tests a test environment is needed to run against.
@@ -64,6 +60,7 @@ pnpm env:performance-init --filter=@woocommerce/plugin-woocommerce
 If using a different environment the details can be changed in `config.js`.
 
 ---
+
 ### Config Variables
 
 `config.js` comes with some example values for using with the suggested local test environment. If using a different environment be sure to update the values.
@@ -99,12 +96,13 @@ think_time_max | maximum sleep time (in seconds) between each request | no
 
 
 ---
----
+
 ## Running Tests
 
 When referring to running k6 tests usually this means executing the test scenario. The test scenario file in turn determines which requests we run and how much load will be applied to them. It is also possible to execute individual test files containing requests and pass in scenario config as a CLI flag but scenario files allow for more configuration options.
 
 ---
+
 ### Running Individual Tests
 
 To execute an individual test file (for example `requests/shopper/shop-page.js`)  containing requests.
@@ -116,6 +114,7 @@ Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/test
 This will run the individual test for 1 iteration. 
 
 ---
+
 ### Running Scenarios
 
 Included in the `tests` folder are some sample scenarios that can be ran or used as a starting point to be modified to suit the context in which tests are being ran.
@@ -138,25 +137,29 @@ CLI `k6 run tests/simple-all-requests.js`
 Docker `docker run --network="host" -v /[YOUR LOCAL WC DIRECTORY FULL PATH]/tests:/tests -it loadimpact/k6 run /tests/simple-all-requests.js`
 
 ---
+
 ### Debugging Tests
 
 To help with getting a test working, the `--http-debug="full"` flag prints to console the full log of requests and their responses. It is also useful to use `console.log()` to print messages when debugging.
 
 ---
+
 ### User Agent
 
 k6 adds a user agent to requests, for example `User-Agent: k6/0.33.0 (https://k6.io/)` which makes it easier to understand what load is coming from k6 synthetically generating it versus real user load when looking at server logs.
 
 ---
----
+
 ## Results Output
 
 ---
+
 ### Basic Results
 
 By default when running the test using `k6 run`, there is an aggregated summary report at the end of the test.
 
 ---
+
 ### InfluxDB and Grafana
 
 [See this guide for more details](https://k6.io/docs/results-visualization/influxdb-+-grafana/)
@@ -171,7 +174,7 @@ Run InfluxDB
 
 `brew services start influxdb@1`
 
-InfluxDB can now be accessed at http://localhost:8086/
+InfluxDB can now be accessed at `http://localhost:8086/`
 
 Add this option to the `k6 run` command to send results to the InfluxDB instance into a database named `myk6db`. If this database does not exist, k6 will create it automatically.
 
@@ -189,15 +192,16 @@ Run Grafana
 
 `./bin/grafana-server web`
 
-Grafana can now be accessed at http://localhost:3000/
+Grafana can now be accessed at `http://localhost:3000/`
 
 Create a custom Grafana dashboard using [these instructions](https://k6.io/docs/results-visualization/influxdb-+-grafana/#custom-grafana-dashboard) or import [this dashboard](https://grafana.com/grafana/dashboards/2587) using [these instructions](https://grafana.com/docs/grafana/v7.5/dashboards/export-import/#importing-a-dashboard).
 
 ---
----
+
 ## Writing Tests
 
 ---
+
 ### Capturing Requests
 
 k6 tests rely on HTTP requests in order to test the backend. They can either be constructed from scratch, by using the k6 recorder, or by converting a HAR file.
@@ -209,6 +213,7 @@ Alternatively any application which captures HTTP requests can be used to figure
 Tests could also be created to simulate API requests.
 
 ---
+
 ### Static Assets
 
 The tests only simulate the HTTP requests and do not include static assets requests (fonts, images, css, js etc).
@@ -220,7 +225,8 @@ Although static resources do affect the bandwidth and the overall response time 
 In additional any use of CDNs, cache settings, and themes used would also vary from site to site.
 
 ---
-### Request Headers
+
+### RequestHeaders
 
 Every HTTP requests tested includes the headers. 
 
@@ -228,6 +234,7 @@ To make it easier to manage the headers they have been moved to a separate file 
 In `headers.js` the common headers are grouped by type and then can be imported in for use in the requests. However if an individual request uniquely needs a specific header this can still be added in as an extra member of the headers object literal of that request.
 
 ---
+
 ### Correlation
 
 To make a test work so it can be ran reliably multiple times usually there is a need to correlate any dynamic data in the test. This means extracting one or more values from the response of one request and then reusing them in subsequent requests.
@@ -237,11 +244,13 @@ An example of this is the `woocommerce-process-checkout-nonce` . This is returne
 A value can be correlated by using k6 selector `.find` to extract the data from a response by matching an element. Alternatively for extracting data from a response unsuitable for using selectors k6 has a `findBetween` utility that makes its easier by just having to provide the left and right boundaries of the data.
 
 ---
+
 ### Groups
 
 Groups are used to organize common logic in the test scripts and can help with the test result analysis. For example the `group` ``"Proceed to checkout"`` groups together multiple requests triggered by this action.
 
 ---
+
 ### Checks
 
 Checks are like asserts but they don’t stop the tests if they record a failure (for example in a load test with 1000s of iterations of a request this allows for an isolated flakey iteration to not stop test execution).
@@ -249,6 +258,7 @@ Checks are like asserts but they don’t stop the tests if they record a failure
 All requests have had checks for at least a `200` http status response added and most also have an additional check for a string contained in the response body.
 
 ---
+
 ## Other Resources
 
 [k6 documentation](https://k6.io/docs/) is a very useful resource for test creation and execution.
