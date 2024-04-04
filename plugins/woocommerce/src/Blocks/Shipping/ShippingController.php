@@ -293,13 +293,7 @@ class ShippingController {
 		}
 
 		$settings = array(
-			'pickupLocationSettings' => get_option(
-				'woocommerce_pickup_location_settings',
-				[
-					'enabled' => false,
-					'title'   => __( 'Local Pickup', 'woocommerce' ),
-				]
-			),
+			'pickupLocationSettings' => LocalPickupUtils::get_local_pickup_settings(),
 			'pickupLocations'        => $formatted_pickup_locations,
 			'readonlySettings'       => array(
 				'hasLegacyPickup' => $has_legacy_pickup,
