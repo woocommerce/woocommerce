@@ -182,7 +182,7 @@ test.describe( 'Shopper → Cart block', () => {
 
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
@@ -204,7 +204,7 @@ test.describe( 'Shopper → Cart block', () => {
 			.click();
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
@@ -224,7 +224,7 @@ test.describe( 'Shopper → Cart block', () => {
 			.click();
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
