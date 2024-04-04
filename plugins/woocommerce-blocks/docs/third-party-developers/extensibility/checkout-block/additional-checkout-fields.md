@@ -123,7 +123,7 @@ $my_order_billing_field = $checkout_fields->get_field_from_order( $field_id, $or
 $my_order_shipping_field = $checkout_fields->get_field_from_order( $field_id, $order, 'shipping' );
 ```
 
-After an order is placed, customer and order values will be the same, but customers can change that value for future orders, or from within their My Account page. So if you're looking at a customer value at that point in time, access it from the order, if you're looking for the most up to date value regardless, access it from the order.
+After an order is placed, the data saved to the customer and the data saved to the order will be the same. Customers can change the values for _future_ orders, or from within their My Account page. If you're looking at a customer value at a specific point in time (i.e. when the order was placed), access it from the order object, if you're looking for the most up to date value regardless, access it from the customer object.
 
 #### Guest customers
 
