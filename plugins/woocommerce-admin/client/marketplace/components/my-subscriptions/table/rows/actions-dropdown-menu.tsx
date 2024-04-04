@@ -16,16 +16,6 @@ export default function ActionsDropdownMenu( props: {
 } ) {
 	const controls = [
 		{
-			title: __( 'Manage on Woo.com', 'woocommerce' ),
-			icon: <></>,
-			onClick: () => {
-				window.open(
-					'https://woo.com/my-account/my-subscriptions',
-					'_blank'
-				);
-			},
-		},
-		{
 			title: __( 'Manage in Plugins', 'woocommerce' ),
 			icon: <></>,
 			onClick: () => {
@@ -33,6 +23,21 @@ export default function ActionsDropdownMenu( props: {
 			},
 		},
 	];
+
+	if ( ! props.subscription.is_shared ) {
+		controls.unshift(
+			{
+				title: __( 'Manage on Woo.com', 'woocommerce' ),
+				icon: <></>,
+				onClick: () => {
+					window.open(
+						'https://woo.com/my-account/my-subscriptions',
+						'_blank'
+					);
+				},
+			},
+		);
+	}
 
 	if ( props.subscription.documentation_url ) {
 		controls.unshift( {
