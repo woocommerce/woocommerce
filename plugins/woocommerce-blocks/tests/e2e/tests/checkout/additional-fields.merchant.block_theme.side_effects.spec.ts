@@ -303,11 +303,11 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			.click();
 
 		await admin.page
-			.getByRole( 'heading', { name: 'Shipping Edit' } )
+			.getByRole( 'heading', { name: 'Billing Edit' } )
 			.getByRole( 'link' )
 			.click();
 
-		// Change all the shipping details
+		// Change all the billing details
 		await admin.page
 			.getByRole( 'textbox', {
 				name: 'Government ID',
