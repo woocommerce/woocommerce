@@ -565,6 +565,7 @@ jQuery( function( $ ) {
 
 						if (
 							typeof wc_checkout_params === 'object' &&
+							wc_checkout_params !== null &&
 							wc_checkout_params.hasOwnProperty( 'i18n_checkout_error' ) &&
 							typeof wc_checkout_params.i18n_checkout_error === 'string' &&
 							wc_checkout_params.i18n_checkout_error.trim() !== ''
