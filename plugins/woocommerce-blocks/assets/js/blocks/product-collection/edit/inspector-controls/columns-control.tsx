@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -64,7 +64,7 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 
 	// Keep track of the last layout values so that we can switch back and forth
 	// without needing to serialize the previous value to the block.
-	const [ lastLayoutValue, setLastLayoutValue ] = useState(
+	const lastLayoutValue = useRef(
 		isAutoColumnLayout
 			? DEFAULT_LAYOUT_GRID_COLUMNS
 			: DEFAULT_LAYOUT_GRID_MINIMUM_COLUMN_WIDTH
@@ -76,14 +76,15 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 		// want to switch back to the other and not lose the value.
 		if ( value ) {
 			setTemplateLayout( {
-				minimumColumnWidth: lastLayoutValue as string,
+				minimumColumnWidth: lastLayoutValue.current as string,
 			} );
-			setLastLayoutValue( templateLayout.columnCount as number );
+			lastLayoutValue.current = templateLayout.columnCount as number;
 		} else {
 			setTemplateLayout( {
-				columnCount: lastLayoutValue as number,
+				columnCount: lastLayoutValue.current as number,
 			} );
-			setLastLayoutValue( templateLayout.minimumColumnWidth as string );
+			lastLayoutValue.current =
+				templateLayout.minimumColumnWidth as string;
 		}
 
 		setIsAutoColumnLayout( value );
