@@ -9,6 +9,11 @@
 		box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
 		width: 257px;
 	}
+
+	.components-card__footer {
+		display: none;
+	}
+
 	.tour-kit-frame__container {
 		box-shadow: none;
 		background: none;
@@ -23,6 +28,7 @@
 		background-repeat: no-repeat;
 		background-position-x: center;
 		background-position-y: 5px;
+		padding-bottom: 24px;
 	}
 	.woocommerce-tour-kit-step-navigation {
 		display: none;
