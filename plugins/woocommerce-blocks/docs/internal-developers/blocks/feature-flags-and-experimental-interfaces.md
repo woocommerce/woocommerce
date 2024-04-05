@@ -6,7 +6,7 @@
     -   [Feature plugin flag](#feature-plugin-flag)
     -   [Experimental flag](#experimental-flag)
 -   [Features behind flags](#features-behind-flags)
-    -   [Feature plugin flag](#feature-plugin-flag-1)
+    -   [Feature plugin flag](#feature-plugin-flag)
 -   [Processes and commands that use a flag](#processes-and-commands-that-use-a-flag)
 -   [Usages of `__experimental` prefix](#usages-of-__experimental-prefix)
     -   [PHP filters and actions](#php-filters-and-actions)
