@@ -256,11 +256,8 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
-
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
-			add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
-		}
+		add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
+		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -322,6 +319,10 @@ final class WooCommerce {
 	 * Set default option values for launch your store task.
 	 */
 	public function add_lys_default_values() {
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+			return;
+		}
+
 		$is_new_install = current_action() === 'woocommerce_newly_installed';
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
@@ -435,7 +436,6 @@ final class WooCommerce {
 		 * The SSR in the name is preserved for bw compatibility, as this was initially used in System Status Report.
 		 */
 		$this->define( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE', 'none' );
-
 	}
 
 	/**
