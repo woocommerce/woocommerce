@@ -62,7 +62,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		global $wpdb;
-		$table_name           = self::get_db_table_name();
+		$table_name = self::get_db_table_name();
+
 		// Using wp_woocommerce_tax_rates table limits the result to only the existing tax rates and
 		// omit the hitorical records which differs from the porpuse of wp_wc_order_tax_lookup table.
 		// So in order to get the same data present in wp_woocommerce_tax_rates without braking the
@@ -241,7 +242,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( 'tax_code' === $order_by ) {
 			return "{$wpdb->prefix}woocommerce_order_items.order_item_name";
 		} elseif ( 'rate' === $order_by ) {
-			return "tax_rate";
+			return 'tax_rate';
 		}
 
 		return $order_by;
