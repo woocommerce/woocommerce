@@ -120,7 +120,7 @@ class LaunchYourStore {
 		}
 
 		$link       = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
-		$rest_url   = rest_url( 'wc-admin/launch-your-store/dismiss-coming-soon-banner' );
+		$rest_url   = rest_url( 'wp/v2/users/' . $current_user_id );
 		$rest_nonce = wp_create_nonce( 'wp_rest' );
 
 		$text = sprintf(
@@ -151,5 +151,12 @@ class LaunchYourStore {
 				'show_in_rest' => true,
 			)
 		);
+
+		register_meta( 'user', 'woocommerce_coming_soon_banner_dismissed', array(
+			'type'         => 'string',
+			'description'  => 'Indicate wheter user has dismissed coming soon notice or not',
+			'single'       => true,
+			'show_in_rest' => true,
+		) );
 	}
 }

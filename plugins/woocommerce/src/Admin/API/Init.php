@@ -134,11 +134,6 @@ class Init {
 
 			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
-
-			if ( Features::is_enabled( 'launch-your-store' ) ) {
-				$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-			}
-
 			$controllers = array_merge( $controllers, $analytics_controllers, $product_form_controllers );
 		}
 
