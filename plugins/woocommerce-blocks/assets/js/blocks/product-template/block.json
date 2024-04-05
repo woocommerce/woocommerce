@@ -26,6 +26,11 @@
 		"layout": {
 			"allowEditing": false
 		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
 		"color": {
 			"gradients": true,
 			"link": true,
