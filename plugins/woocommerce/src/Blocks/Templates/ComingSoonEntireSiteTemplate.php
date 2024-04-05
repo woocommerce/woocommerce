@@ -46,8 +46,7 @@ class ComingSoonEntireSiteTemplate extends AbstractPageTemplate {
 	 * @return \WP_Post|null Post object or null.
 	 */
 	protected function get_placeholder_page() {
-		// This isn't quite right. We need to get the page ID from the option.
-		$page_id = wc_get_page_id( 'coming-soon-entire-site' );
+		$page_id = get_option( 'woocommerce_coming_soon_page_id' );
 		return $page_id ? get_post( $page_id ) : null;
 	}
 
