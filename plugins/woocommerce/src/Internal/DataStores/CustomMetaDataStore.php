@@ -97,7 +97,7 @@ abstract class CustomMetaDataStore {
 			)
 		);
 		if ( $successful ) {
-			$this->delete_cache_for_objects( array( $object->get_id() ) );
+			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
 		}
 
 		return $successful;
@@ -133,7 +133,7 @@ abstract class CustomMetaDataStore {
 
 		$insert_id = $result ? (int) $wpdb->insert_id : false;
 		if ( false !== $insert_id ) {
-			$this->delete_cache_for_objects( array( $object->get_id() ) );
+			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
 		}
 		return $insert_id;
 	}
@@ -173,7 +173,7 @@ abstract class CustomMetaDataStore {
 
 		$is_successful = 1 === $result;
 		if ( $is_successful ) {
-			$this->delete_cache_for_objects( array( $object->get_id() ) );
+			$this->invalidate_cache_for_objects( array( $object->get_id() ) );
 		}
 		return $is_successful;
 	}
@@ -331,17 +331,34 @@ abstract class CustomMetaDataStore {
 	/**
 	 * Delete cached meta data for the given object_ids.
 	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
 	 * @param array $object_ids The object_ids to delete cache for.
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.
 	 */
-	public function delete_cache_for_objects( array $object_ids ): array {
+	public function invalidate_cache_for_objects( array $object_ids ): array {
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
 		foreach ( $object_ids as $object_id ) {
 			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
 		}
 		return $return_values;
+	}
+
+	/**
+	 * Invalidate all the cache used by this data store.
+	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
+	 * @return bool Whether the cache as fully invalidated.
+	 */
+	public function invalidate_all_cache(): bool {
+		/** @var WPCacheEngine $cache_engine */
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		return $cache_engine->delete_cache_group( $this->get_cache_group() );
 	}
 }

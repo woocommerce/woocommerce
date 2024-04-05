@@ -209,6 +209,9 @@ class DataSynchronizer implements BatchProcessorInterface {
 		foreach ( $table_names as $table_name ) {
 			$this->database_util->drop_database_table( $table_name );
 		}
+		if ( is_callable( array( $this->data_store, 'invalidate_all_cache' ) ) ) {
+			$this->data_store->invalidate_all_cache();
+		}
 		delete_option( self::ORDERS_TABLE_CREATED );
 	}
 

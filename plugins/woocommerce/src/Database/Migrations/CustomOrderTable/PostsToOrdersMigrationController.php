@@ -101,7 +101,7 @@ class PostsToOrdersMigrationController {
 
 			$this->handle_migration_error( $order_post_ids, $errors, $exception, $using_transactions, $name );
 			if ( ! $using_transactions ) {
-				wc_get_container()->get( OrdersTableDataStore::class )->delete_cache_for_objects( $order_post_ids );
+				wc_get_container()->get( OrdersTableDataStore::class )->invalidate_cache_for_objects( $order_post_ids );
 			}
 			return;
 		}
@@ -109,7 +109,7 @@ class PostsToOrdersMigrationController {
 		if ( $using_transactions ) {
 			$this->commit_transaction();
 		}
-		wc_get_container()->get( OrdersTableDataStore::class )->delete_cache_for_objects( $order_post_ids );
+		wc_get_container()->get( OrdersTableDataStore::class )->invalidate_cache_for_objects( $order_post_ids );
 	}
 
 	/**

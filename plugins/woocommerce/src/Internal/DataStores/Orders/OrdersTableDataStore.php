@@ -539,23 +539,43 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Delete cached order data for the given object_ids.
 	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
 	 * @param array $object_ids The IDs of the orders to remove cache.
 	 *
 	 * @return bool[] Array of return values, grouped by the object_id. Each value is either true on success, or false
 	 *                if the contents were not deleted.
 	 */
-	public function delete_cache_for_objects( array $object_ids ): array {
+	public function invalidate_cache_for_objects( array $object_ids ): array {
 		$cache_engine  = wc_get_container()->get( WPCacheEngine::class );
 		$return_values = array();
 		foreach ( $object_ids as $object_id ) {
 			$return_values[ $object_id ] = $cache_engine->delete_cached_object( $object_id, $this->get_cache_group() );
 		}
 		$successfully_deleted_cache_object_ids = array_keys( array_filter( $return_values ) );
-		$cache_deletion_results                = $this->data_store_meta->delete_cache_for_objects( $successfully_deleted_cache_object_ids );
+		$cache_deletion_results                = $this->data_store_meta->invalidate_cache_for_objects( $successfully_deleted_cache_object_ids );
 		foreach ( $cache_deletion_results as $object_id => $meta_cache_was_deleted ) {
 			$return_values[ $object_id ] = $return_values[ $object_id ] && $meta_cache_was_deleted;
 		}
 		return $return_values;
+	}
+
+	/**
+	 * Invalidate all the cache used by this data store.
+	 *
+	 * @internal This method should only be used by internally and in cases where the CRUD operations of this datastore
+	 *           are bypassed for performance purposes. This interface is not guaranteed.
+	 *
+	 * @return bool Whether the cache as fully invalidated.
+	 */
+	public function invalidate_all_cache(): bool {
+		/** @var WPCacheEngine $cache_engine */
+		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$orders_invalidated = $cache_engine->delete_cache_group( $this->get_cache_group() );
+		$meta_invalidated   = $this->data_store_meta->invalidate_all_cache();
+
+		return $orders_invalidated && $meta_invalidated;
 	}
 
 
@@ -1910,7 +1930,7 @@ FROM $order_meta_table
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
-		$this->delete_cache_for_objects( array( $order->get_id() ) );
+		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2351,7 +2371,7 @@ FROM $order_meta_table
 				array( '%d' )
 			);
 
-			$this->delete_cache_for_objects( $child_order_ids );
+			$this->invalidate_cache_for_objects( $child_order_ids );
 		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
@@ -2409,7 +2429,7 @@ FROM $order_meta_table
 			wp_trash_post( $order->get_id() );
 		}
 
-		$this->delete_cache_for_objects( array( $order->get_id() ) );
+		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
 	}
 
 	/**
@@ -2524,7 +2544,7 @@ FROM $order_meta_table
 			$order_cache->remove( $order_id );
 		}
 
-		$this->delete_cache_for_objects( array( $order_id ) );
+		$this->invalidate_cache_for_objects( array( $order_id ) );
 	}
 
 	/**
@@ -3120,7 +3140,7 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
-			$this->delete_cache_for_objects( array( $order->get_id() ) );
+			$this->invalidate_cache_for_objects( array( $order->get_id() ) );
 		}
 
 		return false;

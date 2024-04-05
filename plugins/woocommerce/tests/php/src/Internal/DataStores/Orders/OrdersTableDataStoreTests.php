@@ -2574,7 +2574,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 			);
 
 			// We have to clear the cache after a direct DB update.
-			$this->sut->delete_cache_for_objects( ( array( $refund->get_id() ) ) );
+			$this->sut->invalidate_cache_for_objects( ( array( $refund->get_id() ) ) );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -3357,8 +3357,7 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$order_id = $order->get_id();
 
 		$wpdb->query( "INSERT INTO {$order_meta_table} (order_id, meta_key, meta_value) VALUES ({$order_id}, '{$meta_key}', '{$meta_value}')" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-		$order->add_meta_data( 'extra_meta_key', 'standard_meta', true ); // Trigger a meta cache purge since the above was a direct DB write.
-		$order->save();
+		$order->save(); // Trigger a meta cache purge since the above was a direct DB write.
 
 		// Test fetching an order with meta data containing an object of a non-existent class.
 		$fetched_order = wc_get_order( $order->get_id() );
