@@ -64,16 +64,10 @@ mockedUseSelect.mockImplementation(
 									tokenId: 4,
 									expires: '1/2099',
 									method: {
-										brand: 'Visa',
+										brand: 'Cartes Bancaires',
 										gateway:
 											'can-pay-true-test-payment-method',
 										last4: '1001',
-										is_co_branded: true,
-										networks: [
-											'Visa',
-											'Cartes Bancaires',
-										],
-										preferred_network: 'Cartes Bancaires',
 									},
 								},
 							],
@@ -124,7 +118,7 @@ describe( 'SavedPaymentMethodOptions', () => {
 		// Fourth saved token for can-pay-true-test-payment-method - co-branded credit card.
 		expect(
 			screen.getByText(
-				'Visa / Cartes Bancaires ending in 1001 (expires 1/2099, Cartes Bancaires preferred)'
+				'Cartes Bancaires ending in 1001 (expires 1/2099)'
 			)
 		).toBeInTheDocument();
 	} );
