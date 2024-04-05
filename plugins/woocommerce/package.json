@@ -88,6 +88,7 @@
 					"src/**/*.php",
 					"templates/**/*.php",
 					"tests/php/**/*.php",
+					"tests/legacy/unit-tests/**/*.php",
 					"tests/unit-tests/**/*.php"
 				]
 			},
@@ -103,6 +104,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -120,6 +122,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -140,6 +143,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -160,6 +164,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -188,6 +193,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						"tests/e2e-pw/**"
 					],
@@ -207,6 +213,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						"tests/api-core-tests/**"
 					],
@@ -226,7 +233,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
-						"tests/unit-tests/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/performance/**"
 					],
 					"testEnv": {
@@ -277,7 +284,7 @@
 		"mocha": "7.2.0",
 		"nodemon": "^3.0.2",
 		"prettier": "npm:wp-prettier@^2.8.5",
-		"stylelint": "^13.13.1",
+		"stylelint": "^14.16.1",
 		"typescript": "^5.3.3",
 		"uuid": "^8.3.2",
 		"webpack": "5.70.0",

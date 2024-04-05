@@ -136,7 +136,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 				),
 
 				Features::is_enabled( 'launch-your-store' ) ? array(
-					'title'    => __( 'Coming soon', 'woocommerce' ),
+					'title'    => __( 'Coming soon page', 'woocommerce' ),
 					'desc'     => __( 'TBD', 'woocommerce' ),
 					'id'       => 'woocommerce_coming_soon_page_id',
 					'type'     => 'single_select_page_with_search',
