@@ -21,13 +21,16 @@
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
+<!-- wp:spacer {"height":"50px"} -->
+<div style="height:50px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
 <!-- wp:post-content {"align":"wide"} /-->
 <!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|10"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--10)"><!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"0"}}}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:0"><!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast-2","fontSize":"small"} -->
 <p class="has-text-align-center has-contrast-2-color has-text-color has-link-color has-small-font-size">
     Powered by
-    <a href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
+    <a style="text-decoration: none;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
 </p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
@@ -37,5 +40,14 @@
     body.page-template-coming-soon-entire-site {
         background-color: #bea0f2;
     }
+    .page-template-coming-soon-entire-site .wp-block-loginout {
+        background-color: #000000;
+        padding: 7px 8px;
+        border-radius: 6px;
+    }
+    .page-template-coming-soon-entire-site .wp-block-loginout a {
+        color: #ffffff;
+        text-decoration: none;
+        line-height: 26px;
+    }
 </style>
-    
