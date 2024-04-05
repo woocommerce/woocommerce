@@ -5,6 +5,7 @@ declare global {
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
+			currentUserId: number;
 		};
 		wcAdminFeatures: {
 			'activity-panels': boolean;

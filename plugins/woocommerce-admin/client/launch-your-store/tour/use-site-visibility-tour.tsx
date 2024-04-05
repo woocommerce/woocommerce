@@ -1,31 +1,28 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, dispatch } from '@wordpress/data';
 import { useState } from 'react';
 
 export const LYS_TOUR_HIDDEN = 'woocommerce_launch_your_store_tour_hidden';
-
 export const useSiteVisibilityTour = () => {
 	const [ showTour, setShowTour ] = useState( true );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
 	const { shouldTourBeShown } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
-
+		const { getCurrentUser } = select( 'core' );
 		const wasTourShown =
-			getOption( LYS_TOUR_HIDDEN ) === 'yes' ||
-			! hasFinishedResolution( 'getOption', [ LYS_TOUR_HIDDEN ] );
-
+			( getCurrentUser() as { meta?: { [ key: string ]: string } } )
+				?.meta?.[ LYS_TOUR_HIDDEN ] === 'yes';
 		return {
 			shouldTourBeShown: ! wasTourShown,
 		};
 	} );
 
 	const onClose = () => {
-		updateOptions( {
-			[ LYS_TOUR_HIDDEN ]: 'yes',
+		dispatch( 'core' ).saveUser( {
+			id: window?.wcSettings?.currentUserId,
+			meta: {
+				[ LYS_TOUR_HIDDEN ]: 'yes',
+			},
 		} );
 	};
 

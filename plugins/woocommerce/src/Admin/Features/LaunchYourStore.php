@@ -18,6 +18,7 @@ class LaunchYourStore {
 			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
+		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 	}
 
 	/**
@@ -133,5 +134,14 @@ class LaunchYourStore {
 		);
 		// phpcs:ignore
 		echo "<div id='coming-soon-footer-banner'>$text</div>";
+	}
+
+	public function register_launch_your_store_user_meta_fields() {
+		register_meta( 'user', 'woocommerce_launch_your_store_tour_hidden', array(
+			'type'         => 'string',
+			'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+			'single'       => true,
+			'show_in_rest' => true,
+		) );
 	}
 }
