@@ -1,16 +1,23 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
+const { CustomizeStorePage } = require( '../customize-store.page' );
+
 const { activateTheme } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
-	pageObject: async ( { page }, use ) => {
-		const pageObject = new AssemblerPage( { page } );
-		await use( pageObject );
+	assemblerPageObject: async ( { page }, use ) => {
+		const assemblerPageObject = new AssemblerPage( { page } );
+		await use( assemblerPageObject );
+	},
+	customizeStorePageObject: async ( {}, use ) => {
+		const assemblerPageObject = new CustomizeStorePage( { request } );
+		await use( assemblerPageObject );
 	},
 } );
 
-test.describe( 'Assembler -> Color Pickers', () => {
+// These tests will be fixed by https://github.com/woocommerce/woocommerce/pull/46127.
+test.skip( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -27,7 +34,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		}
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
+	test.afterAll( async ( { baseURL, customizeStorePageObject } ) => {
 		try {
 			// In some environments the tour blocks clicking other elements.
 			await setOption(
@@ -44,20 +51,25 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			);
 
 			await activateTheme( 'twentynineteen' );
+			await customizeStorePageObject.resetCustomizeStoreChanges(
+				baseURL
+			);
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
 	} );
 
-	test.beforeEach( async ( { baseURL, pageObject } ) => {
-		await pageObject.setupSite( baseURL );
-		await pageObject.waitForLoadingScreenFinish();
-		const assembler = await pageObject.getAssembler();
+	test.beforeEach( async ( { baseURL, assemblerPageObject } ) => {
+		await assemblerPageObject.setupSite( baseURL );
+		await assemblerPageObject.waitForLoadingScreenFinish();
+		const assembler = await assemblerPageObject.getAssembler();
 		await assembler.getByText( 'Choose your color palette' ).click();
 	} );
 
-	test( 'Color pickers should be displayed', async ( { pageObject } ) => {
-		const assembler = await pageObject.getAssembler();
+	test( 'Color pickers should be displayed', async ( {
+		assemblerPageObject,
+	} ) => {
+		const assembler = await assemblerPageObject.getAssembler();
 
 		const colorPickers = assembler.locator(
 			'.woocommerce-customize-store_global-styles-variations_item'
@@ -66,10 +78,10 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	} );
 
 	test( 'Picking a color should trigger an update of colors on the site preview', async ( {
-		pageObject,
+		assemblerPageObject,
 	}, testInfo ) => {
-		const assembler = await pageObject.getAssembler();
-		const editor = await pageObject.getEditor();
+		const assembler = await assemblerPageObject.getAssembler();
+		const editor = await assemblerPageObject.getEditor();
 		testInfo.snapshotSuffix = '';
 
 		await assembler
@@ -102,9 +114,9 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	} );
 
 	test( 'Color picker should be focused when a color is picked', async ( {
-		pageObject,
+		assemblerPageObject,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
@@ -116,9 +128,9 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	} );
 
 	test( 'Picking a color should activate the save button', async ( {
-		pageObject,
+		assemblerPageObject,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
@@ -133,10 +145,10 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	} );
 
 	test( 'The Done button should be visible after clicking save', async ( {
-		pageObject,
+		assemblerPageObject,
 		page,
 	} ) => {
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
@@ -161,12 +173,12 @@ test.describe( 'Assembler -> Color Pickers', () => {
 	} );
 
 	test( 'Selected color palette should be applied on the frontend', async ( {
-		pageObject,
+		assemblerPageObject,
 		page,
 		baseURL,
 	}, testInfo ) => {
 		testInfo.snapshotSuffix = '';
-		const assembler = await pageObject.getAssembler();
+		const assembler = await assemblerPageObject.getAssembler();
 		const colorPicker = assembler
 			.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: add merchant e2e tests to cover inserting WooCoommerce patterns

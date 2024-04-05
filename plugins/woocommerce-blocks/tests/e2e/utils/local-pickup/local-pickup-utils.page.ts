@@ -4,6 +4,7 @@
 import { Page } from '@playwright/test';
 import { Admin } from '@wordpress/e2e-test-utils-playwright';
 import { cli } from '@woocommerce/e2e-utils';
+import { Notice } from '@wordpress/notices';
 
 type Location = {
 	name: string;
@@ -32,6 +33,17 @@ export class LocalPickupUtils {
 
 	async saveLocalPickupSettings() {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
+		await this.page.waitForFunction( () => {
+			return window.wp.data
+				.select( 'core/notices' )
+				.getNotices()
+				.some(
+					( notice: Notice ) =>
+						notice.status === 'success' &&
+						notice.content ===
+							'Local Pickup settings have been saved.'
+				);
+		} );
 	}
 
 	async enableLocalPickup() {
@@ -67,6 +79,12 @@ export class LocalPickupUtils {
 			.getByLabel( 'Add a price for customers who choose local pickup' )
 			.uncheck();
 
+		await this.saveLocalPickupSettings();
+	}
+
+	async setLocalPickupTitle( title: string ) {
+		await this.openLocalPickupSettings();
+		await this.page.getByLabel( 'Title' ).fill( title );
 		await this.saveLocalPickupSettings();
 	}
 

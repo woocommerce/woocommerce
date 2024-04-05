@@ -14,6 +14,7 @@ import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
+import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -154,7 +155,7 @@ export function BlockEditor( {
 		{ postType }
 	);
 
-	const { record: product } = useEntityRecord(
+	const { record: product } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId
