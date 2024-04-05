@@ -391,10 +391,10 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 		return $item;
 	}
 
-	$card_type                           = $payment_token->get_card_type();
-	$item['method']['last4']             = $payment_token->get_last4();
-	$item['method']['brand']             = ( ! empty( $card_type ) ? ucwords( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
-	$item['expires']                     = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
+	$card_type               = $payment_token->get_card_type();
+	$item['method']['last4'] = $payment_token->get_last4();
+	$item['method']['brand'] = ( ! empty( $card_type ) ? ucwords( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
+	$item['expires']         = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
 	return $item;
 }
