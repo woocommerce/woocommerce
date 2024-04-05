@@ -247,6 +247,15 @@
 		},
 		{
 			"dependencies": [
+				"glob"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.3.10"
+		},
+		{
+			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [

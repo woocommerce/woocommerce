@@ -43,7 +43,7 @@
 		"copy-webpack-plugin": "^10.2.4",
 		"core-js": "^3.34.0",
 		"css-loader": "^6.8.1",
-		"glob": "^7.2.3",
+		"glob": "^10.3.10",
 		"husky": "^9.0.11",
 		"jest": "~27.5.1",
 		"lint-staged": "^12.5.0",
