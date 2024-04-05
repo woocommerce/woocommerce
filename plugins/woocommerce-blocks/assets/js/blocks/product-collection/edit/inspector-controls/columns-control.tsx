@@ -32,11 +32,11 @@ import {
 	DEFAULT_LAYOUT_GRID_MINIMUM_COLUMN_WIDTH,
 } from '../../constants';
 
-const autoColumnsLabel = __( 'Column Mode', 'woocommerce' );
+const columnModeLabel = __( 'Column Mode', 'woocommerce' );
 const autoModeLabel = __( 'Auto', 'woocommerce' );
 const manualModeLabel = __( 'Manual', 'woocommerce' );
-const minimumColumnWidthLabel = __( 'Minimum Column Width', 'woocommerce' );
-const columnsLabel = __( 'Columns', 'woocommerce' );
+const minimumColumnWidthLabel = __( 'Min. Column Width', 'woocommerce' );
+const columnCountLabel = __( 'Columns', 'woocommerce' );
 
 const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 	const templateLayout = props.templateLayout as ProductCollectionLayoutGrid;
@@ -46,7 +46,7 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 	// layout. When they're using a minimum width we
 	// are in auto mode, and if nothing is set, we
 	// will just default to auto mode.
-	const [ autoColumns, setAutoColumns ] = useState(
+	const [ isAutoColumnLayout, setIsAutoColumnLayout ] = useState(
 		templateLayout.minimumColumnWidth !== undefined ||
 			templateLayout.columnCount === undefined
 	);
@@ -64,29 +64,29 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 
 	// Keep track of the last layout values so that we can switch back and forth
 	// without needing to serialize the previous value to the block.
-	const [ lastLayout, setLastLayout ] = useState(
-		autoColumns
+	const [ lastLayoutValue, setLastLayoutValue ] = useState(
+		isAutoColumnLayout
 			? DEFAULT_LAYOUT_GRID_COLUMNS
 			: DEFAULT_LAYOUT_GRID_MINIMUM_COLUMN_WIDTH
 	);
 
-	const onAutoColumnsChange = ( value: boolean ) => {
+	const onIsAutoColumnLayout = ( value: boolean ) => {
 		// When we switch back and forth we should restore the last layout value
 		// to the template layout and store the opposite value in case we
 		// want to switch back to the other and not lose the value.
 		if ( value ) {
 			setTemplateLayout( {
-				minimumColumnWidth: lastLayout as string,
+				minimumColumnWidth: lastLayoutValue as string,
 			} );
-			setLastLayout( templateLayout.columnCount as number );
+			setLastLayoutValue( templateLayout.columnCount as number );
 		} else {
 			setTemplateLayout( {
-				columnCount: lastLayout as number,
+				columnCount: lastLayoutValue as number,
 			} );
-			setLastLayout( templateLayout.minimumColumnWidth as string );
+			setLastLayoutValue( templateLayout.minimumColumnWidth as string );
 		}
 
-		setAutoColumns( value );
+		setIsAutoColumnLayout( value );
 	};
 
 	const onColumnCountChange = ( value: number ) =>
@@ -108,14 +108,14 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 	return (
 		<>
 			<ToolsPanelItem
-				label={ autoColumnsLabel }
+				label={ columnModeLabel }
 				hasValue={ () => true }
 				isShownByDefault
 			>
 				<ToggleGroupControl
-					label={ autoColumnsLabel }
-					value={ autoColumns }
-					onChange={ onAutoColumnsChange }
+					label={ columnModeLabel }
+					value={ isAutoColumnLayout }
+					onChange={ onIsAutoColumnLayout }
 					isBlock
 				>
 					<ToggleGroupControlOption
@@ -129,7 +129,7 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 				</ToggleGroupControl>
 			</ToolsPanelItem>
 
-			{ autoColumns && (
+			{ isAutoColumnLayout && (
 				<ToolsPanelItem
 					label={ minimumColumnWidthLabel }
 					hasValue={ () => true }
@@ -143,14 +143,14 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 				</ToolsPanelItem>
 			) }
 
-			{ ! autoColumns && (
+			{ ! isAutoColumnLayout && (
 				<ToolsPanelItem
-					label={ columnsLabel }
+					label={ columnCountLabel }
 					hasValue={ () => true }
 					isShownByDefault
 				>
 					<RangeControl
-						label={ columnsLabel }
+						label={ columnCountLabel }
 						onChange={ onColumnCountChange }
 						value={ templateLayout.columnCount as number }
 						min={ 2 }

@@ -18,7 +18,6 @@ import {
 	TProductCollectionOrder,
 	TProductCollectionOrderBy,
 	ProductCollectionQuery,
-	ProductCollectionLayout,
 	LayoutOptions,
 	ProductCollectionLayoutGrid,
 } from './types';

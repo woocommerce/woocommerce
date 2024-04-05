@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockInstance, createBlock } from '@wordpress/blocks';
+import { BlockInstance } from '@wordpress/blocks';
 import { useInnerBlocksProps, useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -26,7 +26,7 @@ const migrateDisplayLayout = (
 
 	const { type, columns, shrinkColumns } = displayLayout;
 
-	// Convert custom displayLatout to templateLayout which will then
+	// Convert custom displayLayout to templateLayout which will then
 	// be applied automatically to the template block.
 	let templateLayout: ProductCollectionLayout;
 	if ( type === 'flex' ) {
