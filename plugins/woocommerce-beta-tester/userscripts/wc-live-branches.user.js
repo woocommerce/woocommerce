@@ -268,8 +268,8 @@
 
 			if ( enabledFeatureFlags.length ) {
 				query.push(
-					`woocommerce-beta-tester-feature-flags=${ enabledFeatureFlags.join(
-						','
+					`woocommerce-beta-tester-feature-flags=${ encodeURIComponent(
+						enabledFeatureFlags.join( ',' )
 					) }`
 				);
 			}
