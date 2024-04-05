@@ -98,12 +98,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 		}
 
-		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$this->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_tax_rates ON default_results.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id" );
-		} else {
-			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
-			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
-		}
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
 	}
 
 	/**
@@ -180,28 +176,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 				$total_results = count( $query_args['taxes'] );
 				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
-
-				$inner_selections = array( 'tax_rate_id', 'total_tax', 'order_tax', 'shipping_tax', 'orders_count' );
-				$outer_selections = array( 'name', 'tax_rate', 'country', 'state', 'priority' );
-
-				$selections      = $this->selected_columns( array( 'fields' => $inner_selections ) );
-				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, array( 'tax_rate_id' ), $outer_selections );
-				$ids_table       = $this->get_ids_table( $query_args['taxes'], 'tax_rate_id' );
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $this->selected_columns( array( 'fields' => $inner_selections ) ) );
-				$this->add_sql_clause( 'select', $join_selections );
-				$this->add_sql_clause( 'from', '(' );
-				$this->add_sql_clause( 'from', $this->subquery->get_query_statement() );
-				$this->add_sql_clause( 'from', ") AS {$table_name}" );
-				$this->add_sql_clause(
-					'right_join',
-					"RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.tax_rate_id = {$table_name}.tax_rate_id"
-				);
-
-				$taxes_query = $this->get_query_statement();
 			} else {
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (
@@ -215,13 +189,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 					return $data;
 				}
-
-				$this->subquery->clear_sql_clause( 'select' );
-				$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
-				$this->subquery->add_sql_clause( 'order_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name" );
-				$taxes_query = $this->subquery->get_query_statement();
 			}
+
+			$this->subquery->clear_sql_clause( 'select' );
+			$this->subquery->add_sql_clause( 'select', $this->selected_columns( $query_args ) );
+			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$this->subquery->add_sql_clause( 'order_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name" );
+
+			$taxes_query = $this->subquery->get_query_statement();
 
 			$tax_data = $wpdb->get_results(
 				$taxes_query,
