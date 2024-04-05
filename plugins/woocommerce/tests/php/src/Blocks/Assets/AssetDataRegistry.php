@@ -49,14 +49,14 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 	}
 
 	public function test_invalid_key_on_adding_data() {
-		$this->expectException( InvalidArgumentException::class );
-		$this->registry->add( [ 'some_value' ], 'foo' );
+		$this->expectWarning();
+		$this->registry->add_data( [ 'some_value' ], 'foo' );
 	}
 
 	public function test_already_existing_key_on_adding_data() {
-		$this->registry->add( 'foo', 'bar' );
+		$this->registry->add_data( 'foo', 'bar' );
 		$this->expectWarning();
-		$this->registry->add( 'foo', 'yar' );
+		$this->registry->add_data( 'foo', 'yar' );
 	}
 
 	/**
