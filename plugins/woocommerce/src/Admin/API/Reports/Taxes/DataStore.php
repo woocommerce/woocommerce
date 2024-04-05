@@ -63,6 +63,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		global $wpdb;
 		$table_name           = self::get_db_table_name();
+		// Using wp_woocommerce_tax_rates table limits the result to only the existing tax rates and
+		// omit the hitorical records which differs from the porpuse of wp_wc_order_tax_lookup table.
+		// So in order to get the same data present in wp_woocommerce_tax_rates without braking the
+		// API contract the values are now get from wp_woocommerce_order_items and wp_woocommerce_order_itemmeta.
+		// And given that country, state and priority are not separate columns within the woocommerce_order_items
+		// a split to order_item_name column value is required to separate those values. This is not ideal,
+		// but given this query is paginated and cached, then it is not a big deal. There is always room for
+		// improvements here.
 		$this->report_columns = array(
 			'tax_rate_id'  => "{$table_name}.tax_rate_id",
 			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
