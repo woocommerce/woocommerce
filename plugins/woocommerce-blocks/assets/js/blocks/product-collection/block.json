@@ -43,6 +43,7 @@
 	"providesContext": {
 		"queryId": "queryId",
 		"query": "query",
+		"displayLayout": "displayLayout",
 		"templateLayout": "templateLayout",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection"
