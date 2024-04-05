@@ -12,9 +12,9 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	cot_status,
+	hpos_status,
 	admin_orders_base_url,
-	cot_admin_orders_base_url,
+	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 	customer_user_id,
@@ -31,11 +31,11 @@ const month = date.toJSON().slice( 5, 7 );
 const year = date.toJSON().slice( 0, 4 );
 const currentDate = `${ year }${ month }`;
 
-// Change URL if COT is enabled and being used
+// Change URL if HPOS is enabled and being used
 let admin_orders_base;
 let admin_filter_month_assert;
-if ( cot_status === true ) {
-	admin_orders_base = cot_admin_orders_base_url;
+if ( hpos_status === true ) {
+	admin_orders_base = hpos_admin_orders_base_url;
 	admin_filter_month_assert = `selected='selected' value="${ currentDate }">`;
 } else {
 	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;

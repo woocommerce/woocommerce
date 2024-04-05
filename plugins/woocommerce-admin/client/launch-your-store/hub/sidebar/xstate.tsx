@@ -11,14 +11,8 @@ import {
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
-import { getNewPath, getQuery, navigateTo } from '@woocommerce/navigation';
-import { resolveSelect } from '@wordpress/data';
-import {
-	ONBOARDING_STORE_NAME,
-	TaskListType,
-	TaskType,
-} from '@woocommerce/data';
-import { applyFilters } from '@wordpress/hooks';
+import { getQuery, navigateTo } from '@woocommerce/navigation';
+import { TaskListType, TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,6 +21,7 @@ import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import type { LaunchYourStoreComponentProps } from '..';
 import type { mainContentMachine } from '../main-content/xstate';
 import { updateQueryParams, createQueryParamsListener } from '../common';
+import { taskClickedAction, getLysTasklist } from './tasklist';
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
@@ -51,31 +46,6 @@ export type SidebarMachineEvents =
 const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
 } );
-
-const getLysTasklist = async () => {
-	const LYS_TASKS = [
-		'products',
-		'customize-store',
-		'woocommerce-payments',
-		'payments',
-		'shipping',
-		'tax',
-	];
-
-	const tasklist = await resolveSelect(
-		ONBOARDING_STORE_NAME
-	).getTaskListsByIds( [ 'setup' ] );
-	const visibleTasks: string[] = applyFilters(
-		'woocommerce_launch_your_store_tasklist_visible',
-		[ ...LYS_TASKS ]
-	) as string[];
-	return {
-		...tasklist[ 0 ],
-		tasks: tasklist[ 0 ].tasks.filter( ( task ) =>
-			visibleTasks.includes( task.id )
-		),
-	};
-};
 
 export const sidebarMachine = setup( {
 	types: {} as {
@@ -107,13 +77,7 @@ export const sidebarMachine = setup( {
 		},
 		taskClicked: ( { event } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
-				if ( event.task.actionUrl ) {
-					navigateTo( { url: event.task.actionUrl } );
-				} else {
-					navigateTo( {
-						url: getNewPath( { task: event.task.id }, '/', {} ),
-					} );
-				}
+				taskClickedAction( event );
 			}
 		},
 		openWcAdminUrl: ( { event } ) => {
