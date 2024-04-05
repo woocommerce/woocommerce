@@ -39,7 +39,7 @@ class LaunchYourStore {
 		);
 
 		if ( isset( $_POST['woocommerce_store_pages_only'] ) ) {
-			$this->possibly_update_coming_soon_page_content( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
+			$this->possibly_update_coming_soon_page( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
 		}
 
 		$at_least_one_saved = false;
@@ -64,7 +64,7 @@ class LaunchYourStore {
 	 * @param string $next_store_pages_only The next store pages only setting.
 	 * @return void
 	 */
-	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
+	public function possibly_update_coming_soon_page( $next_store_pages_only ) {
 		$option_name              = 'woocommerce_store_pages_only';
 		$current_store_pages_only = get_option( $option_name, null );
 
