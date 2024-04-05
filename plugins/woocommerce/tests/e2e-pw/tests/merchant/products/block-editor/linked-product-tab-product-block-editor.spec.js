@@ -94,7 +94,7 @@ test.describe( 'General tab', () => {
 				( [ selector, expectedCount ] ) =>
 					document.querySelectorAll( selector ).length ===
 					expectedCount,
-				[ '.woocommerce-product-list div[role="row"]', 5 ]
+				[ '.woocommerce-product-list div[role="row"]', 4 ]
 			);
 
 			const upsellsRows = page.locator(
@@ -103,7 +103,7 @@ test.describe( 'General tab', () => {
 
 			const upsellsRowsCount = await upsellsRows.count();
 
-			await expect( upsellsRowsCount ).toBe( 5 );
+			await expect( upsellsRowsCount ).toBe( 4 );
 
 			await page
 				.locator(
@@ -159,7 +159,7 @@ test.describe( 'General tab', () => {
 
 			const productsCount = await productsList.count();
 
-			await expect( productsCount ).toBe( 5 );
+			await expect( productsCount ).toBe( 4 );
 		} );
 	} );
 } );
