@@ -16,13 +16,6 @@ class ComingSoonEntireSiteTemplate extends AbstractPageTemplate {
 	const SLUG = 'page-coming-soon-entire-site';
 
 	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		parent::init();
-	}
-
-	/**
 	 * Returns the title of the template.
 	 *
 	 * @return string
