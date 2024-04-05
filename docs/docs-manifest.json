@@ -436,6 +436,15 @@
           "id": "b3e0b17ca74596e858c26887c1e4c8ee6c8f6102"
         },
         {
+          "post_title": "How to create custom product tours",
+          "menu_title": "How to create custom product tours",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/creating-custom-product-tours.md",
+          "hash": "0c92334bb1ac4da6f3e60c9d8ad7fbe8e0854c4c808049ce116df1e4d6f70329",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/creating-custom-product-tours.md",
+          "id": "7b6e4726678c0280f050dba86b9f7ea1fc417dea"
+        },
+        {
           "post_title": "Classes in WooCommerce",
           "menu_title": "Classes in WooCommerce",
           "tags": "reference",
@@ -461,6 +470,15 @@
           "hash": "6b3af5e8e96294df9625e843654adddcf97b26c81ec43b47c41be2b2ad835783",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/building-your-first-extension.md",
           "id": "278c2822fe06f1ab72499a757ef0c4981cfbffb5"
+        },
+        {
+          "post_title": "How to add custom product types to Add Products onboarding list",
+          "menu_title": "Add custom product types to Add Products onboarding list",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/extension-development/adding-custom-products-to-add-products-onboarding-list.md",
+          "hash": "60e50ef5d7e2ac6d0745c31031140df1dbb3c1b8724230cab1eaedebe3814688",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/extension-development/adding-custom-products-to-add-products-onboarding-list.md",
+          "id": "747321d7fd2eb5c9c3351ea38374dfc80d3ec968"
         },
         {
           "post_title": "How to add actions and filters",
@@ -1204,5 +1222,5 @@
       "categories": []
     }
   ],
-  "hash": "494b0c55a9312202c17bf17b4e50f1f574790788c1606be4c61c99ad479b279a"
+  "hash": "9686cf59a38eb12478f2cde1c5bd214beec5ed30b48e3088a1fe44e327bc345c"
 }
