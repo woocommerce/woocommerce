@@ -25,8 +25,9 @@ import {
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { taskCompleteIcon, taskIcons } from './icons';
+import { taskCompleteIcon } from './icons';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
 export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	props
 ) => {
@@ -109,28 +110,25 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				<ItemGroup className="edit-site-sidebar-navigation-screen-essential-tasks__group">
 					{ tasklist &&
 						hasIncompleteTasks &&
-						tasklist.tasks.map( ( task ) => (
-							<SidebarNavigationItem
-								className={ classnames( task.id, {
-									'is-complete': task.isComplete,
-								} ) }
-								icon={
-									task.isComplete
-										? taskCompleteIcon
-										: taskIcons[ task.id ]
-								}
-								withChevron
-								key={ task.id }
-								onClick={ () => {
-									props.sendEventToSidebar( {
-										type: 'TASK_CLICKED',
-										task,
-									} );
-								} }
-							>
-								{ task.title }
-							</SidebarNavigationItem>
-						) ) }
+						tasklist.tasks.map( ( task ) =>
+							task.isComplete ? (
+								<CompletedTaskItem
+									task={ task }
+									key={ task.id }
+								/>
+							) : (
+								<IncompleteTaskItem
+									task={ task }
+									key={ task.id }
+									onClick={ () => {
+										props.sendEventToSidebar( {
+											type: 'TASK_CLICKED',
+											task,
+										} );
+									} }
+								/>
+							)
+						) }
 					{ tasklist && ! hasIncompleteTasks && (
 						<SidebarNavigationItem
 							className="all-tasks-complete"

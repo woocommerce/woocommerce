@@ -113,3 +113,4 @@ export {
 } from './product-section-layout';
 export { DisplayState } from './display-state';
 export { ProgressBar } from './progress-bar';
+export { ConfettiAnimation } from './confetti-animation';
