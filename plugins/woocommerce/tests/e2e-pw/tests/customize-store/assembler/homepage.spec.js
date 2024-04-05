@@ -43,7 +43,7 @@ test.describe( 'Assembler -> Homepage', () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( 'twentytwentythree' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
