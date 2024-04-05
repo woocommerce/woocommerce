@@ -16,7 +16,6 @@ import {
  */
 import TaxonomyItem from './taxonomy-item';
 import { ProductCollectionQuery } from '../../../types';
-import { DEFAULT_FILTERS } from '../../../constants';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;
