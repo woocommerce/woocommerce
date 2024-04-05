@@ -16,13 +16,6 @@ class ComingSoonStoreOnlyTemplate extends AbstractPageTemplate {
 	const SLUG = 'page-coming-soon-store-only';
 
 	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		parent::init();
-	}
-
-	/**
 	 * Returns the title of the template.
 	 *
 	 * @return string
