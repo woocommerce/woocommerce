@@ -139,7 +139,6 @@ const ColumnsControl = ( props: TemplateLayoutControlProps ) => {
 						label={ minimumColumnWidthLabel }
 						value={ templateLayout.minimumColumnWidth as string }
 						onChange={ onMinimumColumnWidthChange }
-						isDragEnabled={ false }
 					/>
 				</ToolsPanelItem>
 			) }
