@@ -4,7 +4,7 @@
 import { useEntityProp } from '@wordpress/core-data';
 import { dispatch, useSelect, select as wpSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import type { Product, ProductStatus } from '@woocommerce/data';
+import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -102,6 +102,21 @@ export function useProductManager< T = Product >( postType: string ) {
 		}
 	}
 
+	async function copyToDraft() {
+		try {
+			setIsSaving( true );
+			const duplicatedProduct = await dispatch(
+				PRODUCTS_STORE_NAME
+			).duplicateProduct( id );
+
+			return duplicatedProduct as T;
+		} catch ( error ) {
+			throw errorHandler( error as WPError, status );
+		} finally {
+			setIsSaving( false );
+		}
+	}
+
 	async function publish( extraProps: Partial< T > = {} ) {
 		const isPublished = status === 'publish' || status === 'future';
 
@@ -156,5 +171,6 @@ export function useProductManager< T = Product >( postType: string ) {
 		save,
 		publish,
 		trash,
+		copyToDraft,
 	};
 }
