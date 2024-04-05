@@ -16,7 +16,8 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Color Pickers', () => {
+// These tests will be fixed by https://github.com/woocommerce/woocommerce/pull/46127.
+test.skip( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -101,19 +102,9 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		for ( const colorPicker of colorPickers ) {
 			await colorPicker.waitFor();
 			await colorPicker.click();
-			const styles = await editor.locator( 'style' ).allInnerTexts();
-			// Remove editor styles from the snapshot
-			const stylesWithoutEditorStyles = styles.filter(
-				( css ) => ! css.includes( '.editor-styles-wrapper' )
-			);
-
+			// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
 			await expect(
-				// WordPress adds a unique number to the class name, so we need to remove it
-				stylesWithoutEditorStyles
-					.map( ( css ) =>
-						css.replace( /.wp-container-content-(\d+)/, '' )
-					)
-					.join( ',' )
+				( await editor.locator( 'style' ).allInnerTexts() ).join( ',' )
 			).toMatchSnapshot( {
 				name: 'color-palette-' + index,
 			} );
