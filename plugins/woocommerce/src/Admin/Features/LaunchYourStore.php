@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\WCAdminHelper;
  * Takes care of Launch Your Store related actions.
  */
 class LaunchYourStore {
+	const BANNER_DISMISS_USER_META_KEY = 'woocommerce_coming_soon_banner_dismissed';
 	/**
 	 * Constructor.
 	 */
@@ -100,7 +101,7 @@ class LaunchYourStore {
 			return false;
 		}
 
-		if ( get_user_meta( $current_user_id, 'woocommerce_coming_soon_banner_dismissed', true ) === 'yes' ) {
+		if ( get_user_meta( $current_user_id, self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes' ) {
 			return false;
 		}
 		// User must be an admin or editor.
@@ -158,5 +159,16 @@ class LaunchYourStore {
 			'single'       => true,
 			'show_in_rest' => true,
 		) );
+	
+	}
+	
+	/**
+	 * Reset 'woocommerce_coming_soon_banner_dismissed' user meta to 'no'.
+	 *
+	 * Runs when a user logs-in successfully.
+	 */
+	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
+		update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 	}
 }
+
