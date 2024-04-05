@@ -16,6 +16,7 @@ import {
  */
 import TaxonomyItem from './taxonomy-item';
 import { ProductCollectionQuery } from '../../../types';
+import { DEFAULT_FILTERS } from '../../../constants';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;
@@ -64,12 +65,15 @@ function TaxonomyControls( {
 						},
 					} );
 
+				const deselectCallback = () => handleChange( [] );
+
 				return (
 					<ToolsPanelItem
 						key={ taxonomy.slug }
 						label={ taxonomy.name }
 						hasValue={ () => termIds.length }
-						onDeselect={ () => handleChange( [] ) }
+						onDeselect={ deselectCallback }
+						resetAllFilter={ deselectCallback }
 					>
 						<TaxonomyItem
 							key={ taxonomy.slug }

@@ -38,7 +38,7 @@
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.69.5",
-		"stylelint": "13.8.0",
+		"stylelint": "^14.16.1",
 		"wireit": "0.14.3"
 	},
 	"dependencies": {
