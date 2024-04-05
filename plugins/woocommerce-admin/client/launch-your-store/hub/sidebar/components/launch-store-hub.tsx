@@ -227,7 +227,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 						{ hasSubmitted ? (
 							<Spinner />
 						) : (
-							__( 'Launch Store', 'woocommerce' )
+							__( 'Launch your store', 'woocommerce' )
 						) }
 					</Button>
 				</ItemGroup>
