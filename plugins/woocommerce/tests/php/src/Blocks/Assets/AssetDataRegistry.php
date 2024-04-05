@@ -55,7 +55,7 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 
 	public function test_already_existing_key_on_adding_data() {
 		$this->registry->add( 'foo', 'bar' );
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectWarning();
 		$this->registry->add( 'foo', 'yar' );
 	}
 
