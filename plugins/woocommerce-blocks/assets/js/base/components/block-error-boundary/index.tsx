@@ -20,6 +20,7 @@ class BlockErrorBoundary extends Component< BlockErrorBoundaryProps > {
 
 	static getDerivedStateFromError( error: ReactError ): DerivedStateReturn {
 		if (
+			error &&
 			typeof error.statusText !== 'undefined' &&
 			typeof error.status !== 'undefined'
 		) {
@@ -34,7 +35,10 @@ class BlockErrorBoundary extends Component< BlockErrorBoundaryProps > {
 			};
 		}
 
-		return { errorMessage: error.message, hasError: true };
+		return {
+			errorMessage: error?.message || 'An unknown error occurred',
+			hasError: true,
+		};
 	}
 
 	render(): JSX.Element | React.ReactNode {
