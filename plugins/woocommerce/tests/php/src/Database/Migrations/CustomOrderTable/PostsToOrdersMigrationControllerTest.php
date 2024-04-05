@@ -154,7 +154,7 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		$this->assertSame( $order->get_shipping_first_name(), $cot_order->get_shipping_first_name() );
 
 		// Change the original post order.
-		$order->set_shipping_first_name('John');
+		$order->set_shipping_first_name( 'John' );
 		$order->save();
 
 		// Run the migration again, assert there are still no duplicates.
