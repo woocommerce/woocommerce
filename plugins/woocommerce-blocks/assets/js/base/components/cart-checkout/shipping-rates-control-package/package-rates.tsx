@@ -71,31 +71,17 @@ const PackageRates = ( {
 		return noResultsMessage;
 	}
 
-	if ( rates.length > 1 ) {
-		return (
-			<RadioControl
-				className={ className }
-				onChange={ ( value: string ) => {
-					setSelectedOption( value );
-					onSelectRate( value );
-				} }
-				highlightChecked={ highlightChecked }
-				disabled={ disabled }
-				selected={ selectedOption }
-				options={ rates.map( renderOption ) }
-			/>
-		);
-	}
-
-	const { label, secondaryLabel, description, secondaryDescription } =
-		renderOption( rates[ 0 ] );
-
 	return (
-		<RadioControlOptionLayout
-			label={ label }
-			secondaryLabel={ secondaryLabel }
-			description={ description }
-			secondaryDescription={ secondaryDescription }
+		<RadioControl
+			className={ className }
+			onChange={ ( value: string ) => {
+				setSelectedOption( value );
+				onSelectRate( value );
+			} }
+			highlightChecked={ highlightChecked }
+			disabled={ disabled }
+			selected={ selectedOption }
+			options={ rates.map( renderOption ) }
 		/>
 	);
 };
