@@ -266,31 +266,32 @@
           "id": "42e4e4a593b67fd844f2d7b366259d64cf2332ab"
         }
       ],
-      "categories": []
-    },
-    {
-      "content": "\nJust like WooCommerce itself, our developer docs are open source and editable by the community. This category outlines guidance and best practices to follow when contributing documentation.\n ",
-      "category_slug": "contributing-docs",
-      "category_title": "Contribute to Docs",
-      "posts": [
+      "categories": [
         {
-          "post_title": "Technical Documentation Style Guide",
-          "menu_title": "Style Guide",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/style-guide.md",
-          "hash": "1f7b619b73e05f0e607aa8959f598254b7af9adb5375f25df668a104eeadba5e",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/style-guide.md",
-          "id": "5020907d57ae845a6477a36f59ec8c2f5f7b4b01"
-        },
-        {
-          "post_title": "Contributing Technical Documentation",
-          "menu_title": "Contributing Docs",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing-docs/contributing-docs.md",
-          "hash": "3bcfb5ac1ad271b34f4f13db409b1f5e50c6ed6e310f474bcc3ccc2f4b0448b1",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing-docs/contributing-docs.md",
-          "id": "71c1a72bfd4d5ae6aa656d4264b1bf3beb6eca1c"
+          "content": "\nJust like WooCommerce itself, our developer docs are open source and editable by the community. This category outlines guidance and best practices to follow when contributing documentation.\n ",
+          "category_slug": "contributing-docs",
+          "category_title": "Contribute to Docs",
+          "posts": [
+            {
+              "post_title": "Technical Documentation Style Guide",
+              "menu_title": "Style Guide",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/contributing-docs/style-guide.md",
+              "hash": "1f7b619b73e05f0e607aa8959f598254b7af9adb5375f25df668a104eeadba5e",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/contributing-docs/style-guide.md",
+              "id": "d8300e6da0a56477e14dd4f77b610b5a6da91362"
+            },
+            {
+              "post_title": "Contributing Technical Documentation",
+              "menu_title": "Contributing Docs",
+              "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/contributing-docs/contributing-docs.md",
+              "hash": "3bcfb5ac1ad271b34f4f13db409b1f5e50c6ed6e310f474bcc3ccc2f4b0448b1",
+              "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/contributing-docs/contributing-docs.md",
+              "id": "dbe78ba578ea36f660b6b3ec3be5608d4be0f8ad"
+            }
+          ],
+          "categories": []
         }
-      ],
-      "categories": []
+      ]
     },
     {
       "content": "\nMaster data management in WooCommerce, including documentation related to CRUD objects and data stores.\n",
@@ -1235,5 +1236,5 @@
       "categories": []
     }
   ],
-  "hash": "ac286b65bd2784775f7af6cf394f351b5af0e9381aa8f703a1d24432671452d4"
+  "hash": "c8aad6813f48f6dd4b494501e741bd920d327bfb7dfe1ff0edfae480e5e04da4"
 }
