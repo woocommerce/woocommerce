@@ -3,10 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import {
-	__experimentalRadio as Radio,
-	__experimentalRadioGroup as RadioGroup,
-} from 'wordpress-components';
 import classnames from 'classnames';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
