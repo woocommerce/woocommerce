@@ -167,6 +167,7 @@ export const sidebarMachine = setup( {
 					},
 				},
 				launchYourStoreHub: {
+					id: 'launchYourStoreHub',
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
@@ -184,6 +185,7 @@ export const sidebarMachine = setup( {
 			initial: 'launching',
 			states: {
 				launching: {
+					entry: assign( { launchStoreError: undefined } ), // clear the errors if any from previously
 					invoke: {
 						src: 'updateLaunchStoreOptions',
 						onDone: {
@@ -197,7 +199,7 @@ export const sidebarMachine = setup( {
 									};
 								},
 							} ),
-							target: '..launchYourStoreHub',
+							target: '#launchYourStoreHub',
 						},
 					},
 				},
