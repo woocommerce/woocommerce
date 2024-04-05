@@ -47,7 +47,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back
+		// Reset theme back to default.
 		await activateTheme( DEFAULT_THEME );
 
 		// Reset tour to visible.
