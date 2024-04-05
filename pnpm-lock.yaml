@@ -919,8 +919,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
       webpack:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@3.3.12)
@@ -3145,8 +3145,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
       webpack:
         specifier: 5.70.0
         version: 5.70.0(webpack-cli@3.3.12)
@@ -4581,8 +4581,8 @@ importers:
         specifier: ^3.21.0
         version: 3.21.0
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -45305,7 +45305,6 @@ packages:
       prop-types: 15.8.1
       react: 17.0.2
       scheduler: 0.19.1
-    bundledDependencies: false
 
   /react-dom@17.0.2(react@17.0.2):
     resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==}
@@ -45838,7 +45837,6 @@ packages:
       react-is: 16.13.1
       scheduler: 0.19.1
     dev: true
-    bundledDependencies: false
 
   /react-test-renderer@17.0.2(react@17.0.2):
     resolution: {integrity: sha512-yaQ9cB89c17PUb0x6UfWRs7kQCorVdHlutU1boVPEsB8IDZH6n9tHxMacc3y0JoXOJUsZb/t/Mb8FUWMKaM7iQ==}

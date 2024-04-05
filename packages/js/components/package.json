@@ -176,7 +176,7 @@
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
-		"uuid": "^8.3.2",
+		"uuid": "^9.0.1",
 		"webpack": "^5.89.0",
 		"webpack-cli": "^3.3.12",
 		"wireit": "0.14.3"

@@ -292,6 +292,15 @@
 		},
 		{
 			"dependencies": [
+				"uuid"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^9.0.1"
+		},
+		{
+			"dependencies": [
 				"@types/node"
 			],
 			"packages": [
