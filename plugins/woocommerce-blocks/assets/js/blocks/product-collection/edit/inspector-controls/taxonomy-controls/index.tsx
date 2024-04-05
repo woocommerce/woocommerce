@@ -17,6 +17,7 @@ import {
  */
 import TaxonomyItem from './taxonomy-item';
 import { ProductCollectionQuery } from '../../../types';
+import { DEFAULT_FILTERS } from '../../../constants';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;
@@ -53,7 +54,8 @@ function TaxonomyControls( {
 		return null;
 	}
 
-	const deselectCallback = () => setQueryAttribute( { taxQuery: {} } );
+	const deselectCallback = () =>
+		setQueryAttribute( { taxQuery: DEFAULT_FILTERS.taxQuery } );
 
 	return (
 		<ToolsPanelItem

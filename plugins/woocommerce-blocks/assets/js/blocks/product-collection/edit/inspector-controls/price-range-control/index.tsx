@@ -15,6 +15,7 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../../types';
+import { DEFAULT_FILTERS } from '../../../constants';
 import PriceTextField from './PriceTextField';
 
 const PriceRangeControl = ( props: QueryControlProps ) => {
@@ -23,7 +24,7 @@ const PriceRangeControl = ( props: QueryControlProps ) => {
 	const value = query.priceRange;
 
 	const deselectCallback = () => {
-		setQueryAttribute( { priceRange: undefined } );
+		setQueryAttribute( { priceRange: DEFAULT_FILTERS.priceRange } );
 	};
 
 	return (

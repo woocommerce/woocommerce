@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 /**
  * Returns:
@@ -117,7 +118,8 @@ const HandPickedProductsControl = ( {
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
-			woocommerceHandPickedProducts: [],
+			woocommerceHandPickedProducts:
+				DEFAULT_FILTERS.woocommerceHandPickedProducts,
 		} );
 	};
 

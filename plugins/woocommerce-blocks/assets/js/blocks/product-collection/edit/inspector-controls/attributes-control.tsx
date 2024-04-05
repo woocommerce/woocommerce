@@ -16,6 +16,7 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const EDIT_ATTRIBUTES_URL = `${ ADMIN_URL }edit.php?post_type=product&page=product_attributes`;
 
@@ -31,7 +32,9 @@ const AttributesControl = ( {
 	);
 
 	const deselectCallback = () => {
-		setQueryAttribute( { woocommerceAttributes: [] } );
+		setQueryAttribute( {
+			woocommerceAttributes: DEFAULT_FILTERS.woocommerceAttributes,
+		} );
 	};
 
 	return (

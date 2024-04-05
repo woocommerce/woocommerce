@@ -14,13 +14,14 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const FeaturedProductsControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
-			featured: false,
+			featured: DEFAULT_FILTERS.featured,
 		} );
 	};
 

@@ -23,6 +23,7 @@ import {
  * Internal dependencies
  */
 import { ETimeFrameOperator, QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const CreatedControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
@@ -30,7 +31,7 @@ const CreatedControl = ( props: QueryControlProps ) => {
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
-			timeFrame: undefined,
+			timeFrame: DEFAULT_FILTERS.timeFrame,
 		} );
 	};
 

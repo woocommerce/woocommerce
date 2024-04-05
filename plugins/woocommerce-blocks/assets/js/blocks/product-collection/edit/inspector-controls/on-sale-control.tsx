@@ -13,12 +13,15 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const OnSaleControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
-		setQueryAttribute( { woocommerceOnSale: false } );
+		setQueryAttribute( {
+			woocommerceOnSale: DEFAULT_FILTERS.woocommerceOnSale,
+		} );
 	};
 
 	return (
