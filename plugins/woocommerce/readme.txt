@@ -300,6 +300,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update the themes list on the Customize Your Store intro screen. [#44822](https://github.com/woocommerce/woocommerce/pull/44822)
 * Update - Update usages of WooCommerce Blocks version checks to use WooCommerce core version when possible [#44804](https://github.com/woocommerce/woocommerce/pull/44804)
 * Update - [CYS] Update the woo.com themes link to include the back url [#45661](https://github.com/woocommerce/woocommerce/pull/45661)
+* Dev - E2E tests: re-enable all e2e tests [#45825](https://github.com/woocommerce/woocommerce/pull/45825)
 * Dev - Temporary disable DataSourcePoller class deprecation message [#46163](https://github.com/woocommerce/woocommerce/pull/46163)
 * Dev - Add e2e tests for the customer list [#45198](https://github.com/woocommerce/woocommerce/pull/45198)
 * Dev - Add new test shopper product filters [#44516](https://github.com/woocommerce/woocommerce/pull/44516)

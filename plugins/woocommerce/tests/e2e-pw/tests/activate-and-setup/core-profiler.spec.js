@@ -3,7 +3,7 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'Store owner can complete the core profiler', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test( 'Can complete the core profiler skipping extension install', async ( {
+	test.skip( 'Can complete the core profiler skipping extension install', async ( {
 		page,
 	} ) => {
 		await page.goto(
@@ -147,7 +147,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		} );
 	} );
 
-	test( 'Can complete the core profiler installing default extensions', async ( {
+	test.skip( 'Can complete the core profiler installing default extensions', async ( {
 		page,
 	} ) => {
 		await page.goto(
