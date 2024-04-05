@@ -33,12 +33,16 @@ const KeywordControl = ( props: QueryControlProps ) => {
 		return onChangeDebounced.cancel;
 	}, [ querySearch, onChangeDebounced ] );
 
+	const deselectCallback = () => {
+		setQuerySearch( '' );
+	};
+
 	return (
 		<ToolsPanelItem
 			hasValue={ () => !! querySearch }
 			label={ __( 'Keyword', 'woocommerce' ) }
-			onDeselect={ () => setQuerySearch( '' ) }
-			resetAllFilter={ () => setQuerySearch( '' ) }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<TextControl
 				label={ __( 'Keyword', 'woocommerce' ) }

@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 /**
  * Returns:
@@ -115,15 +116,19 @@ const HandPickedProductsControl = ( {
 		return decodeEntities( product?.name ) || '';
 	};
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			woocommerceHandPickedProducts:
+				DEFAULT_FILTERS.woocommerceHandPickedProducts,
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					woocommerceHandPickedProducts: [],
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<FormTokenField
 				disabled={ ! productsMap.size }

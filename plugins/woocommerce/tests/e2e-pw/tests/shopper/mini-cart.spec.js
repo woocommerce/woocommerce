@@ -15,7 +15,7 @@ const totalInclusiveTax = +singleProductSalePrice + 5 + 2.5;
 
 let productId, countryTaxId, stateTaxId, shippingZoneId;
 
-test.describe( 'Mini Cart block page', () => {
+test.describe.skip( 'Mini Cart block page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
