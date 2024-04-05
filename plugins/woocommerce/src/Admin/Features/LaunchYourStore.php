@@ -12,7 +12,7 @@ class LaunchYourStore {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_update_options_general', array( $this, 'save_site_visibility_options' ) );
+		add_action( 'woocommerce_update_options_site-visibility', array( $this, 'save_site_visibility_options' ) );
 		add_action( 'current_screen', array( $this, 'maybe_create_coming_soon_page' ) );
 		if ( is_admin() ) {
 			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
@@ -37,12 +37,19 @@ class LaunchYourStore {
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
 		);
 
+		$at_least_one_saved = false;
+
 		foreach ( $options as $name => $option ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( isset( $_POST[ $name ] ) && in_array( $_POST[ $name ], $option, true ) ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				update_option( $name, wp_unslash( $_POST[ $name ] ) );
+				$at_least_one_saved = true;
 			}
+		}
+
+		if ( $at_least_one_saved ) {
+			wc_admin_record_tracks_event( 'site_visibility_saved' );
 		}
 	}
 
