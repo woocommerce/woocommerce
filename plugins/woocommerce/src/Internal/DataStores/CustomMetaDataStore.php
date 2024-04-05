@@ -357,8 +357,8 @@ abstract class CustomMetaDataStore {
 	 * @return bool Whether the cache as fully invalidated.
 	 */
 	public function invalidate_all_cache(): bool {
-		/** @var WPCacheEngine $cache_engine */
-		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
+		$cache_engine = wc_get_container()->get( WPCacheEngine::class );
+
 		return $cache_engine->delete_cache_group( $this->get_cache_group() );
 	}
 }

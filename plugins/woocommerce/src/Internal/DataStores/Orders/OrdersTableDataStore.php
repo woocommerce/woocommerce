@@ -570,7 +570,6 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @return bool Whether the cache as fully invalidated.
 	 */
 	public function invalidate_all_cache(): bool {
-		/** @var WPCacheEngine $cache_engine */
 		$cache_engine       = wc_get_container()->get( WPCacheEngine::class );
 		$orders_invalidated = $cache_engine->delete_cache_group( $this->get_cache_group() );
 		$meta_invalidated   = $this->data_store_meta->invalidate_all_cache();

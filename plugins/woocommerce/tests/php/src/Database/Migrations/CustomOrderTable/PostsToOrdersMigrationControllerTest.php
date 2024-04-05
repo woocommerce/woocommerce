@@ -147,13 +147,13 @@ WHERE order_id = {$order_id} AND meta_key = 'non_unique_key_1' AND meta_value in
 		// Run the migration once.
 		$this->sut->migrate_order( $order->get_id() );
 
-		// Load the order to confirm it's been properly migrated and prime cache
+		// Load the order to confirm it's been properly migrated and prime cache.
 		$cot_order = clone( $order );
 		$this->data_store->read( $cot_order );
 		$this->assertSame( $order->get_id(), $cot_order->get_id() );
 		$this->assertSame( $order->get_shipping_first_name(), $cot_order->get_shipping_first_name() );
 
-		// Change the original post order
+		// Change the original post order.
 		$order->set_shipping_first_name('John');
 		$order->save();
 
