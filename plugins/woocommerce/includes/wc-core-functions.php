@@ -1539,12 +1539,13 @@ function wc_get_credit_card_type_label( $type ) {
 			'visa'             => _x( 'Visa', 'Name of credit card', 'woocommerce' ),
 			'discover'         => _x( 'Discover', 'Name of credit card', 'woocommerce' ),
 			'american express' => _x( 'American Express', 'Name of credit card', 'woocommerce' ),
+			'cartes bancaires' => _x( 'Cartes Bancaires', 'Name of credit card', 'woocommerce' ),
 			'diners'           => _x( 'Diners', 'Name of credit card', 'woocommerce' ),
 			'jcb'              => _x( 'JCB', 'Name of credit card', 'woocommerce' ),
 		)
 	);
 
-	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucfirst( $type ) ) );
+	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucwords( $type ) ) );
 }
 
 /**

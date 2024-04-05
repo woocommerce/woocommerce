@@ -33,24 +33,10 @@ const getCcOrEcheckLabel = ( {
 	method: CustomerPaymentMethodConfiguration;
 	expires: string;
 } ): string => {
-	const networks = method.networks || [];
-	if ( method.is_co_branded && networks.length > 1 ) {
-		return sprintf(
-			/* translators: %1$s is referring to the credit card brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date, %4$s is referring to the preferred network. */
-			__(
-				'%1$s ending in %2$s (expires %3$s, %4$s preferred)',
-				'woocommerce'
-			),
-			networks.join( ' / ' ),
-			method.last4,
-			expires,
-			method.preferred_network
-		);
-	}
 	return sprintf(
 		/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 		__( '%1$s ending in %2$s (expires %3$s)', 'woocommerce' ),
-		method.brand,
+		method.display_brand ?? method?.networks?.preferred ?? method.brand,
 		method.last4,
 		expires
 	);

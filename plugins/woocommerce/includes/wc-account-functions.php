@@ -379,17 +379,6 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_payment_methods_list', 10, 2 );
 
 /**
- * Get the friendly name for a credit card brand.
- *
- * @since 8.9.0-dev
- * @param  string $brand Credit card brand.
- * @return string        Friendly brand name.
- */
-function wc_get_credit_card_brand_friendly_name( $brand ) {
-	return ucwords( str_replace( '_', ' ', $brand ) );
-}
-
-/**
  * Controls the output for credit cards on the my account page.
  *
  * @since 2.6
@@ -403,12 +392,8 @@ function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_toke
 	}
 
 	$card_type                           = $payment_token->get_card_type();
-	$networks                            = $payment_token->get_available_networks();
 	$item['method']['last4']             = $payment_token->get_last4();
-	$item['method']['brand']             = ( ! empty( $card_type ) ? wc_get_credit_card_brand_friendly_name( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
-	$item['method']['is_co_branded']     = $payment_token->is_co_branded();
-	$item['method']['networks']          = ( ! empty( $networks ) ? array_map( 'wc_get_credit_card_brand_friendly_name', $networks ) : $networks );
-	$item['method']['preferred_network'] = wc_get_credit_card_brand_friendly_name( $payment_token->get_preferred_network() );
+	$item['method']['brand']             = ( ! empty( $card_type ) ? ucfirst( $card_type ) : esc_html__( 'Credit card', 'woocommerce' ) );
 	$item['expires']                     = $payment_token->get_expiry_month() . '/' . substr( $payment_token->get_expiry_year(), -2 );
 
 	return $item;
