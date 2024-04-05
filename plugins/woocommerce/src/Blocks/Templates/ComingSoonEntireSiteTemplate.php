@@ -51,7 +51,7 @@ class ComingSoonEntireSiteTemplate extends AbstractPageTemplate {
 	}
 
 	/**
-	 * True when viewing the cart page or cart endpoint.
+	 * True when viewing the coming soon page.
 	 *
 	 * @return boolean
 	 */
