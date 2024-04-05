@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 /**
  * Cart class.
@@ -245,9 +246,8 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
 		$this->asset_data_registry->add( 'activeShippingZones', CartCheckoutUtils::get_shipping_zones() );
-
-		$pickup_location_settings = get_option( 'woocommerce_pickup_location_settings', [] );
-		$this->asset_data_registry->add( 'localPickupEnabled', wc_string_to_bool( $pickup_location_settings['enabled'] ?? 'no' ) );
+		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
+		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
