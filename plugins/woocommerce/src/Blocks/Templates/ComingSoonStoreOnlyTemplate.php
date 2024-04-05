@@ -29,7 +29,6 @@ class ComingSoonStoreOnlyTemplate extends AbstractPageTemplate {
 	 */
 	public function get_template_title() {
 		return _x( 'Page: Coming soon store only', 'Template name', 'woocommerce' );
-
 	}
 
 	/**
@@ -39,10 +38,9 @@ class ComingSoonStoreOnlyTemplate extends AbstractPageTemplate {
 	 */
 	public function get_template_description() {
 		return __( 'Page template for Coming soon page when access is restricted for store pages.', 'woocommerce' );
-
 	}
 
-    /**
+	/**
 	 * Returns the page object assigned to this template/page.
 	 *
 	 * @return \WP_Post|null Post object or null.
