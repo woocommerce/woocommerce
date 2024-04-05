@@ -32,14 +32,17 @@ const migrateDisplayLayout = (
 	if ( type === 'flex' ) {
 		// Convert responsive columns to size-based automatic columns.
 		if ( shrinkColumns ) {
-			// We can replicate the previous responsive behavior with percentage
-			// based minimum width. One consideration, however, is that the
-			// block gap is not accounted for. We can approximate it by
-			// not using 90% as the width for our column area instead.
-			const columnWidth = Math.floor( 90 / columns );
+			// We can replicate the previous responsive behavior by using the same
+			// math as the column classes. This subtracts the gap between columns
+			// from the width of the container and then divides the width into
+			// the number of columns that was selected.
+			const columnWidth = `max( 150px, (100% - ${
+				1.25 * ( columns - 1 )
+			}em) / ${ columns } )`;
+
 			templateLayout = {
 				type: LayoutOptions.GRID,
-				minimumColumnWidth: columnWidth + '%',
+				minimumColumnWidth: columnWidth,
 			};
 		} else {
 			templateLayout = {
