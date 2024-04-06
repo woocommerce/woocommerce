@@ -700,6 +700,18 @@
           "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
         },
         {
+          "post_title": "Privacy Standards for WooCommerce Extensions",
+          "menu_title": "Privacy Standards",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/privacy-standards.md",
+          "hash": "44496b3d6244ea09c86b9d13fbefe9b77478311df25def6ae5e4e567a0e2bd6f",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/privacy-standards.md",
+          "id": "840cf3001ed520ed206a42b147a2e3afa4ed82ae",
+          "links": {
+            "./gdpr-compliance.md": "af392a92b41b69b543c5ec77a07af770f6bb1587"
+          }
+        },
+        {
           "post_title": "How to optimize performance for WooCommerce stores",
           "menu_title": "Optimize store performance",
           "tags": "reference",
@@ -855,7 +867,7 @@
       "categories": []
     },
     {
-      "content": "# Testing\n\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woo.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woo.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended][https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/]), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "content": "\n# Testing\n\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woo.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woo.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
       "category_slug": "testing",
       "category_title": "Testing",
       "posts": [
@@ -1236,5 +1248,5 @@
       "categories": []
     }
   ],
-  "hash": "210628059253d97a4833800b7326dc15af80ecb31e68d88780a83a9b99d2abf6"
+  "hash": "708bc0ed65a528d6805efe34b5c10b5f9426eff8e752b646108bf73dfbc585ff"
 }
