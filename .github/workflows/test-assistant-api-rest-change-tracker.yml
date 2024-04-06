@@ -70,6 +70,62 @@ jobs:
           # Export for later steps
           echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
+          # Output the operating system type
+          echo "Operating System Type: $OSTYPE"
+          
+          # Function to calculate the second Tuesday of the given month and year
+          calculate_second_tuesday() {
+            year=$1
+            month=$2
+            # Check OS and adjust `date` command accordingly
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              echo "macOS"
+              # macOS version (BSD date)
+              # Find the first Tuesday of the month
+              first_of_month="$year-$month-01"
+              day_of_week=$(date -j -f "%Y-%m-%d" "$first_of_month" "+%u")
+              offset_to_first_tuesday=$(( (9 - day_of_week) % 7 ))
+              first_tuesday=$(date -j -v+"$offset_to_first_tuesday"d -f "%Y-%m-%d" "$first_of_month" "+%Y-%m-%d")
+              # Calculate the second Tuesday by adding 7 days to the first Tuesday
+              second_tuesday=$(date -j -v+7d -f "%Y-%m-%d" "$first_tuesday" "+%Y-%m-%d")
+            else
+              echo "Linux"
+              # Linux version (GNU date)
+              first_of_month="$year-$month-01"
+              day_of_week=$(date -d "$first_of_month" "+%u")
+              offset_to_first_tuesday=$(( (9 - day_of_week) % 7 ))
+              first_tuesday=$(date -d "$first_of_month +$offset_to_first_tuesday days" "+%Y-%m-%d")
+              # Calculate the second Tuesday by adding 7 days
+              second_tuesday=$(date -d "$first_tuesday +7 days" "+%Y-%m-%d")
+            fi
+            echo $second_tuesday
+          }
+          
+          # Initialize the starting version and date
+          initial_year=2024
+          initial_month=6  # June
+          versions_to_calculate=12
+          
+          for (( i=0; i<versions_to_calculate; i++ )); do
+            # Calculate year and month offset
+            offset_year=$(( (initial_month + i - 1) / 12 ))
+            current_year=$(( initial_year + offset_year ))
+            current_month=$(( (initial_month + i - 1) % 12 + 1 ))
+          
+            # Format current month correctly
+            current_month_formatted=$(printf "%02d" $current_month)
+          
+            # Calculate the release date
+            release_date=$(calculate_second_tuesday $current_year $current_month_formatted)
+          
+            # Calculate the version
+            version_major=$((9 + offset_year))
+            version_minor=$((i % 12))
+            version="$version_major.$version_minor.0"
+          
+            echo "Version $version will be released on $release_date"
+          done
+
       # Notify Slack Step
       - name: Notify Slack
         uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
