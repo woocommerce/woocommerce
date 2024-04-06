@@ -11,7 +11,7 @@ Adhering to WooCommerce coding standards is essential for maintaining high code 
 
 Position hooks below the function call to align with the common pattern in the WordPress and WooCommerce ecosystem.
 
-### Example
+Example:
 
 ```php
 /**
@@ -27,7 +27,7 @@ add_action( 'wp_footer', 'YOUR_PREFIX_custom_message' );
 
 Use a consistent prefix for all function calls to avoid conflicts. For the code snippets in this repo, use `YOUR_PREFIX`.
 
-### Example
+Example:
 
 ```php
 /**
@@ -43,7 +43,7 @@ add_filter( 'woocommerce_product_get_price', 'YOUR_PREFIX_custom_discount', 10, 
 
 Ensure all plain texts are translatable and use a consistent text domain, adhering to internationalization best practices. For the code snippets in this repo, use the textdomain `YOUR-TEXTDOMAIN`.
 
-### Example
+Example:
 
 ```php
 /**
@@ -59,7 +59,7 @@ add_action( 'wp_footer', 'YOUR_PREFIX_welcome_message' );
 
 To prevent errors from potential function redeclaration, wrap all function calls with `function_exists()`.
 
-### Example
+Example:
 
 ```php
 /**
