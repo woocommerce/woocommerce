@@ -641,6 +641,32 @@
       "categories": []
     },
     {
+      "content": "This section is dedicated to providing you with guides and best practices to optimize the performance of WooCommerce stores and extensions. Whether you're a store developer looking to enhance your site's speed and efficiency or an extension developer aiming to ensure your products contribute positively to store performance, you'll find valuable resources here to assist you.\n",
+      "category_slug": "performance",
+      "category_title": "Performance",
+      "posts": [
+        {
+          "post_title": "How to optimize performance for WooCommerce stores",
+          "menu_title": "Optimize store performance",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-optimization.md",
+          "hash": "25588fe2fab942f8db82a47d98594a3b0b6f35748185719b5c3b453876a9714b",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-optimization.md",
+          "id": "7294890af7805de703ce7b3d4b55d3c56ff39186"
+        },
+        {
+          "post_title": "WooCommerce performance best practices",
+          "menu_title": "Performance best practices",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/performance/performance-best-practices.md",
+          "hash": "5af1f4e4085e85a1693390f40e238cbd6a4a0b7d5d304afdda935c34fed97c64",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/performance/performance-best-practices.md",
+          "id": "35bda1cd7068d6179a9e46cca8d7dc2694d0df96"
+        }
+      ],
+      "categories": []
+    },
+    {
       "content": "\nDiscover how to customize the WooCommerce product editor, from extending product data to adding unique functionalities.\n\nThis handbook is a guide for extension developers looking to add support for the new product editor in their extensions. The product editor uses [Gutenberg's Block Editor](https://github.com/WordPress/gutenberg/tree/trunk/packages/block-editor), which is going to help WooCommerce evolve alongside the WordPress ecosystem.",
       "category_slug": "product-editor",
       "category_title": "Product Editor",
@@ -698,15 +724,6 @@
           "hash": "414970e7d53ddcafb186f2f3a253eed0d01800df2182f8bd2a4310c53079a795",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/removing-product-product-category-or-shop-from-the-url.md",
           "id": "827bfa56d40c2155542147ea5afe7cc756e18c5d"
-        },
-        {
-          "post_title": "How to optimize performance for WooCommerce stores",
-          "menu_title": "Optimize store performance",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/performance-optimization.md",
-          "hash": "25588fe2fab942f8db82a47d98594a3b0b6f35748185719b5c3b453876a9714b",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/performance-optimization.md",
-          "id": "4a616a12defd72bf5a16fb48db4dccd63000d98f"
         },
         {
           "post_title": "Naming conventions",
@@ -855,7 +872,7 @@
       "categories": []
     },
     {
-      "content": "# Testing\n\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woo.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woo.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended][https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/]), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "content": "\n# Testing\n\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woo.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woo.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/)), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
       "category_slug": "testing",
       "category_title": "Testing",
       "posts": [
@@ -1236,5 +1253,5 @@
       "categories": []
     }
   ],
-  "hash": "210628059253d97a4833800b7326dc15af80ecb31e68d88780a83a9b99d2abf6"
+  "hash": "4eb436133b26eb824a7a77dd09ea9029edac7469ff9466ce4400469ecc150564"
 }
