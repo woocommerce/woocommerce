@@ -11,8 +11,8 @@ jobs:
     if: "${{ github.event.label.name == 'contains: rest api change' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
     runs-on: ubuntu-20.04
     steps:
-      - name: Wait 1 minutes for other labelling jobs to finish
-        run: sleep 1m
+      - name: Wait 20sec for other labelling jobs to finish
+        run: sleep 20
         shell: bash
 
       - name: Calculate test date
