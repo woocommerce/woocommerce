@@ -105,6 +105,9 @@ jobs:
           initial_year=2024
           initial_month=6  # June
           versions_to_calculate=12
+
+          # Declare associative array
+          declare -A MILESTONE_DATES_TEST
           
           for (( i=0; i<versions_to_calculate; i++ )); do
             # Calculate year and month offset
@@ -124,7 +127,17 @@ jobs:
             version="$version_major.$version_minor.0"
           
             echo "Version $version will be released on $release_date"
+
+            # Populate the associative array
+            MILESTONE_DATES_TEST["$version"]=$release_date
           done
+
+          # To print the array in the desired format
+          echo "MILESTONE_DATES_TEST=("
+          for version in "${!MILESTONE_DATES[@]}"; do
+            echo "  [\"$version\"]=\"${MILESTONE_DATES[$version]}\""
+          done
+          echo ")"
 
       # Notify Slack Step
       - name: Notify Slack
