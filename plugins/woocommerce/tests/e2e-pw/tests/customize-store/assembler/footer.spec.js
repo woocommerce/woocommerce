@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -42,8 +42,8 @@ test.describe( 'Assembler -> Footers', () => {
 				'woocommerce_admin_customize_store_completed',
 				'no'
 			);
-
-			await activateTheme( 'twentynineteen' );
+			// Reset theme back to default.
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -117,7 +117,9 @@ test.describe( 'Assembler -> Footers', () => {
 			.frameLocator( 'iframe' )
 			.locator( '.wc-blocks-footer-pattern' );
 
-		const expectedFooterClass = extractFooterClass( await footer.getAttribute( 'class' ) );
+		const expectedFooterClass = extractFooterClass(
+			await footer.getAttribute( 'class' )
+		);
 
 		await footer.click();
 
@@ -135,7 +137,9 @@ test.describe( 'Assembler -> Footers', () => {
 
 		await page.goto( baseURL );
 
-		const selectedFooterClasses = await page.locator( 'footer div.wc-blocks-footer-pattern' ).getAttribute( 'class' );
+		const selectedFooterClasses = await page
+			.locator( 'footer div.wc-blocks-footer-pattern' )
+			.getAttribute( 'class' );
 
 		expect( selectedFooterClasses ).toContain( expectedFooterClass );
 	} );

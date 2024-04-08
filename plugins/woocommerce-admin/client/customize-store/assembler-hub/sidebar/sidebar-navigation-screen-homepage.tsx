@@ -95,7 +95,13 @@ export const SidebarNavigationScreenHomepage = () => {
 	}, [ homeTemplates ] );
 
 	useEffect( () => {
-		if ( selectedPattern || ! blocks.length || ! homePatterns.length ) {
+		if (
+			selectedPattern ||
+			! blocks.length ||
+			! homePatterns.length ||
+			isLoading ||
+			isEditorLoading
+		) {
 			return;
 		}
 
@@ -117,7 +123,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 		setSelectedPattern( currentSelectedPattern );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
-	}, [ blocks, homePatterns ] );
+	}, [ blocks, homePatterns, isLoading, isEditorLoading ] );
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
