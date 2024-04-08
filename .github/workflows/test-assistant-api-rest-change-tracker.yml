@@ -104,7 +104,18 @@ jobs:
           # Initialize the starting version and date
           initial_year=2024
           initial_month=6  # June
-          versions_to_calculate=12
+
+          # Assuming the script is being run in a year >= 2024
+          current_year=$(date +%Y) # Get the current year
+
+          # Calculate additional versions based on the year difference from 2024, inclusive
+          additional_versions=$(( (current_year - 2024 + 2) * 12 ))
+
+          # Now, set the versions_to_calculate to this value
+          versions_to_calculate=$additional_versions
+
+          # Output the value of versions_to_calculate
+          echo "Versions to calculate: $versions_to_calculate"
 
           # Declare associative array
           declare -A MILESTONE_DATES_TEST
