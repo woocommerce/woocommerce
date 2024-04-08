@@ -18,6 +18,10 @@ export type QueryProductAttribute = {
 	generate_slug: boolean;
 };
 
+export type QueryProductOptionProps = {
+	optimisticQueryUpdate: boolean;
+};
+
 type Query = {
 	context?: string;
 };
@@ -43,3 +47,16 @@ export type ProductAttributeSelectors = CrudSelectors<
 >;
 
 export type ActionDispatchers = DispatchFromMap< ProductAttributeActions >;
+
+/*
+ * Add a the second `options` parameter to the `createProductAttribute` action dispatcher
+ * todo: do this in a more generic way
+ */
+export interface CustomActionDispatchers extends ActionDispatchers {
+	createProductAttribute: (
+		x: Partial< Omit< QueryProductAttribute, 'id' > >,
+		options?: {
+			optimisticQueryUpdate: Partial< QueryProductAttribute > | boolean;
+		}
+	) => Promise< QueryProductAttribute >;
+}
