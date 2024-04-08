@@ -40,12 +40,14 @@ templates.forEach( async ( template ) => {
 			await requestUtils.deleteAllTemplates( 'wp_template' );
 		} );
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
-			admin,
 			page,
+			admin,
 			editorUtils,
 			frontendUtils,
 		} ) => {
-			await admin.visitAdminPage( 'edit.php?post_type=page' );
+			await admin.createNewPost( {
+				postType: 'page',
+			} );
 			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
@@ -63,7 +65,9 @@ templates.forEach( async ( template ) => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Clean up the paragraph block added before.
-			await admin.visitAdminPage( 'edit.php?post_type=page' );
+			await admin.createNewPost( {
+				postType: 'page',
+			} );
 			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
