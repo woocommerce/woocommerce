@@ -46,8 +46,10 @@ const useSetPreviewState = ( {
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
-			...attributes.previewState,
-			previewState: newPreviewState,
+			previewState: {
+				...attributes.previewState,
+				...newPreviewState,
+			},
 		} );
 	};
 
