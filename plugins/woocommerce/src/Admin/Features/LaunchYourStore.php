@@ -110,19 +110,19 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer {"height":"10px"} -->
 			<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:paragraph {"align":"center"} -->
 			<p class="has-text-align-center">%s</p>
 			<!-- /wp:paragraph -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -145,11 +145,11 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -223,6 +223,11 @@ class LaunchYourStore {
 	 * - 'woocommerce_coming_soon' option value must be 'yes'
 	 */
 	public function maybe_add_coming_soon_banner_on_frontend() {
+		// Do not show the banner if the site is being previewed.
+		if ( isset( $_GET['site-preview'] ) ) { // @phpcs:ignore
+			return false;
+		}
+
 		// User must be an admin or editor.
 		// phpcs:ignore
 		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
