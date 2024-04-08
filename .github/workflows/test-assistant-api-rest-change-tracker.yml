@@ -79,7 +79,6 @@ jobs:
             month=$2
             # Check OS and adjust `date` command accordingly
             if [[ "$OSTYPE" == "darwin"* ]]; then
-              echo "macOS"
               # macOS version (BSD date)
               # Find the first Tuesday of the month
               first_of_month="$year-$month-01"
@@ -89,7 +88,6 @@ jobs:
               # Calculate the second Tuesday by adding 7 days to the first Tuesday
               second_tuesday=$(date -j -v+7d -f "%Y-%m-%d" "$first_tuesday" "+%Y-%m-%d")
             else
-              echo "Linux"
               # Linux version (GNU date)
               first_of_month="$year-$month-01"
               day_of_week=$(date -d "$first_of_month" "+%u")
