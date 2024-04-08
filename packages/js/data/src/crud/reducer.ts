@@ -92,6 +92,14 @@ export const createReducer = (
 					);
 
 					const { options } = payload;
+					const data = {
+						...itemData,
+						[ payload.key ]: {
+							...( itemData[ payload.key ] || {} ),
+							...payload.item,
+						},
+					};
+
 					let items = state.items;
 					let itemsCount = state.itemsCount;
 
@@ -110,19 +118,15 @@ export const createReducer = (
 							...state.items,
 							[ getItemQuery ]: {
 								...state.items[ getItemQuery ],
-								data: [
-									...( state.items[ getItemQuery ]?.data ||
-										[] ),
-									payload.key,
-								],
+								data: Object.keys( data ).map(
+									( key ) => +key
+								),
 							},
 						};
 
 						itemsCount = {
 							...state.itemsCount,
-							[ getItemCountQuery ]:
-								( state.itemsCount[ getItemCountQuery ] || 0 ) +
-								1,
+							[ getItemCountQuery ]: Object.keys( data ).length,
 						};
 					}
 
@@ -130,13 +134,7 @@ export const createReducer = (
 						...state,
 						items,
 						itemsCount,
-						data: {
-							...itemData,
-							[ payload.key ]: {
-								...( itemData[ payload.key ] || {} ),
-								...payload.item,
-							},
-						},
+						data,
 						requesting: {
 							...state.requesting,
 							[ createItemSuccessRequestId ]: false,
