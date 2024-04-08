@@ -78,16 +78,16 @@ describe( 'List', () => {
 			render( <List items={ listItems } /> );
 
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Add products' } ).dataset
-					.linkType
+				screen.getByRole( 'menuitem', { name: 'Add products' } )
+					.dataset.linkType
 			).toBe( 'wp-admin' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'Market my store' } )
 					.dataset.linkType
 			).toBe( 'wc-admin' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } ).dataset
-					.linkType
+				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } )
+					.dataset.linkType
 			).toBe( 'external' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
@@ -124,16 +124,16 @@ describe( 'List', () => {
 			render( <List items={ listItems } /> );
 
 			expect(
-				screen.getByRole( 'menuitem', { name: 'Add products' } ).dataset
-					.listItemTag
+				screen.getByRole( 'menuitem', { name: 'Add products' } )
+					.dataset.listItemTag
 			).toBe( 'add-product' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'Market my store' } )
 					.dataset.listItemTag
 			).toBe( 'marketing' );
 			expect(
-				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } ).dataset
-					.listItemTag
+				screen.getByRole( 'menuitem', { name: 'WooCommerce.com' } )
+					.dataset.listItemTag
 			).toBe( 'woo.com-site' );
 			expect(
 				screen.getByRole( 'menuitem', { name: 'WordPress.org' } )
