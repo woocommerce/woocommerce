@@ -35,13 +35,17 @@ export function createItemRequest( query: Partial< ItemQuery > ) {
 export function createItemSuccess(
 	key: IdType,
 	item: Item,
-	query: Partial< ItemQuery >
+	query: Partial< ItemQuery >,
+	options: {
+		optimisticQueryUpdate: Partial< ItemQuery > | boolean;
+	}
 ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
 		key,
 		item,
 		query,
+		options,
 	};
 }
 
@@ -176,7 +180,12 @@ export const createDispatchActions = ( {
 	namespace,
 	resourceName,
 }: ResolverOptions ) => {
-	const createItem = function* ( query: Partial< ItemQuery > ) {
+	const createItem = function* (
+		query: Partial< ItemQuery >,
+		options: {
+			optimisticQueryUpdate: Partial< ItemQuery > | boolean;
+		}
+	) {
 		yield createItemRequest( query );
 		const urlParameters = getUrlParameters( namespace, query );
 
@@ -191,7 +200,7 @@ export const createDispatchActions = ( {
 			} );
 			const { key } = parseId( item.id, urlParameters );
 
-			yield createItemSuccess( key, item, query );
+			yield createItemSuccess( key, item, query, options );
 			return item;
 		} catch ( error ) {
 			yield createItemError( query, error );
