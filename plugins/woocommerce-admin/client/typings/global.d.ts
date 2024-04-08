@@ -1,11 +1,28 @@
 declare global {
 	interface Window {
+		location: Location;
 		pagenow: string;
 		adminpage: string;
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
 			currentUserId: number;
+			admin: {
+				wcpay_welcome_page_connect_nonce: string;
+				currentUserData: {
+					first_name: string;
+				};
+				wcpayWelcomePageIncentive: {
+					id: string;
+					description: string;
+					cta_label: string;
+					tc_url: string;
+				};
+				currency?: {
+					symbol: string;
+				};
+				currentUserId: number;
+			};
 		};
 		wcAdminFeatures: {
 			'activity-panels': boolean;
