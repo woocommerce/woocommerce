@@ -3,7 +3,7 @@
  */
 import { cleanForSlug } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
-import { isObject, isString } from '@woocommerce/types';
+import { isObject } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
