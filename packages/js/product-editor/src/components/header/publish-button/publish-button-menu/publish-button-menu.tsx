@@ -118,7 +118,7 @@ export function PublishButtonMenu( {
 										);
 										createSuccessNotice(
 											__(
-												'Product successfully deleted',
+												'Product successfully duplicated',
 												'woocommerce'
 											)
 										);
