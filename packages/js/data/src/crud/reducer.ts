@@ -277,18 +277,12 @@ export const createReducer = (
 						( payload.query || {} ) as ItemQuery
 					);
 
-					// console.log( '(reducer) Item Query: ', itemQuery );
-
-					const nextItemsDos = {
-						...state.items,
-						[ itemQuery ]: { data: ids },
-					};
-
-					// console.log( '(reducer) Next Items: ', nextItemsDos );
-
 					return {
 						...state,
-						items: nextItemsDos,
+						items: {
+							...state.items,
+							[ itemQuery ]: { data: ids },
+						},
 						data: {
 							...state.data,
 							...nextResources,
