@@ -93,8 +93,15 @@ export const createReducer = (
 
 					const { options } = payload;
 					let items = state.items;
+					let itemsCount = state.itemsCount;
+
 					if ( options.optimisticQueryUpdate ) {
 						const getItemQuery = getRequestIdentifier(
+							CRUD_ACTIONS.GET_ITEMS,
+							options.optimisticQueryUpdate as ItemQuery
+						);
+
+						const getItemCountQuery = getTotalCountResourceName(
 							CRUD_ACTIONS.GET_ITEMS,
 							options.optimisticQueryUpdate as ItemQuery
 						);
@@ -110,11 +117,19 @@ export const createReducer = (
 								],
 							},
 						};
+
+						itemsCount = {
+							...state.itemsCount,
+							[ getItemCountQuery ]:
+								( state.itemsCount[ getItemCountQuery ] || 0 ) +
+								1,
+						};
 					}
 
 					const newState = {
 						...state,
 						items,
+						itemsCount,
 						data: {
 							...itemData,
 							[ payload.key ]: {
