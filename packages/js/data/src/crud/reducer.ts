@@ -95,15 +95,15 @@ export const createReducer = (
 					let items = state.items;
 					let itemsCount = state.itemsCount;
 
-					if ( options.optimisticQueryUpdate ) {
+					if ( typeof options.optimisticQueryUpdate === 'object' ) {
 						const getItemQuery = getRequestIdentifier(
 							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate as ItemQuery
+							options.optimisticQueryUpdate
 						);
 
 						const getItemCountQuery = getTotalCountResourceName(
 							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate as ItemQuery
+							options.optimisticQueryUpdate
 						);
 
 						items = {
