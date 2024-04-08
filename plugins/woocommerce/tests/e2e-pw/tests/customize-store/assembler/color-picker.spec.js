@@ -223,7 +223,6 @@ const colorPalette = {
 	},
 };
 
-// These tests will be fixed by https://github.com/woocommerce/woocommerce/pull/46127.
 test.describe( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
