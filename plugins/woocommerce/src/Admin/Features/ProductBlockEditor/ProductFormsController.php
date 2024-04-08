@@ -15,6 +15,7 @@ class ProductFormsController {
 	 */
 	public function init() {
 		add_action( 'admin_init', array( $this, 'maybe_create_product_forms' ) );
+		add_filter( 'the_content', array( $this, 'replace_template_content' ) );
 	}
 
 	/**
@@ -24,15 +25,15 @@ class ProductFormsController {
         $templates = apply_filters(
             'woocommerce_product_form_templates',
             array(
-                'simple.php'
+                'simple'
             )
         );
-        foreach ( $templates as $template ) {
-            $file_path = BlockTemplateUtils::get_block_template( $template );
+        foreach ( $templates as $slug ) {
+            $file_path = BlockTemplateUtils::get_block_template( $slug );
             $file_data = BlockTemplateUtils::get_template_data( $file_path );
             $posts     = get_posts(
                 array(
-                    'name'           => $file_data['slug'],
+                    'name'           => $slug,
                     'post_type'      => 'product_form',
                     'post_status'    => 'any',
                     'posts_per_page' => 1
@@ -45,13 +46,30 @@ class ProductFormsController {
             
             $post = wp_insert_post(
                 array(
-                    'post_title'  => $file_data['title'],
-                    'post_name'   => $file_data['slug'],
-                    'post_status' =>	'publish',
-                    'post_type'   => 'product_form'
+                    'post_title'   => $file_data['title'],
+                    'post_name'    => $slug,
+                    'post_status'  => 'publish',
+                    'post_type'    => 'product_form',
+                    'post_content' => BlockTemplateUtils::get_template_content( $file_path )
                 )
             );
         }
 	}
+
+    public function replace_template_content( $content ) {
+        global $post;
+
+        if ( 'product_form' !== $post->post_type || $post->post_date !== $post->post_modified ) {
+            return $content;
+        }
+
+        $file_path = BlockTemplateUtils::get_block_template( $post->post_name );
+
+        if ( ! file_exists( $file_path ) ) {
+            return $content;
+        }
+
+        return BlockTemplateUtils::get_template_content( $file_path );
+    }
 
 }

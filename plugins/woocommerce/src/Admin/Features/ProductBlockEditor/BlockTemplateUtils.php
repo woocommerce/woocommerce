@@ -45,12 +45,12 @@ class BlockTemplateUtils {
     /**
      * Get all the block templates from the directory by type.
      *
-	 * @param string $template_type wp_template or wp_template_part.
+	 * @param string $slug Template slug.
      */
-    public static function get_block_template( $file ) {
+    public static function get_block_template( $slug ) {
         $directory = self::get_templates_directory();
 
-		return trailingslashit( $directory ) . $file;
+		return trailingslashit( $directory ) . $slug . '.php';
     }
 
     /**
@@ -73,6 +73,20 @@ class BlockTemplateUtils {
         $file_data['product_types'] = explode( ',', trim( $file_data['product_types'] ) );
 
         return $file_data;
+    }
+
+    /**
+     * Get the template content
+     *
+     * @param $file_path File path.
+     * @return string Content.
+     */
+    public static function get_template_content( $file_path ) {
+        ob_start();
+        include( $file_path );
+        $content = ob_get_contents(); 
+        ob_end_clean();
+        return $content;
     }
 
 }
