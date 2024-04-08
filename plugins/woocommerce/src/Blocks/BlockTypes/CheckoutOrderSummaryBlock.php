@@ -26,7 +26,6 @@ class CheckoutOrderSummaryBlock extends AbstractInnerBlock {
 	protected function render( $attributes, $content, $block ) {
 		// The order-summary-totals block was introduced as a new parent block for the totals
 		// (subtotal, discount, fees, shipping and taxes) blocks.
-		// echo $content;
 		$regex_for_checkout_order_summary_totals = '/<div data-block-name="woocommerce\/checkout-order-summary-totals-block"(.+?)>/';
 		$order_summary_totals_content = '<div data-block-name="woocommerce/checkout-order-summary-totals-block" class="wp-block-woocommerce-checkout-order-summary-totals-block">';
 
@@ -53,7 +52,6 @@ class CheckoutOrderSummaryBlock extends AbstractInnerBlock {
 			}
 		}
 		// Remove empty lines
-		// echo preg_replace('/\n\n( *?)/i', '', $content); die();
 		return preg_replace('/\n\n( *?)/i', '', $content);
 	}
 
