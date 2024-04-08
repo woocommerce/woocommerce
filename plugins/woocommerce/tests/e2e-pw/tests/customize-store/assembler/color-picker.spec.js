@@ -2,7 +2,7 @@ const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
 const { CustomizeStorePage } = require( '../customize-store.page' );
 
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -16,7 +16,8 @@ const test = base.extend( {
 	},
 } );
 
-test.describe( 'Assembler -> Color Pickers', () => {
+// These tests will be fixed by https://github.com/woocommerce/woocommerce/pull/46127.
+test.skip( 'Assembler -> Color Pickers', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -49,7 +50,8 @@ test.describe( 'Assembler -> Color Pickers', () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			// Reset theme back to default.
+			await activateTheme( DEFAULT_THEME );
 			await customizeStorePageObject.resetCustomizeStoreChanges(
 				baseURL
 			);

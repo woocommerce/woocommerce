@@ -1002,7 +1002,7 @@ test.describe( 'Product Collection', () => {
 			expect( termId ).toBe( '' );
 		} );
 
-		test( 'as generic in post', async ( {
+		test( 'as site in post', async ( {
 			admin,
 			editorUtils,
 			pageObject,
@@ -1019,7 +1019,7 @@ test.describe( 'Product Collection', () => {
 			const { type, sourceData } =
 				getLocationDetailsFromRequest( locationRequest );
 
-			expect( type ).toBe( 'generic' );
+			expect( type ).toBe( 'site' );
 			// Field is not sent at all. URLSearchParams get method returns a null
 			// if field is not available.
 			expect( sourceData ).toBe( null );
