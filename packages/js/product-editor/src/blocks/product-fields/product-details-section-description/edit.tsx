@@ -60,10 +60,12 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.layoutTemplateId ) {
-					supported.push( productTemplate );
-				} else {
-					unsupported.push( productTemplate );
+				if ( productTemplate.selectable ) {
+					if ( productTemplate.layoutTemplateId ) {
+						supported.push( productTemplate );
+					} else {
+						unsupported.push( productTemplate );
+					}
 				}
 				return [ supported, unsupported ];
 			},

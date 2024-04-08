@@ -62,6 +62,13 @@ class ProductTemplate {
 	private $icon = null;
 
 	/**
+	 * If the template is directly selectable through the UI.
+	 *
+	 * @var boolean
+	 */
+	private $selectable = true;
+
+	/**
 	 * ProductTemplate constructor
 	 *
 	 * @param array $data The data.
@@ -85,6 +92,10 @@ class ProductTemplate {
 
 		if ( isset( $data['icon'] ) ) {
 			$this->icon = $data['icon'];
+		}
+
+		if ( isset( $data['selectable'] ) ) {
+			$this->selectable = $data['selectable'];
 		}
 	}
 
@@ -181,6 +192,15 @@ class ProductTemplate {
 	}
 
 	/**
+	 * Get the selectable attribute.
+	 *
+	 * @return boolean Selectable.
+	 */
+	public function get_selectable() {
+		return $this->selectable;
+	}
+
+	/**
 	 * Set the template order.
 	 *
 	 * @param int $order The template order.
@@ -203,6 +223,7 @@ class ProductTemplate {
 			'order'            => $this->get_order(),
 			'layoutTemplateId' => $this->get_layout_template_id(),
 			'productData'      => $this->get_product_data(),
+			'selectable'       => $this->get_selectable(),
 		);
 	}
 }
