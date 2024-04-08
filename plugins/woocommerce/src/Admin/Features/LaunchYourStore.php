@@ -137,11 +137,15 @@ class LaunchYourStore {
 	}
 
 	public function register_launch_your_store_user_meta_fields() {
-		register_meta( 'user', 'woocommerce_launch_your_store_tour_hidden', array(
-			'type'         => 'string',
-			'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
-			'single'       => true,
-			'show_in_rest' => true,
-		) );
+		register_meta(
+			'user',
+			'woocommerce_launch_your_store_tour_hidden',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
 	}
 }

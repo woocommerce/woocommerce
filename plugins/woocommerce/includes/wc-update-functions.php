@@ -167,7 +167,7 @@ function wc_update_200_taxrates() {
 						)
 					);
 
-					$loop++;
+					++$loop;
 				}
 			}
 		}
@@ -216,7 +216,7 @@ function wc_update_200_taxrates() {
 				}
 			}
 
-			$loop++;
+			++$loop;
 		}
 	}
 
@@ -2571,7 +2571,6 @@ function wc_update_750_add_columns_to_order_stats_table() {
 			and postmeta.meta_key = '_date_completed'
 		SET order_stats.date_completed = IFNULL(FROM_UNIXTIME(postmeta.meta_value), '0000-00-00 00:00:00');"
 	);
-
 }
 
 /**
@@ -2669,8 +2668,8 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * Add woocommerce_launch_your_store_tour_hidden.
+ * Add woocommerce_show_lys_tour.
  */
 function wc_update_890_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_launch_your_store_tour_hidden', 'no' );
+	update_option( 'woocommerce_show_lys_tour', 'yes' );
 }
