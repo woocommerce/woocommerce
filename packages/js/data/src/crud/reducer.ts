@@ -126,7 +126,7 @@ export const createReducer = (
 						};
 					}
 
-					const newState = {
+					return {
 						...state,
 						items,
 						itemsCount,
@@ -142,7 +142,6 @@ export const createReducer = (
 							[ createItemSuccessRequestId ]: false,
 						},
 					};
-					return newState;
 				}
 
 				case TYPES.GET_ITEM_SUCCESS:
