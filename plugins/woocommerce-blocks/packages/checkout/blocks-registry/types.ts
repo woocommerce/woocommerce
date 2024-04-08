@@ -31,6 +31,7 @@ export enum innerBlockAreas {
 	CART_ORDER_SUMMARY = 'woocommerce/cart-order-summary-block',
 	CART_ORDER_SUMMARY_TOTALS = 'woocommerce/cart-order-summary-totals-block',
 	CHECKOUT_ORDER_SUMMARY = 'woocommerce/checkout-order-summary-block',
+	CHECKOUT_ORDER_SUMMARY_TOTALS = 'woocommerce/checkout-order-summary-totals-block',
 }
 
 interface CheckoutBlockOptionsMetadata extends Partial< BlockConfiguration > {
