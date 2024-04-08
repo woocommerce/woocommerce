@@ -11,6 +11,7 @@ import { Product, ProductStatus, PRODUCTS_STORE_NAME } from '@woocommerce/data';
  */
 import { useValidations } from '../../contexts/validation-context';
 import type { WPError } from '../../utils/get-product-error-message';
+import { AUTO_DRAFT_NAME } from '../../utils/constants';
 
 function errorHandler( error: WPError, productStatus: ProductStatus ) {
 	if ( error.code ) {
@@ -45,6 +46,11 @@ function errorHandler( error: WPError, productStatus: ProductStatus ) {
 
 export function useProductManager< T = Product >( postType: string ) {
 	const [ id ] = useEntityProp< number >( 'postType', postType, 'id' );
+	const [ name, , prevName ] = useEntityProp< string >(
+		'postType',
+		postType,
+		'name'
+	);
 	const [ status ] = useEntityProp< ProductStatus >(
 		'postType',
 		postType,
@@ -104,10 +110,14 @@ export function useProductManager< T = Product >( postType: string ) {
 
 	async function copyToDraft() {
 		try {
+			const data =
+				AUTO_DRAFT_NAME === prevName && name !== prevName
+					? { name }
+					: {};
 			setIsSaving( true );
 			const duplicatedProduct = await dispatch(
 				PRODUCTS_STORE_NAME
-			).duplicateProduct( id );
+			).duplicateProduct( id, data );
 
 			return duplicatedProduct as T;
 		} catch ( error ) {
