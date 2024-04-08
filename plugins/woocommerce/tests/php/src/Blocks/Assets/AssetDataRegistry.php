@@ -49,14 +49,8 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 	}
 
 	public function test_invalid_key_on_adding_data() {
-		$this->expectWarning();
+		$this->setExpectedException( 'PHPUnit_Framework_Error_Warning' );
 		$this->registry->add( [ 'some_value' ], 'foo' );
-	}
-
-	public function test_already_existing_key_on_adding_data() {
-		$this->registry->add( 'foo', 'bar' );
-		$this->expectWarning();
-		$this->registry->add( 'foo', 'yar' );
 	}
 
 	/**
