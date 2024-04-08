@@ -52,10 +52,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Revert edition and verify the template from the theme is used.
-			await admin.visitAdminPage(
-				'site-editor.php',
-				`path=/${ testData.templateType }/all`
-			);
+			await admin.visitSiteEditor( {
+				path: `/${ testData.templateType }/all`,
+			} );
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
@@ -97,10 +96,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				).toHaveCount( 0 );
 
 				// Revert the edit.
-				await admin.visitAdminPage(
-					'site-editor.php',
-					`path=/${ testData.templateType }/all`
-				);
+				await admin.visitSiteEditor( {
+					path: `/${ testData.templateType }/all`,
+				} );
 				await editorUtils.revertTemplateCustomizations(
 					testData.fallbackTemplate?.templateName || ''
 				);

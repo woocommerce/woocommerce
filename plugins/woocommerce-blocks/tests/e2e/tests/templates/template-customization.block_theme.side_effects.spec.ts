@@ -73,10 +73,9 @@ for ( const testData of testToRun ) {
 			// `deleteAllTemplates()`). This way, we verify there are no
 			// duplicate templates with the same name.
 			// See: https://github.com/woocommerce/woocommerce/issues/42220
-			await admin.visitAdminPage(
-				'site-editor.php',
-				`path=/${ testData.templateType }/all`
-			);
+			await admin.visitSiteEditor( {
+				path: `/${ testData.templateType }/all`,
+			} );
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);

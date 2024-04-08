@@ -24,10 +24,7 @@ test.describe( 'Single Product template', async () => {
 		const userText = 'Hello World in the Belt template';
 
 		// Create the specific product template.
-		await admin.visitAdminPage(
-			'site-editor.php',
-			`path=/${ testData.templateType }`
-		);
+		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
 		await page.getByLabel( 'Add New Template' ).click();
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
@@ -52,10 +49,9 @@ test.describe( 'Single Product template', async () => {
 		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Revert edition.
-		await admin.visitAdminPage(
-			'site-editor.php',
-			`path=/${ testData.templateType }/all`
-		);
+		await admin.visitSiteEditor( {
+			path: `/${ testData.templateType }/all`,
+		} );
 		await editorUtils.revertTemplateCreation( testData.templateName );
 		await page.goto( testData.permalink );
 

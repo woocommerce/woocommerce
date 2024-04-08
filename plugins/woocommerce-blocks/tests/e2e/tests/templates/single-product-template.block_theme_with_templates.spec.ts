@@ -48,10 +48,9 @@ test.describe( 'Single Product Template', async () => {
 		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Revert edition and verify the template from the theme is used.
-		await admin.visitAdminPage(
-			'site-editor.php',
-			`path=/${ testData.templateType }/all`
-		);
+		await admin.visitSiteEditor( {
+			path: `/${ testData.templateType }/all`,
+		} );
 		await editorUtils.revertTemplateCustomizations( testData.templateName );
 		await page.goto( testData.permalink );
 

@@ -32,7 +32,7 @@ test.describe( 'Test the cart template', async () => {
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
+		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Cart', exact: true } )
 			.click();
