@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: update the default theme to use twentytwentythree

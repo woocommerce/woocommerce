@@ -1,169 +1,170 @@
 name: Add issue triage comments.
 on:
-  issues:
-    types:
-      - labeled
+    issues:
+        types:
+            - labeled
 
 permissions: {}
 
 jobs:
-  add-dev-comment:
-    if: "github.event.label.name == 'needs: developer feedback'"
-    runs-on: ubuntu-20.04
-    permissions:
-      issues: write
-    steps:
-      - name: Add developer feedback comment
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'Hi @${{ github.event.issue.user.login }},\n\n\
-              Thank you for opening the issue! It requires further feedback from the WooCommerce Core team.\n\n\
-              We are adding the `needs developer feedback` label to this issue so that the Core team could take a look.\n\n\
-              Please note it may take a few days for them to get to this issue. Thank you for your patience.'
-            })              
-  add-reproduction-comment:
-    if: "github.event.label.name == 'status: reproduction'"
-    runs-on: ubuntu-20.04
-    permissions:
-      issues: write
-    steps:
-      - name: Add needs reproduction comment
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'We are adding the `status: needs reproduction` label to this issue to try reproduce it on the \
-              current released version of WooCommerce.\n\n\
-              Thank you for your patience.'
-            })
-  add-support-comment:
-    if: "github.event.label.name == 'type: support request'"
-    runs-on: ubuntu-20.04
-    permissions:
-      issues: write
-    steps:
-      - name: Add support request comment
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'Hi @${{ github.event.issue.user.login }},\n\n\
-              While our goal is to address all the issues reported in this repository, \
-              GitHub should be treated as a place to report confirmed bugs only.\n\n\
-              The type of issue you submitted looks like a support request which may or may not reveal a bug once proper \
-              troubleshooting is done.  In order to confirm the bug, please follow one of the steps below:\n\n\
-              - Review [WooCommerce Self-Service Guide](https://woo.com/document/woocommerce-self-service-guide/) \
-              to see if the solutions listed there apply to your case;\n\
-              - If you are a paying customer of WooCommerce, contact WooCommerce support by \
-              [opening a ticket or starting a live chat](https://woo.com/contact-us/);\n\
-              - Make a post on [WooCommerce community forum](https://wordpress.org/support/plugin/woocommerce/)\n\n\
-              If you confirm the bug, please provide us with clear steps to reproduce it.\n\n\
-              We are closing this issue for now as it seems to be a support request and not a bug. \
-              If we missed something, please leave a comment and we will take a second look.'
-            })
-      - name: Close support request issue
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  state: 'closed'
-                })
-  add-votes-comment:
-    if: "github.event.label.name == 'needs: votes'"
-    runs-on: ubuntu-20.04
-    permissions:
-      issues: write
-    steps:
-      - name: Add votes needed comment
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "Thanks for the suggestion @${{ github.event.issue.user.login }},\n\n\
-              While we appreciate you sharing your ideas with us, it doesn't fit in with our current priorities for the project.\n\
-              At some point, we may revisit our priorities and look through the list of suggestions like this one to see if it \
-              warrants a second look.\n\n\
-              In the meantime, we are going to close this issue with the `votes needed` label and evaluate over time if this \
-              issue collects more feedback.\n\n\
-              Don't be alarmed if you don't see any activity on this issue for a while. \
-              We'll keep an eye on the popularity of this request."
-            })
-      - name: Close votes needed issue
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  state: 'closed'
-                })
-  fill-template-comment:
-    if: "github.event.label.name == 'needs: template'"
-    runs-on: ubuntu-20.04
-    permissions:
-      issues: write
-    steps:
-      - name: Add reply to fill template
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "Hi @${{ github.event.issue.user.login }},\n\n\
-              Thank you for submitting the issue. However, you didn't fill out the details of the bug report template that we ask for. Without these details, we can't fully evaluate this issue. Please provide us with the information requested so we could take a look further.\n\n\
-              **Describe the bug**\n\n\
-              A clear and concise description of what the bug is. Please be as descriptive as possible; issues lacking detail, or for any other reason than to report a bug, may be closed without action.\n\n\
-              **To Reproduce**\n\n\
-              Steps to reproduce the behavior:\n\n\
-              1. Go to '...'\n\
-              2. Click on '....'\n\
-              3. Scroll down to '....'\n\
-              4. See error\n\n\
-              **Screenshots**\n\n\
-              If applicable, add screenshots to help explain your problem.\n\n\
-              **Expected behavior**\n\n\
-              A clear and concise description of what you expected to happen.\n\n\
-              **Isolating the problem (mark completed items with an [x]):**\n\n\
-              - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.\n\
-              - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/products/storefront/).\n\
-              - [ ] I can reproduce this bug consistently using the steps above.\n\n\
-              **WordPress Environment**\n\n\
-              Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin."
-            })
-      - name: remove-needs-template-label
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'needs: template'
-      - name: add-needs-author-feedback-label
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          labels: 'needs: author feedback'
+    add-dev-comment:
+        if: "github.event.label.name == 'needs: developer feedback'"
+        runs-on: ubuntu-20.04
+        permissions:
+            issues: write
+        steps:
+            - name: Add developer feedback comment
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: 'Hi @${{ github.event.issue.user.login }},\n\n\
+                        Thank you for opening the issue! It requires further feedback from the WooCommerce Core team.\n\n\
+                        We are adding the `needs developer feedback` label to this issue so that the Core team could take a look.\n\n\
+                        Please note it may take a few days for them to get to this issue. Thank you for your patience.'
+                      })
+    add-reproduction-comment:
+        if: "github.event.label.name == 'status: reproduction'"
+        runs-on: ubuntu-20.04
+        permissions:
+            issues: write
+        steps:
+            - name: Add needs reproduction comment
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: 'We are adding the `status: needs reproduction` label to this issue to try reproduce it on the \
+                        current released version of WooCommerce.\n\n\
+                        Thank you for your patience.'
+                      })
+    add-support-comment:
+        if: "github.event.label.name == 'type: support request'"
+        runs-on: ubuntu-20.04
+        permissions:
+            issues: write
+        steps:
+            - name: Add support request comment
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: 'Hi @${{ github.event.issue.user.login }},\n\n\
+                        While our goal is to address all the issues reported in this repository, \
+                        GitHub should be treated as a place to report confirmed bugs only.\n\n\
+                        The type of issue you submitted looks like a support request which may or may not reveal a bug once proper \
+                        troubleshooting is done.  In order to confirm the bug, please follow one of the steps below:\n\n\
+                        - Review [WooCommerce Self-Service Guide](https://woo.com/document/woocommerce-self-service-guide/) \
+                        to see if the solutions listed there apply to your case;\n\
+                        - If you are a paying customer of WooCommerce, contact WooCommerce support by \
+                        [opening a ticket or starting a live chat](https://woo.com/contact-us/);\n\
+                        - Make a post on [WooCommerce community forum](https://wordpress.org/support/plugin/woocommerce/)\n\n\
+                        If you confirm the bug, please provide us with clear steps to reproduce it.\n\n\
+                        We are closing this issue for now as it seems to be a support request and not a bug. \
+                        If we missed something, please leave a comment and we will take a second look.'
+                      })
+            - name: Close support request issue
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.update({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: context.issue.number,
+                            state: 'closed',
+                            state_reason: 'not_planned'
+                          })
+    add-votes-comment:
+        if: "github.event.label.name == 'needs: votes'"
+        runs-on: ubuntu-20.04
+        permissions:
+            issues: write
+        steps:
+            - name: Add votes needed comment
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: "Thanks for the suggestion @${{ github.event.issue.user.login }},\n\n\
+                        While we appreciate you sharing your ideas with us, it doesn't fit in with our current priorities for the project.\n\
+                        At some point, we may revisit our priorities and look through the list of suggestions like this one to see if it \
+                        warrants a second look.\n\n\
+                        In the meantime, we are going to close this issue with the `votes needed` label and evaluate over time if this \
+                        issue collects more feedback.\n\n\
+                        Don't be alarmed if you don't see any activity on this issue for a while. \
+                        We'll keep an eye on the popularity of this request."
+                      })
+            - name: Close votes needed issue
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.update({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: context.issue.number,
+                            state: 'closed'
+                          })
+    fill-template-comment:
+        if: "github.event.label.name == 'needs: template'"
+        runs-on: ubuntu-20.04
+        permissions:
+            issues: write
+        steps:
+            - name: Add reply to fill template
+              uses: actions/github-script@v5
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: "Hi @${{ github.event.issue.user.login }},\n\n\
+                        Thank you for submitting the issue. However, you didn't fill out the details of the bug report template that we ask for. Without these details, we can't fully evaluate this issue. Please provide us with the information requested so we could take a look further.\n\n\
+                        **Describe the bug**\n\n\
+                        A clear and concise description of what the bug is. Please be as descriptive as possible; issues lacking detail, or for any other reason than to report a bug, may be closed without action.\n\n\
+                        **To Reproduce**\n\n\
+                        Steps to reproduce the behavior:\n\n\
+                        1. Go to '...'\n\
+                        2. Click on '....'\n\
+                        3. Scroll down to '....'\n\
+                        4. See error\n\n\
+                        **Screenshots**\n\n\
+                        If applicable, add screenshots to help explain your problem.\n\n\
+                        **Expected behavior**\n\n\
+                        A clear and concise description of what you expected to happen.\n\n\
+                        **Isolating the problem (mark completed items with an [x]):**\n\n\
+                        - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.\n\
+                        - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/products/storefront/).\n\
+                        - [ ] I can reproduce this bug consistently using the steps above.\n\n\
+                        **WordPress Environment**\n\n\
+                        Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin."
+                      })
+            - name: remove-needs-template-label
+              uses: actions-ecosystem/action-remove-labels@v1
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  labels: 'needs: template'
+            - name: add-needs-author-feedback-label
+              uses: actions-ecosystem/action-add-labels@v1
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  labels: 'needs: author feedback'

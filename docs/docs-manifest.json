@@ -155,7 +155,7 @@
       "categories": []
     },
     {
-      "content": "\nJoin the WooCommerce community of contributors. Find out how to build with WooCommerce and help enhance the Woo ecosystem.\n",
+      "content": "\nInterested in joining the Woo contributor community? The links in this doc summarize and direct you to the order of operations you will need to make your first contribution. If you are a seasoned WooCommerce developer, feel free to skip ahead and utilize the template links, or the reference docs and guides below.\n\n## Contributing to WooCommerce Core\n\nThe WooCommerce core plugin code can be found in our [monorepo](https://github.com/woocommerce/woocommerce). Here you can contribute to: \n\n- [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)\n- [WooCommerce Admin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin)\n- [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-blocks) \n\n### Code of Conduct\n\nContributing to an open source project requires cooperation amongst individuals and organziations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.\n\n### Contributor Guidelines\n\nOur [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.\n\n- [Prerequisites and developer tools to get started](https://github.com/woocommerce/woocommerce/blob/trunk/README.md#getting-started)\n- [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)\n- [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) \n\n### Templates, Bug Reports, and Feature Requests\n\n- [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)\n- [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)\n- [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)\n- [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)\n- [Feature requests](https://woo.com/feature-requests/woocommerce/)\n\n### Security\n\nSecurity and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.\n\nPlease report any vulnerabilities or security issues by reading through Woo's security policy [here](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md).\n\n\n\n\n\n",
       "category_slug": "contributing",
       "category_title": "Contribute to Woo",
       "posts": [
@@ -571,6 +571,13 @@
       "category_title": "High Performance Order Storage",
       "posts": [
         {
+          "post_title": "A large store's guide to enable HPOS on WooCommerce",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "hash": "3127a6befad4538edf8b005300885cf80254efa43080b96aeccf2b822b4015d4",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
+          "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
+        },
+        {
           "post_title": "How to enable High Performance Order Storage",
           "menu_title": "Enable HPOS",
           "tags": "how-to",
@@ -843,6 +850,24 @@
           "hash": "9a417b9e722ca819f860cedd25c4139bd67bdae39d10d9701ada93ed66c6bf6c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/shipping/shipping-method-api.md",
           "id": "70270a01c8f1f2b630c809c0b9611940e99293a9"
+        }
+      ],
+      "categories": []
+    },
+    {
+      "content": "# Testing\n\nProperly setting up your test environment and writing tests when contributing to WooCommrece core are essential parts of our development pipeline. The links below are also included in our [Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) on GitHub.\n\nIf you have any questions about testing please reach out to the developer community in our public channels([Developer Blog](https://developer.woo.com/blog/), [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions), or [Community Slack](https://woo.com/community-slack/)).\n\n## Unit Testing\n\n[End-to-end tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw) are powered by `Playwright`. The test site is spun up using `wp-env` ([recommended][https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/]), but we will continue to support `e2e-environment` in the meantime, and slowly [deprecate](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) `Puppeteer` testing. \n\n## API Testing\n\n`api-core-tests` is a [package](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/api-core-tests#guide-for-writing-api-tests) that contains automated API tests for WooCommerce, based on `Playwright` and `wp-env`. It supersedes the SuperTest based `api-core-tests` package and `e2e-environment` setup, which we will gradually deprecate.\n\n## Calls for Testing\n\nKeep tabs on calls for testing on our developer blog, and make sure to read our beta testing instructions to help us build new features and enhancements.\n",
+      "category_slug": "testing",
+      "category_title": "Testing",
+      "posts": [
+        {
+          "category_title": "Beta Testing",
+          "category_slug": "Beta Testing",
+          "tags": "how-to",
+          "post_title": "Beta Testing New Features",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/testing/beta-testing.md",
+          "hash": "2daf9846db320da1053767e1f11b48019b52b336e614950c00fd2b38fe0c6060",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/testing/beta-testing.md",
+          "id": "01f266904647aad0d44b5687fb5f143560dabc67"
         }
       ],
       "categories": []
@@ -1211,5 +1236,5 @@
       "categories": []
     }
   ],
-  "hash": "5525848d534418c277f3935b954bb9b7379dbf3b05c9e6d61056041a766b2636"
+  "hash": "210628059253d97a4833800b7326dc15af80ecb31e68d88780a83a9b99d2abf6"
 }
