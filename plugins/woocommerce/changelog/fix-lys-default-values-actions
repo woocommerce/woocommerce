@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Move the feature flag check to add_lys_default_values method

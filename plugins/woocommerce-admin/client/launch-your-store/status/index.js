@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, moreVertical, edit, cog } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
-import { getNewPath } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
 import classnames from 'classnames';
 
@@ -12,6 +11,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import './style.scss';
+import { useComingSoonEditorLink } from '../hooks/use-coming-soon-editor-link';
 
 export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
@@ -22,9 +22,8 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 		: __( 'Site coming soon', 'woocommerce' );
 	const liveText = __( 'Live', 'woocommerce' );
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
-	const launchYourStoreLink = new URL(
-		getAdminLink( getNewPath( {}, '/launch-your-store', {} ) )
-	);
+	const [ commingSoonPageLink ] = useComingSoonEditorLink();
+
 	return (
 		<div className="woocommerce-lys-status">
 			<div className="woocommerce-lys-status-pill-wrapper">
@@ -50,7 +49,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 							<MenuGroup className="woocommerce-lys-status-popover">
 								<MenuItem
 									href={ getAdminLink(
-										'admin.php?page=wc-settings'
+										'admin.php?page=wc-settings&tab=site-visibility'
 									) }
 								>
 									<Icon icon={ cog } size={ 24 } />
@@ -60,7 +59,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 									) }
 								</MenuItem>
 								{ isComingSoon && (
-									<MenuItem href={ launchYourStoreLink.href }>
+									<MenuItem href={ commingSoonPageLink }>
 										<Icon icon={ edit } size={ 24 } />
 										{ __(
 											'Customize "Coming soon" page',
