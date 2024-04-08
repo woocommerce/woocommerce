@@ -55,7 +55,7 @@ export const getInitialSettings = (): ShippingMethodSettings => {
 
 	return {
 		enabled:
-			typeof settings?.enabled == 'boolean'
+			typeof settings?.enabled === 'boolean'
 				? settings.enabled
 				: defaultSettings.enabled,
 		title: settings?.title || defaultSettings.title,
