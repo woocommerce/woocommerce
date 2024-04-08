@@ -141,6 +141,7 @@ class Checkout extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		echo $content; die();
 
 		if ( $this->is_checkout_endpoint() ) {
 			// Note: Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
@@ -489,6 +490,7 @@ class Checkout extends AbstractBlock {
 			'CheckoutOrderSummaryShippingBlock',
 			'CheckoutOrderSummarySubtotalBlock',
 			'CheckoutOrderSummaryTaxesBlock',
+			'CheckoutOrderSummaryTotalsBlock',
 			'CheckoutPaymentBlock',
 			'CheckoutShippingAddressBlock',
 			'CheckoutShippingMethodsBlock',
