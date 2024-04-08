@@ -13,7 +13,7 @@ test.describe( 'Legacy templates', async () => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 
-	test( 'woocommerce//* name is supported', async ( {
+	test( 'woocommerce//* slug is supported', async ( {
 		admin,
 		page,
 		editor,
