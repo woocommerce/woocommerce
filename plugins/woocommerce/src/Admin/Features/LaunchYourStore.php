@@ -19,6 +19,7 @@ class LaunchYourStore {
 			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
+		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 	}
 
 	/**
@@ -116,19 +117,19 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer {"height":"10px"} -->
 			<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:paragraph {"align":"center"} -->
 			<p class="has-text-align-center">%s</p>
 			<!-- /wp:paragraph -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -151,11 +152,11 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -254,5 +255,21 @@ class LaunchYourStore {
 		);
 		// phpcs:ignore
 		echo "<div id='coming-soon-footer-banner'>$text</div>";
+	}
+
+	/**
+	 * Register user meta fields for Launch Your Store.
+	 */
+	public function register_launch_your_store_user_meta_fields() {
+		register_meta(
+			'user',
+			'woocommerce_launch_your_store_tour_hidden',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
 	}
 }
