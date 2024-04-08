@@ -21,7 +21,7 @@ import {
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
 		setPreviewState?: SetPreviewState;
-		initialState?: PreviewState;
+		initialPreviewState?: PreviewState;
 	};
 }
 
@@ -31,11 +31,11 @@ export interface ProductCollectionConfig extends BlockVariation {
  * @param {ProductCollectionConfig} blockVariationArgs - The configuration for the product collection, potentially including a setPreviewState function.
  */
 const registerProductCollection = ( {
-	preview: { setPreviewState, initialState } = {},
+	preview: { setPreviewState, initialPreviewState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
 	// Don't add filter if setPreviewState is not provided.
-	if ( setPreviewState || initialState ) {
+	if ( setPreviewState || initialPreviewState ) {
 		// This HOC adds a setPreviewState & initialPreviewState to the BlockEdit component's props.
 		const withSetPreviewState =
 			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
@@ -49,7 +49,10 @@ const registerProductCollection = ( {
 				return (
 					<BlockEdit
 						{ ...props }
-						preview={ { setPreviewState, initialState } }
+						preview={ {
+							setPreviewState,
+							initialPreviewState,
+						} }
 					/>
 				);
 			};
@@ -64,7 +67,7 @@ const registerProductCollection = ( {
 		...blockVariationArgs,
 		attributes: {
 			...blockVariationArgs.attributes,
-			previewState: initialState,
+			previewState: initialPreviewState,
 		},
 	} );
 };

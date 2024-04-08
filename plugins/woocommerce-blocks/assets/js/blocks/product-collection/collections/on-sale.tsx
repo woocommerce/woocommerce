@@ -69,7 +69,7 @@ export default {
 	 * operation to calculate preview state.
 	 */
 	preview: {
-		initialState: {
+		initialPreviewState: {
 			isPreview: true,
 			previewMessage: 'On sale Collection Preview',
 		},

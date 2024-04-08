@@ -92,7 +92,7 @@ export default {
 	innerBlocks,
 	preview: {
 		setPreviewState,
-		initialState: {
+		initialPreviewState: {
 			isPreview: true,
 			previewMessage: 'This is in preview mode',
 		},

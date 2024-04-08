@@ -98,7 +98,7 @@ export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
 		preview: {
-			initialState?: PreviewState;
+			initialPreviewState?: PreviewState;
 			setPreviewState?: SetPreviewState;
 		};
 		context: {

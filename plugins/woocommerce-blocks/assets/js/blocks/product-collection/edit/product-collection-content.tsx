@@ -72,7 +72,7 @@ const useSetPreviewState = ( {
 };
 
 const ProductCollectionContent = ( {
-	preview: { setPreviewState, initialState: initialPreviewState } = {},
+	preview: { setPreviewState, initialPreviewState } = {},
 	...props
 }: ProductCollectionEditComponentProps ) => {
 	const isInitialAttributesSet = useRef( false );
