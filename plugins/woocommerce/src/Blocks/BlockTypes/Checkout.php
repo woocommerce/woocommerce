@@ -321,7 +321,20 @@ class Checkout extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
+		$country_data    = CartCheckoutUtils::get_country_data();
+		$address_formats = WC()->countries->get_address_formats();
+
+		// Move the address format into the 'countryData' setting.
+		// We need to skip 'default' because that's not a valid country.
+		foreach ( $address_formats as $country_code => $format ) {
+			if ( 'default' === $country_code ) {
+				continue;
+			}
+			$country_data[ $country_code ]['format'] = $format;
+		}
+
+		$this->asset_data_registry->add( 'countryData', $country_data, true );
+		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'], true );
 		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',

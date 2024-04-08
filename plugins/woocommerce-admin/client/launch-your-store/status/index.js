@@ -11,6 +11,8 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import './style.scss';
+import { SiteVisibilityTour } from '../tour';
+import { useSiteVisibilityTour } from '../tour/use-site-visibility-tour';
 import { useComingSoonEditorLink } from '../hooks/use-coming-soon-editor-link';
 
 export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
@@ -22,10 +24,20 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 		: __( 'Site coming soon', 'woocommerce' );
 	const liveText = __( 'Live', 'woocommerce' );
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
+	const { showTour, setShowTour, onClose, shouldTourBeShown } =
+		useSiteVisibilityTour();
 	const [ commingSoonPageLink ] = useComingSoonEditorLink();
 
 	return (
 		<div className="woocommerce-lys-status">
+			{ shouldTourBeShown && showTour && (
+				<SiteVisibilityTour
+					onClose={ () => {
+						onClose();
+						setShowTour( false );
+					} }
+				/>
+			) }
 			<div className="woocommerce-lys-status-pill-wrapper">
 				<Dropdown
 					className="woocommerce-lys-status-dropdown"
