@@ -84,14 +84,37 @@ export const createReducer = (
 						},
 					};
 
-				case TYPES.CREATE_ITEM_SUCCESS:
+				case TYPES.CREATE_ITEM_SUCCESS: {
 					const createItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.CREATE_ITEM,
 						payload.key,
 						payload.query
 					);
-					return {
+
+					const { options } = payload;
+					let items = state.items;
+					if ( options.optimisticQueryUpdate ) {
+						const getItemQuery = getRequestIdentifier(
+							CRUD_ACTIONS.GET_ITEMS,
+							options.optimisticQueryUpdate as ItemQuery
+						);
+
+						items = {
+							...state.items,
+							[ getItemQuery ]: {
+								...state.items[ getItemQuery ],
+								data: [
+									...( state.items[ getItemQuery ]?.data ||
+										[] ),
+									payload.key,
+								],
+							},
+						};
+					}
+
+					const newState = {
 						...state,
+						items,
 						data: {
 							...itemData,
 							[ payload.key ]: {
@@ -104,6 +127,8 @@ export const createReducer = (
 							[ createItemSuccessRequestId ]: false,
 						},
 					};
+					return newState;
+				}
 
 				case TYPES.GET_ITEM_SUCCESS:
 					return {
@@ -237,12 +262,18 @@ export const createReducer = (
 						( payload.query || {} ) as ItemQuery
 					);
 
+					// console.log( '(reducer) Item Query: ', itemQuery );
+
+					const nextItemsDos = {
+						...state.items,
+						[ itemQuery ]: { data: ids },
+					};
+
+					// console.log( '(reducer) Next Items: ', nextItemsDos );
+
 					return {
 						...state,
-						items: {
-							...state.items,
-							[ itemQuery ]: { data: ids },
-						},
+						items: nextItemsDos,
 						data: {
 							...state.data,
 							...nextResources,
