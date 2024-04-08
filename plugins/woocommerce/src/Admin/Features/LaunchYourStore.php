@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -38,7 +39,7 @@ class LaunchYourStore {
 		);
 
 		if ( isset( $_POST['woocommerce_store_pages_only'] ) ) {
-			$this->possibly_update_coming_soon_page_content( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
+			$this->possibly_update_coming_soon_page( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
 		}
 
 		$at_least_one_saved = false;
@@ -63,7 +64,7 @@ class LaunchYourStore {
 	 * @param string $next_store_pages_only The next store pages only setting.
 	 * @return void
 	 */
-	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
+	public function possibly_update_coming_soon_page( $next_store_pages_only ) {
 		$option_name              = 'woocommerce_store_pages_only';
 		$current_store_pages_only = get_option( $option_name, null );
 
@@ -93,6 +94,11 @@ class LaunchYourStore {
 					'post_content' => $next_page_content,
 				)
 			);
+
+			$template_id = 'yes' === $next_store_pages_only
+				? 'coming-soon-store-only'
+				: 'coming-soon-entire-site';
+			update_post_meta( $page_id, '_wp_page_template', $template_id );
 		}
 	}
 
@@ -178,8 +184,8 @@ class LaunchYourStore {
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
 				$store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content(),
 			);
-			// Make sure the page uses the no-title template. This only works for Twenty twenty-four and is temporary.
-			update_post_meta( $page_id, '_wp_page_template', 'page-no-title' );
+			$template_id      = $store_pages_only ? 'coming-soon-store-only' : 'coming-soon-entire-site';
+			update_post_meta( $page_id, '_wp_page_template', $template_id );
 			// wc_create_page doesn't create options with autoload = yes.
 			// Since we'll querying the option on WooCommerce home,
 			// we should update the option to set autoload to yes.
