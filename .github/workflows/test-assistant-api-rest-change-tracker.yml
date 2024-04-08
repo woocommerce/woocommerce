@@ -145,8 +145,8 @@ jobs:
 
           # To print the array in the desired format
           echo "MILESTONE_DATES_TEST=("
-          for version in "${!MILESTONE_DATES[@]}"; do
-            echo "  [\"$version\"]=\"${MILESTONE_DATES[$version]}\""
+          for version in "${!MILESTONE_DATES_TEST[@]}"; do
+            echo "  [\"$version\"]=\"${MILESTONE_DATES_TEST[$version]}\""
           done
           echo ")"
 
