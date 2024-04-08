@@ -305,10 +305,6 @@ class AssetDataRegistry {
 			wc_deprecated_argument( 'Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::add()', '8.9', 'The $check_key_exists parameter is no longer used: all duplicate data will be ignored if the key exists by default' );
 		}
 
-		if ( $this->exists( $key ) ) {
-			return;
-		}
-
 		$this->add_data( $key, $data );
 	}
 
@@ -414,6 +410,9 @@ class AssetDataRegistry {
 		if ( ! is_string( $key ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			trigger_error( esc_html__( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
+			return;
+		}
+		if ( $this->exists( $key ) ) {
 			return;
 		}
 		if ( isset( $this->data[ $key ] ) ) {
