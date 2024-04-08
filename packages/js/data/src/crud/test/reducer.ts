@@ -323,6 +323,11 @@ describe( 'crud reducer', () => {
 			name: 'Off the hook!',
 			status: 'draft',
 		};
+
+		const options = {
+			optimisticQueryUpdate: false,
+		};
+
 		const resourceName = getRequestIdentifier(
 			CRUD_ACTIONS.CREATE_ITEM,
 			item.id,
@@ -334,6 +339,7 @@ describe( 'crud reducer', () => {
 			key: item.id,
 			item,
 			query,
+			options,
 		} );
 
 		expect( state.data[ 2 ].name ).toEqual( item.name );
