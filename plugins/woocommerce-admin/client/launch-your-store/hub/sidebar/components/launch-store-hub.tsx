@@ -4,7 +4,11 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 // @ts-ignore No types for this exist yet.
@@ -18,6 +22,8 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
 	ToggleControl,
+	Notice,
+	Spinner,
 } from '@wordpress/components';
 
 /**
@@ -25,8 +31,9 @@ import {
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { taskCompleteIcon, taskIcons } from './icons';
+import { taskCompleteIcon } from './icons';
 import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
 export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	props
 ) => {
@@ -35,6 +42,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 			tasklist,
 			removeTestOrders: removeTestOrdersContext,
 			testOrderCount,
+			launchStoreError,
 		},
 	} = props;
 
@@ -77,6 +85,23 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 		removeTestOrdersContext ?? true
 	);
 
+	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
+	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+
+	const launchStoreAction = () => {
+		setHasSubmitted( true );
+		props.sendEventToSidebar( {
+			type: 'LAUNCH_STORE',
+			removeTestOrders,
+		} );
+	};
+
+	useEffect( () => {
+		if ( launchStoreError?.message ) {
+			setHasSubmitted( false );
+		}
+	}, [ launchStoreError?.message ] );
+
 	return (
 		<div
 			className={ classnames(
@@ -109,28 +134,25 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 				<ItemGroup className="edit-site-sidebar-navigation-screen-essential-tasks__group">
 					{ tasklist &&
 						hasIncompleteTasks &&
-						tasklist.tasks.map( ( task ) => (
-							<SidebarNavigationItem
-								className={ classnames( task.id, {
-									'is-complete': task.isComplete,
-								} ) }
-								icon={
-									task.isComplete
-										? taskCompleteIcon
-										: taskIcons[ task.id ]
-								}
-								withChevron
-								key={ task.id }
-								onClick={ () => {
-									props.sendEventToSidebar( {
-										type: 'TASK_CLICKED',
-										task,
-									} );
-								} }
-							>
-								{ task.title }
-							</SidebarNavigationItem>
-						) ) }
+						tasklist.tasks.map( ( task ) =>
+							task.isComplete ? (
+								<CompletedTaskItem
+									task={ task }
+									key={ task.id }
+								/>
+							) : (
+								<IncompleteTaskItem
+									task={ task }
+									key={ task.id }
+									onClick={ () => {
+										props.sendEventToSidebar( {
+											type: 'TASK_CLICKED',
+											task,
+										} );
+									} }
+								/>
+							)
+						) }
 					{ tasklist && ! hasIncompleteTasks && (
 						<SidebarNavigationItem
 							className="all-tasks-complete"
@@ -173,16 +195,40 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 					</>
 				) }
 				<ItemGroup className="edit-site-sidebar-navigation-screen-launch-store-button__group">
-					<Button
-						variant="primary"
-						onClick={ () => {
-							props.sendEventToSidebar( {
-								type: 'LAUNCH_STORE',
-								removeTestOrders,
-							} );
-						} }
-					>
-						{ __( 'Launch Store', 'woocommerce' ) }
+					{ launchStoreError?.message && ! errorNoticeDismissed && (
+						<Notice
+							className="launch-store-error-notice"
+							isDismissible={ true }
+							onRemove={ () => setErrorNoticeDismissed( true ) }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while launching your store. <retryButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ launchStoreAction }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
+					<Button variant="primary" onClick={ launchStoreAction }>
+						{ hasSubmitted ? (
+							<Spinner />
+						) : (
+							__( 'Launch your store', 'woocommerce' )
+						) }
 					</Button>
 				</ItemGroup>
 			</SidebarContainer>

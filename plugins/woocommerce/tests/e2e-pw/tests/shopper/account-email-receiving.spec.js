@@ -179,7 +179,9 @@ test.describe( 'Shopper Password Reset Email Receiving', () => {
 			.fill( 'customer@woocommercecoree2etestsuite.com' );
 		await page.getByRole( 'button', { name: 'Reset password' } ).click();
 
-		await page.waitForSelector( '.woocommerce-message' );
+		await expect(
+			await page.getByText( 'Password reset email has been sent' ).count()
+		).toBeGreaterThan( 0 );
 
 		// verify that the email was sent
 		await page.goto( 'wp-login.php' );

@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { customer, storeDetails } = require( '../../test-data/data' );
 const { api } = require( '../../utils' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 let productId, orderId, zoneId;
 
@@ -101,11 +102,9 @@ test.describe( 'Shopper Order Email Receiving', () => {
 		await page.locator( 'text=Place order' ).click();
 
 		await expect(
-			page.locator( 'li.woocommerce-order-overview__order > strong' )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
-		orderId = await page
-			.locator( 'li.woocommerce-order-overview__order > strong' )
-			.textContent();
+		orderId = getOrderIdFromUrl( page );
 
 		// search to narrow it down to just the messages we want
 		await page.goto(
@@ -113,7 +112,6 @@ test.describe( 'Shopper Order Email Receiving', () => {
 				customer.email
 			) }`
 		);
-		await page.waitForLoadState( 'networkidle' );
 		await expect(
 			page.locator( 'td.column-receiver >> nth=0' )
 		).toContainText( customer.email );

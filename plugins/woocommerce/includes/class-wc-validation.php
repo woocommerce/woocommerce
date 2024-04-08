@@ -102,7 +102,7 @@ class WC_Validation {
 				break;
 			case 'CZ':
 			case 'SK':
-				$valid = (bool) preg_match( '/^([0-9]{3})(\s?)([0-9]{2})$/', $postcode );
+				$valid = (bool) preg_match( "/^($country-)?([0-9]{3})(\s?)([0-9]{2})$/", $postcode );
 				break;
 			case 'NL':
 				$valid = (bool) preg_match( '/^([1-9][0-9]{3})(\s?)(?!SA|SD|SS)[A-Z]{2}$/i', $postcode );
