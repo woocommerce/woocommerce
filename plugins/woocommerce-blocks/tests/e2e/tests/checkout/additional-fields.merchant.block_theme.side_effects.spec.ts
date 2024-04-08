@@ -297,10 +297,16 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			.getByLabel( 'Is this a personal purchase or a business purchase?' )
 			.selectOption( 'personal' );
 
-		await admin.page
+		const clickPromise = admin.page
 			.getByRole( 'button', { name: 'Update' } )
 			.first()
 			.click();
+
+		const navigationPromise = admin.page.waitForEvent( 'domcontentloaded' );
+
+		// When update is clicked without waiting for DOMContentLoaded the page becomes
+		// available before click handlers are attached to the shipping edit link.
+		await Promise.all( [ clickPromise, navigationPromise ] );
 
 		await admin.page
 			.getByRole( 'heading', { name: 'Shipping Edit' } )

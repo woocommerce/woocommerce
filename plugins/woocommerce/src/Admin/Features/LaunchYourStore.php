@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Admin\Features;
 
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * Takes care of Launch Your Store related actions.
@@ -18,6 +19,7 @@ class LaunchYourStore {
 			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
+		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 	}
 
 	/**
@@ -38,7 +40,7 @@ class LaunchYourStore {
 		);
 
 		if ( isset( $_POST['woocommerce_store_pages_only'] ) ) {
-			$this->possibly_update_coming_soon_page_content( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
+			$this->possibly_update_coming_soon_page( wc_clean( wp_unslash( $_POST['woocommerce_store_pages_only'] ) ) );
 		}
 
 		$at_least_one_saved = false;
@@ -63,7 +65,7 @@ class LaunchYourStore {
 	 * @param string $next_store_pages_only The next store pages only setting.
 	 * @return void
 	 */
-	public function possibly_update_coming_soon_page_content( $next_store_pages_only ) {
+	public function possibly_update_coming_soon_page( $next_store_pages_only ) {
 		$option_name              = 'woocommerce_store_pages_only';
 		$current_store_pages_only = get_option( $option_name, null );
 
@@ -93,6 +95,11 @@ class LaunchYourStore {
 					'post_content' => $next_page_content,
 				)
 			);
+
+			$template_id = 'yes' === $next_store_pages_only
+				? 'coming-soon-store-only'
+				: 'coming-soon-entire-site';
+			update_post_meta( $page_id, '_wp_page_template', $template_id );
 		}
 	}
 
@@ -110,19 +117,19 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer {"height":"10px"} -->
 			<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:paragraph {"align":"center"} -->
 			<p class="has-text-align-center">%s</p>
 			<!-- /wp:paragraph -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -145,11 +152,11 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -178,8 +185,8 @@ class LaunchYourStore {
 				_x( 'Coming Soon', 'Page title', 'woocommerce' ),
 				$store_pages_only ? $this->get_store_only_coming_soon_content() : $this->get_entire_site_coming_soon_content(),
 			);
-			// Make sure the page uses the no-title template. This only works for Twenty twenty-four and is temporary.
-			update_post_meta( $page_id, '_wp_page_template', 'page-no-title' );
+			$template_id      = $store_pages_only ? 'coming-soon-store-only' : 'coming-soon-entire-site';
+			update_post_meta( $page_id, '_wp_page_template', $template_id );
 			// wc_create_page doesn't create options with autoload = yes.
 			// Since we'll querying the option on WooCommerce home,
 			// we should update the option to set autoload to yes.
@@ -248,5 +255,21 @@ class LaunchYourStore {
 		);
 		// phpcs:ignore
 		echo "<div id='coming-soon-footer-banner'>$text</div>";
+	}
+
+	/**
+	 * Register user meta fields for Launch Your Store.
+	 */
+	public function register_launch_your_store_user_meta_fields() {
+		register_meta(
+			'user',
+			'woocommerce_launch_your_store_tour_hidden',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate whether the user has dismissed the site visibility tour on the home screen.',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
 	}
 }

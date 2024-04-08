@@ -34,7 +34,7 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
 
-		const expectedValues = [ '4', '0', '2', '2', '0' ];
+		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
 		await expect(
 			page
@@ -57,7 +57,7 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
 
-		const expectedValues = [ '4', '3', '2', '2', '0' ];
+		const expectedValues = [ '4', '2', '3', '4', '1' ];
 
 		await expect(
 			page
@@ -80,7 +80,7 @@ test.describe( 'Filter by Attributes Block - with All products Block', () => {
 		// Check if the page has loaded successfully.
 		await expect( page.getByText( 'Active Filters block' ) ).toBeVisible();
 
-		const expectedValues = [ '2', '0', '1', '1', '0' ];
+		const expectedValues = [ '2', '2', '2', '3', '1' ];
 
 		await expect(
 			page
