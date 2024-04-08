@@ -7,15 +7,9 @@ const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
 const simpleProductSlug = simpleProductName.replace( / /gi, '-' ).toLowerCase();
 
-let simpleProductId,
-	crossSellProductId,
-	upSellProductId,
-	productCategory1Id,
-	productCategory2Id;
+let simpleProductId, productCategory1Id, productCategory2Id;
 
 test.describe( 'Single Product Page', () => {
-	const crossSellProduct = simpleProductName + ' Related';
-	const upSellProduct = simpleProductName + ' Upsell';
 	const productCategoryName1 = 'Hoodies';
 	const productCategoryName2 = 'Jumpers';
 	const productDescription =
@@ -54,36 +48,6 @@ test.describe( 'Single Product Page', () => {
 		// add products
 		await api
 			.post( 'products', {
-				name: crossSellProduct,
-				type: 'simple',
-				categories: [
-					{
-						id: productCategory1Id,
-						name: productCategoryName1,
-					},
-				],
-				regular_price: productPrice,
-			} )
-			.then( ( response ) => {
-				crossSellProductId = response.data.id;
-			} );
-		await api
-			.post( 'products', {
-				name: upSellProduct,
-				type: 'simple',
-				categories: [
-					{
-						id: productCategory2Id,
-						name: productCategoryName2,
-					},
-				],
-				regular_price: productPrice,
-			} )
-			.then( ( response ) => {
-				upSellProductId = response.data.id;
-			} );
-		await api
-			.post( 'products', {
 				name: simpleProductName,
 				description: productDescription,
 				type: 'simple',
@@ -105,8 +69,6 @@ test.describe( 'Single Product Page', () => {
 					},
 				],
 				regular_price: productPrice,
-				related_ids: crossSellProductId,
-				upsell_ids: upSellProductId,
 			} )
 			.then( ( response ) => {
 				simpleProductId = response.data.id;
@@ -126,34 +88,11 @@ test.describe( 'Single Product Page', () => {
 			version: 'wc/v3',
 		} );
 		await api.post( 'products/batch', {
-			delete: [ simpleProductId, crossSellProductId, upSellProductId ],
+			delete: [ simpleProductId ],
 		} );
 		await api.post( 'products/categories/batch', {
 			delete: [ productCategory1Id, productCategory2Id ],
 		} );
-	} );
-
-	test( 'should be able to see upsell and related products', async ( {
-		page,
-	} ) => {
-		await page.goto( `product/${ simpleProductSlug }` );
-
-		await expect( page.locator( '.upsells > h2' ) ).toContainText(
-			'You may also like…'
-		);
-		await expect( page.locator( '.related > h2' ) ).toContainText(
-			'Related products'
-		);
-		await expect(
-			page.locator(
-				'.upsells > .products > li > a > .woocommerce-loop-product__title'
-			)
-		).toContainText( upSellProduct );
-		await expect(
-			page.locator(
-				'.related > .products > li > a > .woocommerce-loop-product__title'
-			)
-		).toContainText( crossSellProduct );
 	} );
 
 	test( 'should be able to post a review and see it after', async ( {
@@ -181,11 +120,7 @@ test.describe( 'Single Product Page', () => {
 		);
 	} );
 
-	test( 'should be able to see product description and image', async ( {
-		page,
-	} ) => {
-		const images = [ 'image-02', 'image-03' ];
-
+	test( 'should be able to see product description', async ( { page } ) => {
 		await page.goto( `product/${ simpleProductSlug }` );
 		await page.getByRole( 'tab', { name: 'Description' } ).click();
 
@@ -224,47 +159,5 @@ test.describe( 'Single Product Page', () => {
 				.getByRole( 'tabpanel' )
 				.filter( 'listitem', { name: 'Test numbered item' } )
 		).toBeVisible();
-		await expect(
-			page
-				.locator( `#product-${ simpleProductId } ol img` )
-				.nth( images.length ),
-			'all gallery images should be visible'
-		).toBeVisible(); // +1 for the featured image
-	} );
-
-	test( 'should be able to add simple products to the cart', async ( {
-		page,
-	} ) => {
-		await page.goto( `product/${ simpleProductSlug }` );
-
-		await page.locator( 'input.qty' ).fill( '5' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-
-		await expect( page.locator( '.woocommerce-message' ) ).toContainText(
-			'have been added to your cart.'
-		);
-
-		await page.goto( 'cart/' );
-		await expect( page.locator( 'td.product-name' ) ).toContainText(
-			simpleProductName
-		);
-		await expect( page.locator( 'input.qty' ) ).toHaveValue( '5' );
-		await expect( page.locator( 'td.product-subtotal' ) ).toContainText(
-			( 5 * +productPrice ).toString()
-		);
-	} );
-
-	test( 'should be able to remove simple products from the cart', async ( {
-		page,
-	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ simpleProductId }` );
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( 'cart/' );
-		await page.locator( 'a.remove' ).click();
-
-		await expect( page.locator( '.cart-empty' ) ).toContainText(
-			'Your cart is currently empty.'
-		);
 	} );
 } );

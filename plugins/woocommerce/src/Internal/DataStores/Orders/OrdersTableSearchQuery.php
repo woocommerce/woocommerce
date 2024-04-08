@@ -52,7 +52,7 @@ class OrdersTableSearchQuery {
 	 * @return array Array of search filters.
 	 */
 	private function sanitize_search_filters( string $search_filter ) : array {
-		$available_filters = array(
+		$core_filters = array(
 			'order_id',
 			'customer_email',
 			'customers', // customers also searches in meta.
@@ -60,9 +60,9 @@ class OrdersTableSearchQuery {
 		);
 
 		if ( 'all' === $search_filter || '' === $search_filter ) {
-			return $available_filters;
+			return $core_filters;
 		} else {
-			return array_intersect( $available_filters, array( $search_filter ) );
+			return array( $search_filter );
 		}
 	}
 
@@ -119,7 +119,29 @@ class OrdersTableSearchQuery {
 				LEFT JOIN $items_table AS search_query_items ON search_query_items.order_id = $orders_table.id
 			";
 		}
-		return '';
+
+		/**
+		 * Filter to support adding a custom order search filter.
+		 * Provide a JOIN clause for a new search filter. This should be used along with `woocommerce_hpos_admin_search_filters`
+		 * to declare a new custom filter, and `woocommerce_hpos_generate_where_for_search_filter` to generate the WHERE
+		 * clause.
+		 *
+		 * Hardcoded JOINS (products) cannot be modified using this filter for consistency.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param string $join The JOIN clause.
+		 * @param string $search_term The search term.
+		 * @param string $search_filter The search filter. Use this to bail early if this is not filter you are interested in.
+		 * @param OrdersTableQuery $query The order query object.
+		 */
+		return apply_filters(
+			'woocommerce_hpos_generate_join_for_search_filter',
+			'',
+			$this->search_term,
+			$search_filter,
+			$this->query
+		);
 	}
 
 	/**
@@ -189,7 +211,28 @@ class OrdersTableSearchQuery {
 			return "`$order_table`.id IN ( $meta_sub_query ) ";
 		}
 
-		return '';
+		/**
+		 * Filter to support adding a custom order search filter.
+		 * Provide a WHERE clause for a custom search filter via this filter. This should be used with the
+		 * `woocommerce_hpos_admin_search_filters` to declare a new custom filter, and optionally also with the
+		 * `woocommerce_hpos_generate_join_for_search_filter` filter if a join is also needed.
+		 *
+		 * Hardcoded filters (products, customers, ID and email) cannot be modified using this filter for consistency.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param string $where WHERE clause to add to the search query.
+		 * @param string $search_term The search term.
+		 * @param string $search_filter Name of the search filter. Use this to bail early if this is not the filter you are looking for.
+		 * @param OrdersTableQuery $query The order query object.
+		 */
+		return apply_filters(
+			'woocommerce_hpos_generate_where_for_search_filter',
+			'',
+			$this->search_term,
+			$search_filter,
+			$this->query
+		);
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: Fixes a mis-alignment of the form when certain extensions are installed.

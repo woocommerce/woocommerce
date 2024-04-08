@@ -17,6 +17,7 @@ import {
  */
 import TaxonomyItem from './taxonomy-item';
 import { ProductCollectionQuery } from '../../../types';
+import { DEFAULT_FILTERS } from '../../../constants';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;
@@ -53,6 +54,9 @@ function TaxonomyControls( {
 		return null;
 	}
 
+	const deselectCallback = () =>
+		setQueryAttribute( { taxQuery: DEFAULT_FILTERS.taxQuery } );
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Taxonomies', 'woocommerce' ) }
@@ -61,7 +65,8 @@ function TaxonomyControls( {
 					( terms ) => !! terms.length
 				)
 			}
-			onDeselect={ () => setQueryAttribute( { taxQuery: {} } ) }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
 				const termIds = taxQuery?.[ taxonomy.slug ] || [];

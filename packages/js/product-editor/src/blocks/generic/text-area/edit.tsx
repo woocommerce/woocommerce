@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
+import { LegacyRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement } from '@wordpress/element';
+import { createElement, useRef } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
@@ -35,7 +36,7 @@ export function TextAreaBlockEdit( {
 		required,
 		note,
 		tooltip,
-		disabled,
+		disabled = false,
 		align,
 		allowedFormats,
 		direction,
@@ -50,6 +51,8 @@ export function TextAreaBlockEdit( {
 		TextAreaBlockEdit,
 		'wp-block-woocommerce-product-content-field__content'
 	);
+
+	const labelId = contentId.toString() + '__label';
 
 	// `property` attribute is required.
 	if ( ! property ) {
@@ -75,6 +78,17 @@ export function TextAreaBlockEdit( {
 		value: TextAreaBlockEditAttributes[ 'direction' ]
 	) {
 		setAttributes( { direction: value } );
+	}
+
+	const richTextRef = useRef< HTMLParagraphElement >( null );
+	const textAreaRef = useRef< HTMLTextAreaElement >( null );
+
+	function focusRichText() {
+		richTextRef.current?.focus();
+	}
+
+	function focusTextArea() {
+		textAreaRef.current?.focus();
 	}
 
 	const blockControlsBlockProps = { group: 'block' };
@@ -103,16 +117,22 @@ export function TextAreaBlockEdit( {
 				label={
 					<Label
 						label={ label || '' }
+						labelId={ labelId }
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
+						onClick={
+							isRichTextMode ? focusRichText : focusTextArea
+						}
 					/>
 				}
 				help={ help }
 			>
 				{ isRichTextMode && (
 					<RichText
+						ref={ richTextRef as unknown as LegacyRef< 'p' > }
 						id={ contentId.toString() }
+						aria-labelledby={ labelId }
 						identifier="content"
 						tagName="p"
 						value={ content || '' }
@@ -125,13 +145,16 @@ export function TextAreaBlockEdit( {
 						allowedFormats={ allowedFormats }
 						placeholder={ placeholder }
 						required={ required }
-						disabled={ disabled }
+						aria-required={ required }
+						readOnly={ disabled }
 						onBlur={ hideToolbar }
 					/>
 				) }
 
 				{ isPlainTextMode && (
 					<TextareaControl
+						ref={ textAreaRef }
+						aria-labelledby={ labelId }
 						value={ content || '' }
 						onChange={ setContent }
 						placeholder={ placeholder }

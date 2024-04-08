@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import {
-	getSetting,
-	STORE_PAGES,
-	LocaleSpecificFormField,
-} from '@woocommerce/settings';
+import { getSetting, STORE_PAGES } from '@woocommerce/settings';
+import { CountryData } from '@woocommerce/types';
 
 export type WordCountType =
 	| 'words'
@@ -50,13 +47,6 @@ export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	'localPickupEnabled',
 	false
 );
-
-type CountryData = {
-	allowBilling: boolean;
-	allowShipping: boolean;
-	states: Record< string, string >;
-	locale: Record< string, LocaleSpecificFormField >;
-};
 
 type FieldsLocations = {
 	address: string[];
