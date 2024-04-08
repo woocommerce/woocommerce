@@ -95,7 +95,7 @@ export const createReducer = (
 					let items = state.items;
 					let itemsCount = state.itemsCount;
 
-					if ( typeof options.optimisticQueryUpdate === 'object' ) {
+					if ( typeof options?.optimisticQueryUpdate === 'object' ) {
 						const getItemQuery = getRequestIdentifier(
 							CRUD_ACTIONS.GET_ITEMS,
 							options.optimisticQueryUpdate
