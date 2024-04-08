@@ -18,10 +18,6 @@ export type QueryProductAttribute = {
 	generate_slug: boolean;
 };
 
-export type QueryProductOptionProps = {
-	optimisticQueryUpdate: boolean;
-};
-
 type Query = {
 	context?: string;
 };
