@@ -103,6 +103,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$request['type'] = $product->get_type();
 		}
 
+		// Creating product object from request data in preparation for copying.
 		$updated_product    = $this->prepare_object_for_database( $request );
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
