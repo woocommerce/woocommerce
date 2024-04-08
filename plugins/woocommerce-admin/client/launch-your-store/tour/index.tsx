@@ -60,7 +60,7 @@ export const SiteVisibilityTour = ( { onClose }: { onClose: () => void } ) => {
 							descriptions: {
 								desktop: createInterpolateElement(
 									__(
-										'Launch your store only when you’re ready to by switching between “Coming soon” and “Live” modes. Build excitement by creating a custom page visitors will see before you’re ready to go live. <link>Discover more</link>',
+										'Launch your store only when you\'re ready to by switching between "Coming soon" and "Live" modes. Build excitement by creating a custom page visitors will see before you\'re ready to go live. <link>Discover more</link>',
 										'woocommerce'
 									),
 									{
