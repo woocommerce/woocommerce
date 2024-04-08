@@ -8,6 +8,7 @@
 		/* Shadow / Popover */
 		box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.05);
 		width: 257px;
+		padding-bottom: 0;
 	}
 
 	.components-card__footer {
@@ -60,6 +61,7 @@
 	a {
 		display: block;
 		text-decoration: none;
-		padding-top: 23px;
+		margin-top: 12px;
+		padding-block: 11px;
 	}
 }
