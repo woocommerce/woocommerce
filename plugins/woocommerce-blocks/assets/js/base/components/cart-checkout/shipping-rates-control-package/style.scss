@@ -1,6 +1,10 @@
 .wc-block-components-shipping-rates-control__package {
 	margin: 0;
 
+	.wc-block-components-shipping-rates-control__package__description--free {
+		text-transform: uppercase;
+	}
+
 	&.wc-block-components-panel {
 		margin-bottom: 0;
 	}
