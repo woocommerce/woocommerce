@@ -111,19 +111,19 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer {"height":"10px"} -->
 			<div style="height:10px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:paragraph {"align":"center"} -->
 			<p class="has-text-align-center">%s</p>
 			<!-- /wp:paragraph -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -146,11 +146,11 @@ class LaunchYourStore {
 			<div class="wp-block-group"><!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
-			
+
 			<!-- wp:heading {"textAlign":"center","level":1} -->
 			<h1 class="wp-block-heading has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
-			
+
 			<!-- wp:spacer -->
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer --></div>
@@ -251,6 +251,9 @@ class LaunchYourStore {
 		echo "<div id='coming-soon-footer-banner'>$text</div>";
 	}
 
+	/**
+	 * Register user meta fields for Launch Your Store.
+	 */
 	public function register_launch_your_store_user_meta_fields() {
 		register_meta(
 			'user',
