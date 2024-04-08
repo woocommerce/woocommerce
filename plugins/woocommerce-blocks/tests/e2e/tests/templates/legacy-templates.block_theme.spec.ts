@@ -18,12 +18,16 @@ test.describe( 'Legacy templates', async () => {
 		page,
 		editor,
 	} ) => {
-		const templateName = 'single-product';
-		const customText = 'This is a customized template.';
+		const template = {
+			id: 'single-product',
+			name: 'Single Product',
+			customText: 'This is a customized template.',
+			frontendPath: '/product/hoodie/',
+		};
 
 		await test.step( 'Customize existing template to create DB entry', async () => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ templateName }`,
+				postId: `woocommerce/woocommerce//${ template.id }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -37,10 +41,12 @@ test.describe( 'Legacy templates', async () => {
 				.getByLabel( 'Empty block' )
 				.first();
 
-			await emptyBlock.fill( customText );
+			await emptyBlock.fill( template.customText );
 			await page.keyboard.press( 'Escape' );
 
-			await expect( editor.canvas.getByText( customText ) ).toBeVisible();
+			await expect(
+				editor.canvas.getByText( template.customText )
+			).toBeVisible();
 
 			await editor.saveSiteEditorEntities();
 		} );
@@ -57,14 +63,32 @@ test.describe( 'Legacy templates', async () => {
 			expect( cliOutput.stdout ).toContain( 'Success: Term updated.' );
 		} );
 
-		await test.step( 'Verify the template can be loaded via legacy ID', async () => {
+		await test.step( 'Verify the template can be edited via a legacy ID ', async () => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce//${ templateName }`,
+				postId: `woocommerce//${ template.id }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
 
-			await expect( editor.canvas.getByText( customText ) ).toBeVisible();
+			await expect(
+				editor.canvas.getByText( template.customText )
+			).toBeVisible();
+		} );
+
+		await test.step( 'Verify the template is listed in the Site Editor UI', async () => {
+			await admin.visitSiteEditor( {
+				path: '/wp_template/all',
+			} );
+
+			await expect(
+				page.getByRole( 'link', { name: template.name } )
+			).toBeVisible();
+		} );
+
+		await test.step( 'Verify the template loads correctly in the frontend', async () => {
+			await page.goto( template.frontendPath );
+
+			await expect( page.getByText( template.customText ) ).toBeVisible();
 		} );
 
 		await test.step( 'Revert term update', async () => {
