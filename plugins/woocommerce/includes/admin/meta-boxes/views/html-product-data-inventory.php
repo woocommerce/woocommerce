@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="inline notice woocommerce-message show_if_variable">
 			<img class="info-icon" src="<?php echo esc_url( $info_img_url ); ?>" />
 			<p>
-				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woo.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
+				<?php echo esc_html_e( 'Settings below apply to all variations without manual stock management enabled. ', 'woocommerce' ); ?> <a target="_blank" href="https://woocommerce.com/document/variable-product/"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a>
 			</p>
 		</div>
 		<?php

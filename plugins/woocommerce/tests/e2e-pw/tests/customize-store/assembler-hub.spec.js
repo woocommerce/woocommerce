@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
-const { activateTheme } = require( '../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
 const ASSEMBLER_HUB_URL =
@@ -47,8 +47,8 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to twentynineteen
-		await activateTheme( 'twentynineteen' );
+		// Reset theme back to default.
+		await activateTheme( DEFAULT_THEME );
 
 		// Reset tour to visible.
 		await setOption(
