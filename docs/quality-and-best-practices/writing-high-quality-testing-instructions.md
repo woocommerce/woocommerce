@@ -53,7 +53,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 3. Identify the **preconditions**, **action** and **validation** steps.
 4. Write **as many preconditions as you need** to explain how to set up the state of WooCommerce so that you can execute the desired action to test every flow.
     1. Try to be detailed when explaining the interactions the user needs to perform in WooCommerce.
-    2. If there are several preconditions for a user flow that is explained in a public guide, feel free to simply link the guide in the testing instructions instead of writing several steps. For example, _"Enable dev mode in WooCommerce Payments by following the steps mentioned [here](https://woocommerce.com/document/woocommerce-payments/testing-and-troubleshooting/dev-mode/)"_.
+    2. If there are several preconditions for a user flow that is explained in a public guide, feel free to simply link the guide in the testing instructions instead of writing several steps. For example, _"Enable dev mode in WooCommerce Payments by following the steps mentioned [here](https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/)"_.
 5. Write **the action step**, which should cover the specific action that we want to test as part of this user flow.
 6. Write **as many validation steps** as needed in order to assess that the actual result meets expectations.
     1. Bear in mind to check only the steps needed to validate that this change works.
