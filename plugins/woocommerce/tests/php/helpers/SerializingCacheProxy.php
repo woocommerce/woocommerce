@@ -15,7 +15,7 @@ class Serializing_Cache_Proxy {
 	public $original_cache_instance;
 
 	/**
-	 * @param \WP_Object_Cache $original_cache_instance
+	 * @param \WP_Object_Cache $original_cache_instance The original global $wp_object_cache instance.
 	 */
 	public function __construct( $original_cache_instance ) {
 		$this->original_cache_instance = $original_cache_instance;
@@ -25,7 +25,7 @@ class Serializing_Cache_Proxy {
 	 * Proxy method to route all method calls to the underlying cache object.
 	 *
 	 * @param string $func The function name being called.
-	 * @param array $args The arguments to pass to the underlying class.
+	 * @param array  $args The arguments to pass to the underlying class.
 	 *
 	 * @return mixed
 	 */
