@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, expect, Admin } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
@@ -451,27 +451,24 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCustomizations( templateName: string ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+
 		const templateRow = this.page.getByRole( 'row' ).filter( {
 			has: this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
 			} ),
 		} );
-		const resetButton = templateRow.getByRole( 'button', {
-			name: 'Reset',
-		} );
-		const waitForReset = this.page
+		const resetButton = templateRow.getByLabel( 'Reset', { exact: true } );
+		const revertedNotice = this.page
 			.getByLabel( 'Dismiss this notice' )
-			.getByText( `"${ templateName }" reverted.` )
-			.waitFor();
-
-		const waitForSavedLabel = this.page
-			.getByRole( 'button', { name: 'Saved' } )
-			.waitFor();
+			.getByText( `"${ templateName }" reverted.` );
+		const savedButton = this.page.getByRole( 'button', { name: 'Saved' } );
 
 		await resetButton.click();
-		await waitForSavedLabel;
-		await waitForReset;
+
+		await expect( revertedNotice ).toBeVisible();
+		await expect( savedButton ).toBeVisible();
 	}
 
 	async updatePost() {
