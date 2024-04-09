@@ -6,6 +6,15 @@
 
 .wc-block-components-form .wc-block-components-combobox,
 .wc-block-components-combobox {
+	position: relative;
+
+	svg {
+		position: absolute;
+		right: 15px;
+		top: 15px;
+		pointer-events: none;
+	}
+
 	.wc-block-components-combobox-control {
 		@include reset-typography();
 		@include reset-box();
