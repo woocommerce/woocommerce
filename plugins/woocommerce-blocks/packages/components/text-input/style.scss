@@ -62,7 +62,7 @@
 			background-color: #fff;
 			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 2px $input-border-gray;
+			box-shadow: 0 0 0 1.5px $input-border-gray;
 		}
 
 		.has-dark-controls & {
@@ -73,7 +73,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 2px $input-border-dark;
+				box-shadow: 0 0 0 1.5px $input-border-dark;
 			}
 		}
 	}

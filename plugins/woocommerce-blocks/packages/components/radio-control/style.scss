@@ -19,7 +19,8 @@
 	width: 100%;
 }
 
-.wc-block-components-radio-control__option .wc-block-components-radio-control__option-layout {
+.wc-block-components-radio-control__option
+	.wc-block-components-radio-control__option-layout {
 	&::after {
 		display: none;
 	}
@@ -78,7 +79,7 @@
 		}
 
 		&:focus {
-			outline: 1px solid $universal-border-strong;
+			outline: 1.5px solid $universal-border-strong;
 			outline-offset: 2px;
 		}
 
@@ -116,7 +117,8 @@
 }
 
 .theme-twentytwentyone {
-	.wc-block-components-radio-control .wc-block-components-radio-control__input {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__input {
 		&:checked {
 			border-width: 2px;
 
