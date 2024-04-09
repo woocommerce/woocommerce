@@ -548,15 +548,6 @@
           "links": {
             "./woocommerce-endpoints.md": "31a11f74bcd9f21f97cd4c6c719240b3d84e40f4"
           }
-        },
-        {
-          "post_title": "Contributing to WooCommerce Core",
-          "menu_title": "Contribute to WooCommerce Core",
-          "tags": "reference",
-          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
-          "hash": "02cd443e5bfffe05ecf7d49161747dc4444c941c110d44ac72c694e134782aee",
-          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/getting-started/contributing-to-core-and-marketplace.md",
-          "id": "198a4d4a506d464737c356f86684676ad4a0c27b"
         }
       ],
       "categories": []
@@ -859,9 +850,8 @@
           "category_title": "Beta Testing",
           "category_slug": "Beta Testing",
           "tags": "how-to",
-          "post_title": "Beta Testing New Features",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/testing/beta-testing.md",
-          "hash": "2daf9846db320da1053767e1f11b48019b52b336e614950c00fd2b38fe0c6060",
+          "hash": "c2fca37ff3a05faf19c4afd3786d5ec6bd8223c7ddf2460566d4eba7c0140e2a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/testing/beta-testing.md",
           "id": "01f266904647aad0d44b5687fb5f143560dabc67"
         }
@@ -1235,5 +1225,5 @@
       "categories": []
     }
   ],
-  "hash": "ac321aa91d201742f4966fe16c93f9b6e3d24c132bc14fb924d8ba7440ef113d"
+  "hash": "ca4e8cf017f1d274d9a54145357cc749a46b12e65de712ab889b7130ccd54abf"
 }
