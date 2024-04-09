@@ -71,15 +71,12 @@ jobs:
           
           # Assuming the script is run in or after 2024
           current_year=$(date +%Y) # Get the current year
-          echo "current_year: $current_year" 
           
           # Calculate the number of versions to generate based on the current year
           additional_versions=$(( (current_year - 2024 + 1) * 12 ))
-          echo "additional_versions: $additional_versions"
           
           # Versions to calculate
           versions_to_calculate=$additional_versions
-          echo "versions_to_calculate: $versions_to_calculate"
 
           # Declare the associative array outside the loop
           declare -A MILESTONE_DATES
@@ -87,39 +84,29 @@ jobs:
           for (( i=0; i<versions_to_calculate; i++ )); do
             # Calculate year and month offset
             offset_year=$(( (initial_month + i - 1) / 12 ))
-            echo "offset_year: $offset_year"
             current_year=$(( initial_year + offset_year ))
-            echo "current_year: $current_year"
             current_month=$(( (initial_month + i - 1) % 12 + 1 ))
-            echo "current_month: $current_month"
           
             # Format current month correctly
             current_month_formatted=$(printf "%02d" $current_month)
-            echo "current_month_formatted: $current_month_formatted"
           
             # Calculate the release date
             release_date=$(calculate_second_tuesday $current_year $current_month_formatted)
-            echo "release_date: $release_date"
           
             # Calculate the total versions from start, adjusting for starting at 8.8.0
             total_versions_from_start=$(( i + initial_version_minor ))
-            echo "total_versions_from_start: $total_versions_from_start"
           
             # Adjust version major and minor calculations
             version_major=$(( initial_version_major + total_versions_from_start / 10 ))
-            echo "version_major: $version_major"
             version_minor=$(( total_versions_from_start % 10 ))
-            echo "version_minor: $version_minor"
           
             # Construct version string
             version="$version_major.$version_minor.0"
-            echo "version: $version"
 
             # Populate the associative array with version as key and release_date as value
             MILESTONE_DATES["$version"]=$release_date
           
-            echo "Version $version will be released on $release_date"
-          
+            echo "Version $version will be released on $release_date"     
           done     
           
           MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
@@ -133,7 +120,7 @@ jobs:
           # Export for later steps
           echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
-          # If you need to print the array in the desired format for debugging
+          # Print the array in the desired format for display purposes
           echo "MILESTONE_DATES=("
           for version in "${!MILESTONE_DATES[@]}"; do
             echo "  [\"$version\"]=\"${MILESTONE_DATES[$version]}\""
