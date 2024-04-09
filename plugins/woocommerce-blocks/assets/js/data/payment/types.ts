@@ -19,7 +19,7 @@ import type { EventObserversType } from '../../base/context/event-emit';
 import type { DispatchFromMap } from '../mapped-types';
 import * as actions from './actions';
 
-export interface CreditCardNetworks {
+export interface CardNetworks {
 	preferred: string;
 }
 
@@ -28,7 +28,7 @@ export interface CustomerPaymentMethodConfiguration {
 	brand: string;
 	last4: string;
 	display_brand?: string;
-	networks?: CreditCardNetworks;
+	networks?: CardNetworks;
 }
 export interface SavedPaymentMethod {
 	method: CustomerPaymentMethodConfiguration;
