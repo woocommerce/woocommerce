@@ -258,7 +258,7 @@ jobs:
       - name: 'Download blob reports from artifacts'
         uses: actions/download-artifact@v4
         with:
-          path: ./out/allure-results
+          path: ./out
           pattern: all-blob-reports-*
           run-id: project-e2e-test-jobs
           merge-multiple: true
