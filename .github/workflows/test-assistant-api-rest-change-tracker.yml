@@ -101,7 +101,7 @@ jobs:
           
           # Initialize the starting version and date
           initial_year=2024
-          initial_month=6  # June
+          initial_month=3  # June
 
           # Assuming the script is being run in a year >= 2024
           current_year=$(date +%Y) # Get the current year
