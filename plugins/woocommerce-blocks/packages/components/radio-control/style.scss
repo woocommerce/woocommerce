@@ -84,7 +84,7 @@
 		}
 
 		&:checked::before {
-			background: #000;
+			background: $input-border-gray;
 			border-radius: 50%;
 			content: "";
 			display: block;
