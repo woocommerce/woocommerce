@@ -87,7 +87,7 @@ add_action( 'woocommerce_update_options_payment_gateways\_' . $this->id, array( 
 
 #### init_form_fields()
 
-Use this method to set `$this->form_fields` - these are options you'll show in admin on your gateway settings page and make use of the [WC Settings API](https://developer.woocommerce.com/docs/settings-api/ "https://developer.woocommerce.com/docs/settings-api/").
+Use this method to set `$this->form_fields` - these are options you'll show in admin on your gateway settings page and make use of the [WC Settings API](https://developer.woocommerce.com/docs/settings-api/).
 
 A basic set of settings for your gateway would consist of _enabled_, _title_ and _description_:
 
