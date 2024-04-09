@@ -125,7 +125,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
+          name: all-blob-e2e-reports-${{ matrix.shardNumber }}
           path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
           retention-days: 1
           compression-level: 9
@@ -162,7 +162,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
+          name: all-blob-api-reports-${{ matrix.shardNumber }}
           path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
           retention-days: 1
           compression-level: 9
@@ -259,7 +259,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./out
-          pattern: all-blob-reports-*
+          pattern: all-blob-e2e-reports-*
           run-id: project-e2e-test-jobs
           merge-multiple: true
 
@@ -327,7 +327,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./out/allure-results
-          pattern: all-blob-reports-*
+          pattern: all-blob-api-reports-*
           run-id: project-api-test-jobs
           merge-multiple: true
 
