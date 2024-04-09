@@ -39,7 +39,7 @@ export const DetailsFeatureField = () => {
 							{
 								moreLink: (
 									<Link
-										href="https://woo.com/document/woocommerce-shortcodes/#products"
+										href="https://woocommerce.com/document/woocommerce-shortcodes/#products"
 										target="_blank"
 										type="external"
 										onClick={ () =>

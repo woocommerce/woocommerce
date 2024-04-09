@@ -29,6 +29,7 @@ export const Tab = ( {
 			aria-controls={ `activity-panel-${ name }` }
 			key={ tabKey }
 			id={ tabKey }
+			data-testid={ tabKey }
 			onClick={ () => {
 				onTabClick( name );
 			} }

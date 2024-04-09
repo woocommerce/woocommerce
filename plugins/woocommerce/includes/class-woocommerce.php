@@ -326,7 +326,6 @@ final class WooCommerce {
 		$is_new_install = current_action() === 'woocommerce_newly_installed';
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
-		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
 		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
 		$private_link     = 'yes';
 		$share_key        = wp_generate_password( 32, false );
@@ -342,9 +341,6 @@ final class WooCommerce {
 		}
 		if ( false === get_option( 'woocommerce_share_key', false ) ) {
 			update_option( 'woocommerce_share_key', $share_key );
-		}
-		if ( false === get_option( 'launch-status', false ) ) {
-			update_option( 'launch-status', $launch_status );
 		}
 	}
 
@@ -1027,7 +1023,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the activated plugin.
 	 */
 	public function activated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
 			set_transient( 'woocommerce_activated_plugin', $filename );
@@ -1043,7 +1039,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the deactivated plugin.
 	 */
 	public function deactivated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
 	}
