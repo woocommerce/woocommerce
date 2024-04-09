@@ -6,6 +6,12 @@ namespace Automattic\WooCommerce\RestApi\UnitTests;
  * Proxy class used to mimic object cache instances that serialize/deserialized stored data.
  */
 class Serializing_Cache_Proxy {
+
+	/**
+	 * A reference to the original global object cache instance.
+	 *
+	 * @var \WP_Object_Cache
+	 */
 	public $original_cache_instance;
 
 	/**
@@ -33,11 +39,11 @@ class Serializing_Cache_Proxy {
 	 * mimic behaviour of caching where data is stored serialized.
 	 *
 	 * @param int|string $key The key under which the cache contents are stored.
-	 * @param string $group Optional. Where the cache contents are grouped. Default 'default'.
-	 * @param bool $force Optional. Unused. Whether to force an update of the local cache
-	 *                          from the persistent cache. Default false.
-	 * @param bool $found Optional. Whether the key was found in the cache (passed by reference).
-	 *                          Disambiguates a return of false, a storable value. Default null.
+	 * @param string     $group Optional. Where the cache contents are grouped. Default 'default'.
+	 * @param bool       $force Optional. Unused. Whether to force an update of the local cache
+	 *                    from the persistent cache. Default false.
+	 * @param bool       $found Optional. Whether the key was found in the cache (passed by reference).
+	 *                    Disambiguates a return of false, a storable value. Default null.
 	 *
 	 * @return mixed|false The cache contents on success, false on failure to retrieve contents.
 	 */
