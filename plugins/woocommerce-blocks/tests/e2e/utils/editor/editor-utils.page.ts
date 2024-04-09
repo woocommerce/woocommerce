@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
@@ -13,9 +13,11 @@ import type { TemplateType } from '../../utils/types';
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
-	constructor( editor: Editor, page: Page ) {
+	admin: Admin;
+	constructor( editor: Editor, page: Page, admin: Admin ) {
 		this.editor = editor;
 		this.page = page;
+		this.admin = admin;
 	}
 
 	/**
@@ -372,6 +374,9 @@ export class EditorUtils {
 		templateType: TemplateType
 	) {
 		if ( templateType === 'wp_template_part' ) {
+			await this.admin.visitSiteEditor( {
+				path: `/${ templateType }/all`,
+			} );
 			await this.page.goto(
 				`/wp-admin/site-editor.php?path=/${ templateType }/all`
 			);
@@ -381,9 +386,9 @@ export class EditorUtils {
 			} );
 			await templateLink.click();
 		} else {
-			await this.page.goto(
-				`/wp-admin/site-editor.php?path=/${ templateType }`
-			);
+			await this.admin.visitSiteEditor( {
+				path: '/' + templateType,
+			} );
 			const templateButton = this.page.getByRole( 'button', {
 				name: templateName,
 				exact: true,
@@ -392,7 +397,6 @@ export class EditorUtils {
 		}
 
 		await this.enterEditMode();
-		await this.closeWelcomeGuideModal();
 		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
