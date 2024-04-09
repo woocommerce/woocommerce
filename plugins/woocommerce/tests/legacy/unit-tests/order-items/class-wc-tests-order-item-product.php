@@ -145,7 +145,7 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 		$product->save();
 
 		$order = new WC_Order();
-		$order->set_billing_email( 'test@woo.com' );
+		$order->set_billing_email( 'test@woocommerce.com' );
 		$order->save();
 
 		$product_item = new WC_Order_Item_Product();
