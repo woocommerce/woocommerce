@@ -135,16 +135,12 @@ class ReceiptRenderingEngine {
 
 		$formatted_line_items = array();
 		foreach ( $data['line_items'] as $line_item_data ) {
-			if ( isset( $line_item_data['quantity'] ) ) {
-				$formatted_line_item = "<td>${line_item_data['title']} × ${line_item_data['quantity']}</td><td>${line_item_data['amount']}</td>";
-			} else {
-				$formatted_line_item = "<td>${line_item_data['title']}</td><td>${line_item_data['amount']}</td>";
-			}
+			$quantity_data       = isset( $line_item_data['quantity'] ) ? " × ${line_item_data['quantity']}" : '';
+			$formatted_line_item = "<tr><td>${line_item_data['title']}$quantity_data</td><td>${line_item_data['amount']}</td></tr>";
 
 			/**
 			 * Filter to customize the HTML that gets generated for each order line item in the receipt.
-			 * The returned HTML will be rendered inside a <tr> element which in turn goes into a <table> element.
-			 *
+			 * The returned value must be a <tr> element containing the appropriate <td> elements.
 			 * $line_item_data will contain the following keys:
 			 *
 			 * - type: One of 'product', 'subtotal', 'discount', 'fee', 'shipping_total', 'taxes_total', 'amount_paid'
