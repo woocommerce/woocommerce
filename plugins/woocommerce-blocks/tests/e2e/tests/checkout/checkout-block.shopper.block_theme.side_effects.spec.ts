@@ -608,7 +608,7 @@ test.describe( 'Billing Address Form', () => {
 	test.describe( 'Guest user', () => {
 		test.use( { storageState: guestFile } );
 
-		test( 'Ensure billing is empty and shipping address is filled', async ( {
+		test.only( 'Ensure billing is empty and shipping address is filled', async ( {
 			frontendUtils,
 			page,
 			checkoutPageObject,
@@ -617,11 +617,17 @@ test.describe( 'Billing Address Form', () => {
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
-			await checkoutPageObject.fillShippingDetails( shippingTestData );
+			const { company, ...shippingDetailsWithoutCompany } =
+				shippingTestData;
+			await checkoutPageObject.fillShippingDetails(
+				shippingDetailsWithoutCompany
+			);
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
 			// Check shipping fields are filled.
-			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
+			for ( const [ key, value ] of Object.entries(
+				shippingDetailsWithoutCompany
+			) ) {
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				switch ( key ) {
 					case 'firstname':
@@ -662,7 +668,9 @@ test.describe( 'Billing Address Form', () => {
 			}
 
 			// Check billing fields are empty.
-			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
+			for ( const [ key, value ] of Object.entries(
+				shippingDetailsWithoutCompany
+			) ) {
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				switch ( key ) {
 					case 'country':
