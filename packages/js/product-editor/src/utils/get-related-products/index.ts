@@ -12,6 +12,7 @@ type getRelatedProductsOptions = {
 
 const POSTS_NUMBER_TO_RANDOMIZE = 30;
 const POSTS_NUMBER_TO_PICK = 3;
+const POSTS_NUMBER_TO_DISPLAY = 4;
 
 /**
  * Return related products for a given product ID.
@@ -99,6 +100,7 @@ export async function getSuggestedProductsFor( {
 			: [],
 		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
 		exclude: exclude?.length ? exclude : [ postId ],
+		limit: POSTS_NUMBER_TO_DISPLAY,
 	};
 
 	if ( forceRequest ) {

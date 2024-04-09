@@ -37,7 +37,7 @@ export const CartCheckoutSidebarCompatibilityNotice = ( {
 			a: (
 				// Suppress the warning as this <a> will be interpolated into the string with content.
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
-				<ExternalLink href="https://woo.com/document/cart-checkout-blocks-status/#section-10" />
+				<ExternalLink href="https://woocommerce.com/document/cart-checkout-blocks-status/#section-10" />
 			),
 		}
 	);

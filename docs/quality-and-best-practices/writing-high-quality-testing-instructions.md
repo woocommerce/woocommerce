@@ -53,7 +53,7 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 3. Identify the **preconditions**, **action** and **validation** steps.
 4. Write **as many preconditions as you need** to explain how to set up the state of WooCommerce so that you can execute the desired action to test every flow.
     1. Try to be detailed when explaining the interactions the user needs to perform in WooCommerce.
-    2. If there are several preconditions for a user flow that is explained in a public guide, feel free to simply link the guide in the testing instructions instead of writing several steps. For example, _"Enable dev mode in WooCommerce Payments by following the steps mentioned [here](https://woo.com/document/woocommerce-payments/testing-and-troubleshooting/dev-mode/)"_.
+    2. If there are several preconditions for a user flow that is explained in a public guide, feel free to simply link the guide in the testing instructions instead of writing several steps. For example, _"Enable dev mode in WooCommerce Payments by following the steps mentioned [here](https://woocommerce.com/document/woocommerce-payments/testing-and-troubleshooting/dev-mode/)"_.
 5. Write **the action step**, which should cover the specific action that we want to test as part of this user flow.
 6. Write **as many validation steps** as needed in order to assess that the actual result meets expectations.
     1. Bear in mind to check only the steps needed to validate that this change works.
@@ -83,11 +83,11 @@ Therefore, a PR could have testing instructions for multiple scenarios, in fact,
 
 #### Example 1
 
-![Sample of good quality instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682695-3dc51613-b836-4e7e-93ef-f75078ab48ac.png)
+![Sample of good quality instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682695-3dc51613-b836-4e7e-93ef-f75078ab48ac.png)
 
 #### Example 2
 
-![Another sample of good quality instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682778-b552ab07-a518-48a7-9358-16adc5762aca.png)
+![Another sample of good quality instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682778-b552ab07-a518-48a7-9358-16adc5762aca.png)
 
 ### Improving real testing instructions
 
@@ -99,7 +99,7 @@ Before:
 
 After:
 
-![Improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
+![Improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682303-1b12ab97-f27a-41cb-a8db-da8a78d18840.png)
 
 Improvements:
 
@@ -107,36 +107,36 @@ Improvements:
 
 Before:
 
-![Instructions needing improvement](https://developer.woo.com/wp-content/uploads/2023/12/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
+![Instructions needing improvement](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682396-8c52d20e-1fca-4ac1-8345-f381c15a102a.png)
 
 After:
 
-![Improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
+![Improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682480-c01e0e84-5969-4456-8f43-70cbb8509e8d.png)
 
 Improvements:
 
-![Changes made](https://developer.woo.com/wp-content/uploads/2023/12/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
+![Changes made](https://developer.woocommerce.com/wp-content/uploads/2023/12/213682597-8d06e638-35dd-4ff8-9236-63c6ec5d05b8.jpg)
 
 Before:
 
-![example before providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216365611-b540a814-3b8f-40f3-ae64-81018b9f97fb.png)
+![example before providing improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/216365611-b540a814-3b8f-40f3-ae64-81018b9f97fb.png)
 
 After:
 
-![example after providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216366043-967e5daa-6a23-4ab8-adda-5f3082d1ebf7.png)
+![example after providing improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/216366043-967e5daa-6a23-4ab8-adda-5f3082d1ebf7.png)
 
 Improvements:
 
-![example of improvements](https://developer.woo.com/wp-content/uploads/2023/12/216366152-b331648d-bcef-443b-b126-de2621a20862.png)
+![example of improvements](https://developer.woocommerce.com/wp-content/uploads/2023/12/216366152-b331648d-bcef-443b-b126-de2621a20862.png)
 
 Before:
 
-![example before providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216388785-8806ea74-62e6-42da-8887-c8e291e7dfe2-1.png)
+![example before providing improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/216388785-8806ea74-62e6-42da-8887-c8e291e7dfe2-1.png)
 
 After:
 
-![example after providing improved instructions](https://developer.woo.com/wp-content/uploads/2023/12/216388842-e5ab433e-d288-4306-862f-72f6f81ab2cd.png)
+![example after providing improved instructions](https://developer.woocommerce.com/wp-content/uploads/2023/12/216388842-e5ab433e-d288-4306-862f-72f6f81ab2cd.png)
 
 Improvements:
 
-![example of improvements](https://developer.woo.com/wp-content/uploads/2023/12/216388874-c5b21fc3-f693-4a7e-a58a-c5d1b6606682.png)
+![example of improvements](https://developer.woocommerce.com/wp-content/uploads/2023/12/216388874-c5b21fc3-f693-4a7e-a58a-c5d1b6606682.png)

@@ -32,6 +32,13 @@ Help text that appears below the field, providing additional guidance to the use
 
 Indicates that the field is required.
 
+### disabled
+
+-   **Type:** `Boolean`
+-   **Required:** `No`
+
+Indicates that the field is not editable.
+
 ### tooltip
 
 -   **Type:** `String`

@@ -1,6 +1,6 @@
 <?php
 /**
- * The update helper for Woo.com plugins.
+ * The update helper for WooCommerce.com plugins.
  *
  * @class WC_Helper_Updater
  * @package WooCommerce\Admin\Helper
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Helper_Updater Class
  *
  * Contains the logic to fetch available updates and hook into Core's update
- * routines to serve Woo.com-provided packages.
+ * routines to serve WooCommerce.com-provided packages.
  */
 class WC_Helper_Updater {
 
@@ -103,7 +103,7 @@ class WC_Helper_Updater {
 
 	/**
 	 * Runs on pre_set_site_transient_update_themes, provides custom
-	 * packages for Woo.com-hosted extensions.
+	 * packages for WooCommerce.com-hosted extensions.
 	 *
 	 * @param object $transient The update_themes transient object.
 	 *
@@ -150,7 +150,7 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Runs on load-plugins.php, adds a hook to show a custom plugin update message for Woo.com hosted plugins.
+	 * Runs on load-plugins.php, adds a hook to show a custom plugin update message for WooCommerce.com hosted plugins.
 	 *
 	 * @return void.
 	 */
@@ -179,7 +179,7 @@ class WC_Helper_Updater {
 			printf(
 				wp_kses(
 					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install Woo.com Update Manager</a> to update.', 'woocommerce' ),
+					__( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' ),
 					array(
 						'a' => array(
 							'href' => array(),
@@ -192,7 +192,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate Woo.com Update Manager to update.', 'woocommerce' );
+			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
 		}
 	}
 
@@ -312,7 +312,7 @@ class WC_Helper_Updater {
 		*/
 		$active_for_translations = array_filter(
 			$active_woo_plugins,
-			function( $plugin ) use ( $plugins ) {
+			function ( $plugin ) use ( $plugins ) {
 				/**
 				 * Filters the plugins that are subscribed to the automatic translations updates.
 				 *
@@ -476,7 +476,7 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
@@ -487,11 +487,30 @@ class WC_Helper_Updater {
 			}
 
 			if ( version_compare( $theme['Version'], $update_data[ $theme['_product_id'] ]['version'], '<' ) ) {
-				$count++;
+				++$count;
 			}
 		}
 
 		set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
+
+		return $count;
+	}
+
+	/**
+	 * Get the update count to based on the status of the site.
+	 *
+	 * @return int
+	 */
+	public static function get_updates_count_based_on_site_status() {
+		if ( ! WC_Helper::is_site_connected() ) {
+			return 1;
+		}
+
+		$count = self::get_updates_count() ?? 0;
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+			++$count;
+		}
+
 		return $count;
 	}
 
@@ -501,12 +520,9 @@ class WC_Helper_Updater {
 	 * @return string Updates count markup, empty string if no updates avairable.
 	 */
 	public static function get_updates_count_html() {
-		$count = self::get_updates_count();
-		if ( ! $count ) {
-			return '';
-		}
-
+		$count      = self::get_updates_count_based_on_site_status();
 		$count_html = sprintf( '<span class="update-plugins count-%d"><span class="update-count">%d</span></span>', $count, number_format_i18n( $count ) );
+
 		return $count_html;
 	}
 
@@ -551,7 +567,7 @@ class WC_Helper_Updater {
 		return new WP_Error(
 			'woocommerce_subscription_expired',
 			sprintf(
-				// translators: %s: URL of Woo.com subscriptions tab.
+				// translators: %s: URL of WooCommerce.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
 				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
 			)
