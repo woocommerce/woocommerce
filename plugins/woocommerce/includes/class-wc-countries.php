@@ -1719,6 +1719,21 @@ class WC_Countries {
 			);
 		}
 
+		// Add shipping phone fields.
+		if ( 'shipping_' === $type ) {
+			if ( 'hidden' !== get_option( 'woocommerce_checkout_phone_field', 'required' ) ) {
+				$address_fields['shipping_phone'] = array(
+					'label'        => __( 'Phone', 'woocommerce' ),
+					'required'     => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),
+					'type'         => 'tel',
+					'class'        => array( 'form-row-wide' ),
+					'validate'     => array( 'phone' ),
+					'autocomplete' => 'tel',
+					'priority'     => 100,
+				);
+			}
+		}
+
 		/**
 		 * Important note on this filter: Changes to address fields can and will be overridden by
 		 * the woocommerce_default_address_fields. The locales/default locales apply on top based
