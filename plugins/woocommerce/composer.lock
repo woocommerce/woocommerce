@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9f162d5e4864b7dcf5bd63a56493012b",
+    "content-hash": "b3c6ea2867f43457b924ca2860c2125a",
     "packages": [
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -973,16 +973,16 @@
         },
         {
             "name": "woocommerce/action-scheduler",
-            "version": "3.7.3",
+            "version": "3.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/action-scheduler.git",
-                "reference": "8aa895a6edfeb92f40d6eddc9dfc35df65da38ae"
+                "reference": "5fb655253dc004bb7a6d840da807f0949aea8bcd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/8aa895a6edfeb92f40d6eddc9dfc35df65da38ae",
-                "reference": "8aa895a6edfeb92f40d6eddc9dfc35df65da38ae",
+                "url": "https://api.github.com/repos/woocommerce/action-scheduler/zipball/5fb655253dc004bb7a6d840da807f0949aea8bcd",
+                "reference": "5fb655253dc004bb7a6d840da807f0949aea8bcd",
                 "shasum": ""
             },
             "require": {
@@ -1010,9 +1010,9 @@
             "homepage": "https://actionscheduler.org/",
             "support": {
                 "issues": "https://github.com/woocommerce/action-scheduler/issues",
-                "source": "https://github.com/woocommerce/action-scheduler/tree/3.7.3"
+                "source": "https://github.com/woocommerce/action-scheduler/tree/3.7.4"
             },
-            "time": "2024-03-20T10:16:56+00:00"
+            "time": "2024-04-05T14:42:07+00:00"
         }
     ],
     "packages-dev": [

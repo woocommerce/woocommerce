@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
-	"homepage": "https://woo.com/",
+	"homepage": "https://woocommerce.com/",
 	"version": "8.9.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
@@ -26,7 +26,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.7.3"
+		"woocommerce/action-scheduler": "3.7.4"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

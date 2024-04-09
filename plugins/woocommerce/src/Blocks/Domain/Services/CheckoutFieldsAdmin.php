@@ -73,7 +73,9 @@ class CheckoutFieldsAdmin {
 	 * @param \WC_Order $order The order to update the field for.
 	 */
 	public function update_callback( $key, $value, $order ) {
-		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, false );
+		list( $group, $key ) = explode( '/', $key, 2 );
+		$group               = CheckoutFields::get_group_name( $group );
+		$this->checkout_fields_controller->persist_field_for_order( $key, $value, $order, $group, false );
 	}
 
 	/**
@@ -89,11 +91,11 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$group             = doing_action( 'woocommerce_admin_billing_fields' ) ? 'billing' : 'shipping';
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $group, $context );
+		$group_name        = doing_action( 'woocommerce_admin_billing_fields' ) ? 'billing' : 'shipping';
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'address', $group_name, $context );
 		foreach ( $additional_fields as $key => $field ) {
-			$group_key                 = '/' . $group . '/' . $key;
-			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $group_key );
+			$prefixed_key              = CheckoutFields::get_group_key( $group_name ) . $key;
+			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $prefixed_key );
 		}
 
 		array_splice(
@@ -123,16 +125,14 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', '', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'additional', $context );
 
-		return array_merge(
-			$fields,
-			array_map(
-				array( $this, 'format_field_for_meta_box' ),
-				$additional_fields,
-				array_keys( $additional_fields )
-			)
-		);
+		foreach ( $additional_fields as $key => $field ) {
+			$prefixed_key              = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $prefixed_key );
+		}
+
+		return array_merge( $fields, $additional_fields );
 	}
 
 	/**
@@ -148,15 +148,13 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', '', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', 'additional', $context );
 
-		return array_merge(
-			$fields,
-			array_map(
-				array( $this, 'format_field_for_meta_box' ),
-				$additional_fields,
-				array_keys( $additional_fields )
-			)
-		);
+		foreach ( $additional_fields as $key => $field ) {
+			$prefixed_key              = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $prefixed_key );
+		}
+
+		return array_merge( $fields, $additional_fields );
 	}
 }

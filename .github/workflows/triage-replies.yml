@@ -66,10 +66,10 @@ jobs:
                         GitHub should be treated as a place to report confirmed bugs only.\n\n\
                         The type of issue you submitted looks like a support request which may or may not reveal a bug once proper \
                         troubleshooting is done.  In order to confirm the bug, please follow one of the steps below:\n\n\
-                        - Review [WooCommerce Self-Service Guide](https://woo.com/document/woocommerce-self-service-guide/) \
+                        - Review [WooCommerce Self-Service Guide](https://woocommerce.com/document/woocommerce-self-service-guide/) \
                         to see if the solutions listed there apply to your case;\n\
                         - If you are a paying customer of WooCommerce, contact WooCommerce support by \
-                        [opening a ticket or starting a live chat](https://woo.com/contact-us/);\n\
+                        [opening a ticket or starting a live chat](https://woocommerce.com/contact-us/);\n\
                         - Make a post on [WooCommerce community forum](https://wordpress.org/support/plugin/woocommerce/)\n\n\
                         If you confirm the bug, please provide us with clear steps to reproduce it.\n\n\
                         We are closing this issue for now as it seems to be a support request and not a bug. \
@@ -153,7 +153,7 @@ jobs:
                         A clear and concise description of what you expected to happen.\n\n\
                         **Isolating the problem (mark completed items with an [x]):**\n\n\
                         - [ ] I have deactivated other plugins and confirmed this bug occurs when only WooCommerce plugin is active.\n\
-                        - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woo.com/products/storefront/).\n\
+                        - [ ] This bug happens with a default WordPress theme active, or [Storefront](https://woocommerce.com/products/storefront/).\n\
                         - [ ] I can reproduce this bug consistently using the steps above.\n\n\
                         **WordPress Environment**\n\n\
                         Copy and paste the system status report from **WooCommerce > System Status** in WordPress admin."
