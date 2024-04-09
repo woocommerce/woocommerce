@@ -23,7 +23,10 @@ const reporter = [
 			suiteTitle: true,
 		},
 	],
-	[ 'json', { outputFile: './test-results/test-results.json' } ],
+	[
+		'json',
+		{ outputFile: `./test-results/test-results-${ Date.now() }.json` },
+	],
 ];
 
 if ( process.env.CI ) {

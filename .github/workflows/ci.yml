@@ -299,13 +299,6 @@ jobs:
               --repo woocommerce/woocommerce-test-reports
           fi
           
-      - name: 'Download Playwright JSON reports for Slack notification'
-        uses: actions/download-artifact@v4
-        with:
-          path: ./out
-          pattern: all-blob-reports-*/test-results.json
-          run-id: project-e2e-test-jobs
-          
       - name: 'Send Slack notification'
         if: github.event_name == 'pull_request'
         uses: automattic/action-test-results-to-slack@v0.3.0
@@ -313,7 +306,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: 'C02180M7JFM'
-          playwright_report_path: ./out/**/test-results.json
+          playwright_report_path: ./out/test-results-*.json
           playwright_output_dir: ./out/results-data
 
   api-test-reports:
