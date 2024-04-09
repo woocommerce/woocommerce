@@ -13,14 +13,16 @@ import type { ButtonProps as AriakitButtonProps } from '@ariakit/react';
 import './style.scss';
 import Spinner from '../../../../../packages/components/spinner';
 
-interface LinkProps extends ButtonProps {
+type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
+
+interface LinkProps extends WCButtonProps {
 	/**
 	 * Button href
 	 */
 	href: string;
 }
 
-export interface ButtonProps extends AriakitButtonProps {
+export interface ButtonProps extends WCButtonProps {
 	/**
 	 * Show spinner
 	 *
