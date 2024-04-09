@@ -5,7 +5,7 @@ menu_title: Sections
 
 Sections are significant parts of the form that may consist of multiple subsections and fields. They should be used sparsely throughout the form, so merchants are not overwhelmed with options while filling out the information about their products.
 
-![Sections example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
+![Sections example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-sections.png)
 
 ## What they are for
 

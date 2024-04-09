@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Helper_API Class
  *
- * Provides a communication interface with the Woo.com Helper API.
+ * Provides a communication interface with the WooCommerce.com Helper API.
  */
 class WC_Helper_API {
 	/**
