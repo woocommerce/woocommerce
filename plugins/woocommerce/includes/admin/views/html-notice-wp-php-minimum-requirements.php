@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
 						'utm_campaign' => 'woocommerceplugin',
 						'utm_content'  => 'docs',
 					),
-					'https://woo.com/document/update-php-wordpress/'
+					'https://woocommerce.com/document/update-php-wordpress/'
 				)
 			)
 		);

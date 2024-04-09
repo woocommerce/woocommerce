@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Remove experimental unused product add to cart block, don't tree-shake `@woocommerce/types` to avoid runtime exception.
+

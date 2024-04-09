@@ -56,7 +56,7 @@ class ManageOrdersOnTheGo {
 		$note->add_action(
 			'learn-more',
 			__( 'Learn more', 'woocommerce' ),
-			'https://woo.com/mobile/?utm_source=inbox&utm_medium=product'
+			'https://woocommerce.com/mobile/?utm_source=inbox&utm_medium=product'
 		);
 
 		return $note;

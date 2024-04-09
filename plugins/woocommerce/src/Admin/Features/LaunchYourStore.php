@@ -230,6 +230,11 @@ class LaunchYourStore {
 	 * - 'woocommerce_coming_soon' option value must be 'yes'
 	 */
 	public function maybe_add_coming_soon_banner_on_frontend() {
+		// Do not show the banner if the site is being previewed.
+		if ( isset( $_GET['site-preview'] ) ) { // @phpcs:ignore
+			return false;
+		}
+
 		// User must be an admin or editor.
 		// phpcs:ignore
 		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {

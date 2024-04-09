@@ -14,6 +14,6 @@ If you have ever wanted to contribute to the WooCommerce platform as a developer
 
 Visit the WooCommerce monorepo on GitHub to learn the first steps to environment set up and platform contribution expectations.
 
-### [Marketplace Contribution Guidelines](https://woo.com/document/marketplace-overview/)
+### [Marketplace Contribution Guidelines](https://woocommerce.com/document/marketplace-overview/)
 
-Are you hoping to sell your extension in the [Woo Marketplace](https://woo.com/marketplace/)? Read our guidelines to make sure your extension is marketplace-ready.
+Are you hoping to sell your extension in the [Woo Marketplace](https://woocommerce.com/marketplace/)? Read our guidelines to make sure your extension is marketplace-ready.
