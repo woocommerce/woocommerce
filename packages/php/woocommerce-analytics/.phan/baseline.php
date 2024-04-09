@@ -9,23 +9,18 @@
  */
 return [
     // # Issue statistics:
-    // PhanUndeclaredFunction : 65+ occurrences
-    // PhanUndeclaredClassMethod : 20+ occurrences
-    // PhanUndeclaredClassInstanceof : 10+ occurrences
     // PhanPluginRedundantAssignment : 4 occurrences
-    // PhanUndeclaredTypeParameter : 2 occurrences
+    // PhanUndeclaredFunction : 4 occurrences
+    // PhanUndeclaredMethod : 2 occurrences
     // PhanTypeSuspiciousNonTraversableForeach : 1 occurrence
-    // PhanUndeclaredConstant : 1 occurrence
-    // PhanUndeclaredMethod : 1 occurrence
+    // PhanUndeclaredMethodInCallable : 1 occurrence
     // PhanUnextractableAnnotationSuffix : 1 occurrence
 
     // Currently, file_suppressions and directory_suppressions are the only supported suppressions
     'file_suppressions' => [
-        'src/class-checkout-flow.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredClassInstanceof', 'PhanUndeclaredClassMethod', 'PhanUndeclaredFunction'],
-        'src/class-my-account.php' => ['PhanUndeclaredFunction'],
-        'src/class-universal.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredClassInstanceof', 'PhanUndeclaredClassMethod', 'PhanUndeclaredFunction', 'PhanUnextractableAnnotationSuffix'],
-        'src/class-woo-analytics-trait.php' => ['PhanTypeSuspiciousNonTraversableForeach', 'PhanUndeclaredClassInstanceof', 'PhanUndeclaredClassMethod', 'PhanUndeclaredFunction', 'PhanUndeclaredMethod', 'PhanUndeclaredTypeParameter'],
-        'src/class-woocommerce-analytics.php' => ['PhanUndeclaredClassMethod', 'PhanUndeclaredConstant', 'PhanUndeclaredFunction'],
+        'src/class-checkout-flow.php' => ['PhanPluginRedundantAssignment'],
+        'src/class-universal.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredMethod', 'PhanUndeclaredMethodInCallable', 'PhanUnextractableAnnotationSuffix'],
+        'src/class-woo-analytics-trait.php' => ['PhanTypeSuspiciousNonTraversableForeach', 'PhanUndeclaredFunction', 'PhanUndeclaredMethod'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
     // (directory_suppressions will currently be ignored by subsequent calls to --save-baseline, but may be preserved in future Phan releases)

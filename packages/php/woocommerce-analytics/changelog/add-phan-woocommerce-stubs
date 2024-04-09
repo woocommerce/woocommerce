@@ -1,0 +1,5 @@
+Significance: patch
+Type: added
+Comment: Add WooCommerce stubs to the Phan config. No change to functionality.
+
+
