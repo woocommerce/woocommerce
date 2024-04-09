@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: all-blob-reports-${{ matrix.shardNumber }}
-          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
+          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
           retention-days: 1
           compression-level: 9
           
