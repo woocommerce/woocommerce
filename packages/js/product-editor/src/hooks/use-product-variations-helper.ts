@@ -60,7 +60,7 @@ export function useProductVariationsHelper() {
 		'id'
 	);
 
-	const { editedRecord: product } = useEntityRecord< Product >(
+	const { record: product } = useEntityRecord< Product >(
 		'postType',
 		'product',
 		productId
