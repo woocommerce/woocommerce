@@ -47,9 +47,10 @@ templates.forEach( async ( template ) => {
 		} ) => {
 			await admin.visitAdminPage( 'edit.php?post_type=page' );
 
-			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			const waitWelcomeGuide = editorUtils.closeWelcomeGuideModal();
 
-			await editorUtils.closeWelcomeGuideModal();
+			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			await waitWelcomeGuide;
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();
