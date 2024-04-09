@@ -16,7 +16,7 @@ import {
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const allowedBlocks = getAllowedBlocks(
-		innerBlockAreas.CART_ORDER_SUMMARY_TOTALS
+		innerBlockAreas.CHECKOUT_ORDER_SUMMARY_TOTALS
 	);
 	const defaultTemplate = [
 		[ 'woocommerce/checkout-order-summary-subtotal-block', {}, [] ],
