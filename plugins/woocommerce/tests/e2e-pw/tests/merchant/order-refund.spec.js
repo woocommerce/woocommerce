@@ -51,7 +51,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 	} );
 
 	test( 'can issue a refund by quantity', async ( { page } ) => {
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// get currency symbol
 		currencySymbol = await page
@@ -112,7 +114,9 @@ test.describe.serial( 'WooCommerce Orders > Refund an order', () => {
 
 	// this test relies on the previous test, so should refactor
 	test( 'can delete an issued refund', async ( { page } ) => {
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		await page.waitForLoadState( 'networkidle' );
 
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
@@ -203,7 +207,9 @@ test.describe( 'WooCommerce Orders > Refund and restock an order item', () => {
 	test( 'can update order after refunding item without automatic stock adjustment', async ( {
 		page,
 	} ) => {
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// Verify stock reduction system note was added
 		await expect( page.locator( '.system-note >> nth=1' ) ).toContainText(

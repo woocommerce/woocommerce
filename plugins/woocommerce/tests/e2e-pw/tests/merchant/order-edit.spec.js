@@ -43,7 +43,7 @@ test.describe( 'Edit order', () => {
 
 	test( 'can view single order', async ( { page } ) => {
 		// go to orders page
-		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+		await page.goto( '/wp-admin/admin.php?page=wc-orders&action=new' );
 
 		// confirm we're on the orders page
 		await expect( page.locator( 'h1.components-text' ) ).toContainText(
@@ -51,7 +51,9 @@ test.describe( 'Edit order', () => {
 		);
 
 		// open order we created
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// make sure we're on the order details page
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
@@ -61,7 +63,9 @@ test.describe( 'Edit order', () => {
 
 	test( 'can update order status', async ( { page } ) => {
 		// open order we created
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// update order status to Completed
 		await page.locator( '#order_status' ).selectOption( 'wc-completed' );
@@ -76,7 +80,7 @@ test.describe( 'Edit order', () => {
 		).toContainText( 'Order status changed from Processing to Completed.' );
 
 		// load the orders listing and confirm order is completed
-		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 		await expect(
 			page
@@ -88,7 +92,7 @@ test.describe( 'Edit order', () => {
 	test( 'can update order status to cancelled', async ( { page } ) => {
 		// open order we created
 		await page.goto(
-			`wp-admin/post.php?post=${ orderToCancel }&action=edit`
+			`/wp-admin/post.php?post=${ orderToCancel }&action=edit`
 		);
 
 		// update order status to Completed
@@ -106,7 +110,7 @@ test.describe( 'Edit order', () => {
 		).toBeVisible();
 
 		// load the orders listing and confirm order is cancelled
-		await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 		await expect(
 			page
@@ -119,7 +123,9 @@ test.describe( 'Edit order', () => {
 
 	test( 'can update order details', async ( { page } ) => {
 		// open order we created
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// update order date
 		await page.locator( 'input[name=order_date]' ).fill( '2018-12-14' );
@@ -138,7 +144,9 @@ test.describe( 'Edit order', () => {
 
 	test( 'can add and delete order notes', async ( { page } ) => {
 		// open order we created
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		page.on( 'dialog', ( dialog ) => dialog.accept() );
 
 		// add an order note
@@ -235,7 +243,9 @@ test.describe( 'Edit order', () => {
 			} );
 
 		// Open our test order and select the customer we just created.
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// Simulate the ajax `woocommerce_get_customer_details` call normally done inside meta-boxes-order.js.
 		const response = await page.evaluate( async ( customerId ) => {
@@ -398,7 +408,7 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 	} ) => {
 		// go to the order with no products
 		await page.goto(
-			`wp-admin/post.php?post=${ noProductOrderId }&action=edit`
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ noProductOrderId }`
 		);
 
 		// add downloadable product permissions
@@ -437,7 +447,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		page,
 	} ) => {
 		// open the order that already has a product assigned
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// add downloadable product permissions
 		await page
@@ -475,7 +487,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		const expectedDownloadsExpirationDate = '2050-01-01';
 
 		// open the order that already has a product assigned
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// expand product download permissions
 		await page
@@ -517,7 +531,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 
 	test( 'can revoke downloadable product permissions', async ( { page } ) => {
 		// open the order that already has a product assigned
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// expand product download permissions
 		await page
@@ -553,7 +569,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 			'Sorry, you have reached your download limit for this file';
 
 		// open the order that already has a product assigned
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// set the download limit to 0
 		// expand product download permissions
@@ -594,7 +612,9 @@ test.describe( 'Edit order > Downloadable product permissions', () => {
 		const expectedReason = 'Sorry, this download has expired';
 
 		// open the order that already has a product assigned
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`/wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 
 		// set the download limit to 0
 		// expand product download permissions

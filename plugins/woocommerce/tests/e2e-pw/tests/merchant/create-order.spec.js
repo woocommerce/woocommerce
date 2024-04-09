@@ -254,7 +254,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	} );
 
 	test( 'can create a simple guest order', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 
 		// get order ID from the page
 		const orderText = await page
@@ -350,7 +350,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	test( 'can create an order for an existing customer', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 
 		// get order ID from the page
 		const orderText = await page
@@ -403,7 +403,9 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		).toBeVisible();
 
 		// Go back to the order
-		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+		);
 		await page
 			.getByRole( 'link', {
 				name: 'View other orders',
@@ -416,7 +418,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 	} );
 
 	test( 'can create new order', async ( { page } ) => {
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 		await expect( page.locator( 'h1.wp-heading-inline' ) ).toContainText(
 			'Add new order'
 		);
@@ -453,7 +455,7 @@ test.describe( 'WooCommerce Orders > Add new order', () => {
 		page,
 	} ) => {
 		orderId = '';
-		await page.goto( 'wp-admin/post-new.php?post_type=shop_order' );
+		await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
 
 		// open modal for adding line items
 		await page.locator( 'button.add-line-item' ).click();

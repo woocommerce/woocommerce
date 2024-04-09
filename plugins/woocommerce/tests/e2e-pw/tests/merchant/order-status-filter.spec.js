@@ -53,7 +53,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 	} );
 
 	test( 'should filter by All', async ( { page } ) => {
-		await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+		await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 		await page.locator( 'li.all > a' ).click();
 		await page.waitForLoadState( 'networkidle' );
@@ -70,7 +70,7 @@ test.describe( 'WooCommerce Orders > Filter Order by Status', () => {
 		test( `should filter by ${ orderStatus[ i ][ 0 ] }`, async ( {
 			page,
 		} ) => {
-			await page.goto( 'wp-admin/edit.php?post_type=shop_order' );
+			await page.goto( '/wp-admin/admin.php?page=wc-orders' );
 
 			await page.locator( `li.${ orderStatus[ i ][ 1 ] }` ).click();
 			await page.waitForLoadState( 'networkidle' );
