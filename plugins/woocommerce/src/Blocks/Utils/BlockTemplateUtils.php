@@ -702,16 +702,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns whether the passed `$template` has a title, and it's different from the slug.
-	 *
-	 * @param object $template The template object.
-	 * @return boolean
-	 */
-	public static function template_has_title( $template ) {
-		return ! empty( $template->title ) && $template->title !== $template->slug;
-	}
-
-	/**
 	 * Returns whether the passed `$template` has the legacy template block.
 	 *
 	 * @param object $template The template object.
@@ -739,17 +729,14 @@ class BlockTemplateUtils {
 		if ( ! $template ) {
 			return $template;
 		}
-		$formatted_title       = self::get_block_template_title( $template->slug );
-		$formatted_description = self::get_block_template_description( $template->slug );
-		$formatted_area        = self::get_block_template_area( $template->slug, $template_type );
-		if ( $formatted_title ) {
-			$template->title = $formatted_title;
+		if ( empty( $template->title ) || $template->title === $template->slug ) {
+			$template->title = self::get_block_template_title( $template->slug );
 		}
-		if ( $formatted_description ) {
-			$template->description = $formatted_description;
+		if ( empty( $template->description ) ) {
+			$template->description = self::get_block_template_description( $template->slug );
 		}
-		if ( $formatted_area ) {
-			$template->area = $formatted_area;
+		if ( empty( $template->area ) || 'uncategorized' === $template->area ) {
+			$template->area = self::get_block_template_area( $template->slug, $template_type );
 		}
 
 		return $template;
