@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -42,8 +42,8 @@ test.describe( 'Assembler -> Footers', () => {
 				'woocommerce_admin_customize_store_completed',
 				'no'
 			);
-
-			await activateTheme( 'twentynineteen' );
+			// Reset theme back to default.
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -109,12 +109,17 @@ test.describe( 'Assembler -> Footers', () => {
 		assemblerPage,
 		page,
 		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const footer = assembler
 			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
+			.nth( 2 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-footer-pattern' );
+
+		const expectedFooterClass = extractFooterClass(
+			await footer.getAttribute( 'class' )
+		);
 
 		await footer.click();
 
@@ -131,17 +136,17 @@ test.describe( 'Assembler -> Footers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const footerHTML = await page.locator( 'footer' ).innerHTML();
 
-		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( footerHTML ).toMatchSnapshot( {
-			name: 'cys-selected-footer',
-		} );
+		const selectedFooterClasses = await page
+			.locator( 'footer div.wc-blocks-footer-pattern' )
+			.getAttribute( 'class' );
+
+		expect( selectedFooterClasses ).toContain( expectedFooterClass );
 	} );
 
 	test( 'Picking a footer should trigger an update on the site preview', async ( {
 		assemblerPage,
-	}, testInfo ) => {
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const editor = await assemblerPage.getEditor();
 

@@ -1,0 +1,4 @@
+Significance: major
+Type: fix
+
+Deprecate the $check_key_exists parameter from AssetDataRegistry and disallow duplicate data for all cases.

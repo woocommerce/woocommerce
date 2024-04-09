@@ -1,7 +1,5 @@
 const { test, expect, request } = require( '@playwright/test' );
-const { BASE_URL } = process.env;
-const { features } = require( '../../utils' );
-const { activateTheme } = require( '../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
 const CUSTOMIZE_STORE_URL =
@@ -37,8 +35,8 @@ test.describe( 'Store owner can view the Intro page', () => {
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to twentynineteen
-		await activateTheme( 'twentynineteen' );
+		// Reset theme to the default.
+		await activateTheme( DEFAULT_THEME );
 
 		// Reset tour to visible.
 		await setOption(
