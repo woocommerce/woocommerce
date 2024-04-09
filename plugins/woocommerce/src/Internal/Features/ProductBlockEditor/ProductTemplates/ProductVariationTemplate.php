@@ -152,7 +152,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 				'attributes' => array(
 					'property'       => 'status',
 					'label'          => __( 'Hide in product catalog', 'woocommerce' ),
-					'checkedValue'   => 'protected',
+					'checkedValue'   => 'private',
 					'uncheckedValue' => 'publish',
 				),
 			)
