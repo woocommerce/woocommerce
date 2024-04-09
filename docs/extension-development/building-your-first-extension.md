@@ -78,7 +78,7 @@ If you didn't set a custom name for your extension, you can visit [here](http://
 
 Now that you've bootstrapped your extension, it's time to add some features! Here's some simple ones you could include:
 
-[How to add a custom field to simple and variable products](https://developer.woo.com/docs/how-to-add-a-custom-field-to-simple-and-variable-products/)
+[How to add a custom field to simple and variable products](https://developer.woocommerce.com/docs/how-to-add-a-custom-field-to-simple-and-variable-products/)
 
 ## Reference
 

@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/woo-ai",
 	"description": "Run AI experiments in WooCommerce.",
-	"homepage": "https://woo.com/",
+	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,

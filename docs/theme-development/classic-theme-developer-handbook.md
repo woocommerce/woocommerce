@@ -137,7 +137,7 @@ The `product_grid` settings let theme developers set default, minimum, and maxim
 
 ### Product gallery features (zoom, swipe, lightbox)
 
-The product gallery introduced in 3.0.0 ([read here for more information](https://developer.woo.com/2016/10/19/new-product-gallery-merged-in-to-core-for-2-7/)) uses Flexslider, Photoswipe, and the jQuery Zoom plugin to offer swiping, lightboxes, and other neat features.
+The product gallery introduced in 3.0.0 ([read here for more information](https://developer.woocommerce.com/2016/10/19/new-product-gallery-merged-in-to-core-for-2-7/)) uses Flexslider, Photoswipe, and the jQuery Zoom plugin to offer swiping, lightboxes, and other neat features.
 
 In versions `3.0`, `3.1`, and `3.2`, the new gallery is off by default and needs to be enabled using a snippet (below) or by using a compatible theme. This is because it's common for themes to disable the WooCommerce gallery and replace it with their own scripts.
 

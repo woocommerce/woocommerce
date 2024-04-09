@@ -251,7 +251,7 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 'Buy external product', $data['button_text'] );
-		$this->assertEquals( 'https://woo.com', $data['external_url'] );
+		$this->assertEquals( 'https://woocommerce.com', $data['external_url'] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product->get_id() );
 		$request->set_body_params(

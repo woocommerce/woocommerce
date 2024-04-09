@@ -17,7 +17,7 @@ class WC_Admin_Marketplace_Promotions {
 
 	const TRANSIENT_NAME            = 'woocommerce_marketplace_promotions';
 	const SCHEDULED_ACTION_HOOK     = 'woocommerce_marketplace_fetch_promotions';
-	const PROMOTIONS_API_URL        = 'https://woo.com/wp-json/wccom-extensions/3.0/promotions';
+	const PROMOTIONS_API_URL        = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
 	const SCHEDULED_ACTION_INTERVAL = 12 * HOUR_IN_SECONDS;
 
 	/**
@@ -248,7 +248,7 @@ class WC_Admin_Marketplace_Promotions {
 	 * Adds a bubble to the menu item.
 	 *
 	 * @param array  $menu_items  Arrays representing items in nav menu.
-	 * @param ?array $promotion   Data about a promotion from the Woo.com API.
+	 * @param ?array $promotion   Data about a promotion from the WooCommerce.com API.
 	 *
 	 * @return array
 	 */
@@ -304,7 +304,7 @@ class WC_Admin_Marketplace_Promotions {
 	}
 }
 
-// Fetch list of promotions from Woo.com for WooCommerce admin UI.
+// Fetch list of promotions from WooCommerce.com for WooCommerce admin UI.
 if ( ! has_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ) ) ) {
 	add_action( 'init', array( 'WC_Admin_Marketplace_Promotions', 'init' ), 11 );
 }

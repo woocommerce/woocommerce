@@ -48,7 +48,7 @@ In addition to the software listed above, you'll also want to have some way of s
 
 ### Minimum server requirements
 
-Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woo.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
+Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woocommerce.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
 
 ## Anatomy of a WordPress development environment (public_html/)
 

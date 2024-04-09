@@ -282,7 +282,7 @@ class ListTable extends WP_List_Table {
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woo.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
