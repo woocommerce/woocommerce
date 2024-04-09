@@ -54,7 +54,6 @@ const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 const launchStoreAction = async () => {
 	const results = await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_coming_soon: 'no',
-		'launch-status': 'launched',
 	} );
 	if ( results.success ) {
 		return results;
