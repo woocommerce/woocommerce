@@ -54,14 +54,33 @@ class ComingSoonRequestHandler {
 			return $wp;
 		}
 
-		// Replace the query page_id with the coming soon page.
+		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
+
 		$coming_soon_page_id = get_option( 'woocommerce_coming_soon_page_id' ) ?? null;
-		if ( isset( $coming_soon_page_id ) ) {
-			$wp->query_vars['page_id'] = $coming_soon_page_id;
-		} else { // phpcs:ignore -- TODO: render a default template.
+
+		// Render a 404 if for there is no coming soon page defined.
+		if ( empty( $coming_soon_page_id ) ) {
+			$this->render_404();
 		}
 
+		// Replace the query page_id with the coming soon page.
+		$wp->query_vars['page_id'] = $coming_soon_page_id;
+
 		return $wp;
+	}
+
+	/**
+	 * Render a 404 Page Not Found screen.
+	 */
+	private function render_404() {
+		global $wp_query;
+		$wp_query->set_404();
+		status_header( 404 );
+		$template = get_query_template( '404' );
+		if ( ! empty( $template ) ) {
+			include $template;
+		}
+		die();
 	}
 }
