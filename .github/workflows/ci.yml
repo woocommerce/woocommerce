@@ -306,6 +306,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+          playwright_report_path: ./out/test-results.json
+          playwright_output_dir: ./out/results-data
 
   api-test-reports:
     name: 'Report API tests results'

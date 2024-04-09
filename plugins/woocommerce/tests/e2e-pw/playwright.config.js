@@ -16,7 +16,7 @@ const config = {
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './test-results/report',
+	outputDir: './test-results/results-data',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
@@ -32,7 +32,7 @@ const config = {
 				outputFolder:
 					PLAYWRIGHT_HTML_REPORT ??
 					'./test-results/playwright-report',
-				open: CI ? 'never' : 'always',
+				open: CI ? 'never' : 'on-failure',
 			},
 		],
 		[
