@@ -90,7 +90,7 @@
 		position: absolute;
 		width: em(18px);
 		height: em(18px);
-		padding: em(3px);
+		padding: em(1px) em(3px) em(5px);
 		pointer-events: none;
 
 		.has-dark-controls & {
