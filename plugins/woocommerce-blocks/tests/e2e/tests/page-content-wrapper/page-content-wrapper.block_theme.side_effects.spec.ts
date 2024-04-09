@@ -45,10 +45,11 @@ templates.forEach( async ( template ) => {
 			editorUtils,
 			frontendUtils,
 		} ) => {
-			await admin.createNewPost( {
-				postType: 'page',
-			} );
+			await admin.visitAdminPage( 'edit.php?post_type=page' );
+
 			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
+
+			await editorUtils.closeWelcomeGuideModal();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.
 			await page.locator( template.blockClassName ).waitFor();
@@ -65,9 +66,8 @@ templates.forEach( async ( template ) => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Clean up the paragraph block added before.
-			await admin.createNewPost( {
-				postType: 'page',
-			} );
+			await admin.visitAdminPage( 'edit.php?post_type=page' );
+
 			await page.getByLabel( `“${ template.title }” (Edit)` ).click();
 
 			// Prevent trying to insert the paragraph block before the editor is ready.

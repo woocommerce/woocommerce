@@ -299,22 +299,44 @@ export class EditorUtils {
 	}
 
 	async closeWelcomeGuideModal() {
-		const isModalOpen = await this.page
-			.getByRole( 'dialog', { name: 'Welcome to the site editor' } )
-			.locator( 'div' )
-			.filter( {
-				hasText:
-					'Edit your siteDesign everything on your site — from the header right down to the',
-			} )
-			.nth( 2 )
-			.isVisible();
+		await this.page.waitForFunction( () => {
+			return (
+				window.wp &&
+				window.wp.data &&
+				window.wp.data.dispatch( 'core/preferences' )
+			);
+		} );
 
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( isModalOpen ) {
-			await this.page
-				.getByRole( 'button', { name: 'Get started' } )
-				.click();
-		}
+		// Disable the welcome guide for the site editor.
+		await this.page.evaluate( () => {
+			return Promise.all( [
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuidePage', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuidePage', false ),
+
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
+			] );
+		} );
 	}
 
 	async transformIntoBlocks() {
