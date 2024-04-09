@@ -77,7 +77,7 @@ class BlockTemplatesController {
 		$theme               = $template_name_parts[0] ?? '';
 		$slug                = $template_name_parts[1] ?? '';
 
-		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_fallback( $slug ) ) {
 			return null;
 		}
 
@@ -135,7 +135,7 @@ class BlockTemplatesController {
 		$templates_eligible_for_fallback = array_filter(
 			$template_slugs,
 			function ( $template_slug ) {
-				return BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug );
+				return BlockTemplateUtils::template_is_eligible_for_fallback( $template_slug );
 			}
 		);
 
