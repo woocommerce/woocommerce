@@ -42,38 +42,13 @@ jobs:
         id: get_milestone_date
         run: |
           #!/bin/bash
-          
-          MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
-          MILESTONE_DATE="Undefined"
-          
-          # Mapping of milestone titles to release dates
-          declare -A MILESTONE_DATES
-          MILESTONE_DATES=(
-            ["8.0.0"]="2023-08-08"
-            ["8.1.0"]="2023-09-12"
-            ["8.2.0"]="2023-10-10"
-            ["8.3.0"]="2023-11-14"
-            ["8.4.0"]="2023-12-12"
-            ["8.5.0"]="2024-01-09"
-            ["8.6.0"]="2024-02-13"
-            ["8.7.0"]="2024-03-12"
-            ["8.8.0"]="2024-04-09"
-            ["8.9.0"]="2024-05-14"
-            ["9.0.0"]="2024-06-11"
-          )
-          
-          # Check if the milestone title exists in our predefined list and get the date
-          if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
-            MILESTONE_DATE=${MILESTONE_DATES[${MILESTONE_TITLE}]}
-          fi
-          
-          # Export for later steps
-          echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
-          # Output the operating system type
-          echo "Operating System Type: $OSTYPE"
+          #
+          # Generate Array with Milestones and dates
+          #
           
           # Function to calculate the second Tuesday of the given month and year
+          # as the release day is always the 2nd Tuesday
           calculate_second_tuesday() {
             year=$1
             month=$2
@@ -110,12 +85,15 @@ jobs:
           echo "current_year: $current_year" 
           
           # Calculate the number of versions to generate based on the current year
-          additional_versions=$(( (current_year - 2024 + 2) * 12 ))
+          additional_versions=$(( (current_year - 2024 + 1) * 12 ))
           echo "additional_versions: $additional_versions"
           
           # Versions to calculate
           versions_to_calculate=$additional_versions
           echo "versions_to_calculate: $versions_to_calculate"
+
+          # Declare the associative array outside the loop
+          declare -A MILESTONE_DATES
           
           for (( i=0; i<versions_to_calculate; i++ )); do
             # Calculate year and month offset
@@ -147,16 +125,29 @@ jobs:
             # Construct version string
             version="$version_major.$version_minor.0"
             echo "version: $version"
+
+            # Populate the associative array with version as key and release_date as value
+            MILESTONE_DATES["$version"]=$release_date
           
             echo "Version $version will be released on $release_date"
           
-          done
+          done     
+          
+          MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
+          MILESTONE_DATE="Undefined"
+          
+          # Check if the milestone title exists in our predefined list and get the date
+          if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
+            MILESTONE_DATE=${MILESTONE_DATES[${MILESTONE_TITLE}]}
+          fi
+          
+          # Export for later steps
+          echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
 
-
-          # To print the array in the desired format
-          echo "MILESTONE_DATES_TEST=("
-          for version in "${!MILESTONE_DATES_TEST[@]}"; do
-            echo "  [\"$version\"]=\"${MILESTONE_DATES_TEST[$version]}\""
+          # If you need to print the array in the desired format for debugging
+          echo "MILESTONE_DATES=("
+          for version in "${!MILESTONE_DATES[@]}"; do
+            echo "  [\"$version\"]=\"${MILESTONE_DATES[$version]}\""
           done
           echo ")"
 
