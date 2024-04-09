@@ -99,24 +99,18 @@ jobs:
             echo $second_tuesday
           }
           
-          # Initialize the starting version and date
+          # Assuming initial values for starting with version 8.8.0
+          initial_version_major=8
+          initial_version_minor=8  # Starting point for the version minor
           initial_year=2024
-          initial_month=3  # June
-
-          # Assuming the script is being run in a year >= 2024
-          current_year=$(date +%Y) # Get the current year
-
+          initial_month=4  # April, since version 8.8.0 is released in April 2024
+          
           # Calculate additional versions based on the year difference from 2024, inclusive
+          current_year=$(date +%Y)  # Get the current year
           additional_versions=$(( (current_year - 2024 + 2) * 12 ))
-
-          # Now, set the versions_to_calculate to this value
+          
+          # Set the versions_to_calculate to this value
           versions_to_calculate=$additional_versions
-
-          # Output the value of versions_to_calculate
-          echo "Versions to calculate: $versions_to_calculate"
-
-          # Declare associative array
-          declare -A MILESTONE_DATES_TEST
           
           for (( i=0; i<versions_to_calculate; i++ )); do
             # Calculate year and month offset
@@ -130,10 +124,11 @@ jobs:
             # Calculate the release date
             release_date=$(calculate_second_tuesday $current_year $current_month_formatted)
           
-            # Calculate the version numbers based on i, incrementing major version after every 10 versions
-            version_increment=$(( i / 10 ))  # Determines when to increment the major version
-            version_major=$(( 9 + version_increment ))  # Starting from version 9.x.0
-            version_minor=$(( i % 10 ))  # Cycles through 0 to 9 for minor versions
+            # Adjust the calculation for version numbers
+            total_version_count=$(( initial_version_minor + i ))  # Total count including starting point
+            version_increment=$(( total_version_count / 10 ))  # Determines when to increment the major version
+            version_major=$(( initial_version_major + version_increment ))  # Adjusted to start from version 8
+            version_minor=$(( total_version_count % 10 ))  # Cycles through 0 to 9 for minor versions
             version="$version_major.$version_minor.0"
           
             echo "Version $version will be released on $release_date"
