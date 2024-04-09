@@ -262,6 +262,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Support range operator in Remote Inbox Notification [#45201](https://github.com/woocommerce/woocommerce/pull/45201)
 * Add - Updated copies and illustrations for the onboarding task list. [#44854](https://github.com/woocommerce/woocommerce/pull/44854)
 * Add - Update the WooCommerce Extensions Theme page to include references to the Customize Your Store flow. [#45468](https://github.com/woocommerce/woocommerce/pull/45468)
+* Update - Update Action Scheduler to 3.7.4 [#46277](https://github.com/woocommerce/woocommerce/pull/46277)
 * Update - Add formatting for Cost and Sales numbers in Campaigns card in Marketing page. [#44917](https://github.com/woocommerce/woocommerce/pull/44917)
 * Update - Add set_attribute method to Block class [#45523](https://github.com/woocommerce/woocommerce/pull/45523)
 * Update - Allow usage of block notice templates when using classic themes. [#45164](https://github.com/woocommerce/woocommerce/pull/45164)
