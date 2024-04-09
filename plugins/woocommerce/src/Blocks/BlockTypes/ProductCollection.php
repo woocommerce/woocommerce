@@ -84,7 +84,6 @@ class ProductCollection extends AbstractBlock {
 
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
-
 	}
 
 	/**
@@ -370,6 +369,14 @@ class ProductCollection extends AbstractBlock {
 			return $args;
 		}
 
+		// Is this a preview request?
+		// If yes, short-circuit the query and return the preview query.
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$is_preview                       = $product_collection_query_context['previewState']['isPreview'] ?? false;
+		if ( 'true' === $is_preview ) {
+			return $this->get_preview_query_args( $args, $request );
+		}
+
 		$orderby             = $request->get_param( 'orderBy' );
 		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
 		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
@@ -529,6 +536,32 @@ class ProductCollection extends AbstractBlock {
 		$result = $this->filter_query_to_only_include_ids( $merged_query, $handpicked_products );
 
 		return $result;
+	}
+
+	/**
+	 * POC:
+	 *
+	 * Modifies the query arguments based on the collection name for preview requests.
+	 * For instance, for the 'On-sale' collection, products on sale should always be displayed in preview mode,
+	 * regardless of whether the intention is to display random products.
+	 *
+	 * @param array           $args    Query args.
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function get_preview_query_args( $args, $request ) {
+		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		$collection_name                  = $product_collection_query_context['collection'] ?? '';
+
+		$collection_query = array();
+
+		if ( 'woocommerce/product-collection/featured' === $collection_name ) {
+			$collection_query = $this->get_featured_query( true );
+		} elseif ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+			$collection_query = $this->get_on_sale_products_query( true );
+		}
+
+		$args = $this->merge_queries( $args, $collection_query );
+		return $args;
 	}
 
 	/**

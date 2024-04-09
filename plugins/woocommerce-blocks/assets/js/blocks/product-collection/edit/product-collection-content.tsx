@@ -7,8 +7,13 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
+import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import {
+	WooCommerceBlockLocation,
+	useGetLocation,
+} from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
@@ -17,6 +22,8 @@ import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
+	PreviewState,
+	SetPreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
@@ -24,10 +31,61 @@ import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
-const ProductCollectionContent = (
-	props: ProductCollectionEditComponentProps
-) => {
+const useSetPreviewState = ( {
+	setAttributes,
+	location,
+	setPreviewState,
+	attributes,
+}: {
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+	setPreviewState?: SetPreviewState | undefined;
+} ) => {
+	const setState = ( newPreviewState: PreviewState ) => {
+		setAttributes( {
+			previewState: {
+				...attributes.previewState,
+				...newPreviewState,
+			},
+		} );
+	};
+
+	// Running setPreviewState function provided by Collection, if it exists.
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			return;
+		}
+
+		const cleanup = setPreviewState?.( {
+			setState,
+			location,
+			attributes,
+		} );
+
+		if ( cleanup ) {
+			return cleanup;
+		}
+		// We want this to run only once, adding deps will cause performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+};
+
+const ProductCollectionContent = ( {
+	preview: { setPreviewState, initialPreviewState } = {},
+	...props
+}: ProductCollectionEditComponentProps ) => {
+	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
+	const location = useGetLocation( props.context, props.clientId );
+	useSetPreviewState( {
+		setPreviewState,
+		setAttributes,
+		location,
+		attributes,
+	} );
 
 	const blockProps = useBlockProps();
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
@@ -75,7 +133,13 @@ const ProductCollectionContent = (
 				},
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
+				// If initialPreviewState is provided, use it, otherwise use default preview state.
+				previewState:
+					initialPreviewState ||
+					( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
 			} );
+
+			isInitialAttributesSet.current = true;
 		},
 		// This hook is only needed on initialization and sets default attributes.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,8 +155,31 @@ const ProductCollectionContent = (
 		return null;
 	}
 
+	// Let's not render anything until default attributes are set.
+	if ( ! isInitialAttributesSet.current ) {
+		return null;
+	}
+
 	return (
 		<div { ...blockProps }>
+			{ attributes.previewState?.isPreview && (
+				<Button
+					variant="primary"
+					size="small"
+					style={ {
+						position: 'absolute',
+						top: 0,
+						right: 0,
+						zIndex: 1000,
+					} }
+					showTooltip
+					label={ attributes.previewState?.previewMessage }
+					className="wc-block-product-collection__preview-button"
+				>
+					Preview
+				</Button>
+			) }
+
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
 			<ToolbarControls { ...props } />

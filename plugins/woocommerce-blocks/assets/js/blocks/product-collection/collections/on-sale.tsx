@@ -63,4 +63,15 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
+	/**
+	 * Example of how to set initial state for the preview.
+	 * This is also useful when it doesn't require any async
+	 * operation to calculate preview state.
+	 */
+	preview: {
+		initialPreviewState: {
+			isPreview: true,
+			previewMessage: 'On sale Collection Preview',
+		},
+	},
 };

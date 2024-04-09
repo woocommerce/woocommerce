@@ -4,6 +4,11 @@
 import type { BlockEditProps } from '@wordpress/blocks';
 import { type AttributeMetadata } from '@woocommerce/types';
 
+/**
+ * Internal dependencies
+ */
+import { WooCommerceBlockLocation } from '../product-template/utils';
+
 export interface ProductCollectionAttributes {
 	query: ProductCollectionQuery;
 	queryId: number;
@@ -23,6 +28,7 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
+	previewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -91,6 +97,10 @@ export interface ProductCollectionQuery {
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		preview: {
+			initialPreviewState?: PreviewState;
+			setPreviewState?: SetPreviewState;
+		};
 		context: {
 			templateSlug: string;
 		};
@@ -141,3 +151,26 @@ export enum CoreFilterNames {
 
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
+
+/**
+ * Preview state
+ */
+export interface PreviewState {
+	isPreview: boolean;
+	previewMessage: string;
+}
+
+/**
+ * For now it only has one property, but it can be extended in the future to pass
+ * more information to the preview state handler.
+ */
+export interface SetPreviewStateArgs {
+	previewState?: PreviewState;
+	setState: ( previewState: PreviewState ) => void;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+}
+
+export type SetPreviewState = (
+	args: SetPreviewStateArgs
+) => void | ( () => void );

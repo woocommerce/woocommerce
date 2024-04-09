@@ -28,7 +28,7 @@ import type { BlockEditProps, BlockInstance } from '@wordpress/blocks';
 import { useGetLocation, useProductCollectionQueryContext } from './utils';
 import './editor.scss';
 
-const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
+const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection', 'previewState' ];
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -247,6 +247,7 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
+					testing: 'testing',
 					location,
 					productCollectionQueryContext,
 				} ),
