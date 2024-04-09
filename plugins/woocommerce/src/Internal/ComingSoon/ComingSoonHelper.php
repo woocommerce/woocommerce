@@ -52,4 +52,20 @@ class ComingSoonHelper {
 		// Default to false.
 		return false;
 	}
+
+	/**
+	 * Builds the relative URL from the WP instance.
+	 *
+	 * @internal
+	 * @link https://wordpress.stackexchange.com/a/274572
+	 * @param \WP $wp WordPress environment instance.
+	 */
+	public function get_url_from_wp( \WP $wp ) {
+		// Special case for plain permalinks.
+		if ( empty( get_option( 'permalink_structure' ) ) ) {
+			return '/' . add_query_arg( $wp->query_vars, $wp->request );
+		}
+
+		return trailingslashit( '/' . $wp->request );
+	}
 }
