@@ -19,7 +19,7 @@ class ComingSoonHelper {
 	 * Returns true when the entire site is coming soon mode.
 	 */
 	public function is_site_coming_soon(): bool {
-		return 'yes' === get_option( 'woocommerce_coming_soon' ) && 'no' === get_option( 'woocommerce_store_pages_only' );
+		return 'yes' === get_option( 'woocommerce_coming_soon' ) && 'yes' !== get_option( 'woocommerce_store_pages_only' );
 	}
 
 	/**
