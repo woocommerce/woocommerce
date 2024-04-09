@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Fixed a JavaScript error when accessing the Shortcode checkout with WooCommerce Analytics enabled
