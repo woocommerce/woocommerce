@@ -130,16 +130,18 @@ jobs:
             # Calculate the release date
             release_date=$(calculate_second_tuesday $current_year $current_month_formatted)
           
-            # Calculate the version
-            version_major=$((9 + offset_year))
-            version_minor=$((i % 12))
+            # Calculate the version numbers based on i, incrementing major version after every 10 versions
+            version_increment=$(( i / 10 ))  # Determines when to increment the major version
+            version_major=$(( 9 + version_increment ))  # Starting from version 9.x.0
+            version_minor=$(( i % 10 ))  # Cycles through 0 to 9 for minor versions
             version="$version_major.$version_minor.0"
           
             echo "Version $version will be released on $release_date"
-
+          
             # Populate the associative array
             MILESTONE_DATES_TEST["$version"]=$release_date
           done
+
 
           # To print the array in the desired format
           echo "MILESTONE_DATES_TEST=("
