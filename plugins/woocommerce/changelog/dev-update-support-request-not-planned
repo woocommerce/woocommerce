@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Change the support request GH workflow to label issues as not planned when closing them

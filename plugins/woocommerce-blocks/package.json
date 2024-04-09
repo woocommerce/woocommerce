@@ -1,10 +1,11 @@
 {
 	"name": "@woocommerce/block-library",
+	"private": true,
 	"title": "WooCommerce Blocks",
 	"author": "Automattic",
 	"version": "11.8.0-dev",
 	"description": "WooCommerce blocks for the Gutenberg editor.",
-	"homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
+	"homepage": "https://github.com/woocommerce/woocommerce/plugins/woocommerce-blocks/",
 	"keywords": [
 		"woocommerce",
 		"wordpress",
@@ -16,6 +17,7 @@
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/middleware/**",
+		"./assets/js/types/**",
 		"./assets/js/blocks/checkout/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/checkout/inner-blocks/register-components.ts",
 		"./assets/js/blocks/cart/inner-blocks/**/index.tsx",
@@ -38,7 +40,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
+		"url": "https://github.com:woocommerce/woocommerce.git"
 	},
 	"license": "GPL-3.0+",
 	"scripts": {
@@ -186,7 +188,7 @@
 		"@wordpress/dom": "3.27.0",
 		"@wordpress/dom-ready": "3.27.0",
 		"@wordpress/e2e-test-utils": "10.12.0",
-		"@wordpress/e2e-test-utils-playwright": "wp-6.4",
+		"@wordpress/e2e-test-utils-playwright": "wp-6.5",
 		"@wordpress/e2e-tests": "^4.9.2",
 		"@wordpress/element": "5.22.0",
 		"@wordpress/env": "8.2.0",
@@ -197,7 +199,7 @@
 		"@wordpress/postcss-themes": "1.0.5",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/scripts": "24.6.0",
-		"@wordpress/stylelint-config": "^20.0.3",
+		"@wordpress/stylelint-config": "^21.36.0",
 		"autoprefixer": "10.4.14",
 		"axios": "0.27.2",
 		"babel-jest": "^29.7.0",
@@ -248,7 +250,7 @@
 		"postcss": "8.4.32",
 		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.0",
-		"prettier": "npm:wp-prettier@2.6.2",
+		"prettier": "npm:wp-prettier@^2.8.5",
 		"progress-bar-webpack-plugin": "2.1.0",
 		"promptly": "3.2.0",
 		"puppeteer": "17.1.3",
@@ -259,7 +261,7 @@
 		"request-promise": "4.2.6",
 		"rimraf": "5.0.5",
 		"rtlcss": "^4.1.1",
-		"sass-loader": "10.1.0",
+		"sass-loader": "^10.5.0",
 		"storybook": "^7.6.4",
 		"storybook-addon-react-docgen": "1.2.44",
 		"stylelint": "^14.16.1",
@@ -297,7 +299,7 @@
 		"@wordpress/url": "3.13.0",
 		"@wordpress/wordcount": "3.47.0",
 		"change-case": "^4.1.2",
-		"classnames": "2.3.1",
+		"classnames": "^2.3.2",
 		"compare-versions": "4.1.3",
 		"config": "3.3.7",
 		"dataloader": "2.2.2",
@@ -313,7 +315,6 @@
 		"prop-types": "^15.8.1",
 		"react-number-format": "4.9.3",
 		"react-transition-group": "^4.4.5",
-		"reakit": "1.3.11",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
@@ -342,12 +343,6 @@
 		"*.md": [
 			"pnpm run lint:md:docs"
 		]
-	},
-	"changelog": {
-		"labelPrefix": "type:",
-		"skipLabel": "skip-changelog",
-		"defaultPrefix": "dev",
-		"repo": "woocommerce/woocommerce-gutenberg-products-block"
 	},
 	"files": [
 		"build",

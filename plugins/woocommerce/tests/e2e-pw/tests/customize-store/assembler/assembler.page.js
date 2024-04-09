@@ -33,4 +33,16 @@ export class AssemblerPage {
 		}
 		return this.page;
 	}
+
+	/**
+	 * Get the editor frame locator.
+	 *
+	 * @return {Promise<import('playwright').FrameLocator>} The editor frame locator.
+	 */
+	async getEditor() {
+		const assembler = await this.getAssembler();
+		return assembler.frameLocator(
+			'.woocommerce-customize-store__edit-site-editor [name="editor-canvas"]'
+		);
+	}
 }

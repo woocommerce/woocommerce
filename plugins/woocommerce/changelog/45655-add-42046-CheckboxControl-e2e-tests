@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add an e2e test to ensure that each <CheckboxControl> component has a unique ID.

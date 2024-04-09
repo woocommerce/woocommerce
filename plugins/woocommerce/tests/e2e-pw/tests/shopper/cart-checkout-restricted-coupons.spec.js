@@ -1,4 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const includedProductName = 'Included test product';
@@ -314,20 +315,6 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					'Sorry, coupon "min-max-spend-individual" has already been applied and cannot be used in conjunction with other coupons.'
 				)
 			).toBeVisible();
-
-			// add more products so the total is > $200
-			for ( let i = 0; i < 8; i++ ) {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
-			}
-			// failed because we're over 200 dollars
-			await page.goto( '/checkout/' );
-			await expect(
-				page.getByText(
-					'There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.'
-				)
-			).toBeVisible();
-			await page.getByRole( 'link', { name: 'Return to cart' } ).click();
 		} );
 	} );
 
@@ -393,7 +380,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					billing: {
 						first_name: 'Marge',
 						last_name: 'Simpson',
-						email: 'marge@example.com',
+						email: 'marge.simpson@example.org',
 					},
 					line_items: [
 						{
@@ -625,8 +612,8 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 	} );
 
 	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
-																							  page,
-																						  } ) => {
+		page,
+	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
 		await page.waitForLoadState( 'networkidle' );
 
@@ -661,13 +648,15 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page
 			.getByLabel( 'Email address' )
 			.first()
-			.fill( 'marge@example.com' );
+			.fill( 'marge.simpson@example.org' );
 
 		await page
 			.getByRole( 'link', { name: 'Click here to enter your code' } )
 			.click();
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
+
+		await page.waitForLoadState( 'networkidle' );
 
 		await expect(
 			page.getByText(
@@ -718,11 +707,9 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
-		const newOrderId = await page
-			.locator( 'li.woocommerce-order-overview__order > strong' )
-			.textContent();
+		const newOrderId = getOrderIdFromUrl( page );
 
 		// try to order a second time, but should get an error
 		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );

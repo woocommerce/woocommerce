@@ -7,8 +7,8 @@ const updateProduct = async ( { page, expect } ) => {
 };
 
 const disableVariableProductBlockTour = async ( { page } ) => {
-	await page.waitForLoadState();
-	await page.waitForFunction( () => window?.wp?.data );
+	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
+	await page.waitForLoadState( 'domcontentloaded' );
 
 	// Get the current user data
 	const { id: userId, woocommerce_meta } = await page.evaluate( () => {

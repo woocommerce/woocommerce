@@ -4,6 +4,7 @@
 import { useMachine } from '@xstate5/react';
 import React from 'react';
 import classnames from 'classnames';
+
 /**
  * Internal dependencies
  */
@@ -23,21 +24,27 @@ import {
 	MainContentComponentProps,
 	MainContentContainer,
 } from './main-content/xstate';
+import { useXStateInspect } from '~/xstate';
 
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
 	className?: string;
 };
+
 const LaunchStoreController = () => {
 	useFullScreen( [ 'woocommerce-launch-your-store' ] );
+	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
-		useMachine( mainContentMachine );
+		useMachine( mainContentMachine, {
+			inspect,
+		} );
 
 	const [ sidebarState, sendToSidebar, sidebarMachineService ] = useMachine(
 		sidebarMachine,
 		{
+			inspect,
 			input: {
 				mainContentMachineRef: mainContentMachineService,
 			},
@@ -70,8 +77,6 @@ const LaunchStoreController = () => {
 						context={ sidebarState.context }
 					/>
 				) }
-				{ JSON.stringify( sidebarState.toJSON() ) }
-				{ JSON.stringify( sidebarState.getMeta() ) }
 			</SidebarContainer>
 			<MainContentContainer>
 				{ CurrentMainContentComponent && (
@@ -81,8 +86,6 @@ const LaunchStoreController = () => {
 						context={ mainContentState.context }
 					/>
 				) }
-				{ JSON.stringify( mainContentState.getMeta() ) }
-				{ JSON.stringify( mainContentState.toJSON() ) }
 			</MainContentContainer>
 		</div>
 	);
