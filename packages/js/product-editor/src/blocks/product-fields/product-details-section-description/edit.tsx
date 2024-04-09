@@ -60,7 +60,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.selectable ) {
+				if ( productTemplate.isSelectableByUser ) {
 					if ( productTemplate.layoutTemplateId ) {
 						supported.push( productTemplate );
 					} else {

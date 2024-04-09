@@ -66,7 +66,7 @@ class ProductTemplate {
 	 *
 	 * @var boolean
 	 */
-	private $selectable = true;
+	private $is_selectable_by_user = true;
 
 	/**
 	 * ProductTemplate constructor
@@ -94,8 +94,8 @@ class ProductTemplate {
 			$this->icon = $data['icon'];
 		}
 
-		if ( isset( $data['selectable'] ) ) {
-			$this->selectable = $data['selectable'];
+		if ( isset( $data['is_selectable_by_user'] ) ) {
+			$this->is_selectable_by_user = $data['is_selectable_by_user'];
 		}
 	}
 
@@ -196,8 +196,8 @@ class ProductTemplate {
 	 *
 	 * @return boolean Selectable.
 	 */
-	public function get_selectable() {
-		return $this->selectable;
+	public function get_is_selectable_by_user() {
+		return $this->is_selectable_by_user;
 	}
 
 	/**
@@ -216,14 +216,14 @@ class ProductTemplate {
 	 */
 	public function to_json() {
 		return array(
-			'id'               => $this->get_id(),
-			'title'            => $this->get_title(),
-			'description'      => $this->get_description(),
-			'icon'             => $this->get_icon(),
-			'order'            => $this->get_order(),
-			'layoutTemplateId' => $this->get_layout_template_id(),
-			'productData'      => $this->get_product_data(),
-			'selectable'       => $this->get_selectable(),
+			'id'                 => $this->get_id(),
+			'title'              => $this->get_title(),
+			'description'        => $this->get_description(),
+			'icon'               => $this->get_icon(),
+			'order'              => $this->get_order(),
+			'layoutTemplateId'   => $this->get_layout_template_id(),
+			'productData'        => $this->get_product_data(),
+			'isSelectableByUser' => $this->get_is_selectable_by_user(),
 		);
 	}
 }
