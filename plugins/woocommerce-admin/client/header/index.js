@@ -101,7 +101,8 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
+	const isHomescreen =
+		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
 	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
 		useLaunchYourStore();
 	const showLaunchYourStoreStatus =
