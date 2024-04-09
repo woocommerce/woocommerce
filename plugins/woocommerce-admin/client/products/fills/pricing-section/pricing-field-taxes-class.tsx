@@ -59,7 +59,7 @@ export const PricingTaxesClassField = () => {
 							components: {
 								link: (
 									<Link
-										href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class"
+										href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class"
 										target="_blank"
 										type="external"
 									>

@@ -265,7 +265,7 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 | User Type | Flow Area        | Flow Name                               | Test File |
 | --------- | ---------------- | --------------------------------------- | --------- |
-| Merchant  | My Subscriptions | Can initiate Woo.com Connection |           |
+| Merchant  | My Subscriptions | Can initiate WooCommerce.com Connection |           |
 
 ### Merchant - Pages
 
