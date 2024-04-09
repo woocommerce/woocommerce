@@ -34,7 +34,7 @@ class ComingSoonRequestHandler {
 	 *
 	 * @internal
 	 *
-	 * @param \WP $wp Current WordPress environment t instance (passed by reference).
+	 * @param \WP $wp Current WordPress environment instance (passed by reference).
 	 */
 	public function handle_parse_request( \WP &$wp ) {
 		// Early exit if LYS feature is disabled.
