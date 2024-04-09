@@ -108,7 +108,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		OrderHelper::toggle_cot_feature_and_usage( true );
-		$this->setup_mock_cache();
+		$this->setup_serializing_cache();
 
 		$order = OrderHelper::create_order();
 

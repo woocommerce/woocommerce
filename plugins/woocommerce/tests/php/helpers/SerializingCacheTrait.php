@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\RestApi\UnitTests;
 
+require_once __DIR__ . '/SerializingCacheProxy.php';
+
 /**
  * TestCase trait that allows the replacement of the default WP_Object_Cache with an instance that will
  * serialize and deserialize objects stored in cache instead of just keeping in memory to better mimic
@@ -9,19 +11,16 @@ namespace Automattic\WooCommerce\RestApi\UnitTests;
  */
 trait SerializingCacheTrait {
 
-	private $wp_object_cache_instance;
-
 	/**
 	 * Replace the global WP_Object_Cache instance with a proxy instance that will run any retrieved data through
 	 * serialization.
 	 *
 	 * @return void
 	 */
-	public function setup_mock_cache() {
-		if ( is_null( $this->wp_object_cache_instance ) ) {
-			$this->wp_object_cache_instance = $GLOBALS['wp_object_cache'];
-			require_once __DIR__ . '/SerializingCacheProxy.php';
-			$GLOBALS['wp_object_cache'] = new Serializing_Cache_Proxy( $this->wp_object_cache_instance );
+	public function setup_serializing_cache() {
+		if ( ! $GLOBALS['wp_object_cache'] instanceof Serializing_Cache_Proxy ) {
+			$original_object_cache_instance = $GLOBALS['wp_object_cache'];
+			$GLOBALS['wp_object_cache']     = new Serializing_Cache_Proxy( $original_object_cache_instance );  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
@@ -34,11 +33,8 @@ trait SerializingCacheTrait {
 	 * @after Force cleanup of serializing cache instance if being used.
 	 */
 	public function cleanup_mock_cache() {
-		if ( ! is_null( $this->wp_object_cache_instance ) ) {
-			$GLOBALS['wp_object_cache'] = $this->wp_object_cache_instance;
-			unset( $this->wp_object_cache_instance );
+		if ( $GLOBALS['wp_object_cache'] instanceof Serializing_Cache_Proxy ) {
+			$GLOBALS['wp_object_cache'] = $GLOBALS['wp_object_cache']->original_cache_instance; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
-
 }
-
