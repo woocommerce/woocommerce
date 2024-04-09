@@ -14,15 +14,6 @@ For documentation on WC versions 2.5 and 2.6's CLI, visit [Legacy CLI commands](
 
 WP-CLI is a powerful set of command-line tools for managing WordPress installations. You can update plugins, configure multisite installations, and much more, all without using a web browser. For more information, visit the [official WP-CLI website](http://wp-cli.org/).
 
-## Documentation Structure
-
-This suite of documentation includes:
-
-- [**How-to Guide**](./using-wc-cli.md): Step-by-step instructions for common WC-CLI tasks.
-- [**Command Reference**](./wc-cli-commands.md): Detailed information on WC-CLI commands and their options.
-- [**FAQs**](./cli-faq.md): Answers to frequently asked questions about WC-CLI.
-- [**Examples**](./wc-cli-examples.md): Practical examples of WC-CLI commands in use.
-
 ## Getting Started with WooCommerce CLI
 
 To begin using WC-CLI, ensure that you have WP-CLI installed and that you are running WooCommerce 3.0.0 or later. The CLI commands are accessed through the `wp wc` command. For a full list of available commands, type `wp wc` in your command-line interface.

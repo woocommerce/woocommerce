@@ -48,7 +48,7 @@ The order data is synced from `_posts` and `_postmeta` table to four custom orde
 
 ## Enabling the feature
 
-From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](./enable-hpos.md)
+From WooCommerce 8.2, released on October 2023, HPOS is enabled by default for new installations. Existing stores can check [How to enable HPOS](https://developer.woocommerce.com/docs/how-to-enable-high-performance-order-storage/)
 
 ## Database tables
 
