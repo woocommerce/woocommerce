@@ -51,7 +51,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
+		$this->assertEquals( 'no', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
 	}
@@ -67,7 +67,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'no', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'yes', get_option( 'woocommerce_store_pages_only' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
+		$this->assertEquals( 'no', get_option( 'woocommerce_private_link' ) );
 		$this->assertNotEmpty( get_option( 'woocommerce_share_key' ) );
 		$this->assertMatchesRegularExpression( '/^[a-zA-Z0-9]{32}$/', get_option( 'woocommerce_share_key' ) );
 	}
@@ -88,7 +88,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertEquals( 'no', get_option( 'woocommerce_store_pages_only' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_private_link' ) );
+		$this->assertEquals( 'no', get_option( 'woocommerce_private_link' ) );
 		$this->assertEquals( 'test', get_option( 'woocommerce_share_key' ) );
 	}
 
