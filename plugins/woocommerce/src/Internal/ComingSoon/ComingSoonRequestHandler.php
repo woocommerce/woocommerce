@@ -48,7 +48,8 @@ class ComingSoonRequestHandler {
 		}
 
 		// Early exit if the URL doesn't need a coming soon screen.
-		$url = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$url = $this->coming_soon_helper->get_url_from_wp( $wp );
+
 		if ( ! $this->coming_soon_helper->is_url_coming_soon( $url ) ) {
 			return $wp;
 		}
