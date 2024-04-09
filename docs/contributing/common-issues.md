@@ -80,7 +80,7 @@ Add this to `wp-config.php`:
 define( 'WCPAY_DEV_MODE', true );
 ```
 
-Also see [this document](https://woocommerce.com/document/payments/testing/dev-mode).
+Also see [this document](hhttps://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/).
 
 ## WooCommerce Admin install timestamp
 
