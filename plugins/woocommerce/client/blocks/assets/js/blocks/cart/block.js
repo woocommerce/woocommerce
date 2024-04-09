@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useStoreCart, useStoreEvents } from '@woocommerce/base-context/hooks';
+import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
@@ -25,14 +25,13 @@ import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/in
 import './style.scss';
 
 const Cart = ( { children, attributes = {} } ) => {
-	const cart = useStoreCart();
 	const { hasDarkControls } = attributes;
 
 	const { dispatchCheckoutEvent } = useStoreEvents();
 
 	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
 	useEffect( () => {
-		dispatchCheckoutEvent('cart-render');
+		dispatchCheckoutEvent( 'cart-render' );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 

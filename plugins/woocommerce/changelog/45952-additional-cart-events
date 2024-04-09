@@ -1,4 +1,4 @@
 Significance: patch
 Type: enhancement
 
-Add additional events to Mini Cart/Cart/Checkout.
+Add events for Cart rendering and Mini Cart drawer state changes.
