@@ -75,7 +75,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 		$tax_item = new WC_Order_Item_Tax();
 		$tax_item->set_rate( $tax_rate_id );
-		
+
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->add_item( $tax_item );
 		$order->set_status( 'completed' );
