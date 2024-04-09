@@ -27,7 +27,7 @@ Payment gateways should be created as additional plugins that hook into WooComme
 add_action( 'plugins_loaded', 'init_your_gateway_class' );
 ```
 
-It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://developer.woocommerce.com/docs/settings-api/ "https://developer.woocommerce.com/docs/settings-api/"):
+It is also important that your gateway class extends the WooCommerce base gateway class, so you have access to important methods and the [settings API](https://developer.woocommerce.com/docs/settings-api/):
 
 ```php
 function init_your_gateway_class() {
