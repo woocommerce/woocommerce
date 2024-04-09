@@ -33,10 +33,6 @@
 		vertical-align: middle;
 		background-color: #fff;
 
-		&:checked {
-			background: #fff;
-		}
-
 		&:focus {
 			outline: 1px solid $universal-border-strong;
 			outline-offset: 2px;
@@ -88,16 +84,18 @@
 	}
 
 	.wc-block-components-checkbox__mark {
-		fill: #000;
+		background: #000;
+		fill: #fff;
+		border-radius: $universal-border-radius;
 		position: absolute;
-		margin-left: em(3px);
-		margin-top: em(1px);
 		width: em(18px);
 		height: em(18px);
+		padding: em(3px);
 		pointer-events: none;
 
 		.has-dark-controls & {
-			fill: #fff;
+			background: #fff;
+			fill: $input-text-active;
 		}
 	}
 
@@ -126,7 +124,7 @@
 
 	.wc-block-components-checkbox__input[type="checkbox"]:checked,
 	.has-dark-controls
-	.wc-block-components-checkbox__input[type="checkbox"]:checked {
+		.wc-block-components-checkbox__input[type="checkbox"]:checked {
 		background-color: #fff;
 		border-color: var(--form--border-color);
 	}
