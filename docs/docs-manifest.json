@@ -1030,9 +1030,13 @@
           "post_title": "User Experience Guidelines - Payments Onboarding and Setup",
           "menu_title": "Payments Onboarding and Setup",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
-          "hash": "a7e978ec3ab241db1aca5e5e764e3dfe80d33d6f23aef25f4588c7b81826f60a",
+          "hash": "b564c61dbaca4c883b94f3a82051e3baf1738337ea38ac29d2eb95bb1dfe8269",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/ux-guidelines-payments/payments-onboarding.md",
-          "id": "9e100f5d1c5e52bb337a294456f75cd60929d9e3"
+          "id": "9e100f5d1c5e52bb337a294456f75cd60929d9e3",
+          "links": {
+            "../ux-guidelines-extensions/settings.md": "1066428802afb323fbf38c64f5480edbabd93178",
+            "../ux-guidelines-extensions/navigation.md": "9922abbcea787a91b3360f49fa53d5402a604e6b"
+          }
         },
         {
           "post_title": "User Experience Guidelines - Payment Button Style",
