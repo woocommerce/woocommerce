@@ -74,15 +74,7 @@ class LaunchYourStore extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$launch_status = get_option( 'launch-status' );
-
-		// The site is launched when the launch status is 'launched' or missing.
-		$launched_values = array(
-			'launched',
-			'',
-			false,
-		);
-		return in_array( $launch_status, $launched_values, true );
+		return 'no' !== get_option( 'woocommerce_coming_soon' );
 	}
 
 	/**
