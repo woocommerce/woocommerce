@@ -2,8 +2,6 @@
 
 namespace Automattic\WooCommerce\RestApi\UnitTests;
 
-use PHPUnit\Framework\MockObject\MockBuilder;
-
 /**
  * TestCase trait that allows the replacement of the default WP_Object_Cache with an instance that will
  * serialize and deserialize objects stored in cache instead of just keeping in memory to better mimic
@@ -13,18 +11,23 @@ trait SerializingCacheTrait {
 
 	private $wp_object_cache_instance;
 
-	abstract public function getMockBuilder( string $className ): MockBuilder;
-
-
+	/**
+	 * Replace the global WP_Object_Cache instance with a proxy instance that will run any retrieved data through
+	 * serialization.
+	 *
+	 * @return void
+	 */
 	public function setup_mock_cache() {
 		if ( is_null( $this->wp_object_cache_instance ) ) {
 			$this->wp_object_cache_instance = $GLOBALS['wp_object_cache'];
-
+			require_once __DIR__ . '/SerializingCacheProxy.php';
 			$GLOBALS['wp_object_cache'] = new Serializing_Cache_Proxy( $this->wp_object_cache_instance );
 		}
 	}
 
 	/**
+	 * Clean up after a test that used $this::setup_mock_cache() by restoring the initial WP_Object_Cache instance.
+	 * This is run automatically after each test.
 	 *
 	 * @return void
 	 *
@@ -39,26 +42,3 @@ trait SerializingCacheTrait {
 
 }
 
-/**
- * Proxy class used to mimic object cache instances that serialize/deserialized stored data.
- */
-class Serializing_Cache_Proxy {
-	public $original_cache_instance;
-
-	public function __construct( $original_cache_instance ) {
-		$this->original_cache_instance = $original_cache_instance;
-	}
-
-	public function __call( $function, $args ) {
-		return $this->original_cache_instance->$function( ...$args );
-	}
-
-	public function get( $key, $group = 'default', $force = false, &$found = null ) {
-		$data = $this->original_cache_instance->get( $key, $group, $found, $found );
-		if ( is_object( $data ) || is_array( $data ) ) {
-			return unserialize( serialize( $data ) );
-		}
-
-		return $data;
-	}
-}
