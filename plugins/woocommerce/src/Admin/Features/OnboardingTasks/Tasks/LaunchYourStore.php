@@ -74,7 +74,7 @@ class LaunchYourStore extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		return 'no' !== get_option( 'woocommerce_coming_soon' );
+		return 'yes' !== get_option( 'woocommerce_coming_soon' );
 	}
 
 	/**
