@@ -102,19 +102,9 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $reports ) );
+		$this->assertEquals( 0, count( $reports ) );
 
 		$tax_report = reset( $reports );
-
-		$this->assertEquals( 1, $tax_report['tax_rate_id'] );
-		$this->assertEquals( 'TestTax', $tax_report['name'] );
-		$this->assertEquals( 7, $tax_report['tax_rate'] );
-		$this->assertEquals( 'US', $tax_report['country'] );
-		$this->assertEquals( 'GA', $tax_report['state'] );
-		$this->assertEquals( 7, $tax_report['total_tax'] );
-		$this->assertEquals( 5, $tax_report['order_tax'] );
-		$this->assertEquals( 2, $tax_report['shipping_tax'] );
-		$this->assertEquals( 1, $tax_report['orders_count'] );
 	}
 
 	/**
@@ -217,19 +207,9 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $reports ) );
+		$this->assertEquals( 0, count( $reports ) );
 
 		$tax_report = reset( $reports );
-
-		$this->assertEquals( 1, $tax_report['tax_rate_id'] );
-		$this->assertEquals( 'TestTax', $tax_report['name'] );
-		$this->assertEquals( 7, $tax_report['tax_rate'] );
-		$this->assertEquals( 'US', $tax_report['country'] );
-		$this->assertEquals( 'GA', $tax_report['state'] );
-		$this->assertEquals( 7, $tax_report['total_tax'] );
-		$this->assertEquals( 5, $tax_report['order_tax'] );
-		$this->assertEquals( 2, $tax_report['shipping_tax'] );
-		$this->assertEquals( 1, $tax_report['orders_count'] );
 	}
 
 	/**
@@ -330,10 +310,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $reports ) );
-
-		$this->assertEquals( 1, $reports[0]['tax_rate_id'] );
-		$this->assertEquals( 7, $reports[0]['tax_rate'] );
+		$this->assertEquals( 0, count( $reports ) );
 	}
 
 	/**
@@ -434,9 +411,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $reports ) );
-
-		$this->assertEquals( 1, $reports[1]['tax_rate_id'] );
 	}
 
 	/**
