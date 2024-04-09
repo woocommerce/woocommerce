@@ -316,16 +316,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://woo.com/storefront/';
+			$url         = 'https://woocommerce.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
@@ -1015,11 +1015,11 @@ class WC_Admin_Addons {
 					wp_kses_post(
 						/* translators: a url */
 						__(
-							'To start growing your business, head over to <a href="%s">Woo.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
-					'https://woo.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
 				);
 				?>
 			</p>
@@ -1547,7 +1547,7 @@ class WC_Admin_Addons {
 	}
 
 	/**
-	 * Make wp_safe_remote_get request to Woo.com endpoint.
+	 * Make wp_safe_remote_get request to WooCommerce.com endpoint.
 	 * Optionally pass user auth token, locale or country.
 	 *
 	 * @param string $url     URL to request.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent reading items with zero order ID to avoid mixups.

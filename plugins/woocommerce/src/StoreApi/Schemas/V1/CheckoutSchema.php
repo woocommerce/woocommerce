@@ -261,20 +261,26 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields   = wp_parse_args(
-			$this->additional_fields_controller->get_all_fields_from_order( $order ),
-			$this->additional_fields_controller->get_all_fields_from_customer( wc()->customer )
+		$fields = wp_parse_args(
+			$this->additional_fields_controller->get_all_fields_from_object( $order, 'additional' ),
+			$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'additional' )
 		);
-		$response = [];
 
+		$additional_field_schema = $this->get_additional_fields_schema();
 		foreach ( $fields as $key => $value ) {
-			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
+			if ( ! isset( $additional_field_schema[ $key ] ) ) {
+				unset( $fields[ $key ] );
 				continue;
 			}
-			$response[ $key ] = $value;
+			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
+			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
+				$fields[ $key ] = (bool) $value;
+			} else {
+				$fields[ $key ] = $this->prepare_html_response( $value );
+			}
 		}
 
-		return $response;
+		return $fields;
 	}
 
 	/**
@@ -418,7 +424,7 @@ class CheckoutSchema extends AbstractSchema {
 
 		foreach ( $locations as $location ) {
 			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
-			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location );
+			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location, 'additional' );
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$errors->merge_from( $result );

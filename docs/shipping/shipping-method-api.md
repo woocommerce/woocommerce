@@ -76,7 +76,7 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 
 ## Defining settings/options
 
-You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woo.com/document/settings-api/).
+You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woocommerce.com/document/settings-api/).
 
 ## The calculate_shipping() method
 
@@ -114,11 +114,11 @@ The skeleton shipping method code all put together looks like this:
 <?php
 /*
 Plugin Name: Your Shipping plugin
-Plugin URI: https://woo.com/
+Plugin URI: https://woocommerce.com/
 Description: Your shipping method plugin
 Version: 1.0.0
 Author: WooThemes
-Author URI: https://woo.com/
+Author URI: https://woocommerce.com/
 */
 
 /**

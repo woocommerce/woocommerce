@@ -11,8 +11,8 @@ concurrency:
 permissions: {}
 
 jobs:
-    hpos-e2e-tests-run:
-        name: Runs E2E tests with HPOS enabled.
+    non-hpos-e2e-tests-run:
+        name: Runs E2E tests with HPOS disabled.
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -20,7 +20,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -28,7 +28,7 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Load docker images and start containers with HPOS enabled.
+            - name: Load docker images and start containers with HPOS disabled.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
@@ -70,8 +70,8 @@ jobs:
                   if-no-files-found: ignore
                   retention-days: 5
 
-    hpos-api-tests-run:
-        name: Runs API tests with HPOS enabled.
+    non-hpos-api-tests-run:
+        name: Runs API tests with HPOS disabled.
         runs-on: ubuntu-20.04
         permissions:
             contents: read
@@ -79,7 +79,7 @@ jobs:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/api-core-tests/api-test-report/allure-report
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -87,7 +87,7 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Load docker images and start containers with HPOS enabled.
+            - name: Load docker images and start containers with HPOS disabled.
               working-directory: plugins/woocommerce
               env:
                   ENABLE_HPOS: 0
@@ -138,7 +138,9 @@ jobs:
         runs-on: ubuntu-20.04
         permissions:
             contents: read
-        needs: [hpos-api-tests-run, hpos-e2e-tests-run]
+        needs:
+          - non-hpos-api-tests-run
+          - non-hpos-e2e-tests-run
         steps:
             - name: Create dirs
               run: |
@@ -148,7 +150,7 @@ jobs:
                   mkdir -p output
 
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   path: repo
 
