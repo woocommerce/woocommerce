@@ -150,8 +150,6 @@ jobs:
           
             echo "Version $version will be released on $release_date"
           
-            # Populate the associative array
-            MILESTONE_DATES_TEST["$version"]=$release_date
           done
 
 
