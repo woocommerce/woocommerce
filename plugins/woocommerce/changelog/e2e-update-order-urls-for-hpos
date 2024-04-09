@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update the URLs for order-related e2e tests to use new URLs from HPOS
