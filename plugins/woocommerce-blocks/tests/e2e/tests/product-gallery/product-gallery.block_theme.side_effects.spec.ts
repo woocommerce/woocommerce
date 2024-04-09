@@ -570,6 +570,7 @@ test.describe( `${ blockData.name }`, () => {
 		editor,
 		pageObject,
 	} ) => {
+		await editor.openDocumentSettingsSidebar();
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
 		await page

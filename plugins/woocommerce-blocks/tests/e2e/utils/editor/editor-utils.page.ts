@@ -500,7 +500,7 @@ export class EditorUtils {
 		productSlug: string,
 		createIfDoesntExist = true
 	) {
-		await this.page.goto( '/wp-admin/site-editor.php' );
+		await this.admin.visitSiteEditor();
 		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
 
 		const templateButton = this.page.getByRole( 'button', {
