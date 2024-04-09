@@ -115,8 +115,6 @@ baseTest.describe( 'Products > Product Images', () => {
 			);
 		} );
 
-		expect( 1 ).toBeGreaterThanOrEqual( 5 );
-
 		await test.step( 'Update product image', async () => {
 			await page.locator( '#set-post-thumbnail' ).click();
 			await addImageFromLibrary( page, 'image-02', 'Set product image' );

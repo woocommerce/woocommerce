@@ -103,7 +103,5 @@ test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 		await expect(
 			page.locator( '#woocommerce_file_download_method' )
 		).toHaveValue( 'force' );
-
-		await expect( page.locator( '#missing-locator' ) ).toBeVisible();
 	} );
 } );
