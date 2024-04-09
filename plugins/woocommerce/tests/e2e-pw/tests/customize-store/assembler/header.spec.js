@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -43,7 +43,7 @@ test.describe( 'Assembler -> headers', () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -117,7 +117,9 @@ test.describe( 'Assembler -> headers', () => {
 			.frameLocator( 'iframe' )
 			.locator( '.wc-blocks-header-pattern' );
 
-		const expectedHeaderClass = extractHeaderClass( await header.getAttribute( 'class' ) );
+		const expectedHeaderClass = extractHeaderClass(
+			await header.getAttribute( 'class' )
+		);
 
 		await header.click();
 
@@ -134,7 +136,9 @@ test.describe( 'Assembler -> headers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const selectedHeaderClasses = await page.locator( 'header div.wc-blocks-header-pattern' ).getAttribute( 'class' );
+		const selectedHeaderClasses = await page
+			.locator( 'header div.wc-blocks-header-pattern' )
+			.getAttribute( 'class' );
 
 		expect( selectedHeaderClasses ).toContain( expectedHeaderClass );
 	} );

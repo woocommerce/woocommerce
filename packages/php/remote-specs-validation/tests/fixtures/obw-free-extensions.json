@@ -5,7 +5,7 @@
 	"plugins": [
 	  {
 		"name": "WooPayments",
-		"description": "Accept credit cards and other popular payment methods with <a href=\"https://woo.com/products/woocommerce-payments\" target=\"_blank\">WooPayments</a>",
+		"description": "Accept credit cards and other popular payment methods with <a href=\"https://woocommerce.com/products/woocommerce-payments\" target=\"_blank\">WooPayments</a>",
 		"is_visible": [
 		  {
 			"type": "or",
@@ -235,7 +235,7 @@
 	  },
 	  {
 		"name": "WooCommerce Shipping",
-		"description": "Print shipping labels with <a href=\"https://woo.com/products/shipping\" target=\"_blank\">WooCommerce Shipping</a>",
+		"description": "Print shipping labels with <a href=\"https://woocommerce.com/products/shipping\" target=\"_blank\">WooCommerce Shipping</a>",
 		"is_visible": [
 		  {
 			"type": "base_location_country",
@@ -301,7 +301,7 @@
 	  },
 	  {
 		"name": "WooCommerce Tax",
-		"description": "Get automated sales tax with <a href=\"https://woo.com/products/tax\" target=\"_blank\">WooCommerce Tax</a>",
+		"description": "Get automated sales tax with <a href=\"https://woocommerce.com/products/tax\" target=\"_blank\">WooCommerce Tax</a>",
 		"is_visible": [
 		  {
 			"type": "or",
@@ -380,7 +380,7 @@
 	  },
 	  {
 		"name": "Jetpack",
-		"description": "Enhance speed and security with <a href=\"https://woo.com/products/jetpack\" target=\"_blank\">Jetpack</a>",
+		"description": "Enhance speed and security with <a href=\"https://woocommerce.com/products/jetpack\" target=\"_blank\">Jetpack</a>",
 		"is_visible": [
 		  {
 			"type": "not",
@@ -406,7 +406,7 @@
 	"plugins": [
 	  {
 		"name": "MailPoet",
-		"description": "Level up your email marketing with <a href=\"https://woo.com/products/mailpoet\" target=\"_blank\">MailPoet</a>",
+		"description": "Level up your email marketing with <a href=\"https://woocommerce.com/products/mailpoet\" target=\"_blank\">MailPoet</a>",
 		"manage_url": "admin.php?page=mailpoet-newsletters",
 		"is_visible": [
 		  {
@@ -426,8 +426,8 @@
 	  },
 	  {
 		"name": "Google Listings & Ads",
-		"description": "Drive sales with <a href=\"https://woo.com/products/google-listings-and-ads\" target=\"_blank\">Google Listings and Ads</a>",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
+		"description": "Drive sales with <a href=\"https://woocommerce.com/products/google-listings-and-ads\" target=\"_blank\">Google Listings and Ads</a>",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
 		"is_visible": [
 		  {
@@ -449,7 +449,7 @@
 	  {
 		"name": "Pinterest for WooCommerce",
 		"description": "Get your products in front of Pinners searching for ideas and things to buy.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/pinterest.png",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/pinterest.png",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fpinterest%2Flanding",
 		"is_built_by_wc": true,
 		"min_php_version": "7.3",
@@ -457,8 +457,8 @@
 	  },
 	  {
 		"name": "Facebook for WooCommerce",
-		"description": "List products and create ads on Facebook and Instagram with <a href=\"https://woo.com/products/facebook/\">Facebook for WooCommerce</a>",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/facebook.png",
+		"description": "List products and create ads on Facebook and Instagram with <a href=\"https://woocommerce.com/products/facebook/\">Facebook for WooCommerce</a>",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/facebook.png",
 		"manage_url": "admin.php?page=wc-facebook",
 		"is_visible": false,
 		"is_built_by_wc": false,
@@ -473,7 +473,7 @@
 	  {
 		"name": "MailPoet",
 		"description": "Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/mailpoet.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/mailpoet.svg",
 		"manage_url": "admin.php?page=mailpoet-newsletters",
 		"is_built_by_wc": true,
 		"key": "mailpoet:alt"
@@ -481,7 +481,7 @@
 	  {
 		"name": "Mailchimp",
 		"description": "Send targeted campaigns, recover abandoned carts and much more with Mailchimp.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/mailchimp.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/mailchimp.svg",
 		"manage_url": "admin.php?page=mailchimp-woocommerce",
 		"is_built_by_wc": false,
 		"key": "mailchimp-for-woocommerce"
@@ -489,7 +489,7 @@
 	  {
 		"name": "Klaviyo",
 		"description": "Grow and retain customers with intelligent, impactful email and SMS marketing automation and a consolidated view of customer interactions.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/klaviyo.png",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/klaviyo.png",
 		"manage_url": "admin.php?page=klaviyo_settings",
 		"is_built_by_wc": false,
 		"key": "klaviyo"
@@ -503,14 +503,14 @@
 	  {
 		"name": "Google Listings & Ads",
 		"description": "Reach more shoppers and drive sales for your store. Integrate with Google to list your products for free and launch paid ad campaigns.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
 		"is_built_by_wc": true,
 		"key": "google-listings-and-ads:alt"
 	  },
 	  {
 		"name": "TikTok for WooCommerce",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/tiktok.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/tiktok.svg",
 		"description": "Grow your online sales by promoting your products on TikTok to over one billion monthly active users around the world.",
 		"manage_url": "admin.php?page=tiktok",
 		"is_visible": [
@@ -726,7 +726,7 @@
 	  {
 		"name": "Pinterest for WooCommerce",
 		"description": "Get your products in front of Pinterest users searching for ideas and things to buy. Get started with Pinterest and make your entire product catalog browsable.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/pinterest.png",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/pinterest.png",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fpinterest%2Flanding",
 		"is_built_by_wc": true,
 		"key": "pinterest-for-woocommerce:alt"
@@ -734,7 +734,7 @@
 	  {
 		"name": "Facebook for WooCommerce",
 		"description": "List products and create ads on Facebook and Instagram.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/facebook.png",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/facebook.png",
 		"manage_url": "admin.php?page=wc-facebook",
 		"is_visible": false,
 		"is_built_by_wc": false,
@@ -976,8 +976,8 @@
 		"min_wp_version": "5.9",
 		"key": "woocommerce-payments",
 		"label": "Get paid with WooPayments",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
-		"learn_more_link": "https://woo.com/products/woocommerce-payments",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
+		"learn_more_link": "https://woocommerce.com/products/woocommerce-payments",
 		"install_priority": 5
 	  },
 	  {
@@ -993,8 +993,8 @@
 		"is_built_by_wc": true,
 		"key": "woocommerce-services:shipping",
 		"label": "Print shipping labels with WooCommerce Shipping",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
-		"learn_more_link": "https://woo.com/woocommerce-shipping",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
+		"learn_more_link": "https://woocommerce.com/woocommerce-shipping",
 		"install_priority": 3
 	  },
 	  {
@@ -1005,20 +1005,20 @@
 		"min_wp_version": "6.0",
 		"key": "jetpack",
 		"label": "Boost content creation with Jetpack AI Assistant",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-jetpack.svg",
-		"learn_more_link": "https://woo.com/products/jetpack",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-jetpack.svg",
+		"learn_more_link": "https://woocommerce.com/products/jetpack",
 		"install_priority": 8
 	  },
 	  {
 		"name": "Pinterest for WooCommerce",
 		"description": "Get your products in front of a highly engaged audience.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-pinterest.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-pinterest.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fpinterest%2Flanding",
 		"is_built_by_wc": true,
 		"min_php_version": "7.3",
 		"key": "pinterest-for-woocommerce",
 		"label": "Showcase your products with Pinterest",
-		"learn_more_link": "https://woo.com/products/pinterest-for-woocommerce",
+		"learn_more_link": "https://woocommerce.com/products/pinterest-for-woocommerce",
 		"install_priority": 2
 	  },
 	  {
@@ -1029,21 +1029,21 @@
 		"is_built_by_wc": true,
 		"key": "mailpoet",
 		"label": "Reach your customers with MailPoet",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-mailpoet.svg",
-		"learn_more_link": "https://woo.com/products/mailpoet",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-mailpoet.svg",
+		"learn_more_link": "https://woocommerce.com/products/mailpoet",
 		"install_priority": 7
 	  },
 	  {
 		"name": "Google Listings & Ads",
 		"description": "Reach millions of active shoppers across Google with free product listings and ads.",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-google.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-google.svg",
 		"manage_url": "admin.php?page=wc-admin&path=%2Fgoogle%2Fstart",
 		"is_visible": true,
 		"is_built_by_wc": true,
 		"min_php_version": "7.4",
 		"key": "google-listings-and-ads",
 		"label": "Drive sales with Google Listings & Ads",
-		"learn_more_link": "https://woo.com/products/google-listings-and-ads",
+		"learn_more_link": "https://woocommerce.com/products/google-listings-and-ads",
 		"install_priority": 6
 	  },
 	  {
@@ -1114,13 +1114,13 @@
 		"is_built_by_wc": true,
 		"key": "woocommerce-services:tax",
 		"label": "Get automated tax rates with WooCommerce Tax",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
-		"learn_more_link": "https://woo.com/products/tax",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-woo.svg",
+		"learn_more_link": "https://woocommerce.com/products/tax",
 		"install_priority": 4
 	  },
 	  {
 		"name": "TikTok for WooCommerce",
-		"image_url": "https://woo.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-tiktok.svg",
+		"image_url": "https://woocommerce.com/wp-content/plugins/wccom-plugins/obw-free-extensions/images/core-profiler/logo-tiktok.svg",
 		"description": "Create advertising campaigns and reach one billion global users.",
 		"manage_url": "admin.php?page=tiktok",
 		"is_visible": [
@@ -1333,7 +1333,7 @@
 		"is_built_by_wc": false,
 		"key": "tiktok-for-business",
 		"label": "Create ad campaigns with TikTok",
-		"learn_more_link": "https://woo.com/products/tiktok-for-woocommerce",
+		"learn_more_link": "https://woocommerce.com/products/tiktok-for-woocommerce",
 		"install_priority": 1
 	  }
 	]

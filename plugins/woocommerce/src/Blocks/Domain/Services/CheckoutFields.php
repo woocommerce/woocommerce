@@ -233,8 +233,8 @@ class CheckoutFields {
 	 * Add fields data to the asset data registry.
 	 */
 	public function add_fields_data() {
-		$this->asset_data_registry->add( 'defaultFields', array_merge( $this->get_core_fields(), $this->get_additional_fields() ), true );
-		$this->asset_data_registry->add( 'addressFieldsLocations', $this->fields_locations, true );
+		$this->asset_data_registry->add( 'defaultFields', array_merge( $this->get_core_fields(), $this->get_additional_fields() ) );
+		$this->asset_data_registry->add( 'addressFieldsLocations', $this->fields_locations );
 	}
 
 	/**

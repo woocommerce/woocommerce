@@ -2,15 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ALLOWED_COUNTRIES, ALLOWED_STATES } from '@woocommerce/block-settings';
 import {
 	type CartShippingAddress,
 	type CartBillingAddress,
-	isObject,
+	type CountryData,
+	objectHasProp,
 	isString,
 } from '@woocommerce/types';
-import { FormFieldsConfig } from '@woocommerce/settings';
-import { decodeEntities } from '@wordpress/html-entities';
+import { FormFieldsConfig, getSetting } from '@woocommerce/settings';
+import { formatAddress } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -28,33 +28,37 @@ const AddressCard = ( {
 	target: string;
 	fieldConfig: FormFieldsConfig;
 } ): JSX.Element | null => {
-	const formattedCountry = isString( ALLOWED_COUNTRIES[ address.country ] )
-		? decodeEntities( ALLOWED_COUNTRIES[ address.country ] )
-		: '';
+	const countryData = getSetting< Record< string, CountryData > >(
+		'countryData',
+		{}
+	);
 
-	const formattedState =
-		isObject( ALLOWED_STATES[ address.country ] ) &&
-		isString( ALLOWED_STATES[ address.country ][ address.state ] )
-			? decodeEntities(
-					ALLOWED_STATES[ address.country ][ address.state ]
-			  )
-			: address.state;
+	let formatToUse = getSetting< string >(
+		'defaultAddressFormat',
+		'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}'
+	);
+
+	if (
+		objectHasProp( countryData, address?.country ) &&
+		objectHasProp( countryData[ address.country ], 'format' ) &&
+		isString( countryData[ address.country ].format )
+	) {
+		// `as string` is fine here because we check if it's a string above.
+		formatToUse = countryData[ address.country ].format as string;
+	}
+	const { name: formattedName, address: formattedAddress } = formatAddress(
+		address,
+		formatToUse
+	);
 
 	return (
 		<div className="wc-block-components-address-card">
 			<address>
 				<span className="wc-block-components-address-card__address-section">
-					{ address.first_name + ' ' + address.last_name }
+					{ formattedName }
 				</span>
 				<div className="wc-block-components-address-card__address-section">
-					{ [
-						address.address_1,
-						! fieldConfig.address_2.hidden && address.address_2,
-						address.city,
-						formattedState,
-						address.postcode,
-						formattedCountry,
-					]
+					{ formattedAddress
 						.filter( ( field ) => !! field )
 						.map( ( field, index ) => (
 							<span key={ `address-` + index }>{ field }</span>
