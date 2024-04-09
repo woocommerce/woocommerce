@@ -80,6 +80,8 @@ test.describe( 'Legacy templates', async () => {
 				path: '/wp_template/all',
 			} );
 
+			await page.getByPlaceholder( 'Search' ).fill( template.name );
+
 			await expect(
 				page.getByRole( 'link', { name: template.name } )
 			).toBeVisible();
