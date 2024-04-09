@@ -109,6 +109,7 @@ baseTest.describe( 'Products > Product Images', () => {
 		page,
 		productWithImage,
 	} ) => {
+		expect( 1 ).toBeGreaterThanOrEqual( 5 );
 		await test.step( 'Navigate to product edit page', async () => {
 			await page.goto(
 				`wp-admin/post.php?post=${ productWithImage.id }&action=edit`

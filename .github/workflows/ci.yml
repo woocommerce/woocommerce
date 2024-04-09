@@ -300,12 +300,12 @@ jobs:
           fi
           
       - name: 'Send Slack notification'
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'pull_request'
         uses: automattic/action-test-results-to-slack@v0.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-          slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+          slack_channel: 'C02180M7JFM'
           playwright_report_path: ./out/test-results.json
           playwright_output_dir: ./out/results-data
 
