@@ -395,7 +395,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should have panel open and panel switching as false by default', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: 'products',
@@ -413,7 +413,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should allow user to toggle, an individual panel without setting panelSwitching to true', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
@@ -445,7 +445,7 @@ describe( 'Activity Panel', () => {
 		} );
 
 		it( 'should remove panel element after clearPanel is triggered', () => {
-			const { queryByText, getByRole } = render(
+			const { queryByText } = render(
 				<ActivityPanel
 					query={ {
 						task: '',
