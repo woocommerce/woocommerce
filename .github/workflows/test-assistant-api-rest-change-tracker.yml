@@ -52,25 +52,14 @@ jobs:
           calculate_second_tuesday() {
             year=$1
             month=$2
-            # Check OS and adjust `date` command accordingly
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-              # macOS version (BSD date)
-              # Find the first Tuesday of the month
-              first_of_month="$year-$month-01"
-              day_of_week=$(date -j -f "%Y-%m-%d" "$first_of_month" "+%u")
-              offset_to_first_tuesday=$(( (9 - day_of_week) % 7 ))
-              first_tuesday=$(date -j -v+"$offset_to_first_tuesday"d -f "%Y-%m-%d" "$first_of_month" "+%Y-%m-%d")
-              # Calculate the second Tuesday by adding 7 days to the first Tuesday
-              second_tuesday=$(date -j -v+7d -f "%Y-%m-%d" "$first_tuesday" "+%Y-%m-%d")
-            else
-              # Linux version (GNU date)
-              first_of_month="$year-$month-01"
-              day_of_week=$(date -d "$first_of_month" "+%u")
-              offset_to_first_tuesday=$(( (9 - day_of_week) % 7 ))
-              first_tuesday=$(date -d "$first_of_month +$offset_to_first_tuesday days" "+%Y-%m-%d")
-              # Calculate the second Tuesday by adding 7 days
-              second_tuesday=$(date -d "$first_tuesday +7 days" "+%Y-%m-%d")
-            fi
+
+            first_of_month="$year-$month-01"
+            day_of_week=$(date -d "$first_of_month" "+%u")
+            offset_to_first_tuesday=$(( (9 - day_of_week) % 7 ))
+            first_tuesday=$(date -d "$first_of_month +$offset_to_first_tuesday days" "+%Y-%m-%d")
+            # Calculate the second Tuesday by adding 7 days
+            second_tuesday=$(date -d "$first_tuesday +7 days" "+%Y-%m-%d")
+            
             echo $second_tuesday
           }
           
