@@ -17,7 +17,6 @@ import {
 	ProductCollectionAttributes,
 } from '../types';
 
-// Extends BlockVariation to include an optional setPreviewState function for preview management.
 export interface ProductCollectionConfig extends BlockVariation {
 	preview?: {
 		setPreviewState?: SetPreviewState;
@@ -26,17 +25,19 @@ export interface ProductCollectionConfig extends BlockVariation {
 }
 
 /**
- * Registers a product collection variation, optionally setting up a preview state handler.
+ * Register a new collection for the Product Collection block.
  *
- * @param {ProductCollectionConfig} blockVariationArgs - The configuration for the product collection, potentially including a setPreviewState function.
+ * @param {ProductCollectionConfig} blockVariationArgs The configuration of new collection.
  */
 const registerProductCollection = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
 	...blockVariationArgs
 }: ProductCollectionConfig ) => {
-	// Don't add filter if setPreviewState is not provided.
+	/**
+	 * If setPreviewState or initialPreviewState is provided, inject the setPreviewState & initialPreviewState props.
+	 * This is useful for handling preview mode in the editor.
+	 */
 	if ( setPreviewState || initialPreviewState ) {
-		// This HOC adds a setPreviewState & initialPreviewState to the BlockEdit component's props.
 		const withSetPreviewState =
 			< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 			( props: BlockEditProps< ProductCollectionAttributes > ) => {

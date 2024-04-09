@@ -12,11 +12,7 @@ import {
 	DEFAULT_ATTRIBUTES,
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
-import {
-	CoreCollectionNames,
-	CoreFilterNames,
-	SetPreviewStateArgs,
-} from '../types';
+import { CoreCollectionNames, CoreFilterNames } from '../types';
 import { ProductCollectionConfig } from './register-product-collection';
 
 const collection = {
@@ -61,40 +57,15 @@ const innerBlocks: InnerBlockTemplate[] = [
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 ];
 
-/**
- * Example:
- * - How to access attributes and location in the preview state.
- * - How to use async operations
- * - How to use cleanup function as a return value.
- */
-const setPreviewState = ( {
-	setState,
-	attributes: currentAttributes,
-	location,
-}: SetPreviewStateArgs ) => {
-	// setPreviewState has access to the current attributes and location.
-	console.log( 'setPreviewState' );
-	console.log( currentAttributes, location );
-
-	const timeoutID = setTimeout( () => {
-		setState( {
-			isPreview: false,
-			previewMessage: '',
-		} );
-	}, 5000 );
-
-	return () => clearTimeout( timeoutID );
-};
-
 export default {
 	...collection,
 	attributes,
 	innerBlocks,
 	preview: {
-		setPreviewState,
 		initialPreviewState: {
 			isPreview: true,
-			previewMessage: 'This is in preview mode',
+			previewMessage:
+				'Actual products will vary depending on the currently viewed page.',
 		},
 	},
 } as ProductCollectionConfig;

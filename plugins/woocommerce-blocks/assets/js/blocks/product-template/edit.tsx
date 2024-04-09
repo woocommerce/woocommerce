@@ -247,7 +247,6 @@ const ProductTemplateEdit = (
 				products: getEntityRecords( 'postType', postType, {
 					...query,
 					...restQueryArgs,
-					testing: 'testing',
 					location,
 					productCollectionQueryContext,
 				} ),

@@ -32,17 +32,17 @@ import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
 
 const useSetPreviewState = ( {
-	setAttributes,
-	location,
 	setPreviewState,
+	location,
 	attributes,
+	setAttributes,
 }: {
+	setPreviewState?: SetPreviewState | undefined;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
 	setAttributes: (
 		attributes: Partial< ProductCollectionAttributes >
 	) => void;
-	location: WooCommerceBlockLocation;
-	attributes: ProductCollectionAttributes;
-	setPreviewState?: SetPreviewState | undefined;
 } ) => {
 	const setState = ( newPreviewState: PreviewState ) => {
 		setAttributes( {
