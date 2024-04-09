@@ -33,7 +33,7 @@ const Cart = ( { children, attributes = {} } ) => {
 
 	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
 	useEffect( () => {
-		dispatchCheckoutEvent('cart-render');
+		dispatchCheckoutEvent( 'cart-render' );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
