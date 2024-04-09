@@ -49,7 +49,8 @@
 		line-height: em($gap);
 		width: 100%;
 		border-radius: $universal-border-radius;
-		border: 1px solid $universal-border-strong;
+		border: 1px solid $universal-border-light;
+
 		font-family: inherit;
 		margin: 0;
 		box-sizing: border-box;
@@ -61,7 +62,7 @@
 			background-color: #fff;
 			color: $input-text-active;
 			outline: 0;
-			box-shadow: 0 0 0 1px $input-border-gray;
+			box-shadow: 0 0 0 2px $input-border-gray;
 		}
 
 		.has-dark-controls & {
@@ -72,7 +73,7 @@
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				box-shadow: 0 0 0 1px $input-border-dark;
+				box-shadow: 0 0 0 2px $input-border-dark;
 			}
 		}
 	}

@@ -14,16 +14,18 @@
 }
 
 .wc-block-checkout__add-note .wc-block-components-textarea {
+	border: 1px solid $universal-border-light;
 	margin-top: $gap;
 
 	&:focus {
 		background-color: #fff;
 		color: $input-text-active;
 		outline: 0;
-		box-shadow: 0 0 0 1px $input-border-gray;
+		box-shadow: 0 0 0 2px $input-border-gray;
 	}
 }
 
-.wc-block-components-form .wc-block-checkout__order-notes.wc-block-components-checkout-step {
+.wc-block-components-form
+	.wc-block-checkout__order-notes.wc-block-components-checkout-step {
 	padding-left: 0;
 }
