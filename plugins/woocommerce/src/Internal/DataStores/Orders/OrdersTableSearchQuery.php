@@ -54,6 +54,7 @@ class OrdersTableSearchQuery {
 	private function sanitize_search_filters( string $search_filter ) : array {
 		$core_filters = array(
 			'order_id',
+			'transaction_id',
 			'customer_email',
 			'customers', // customers also searches in meta.
 			'products',
@@ -196,6 +197,13 @@ class OrdersTableSearchQuery {
 			return $wpdb->prepare(
 				"`$order_table`.id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
 				absint( $this->search_term )
+			);
+		}
+
+		if ( 'transaction_id' === $search_filter ) {
+			return $wpdb->prepare(
+				"`$order_table`.transaction_id LIKE %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+				'%' . $wpdb->esc_like( $this->search_term ) . '%'
 			);
 		}
 
