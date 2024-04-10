@@ -308,19 +308,7 @@ class BlockTemplatesController {
 	 * @return WP_Block_Template|null
 	 */
 	public function add_block_template_details( $block_template, $id, $template_type ) {
-		if ( ! $block_template ) {
-			return $block_template;
-		}
-		if ( ! BlockTemplateUtils::template_has_title( $block_template ) ) {
-			$block_template->title = BlockTemplateUtils::get_block_template_title( $block_template->slug );
-		}
-		if ( ! $block_template->description ) {
-			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
-		}
-		if ( ! $block_template->area || 'uncategorized' === $block_template->area ) {
-			$block_template->area = BlockTemplateUtils::get_block_template_area( $block_template->slug, $template_type );
-		}
-		return $block_template;
+		return BlockTemplateUtils::update_template_data( $block_template, $template_type );
 	}
 
 	/**
@@ -401,17 +389,7 @@ class BlockTemplatesController {
 		 */
 		$query_result = array_map(
 			function ( $template ) use ( $template_type ) {
-				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
-					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
-				}
-				if ( ! $template->description ) {
-					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
-				}
-				if ( ! $template->area || 'uncategorized' === $template->area ) {
-					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
-				}
-
-				return $template;
+				return BlockTemplateUtils::update_template_data( $template, $template_type );
 			},
 			$query_result
 		);
