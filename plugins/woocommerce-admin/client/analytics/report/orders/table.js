@@ -91,6 +91,13 @@ class OrdersReportTable extends Component {
 				isSortable: true,
 				isNumeric: true,
 			},
+			{
+				label: __( 'Channel', 'woocommerce' ),
+				screenReaderLabel: __( 'Channel', 'woocommerce' ),
+				key: 'channel',
+				required: false,
+				isSortable: false,
+			},
 		];
 	}
 
@@ -124,6 +131,7 @@ class OrdersReportTable extends Component {
 				parent_id: parentId,
 				status,
 				customer_type: customerType,
+				channel,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const { coupons, customer, products } = extendedInfo;
@@ -240,6 +248,10 @@ class OrdersReportTable extends Component {
 				{
 					display: renderCurrency( netTotal, currency ),
 					value: netTotal,
+				},
+				{
+					display: channel,
+					value: channel,
 				},
 			];
 		} );
