@@ -1153,7 +1153,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes' => array(
 					'title'       => __( 'Upsells', 'woocommerce' ),
 					'description' => sprintf(
-						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products link closing tag.*/
+						/* translators: %1$s: "Learn more about linked products" link opening tag. %2$s: "Learn more about linked products" link closing tag. */
 						__( 'Upsells are typically products that are extra profitable or better quality or more expensive. Experiment with combinations to boost sales. %1$sLearn more about linked products%2$s', 'woocommerce' ),
 						'<br /><a href="https://woocommerce.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
@@ -1186,7 +1186,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes'     => array(
 					'title'       => __( 'Cross-sells', 'woocommerce' ),
 					'description' => sprintf(
-						/* translators: %1$s: Learn more about linked products. %2$s: Learn more about linked products link closing tag.*/
+						/* translators: %1$s: "Learn more about linked products" link opening tag. %2$s: "Learn more about linked products" link closing tag. */
 						__( 'By suggesting complementary products in the cart using cross-sells, you can significantly increase the average order value. %1$sLearn more about linked products%2$s', 'woocommerce' ),
 						'<br /><a href="https://woocommerce.com/document/related-products-up-sells-and-cross-sells/" target="_blank" rel="noreferrer">',
 						'</a>'
