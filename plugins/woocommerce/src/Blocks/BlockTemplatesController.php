@@ -556,6 +556,10 @@ class BlockTemplatesController {
 	/**
 	 * Update the product archive title to "Shop".
 	 *
+	 * Attention: this method is run in classic themes as well, so it
+	 * can't be moved to the ProductCatalogTemplate class. See:
+	 * https://github.com/woocommerce/woocommerce/pull/46429
+	 *
 	 * @param string $post_type_name Post type 'name' label.
 	 * @param string $post_type      Post type.
 	 *
