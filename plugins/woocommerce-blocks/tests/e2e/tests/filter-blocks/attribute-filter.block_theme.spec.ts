@@ -3,8 +3,13 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-import { Template } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/templates';
+
+/**
+ * Internal dependencies
+ */
+import { Template } from '../../types/e2e-test-utils-playwright';
+
+type ExtendedTemplate = Template & { link: string };
 
 const TEMPLATE_PATH = path.join( __dirname, './attribute-filter.handlebars' );
 
@@ -18,15 +23,18 @@ const COLOR_ATTRIBUTES_WITH_COUNTS = [
 	'Yellow (1)',
 ];
 
+const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
+const productCatalogLink = '/shop';
+
 const test = base.extend< {
-	templateWithShowCounts: Template;
-	defaultBlockTemplate: Template;
-	dropdownBlockTemplate: Template;
+	templateWithShowCounts: ExtendedTemplate;
+	defaultBlockTemplate: ExtendedTemplate;
+	dropdownBlockTemplate: ExtendedTemplate;
 } >( {
 	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
 			{
-				id: 'woocommerce/woocommerce//archive-product',
+				id: productCatalogTemplateId,
 			},
 			TEMPLATE_PATH,
 			{
@@ -36,7 +44,7 @@ const test = base.extend< {
 			}
 		);
 
-		testingTemplate.link = '/shop';
+		testingTemplate.link = productCatalogLink;
 
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );
@@ -48,7 +56,7 @@ const test = base.extend< {
 	) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
 			{
-				id: 'woocommerce/woocommerce//archive-product',
+				id: productCatalogTemplateId,
 			},
 			TEMPLATE_PATH,
 			{
@@ -59,7 +67,7 @@ const test = base.extend< {
 			}
 		);
 
-		testingTemplate.link = '/shop';
+		testingTemplate.link = productCatalogLink;
 
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );
@@ -71,7 +79,7 @@ const test = base.extend< {
 	) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
 			{
-				id: 'woocommerce/woocommerce//archive-product',
+				id: productCatalogTemplateId,
 			},
 			TEMPLATE_PATH,
 			{
@@ -82,7 +90,7 @@ const test = base.extend< {
 			}
 		);
 
-		testingTemplate.link = '/shop';
+		testingTemplate.link = productCatalogLink;
 
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );

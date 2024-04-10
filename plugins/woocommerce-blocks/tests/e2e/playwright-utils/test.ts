@@ -34,6 +34,7 @@ import {
 	updateTemplatesContent,
 	deletePost,
 } from '../utils/create-dynamic-content';
+import type { Template } from '../types/e2e-test-utils-playwright';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -141,12 +142,11 @@ const test = base.extend<
 				data: unknown
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
-			createTemplateFromTemplate: (
+			updateTemplatesContent: (
 				template: TemplatePayload,
 				templatePath: string,
 				data: unknown
-			) => Promise< Post >;
-			deleteTemplate: ( id: string ) => Promise< void >;
+			) => Promise< Template & { link: string } >;
 		};
 	}
 >( {
