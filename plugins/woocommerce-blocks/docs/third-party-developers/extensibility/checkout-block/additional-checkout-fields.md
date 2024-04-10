@@ -38,7 +38,7 @@ A common use-case for developers and merchants is to add a new field to the Chec
 
 This document will outline the steps an extension should take to register some additional checkout fields.
 
-> [!NOTE]  
+> [!NOTE]
 > Additional Checkout fields is still in the testing phases, use it to test the API and leave feedback in this [public discussion.](https://github.com/woocommerce/woocommerce/discussions/42995)
 
 ## Available field locations
@@ -84,6 +84,135 @@ Fields rendered here will be saved to the order. They will not be part of the cu
 By default, this block will render as the last step in the Checkout form, however it can be moved using the Gutenberg block controls in the editor.
 
 ![The additional order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
+
+## Accessing values
+
+Additional fields are saved to individual meta keys in both the customer meta and order meta, you can access them using helper methods, or using the meta keys directly, we recommend using the helper methods, as they're less likely to change, can handle future migrations, and will support future enhancements (e.g. reading from different locations).
+
+For address fields, two values are saved: one for shipping, and one for billing. If the customer has selected 'Use same address for billing` then the values will be the same, but still saved independently of each other.
+
+For contact and additional fields, only one value is saved per field.
+
+### Helper methods
+
+`CheckoutFields` provides a function to access values from both customers and orders, it's are `get_field_from_object`.
+
+To access a customer billing and/or shipping value:
+
+```php
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+
+$field_id = 'my-plugin-namespace/my-field';
+$customer = wc()->customer; // Or new WC_Customer( $id )
+$checkout_fields = Package::container()->get( CheckoutFields::class );
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
+$my_customer_shipping_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'shipping' );
+```
+
+To access an order field:
+
+```php
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+
+$field_id = 'my-plugin-namespace/my-field';
+$order = wc_get_order( 1234 );
+$checkout_fields = Package::container()->get( CheckoutFields::class );
+$my_order_billing_field = $checkout_fields->get_field_from_object( $field_id, $order, 'billing' );
+$my_order_shipping_field = $checkout_fields->get_field_from_object( $field_id, $order, 'shipping' );
+```
+
+After an order is placed, the data saved to the customer and the data saved to the order will be the same. Customers can change the values for _future_ orders, or from within their My Account page. If you're looking at a customer value at a specific point in time (i.e. when the order was placed), access it from the order object, if you're looking for the most up to date value regardless, access it from the customer object.
+
+#### Guest customers
+
+When a guest customer places an order with additional fields, those fields will be saved to its session, so as long as the customer still has a valid session going, the values will always be there.
+
+#### Logged-in customers
+
+For logged-in customers, the value is only persisted once they place an order. Accessing a logged-in customer object during the place order lifecycle will return null or stale data.
+
+If you're at a place order hook, doing this will return previous data (not the currently inserted one):
+
+```php
+$customer = new WC_Customer( $order->customer_id ); // Or new WC_Customer( 1234 )
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
+```
+
+Instead, always access the latest data if you want to run some extra validation/data-moving:
+
+```php
+$customer = wc()->customer // This will return the current customer with its session.
+$my_customer_billing_field = $checkout_fields->get_field_from_object( $field_id, $customer, 'billing' );
+```
+
+#### Accessing all fields
+
+You can use `get_all_fields_from_object` to access all additional fields saved to an order or a customer.
+
+```php
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+
+$order = wc_get_order( 1234 );
+$checkout_fields = Package::container()->get( CheckoutFields::class );
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' );
+$order_additional_shipping_fields = $checkout_fields->get_all_fields_from_object( $order, 'shipping' );
+$order_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'additional' ); // Contact and Additional are saved in the same place under the additional group.
+```
+
+This will return an array of all values, it will only include fields currently registered, if you want to include fields no longer registered, you can pass a third `true` parameter.
+
+```php
+
+$order = wc_get_order( 1234 );
+$checkout_fields = Package::container()->get( CheckoutFields::class );
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' ); // array( 'my-plugin-namespace/my-field' => 'my-value' );
+
+$order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing', true  ); // array( 'my-plugin-namespace/my-field' => 'my-value', 'old-namespace/old-key' => 'old-value' );
+```
+
+### Accessing values directly
+
+While not recommended, you can use the direct meta key to access certain values, this is useful for external engines or page/email builders who only provide access to meta values.
+
+Values are saved under a predefined prefix, this is needed to able to query fields without knowing which ID the field was registered under, for a field with key `'my-plugin-namespace/my-field'`, it's meta key will be the following if it's an address field:
+
+- `_wc_billing/my-plugin-namespace/my-field`
+- `_wc_shipping/my-plugin-namespace/my-field`
+
+Or the following if it's a contact/additional field:
+
+- `_wc_additional/my-plugin-namespace/my-field`.
+
+Those prefixes are part of `CheckoutFields` class, and can be accessed using the following constants:
+
+```php
+echo ( CheckoutFields::BILLING_FIELDS_PREFIX ); // _wc_billing/
+echo ( CheckoutFields::SHIPPING_FIELDS_PREFIX ); // _wc_shipping/
+echo ( CheckoutFields::ADDITIONAL_FIELDS_PREFIX ); // _wc_additional/
+```
+
+`CheckoutFields` provides a couple of helpers to get the group name or key based on one or the other:
+
+```php
+CheckoutFields::get_group_name( "_wc_billing" ); // "billing"
+CheckoutFields::get_group_name( "_wc_billing/" ); // "billing"
+
+CheckoutFields::get_group_key( "shipping" ); // "_wc_shipping/"
+```
+
+Use cases here would be to build the key name to access the meta directly:
+
+```php
+$key      = CheckoutFields::get_group_key( "additional" ) . 'my-plugin/is-opt-in';
+$opted_in = get_user_meta( 123, $key, true ) === "1" ? true : false;
+```
+
+#### Checkboxes values
+
+When accessing a checkbox values directly, it will either return `"1"` for true, `"0"` for false, or `""` if the value doesn't exist, only the provided functions will sanitize that to a boolean.
 
 ## Supported field types
 
@@ -428,7 +557,7 @@ It is important to note that any fields rendered in other locations will not be 
 |----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `$errors`  | `WP_Error`                  | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
 | `$fields`  | `array`                     | The fields rendered in this locations.                                                                                                                                                |
-| `$group`   | `'billing'\|'shipping'\|''` | If the action is for the address location, the type of address will be set here. If it is for contact or addiotional, this will be an empty string.                                   |
+| `$group`   | `'billing'\|'shipping'\|'additional'` | If the action is for the address location, the type of address will be set here. If it is for contact or additional, this will be 'additional'.                                   |
 
 There are several places where these hooks are fired.
 
@@ -545,7 +674,7 @@ add_action(
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&projects=&template=suggestion-for-documentation-improvement-correction.md&title=%5BDOC-BUG%5D%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
 

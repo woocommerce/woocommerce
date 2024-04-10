@@ -8,7 +8,7 @@ WooCommerce has a shipping method API which plugins can use to add their own rat
 
 ## Create a plugin
 
-First off, create a regular WordPress/WooCommerce plugin - see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
+First off, create a regular WordPress/WooCommerce plugin - see our [Building Your First Extension guide](../extension-development/building-your-first-extension.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
 
 ## Create a function to house your class
 
@@ -76,7 +76,7 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 
 ## Defining settings/options
 
-You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woo.com/document/settings-api/).
+You can then define your options using the settings API. In the snippets above you'll notice we init_form_fields and init_settings. These load up the settings API. To see how to add settings, see [WooCommerce settings API](https://woocommerce.com/document/settings-api/).
 
 ## The calculate_shipping() method
 
@@ -114,11 +114,11 @@ The skeleton shipping method code all put together looks like this:
 <?php
 /*
 Plugin Name: Your Shipping plugin
-Plugin URI: https://woo.com/
+Plugin URI: https://woocommerce.com/
 Description: Your shipping method plugin
 Version: 1.0.0
 Author: WooThemes
-Author URI: https://woo.com/
+Author URI: https://woocommerce.com/
 */
 
 /**

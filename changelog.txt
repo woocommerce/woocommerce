@@ -74,7 +74,7 @@
 * Add - Add functionality to navigate between Product Gallery image thumbnails with the keyboard. [#44236](https://github.com/woocommerce/woocommerce/pull/44236)
 * Add - Add legacy data cleanup process for HPOS. [#43293](https://github.com/woocommerce/woocommerce/pull/43293)
 * Add - Add new "can receive cancelled order email" test [#43985](https://github.com/woocommerce/woocommerce/pull/43985)
-* Add - Adds logic to display notices of promotions from Woo.com on in-app marketplace pages [#44840](https://github.com/woocommerce/woocommerce/pull/44840)
+* Add - Adds logic to display notices of promotions from WooCommerce.com on in-app marketplace pages [#44840](https://github.com/woocommerce/woocommerce/pull/44840)
 * Add - Add structured metadata to grouped products. [#42808](https://github.com/woocommerce/woocommerce/pull/42808)
 * Add - Adds `wp wc hpos backfill` tool to backfill from/to either order datastore. [#44281](https://github.com/woocommerce/woocommerce/pull/44281)
 * Add - Add test to check product reviews. [#44077](https://github.com/woocommerce/woocommerce/pull/44077)
@@ -139,7 +139,7 @@
 * Dev - Add php unit watcher and update unit test docs [#44681](https://github.com/woocommerce/woocommerce/pull/44681)
 * Dev - Adds e2e tests for the creation of all coupon types (merchant) [#44671](https://github.com/woocommerce/woocommerce/pull/44671)
 * Dev - Adds e2e tests for user account email flows [#44622](https://github.com/woocommerce/woocommerce/pull/44622)
-* Dev - Adds logic to get notices of promotions from Woo.com endpoint, and (if necessary) show a bubble next to the WooCommerce "Extensions" menu item. [#44655](https://github.com/woocommerce/woocommerce/pull/44655)
+* Dev - Adds logic to get notices of promotions from WooCommerce.com endpoint, and (if necessary) show a bubble next to the WooCommerce "Extensions" menu item. [#44655](https://github.com/woocommerce/woocommerce/pull/44655)
 * Dev - Add some missing core contributors to the contributors list. [#44740](https://github.com/woocommerce/woocommerce/pull/44740)
 * Dev - Adds tests for the creation of restricted coupons [#44716](https://github.com/woocommerce/woocommerce/pull/44716)
 * Dev - Add `queryContextIncludes` attribute to Product Collection block [#44150](https://github.com/woocommerce/woocommerce/pull/44150)
@@ -8837,7 +8837,7 @@
 * Fix - Datepicker range for variations.
 
 = 2.3.12 - 2015-07-06 =
-* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://woo.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
+* Fix - Fixed Google Chrome forcing to use SSL. This can cause some issues on websites behind load balancers or reverse proxies. [Read more](https://woocommerce.com/document/ssl-and-https/#websites-behind-load-balancers-or-reverse-proxies).
 * Fix - Escaped shop url in empty cart template.
 * Fix - Escaped product tabs titles.
 * Fix - Removed deprecated PHP4 constructor on Widget classes.

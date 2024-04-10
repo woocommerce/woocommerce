@@ -36,7 +36,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 	</p>
 	<p class="submit">
 		<a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
-		<a class="button-secondary docs" href="https://woo.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
+		<a class="button-secondary docs" href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
 			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
 		</a>
 	</p>
@@ -452,7 +452,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 				<?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
 					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woo.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -563,7 +563,7 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 					<mark class="error"><span class="dashicons dashicons-warning"></span>
 					<?php
 					/* Translators: %s: docs link. */
-					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/' ) );
+					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woocommerce.com/document/ssl-and-https/' ) );
 					?>
 					</mark>
 				<?php endif; ?>
@@ -731,8 +731,8 @@ if ( 0 < $mu_plugins_count ) :
 			</td>
 		</tr>
 		<tr>
-			<td data-export-label="Connected to Woo.com"><?php esc_html_e( 'Connected to Woo.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to Woo.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
@@ -1012,7 +1012,7 @@ if ( 0 < $mu_plugins_count ) :
 					<mark class="error">
 						<span class="dashicons dashicons-warning"></span>
 					</mark>
-					<a href="https://woo.com/document/fix-outdated-templates-woocommerce/" target="_blank">
+					<a href="https://woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
 					</a>
 				</td>
