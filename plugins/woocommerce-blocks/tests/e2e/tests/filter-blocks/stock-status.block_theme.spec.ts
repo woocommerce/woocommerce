@@ -3,33 +3,23 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 
 /**
  * Internal dependencies
  */
-import { Template } from '../../types/e2e-test-utils-playwright';
-
-type ExtendedTemplate = Template & { link: string };
+import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
 
 const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
-
-const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
-const productCatalogLink = '/shop';
 
 const test = base.extend< {
 	dropdownBlockTemplate: ExtendedTemplate;
 	defaultBlockTemplate: ExtendedTemplate;
 } >( {
 	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{ id: productCatalogTemplateId },
+		const testingTemplate = await requestUtils.updateProductCatalogContent(
 			TEMPLATE_PATH,
 			{}
 		);
-
-		testingTemplate.link = productCatalogLink;
-
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},
@@ -38,8 +28,7 @@ const test = base.extend< {
 		{ requestUtils, templateApiUtils },
 		use
 	) => {
-		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{ id: productCatalogTemplateId },
+		const testingTemplate = await requestUtils.updateProductCatalogContent(
 			TEMPLATE_PATH,
 			{
 				attributes: {
@@ -47,9 +36,6 @@ const test = base.extend< {
 				},
 			}
 		);
-
-		testingTemplate.link = productCatalogLink;
-
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},

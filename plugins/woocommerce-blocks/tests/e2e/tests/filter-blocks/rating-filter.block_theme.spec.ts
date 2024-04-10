@@ -7,27 +7,18 @@ import path from 'path';
 /**
  * Internal dependencies
  */
-import { Template } from '../../types/e2e-test-utils-playwright';
-
-type ExtendedTemplate = Template & { link: string };
+import { ExtendedTemplate } from '../../types/e2e-test-utils-playwright';
 
 const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
-
-const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
-const productCatalogLink = '/shop';
 
 const test = base.extend< {
 	defaultBlockTemplate: ExtendedTemplate;
 } >( {
 	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{ id: productCatalogTemplateId },
+		const testingTemplate = await requestUtils.updateProductCatalogContent(
 			TEMPLATE_PATH,
 			{}
 		);
-
-		testingTemplate.link = productCatalogLink;
-
 		await use( testingTemplate );
 		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},
