@@ -1,4 +1,4 @@
-name: Run Blocks Playwright Tests
+name: Blocks E2E Tests (Playwright)
 
 on:
     pull_request:
