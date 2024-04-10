@@ -583,7 +583,6 @@ test.describe( 'Billing Address Form', () => {
 	const shippingTestData = {
 		firstname: 'John',
 		lastname: 'Doe',
-		company: 'Automattic',
 		addressfirstline: '123 Easy Street',
 		addresssecondline: 'Testville',
 		country: 'United States (US)',
@@ -595,7 +594,6 @@ test.describe( 'Billing Address Form', () => {
 	const billingTestData = {
 		first_name: '',
 		last_name: '',
-		company: '',
 		address_1: '',
 		address_2: '',
 		country: 'United States (US)',
@@ -617,17 +615,12 @@ test.describe( 'Billing Address Form', () => {
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
-			const { company, ...shippingDetailsWithoutCompany } =
-				shippingTestData;
-			await checkoutPageObject.fillShippingDetails(
-				shippingDetailsWithoutCompany
-			);
+
+			await checkoutPageObject.fillShippingDetails( shippingTestData );
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
 			// Check shipping fields are filled.
-			for ( const [ key, value ] of Object.entries(
-				shippingDetailsWithoutCompany
-			) ) {
+			for ( const [ key, value ] of Object.entries( shippingTestData ) ) {
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				switch ( key ) {
 					case 'firstname':
@@ -681,10 +674,6 @@ test.describe( 'Billing Address Form', () => {
 							page.locator( '#billing-state input' )
 						).toHaveValue( value );
 						break;
-					default:
-						await expect(
-							page.locator( `#billing-${ key }` )
-						).toHaveValue( value );
 				}
 			}
 		} );
