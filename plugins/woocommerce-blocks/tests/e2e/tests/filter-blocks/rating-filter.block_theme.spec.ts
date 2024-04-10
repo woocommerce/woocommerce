@@ -2,23 +2,34 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 import path from 'path';
+
+/**
+ * Internal dependencies
+ */
+import { Template } from '../../types/e2e-test-utils-playwright';
+
+type ExtendedTemplate = Template & { link: string };
 
 const TEMPLATE_PATH = path.join( __dirname, './rating-filter.handlebars' );
 
+const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
+const productCatalogLink = '/shop';
+
 const test = base.extend< {
-	defaultBlockPost: Post;
+	defaultBlockTemplate: ExtendedTemplate;
 } >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Rating Block' },
+	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
+		const testingTemplate = await requestUtils.updateTemplatesContent(
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{}
 		);
 
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		testingTemplate.link = productCatalogLink;
+
+		await use( testingTemplate );
+		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},
 } );
 
@@ -26,9 +37,9 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 	test.describe( 'frontend', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
-			defaultBlockPost,
+			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( defaultBlockTemplate.link );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
 			await expect( ratingStars ).toHaveCount( 2 );
@@ -46,9 +57,9 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 
 		test( 'Selecting a checkbox filters down the products', async ( {
 			page,
-			defaultBlockPost,
+			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( defaultBlockTemplate.link );
 
 			const ratingCheckboxes = page.getByLabel(
 				/Checkbox: Rated \d out of 5/
