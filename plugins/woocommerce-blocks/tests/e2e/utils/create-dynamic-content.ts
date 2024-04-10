@@ -78,9 +78,7 @@ export const createPostFromTemplate = async (
 };
 
 export type TemplatePayload = {
-	slug: string;
-	title?: string;
-	description?: string;
+	id: string;
 };
 
 export const updateTemplatesContent = async (
