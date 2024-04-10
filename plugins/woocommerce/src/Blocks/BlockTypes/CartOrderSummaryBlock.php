@@ -48,7 +48,7 @@ class CartOrderSummaryBlock extends AbstractInnerBlock {
 		// The order-summary-totals block was introduced as a new parent block for the totals
 		// (subtotal, discount, fees, shipping and taxes) blocks.
 		$regex_for_cart_order_summary_totals = '/<div data-block-name="woocommerce\/cart-order-summary-totals-block"(.+?)>/';
-		$order_summary_totals_content = '<div data-block-name="woocommerce/cart-order-summary-totals-block" class="wp-block-woocommerce-cart-order-summary-totals-block">';
+		$order_summary_totals_content        = '<div data-block-name="woocommerce/cart-order-summary-totals-block" class="wp-block-woocommerce-cart-order-summary-totals-block">';
 
 		$totals_inner_blocks = array( 'subtotal', 'discount', 'fee', 'shipping', 'taxes' ); // We want to move these blocks inside a parent 'totals' block.
 
@@ -62,7 +62,7 @@ class CartOrderSummaryBlock extends AbstractInnerBlock {
 					// The last block is replaced with the totals block.
 					if ( count( $totals_inner_blocks ) - 1 === $key ) {
 						$order_summary_totals_content .= '</div>';
-						$content = preg_replace( $this->inner_block_regex( $block_name ), $order_summary_totals_content, $content );
+						$content                       = preg_replace( $this->inner_block_regex( $block_name ), $order_summary_totals_content, $content );
 					} else {
 						// Otherwise, remove the block.
 						$content = preg_replace( $this->inner_block_regex( $block_name ), '', $content );
