@@ -17,7 +17,7 @@ env:
 
 jobs:
     e2e:
-        name: ${{ matrix.config.name }} [${{ matrix.shards.name }}]
+        name: Blocks E2E Tests [${{ matrix.part }} of ${{ matrix.total-parts }}]
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
@@ -26,25 +26,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                config:
-                    - name: Default (Block) Theme
-                      file: playwright.config.ts
-                      resultPath: test-results
-                    - name: Classic Theme
-                      file: playwright.classic-theme.config.ts
-                      resultPath: test-results-classic-theme
-                    - name: Side Effects
-                      file: playwright.side-effects.config.ts
-                      resultPath: test-results-side-effects
-                    - name: Block Theme With Templates
-                      file: playwright.block-theme-with-templates.config.ts
-                      resultPath: test-results-block-theme-with-templates
-                shards:
-                    - name: 1/5
-                    - name: 2/5
-                    - name: 3/5
-                    - name: 4/5
-                    - name: 5/5
+                part: [1, 2, 3, 4, 5, 6, 7, 8]
+                total-parts: [8]
+
         steps:
             - uses: actions/checkout@v3
 
@@ -54,19 +38,20 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Install Playwright
-              run: pnpm --filter='@woocommerce/block-library' exec playwright install --with-deps
+            - name: Install Playwright dependencies
+              run: pnpm exec playwright install chromium --with-deps
 
-            - name: Start wp-env
-              run: pnpm --filter='@woocommerce/block-library' env:start
+            - name: Install WordPress and start the server
+              run: pnpm env:start
 
             - name: Run Playwright tests
               working-directory: plugins/woocommerce-blocks
-              run: pnpm playwright test --config=tests/e2e/${{ matrix.config.file }} --shard ${{ matrix.shards.name }}
+              run: pnpm test:e2e --shard=${{ matrix.part }}/${{ matrix.total-parts }}
 
-            - uses: actions/upload-artifact@v3
-              if: ${{ failure() }}
+            - name: Archive debug artifacts (screenshots, traces)
+              uses: actions/upload-artifact@v3
+              if: always()
               with:
-                  name: playwright-report-${{ matrix.config.name }}
-                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/${{ matrix.config.resultPath }}
-                  if-no-files-found: error # 'warn' or 'ignore' are also available, defaults to `warn`
+                  name: failures-artifacts
+                  path: artifacts/test-results
+                  if-no-files-found: ignore
