@@ -60,6 +60,7 @@
 	height: 100vh;
 	width: 100%;
 	position: relative;
+	z-index: 2;
 
 	.launch-store-site__preview-site-iframe {
 		display: block;
@@ -80,8 +81,8 @@
 		z-index: 1;
 		background-color: #fff;
 		opacity: 0.9;
-		height: calc(100% - 32px);
-		width: calc(100% - 16px);
+		height: 100%;
+		width: 100%;
 	}
 
 	.launch-store-preview-layout__canvas {
