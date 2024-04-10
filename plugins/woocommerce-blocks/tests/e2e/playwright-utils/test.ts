@@ -158,13 +158,6 @@ const test = base.extend<
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
-
-		console.time( 'Database import time' );
-		const cliOutput = await cli(
-			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
-		);
-		console.log( cliOutput.stdout );
-		console.timeEnd( 'Database import time' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
@@ -225,6 +218,15 @@ const test = base.extend<
 		},
 		{ scope: 'worker', auto: true },
 	],
+} );
+
+test.afterAll( async () => {
+	console.time( 'Database import time' );
+	const cliOutput = await cli(
+		'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
+	);
+	console.log( cliOutput.stdout );
+	console.timeEnd( 'Database import time' );
 } );
 
 export { test, expect };
