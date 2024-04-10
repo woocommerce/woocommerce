@@ -41,7 +41,7 @@ jobs:
             - name: Install Playwright dependencies
               run: pnpm exec playwright install chromium --with-deps
 
-            - name: Install WordPress and start the server
+            - name: Setup testing environment and start the server
               run: pnpm env:start
 
             - name: Run Playwright tests
