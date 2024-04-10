@@ -28,7 +28,18 @@ import './product-page.scss';
 productApiFetchMiddleware();
 
 let productId: string;
-window._wpLoadBlockEditor.then( ( data ) => {
+interface LoadBlockEditorData {
+	postId: number;
+}
+declare global {
+	interface Window {
+		_wpLoadBlockEditor?: Promise< {
+			postId: number;
+		} >;
+	}
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+window?._wpLoadBlockEditor?.then( ( data: LoadBlockEditorData ) => {
 	console.log( data );
 	productId = data.postId.toString();
 } );

@@ -43,7 +43,7 @@ export const EmbeddedProductPageLayout = () => {
 	const [ loaded, setLoaded ] = useState( false );
 	useEffect( () => {
 		triggerExitPageCesSurvey();
-		window._wpLoadBlockEditor.then( ( data ) => {
+		window?._wpLoadBlockEditor?.then( () => {
 			setLoaded( true );
 		} );
 	}, [] );
