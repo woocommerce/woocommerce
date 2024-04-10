@@ -97,11 +97,6 @@ test.describe( `${ blockData.name }`, () => {
 		await editorUtils.enterEditMode();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	// eslint-disable-next-line playwright/no-skipped-test
 	test.skip( 'Renders Next/Previous Button block on the editor side', async ( {
 		editor,

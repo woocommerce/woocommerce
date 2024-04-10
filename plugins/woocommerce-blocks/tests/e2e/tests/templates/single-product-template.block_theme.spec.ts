@@ -4,10 +4,6 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 test.describe( 'Single Product template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
 		editor,

@@ -42,11 +42,6 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test( 'Renders Product Gallery Large Image block on the editor and frontend side', async ( {
 		page,
 		editor,

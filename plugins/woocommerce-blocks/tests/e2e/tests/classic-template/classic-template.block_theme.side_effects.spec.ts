@@ -4,7 +4,6 @@
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
-import { deleteAllTemplates } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -49,18 +48,10 @@ const templates = {
 	},
 };
 
-test.beforeAll( async () => {
+test.beforeEach( async () => {
 	await cli(
 		'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 	);
-	await deleteAllTemplates( 'wp_template' );
-} );
-
-test.afterAll( async () => {
-	await cli(
-		'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
-	);
-	await deleteAllTemplates( 'wp_template' );
 } );
 
 for ( const { templateTitle, slug } of Object.values( templates ) ) {

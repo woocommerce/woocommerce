@@ -85,11 +85,6 @@ test.describe( `${ blockData.name }`, () => {
 			}
 		);
 
-		test.afterEach( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( 'wp_template' );
-			await requestUtils.deleteAllTemplates( 'wp_template_part' );
-		} );
-
 		test( 'should be rendered on the editor side', async ( {
 			editorUtils,
 			editor,

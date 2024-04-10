@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
+import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -90,21 +87,18 @@ const singleOccurranceScenarios: Scenario[] = [
 const compatiblityPluginFileName = 'compatibility-plugin.php';
 
 test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.beforeAll( async () => {
+	test.beforeEach( async () => {
 		await installPluginFromPHPFile(
 			`${ __dirname }/${ compatiblityPluginFileName }`
 		);
 	} );
 
 	test.describe( 'Product Archive with Product Collection block', async () => {
-		test.beforeAll( async ( { page } ) => {
-			await page.goto( '/product/hoodie/' );
-		} );
-
 		for ( const scenario of singleOccurranceScenarios ) {
 			test( `${ scenario.title } is attached to the page`, async ( {
 				page,
 			} ) => {
+				await page.goto( '/product/hoodie/' );
 				const hooks = page.getByTestId( scenario.dataTestId );
 
 				await expect( hooks ).toHaveCount( scenario.amount );
@@ -112,11 +106,4 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			} );
 		}
 	} );
-} );
-
-test.afterAll( async ( { requestUtils } ) => {
-	await uninstallPluginFromPHPFile(
-		`${ __dirname }/${ compatiblityPluginFileName }`
-	);
-	await requestUtils.deleteAllTemplates( 'wp_template' );
 } );

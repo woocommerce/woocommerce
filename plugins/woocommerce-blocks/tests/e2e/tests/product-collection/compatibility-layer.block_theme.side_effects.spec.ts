@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
+import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -97,7 +94,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.beforeAll( async () => {
+	test.beforeEach( async () => {
 		await installPluginFromPHPFile(
 			`${ __dirname }/${ compatibilityPluginFileName }`
 		);
@@ -132,12 +129,5 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 				await expect( hooks.first() ).toHaveText( scenario.content );
 			} );
 		}
-	} );
-
-	test.afterAll( async ( { requestUtils } ) => {
-		await uninstallPluginFromPHPFile(
-			`${ __dirname }/${ compatibilityPluginFileName }`
-		);
-		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 } );

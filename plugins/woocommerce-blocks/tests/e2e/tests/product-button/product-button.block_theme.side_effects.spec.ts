@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
+import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -13,9 +10,6 @@ import {
 import { blockData, handleAddToCartAjaxSetting } from './utils';
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
 	test.beforeEach( async ( { frontendUtils, storeApiUtils } ) => {
 		await storeApiUtils.cleanCart();
 		await frontendUtils.goToShop();
@@ -130,13 +124,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		const buttonWithNewText = blocks.getByText( 'Buy Now' );
 		await expect( buttonWithNewText ).toHaveCount(
 			blockData.selectors.frontend.productsToDisplay
-		);
-	} );
-
-	test.afterAll( async ( { storeApiUtils } ) => {
-		await storeApiUtils.cleanCart();
-		await uninstallPluginFromPHPFile(
-			`${ __dirname }/update-product-button-text.php`
 		);
 	} );
 } );

@@ -18,10 +18,6 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
-
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
 			editor,

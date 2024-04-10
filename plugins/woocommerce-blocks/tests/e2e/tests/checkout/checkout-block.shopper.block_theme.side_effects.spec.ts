@@ -43,7 +43,7 @@ const blockData: BlockData = {
 test.describe( 'Shopper → Account (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
 			path: 'wc/v3/settings/account/woocommerce_enable_guest_checkout',
@@ -54,8 +54,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			path: 'wc/v3/settings/account/woocommerce_enable_checkout_login_reminder',
 			data: { value: 'yes' },
 		} );
-	} );
-	test.beforeEach( async ( { frontendUtils } ) => {
+
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
@@ -124,21 +123,6 @@ test.describe( 'Shopper → Local pickup', () => {
 			.getByLabel( 'Pickup details' )
 			.fill( 'Pickup method.' );
 		await admin.page.getByRole( 'button', { name: 'Done' } ).click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
-	} );
-
-	test.afterEach( async ( { admin } ) => {
-		// Enable local pickup.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=pickup_location'
-		);
-		await admin.page.getByRole( 'button', { name: 'Edit' } ).last().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Delete location' } )
-			.click();
 		await admin.page
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
@@ -286,34 +270,6 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 		}
 	);
 
-	test.afterEach(
-		async ( { frontendUtils, admin, editorUtils, editor, page } ) => {
-			await frontendUtils.emptyCart();
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
-			const checkbox = page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.uncheck();
-			await expect( checkbox ).not.toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
-				)
-			).toBeHidden();
-			await editorUtils.saveSiteEditorEntities();
-		}
-	);
-
 	test( 'User can add postcodes for different countries', async ( {
 		frontendUtils,
 		page,
@@ -433,19 +389,11 @@ test.describe( 'Shopper → Place Guest Order', () => {
 } );
 
 test.describe( 'Shopper → Place Virtual Order', () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
 			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
 			data: { value: 'disabled' },
-		} );
-	} );
-
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
-			data: { value: 'all' },
 		} );
 	} );
 

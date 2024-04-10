@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
+import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -23,13 +20,8 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Additional Checkout Fields', () => {
-	test.beforeAll( async () => {
+	test.beforeEach( async () => {
 		await installPluginFromPHPFile(
-			`${ __dirname }/additional-checkout-fields-plugin.php`
-		);
-	} );
-	test.afterAll( async () => {
-		await uninstallPluginFromPHPFile(
 			`${ __dirname }/additional-checkout-fields-plugin.php`
 		);
 	} );

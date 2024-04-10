@@ -93,11 +93,6 @@ test.describe( `${ blockData.name }`, () => {
 		await editorUtils.enterEditMode();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test.describe( 'with thumbnails', () => {
 		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
 			page,

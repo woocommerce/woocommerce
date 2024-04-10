@@ -21,10 +21,6 @@ for ( const testData of testToRun ) {
 	const woocommerceTemplateUserText = `Hello World in the WooCommerce ${ testData.templateName } template`;
 
 	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
-
 		test( `user-modified ${ testData.templateName } template based on the theme template has priority over the user-modified template based on the default WooCommerce template`, async ( {
 			page,
 			admin,

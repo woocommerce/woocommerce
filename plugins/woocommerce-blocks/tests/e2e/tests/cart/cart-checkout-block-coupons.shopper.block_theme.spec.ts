@@ -26,15 +26,6 @@ test.describe( 'Shopper → Coupon', () => {
 		);
 	} );
 
-	test.afterEach( async ( { wpCliUtils } ) => {
-		const couponId = await wpCliUtils.getCouponIDByCode(
-			'single-use-coupon'
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp wc shop_coupon delete ${ couponId } --force=1 --user=1`
-		);
-	} );
-
 	test( 'Logged in user can apply single-use coupon and place order', async ( {
 		checkoutPageObject,
 		frontendUtils,

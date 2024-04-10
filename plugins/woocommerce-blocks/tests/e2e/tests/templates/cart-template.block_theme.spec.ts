@@ -64,11 +64,6 @@ test.describe( 'Test the cart template', async () => {
 } );
 
 test.describe( 'Test editing the cart template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
 		editorUtils,

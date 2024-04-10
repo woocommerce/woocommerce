@@ -49,10 +49,6 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test.afterEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.enableLocalPickup();
-	} );
-
 	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
