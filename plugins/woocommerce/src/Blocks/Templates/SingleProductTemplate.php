@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
- * SingleProductTemplae class.
+ * SingleProductTemplate class.
  *
  * @internal
  */
