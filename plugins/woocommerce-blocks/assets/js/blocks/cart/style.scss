@@ -122,13 +122,6 @@
 		}
 	}
 }
-.is-large {
-	.wp-block-woocommerce-cart-order-summary-block {
-		border: 1px solid $universal-border-light;
-		border-radius: 5px;
-		margin-top: 32px; // align with the top of the cart items since we removed the order summary heading
-	}
-}
 
 .is-large.wc-block-cart {
 	margin-bottom: 3em;
@@ -144,8 +137,10 @@
 		display: block;
 		font-weight: 700;
 		padding: $gap-smaller $gap $gap-smaller 0;
-		text-align: right;
+		text-align: left;
 		text-transform: uppercase;
+		border-bottom: 1px solid $universal-border-light;
+		padding-left: $gap;
 
 		textarea {
 			font-weight: 700; // Ensure correct font-weight in site-editor.
