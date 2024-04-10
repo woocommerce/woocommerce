@@ -6,13 +6,20 @@ import { addFilter } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { isWpVersion } from '@woocommerce/settings';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { useLayoutEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { ProductCollectionAttributes, ProductCollectionQuery } from './types';
+import {
+	PreviewState,
+	ProductCollectionAttributes,
+	ProductCollectionQuery,
+	SetPreviewState,
+} from './types';
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
+import { WooCommerceBlockLocation } from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block
@@ -108,4 +115,46 @@ export const addProductCollectionBlockToParentOfPaginationBlock = () => {
 			}
 		);
 	}
+};
+
+export const useSetPreviewState = ( {
+	setPreviewState,
+	location,
+	attributes,
+	setAttributes,
+}: {
+	setPreviewState?: SetPreviewState | undefined;
+	location: WooCommerceBlockLocation;
+	attributes: ProductCollectionAttributes;
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void;
+} ) => {
+	const setState = ( newPreviewState: PreviewState ) => {
+		setAttributes( {
+			previewState: {
+				...attributes.previewState,
+				...newPreviewState,
+			},
+		} );
+	};
+
+	// Running setPreviewState function provided by Collection, if it exists.
+	useLayoutEffect( () => {
+		if ( ! setPreviewState ) {
+			return;
+		}
+
+		const cleanup = setPreviewState?.( {
+			setState,
+			location,
+			attributes,
+		} );
+
+		if ( cleanup ) {
+			return cleanup;
+		}
+		// We want this to run only once, adding deps will cause performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 };

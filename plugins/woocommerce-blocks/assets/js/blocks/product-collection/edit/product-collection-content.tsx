@@ -7,13 +7,10 @@ import {
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { useInstanceId } from '@wordpress/compose';
-import { useEffect, useLayoutEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import {
-	WooCommerceBlockLocation,
-	useGetLocation,
-} from '@woocommerce/blocks/product-template/utils';
+import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 
 /**
  * Internal dependencies
@@ -23,55 +20,15 @@ import type {
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
 	PreviewState,
-	SetPreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
-import { getDefaultValueOfInheritQueryFromTemplate } from '../utils';
+import {
+	getDefaultValueOfInheritQueryFromTemplate,
+	useSetPreviewState,
+} from '../utils';
 import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
-
-const useSetPreviewState = ( {
-	setPreviewState,
-	location,
-	attributes,
-	setAttributes,
-}: {
-	setPreviewState?: SetPreviewState | undefined;
-	location: WooCommerceBlockLocation;
-	attributes: ProductCollectionAttributes;
-	setAttributes: (
-		attributes: Partial< ProductCollectionAttributes >
-	) => void;
-} ) => {
-	const setState = ( newPreviewState: PreviewState ) => {
-		setAttributes( {
-			previewState: {
-				...attributes.previewState,
-				...newPreviewState,
-			},
-		} );
-	};
-
-	// Running setPreviewState function provided by Collection, if it exists.
-	useLayoutEffect( () => {
-		if ( ! setPreviewState ) {
-			return;
-		}
-
-		const cleanup = setPreviewState?.( {
-			setState,
-			location,
-			attributes,
-		} );
-
-		if ( cleanup ) {
-			return cleanup;
-		}
-		// We want this to run only once, adding deps will cause performance issues.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
-};
 
 const ProductCollectionContent = ( {
 	preview: { setPreviewState, initialPreviewState } = {},
@@ -80,6 +37,7 @@ const ProductCollectionContent = ( {
 	const isInitialAttributesSet = useRef( false );
 	const { clientId, attributes, setAttributes } = props;
 	const location = useGetLocation( props.context, props.clientId );
+
 	useSetPreviewState( {
 		setPreviewState,
 		setAttributes,
