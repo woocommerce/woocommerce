@@ -153,8 +153,8 @@ class LaunchYourStore {
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
 
-			<!-- wp:heading {"textAlign":"center","level":1} -->
-			<h1 class="wp-block-heading has-text-align-center">%s</h1>
+			<!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
+			<h1 class="wp-block-heading alignwide has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
 
 			<!-- wp:spacer -->
@@ -228,6 +228,7 @@ class LaunchYourStore {
 	 *
 	 * - User must be either an admin or store editor (must be logged in).
 	 * - 'woocommerce_coming_soon' option value must be 'yes'
+	 * - The page must not be the Coming soon page itself.
 	 */
 	public function maybe_add_coming_soon_banner_on_frontend() {
 		// Do not show the banner if the site is being previewed.
@@ -243,6 +244,13 @@ class LaunchYourStore {
 
 		// 'woocommerce_coming_soon' must be 'yes'
 		if ( get_option( 'woocommerce_coming_soon', 'no' ) !== 'yes' ) {
+			return false;
+		}
+
+		// No need to show the banner on the Coming soon page itself.
+		$page_id             = get_the_ID();
+		$coming_soon_page_id = intval( get_option( 'woocommerce_coming_soon_page_id' ) );
+		if ( $page_id === $coming_soon_page_id ) {
 			return false;
 		}
 
