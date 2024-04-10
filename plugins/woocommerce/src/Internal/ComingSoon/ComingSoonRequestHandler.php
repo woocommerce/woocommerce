@@ -10,9 +10,9 @@ use Automattic\WooCommerce\Admin\Features\Features;
 class ComingSoonRequestHandler {
 
 	/**
-	 * NHelper dependency.
+	 * Coming soon helper.
 	 *
-	 * @var string
+	 * @var ComingSoonHelper
 	 */
 	private $coming_soon_helper = null;
 
