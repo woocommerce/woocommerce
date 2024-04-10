@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 /**
@@ -18,7 +19,11 @@ const testData = {
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
-test.describe( 'Single Product Template', () => {
+test.describe( 'Single Product Template', async () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
+	} );
+
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,

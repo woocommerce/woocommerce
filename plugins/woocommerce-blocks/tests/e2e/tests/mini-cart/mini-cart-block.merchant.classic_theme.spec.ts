@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
 
@@ -15,6 +16,10 @@ const blockData: BlockData = {
 };
 
 test.describe( 'Merchant → Mini Cart', () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
 	test.describe( 'in widget editor', () => {
 		test( 'can be inserted in a widget area', async ( { editorUtils } ) => {
 			await editorUtils.openWidgetEditor();

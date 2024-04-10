@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 
 /**
@@ -25,6 +26,10 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	},
 } );
 test.describe( `${ blockData.name } Block`, () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
 	test.beforeEach( async ( { page } ) => {
 		await page.goto( '/product-collection/' );
 	} );

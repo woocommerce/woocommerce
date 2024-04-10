@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
+import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 test.describe( 'Merchant → Checkout', () => {
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
+	} );
+
 	test.describe( 'in widget editor', () => {
 		test( "can't be inserted in a widget area", async ( {
 			editorUtils,

@@ -5,7 +5,13 @@
  */
 import { chromium, request } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
-import { BASE_URL, adminFile, cli, customerFile } from '@woocommerce/e2e-utils';
+import {
+	BASE_URL,
+	adminFile,
+	cli,
+	customerFile,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -53,36 +59,40 @@ const prepareAttributes = async () => {
 };
 
 async function globalSetup() {
-	const timers = {
-		total: '└ Total time',
-		authentication: '├ Authentication time',
-		attributes: '├ Attributes preparation time',
-	};
-
-	console.log( 'Running global setup...' );
-	console.time( timers.total );
+	console.log( 'Running global setup:' );
+	console.time( '└ Total time' );
 
 	const requestContext = await request.newContext( {
 		baseURL: BASE_URL,
 	} );
 
-	console.time( timers.authentication );
-	await new RequestUtils( requestContext, {
-		user: admin,
-		storageStatePath: adminFile,
-	} ).setupRest();
+	console.log( '├ Pre-authenticating users…' );
 	await new RequestUtils( requestContext, {
 		user: customer,
 		storageStatePath: customerFile,
 	} ).setupRest();
-	console.timeEnd( timers.authentication );
+	const requestUtils = new RequestUtils( requestContext, {
+		user: admin,
+		storageStatePath: adminFile,
+	} );
+	await requestUtils.setupRest();
 
-	console.time( timers.attributes );
+	console.log( '├ Activating default theme…' );
+	await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+
+	console.log( '├ Preparing product attributes…' );
 	await prepareAttributes();
-	console.timeEnd( timers.attributes );
+
+	console.log( '├ Exporting database…' );
+	const cliOutput = await cli(
+		'npm run wp-env run tests-cli wp db export blocks_e2e.sql '
+	);
+	if ( ! cliOutput.stdout.includes( 'Success: Exported' ) ) {
+		throw new Error( 'Database export failed' );
+	}
 
 	await requestContext.dispose();
-	console.timeEnd( timers.total );
+	console.timeEnd( '└ Total time' );
 }
 
 export default globalSetup;

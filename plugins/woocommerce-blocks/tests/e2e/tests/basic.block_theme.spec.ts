@@ -20,6 +20,7 @@ test.describe( 'Basic role-based functionality tests', () => {
 		test.use( {
 			storageState: customerFile,
 		} );
+
 		test( 'Load My Account page', async ( { page } ) => {
 			await page.goto( '/my-account' );
 
