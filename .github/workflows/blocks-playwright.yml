@@ -48,9 +48,9 @@ jobs:
               run: pnpm test:e2e --shard=${{ matrix.part }}/${{ matrix.total-parts }}
 
             - name: Archive debug artifacts (screenshots, traces)
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: always()
               with:
                   name: failures-artifacts
-                  path: tests/e2e/artifacts/test-results
+                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
