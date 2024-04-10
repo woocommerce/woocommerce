@@ -1,11 +1,11 @@
 .wp-block-woocommerce-product-tab__content {
-    &:not(.is-selected) {
+	&:not(.is-selected) {
 		display: none;
 	}
 }
 
 .woocommerce-product-tabs {
-	.wp-block-woocommerce-product-tab__button:focus:not( :disabled ) {
+	.wp-block-woocommerce-product-tab__button:focus:not(:disabled) {
 		box-shadow: none;
 	}
 }

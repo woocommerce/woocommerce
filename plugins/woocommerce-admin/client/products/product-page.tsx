@@ -39,12 +39,15 @@ declare global {
 	}
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-window?._wpLoadBlockEditor?.then( ( data: LoadBlockEditorData ) => {
-	console.log( data );
-	productId = data.postId.toString();
-} );
+if ( window._wpLoadBlockEditor ) {
+	window._wpLoadBlockEditor.then( ( data ) => {
+		productId = data.postId.toString();
+	} );
+}
 export default function ProductPage() {
 	console.log( productId );
+	const params = useParams();
+	productId = productId || params.productId;
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {

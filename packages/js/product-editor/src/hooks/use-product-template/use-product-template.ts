@@ -87,6 +87,7 @@ export const useProductTemplate = (
 				templateDataMatchesProductData( productTemplate, product )
 		);
 
+		console.log( 'matchingTemplates', product, matchingTemplates );
 		// If there are multiple matching templates, we should use the one with the most matching fields.
 		matchingProductTemplate = findBetterMatchTemplate( matchingTemplates );
 	}

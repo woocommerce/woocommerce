@@ -154,6 +154,7 @@ export function BlockEditor( {
 		'meta_data._product_template_id',
 		{ postType }
 	);
+	console.log( postType, productTemplateId );
 
 	const { record: product } = useEntityRecord< Product >(
 		'postType',
@@ -178,7 +179,7 @@ export function BlockEditor( {
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
-	console.log( settings, layoutTemplate );
+	console.log( productTemplate, settings, layoutTemplate );
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||

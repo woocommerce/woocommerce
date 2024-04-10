@@ -8,6 +8,7 @@ import {
 	LayoutContextProvider,
 	getLayoutContextValue,
 } from '@woocommerce/admin-layout';
+import { SlotFillProvider } from '@wordpress/components';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -43,9 +44,13 @@ export const EmbeddedProductPageLayout = () => {
 	const [ loaded, setLoaded ] = useState( false );
 	useEffect( () => {
 		triggerExitPageCesSurvey();
-		window?._wpLoadBlockEditor?.then( () => {
+		if ( window._wpLoadBlockEditor ) {
+			window._wpLoadBlockEditor.then( () => {
+				setLoaded( true );
+			} );
+		} else {
 			setLoaded( true );
-		} );
+		}
 	}, [] );
 
 	const query = parse( location.search.substring( 1 ) );
@@ -68,12 +73,14 @@ export const EmbeddedProductPageLayout = () => {
 
 	return (
 		<LayoutContextProvider value={ getLayoutContextValue( [ 'page' ] ) }>
-			<div
-				className="woocommerce-embedded-layout__primary"
-				id="woocommerce-embedded-layout__primary"
-			>
-				{ loaded && <ProductPage /> }
-			</div>
+			<SlotFillProvider>
+				<div
+					className="woocommerce-embedded-layout__primary"
+					id="woocommerce-embedded-layout__primary"
+				>
+					{ loaded && <ProductPage /> }
+				</div>
+			</SlotFillProvider>
 		</LayoutContextProvider>
 	);
 };
