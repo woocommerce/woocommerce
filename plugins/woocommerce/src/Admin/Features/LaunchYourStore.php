@@ -20,6 +20,12 @@ class LaunchYourStore {
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
+
+		// Exclude coming soon page from pages list to remove it from front end navigation.
+		add_filter( 'get_pages', array( $this, 'exclude_coming_soon_page' ) );
+
+		// Exclude coming soon page from the REST API to remove it from the site editor.
+		add_filter( 'rest_page_query', array( $this, 'exclude_coming_soon_page_from_rest_api' ), 10, 2 );
 	}
 
 	/**
@@ -276,5 +282,48 @@ class LaunchYourStore {
 				'show_in_rest' => true,
 			)
 		);
+	}
+
+	/**
+	 * Exclude the coming soon page from the pages list.
+	 *
+	 * @param array $pages The pages.
+	 *
+	 * @return array
+	 */
+	public function exclude_coming_soon_page( $pages ) {
+		if ( is_admin() ) {
+			// No need to exclude the coming soon page from the admin.
+			return $pages;
+		}
+
+		$coming_soon_page_id = intval( get_option( 'woocommerce_coming_soon_page_id' ) );
+
+		foreach ( $pages as $key => $page ) {
+			if ( $coming_soon_page_id === $page->ID ) {
+				unset( $pages[ $key ] );
+			}
+		}
+
+		return $pages;
+	}
+
+	/**
+	 * Exclude a page from the REST API
+	 *
+	 * @param array $args The query arguments for get_pages.
+	 *
+	 * @return array
+	 */
+	public function exclude_coming_soon_page_from_rest_api( $args ) {
+		$coming_soon_page_id = get_option( 'woocommerce_coming_soon_page_id' );
+
+		if ( isset( $args['post__not_in'] ) ) {
+			$args['post__not_in'][] = $coming_soon_page_id;
+		} else {
+			$args['post__not_in'] = array( $coming_soon_page_id );
+		}
+
+		return $args;
 	}
 }
