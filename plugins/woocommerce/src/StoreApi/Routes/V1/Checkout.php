@@ -290,6 +290,9 @@ class Checkout extends AbstractCartRoute {
 		if ( 409 === $http_status_code ) {
 			return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code, true );
 		}
+
+		$additional_data['notices'] = wc_get_notices();
+		wc_clear_notices();
 		return $this->add_data_to_error_object( $error_from_message, $additional_data, $http_status_code );
 	}
 
