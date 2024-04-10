@@ -33,9 +33,7 @@ const test = base.extend< {
 } >( {
 	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{
-				id: productCatalogTemplateId,
-			},
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{
 				attributes: {
@@ -55,9 +53,7 @@ const test = base.extend< {
 		use
 	) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{
-				id: productCatalogTemplateId,
-			},
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{
 				attributes: {
@@ -78,9 +74,7 @@ const test = base.extend< {
 		use
 	) => {
 		const testingTemplate = await requestUtils.updateTemplatesContent(
-			{
-				id: productCatalogTemplateId,
-			},
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{
 				attributes: {
