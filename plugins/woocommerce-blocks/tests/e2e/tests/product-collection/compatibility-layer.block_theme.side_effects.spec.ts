@@ -94,14 +94,12 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.beforeEach( async () => {
-		await installPluginFromPHPFile(
-			`${ __dirname }/${ compatibilityPluginFileName }`
-		);
-	} );
-
 	test.describe( 'Product Archive with Product Collection block', async () => {
 		test.beforeEach( async ( { pageObject } ) => {
+			await installPluginFromPHPFile(
+				`${ __dirname }/${ compatibilityPluginFileName }`
+			);
+
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
 				'woocommerce/woocommerce//archive-product'
 			);
