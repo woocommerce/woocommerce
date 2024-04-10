@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Product Editor: Add support for note and tooltip attributes for woocommerce/product-select-field block
