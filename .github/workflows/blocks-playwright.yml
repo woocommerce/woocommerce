@@ -45,7 +45,6 @@ jobs:
               run: pnpm env:start
 
             - name: Run Playwright tests
-              working-directory: plugins/woocommerce-blocks
               run: pnpm test:e2e --shard=${{ matrix.part }}/${{ matrix.total-parts }}
 
             - name: Archive debug artifacts (screenshots, traces)
@@ -53,5 +52,5 @@ jobs:
               if: always()
               with:
                   name: failures-artifacts
-                  path: artifacts/test-results
+                  path: tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
