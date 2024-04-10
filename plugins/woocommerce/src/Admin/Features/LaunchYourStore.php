@@ -153,8 +153,8 @@ class LaunchYourStore {
 			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			<!-- /wp:spacer -->
 
-			<!-- wp:heading {"textAlign":"center","level":1} -->
-			<h1 class="wp-block-heading has-text-align-center">%s</h1>
+			<!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
+			<h1 class="wp-block-heading alignwide has-text-align-center">%s</h1>
 			<!-- /wp:heading -->
 
 			<!-- wp:spacer -->
