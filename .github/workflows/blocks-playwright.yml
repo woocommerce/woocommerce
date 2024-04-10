@@ -17,7 +17,7 @@ env:
 
 jobs:
     e2e:
-        name: Blocks E2E Tests [${{ matrix.part }} of ${{ matrix.total-parts }}]
+        name: Shard ${{ matrix.part }} of ${{ matrix.total-parts }}
         timeout-minutes: 60
         runs-on: ubuntu-latest
         defaults:
