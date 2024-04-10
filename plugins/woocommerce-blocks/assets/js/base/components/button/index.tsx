@@ -15,13 +15,6 @@ import Spinner from '../../../../../packages/components/spinner';
 
 type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
 
-interface LinkProps extends WCButtonProps {
-	/**
-	 * Button href
-	 */
-	href: string;
-}
-
 export interface ButtonProps extends WCButtonProps {
 	/**
 	 * Show spinner
@@ -31,10 +24,25 @@ export interface ButtonProps extends WCButtonProps {
 	showSpinner?: boolean | undefined;
 	/**
 	 * Button variant
+	 *
+	 * @default 'contained'
 	 */
 	variant?: 'text' | 'contained' | 'outlined';
-
+	/**
+	 * By default we render a wrapper around  the button children,
+	 * but you can opt in to removing it by setting removeTextWrap
+	 * to true.
+	 *
+	 * @default false
+	 */
 	removeTextWrap?: boolean;
+}
+
+interface LinkProps extends ButtonProps {
+	/**
+	 * Button href
+	 */
+	href: string;
 }
 
 /**
