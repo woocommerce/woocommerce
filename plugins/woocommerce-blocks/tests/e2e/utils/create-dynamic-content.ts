@@ -9,16 +9,6 @@ import {
 } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
-export type TestingPost = {
-	post: Post;
-	deletePost: () => Promise< void >;
-};
-
-export type TestingTemplate = {
-	templateSlug: string;
-	clearCustomisations: () => Promise< void >;
-};
-
 Handlebars.registerPartial(
 	'wp-block',
 	`
