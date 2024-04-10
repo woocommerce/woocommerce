@@ -3,10 +3,7 @@
  */
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
-import {
-	CreatePostPayload,
-	Post,
-} from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
+import { CreatePostPayload } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 
 Handlebars.registerPartial(

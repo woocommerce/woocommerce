@@ -29,7 +29,6 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
  */
 import {
 	type PostPayload,
-	type TemplatePayload,
 	createPostFromTemplate,
 	updateTemplatesContent,
 	updateProductCatalogContent,
@@ -144,7 +143,7 @@ const test = base.extend<
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
 			updateTemplatesContent: (
-				template: TemplatePayload,
+				templateId: string,
 				templatePath: string,
 				data: unknown
 			) => Promise< Template & { link: string } >;
