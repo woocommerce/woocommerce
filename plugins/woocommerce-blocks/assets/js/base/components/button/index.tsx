@@ -6,6 +6,7 @@ import { forwardRef } from '@wordpress/element';
 import classNames from 'classnames';
 import type { ForwardedRef } from 'react';
 import type { ButtonProps as AriakitButtonProps } from '@ariakit/react';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -17,7 +18,9 @@ type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
 
 export interface ButtonProps extends WCButtonProps {
 	/**
-	 * Show spinner
+	 * Deprecated: Show a spinner. Preferably,
+	 * render a spinner in the button children
+	 * instead.
 	 *
 	 * @default false
 	 */
@@ -51,6 +54,14 @@ interface LinkProps extends ButtonProps {
  */
 const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 	( props, ref ) => {
+		if ( 'showSpinner' in props ) {
+			deprecated( 'showSpinner prop', {
+				version: '8.9.0',
+				alternative: 'Render a spinner in the button children instead.',
+				plugin: 'WooCommerce',
+			} );
+		}
+
 		const {
 			className,
 			showSpinner = false,
