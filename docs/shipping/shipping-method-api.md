@@ -8,7 +8,7 @@ WooCommerce has a shipping method API which plugins can use to add their own rat
 
 ## Create a plugin
 
-First off, create a regular WordPress/WooCommerce plugin - see our [Extension Developer Handbook](/docs/extension-development/extension-developer-handbook.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
+First off, create a regular WordPress/WooCommerce plugin - see our [Building Your First Extension guide](../extension-development/building-your-first-extension.md) to get started. You'll define your shipping method class in this plugin file and maintain it outside of WooCommerce.
 
 ## Create a function to house your class
 
