@@ -273,8 +273,8 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'method'  => array(
-					'last4'             => '1001',
-					'brand'             => 'Cartes Bancaires',
+					'last4' => '1001',
+					'brand' => 'Cartes Bancaires',
 				),
 				'expires' => '12/20',
 			),
