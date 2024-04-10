@@ -170,6 +170,7 @@ const SavedPaymentMethodOptions = () => {
 	return options.length > 0 ? (
 		<>
 			<RadioControl
+				highlightChecked={ true }
 				id={ 'wc-payment-method-saved-tokens' }
 				selected={ activeSavedToken }
 				options={ options }

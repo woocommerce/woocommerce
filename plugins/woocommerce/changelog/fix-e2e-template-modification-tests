@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix template revert tests where the template is unreachable due to pagination.

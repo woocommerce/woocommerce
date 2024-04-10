@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -51,11 +51,19 @@ export const Inspector = ( { attributes, setAttributes }: EditProps ) => {
 				>
 					<ToggleGroupControlOption
 						value="multiple"
-						label={ __( 'Multiple', 'woocommerce' ) }
+						label={ _x(
+							'Multiple',
+							'Number of filters',
+							'woocommerce'
+						) }
 					/>
 					<ToggleGroupControlOption
 						value="single"
-						label={ __( 'Single', 'woocommerce' ) }
+						label={ _x(
+							'Single',
+							'Number of filters',
+							'woocommerce'
+						) }
 					/>
 				</ToggleGroupControl>
 				{ selectType === 'multiple' && (

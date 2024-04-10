@@ -174,6 +174,7 @@
 .wc-block-checkout__payment-method {
 	.wc-block-components-radio-control__option {
 		padding-left: em($gap-huge);
+		padding-right: em($gap-small);
 
 		&::after {
 			content: none;
@@ -197,17 +198,6 @@
 		font-weight: bold;
 	}
 
-	.wc-block-components-radio-control {
-		border: 1px solid $universal-border-light;
-		border-radius: $universal-border-radius;
-	}
-	.wc-block-components-radio-control-accordion-option,
-	.wc-block-components-radio-control__option {
-		border-top: 1px solid $universal-border-light;
-		&:first-child {
-			border-top: 0;
-		}
-	}
 	.wc-block-components-radio-control-accordion-option
 	.wc-block-components-radio-control__option {
 		border-width: 0;
