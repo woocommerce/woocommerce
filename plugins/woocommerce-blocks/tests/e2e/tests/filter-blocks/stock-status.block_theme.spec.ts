@@ -5,26 +5,41 @@ import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import path from 'path';
 import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
 
+/**
+ * Internal dependencies
+ */
+import { Template } from '../../types/e2e-test-utils-playwright';
+
+type ExtendedTemplate = Template & { link: string };
+
 const TEMPLATE_PATH = path.join( __dirname, './stock-status.handlebars' );
 
+const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
+const productCatalogLink = '/shop';
+
 const test = base.extend< {
-	dropdownBlockPost: Post;
-	defaultBlockPost: Post;
+	dropdownBlockTemplate: ExtendedTemplate;
+	defaultBlockTemplate: ExtendedTemplate;
 } >( {
-	defaultBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Stock Status Block' },
+	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
+		const testingTemplate = await requestUtils.updateTemplatesContent(
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{}
 		);
 
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		testingTemplate.link = productCatalogLink;
+
+		await use( testingTemplate );
+		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},
 
-	dropdownBlockPost: async ( { requestUtils }, use ) => {
-		const testingPost = await requestUtils.createPostFromTemplate(
-			{ title: 'Product Filter: Stock Status Block' },
+	dropdownBlockTemplate: async (
+		{ requestUtils, templateApiUtils },
+		use
+	) => {
+		const testingTemplate = await requestUtils.updateTemplatesContent(
+			{ id: productCatalogTemplateId },
 			TEMPLATE_PATH,
 			{
 				attributes: {
@@ -33,8 +48,10 @@ const test = base.extend< {
 			}
 		);
 
-		await use( testingPost );
-		await requestUtils.deletePost( testingPost.id );
+		testingTemplate.link = productCatalogLink;
+
+		await use( testingTemplate );
+		await templateApiUtils.revertTemplate( testingTemplate.id );
 	},
 } );
 
@@ -42,9 +59,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 	test.describe( 'With default display style', () => {
 		test( 'renders a checkbox list with the available stock statuses', async ( {
 			page,
-			defaultBlockPost,
+			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( defaultBlockTemplate.link );
 
 			const stockStatuses = page.locator(
 				'.wc-block-components-checkbox__label'
@@ -57,9 +74,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 
 		test( 'filters the list of products by selecting a stock status', async ( {
 			page,
-			defaultBlockPost,
+			defaultBlockTemplate,
 		} ) => {
-			await page.goto( defaultBlockPost.link );
+			await page.goto( defaultBlockTemplate.link );
 
 			const outOfStockCheckbox = page.getByText( 'Out of stock' );
 			await outOfStockCheckbox.click();
@@ -76,9 +93,9 @@ test.describe( 'Product Filter: Stock Status Block', async () => {
 	test.describe( 'With dropdown display style', () => {
 		test( 'a dropdown is displayed with the available stock statuses', async ( {
 			page,
-			dropdownBlockPost,
+			dropdownBlockTemplate,
 		} ) => {
-			await page.goto( dropdownBlockPost.link );
+			await page.goto( dropdownBlockTemplate.link );
 
 			const dropdownLocator = page.locator(
 				'.wc-interactivity-dropdown'
