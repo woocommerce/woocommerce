@@ -14,6 +14,11 @@ export type TestingPost = {
 	deletePost: () => Promise< void >;
 };
 
+export type TestingTemplate = {
+	templateSlug: string;
+	clearCustomisations: () => Promise< void >;
+};
+
 Handlebars.registerPartial(
 	'wp-block',
 	`
@@ -37,8 +42,6 @@ export const deletePost = async ( requestUtils: RequestUtils, id: number ) => {
 	} );
 };
 
-const posts: number[] = [];
-
 const createPost = async (
 	requestUtils: RequestUtils,
 	payload: CreatePostPayload
@@ -50,7 +53,6 @@ const createPost = async (
 		path: `/wp/v2/posts`,
 		data: { ...payload },
 	} );
-	posts.push( post.id );
 	return post;
 };
 
@@ -73,4 +75,30 @@ export const createPostFromTemplate = async (
 	};
 
 	return createPost( requestUtils, payload );
+};
+
+export type TemplatePayload = {
+	slug: string;
+	title?: string;
+	description?: string;
+};
+
+export const updateTemplatesContent = async (
+	requestUtils: RequestUtils,
+	template: TemplatePayload,
+	templatePath: string,
+	data: unknown
+) => {
+	const templateContent = await readFile( templatePath, 'utf8' );
+	const content = Handlebars.compile( templateContent )( data );
+
+	const payload = {
+		content,
+	};
+
+	return requestUtils.rest( {
+		method: 'POST',
+		path: `/wp/v2/templates/${ template.id }`,
+		data: { ...payload },
+	} );
 };

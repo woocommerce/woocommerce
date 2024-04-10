@@ -28,8 +28,10 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
  * Internal dependencies
  */
 import {
-	PostPayload,
+	type PostPayload,
+	type TemplatePayload,
 	createPostFromTemplate,
+	updateTemplatesContent,
 	deletePost,
 } from '../utils/create-dynamic-content';
 
@@ -51,7 +53,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	const type = message.type();
 	if (
 		! OBSERVED_CONSOLE_MESSAGE_TYPES.includes(
-			type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ]
+			type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ]
 		)
 	) {
 		return;
@@ -104,8 +106,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 		return;
 	}
 
-	const logFunction =
-		type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ];
+	const logFunction = type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ];
 
 	// Disable reason: We intentionally bubble up the console message
 	// which, unless the test explicitly anticipates the logging via
@@ -140,6 +141,12 @@ const test = base.extend<
 				data: unknown
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
+			createTemplateFromTemplate: (
+				template: TemplatePayload,
+				templatePath: string,
+				data: unknown
+			) => Promise< Post >;
+			deleteTemplate: ( id: string ) => Promise< void >;
 		};
 	}
 >( {
@@ -210,9 +217,22 @@ const test = base.extend<
 			const utilDeletePost = ( id: number ) =>
 				deletePost( requestUtils, id );
 
+			const utilUpdateTemplatesContent = (
+				template: TemplatePayload,
+				templatePath: string,
+				data: unknown
+			) =>
+				updateTemplatesContent(
+					requestUtils,
+					template,
+					templatePath,
+					data
+				);
+
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
+				updateTemplatesContent: utilUpdateTemplatesContent,
 				deletePost: utilDeletePost,
 			} );
 		},
