@@ -34,7 +34,7 @@ import {
 	updateProductCatalogContent,
 	deletePost,
 } from '../utils/create-dynamic-content';
-import type { Template } from '../types/e2e-test-utils-playwright';
+import type { ExtendedTemplate } from '../types/e2e-test-utils-playwright';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -146,11 +146,11 @@ const test = base.extend<
 				templateId: string,
 				templatePath: string,
 				data: unknown
-			) => Promise< Template & { link: string } >;
+			) => Promise< ExtendedTemplate >;
 			updateProductCatalogContent: (
 				templatePath: string,
 				data: unknown
-			) => Promise< Template & { link: string } >;
+			) => Promise< ExtendedTemplate >;
 		};
 	}
 >( {
