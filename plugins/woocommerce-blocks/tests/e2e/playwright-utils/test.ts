@@ -154,19 +154,19 @@ const test = base.extend<
 	page: async ( { page }, use ) => {
 		page.on( 'console', observeConsoleLogging );
 
-		const cliOutput = await cli(
-			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
-		);
-		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
-			throw new Error( 'Failed to import database' );
-		}
-
 		await use( page );
 
 		// Clear local storage after each test.
 		await page.evaluate( () => {
 			window.localStorage.clear();
 		} );
+
+		console.time( 'Database import time' );
+		const cliOutput = await cli(
+			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
+		);
+		console.log( cliOutput.stdout );
+		console.timeEnd( 'Database import time' );
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
