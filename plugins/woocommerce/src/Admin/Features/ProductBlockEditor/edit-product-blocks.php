@@ -49,7 +49,7 @@ remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 add_filter( 'screen_options_show_screen', '__return_false' );
 
 wp_enqueue_script( 'heartbeat' );
-// wp_enqueue_script( 'wp-edit-post' );
+ wp_enqueue_script( 'wp-edit-post' );
 
 $rest_path = rest_get_route_for_post( $post );
 
@@ -287,6 +287,7 @@ $editor_settings = get_block_editor_settings( $editor_settings, $block_editor_co
 
 $init_script = <<<JS
 ( function() {
+	console.log('TESTTTTTTTTTTT');
 	window._wpLoadBlockEditor = new Promise( function( resolve ) {
 		wp.domReady( function() {
 			resolve( {
@@ -315,6 +316,7 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 ?>
 
 <div class="wrap" >
+	<?php echo $post->ID ?>
 <div id="woocommerce-product-root" class="is-embed-loading">
     <div class="woocommerce-layout">
         <div class="woocommerce-layout__header is-embed-loading">
