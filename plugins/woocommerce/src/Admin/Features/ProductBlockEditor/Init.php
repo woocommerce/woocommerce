@@ -64,6 +64,13 @@ class Init {
 		$this->redirection_controller = new RedirectionController();
 
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
+			add_filter(
+				'use_block_editor_for_post_type',
+				array( $this, 'activate_blocks_product' ),
+				20,
+				2
+			);
+			add_filter( 'replace_editor', array( $this, 'replace_editor'), 10, 2 );
 			if ( ! Features::is_enabled( 'new-product-management-experience' ) ) {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 				add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_conflicting_styles' ), 100 );
@@ -88,6 +95,21 @@ class Init {
 
 			$this->register_product_templates();
 		}
+	}
+
+	public function activate_blocks_product( $can_edit, $post_type ) {
+		if ( $post_type == 'product' ) {
+            $can_edit = true;
+        }
+    	return $can_edit;
+	}
+
+	public function replace_editor( $replace, $post ) {
+		if ( use_block_editor_for_post( $post ) ) {
+			require dirname( __FILE__ ) . '/edit-product-blocks.php';
+			return true;
+		}
+		return $replace;
 	}
 
 	/**

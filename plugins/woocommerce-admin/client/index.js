@@ -22,9 +22,11 @@ import { possiblyRenderSettingsSlots } from './settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from './settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from './payments/payments-settings-banner-slotfill';
 import { registerSiteVisibilitySlotFill } from './launch-your-store';
+import { EmbeddedProductPageLayout } from './products/embedded-product-page-layout';
 
 const appRoot = document.getElementById( 'root' );
 const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
+const productRoot = document.getElementById( 'woocommerce-product-root' );
 const settingsGroup = 'wc_admin';
 const hydrateUser = getAdminSetting( 'currentUserData' );
 
@@ -95,6 +97,8 @@ if ( appRoot ) {
 	) {
 		registerSiteVisibilitySlotFill();
 	}
+} else if ( productRoot ) {
+	render( <EmbeddedProductPageLayout />, productRoot );
 }
 
 // Render the CustomerEffortScoreTracksContainer only if
@@ -105,7 +109,7 @@ if (
 ) {
 	// Set up customer effort score survey.
 	( function () {
-		const root = appRoot || embeddedRoot;
+		const root = appRoot || embeddedRoot || productRoot;
 
 		render(
 			<CustomerEffortScoreTracksContainer />,

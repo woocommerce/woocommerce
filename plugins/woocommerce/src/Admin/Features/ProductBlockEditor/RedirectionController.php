@@ -24,10 +24,10 @@ class RedirectionController {
 	 */
 	public function __construct() {
 		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
-			add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
-			add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
+			// add_action( 'current_screen', array( $this, 'maybe_redirect_to_new_editor' ), 30, 0 );
+			// add_action( 'current_screen', array( $this, 'redirect_non_supported_product_types' ), 30, 0 );
 		} else {
-			add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
+			// add_action( 'current_screen', array( $this, 'maybe_redirect_to_old_editor' ), 30, 0 );
 		}
 	}
 

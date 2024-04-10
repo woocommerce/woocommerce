@@ -9,6 +9,7 @@ import { useEffect, useState } from '@wordpress/element';
 export function useProductEntityRecord(
 	productId: string | undefined
 ): Product | undefined {
+	console.log( productId );
 	const { saveEntityRecord } = useDispatch( 'core' );
 	const [ product, setProduct ] = useState< Product | undefined >(
 		undefined

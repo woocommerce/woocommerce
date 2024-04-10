@@ -27,9 +27,13 @@ import './product-page.scss';
 
 productApiFetchMiddleware();
 
+let productId: string;
+window._wpLoadBlockEditor.then( ( data ) => {
+	console.log( data );
+	productId = data.postId.toString();
+} );
 export default function ProductPage() {
-	const { productId } = useParams();
-
+	console.log( productId );
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
@@ -97,9 +101,5 @@ export default function ProductPage() {
 		[ productId ]
 	);
 
-	return (
-		<>
-			<Editor product={ product } />
-		</>
-	);
+	return <>{ product && <Editor product={ product } /> }</>;
 }

@@ -42,6 +42,7 @@ export function Editor( { product, productType = 'product' }: EditorProps ) {
 	const [ selectedTab, setSelectedTab ] = useState< string | null >( null );
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
+	console.log( product, productType );
 
 	const productId = product?.id || -1;
 

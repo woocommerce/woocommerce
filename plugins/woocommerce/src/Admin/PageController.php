@@ -556,7 +556,7 @@ class PageController {
 	 * a "classic" (non JS app) powered admin page (an embedded page).
 	 */
 	public static function is_admin_or_embed_page() {
-		return self::is_admin_page() || self::is_embed_page();
+		return self::is_admin_page() || self::is_embed_page() || true;
 	}
 
 	/**

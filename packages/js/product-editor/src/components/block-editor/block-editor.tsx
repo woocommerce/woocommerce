@@ -178,6 +178,7 @@ export function BlockEditor( {
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
+	console.log( settings, layoutTemplate );
 	const isEditorLoading =
 		! settings ||
 		! layoutTemplate ||
