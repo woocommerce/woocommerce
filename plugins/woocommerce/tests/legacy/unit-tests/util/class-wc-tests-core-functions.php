@@ -964,7 +964,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'Cartes Bancaires', wc_get_credit_card_type_label( 'cartes_bancaires' ) );
 		$this->assertEquals( 'Cartes Bancaires', wc_get_credit_card_type_label( 'cartes-bancaires' ) );
 		$this->assertEquals( '', wc_get_credit_card_type_label( '' ) );
-		$this->assertEquals( 'Random name', wc_get_credit_card_type_label( 'random-name' ) );
+		$this->assertEquals( 'Random Name', wc_get_credit_card_type_label( 'random-name' ) );
 	}
 
 	/**
