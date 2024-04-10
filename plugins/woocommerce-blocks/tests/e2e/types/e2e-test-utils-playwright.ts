@@ -7,3 +7,4 @@ export interface Template {
 	wp_id: number;
 	id: string;
 }
+export type ExtendedTemplate = Template & { link: string };

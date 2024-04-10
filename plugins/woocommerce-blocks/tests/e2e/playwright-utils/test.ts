@@ -32,6 +32,7 @@ import {
 	type TemplatePayload,
 	createPostFromTemplate,
 	updateTemplatesContent,
+	updateProductCatalogContent,
 	deletePost,
 } from '../utils/create-dynamic-content';
 import type { Template } from '../types/e2e-test-utils-playwright';
@@ -147,6 +148,10 @@ const test = base.extend<
 				templatePath: string,
 				data: unknown
 			) => Promise< Template & { link: string } >;
+			updateProductCatalogContent: (
+				templatePath: string,
+				data: unknown
+			) => Promise< Template & { link: string } >;
 		};
 	}
 >( {
@@ -229,10 +234,17 @@ const test = base.extend<
 					data
 				);
 
+			const utilUpdateProductCatalogContent = (
+				templatePath: string,
+				data: unknown
+			) =>
+				updateProductCatalogContent( requestUtils, templatePath, data );
+
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
 				updateTemplatesContent: utilUpdateTemplatesContent,
+				updateProductCatalogContent: utilUpdateProductCatalogContent,
 				deletePost: utilDeletePost,
 			} );
 		},

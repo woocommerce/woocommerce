@@ -77,13 +77,9 @@ export const createPostFromTemplate = async (
 	return createPost( requestUtils, payload );
 };
 
-export type TemplatePayload = {
-	id: string;
-};
-
 export const updateTemplatesContent = async (
 	requestUtils: RequestUtils,
-	template: TemplatePayload,
+	templateId: string,
 	templatePath: string,
 	data: unknown
 ) => {
@@ -96,7 +92,26 @@ export const updateTemplatesContent = async (
 
 	return requestUtils.rest( {
 		method: 'POST',
-		path: `/wp/v2/templates/${ template.id }`,
+		path: `/wp/v2/templates/${ templateId }`,
 		data: { ...payload },
 	} );
+};
+
+export const updateProductCatalogContent = async (
+	requestUtils: RequestUtils,
+	templatePath: string,
+	data: unknown
+) => {
+	const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
+	const productCatalogLink = '/shop';
+
+	const template = await updateTemplatesContent(
+		requestUtils,
+		productCatalogTemplateId,
+		templatePath,
+		data
+	);
+
+	template.link = productCatalogLink;
+	return template;
 };
