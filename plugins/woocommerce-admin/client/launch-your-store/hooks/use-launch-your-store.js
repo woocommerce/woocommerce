@@ -7,7 +7,6 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 export const useLaunchYourStore = () => {
 	const {
 		isLoading,
-		launchStatus,
 		launchYourStoreEnabled,
 		comingSoon,
 		storePagesOnly,
@@ -18,7 +17,6 @@ export const useLaunchYourStore = () => {
 			select( OPTIONS_STORE_NAME );
 
 		const allOptionResolutionsFinished =
-			! hasFinishedResolution( 'getOption', [ 'launch-status' ] ) &&
 			! hasFinishedResolution( 'getOption', [
 				'woocommerce_coming_soon',
 			] ) &&
@@ -32,7 +30,6 @@ export const useLaunchYourStore = () => {
 
 		return {
 			isLoading: allOptionResolutionsFinished,
-			launchStatus: getOption( 'launch-status' ),
 			comingSoon: getOption( 'woocommerce_coming_soon' ),
 			storePagesOnly: getOption( 'woocommerce_store_pages_only' ),
 			privateLink: getOption( 'woocommerce_private_link' ),
@@ -48,7 +45,6 @@ export const useLaunchYourStore = () => {
 		storePagesOnly,
 		privateLink,
 		shareKey,
-		launchStatus,
 		launchYourStoreEnabled,
 	};
 };
