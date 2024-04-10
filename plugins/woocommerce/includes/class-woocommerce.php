@@ -323,7 +323,7 @@ final class WooCommerce {
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
 		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
-		$private_link     = 'yes';
+		$private_link     = 'no';
 		$share_key        = wp_generate_password( 32, false );
 
 		if ( false === get_option( 'woocommerce_coming_soon', false ) ) {
