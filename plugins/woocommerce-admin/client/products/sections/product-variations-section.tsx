@@ -48,7 +48,7 @@ export const ProductVariationsSection: React.FC = () => {
 					</span>
 					<Link
 						className="woocommerce-form-section__header-link"
-						href="https://woo.com/posts/product-variations-display/"
+						href="https://woocommerce.com/posts/product-variations-display/"
 						target="_blank"
 						type="external"
 						onClick={ () => {

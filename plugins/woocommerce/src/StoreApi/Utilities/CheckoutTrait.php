@@ -199,12 +199,11 @@ trait CheckoutTrait {
 				$errors[] = $e->getMessage();
 				continue;
 			}
-			$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, false );
+			$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, 'additional', false );
 		}
 
 		if ( $errors->has_errors() ) {
 			throw new RouteException( 'woocommerce_rest_checkout_invalid_additional_fields', $errors->get_error_messages(), 400 );
 		}
-
 	}
 }

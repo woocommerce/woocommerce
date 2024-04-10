@@ -321,38 +321,49 @@ class Checkout extends AbstractBlock {
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
-		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data(), true );
-		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location(), true );
+		$country_data    = CartCheckoutUtils::get_country_data();
+		$address_formats = WC()->countries->get_address_formats();
+
+		// Move the address format into the 'countryData' setting.
+		// We need to skip 'default' because that's not a valid country.
+		foreach ( $address_formats as $country_code => $format ) {
+			if ( 'default' === $country_code ) {
+				continue;
+			}
+			$country_data[ $country_code ]['format'] = $format;
+		}
+
+		$this->asset_data_registry->add( 'countryData', $country_data );
+		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
+		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location() );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(
 				wc()->checkout()->is_registration_required(),
 				FILTER_VALIDATE_BOOLEAN
-			),
-			true
+			)
 		);
 		$this->asset_data_registry->add(
 			'checkoutAllowsSignup',
 			filter_var(
 				wc()->checkout()->is_registration_enabled(),
 				FILTER_VALIDATE_BOOLEAN
-			),
-			true
+			)
 		);
-		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ), true );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ), true );
-		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ), true );
-		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ), true );
-		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled(), true );
-		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled(), true );
-		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled(), true );
-		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ), true );
+		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
+		$this->asset_data_registry->add( 'forcedBillingAddress', 'billing_only' === get_option( 'woocommerce_ship_to_destination' ) );
+		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
+		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
+		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
+		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['cartPageId'] ) ? $attributes['cartPageId'] : 0 );
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme(), true );
+		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'], true );
-		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'], true );
+		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
+		$this->asset_data_registry->add( 'localPickupText', $pickup_location_settings['title'] );
 
 		$is_block_editor = $this->is_block_editor();
 
