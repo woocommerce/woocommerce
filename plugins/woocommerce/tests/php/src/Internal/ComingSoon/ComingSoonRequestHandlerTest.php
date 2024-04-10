@@ -48,7 +48,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 		$wp->request = '/';
 		do_action_ref_array( 'parse_request', array( &$wp ) );
 
-		$this->assertSame( $wp->query_vars['page_id'], null );
+		$this->assertArrayNotHasKey( 'page_id', $wp->query_vars );
 	}
 
 	/**
