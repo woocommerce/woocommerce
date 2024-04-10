@@ -50,7 +50,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 				exact: true,
 			} );
 
-			await expect( miniCartButton ).toBeDisabled();
+			await expect( miniCartButton ).toBeHidden();
 		} );
 	} );
 } );
