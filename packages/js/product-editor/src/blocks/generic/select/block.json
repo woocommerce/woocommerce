@@ -12,9 +12,6 @@
 			"type": "string",
 			"__experimentalRole": "content"
 		},
-		"note": {
-			"type": "string"
-		},
 		"property": {
 			"type": "string"
 		},
