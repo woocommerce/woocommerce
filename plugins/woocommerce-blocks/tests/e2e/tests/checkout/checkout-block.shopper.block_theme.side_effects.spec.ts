@@ -608,7 +608,7 @@ test.describe( 'Billing Address Form', () => {
 	test.describe( 'Guest user', () => {
 		test.use( { storageState: guestFile } );
 
-		test.only( 'Ensure billing is empty and shipping address is filled', async ( {
+		test( 'Ensure billing is empty and shipping address is filled', async ( {
 			frontendUtils,
 			page,
 			checkoutPageObject,
@@ -668,9 +668,7 @@ test.describe( 'Billing Address Form', () => {
 			}
 
 			// Check billing fields are empty.
-			for ( const [ key, value ] of Object.entries(
-				shippingDetailsWithoutCompany
-			) ) {
+			for ( const [ key, value ] of Object.entries( billingTestData ) ) {
 				// eslint-disable-next-line playwright/no-conditional-in-test
 				switch ( key ) {
 					case 'country':
