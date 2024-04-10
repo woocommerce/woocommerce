@@ -26,11 +26,9 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Notice Templates', () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils, wpCliUtils, frontendUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
-	} );
 
-	test.beforeEach( async ( { wpCliUtils, frontendUtils } ) => {
 		const cartShortcodeID = await wpCliUtils.getPostIDByTitle(
 			'Cart Shortcode'
 		);

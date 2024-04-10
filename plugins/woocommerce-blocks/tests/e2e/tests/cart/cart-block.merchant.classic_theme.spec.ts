@@ -5,7 +5,7 @@ import { CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 test.describe( 'Merchant → Cart', () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
 

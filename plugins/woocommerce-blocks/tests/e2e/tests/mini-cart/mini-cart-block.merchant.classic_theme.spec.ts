@@ -16,7 +16,7 @@ const blockData: BlockData = {
 };
 
 test.describe( 'Merchant → Mini Cart', () => {
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 	} );
 
