@@ -92,4 +92,117 @@ class ProductCollectionUtils {
 		}
 		return $array;
 	}
+
+	/**
+	 * Translate WP Post instance to context.
+	 * 
+	 * Possible contexts:
+	 * - page
+	 * - post
+	 * - product
+	 * - product-archive
+	 * - checkout
+	 * - catalog
+	 * - cart
+	 * - checkout
+	 * - order
+	 *
+	 * @param WP_Post $post The Post instance.
+	 *
+	 * @return string|false Returns the context. False for unknown or invalid context.
+	 */
+	public static function parse_editor_location_context( $post ) {
+
+		if ( ! $post instanceof \WP_Post ) {
+			return false;
+		}
+
+		$post_type = $post->post_type;
+		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
+			return false;
+		}
+
+		$context = 'post';
+
+		if ( in_array( $post_type, array( 'wp_template', 'wp_template_part' ), true ) ) {
+
+			$name = $post->post_name;
+			if ( false !== strpos( $name, 'single-product' ) ) {
+				$context = 'product';			
+			} elseif ( false !== strpos( $name, 'taxonomy-' ) ) { // Including the '-' in the check to avoid false positives.
+				$taxonomy           = str_replace( 'taxonomy-', '', $name );
+				$product_taxonomies = get_object_taxonomies( 'product', 'names' );
+				if ( in_array( $taxonomy, $product_taxonomies, true ) ) {
+					$context = 'product-archive';
+				}
+			} elseif(  'page-cart' === $name ) {
+				$context = 'cart';
+			} elseif(  'page-checkout' === $name ) {
+				$context = 'checkout';
+			} elseif( in_array( $name, array( 'archive-product' ) ) ) {
+				$context = 'catalog';
+			} elseif( in_array( $name, array( 'order-confirmation' ) ) ) {
+				$context = 'order';
+			}
+		}
+
+		if ( 'page' === $post_type ) {
+			$context = 'page';
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Parse the collection query filters from the query attributes.
+	 */
+	public static function get_event_data( $block) {
+
+		$query_attrs = $block['attrs']['query'] ?? array();
+		$filters = array(
+			'on-sale' => 0,
+			'stock-status' => 0,
+			'handpicked' => 0,
+			'keyword' => 0,
+			'attributes' => 0,
+			'taxonomy' => 0,
+			'featured' => 0,
+			'created' => 0,
+			'price' => 0,
+		);
+
+		if ( ! empty( $query_attrs['woocommerceOnSale'])){
+			$filters['on-sale'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['woocommerceStockStatus'])){
+			$filters['stock-status'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['woocommerceAttributes'])){
+			$filters['attributes'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['timeFrame'])){
+			$filters['created'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['taxQuery'])){
+			$filters['taxonomy'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'])){
+			$filters['handpicked'] = 1;
+		}
+
+		if ( ! empty( $query_attrs['search'])){
+			$filters['keyword'] = 1;
+		}
+
+		if ( true === $query_attrs['featured'] ){
+			$filters['featured'] = 1;
+		}
+
+		return $filters;
+	}
 }

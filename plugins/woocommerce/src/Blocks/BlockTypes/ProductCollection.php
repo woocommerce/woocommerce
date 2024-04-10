@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use WP_Query;
 use WC_Tax;
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 /**
  * ProductCollection class.
@@ -45,7 +46,6 @@ class ProductCollection extends AbstractBlock {
 	 */
 	protected $custom_order_opts = array( 'popularity', 'rating' );
 
-
 	/**
 	 * Initialize this block type.
 	 *
@@ -85,6 +85,65 @@ class ProductCollection extends AbstractBlock {
 		// Disable client-side-navigation if incompatible blocks are detected.
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
+		// Tracks.
+		add_action(
+			'save_post',
+			function ( $post_id, $post, $is_updated ) {
+
+				// Important: don't track revisions.
+				if ( 'revision' === $post->post_type ) {
+					return;
+				}
+
+				// if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
+				// 	return;
+				// }
+
+				if ( ! has_block( $this->get_full_block_name(), $post ) ) {
+					return;
+				}
+
+				$context = ProductCollectionUtils::parse_editor_location_context( $post );
+				error_log('Found context: ' . $context );
+				$blocks = parse_blocks( $post->post_content );
+				$this->track_collection_block_usage( $blocks );
+			},
+			10,
+			3
+		);
+	}
+
+	/**
+	 * Track usage of the Product Collection block within the site editor.
+	 *
+	 * @param array $blocks     The blocks to check.
+	 * @param bool  $in_single  Whether we are in a single product container (optional.)
+	 * 
+	 * @return void
+	 */
+	public function track_collection_block_usage( $blocks, $in_single = false ) {
+		foreach ( $blocks as $block ) {
+			if ( $this->get_full_block_name() === $block['blockName'] ) {
+
+				error_log($block['attrs']['collection'] ?? 'No Collection.');
+				error_log($in_single ? 'in-single-product' : 'not-in-single-product');
+
+				// \WC_Tracks::record_event(
+				// 	'product_collection_instance', 
+				// 	ProductCollectionUtils::get_event_data( $block ) 
+				// );
+			}
+
+			$local_in_single = $in_single;
+			if ( 'woocommerce/single-product' === $block['blockName'] ) {
+				$local_in_single = true;
+			}
+
+			// Recursive.
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$this->track_collection_block_usage( $block['innerBlocks'], $local_in_single );
+			}
+		}
 	}
 
 	/**
