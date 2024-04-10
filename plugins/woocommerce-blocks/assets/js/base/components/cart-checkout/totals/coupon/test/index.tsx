@@ -14,6 +14,10 @@ import { TotalsCoupon } from '..';
 describe( 'TotalsCoupon', () => {
 	it( "Shows a validation error when one is in the wc/store/validation data store and doesn't show one when there isn't", () => {
 		const { rerender } = render( <TotalsCoupon instanceId={ 'coupon' } /> );
+
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		const openCouponFormButton = screen.getByText( 'Add a coupon' );
 		expect( openCouponFormButton ).toBeInTheDocument();
 		userEvent.click( openCouponFormButton );
