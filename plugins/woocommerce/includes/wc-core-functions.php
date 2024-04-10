@@ -1547,6 +1547,8 @@ function wc_get_credit_card_type_label( $type ) {
 
 	/**
 	 * Fallback to title case, uppercasing the first letter of each word.
+	 *
+	 * @since 8.9.0
 	 */
 	return apply_filters( 'woocommerce_get_credit_card_type_label', ( array_key_exists( $type, $labels ) ? $labels[ $type ] : ucwords( $type ) ) );
 }
