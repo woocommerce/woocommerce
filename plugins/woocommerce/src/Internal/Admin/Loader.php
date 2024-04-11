@@ -125,13 +125,18 @@ class Loader {
 		$sections = self::get_embed_breadcrumbs();
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 
-		$page_title = '';
-		if ( count( $sections ) < 3 || ! is_array( $sections[1] ) || ! isset( $sections[1][1] ) ) {
-			$page_title = end( $sections );
-		} else {
-			$page_title = $sections[1][1];
-		}
+		$page_title      = '';
+		$pages_with_tabs = array( 'Settings', 'Reports', 'Status' );
 
+		if (
+			count( $sections ) > 2 &&
+			is_array( $sections[1] ) &&
+			in_array( $sections[1][1], $pages_with_tabs, true )
+		) {
+			$page_title = $sections[1][1];
+		} else {
+			$page_title = end( $sections );
+		}
 		?>
 		<div id="woocommerce-embedded-root" class="is-embed-loading">
 			<div class="woocommerce-layout">
