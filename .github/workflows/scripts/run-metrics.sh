@@ -7,11 +7,11 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	exit 1
 fi
 
-if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
   	echo "Comparing performance with trunk"
   	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA trunk --tests-branch $GITHUB_SHA
 
-elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with base branch"
 	# The base hash used here need to be a commit that is compatible with the current WP version
 	# The current one is 19f3d0884617d7ecdcf37664f648a51e2987cada
