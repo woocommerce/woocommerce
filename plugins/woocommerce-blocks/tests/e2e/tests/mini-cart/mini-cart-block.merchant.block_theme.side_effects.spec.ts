@@ -54,10 +54,9 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page.getByRole( 'option', {
-				name: blockData.name,
-				exact: true,
-			} );
+			const miniCartButton = editorUtils.page
+				.getByLabel( 'WooCommerce', { exact: true } )
+				.getByRole( 'option', { name: blockData.name } );
 
 			await expect( miniCartButton ).toHaveAttribute(
 				'aria-disabled',
