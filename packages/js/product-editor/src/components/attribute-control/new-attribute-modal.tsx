@@ -58,6 +58,8 @@ type AttributeForm = {
 	attributes: Array< EnhancedProductAttribute | null >;
 };
 
+const MAX_N_TERMS_AUTO_SELECTION = 10;
+
 export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	title = __( 'Add attributes', 'woocommerce' ),
 	description = '',
@@ -254,7 +256,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 											getProductAttributeObject(
 												value
 											) as EnhancedProductAttribute;
-										if ( termsAutoSelection === 'all' ) {
+										if (
+											termsAutoSelection === 'all' &&
+											terms.length <=
+												MAX_N_TERMS_AUTO_SELECTION
+										) {
 											selectedAttribute.terms = terms;
 										} else if ( terms.length > 0 ) {
 											selectedAttribute.terms = [

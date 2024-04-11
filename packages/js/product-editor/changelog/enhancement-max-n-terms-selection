@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Only select all terms of an attribute if there are less than 10 entries
