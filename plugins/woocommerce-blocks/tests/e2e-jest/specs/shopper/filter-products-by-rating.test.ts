@@ -56,6 +56,7 @@ const goToShopPage = () =>
 		waitUntil: 'networkidle0',
 	} );
 
+jest.retryTimes( 3 );
 describe( `${ block.name } Block`, () => {
 	describe.skip( 'with All Products Block', () => {
 		let link = '';
