@@ -13,6 +13,11 @@ import {
 } from '@woocommerce/types';
 import { noticeContexts } from '@woocommerce/base-context/event-emit/utils';
 
+/**
+ * Internal dependencies
+ */
+import { processNotices } from './process-notices';
+
 type ApiParamError = {
 	param: string;
 	id: string;
@@ -193,6 +198,10 @@ export const processErrorResponse = (
 ) => {
 	if ( ! isApiErrorResponse( response ) ) {
 		return;
+	}
+
+	if ( response.data?.notices ) {
+		processNotices( response.data?.notices );
 	}
 
 	if ( response.code === 'rest_invalid_param' ) {
