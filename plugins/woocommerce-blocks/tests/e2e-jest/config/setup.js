@@ -81,6 +81,6 @@ module.exports = async ( globalConfig ) => {
 			tags,
 		};
 	} catch ( e ) {
-		console.log( e );
+		console.trace( e );
 	}
 };
