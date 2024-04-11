@@ -10,7 +10,6 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import {
