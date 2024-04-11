@@ -119,8 +119,8 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		// Delete the order from the DB to mimic situations like SQL replication lag where the cache has propagated,
 		// but SQL data hasn't yet caught up.
 		$wpdb->delete( OrdersTableDataStore::get_orders_table_name(), array( 'ID' => $retrieved_order->get_id() ) );
-		foreach ( OrdersTableDataStore::get_all_table_names_with_id() as $id => $table ) {
-			if ( 'orders' != $id ) {
+		foreach ( OrdersTableDataStore::get_all_table_names_with_id() as $table_id => $table ) {
+			if ( 'orders' !== $table_id ) {
 				$wpdb->delete( $table, array( 'order_id' => $retrieved_order->get_id() ) );
 			}
 		}
