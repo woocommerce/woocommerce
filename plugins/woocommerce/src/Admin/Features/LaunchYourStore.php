@@ -148,18 +148,10 @@ class LaunchYourStore {
 		$heading = __( 'Pardon our dust! We\'re working on something amazing -- check back soon!', 'woocommerce' );
 
 		return sprintf(
-			'<!-- wp:group {"layout":{"type":"constrained"}} -->
-			<div class="wp-block-group"><!-- wp:spacer -->
-			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-			<!-- /wp:spacer -->
-
-			<!-- wp:heading {"textAlign":"center","level":1,"align":"wide"} -->
-			<h1 class="wp-block-heading alignwide has-text-align-center">%s</h1>
-			<!-- /wp:heading -->
-
-			<!-- wp:spacer -->
-			<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
-			<!-- /wp:spacer --></div>
+			'<!-- wp:group {"className":"woocommerce-coming-soon-banner-container","layout":{"type":"constrained"}} -->
+			<div class="wp-block-group woocommerce-coming-soon-banner-container"><!-- wp:heading {"textAlign":"center","level":1,"align":"wide","className":"woocommerce-coming-soon-banner"} -->
+			<h1 class="wp-block-heading alignwide has-text-align-center woocommerce-coming-soon-banner">%s</h1>
+			<!-- /wp:heading --></div>
 			<!-- /wp:group -->',
 			$heading
 		);
