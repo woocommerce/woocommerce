@@ -1598,9 +1598,6 @@ importers:
       '@woocommerce/api':
         specifier: ^0.2.0
         version: 0.2.0
-      '@woocommerce/e2e-environment':
-        specifier: workspace:*
-        version: link:../e2e-environment
       '@wordpress/deprecated':
         specifier: wp-6.0
         version: 3.6.1
@@ -1644,6 +1641,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^5.62.0
         version: 5.62.0(eslint@8.55.0)(typescript@5.3.3)
+      '@woocommerce/e2e-environment':
+        specifier: workspace:*
+        version: link:../e2e-environment
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
