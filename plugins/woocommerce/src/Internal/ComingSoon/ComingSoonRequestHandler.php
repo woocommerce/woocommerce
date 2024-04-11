@@ -54,6 +54,15 @@ class ComingSoonRequestHandler {
 			return $wp;
 		}
 
+		// Exclude users with a private link
+		if ( isset ( $_GET['woo-share'] ) && $_GET['woo-share'] === get_option( 'woocommerce_share_key' ) ) {
+			setcookie( 'woo-share', $_GET['woo-share'], time() + 60 * 60 * 24 * 90 ); // Expires after 90 days.
+			return $wp;
+		}
+		if ( isset ( $_COOKIE['woo-share'] ) && $_COOKIE['woo-share'] === get_option( 'woocommerce_share_key' ) ) {
+			return $wp;
+		}
+
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
@@ -61,5 +70,11 @@ class ComingSoonRequestHandler {
 		include $template;
 
 		die();
+	}
+
+	private function maybe_set_cookie() {
+		if ( isset( $_GET['woo-share'] ) ) {
+			setcookie( 'woo-share', $_GET['woo-share'], time() + 60 * 60 * 24 * 90 ); // Expires after 90 days.
+		}
 	}
 }
