@@ -15,6 +15,7 @@ import classnames from 'classnames';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -25,13 +26,20 @@ import type { mainContentMachine } from '../main-content/xstate';
 import { updateQueryParams, createQueryParamsListener } from '../common';
 import { taskClickedAction, getLysTasklist } from './tasklist';
 import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
+import { getTimeFrame } from '~/utils';
+
+export type LYSAugmentedTaskListType = TaskListType & {
+	recentlyActionedTasks: string[];
+	fullLysTaskList: TaskType[];
+};
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
-	tasklist?: TaskListType;
+	tasklist?: LYSAugmentedTaskListType;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
+	launchStoreAttemptTimestamp?: number;
 	launchStoreError?: {
 		message: string;
 	};
@@ -63,6 +71,47 @@ const launchStoreAction = async () => {
 	throw new Error( JSON.stringify( results ) );
 };
 
+const recordLaunchStoreAttempt = ( {
+	context,
+}: {
+	context: SidebarMachineContext;
+} ) => {
+	const total = context.tasklist?.fullLysTaskList.length || 0;
+	const incomplete_tasks =
+		context.tasklist?.tasks
+			.filter( ( task ) => ! task.isComplete )
+			.map( ( task ) => task.id ) || [];
+
+	const completed =
+		context.tasklist?.fullLysTaskList
+			.filter( ( task ) => task.isComplete )
+			.map( ( task ) => task.id ) || [];
+
+	const completed_in_lys = completed.filter( ( task ) =>
+		context.tasklist?.recentlyActionedTasks.includes( task )
+	); // recently actioned tasks can include incomplete tasks
+
+	recordEvent( 'launch_your_store_hub_store_launch_attempted', {
+		tasks: {
+			total, // all lys eligible tasks
+			completed, // all lys eligible tasks that are completed
+			completed_count: completed.length,
+			completed_in_lys,
+			completed_in_lys_count: completed_in_lys.length,
+			incomplete_tasks,
+			incomplete_tasks_count: incomplete_tasks.length,
+		},
+		delete_test_orders: context.removeTestOrders || false,
+	} );
+	return performance.now();
+};
+
+const recordLaunchStoreResults = ( timestamp: number, success: boolean ) => {
+	recordEvent( 'launch_your_store_hub_store_launch_results', {
+		success,
+		duration: getTimeFrame( performance.now() - timestamp ),
+	} );
+};
 export const sidebarMachine = setup( {
 	types: {} as {
 		context: SidebarMachineContext;
@@ -103,6 +152,18 @@ export const sidebarMachine = setup( {
 		},
 		windowHistoryBack: () => {
 			window.history.back();
+		},
+		recordStoreLaunchAttempt: assign( {
+			launchStoreAttemptTimestamp: recordLaunchStoreAttempt,
+		} ),
+		recordStoreLaunchResults: (
+			{ context },
+			{ success }: { success: boolean }
+		) => {
+			recordLaunchStoreResults(
+				context.launchStoreAttemptTimestamp || 0,
+				success
+			);
 		},
 	},
 	guards: {
@@ -192,20 +253,39 @@ export const sidebarMachine = setup( {
 			initial: 'launching',
 			states: {
 				launching: {
-					entry: assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+					entry: [
+						assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+						'recordStoreLaunchAttempt',
+					],
 					invoke: {
 						src: 'updateLaunchStoreOptions',
 						onDone: {
 							target: '#storeLaunchSuccessful',
+							actions: [
+								{
+									type: 'recordStoreLaunchResults',
+									params: { success: true },
+								},
+							],
 						},
 						onError: {
-							actions: assign( {
-								launchStoreError: ( { event } ) => {
-									return {
-										message: JSON.stringify( event.error ), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
-									};
+							actions: [
+								assign( {
+									launchStoreError: ( { event } ) => {
+										return {
+											message: JSON.stringify(
+												event.error
+											), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+										};
+									},
+								} ),
+								{
+									type: 'recordStoreLaunchResults',
+									params: {
+										success: false,
+									},
 								},
-							} ),
+							],
 							target: '#launchYourStoreHub',
 						},
 					},
