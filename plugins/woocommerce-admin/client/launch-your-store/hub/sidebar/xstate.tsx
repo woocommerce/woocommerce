@@ -8,6 +8,7 @@ import {
 	fromCallback,
 	fromPromise,
 	assign,
+	spawnChild,
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
@@ -23,6 +24,7 @@ import type { LaunchYourStoreComponentProps } from '..';
 import type { mainContentMachine } from '../main-content/xstate';
 import { updateQueryParams, createQueryParamsListener } from '../common';
 import { taskClickedAction, getLysTasklist } from './tasklist';
+import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
@@ -116,6 +118,7 @@ export const sidebarMachine = setup( {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
+		fetchCongratsData,
 	},
 } ).createMachine( {
 	id: 'sidebar',
@@ -155,6 +158,11 @@ export const sidebarMachine = setup( {
 			initial: 'preLaunchYourStoreHub',
 			states: {
 				preLaunchYourStoreHub: {
+					entry: [
+						spawnChild( 'fetchCongratsData', {
+							id: 'prefetch-congrats-data ',
+						} ),
+					],
 					invoke: {
 						src: 'getTasklist',
 						onDone: {
