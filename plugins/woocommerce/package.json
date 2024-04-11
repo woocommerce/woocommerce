@@ -175,9 +175,9 @@
 					"command": "test:e2e-pw",
 					"shardingArguments": [
 						"--shard=1/5",
-						"--shard=2/5", 
-						"--shard=3/5", 
-						"--shard=4/5", 
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
 						"--shard=5/5"
 					],
 					"changes": [

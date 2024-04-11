@@ -1596,8 +1596,8 @@ importers:
         specifier: github:Automattic/puppeteer-utils#0f3ec50
         version: github.com/Automattic/puppeteer-utils/0f3ec50(react-native@0.73.0)
       '@woocommerce/api':
-        specifier: workspace:*
-        version: link:../api
+        specifier: ^0.2.0
+        version: 0.2.0
       '@woocommerce/e2e-environment':
         specifier: workspace:*
         version: link:../e2e-environment
