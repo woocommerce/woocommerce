@@ -8,10 +8,16 @@ import { Product } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
+import { addQueryArgs } from '@wordpress/url';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { navigateTo, getNewPath, getQuery } from '@woocommerce/navigation';
+import {
+	navigateTo,
+	getNewPath,
+	getQuery,
+	getHistory,
+} from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -88,13 +94,35 @@ export function Tabs( { onChange = () => {} }: TabsProps ) {
 				fillProps={
 					{
 						onClick: ( tabId ) => {
-							navigateTo( {
-								url: getNewPath( { tab: tabId } ),
-							} );
+							const url = location.pathname.includes( 'post-new' )
+								? addQueryArgs(
+										location.pathname.replace(
+											'/wp-admin.php/',
+											''
+										),
+										{
+											post_type: 'product',
+											tab: tabId,
+										}
+								  )
+								: addQueryArgs(
+										location.pathname.replace(
+											'/wp-admin.php/',
+											''
+										),
+										{
+											post: productId,
+											action: 'edit',
+											tab: tabId,
+										}
+								  );
+							getHistory().push( url );
+							// window.location.href = ;
 							recordEvent(
 								'product_tab_click',
 								getTabTracksData( tabId, product )
 							);
+							setSelected( tabId );
 						},
 					} as TabsFillProps
 				}

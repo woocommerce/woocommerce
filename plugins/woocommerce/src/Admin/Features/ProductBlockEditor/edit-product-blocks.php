@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( '-1' );
 }
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+
 /**
  * @global string       $post_type
  * @global WP_Post_Type $post_type_object
@@ -49,7 +51,7 @@ remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 add_filter( 'screen_options_show_screen', '__return_false' );
 
 wp_enqueue_script( 'heartbeat' );
- wp_enqueue_script( 'wp-edit-post' );
+// wp_enqueue_script( 'wp-edit-post' );
 
 $rest_path = rest_get_route_for_post( $post );
 
@@ -67,10 +69,6 @@ $preload_paths = array(
 	add_query_arg( 'context', 'edit', $rest_path ),
 	sprintf( '/wp/v2/types/%s?context=edit', $post_type ),
 	'/wp/v2/users/me',
-	array( rest_get_route_for_post_type_items( 'attachment' ), 'OPTIONS' ),
-	array( rest_get_route_for_post_type_items( 'page' ), 'OPTIONS' ),
-	array( rest_get_route_for_post_type_items( 'wp_block' ), 'OPTIONS' ),
-	array( rest_get_route_for_post_type_items( 'wp_template' ), 'OPTIONS' ),
 	sprintf( '%s/autosaves?context=edit', $rest_path ),
 	'/wp/v2/settings',
 	array( '/wp/v2/settings', 'OPTIONS' ),
@@ -78,11 +76,11 @@ $preload_paths = array(
 
 block_editor_rest_api_preload( $preload_paths, $block_editor_context );
 
-wp_add_inline_script(
-	'wp-blocks',
-	sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $post ) ) ),
-	'after'
-);
+// wp_add_inline_script(
+// 	'wp-blocks',
+// 	sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $post ) ) ),
+// 	'after'
+// );
 
 /*
  * Assign initial edits, if applicable. These are not initially assigned to the persisted post,
@@ -135,14 +133,14 @@ wp_add_inline_script(
  * not empty so we do not trigger the template select element without any options
  * besides the default value.
  */
-$available_templates = wp_get_theme()->get_page_templates( get_post( $post->ID ) );
-$available_templates = ! empty( $available_templates ) ? array_replace(
-	array(
-		/** This filter is documented in wp-admin/includes/meta-boxes.php */
-		'' => apply_filters( 'default_page_template_title', __( 'Default template' ), 'rest-api' ),
-	),
-	$available_templates
-) : $available_templates;
+// $available_templates = wp_get_theme()->get_page_templates( get_post( $post->ID ) );
+// $available_templates = ! empty( $available_templates ) ? array_replace(
+// 	array(
+// 		/** This filter is documented in wp-admin/includes/meta-boxes.php */
+// 		'' => apply_filters( 'default_page_template_title', __( 'Default template' ), 'rest-api' ),
+// 	),
+// 	$available_templates
+// ) : $available_templates;
 
 // Lock settings.
 $user_id = wp_check_post_lock( $post->ID );
@@ -192,7 +190,7 @@ if ( $user_id ) {
 $body_placeholder = apply_filters( 'write_your_story', __( 'Type / to choose a block' ), $post );
 
 $editor_settings = array(
-	'availableTemplates'   => $available_templates,
+	// 'availableTemplates'   => $available_templates,
 	'disablePostFormats'   => ! current_theme_supports( 'post-formats' ),
 	/** This filter is documented in wp-admin/edit-form-advanced.php */
 	'titlePlaceholder'     => apply_filters( 'enter_title_here', __( 'Add title' ), $post ),
@@ -261,6 +259,8 @@ wp_enqueue_editor();
  */
 // wp_enqueue_style( 'wp-edit-post' );
 
+WCAdminAssets::register_script( 'wp-admin-scripts', 'product-editor', true, array('react', 'wc-admin-layout', 'wc-components', 'wc-customer-effort-score', 'wc-experimental', 'wc-navigation', 'wc-product-editor', 'wc-settings', 'wc-store-data', 'wc-tracks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-element', 'wp-html-entities', 'wp-i18n', 'wp-plugins', 'wp-primitives') );
+
 /**
  * Fires after block assets have been enqueued for the editing interface.
  *
@@ -287,7 +287,6 @@ $editor_settings = get_block_editor_settings( $editor_settings, $block_editor_co
 
 $init_script = <<<JS
 ( function() {
-	console.log('TESTTTTTTTTTTT');
 	window._wpLoadBlockEditor = new Promise( function( resolve ) {
 		wp.domReady( function() {
 			resolve( {
@@ -314,17 +313,11 @@ if ( (int) get_option( 'page_for_posts' ) === $post->ID ) {
 
 require_once ABSPATH . 'wp-admin/admin-header.php';
 ?>
-
+<style>
+	#screen-meta-links { display: none; }
+</style>
 <div class="wrap" >
-	<?php echo $post->ID ?>
 <div id="woocommerce-product-root" class="is-embed-loading">
-    <div class="woocommerce-layout">
-        <div class="woocommerce-layout__header is-embed-loading">
-            <h1 class="woocommerce-layout__header-heading">
-
-            </h1>
-        </div>
-    </div>
 </div>
 </div>
 <div class="block-editor">

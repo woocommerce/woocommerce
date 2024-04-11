@@ -122,6 +122,10 @@ class Loader {
 			return;
 		}
 
+		if ( PageController::is_product_page() ) {
+			return;
+		}
+
 		$sections = self::get_embed_breadcrumbs();
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 		?>

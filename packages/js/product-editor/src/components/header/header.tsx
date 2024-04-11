@@ -37,6 +37,7 @@ import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
 import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 import { HeaderProps, Image } from './types';
+import { FullscreenModeClose } from './fullscreen-mode-close';
 
 const RETURN_TO_MAIN_PRODUCT = __(
 	'Return to the main product',
@@ -163,6 +164,7 @@ export function Header( {
 			tabIndex={ -1 }
 		>
 			<div className="woocommerce-product-header__inner">
+				<FullscreenModeClose />
 				{ isVariation ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
