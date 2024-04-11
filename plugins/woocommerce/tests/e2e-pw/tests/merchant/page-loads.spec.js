@@ -27,19 +27,19 @@ const wcPages = [
 			},
 			{
 				name: 'Reports',
-				heading: 'Orders',
+				heading: 'Reports',
 				element: '.nav-tab-wrapper > .nav-tab-active',
 				text: 'Orders',
 			},
 			{
 				name: 'Settings',
-				heading: 'General',
+				heading: 'Settings',
 				element: '#store_address-description',
 				text: 'This is where your business is located. Tax rates and shipping rates will use this address.',
 			},
 			{
 				name: 'Status',
-				heading: 'System status',
+				heading: 'Status',
 				element: '.nav-tab-active',
 				text: 'System status',
 			},
