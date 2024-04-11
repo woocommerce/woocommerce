@@ -80,6 +80,11 @@ class Controller extends ReportsController implements ExportableInterface {
 		foreach ( $report_data->data as $orders_data ) {
 			$orders_data['order_number']    = $this->get_order_number( $orders_data['order_id'] );
 			$orders_data['total_formatted'] = $this->get_total_formatted( $orders_data['order_id'] );
+
+			// TODO: An alternative if we want to put channel in the order item level
+			// instead of inside extended_info level.
+			$orders_data['channel']         = $orders_data['extended_info']['channel']['name'];
+			
 			$item                           = $this->prepare_item_for_response( $orders_data, $request );
 			$data[]                         = $this->prepare_response_for_collection( $item );
 		}
