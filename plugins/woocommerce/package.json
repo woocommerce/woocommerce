@@ -242,7 +242,7 @@
 					}
 				},
 				{
-					"name": "Metrics tracking",
+					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
 					"changes": [
