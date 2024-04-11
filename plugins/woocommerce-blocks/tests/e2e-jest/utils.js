@@ -38,9 +38,6 @@ import { cli } from '../utils';
 export const BASE_URL = config.get( 'url' );
 export const adminUsername = config.get( 'users.admin.username' );
 export const adminPassword = config.get( 'users.admin.password' );
-export const client = HTTPClientFactory.build( BASE_URL )
-	.withBasicAuth( adminUsername, adminPassword )
-	.create();
 export const DEFAULT_TIMEOUT = 30000;
 export const SHOP_CHECKOUT_BLOCK_PAGE = BASE_URL + 'checkout-block/';
 
