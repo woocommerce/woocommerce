@@ -16,6 +16,7 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 -   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
 -   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently features a minimum PHP version of 7.4. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
 -   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
+-   Before proceeding, ensure you have the following: A WordPress website with WooCommerce installed.A block theme activated on your WordPress site.Basic knowledge of HTML, CSS, and PHP.
 
 Once you've installed all of the prerequisites, you can run the following commands to get everything working.
 
