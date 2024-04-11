@@ -143,6 +143,7 @@ function readBlockJSON( filename ) {
 
 	return `
 ## ${ blockjson.title }
+
 ${ blockjson.description }
 
 -	**Name:** ${ blockjson.name }
