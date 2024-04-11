@@ -57,6 +57,8 @@ const goToShopPage = () =>
 	} );
 
 jest.retryTimes( 3 );
+
+process.on( 'unhandledRejection', console.trace );
 describe( `${ block.name } Block`, () => {
 	describe.skip( 'with All Products Block', () => {
 		let link = '';
