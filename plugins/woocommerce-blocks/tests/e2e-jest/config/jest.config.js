@@ -27,8 +27,8 @@ module.exports = {
 	// before each test
 	setupFilesAfterEnv: [
 		'<rootDir>/tests/e2e-jest/config/custom-matchers/index.js',
-		'<rootDir>/tests/e2e-jest/config/jest.setup.js',
 		'expect-puppeteer',
+		'<rootDir>/tests/e2e-jest/config/jest.setup.js',
 	],
 	testPathIgnorePatterns: [
 		'<rootDir>/tests/e2e-jest/specs/performance',
