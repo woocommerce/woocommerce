@@ -110,6 +110,8 @@ export function useProductManager< T = Product >( postType: string ) {
 
 	async function copyToDraft() {
 		try {
+			// When "Copy to a new draft" is used on an unsaved product with a filled-out name,
+			// the name is retained in the copied product.
 			const data =
 				AUTO_DRAFT_NAME === prevName && name !== prevName
 					? { name }
