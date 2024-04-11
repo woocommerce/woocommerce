@@ -3,7 +3,7 @@
 	"private": true,
 	"title": "WooCommerce",
 	"version": "8.9.0",
-	"homepage": "https://woo.com/",
+	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git"
@@ -88,6 +88,7 @@
 					"src/**/*.php",
 					"templates/**/*.php",
 					"tests/php/**/*.php",
+					"tests/legacy/unit-tests/**/*.php",
 					"tests/unit-tests/**/*.php"
 				]
 			},
@@ -103,6 +104,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -120,6 +122,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -140,6 +143,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -160,6 +164,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php"
 					],
 					"testEnv": {
@@ -188,6 +193,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						"tests/e2e-pw/**"
 					],
@@ -207,6 +213,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/unit-tests/**/*.php",
 						"tests/api-core-tests/**"
 					],
@@ -226,7 +233,7 @@
 						"src/**/*.php",
 						"templates/**/*.php",
 						"tests/php/**/*.php",
-						"tests/unit-tests/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
 						"tests/performance/**"
 					],
 					"testEnv": {
@@ -277,9 +284,9 @@
 		"mocha": "7.2.0",
 		"nodemon": "^3.0.2",
 		"prettier": "npm:wp-prettier@^2.8.5",
-		"stylelint": "^13.13.1",
+		"stylelint": "^14.16.1",
 		"typescript": "^5.3.3",
-		"uuid": "^8.3.2",
+		"uuid": "^9.0.1",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
 		"wireit": "0.14.3",

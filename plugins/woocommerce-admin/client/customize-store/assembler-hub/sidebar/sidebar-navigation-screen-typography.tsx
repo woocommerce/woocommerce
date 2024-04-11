@@ -180,7 +180,7 @@ export const SidebarNavigationScreenTypography = () => {
 											components: {
 												link: (
 													<Link
-														href="https://woo.com/usage-tracking?utm_medium=product"
+														href="https://woocommerce.com/usage-tracking?utm_medium=product"
 														target="_blank"
 														type="external"
 													/>

@@ -8,17 +8,13 @@ import {
 	fromCallback,
 	fromPromise,
 	assign,
+	spawnChild,
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
-import { getNewPath, getQuery, navigateTo } from '@woocommerce/navigation';
-import { resolveSelect } from '@wordpress/data';
-import {
-	ONBOARDING_STORE_NAME,
-	TaskListType,
-	TaskType,
-} from '@woocommerce/data';
-import { applyFilters } from '@wordpress/hooks';
+import { getQuery, navigateTo } from '@woocommerce/navigation';
+import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -27,6 +23,8 @@ import { LaunchYourStoreHubSidebar } from './components/launch-store-hub';
 import type { LaunchYourStoreComponentProps } from '..';
 import type { mainContentMachine } from '../main-content/xstate';
 import { updateQueryParams, createQueryParamsListener } from '../common';
+import { taskClickedAction, getLysTasklist } from './tasklist';
+import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
@@ -34,6 +32,9 @@ export type SidebarMachineContext = {
 	tasklist?: TaskListType;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
+	launchStoreError?: {
+		message: string;
+	};
 };
 export type SidebarComponentProps = LaunchYourStoreComponentProps & {
 	context: SidebarMachineContext;
@@ -52,29 +53,14 @@ const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'sidebar', sendBack );
 } );
 
-const getLysTasklist = async () => {
-	const LYS_TASKS = [
-		'products',
-		'customize-store',
-		'woocommerce-payments',
-		'payments',
-		'shipping',
-		'tax',
-	];
-
-	const tasklist = await resolveSelect(
-		ONBOARDING_STORE_NAME
-	).getTaskListsByIds( [ 'setup' ] );
-	const visibleTasks: string[] = applyFilters(
-		'woocommerce_launch_your_store_tasklist_visible',
-		[ ...LYS_TASKS ]
-	) as string[];
-	return {
-		...tasklist[ 0 ],
-		tasks: tasklist[ 0 ].tasks.filter( ( task ) =>
-			visibleTasks.includes( task.id )
-		),
-	};
+const launchStoreAction = async () => {
+	const results = await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+		woocommerce_coming_soon: 'no',
+	} );
+	if ( results.success ) {
+		return results;
+	}
+	throw new Error( JSON.stringify( results ) );
 };
 
 export const sidebarMachine = setup( {
@@ -107,13 +93,7 @@ export const sidebarMachine = setup( {
 		},
 		taskClicked: ( { event } ) => {
 			if ( event.type === 'TASK_CLICKED' ) {
-				if ( event.task.actionUrl ) {
-					navigateTo( { url: event.task.actionUrl } );
-				} else {
-					navigateTo( {
-						url: getNewPath( { task: event.task.id }, '/', {} ),
-					} );
-				}
+				taskClickedAction( event );
 			}
 		},
 		openWcAdminUrl: ( { event } ) => {
@@ -137,6 +117,8 @@ export const sidebarMachine = setup( {
 	actors: {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
+		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
+		fetchCongratsData,
 	},
 } ).createMachine( {
 	id: 'sidebar',
@@ -176,6 +158,11 @@ export const sidebarMachine = setup( {
 			initial: 'preLaunchYourStoreHub',
 			states: {
 				preLaunchYourStoreHub: {
+					entry: [
+						spawnChild( 'fetchCongratsData', {
+							id: 'prefetch-congrats-data ',
+						} ),
+					],
 					invoke: {
 						src: 'getTasklist',
 						onDone: {
@@ -187,6 +174,7 @@ export const sidebarMachine = setup( {
 					},
 				},
 				launchYourStoreHub: {
+					id: 'launchYourStoreHub',
 					tags: 'sidebar-visible',
 					meta: {
 						component: LaunchYourStoreHubSidebar,
@@ -204,11 +192,21 @@ export const sidebarMachine = setup( {
 			initial: 'launching',
 			states: {
 				launching: {
-					tags: 'fullscreen',
-					entry: { type: 'showLoadingPage' },
-					on: {
-						LAUNCH_STORE_SUCCESS: {
+					entry: assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+					invoke: {
+						src: 'updateLaunchStoreOptions',
+						onDone: {
 							target: '#storeLaunchSuccessful',
+						},
+						onError: {
+							actions: assign( {
+								launchStoreError: ( { event } ) => {
+									return {
+										message: JSON.stringify( event.error ), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+									};
+								},
+							} ),
+							target: '#launchYourStoreHub',
 						},
 					},
 				},

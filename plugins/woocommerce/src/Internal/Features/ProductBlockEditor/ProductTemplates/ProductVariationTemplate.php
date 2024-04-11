@@ -168,7 +168,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag. */
 						__( 'Drag images, upload new ones or select files from your library. For best results, use JPEG files that are 1000 by 1000 pixels or larger. %1$sHow to prepare images?%2$s', 'woocommerce' ),
-						'<a href="https://woo.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
+						'<a href="https://woocommerce.com/posts/how-to-take-professional-product-photos-top-tips" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 				),
@@ -220,7 +220,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'description' => sprintf(
 					/* translators: %1$s: Images guide link opening tag. %2$s: Images guide link closing tag.*/
 						__( 'Set a competitive price, put the product on sale, and manage tax calculations. %1$sHow to price your product?%2$s', 'woocommerce' ),
-						'<a href="https://woo.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
+						'<a href="https://woocommerce.com/posts/how-to-price-products-strategies-expert-tips/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 					'blockGap'    => 'unit-40',
@@ -301,7 +301,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'help'     => sprintf(
 						/* translators: %1$s: Learn more link opening tag. %2$s: Learn more link closing tag.*/
 							__( 'Apply a tax rate if this product qualifies for tax reduction or exemption. %1$sLearn more%2$s', 'woocommerce' ),
-							'<a href="https://woo.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
+							'<a href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/#shipping-tax-class" target="_blank" rel="noreferrer">',
 							'</a>'
 						),
 						'property' => 'tax_class',
@@ -457,7 +457,7 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 						'checkedValue'   => false,
 						'uncheckedValue' => true,
 						'label'          => __( 'This variation requires shipping or pickup', 'woocommerce' ),
-						'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woo.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
+						'uncheckedHelp'  => __( 'This variation will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
 					),
 				)
 			);
@@ -471,8 +471,8 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'title'       => __( 'Fees & dimensions', 'woocommerce' ),
 					'description' => sprintf(
 					/* translators: %1$s: How to get started? link opening tag. %2$s: How to get started? link closing tag.*/
-						__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s.', 'woocommerce' ),
-						'<a href="https://woo.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
+						__( 'Set up shipping costs and enter dimensions used for accurate rate calculations. %1$sHow to get started?%2$s', 'woocommerce' ),
+						'<a href="https://woocommerce.com/posts/how-to-calculate-shipping-costs-for-your-woocommerce-store/" target="_blank" rel="noreferrer">',
 						'</a>'
 					),
 				),

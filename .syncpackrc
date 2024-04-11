@@ -238,6 +238,24 @@
 		},
 		{
 			"dependencies": [
+				"classnames"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.2"
+		},
+		{
+			"dependencies": [
+				"glob"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.3.10"
+		},
+		{
+			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [
@@ -256,12 +274,48 @@
 		},
 		{
 			"dependencies": [
+				"rimraf"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.0.5"
+		},
+		{
+			"dependencies": [
+				"sass-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.5.0"
+		},
+		{
+			"dependencies": [
 				"simple-git"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "^3.21.0"
+		},
+		{
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^14.16.1"
+		},
+		{
+			"dependencies": [
+				"uuid"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^9.0.1"
 		},
 		{
 			"dependencies": [

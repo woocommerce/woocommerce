@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
- * Connect store to Woo.com Task
+ * Connect store to WooCommerce.com Task
  */
 class StoreConnect extends Task {
 	/**
@@ -23,7 +23,7 @@ class StoreConnect extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Manage your Woo.com Marketplace subscriptions', 'woocommerce' );
+		return __( 'Manage your WooCommerce.com Marketplace subscriptions', 'woocommerce' );
 	}
 
 	/**

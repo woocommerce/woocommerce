@@ -23,7 +23,6 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 	}
 
 	/**
@@ -57,25 +56,5 @@ class ProductCatalogTemplate extends AbstractTemplate {
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
-	}
-
-	/**
-	 * Update the product archive title to "Shop".
-	 *
-	 * @param string $post_type_name Post type 'name' label.
-	 * @param string $post_type      Post type.
-	 *
-	 * @return string
-	 */
-	public function update_product_archive_title( $post_type_name, $post_type ) {
-		if (
-			function_exists( 'is_shop' ) &&
-			is_shop() &&
-			'product' === $post_type
-		) {
-			return __( 'Shop', 'woocommerce' );
-		}
-
-		return $post_type_name;
 	}
 }

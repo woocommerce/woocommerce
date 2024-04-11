@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Use isSelectableByUser product template attribute to show/hide product templates in the list

@@ -199,10 +199,10 @@ class CartUpdateCustomer extends AbstractCartRoute {
 
 		// We save them one by one, and we add the group prefix.
 		foreach ( $additional_shipping_values as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_customer( "/shipping/{$key}", $value, $customer );
+			$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'shipping' );
 		}
 		foreach ( $additional_billing_values as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_customer( "/billing/{$key}", $value, $customer );
+			$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'billing' );
 		}
 
 		wc_do_deprecated_action(
@@ -244,20 +244,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$billing_country = $customer->get_billing_country();
 		$billing_state   = $customer->get_billing_state();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
-
-		$additional_fields = array_reduce(
-			array_keys( $additional_fields ),
-			function( $carry, $key ) use ( $additional_fields ) {
-				if ( 0 === strpos( $key, '/billing/' ) ) {
-					$value         = $additional_fields[ $key ];
-					$key           = str_replace( '/billing/', '', $key );
-					$carry[ $key ] = $value;
-				}
-				return $carry;
-			},
-			array()
-		);
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'billing' );
 
 		/**
 		 * There's a bug in WooCommerce core in which not having a state ("") would result in us validating against the store's state.
@@ -293,20 +280,8 @@ class CartUpdateCustomer extends AbstractCartRoute {
 	 * @return array
 	 */
 	protected function get_customer_shipping_address( \WC_Customer $customer ) {
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_customer( $customer );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $customer, 'shipping' );
 
-		$additional_fields = array_reduce(
-			array_keys( $additional_fields ),
-			function( $carry, $key ) use ( $additional_fields ) {
-				if ( 0 === strpos( $key, '/shipping/' ) ) {
-					$value         = $additional_fields[ $key ];
-					$key           = str_replace( '/shipping/', '', $key );
-					$carry[ $key ] = $value;
-				}
-				return $carry;
-			},
-			array()
-		);
 		return array_merge(
 			[
 				'first_name' => $customer->get_shipping_first_name(),

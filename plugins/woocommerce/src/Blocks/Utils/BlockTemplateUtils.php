@@ -298,6 +298,8 @@ class BlockTemplateUtils {
 	public static function get_template_paths( $template_type ) {
 		$wp_template_filenames      = array(
 			'archive-product.html',
+			'coming-soon-entire-site.html',
+			'coming-soon-store-only.html',
 			'order-confirmation.html',
 			'page-cart.html',
 			'page-checkout.html',
