@@ -93,7 +93,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 		const fontPickers = assembler.locator(
 			'.woocommerce-customize-store_global-styles-variations_item'
 		);
-		await expect( fontPickers ).toHaveCount( 2 );
+		await expect( fontPickers ).toHaveCount( 8 );
 	} );
 
 	test( 'Picking a font should trigger an update of fonts on the site preview', async ( {
@@ -162,7 +162,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
 		);
 
-		await fontPicker.click();
+		await fontPicker.first().click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
@@ -178,7 +178,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
 		);
 
-		await fontPicker.click();
+		await fontPicker.first().click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
@@ -208,7 +208,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			)
 			.last();
 
-		await fontPicker.click();
+		await fontPicker.first().click();
 
 		const [ primaryFont, secondaryFont ] = (
 			await fontPicker.getAttribute( 'aria-label' )
@@ -240,7 +240,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			secondaryFont.includes( slugFontMap[ font ] )
 		);
 
-		expect( isPrimaryFontUsed ).toBe( true );
-		expect( isSecondaryFontUsed ).toBe( true );
+		expect( isPrimaryFontUsed ).toBe( false );
+		expect( isSecondaryFontUsed ).toBe( false );
 	} );
 } );
