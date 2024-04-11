@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormattedMonetaryAmount separators should add the thousand separator 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  1.563,45 €
+</span>
+`;
+
+exports[`FormattedMonetaryAmount separators should not add thousand separator 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  1563,45 €
+</span>
+`;
+
+exports[`FormattedMonetaryAmount separators should remove the thousand separator when identical to the decimal one 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  1563,45 €
+</span>
+`;
+
+exports[`FormattedMonetaryAmount suffix/prefix should add the currency prefix 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  € 0,15
+</span>
+`;
+
+exports[`FormattedMonetaryAmount suffix/prefix should add the currency suffix 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  0,15 €
+</span>
+`;
+
+exports[`FormattedMonetaryAmount supports different value types should support numbers 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  15 €
+</span>
+`;
+
+exports[`FormattedMonetaryAmount supports different value types should support strings 1`] = `
+<span
+  className="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+>
+  € 15
+</span>
+`;
