@@ -292,6 +292,9 @@ jobs:
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   PLUGIN_SLUG: ${{ matrix.slug }}
                   GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
+                  
+            - name: Setup plugin for the main e2e suite
+              run: ./.github/workflows/scripts/install-plugin.sh
 
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
