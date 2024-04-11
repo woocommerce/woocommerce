@@ -9,6 +9,7 @@ fi
 
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with trunk"
+  	cd tools/compare-perf && pnpm run compare perf $GITHUB_SHA trunk --tests-branch $GITHUB_SHA
 
 elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
   	echo "Comparing performance with base branch"
