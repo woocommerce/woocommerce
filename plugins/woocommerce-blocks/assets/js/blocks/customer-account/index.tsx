@@ -47,3 +47,5 @@ registerBlockVariation( 'woocommerce/customer-account', {
 		iconClass: 'wc-block-customer-account__account-icon',
 	},
 } );
+
+console.log( 'trigger E2E tests' );
