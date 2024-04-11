@@ -4310,8 +4310,8 @@ importers:
         specifier: 2.28.1
         version: 2.28.1(@typescript-eslint/parser@5.56.0)(eslint-import-resolver-typescript@3.2.4)(eslint-import-resolver-webpack@0.13.2)(eslint@8.55.0)
       eslint-plugin-playwright:
-        specifier: 0.15.3
-        version: 0.15.3(eslint@8.55.0)
+        specifier: 1.6.0
+        version: 1.6.0(eslint@8.55.0)
       eslint-plugin-rulesdir:
         specifier: ^0.2.2
         version: 0.2.2
@@ -31939,18 +31939,6 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-playwright@0.15.3(eslint@8.55.0):
-    resolution: {integrity: sha512-LQMW5y0DLK5Fnpya7JR1oAYL2/7Y9wDiYw6VZqlKqcRGSgjbVKNqxraphk7ra1U3Bb5EK444xMgUlQPbMg2M1g==}
-    peerDependencies:
-      eslint: '>=7'
-      eslint-plugin-jest: '>=25'
-    peerDependenciesMeta:
-      eslint-plugin-jest:
-        optional: true
-    dependencies:
-      eslint: 8.55.0
-    dev: true
-
   /eslint-plugin-playwright@0.22.1(eslint-plugin-jest@23.20.0)(eslint@8.55.0):
     resolution: {integrity: sha512-xUQ9mJH+CjifLG6vMowl3r49G/8JvW4G10IqHjc1WO44fffdhLZF/i4Def+U3y6LqUEBp0JAMnWUhEck7ksqrw==}
     peerDependencies:
@@ -31962,6 +31950,20 @@ packages:
     dependencies:
       eslint: 8.55.0
       eslint-plugin-jest: 23.20.0(eslint@8.55.0)(typescript@5.3.3)
+      globals: 13.24.0
+    dev: true
+
+  /eslint-plugin-playwright@1.6.0(eslint@8.55.0):
+    resolution: {integrity: sha512-tI1E/EDbHT4Fx5KvukUG3RTIT0gk44gvTP8bNwxLCFsUXVM98ZJG5zWU6Om5JOzH9FrmN4AhMu/UKyEsu0ZoDA==}
+    engines: {node: '>=16.6.0'}
+    peerDependencies:
+      eslint: '>=8.40.0'
+      eslint-plugin-jest: '>=25'
+    peerDependenciesMeta:
+      eslint-plugin-jest:
+        optional: true
+    dependencies:
+      eslint: 8.55.0
       globals: 13.24.0
     dev: true
 
