@@ -60,7 +60,7 @@
 	height: 100vh;
 	width: 100%;
 	position: relative;
-	z-index: 2;
+	z-index: 3;
 
 	.launch-store-site__preview-site-iframe {
 		display: block;
@@ -92,8 +92,8 @@
 		justify-content: center;
 		position: absolute;
 		top: 0;
-		left: 0;
-		width: calc(100% - 16px);
-		padding: 16px 16px 16px 0;
+		left: -32px; // Make room for the handle on the left side for maximum width
+		width: calc(100% + 32px);
+		padding: 16px 16px 16px 32px;
 	}
 }
