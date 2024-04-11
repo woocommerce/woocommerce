@@ -347,7 +347,7 @@ test.describe
 
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Welcome to WooCommerce Core E2E Test Suite',
+				name: 'Home',
 			} )
 		).toBeVisible();
 	} );
