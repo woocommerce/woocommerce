@@ -7,17 +7,18 @@ if [[ -z "$GITHUB_EVENT_NAME" ]]; then
  	exit 1
 fi
 
-if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
   	echo "Comparing performance with trunk"
   	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA trunk --tests-branch $GITHUB_SHA
 
-elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+elif [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
   	echo "Comparing performance with base branch"
 	# The base hash used here need to be a commit that is compatible with the current WP version
 	# The current one is 19f3d0884617d7ecdcf37664f648a51e2987cada
 	# it needs to be updated every time it becomes unsupported by the current wp-env (WP version).
 	# It is used as a base comparison point to avoid fluctuation in the performance metrics.
-	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' plugins/woocommerce/readme.txt)
+	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
+	echo "WP_VERSION: $WP_VERSION"
 	IFS=. read -ra WP_VERSION_ARRAY <<< "$WP_VERSION"
 	WP_MAJOR="${WP_VERSION_ARRAY[0]}.${WP_VERSION_ARRAY[1]}"
 	pnpm --filter="compare-perf" run compare perf $GITHUB_SHA 19f3d0884617d7ecdcf37664f648a51e2987cada --tests-branch $GITHUB_SHA --wp-version "$WP_MAJOR"
