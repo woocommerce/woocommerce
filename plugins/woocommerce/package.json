@@ -343,6 +343,7 @@
 				"node_modules/@woocommerce/e2e-core-tests/CHANGELOG.md",
 				"node_modules/@woocommerce/api/dist/",
 				"node_modules/@woocommerce/admin-e2e-tests/build",
+				"node_modules/@woocommerce/classic-assets/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/block-library/blocks.ini",
 				"node_modules/@woocommerce/admin-library/build",
