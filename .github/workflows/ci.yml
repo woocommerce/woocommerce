@@ -176,8 +176,6 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
-    env:
-      WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
       
     steps:
       - uses: 'actions/checkout@v4'
@@ -196,6 +194,9 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
       - name: 'Run tests'
+        env:
+          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }}
+          WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
         
       - name: 'Archive metrics results'
