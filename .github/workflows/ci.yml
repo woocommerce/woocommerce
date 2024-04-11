@@ -176,6 +176,9 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
+    env:
+      WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+      
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -199,8 +202,8 @@ jobs:
         if: ${{ success() && matrix.name == 'Metrics' }}
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
-          name: performance-results
-          path: ./artifacts/*.performance-results*.json
+          name: metrics-results
+          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
