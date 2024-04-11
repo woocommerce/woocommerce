@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -84,12 +83,10 @@ const singleOccurranceScenarios: Scenario[] = [
 	},
 ];
 
-const compatiblityPluginFileName = 'compatibility-plugin.php';
-
 test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.beforeEach( async () => {
-		await installPluginFromPHPFile(
-			`${ __dirname }/${ compatiblityPluginFileName }`
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-single-product-template-compatibility-layer'
 		);
 	} );
 

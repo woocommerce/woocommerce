@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -20,12 +19,11 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Additional Checkout Fields', () => {
-	test.beforeEach( async ( { frontendUtils } ) => {
-		await installPluginFromPHPFile(
-			`${ __dirname }/additional-checkout-fields-plugin.php`
+	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-additional-checkout-fields'
 		);
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();

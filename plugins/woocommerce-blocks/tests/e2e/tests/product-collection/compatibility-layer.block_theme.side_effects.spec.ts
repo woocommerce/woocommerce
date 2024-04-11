@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { installPluginFromPHPFile } from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -76,7 +75,6 @@ const multipleOccurrenceScenarios: Scenario[] = [
 	},
 ];
 
-const compatibilityPluginFileName = 'compatibility-plugin.php';
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async (
 		{ page, admin, editor, templateApiUtils, editorUtils },
@@ -95,9 +93,9 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 
 test.describe( 'Compatibility Layer with Product Collection block', () => {
 	test.describe( 'Product Archive with Product Collection block', async () => {
-		test.beforeEach( async ( { pageObject } ) => {
-			await installPluginFromPHPFile(
-				`${ __dirname }/${ compatibilityPluginFileName }`
+		test.beforeEach( async ( { pageObject, requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-product-collection-compatibility-layer'
 			);
 
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
