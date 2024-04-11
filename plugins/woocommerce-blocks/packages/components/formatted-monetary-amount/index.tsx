@@ -37,6 +37,7 @@ const currencyToNumberFormat = (
 	const hasSimiliarSeparators =
 		currency?.thousandSeparator === currency?.decimalSeparator;
 	if ( hasSimiliarSeparators ) {
+		// eslint-disable-next-line no-console
 		console.warn(
 			'Thousand separator and decimal separator are the same. This may cause formatting issues.'
 		);
