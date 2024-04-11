@@ -75,9 +75,6 @@ jobs:
                   install: '@woocommerce/plugin-woocommerce...'
                   build: '@woocommerce/plugin-woocommerce'
 
-            - name: Install Jest
-              run: pnpm install -g jest
-
             - name: E2E Tests (WP latest)
               env:
                   WOOCOMMERCE_BLOCKS_PHASE: 3

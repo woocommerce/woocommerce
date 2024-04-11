@@ -73,7 +73,8 @@
 		"overrides": {
 			"@types/react": "^17.0.71",
 			"react": "^17.0.2",
-			"react-resize-aware": "3.1.1"
+			"react-resize-aware": "3.1.1",
+			"node-fetch": "3.3.2"
 		}
 	}
 }
