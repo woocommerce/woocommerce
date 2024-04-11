@@ -27,10 +27,7 @@ import './product-page.scss';
 
 productApiFetchMiddleware();
 
-let productId: string;
-interface LoadBlockEditorData {
-	postId: number;
-}
+let productId: string | undefined;
 declare global {
 	interface Window {
 		_wpLoadBlockEditor?: Promise< {
@@ -45,7 +42,6 @@ if ( window._wpLoadBlockEditor ) {
 	} );
 }
 export default function ProductPage() {
-	console.log( productId );
 	const params = useParams();
 	productId = productId || params.productId;
 	const product = useProductEntityRecord( productId );
