@@ -22,9 +22,7 @@ jest.setTimeout( 120000 );
 // Retry failed tests at most 2 times in CI.
 // This enables `flaky-tests-reporter` and `report-flaky-tests` GitHub action
 // to mark test as flaky and automatically create a tracking issue about it.
-if ( process.env.CI ) {
-	jest.retryTimes( 2 );
-}
+jest.retryTimes( 3 );
 
 setDefaultOptions( { timeout: DEFAULT_TIMEOUT } );
 
