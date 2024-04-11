@@ -45,6 +45,11 @@ export function shopPage() {
 				response.body.includes(
 					'<header class="woocommerce-products-header">'
 				),
+			'body contains: woocommerce-loop-product__title': ( response ) =>
+				response
+					.html()
+					.find( '.woocommerce-loop-product__title' )
+					.toArray().length > 0,
 		} );
 	} );
 
