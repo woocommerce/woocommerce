@@ -245,6 +245,10 @@ jobs:
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+            PLUGIN_NAME: ${{ matrix.plugin }}
+            PLUGIN_SLUG: ${{ matrix.slug }}
+            GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         strategy:
             fail-fast: false
             matrix:
@@ -292,11 +296,6 @@ jobs:
               with:
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   tests: upload-plugin.spec.js
-              env:
-                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
-                  PLUGIN_NAME: ${{ matrix.plugin }}
-                  PLUGIN_SLUG: ${{ matrix.slug }}
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
                   
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
