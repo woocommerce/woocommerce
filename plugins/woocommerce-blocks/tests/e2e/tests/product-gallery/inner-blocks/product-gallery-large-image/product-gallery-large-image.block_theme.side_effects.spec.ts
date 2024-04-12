@@ -31,9 +31,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils, editor } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',

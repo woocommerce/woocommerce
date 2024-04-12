@@ -83,9 +83,7 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
