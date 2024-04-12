@@ -249,7 +249,6 @@ jobs:
             PLUGIN_NAME: ${{ matrix.plugin }}
             PLUGIN_SLUG: ${{ matrix.slug }}
             GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-            WC_SUBSCRIPTIONS_REPO: ${{ secrets.WC_SUBSCRIPTIONS_REPO }}
         strategy:
             fail-fast: false
             matrix:
@@ -263,7 +262,6 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                      slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
                       slug: gutenberg
@@ -406,8 +404,6 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'Woo Subscriptions'
-                      slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       slug: gutenberg
                     - plugin: 'Gutenberg - Nightly'
