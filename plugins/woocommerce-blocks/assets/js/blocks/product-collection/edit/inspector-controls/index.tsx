@@ -20,12 +20,15 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import metadata from '../../block.json';
+import { useTracksLocation } from '../../tracks-utils';
 import {
+	ProductCollectionEditComponentProps,
 	ProductCollectionAttributes,
 	CoreFilterNames,
 	FilterName,
@@ -53,9 +56,19 @@ const prepareShouldShowFilter =
 	};
 
 const ProductCollectionInspectorControls = (
-	props: BlockEditProps< ProductCollectionAttributes >
+	props: ProductCollectionEditComponentProps
 ) => {
-	const { query, collection, hideControls } = props.attributes;
+	const { attributes, context, setAttributes } = props;
+	const { query, collection, hideControls, displayLayout } = attributes;
+
+	const tracksLocation = useTracksLocation( context.templateSlug );
+	const trackInteraction = ( filter: FilterName ) =>
+		recordEvent( 'blocks_product_collection_inspector_control_clicked', {
+			collection: attributes.collection,
+			location: tracksLocation,
+			filter,
+		} );
+
 	const inherit = query?.inherit;
 	const shouldShowFilter = prepareShouldShowFilter( hideControls );
 
@@ -73,12 +86,13 @@ const ProductCollectionInspectorControls = (
 	);
 
 	const displayControlProps = {
-		setAttributes: props.setAttributes,
-		displayLayout: props.attributes.displayLayout,
+		setAttributes: setAttributes,
+		displayLayout,
 	};
 
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
+		trackInteraction,
 		query,
 	};
 

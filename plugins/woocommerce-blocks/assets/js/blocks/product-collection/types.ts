@@ -113,6 +113,7 @@ export type DisplayLayoutControlProps = {
 };
 export type QueryControlProps = {
 	query: ProductCollectionQuery;
+	trackInteraction: ( filter: CoreFilterNames | string ) => void;
 	setQueryAttribute: ( attrs: Partial< ProductCollectionQuery > ) => void;
 };
 
