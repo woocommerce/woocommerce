@@ -66,7 +66,7 @@ $preload_paths = array(
 		),
 		rest_get_route_for_post_type_items( 'wp_block' )
 	),
-	add_query_arg( 'context', 'edit', $rest_path ),
+	// add_query_arg( 'context', 'edit', $rest_path ),
 	sprintf( '/wp/v2/types/%s?context=edit', $post_type ),
 	'/wp/v2/users/me',
 	sprintf( '%s/autosaves?context=edit', $rest_path ),
@@ -264,7 +264,7 @@ wp_enqueue_style( 'wp-format-library' );
 wp_dequeue_style( 'woocommerce-blocktheme' );
 
 WCAdminAssets::register_style( 'product-editor', 'style', array( 'wp-components' ) );
-WCAdminAssets::register_script( 'wp-admin-scripts', 'product-editor', true, array('react', 'wc-admin-layout', 'wc-components', 'wc-customer-effort-score', 'wc-experimental', 'wc-navigation', 'wc-product-editor', 'wc-settings', 'wc-store-data', 'wc-tracks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-element', 'wp-html-entities', 'wp-i18n', 'wp-plugins', 'wp-primitives') );
+WCAdminAssets::register_script( 'wp-admin-scripts', 'product-editor-app', true, array('react', 'wc-admin-layout', 'wc-components', 'wc-customer-effort-score', 'wc-experimental', 'wc-navigation', 'wc-product-editor', 'wc-settings', 'wc-store-data', 'wc-tracks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-element', 'wp-html-entities', 'wp-i18n', 'wp-plugins', 'wp-primitives') );
 
 /**
  * Fires after block assets have been enqueued for the editing interface.
@@ -324,6 +324,7 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 	#wpfooter { display: none; }
 	.notice { display: none; }
 	#message { display: none; }
+	.interface-interface-skeleton { background-color: white; }
 </style>
 <div class="wrap" >
 <div id="woocommerce-product-root" class="is-embed-loading">

@@ -3,17 +3,17 @@
  */
 import classnames from 'classnames';
 import { useSelect } from '@wordpress/data';
-import {
-	Button,
-	Icon,
-	__unstableMotion as motion,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { wordpress } from '@wordpress/icons';
-import { store as coreStore } from '@wordpress/core-data';
 import { useReducedMotion } from '@wordpress/compose';
 import { createElement } from '@wordpress/element';
+import {
+	Button,
+	Icon,
+	// @ts-expect-error test.
+	__unstableMotion as motion,
+} from '@wordpress/components';
 
 type FullscreenModeCloseProps = {
 	showTooltip?: boolean;
@@ -26,9 +26,9 @@ function FullscreenModeClose( {
 	href,
 }: FullscreenModeCloseProps ) {
 	const { isRequestingSiteIcon, siteIconUrl } = useSelect( ( select ) => {
-		const { getEntityRecord, isResolving } = select( coreStore );
-		const siteData =
-			getEntityRecord( 'root', '__unstableBase', undefined ) || {};
+		// @ts-expect-error isResolving does exist.
+		const { getEntityRecord, isResolving } = select( 'core' );
+		const siteData = getEntityRecord( 'root', '__unstableBase', 0 ) || {};
 		return {
 			isRequestingSiteIcon: isResolving( 'getEntityRecord', [
 				'root',
@@ -42,7 +42,7 @@ function FullscreenModeClose( {
 	const disableMotion = useReducedMotion();
 
 	let buttonIcon: JSX.Element | null = (
-		<Icon size="36px" icon={ wordpress } />
+		<Icon size={ 36 } icon={ wordpress } />
 	);
 
 	const effect = {
@@ -69,7 +69,8 @@ function FullscreenModeClose( {
 
 	// Override default icon if custom icon is provided via props.
 	if ( icon ) {
-		buttonIcon = <Icon size="36px" icon={ icon } />;
+		// @ts-expect-error icon is supported.
+		buttonIcon = <Icon size={ 36 } icon={ icon } />;
 	}
 
 	const classes = classnames( {

@@ -35,7 +35,6 @@ export const useLayoutTemplate = ( layoutTemplateId: string | undefined ) => {
 			] );
 		}
 	}, [ addEntities, layoutTemplateEntity ] );
-	console.log(layoutTemplateId, layoutTemplateEntity );
 
 	const { record: layoutTemplate, isResolving } = useEntityRecord(
 		'root',

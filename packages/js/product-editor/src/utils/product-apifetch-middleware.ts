@@ -26,16 +26,6 @@ const routeMatchers = [
 	},
 ];
 
-const isProductEditor = () => {
-	const query: { page?: string; path?: string } = getQuery();
-	return (
-		query?.page === 'wc-admin' &&
-		[ '/add-product', '/product/' ].some( ( path ) =>
-			query?.path?.startsWith( path )
-		)
-	);
-};
-
 export const productApiFetchMiddleware = () => {
 	// This is needed to ensure that we use the correct namespace for the entity data store
 	// without disturbing the rest_namespace outside of the product block editor.

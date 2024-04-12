@@ -46,9 +46,11 @@ export const EmbeddedProductPageLayout = () => {
 		triggerExitPageCesSurvey();
 		if ( window._wpLoadBlockEditor ) {
 			window._wpLoadBlockEditor.then( () => {
+				console.log( 'loaded data' );
 				setLoaded( true );
 			} );
 		} else {
+			console.log( 'wpLoadBlockEditor does not exist' );
 			setLoaded( true );
 		}
 	}, [] );

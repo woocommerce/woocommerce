@@ -9,6 +9,8 @@ import {
 	getLayoutContextValue,
 } from '@woocommerce/admin-layout';
 import { SlotFillProvider } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
+import { getQuery } from '@woocommerce/navigation';
 import QueryString, { parse } from 'qs';
 
 /**
@@ -33,6 +35,44 @@ const EMBEDDED_BODY_COMPONENT_LIST: React.ElementType[] = [
 	ShippingRecommendations,
 	StoreAddressTour,
 ];
+
+console.log( 'apiFetch middleware ' );
+
+const routeMatchers = [
+	{
+		matcher: new RegExp( '^/wp/v2/product(?!_)' ),
+		getReplaceString: () => '/wc/v3/products',
+	},
+	{
+		matcher: new RegExp( '^/wp/v2/product_variation' ),
+		replacement: '/wc/v3/products/0/variations',
+		getReplaceString: () => {
+			const query = getQuery() as { path: string };
+			const variationMatcher = new RegExp(
+				'/product/([0-9]+)/variation/([0-9]+)'
+			);
+			const matched = ( query.path || '' ).match( variationMatcher );
+			if ( matched && matched.length === 3 ) {
+				return '/wc/v3/products/' + matched[ 1 ] + '/variations';
+			}
+			return '/wc/v3/products/0/variations';
+		},
+	},
+];
+apiFetch.use( ( options, next ) => {
+	if ( options.path ) {
+		for ( const { matcher, getReplaceString } of routeMatchers ) {
+			if ( matcher.test( options.path ) ) {
+				options.path = options.path.replace(
+					matcher,
+					getReplaceString()
+				);
+				break;
+			}
+		}
+	}
+	return next( options );
+} );
 
 /**
  * This component is appended to the bottom of the WooCommerce non-react pages (like settings).
