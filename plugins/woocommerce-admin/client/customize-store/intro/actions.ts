@@ -203,4 +203,13 @@ export const assignFlags = assign<
 			window.parent.__wcCustomizeStore.isFontLibraryAvailable || false;
 		return isFontLibraryAvailable;
 	},
+	flowType: ( _context, event ) => {
+		const flowTypeData = (
+			event as DoneInvokeEvent< {
+				data: FlowType;
+			} >
+		 ).data;
+
+		return flowTypeData.data;
+	},
 } );

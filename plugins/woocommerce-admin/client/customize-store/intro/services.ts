@@ -11,8 +11,9 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { aiStatusResponse } from '../types';
+import { FlowType, aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
+import { isWooExpress } from '~/utils/is-woo-express';
 
 export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
@@ -164,4 +165,16 @@ export const setFlags = async () => {
 		// all of them to resolve before returning.
 		await Promise.all( Object.values( _featureFlags ) );
 	}
+
+	// Set FlowType flag
+	if ( isWooExpress() ) {
+		try {
+			await fetchAiStatus();
+			return FlowType.AIOnline;
+		} catch ( e ) {
+			return FlowType.AIOffline;
+		}
+	}
+
+	return FlowType.noAI;
 };

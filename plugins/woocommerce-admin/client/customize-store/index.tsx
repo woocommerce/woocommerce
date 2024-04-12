@@ -262,41 +262,8 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'flowType',
+			initial: 'fetchIntroData',
 			states: {
-				flowType: {
-					always: [
-						{
-							target: 'fetchIntroData',
-							cond: 'isNotWooExpress',
-							actions: 'assignNoAI',
-						},
-						{
-							target: 'checkAiStatus',
-							cond: 'isWooExpress',
-						},
-					],
-				},
-				checkAiStatus: {
-					initial: 'pending',
-					states: {
-						pending: {
-							invoke: {
-								src: 'fetchAiStatus',
-								onDone: {
-									actions: 'assignAiStatus',
-									target: 'success',
-								},
-								onError: {
-									actions: 'assignAiOffline',
-									target: 'success',
-								},
-							},
-						},
-						success: { type: 'final' },
-					},
-					onDone: 'fetchIntroData',
-				},
 				fetchIntroData: {
 					initial: 'pending',
 					states: {
