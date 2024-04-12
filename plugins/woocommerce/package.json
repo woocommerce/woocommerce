@@ -252,6 +252,7 @@
 						"patterns/**/*.php",
 						"src/**/*.php",
 						"templates/**/*.php",
+						"templates/**/*.html",
 						"tests/metrics/**"
 					]
 				}
