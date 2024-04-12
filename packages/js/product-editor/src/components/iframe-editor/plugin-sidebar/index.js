@@ -1,2 +1,1 @@
-export * from './iframe-editor';
 export * from './plugin-sidebar';
