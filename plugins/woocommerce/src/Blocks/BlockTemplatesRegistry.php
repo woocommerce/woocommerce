@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
 
 /**
- * BlockTemplatesRegistry class.
+ * BlockTemplatesRegistry class
  *
  * @internal
  */
@@ -36,7 +36,7 @@ class BlockTemplatesRegistry {
 	 * Initialization method.
 	 */
 	public function init() {
-		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
+		if ( BlockTemplateUtils::supports_block_templates('wp_template' ) ) {
 			$templates = array(
 				ProductCatalogTemplate::SLUG       => new ProductCatalogTemplate(),
 				ProductCategoryTemplate::SLUG      => new ProductCategoryTemplate(),

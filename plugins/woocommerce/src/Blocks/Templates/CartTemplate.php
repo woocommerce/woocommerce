@@ -21,7 +21,7 @@ class CartTemplate extends AbstractPageTemplate {
 	 * Initialization method.
 	 */
 	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+		add_action( 'template_redirect', array($this, 'render_block_template' ) );
 
 		parent::init();
 	}
@@ -53,7 +53,10 @@ class CartTemplate extends AbstractPageTemplate {
 		if (
 			! is_embed() && is_cart()
 		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+
+
+			add_filter( 'woocommerce_has_block_template', '__return_true',
+			 10, 0 );
 		}
 	}
 

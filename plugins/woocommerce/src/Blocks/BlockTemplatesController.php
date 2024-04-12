@@ -21,7 +21,7 @@ class BlockTemplatesController {
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
+	public function init(){
 		add_filter( 'pre_get_block_template', array( $this, 'get_block_template_fallback' ), 10, 3 );
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
