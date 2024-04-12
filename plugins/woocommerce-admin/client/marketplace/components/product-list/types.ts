@@ -57,6 +57,7 @@ export interface ProductTracksData {
 export enum ProductType {
 	theme = 'theme',
 	extension = 'extension',
+	businessService = 'businessService',
 }
 
 export enum SearchResultType {

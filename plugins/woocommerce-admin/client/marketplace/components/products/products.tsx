@@ -47,6 +47,10 @@ const LABELS = {
 		label: __( 'themes', 'woocommerce' ),
 		singularLabel: __( 'theme', 'woocommerce' ),
 	},
+	[ ProductType.businessService ]: {
+		label: __( 'business services', 'woocommerce' ),
+		singularLabel: __( 'business service', 'woocommerce' ),
+	},
 };
 
 export default function Products( props: ProductsProps ) {
@@ -108,18 +112,23 @@ export default function Products( props: ProductsProps ) {
 		);
 	}
 
+	const labelForClassName =
+		label === 'business services' ? 'business-services' : label;
+
 	const baseContainerClass = 'woocommerce-marketplace__search-';
 	const baseProductListTitleClass = 'product-list-title--';
 
-	const containerClassName = classnames( baseContainerClass + label );
+	const containerClassName = classnames(
+		baseContainerClass + labelForClassName
+	);
 	const productListTitleClassName = classnames(
 		'woocommerce-marketplace__product-list-title',
-		baseContainerClass + baseProductListTitleClass + label,
+		baseContainerClass + baseProductListTitleClass + labelForClassName,
 		{ 'is-loading': isLoading }
 	);
 	const viewAllButonClassName = classnames(
 		'woocommerce-marketplace__view-all-button',
-		baseContainerClass + 'button-' + label
+		baseContainerClass + 'button-' + labelForClassName
 	);
 
 	if ( products.length === 0 ) {

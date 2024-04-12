@@ -56,6 +56,8 @@ export default function Content(): JSX.Element {
 			params.append( 'category', 'themes' );
 		} else if ( query?.tab === 'search' ) {
 			params.append( 'category', 'extensions-themes' );
+		} else if ( query?.tab === 'business-services' ) {
+			params.append( 'category', 'business-services' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
@@ -111,6 +113,14 @@ export default function Content(): JSX.Element {
 						products={ products }
 						categorySelector={ true }
 						type={ ProductType.theme }
+					/>
+				);
+			case 'business-services':
+				return (
+					<Products
+						products={ products }
+						categorySelector={ true }
+						type={ ProductType.businessService }
 					/>
 				);
 			case 'search':
