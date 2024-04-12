@@ -4,7 +4,7 @@ const fs = require( 'fs' );
 const { site } = require( './utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
-const { setOption } = require( '.utils/options' );
+const { setOption } = require( './utils/options' );
 
 /**
  * @param {import('@playwright/test').FullConfig} config
