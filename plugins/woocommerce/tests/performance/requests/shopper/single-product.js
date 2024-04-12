@@ -42,8 +42,27 @@ export function singleProduct() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
+			'title is: {product_url} – WooCommerce Core E2E Test Suite': (
+				response
+			) => {
+				const title_actual = response
+					.html()
+					.find( 'head title' )
+					.text();
+				const title_expected = new RegExp(
+					`${ product_url } – WooCommerce Core E2E Test Suite`,
+					'i'
+				);
+				return title_actual.match( title_expected );
+			},
 			'body contains: product SKU': ( response ) =>
 				response.body.includes( `class="sku">${ product_sku }` ),
+			'footer contains: Built with WooCommerce': ( response ) =>
+				response
+					.html()
+					.find( 'body footer' )
+					.text()
+					.includes( 'Built with WooCommerce' ),
 		} );
 	} );
 
