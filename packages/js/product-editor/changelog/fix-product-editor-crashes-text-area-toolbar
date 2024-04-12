@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Editor: Workaround a Gutenberg bug that resulted in a crash when clicking in the margin of the editor when the summary or description fields were focused, by reverting the changes that were made in #44166.
