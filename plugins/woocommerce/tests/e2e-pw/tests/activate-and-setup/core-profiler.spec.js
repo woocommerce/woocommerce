@@ -500,7 +500,7 @@ test.describe
 			page.getByRole( 'heading', {
 				name: 'Start customizing your store',
 			} )
-		).not.toBeVisible();
+		).toBeHidden();
 	} );
 
 	test( 'Store management displayed after task list complete/hidden', async ( {
@@ -545,6 +545,6 @@ test.describe
 		await page.getByRole( 'button', { name: 'Task List Options' } ).click();
 		await page.getByRole( 'button', { name: 'Hide this' } ).click();
 
-		await expect( page.getByText( 'Things to do next' ) ).not.toBeVisible();
+		await expect( page.getByText( 'Things to do next' ) ).toBeHidden();
 	} );
 } );
