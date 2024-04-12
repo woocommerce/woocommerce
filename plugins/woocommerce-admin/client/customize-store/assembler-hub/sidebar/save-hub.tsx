@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
@@ -37,7 +37,6 @@ import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/compon
  * Internal dependencies
  */
 import { CustomizeStoreContext } from '../';
-import { HighlightedBlockContext } from '../context/highlighted-block-context';
 
 const PUBLISH_ON_SAVE_ENTITIES = [
 	{
@@ -51,10 +50,7 @@ export const SaveHub = () => {
 	const urlParams = useQuery();
 	const { sendEvent } = useContext( CustomizeStoreContext );
 	const [ isResolving, setIsResolving ] = useState< boolean >( false );
-	const navigator = useNavigator();
-	const { resetHighlightedBlockClientId } = useContext(
-		HighlightedBlockContext
-	);
+
 	const isEditorLoading = useIsSiteEditorLoading();
 	// @ts-ignore No types for this exist yet.
 	const { __unstableMarkLastChangeAsPersistent } =
@@ -77,22 +73,6 @@ export const SaveHub = () => {
 		}[];
 		isDirty: boolean;
 	} = useIsDirty();
-
-	const { isSaving } = useSelect(
-		( select ) => {
-			return {
-				isSaving: dirtyEntityRecords.some( ( record ) =>
-					// @ts-ignore No types for this exist yet.
-					select( coreStore ).isSavingEntityRecord(
-						record.kind,
-						record.name,
-						record.key
-					)
-				),
-			};
-		},
-		[ dirtyEntityRecords ]
-	);
 
 	const {
 		// @ts-ignore No types for this exist yet.
@@ -172,7 +152,11 @@ export const SaveHub = () => {
 
 	if ( isMainScreen ) {
 		return (
-			<HStack className="edit-site-save-hub" alignment="right" spacing={ 4 }>
+			<HStack
+				className="edit-site-save-hub"
+				alignment="right"
+				spacing={ 4 }
+			>
 				<Button
 					variant="primary"
 					onClick={ onDone }
