@@ -6,6 +6,7 @@ providing a slot for specific actions related to the section in which it is incl
 ## Example
 
 ```jsx
+import { __experimentalSectionActions as SectionActions } from '@woocommerce/product-editor'
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
