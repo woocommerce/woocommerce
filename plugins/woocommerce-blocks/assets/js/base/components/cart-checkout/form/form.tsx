@@ -15,7 +15,13 @@ import {
 	BillingStateInput,
 	ShippingStateInput,
 } from '@woocommerce/base-components/state-input';
-import { useEffect, useMemo, useRef } from '@wordpress/element';
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -26,6 +32,7 @@ import {
 	FormFieldsConfig,
 } from '@woocommerce/settings';
 import { objectHasProp } from '@woocommerce/types';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -71,6 +78,18 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 			hidden: preparedFields.filter( ( field ) => field.hidden ),
 		};
 	}, [ currentFields, currentFieldConfig, currentCountry, addressType ] );
+
+	const [ isAddress2Visible, setIsAddress2Visible ] = useState(
+		objectHasProp( values, 'address_2' ) && values.address_2 !== ''
+	);
+
+	const toggleAddress2Visibility = useCallback(
+		( event: React.MouseEvent< HTMLElement > ) => {
+			event.preventDefault();
+			setIsAddress2Visible( ( prevVisibility ) => ! prevVisibility );
+		},
+		[]
+	);
 
 	// Stores refs for rendered fields so we can access them later.
 	const fieldsRef = useRef<
@@ -147,6 +166,54 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							} }
 							{ ...fieldProps }
 						/>
+					);
+				}
+
+				if ( field.key === 'address_2' ) {
+					return (
+						<>
+							{ isAddress2Visible ? (
+								<ValidatedTextInput
+									key={ field.key }
+									ref={ ( el ) =>
+										( fieldsRef.current[ field.key ] = el )
+									}
+									{ ...fieldProps }
+									type={ field.type }
+									value={ values[ field.key ] }
+									onChange={ ( newValue: string ) =>
+										onChange( {
+											...values,
+											[ field.key ]: newValue,
+										} )
+									}
+									customValidation={ (
+										inputObject: HTMLInputElement
+									) =>
+										customValidationHandler(
+											inputObject,
+											field.key,
+											objectHasProp( values, 'country' )
+												? values.country
+												: ''
+										)
+									}
+								/>
+							) : (
+								<button
+									key={ `${ field.key }-toggle` }
+									className={
+										'wc-block-components-address-form__address_2-toggle'
+									}
+									onClick={ toggleAddress2Visibility }
+								>
+									{ __(
+										'+ Add apartment, suite, etc.',
+										'woocommerce'
+									) }
+								</button>
+							) }
+						</>
 					);
 				}
 
