@@ -97,12 +97,12 @@ Current list of events:
 -   `experimental__woocommerce_blocks-cart-add-item` - Fired when an item is added to the cart.
 -   `experimental__woocommerce_blocks-cart-set-item-quantity` - Fired when cart item quantity is changed by the customer.
 -   `experimental__woocommerce_blocks-cart-remove-item` - Fired when a cart item is removed from the cart.
--   `experimental__woocommerce_blocks-cart-calculate-shipping` - Fired when shipping costs are calculated.
 -   `experimental__woocommerce_blocks-product-view-link` - Fired when a product link is clicked.
 -   `experimental__woocommerce_blocks-product-list-render` - Fired when a product list is rendered.
 -   `experimental__woocommerce_blocks-product-search` - Fired when a search is submitted.
 -   `experimental__woocommerce_blocks-store-notice-create` - Fired when a store notice is created.
 -   `experimental__woocommerce_blocks-product-render` - Fired when a single product block is rendered.
+-   `experimental__woocommerce_blocks-checkout-calculate-shipping` - Fired when shipping costs are calculated.
 -   `experimental__woocommerce_blocks-checkout-cart-render` - Fired when a cart block is rendered.
 -   `experimental__woocommerce_blocks-checkout-mini-cart-open` - Fired when the mini cart drawer is opened.
 -   `experimental__woocommerce_blocks-checkout-mini-cart-close` - Fired when the mini cart drawer is closed.

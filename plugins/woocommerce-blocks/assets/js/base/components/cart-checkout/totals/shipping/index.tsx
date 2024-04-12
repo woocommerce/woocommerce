@@ -56,7 +56,7 @@ export const TotalsShipping = ( {
 		shippingRates,
 		isLoadingRates,
 	} = useStoreCart();
-	const { dispatchStoreEvent } = useStoreEvents();
+	const { dispatchCheckoutEvent } = useStoreEvents();
 	const totalShippingValue = getTotalShippingValue( values );
 	const hasRates = hasShippingRate( shippingRates ) || totalShippingValue > 0;
 	const showShippingCalculatorForm =
@@ -138,7 +138,7 @@ export const TotalsShipping = ( {
 			{ showShippingCalculatorForm && (
 				<ShippingCalculator
 					onUpdate={ () => {
-						dispatchStoreEvent( 'calculate-shipping' );
+						dispatchCheckoutEvent( 'calculate-shipping' );
 						setIsShippingCalculatorOpen( false );
 					} }
 					onCancel={ () => {
