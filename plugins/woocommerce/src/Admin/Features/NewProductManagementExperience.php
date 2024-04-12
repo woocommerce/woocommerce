@@ -59,7 +59,7 @@ class NewProductManagementExperience {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page()) {
 			return;
 		}
 		wp_enqueue_style( 'wp-edit-blocks' );

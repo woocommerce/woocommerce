@@ -1,3 +1,8 @@
+.is-fullscreen-mode {
+	.woocommerce-product-block-editor {
+		padding-top: 0px;
+	}
+}
 .woocommerce-product-block-editor {
 	padding-top: 108px; // required space to locate the dashboard just below the admin bar. @todo: find a better way to do this.
 

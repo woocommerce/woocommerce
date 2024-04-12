@@ -300,7 +300,7 @@ class Features {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public static function load_scripts() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() && ! PageController::is_product_page() ) {
 			return;
 		}
 

@@ -28,8 +28,8 @@ $block_editor_context = new \WP_Block_Editor_Context( array( 'post' => $post ) )
 
 // Flag that we're loading the block editor.
 if ( function_exists( 'get_current_screen' ) ) {
-    $current_screen = get_current_screen();
-    $current_screen->is_block_editor(true);
+	$current_screen = get_current_screen();
+	$current_screen->is_block_editor(true);
 }
 
 // Default to is-fullscreen-mode to avoid jumps in the UI.
@@ -51,7 +51,7 @@ remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 add_filter( 'screen_options_show_screen', '__return_false' );
 
 wp_enqueue_script( 'heartbeat' );
-// wp_enqueue_script( 'wp-edit-post' );
+wp_enqueue_script( 'wp-edit-post' );
 
 $rest_path = rest_get_route_for_post( $post );
 
@@ -258,7 +258,12 @@ wp_enqueue_editor();
  * Styles
  */
 // wp_enqueue_style( 'wp-edit-post' );
+wp_enqueue_style( 'wp-edit-blocks' );
+wp_enqueue_style( 'wp-format-library' );
 
+wp_dequeue_style( 'woocommerce-blocktheme' );
+
+WCAdminAssets::register_style( 'product-editor', 'style', array( 'wp-components' ) );
 WCAdminAssets::register_script( 'wp-admin-scripts', 'product-editor', true, array('react', 'wc-admin-layout', 'wc-components', 'wc-customer-effort-score', 'wc-experimental', 'wc-navigation', 'wc-product-editor', 'wc-settings', 'wc-store-data', 'wc-tracks', 'wp-components', 'wp-core-data', 'wp-data', 'wp-element', 'wp-html-entities', 'wp-i18n', 'wp-plugins', 'wp-primitives') );
 
 /**
@@ -315,6 +320,10 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 ?>
 <style>
 	#screen-meta-links { display: none; }
+	#product-templates { display: none; }
+	#wpfooter { display: none; }
+	.notice { display: none; }
+	#message { display: none; }
 </style>
 <div class="wrap" >
 <div id="woocommerce-product-root" class="is-embed-loading">

@@ -118,7 +118,7 @@ class Init {
 	 * Enqueue scripts needed for the product form block editor.
 	 */
 	public function enqueue_scripts() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page() && ! PageController::is_product_page() ) {
 			return;
 		}
 
@@ -132,6 +132,9 @@ class Init {
 			'var productBlockEditorSettings = productBlockEditorSettings || ' . wp_json_encode( $editor_settings ) . ';',
 			'before'
 		);
+		if ( ! PageController::is_admin_or_embed_page() ) {
+			return;
+		}
 		wp_add_inline_script(
 			$script_handle,
 			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( $editor_settings['blockCategories'] ) ),
@@ -145,7 +148,7 @@ class Init {
 	 * Enqueue styles needed for the rich text editor.
 	 */
 	public function enqueue_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page()  ) {
 			return;
 		}
 		wp_enqueue_style( 'wp-edit-blocks' );
@@ -163,7 +166,7 @@ class Init {
 	 * Dequeue conflicting styles.
 	 */
 	public function dequeue_conflicting_styles() {
-		if ( ! PageController::is_admin_or_embed_page() ) {
+		if ( ! PageController::is_admin_or_embed_page()  ) {
 			return;
 		}
 		// Dequeing this to avoid conflicts, until we remove the 'woocommerce-page' class.
@@ -252,6 +255,7 @@ class Init {
 			},
 			$this->product_templates
 		);
+		error_log( print_r( $editor_settings, true ) );
 
 		$block_editor_context = new WP_Block_Editor_Context( array( 'name' => self::EDITOR_CONTEXT_NAME ) );
 
