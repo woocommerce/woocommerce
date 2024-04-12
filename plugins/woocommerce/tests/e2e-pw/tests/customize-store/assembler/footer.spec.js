@@ -3,6 +3,14 @@ const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
+const extractFooterClass = ( footerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-footer\S*/;
+
+	const match = footerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
+
 const test = base.extend( {
 	assemblerPage: async ( { page }, use ) => {
 		const assemblerPage = new AssemblerPage( { page } );
@@ -137,7 +145,6 @@ test.describe( 'Assembler -> Footers', () => {
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.all();
 
-		let index = 0;
 		for ( const footerPicker of footerPickers ) {
 			await footerPicker.waitFor();
 			await footerPicker.click();
@@ -156,16 +163,6 @@ test.describe( 'Assembler -> Footers', () => {
 			await expect(
 				await footerPattern.getAttribute( 'class' )
 			).toContain( expectedFooterClass );
-
-			index++;
 		}
 	} );
 } );
-
-const extractFooterClass = ( footerPickerClass ) => {
-	const regex = /\bwc-blocks-pattern-footer\S*/;
-
-	const match = footerPickerClass.match( regex );
-
-	return match ? match[ 0 ] : null;
-};

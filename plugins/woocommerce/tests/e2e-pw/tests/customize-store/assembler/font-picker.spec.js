@@ -87,7 +87,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 		await assembler.getByText( 'Choose fonts' ).click();
 	} );
 
-	test.only( 'Font pickers should be displayed', async ( { pageObject } ) => {
+	test( 'Font pickers should be displayed', async ( { pageObject } ) => {
 		const assembler = await pageObject.getAssembler();
 
 		const fontPickers = assembler.locator(

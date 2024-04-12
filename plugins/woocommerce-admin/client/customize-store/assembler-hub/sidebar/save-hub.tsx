@@ -16,7 +16,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHStack as HStack,
 	// @ts-ignore No types for this exist yet.
-	__experimentalUseNavigator as useNavigator,
 	Button,
 	Spinner,
 } from '@wordpress/components';

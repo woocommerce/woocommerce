@@ -3,6 +3,14 @@ const { AssemblerPage } = require( './assembler.page' );
 const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
+const extractHeaderClass = ( headerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-header\S*/;
+
+	const match = headerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
+
 const test = base.extend( {
 	assemblerPage: async ( { page }, use ) => {
 		const assemblerPage = new AssemblerPage( { page } );
@@ -136,7 +144,6 @@ test.describe( 'Assembler -> headers', () => {
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.all();
 
-		let index = 0;
 		for ( const headerPicker of headerPickers ) {
 			await headerPicker.waitFor();
 			await headerPicker.click();
@@ -155,16 +162,6 @@ test.describe( 'Assembler -> headers', () => {
 			await expect(
 				await headerPattern.getAttribute( 'class' )
 			).toContain( expectedHeaderClass );
-
-			index++;
 		}
 	} );
 } );
-
-const extractHeaderClass = ( headerPickerClass ) => {
-	const regex = /\bwc-blocks-pattern-header\S*/;
-
-	const match = headerPickerClass.match( regex );
-
-	return match ? match[ 0 ] : null;
-};
