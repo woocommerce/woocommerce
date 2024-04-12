@@ -49,15 +49,15 @@
 <!-- /wp:group -->
 
 <style>
-    body.page-template-coming-soon-entire-site {
+    body {
         background-color: #bea0f2;
     }
-    .page-template-coming-soon-entire-site .wp-block-loginout {
+    .wp-block-loginout {
         background-color: #000000;
         padding: 7px 17px;
         border-radius: 6px;
     }
-    .page-template-coming-soon-entire-site .wp-block-loginout a {
+    .wp-block-loginout a {
         color: #ffffff;
         text-decoration: none;
         line-height: 17px;
