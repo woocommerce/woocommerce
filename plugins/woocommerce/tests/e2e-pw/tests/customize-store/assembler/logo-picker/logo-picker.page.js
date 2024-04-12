@@ -67,6 +67,7 @@ export class LogoPickerPage {
 	}
 
 	async saveLogoSettings( assemblerLocator ) {
+		assemblerLocator.locator( '[aria-label="Back"]' ).click();
 		await assemblerLocator.getByText( 'Save' ).click();
 		const waitForLogoResponse = this.page.waitForResponse(
 			( response ) =>

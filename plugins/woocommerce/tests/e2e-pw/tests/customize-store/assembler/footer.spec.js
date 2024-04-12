@@ -80,31 +80,6 @@ test.describe( 'Assembler -> Footers', () => {
 		await expect( footer ).toHaveClass( /is-selected/ );
 	} );
 
-	test( 'The Done button should be visible after clicking save', async ( {
-		assemblerPage,
-		page,
-	} ) => {
-		const assembler = await assemblerPage.getAssembler();
-		const footer = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
-
-		await footer.click();
-
-		const saveButton = assembler.getByText( 'Save' );
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/template-parts' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
-	} );
-
 	test( 'The selected footer should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
@@ -122,6 +97,8 @@ test.describe( 'Assembler -> Footers', () => {
 		);
 
 		await footer.click();
+
+		assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

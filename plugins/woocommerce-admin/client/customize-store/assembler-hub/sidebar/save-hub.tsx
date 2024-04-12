@@ -153,28 +153,6 @@ export const SaveHub = () => {
 		}
 	}, [ isEditorLoading, isDirty, isMainScreen, save ] );
 
-	const onClickSaveButton = async () => {
-		const source = `${ urlParams.path.replace(
-			'/customize-store/assembler-hub/',
-			''
-		) }`;
-		recordEvent( 'customize_your_store_assembler_hub_save_click', {
-			source,
-		} );
-
-		try {
-			await save();
-			resetHighlightedBlockClientId();
-			navigator.goToParent();
-		} catch ( error ) {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore The types for this are incorrect.
-			createErrorNotice(
-				`${ __( 'Saving failed.', 'woocommerce' ) } ${ error }`
-			);
-		}
-	};
-
 	const onDone = async () => {
 		recordEvent( 'customize_your_store_assembler_hub_done_click' );
 		setIsResolving( true );
@@ -192,9 +170,9 @@ export const SaveHub = () => {
 		}
 	};
 
-	const renderButton = () => {
-		if ( isMainScreen ) {
-			return (
+	if ( isMainScreen ) {
+		return (
+			<HStack className="edit-site-save-hub" alignment="right" spacing={ 4 }>
 				<Button
 					variant="primary"
 					onClick={ onDone }
@@ -204,36 +182,9 @@ export const SaveHub = () => {
 					// @ts-ignore No types for this exist yet.
 					__next40pxDefaultSize
 				>
-					{ isResolving ? <Spinner /> : __( 'Done', 'woocommerce' ) }
+					{ isResolving ? <Spinner /> : __( 'Save', 'woocommerce' ) }
 				</Button>
-			);
-		}
-
-		// if we have only one unsaved change and it matches current context, we can show a more specific label
-		const label = isSaving
-			? __( 'Saving', 'woocommerce' )
-			: __( 'Save', 'woocommerce' );
-
-		const isDisabled = ! isDirty || isSaving;
-
-		return (
-			<Button
-				variant="primary"
-				onClick={ onClickSaveButton }
-				disabled={ isDisabled }
-				aria-disabled={ isDisabled }
-				className="edit-site-save-hub__button"
-				// @ts-ignore No types for this exist yet.
-				__next40pxDefaultSize
-			>
-				{ isSaving ? <Spinner /> : label }
-			</Button>
+			</HStack>
 		);
-	};
-
-	return (
-		<HStack className="edit-site-save-hub" alignment="right" spacing={ 4 }>
-			{ renderButton() }
-		</HStack>
-	);
+	}
 };
