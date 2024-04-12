@@ -162,12 +162,7 @@ export const assignFlags = assign<
 		return isFontLibraryAvailable;
 	},
 	flowType: ( _context, event ) => {
-		const flowTypeData = (
-			event as DoneInvokeEvent< {
-				data: FlowType;
-			} >
-		 ).data;
-
+		const flowTypeData = event as DoneInvokeEvent< FlowType >;
 		return flowTypeData.data;
 	},
 } );
