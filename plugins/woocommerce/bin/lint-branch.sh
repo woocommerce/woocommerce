@@ -12,12 +12,10 @@ baseBranch=${1:-"trunk"}
 
 changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.php')
 
-echo $changedFiles
-
 # Only complete this if changed files are detected.
 if [[ -z $changedFiles ]]; then
     echo "No changed files detected."
     exit 0
 fi
 
-composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+composer exec phpcs-changed -v -- -s --git --git-base $baseBranch $changedFiles
