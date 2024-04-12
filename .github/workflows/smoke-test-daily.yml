@@ -263,7 +263,7 @@ jobs:
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
                     - plugin: 'Woo Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
+                      repo: ${{ secrets.WC_SUBSCRIPTIONS_REPO }}
                       private: true
                       slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
