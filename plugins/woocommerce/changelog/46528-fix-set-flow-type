@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: CYS - set flowType when the state machine is instantiated
+
