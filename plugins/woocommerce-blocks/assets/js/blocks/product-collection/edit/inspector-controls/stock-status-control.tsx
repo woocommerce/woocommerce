@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import {
 	STOCK_STATUS_OPTIONS,
 	DEFAULT_FILTERS,
@@ -38,12 +38,13 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 }
 
 const StockStatusControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
 			woocommerceStockStatus: DEFAULT_FILTERS.woocommerceStockStatus,
 		} );
+		trackInteraction( CoreFilterNames.STOCK_STATUS );
 	};
 
 	return (
@@ -69,6 +70,7 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 					setQueryAttribute( {
 						woocommerceStockStatus,
 					} );
+					trackInteraction( CoreFilterNames.STOCK_STATUS );
 				} }
 				suggestions={ Object.values( STOCK_STATUS_OPTIONS ) }
 				validateInput={ ( value: string ) =>
