@@ -258,7 +258,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product categories';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product categories' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Clothing',
 			] );
@@ -298,7 +298,7 @@ test.describe( 'Product Collection', () => {
 			pageObject,
 		} ) => {
 			const filterName = 'Product tags';
-			await pageObject.addFilter( 'Show Taxonomies' );
+			await pageObject.addFilter( 'Show product tags' );
 			await pageObject.setFilterComboboxValue( filterName, [
 				'Recommended',
 			] );
@@ -1002,7 +1002,7 @@ test.describe( 'Product Collection', () => {
 			expect( termId ).toBe( '' );
 		} );
 
-		test( 'as generic in post', async ( {
+		test( 'as site in post', async ( {
 			admin,
 			editorUtils,
 			pageObject,
@@ -1019,7 +1019,7 @@ test.describe( 'Product Collection', () => {
 			const { type, sourceData } =
 				getLocationDetailsFromRequest( locationRequest );
 
-			expect( type ).toBe( 'generic' );
+			expect( type ).toBe( 'site' );
 			// Field is not sent at all. URLSearchParams get method returns a null
 			// if field is not available.
 			expect( sourceData ).toBe( null );

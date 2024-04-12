@@ -148,7 +148,8 @@ describe( 'Testing cart', () => {
 				return Promise.resolve( '' );
 			} );
 		} );
-		render( <CheckoutBlock /> );
+		const { rerender } = render( <CheckoutBlock /> );
+
 		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		expect(
@@ -156,7 +157,63 @@ describe( 'Testing cart', () => {
 		).toBeInTheDocument();
 
 		expect(
-			screen.getByText( 'Ontario', {
+			screen.getByText( 'Toronto ON M4W 1A6', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+
+		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
+		await act( () =>
+			dispatch( CART_STORE_KEY ).setShippingAddress( {
+				first_name: 'First Name JP',
+				last_name: 'Last Name JP',
+				company: '',
+				address_1: 'Address 1 JP',
+				address_2: '',
+				city: 'Kobe',
+				state: 'JP28',
+				postcode: '650-0000',
+				country: 'JP',
+				phone: '',
+			} )
+		);
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByText( 'Hyogo Kobe Address 1 JP', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+
+		// Testing the default address format
+		await act( () =>
+			dispatch( CART_STORE_KEY ).setShippingAddress( {
+				first_name: 'First Name GB',
+				last_name: 'Last Name GB',
+				company: '',
+				address_1: 'Address 1 GB',
+				address_2: '',
+				city: 'Liverpool',
+				state: 'Merseyside',
+				postcode: 'L1 0BP',
+				country: 'GB',
+				phone: '',
+			} )
+		);
+		rerender( <CheckoutBlock /> );
+
+		expect(
+			screen.getByText( 'Liverpool', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Merseyside', {
+				selector: '.wc-block-components-address-card span',
+			} )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( 'L1 0BP', {
 				selector: '.wc-block-components-address-card span',
 			} )
 		).toBeInTheDocument();

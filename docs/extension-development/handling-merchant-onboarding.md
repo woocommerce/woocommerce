@@ -285,9 +285,9 @@ add_action( 'admin_enqueue_scripts', 'add_task_register_script' );
 
 By following these steps, your custom task should appear in the WooCommerce onboarding tasklist.
 
-For a complete example of adding a custom task as a WordPress plugin, you can check out the [add-task examples directory](../../plugins/woocommerce-admin/docs/examples/extensions/add-task).
+For a complete example of adding a custom task as a WordPress plugin, you can check out the [add-task examples directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/docs/examples/extensions/add-task).
 
-To learn more about the tasklist, you can refer to the [tasklist documentation](../../plugins/woocommerce-admin/docs/features/onboarding-tasks.md).
+To learn more about the tasklist, you can refer to the [tasklist documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/docs/features/onboarding-tasks.md).
 
 
 ---

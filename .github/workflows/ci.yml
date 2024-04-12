@@ -125,8 +125,8 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
-          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
+          name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
           retention-days: 1
           compression-level: 9
           
@@ -162,7 +162,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
+          name: all-blob-api-reports-${{ matrix.shardNumber }}
           path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
           retention-days: 1
           compression-level: 9
@@ -241,10 +241,10 @@ jobs:
           fi
           echo "All jobs have completed successfully."
 
-  publish-e2e-test-reports:
-    name: 'Publish e2e test reports'
+  e2e-test-reports:
+    name: 'Report e2e tests results'
     needs: [ project-e2e-test-jobs ]
-    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
+    if: ${{ ! cancelled() && needs.project-e2e-test-jobs.result != 'skipped' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -258,8 +258,8 @@ jobs:
       - name: 'Download blob reports from artifacts'
         uses: actions/download-artifact@v4
         with:
-          path: ./out/allure-results
-          pattern: all-blob-reports-*
+          path: ./out
+          pattern: all-blob-e2e-reports-*
           run-id: project-e2e-test-jobs
           merge-multiple: true
 
@@ -275,49 +275,44 @@ jobs:
           if-no-files-found: ignore
           retention-days: 5
           
-      - name: 'Publish reports'
+      - name: 'Send workflow dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RUN_ID: ${{ github.run_id }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f e2e_artifact=e2e-test-report \
               -f pr_number=$PR_NUMBER \
-              -f commit_sha=$COMMIT_SHA \
+              -f commit_sha=$GITHUB_SHA \
               -f s3_root=public \
               --repo woocommerce/woocommerce-test-reports
           else
             gh workflow run publish-test-reports-trunk-merge.yml \
               -f run_id=$RUN_ID \
               -f artifact=e2e-test-report \
-              -f pr_number='' \
+              -f pr_number=$PR_NUMBER \
+              -f commit_sha=$GITHUB_SHA \
               -f test_type="e2e" \
               --repo woocommerce/woocommerce-test-reports
           fi
-
-
-  slack-alert-e2e-test:
-    name: 'Send Slack alert for e2e tests'
-    needs: [ project-e2e-test-jobs ]
-    if: ${{ github.event_name != 'pull_request' && ( contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) ) }}
-    runs-on: ubuntu-latest
-
-    steps:
+          
       - name: 'Send Slack notification'
+        if: github.event_name != 'pull_request'
         uses: automattic/action-test-results-to-slack@v0.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+          playwright_report_path: ./out/test-results-*.json
+          playwright_output_dir: ./out/results-data
 
-  publish-api-test-reports:
-    name: 'Publish API test reports'
+  api-test-reports:
+    name: 'Report API tests results'
     needs: [ project-api-test-jobs ]
-    if: ${{ contains( needs.*.result, 'success' ) || contains( needs.*.result, 'failure' ) }}
+    if: ${{ ! cancelled() && needs.project-api-test-jobs.result != 'skipped'}}
     runs-on: ubuntu-latest
 
     steps:
@@ -332,7 +327,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./out/allure-results
-          pattern: all-blob-reports-*
+          pattern: all-blob-api-reports-*
           run-id: project-api-test-jobs
           merge-multiple: true
 
@@ -353,21 +348,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RUN_ID: ${{ github.run_id }}
-          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
             gh workflow run publish-test-reports-pr.yml \
               -f run_id=$RUN_ID \
               -f api_artifact=api-test-report \
               -f pr_number=$PR_NUMBER \
-              -f commit_sha=$COMMIT_SHA \
+              -f commit_sha=$GITHUB_SHA \
               -f s3_root=public \
               --repo woocommerce/woocommerce-test-reports
           else
             gh workflow run publish-test-reports-trunk-merge.yml \
               -f run_id=$RUN_ID \
               -f artifact=api-test-report \
-              -f pr_number='' \
+              -f pr_number=$PR_NUMBER \
+              -f commit_sha=$GITHUB_SHA \
               -f test_type="api" \
               --repo woocommerce/woocommerce-test-reports
           fi
+          
+      - name: 'Send Slack notification'
+        if: github.event_name != 'pull_request'
+        uses: automattic/action-test-results-to-slack@v0.3.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
+          slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}

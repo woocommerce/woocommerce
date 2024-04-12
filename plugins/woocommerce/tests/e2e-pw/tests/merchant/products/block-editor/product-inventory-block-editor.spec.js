@@ -175,7 +175,7 @@ test( 'can limit purchases', async ( { page, product } ) => {
 		await page.goto( product.permalink );
 
 		await page.getByLabel( 'Product quantity' ).fill( '2' );
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
 		await expect(
 			page.getByText(
 				`2 × “${ product.name }” have been added to your cart.`
@@ -205,11 +205,14 @@ test( 'can limit purchases', async ( { page, product } ) => {
 		// Verify image in store frontend
 		await page.goto( product.permalink );
 
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
-		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
+		await page.locator( 'button[name="add-to-cart"]' ).click();
+
 		await expect(
 			page.getByText(
-				`You cannot add another "${ product.name }" to your cart.`
+				new RegExp(
+					`You cannot add another .${ product.name }. to your cart`
+				)
 			)
 		).toBeVisible();
 	} );

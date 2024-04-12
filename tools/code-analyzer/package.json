@@ -23,7 +23,7 @@
 		"commander": "^9.5.0",
 		"dotenv": "^10.0.0",
 		"simple-git": "^3.21.0",
-		"uuid": "^8.3.2"
+		"uuid": "^9.0.1"
 	},
 	"devDependencies": {
 		"@types/jest": "^27.5.2",

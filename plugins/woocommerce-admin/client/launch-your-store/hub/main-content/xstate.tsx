@@ -1,21 +1,32 @@
 /**
  * External dependencies
  */
-import { fromCallback, setup } from 'xstate5';
+import { assign, fromCallback, setup } from 'xstate5';
 import React from 'react';
 import { getQuery } from '@woocommerce/navigation';
+import type { TaskListType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { LoadingPage } from './pages/loading';
-import { LaunchYourStoreSuccess } from './pages/launch-store-success';
 import { SitePreviewPage } from './pages/site-preview';
 import type { LaunchYourStoreComponentProps } from '..';
 import { createQueryParamsListener, updateQueryParams } from '../common';
+import {
+	services as congratsServices,
+	events as congratsEvents,
+	actions as congratsActions,
+	LaunchYourStoreSuccess,
+} from './pages/launch-store-success';
 
 export type MainContentMachineContext = {
-	placeholder?: string; // remove this when we have some types to put here
+	congratsScreen: {
+		hasLoadedCongratsData: boolean;
+		hasCompleteSurvey: boolean;
+		allTasklists: TaskListType[];
+		activePlugins: string[];
+	};
 };
 
 export type MainContentComponentProps = LaunchYourStoreComponentProps & {
@@ -23,11 +34,14 @@ export type MainContentComponentProps = LaunchYourStoreComponentProps & {
 };
 export type MainContentMachineEvents =
 	| { type: 'SHOW_LAUNCH_STORE_SUCCESS' }
-	| { type: 'SHOW_LOADING' };
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'SHOW_LOADING' }
+	| congratsEvents;
 
 const contentQueryParamListener = fromCallback( ( { sendBack } ) => {
 	return createQueryParamsListener( 'content', sendBack );
 } );
+
 export const mainContentMachine = setup( {
 	types: {} as {
 		context: MainContentMachineContext;
@@ -52,11 +66,23 @@ export const mainContentMachine = setup( {
 	},
 	actors: {
 		contentQueryParamListener,
+		fetchCongratsData: congratsServices.fetchCongratsData,
 	},
 } ).createMachine( {
 	id: 'mainContent',
 	initial: 'navigate',
-	context: {},
+	context: {
+		congratsScreen: {
+			hasLoadedCongratsData: false,
+			hasCompleteSurvey: false,
+			allTasklists: [],
+			activePlugins: [],
+		},
+	},
+	invoke: {
+		id: 'contentQueryParamListener',
+		src: 'contentQueryParamListener',
+	},
 	states: {
 		navigate: {
 			always: [
@@ -86,6 +112,14 @@ export const mainContentMachine = setup( {
 		},
 		launchStoreSuccess: {
 			id: 'launchStoreSuccess',
+			invoke: [
+				{
+					src: 'fetchCongratsData',
+					onDone: {
+						actions: assign( congratsActions.assignCongratsData ),
+					},
+				},
+			],
 			entry: [
 				{
 					type: 'updateQueryParams',
@@ -94,6 +128,11 @@ export const mainContentMachine = setup( {
 			],
 			meta: {
 				component: LaunchYourStoreSuccess,
+			},
+			on: {
+				COMPLETE_SURVEY: {
+					actions: assign( congratsActions.assignCompleteSurvey ),
+				},
 			},
 		},
 		loading: {

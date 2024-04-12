@@ -3,9 +3,9 @@
  * Plugin Name: Woo AI
  * Plugin URI: https://github.com/woocommerce/woocommerce/
  * Description: Enable AI experiments within the WooCommerce experience. <a href="https://automattic.com/ai-guidelines" target="_blank" rel="noopener noreferrer">Learn more</a>.
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: WooCommerce
- * Author URI: https://woo.com/
+ * Author URI: https://woocommerce.com/
  * Requires at least: 5.8
  * Tested up to: 6.5
  * WC requires at least: 6.7

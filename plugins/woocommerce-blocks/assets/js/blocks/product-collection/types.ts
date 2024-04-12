@@ -81,16 +81,19 @@ export interface ProductCollectionQuery {
 	 * ),
 	 * ```
 	 */
-	woocommerceStockStatus?: string[];
-	woocommerceAttributes?: AttributeMetadata[];
-	isProductCollectionBlock?: boolean;
-	woocommerceHandPickedProducts?: string[];
-	priceRange?: undefined | PriceRange;
+	woocommerceStockStatus: string[];
+	woocommerceAttributes: AttributeMetadata[];
+	isProductCollectionBlock: boolean;
+	woocommerceHandPickedProducts: string[];
+	priceRange: undefined | PriceRange;
 }
 
 export type ProductCollectionEditComponentProps =
 	BlockEditProps< ProductCollectionAttributes > & {
 		openCollectionSelectionModal: () => void;
+		context: {
+			templateSlug: string;
+		};
 	};
 
 export type TProductCollectionOrder = 'asc' | 'desc';

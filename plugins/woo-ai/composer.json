@@ -1,12 +1,12 @@
 {
 	"name": "woocommerce/woo-ai",
 	"description": "Run AI experiments in WooCommerce.",
-	"homepage": "https://woo.com/",
+	"homepage": "https://woocommerce.com/",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"require": {
 		"composer/installers": "~1.7",
 		"ext-json": "*"
