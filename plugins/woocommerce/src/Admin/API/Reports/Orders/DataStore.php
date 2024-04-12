@@ -8,6 +8,8 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
@@ -553,31 +555,38 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function get_order_attributions_by_order_ids( $order_ids ) {
 		global $wpdb;
-		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
-		$included_order_ids        = implode( ',', $order_ids );
+		$order_meta_table   = OrdersTableDataStore::get_meta_table_name();
+		$included_order_ids = implode( ',', $order_ids );
 
-		// TODO: the following SQL gets from wp_wc_orders_meta table.
-		// We need to cater for legacy wp_postmeta table too.
-
-		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-		$order_attributions_meta = $wpdb->get_results(
-			"SELECT order_id, meta_key, meta_value
-				FROM wp_wc_orders_meta
-				WHERE
-					order_id IN ({$included_order_ids}) AND
-					meta_key IN ('_wc_order_attribution_source_type', '_wc_order_attribution_utm_source')
-				",
-			ARRAY_A
-		);
-		/* phpcs:enable */
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$order_attributions_meta = $wpdb->get_results(
+				"SELECT order_id, meta_key, meta_value
+					FROM $order_meta_table
+					WHERE order_id IN ({$included_order_ids})
+					AND meta_key IN ('_wc_order_attribution_source_type', '_wc_order_attribution_utm_source')
+					",
+				ARRAY_A
+			);
+			/* phpcs:enable */
+		} else {
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			$order_attributions_meta = $wpdb->get_results(
+				"SELECT post_id as order_id, meta_key, meta_value
+					FROM {$wpdb->prefix}postmeta
+					WHERE post_id IN ({$included_order_ids})
+					AND meta_key IN ('_wc_order_attribution_source_type', '_wc_order_attribution_utm_source')
+					",
+				ARRAY_A
+			);
+			/* phpcs:enable */
+		}
 
 		$order_attributions = array();
-
 		foreach ( $order_attributions_meta as $meta ) {
 			if ( ! isset( $order_attributions[ $meta['order_id'] ] ) ) {
 				$order_attributions[ $meta['order_id'] ] = array();
 			}
-
 			$order_attributions[ $meta['order_id'] ][ $meta['meta_key'] ] = $meta['meta_value'];
 		}
 
