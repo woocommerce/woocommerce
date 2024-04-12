@@ -14,10 +14,6 @@ import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
-import {
-	store as keyboardShortcutsStore,
-	useShortcut,
-} from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -97,25 +93,6 @@ export function BlockEditor( {
 		window.addEventListener( 'scroll', wpPinMenuEvent, { once: true } );
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
-
-	const { registerShortcut } = useDispatch( keyboardShortcutsStore );
-
-	useEffect( () => {
-		registerShortcut( {
-			name: 'core/editor/save',
-			category: 'global',
-			description: __( 'Save your changes.', 'woocommerce' ),
-			keyCombination: {
-				modifier: 'primary',
-				character: 's',
-			},
-		} );
-	}, [ registerShortcut ] );
-
-	useShortcut( 'core/editor/save', ( event ) => {
-		event.preventDefault();
-		console.log( event );
-	} );
 
 	const [ settingsGlobal, setSettingsGlobal ] = useState<
 		Partial< ProductEditorSettings > | undefined
