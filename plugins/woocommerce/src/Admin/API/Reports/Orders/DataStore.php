@@ -343,14 +343,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args  Query parameters.
 	 */
 	protected function include_extended_info( &$orders_data, $query_args ) {
-		$mapped_orders    = $this->map_array_by_key( $orders_data, 'order_id' );
-		$related_orders   = $this->get_orders_with_parent_id( $mapped_orders );
-		$order_ids        = array_merge( array_keys( $mapped_orders ), array_keys( $related_orders ) );
-		$products         = $this->get_products_by_order_ids( $order_ids );
-		$coupons          = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
+		$mapped_orders      = $this->map_array_by_key( $orders_data, 'order_id' );
+		$related_orders     = $this->get_orders_with_parent_id( $mapped_orders );
+		$order_ids          = array_merge( array_keys( $mapped_orders ), array_keys( $related_orders ) );
+		$products           = $this->get_products_by_order_ids( $order_ids );
+		$coupons            = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
 		$order_attributions = $this->get_order_attributions_by_order_ids( array_keys( $mapped_orders ) );
-		$customers        = $this->get_customers_by_orders( $orders_data );
-		$mapped_customers = $this->map_array_by_key( $customers, 'customer_id' );
+		$customers          = $this->get_customers_by_orders( $orders_data );
+		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
@@ -400,7 +400,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		foreach ( $order_attributions as $key => $order_attribution_data ) {
-			$mapped_data[ $key ][ 'origin' ] = $this->get_origin_label( $order_attribution_data['_wc_order_attribution_source_type'], $order_attribution_data['_wc_order_attribution_utm_source'] );
+			$mapped_data[ $key ]['origin'] = $this->get_origin_label( $order_attribution_data['_wc_order_attribution_source_type'], $order_attribution_data['_wc_order_attribution_utm_source'] );
 		}
 
 		foreach ( $orders_data as $key => $order_data ) {
