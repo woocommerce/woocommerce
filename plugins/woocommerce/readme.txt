@@ -170,6 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 **WooCommerce**
 
 * Fix - Fix wrong Shop title shown in classic themes after deleting the page [#46429](https://github.com/woocommerce/woocommerce/pull/46429)
+* Fix - Deprecate the $check_key_exists parameter from AssetDataRegistry and disallow duplicate data for all cases. [#46139](https://github.com/woocommerce/woocommerce/pull/46139)
 * Fix - Fixed an issue where orders could be placed when no shipping options were available [#46026](https://github.com/woocommerce/woocommerce/pull/46026)
 * Fix - Fix a bug where saved payment methods were not rendered correctly in the heckout block [#46019](https://github.com/woocommerce/woocommerce/pull/46019)
 * Fix - Removed count from is_array check to fix Analytics comparison filter. [#45939](https://github.com/woocommerce/woocommerce/pull/45939)
