@@ -31,7 +31,6 @@ test.describe( 'Shopper → Coupon', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -80,7 +79,6 @@ test.describe( 'Shopper → Coupon', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();

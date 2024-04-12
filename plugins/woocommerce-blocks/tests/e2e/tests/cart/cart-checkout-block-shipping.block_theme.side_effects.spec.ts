@@ -54,7 +54,6 @@ test.describe( 'Shopper → Shipping', () => {
 
 		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
 
-		await userFrontendUtils.emptyCart();
 		await userFrontendUtils.goToShop();
 		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await userFrontendUtils.goToCart();
@@ -74,7 +73,6 @@ test.describe( 'Shopper → Shipping', () => {
 		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
 		const userCheckoutPageObject = new CheckoutPage( { page: userPage } );
 
-		await userFrontendUtils.emptyCart();
 		await userFrontendUtils.goToShop();
 		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await userFrontendUtils.goToCheckout();

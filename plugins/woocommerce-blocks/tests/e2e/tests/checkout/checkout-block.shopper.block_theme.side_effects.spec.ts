@@ -55,7 +55,6 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			data: { value: 'yes' },
 		} );
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -133,7 +132,6 @@ test.describe( 'Shopper → Local pickup', () => {
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -156,7 +154,6 @@ test.describe( 'Shopper → Local pickup', () => {
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -193,7 +190,6 @@ test.describe( 'Shopper → Payment Methods', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -266,7 +262,6 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 				)
 			).toBeVisible();
 			await editorUtils.saveSiteEditorEntities();
-			await frontendUtils.emptyCart();
 		}
 	);
 
@@ -298,7 +293,6 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
 		await expect(
@@ -370,7 +364,6 @@ test.describe( 'Shopper → Place Guest Order', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -405,7 +398,6 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 	} ) => {
 		await localPickupUtils.disableLocalPickup();
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -438,7 +430,6 @@ test.describe( 'Shopper → Place Virtual Order', () => {
 	} ) => {
 		await localPickupUtils.enableLocalPickup();
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -469,7 +460,6 @@ test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -559,7 +549,6 @@ test.describe( 'Billing Address Form', () => {
 			page,
 			checkoutPageObject,
 		} ) => {
-			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();

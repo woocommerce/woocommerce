@@ -21,7 +21,6 @@ const test = base.extend< { pageObject: CartPage } >( {
 test.describe( 'Cart performance', () => {
 	test.beforeEach( async ( { frontendUtils } ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 	} );
 
