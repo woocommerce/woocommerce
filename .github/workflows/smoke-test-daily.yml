@@ -238,7 +238,7 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     test-plugins:
-        name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
+        name: E2E tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -283,7 +283,7 @@ jobs:
                   test-type: e2e
                   
             - name: Setup plugin for the main e2e suite
-              run: ./.github/workflows/scripts/install-plugin.sh
+              run: ./plugins/woocommerce/tests/e2e-pw/bin/install-plugin.sh
 
             - name: Run 'Upload plugin' test
               id: run-upload-plugin-test
