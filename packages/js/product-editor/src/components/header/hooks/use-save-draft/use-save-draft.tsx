@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { check } from '@wordpress/icons';
 import { createElement, Fragment } from '@wordpress/element';
 import { MouseEvent, ReactNode } from 'react';
+import { useShortcut } from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
@@ -69,22 +70,13 @@ export function useSaveDraft( {
 	// @ts-expect-error There are no types for this.
 	const { editEntityRecord, saveEditedEntityRecord } = useDispatch( 'core' );
 
-	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
-		if ( ariaDisabled ) {
-			return event.preventDefault();
-		}
-
-		if ( onClick ) {
-			onClick( event );
-		}
-
+	async function saveDraft() {
 		try {
 			await validate( { status: 'draft' } );
 
 			await editEntityRecord( 'postType', productType, productId, {
 				status: 'draft',
 			} );
-			// @ts-expect-error There are no types for this.
 			const publishedProduct = await saveEditedEntityRecord< Product >(
 				'postType',
 				productType,
@@ -104,6 +96,17 @@ export function useSaveDraft( {
 		}
 	}
 
+	async function handleClick( event: MouseEvent< HTMLButtonElement > ) {
+		if ( ariaDisabled ) {
+			return event.preventDefault();
+		}
+
+		if ( onClick ) {
+			onClick( event );
+		}
+		await saveDraft();
+	}
+
 	let children: ReactNode;
 	if ( productStatus === 'publish' ) {
 		children = __( 'Switch to draft', 'woocommerce' );
@@ -117,6 +120,13 @@ export function useSaveDraft( {
 			</>
 		);
 	}
+
+	useShortcut( 'core/editor/save', ( event ) => {
+		event.preventDefault();
+		if ( ! disabled ) {
+			saveDraft();
+		}
+	} );
 
 	return {
 		children,
