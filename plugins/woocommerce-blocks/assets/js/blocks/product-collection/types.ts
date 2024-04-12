@@ -138,6 +138,7 @@ export enum CoreFilterNames {
 	ORDER = 'order',
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
+	PRICE_RANGE = 'price-range',
 }
 
 export type CollectionName = CoreCollectionNames | string;
