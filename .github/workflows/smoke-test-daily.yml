@@ -3,7 +3,6 @@ on:
     schedule:
         - cron: '25 3 * * *'
     workflow_dispatch:
-    pull_request: 
 
 env:
     API_ARTIFACT: api-daily--run-${{ github.run_number }}
@@ -468,7 +467,7 @@ jobs:
               id: send-slack-message
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: 'C02180M7JFM'
+                  channel-id: ${{ secrets.DAILY_TEST_SLACK_CHANNEL }}
                   payload: ${{ steps.construct-slack-payload.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
