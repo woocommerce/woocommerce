@@ -317,7 +317,7 @@ jobs:
                       const script = require( './.github/actions/tests/slack-summary-daily/scripts/create-blocks-plugin-tests.js' )
                       script( { core } );
               env:
-                  UPLOAD_RESULT: 'skipped'
+                  UPLOAD_RESULT: ${{ steps.run-upload-plugin-test.outputs.result }}
                   E2E_RESULT: ${{ steps.run-e2e-composite-action.outputs.result }}
                   PLUGIN_NAME: ${{ matrix.plugin }}
                   PLUGIN_SLUG: ${{ matrix.slug }}
@@ -474,7 +474,7 @@ jobs:
               id: send-slack-message
               uses: slackapi/slack-github-action@v1.23.0
               with:
-                  channel-id: ${{ secrets.DAILY_TEST_SLACK_CHANNEL }}
+                  channel-id: 'C02180M7JFM'
                   payload: ${{ steps.construct-slack-payload.outputs.payload }}
               env:
                   SLACK_BOT_TOKEN: ${{ secrets.E2E_SLACK_TOKEN }}
