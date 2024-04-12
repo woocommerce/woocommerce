@@ -1006,17 +1006,13 @@ function wc_enqueue_js( $code, $handle = '' ) {
 
 	$handle = esc_js( $handle ?: wp_generate_uuid4() );
 
-	$block = implode('', [
-		"\n",
+	$code = implode( "\n", [
 		"/** wc_enqueued_js_start:$handle */",
-		"\n",
 		$code,
-		"\n",
 		"/** wc_enqueued_js_end:$handle */",
-		"\n",
-	]);
+	] );
 
-	$wc_queued_js .= $block;
+	$wc_queued_js .= "\n" . $code . "\n";
 }
 
 /**
