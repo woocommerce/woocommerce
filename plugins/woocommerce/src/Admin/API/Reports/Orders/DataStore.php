@@ -545,7 +545,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Get channel information from order IDs.
+	 * Get order attributions data from order IDs.
 	 *
 	 * @param array $order_ids Array of order IDs.
 	 * @return array
