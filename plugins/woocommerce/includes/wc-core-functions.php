@@ -1004,7 +1004,7 @@ function wc_enqueue_js( $code, $handle = '' ) {
 		$wc_queued_js = '';
 	}
 
-	$handle = $handle ?: wp_generate_uuid4();
+	$handle = esc_js( $handle ?: wp_generate_uuid4() );
 
 	$block = implode('', [
 		"\n",
