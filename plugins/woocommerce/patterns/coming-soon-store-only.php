@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: 404
+ * Title: Coming Soon Store Only
  * Slug: woocommerce/coming-soon-store-only
  * Categories: WooCommerce
  */
