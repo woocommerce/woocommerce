@@ -71,12 +71,12 @@ const launchStoreAction = async () => {
 	throw new Error( JSON.stringify( results ) );
 };
 
-const recordLaunchStoreAttempt = ( {
+const recordStoreLaunchAttempt = ( {
 	context,
 }: {
 	context: SidebarMachineContext;
 } ) => {
-	const total = context.tasklist?.fullLysTaskList.length || 0;
+	const total_count = context.tasklist?.fullLysTaskList.length || 0;
 	const incomplete_tasks =
 		context.tasklist?.tasks
 			.filter( ( task ) => ! task.isComplete )
@@ -87,26 +87,24 @@ const recordLaunchStoreAttempt = ( {
 			.filter( ( task ) => task.isComplete )
 			.map( ( task ) => task.id ) || [];
 
-	const completed_in_lys = completed.filter( ( task ) =>
+	const tasks_completed_in_lys = completed.filter( ( task ) =>
 		context.tasklist?.recentlyActionedTasks.includes( task )
 	); // recently actioned tasks can include incomplete tasks
 
 	recordEvent( 'launch_your_store_hub_store_launch_attempted', {
-		tasks: {
-			total, // all lys eligible tasks
-			completed, // all lys eligible tasks that are completed
-			completed_count: completed.length,
-			completed_in_lys,
-			completed_in_lys_count: completed_in_lys.length,
-			incomplete_tasks,
-			incomplete_tasks_count: incomplete_tasks.length,
-		},
+		tasks_total_count: total_count, // all lys eligible tasks
+		tasks_completed: completed, // all lys eligible tasks that are completed
+		tasks_completed_count: completed.length,
+		tasks_completed_in_lys,
+		tasks_completed_in_lys_count: tasks_completed_in_lys.length,
+		incomplete_tasks,
+		incomplete_tasks_count: incomplete_tasks.length,
 		delete_test_orders: context.removeTestOrders || false,
 	} );
 	return performance.now();
 };
 
-const recordLaunchStoreResults = ( timestamp: number, success: boolean ) => {
+const recordStoreLaunchResults = ( timestamp: number, success: boolean ) => {
 	recordEvent( 'launch_your_store_hub_store_launch_results', {
 		success,
 		duration: getTimeFrame( performance.now() - timestamp ),
@@ -154,13 +152,13 @@ export const sidebarMachine = setup( {
 			window.history.back();
 		},
 		recordStoreLaunchAttempt: assign( {
-			launchStoreAttemptTimestamp: recordLaunchStoreAttempt,
+			launchStoreAttemptTimestamp: recordStoreLaunchAttempt,
 		} ),
 		recordStoreLaunchResults: (
 			{ context },
 			{ success }: { success: boolean }
 		) => {
-			recordLaunchStoreResults(
+			recordStoreLaunchResults(
 				context.launchStoreAttemptTimestamp || 0,
 				success
 			);
