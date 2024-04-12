@@ -184,9 +184,6 @@ class LaunchYourStore {
 			// we should update the option to set autoload to yes.
 			$page_id_option = get_option( $option_name );
 			update_option( $option_name, $page_id_option, true );
-
-			// Place here for now to ensure its only done once.
-			
 		}
 	}
 
