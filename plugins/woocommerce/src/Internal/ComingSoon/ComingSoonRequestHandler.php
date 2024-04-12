@@ -71,10 +71,4 @@ class ComingSoonRequestHandler {
 
 		die();
 	}
-
-	private function maybe_set_cookie() {
-		if ( isset( $_GET['woo-share'] ) ) {
-			setcookie( 'woo-share', $_GET['woo-share'], time() + 60 * 60 * 24 * 90 ); // Expires after 90 days.
-		}
-	}
 }
