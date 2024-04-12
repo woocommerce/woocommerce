@@ -90,12 +90,9 @@ test.describe( 'General tab', () => {
 						) && response.status() === 200
 			);
 
-			await page.waitForFunction(
-				( [ selector, expectedCount ] ) =>
-					document.querySelectorAll( selector ).length ===
-					expectedCount,
-				[ '.woocommerce-product-list div[role="row"]', 4 ]
-			);
+			await expect(
+				page.getByRole( 'row', { name: 'Product name' } )
+			).toHaveCount( 4 );
 
 			const upsellsRows = page.locator(
 				'div.woocommerce-product-list div[role="table"] div[role="rowgroup"] div[role="row"]'

@@ -35,8 +35,12 @@
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
+		"lint:changes:branch:php": "pnpm lint:php:changes:branch",
+		"lint:lang:js": "eslint . --ext=js,ts",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
@@ -55,6 +59,7 @@
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
+		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:unit": "pnpm test:php",
@@ -80,7 +85,7 @@
 		"build_step": "pnpm build:zip",
 		"ci": {
 			"lint": {
-				"command": "lint:php:changes:branch <baseRef>",
+				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
 					"includes/**/*.php",
@@ -89,7 +94,8 @@
 					"templates/**/*.php",
 					"tests/php/**/*.php",
 					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php"
+					"tests/unit-tests/**/*.php",
+					"tests/**/*.js"
 				]
 			},
 			"tests": [
@@ -239,6 +245,21 @@
 					"testEnv": {
 						"start": "env:perf"
 					}
+				},
+				{
+					"name": "Metrics",
+					"testType": "performance",
+					"command": "test:metrics:ci",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/metrics/**"
+					]
 				}
 			]
 		}
@@ -293,7 +314,7 @@
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"browserslist": [
