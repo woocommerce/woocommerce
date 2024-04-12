@@ -13,16 +13,17 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { CoreFilterNames, QueryControlProps } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 const FeaturedProductsControl = ( props: QueryControlProps ) => {
-	const { query, setQueryAttribute } = props;
+	const { query, trackInteraction, setQueryAttribute } = props;
 
 	const deselectCallback = () => {
 		setQueryAttribute( {
 			featured: DEFAULT_FILTERS.featured,
 		} );
+		trackInteraction( CoreFilterNames.FEATURED );
 	};
 
 	return (
@@ -43,6 +44,7 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 						setQueryAttribute( {
 							featured,
 						} );
+						trackInteraction( CoreFilterNames.FEATURED );
 					} }
 				/>
 			</BaseControl>
