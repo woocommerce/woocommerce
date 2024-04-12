@@ -6,6 +6,7 @@ import { Popover } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { useResizeObserver } from '@wordpress/compose';
+import { PluginArea } from '@wordpress/plugins';
 import classNames from 'classnames';
 import { isWpVersion } from '@woocommerce/settings';
 import {
@@ -27,6 +28,10 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { ComplementaryArea } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -161,6 +166,9 @@ export function IframeEditor( {
 					} }
 					useSubRegistry={ true }
 				>
+					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+					<PluginArea scope="woocommerce-product-editor-iframe-editor" />
+
 					<HeaderToolbar
 						onSave={ () => {
 							appendEdit( temporalBlocks );
@@ -234,6 +242,7 @@ export function IframeEditor( {
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">
 								<BlockInspector />
+								<ComplementaryArea.Slot scope="woocommerce-product-editor-iframe-editor" />
 							</div>
 						) }
 					</div>
