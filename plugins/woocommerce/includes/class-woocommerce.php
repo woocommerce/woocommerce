@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -273,6 +275,8 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
+		$container->get( ComingSoonCacheInvalidator::class );
+		$container->get( ComingSoonRequestHandler::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -323,7 +327,7 @@ final class WooCommerce {
 
 		$coming_soon      = $is_new_install ? 'yes' : 'no';
 		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
-		$private_link     = 'yes';
+		$private_link     = 'no';
 		$share_key        = wp_generate_password( 32, false );
 
 		if ( false === get_option( 'woocommerce_coming_soon', false ) ) {

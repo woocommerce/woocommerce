@@ -39,7 +39,7 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
-	onClick: React.MouseEventHandler< HTMLElement >;
+	onClick?: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
 	onDismiss?: () => void;

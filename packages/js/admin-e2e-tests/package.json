@@ -67,7 +67,7 @@
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"jest-mock-extended": "^1.0.18",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"wireit": "0.14.3"

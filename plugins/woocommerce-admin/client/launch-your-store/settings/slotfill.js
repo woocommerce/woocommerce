@@ -188,9 +188,9 @@ const SiteVisibility = () => {
 						} }
 					/>
 				</div>
-				{ privateLink === 'yes' && (
+				{ comingSoon === 'yes' && privateLink === 'yes' && (
 					<div className="site-visibility-settings-slotfill-private-link">
-						{ getPrivateLink() }
+						<input value={ getPrivateLink() } readOnly />
 						<Button
 							ref={ copyClipboardRef }
 							variant="link"

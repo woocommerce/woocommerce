@@ -30,12 +30,11 @@ const templates = {
 		slug: 'taxonomy-product_cat',
 		frontendPage: '/product-category/music/',
 	},
-	// We don't have products with tags in the test site. Uncomment this when we have products with tags.
-	// 'taxonomy-product_tag': {
-	// 	templateTitle: 'Product Tag',
-	// 	slug: 'taxonomy-product_tag',
-	// 	frontendPage: '/product-tag/hoodie/',
-	// },
+	'taxonomy-product_tag': {
+		templateTitle: 'Product Tag',
+		slug: 'taxonomy-product_tag',
+		frontendPage: '/product-tag/recommended/',
+	},
 	'archive-product': {
 		templateTitle: 'Product Catalog',
 		slug: 'archive-product',

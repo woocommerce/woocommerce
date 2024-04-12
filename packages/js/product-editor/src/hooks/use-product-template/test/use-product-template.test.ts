@@ -22,6 +22,7 @@ describe( 'useProductTemplate', () => {
 					icon: 'icon',
 					order: 1,
 					layoutTemplateId: 'layout-template-1',
+					isSelectableByUser: true,
 					productData: {
 						type: 'simple',
 					},
@@ -32,6 +33,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Template 2 description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-2',
+					isSelectableByUser: true,
 					order: 2,
 					productData: {
 						type: 'grouped',
@@ -43,6 +45,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Template 3 description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-3',
+					isSelectableByUser: true,
 					order: 3,
 					productData: {
 						type: 'simple',
@@ -54,6 +57,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Standard Product Template description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-4',
+					isSelectableByUser: true,
 					order: 4,
 					productData: {
 						type: 'simple',
@@ -65,6 +69,7 @@ describe( 'useProductTemplate', () => {
 					description: 'Gift CardProduct Template description',
 					icon: 'icon',
 					layoutTemplateId: 'layout-template-5',
+					isSelectableByUser: true,
 					order: 5,
 					productData: {
 						type: 'simple',
