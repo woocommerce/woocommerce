@@ -319,7 +319,7 @@ class Loader {
 			);
 		}
 
-		$preload_data_endpoints                  = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
+		$preload_data_endpoints = apply_filters( 'woocommerce_component_settings_preload_endpoints', array() );
 		$preload_data_endpoints['jetpackStatus'] = '/jetpack/v4/connection';
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$preload_data = array_reduce(
