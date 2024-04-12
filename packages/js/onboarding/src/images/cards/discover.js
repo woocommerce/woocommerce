@@ -5,8 +5,8 @@ import { createElement } from '@wordpress/element';
 
 export default () => (
 	<svg
-		width="52"
-		height="35"
+		width="64"
+		height="40"
 		viewBox="0 0 52 35"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
