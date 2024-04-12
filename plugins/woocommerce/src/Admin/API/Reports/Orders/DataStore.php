@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
@@ -18,6 +19,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
  * API\Reports\Orders\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
+	use OrderAttributionMeta;
 
 	/**
 	 * Dynamically sets the date column name based on configuration
@@ -346,7 +348,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_ids        = array_merge( array_keys( $mapped_orders ), array_keys( $related_orders ) );
 		$products         = $this->get_products_by_order_ids( $order_ids );
 		$coupons          = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
-		$channels		  = $this->get_channels_by_order_ids( array_keys( $mapped_orders ) );
+		$order_attributions = $this->get_order_attributions_by_order_ids( array_keys( $mapped_orders ) );
 		$customers        = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers = $this->map_array_by_key( $customers, 'customer_id' );
 
@@ -397,25 +399,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 		}
 
-		foreach ( $channels as $channel ) {
-			if ( ! isset( $mapped_data[ $channel['order_id'] ] ) ) {
-				$mapped_data[ $channel['order_id'] ]['channel'] = array();
-			}
-
-			$mapped_data[ $channel['order_id'] ]['channel'][ $channel['meta_key'] ] = $channel['meta_value'];
+		foreach ( $order_attributions as $key => $order_attribution_data ) {
+			$mapped_data[ $key ][ 'origin' ] = $this->get_origin_label( $order_attribution_data['_wc_order_attribution_source_type'], $order_attribution_data['_wc_order_attribution_utm_source'] );
 		}
-
-		// TODO: based on the above channel meta values, 
-		// we want to get the final channel name based on the channel mapping.
-		// The following is an example that needs to be implemented.
-		$mapped_data[ $channel['order_id'] ]['channel']['name'] = 'Direct';
 
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
 				'products' => array(),
 				'coupons'  => array(),
 				'customer' => array(),
-				'channel'  => array(),
+				'origin'   => '',
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
@@ -558,7 +551,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $order_ids Array of order IDs.
 	 * @return array
 	 */
-	protected function get_channels_by_order_ids( $order_ids ) {
+	protected function get_order_attributions_by_order_ids( $order_ids ) {
 		global $wpdb;
 		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
 		$included_order_ids        = implode( ',', $order_ids );
@@ -567,18 +560,28 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// We need to cater for legacy wp_postmeta table too.
 
 		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-		$coupons = $wpdb->get_results(
+		$order_attributions_meta = $wpdb->get_results(
 			"SELECT order_id, meta_key, meta_value
 				FROM wp_wc_orders_meta
 				WHERE
 					order_id IN ({$included_order_ids}) AND
-					meta_key IN ('_wc_order_attribution_utm_source')
+					meta_key IN ('_wc_order_attribution_source_type', '_wc_order_attribution_utm_source')
 				",
 			ARRAY_A
 		);
 		/* phpcs:enable */
 
-		return $coupons;
+		$order_attributions = array();
+
+		foreach ( $order_attributions_meta as $meta ) {
+			if ( ! isset( $order_attributions[ $meta['order_id'] ] ) ) {
+				$order_attributions[ $meta['order_id'] ] = array();
+			}
+
+			$order_attributions[ $meta['order_id'] ][ $meta['meta_key'] ] = $meta['meta_value'];
+		}
+
+		return $order_attributions;
 	}
 
 	/**
