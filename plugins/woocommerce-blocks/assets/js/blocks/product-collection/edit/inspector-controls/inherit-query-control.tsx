@@ -16,7 +16,11 @@ import {
 /**
  * Internal dependencies
  */
-import { ProductCollectionQuery } from '../../types';
+import {
+	CoreFilterNames,
+	ProductCollectionQuery,
+	QueryControlProps,
+} from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
 import { getDefaultValueOfInheritQueryFromTemplate } from '../../utils';
 
@@ -63,15 +67,11 @@ const getHelpTextForTemplate = ( templateId: string ): string => {
 	return productArchiveHelpText;
 };
 
-interface InheritQueryControlProps {
-	setQueryAttribute: ( value: Partial< ProductCollectionQuery > ) => void;
-	query: ProductCollectionQuery | undefined;
-}
-
 const InheritQueryControl = ( {
 	setQueryAttribute,
+	trackInteraction,
 	query,
-}: InheritQueryControlProps ) => {
+}: QueryControlProps ) => {
 	const inherit = query?.inherit;
 	const editSiteStore = select( 'core/edit-site' );
 
@@ -105,6 +105,7 @@ const InheritQueryControl = ( {
 				setQueryAttribute( {
 					inherit: defaultValue,
 				} );
+				trackInteraction( CoreFilterNames.INHERIT );
 			} }
 		>
 			<ToggleControl
@@ -127,6 +128,7 @@ const InheritQueryControl = ( {
 							inherit: newInherit,
 						} );
 					}
+					trackInteraction( CoreFilterNames.INHERIT );
 				} }
 			/>
 		</ToolsPanelItem>
