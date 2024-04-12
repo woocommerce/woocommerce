@@ -287,7 +287,8 @@ jobs:
                   test-type: e2e
                   
             - name: Setup plugin for the main e2e suite
-              run: ./plugins/woocommerce/tests/e2e-pw/bin/install-plugin.sh
+              working-directory: ./plugins/woocommerce
+              run: ./tests/e2e-pw/bin/install-plugin.sh
 
             - name: Run 'Upload plugin' test
               id: run-upload-plugin-test
