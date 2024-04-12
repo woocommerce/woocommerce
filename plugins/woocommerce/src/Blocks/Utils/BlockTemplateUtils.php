@@ -510,6 +510,23 @@ class BlockTemplateUtils {
 	}
 
 	/**
+	 * Checks if we can fall back to a different template for a given slug.
+	 *
+	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-product_attribute` templates can
+	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
+	 *
+	 * @param string $template_slug Slug to check for fallbacks.
+	 * @return boolean
+	 */
+	public static function template_is_eligible_for_fallback( $template_slug ) {
+		$registered_template = self::get_template( $template_slug );
+		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
+			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
+		}
+		return false;
+	}
+
+	/**
 	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
 	 *
 	 * @param string $template_slug Slug to check for fallbacks.

@@ -76,13 +76,14 @@ class BlockTemplatesController {
 		$template_name_parts = explode( '//', $id );
 		$theme               = $template_name_parts[0] ?? '';
 		$slug                = $template_name_parts[1] ?? '';
+		$registered_template = BlockTemplateUtils::get_template( $slug );
 
-		if ( empty( $theme ) || empty( $slug ) || ! BlockTemplateUtils::template_is_eligible_for_fallback( $slug ) ) {
+		if ( empty( $theme ) || empty( $slug ) || ! $registered_template || ! isset( $registered_template->fallback_template ) ) {
 			return null;
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( ProductCatalogTemplate::SLUG, $slug ),
+			'post_name__in' => array( $registered_template->fallback_template, $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -103,7 +104,7 @@ class BlockTemplatesController {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && ProductCatalogTemplate::SLUG === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && $registered_template->fallback_template === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
