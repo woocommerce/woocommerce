@@ -35,7 +35,7 @@
 	// and right of the selected element, and top and bottom of the first/last elements.
 	label.wc-block-components-radio-control__option--checked-option-highlighted,
 	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
-		box-shadow: 0 0 0 0.1em currentColor inset;
+		box-shadow: 0 0 0 2px currentColor inset;
 		border-radius: 4px;
 	}
 
