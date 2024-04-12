@@ -10,7 +10,6 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import {
@@ -58,24 +57,9 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 		</Button>
 	);
 
-	const sidebarDescription = createInterpolateElement(
-		__(
-			'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to <WCSettingsLink>WooCommerce | Settings | General.</WCSettingsLink>',
-			'woocommerce'
-		),
-		{
-			WCSettingsLink: (
-				<Link
-					onClick={ () => {
-						props.sendEventToSidebar( {
-							type: 'OPEN_WC_ADMIN_URL',
-							url: 'admin.php?page=wc-settings&tab=general',
-						} );
-					} }
-					href=""
-				/>
-			),
-		}
+	const sidebarDescription = __(
+		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce | Settings | General.',
+		'woocommerce'
 	);
 
 	const hasIncompleteTasks =

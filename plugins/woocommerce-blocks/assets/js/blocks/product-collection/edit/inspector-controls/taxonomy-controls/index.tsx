@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Taxonomy } from '@wordpress/core-data/src/entity-types';
-import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -17,7 +16,6 @@ import {
  */
 import TaxonomyItem from './taxonomy-item';
 import { ProductCollectionQuery } from '../../../types';
-import { DEFAULT_FILTERS } from '../../../constants';
 
 interface TaxonomyControlProps {
 	query: ProductCollectionQuery;
@@ -54,20 +52,8 @@ function TaxonomyControls( {
 		return null;
 	}
 
-	const deselectCallback = () =>
-		setQueryAttribute( { taxQuery: DEFAULT_FILTERS.taxQuery } );
-
 	return (
-		<ToolsPanelItem
-			label={ __( 'Taxonomies', 'woocommerce' ) }
-			hasValue={ () =>
-				Object.values( taxQuery || {} ).some(
-					( terms ) => !! terms.length
-				)
-			}
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
-		>
+		<>
 			{ taxonomies.map( ( taxonomy: Taxonomy ) => {
 				const termIds = taxQuery?.[ taxonomy.slug ] || [];
 				const handleChange = ( newTermIds: number[] ) =>
@@ -78,16 +64,26 @@ function TaxonomyControls( {
 						},
 					} );
 
+				const deselectCallback = () => handleChange( [] );
+
 				return (
-					<TaxonomyItem
+					<ToolsPanelItem
 						key={ taxonomy.slug }
-						taxonomy={ taxonomy }
-						termIds={ termIds }
-						onChange={ handleChange }
-					/>
+						label={ taxonomy.name }
+						hasValue={ () => termIds.length }
+						onDeselect={ deselectCallback }
+						resetAllFilter={ deselectCallback }
+					>
+						<TaxonomyItem
+							key={ taxonomy.slug }
+							taxonomy={ taxonomy }
+							termIds={ termIds }
+							onChange={ handleChange }
+						/>
+					</ToolsPanelItem>
 				);
 			} ) }
-		</ToolsPanelItem>
+		</>
 	);
 }
 

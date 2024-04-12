@@ -69,8 +69,8 @@ importers:
         specifier: ^6.8.1
         version: 6.8.1(webpack@5.89.0)
       glob:
-        specifier: ^7.2.3
-        version: 7.2.3
+        specifier: ^10.3.10
+        version: 10.3.10
       husky:
         specifier: ^9.0.11
         version: 9.0.11
@@ -102,8 +102,8 @@ importers:
         specifier: ^2.88.2
         version: 2.88.2
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass:
         specifier: ^1.69.5
         version: 1.69.5
@@ -178,8 +178,8 @@ importers:
         specifier: ^1.0.18
         version: 1.0.18(jest@27.5.1)(typescript@5.3.3)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -242,8 +242,8 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2(react@17.0.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -381,8 +381,8 @@ importers:
         specifier: link:@testing-library/react-hooks^8.0.1
         version: link:@testing-library/react-hooks^8.0.1
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -576,8 +576,8 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2(react@17.0.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -907,8 +907,8 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -919,8 +919,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
       webpack:
         specifier: ^5.89.0
         version: 5.89.0(webpack-cli@3.3.12)
@@ -977,8 +977,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1035,8 +1035,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1150,8 +1150,8 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0(postcss@8.4.32)(webpack@5.89.0)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -1298,8 +1298,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1371,8 +1371,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1405,8 +1405,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1706,8 +1706,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1836,8 +1836,8 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0(postcss@8.4.32)(webpack@5.89.0)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -1915,8 +1915,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -1961,8 +1961,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2006,8 +2006,8 @@ importers:
         specifier: ^8.1.5
         version: 8.1.5
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       write-pkg:
         specifier: ^4.0.0
         version: 4.0.0
@@ -2088,8 +2088,8 @@ importers:
         specifier: ^8.55.0
         version: 8.55.0
       glob:
-        specifier: ^7.2.3
-        version: 7.2.3
+        specifier: ^10.3.10
+        version: 10.3.10
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -2143,8 +2143,8 @@ importers:
         specifier: 1.5.1
         version: 1.5.1
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2204,8 +2204,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2289,8 +2289,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2356,8 +2356,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2405,8 +2405,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -2511,8 +2511,8 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0(postcss@8.4.32)(webpack@5.89.0)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -2779,8 +2779,8 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2(react@17.0.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       sass-loader:
         specifier: ^10.5.0
         version: 10.5.0(sass@1.69.5)(webpack@5.89.0)
@@ -2834,8 +2834,8 @@ importers:
         specifier: ~27.5.1
         version: 27.5.1(ts-node@10.9.2)
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       ts-jest:
         specifier: ~29.1.1
         version: 29.1.1(@babel/core@7.23.5)(babel-jest@27.5.1)(jest@27.5.1)(typescript@5.3.3)
@@ -3145,8 +3145,8 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
       webpack:
         specifier: 5.70.0
         version: 5.70.0(webpack-cli@3.3.12)
@@ -3692,8 +3692,8 @@ importers:
         specifier: ^1.2.2
         version: 1.2.2
       rimraf:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: 5.0.5
+        version: 5.0.5
       rtlcss:
         specifier: ^2.6.2
         version: 2.6.2
@@ -4581,8 +4581,8 @@ importers:
         specifier: ^3.21.0
         version: 3.21.0
       uuid:
-        specifier: ^8.3.2
-        version: 8.3.2
+        specifier: ^9.0.1
+        version: 9.0.1
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -34455,7 +34455,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: true
@@ -47221,7 +47221,6 @@ packages:
     hasBin: true
     dependencies:
       glob: 10.3.10
-    dev: true
 
   /ripemd160@2.0.2:
     resolution: {integrity: sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==}

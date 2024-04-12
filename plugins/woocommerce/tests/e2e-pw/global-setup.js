@@ -1,9 +1,10 @@
-const { chromium, expect } = require( '@playwright/test' );
+const { chromium, expect, request } = require( '@playwright/test' );
 const { admin, customer } = require( './test-data/data' );
 const fs = require( 'fs' );
 const { site } = require( './utils' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { ENABLE_HPOS } = process.env;
+const { setOption } = require( './utils/options' );
 
 /**
  * @param {import('@playwright/test').FullConfig} config
@@ -55,6 +56,9 @@ module.exports = async ( config ) => {
 	const customerContext = await browser.newContext( contextOptions );
 	const adminPage = await adminContext.newPage();
 	const customerPage = await customerContext.newPage();
+
+	// Ensure live mode state (coming soon = no)
+	await setOption( request, baseURL, 'woocommerce_coming_soon', 'no' );
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
