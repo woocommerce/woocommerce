@@ -300,6 +300,7 @@ class BlockTemplateUtils {
 			'archive-product.html',
 			'coming-soon-entire-site.html',
 			'coming-soon-store-only.html',
+			'coming-soon.html',
 			'order-confirmation.html',
 			'page-cart.html',
 			'page-checkout.html',
