@@ -263,9 +263,6 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'Woo Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
                       slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
