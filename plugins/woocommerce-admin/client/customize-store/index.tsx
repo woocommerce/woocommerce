@@ -399,31 +399,9 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						{
 							// Otherwise, proceed to the next step.
 							cond: 'activeThemeHasMods',
-							target: 'preCheckAiStatus',
-						},
-					],
-				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
 							target: 'assemblerHub',
 						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'assemblerHub',
-						},
-					},
+					],
 				},
 				assemblerHub: {
 					entry: [
@@ -491,33 +469,11 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'preCheckAiStatus', // leave it as initialised default on error
+							target: 'transitional', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'preCheckAiStatus',
+							target: 'transitional',
 							actions: [ 'assignHasCompleteSurvey' ],
-						},
-					},
-				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'transitional' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
-							target: 'transitional',
-						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'transitional',
 						},
 					},
 				},
