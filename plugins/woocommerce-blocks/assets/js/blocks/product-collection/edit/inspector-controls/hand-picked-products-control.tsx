@@ -16,7 +16,7 @@ import {
 /**
  * Internal dependencies
  */
-import { QueryControlProps } from '../../types';
+import { QueryControlProps, CoreFilterNames } from '../../types';
 import { DEFAULT_FILTERS } from '../../constants';
 
 /**
@@ -59,6 +59,7 @@ function useProducts() {
 
 const HandPickedProductsControl = ( {
 	query,
+	trackInteraction,
 	setQueryAttribute,
 }: QueryControlProps ) => {
 	const selectedProductIds = query.woocommerceHandPickedProducts;
@@ -83,6 +84,7 @@ const HandPickedProductsControl = ( {
 					newHandPickedProductsSet
 				),
 			} );
+			trackInteraction( CoreFilterNames.HAND_PICKED );
 		},
 		[ setQueryAttribute, productsMap ]
 	);
@@ -121,6 +123,7 @@ const HandPickedProductsControl = ( {
 			woocommerceHandPickedProducts:
 				DEFAULT_FILTERS.woocommerceHandPickedProducts,
 		} );
+		trackInteraction( CoreFilterNames.HAND_PICKED );
 	};
 
 	return (
