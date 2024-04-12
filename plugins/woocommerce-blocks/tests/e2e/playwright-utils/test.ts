@@ -13,6 +13,7 @@ import {
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
+	DB_EXPORT_FILE,
 	EditorUtils,
 	FrontendUtils,
 	StoreApiUtils,
@@ -52,7 +53,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 	const type = message.type();
 	if (
 		! OBSERVED_CONSOLE_MESSAGE_TYPES.includes(
-			type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ]
+			type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ]
 		)
 	) {
 		return;
@@ -105,7 +106,8 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 		return;
 	}
 
-	const logFunction = type as typeof OBSERVED_CONSOLE_MESSAGE_TYPES[ number ];
+	const logFunction =
+		type as ( typeof OBSERVED_CONSOLE_MESSAGE_TYPES )[ number ];
 
 	// Disable reason: We intentionally bubble up the console message
 	// which, unless the test explicitly anticipates the logging via
@@ -159,12 +161,12 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		console.time( 'Database import time' );
 		const cliOutput = await cli(
-			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
 		);
-		console.log( cliOutput.stdout );
-		console.timeEnd( 'Database import time' );
+		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
+			throw new Error( `Failed to import ${ DB_EXPORT_FILE }` );
+		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
