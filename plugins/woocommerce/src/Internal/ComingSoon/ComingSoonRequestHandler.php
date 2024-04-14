@@ -59,7 +59,7 @@ class ComingSoonRequestHandler {
 
 		$template = get_query_template( 'coming-soon' );
 		include $template;
-		
+
 		die();
 	}
 }
