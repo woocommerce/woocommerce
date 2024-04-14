@@ -13,7 +13,7 @@ import classnames from 'classnames';
 import './style.scss';
 import { SiteVisibilityTour } from '../tour';
 import { useSiteVisibilityTour } from '../tour/use-site-visibility-tour';
-import { useComingSoonEditorLink } from '../hooks/use-coming-soon-editor-link';
+import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
 
 export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
@@ -26,7 +26,6 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 	const dropdownText = isComingSoon ? comingSoonText : liveText;
 	const { showTour, setShowTour, onClose, shouldTourBeShown } =
 		useSiteVisibilityTour();
-	const [ commingSoonPageLink ] = useComingSoonEditorLink();
 
 	return (
 		<div className="woocommerce-lys-status">
@@ -71,7 +70,9 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 									) }
 								</MenuItem>
 								{ isComingSoon && (
-									<MenuItem href={ commingSoonPageLink }>
+									<MenuItem
+										href={ COMING_SOON_PAGE_EDITOR_LINK }
+									>
 										<Icon icon={ edit } size={ 24 } />
 										{ __(
 											'Customize "Coming soon" page',

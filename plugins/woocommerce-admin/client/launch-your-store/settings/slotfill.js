@@ -22,8 +22,8 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
-import { useComingSoonEditorLink } from '../hooks/use-coming-soon-editor-link';
 import './style.scss';
+import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -48,7 +48,6 @@ const SiteVisibility = () => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
-	const [ commingSoonPageLink ] = useComingSoonEditorLink();
 
 	const getPrivateLink = () => {
 		if ( storePagesOnly === 'yes' ) {
@@ -118,7 +117,7 @@ const SiteVisibility = () => {
 						),
 						{
 							a: createElement( 'a', {
-								href: commingSoonPageLink,
+								href: COMING_SOON_PAGE_EDITOR_LINK,
 							} ),
 						}
 					) }
