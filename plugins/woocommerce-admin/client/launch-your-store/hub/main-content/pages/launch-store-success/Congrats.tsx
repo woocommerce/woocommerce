@@ -93,6 +93,9 @@ export const Congrats = ( {
 				</span>
 				<Button
 					onClick={ () => {
+						recordEvent(
+							'launch_your_store_congrats_back_to_home_click'
+						);
 						navigateTo( { url: '/' } );
 					} }
 					className="back-to-home-button"
@@ -125,7 +128,7 @@ export const Congrats = ( {
 								ref={ copyClipboardRef }
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_congrats_copy_store_link_click'
+										'launch_your_store_congrats_copy_store_link_click'
 									);
 								} }
 							>
@@ -136,7 +139,7 @@ export const Congrats = ( {
 								variant="primary"
 								onClick={ () => {
 									recordEvent(
-										'launch_you_store_congrats_preview_store_click'
+										'launch_your_store_congrats_preview_store_click'
 									);
 									window.open( homeUrl, '_blank' );
 								} }
@@ -256,8 +259,8 @@ export const Congrats = ( {
 											onClick={ () => {
 												recordEvent(
 													isWooExpress
-														? 'launch_you_store_congrats_survey_click'
-														: 'launch_you_store_on_core_congrats_survey_click'
+														? 'launch_your_store_congrats_survey_click'
+														: 'launch_your_store_on_core_congrats_survey_click'
 												);
 												sendData();
 											} }

@@ -68,8 +68,6 @@ jobs:
                         troubleshooting is done.  In order to confirm the bug, please follow one of the steps below:\n\n\
                         - Review [WooCommerce Self-Service Guide](https://woocommerce.com/document/woocommerce-self-service-guide/) \
                         to see if the solutions listed there apply to your case;\n\
-                        - If you are a paying customer of WooCommerce, contact WooCommerce support by \
-                        [opening a ticket or starting a live chat](https://woocommerce.com/contact-us/);\n\
                         - Make a post on [WooCommerce community forum](https://wordpress.org/support/plugin/woocommerce/)\n\n\
                         If you confirm the bug, please provide us with clear steps to reproduce it.\n\n\
                         We are closing this issue for now as it seems to be a support request and not a bug. \
