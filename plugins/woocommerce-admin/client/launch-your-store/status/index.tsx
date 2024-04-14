@@ -69,7 +69,12 @@ export const LaunchYourStoreStatus = ( {
 								<MenuItem
 									onClick={ () => {
 										recordEvent(
-											'launch_your_store_badge_menu_manage_site_visibility_click'
+											'launch_your_store_badge_menu_manage_site_visibility_click',
+											{
+												site_visibility: isComingSoon
+													? 'coming_soon'
+													: 'live',
+											}
 										);
 									} }
 									// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
