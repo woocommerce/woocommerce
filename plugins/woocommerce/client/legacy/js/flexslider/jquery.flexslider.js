@@ -496,7 +496,7 @@
 
               if ( ! scrolling || Number( new Date() ) - startT > fxms ) {
                 e.preventDefault();
-                if (!fade && slider.transitions) {
+                if (!fade) {
                   if (!slider.vars.animationLoop) {
                     dx = dx/((slider.currentSlide === 0 && dx < 0 || slider.currentSlide === slider.last && dx > 0) ? (Math.abs(dx)/cwidth+2) : 1);
                   }
@@ -684,7 +684,7 @@
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transitions) {
+
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
               slider.currentSlide = slider.animatingTo;
@@ -703,20 +703,6 @@
               slider.wrapup(dimension);
             }, slider.vars.animationSpeed + 100);
 
-          } else {
-            var prop = slider.prop;
-
-            slider.container.each(function() {
-              var container = this;
-              var currentStyle = {};
-              currentStyle[prop] = container.style[prop];
-
-              container.animate([currentStyle, slider.args], { duration: slider.vars.animationSpeed, easing: easing }).onfinish = function() {
-                container.style[prop] = slider.args[prop];
-                slider.wrapup(dimension);
-              };
-            });
-          }
         } else { // FADE:
           // if (!touch) calls slider.wrapup() on fade animation end; if (touch) calls slider.wrapup() immediately
           if (!touch) {
@@ -824,16 +810,17 @@
             return (posCalc * ((slider.vars.rtl)?1:-1)) + "px";
           }());
 
+      dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
+      slider.container.css("transition-duration", dur);
+
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
-        dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
-         slider.container.css("transition-duration", dur);
+      } else {
+        slider.container.css("transition-timing-funciton", easing);
       }
 
       slider.args[slider.prop] = target;
-      if (slider.transitions || dur === undefined) { slider.container.css(slider.args); }
-
-      slider.container.css('transform',target);
+      slider.container.css(slider.args);
     };
 
     slider.setup = function(type) {
