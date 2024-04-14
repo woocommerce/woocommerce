@@ -10,7 +10,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
-use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
@@ -275,7 +274,6 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
-		$container->get( ComingSoonCacheInvalidator::class );
 		$container->get( ComingSoonRequestHandler::class );
 
 		/**
