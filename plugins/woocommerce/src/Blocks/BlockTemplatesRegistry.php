@@ -47,8 +47,6 @@ class BlockTemplatesRegistry {
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),
 				ComingSoonTemplate::SLUG           => new ComingSoonTemplate(),
-				ComingSoonEntireSiteTemplate::SLUG => new ComingSoonEntireSiteTemplate(),
-				ComingSoonStoreOnlyTemplate::SLUG  => new ComingSoonStoreOnlyTemplate(),
 				OrderConfirmationTemplate::SLUG    => new OrderConfirmationTemplate(),
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);

@@ -39,6 +39,7 @@ class ComingSoonTemplate extends AbstractPageTemplate {
 	 * @return \WP_Post|null Post object or null.
 	 */
 	protected function get_placeholder_page() {
+        // not sure what to do about this.
 		$page_id = get_option( 'woocommerce_coming_soon_page_id' );
 		return $page_id ? get_post( $page_id ) : null;
 	}
