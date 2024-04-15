@@ -29,7 +29,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @testdox Test request parser displays a coming soon page to public visitor.
 	 */
 	public function test_coming_soon_mode_shown_to_visitor() {
-		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$wp          = new \WP();
 		$wp->request = '/';
@@ -42,7 +41,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	 * @testdox Test request parser displays a live page to public visitor.
 	 */
 	public function test_live_mode_shown_to_visitor() {
-		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
 		update_option( 'woocommerce_coming_soon', 'no' );
 		$wp          = new \WP();
 		$wp->request = '/';
