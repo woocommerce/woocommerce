@@ -2,8 +2,13 @@
  * External dependencies
  */
 import { BlockData } from '@woocommerce/e2e-types';
-import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { BASE_URL, cli } from '@woocommerce/e2e-utils';
+
+/**
+ * Internal dependencies
+ */
+import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const blockData: BlockData< {
 	urlSearchParamWhenFilterIsApplied: string;
@@ -22,6 +27,23 @@ const blockData: BlockData< {
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
+const test = base.extend< {
+	productCollectionPageObject: ProductCollectionPage;
+} >( {
+	productCollectionPageObject: async (
+		{ page, admin, editor, templateApiUtils, editorUtils },
+		use
+	) => {
+		const pageObject = new ProductCollectionPage( {
+			page,
+			admin,
+			editor,
+			templateApiUtils,
+			editorUtils,
+		} );
+		await use( pageObject );
+	},
+} );
 test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await admin.createNewPost( { legacyCanvas: true } );
@@ -195,18 +217,24 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	} );
 } );
 
-test.describe( `${ blockData.name } Block - with Product Query Block`, () => {
-	test.beforeEach( async ( { admin, editor, editorUtils } ) => {
-		await admin.createNewPost();
-		await editorUtils.insertBlockUsingGlobalInserter( 'Products (Beta)' );
-		await editor.insertBlock( { name: blockData.name } );
-		await editor.insertBlock( { name: 'woocommerce/active-filters' } );
-		await editorUtils.publishAndVisitPost();
-	} );
+test.describe( `${ blockData.name } Block - with Product Collection`, () => {
+	test.beforeEach(
+		async ( { admin, editorUtils, productCollectionPageObject } ) => {
+			await admin.createNewPost();
+			await productCollectionPageObject.insertProductCollection();
+			await productCollectionPageObject.chooseCollectionInPost(
+				'productCatalog'
+			);
+			await editorUtils.insertBlockUsingGlobalInserter(
+				'Filter by Price'
+			);
+			await editorUtils.publishAndVisitPost();
+		}
+	);
 
 	test( 'should show all products', async ( { page } ) => {
 		const products = page
-			.locator( '.wp-block-post-template' )
+			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 9 );
@@ -230,7 +258,7 @@ test.describe( `${ blockData.name } Block - with Product Query Block`, () => {
 		);
 
 		const products = page
-			.locator( '.wp-block-post-template' )
+			.locator( '.wp-block-woocommerce-product-template' )
 			.getByRole( 'listitem' );
 
 		await expect( products ).toHaveCount( 1 );
@@ -241,11 +269,15 @@ test.describe( `${ blockData.name } Block - with Product Query Block`, () => {
 		admin,
 		editor,
 		editorUtils,
+		productCollectionPageObject,
 	} ) => {
 		await admin.createNewPost();
-		await editorUtils.insertBlockUsingGlobalInserter( 'Products (Beta)' );
-		await editor.insertBlock( { name: blockData.name } );
-		await editor.insertBlock( { name: 'woocommerce/active-filters' } );
+		await productCollectionPageObject.insertProductCollection();
+		await productCollectionPageObject.chooseCollectionInPost(
+			'productCatalog'
+		);
+		await editorUtils.insertBlockUsingGlobalInserter( 'Filter by Price' );
+
 		const priceFilterControls = await editorUtils.getBlockByName(
 			'woocommerce/price-filter'
 		);
