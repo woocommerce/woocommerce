@@ -33,29 +33,37 @@ class LaunchYourStore {
 			return;
 		}
 
-		// valid options and their allowed values.
-		$allowed_options_values = array(
+		// options to allowed update and their allowed values.
+		$options = array(
 			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
 			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
 		);
 
-		$validated_options = array();
+		$event_data = array();
 
-		foreach ( $allowed_options_values as $name => $allowed_values ) {
+		foreach ( $options as $name => $allowed_values ) {
+			$current_value = get_option( $name, 'not set' );
+			$new_value     = $current_value;
+
 			if ( isset( $_POST[ $name ] ) ) {
 				$input_value = sanitize_text_field( wp_unslash( $_POST[ $name ] ) );
+
+				// no-op if input value is invalid.
 				if ( in_array( $input_value, $allowed_values, true ) ) {
 					update_option( $name, $input_value );
-					$validated_options[ $name ] = $input_value;
-				}
-				// do nothing if the value is not allowed.
-			}
-		}
+					$new_value = $input_value;
 
-		if ( ! empty( $validated_options ) ) {
-			wc_admin_record_tracks_event( 'site_visibility_saved', $validated_options );
+					// log the transition if there is one.
+					if ( $current_value !== $new_value ) {
+						$enabled_or_disabled              = yes === $new_value ? 'enabled' : 'disabled';
+						$event_data[ $name . '_toggled' ] = $enabled_or_disabled;
+					}
+				}
+			}
+			$event_data[ $name ] = $new_value;
 		}
+		wc_admin_record_tracks_event( 'site_visibility_saved', $event_data );
 	}
 
 	/**
