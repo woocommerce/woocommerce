@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, moreVertical, edit, cog } from '@wordpress/icons';
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import classnames from 'classnames';
 
 /**
@@ -69,17 +69,20 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 										'woocommerce'
 									) }
 								</MenuItem>
-								{ isComingSoon && (
-									<MenuItem
-										href={ COMING_SOON_PAGE_EDITOR_LINK }
-									>
-										<Icon icon={ edit } size={ 24 } />
-										{ __(
-											'Customize "Coming soon" page',
-											'woocommerce'
-										) }
-									</MenuItem>
-								) }
+								{ isComingSoon &&
+									getSetting( 'currentThemeIsFSETheme' ) && (
+										<MenuItem
+											href={
+												COMING_SOON_PAGE_EDITOR_LINK
+											}
+										>
+											<Icon icon={ edit } size={ 24 } />
+											{ __(
+												'Customize "Coming soon" page',
+												'woocommerce'
+											) }
+										</MenuItem>
+									) }
 							</MenuGroup>
 						</>
 					) }

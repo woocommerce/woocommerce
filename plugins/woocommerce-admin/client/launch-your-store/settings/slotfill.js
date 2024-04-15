@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -48,7 +49,6 @@ const SiteVisibility = () => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
-
 	const getPrivateLink = () => {
 		if ( storePagesOnly === 'yes' ) {
 			return (
@@ -110,17 +110,22 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ createInterpolateElement(
-						__(
-							'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
-							'woocommerce'
-						),
-						{
-							a: createElement( 'a', {
-								href: COMING_SOON_PAGE_EDITOR_LINK,
-							} ),
-						}
-					) }
+					{ getSetting( 'currentThemeIsFSETheme' )
+						? createInterpolateElement(
+								__(
+									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
+									'woocommerce'
+								),
+								{
+									a: createElement( 'a', {
+										href: COMING_SOON_PAGE_EDITOR_LINK,
+									} ),
+								}
+						  )
+						: __(
+								'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing.',
+								'woocommerce'
+						  ) }
 				</p>
 				<div
 					className={ classNames(
