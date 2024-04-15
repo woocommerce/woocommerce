@@ -130,7 +130,7 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		}
 		if ( $clear_datastore_cache ) {
 			$datastore = wc_get_container()->get( OrdersTableDataStore::class );
-			$datastore->invalidate_cache_for_objects( [ $retrieved_order->get_id() ] );
+			$datastore->invalidate_cache_for_objects( array( $retrieved_order->get_id() ) );
 			// Retrieving the order again should either return false because the order was not able to fully load as the data was missing.
 			$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
 			$this->assertFalse( $retrieved_order );
@@ -140,8 +140,5 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 			$this->assertInstanceOf( WC_Order::class, $retrieved_order );
 			$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
 		}
-
-
 	}
-
 }
