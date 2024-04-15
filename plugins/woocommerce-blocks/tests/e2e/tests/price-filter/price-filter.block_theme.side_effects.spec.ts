@@ -10,6 +10,7 @@ const blockData: BlockData< {
 	endpointAPI: string;
 	placeholderUrl: string;
 } > = {
+	slug: 'woocommerce/price-filter',
 	name: 'woocommerce/price-filter',
 	mainClass: '.wc-block-price-filter',
 	selectors: {
@@ -129,7 +130,6 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		);
 	} );
 } );
-// These tests are disabled because there is an issue with the default contents of this page, possible caused by other tests.
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
@@ -166,8 +166,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await expect( products ).toHaveCount( 16 );
 	} );
 
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'should show only products that match the filter', async ( {
+	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -193,5 +192,96 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.locator( '.product' );
 
 		await expect( products ).toHaveCount( 1 );
+	} );
+} );
+
+test.describe( `${ blockData.name } Block - with Product Query Block`, () => {
+	test.beforeEach( async ( { admin, editor, editorUtils } ) => {
+		await admin.createNewPost();
+		await editorUtils.insertBlockUsingGlobalInserter( 'Products (Beta)' );
+		await editor.insertBlock( { name: blockData.name } );
+		await editor.insertBlock( { name: 'woocommerce/active-filters' } );
+		await editorUtils.publishAndVisitPost();
+	} );
+
+	test( 'should show all products', async ( { page } ) => {
+		const products = page
+			.locator( '.wp-block-post-template' )
+			.getByRole( 'listitem' );
+
+		await expect( products ).toHaveCount( 16 );
+	} );
+
+	test( 'should show only products that match the filter', async ( {
+		page,
+		frontendUtils,
+	} ) => {
+		const maxPriceInput = page.getByRole( 'textbox', {
+			name: 'Filter products by maximum price',
+		} );
+
+		await frontendUtils.selectTextInput( maxPriceInput );
+		await maxPriceInput.fill( '$5' );
+		await maxPriceInput.press( 'Tab' );
+		await page.waitForURL( ( url ) =>
+			url
+				.toString()
+				.includes( blockData.urlSearchParamWhenFilterIsApplied )
+		);
+
+		const products = page
+			.locator( '.wp-block-post-template' )
+			.getByRole( 'listitem' );
+
+		await expect( products ).toHaveCount( 1 );
+	} );
+
+	test( 'should refresh the page only if the user click on button', async ( {
+		page,
+		admin,
+		editor,
+		editorUtils,
+	} ) => {
+		await admin.createNewPost();
+		await editorUtils.insertBlockUsingGlobalInserter( 'Products (Beta)' );
+		await editor.insertBlock( { name: blockData.name } );
+		await editor.insertBlock( { name: 'woocommerce/active-filters' } );
+		const priceFilterControls = await editorUtils.getBlockByName(
+			'woocommerce/price-filter'
+		);
+		await editor.selectBlocks( priceFilterControls );
+		await editor.openDocumentSettingsSidebar();
+		await page.getByText( "Show 'Apply filters' button" ).click();
+		await editorUtils.publishAndVisitPost();
+
+		const maxPriceInput = page.getByRole( 'textbox', {
+			name: 'Filter products by maximum price',
+		} );
+
+		await page.addInitScript( () => {
+			document.addEventListener( 'DOMContentLoaded', () => {
+				// eslint-disable-next-line dot-notation
+				window[ '__DOMContentLoaded__' ] = true;
+			} );
+		} );
+
+		await maxPriceInput.dblclick();
+		await maxPriceInput.fill( '$5' );
+		await page
+			.getByRole( 'button', { name: 'Apply price filter' } )
+			.click();
+
+		await page.waitForEvent( 'domcontentloaded' );
+
+		const domContentLoaded = await page.evaluate(
+			// eslint-disable-next-line dot-notation
+			() => window[ '__DOMContentLoaded__' ] === true
+		);
+
+		await expect( page.url() ).toContain(
+			blockData.urlSearchParamWhenFilterIsApplied
+		);
+
+		expect( domContentLoaded ).toBe( true );
 	} );
 } );
