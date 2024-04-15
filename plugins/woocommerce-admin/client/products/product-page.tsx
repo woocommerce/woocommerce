@@ -10,6 +10,7 @@ import {
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
+import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
@@ -64,9 +65,7 @@ export default function ProductPage() {
 						<WooFooterItem>
 							<>
 								<FeedbackBar productType="product" />
-								<Suspense
-									fallback={ <div>Loading feedback...</div> }
-								>
+								<Suspense fallback={ <Spinner /> }>
 									<ProductMVPFeedbackModalContainer
 										productId={
 											productId
@@ -78,7 +77,7 @@ export default function ProductPage() {
 							</>
 						</WooFooterItem>
 
-						<Suspense fallback={ <div>Loading tour...</div> }>
+						<Suspense fallback={ <Spinner /> }>
 							<BlockEditorTourWrapper />
 						</Suspense>
 					</>
