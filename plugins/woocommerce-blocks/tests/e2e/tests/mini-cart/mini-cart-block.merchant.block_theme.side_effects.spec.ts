@@ -9,8 +9,11 @@ const blockData: BlockData = {
 	slug: 'woocommerce/mini-cart',
 	mainClass: '.wc-block-minicart',
 	selectors: {
+		editor: {
+			block: '.wp-block-woocommerce-mini-cart',
+			insertButton: "//button//span[text()='Mini-Cart']",
+		},
 		frontend: {},
-		editor: {},
 	},
 };
 
@@ -54,10 +57,18 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			const miniCartButton = editorUtils.page
-				.getByLabel( 'WooCommerce', { exact: true } )
-				.getByRole( 'option', { name: blockData.name } );
+			// Await for blocks commercial to be loaded in the Blocks inserter.
+			await expect(
+				editorUtils.page.locator(
+					'.block-directory-downloadable-block-list-item__details'
+				)
+			).toBeVisible();
 
+			const miniCartButton = editorUtils.page.getByRole( 'option', {
+				name: blockData.name,
+			} );
+
+			await expect( miniCartButton ).toBeVisible();
 			await expect( miniCartButton ).toBeDisabled();
 		} );
 	} );
