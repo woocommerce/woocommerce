@@ -227,7 +227,7 @@
           "menu_title": "Common issues",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/contributing/common-issues.md",
-          "hash": "1d89051f8ed4cb566b9f1fb18f12ec15acc1365b0ae999783f94dfd2f2a26ace",
+          "hash": "9d8f0b78a0597ab22dce58e2b3707e3a08770bc22e2b901c0c6690928b1596bf",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/contributing/common-issues.md",
           "id": "5766fb43cf9135d5a2cceaf0d386ec14b57c9ba0"
         },
@@ -622,7 +622,7 @@
           "menu_title": "Payment Gateway API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/payments/payment-gateway-api.md",
-          "hash": "9a424247decbeee8f3b28ccb5ed9583137a4d1d826c4e33404ef56889bdca228",
+          "hash": "812b0beff6b99ca3ac54a896be7daf3c2baca79cc0ba6caa6010c5563c97bd8f",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/payments/payment-gateway-api.md",
           "id": "b337203996650b567f91c70306e1010d6f1ae552"
         }
@@ -675,7 +675,7 @@
           "post_title": "Writing high quality testing instructions",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
-          "hash": "77c0027dc13fa8970a2cff15a5467ea38d41812f05701717a324ae66ed8c790a",
+          "hash": "51fb384f8b1dfcb82fdbad6db08145b2c51dba6227529b8b54e2a281fc4b8ef7",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/quality-and-best-practices/writing-high-quality-testing-instructions.md",
           "id": "56a8ef0ef0afec9c884f655e7fdd23d9666c9d00"
         },
@@ -836,7 +836,7 @@
           "menu_title": "Shipping method API",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/shipping/shipping-method-api.md",
-          "hash": "ac3b99a8e8ffbd3a9f9d803b2066e121d6d7d70cf19623bde1bdd2977e18113f",
+          "hash": "40bf33d540692608fccec48e9a6cc08e51c510c894c32414723c75cc2d2dc3a8",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/shipping/shipping-method-api.md",
           "id": "70270a01c8f1f2b630c809c0b9611940e99293a9",
           "links": {
@@ -1241,5 +1241,5 @@
       "categories": []
     }
   ],
-  "hash": "8405edcef5099817f6f890009993f1f2542bdfac1c6a30db0507097ee15be782"
+  "hash": "ca683a7750097a24dfcb4b472ea3575dd40a05e0ce7bd9dd54277ed3ed30fa61"
 }
