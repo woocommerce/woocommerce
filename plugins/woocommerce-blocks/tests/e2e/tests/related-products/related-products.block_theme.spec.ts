@@ -32,13 +32,12 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( "can't be added in the Post Editor - Product Catalog Template", async ( {
 		admin,
 		editor,
-		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//archive-product`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 
 		try {
 			await editor.insertBlock( { name: blockData.slug } );
@@ -55,8 +54,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
 
 		await editor.setContent( '' );
 

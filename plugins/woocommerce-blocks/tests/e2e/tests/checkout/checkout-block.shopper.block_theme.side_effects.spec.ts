@@ -237,33 +237,31 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach(
-		async ( { editor, frontendUtils, admin, editorUtils, page } ) => {
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
+	test.beforeEach( async ( { editor, admin, editorUtils, page } ) => {
+		await admin.visitSiteEditor( {
+			postId: 'woocommerce/woocommerce//page-checkout',
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+		await editor.openDocumentSettingsSidebar();
+		await editor.selectBlocks(
+			blockSelectorInEditor +
+				'  [data-type="woocommerce/checkout-shipping-address-block"]'
+		);
 
-			const checkbox = page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.check();
-			await expect( checkbox ).toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'div.wc-block-components-address-form__company'
-				)
-			).toBeVisible();
-			await editorUtils.saveSiteEditorEntities();
-		}
-	);
+		const checkbox = page.getByRole( 'checkbox', {
+			name: 'Company',
+			exact: true,
+		} );
+		await checkbox.check();
+		await expect( checkbox ).toBeChecked();
+		await expect(
+			editor.canvas.locator(
+				'div.wc-block-components-address-form__company'
+			)
+		).toBeVisible();
+		await editorUtils.saveSiteEditorEntities();
+	} );
 
 	test( 'User can add postcodes for different countries', async ( {
 		frontendUtils,

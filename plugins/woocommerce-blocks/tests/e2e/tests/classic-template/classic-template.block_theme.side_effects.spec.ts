@@ -62,8 +62,8 @@ for ( const { templateTitle, slug } of Object.values( templates ) ) {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editorUtils.enterEditMode();
 			const block = await editorUtils.getBlockByName( blockData.name );
 
 			await expect( block ).toBeVisible();
@@ -75,14 +75,13 @@ for ( const { templateTitle, slug } of Object.values( templates ) ) {
 		test.skip( `is rendered on ${ templateTitle } template - frontend side`, async ( {
 			admin,
 			editor,
-			editorUtils,
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editorUtils.enterEditMode();
 			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: 'Hello World' },
