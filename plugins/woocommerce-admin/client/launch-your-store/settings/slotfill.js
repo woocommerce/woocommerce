@@ -49,6 +49,7 @@ const SiteVisibility = () => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
+
 	const getPrivateLink = () => {
 		if ( storePagesOnly === 'yes' ) {
 			return (
