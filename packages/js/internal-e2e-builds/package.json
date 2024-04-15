@@ -9,7 +9,7 @@
 		"get-babel-config.js"
 	],
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"bin": {
@@ -35,7 +35,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"chalk": "^4.1.2",
 		"eslint": "^8.55.0",
-		"glob": "^7.2.3",
+		"glob": "^10.3.10",
 		"lodash": "^4.17.21",
 		"mkdirp": "^1.0.4",
 		"wireit": "0.14.3"

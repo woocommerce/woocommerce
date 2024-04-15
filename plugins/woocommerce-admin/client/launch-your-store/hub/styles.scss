@@ -13,6 +13,7 @@
 		.launch-your-store-layout__container {
 			display: flex;
 			flex-direction: row;
+			background-color: #fcfcfc;
 
 			.launch-your-store-layout__sidebar {
 				width: 380px;
@@ -49,6 +50,7 @@
 						align-items: center;
 						padding-top: 16px;
 						padding-bottom: 0;
+						margin-bottom: 8px;
 						gap: 0;
 						width: 348px;
 						z-index: 2;
@@ -112,6 +114,7 @@
 						.edit-site-sidebar-navigation-screen__title {
 							flex-grow: 1;
 							padding: 0;
+
 							button {
 								font-size: 1rem;
 								color: $gray-900;
@@ -120,6 +123,7 @@
 								font-style: normal;
 								font-weight: 600;
 								line-height: 24px; /* 150% */
+								padding: 0;
 							}
 						}
 
@@ -129,6 +133,7 @@
 							font-style: normal;
 							font-weight: 400;
 							line-height: 20px; /* 153.846% */
+							margin-block: 0 32px;
 
 							a {
 								text-decoration: none;
@@ -157,7 +162,6 @@
 							.edit-site-sidebar-navigation-screen-essential-tasks__group-header,
 							.edit-site-sidebar-navigation-screen-test-data__group-header {
 								& .components-heading {
-									margin-top: 40px;
 									margin-bottom: 16px;
 								}
 							}
@@ -201,11 +205,11 @@
 									line-height: 16px; /* 123.077% */
 									letter-spacing: -0.078px;
 								}
-							}
 
-							.edit-site-sidebar-navigation-item.components-item
-							.edit-site-sidebar-navigation-item__drilldown-indicator {
-								fill: #ccc;
+								svg {
+									color: $gray-600;
+									fill: $gray-600;
+								}
 							}
 
 							.edit-site-sidebar-navigation-screen-remove-test-data__group {
