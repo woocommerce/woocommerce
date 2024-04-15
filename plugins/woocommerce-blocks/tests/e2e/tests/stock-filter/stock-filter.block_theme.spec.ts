@@ -4,8 +4,8 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const blockData = {
-	slug: 'Filter by Stock',
-	name: 'woocommerce/stock-filter',
+	name: 'Filter by Stock',
+	slug: 'woocommerce/stock-filter',
 };
 
 test.describe( `${ blockData.name } Block`, () => {
