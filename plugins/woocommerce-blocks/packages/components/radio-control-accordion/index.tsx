@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import { withInstanceId } from '@wordpress/compose';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,6 +23,8 @@ export interface RadioControlAccordionProps {
 		content: JSX.Element;
 	} >;
 	selected: string | null;
+	// Should the selected option be highlighted with a border?
+	highlightChecked?: boolean;
 }
 
 const RadioControlAccordion = ( {
@@ -31,8 +34,13 @@ const RadioControlAccordion = ( {
 	selected,
 	onChange,
 	options = [],
+	highlightChecked = false,
 }: RadioControlAccordionProps ): JSX.Element | null => {
 	const radioControlId = id || instanceId;
+
+	const selectedOptionNumber = useMemo( () => {
+		return options.findIndex( ( option ) => option.value === selected );
+	}, [ options, selected ] );
 
 	if ( ! options.length ) {
 		return null;
@@ -41,6 +49,15 @@ const RadioControlAccordion = ( {
 		<div
 			className={ classnames(
 				'wc-block-components-radio-control',
+				{
+					'wc-block-components-radio-control--highlight-checked':
+						highlightChecked,
+					'wc-block-components-radio-control--highlight-checked--first-selected':
+						highlightChecked && selectedOptionNumber === 0,
+					'wc-block-components-radio-control--highlight-checked--last-selected':
+						highlightChecked &&
+						selectedOptionNumber === options.length - 1,
+				},
 				className
 			) }
 		>
@@ -50,7 +67,13 @@ const RadioControlAccordion = ( {
 				const checked = option.value === selected;
 				return (
 					<div
-						className="wc-block-components-radio-control-accordion-option"
+						className={ classnames(
+							'wc-block-components-radio-control-accordion-option',
+							{
+								'wc-block-components-radio-control-accordion-option--checked-option-highlighted':
+									checked && highlightChecked,
+							}
+						) }
 						key={ option.value }
 					>
 						<RadioControlOption

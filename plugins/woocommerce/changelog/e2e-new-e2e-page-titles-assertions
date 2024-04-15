@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Adds some end to end tests to verify page titles of key WC pages

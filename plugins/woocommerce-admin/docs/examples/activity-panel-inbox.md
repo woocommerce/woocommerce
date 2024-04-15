@@ -20,7 +20,7 @@ The second category is what we’re focusing on in this example - and what we ex
 
 ![Activity Panel Inbox](images/activity-panel-inbox.png)
 
-This section is dedicated to informational content coming from multiple sources such as WooCommerce core, Woo.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
+This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
 
 Each notice or “note” has a type represented by an icon (Gridicon), a title, content, a timestamp and one or two actions (action title + link).
 
@@ -52,10 +52,10 @@ Here’s a short example plugin that adds a new activity panel inbox note on plu
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin One
- * Plugin URI: https://woo.com/
+ * Plugin URI: https://woocommerce.com/
  * Description: An example plugin.
  * Author: Automattic
- * Author URI: https://woo.com/
+ * Author URI: https://woocommerce.com/
  * Text Domain: wapi-example-one
  * Version: 1.0.1
  */
@@ -158,10 +158,10 @@ Here’s a short example plugin that updates an activity panel inbox note:
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin Two
- * Plugin URI: https://woo.com/
+ * Plugin URI: https://woocommerce.com/
  * Description: An example plugin.
  * Author: Automattic
- * Author URI: https://woo.com/
+ * Author URI: https://woocommerce.com/
  * Text Domain: wapi-example-plugin-two
  * Version: 1.0.0
  */

@@ -219,7 +219,7 @@
 		"react-refresh": "^0.14.0",
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"rtlcss": "^2.6.2",
 		"sass": "^1.69.5",
 		"sass-loader": "^10.5.0",
@@ -241,7 +241,7 @@
 		"@wordpress/data": "wp-6.0"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"config": {

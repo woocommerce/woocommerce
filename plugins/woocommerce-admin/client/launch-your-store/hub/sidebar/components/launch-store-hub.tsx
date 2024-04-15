@@ -4,9 +4,12 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { createInterpolateElement, useState } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useEffect,
+	useState,
+} from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Link } from '@woocommerce/components';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import {
@@ -18,6 +21,8 @@ import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
 	ToggleControl,
+	Notice,
+	Spinner,
 } from '@wordpress/components';
 
 /**
@@ -36,6 +41,7 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 			tasklist,
 			removeTestOrders: removeTestOrdersContext,
 			testOrderCount,
+			launchStoreError,
 		},
 	} = props;
 
@@ -51,24 +57,9 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 		</Button>
 	);
 
-	const sidebarDescription = createInterpolateElement(
-		__(
-			'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to <WCSettingsLink>WooCommerce | Settings | General.</WCSettingsLink>',
-			'woocommerce'
-		),
-		{
-			WCSettingsLink: (
-				<Link
-					onClick={ () => {
-						props.sendEventToSidebar( {
-							type: 'OPEN_WC_ADMIN_URL',
-							url: 'admin.php?page=wc-settings&tab=general',
-						} );
-					} }
-					href=""
-				/>
-			),
-		}
+	const sidebarDescription = __(
+		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce | Settings | General.',
+		'woocommerce'
 	);
 
 	const hasIncompleteTasks =
@@ -77,6 +68,23 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 	const [ removeTestOrders, setRemoveTestOrder ] = useState(
 		removeTestOrdersContext ?? true
 	);
+
+	const [ errorNoticeDismissed, setErrorNoticeDismissed ] = useState( false );
+	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+
+	const launchStoreAction = () => {
+		setHasSubmitted( true );
+		props.sendEventToSidebar( {
+			type: 'LAUNCH_STORE',
+			removeTestOrders,
+		} );
+	};
+
+	useEffect( () => {
+		if ( launchStoreError?.message ) {
+			setHasSubmitted( false );
+		}
+	}, [ launchStoreError?.message ] );
 
 	return (
 		<div
@@ -171,16 +179,40 @@ export const LaunchYourStoreHubSidebar: React.FC< SidebarComponentProps > = (
 					</>
 				) }
 				<ItemGroup className="edit-site-sidebar-navigation-screen-launch-store-button__group">
-					<Button
-						variant="primary"
-						onClick={ () => {
-							props.sendEventToSidebar( {
-								type: 'LAUNCH_STORE',
-								removeTestOrders,
-							} );
-						} }
-					>
-						{ __( 'Launch Store', 'woocommerce' ) }
+					{ launchStoreError?.message && ! errorNoticeDismissed && (
+						<Notice
+							className="launch-store-error-notice"
+							isDismissible={ true }
+							onRemove={ () => setErrorNoticeDismissed( true ) }
+							status="error"
+						>
+							{ createInterpolateElement(
+								__(
+									'Oops! We encountered a problem while launching your store. <retryButton/>',
+									'woocommerce'
+								),
+								{
+									retryButton: (
+										<Button
+											onClick={ launchStoreAction }
+											variant="tertiary"
+										>
+											{ __(
+												'Please try again',
+												'woocommerce'
+											) }
+										</Button>
+									),
+								}
+							) }
+						</Notice>
+					) }
+					<Button variant="primary" onClick={ launchStoreAction }>
+						{ hasSubmitted ? (
+							<Spinner />
+						) : (
+							__( 'Launch your store', 'woocommerce' )
+						) }
 					</Button>
 				</ItemGroup>
 			</SidebarContainer>
