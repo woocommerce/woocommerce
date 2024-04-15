@@ -168,7 +168,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		frontendUtils,
 	} ) => {
 		const stockFilter = await frontendUtils.getBlockByName(
-			blockData.slug
+			'woocommerce/filter-wrapper'
 		);
 
 		await stockFilter.getByText( 'Out of Stock' ).click();
