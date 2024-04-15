@@ -28,10 +28,12 @@ import {
 	// @ts-ignore
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { ComplementaryArea } from '@wordpress/interface';
+import {
+	ComplementaryArea,
+	store as interfaceStore,
+	// @ts-expect-error No types for this exist yet.
+} from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -110,13 +112,22 @@ export function IframeEditor( {
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 
-	const { hasFixedToolbar } = useSelect( ( select ) => {
+	const { hasFixedToolbar, isRightSidebarOpen } = useSelect( ( select ) => {
 		// @ts-expect-error These selectors are available in the block data store.
 		const { get: getPreference } = select( preferencesStore );
+
+		// @ts-expect-error These selectors are available in the interface data store.
+		const { getActiveComplementaryArea } = select( interfaceStore );
+
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
+			isRightSidebarOpen: getActiveComplementaryArea(
+				'woocommerce-product-editor-iframe-editor'
+			),
 		};
 	}, [] );
+
+	console.log( 'isRightSidebarOpen', isRightSidebarOpen );
 
 	useEffect( () => {
 		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
@@ -166,9 +177,6 @@ export function IframeEditor( {
 					} }
 					useSubRegistry={ true }
 				>
-					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-					<PluginArea scope="woocommerce-product-editor-iframe-editor" />
-
 					<HeaderToolbar
 						onSave={ () => {
 							appendEdit( temporalBlocks );
@@ -242,10 +250,14 @@ export function IframeEditor( {
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">
 								<BlockInspector />
-								<ComplementaryArea.Slot scope="woocommerce-product-editor-iframe-editor" />
+								{ isRightSidebarOpen && (
+									<ComplementaryArea.Slot scope="woocommerce-product-editor-iframe-editor" />
+								) }
 							</div>
 						) }
 					</div>
+					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
+					<PluginArea scope="woocommerce-product-editor-iframe-editor" />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
 		</div>
