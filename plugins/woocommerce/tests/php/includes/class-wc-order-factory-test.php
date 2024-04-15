@@ -125,18 +125,9 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 			}
 		}
 
-		/**
-		 * Retrieving the order again should either:
-		 * - return false because the order was not able to fully load.
-		 * - return a fully loaded order. Our direct DB write purposefully does not trigger a cache refresh so a fully
-		 *      loaded order should also be an expected result with cache enabled.
-		 */
+		// Retrieving the order again should either return false because the order was not able to fully load.
 		$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
-		if ( is_object( $retrieved_order ) ) {
-			$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
-		} else {
-			$this->assertFalse( $retrieved_order );
-		}
+		$this->assertFalse( $retrieved_order );
 	}
 
 }
