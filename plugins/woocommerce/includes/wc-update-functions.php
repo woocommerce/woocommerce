@@ -2688,7 +2688,7 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 	if ( ! str_contains( $note->get_title(), 'Woo.com' ) ) {
 		return;
 	}
-	if ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_SNOOZED && $note->get_status() !== Note::E_WC_ADMIN_NOTE_UNACTIONED) {
+	if ( $note->get_status() !== Note::E_WC_ADMIN_NOTE_SNOOZED && $note->get_status() !== Note::E_WC_ADMIN_NOTE_UNACTIONED ) {
 		return;
 	}
 	Notes::delete_notes_with_name( WooSubscriptionsNotes::CONNECTION_NOTE_NAME );
