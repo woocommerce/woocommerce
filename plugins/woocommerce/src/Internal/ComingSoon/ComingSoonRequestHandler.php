@@ -63,7 +63,7 @@ class ComingSoonRequestHandler {
 			// A coming soon page needs to be displayed. Don't cache this response.
 			nocache_headers();
 			return $coming_soon_template;
-		};
+		}
 
 		return $template;
 	}
