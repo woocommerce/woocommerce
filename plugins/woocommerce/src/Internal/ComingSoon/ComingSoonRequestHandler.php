@@ -70,7 +70,16 @@ class ComingSoonRequestHandler {
 		add_theme_support( 'block-template-parts' );
 
 		$template = get_query_template( 'coming-soon' );
+
+		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+			get_header();
+		}
+
 		include $template;
+
+		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+			get_footer();
+		}
 
 		die();
 	}
