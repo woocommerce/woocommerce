@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Use a public helper API endpoint update-check-public to check latest versions of Woo extensions and show a plugin update message in the plugin table list to connect to Woo.com.
+Use a public helper API endpoint update-check-public to check latest versions of WooCommerce extensions and show a plugin update message in the plugin table list to connect to woocommerce.com.

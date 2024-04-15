@@ -167,7 +167,7 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to Woo.com for unconnected stores
+	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to woocommerce.com for unconnected stores
 	 *
 	 * @return void.
 	 */
@@ -184,7 +184,7 @@ class WC_Helper_Updater {
 		printf(
 			wp_kses(
 			/* translators: 1: Woo Update Manager plugin install URL */
-				__( ' <a href="%1$s">Connect your store</a> to Woo.com to update.', 'woocommerce' ),
+				__( ' <a href="%1$s">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
 				array(
 					'a' => array(
 						'href' => array(),
