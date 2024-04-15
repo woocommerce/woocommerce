@@ -1,29 +1,14 @@
 /**
  * External dependencies
  */
-import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL, cli } from '@woocommerce/e2e-utils';
 
-const blockData: BlockData< {
-	urlSearchParamWhenFilterIsApplied: string;
-	endpointAPI: string;
-	placeholderUrl: string;
-} > = {
-	slug: 'woocommerce/price-filter',
+const blockData = {
 	name: 'woocommerce/price-filter',
-	mainClass: '.wc-block-price-filter',
-	selectors: {
-		frontend: {},
-		editor: {},
-	},
-	urlSearchParamWhenFilterIsApplied: '?max_price=5',
-	endpointAPI: 'max_price=500',
-	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, page, editor } ) => {
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.createNewPost();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
