@@ -407,7 +407,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'products' => array(),
 				'coupons'  => array(),
 				'customer' => array(),
-				'origin'   => '',
+				'origin'   => __( 'Unknown', 'woocommerce' ),
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
