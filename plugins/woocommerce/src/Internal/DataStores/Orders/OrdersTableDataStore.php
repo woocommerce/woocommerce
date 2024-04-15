@@ -1631,7 +1631,7 @@ WHERE
 		);
 		// phpcs:enable
 
-		$order_data      = array();
+		$order_data = array();
 
 		foreach ( $table_data as $table_datum ) {
 			$id                = $table_datum->{"{$order_table_alias}_id"};
