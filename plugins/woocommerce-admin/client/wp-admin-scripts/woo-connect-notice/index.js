@@ -1,11 +1,14 @@
-window.jQuery( document ).ready( function() {
+window.jQuery( document ).ready( function () {
 	// hide the notice when the customer clicks the dismiss button up until 1 month, then it will be shown again.
 	const wooConnectNoticeSelector = '.woo-connect-notice';
 	const localStorageKey = 'woo-connect-notice-settings-dismissed';
 
 	window.jQuery( wooConnectNoticeSelector ).on( "click", "button.notice-dismiss", function() {
-			window.localStorage.setItem( localStorageKey, new Date().toString() );
-	});
+			window.localStorage.setItem(
+				localStorageKey,
+				new Date().toString()
+			);
+		} );
 
 	let shouldHideNotice = false;
 
