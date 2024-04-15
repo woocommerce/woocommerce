@@ -7,7 +7,7 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
  * Internal dependencies
  */
 
-test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load', async () => {
+test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load', () => {
 	test( 'Load the home page', async ( { page } ) => {
 		await page.goto( '/' );
 		const title = page
