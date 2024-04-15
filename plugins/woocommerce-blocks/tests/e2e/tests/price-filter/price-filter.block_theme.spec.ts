@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { BASE_URL } from '@woocommerce/e2e-utils';
+import { BASE_URL, cli } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
