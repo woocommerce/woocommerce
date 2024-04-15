@@ -28,29 +28,33 @@ class LaunchYourStore {
 	 * @return void
 	 */
 	public function save_site_visibility_options() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'woocommerce-settings' ) ) {
+		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'woocommerce-settings' ) ) {
 			return;
 		}
 
-		$options = array(
+		// valid options and their allowed values.
+		$allowed_options_values = array(
 			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
 			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
 		);
 
-		$at_least_one_saved = false;
-		foreach ( $options as $name => $option ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			if ( isset( $_POST[ $name ] ) && in_array( $_POST[ $name ], $option, true ) ) {
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				update_option( $name, wp_unslash( $_POST[ $name ] ) );
-				$at_least_one_saved = true;
+		$validated_options = array();
+
+		foreach ( $allowed_options_values as $name => $allowed_values ) {
+			if ( isset( $_POST[ $name ] ) ) {
+				$input_value = sanitize_text_field( wp_unslash( $_POST[ $name ] ) );
+				if ( in_array( $input_value, $allowed_values, true ) ) {
+					update_option( $name, $input_value );
+					$validated_options[ $name ] = $input_value;
+				}
+				// do nothing if the value is not allowed.
 			}
 		}
 
-		if ( $at_least_one_saved ) {
-			wc_admin_record_tracks_event( 'site_visibility_saved' );
+		if ( ! empty( $validated_options ) ) {
+			wc_admin_record_tracks_event( 'site_visibility_saved', $validated_options );
 		}
 	}
 
