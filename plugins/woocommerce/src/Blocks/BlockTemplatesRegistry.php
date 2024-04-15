@@ -53,7 +53,9 @@ class BlockTemplatesRegistry {
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);
 		} else {
-			$templates = array();
+			$templates = array(
+				ComingSoonTemplate::SLUG => new ComingSoonTemplate(),
+			);
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(

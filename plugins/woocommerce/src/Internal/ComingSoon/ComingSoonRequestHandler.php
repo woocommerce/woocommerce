@@ -66,6 +66,8 @@ class ComingSoonRequestHandler {
 
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
+		add_theme_support( 'block-templates' );
+		add_theme_support( 'block-template-parts' );
 
 		$template = get_query_template( 'coming-soon' );
 		include $template;
