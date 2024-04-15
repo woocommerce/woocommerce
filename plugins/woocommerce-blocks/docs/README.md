@@ -127,7 +127,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ### Articles
 
-The following posts from [developer.woo.com](https://developer.woocommerce.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
+The following posts from [developer.woocommerce.com](https://developer.woocommerce.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
 
 -   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
 -   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
@@ -136,7 +136,7 @@ The following posts from [developer.woo.com](https://developer.woocommerce.com/c
 
 ### Tutorials
 
-The following tutorials from [developer.woo.com](https://developer.woocommerce.com/) help you with extending the WooCommerce Blocks plugin.
+The following tutorials from [developer.woocommerce.com](https://developer.woocommerce.com/) help you with extending the WooCommerce Blocks plugin.
 
 -   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
 -   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
