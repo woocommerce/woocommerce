@@ -54,33 +54,32 @@ class ComingSoonRequestHandler {
 			return $wp;
 		}
 
+		// Exclude users with a private link.
+		if ( isset( $_GET['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_GET['woo-share'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Persist the share link with a cookie for 90 days.
+			setcookie( 'woo-share', sanitize_text_field( wp_unslash( $_GET['woo-share'] ) ), time() + 60 * 60 * 24 * 90 ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return $wp;
+		}
+		if ( isset( $_COOKIE['woo-share'] ) && get_option( 'woocommerce_share_key' ) === $_COOKIE['woo-share'] ) {
+			return $wp;
+		}
+
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
+		add_theme_support( 'block-templates' );
 
-		$coming_soon_page_id = get_option( 'woocommerce_coming_soon_page_id' ) ?? null;
+		$template = get_query_template( 'coming-soon' );
 
-		// Render a 404 if for there is no coming soon page defined.
-		if ( empty( $coming_soon_page_id ) ) {
-			$this->render_404();
+		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+			get_header();
 		}
 
-		// Replace the query page_id with the coming soon page.
-		$wp->query_vars['page_id'] = $coming_soon_page_id;
+		include $template;
 
-		return $wp;
-	}
-
-	/**
-	 * Render a 404 Page Not Found screen.
-	 */
-	private function render_404() {
-		global $wp_query;
-		$wp_query->set_404();
-		status_header( 404 );
-		$template = get_query_template( '404' );
-		if ( ! empty( $template ) ) {
-			include $template;
+		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
+			get_footer();
 		}
+
 		die();
 	}
 }

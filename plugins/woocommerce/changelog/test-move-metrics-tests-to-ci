@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move metrics job into ci.yml
