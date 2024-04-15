@@ -14,5 +14,6 @@ setup( 'Sets up the block theme with templates', async ( { requestUtils } ) => {
 	const cliOutput = await cli(
 		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
 	);
+	// eslint-disable-next-line playwright/no-standalone-expect
 	expect( cliOutput.stdout ).toContain( 'Success: Exported' );
 } );
