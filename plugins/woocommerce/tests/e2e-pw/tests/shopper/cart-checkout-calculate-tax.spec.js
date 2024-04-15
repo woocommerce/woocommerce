@@ -131,7 +131,7 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				value: 'incl',
 			} );
 
-			await test.step( 'Load shop page and confirm price display', async () => {
+			await test.step( 'Load shop page, confirm title and confirm price display', async () => {
 				await page.goto( '/shop/' );
 				await expect(
 					page.getByRole( 'heading', { name: 'Shop' } )
@@ -140,6 +140,9 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 				await expect(
 					page.getByText( '$250.00', { exact: true } )
 				).toBeVisible();
+				expect( await page.title() ).toBe(
+					'Shop – WooCommerce Core E2E Test Suite'
+				);
 			} );
 
 			await test.step( 'Load cart page and confirm price display', async () => {
