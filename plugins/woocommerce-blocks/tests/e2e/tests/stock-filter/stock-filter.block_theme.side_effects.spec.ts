@@ -162,9 +162,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		} );
 
 		await page.getByText( 'Out of Stock' ).click();
-		await page
-			.getByRole( 'button', { name: 'Apply price filter' } )
-			.click();
+		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
 		await page.waitForEvent( 'domcontentloaded' );
 
