@@ -3,7 +3,9 @@ window.jQuery( document ).ready( function () {
 	const wooConnectNoticeSelector = '.woo-connect-notice';
 	const localStorageKey = 'woo-connect-notice-settings-dismissed';
 
-	window.jQuery( wooConnectNoticeSelector ).on( "click", "button.notice-dismiss", function() {
+	window
+		.jQuery( wooConnectNoticeSelector )
+		.on( 'click', 'button.notice-dismiss', function () {
 			window.localStorage.setItem(
 				localStorageKey,
 				new Date().toString()

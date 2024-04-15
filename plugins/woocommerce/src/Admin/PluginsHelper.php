@@ -580,6 +580,11 @@ class PluginsHelper {
 	    	</div>';
 	}
 
+	/**
+	 * Enqueue scripts for connect notice.
+	 *
+	 * @return void
+	 */
 	public static function maybe_enqueue_scripts_for_connect_notice() {
 		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
 			return;
