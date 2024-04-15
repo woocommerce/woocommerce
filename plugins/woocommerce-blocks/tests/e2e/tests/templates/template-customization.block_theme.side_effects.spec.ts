@@ -48,8 +48,9 @@ for ( const testData of testToRun ) {
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
 				postType: testData.templateType,
-				canvas: 'edit',
 			} );
+			await editorUtils.enterEditMode();
+			await editorUtils.waitForSiteEditorFinishLoading();
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },

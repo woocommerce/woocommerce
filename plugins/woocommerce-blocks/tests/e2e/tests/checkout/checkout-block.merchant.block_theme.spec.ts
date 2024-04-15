@@ -42,13 +42,12 @@ test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { admin, editor } ) => {
+	test.beforeEach( async ( { editorUtils, admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
-
+		await editorUtils.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 	} );
 
@@ -148,8 +147,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +
@@ -191,8 +190,8 @@ test.describe( 'Merchant → Checkout', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
 		await editor.selectBlocks(
 			blockSelectorInEditor +

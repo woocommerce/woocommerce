@@ -62,8 +62,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//archive-product`,
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
@@ -89,8 +89,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//single-product`,
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 
 		await editor.setContent( '' );
 

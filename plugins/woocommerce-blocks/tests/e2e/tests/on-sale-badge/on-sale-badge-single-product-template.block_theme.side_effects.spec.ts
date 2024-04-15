@@ -72,12 +72,12 @@ const getBoundingClientRect = async ( {
 };
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
-		test.beforeEach( async ( { admin, editor } ) => {
+		test.beforeEach( async ( { admin, editorUtils, editor } ) => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ blockData.slug }`,
 				postType: 'wp_template',
-				canvas: 'edit',
 			} );
+			await editorUtils.enterEditMode();
 			await editor.setContent( '' );
 		} );
 

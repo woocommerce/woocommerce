@@ -182,8 +182,9 @@ class ProductCollectionPage {
 		await this.admin.visitSiteEditor( {
 			postId: template,
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await this.editorUtils.waitForSiteEditorFinishLoading();
+		await this.editorUtils.enterEditMode();
 		await this.editorUtils.replaceBlockByBlockName(
 			'core/query',
 			this.BLOCK_SLUG

@@ -44,8 +44,8 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//order-confirmation',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 		await editorUtils.transformIntoBlocks();
 	} );
 

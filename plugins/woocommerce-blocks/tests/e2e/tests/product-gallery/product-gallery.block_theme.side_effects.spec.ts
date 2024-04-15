@@ -83,12 +83,12 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin } ) => {
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 	} );
 
 	test.describe( 'with thumbnails', () => {
@@ -532,8 +532,8 @@ test.describe( `${ blockData.name }`, () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//product-gallery`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
 			} );
+			await editorUtils.enterEditMode();
 			await editorUtils.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
 			const productGalleryBlockOption = page

@@ -48,12 +48,12 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin } ) => {
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+		await editorUtils.enterEditMode();
 	} );
 
 	test( 'Renders Product Gallery Thumbnails block on the editor and frontend side', async ( {

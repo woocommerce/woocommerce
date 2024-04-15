@@ -953,8 +953,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
 				postType: 'wp_template',
-				canvas: 'edit',
 			} );
+			await editorUtils.enterEditMode();
 			await editorUtils.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
@@ -982,8 +982,8 @@ test.describe( 'Product Collection', () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
 				postType: 'wp_template',
-				canvas: 'edit',
 			} );
+			await editorUtils.enterEditMode();
 			await editorUtils.insertBlockUsingGlobalInserter(
 				pageObject.BLOCK_NAME
 			);
