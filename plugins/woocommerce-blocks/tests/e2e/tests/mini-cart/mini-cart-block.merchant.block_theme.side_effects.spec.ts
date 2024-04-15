@@ -58,10 +58,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByLabel( 'WooCommerce', { exact: true } )
 				.getByRole( 'option', { name: blockData.name } );
 
-			await expect( miniCartButton ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
+			await expect( miniCartButton ).toBeDisabled();
 		} );
 	} );
 } );
