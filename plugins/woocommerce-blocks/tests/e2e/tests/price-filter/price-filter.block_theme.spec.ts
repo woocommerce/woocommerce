@@ -35,7 +35,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( "should allow to change the block's title", async ( { page } ) => {
+	test( "should allow changing the block's title", async ( { page } ) => {
 		const textSelector =
 			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
 
@@ -48,7 +48,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		expect( true ).toBe( true );
 	} );
 
-	test( 'should allow to change the display style', async ( {
+	test( 'should allow changing the display style', async ( {
 		page,
 		editorUtils,
 		editor,
@@ -88,7 +88,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		).toBeHidden();
 	} );
 
-	test( 'should allow to toggle the filter button', async ( {
+	test( 'should allow toggling the visibility of the filter button', async ( {
 		page,
 		editorUtils,
 		editor,

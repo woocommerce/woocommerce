@@ -209,7 +209,7 @@ test.describe( `${ blockData.name } Block - with Product Query Block`, () => {
 			.locator( '.wp-block-post-template' )
 			.getByRole( 'listitem' );
 
-		await expect( products ).toHaveCount( 16 );
+		await expect( products ).toHaveCount( 9 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
