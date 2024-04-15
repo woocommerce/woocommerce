@@ -63,11 +63,11 @@ test.describe( 'General tab', () => {
 
 			await clickOnTab( 'Linked products', page );
 
-			await page
-				.getByRole( 'heading', {
+			await expect(
+				page.getByRole( 'heading', {
 					name: 'Cross-sells',
 				} )
-				.isVisible();
+			).toBeVisible();
 
 			await page
 				.locator(
@@ -79,9 +79,7 @@ test.describe( 'General tab', () => {
 
 			await page.getByText( linkedProductsData[ 0 ].name ).click();
 
-			await page.getByText( 'Choose products for me' ).first().click();
-
-			await page.waitForResponse(
+			const chooseProductsResponsePromise = page.waitForResponse(
 				( response ) =>
 					response
 						.url()
@@ -89,6 +87,9 @@ test.describe( 'General tab', () => {
 							'/wp-json/wc/v3/products?search=&orderby=title&order=asc&per_page='
 						) && response.status() === 200
 			);
+
+			await page.getByText( 'Choose products for me' ).first().click();
+			await chooseProductsResponsePromise;
 
 			await expect(
 				page.getByRole( 'row', { name: 'Product name' } )
@@ -98,9 +99,7 @@ test.describe( 'General tab', () => {
 				'div.woocommerce-product-list div[role="table"] div[role="rowgroup"] div[role="row"]'
 			);
 
-			const upsellsRowsCount = await upsellsRows.count();
-
-			await expect( upsellsRowsCount ).toBe( 4 );
+			await expect( upsellsRows ).toHaveCount( 4 );
 
 			await page
 				.locator(
@@ -154,9 +153,7 @@ test.describe( 'General tab', () => {
 				'section.upsells.products ul > li'
 			);
 
-			const productsCount = await productsList.count();
-
-			await expect( productsCount ).toBe( 4 );
+			await expect( productsList ).toHaveCount( 4 );
 		} );
 	} );
 } );
