@@ -152,11 +152,11 @@ class WCAdminHelper {
 
 		// WC store pages.
 		$store_pages = array(
-			'shop'      => wc_get_page_id( 'shop' ),
-			'cart'      => wc_get_page_id( 'cart' ),
-			'checkout'  => wc_get_page_id( 'checkout' ),
-			'privacy'   => wc_privacy_policy_page_id(),
-			'terms'     => wc_terms_and_conditions_page_id(),
+			'shop'     => wc_get_page_id( 'shop' ),
+			'cart'     => wc_get_page_id( 'cart' ),
+			'checkout' => wc_get_page_id( 'checkout' ),
+			'privacy'  => wc_privacy_policy_page_id(),
+			'terms'    => wc_terms_and_conditions_page_id(),
 		);
 
 		/**
