@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout Filters - Order Summary Items
+menu_title: Order Summary Items
+tags: reference, checkout-available-filters
+---
+
 # Order Summary Items
 
 The following Order Summary Items filters are available:
@@ -485,11 +491,3 @@ The Cart Item object of the filters above has the following keys:
     -   _line_total_tax_ `string` - The line total tax.
 -   _type_ `string` - The item type.
 -   _variation_ `array` - The item variation array.
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/order-summary-items.md)

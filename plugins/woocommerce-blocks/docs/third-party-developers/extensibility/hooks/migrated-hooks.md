@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout Filters - Legacy Hooks and Filters
+menu_title: Legacy Hooks and Filters
+tags: reference, checkout-hooks
+---
+
 # Migrated Legacy Hooks
 
 Below are the hooks that exist in WooCommerce core and that were brough over to WooCommerce Blocks.

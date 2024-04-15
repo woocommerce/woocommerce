@@ -1,3 +1,10 @@
+---
+post_title: Cart and Checkout Filters - Inner Block Types
+menu_title: Inner Block Types
+tags: reference, checkout-available-filters
+---
+
+
 # Additional Cart and Checkout inner block types
 
 The following Additional Cart and Checkout inner block types filter is available:
@@ -79,11 +86,3 @@ To call this filter within the editor, wrap the filter registration in a `DOMCon
 </td>
 </tr>
 </table>
-
-<!-- FEEDBACK -->
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/additional-cart-checkout-inner-block-types.md)

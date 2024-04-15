@@ -1,3 +1,9 @@
+---
+post_title: Cart and Checkout Filters - Checkout and Place Order Button
+menu_title: Checkout and Place Order Button
+tags: reference, checkout-available-filters
+---
+
 # Checkout and place order button
 
 The following Checkout and place order button filters are available:
@@ -345,9 +351,3 @@ The Cart Item object of the filters above has the following keys:
     -   _line_total_tax_ `string` - The line total tax.
 -   _type_ `string` - The item type.
 -   _variation_ `array` - The item variation array.
-
----
-
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
-
-🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters/checkout-and-place-order-button.md)
