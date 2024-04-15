@@ -102,9 +102,13 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @param bool $clear_datastore_cache Whether the datastore cache should be cleared prior to retrieving the cached Order.
+	 *
 	 * @testDox Test that an WC_Order_Factory::get_order() does not return an order that did not properly load, $id = 0.
+	 * @testWith [ true ]
+	 *           [ false ]
 	 */
-	public function test_get_order_doesnt_return_invalid_cached_order() {
+	public function test_get_order_doesnt_return_invalid_cached_order( bool $clear_datastore_cache ) {
 		global $wpdb;
 
 		OrderHelper::toggle_cot_feature_and_usage( true );
@@ -124,10 +128,20 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 				$wpdb->delete( $table, array( 'order_id' => $retrieved_order->get_id() ) );
 			}
 		}
+		if ( $clear_datastore_cache ) {
+			$datastore = wc_get_container()->get( OrdersTableDataStore::class );
+			$datastore->invalidate_cache_for_objects( [ $retrieved_order->get_id() ] );
+			// Retrieving the order again should either return false because the order was not able to fully load as the data was missing.
+			$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
+			$this->assertFalse( $retrieved_order );
+		} else {
+			// Retrieving the order again should return the correctly loaded order because we were able to load from cache.
+			$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
+			$this->assertInstanceOf( WC_Order::class, $retrieved_order );
+			$this->assertEquals( $order->get_id(), $retrieved_order->get_id() );
+		}
 
-		// Retrieving the order again should either return false because the order was not able to fully load.
-		$retrieved_order = WC_Order_Factory::get_order( $order->get_id() );
-		$this->assertFalse( $retrieved_order );
+
 	}
 
 }
