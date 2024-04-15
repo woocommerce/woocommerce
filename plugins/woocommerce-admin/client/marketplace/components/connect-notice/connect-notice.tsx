@@ -43,7 +43,7 @@ export default function ConnectNotice(): JSX.Element | null {
 	if ( noticeType === 'long' ) {
 		description = description.concat(
 			__(
-				'Your store might be at risk as you are running old versions of Woo plugins.',
+				'Your store might be at risk as you are running old versions of WooCommerce plugins.',
 				'woocommerce'
 			)
 		);
@@ -53,7 +53,7 @@ export default function ConnectNotice(): JSX.Element | null {
 
 	description = description.concat(
 		__(
-			'<strong>Connect your store to Woo.com</strong> to get updates and streamlined support for your subscriptions.',
+			'<strong>Connect your store to woocommerce.com</strong> to get updates and streamlined support for your subscriptions.',
 			'woocommerce'
 		)
 	);
