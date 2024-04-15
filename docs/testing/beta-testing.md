@@ -1,6 +1,5 @@
 ---
-category_title: Beta Testing
-category_slug: Beta Testing
+post_title: Beta Testing
 tags: how-to
 ---
 
