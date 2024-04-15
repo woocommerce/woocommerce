@@ -11,7 +11,7 @@ import { connectUrl } from '~/marketplace/utils/functions';
 import Notice from '~/marketplace/components/notice/notice';
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export default function WoocomConnectNotice(): JSX.Element | null {
+export default function ConnectNotice(): JSX.Element | null {
 	const localStorageKey = 'woo-connect-notice-marketplace-dismissed';
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const noticeType = wccomSettings?.woocomConnectNoticeType || 'none';
