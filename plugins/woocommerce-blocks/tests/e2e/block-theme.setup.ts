@@ -1,3 +1,4 @@
+/* eslint-disable playwright/no-standalone-expect */
 /**
  * External dependencies
  */
