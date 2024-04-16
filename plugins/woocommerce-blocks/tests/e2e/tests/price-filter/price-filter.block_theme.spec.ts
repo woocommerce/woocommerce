@@ -17,7 +17,7 @@ export const blockData = {
 		frontend: {},
 		editor: {},
 	},
-	urlSearchParamWhenFilterIsApplied: '?max_price=5',
+	urlSearchParamWhenFilterIsApplied: 'max_price=5',
 	endpointAPI: 'max_price=500',
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
@@ -59,7 +59,7 @@ test.describe( `${ blockData.name } Block - editor side`, () => {
 
 		const title = 'New Title';
 
-		await page.fill( textSelector, title );
+		await page.locator( textSelector ).fill( title );
 
 		await expect( page.locator( textSelector ) ).toHaveText( title );
 	} );
@@ -141,10 +141,8 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 				heading: 'Filter By Price',
 			},
 		} );
-		await editor.publishPost();
-		const url = new URL( page.url() );
-		const postId = url.searchParams.get( 'post' );
 
+		const postId = await editor.publishPost();
 		await page.goto( `/?p=${ postId }` );
 
 		await page
@@ -214,7 +212,6 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
-		// await page.pause();
 
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$5' );
@@ -239,7 +236,7 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 	} );
 } );
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor } ) => {
+	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -249,7 +246,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editor.canvas.locator( 'body' ).click();
+		await editorUtils.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -285,10 +282,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await frontendUtils.selectTextInput( maxPriceInput );
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
-		await page.waitForURL( ( url ) =>
-			url
-				.toString()
-				.includes( blockData.urlSearchParamWhenFilterIsApplied )
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		const legacyTemplate = await frontendUtils.getBlockByName(
@@ -347,10 +342,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await frontendUtils.selectTextInput( maxPriceInput );
 		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
-		await page.waitForURL( ( url ) =>
-			url
-				.toString()
-				.includes( blockData.urlSearchParamWhenFilterIsApplied )
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		const products = page
@@ -393,30 +386,20 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			name: 'Filter products by maximum price',
 		} );
 
-		await page.addInitScript( () => {
-			document.addEventListener( 'DOMContentLoaded', () => {
-				// eslint-disable-next-line dot-notation
-				window[ '__DOMContentLoaded__' ] = true;
-			} );
-		} );
-
 		await maxPriceInput.dblclick();
 		await maxPriceInput.fill( '$5' );
 		await page
 			.getByRole( 'button', { name: 'Apply price filter' } )
 			.click();
 
-		await page.waitForEvent( 'domcontentloaded' );
-
-		const domContentLoaded = await page.evaluate(
-			// eslint-disable-next-line dot-notation
-			() => window[ '__DOMContentLoaded__' ] === true
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		await expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
-		);
+		const products = page
+			.locator( '.wp-block-woocommerce-product-template' )
+			.getByRole( 'listitem' );
 
-		expect( domContentLoaded ).toBe( true );
+		await expect( products ).toHaveCount( 1 );
 	} );
 } );
