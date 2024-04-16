@@ -2,6 +2,7 @@
  * External dependencies
  */
 import TestRenderer from 'react-test-renderer';
+import { render, screen } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import FormattedMonetaryAmount from '../index';
 describe( 'FormattedMonetaryAmount', () => {
 	describe( 'separators', () => {
 		test( 'should add the thousand separator', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="156345"
 					currency={ {
@@ -25,11 +26,12 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+
+			expect( screen.getByText( '1.563,45 €' ) ).toBeInTheDocument();
 		} );
 
 		test( 'should not add thousand separator', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="156345"
 					currency={ {
@@ -42,11 +44,11 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '1563,45 €' ) ).toBeInTheDocument();
 		} );
 
 		test( 'should remove the thousand separator when identical to the decimal one', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="156345"
 					currency={ {
@@ -61,12 +63,12 @@ describe( 'FormattedMonetaryAmount', () => {
 				/>
 			);
 			expect( console ).toHaveWarned();
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '1563,45 €' ) ).toBeInTheDocument();
 		} );
 	} );
 	describe( 'suffix/prefix', () => {
 		test( 'should add the currency suffix', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="15"
 					currency={ {
@@ -79,11 +81,11 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '0,15 €' ) ).toBeInTheDocument();
 		} );
 
 		test( 'should add the currency prefix', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="15"
 					currency={ {
@@ -96,13 +98,13 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '€ 0,15' ) ).toBeInTheDocument();
 		} );
 	} );
 
 	describe( 'supports different value types', () => {
 		test( 'should support numbers', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value={ 15.0 }
 					currency={ {
@@ -115,11 +117,11 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '15 €' ) ).toBeInTheDocument();
 		} );
 
 		test( 'should support strings', () => {
-			const component = TestRenderer.create(
+			render(
 				<FormattedMonetaryAmount
 					value="15.0"
 					currency={ {
@@ -132,7 +134,7 @@ describe( 'FormattedMonetaryAmount', () => {
 					} }
 				/>
 			);
-			expect( component.toJSON() ).toMatchSnapshot();
+			expect( screen.getByText( '€ 15' ) ).toBeInTheDocument();
 		} );
 	} );
 } );
