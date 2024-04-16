@@ -41,6 +41,7 @@ const products = [
 ];
 
 for ( const { classes, product, frontendPage } of products ) {
+	// eslint-disable-next-line playwright/valid-describe-callback
 	test.describe( `The Single Product page of the ${ product }`, () =>
 		test( 'add product specific classes to the body', async ( {
 			page,

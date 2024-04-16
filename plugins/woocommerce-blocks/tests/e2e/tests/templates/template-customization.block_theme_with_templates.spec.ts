@@ -17,7 +17,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const templateTypeName =
 		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
-	test.describe( `${ testData.templateName } template`, async () => {
+	test.describe( `${ testData.templateName } template`, () => {
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
 			editor,
