@@ -3,7 +3,7 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
-test.describe( 'Single Product template', async () => {
+test.describe( 'Single Product template', () => {
 	test( 'loads the Single Product template for a specific product', async ( {
 		admin,
 		editor,

@@ -18,7 +18,7 @@ const testData = {
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
-test.describe( 'Single Product Template', async () => {
+test.describe( 'Single Product Template', () => {
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,

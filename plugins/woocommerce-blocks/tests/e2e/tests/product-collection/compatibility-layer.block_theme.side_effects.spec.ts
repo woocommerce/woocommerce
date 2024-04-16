@@ -92,7 +92,7 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Compatibility Layer with Product Collection block', () => {
-	test.describe( 'Product Archive with Product Collection block', async () => {
+	test.describe( 'Product Archive with Product Collection block', () => {
 		test.beforeEach( async ( { pageObject, requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-product-collection-compatibility-layer'

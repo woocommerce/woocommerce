@@ -141,11 +141,11 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( blockData.selectors.editor.noThumbnailsOption )
 				.click();
 
-			const isVisible = await page
-				.locator( blockData.selectors.editor.thumbnails )
-				.isVisible();
+			const element = page.locator(
+				blockData.selectors.editor.thumbnails
+			);
 
-			expect( isVisible ).toBe( false );
+			await expect( element ).toBeHidden();
 
 			await editor.saveSiteEditorEntities();
 
