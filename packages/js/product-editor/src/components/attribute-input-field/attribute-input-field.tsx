@@ -32,7 +32,7 @@ import {
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
-	attributes,
+	attributes = [],
 	isLoading,
 	onChange,
 	placeholder,
@@ -40,7 +40,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	disabled,
 	disabledAttributeIds = [],
 	disabledAttributeMessage,
-	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -70,17 +69,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
-			ignoredAttributeIds.length
-				? ! ignoredAttributeIds.includes( item.id )
-				: true;
-
-		const filteredItems = allItems.filter(
-			( item ) =>
-				ignoreIdsFilter( item ) &&
-				( item.name || '' )
-					.toLowerCase()
-					.startsWith( inputValue.toLowerCase() )
+		const filteredItems = allItems.filter( ( item ) =>
+			( item.name || '' )
+				.toLowerCase()
+				.startsWith( inputValue.toLowerCase() )
 		);
 
 		if (

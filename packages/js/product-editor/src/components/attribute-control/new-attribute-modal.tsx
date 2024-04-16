@@ -48,7 +48,6 @@ type NewAttributeModalProps = {
 	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
-	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
 	termsAutoSelection?: 'first' | 'all';
 	defaultVisibility?: boolean;
@@ -79,7 +78,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
-	disabledAttributeIds = [],
 	disabledAttributeMessage = __(
 		'Already used in Attributes',
 		'woocommerce'
@@ -291,6 +289,21 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						};
 					}
 
+					const ignoredAttributeIds = [
+						...selectedAttributeIds,
+						...values.attributes
+							.map( ( attr ) => attr?.id )
+							.filter(
+								( attrId ): attrId is number =>
+									attrId !== undefined
+							),
+					];
+
+					const availableAttributes = attributes?.filter(
+						( attribute: EnhancedProductAttribute ) =>
+							! ignoredAttributeIds.includes( attribute.id )
+					);
+
 					return (
 						<Modal
 							title={ title }
@@ -336,7 +349,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															}
 															value={ attribute }
 															attributes={
-																attributes
+																availableAttributes
 															}
 															isLoading={
 																isLoading
@@ -347,28 +360,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															onChange={ getAttributeOnChange(
 																index
 															) }
-															ignoredAttributeIds={ [
-																...selectedAttributeIds,
-																...values.attributes
-																	.map(
-																		(
-																			attr
-																		) =>
-																			attr?.id
-																	)
-																	.filter(
-																		(
-																			attrId
-																		): attrId is number =>
-																			attrId !==
-																			undefined
-																	),
-															] }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
-															}
-															disabledAttributeIds={
-																disabledAttributeIds
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage
