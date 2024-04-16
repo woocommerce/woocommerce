@@ -7,6 +7,7 @@ declare global {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
 			currentUserId: number;
+			currentThemeIsFSETheme: boolean;
 			admin: {
 				wcpay_welcome_page_connect_nonce: string;
 				currentUserData: {
