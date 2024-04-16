@@ -11,6 +11,7 @@ import {
 	getNewPath,
 	getQuery,
 	updateQueryString,
+	getHistory,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -84,6 +85,18 @@ const redirectToWooHome = () => {
 	navigateOrParent( window, url );
 };
 
+const goBack = () => {
+	// If the user navigated to the customize store from a WC admin page, we want to go back to that page.
+	// Otherwise, we go back to the home page.
+	const history = getHistory();
+	if ( history.action === 'PUSH' ) {
+		history.back();
+		return;
+	}
+
+	redirectToWooHome();
+};
+
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 	if ( isWooExpress() ) {
 		window.location.href =
@@ -130,6 +143,7 @@ export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
 	redirectToThemes,
+	goBack,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -330,7 +344,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				CLICKED_ON_BREADCRUMB: {
-					actions: 'redirectToWooHome',
+					actions: 'goBack',
 				},
 				DESIGN_WITH_AI: {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
