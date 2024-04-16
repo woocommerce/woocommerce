@@ -31,7 +31,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	public function test_coming_soon_mode_shown_to_visitor() {
 		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
 		update_option( 'woocommerce_coming_soon', 'yes' );
-		update_option( 'woocommerce_coming_soon_page_id', 99 );
 		$wp          = new \WP();
 		$wp->request = '/';
 		do_action_ref_array( 'parse_request', array( &$wp ) );
@@ -45,7 +44,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	public function test_live_mode_shown_to_visitor() {
 		$this->markTestSkipped( 'The die statement breaks the test. To be improved.' );
 		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'woocommerce_coming_soon_page_id', 99 );
 		$wp          = new \WP();
 		$wp->request = '/';
 		do_action_ref_array( 'parse_request', array( &$wp ) );
@@ -59,7 +57,6 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	public function test_shop_manager_exclusion() {
 		$this->markTestSkipped( 'Failing in CI but not locally. To be investigated.' );
 		update_option( 'woocommerce_coming_soon', 'yes' );
-		update_option( 'woocommerce_coming_soon_page_id', 99 );
 		$user_id = $this->factory->user->create(
 			array(
 				'role' => 'shop_manager',
