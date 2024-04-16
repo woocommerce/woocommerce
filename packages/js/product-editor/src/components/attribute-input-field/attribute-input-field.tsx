@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Spinner } from '@wordpress/components';
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	WCDataSelector,
@@ -37,7 +37,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	placeholder,
 	label,
 	disabled,
-	disabledAttributeIds = [],
 	disabledAttributeMessage,
 	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
@@ -57,18 +56,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			attributes: getProductAttributes(),
 		};
 	} );
-
-	const markedAttributes = useMemo(
-		function setDisabledAttribute() {
-			return (
-				attributes?.map( ( attribute: NarrowedQueryAttribute ) => ( {
-					...attribute,
-					isDisabled: disabledAttributeIds.includes( attribute.id ),
-				} ) ) ?? []
-			);
-		},
-		[ attributes, disabledAttributeIds ]
-	);
 
 	function isNewAttributeListItem(
 		attribute: NarrowedQueryAttribute
@@ -148,7 +135,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
-			items={ markedAttributes || [] }
+			items={ attributes || [] }
 			label={ label || '' }
 			disabled={ disabled }
 			getFilteredItems={ getFilteredItems }
