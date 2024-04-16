@@ -55,7 +55,6 @@ jobs:
                   if-no-files-found: ignore
     merge-artifacts:
         name: Merge Artifacts
-        # Merge reports even if some shards have failed.
         if: ${{ !cancelled() }}
         needs: [blocks-playwright-tests]
 
