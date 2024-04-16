@@ -221,7 +221,7 @@ class WooSubscriptionsNotes {
 	 * @return int|false
 	 */
 	public function get_product_id_from_subscription_note( &$note ) {
-		if ( false === $note ) {
+		if ( ! is_object( $note ) ) {
 			return false;
 		}
 		$content_data = $note->get_content_data();
