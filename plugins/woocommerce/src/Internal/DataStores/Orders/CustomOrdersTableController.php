@@ -457,7 +457,9 @@ class CustomOrdersTableController {
 			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
-			if ( count( array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] ) ) > 0 ) {
+			$incompatible_plugins = array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] );
+			$incompatible_plugins = array_diff( $incompatible_plugins, $this->plugin_util->get_plugins_excluded_from_compatibility_ui() );
+			if ( count( $incompatible_plugins ) > 0 ) {
 				$disabled = array( 'yes' );
 			}
 			if ( ! $sync_complete && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
