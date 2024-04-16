@@ -398,21 +398,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			);
 		}
 
-		foreach ( $order_attributions as $key => $order_attribution_data ) {
-			$mapped_data[ $key ]['origin'] = $this->get_origin_label( $order_attribution_data['_wc_order_attribution_source_type'] ?? '', $order_attribution_data['_wc_order_attribution_utm_source'] ?? '' );
-		}
-
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
 				'products' => array(),
 				'coupons'  => array(),
 				'customer' => array(),
-				'origin'   => __( 'Unknown', 'woocommerce' ),
+				'origin'   => '',
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
 			}
+
+			$orders_data[ $key ]['extended_info']['origin'] = $this->get_origin_label( $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_source_type'] ?? '', $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_utm_source'] ?? '' );
 		}
 	}
 
