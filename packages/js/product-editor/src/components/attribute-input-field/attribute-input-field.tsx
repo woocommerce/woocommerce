@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { Spinner } from '@wordpress/components';
-import { createElement, useMemo } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	WCDataSelector,
 	ProductAttributesActions,
 	WPDataActions,
 } from '@woocommerce/data';
@@ -33,42 +32,19 @@ import {
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
+	items = [],
+	isLoading,
 	onChange,
 	placeholder,
 	label,
 	disabled,
-	disabledAttributeIds = [],
 	disabledAttributeMessage,
-	ignoredAttributeIds = [],
 	createNewAttributesAsGlobal = false,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as ProductAttributesActions & WPDataActions;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
-		const { getProductAttributes, hasFinishedResolution } = select(
-			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-		);
-		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
-		};
-	} );
-
-	const markedAttributes = useMemo(
-		function setDisabledAttribute() {
-			return (
-				attributes?.map( ( attribute: NarrowedQueryAttribute ) => ( {
-					...attribute,
-					isDisabled: disabledAttributeIds.includes( attribute.id ),
-				} ) ) ?? []
-			);
-		},
-		[ attributes, disabledAttributeIds ]
-	);
+	) as unknown as ProductAttributesActions & WPDataActions;
 
 	function isNewAttributeListItem(
 		attribute: NarrowedQueryAttribute
@@ -80,17 +56,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		allItems: NarrowedQueryAttribute[],
 		inputValue: string
 	) => {
-		const ignoreIdsFilter = ( item: NarrowedQueryAttribute ) =>
-			ignoredAttributeIds.length
-				? ! ignoredAttributeIds.includes( item.id )
-				: true;
-
-		const filteredItems = allItems.filter(
-			( item ) =>
-				ignoreIdsFilter( item ) &&
-				( item.name || '' )
-					.toLowerCase()
-					.startsWith( inputValue.toLowerCase() )
+		const filteredItems = allItems.filter( ( item ) =>
+			( item.name || '' )
+				.toLowerCase()
+				.startsWith( inputValue.toLowerCase() )
 		);
 
 		if (
@@ -148,7 +117,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	return (
 		<SelectControl< NarrowedQueryAttribute >
 			className="woocommerce-attribute-input-field"
-			items={ markedAttributes || [] }
+			items={ items }
 			label={ label || '' }
 			disabled={ disabled }
 			getFilteredItems={ getFilteredItems }

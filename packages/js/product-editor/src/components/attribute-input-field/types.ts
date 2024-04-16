@@ -24,6 +24,8 @@ export type AttributeInputFieldProps = {
 			| string
 	) => void;
 	label?: string;
+	items: NarrowedQueryAttribute[];
+	isLoading: boolean;
 	placeholder?: string;
 	disabled?: boolean;
 	disabledAttributeIds?: number[];
