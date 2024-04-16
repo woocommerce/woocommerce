@@ -2,16 +2,17 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { cli } from '@woocommerce/e2e-utils';
+
 /**
  * Internal dependencies
  */
 import ProductCollectionPage from '../product-collection/product-collection.page';
-import { cli } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Attribute',
 	slug: 'woocommerce/attribute-filter',
-	urlSearchParamWhenFilterIsApplied: '?filter_size=small&query_type_size=or',
+	urlSearchParamWhenFilterIsApplied: 'filter_size=small&query_type_size=or',
 };
 
 const test = base.extend< {
@@ -57,11 +58,9 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		const title = 'New Title';
 
-		await page.fill( textSelector, title );
+		await page.locator( textSelector ).fill( title );
 
 		await expect( page.locator( textSelector ) ).toHaveText( title );
-
-		expect( true ).toBe( true );
 	} );
 
 	test( 'should allow changing the display style', async ( {
@@ -128,6 +127,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
 
 		await editor.canvas.locator( 'body' ).click();
@@ -188,8 +188,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.getByRole( 'list' )
 			.locator( '.product' );
 
-		await expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		await expect( products ).toHaveCount( 1 );
@@ -241,10 +241,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 	} ) => {
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 
-		await page.waitForURL( ( url ) =>
-			url
-				.toString()
-				.includes( blockData.urlSearchParamWhenFilterIsApplied )
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		const products = page
@@ -284,27 +282,17 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 		await editorUtils.publishAndVisitPost();
 
-		await page.addInitScript( () => {
-			document.addEventListener( 'DOMContentLoaded', () => {
-				// eslint-disable-next-line dot-notation
-				window[ '__DOMContentLoaded__' ] = true;
-			} );
-		} );
-
 		await page.getByRole( 'checkbox', { name: 'Small' } ).click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
-		await page.waitForEvent( 'domcontentloaded' );
-
-		const domContentLoaded = await page.evaluate(
-			// eslint-disable-next-line dot-notation
-			() => window[ '__DOMContentLoaded__' ] === true
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		await expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
-		);
+		const products = page
+			.locator( '.wp-block-woocommerce-product-template' )
+			.getByRole( 'listitem' );
 
-		expect( domContentLoaded ).toBe( true );
+		await expect( products ).toHaveCount( 1 );
 	} );
 } );
