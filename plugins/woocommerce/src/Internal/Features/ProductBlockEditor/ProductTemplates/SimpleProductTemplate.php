@@ -539,7 +539,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'title'       => __( 'Custom fields', 'woocommerce' ),
 						'description' => sprintf(
 							/* translators: %1$s: Custom fields guide link opening tag. %2$s: Custom fields guide link closing tag. */
-							__( 'Custom fields can be used in a variety of ways, such as sharing more detailed product information, showing more input fields, or internal inventory organization. %1$sRead more about custom fields%2$s', 'woocommerce' ),
+							__( 'Custom fields can be used in a variety of ways, such as sharing more detailed product information, showing more input fields, or for internal inventory organization. %1$sRead more about custom fields%2$s', 'woocommerce' ),
 							'<a href="https://woocommerce.com/document/custom-product-fields/" target="_blank" rel="noreferrer">',
 							'</a>'
 						),
