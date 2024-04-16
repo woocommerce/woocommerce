@@ -80,3 +80,70 @@ test( 'can update the general information of a product', async ( {
 			.toHaveText( updatedProduct.description );
 	} );
 } );
+
+test( 'can schedule a product publication', async ( { page, product } ) => {
+	await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
+
+	await page
+		.locator( '.woocommerce-product-header__actions' )
+		.first()
+		.locator( 'button[aria-label="More options"]' )
+		.click();
+
+	await page.getByText( 'Schedule publish' ).click();
+
+	await expect(
+		page.getByRole( 'heading', { name: 'Schedule product' } )
+	).toBeVisible();
+
+	await page
+		.locator( '.woocommerce-schedule-publish-modal' )
+		.locator( 'button[aria-label="View next month"]' )
+		.click();
+
+	await page
+		.locator( '.woocommerce-schedule-publish-modal' )
+		.getByText( '14' )
+		.click();
+
+	await page.getByRole( 'button', { name: 'Schedule' } ).click();
+
+	await expect(
+		page.getByLabel( 'Dismiss this notice' ).first()
+	).toContainText( 'Product scheduled for' );
+
+	await page
+		.locator( '.woocommerce-product-header__actions' )
+		.first()
+		.locator( 'button[aria-label="More options"]' )
+		.click();
+
+	await page.getByText( 'Copy to a new draft' ).click();
+
+	await expect(
+		page.getByLabel( 'Dismiss this notice' ).first()
+	).toContainText( 'Product successfully duplicated' );
+
+	await expect(
+		page.getByRole( 'heading', { name: `${ product.name } (Copy)` } )
+	).toBeVisible();
+
+	await expect(
+		page
+			.locator( '.woocommerce-product-header__visibility-tags' )
+			.getByText( 'Draft' )
+			.first()
+	).toBeVisible();
+
+	await page
+		.locator( '.woocommerce-product-header__actions' )
+		.first()
+		.locator( 'button[aria-label="More options"]' )
+		.click();
+
+	await page.getByText( 'Move to trash' ).click();
+
+	await expect(
+		page.getByRole( 'heading', { name: 'Products' } ).first()
+	).toBeVisible();
+} );
