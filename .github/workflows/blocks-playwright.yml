@@ -51,6 +51,6 @@ jobs:
               uses: actions/upload-artifact@v4
               if: ${{ !cancelled() }}
               with:
-                  name: failures-artifacts-${{ matrix.shardIndex }}
+                  name: failures-artifacts-shard-${{ matrix.shardIndex }}
                   path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
