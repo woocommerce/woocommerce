@@ -170,9 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fixed a bug causing incompatibility with 3rd-party coupon extensions when certain conditions were met. [#46642](https://github.com/woocommerce/woocommerce/pull/46642)
 * Fix - Defensive coding for when Action Scheduler function as_has_scheduled_action is not defined. [#46630](https://github.com/woocommerce/woocommerce/pull/46630)
 
-
-**WooCommerce**
-
 = 8.8.1 2024-04-15 =
 
 * Fix - Fix wrong Shop title shown in classic themes after deleting the page [#46429](https://github.com/woocommerce/woocommerce/pull/46429)
