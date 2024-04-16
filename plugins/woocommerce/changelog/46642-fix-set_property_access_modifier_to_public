@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed a bug causing incompatibility with 3rd-party coupon extensions when certain conditions were met.
