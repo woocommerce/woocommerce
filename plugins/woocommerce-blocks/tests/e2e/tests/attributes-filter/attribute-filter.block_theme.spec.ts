@@ -127,11 +127,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
 
-		await editor.canvas.locator( 'body' ).click();
-
+		await editorUtils.enterEditMode();
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
 			attributes: {
