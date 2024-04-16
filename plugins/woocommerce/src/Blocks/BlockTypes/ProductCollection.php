@@ -88,49 +88,65 @@ class ProductCollection extends AbstractBlock {
 		// Tracks.
 		add_action(
 			'save_post',
-			function ( $post_id, $post, $is_updated ) {
-
-				// Important: don't track revisions.
-				if ( 'revision' === $post->post_type ) {
-					return;
-				}
-
-				// if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
-				// 	return;
-				// }
-
-				if ( ! has_block( $this->get_full_block_name(), $post ) ) {
-					return;
-				}
-
-				$context = ProductCollectionUtils::parse_editor_location_context( $post );
-				error_log('Found context: ' . $context );
-				$blocks = parse_blocks( $post->post_content );
-				$this->track_collection_block_usage( $blocks );
-			},
+			array( $this, 'track_collection_instances' ),
 			10,
-			3
+			2
 		);
 	}
 
 	/**
-	 * Track usage of the Product Collection block within the site editor.
+	 * Track feature usage of the Product Collection block within the site editor.
 	 *
-	 * @param array $blocks     The blocks to check.
-	 * @param bool  $in_single  Whether we are in a single product container (optional.)
-	 * 
+	 * @param int      $post_id
+	 * @param \WP_Post $post
+	 *
 	 * @return void
 	 */
-	public function track_collection_block_usage( $blocks, $in_single = false ) {
+	public function track_collection_instances( $post_id, $post ) {
+
+		// Important: don't track revisions.
+		if ( 'revision' === $post->post_type ) {
+			return;
+		}
+
+		// if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		// 	return;
+		// }
+
+		if ( ! has_block( $this->get_full_block_name(), $post ) ) {
+			return;
+		}
+
+		$context = ProductCollectionUtils::parse_editor_location_context( $post );
+		$blocks  = parse_blocks( $post->post_content );
+		$this->track_collection_block_usage( $blocks, $context );
+	}
+
+	/**
+	 * Track feature usage of the Product Collection block within the site editor.
+	 *
+	 * @param array  $blocks     The parsed blocks to check.
+	 * @param string $context    The context in which the block is being used.
+	 * @param bool   $in_single  Whether we are in a single product container (optional.)
+	 *
+	 * @return void
+	 */
+	public function track_collection_block_usage( $blocks, $context, $in_single = false ) {
 		foreach ( $blocks as $block ) {
 			if ( $this->get_full_block_name() === $block['blockName'] ) {
 
-				error_log($block['attrs']['collection'] ?? 'No Collection.');
-				error_log($in_single ? 'in-single-product' : 'not-in-single-product');
+				$event_data = array(
+					'collection' => $block['attrs']['collection'] ?? 'catalog',
+					'context'    => $in_single ? 'in-single-product' : $context,
+					'filters'    => ProductCollectionUtils::get_event_filters_data( $block )
+				);
+
+				error_log('Event Data: ');
+				error_log(print_r($event_data, true));
 
 				// \WC_Tracks::record_event(
 				// 	'product_collection_instance', 
-				// 	ProductCollectionUtils::get_event_data( $block ) 
+				// 	$event_data
 				// );
 			}
 
@@ -141,7 +157,7 @@ class ProductCollection extends AbstractBlock {
 
 			// Recursive.
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$this->track_collection_block_usage( $block['innerBlocks'], $local_in_single );
+				$this->track_collection_block_usage( $block['innerBlocks'], $context, $local_in_single );
 			}
 		}
 	}

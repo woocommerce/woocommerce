@@ -2,6 +2,13 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use WP_Query;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
+use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
+use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 
 /**
  * Utility methods used for the Product Collection block.
@@ -94,17 +101,16 @@ class ProductCollectionUtils {
 	}
 
 	/**
-	 * Translate WP Post instance to context.
-	 * 
+	 * Parse editor's location context from WP Post.
+	 *
 	 * Possible contexts:
-	 * - page
 	 * - post
+	 * - page
 	 * - product
 	 * - product-archive
-	 * - checkout
-	 * - catalog
 	 * - cart
 	 * - checkout
+	 * - catalog
 	 * - order
 	 *
 	 * @param WP_Post $post The Post instance.
@@ -122,26 +128,29 @@ class ProductCollectionUtils {
 			return false;
 		}
 
+		// Default to post.
 		$context = 'post';
 
 		if ( in_array( $post_type, array( 'wp_template', 'wp_template_part' ), true ) ) {
 
 			$name = $post->post_name;
-			if ( false !== strpos( $name, 'single-product' ) ) {
+			if ( false !== strpos( $name, SingleProductTemplate::SLUG ) ) {
 				$context = 'product';			
+			} elseif( ProductAttributeTemplate::SLUG === $name ) {
+				$context = 'product-archive';
 			} elseif ( false !== strpos( $name, 'taxonomy-' ) ) { // Including the '-' in the check to avoid false positives.
 				$taxonomy           = str_replace( 'taxonomy-', '', $name );
 				$product_taxonomies = get_object_taxonomies( 'product', 'names' );
 				if ( in_array( $taxonomy, $product_taxonomies, true ) ) {
 					$context = 'product-archive';
 				}
-			} elseif(  'page-cart' === $name ) {
+			} elseif( in_array( $name, array( CartTemplate::SLUG, MiniCartTemplate::SLUG ), true ) ) {
 				$context = 'cart';
-			} elseif(  'page-checkout' === $name ) {
+			} elseif( CheckoutTemplate::SLUG === $name ) {
 				$context = 'checkout';
-			} elseif( in_array( $name, array( 'archive-product' ) ) ) {
+			} elseif( ProductCatalogTemplate::SLUG === $name ) {
 				$context = 'catalog';
-			} elseif( in_array( $name, array( 'order-confirmation' ) ) ) {
+			} elseif( OrderConfirmationTemplate::SLUG === $name ) {
 				$context = 'order';
 			}
 		}
@@ -155,20 +164,23 @@ class ProductCollectionUtils {
 
 	/**
 	 * Parse the collection query filters from the query attributes.
+	 *
+	 * @param array $block The parsed block.
+	 * @return array The filters data for tracking.
 	 */
-	public static function get_event_data( $block) {
+	public static function get_event_filters_data( $block ) {
 
 		$query_attrs = $block['attrs']['query'] ?? array();
-		$filters = array(
-			'on-sale' => 0,
+		$filters     = array(
+			'on-sale'      => 0,
 			'stock-status' => 0,
-			'handpicked' => 0,
-			'keyword' => 0,
-			'attributes' => 0,
-			'taxonomy' => 0,
-			'featured' => 0,
-			'created' => 0,
-			'price' => 0,
+			'handpicked'   => 0,
+			'keyword'      => 0,
+			'attributes'   => 0,
+			'taxonomy'     => 0,
+			'featured'     => 0,
+			'created'      => 0,
+			'price'        => 0,
 		);
 
 		if ( ! empty( $query_attrs['woocommerceOnSale'])){
