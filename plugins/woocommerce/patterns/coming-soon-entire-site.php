@@ -10,7 +10,7 @@
 ?>
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"20px","bottom":"20px"}},"color":{"background":"#bea0f2"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide has-background" style="background-color:#bea0f2;padding-top:20px;padding-bottom:20px"><!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
+<div class="wp-block-group alignwide has-background" style="background-color:#bea0f2;padding: 26px 90px 14px 90px;color: #111111;"><!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
 <div class="wp-block-group alignwide"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"},"layout":{"selfStretch":"fit","flexSize":null}},"layout":{"type":"flex"}} -->
 <div class="wp-block-group"><!-- wp:site-logo {"width":60} /-->
 
@@ -45,20 +45,99 @@
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:0"><!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast-2","fontSize":"small"} -->
 <p class="has-text-align-center has-contrast-2-color has-text-color has-link-color has-small-font-size">
 Powered by
-<a style="text-decoration: none;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
+<a style="text-decoration: none; font-family: Inter;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
 </p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
 <style>
-	body {
+	@font-face {
+		font-family: 'Inter';
+		src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
+		font-weight: 300 900;
+		font-style: normal;
+	}
+
+	@font-face {
+		font-family: 'Cardo';
+		src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/cardo_normal_400.woff2' ); ?>) format('woff2');
+		font-weight: 400;
+		font-style: normal;
+	}
+	/* Reset */
+	h1, p, a {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		vertical-align: baseline;
+	}
+	ol, ul {
+		list-style: none;
+	}
+	a {
+		text-decoration: none;
+	}
+	body,
+	body.custom-background {
+		margin: 0;
 		background-color: #bea0f2;
+		font-family: 'Inter', sans-serif;
+		/* Use TT4 variable https://github.com/WordPress/twentytwentyfour/blob/a38224418bd1c0428567b6d988c737e8116eb46c/README.md#colors */
+		--wp--preset--color--contrast: #111111;
+		--wp--preset--spacing--10: min(1rem, 2vw);
+		--wp--preset--spacing--20: min(1.5rem, 3vw);
+		--wp--preset--spacing--30: min(2.5rem, 5vw);
+		--wp--preset--spacing--40: min(4rem, 8vw);
+		--wp--preset--spacing--50: min(6.5rem, 13vw);
+		--wp--preset--spacing--60: min(10.5rem, 24vw);
+		--wp--preset--font-size--small: 12px;
+		--wp--style--global--wide-size: 1280px;
+	}
+	body .is-layout-constrained > .alignwide {
+		margin: 0 auto !important;
+	}
+	.wp-container-core-group-is-layout-4.wp-container-core-group-is-layout-4 {
+		justify-content: space-between;
+	}
+	.is-layout-flex {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		margin: 0;
+	}
+	.wp-site-blocks > .wp-block-group {
+		padding: 20px min(6.5rem, 8vw);
+	}
+	.wp-block-site-title p {
+		line-height: normal;
+	}
+	.wp-block-site-title a {
+		font-weight: 600;
+		font-size: 20px;
+		font-style: normal;
+		line-height: normal;
+		letter-spacing: -0.4px;
+		color: var(--wp--preset--color--contrast);
+		text-decoration: none;
+	}
+	.wp-block-social-links {
+		gap: 0.5em 18px;
+	}
+	.woocommerce-coming-soon-social-login {
+		gap: 48px;
 	}
 	.wp-block-loginout {
 		background-color: #000000;
-		padding: 7px 17px;
 		border-radius: 6px;
+		display: flex;
+		height: 40px;
+		width: 74px;
+		padding: 17px 16px;
+		justify-content: center;
+		align-items: center;
+		gap: 10px;
+		box-sizing: border-box;
 	}
 	.wp-block-loginout a {
 		color: #ffffff;
@@ -67,25 +146,42 @@ Powered by
 		font-size: 14px;
 		font-weight: 500;
 	}
-	.woocommerce-coming-soon-powered-by-woo {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		width: 100%;
-	}
-	body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
-		max-width: 820px;
+	.wp-block-spacer {
+		margin: 0;
 	}
 	.woocommerce-coming-soon-banner-container {
 		width: 100%;
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
+		padding-inline: min(6.5rem, 8vw);
+		margin: 0;
 	}
 	.woocommerce-coming-soon-banner {
 		font-size: 48px;
 		font-weight: 400;
 		line-height: 58px;
+		font-family: 'Cardo', serif;
+		letter-spacing: normal;
+		text-align: center;
+		font-style: normal;
+		max-width: 820px;
+	}
+	.woocommerce-coming-soon-powered-by-woo {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		--wp--preset--spacing--30: 0;
+		--wp--preset--spacing--10: 35px;
+	}
+	.woocommerce-coming-soon-powered-by-woo p {
+		font-style: normal;
+		font-weight: 400;
+		line-height: 160%; /* 19.2px */
+		letter-spacing: -0.12px;
+		color: #3C434A;
+		font-size: var(--wp--preset--font-size--small);
 	}
 </style>
 
