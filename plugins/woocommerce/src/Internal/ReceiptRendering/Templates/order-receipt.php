@@ -34,7 +34,7 @@
 <table id="line_items">
 	<?php
 	foreach ( $data['formatted_line_items'] as $formatted_line_item ) {
-		echo "<tr>$formatted_line_item</tr>";
+		echo $formatted_line_item;
 	}
 	?>
 </table>

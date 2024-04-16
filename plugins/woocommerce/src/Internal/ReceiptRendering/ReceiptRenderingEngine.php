@@ -134,13 +134,25 @@ class ReceiptRenderingEngine {
 		$data = apply_filters( 'woocommerce_printable_order_receipt_data', $this->get_order_data( $order ), $order );
 
 		$formatted_line_items = array();
+		$row_index            = 0;
 		foreach ( $data['line_items'] as $line_item_data ) {
-			$quantity_data       = isset( $line_item_data['quantity'] ) ? " × ${line_item_data['quantity']}" : '';
-			$formatted_line_item = "<tr><td>${line_item_data['title']}$quantity_data</td><td>${line_item_data['amount']}</td></tr>";
+			$quantity_data          = isset( $line_item_data['quantity'] ) ? " × ${line_item_data['quantity']}" : '';
+			$line_item_display_data = array(
+				'inner_html'    => "<td>${line_item_data['title']}$quantity_data</td><td>${line_item_data['amount']}</td>",
+				'tr_attributes' => array(),
+				'row_index'     => $row_index++,
+			);
 
 			/**
-			 * Filter to customize the HTML that gets generated for each order line item in the receipt.
-			 * The returned value must be a <tr> element containing the appropriate <td> elements.
+			 * Filter to customize the HTML that gets rendered for each order line item in the receipt.
+			 *
+			 * $line_item_display_data will be passed (and must be returned) with the following keys:
+			 *
+			 * - inner_html: the HTML text that will go inside a <tr> element.
+			 * - tr_attributes: attributes (e.g. 'class', 'data', 'style') that will be applied to the <tr> element,
+			 *                  as an associative array of attribute name => value.
+			 * - row_index: a number that starts at 0 and increases by one for each processed line item.
+			 *
 			 * $line_item_data will contain the following keys:
 			 *
 			 * - type: One of 'product', 'subtotal', 'discount', 'fee', 'shipping_total', 'taxes_total', 'amount_paid'
@@ -149,15 +161,19 @@ class ReceiptRenderingEngine {
 			 * - item (only when type is 'product'), and instance of WC_Order_Item
 			 * - quantity (only when type is 'product')
 			 *
-			 * @param string $formatted_line_item The original HTML as a concatenation of <td> elements.
-			 * @param array $line_item_data The relevant data for the line item for which the table row is being generated.
+			 * @param string $line_item_display_data Data to use to generate the HTML table row to be rendered for the line item.
+			 * @param array $line_item_data The relevant data for the line item for which the HTML table row is being generated.
 			 * @param WC_Order $order The order for which the receipt is being generated.
-			 * @return string The actual HTML to put inside the <tr> element corresponding to the line item in the table.
+			 * @return string The actual data to use to generate the HTML for the line item.
 			 *
 			 * @since 8.9.0
 			 */
-			$formatted_line_item    = apply_filters( 'woocommerce_printable_order_receipt_formatted_line_item', $formatted_line_item, $line_item_data, $order );
-			$formatted_line_items[] = $formatted_line_item;
+			$line_item_display_data = apply_filters( 'woocommerce_printable_order_receipt_line_item_display_data', $line_item_display_data, $line_item_data, $order );
+			$attributes             = '';
+			foreach ( $line_item_display_data['tr_attributes'] as $attribute_name => $attribute_value ) {
+				$attributes .= " $attribute_name=\"$attribute_value\"";
+			}
+			$formatted_line_items[] = "<tr$attributes>${line_item_display_data['inner_html']}</tr>";
 		}
 		$data['formatted_line_items'] = $formatted_line_items;
 
