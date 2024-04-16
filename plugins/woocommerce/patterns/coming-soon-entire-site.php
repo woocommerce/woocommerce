@@ -10,7 +10,7 @@
 ?>
 
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"20px","bottom":"20px"}},"color":{"background":"#bea0f2"}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignwide has-background" style="background-color:#bea0f2;padding: 26px 90px 14px 90px;color: #111111;"><!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
+<div class="wp-block-group alignwide has-background" style="background-color:#bea0f2;"><!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->
 <div class="wp-block-group alignwide"><!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|20"},"layout":{"selfStretch":"fit","flexSize":null}},"layout":{"type":"flex"}} -->
 <div class="wp-block-group"><!-- wp:site-logo {"width":60} /-->
 
@@ -45,7 +45,7 @@
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--30);padding-bottom:0"><!-- wp:paragraph {"align":"center","style":{"elements":{"link":{"color":{"text":"var:preset|color|contrast"}}}},"textColor":"contrast-2","fontSize":"small"} -->
 <p class="has-text-align-center has-contrast-2-color has-text-color has-link-color has-small-font-size">
 Powered by
-<a style="text-decoration: none; font-family: Inter;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
+<a style="text-decoration: none;" href="https://woocommerce.com" rel="nofollow">WooCommerce</a>
 </p>
 <!-- /wp:paragraph --></div>
 <!-- /wp:group --></div>
@@ -83,19 +83,11 @@ Powered by
 		margin: 0;
 		background-color: #bea0f2;
 		font-family: 'Inter', sans-serif;
-		/* Use TT4 variable https://github.com/WordPress/twentytwentyfour/blob/a38224418bd1c0428567b6d988c737e8116eb46c/README.md#colors */
 		--wp--preset--color--contrast: #111111;
-		--wp--preset--spacing--10: min(1rem, 2vw);
-		--wp--preset--spacing--20: min(1.5rem, 3vw);
-		--wp--preset--spacing--30: min(2.5rem, 5vw);
-		--wp--preset--spacing--40: min(4rem, 8vw);
-		--wp--preset--spacing--50: min(6.5rem, 13vw);
-		--wp--preset--spacing--60: min(10.5rem, 24vw);
-		--wp--preset--font-size--small: 12px;
 		--wp--style--global--wide-size: 1280px;
 	}
 	body .is-layout-constrained > .alignwide {
-		margin: 0 auto !important;
+		margin: 0 auto;
 	}
 	.wp-container-core-group-is-layout-4.wp-container-core-group-is-layout-4 {
 		justify-content: space-between;
@@ -166,6 +158,7 @@ Powered by
 		text-align: center;
 		font-style: normal;
 		max-width: 820px;
+		color: var(--wp--preset--color--contrast);
 	}
 	.woocommerce-coming-soon-powered-by-woo {
 		position: fixed;
@@ -181,7 +174,11 @@ Powered by
 		line-height: 160%; /* 19.2px */
 		letter-spacing: -0.12px;
 		color: #3C434A;
-		font-size: var(--wp--preset--font-size--small);
+		font-size: 12px;
+		font-family: Inter;
+	}
+	.woocommerce-coming-soon-powered-by-woo a {
+		font-family: Inter;
 	}
 </style>
 
