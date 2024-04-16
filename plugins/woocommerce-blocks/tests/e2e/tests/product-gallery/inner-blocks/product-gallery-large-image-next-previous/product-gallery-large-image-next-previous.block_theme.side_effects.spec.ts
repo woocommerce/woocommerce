@@ -153,28 +153,26 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( blockData.selectors.editor.noArrowsOption )
 				.click();
 
-			const isVisible = await page
-				.locator(
-					'.wc-block-product-gallery-large-image-next-previous-container'
-				)
-				.isVisible();
+			const container = page.locator(
+				'.wc-block-product-gallery-large-image-next-previous-container'
+			);
 
-			expect( isVisible ).toBe( false );
+			await expect( container ).toBeHidden();
 
 			await editor.saveSiteEditorEntities();
 
 			await page.goto( blockData.productPage );
 
-			const leftArrow = await page
-				.locator( blockData.selectors.editor.leftArrow.off )
-				.isVisible();
+			const leftArrow = page.locator(
+				blockData.selectors.editor.leftArrow.off
+			);
 
-			const rightArrow = await page
-				.locator( blockData.selectors.editor.rightArrow.off )
-				.isVisible();
+			const rightArrow = page.locator(
+				blockData.selectors.editor.rightArrow.off
+			);
 
-			expect( leftArrow ).toBe( false );
-			expect( rightArrow ).toBe( false );
+			await expect( leftArrow ).toBeHidden();
+			await expect( rightArrow ).toBeHidden();
 		} );
 
 		// eslint-disable-next-line playwright/no-skipped-test
