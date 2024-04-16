@@ -25,6 +25,7 @@ const blocks = {
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
+	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
