@@ -19,7 +19,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-analytics/reports/taxes';
 
 	/**
-	 * Tax option. 
+	 * Tax option.
 	 *
 	 * @var string
 	 */
@@ -126,7 +126,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$tax_report = reset( $reports );
 
 		$this->assertEquals( 1, $tax_report['tax_rate_id'] );
-		// $this->assertEquals( 'TestTax', $tax_report['name'] );
 		$this->assertEquals( 7, $tax_report['tax_rate'] );
 		$this->assertEquals( 'US', $tax_report['country'] );
 		$this->assertEquals( 'NY', $tax_report['state'] );
@@ -245,7 +244,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$tax_report = reset( $reports );
 
 		$this->assertEquals( 2, $tax_report['tax_rate_id'] );
-		// $this->assertEquals( 'TestTax 2', $tax_report['name'] );
 		$this->assertEquals( 8.0, $tax_report['tax_rate'] );
 		$this->assertEquals( 'CA', $tax_report['country'] );
 		$this->assertEquals( 'ON', $tax_report['state'] );
@@ -257,7 +255,6 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$tax_report = next( $reports );
 
 		$this->assertEquals( 1, $tax_report['tax_rate_id'] );
-		// $this->assertEquals( 'TestTax', $tax_report['name'] );
 		$this->assertEquals( 7, $tax_report['tax_rate'] );
 		$this->assertEquals( 'US', $tax_report['country'] );
 		$this->assertEquals( 'NY', $tax_report['state'] );
