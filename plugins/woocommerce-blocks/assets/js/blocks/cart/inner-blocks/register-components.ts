@@ -206,7 +206,7 @@ registerCheckoutBlock( {
 	component: lazy(
 		() =>
 			import(
-				/* webpackChunkName: "cart-blocks/order-summary-shipping" */
+				/* webpackChunkName: "cart-blocks/order-summary-totals" */
 				'./cart-order-summary-totals/frontend'
 			)
 	),
