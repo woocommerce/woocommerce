@@ -31,7 +31,6 @@ if ( wc_current_theme_is_fse_theme() ) {
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center"><?php echo esc_html__( 'Something big is brewing! Our store is in the works - Launching shortly!', 'woocommerce' ); ?></p>
 <!-- /wp:paragraph -->
-
 <!-- wp:spacer -->
 <div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer --></div>
