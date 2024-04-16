@@ -301,10 +301,17 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							),
 					];
 
-					const availableAttributes = attributes?.filter(
-						( attribute: EnhancedProductAttribute ) =>
-							! ignoredAttributeIds.includes( attribute.id )
-					);
+					const availableAttributes = attributes
+						?.filter(
+							( attribute: EnhancedProductAttribute ) =>
+								! ignoredAttributeIds.includes( attribute.id )
+						)
+						.map( ( attribute: EnhancedProductAttribute ) => ( {
+							...attribute,
+							isDisabled: disabledAttributeIds.includes(
+								attribute.id
+							),
+						} ) );
 
 					return (
 						<Modal
