@@ -63,7 +63,7 @@ class ComingSoonHelper {
 	public function get_url_from_wp( \WP $wp ) {
 		// Special case for plain permalinks.
 		if ( empty( get_option( 'permalink_structure' ) ) ) {
-			return '/' . add_query_arg( $wp->query_vars, $wp->request );
+			return home_url( add_query_arg( $wp->query_vars, $wp->request ) );
 		}
 
 		return trailingslashit( '/' . $wp->request );
