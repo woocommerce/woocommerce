@@ -338,7 +338,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															attributes={
 																attributes
 															}
-															isLoading={ isLoading }
+															isLoading={
+																isLoading
+															}
 															label={
 																attributeLabel
 															}
