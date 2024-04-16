@@ -209,6 +209,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
+	const sortCriteria = { order_by: 'name' };
+
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
@@ -216,8 +218,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 		);
 		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
 		};
 	} );
 

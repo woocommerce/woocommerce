@@ -46,7 +46,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
 
-	// It should be moved our of this component
+	/*
+	 * todo: It should be moved out of this component
+	 * together with the addNewAttribute function
+	 */
 	const sortCriteria = { order_by: 'name' };
 
 	function isNewAttributeListItem(
