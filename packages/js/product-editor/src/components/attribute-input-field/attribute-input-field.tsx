@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { Spinner } from '@wordpress/components';
 import { createElement, useMemo } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	WCDataSelector,
 	ProductAttributesActions,
 	WPDataActions,
 } from '@woocommerce/data';
@@ -33,6 +32,8 @@ import {
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
+	attributes,
+	isLoading,
 	onChange,
 	placeholder,
 	label,
@@ -46,17 +47,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	const { createProductAttribute, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
-		const { getProductAttributes, hasFinishedResolution } = select(
-			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-		);
-		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
-		};
-	} );
 
 	const markedAttributes = useMemo(
 		function setDisabledAttribute() {

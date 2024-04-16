@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
+	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	ProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
@@ -208,6 +209,18 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
+		const { getProductAttributes, hasFinishedResolution } = select(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+		);
+		return {
+			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
+			attributes: getProductAttributes(),
+		};
+	} );
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -322,6 +335,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																attributePlaceholder
 															}
 															value={ attribute }
+															attributes={
+																attributes
+															}
+															isLoading={ isLoading }
 															label={
 																attributeLabel
 															}
