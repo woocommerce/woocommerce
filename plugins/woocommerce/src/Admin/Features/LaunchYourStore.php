@@ -69,6 +69,11 @@ class LaunchYourStore {
 		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
 
 		if ( $is_setting_page ) {
+			// Regnerate the share key if it's not set.
+			if ( false === get_option( 'woocommerce_share_key', false ) ) {
+				update_option( 'woocommerce_share_key', wp_generate_password( 32, false ) );
+			}
+
 			$settings['siteVisibilitySettings'] = array(
 				'shop_permalink'               => get_permalink( wc_get_page_id( 'shop' ) ),
 				'woocommerce_coming_soon'      => get_option( 'woocommerce_coming_soon' ),
