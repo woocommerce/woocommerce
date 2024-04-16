@@ -106,6 +106,11 @@ jQuery( function( $ ) {
 		$.ajax( {
 			type: 'post',
 			url: target.data( 'rest-url' ),
+			data: {
+				meta: {
+					'woocommerce_coming_soon_banner_dismissed': 'yes'
+				}
+			},
 			beforeSend: function ( xhr ) {
 				xhr.setRequestHeader( 'X-WP-Nonce',  target.data( 'rest-nonce' ) );
 			},

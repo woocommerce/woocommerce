@@ -21,7 +21,7 @@ class LaunchYourStore {
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
-		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ) );
+		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
 	}
 
 	/**
