@@ -4,12 +4,8 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 
-test.describe( 'Legacy templates', async () => {
-	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
-	test.afterEach( async ( { requestUtils } ) => {
+test.describe( 'Legacy templates', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 
