@@ -2,16 +2,17 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { cli } from '@woocommerce/e2e-utils';
+
 /**
  * Internal dependencies
  */
 import ProductCollectionPage from '../product-collection/product-collection.page';
-import { cli } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'Filter by Rating',
 	slug: 'woocommerce/rating-filter',
-	urlSearchParamWhenFilterIsApplied: '?rating_filter=1',
+	urlSearchParamWhenFilterIsApplied: 'rating_filter=1',
 };
 
 const test = base.extend< {
@@ -110,7 +111,7 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeEach( async ( { admin, page, editor } ) => {
+	test.beforeEach( async ( { admin, page, editor, editorUtils } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
@@ -118,8 +119,9 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
-			canvas: 'edit',
 		} );
+
+		await editorUtils.enterEditMode();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -164,8 +166,8 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.getByRole( 'list' )
 			.locator( '.product' );
 
-		await expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		await expect( products ).toHaveCount( 1 );
@@ -211,10 +213,8 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 			.click();
 
-		await page.waitForURL( ( url ) =>
-			url
-				.toString()
-				.includes( blockData.urlSearchParamWhenFilterIsApplied )
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
 		const products = page
@@ -252,29 +252,19 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await page.getByText( "Show 'Apply filters' button" ).click();
 		await editorUtils.publishAndVisitPost();
 
-		await page.addInitScript( () => {
-			document.addEventListener( 'DOMContentLoaded', () => {
-				// eslint-disable-next-line dot-notation
-				window[ '__DOMContentLoaded__' ] = true;
-			} );
-		} );
-
 		await page
 			.getByRole( 'checkbox', { name: 'Rated 1 out of 5' } )
 			.click();
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
-		await page.waitForEvent( 'domcontentloaded' );
-
-		const domContentLoaded = await page.evaluate(
-			// eslint-disable-next-line dot-notation
-			() => window[ '__DOMContentLoaded__' ] === true
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		await expect( page.url() ).toContain(
-			blockData.urlSearchParamWhenFilterIsApplied
-		);
+		const products = page
+			.locator( '.wp-block-woocommerce-product-template' )
+			.getByRole( 'listitem' );
 
-		expect( domContentLoaded ).toBe( true );
+		await expect( products ).toHaveCount( 1 );
 	} );
 } );
