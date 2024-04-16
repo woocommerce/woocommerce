@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Defensive coding for when Action Scheduler function as_has_scheduled_action is not defined.
+
+
