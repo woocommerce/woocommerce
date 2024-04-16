@@ -156,7 +156,7 @@ class LaunchYourStore {
 
 		register_meta(
 			'user',
-			'woocommerce_coming_soon_banner_dismissed',
+			self::BANNER_DISMISS_USER_META_KEY,
 			array(
 				'type'         => 'string',
 				'description'  => 'Indicate wheter user has dismissed coming soon notice or not',
