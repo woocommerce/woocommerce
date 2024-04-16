@@ -191,7 +191,7 @@ class LaunchYourStore {
 	 */
 	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
 		$existing_meta = get_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, true );
-		if ( $existing_meta === 'yes' ) {
+		if ( "yes" === $existing_meta ) {
 			update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 		}
 	}
