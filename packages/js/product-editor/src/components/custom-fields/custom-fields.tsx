@@ -5,11 +5,13 @@ import { Button } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import { TRACKS_SOURCE } from '../../constants';
 import { useCustomFields } from '../../hooks/use-custom-fields';
 import { CreateModal } from './create-modal';
 import { EditModal } from './edit-modal';
@@ -35,6 +37,10 @@ export function CustomFields( {
 
 	function handleAddNewButtonClick() {
 		setShowCreateModal( true );
+
+		recordEvent( 'product_custom_fields_show_add_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	function customFieldEditButtonClickHandler(
@@ -42,6 +48,12 @@ export function CustomFields( {
 	) {
 		return function handleCustomFieldEditButtonClick() {
 			setSelectedCustomField( customField );
+
+			recordEvent( 'product_custom_fields_show_edit_modal', {
+				source: TRACKS_SOURCE,
+				custom_field_id: customField.id,
+				custom_field_name: customField.key,
+			} );
 		};
 	}
 
@@ -50,6 +62,12 @@ export function CustomFields( {
 	) {
 		return function handleCustomFieldRemoveButtonClick() {
 			removeCustomField( customField );
+
+			recordEvent( 'product_custom_fields_remove_button_click', {
+				source: TRACKS_SOURCE,
+				custom_field_id: customField.id,
+				custom_field_name: customField.key,
+			} );
 		};
 	}
 
@@ -60,6 +78,10 @@ export function CustomFields( {
 
 	function handleCreateModalCancel() {
 		setShowCreateModal( false );
+
+		recordEvent( 'product_custom_fields_cancel_add_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	function handleEditModalUpdate( customField: Metadata< string > ) {
@@ -69,6 +91,10 @@ export function CustomFields( {
 
 	function handleEditModalCancel() {
 		setSelectedCustomField( undefined );
+
+		recordEvent( 'product_custom_fields_cancel_edit_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	return (
