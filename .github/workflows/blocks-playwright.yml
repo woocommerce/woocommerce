@@ -11,7 +11,6 @@ on:
     # Allow manually triggering the workflow.
     workflow_dispatch:
 
-
 env:
     FORCE_COLOR: 1
 
@@ -26,8 +25,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                shardIndex: [ 1, 2, 3, 4, 5, 6, 7, 8 ]
-                shardTotal: [ 8 ]
+                shardIndex: [1, 2, 3, 4, 5, 6, 7, 8]
+                shardTotal: [8]
 
         steps:
             - uses: actions/checkout@v4
@@ -54,3 +53,17 @@ jobs:
                   name: failures-artifacts-shard-${{ matrix.shardIndex }}
                   path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
                   if-no-files-found: ignore
+    merge-artifacts:
+        name: Merge Artifacts
+        # Merge reports even if some shards have failed.
+        if: ${{ !cancelled() }}
+        needs: [blocks-playwright-tests]
+
+        runs-on: ubuntu-latest
+        steps:
+            - name: Merge Artifacts
+              uses: actions/upload-artifact/merge@v4
+              with:
+                  name: failures-artifacts
+                  pattern: failures-artifacts-shard-*
+                  delete-merged: true
