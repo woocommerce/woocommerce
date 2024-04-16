@@ -39,8 +39,7 @@ class ComingSoonTemplate extends AbstractPageTemplate {
 	 * @return \WP_Post|null Post object or null.
 	 */
 	protected function get_placeholder_page() {
-		$page_id = get_option( 'woocommerce_coming_soon_page_id' );
-		return $page_id ? get_post( $page_id ) : null;
+		return null;
 	}
 
 	/**
@@ -49,8 +48,6 @@ class ComingSoonTemplate extends AbstractPageTemplate {
 	 * @return boolean
 	 */
 	protected function is_active_template() {
-		global $post;
-		$placeholder = $this->get_placeholder_page();
-		return null !== $placeholder && $post instanceof \WP_Post && $placeholder->post_name === $post->post_name;
+		return false;
 	}
 }
