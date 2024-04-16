@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow enbling HPOS when the only incompatible plugin is the Legacy REST API one
