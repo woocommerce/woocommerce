@@ -51,7 +51,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		const title = 'New Title';
 
-		await page.fill( textSelector, title );
+		await page.locator( textSelector ).fill( title );
 
 		await expect( page.locator( textSelector ) ).toHaveText( title );
 	} );
