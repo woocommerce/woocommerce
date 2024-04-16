@@ -250,7 +250,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await expect( products ).toHaveCount( 1 );
 	} );
 
-	test( 'should refresh the page only if the user click on button', async ( {
+	test( 'should refresh the page only if the user clicks on button', async ( {
 		page,
 		admin,
 		editor,
