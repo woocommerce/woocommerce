@@ -21,6 +21,7 @@ class LaunchYourStore {
 		}
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
+		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ) );
 	}
 
 	/**
@@ -120,7 +121,7 @@ class LaunchYourStore {
 			return false;
 		}
 
-		$link       = admin_url( 'admin.php?page=wc-settings#wc_settings_general_site_visibility_slotfill' );
+		$link       = admin_url( 'admin.php?page=wc-settings&tab=site-visibility' );
 		$rest_url   = rest_url( 'wp/v2/users/' . $current_user_id );
 		$rest_nonce = wp_create_nonce( 'wp_rest' );
 
@@ -153,22 +154,27 @@ class LaunchYourStore {
 			)
 		);
 
-		register_meta( 'user', 'woocommerce_coming_soon_banner_dismissed', array(
-			'type'         => 'string',
-			'description'  => 'Indicate wheter user has dismissed coming soon notice or not',
-			'single'       => true,
-			'show_in_rest' => true,
-		) );
-	
+		register_meta(
+			'user',
+			'woocommerce_coming_soon_banner_dismissed',
+			array(
+				'type'         => 'string',
+				'description'  => 'Indicate wheter user has dismissed coming soon notice or not',
+				'single'       => true,
+				'show_in_rest' => true,
+			)
+		);
 	}
-	
+
 	/**
 	 * Reset 'woocommerce_coming_soon_banner_dismissed' user meta to 'no'.
 	 *
 	 * Runs when a user logs-in successfully.
+	 *
+	 * @param string $user_login user login.
+	 * @param object $user user object.
 	 */
 	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
 		update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 	}
 }
-
