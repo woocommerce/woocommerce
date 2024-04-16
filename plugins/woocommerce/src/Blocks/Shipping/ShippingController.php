@@ -57,12 +57,11 @@ class ShippingController {
 				'countryStates',
 				function () {
 					return WC()->countries->get_states();
-				},
-				true
+				}
 			);
 		}
 
-		$this->asset_data_registry->add( 'collectableMethodIds', array( 'Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils', 'get_local_pickup_method_ids' ), true );
+		$this->asset_data_registry->add( 'collectableMethodIds', array( 'Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils', 'get_local_pickup_method_ids' ) );
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
@@ -148,7 +147,7 @@ class ShippingController {
 					$settings[ $index ]['desc'] = sprintf(
 						/* translators: %s: URL to the documentation. */
 						__( 'Hide shipping costs until an address is entered (Not available when using the <a href="%s">Local pickup options powered by the Checkout block</a>)', 'woocommerce' ),
-						'https://woo.com/document/woocommerce-blocks-local-pickup/'
+						'https://woocommerce.com/document/woocommerce-blocks-local-pickup/'
 					);
 					$settings[ $index ]['disabled'] = true;
 					$settings[ $index ]['value']    = 'no';
@@ -293,7 +292,7 @@ class ShippingController {
 		}
 
 		$settings = array(
-			'pickupLocationSettings' => get_option( 'woocommerce_pickup_location_settings', array() ),
+			'pickupLocationSettings' => LocalPickupUtils::get_local_pickup_settings(),
 			'pickupLocations'        => $formatted_pickup_locations,
 			'readonlySettings'       => array(
 				'hasLegacyPickup' => $has_legacy_pickup,

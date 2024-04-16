@@ -11,14 +11,14 @@
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
-		"@wordpress/env": "^8.13.0",
+		"@wordpress/env": "^9.0.7",
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",
 		"simple-git": "^3.21.0"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	}
 }

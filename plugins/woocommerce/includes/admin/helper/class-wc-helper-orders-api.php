@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_Helper_Orders_API
  *
- * Pings Woo.com to create an order and pull in the necessary data to start the installation process.
+ * Pings WooCommerce.com to create an order and pull in the necessary data to start the installation process.
  */
 class WC_Helper_Orders_API {
 	/**
@@ -59,7 +59,7 @@ class WC_Helper_Orders_API {
 	}
 
 	/**
-	 * Core function to create an order on Woo.com. Pings the API and catches the exceptions if any.
+	 * Core function to create an order on WooCommerce.com. Pings the API and catches the exceptions if any.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *

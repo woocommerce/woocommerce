@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
@@ -22,7 +22,7 @@ import { useSettingsContext } from './settings-context';
 
 const GeneralSettingsDescription = () => (
 	<>
-		<h2>{ __( 'General', 'woocommerce' ) }</h2>
+		<h2>{ _x( 'General', 'Admin settings', 'woocommerce' ) }</h2>
 		<p>
 			{ __(
 				'Enable or disable local pickup on your store, and define costs. Local pickup is only available from the block checkout.',

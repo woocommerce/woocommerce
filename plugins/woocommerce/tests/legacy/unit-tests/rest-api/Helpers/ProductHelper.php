@@ -79,7 +79,7 @@ class ProductHelper {
 				'name'          => 'Dummy External Product',
 				'regular_price' => 10,
 				'sku'           => 'DUMMY EXTERNAL SKU',
-				'product_url'   => 'https://woo.com',
+				'product_url'   => 'https://woocommerce.com',
 				'button_text'   => 'Buy external product',
 			)
 		);
