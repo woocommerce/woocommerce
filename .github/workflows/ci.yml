@@ -125,8 +125,8 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
-          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results/allure-results
+          name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
           retention-days: 1
           compression-level: 9
           
@@ -162,7 +162,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: all-blob-reports-${{ matrix.shardNumber }}
+          name: all-blob-api-reports-${{ matrix.shardNumber }}
           path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
           retention-days: 1
           compression-level: 9
@@ -176,6 +176,9 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
+    env: 
+      WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+    
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -193,7 +196,16 @@ jobs:
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
       - name: 'Run tests'
+        env:
+          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }}
         run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+        
+      - name: 'Archive metrics results'
+        if: ${{ success() && matrix.name == 'Metrics' }}
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        with:
+          name: metrics-results
+          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
   
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
@@ -258,8 +270,8 @@ jobs:
       - name: 'Download blob reports from artifacts'
         uses: actions/download-artifact@v4
         with:
-          path: ./out/allure-results
-          pattern: all-blob-reports-*
+          path: ./out
+          pattern: all-blob-e2e-reports-*
           run-id: project-e2e-test-jobs
           merge-multiple: true
 
@@ -306,6 +318,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
           slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+          playwright_report_path: ./out/test-results-*.json
+          playwright_output_dir: ./out/results-data
 
   api-test-reports:
     name: 'Report API tests results'
@@ -325,7 +339,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./out/allure-results
-          pattern: all-blob-reports-*
+          pattern: all-blob-api-reports-*
           run-id: project-api-test-jobs
           merge-multiple: true
 

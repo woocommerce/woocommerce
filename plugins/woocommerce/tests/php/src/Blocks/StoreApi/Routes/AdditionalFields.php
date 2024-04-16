@@ -31,6 +31,14 @@ class AdditionalFields extends MockeryTestCase {
 	 * @var CheckoutFields
 	 */
 	protected $controller;
+
+	/**
+	 * Products to use in tests.
+	 *
+	 * @var array
+	 */
+	protected $products;
+
 	/**
 	 * Setup products and a cart, as well as register fields.
 	 */
@@ -1469,6 +1477,7 @@ class AdditionalFields extends MockeryTestCase {
 
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
+
 		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
 		$this->assertEquals( 'sanitized-value', $data['additional_fields'][ $id ], print_r( $data, true ) );
 
@@ -1731,5 +1740,127 @@ class AdditionalFields extends MockeryTestCase {
 		$data     = $response->get_data();
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'plugin-namespace/job-function is not one of director, engineering, customer-support, and other.', $data['data']['params']['additional_fields'], print_r( $data, true ) );
+	}
+
+	/**
+	 * Ensures that saved values are returned in the cart response.
+	 */
+	public function test_previous_values_are_loaded_in_cart() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'billing-saved-gov-id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'plugin-namespace/gov-id' => 'shipping-saved-gov-id',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function'   => 'engineering',
+					'plugin-namespace/leave-on-porch' => true,
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
+
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
+		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
+	}
+
+	/**
+	 * Ensures that saved values are returned in the checkout response.
+	 */
+	public function test_previous_values_are_loaded_in_checkout() {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'billing-saved-gov-id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'plugin-namespace/gov-id' => 'shipping-saved-gov-id',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function'   => 'engineering',
+					'plugin-namespace/leave-on-porch' => true,
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
+		wc()->cart->add_to_cart( $this->products[1]->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'billing-saved-gov-id', ( (array) $data['billing_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
+		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
+		$this->assertEquals( 'engineering', ( (array) $data['additional_fields'] )['plugin-namespace/job-function'], print_r( $data, true ) );
+		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
 	}
 }

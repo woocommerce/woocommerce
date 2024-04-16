@@ -225,9 +225,7 @@ class Options extends \WC_REST_Data_Controller {
 			'woocommerce_store_pages_only',
 			'woocommerce_private_link',
 			'woocommerce_share_key',
-			'launch-status',
 			'woocommerce_show_lys_tour',
-			'woocommerce_coming_soon_page_id',
 			// WC Test helper options.
 			'wc-admin-test-helper-rest-api-filters',
 			'wc_admin_helper_feature_values',

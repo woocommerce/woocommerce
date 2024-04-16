@@ -33,13 +33,13 @@ export default function MySubscriptions(): JSX.Element {
 
 	const installedTableDescription = createInterpolateElement(
 		__(
-			'Woo.com extensions and themes installed on this store. To see all your subscriptions go to <a>your account<custom_icon /></a> on Woo.com.',
+			'WooCommerce.com extensions and themes installed on this store. To see all your subscriptions go to <a>your account<custom_icon /></a> on WooCommerce.com.',
 			'woocommerce'
 		),
 		{
 			a: (
 				<a
-					href="https://woo.com/my-account/my-subscriptions"
+					href="https://woocommerce.com/my-account/my-subscriptions"
 					target="_blank"
 					rel="nofollow noopener noreferrer"
 				>
@@ -71,7 +71,7 @@ export default function MySubscriptions(): JSX.Element {
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
 					{ __(
-						"Connect your store to Woo.com using the Woo.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
+						"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
 						'woocommerce'
 					) }
 				</p>
@@ -119,7 +119,7 @@ export default function MySubscriptions(): JSX.Element {
 					</h2>
 					<p className="woocommerce-marketplace__my-subscriptions__table-description">
 						{ __(
-							"Woo.com subscriptions you haven't used yet.",
+							"WooCommerce.com subscriptions you haven't used yet.",
 							'woocommerce'
 						) }
 					</p>

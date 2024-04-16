@@ -30,7 +30,7 @@ export default function PluginInstallNotice() {
 					<span
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							__(
-								'Please install the <b>Woo.com Update Manager</b> to continue receiving the updates and streamlined support included in your Woo.com subscriptions.<br/>Alternatively, you can download and install it manually.',
+								'Please install the <b>WooCommerce.com Update Manager</b> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.<br/>Alternatively, you can download and install it manually.',
 								'woocommerce'
 							)
 						) }
@@ -62,7 +62,7 @@ export default function PluginInstallNotice() {
 					<span
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							__(
-								'Activate the <b>Woo.com Update Manager</b> to continue receiving the updates and streamlined support included in your Woo.com subscriptions.',
+								'Activate the <b>WooCommerce.com Update Manager</b> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.',
 								'woocommerce'
 							)
 						) }

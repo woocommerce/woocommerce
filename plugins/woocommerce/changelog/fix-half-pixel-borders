@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fixes an issue on high-res screens. The bug was not present in any released version
+
+
