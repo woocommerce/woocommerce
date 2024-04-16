@@ -1,6 +1,7 @@
 .woocommerce-recommended-payments-banner {
 	margin: 0 15px 10px 0;
 	animation: isLoaded;
+	min-width: 550px;
 	animation-duration: 250ms;
 
 	&.components-card {
