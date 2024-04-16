@@ -36,7 +36,7 @@ const getCcOrEcheckLabel = ( {
 	return sprintf(
 		/* translators: %1$s is referring to the payment method brand, %2$s is referring to the last 4 digits of the payment card, %3$s is referring to the expiry date.  */
 		__( '%1$s ending in %2$s (expires %3$s)', 'woocommerce' ),
-		method.brand,
+		method?.display_brand ?? method?.networks?.preferred ?? method.brand,
 		method.last4,
 		expires
 	);
@@ -170,6 +170,7 @@ const SavedPaymentMethodOptions = () => {
 	return options.length > 0 ? (
 		<>
 			<RadioControl
+				highlightChecked={ true }
 				id={ 'wc-payment-method-saved-tokens' }
 				selected={ activeSavedToken }
 				options={ options }

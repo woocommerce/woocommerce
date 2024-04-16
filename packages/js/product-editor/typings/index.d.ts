@@ -23,5 +23,5 @@ declare module '@wordpress/core-data' {
 		kind: string,
 		name: string,
 		id: number | string
-	): { record: T };
+	): { record: T, editedRecord: T };
 }

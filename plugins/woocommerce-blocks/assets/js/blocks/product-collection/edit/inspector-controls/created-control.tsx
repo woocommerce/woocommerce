@@ -23,20 +23,24 @@ import {
  * Internal dependencies
  */
 import { ETimeFrameOperator, QueryControlProps } from '../../types';
+import { DEFAULT_FILTERS } from '../../constants';
 
 const CreatedControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 	const { timeFrame } = query;
 
+	const deselectCallback = () => {
+		setQueryAttribute( {
+			timeFrame: DEFAULT_FILTERS.timeFrame,
+		} );
+	};
+
 	return (
 		<ToolsPanelItem
 			label={ __( 'Created', 'woocommerce' ) }
 			hasValue={ () => timeFrame?.operator && timeFrame?.value }
-			onDeselect={ () => {
-				setQueryAttribute( {
-					timeFrame: undefined,
-				} );
-			} }
+			onDeselect={ deselectCallback }
+			resetAllFilter={ deselectCallback }
 		>
 			<Flex direction="column" gap={ 3 }>
 				<FlexItem>

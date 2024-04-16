@@ -283,7 +283,9 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 
 		// Use Locator here because the select2 box is duplicated in shipping.
 		await admin.page
-			.locator( '[id="\\/billing\\/first-plugin-namespace\\/road-size"]' )
+			.locator(
+				'[id="\\_wc_billing\\/first-plugin-namespace\\/road-size"]'
+			)
 			.selectOption( 'wide' );
 
 		// Handle changing the contact fields.
@@ -297,10 +299,16 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 			.getByLabel( 'Is this a personal purchase or a business purchase?' )
 			.selectOption( 'personal' );
 
-		await admin.page
+		const clickPromise = admin.page
 			.getByRole( 'button', { name: 'Update' } )
 			.first()
 			.click();
+
+		const navigationPromise = admin.page.waitForEvent( 'domcontentloaded' );
+
+		// When update is clicked without waiting for DOMContentLoaded the page becomes
+		// available before click handlers are attached to the shipping edit link.
+		await Promise.all( [ clickPromise, navigationPromise ] );
 
 		await admin.page
 			.getByRole( 'heading', { name: 'Shipping Edit' } )
@@ -329,7 +337,7 @@ test.describe( 'Merchant → Additional Checkout Fields', () => {
 		// Use Locator here because the select2 box is duplicated in billing.
 		await admin.page
 			.locator(
-				'[id="\\/shipping\\/first-plugin-namespace\\/road-size"]'
+				'[id="\\_wc_shipping\\/first-plugin-namespace\\/road-size"]'
 			)
 			.selectOption( 'super-wide' );
 

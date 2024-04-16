@@ -155,7 +155,7 @@ export function BlockEditor( {
 		{ postType }
 	);
 
-	const { record: product } = useEntityRecord< Product >(
+	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId
