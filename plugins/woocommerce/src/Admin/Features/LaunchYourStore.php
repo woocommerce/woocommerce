@@ -16,9 +16,7 @@ class LaunchYourStore {
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_update_options_site-visibility', array( $this, 'save_site_visibility_options' ) );
-		if ( is_admin() ) {
-			add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
-		}
+		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'preload_settings' ) );
 		add_action( 'wp_footer', array( $this, 'maybe_add_coming_soon_banner_on_frontend' ) );
 		add_action( 'init', array( $this, 'register_launch_your_store_user_meta_fields' ) );
 		add_action( 'wp_login', array( $this, 'reset_woocommerce_coming_soon_banner_dismissed' ), 10, 2 );
@@ -85,6 +83,20 @@ class LaunchYourStore {
 	}
 
 	/**
+	 * User must be an admin or editor.
+	 *
+	 * @return bool
+	 */
+	private function is_manager_or_admin() {
+		// phpcs:ignore
+		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Add 'coming soon' banner on the frontend when the following conditions met.
 	 *
 	 * - User must be either an admin or store editor (must be logged in).
@@ -105,9 +117,8 @@ class LaunchYourStore {
 		if ( get_user_meta( $current_user_id, self::BANNER_DISMISS_USER_META_KEY, true ) === 'yes' ) {
 			return false;
 		}
-		// User must be an admin or editor.
-		// phpcs:ignore
-		if ( ! current_user_can( 'shop_manager' ) && ! current_user_can( 'administrator' ) ) {
+
+		if ( ! $this->is_manager_or_admin() ) {
 			return false;
 		}
 
@@ -143,6 +154,10 @@ class LaunchYourStore {
 	 * Register user meta fields for Launch Your Store.
 	 */
 	public function register_launch_your_store_user_meta_fields() {
+		if ( ! $this->is_manager_or_admin() ) {
+			return;
+		}
+
 		register_meta(
 			'user',
 			'woocommerce_launch_your_store_tour_hidden',
@@ -175,6 +190,9 @@ class LaunchYourStore {
 	 * @param object $user user object.
 	 */
 	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
-		update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
+		$existing_meta = get_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, true );
+		if ( $existing_meta === 'yes' ) {
+			update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
+		}
 	}
 }
