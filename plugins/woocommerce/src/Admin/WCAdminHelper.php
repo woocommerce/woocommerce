@@ -235,7 +235,7 @@ class WCAdminHelper {
 	private static function get_normalized_url_path( $url ) {
 		$query           = wp_parse_url( $url, PHP_URL_QUERY );
 		$path            = wp_parse_url( $url, PHP_URL_PATH ) . ( $query ? '?' . $query : '' );
-		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH );
+		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH ) ?? '';
 		$normalized_path = trim( substr( $path, strlen( $home_path ) ), '/' );
 		return $normalized_path;
 	}
