@@ -14,7 +14,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const templateTypeName =
 		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
-	test.describe( `${ testData.templateName } template`, async () => {
+	test.describe( `${ testData.templateName } template`, () => {
 		test( 'can be modified and reverted', async ( {
 			admin,
 			frontendUtils,
