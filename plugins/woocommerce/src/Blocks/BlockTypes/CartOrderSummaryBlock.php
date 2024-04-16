@@ -52,21 +52,23 @@ class CartOrderSummaryBlock extends AbstractInnerBlock {
 
 		$totals_inner_blocks = array( 'subtotal', 'discount', 'fee', 'shipping', 'taxes' ); // We want to move these blocks inside a parent 'totals' block.
 
-		if ( ! preg_match( $regex_for_cart_order_summary_totals, $content ) ) {
-			foreach ( $totals_inner_blocks as $key => $block_name ) {
-				$inner_block_content = $this->get_inner_block_content( $block_name, $content );
+		if ( preg_match( $regex_for_cart_order_summary_totals, $content ) ) {
+			return $content;
+		}
 
-				if ( $inner_block_content ) {
-					$order_summary_totals_content .= "\n" . $inner_block_content;
+		foreach ( $totals_inner_blocks as $key => $block_name ) {
+			$inner_block_content = $this->get_inner_block_content( $block_name, $content );
 
-					// The last block is replaced with the totals block.
-					if ( count( $totals_inner_blocks ) - 1 === $key ) {
-						$order_summary_totals_content .= '</div>';
-						$content                       = preg_replace( $this->inner_block_regex( $block_name ), $order_summary_totals_content, $content );
-					} else {
-						// Otherwise, remove the block.
-						$content = preg_replace( $this->inner_block_regex( $block_name ), '', $content );
-					}
+			if ( $inner_block_content ) {
+				$order_summary_totals_content .= "\n" . $inner_block_content;
+
+				// The last block is replaced with the totals block.
+				if ( count( $totals_inner_blocks ) - 1 === $key ) {
+					$order_summary_totals_content .= '</div>';
+					$content                       = preg_replace( $this->inner_block_regex( $block_name ), $order_summary_totals_content, $content );
+				} else {
+					// Otherwise, remove the block.
+					$content = preg_replace( $this->inner_block_regex( $block_name ), '', $content );
 				}
 			}
 		}
