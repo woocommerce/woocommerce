@@ -48,6 +48,7 @@ type NewAttributeModalProps = {
 	onRemoveItem?: () => void;
 	selectedAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
+	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
 	termsAutoSelection?: 'first' | 'all';
 	defaultVisibility?: boolean;
@@ -78,6 +79,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 	onRemoveItem = () => {},
 	selectedAttributeIds = [],
 	createNewAttributesAsGlobal = false,
+	disabledAttributeIds = [],
 	disabledAttributeMessage = __(
 		'Already used in Attributes',
 		'woocommerce'
@@ -362,6 +364,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															) }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
+															}
+															disabledAttributeIds={
+																disabledAttributeIds
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage
