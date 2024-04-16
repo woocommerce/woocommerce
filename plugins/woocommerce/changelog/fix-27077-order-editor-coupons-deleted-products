@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Addresses a fatal error that can occur when applying a coupon within the order editor (where one of the products has been deleted).

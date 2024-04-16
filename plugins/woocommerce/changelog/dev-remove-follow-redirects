@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Removed follow-redirects from dev dependencies
+
+

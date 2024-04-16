@@ -27,11 +27,11 @@ export default function ActionsDropdownMenu( props: {
 	if ( ! props.subscription.is_shared ) {
 		controls.unshift(
 			{
-				title: __( 'Manage on Woo.com', 'woocommerce' ),
+				title: __( 'Manage on WooCommerce.com', 'woocommerce' ),
 				icon: <></>,
 				onClick: () => {
 					window.open(
-						'https://woo.com/my-account/my-subscriptions',
+						'https://woocommerce.com/my-account/my-subscriptions',
 						'_blank'
 					);
 				},

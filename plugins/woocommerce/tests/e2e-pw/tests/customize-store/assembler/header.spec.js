@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
 
 const test = base.extend( {
@@ -43,7 +43,7 @@ test.describe( 'Assembler -> headers', () => {
 				'no'
 			);
 
-			await activateTheme( 'twentynineteen' );
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -105,16 +105,21 @@ test.describe( 'Assembler -> headers', () => {
 		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
 	} );
 
-	test.skip( 'The selected header should be applied on the frontend', async ( {
+	test( 'The selected header should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
 		baseURL,
-	}, testInfo ) => {
-		testInfo.snapshotSuffix = '';
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
-		const header = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 1 );
+		const header = await assembler
+			.locator( '.block-editor-block-patterns-list__list-item' )
+			.nth( 1 )
+			.frameLocator( 'iframe' )
+			.locator( '.wc-blocks-header-pattern' );
+
+		const expectedHeaderClass = extractHeaderClass(
+			await header.getAttribute( 'class' )
+		);
 
 		await header.click();
 
@@ -131,17 +136,16 @@ test.describe( 'Assembler -> headers', () => {
 		await waitResponse;
 
 		await page.goto( baseURL );
-		const headerHTML = await page.locator( 'header' ).innerHTML();
+		const selectedHeaderClasses = await page
+			.locator( 'header div.wc-blocks-header-pattern' )
+			.getAttribute( 'class' );
 
-		// The snapshot is created in headless mode. Please make sure the browser is in headless mode to ensure the snapshot is correct.
-		expect( headerHTML ).toMatchSnapshot( {
-			name: 'cys-selected-header',
-		} );
+		expect( selectedHeaderClasses ).toContain( expectedHeaderClass );
 	} );
 
 	test( 'Picking a header should trigger an update on the site preview', async ( {
 		assemblerPage,
-	}, testInfo ) => {
+	} ) => {
 		const assembler = await assemblerPage.getAssembler();
 		const editor = await assemblerPage.getEditor();
 
@@ -168,7 +172,7 @@ test.describe( 'Assembler -> headers', () => {
 			const expectedHeaderClass = extractHeaderClass( headerPickerClass );
 
 			const headerPattern = await editor.locator(
-				`header div.wc-blocks-header-pattern`
+				'header div.wc-blocks-header-pattern'
 			);
 
 			await expect(

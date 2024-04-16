@@ -428,7 +428,7 @@ class Checkout extends AbstractCartRoute {
 			if ( is_callable( [ $customer, $callback ] ) ) {
 				$customer->$callback( $value );
 			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/billing/$key", $value, $customer );
+				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'billing' );
 			}
 		}
 
@@ -440,7 +440,7 @@ class Checkout extends AbstractCartRoute {
 			if ( is_callable( [ $customer, $callback ] ) ) {
 				$customer->$callback( $value );
 			} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_customer( "/shipping/$key", $value, $customer );
+				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'shipping' );
 			}
 		}
 

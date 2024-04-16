@@ -41,7 +41,7 @@ $untested_plugins_msg = sprintf(
 				</table>
 			</div>
 
-			<p><?php esc_html_e( 'We strongly recommend creating a backup of your site before updating.', 'woocommerce' ); ?> <a href="https://woo.com/2017/05/create-use-backups-woocommerce/" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
+			<p><?php esc_html_e( 'We strongly recommend creating a backup of your site before updating.', 'woocommerce' ); ?> <a href="https://woocommerce.com/2017/05/create-use-backups-woocommerce/" target="_blank"><?php esc_html_e( 'Learn more', 'woocommerce' ); ?></a></p>
 
 			<?php if ( current_user_can( 'update_plugins' ) ) : ?>
 				<div class="actions">

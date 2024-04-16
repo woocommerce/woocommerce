@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix daily e2e tests run setup

@@ -6,7 +6,13 @@ import { useState, useEffect, useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
-type LocationType = 'product' | 'archive' | 'cart' | 'order' | 'generic';
+export const enum LocationType {
+	Product = 'product',
+	Archive = 'archive',
+	Cart = 'cart',
+	Order = 'order',
+	Site = 'site',
+}
 type Context< T > = T & {
 	templateSlug?: string;
 	postId?: number;
@@ -143,7 +149,9 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSingleProductBlock ) {
-		return createLocationObject( 'product', { productId: postId } );
+		return createLocationObject( LocationType.Product, {
+			productId: postId,
+		} );
 	}
 
 	/**
@@ -152,7 +160,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSomeCartCheckoutBlock ) {
-		return createLocationObject( 'cart' );
+		return createLocationObject( LocationType.Cart );
 	}
 
 	/**
@@ -161,7 +169,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSpecificProductTemplate ) {
-		return createLocationObject( 'product', { productId } );
+		return createLocationObject( LocationType.Product, { productId } );
 	}
 
 	const isInGenericTemplate = prepareIsInGenericTemplate( templateSlug );
@@ -176,7 +184,9 @@ export const useGetLocation = < T, >(
 	);
 
 	if ( isInSingleProductTemplate ) {
-		return createLocationObject( 'product', { productId: null } );
+		return createLocationObject( LocationType.Product, {
+			productId: null,
+		} );
 	}
 
 	/**
@@ -185,7 +195,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSpecificCategoryTemplate ) {
-		return createLocationObject( 'archive', {
+		return createLocationObject( LocationType.Archive, {
 			taxonomy: 'product_cat',
 			termId: categoryId,
 		} );
@@ -197,7 +207,7 @@ export const useGetLocation = < T, >(
 	 */
 
 	if ( isInSpecificTagTemplate ) {
-		return createLocationObject( 'archive', {
+		return createLocationObject( LocationType.Archive, {
 			taxonomy: 'product_tag',
 			termId: tagId,
 		} );
@@ -213,7 +223,7 @@ export const useGetLocation = < T, >(
 	);
 
 	if ( isInProductsByCategoryTemplate ) {
-		return createLocationObject( 'archive', {
+		return createLocationObject( LocationType.Archive, {
 			taxonomy: 'product_cat',
 			termId: null,
 		} );
@@ -224,7 +234,7 @@ export const useGetLocation = < T, >(
 	);
 
 	if ( isInProductsByTagTemplate ) {
-		return createLocationObject( 'archive', {
+		return createLocationObject( LocationType.Archive, {
 			taxonomy: 'product_tag',
 			termId: null,
 		} );
@@ -235,7 +245,7 @@ export const useGetLocation = < T, >(
 	);
 
 	if ( isInProductsByAttributeTemplate ) {
-		return createLocationObject( 'archive', {
+		return createLocationObject( LocationType.Archive, {
 			taxonomy: null,
 			termId: null,
 		} );
@@ -251,7 +261,7 @@ export const useGetLocation = < T, >(
 		templateSlug === templateSlugs.checkout;
 
 	if ( isInCartCheckoutTemplate ) {
-		return createLocationObject( 'cart' );
+		return createLocationObject( LocationType.Cart );
 	}
 
 	/**
@@ -264,7 +274,7 @@ export const useGetLocation = < T, >(
 	);
 
 	if ( isInOrderTemplate ) {
-		return createLocationObject( 'order' );
+		return createLocationObject( LocationType.Order );
 	}
 
 	/**
@@ -272,7 +282,7 @@ export const useGetLocation = < T, >(
 	 * All other cases
 	 */
 
-	return createLocationObject( 'generic' );
+	return createLocationObject( LocationType.Site );
 };
 
 /**

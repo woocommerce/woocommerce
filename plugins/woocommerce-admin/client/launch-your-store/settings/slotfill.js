@@ -7,17 +7,24 @@ import {
 	RadioControl,
 	Button,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import {
+	useState,
+	createInterpolateElement,
+	createElement,
+} from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
+import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
+import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -91,6 +98,9 @@ const SiteVisibility = () => {
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'yes' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'coming_soon',
+						} );
 					} }
 					options={ [
 						{
@@ -101,10 +111,22 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ __(
-						'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the Editor.',
-						'woocommerce'
-					) }
+					{ getSetting( 'currentThemeIsFSETheme' )
+						? createInterpolateElement(
+								__(
+									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
+									'woocommerce'
+								),
+								{
+									a: createElement( 'a', {
+										href: COMING_SOON_PAGE_EDITOR_LINK,
+									} ),
+								}
+						  )
+						: __(
+								'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing.',
+								'woocommerce'
+						  ) }
 				</p>
 				<div
 					className={ classNames(
@@ -130,9 +152,15 @@ const SiteVisibility = () => {
 							</>
 						}
 						checked={ storePagesOnly === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setStorePagesOnly(
 								storePagesOnly === 'yes' ? 'no' : 'yes'
+							);
+							recordEvent(
+								'site_visibility_restrict_store_pages_only_toggle',
+								{
+									enabled,
+								}
 							);
 						} }
 					/>
@@ -149,32 +177,46 @@ const SiteVisibility = () => {
 										'woocommerce'
 									) }
 								</p>
-								{ privateLink === 'yes' && (
-									<div className="site-visibility-settings-slotfill-private-link">
-										{ getPrivateLink() }
-										<Button
-											ref={ copyClipboardRef }
-											variant="link"
-										>
-											{ copyLinkText }
-										</Button>
-									</div>
-								) }
 							</>
 						}
 						checked={ privateLink === 'yes' }
-						onChange={ () => {
+						onChange={ ( enabled ) => {
 							setPrivateLink(
 								privateLink === 'yes' ? 'no' : 'yes'
+							);
+							recordEvent(
+								'site_visibility_share_private_link_toggle',
+								{
+									enabled,
+								}
 							);
 						} }
 					/>
 				</div>
+				{ comingSoon === 'yes' && privateLink === 'yes' && (
+					<div className="site-visibility-settings-slotfill-private-link">
+						<input value={ getPrivateLink() } readOnly />
+						<Button
+							ref={ copyClipboardRef }
+							variant="link"
+							onClick={ () => {
+								recordEvent(
+									'site_visibility_private_link_copy'
+								);
+							} }
+						>
+							{ copyLinkText }
+						</Button>
+					</div>
+				) }
 			</div>
 			<div className="site-visibility-settings-slotfill-section">
 				<RadioControl
 					onChange={ () => {
 						setComingSoon( 'no' );
+						recordEvent( 'site_visibility_toggle', {
+							status: 'live',
+						} );
 					} }
 					options={ [
 						{
@@ -205,7 +247,7 @@ const SiteVisibilitySlotFill = () => {
 
 export const registerSiteVisibilitySlotFill = () => {
 	registerPlugin( 'woocommerce-admin-site-visibility-settings-slotfill', {
-		scope: 'woocommerce-settings',
+		scope: 'woocommerce-site-visibility-settings',
 		render: SiteVisibilitySlotFill,
 	} );
 };
