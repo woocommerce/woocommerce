@@ -14,7 +14,7 @@ jobs:
             pull-requests: write
         steps:
             - name: Scan issues
-              uses: actions/stale@v8
+              uses: actions/stale@v9.0.0
               with:
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
                   stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
