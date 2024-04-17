@@ -71,8 +71,6 @@ class ComingSoonRequestHandler {
 			return $template;
 		}
 
-		$coming_soon_template = get_query_template( 'coming-soon' );
-
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
@@ -82,6 +80,7 @@ class ComingSoonRequestHandler {
 
 		add_theme_support( 'block-templates' );
 		wp_dequeue_style( 'global-styles' );
+		$coming_soon_template = get_query_template( 'coming-soon' );
 
 		if ( ! wc_current_theme_is_fse_theme() && $this->coming_soon_helper->is_store_coming_soon() ) {
 			get_header();
@@ -93,8 +92,14 @@ class ComingSoonRequestHandler {
 			get_footer();
 		}
 
-		// Since we've already rendered a template, return null to ensure no other template is rendered.
-		return null;
+		if ( wc_current_theme_is_fse_theme() ) {
+			// Since we've already rendered a template, return null to ensure no other template is rendered.
+			return null;
+		} else {
+			// In non-FSE themes, other templates will still be rendered.
+			// We need to exit to prevent further processing.
+			exit();
+		}
 	}
 
 	/**
