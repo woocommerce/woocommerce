@@ -167,8 +167,8 @@ export const setFlags = async () => {
 		await Promise.all( Object.values( _featureFlags ) );
 	}
 
-	// Set FlowType flag
-	if ( isWooExpress() ) {
+	// Set FlowType flag. We want to set the flag only in the parent window.
+	if ( isWooExpress() && ! isIframe( window ) ) {
 		try {
 			const { status } = await fetchAiStatus();
 
