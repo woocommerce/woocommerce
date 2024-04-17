@@ -123,7 +123,10 @@ export function useSaveDraft( {
 
 	useShortcut( 'core/editor/save', ( event ) => {
 		event.preventDefault();
-		if ( ! disabled ) {
+		if (
+			! ariaDisabled &&
+			( productStatus === 'draft' || productStatus === 'auto-draft' )
+		) {
 			saveDraft();
 		}
 	} );
