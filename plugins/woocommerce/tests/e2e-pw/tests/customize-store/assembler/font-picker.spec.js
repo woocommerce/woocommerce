@@ -175,7 +175,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			.split( '+' )
 			.map( ( e ) => e.trim() );
 
-		assembler.locator( '[aria-label="Back"]' ).click();
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

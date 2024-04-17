@@ -298,7 +298,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 			await colorPicker.click();
 
-			assembler.locator( '[aria-label="Back"]' ).click();
+			await assembler.locator( '[aria-label="Back"]' ).click();
 
 			const saveButton = assembler.getByText( 'Save' );
 
@@ -399,7 +399,7 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 		await colorPicker.click();
 
-		assembler.locator( '[aria-label="Back"]' ).click();
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

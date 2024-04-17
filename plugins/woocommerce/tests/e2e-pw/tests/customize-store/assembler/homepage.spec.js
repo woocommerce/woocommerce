@@ -134,7 +134,7 @@ test.describe( 'Assembler -> Homepage', () => {
 
 		await homepage.click();
 
-		assembler.locator( '[aria-label="Back"]' ).click();
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

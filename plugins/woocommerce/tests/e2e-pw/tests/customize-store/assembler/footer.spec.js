@@ -106,7 +106,7 @@ test.describe( 'Assembler -> Footers', () => {
 
 		await footer.click();
 
-		assembler.locator( '[aria-label="Back"]' ).click();
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
