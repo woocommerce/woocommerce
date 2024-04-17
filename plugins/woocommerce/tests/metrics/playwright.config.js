@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { defineConfig, devices } from '@playwright/test';
@@ -24,7 +27,7 @@ const config = defineConfig( {
 	testDir: './specs',
 	outputDir: path.join( process.env.WP_ARTIFACTS_PATH, 'test-results' ),
 	snapshotPathTemplate:
-		'{testDir}/{testFileDir}/__snapshots__/{arg}-{projectName}{ext}',  
+		'{testDir}/{testFileDir}/__snapshots__/{arg}-{projectName}{ext}',
 	globalSetup: fileURLToPath(
 		new URL( './config/global-setup.ts', 'file:' + __filename ).href
 	),
