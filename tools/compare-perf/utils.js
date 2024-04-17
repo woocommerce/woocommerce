@@ -15,6 +15,7 @@ const chalk = require( 'chalk' );
  * @param {Env=}    env    Additional environment variables to pass to the script.
  */
 function runShellScript( script, cwd, env = {} ) {
+	console.log( `Running '${ script }' in '${ cwd }'` );
 	return new Promise( ( resolve, reject ) => {
 		childProcess.exec(
 			script,
