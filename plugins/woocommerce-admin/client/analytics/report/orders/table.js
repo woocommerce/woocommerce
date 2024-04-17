@@ -249,8 +249,8 @@ class OrdersReportTable extends Component {
 					value: netTotal,
 				},
 				{
-					display: extendedInfo.origin,
-					value: extendedInfo.origin,
+					display: extendedInfo.attribution.origin,
+					value: extendedInfo.attribution.origin,
 				},
 			];
 		} );
