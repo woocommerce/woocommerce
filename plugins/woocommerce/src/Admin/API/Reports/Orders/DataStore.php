@@ -400,10 +400,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
-				'products' => array(),
-				'coupons'  => array(),
-				'customer' => array(),
-				'origin'   => '',
+				'products'    => array(),
+				'coupons'     => array(),
+				'customer'    => array(),
+				'attribution' => array(),
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
