@@ -210,10 +210,7 @@ async function runPerformanceTests( branches, options ) {
 	await SimpleGit( testRunnerDir ).raw( 'checkout', testRunnerBranch );
 
 	logAtIndent( 2, 'Installing dependencies and building' );
-	await runShellScript(
-		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupTestRunner }"`,
-		testRunnerDir
-	);
+	await runShellScript( config.setupTestRunner, testRunnerDir );
 
 	logAtIndent( 1, 'Setting up test environments' );
 
@@ -251,10 +248,7 @@ async function runPerformanceTests( branches, options ) {
 		await SimpleGit( buildDir ).raw( 'checkout', branch );
 
 		logAtIndent( 3, 'Installing dependencies and building' );
-		await runShellScript(
-			`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupCommand }"`,
-			buildDir
-		);
+		await runShellScript( config.setupCommand, buildDir );
 
 		const wpEnvConfigPath = path.join( envDir, '.wp-env.json' );
 
