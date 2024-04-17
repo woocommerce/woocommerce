@@ -29,12 +29,12 @@ class ComingSoonCacheInvalidator {
 		 * Temporary solution to invalidate the WordPress.com Edge Cache. We can trigger
 		 * invalidation by publishing any post. It should be refactored with a supported integration.
 		 */
-		$coming_soon_page_id = get_option( 'woocommerce_coming_soon_page_id' ) ?? null;
-		if ( $coming_soon_page_id ) {
+		$cart_page_id = get_option( 'woocommerce_cart_page_id' ) ?? null;
+		if ( $cart_page_id ) {
 			// Re-publish the coming soon page. Has the side-effect of invalidating the Edge Cache.
 			wp_update_post(
 				array(
-					'ID'          => $coming_soon_page_id,
+					'ID'          => $cart_page_id,
 					'post_status' => 'publish',
 				)
 			);

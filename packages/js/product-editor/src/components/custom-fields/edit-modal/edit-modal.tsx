@@ -4,12 +4,14 @@
 import { Button, Modal } from '@wordpress/components';
 import { createElement, useState, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
 import type { FocusEvent } from 'react';
 
 /**
  * Internal dependencies
  */
+import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
 import type { Metadata } from '../../../types';
 import { type ValidationError, validate } from '../utils/validations';
@@ -71,6 +73,13 @@ export function EditModal( {
 		}
 
 		onUpdate( customField );
+
+		recordEvent( 'product_custom_fields_update_button_click', {
+			source: TRACKS_SOURCE,
+			custom_field_id: customField.id,
+			custom_field_name: customField.key,
+			prev_custom_field_name: initialValue.key,
+		} );
 	}
 
 	return (
