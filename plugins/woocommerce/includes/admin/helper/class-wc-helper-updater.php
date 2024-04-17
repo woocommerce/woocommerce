@@ -559,7 +559,7 @@ class WC_Helper_Updater {
 
 	/**
 	 * Get the type of woo connect notice to be shown in the WC Settings and Marketplace pages.
-	 * - If a store is connected to woo.com or has no installed woo plugins, return 'none'.
+	 * - If a store is connected to woocommerce.com or has no installed woo plugins, return 'none'.
 	 * - If a store has installed woo plugins but no updates, return 'short'.
 	 * - If a store has an installed woo plugin with update, return 'long'.
 	 *

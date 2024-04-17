@@ -538,7 +538,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Show notices to connect to woo.com for unconnected store in the plugin list.
+	 * Show notices to connect to woocommerce.com for unconnected store in the plugin list.
 	 *
 	 * @return void
 	 */
