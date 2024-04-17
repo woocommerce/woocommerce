@@ -558,6 +558,45 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Get the type of woo connect notice to be shown in the WC Settings and Marketplace pages.
+	 * - If a store is connected to woocommerce.com or has no installed woo plugins, return 'none'.
+	 * - If a store has installed woo plugins but no updates, return 'short'.
+	 * - If a store has an installed woo plugin with update, return 'long'.
+	 *
+	 * @return string The notice type, 'none', 'short', or 'long'.
+	 */
+	public static function get_woo_connect_notice_type() {
+		if ( WC_Helper::is_site_connected() ) {
+			return 'none';
+		}
+
+		$woo_plugins = WC_Helper::get_local_woo_plugins();
+
+		if ( empty( $woo_plugins ) ) {
+			return 'none';
+		}
+
+		$update_data = self::get_update_data();
+
+		if ( empty( $update_data ) ) {
+			return 'short';
+		}
+
+		// Scan local plugins.
+		foreach ( $woo_plugins as $plugin ) {
+			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
+				return 'long';
+			}
+		}
+
+		return 'short';
+	}
+
+	/**
 	 * Return the updates count markup.
 	 *
 	 * @return string Updates count markup, empty string if no updates avairable.

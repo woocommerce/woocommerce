@@ -23,6 +23,7 @@ import {
 } from '../../utils/tracking';
 import InstallNewProductModal from '../install-flow/install-new-product-modal';
 import Promotions from '../promotions/promotions';
+import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -137,6 +138,7 @@ export default function Content(): JSX.Element {
 		<div className="woocommerce-marketplace__content">
 			<Promotions />
 			<InstallNewProductModal products={ products } />
+			<ConnectNotice />
 			{ renderContent() }
 		</div>
 	);
