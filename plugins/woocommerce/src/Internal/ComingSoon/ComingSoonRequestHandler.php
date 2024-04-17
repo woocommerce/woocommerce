@@ -57,12 +57,12 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Parses the current request and sets the page ID to the coming soon page if it
-	 * needs to be shown in place of the normal page.
+	 * Replaces the page template with a 'coming soon' when the site is in coming soon mode.
 	 *
 	 * @internal
 	 *
-	 * @param string $template Previous template path.
+	 * @param string $template The path to the previously determined template.
+	 * @return string|null The path to the 'coming soon' template or null to prevent further template loading in FSE themes.
 	 */
 	public function handle_template_include( $template ) {
 		global $wp;
