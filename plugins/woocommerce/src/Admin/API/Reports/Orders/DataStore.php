@@ -410,7 +410,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
 			}
 
-			$orders_data[ $key ]['extended_info']['origin'] = $this->get_origin_label( $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_source_type'] ?? '', $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_utm_source'] ?? '' );
+			$orders_data[ $key ]['extended_info']['attribution']['origin'] = $this->get_origin_label( $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_source_type'] ?? '', $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_utm_source'] ?? '' );
 		}
 	}
 
