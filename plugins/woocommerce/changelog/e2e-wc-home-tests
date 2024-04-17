@@ -1,4 +1,4 @@
 Significance: patch
-Type: dev
+Type: add
 
-Tests for task list and WC Home area
+E2e tests for WC home and task list
