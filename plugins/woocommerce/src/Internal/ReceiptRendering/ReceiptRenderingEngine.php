@@ -171,7 +171,8 @@ class ReceiptRenderingEngine {
 			$line_item_display_data = apply_filters( 'woocommerce_printable_order_receipt_line_item_display_data', $line_item_display_data, $line_item_data, $order );
 			$attributes             = '';
 			foreach ( $line_item_display_data['tr_attributes'] as $attribute_name => $attribute_value ) {
-				$attributes .= " $attribute_name=\"$attribute_value\"";
+				$attribute_value = esc_attr( $attribute_value );
+				$attributes     .= " $attribute_name=\"$attribute_value\"";
 			}
 			$formatted_line_items[] = "<tr$attributes>${line_item_display_data['inner_html']}</tr>";
 		}
