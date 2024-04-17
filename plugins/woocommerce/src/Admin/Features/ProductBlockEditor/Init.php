@@ -10,8 +10,8 @@ use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplate;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry;
 
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
-use Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\SimpleProductTemplate;
+use Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates\ProductVariationTemplate;
 
 use WP_Block_Editor_Context;
 
@@ -77,6 +77,8 @@ class Init {
 
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
 			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
+
+			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
 			BlockRegistry::get_instance();
@@ -393,7 +395,8 @@ class Init {
 					$hidden = get_user_meta( $object['id'], $attr, true );
 
 					if ( is_array( $hidden ) ) {
-						return $hidden;
+						// Ensures to always return a string array.
+						return array_values( $hidden );
 					}
 
 					return array( 'postcustom' );
@@ -415,5 +418,32 @@ class Init {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Registers the metadata block attribute for all block types.
+	 * This is a fallback/temporary solution until
+	 * the Gutenberg core version registers the metadata attribute.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/blob/6aaa3686ae67adc1a6a6b08096d3312859733e1b/lib/compat/wordpress-6.5/blocks.php#L27-L47
+	 * To do: Remove this method once the Gutenberg core version registers the metadata attribute.
+	 *
+	 * @param array $args Array of arguments for registering a block type.
+	 * @return array $args
+	 */
+	public function register_metadata_attribute( $args ) {
+		// Setup attributes if needed.
+		if ( ! isset( $args['attributes'] ) || ! is_array( $args['attributes'] ) ) {
+			$args['attributes'] = array();
+		}
+
+		// Add metadata attribute if it doesn't exist.
+		if ( ! array_key_exists( 'metadata', $args['attributes'] ) ) {
+			$args['attributes']['metadata'] = array(
+				'type' => 'object',
+			);
+		}
+
+		return $args;
 	}
 }

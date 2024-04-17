@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useLayoutEffect,
 	useEffect,
+	useState,
 } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
@@ -32,6 +33,9 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityRecord,
 } from '@wordpress/core-data';
 
 /**
@@ -66,7 +70,6 @@ function getLayoutTemplateId(
 
 export function BlockEditor( {
 	context,
-	settings: _settings,
 	postType,
 	productId,
 	setIsEditorLoading,
@@ -91,7 +94,35 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	const settings = useMemo< Partial< ProductEditorSettings > >( () => {
+	const [ settingsGlobal, setSettingsGlobal ] = useState<
+		Partial< ProductEditorSettings > | undefined
+	>( undefined );
+
+	useEffect( () => {
+		let timeoutId: number;
+
+		const checkSettingsGlobal = () => {
+			if ( window.productBlockEditorSettings !== undefined ) {
+				setSettingsGlobal( window.productBlockEditorSettings );
+			} else {
+				timeoutId = setTimeout( checkSettingsGlobal, 100 );
+			}
+		};
+
+		checkSettingsGlobal();
+
+		return () => {
+			clearTimeout( timeoutId );
+		};
+	}, [] );
+
+	const settings = useMemo<
+		Partial< ProductEditorSettings > | undefined
+	>( () => {
+		if ( settingsGlobal === undefined ) {
+			return undefined;
+		}
+
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -104,7 +135,7 @@ export function BlockEditor( {
 						// @ts-ignore No types for this exist yet.
 						uploadMedia( {
 							wpAllowedMimeTypes:
-								_settings?.allowedMimeTypes || undefined,
+								settingsGlobal.allowedMimeTypes || undefined,
 							onError: ( { message } ) => onError( message ),
 							...rest,
 						} );
@@ -113,24 +144,26 @@ export function BlockEditor( {
 			: {};
 
 		return {
-			..._settings,
+			...settingsGlobal,
 			...mediaSettings,
 			templateLock: 'all',
 		};
-	}, [ canUserCreateMedia, _settings ] );
-
-	const [ productType ] = useProductEntityProp< Product[ 'type' ] >( 'type', {
-		postType,
-	} );
+	}, [ settingsGlobal, canUserCreateMedia ] );
 
 	const [ productTemplateId ] = useProductEntityProp< string >(
 		'meta_data._product_template_id',
 		{ postType }
 	);
 
+	const { editedRecord: product } = useEntityRecord< Product >(
+		'postType',
+		postType,
+		productId
+	);
+
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		productType
+		product
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
@@ -146,6 +179,7 @@ export function BlockEditor( {
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
 	const isEditorLoading =
+		! settings ||
 		! layoutTemplate ||
 		// variations don't have a product template
 		( postType !== 'product_variation' && ! productTemplate ) ||

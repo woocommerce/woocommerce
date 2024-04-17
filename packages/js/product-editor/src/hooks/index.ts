@@ -10,3 +10,4 @@ export { useProductTemplate as __experimentalUseProductTemplate } from './use-pr
 export { useProductScheduled as __experimentalUseProductScheduled } from './use-product-scheduled';
 export { useProductManager as __experimentalUseProductManager } from './use-product-manager';
 export { useMetaboxHiddenProduct as __experimentalUseMetaboxHiddenProduct } from './use-metabox-hidden-product';
+export { useClearSelectedBlockOnBlur as __experimentalClearSelectedBlockOnBlur } from './use-clear-selected-block-on-blur';

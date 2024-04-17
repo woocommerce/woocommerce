@@ -24,13 +24,33 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^16.14.1",
+			"pinVersion": "^20.11.1",
 			"packages": [
 				"**"
 			]
 		},
 		{
-			"dependencies": [ "**" ],
+			"dependencies": [
+				"@actions/*",
+				"@automattic/*",
+				"@babel/*",
+				"@bartekbp/*",
+				"@octokit/*",
+				"@storybook/*",
+				"@testing-library/*",
+				"@types/*",
+				"@typescript-eslint/*",
+				"@woocommerce/*",
+				"@wordpress/*",
+				"babel*",
+				"eslint*",
+				"glob*",
+				"jest*",
+				"postcss*",
+				"react*",
+				"typescript",
+				"webpack*"
+			],
 			"packages": [
 				"@woocommerce/block-library"
 			],
@@ -102,6 +122,24 @@
 		},
 		{
 			"dependencies": [
+				"github-label-sync"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.1"
+		},
+		{
+			"dependencies": [
+				"@playwright/test"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^1.40.1"
+		},
+		{
+			"dependencies": [
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
 				"@wordpress/stylelint-config",
@@ -169,7 +207,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^8.13.0"
+			"pinVersion": "^9.0.7"
 		},
 		{
 			"dependencies": [
@@ -200,6 +238,24 @@
 		},
 		{
 			"dependencies": [
+				"classnames"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^2.3.2"
+		},
+		{
+			"dependencies": [
+				"glob"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.3.10"
+		},
+		{
+			"dependencies": [
 				"postcss-loader"
 			],
 			"packages": [
@@ -218,12 +274,48 @@
 		},
 		{
 			"dependencies": [
+				"rimraf"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "5.0.5"
+		},
+		{
+			"dependencies": [
+				"sass-loader"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^10.5.0"
+		},
+		{
+			"dependencies": [
 				"simple-git"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "^3.21.0"
+		},
+		{
+			"dependencies": [
+				"stylelint"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^14.16.1"
+		},
+		{
+			"dependencies": [
+				"uuid"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^9.0.1"
 		},
 		{
 			"dependencies": [

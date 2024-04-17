@@ -11,12 +11,43 @@ const {
 	REPEAT_EACH,
 } = process.env;
 
+const reporter = [
+	[ 'list' ],
+	[
+		'allure-playwright',
+		{
+			outputFolder:
+				ALLURE_RESULTS_DIR ??
+				'./tests/e2e-pw/test-results/allure-results',
+			detail: true,
+			suiteTitle: true,
+		},
+	],
+	[
+		'json',
+		{ outputFile: `./test-results/test-results-${ Date.now() }.json` },
+	],
+];
+
+if ( process.env.CI ) {
+	reporter.push( [ 'github' ] );
+} else {
+	reporter.push( [
+		'html',
+		{
+			outputFolder:
+				PLAYWRIGHT_HTML_REPORT ?? './test-results/playwright-report',
+			open: 'on-failure',
+		},
+	] );
+}
+
 const config = {
 	timeout: DEFAULT_TIMEOUT_OVERRIDE
 		? Number( DEFAULT_TIMEOUT_OVERRIDE )
 		: 120 * 1000,
 	expect: { timeout: 20 * 1000 },
-	outputDir: './test-results/report',
+	outputDir: './test-results/results-data',
 	globalSetup: require.resolve( './global-setup' ),
 	globalTeardown: require.resolve( './global-teardown' ),
 	testDir: 'tests',
@@ -24,35 +55,12 @@ const config = {
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
 	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
-	reporter: [
-		[ 'list' ],
-		[
-			'html',
-			{
-				outputFolder:
-					PLAYWRIGHT_HTML_REPORT ??
-					'./test-results/playwright-report',
-				open: CI ? 'never' : 'always',
-			},
-		],
-		[
-			'allure-playwright',
-			{
-				outputFolder:
-					ALLURE_RESULTS_DIR ??
-					'./tests/e2e-pw/test-results/allure-results',
-				detail: true,
-				suiteTitle: true,
-			},
-		],
-		[ 'json', { outputFile: './test-results/test-results.json' } ],
-		[ 'github' ],
-	],
+	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	use: {
 		baseURL: BASE_URL ?? 'http://localhost:8086',
 		screenshot: { mode: 'only-on-failure', fullPage: true },
-		stateDir: 'tests/e2e-pw/test-results/storage/',
+		stateDir: 'tests/e2e-pw/.state/',
 		trace: 'retain-on-failure',
 		video: 'retain-on-failure',
 		viewport: { width: 1280, height: 720 },

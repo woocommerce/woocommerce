@@ -184,6 +184,19 @@ class BlockTemplateUtils {
 			$template->origin = 'plugin';
 		}
 
+		/*
+		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		*/
+		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
+			$hooked_blocks = get_hooked_blocks();
+			if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
+				$before_block_visitor = make_before_block_visitor( $hooked_blocks, $template );
+				$after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template );
+				$blocks               = parse_blocks( $template->content );
+				$template->content    = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
+			}
+		}
+
 		return $template;
 	}
 
@@ -229,6 +242,21 @@ class BlockTemplateUtils {
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
+		/*
+		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		*/
+		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
+			$before_block_visitor = '_inject_theme_attribute_in_template_part_block';
+			$after_block_visitor  = null;
+			$hooked_blocks        = get_hooked_blocks();
+			if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
+				$before_block_visitor = make_before_block_visitor( $hooked_blocks, $template );
+				$after_block_visitor  = make_after_block_visitor( $hooked_blocks, $template );
+			}
+			$blocks            = parse_blocks( $template->content );
+			$template->content = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
+		}
+
 		return $template;
 	}
 
@@ -264,18 +292,41 @@ class BlockTemplateUtils {
 	/**
 	 * Finds all nested template part file paths in a theme's directory.
 	 *
-	 * @param string $base_directory The theme's file path.
+	 * @param string $template_type wp_template or wp_template_part.
 	 * @return array $path_list A list of paths to all template part files.
 	 */
-	public static function get_template_paths( $base_directory ) {
-		$path_list = array();
-		if ( file_exists( $base_directory ) ) {
-			$nested_files      = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $base_directory ) );
-			$nested_html_files = new \RegexIterator( $nested_files, '/^.+\.html$/i', \RecursiveRegexIterator::GET_MATCH );
-			foreach ( $nested_html_files as $path => $file ) {
-				$path_list[] = $path;
-			}
-		}
+	public static function get_template_paths( $template_type ) {
+		$wp_template_filenames      = array(
+			'archive-product.html',
+			'coming-soon.html',
+			'order-confirmation.html',
+			'page-cart.html',
+			'page-checkout.html',
+			'product-search-results.html',
+			'single-product.html',
+			'taxonomy-product_attribute.html',
+			'taxonomy-product_cat.html',
+			'taxonomy-product_tag.html',
+		);
+		$wp_template_part_filenames = array(
+			'checkout-header.html',
+			'mini-cart.html',
+		);
+
+		/*
+		* This may return the blockified directory for wp_templates.
+		* At the moment every template file has a corresponding blockified file.
+		* If we decide to add a new template file that doesn't, we will need to update this logic.
+		*/
+		$directory = self::get_templates_directory( $template_type );
+
+		$path_list = array_map(
+			function ( $filename ) use ( $directory ) {
+				return $directory . DIRECTORY_SEPARATOR . $filename;
+			},
+			'wp_template' === $template_type ? $wp_template_filenames : $wp_template_part_filenames
+		);
+
 		return $path_list;
 	}
 
@@ -391,7 +442,7 @@ class BlockTemplateUtils {
 		// or the stylesheet directory for child themes.
 		$possible_paths = array_reduce(
 			$possible_templates_dir,
-			function( $carry, $item ) use ( $template_filename ) {
+			function ( $carry, $item ) use ( $template_filename ) {
 				$filepath = DIRECTORY_SEPARATOR . $item . DIRECTORY_SEPARATOR . $template_filename;
 
 				$carry[] = get_stylesheet_directory() . $filepath;
@@ -570,13 +621,13 @@ class BlockTemplateUtils {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
 		$customised_template_slugs = array_map(
-			function( $template ) {
+			function ( $template ) {
 				return $template->slug;
 			},
 			array_values(
 				array_filter(
 					$templates,
-					function( $template ) {
+					function ( $template ) {
 						// This template has been customised and saved as a post.
 						return 'custom' === $template->source;
 					}
@@ -591,7 +642,7 @@ class BlockTemplateUtils {
 		return array_values(
 			array_filter(
 				$templates,
-				function( $template ) use ( $customised_template_slugs ) {
+				function ( $template ) use ( $customised_template_slugs ) {
 					// This template has been customised and saved as a post, so return it.
 					return ! ( 'theme' === $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
 				}
@@ -611,7 +662,7 @@ class BlockTemplateUtils {
 	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
 		$filtered_templates = array_filter(
 			$templates,
-			function( $template ) use ( $templates, $theme_slug ) {
+			function ( $template ) use ( $templates, $theme_slug ) {
 				if ( $template->theme === $theme_slug ) {
 					// This is a customized template based on the theme template, so it should be returned.
 					return true;
@@ -620,7 +671,7 @@ class BlockTemplateUtils {
 				// Only return it if there isn't a customized version of the theme template.
 				$is_there_a_customized_theme_template = array_filter(
 					$templates,
-					function( $theme_template ) use ( $template, $theme_slug ) {
+					function ( $theme_template ) use ( $template, $theme_slug ) {
 						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug;
 					}
 				);
@@ -700,7 +751,7 @@ class BlockTemplateUtils {
 		$saved_woo_templates = $check_query->posts;
 
 		return array_map(
-			function( $saved_woo_template ) {
+			function ( $saved_woo_template ) {
 				return self::build_template_result_from_post( $saved_woo_template );
 			},
 			$saved_woo_templates

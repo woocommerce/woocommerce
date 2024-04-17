@@ -5,15 +5,14 @@ import {
 	__experimentalEditor as Editor,
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
-	ProductEditorSettings,
 	productApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
-	__experimentalProductMVPFeedbackModalContainer as ProductMVPFeedbackModalContainer,
 	__experimentalEditorLoadingContext as EditorLoadingContext,
 } from '@woocommerce/product-editor';
+import { Spinner } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
-import { useContext, useEffect } from '@wordpress/element';
+import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
 import { useParams } from 'react-router-dom';
 import { WooFooterItem } from '@woocommerce/admin-layout';
@@ -22,13 +21,20 @@ import { WooFooterItem } from '@woocommerce/admin-layout';
  * Internal dependencies
  */
 import { useProductEntityRecord } from './hooks/use-product-entity-record';
-import BlockEditorTourWrapper from './tour/block-editor/block-editor-tour-wrapper';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
-declare const productBlockEditorSettings: ProductEditorSettings;
-
 productApiFetchMiddleware();
+
+// Lazy load components
+const BlockEditorTourWrapper = lazy(
+	() => import( './tour/block-editor/block-editor-tour-wrapper' )
+);
+const ProductMVPFeedbackModalContainer = lazy( () =>
+	import( '@woocommerce/product-editor' ).then( ( module ) => ( {
+		default: module.__experimentalProductMVPFeedbackModalContainer,
+	} ) )
+);
 
 export default function ProductPage() {
 	const { productId } = useParams();
@@ -36,6 +42,7 @@ export default function ProductPage() {
 	const product = useProductEntityRecord( productId );
 
 	useEffect( () => {
+		document.body.classList.add( 'is-product-editor' );
 		registerPlugin( 'wc-admin-product-editor', {
 			// @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated.
 			scope: 'woocommerce-product-block-editor',
@@ -58,17 +65,21 @@ export default function ProductPage() {
 						<WooFooterItem>
 							<>
 								<FeedbackBar productType="product" />
-								<ProductMVPFeedbackModalContainer
-									productId={
-										productId
-											? parseInt( productId, 10 )
-											: undefined
-									}
-								/>
+								<Suspense fallback={ <Spinner /> }>
+									<ProductMVPFeedbackModalContainer
+										productId={
+											productId
+												? parseInt( productId, 10 )
+												: undefined
+										}
+									/>
+								</Suspense>
 							</>
 						</WooFooterItem>
 
-						<BlockEditorTourWrapper />
+						<Suspense fallback={ <Spinner /> }>
+							<BlockEditorTourWrapper />
+						</Suspense>
 					</>
 				);
 			},
@@ -77,6 +88,7 @@ export default function ProductPage() {
 		const unregisterBlocks = initBlocks();
 
 		return () => {
+			document.body.classList.remove( 'is-product-editor' );
 			unregisterPlugin( 'wc-admin-more-menu' );
 			unregisterBlocks();
 		};
@@ -100,10 +112,7 @@ export default function ProductPage() {
 
 	return (
 		<>
-			<Editor
-				product={ product }
-				settings={ productBlockEditorSettings || {} }
-			/>
+			<Editor product={ product } />
 		</>
 	);
 }

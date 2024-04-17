@@ -657,4 +657,21 @@ class BlockTest extends WC_Unit_Test_Case {
 			'Failed asserting that the inner blocks are sorted by order.'
 		);
 	}
+	/**
+	 * Test for set_attribute method.
+	 */
+	public function test_set_attribute() {
+		$template = new BlockTemplate();
+
+		$block = new Block(
+			array(
+				'blockName' => 'test-block-name',
+			),
+			$template
+		);
+
+		$block->set_attribute( 'test-attr', 'test-value' );
+
+		$this->assertSame( 'test-value', $block->get_attributes()['test-attr'] );
+	}
 }

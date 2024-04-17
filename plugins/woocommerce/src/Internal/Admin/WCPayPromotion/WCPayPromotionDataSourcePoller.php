@@ -1,4 +1,5 @@
 <?php
+
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 use Automattic\WooCommerce\Admin\DataSourcePoller;
@@ -20,7 +21,7 @@ class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 	/**
 	 * Class instance.
 	 *
-	 * @var Analytics instance
+	 * @var WCPayPromotionDataSourcePoller instance
 	 */
 	protected static $instance = null;
 

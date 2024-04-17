@@ -50,18 +50,22 @@ test.describe( 'General tab', () => {
 				)
 				.last()
 				.fill( productData.summary );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-regular-price-field"]'
-				)
-				.first()
-				.fill( productData.productPrice );
-			await page
-				.locator(
-					'[id^="wp-block-woocommerce-product-sale-price-field"]'
-				)
-				.first()
-				.fill( productData.salePrice );
+
+			await clickOnTab( 'Pricing', page );
+
+			const regularPrice = page
+				.locator( 'input[name="regular_price"]' )
+				.first();
+			await regularPrice.waitFor( { state: 'visible' } );
+			await regularPrice.click();
+			await regularPrice.fill( productData.productPrice );
+
+			const salePrice = page
+				.locator( 'input[name="sale_price"]' )
+				.first();
+			await salePrice.waitFor( { state: 'visible' } );
+			await salePrice.click();
+			await salePrice.fill( productData.salePrice );
 
 			await page
 				.locator( '.woocommerce-product-header__actions' )
@@ -70,10 +74,16 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
+			await page
+				.locator( '.woocommerce-product-publish-panel__header' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
 
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
@@ -86,6 +96,7 @@ test.describe( 'General tab', () => {
 			await expect( productId ).toBeDefined();
 			await expect( title ).toHaveText( productData.name );
 		} );
+
 		test( 'can not create a product with duplicated SKU', async ( {
 			page,
 		} ) => {
@@ -99,6 +110,8 @@ test.describe( 'General tab', () => {
 					'[data-template-block-id="basic-details"] .components-summary-control'
 				)
 				.fill( productData.summary );
+
+			await clickOnTab( 'Pricing', page );
 			await page
 				.locator(
 					'[id^="wp-block-woocommerce-product-regular-price-field"]'
@@ -112,11 +125,18 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
+			await page
+				.locator( '.woocommerce-product-publish-panel__header' )
+				.getByRole( 'button', {
+					name: 'Publish',
+				} )
+				.click();
 
-			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
+
 		test( 'can a shopper add the simple product to the cart', async ( {
 			page,
 		} ) => {
@@ -124,24 +144,25 @@ test.describe( 'General tab', () => {
 			await expect(
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
-			const productPriceElements = await page
-				.locator( '.summary .woocommerce-Price-amount' )
-				.all();
 
-			let foundProductPrice = false;
-			let foundSalePrice = false;
-			for ( const element of productPriceElements ) {
-				const textContent = await element.innerText();
-				if ( textContent.includes( productData.productPrice ) ) {
-					foundProductPrice = true;
-				}
-				if ( textContent.includes( productData.salePrice ) ) {
-					foundSalePrice = true;
-				}
-			}
-			await expect( foundProductPrice && foundSalePrice ).toBeTruthy();
+			await expect
+				.soft(
+					await page
+						.locator( 'del' )
+						.getByText( `$${ productData.productPrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
+			await expect
+				.soft(
+					await page
+						.locator( 'ins' )
+						.getByText( `$${ productData.salePrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
 
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 			await expect(
 				page.locator( 'td[data-title=Product]' ).first()

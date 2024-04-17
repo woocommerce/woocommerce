@@ -78,34 +78,9 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		},
 	} );
 
-	test.beforeAll( async ( { api } ) => {
-		let oldCustomers = {};
-		await api.get( 'customers' ).then( ( response ) => {
-			oldCustomers = response.data;
-		} );
-		await api.post( `customers/batch`, {
-			delete: oldCustomers.map( ( customer ) => customer.id ),
-		} );
-	} );
-
 	test.beforeEach( async ( { context } ) => {
 		// prevents the column picker from saving state between tests
 		await context.route( '**/users/**', ( route ) => route.abort() );
-	} );
-
-	// skipping this test because guest orders show in this list as undeletable customers.
-	test.skip( 'Merchant can view an empty customer list', async ( {
-		page,
-	} ) => {
-		await page.goto(
-			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomers'
-		);
-		await expect(
-			page.getByRole( 'cell', { name: 'No data to display' } )
-		).toBeVisible();
-		await expect(
-			page.getByText( '0customers0Average orders$0.' )
-		).toBeVisible();
 	} );
 
 	test( 'Merchant can view a list of all customers, filter and download', async ( {
@@ -169,13 +144,13 @@ baseTest.describe( 'Merchant > Customer List', () => {
 
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Username' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Last active' } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'columnheader', { name: 'Total spend' } )
-			).not.toBeVisible();
+			).toBeHidden();
 
 			// show the columns again
 			await page
@@ -201,7 +176,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 		} );
 
-		test.step( 'Download the customer list', async () => {
+		await test.step( 'Download the customer list', async () => {
 			const downloadPromise = page.waitForEvent( 'download' );
 			await page.getByRole( 'button', { name: 'Download' } ).click();
 			const download = await downloadPromise;
@@ -249,7 +224,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 1 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 			await expect(
 				page.getByRole( 'button', {
 					name: `${ customers[ 0 ].first_name } ${ customers[ 0 ].last_name } Single Customer`,
@@ -319,7 +294,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: customers[ 0 ].email } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	} );
 } );

@@ -804,7 +804,7 @@ p.demo_store,
 		line-height: 1;
 		font-size: 1em;
 		width: 5.4em;
-		font-family: "star";
+		font-family: WooCommerce;
 
 		&::before {
 			content: "\73\73\73\73\73";
@@ -2440,4 +2440,30 @@ body:not(.search-results) .twentysixteen .entry-summary {
 .twentysixteen .price ins {
 	background: inherit;
 	color: inherit;
+}
+
+#coming-soon-footer-banner {
+	width: 100%;
+	height: 56px;
+	background: #fff;
+	position: fixed;
+	display: flex;
+	font-size: 13px;
+	bottom: 0;
+	justify-content: center;
+	align-items: center;
+	border-top: 1px solid #dcdcdc;
+	a {
+		color: #3858E9;
+		text-decoration: none;
+	}
+
+	a.coming-soon-footer-banner-dismiss {
+		background-image: url('data:image/svg+xml,<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.4995 13.0602L16.2118 16.7725L17.2725 15.7118L13.5602 11.9995L17.2725 8.28723L16.2119 7.22657L12.4995 10.9389L8.78722 7.22656L7.72656 8.28722L11.4389 11.9995L7.72657 15.7119L8.78723 16.7725L12.4995 13.0602Z" fill="%23757575"/></svg>');
+		width: 24px;
+		height: 24px;
+		cursor: pointer;
+		position: absolute;
+		right: 20px;
+	}
 }

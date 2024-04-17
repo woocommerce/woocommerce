@@ -34,6 +34,10 @@
 		},
 		"queryContextIncludes": {
 			"type": "array"
+		},
+		"forcePageReload": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"providesContext": {
@@ -43,6 +47,7 @@
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection"
 	},
+	"usesContext": [ "templateSlug" ],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,

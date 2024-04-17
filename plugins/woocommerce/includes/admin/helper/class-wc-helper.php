@@ -54,14 +54,15 @@ class WC_Helper {
 	 * Include supporting helper classes.
 	 */
 	protected static function includes() {
-		include_once dirname( __FILE__ ) . '/class-wc-helper-options.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-api.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-admin.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-subscriptions-api.php';
-		include_once dirname( __FILE__ ) . '/class-wc-helper-orders-api.php';
+		include_once __DIR__ . '/class-wc-helper-options.php';
+		include_once __DIR__ . '/class-wc-helper-api.php';
+		include_once __DIR__ . '/class-wc-woo-update-manager-plugin.php';
+		include_once __DIR__ . '/class-wc-helper-updater.php';
+		include_once __DIR__ . '/class-wc-plugin-api-updater.php';
+		include_once __DIR__ . '/class-wc-helper-compat.php';
+		include_once __DIR__ . '/class-wc-helper-admin.php';
+		include_once __DIR__ . '/class-wc-helper-subscriptions-api.php';
+		include_once __DIR__ . '/class-wc-helper-orders-api.php';
 	}
 
 	/**
@@ -169,7 +170,7 @@ class WC_Helper {
 			}
 
 			$subscription['download_primary'] = true;
-			$subscription['download_url']     = 'https://woo.com/my-account/downloads/';
+			$subscription['download_url']     = 'https://woocommerce.com/my-account/downloads/';
 			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
 			}
@@ -225,7 +226,7 @@ class WC_Helper {
 					'message'      => sprintf( __( 'This subscription has expired. Please <strong>renew</strong> to receive updates and support.', 'woocommerce' ) ),
 					'button_label' => __( 'Renew', 'woocommerce' ),
 					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
-						'https://woo.com/my-account/my-subscriptions/',
+						'https://woocommerce.com/my-account/my-subscriptions/',
 						'renew'
 					),
 					'status'       => 'expired',
@@ -240,7 +241,7 @@ class WC_Helper {
 					'message'      => __( 'Subscription is <strong>expiring</strong> soon.', 'woocommerce' ),
 					'button_label' => __( 'Enable auto-renew', 'woocommerce' ),
 					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
-						'https://woo.com/my-account/my-subscriptions/',
+						'https://woocommerce.com/my-account/my-subscriptions/',
 						'auto-renew'
 					),
 					'status'       => 'expired',
@@ -254,7 +255,7 @@ class WC_Helper {
 					'message'      => sprintf( __( 'This subscription is expiring soon. Please <strong>renew</strong> to continue receiving updates and support.', 'woocommerce' ) ),
 					'button_label' => __( 'Renew', 'woocommerce' ),
 					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
-						'https://woo.com/my-account/my-subscriptions/',
+						'https://woocommerce.com/my-account/my-subscriptions/',
 						'renew'
 					),
 					'status'       => 'expired',
@@ -316,7 +317,7 @@ class WC_Helper {
 			} else {
 				$action = array(
 					/* translators: 1: subscriptions docs 2: subscriptions docs */
-					'message'      => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="%1$s" title="Sharing Docs">sharing</a> or <a href="%2$s" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://woo.com/document/managing-woocommerce-com-subscriptions/#section-10', 'https://woo.com/document/managing-woocommerce-com-subscriptions/#section-5' ),
+					'message'      => sprintf( __( 'To receive updates and support for this extension, you need to <strong>purchase</strong> a new subscription or consolidate your extensions to one connected account by <strong><a href="%1$s" title="Sharing Docs">sharing</a> or <a href="%2$s" title="Transferring Docs">transferring</a></strong> this extension to this connected account.', 'woocommerce' ), 'https://woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-10', 'https://woocommerce.com/document/managing-woocommerce-com-subscriptions/#section-5' ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url'   => self::add_utm_params_to_url_for_subscription_link(
 						$data['_product_url'],
@@ -354,7 +355,7 @@ class WC_Helper {
 	/**
 	 * Add tracking parameters to buttons (Renew, Purchase, etc.) on subscriptions page
 	 *
-	 * @param string $url URL to product page or to https://woo.com/my-account/my-subscriptions/.
+	 * @param string $url URL to product page or to https://woocommerce.com/my-account/my-subscriptions/.
 	 * @param string $utm_content value of utm_content query parameter used for tracking
 	 *
 	 * @return string URL including utm parameters for tracking
@@ -615,14 +616,14 @@ class WC_Helper {
 
 			case 'helper-connected':
 				$notices[] = array(
-					'message' => __( 'You have successfully connected your store to Woo.com', 'woocommerce' ),
+					'message' => __( 'You have successfully connected your store to WooCommerce.com', 'woocommerce' ),
 					'type'    => 'updated',
 				);
 				break;
 
 			case 'helper-disconnected':
 				$notices[] = array(
-					'message' => __( 'You have successfully disconnected your store from Woo.com', 'woocommerce' ),
+					'message' => __( 'You have successfully disconnected your store from WooCommerce.com', 'woocommerce' ),
 					'type'    => 'updated',
 				);
 				break;
@@ -832,6 +833,7 @@ class WC_Helper {
 						)
 					)
 					: '',
+				'wum-installed'      => WC_Woo_Update_Manager_Plugin::is_plugin_installed() ? '1' : '0',
 			),
 			WC_Helper_API::url( 'oauth/authorize' )
 		);
@@ -841,7 +843,7 @@ class WC_Helper {
 	}
 
 	/**
-	 * Return from Woo.com OAuth flow.
+	 * Return from WooCommerce.com OAuth flow.
 	 */
 	private static function _helper_auth_return() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -910,7 +912,7 @@ class WC_Helper {
 			WC_Tracker::send_tracking_data( true );
 		}
 
-		// If connecting through in-app purchase, redirects back to Woo.com
+		// If connecting through in-app purchase, redirects back to WooCommerce.com
 		// for product installation.
 		if ( ! empty( $_GET['wccom-install-url'] ) ) {
 			wp_redirect( wp_unslash( $_GET['wccom-install-url'] ) );
@@ -930,7 +932,7 @@ class WC_Helper {
 	}
 
 	/**
-	 * Disconnect from Woo.com, clear OAuth tokens.
+	 * Disconnect from WooCommerce.com, clear OAuth tokens.
 	 */
 	private static function _helper_auth_disconnect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'disconnect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1193,34 +1195,18 @@ class WC_Helper {
 	 * Get a subscriptions install URL.
 	 *
 	 * @param string $product_key Subscription product key.
+	 * @param string $product_slug Subscription product slug.
 	 * @return string
 	 */
-	public static function get_subscription_install_url( $product_key ) {
-		$install_url_response = WC_Helper_API::post(
-			'install-url',
+	public static function get_subscription_install_url( $product_key, $product_slug ) {
+		$install_url = add_query_arg(
 			array(
-				'authenticated' => true,
-				'body'          => wp_json_encode(
-					array(
-						'product_key' => $product_key,
-						'wc_version'  => WC()->version,
-					)
-				),
-			)
+				'product-key' => rawurlencode( $product_key ),
+			),
+			self::get_install_base_url() . "{$product_slug}/"
 		);
 
-		$code = wp_remote_retrieve_response_code( $install_url_response );
-		if ( 200 !== $code ) {
-			self::log( sprintf( 'Install URL API call returned a non-200 response code (%d)', $code ) );
-			return '';
-		}
-
-		$body = json_decode( wp_remote_retrieve_body( $install_url_response ), true );
-		if ( empty( $body['data']['url'] ) ) {
-			self::log( sprintf( 'Install URL API call returned an invalid body: %s', wp_remote_retrieve_body( $install_url_response ) ) );
-			return '';
-		}
-		return $body['data']['url'];
+		return WC_Helper_API::add_auth_parameters( $install_url );
 	}
 
 	/**
@@ -1517,6 +1503,8 @@ class WC_Helper {
 			$source = 'inbox-notes';
 		elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
 			$source = 'heartbeat-api';
+		elseif ( stripos( $request_uri, 'installer' ) ) :
+			$source = 'wccom-site-installer';
 		elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
 			$source = 'wc-cli';
 		endif;
@@ -2256,6 +2244,22 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+	}
+
+	/**
+	 * Get base URL for plugin auto installer.
+	 *
+	 * @return string
+	 */
+	public static function get_install_base_url() {
+		/**
+		 * Filter the base URL used to install the Woo hosted plugins.
+		 *
+		 * @since 8.7.0
+		 */
+		$woo_com_base_url = apply_filters( 'woo_com_base_url', 'https://woocommerce.com/' );
+
+		return $woo_com_base_url . 'auto-install-init/';
 	}
 }
 

@@ -5,12 +5,14 @@ import { Button, Modal } from '@wordpress/components';
 import { createElement, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
 import type { FocusEvent } from 'react';
 
 /**
  * Internal dependencies
  */
+import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
 import { validate, type ValidationErrors } from '../utils/validations';
 import type { Metadata } from '../../../types';
@@ -122,6 +124,10 @@ export function CreateModal( {
 				{ ...DEFAULT_CUSTOM_FIELD, id: ( lastField.id ?? 0 ) + 1 },
 			];
 		} );
+
+		recordEvent( 'product_custom_fields_add_another_button_click', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	function handleAddButtonClick() {
@@ -161,6 +167,14 @@ export function CreateModal( {
 		onCreate(
 			customFields.map( ( { id, ...customField } ) => customField )
 		);
+
+		recordEvent( 'product_custom_fields_add_new_button_click', {
+			source: TRACKS_SOURCE,
+			custom_field_names: customFields.map(
+				( customField ) => customField.key
+			),
+			total: customFields.length,
+		} );
 	}
 
 	return (

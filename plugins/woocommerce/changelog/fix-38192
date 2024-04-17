@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+update makepot command to use include vs exclude

@@ -4,6 +4,12 @@ require( '@wordpress/data' );
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
 	adminUrl: 'https://vagrant.local/wp/wp-admin/',
+	addressFormats: {
+		default:
+			'{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}',
+		JP: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
+		CA: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
+	},
 	shippingMethodsExist: true,
 	currency: {
 		code: 'USD',
@@ -45,6 +51,7 @@ global.wcSettings = {
 				postcode: { priority: 65 },
 				state: { required: false, hidden: true },
 			},
+			format: '{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}',
 		},
 		CA: {
 			states: {
@@ -56,6 +63,29 @@ global.wcSettings = {
 				postcode: { label: 'Postal code' },
 				state: { label: 'Province' },
 			},
+			format: '{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code} {postcode}\n{country}',
+		},
+		JP: {
+			allowBilling: true,
+			allowShipping: true,
+			states: {
+				JP28: 'Hyogo',
+			},
+			locale: {
+				last_name: { priority: 10 },
+				first_name: { priority: 20 },
+				postcode: {
+					priority: 65,
+				},
+				state: {
+					label: 'Prefecture',
+					priority: 66,
+				},
+				city: { priority: 67 },
+				address_1: { priority: 68 },
+				address_2: { priority: 69 },
+			},
+			format: '{postcode}\n{state} {city} {address_1}\n{address_2}\n{company}\n{last_name} {first_name}\n{country}',
 		},
 		GB: {
 			states: {},
@@ -207,6 +237,13 @@ global.wcSettings = {
 			hidden: false,
 			index: 100,
 		},
+	},
+	checkoutData: {
+		order_id: 100,
+		status: 'checkout-draft',
+		order_key: 'wc_order_mykey',
+		order_number: '100',
+		customer_id: 1,
 	},
 };
 

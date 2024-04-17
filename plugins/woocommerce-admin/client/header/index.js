@@ -14,6 +14,7 @@ import {
 } from '@woocommerce/admin-layout';
 import { getSetting } from '@woocommerce/settings';
 import { Text, useSlot } from '@woocommerce/experimental';
+import { getScreenFromPath, isWCAdmin } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -28,14 +29,29 @@ import {
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
+export const getPageTitle = ( sections ) => {
+	let pageTitle;
+	const pagesWithTabs = [ 'Settings', 'Reports', 'Status' ];
+
+	if (
+		sections.length > 2 &&
+		Array.isArray( sections[ 1 ] ) &&
+		pagesWithTabs.includes( sections[ 1 ][ 1 ] )
+	) {
+		pageTitle = sections[ 1 ][ 1 ];
+	} else {
+		pageTitle = sections[ sections.length - 1 ];
+	}
+	return pageTitle;
+};
+
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
 	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
-	const pageTitle = sections.slice( -1 )[ 0 ];
+	const pageTitle = getPageTitle( sections );
 	const { isScrolled } = useIsScrolled();
 	let debounceTimer = null;
-
 	const className = classnames( 'woocommerce-layout__header', {
 		'is-scrolled': isScrolled,
 	} );
@@ -100,9 +116,12 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const { isLoading, launchStatus, launchYourStoreEnabled } =
+	const isHomescreen =
+		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
+	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
 		useLaunchYourStore();
-	const showLaunchYourStoreStatus = launchYourStoreEnabled && ! isLoading;
+	const showLaunchYourStoreStatus =
+		isHomescreen && launchYourStoreEnabled && ! isLoading;
 
 	return (
 		<div className={ className } ref={ headerElement }>
@@ -137,7 +156,10 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 				</Text>
 
 				{ showLaunchYourStoreStatus && (
-					<LaunchYourStoreStatus status={ launchStatus } />
+					<LaunchYourStoreStatus
+						comingSoon={ comingSoon }
+						storePagesOnly={ storePagesOnly }
+					/>
 				) }
 
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
