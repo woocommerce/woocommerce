@@ -128,8 +128,7 @@ class ProductCollectionUtils {
 			return false;
 		}
 
-		// Default to post.
-		$context = 'post';
+		$context = false;
 
 		if ( in_array( $post_type, array( 'wp_template', 'wp_template_part' ), true ) ) {
 
@@ -158,8 +157,47 @@ class ProductCollectionUtils {
 		if ( 'page' === $post_type ) {
 			$context = 'page';
 		}
+		if ( 'post' === $post_type ) {
+			$context = 'post';
+		}
 
 		return $context;
+	}
+
+	/**
+	 * Track usage of the Product Collection block within the given blocks.
+	 *
+	 * @param array  $blocks     The parsed blocks to check.
+	 * @param bool   $in_single  Whether we are in a single product container (used for keeping state in the recurring process.)
+	 *
+	 * @return array Parsed instances of the Product Collection block.
+	 */
+	public static function parse_blocks_track_data( $blocks, $in_single = false ) {
+
+		$instances = array();
+
+		foreach ( $blocks as $block ) {
+			if ( 'woocommerce/product-collection' === $block['blockName'] ) {
+
+				$instances[] = array(
+					'collection'        => $block['attrs']['collection'] ?? 'catalog',
+					'in-single-product' => $in_single,
+					'filters'           => self::get_query_filters_track_data( $block )
+				);
+			}
+
+			$local_in_single = $in_single;
+			if ( 'woocommerce/single-product' === $block['blockName'] ) {
+				$local_in_single = true;
+			}
+
+			// Recursive.
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$instances = array_merge( $instances, self::parse_blocks_track_data( $block['innerBlocks'], $local_in_single ) );
+			}
+		}
+
+		return $instances;
 	}
 
 	/**
@@ -168,7 +206,7 @@ class ProductCollectionUtils {
 	 * @param array $block The parsed block.
 	 * @return array The filters data for tracking.
 	 */
-	public static function get_event_filters_data( $block ) {
+	public static function get_query_filters_track_data( $block ) {
 
 		$query_attrs = $block['attrs']['query'] ?? array();
 		$filters     = array(

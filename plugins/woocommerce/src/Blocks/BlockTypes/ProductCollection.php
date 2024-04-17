@@ -86,12 +86,7 @@ class ProductCollection extends AbstractBlock {
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 		// Tracks.
-		add_action(
-			'save_post',
-			array( $this, 'track_collection_instances' ),
-			10,
-			2
-		);
+		add_action( 'save_post', array( $this, 'track_collection_instances' ), 10, 2 );
 	}
 
 	/**
@@ -104,61 +99,55 @@ class ProductCollection extends AbstractBlock {
 	 */
 	public function track_collection_instances( $post_id, $post ) {
 
-		// Important: don't track revisions.
-		if ( 'revision' === $post->post_type ) {
+		if ( ! $post instanceof \WP_Post ) {
 			return;
 		}
 
-		// if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
-		// 	return;
-		// }
+		// Important: don't track revisions.
+		$post_type = $post->post_type;
+		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
+			return;
+		}
+
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+			return;
+		}
+
+		if ( ! class_exists( 'WC_Tracks' ) || ! class_exists( 'WC_Site_Tracking' ) || ! \WC_Site_Tracking::is_tracking_enabled() ) {
+			return;
+		}
 
 		if ( ! has_block( $this->get_full_block_name(), $post ) ) {
 			return;
 		}
 
-		$context = ProductCollectionUtils::parse_editor_location_context( $post );
 		$blocks  = parse_blocks( $post->post_content );
-		$this->track_collection_block_usage( $blocks, $context );
-	}
+		if ( empty( $blocks ) ) {
+			return;
+		}
+		// Count orders.
+		// Hint: Product count included in Track event. See WC_Tracks::get_blog_details().
+		$order_count = 0;
+		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
+			$order_count += wc_orders_count( $status_slug );
+		}
+		$additional_data  = array(
+			'editor_location' => ProductCollectionUtils::parse_editor_location_context( $post ),
+			'order_count'     => $order_count,
+		);
+		$instances   = ProductCollectionUtils::parse_blocks_track_data( $blocks );
 
-	/**
-	 * Track feature usage of the Product Collection block within the site editor.
-	 *
-	 * @param array  $blocks     The parsed blocks to check.
-	 * @param string $context    The context in which the block is being used.
-	 * @param bool   $in_single  Whether we are in a single product container (optional.)
-	 *
-	 * @return void
-	 */
-	public function track_collection_block_usage( $blocks, $context, $in_single = false ) {
-		foreach ( $blocks as $block ) {
-			if ( $this->get_full_block_name() === $block['blockName'] ) {
+		foreach( $instances as $instance ) {
 
-				$event_data = array(
-					'collection' => $block['attrs']['collection'] ?? 'catalog',
-					'context'    => $in_single ? 'in-single-product' : $context,
-					'filters'    => ProductCollectionUtils::get_event_filters_data( $block )
-				);
+			$event_properties = array_merge(
+				$additional_data,
+				$instance
+			);
 
-				error_log('Event Data: ');
-				error_log(print_r($event_data, true));
-
-				// \WC_Tracks::record_event(
-				// 	'product_collection_instance', 
-				// 	$event_data
-				// );
-			}
-
-			$local_in_single = $in_single;
-			if ( 'woocommerce/single-product' === $block['blockName'] ) {
-				$local_in_single = true;
-			}
-
-			// Recursive.
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$this->track_collection_block_usage( $block['innerBlocks'], $context, $local_in_single );
-			}
+			\WC_Tracks::record_event(
+				'product_collection_instance', 
+				$event_properties
+			);
 		}
 	}
 
