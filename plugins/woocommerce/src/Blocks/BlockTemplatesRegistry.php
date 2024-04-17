@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonEntireSiteTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonStoreOnlyTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
@@ -45,13 +46,14 @@ class BlockTemplatesRegistry {
 				ProductSearchResultsTemplate::SLUG => new ProductSearchResultsTemplate(),
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),
-				ComingSoonEntireSiteTemplate::SLUG => new ComingSoonEntireSiteTemplate(),
-				ComingSoonStoreOnlyTemplate::SLUG  => new ComingSoonStoreOnlyTemplate(),
+				ComingSoonTemplate::SLUG           => new ComingSoonTemplate(),
 				OrderConfirmationTemplate::SLUG    => new OrderConfirmationTemplate(),
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);
 		} else {
-			$templates = array();
+			$templates = array(
+				ComingSoonTemplate::SLUG => new ComingSoonTemplate(),
+			);
 		}
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(

@@ -93,7 +93,7 @@
 		"react-dom": "^17.0.2"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"lint-staged": {
