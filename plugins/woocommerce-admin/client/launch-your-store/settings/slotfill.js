@@ -183,7 +183,7 @@ const SiteVisibility = () => {
 								) }
 								<p>
 									{ __(
-										'“Coming soon” sites are only visible to Admins and Shop managers. Enable “Share site” to let other users view your site.',
+										'Share your site with anyone using a private link.',
 										'woocommerce'
 									) }
 								</p>
