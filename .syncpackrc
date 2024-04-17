@@ -216,7 +216,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "wp-6.4"
+			"pinVersion": "^0.23.0"
 		},
 		{
 			"dependencies": [
