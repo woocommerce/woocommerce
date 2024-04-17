@@ -60,32 +60,9 @@ jobs:
 
         runs-on: ubuntu-latest
         steps:
-            # - name: Merge Artifacts
-            #   uses: actions/upload-artifact/merge@v4
-            #   with:
-            #       name: failures-artifacts
-            #       pattern: failures-artifacts-shard-*
-                  # delete-merged: true
-
-            - name: Download blob reports from GitHub Actions Artifacts
-              uses: actions/download-artifact@v4
+            - name: Merge Artifacts
+              uses: actions/upload-artifact/merge@v4
               with:
-                  path: failures-artifacts
+                  name: failures-artifacts
                   pattern: failures-artifacts-shard-*
-                  merge-multiple: true
-
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-
-            - name: Install Playwright
-              run: npm install @playwright/test
-
-            - name: Merge into HTML Report
-              run: npx playwright merge-reports --reporter html ./failures-artifacts
-
-            - name: Upload HTML report
-              uses: actions/upload-artifact@v4
-              with:
-                  name: html-report--attempt-${{ github.run_attempt }}
-                  path: playwright-report
+                  delete-merged: true
