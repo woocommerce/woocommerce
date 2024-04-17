@@ -14,7 +14,11 @@ import type { FocusEvent } from 'react';
  */
 import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
-import { validate, type ValidationErrors } from '../utils/validations';
+import {
+	ValidationError,
+	validate,
+	type ValidationErrors,
+} from '../utils/validations';
 import type { Metadata } from '../../../types';
 import type { CreateModalProps } from './types';
 
@@ -87,13 +91,15 @@ export function CreateModal( {
 	) {
 		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
 			const error = validate( {
-				...customField,
 				[ prop ]: event.target.value,
 			} );
 			const id = String( customField.id );
 			setValidationError( ( current ) => ( {
 				...current,
-				[ id ]: error,
+				[ id ]: {
+					...( current[ id ] as ValidationError ),
+					[ prop ]: error[ prop ],
+				},
 			} ) );
 		};
 	}
