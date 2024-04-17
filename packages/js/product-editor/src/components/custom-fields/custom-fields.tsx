@@ -163,6 +163,7 @@ export function CustomFields( {
 
 			{ showCreateModal && (
 				<CreateModal
+					values={ customFields }
 					onCreate={ handleCreateModalCreate }
 					onCancel={ handleCreateModalCancel }
 				/>
@@ -171,6 +172,7 @@ export function CustomFields( {
 			{ selectedCustomField && (
 				<EditModal
 					initialValue={ selectedCustomField }
+					values={ customFields }
 					onUpdate={ handleEditModalUpdate }
 					onCancel={ handleEditModalCancel }
 				/>
