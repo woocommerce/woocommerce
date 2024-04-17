@@ -47,6 +47,9 @@ export function useCustomFields<
 				if ( customField.id && field.id === customField.id ) {
 					return customField;
 				}
+				if ( field.key === customField.key ) {
+					return customField;
+				}
 				return field;
 			} )
 		);
