@@ -9,9 +9,8 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import { Edit, Save } from './edit';
-import deprecated from './deprecated';
 
-registerBlockType( 'woocommerce/cart-order-summary-block', {
+registerBlockType( 'woocommerce/checkout-order-summary-totals-block', {
 	icon: {
 		src: (
 			<Icon
@@ -22,5 +21,4 @@ registerBlockType( 'woocommerce/cart-order-summary-block', {
 	},
 	edit: Edit,
 	save: Save,
-	deprecated,
 } );
