@@ -96,7 +96,7 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'date_created_gmt' => $data->data[0]['date_created_gmt'], // Not under test.
 					'date'             => $data->data[0]['date'], // Not under test.
 					'extended_info'    => array(
-						'products' => array(
+						'products'    => array(
 							array(
 								'id'       => $variation->get_id(),
 								'name'     => $variation->get_name(),

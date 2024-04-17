@@ -399,7 +399,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		foreach ( $orders_data as $key => $order_data ) {
-			$defaults                             = array(
+			$defaults = array(
 				'products'    => array(),
 				'coupons'     => array(),
 				'customer'    => array(),
@@ -413,7 +413,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			$source_type = $order_attributions[ $order_id ]['_wc_order_attribution_source_type'] ?? '';
-			$utm_source = $order_attributions[ $order_id ]['_wc_order_attribution_utm_source'] ?? '';
+			$utm_source  = $order_attributions[ $order_id ]['_wc_order_attribution_utm_source'] ?? '';
 			$orders_data[ $key ]['extended_info']['attribution']['origin'] = $this->get_origin_label( $source_type, $utm_source );
 		}
 	}

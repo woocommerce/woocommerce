@@ -211,25 +211,25 @@ class Controller extends ReportsController implements ExportableInterface {
 					'readonly'    => true,
 				),
 				'extended_info'    => array(
-					'products' => array(
+					'products'    => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order product IDs, names, quantities.', 'woocommerce' ),
 					),
-					'coupons'  => array(
+					'coupons'     => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order coupons.', 'woocommerce' ),
 					),
-					'customer' => array(
+					'customer'    => array(
 						'type'        => 'object',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Order customer information.', 'woocommerce' ),
 					),
-					'attribution'  => array(
+					'attribution' => array(
 						'type'        => 'object',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
