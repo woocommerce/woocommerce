@@ -25,6 +25,8 @@ import { getSetting } from '@woocommerce/settings';
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
 import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
+import { SITE_VISIBILITY_DOC_LINK } from '../constants';
+import { LAUNCH_YOUR_STORE_DOC_LINK } from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -144,10 +146,18 @@ const SiteVisibility = () => {
 									'woocommerce'
 								) }
 								<p>
-									{ __(
-										'Hide store pages only behind a “Coming soon” page. The rest of your site will remain public.',
-										'woocommerce'
-									) }
+									{ createInterpolateElement(
+										__(
+											'Display a "coming soon" message on your <a>store pages</a> — the rest of your site will remain visible.',
+											'woocommerce'
+										),
+										{
+											a: createElement('a', {
+												href: SITE_VISIBILITY_DOC_LINK,
+											}),
+										}
+									}
+						  )
 								</p>
 							</>
 						}
