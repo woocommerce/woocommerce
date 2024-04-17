@@ -21,6 +21,7 @@ test( 'Load the home page', async ( { page } ) => {
 test( 'Load wp-admin as admin', async ( { page } ) => {
 	await page.context().clearCookies();
 	await page.goto( '/wp-admin' );
+	await page.waitForLoadState( 'domcontentloaded' );
 	await logIn( page, admin.username, admin.password );
 	await expect(
 		page.getByRole( 'heading', { name: 'Dashboard' } )
