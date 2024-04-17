@@ -571,7 +571,7 @@ class PluginsHelper {
 
 		$notice_string .= sprintf(
 			/* translators: %s: Connect page URL */
-			__( '<a href="%s">Connect your store</a> to woocommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			__( '<a href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
 			esc_url( $connect_page_url )
 		);
 
