@@ -25,7 +25,7 @@ class ComingSoonRequestHandler {
 	 */
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
-		add_action( 'template_include', array( $this, 'handle_template_include' ) );
+		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'deregister_unnecessary_styles' ), 100 );
 	}
 
