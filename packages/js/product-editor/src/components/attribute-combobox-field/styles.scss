@@ -1,0 +1,16 @@
+.woocommerce-attribute-input-field__combobox {
+	position: relative;
+
+	.components-combobox-control__suggestions-container {
+		padding: 0;
+	}
+
+	.components-form-token-field__suggestions-list {
+		position: absolute;
+		top: 32px;
+		left: 0;
+		z-index: 1;
+		box-shadow: inset -1px 1px 0 0 #949494, inset 1px -1px 0 0 #949494;
+		background-color: white;
+	}
+}
