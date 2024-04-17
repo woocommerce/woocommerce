@@ -565,7 +565,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
 			'net_total'       => $item['net_total'],
-			'origin'          => $item['extended_info']['origin'],
+			'origin'          => $item['extended_info']['attribution']['origin'],
 		);
 
 		/**
