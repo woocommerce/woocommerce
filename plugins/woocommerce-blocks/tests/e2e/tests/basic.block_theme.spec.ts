@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-
-/**
- * Internal dependencies
- */
+import { customerFile } from '@woocommerce/e2e-utils';
 
 test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load', async () => {
 	test( 'Load the home page', async ( { page } ) => {
@@ -26,12 +23,17 @@ test.describe( 'A basic set of tests to ensure WP, wp-admin and my-account load'
 
 	test.describe( 'Sign in as customer', () => {
 		test.use( {
-			storageState: process.env.CUSTOMERSTATE,
+			storageState: customerFile,
 		} );
-		test( 'Load customer my account page', async ( { page } ) => {
+		test.only( 'Load customer my account page', async ( { page } ) => {
 			await page.goto( '/my-account' );
-			const title = page.locator( 'h1.wp-block-post-title' );
-			await expect( title ).toHaveText( 'My Account' );
+
+			await expect(
+				page.getByRole( 'heading', { name: 'My Account' } )
+			).toBeVisible();
+			await expect(
+				page.getByText( 'Hello Jane Smith (not Jane Smith? Log out)' )
+			).toBeVisible();
 		} );
 	} );
 } );
