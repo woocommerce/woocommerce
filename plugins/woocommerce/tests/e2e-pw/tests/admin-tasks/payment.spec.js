@@ -128,7 +128,7 @@ test.describe( 'Payment setup task', () => {
 		page.locator( '.components-button.is-small.has-icon' )
 			.click()
 			.catch( () => {} );
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// enable COD payment option
 		await page
@@ -136,7 +136,7 @@ test.describe( 'Payment setup task', () => {
 				name: 'The "Cash on delivery" payment method is currently disabled',
 			} )
 			.click();
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// reload the page to ensure the status is updated
 		await page.reload();

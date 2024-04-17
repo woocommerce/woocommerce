@@ -135,8 +135,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 				( font ) => secondaryFont.includes( slugFontMap[ font ] )
 			);
 
-			// this assertion is randomly failing, so commenting it out for now
-			// expect( isPrimaryFontUsed ).toBe( true );
+			expect( isPrimaryFontUsed ).toBe( true );
 			expect( isSecondaryFontUsed ).toBe( true );
 		}
 	} );
