@@ -229,11 +229,11 @@ class Controller extends ReportsController implements ExportableInterface {
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Order customer information.', 'woocommerce' ),
 					),
-					'channel'  => array(
+					'attribution'  => array(
 						'type'        => 'object',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Order channel information.', 'woocommerce' ),
+						'description' => __( 'Order attribution information.', 'woocommerce' ),
 					),
 				),
 			),
