@@ -405,12 +405,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				'customer'    => array(),
 				'attribution' => array(),
 			);
-			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
+			$order_id = $order_data['order_id'];
+
+			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_id ] ) ? array_merge( $defaults, $mapped_data[ $order_id ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
 			}
 
-			$orders_data[ $key ]['extended_info']['attribution']['origin'] = $this->get_origin_label( $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_source_type'] ?? '', $order_attributions[ $order_data['order_id'] ]['_wc_order_attribution_utm_source'] ?? '' );
+			$source_type = $order_attributions[ $order_id ]['_wc_order_attribution_source_type'] ?? '';
+			$utm_source = $order_attributions[ $order_id ]['_wc_order_attribution_utm_source'] ?? '';
+			$orders_data[ $key ]['extended_info']['attribution']['origin'] = $this->get_origin_label( $source_type, $utm_source );
 		}
 	}
 
