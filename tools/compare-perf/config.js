@@ -5,8 +5,7 @@ const config = {
 	setupCommand: 'pnpm install &> /dev/null && pnpm build &> /dev/null',
 	pluginPath: '/plugins/woocommerce',
 	testsPath: '/plugins/woocommerce/tests/metrics/specs',
-	testCommand:
-		'npm install -g pnpm && cd plugins/woocommerce && pnpm test:metrics',
+	testCommand: 'cd plugins/woocommerce && pnpm test:metrics',
 };
 
 module.exports = config;
