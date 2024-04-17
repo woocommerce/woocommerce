@@ -161,12 +161,9 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		const cliOutput = await cli(
+		await cli(
 			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
 		);
-		if ( cliOutput.error ) {
-			throw cliOutput.error;
-		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );

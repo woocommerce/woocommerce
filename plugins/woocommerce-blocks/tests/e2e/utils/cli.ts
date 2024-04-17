@@ -1,25 +1,35 @@
 /**
  * External dependencies
  */
-import { ExecException, exec } from 'child_process';
+import { exec, ExecException } from 'child_process';
 
-export function cli(
-	cmd: string,
-	args = []
-): Promise< {
-	code: number;
-	error: ExecException | null;
+interface ExecResult {
 	stdout: string;
 	stderr: string;
-} > {
-	return new Promise( ( resolve ) => {
-		exec( `${ cmd } ${ args.join( ' ' ) }`, ( error, stdout, stderr ) => {
-			resolve( {
-				code: error && error.code ? error.code : 0,
-				error,
-				stdout,
-				stderr,
-			} );
-		} );
+}
+
+interface ExecError extends ExecResult {
+	error: ExecException | null;
+}
+
+export function cli( command: string ): Promise< ExecResult > {
+	return new Promise( ( resolve, reject ) => {
+		exec(
+			command,
+			( error: ExecException | null, stdout: string, stderr: string ) => {
+				if ( error ) {
+					reject( {
+						error: error,
+						stdout: stdout,
+						stderr: stderr,
+					} as ExecError );
+				} else {
+					resolve( {
+						stdout: stdout,
+						stderr: stderr,
+					} as ExecResult );
+				}
+			}
+		);
 	} );
 }

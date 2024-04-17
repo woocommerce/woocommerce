@@ -48,15 +48,13 @@ test.describe( 'Legacy templates', () => {
 		} );
 
 		await test.step( 'Update created term to legacy format in the DB', async () => {
-			const cliOutput = await cli(
+			await cli(
 				`npm run wp-env run tests-cli -- \
 					wp term update wp_theme woocommerce-woocommerce \
 						--by="slug" \
 						--name="woocommerce" \
 						--slug="woocommerce"`
 			);
-
-			expect( cliOutput.stdout ).toContain( 'Success: Term updated.' );
 		} );
 
 		await test.step( 'Verify the template can be edited via a legacy ID ', async () => {
@@ -90,15 +88,13 @@ test.describe( 'Legacy templates', () => {
 		} );
 
 		await test.step( 'Revert term update', async () => {
-			const cliOutput = await cli(
+			await cli(
 				`npm run wp-env run tests-cli -- \
 					wp term update wp_theme woocommerce \
 						--by="slug" \
 						--name="woocommerce/woocommerce" \
 						--slug="woocommerce-woocommerce"`
 			);
-
-			expect( cliOutput.stdout ).toContain( 'Success: Term updated.' );
 		} );
 	} );
 } );

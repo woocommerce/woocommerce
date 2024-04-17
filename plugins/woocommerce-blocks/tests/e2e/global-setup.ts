@@ -85,12 +85,9 @@ async function globalSetup() {
 	await prepareAttributes();
 
 	console.log( '├ Exporting database…' );
-	const cliOutput = await cli(
+	await cli(
 		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
 	);
-	if ( cliOutput.error ) {
-		throw cliOutput.error;
-	}
 
 	await requestContext.dispose();
 	console.timeEnd( '└ Total time' );
