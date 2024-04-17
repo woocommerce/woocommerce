@@ -11,6 +11,7 @@ import {
 	cli,
 	customerFile,
 	BLOCK_THEME_SLUG,
+	DB_EXPORT_FILE,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -85,10 +86,10 @@ async function globalSetup() {
 
 	console.log( '├ Exporting database…' );
 	const cliOutput = await cli(
-		'npm run wp-env run tests-cli wp db export blocks_e2e.sql '
+		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
 	);
-	if ( ! cliOutput.stdout.includes( 'Success: Exported' ) ) {
-		throw new Error( 'Database export failed' );
+	if ( cliOutput.error ) {
+		throw cliOutput.error;
 	}
 
 	await requestContext.dispose();

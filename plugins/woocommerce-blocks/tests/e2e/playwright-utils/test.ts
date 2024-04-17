@@ -162,10 +162,10 @@ const test = base.extend<
 		} );
 
 		const cliOutput = await cli(
-			'npm run wp-env run tests-cli wp db import blocks_e2e.sql'
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
 		);
-		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
-			throw new Error( 'Failed to import database' );
+		if ( cliOutput.error ) {
+			throw cliOutput.error;
 		}
 	},
 	pageUtils: async ( { page }, use ) => {
