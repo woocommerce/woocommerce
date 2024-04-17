@@ -152,12 +152,11 @@ const SiteVisibility = () => {
 											'woocommerce'
 										),
 										{
-											a: createElement('a', {
+											a: createElement( 'a', {
 												href: SITE_VISIBILITY_DOC_LINK,
-											}),
+											} ),
 										}
-									}
-						  )
+									) }
 								</p>
 							</>
 						}
