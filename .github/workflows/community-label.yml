@@ -39,7 +39,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: 'Assign reviewers'
-              if: github.event.pull_request
+              if: github.event.pull_request && steps.check.outputs.is-community == 'yes'
               uses: shufo/auto-assign-reviewer-by-files@f5f3db9ef06bd72ab6978996988c6462cbdaabf6
               with:
                   config: '.github/project-community-pr-assigner.yml'
