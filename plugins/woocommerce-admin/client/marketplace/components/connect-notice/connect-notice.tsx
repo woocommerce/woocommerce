@@ -53,7 +53,7 @@ export default function ConnectNotice(): JSX.Element | null {
 
 	description = description.concat(
 		__(
-			'<strong>Connect your store to woocommerce.com</strong> to get updates and streamlined support for your subscriptions.',
+			'<strong>Connect your store to WooCommerce.com</strong> to get updates and streamlined support for your subscriptions.',
 			'woocommerce'
 		)
 	);
