@@ -20,13 +20,13 @@ import { Button, Modal, Notice } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
+import AttributeCombobox from '../attribute-combobox-field';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -360,13 +360,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
 													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributeInputField
+														<AttributeCombobox
 															placeholder={
 																attributePlaceholder
 															}
-															value={ attribute }
 															items={
 																availableAttributes
+															}
+															currentItem={
+																attribute
 															}
 															isLoading={
 																isLoading
