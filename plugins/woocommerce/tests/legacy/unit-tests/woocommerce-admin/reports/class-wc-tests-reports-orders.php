@@ -108,9 +108,9 @@ class WC_Admin_Tests_Reports_Orders extends WC_Unit_Test_Case {
 								'quantity' => 1,
 							),
 						),
-						'coupons'  => array(),
-						'customer' => $data->data[0]['extended_info']['customer'], // Not under test.
-						'origin'   => 'Unknown',
+						'coupons'     => array(),
+						'customer'    => $data->data[0]['extended_info']['customer'], // Not under test.
+						'attribution' => array(),
 					),
 				),
 			),
