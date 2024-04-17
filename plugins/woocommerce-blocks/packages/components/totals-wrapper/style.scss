@@ -2,11 +2,6 @@
 	border-top: 1px solid $universal-border-light;
 	padding: $gap 0;
 
-	// Remove border for first element, there is a border around the entire order-summary
-	&:first-of-type {
-		border: 0;
-	}
-
 	&.has-bottom-border {
 		&::after {
 			border-bottom-width: 1px;
