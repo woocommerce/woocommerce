@@ -250,6 +250,14 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								value &&
 								! ( typeof value === 'string' )
 							) {
+								/*
+								 * Set value optimistically to avoid waiting for the terms to load
+								 * It will be updated when the terms are fetched
+								 */
+								setValue( 'attributes[' + index + ']', {
+									...getProductAttributeObject( value ),
+								} );
+
 								resolveSelect(
 									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 								)
