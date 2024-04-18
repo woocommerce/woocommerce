@@ -1688,7 +1688,7 @@ WHERE
 			$table_data = $wpdb->get_results(
 				$wpdb->prepare(
 					"$order_table_query WHERE $order_table_alias.id in ( $id_placeholder )",
-					$ids
+					$uncached_order_ids
 				)
 			);
 			// phpcs:enable
