@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a stalebot workflow for the flaky e2e test reporter

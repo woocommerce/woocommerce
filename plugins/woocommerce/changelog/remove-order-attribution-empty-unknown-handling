@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Remove unneeded empty "Unknown" code handling in Order Attribution.
