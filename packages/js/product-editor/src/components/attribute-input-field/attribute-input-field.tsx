@@ -32,8 +32,6 @@ import {
 
 export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	value = null,
-	attributes = [],
-	isLoading,
 	onChange,
 	placeholder,
 	label,
@@ -42,9 +40,23 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	createNewAttributesAsGlobal = false,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { createProductAttribute, invalidateResolution } = useDispatch(
+	const { createProductAttribute } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
+	const sortCriteria = { order_by: 'name' };
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
+		const { getProductAttributes, hasFinishedResolution } = select(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+		);
+		return {
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
+		};
+	} );
 
 	function isNewAttributeListItem(
 		attribute: NarrowedQueryAttribute
@@ -87,12 +99,16 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( {
-				name: attribute.name,
-				generate_slug: true,
-			} ).then(
+			createProductAttribute(
+				{
+					name: attribute.name,
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: sortCriteria,
+				}
+			).then(
 				( newAttr ) => {
-					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
 				},
 				( error ) => {

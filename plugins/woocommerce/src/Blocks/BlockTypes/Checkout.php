@@ -570,6 +570,7 @@ class Checkout extends AbstractBlock {
 			'CheckoutOrderSummaryShippingBlock',
 			'CheckoutOrderSummarySubtotalBlock',
 			'CheckoutOrderSummaryTaxesBlock',
+			'CheckoutOrderSummaryTotalsBlock',
 			'CheckoutPaymentBlock',
 			'CheckoutShippingAddressBlock',
 			'CheckoutShippingMethodsBlock',

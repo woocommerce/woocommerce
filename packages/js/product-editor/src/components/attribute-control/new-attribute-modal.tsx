@@ -250,13 +250,17 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								value &&
 								! ( typeof value === 'string' )
 							) {
-								console.log( 'Value: ', value );
 								/*
 								 * Set value optimistically to avoid waiting for the terms to load
 								 * It will be updated when the terms are fetched
 								 */
+								const selectedAttribute =
+									getProductAttributeObject(
+										value
+									) as EnhancedProductAttribute;
+
 								setValue( 'attributes[' + index + ']', {
-									...getProductAttributeObject( value ),
+									...selectedAttribute,
 								} );
 
 								resolveSelect(
@@ -272,10 +276,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 										attribute_id: value.id,
 									} )
 									.then( ( terms ) => {
-										const selectedAttribute =
-											getProductAttributeObject(
-												value
-											) as EnhancedProductAttribute;
 										if ( termsAutoSelection === 'all' ) {
 											selectedAttribute.terms = terms;
 										} else if ( terms.length > 0 ) {

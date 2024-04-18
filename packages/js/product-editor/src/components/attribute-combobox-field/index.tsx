@@ -44,7 +44,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	onChange,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { createProductAttribute, invalidateResolution } = useDispatch(
+	const { createProductAttribute } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
 
@@ -110,7 +110,9 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 					generate_slug: true,
 				},
 				{
-					optimisticQueryUpdate: {},
+					optimisticQueryUpdate: {
+						order_by: 'name',
+					},
 				}
 			).then(
 				( newAttr ) => {
@@ -121,7 +123,6 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 					} );
 
 					onChange( { ...newAttr, options: [] } );
-					// invalidateResolution( 'getProductAttributes' );
 				},
 				( error ) => {
 					let message = __(

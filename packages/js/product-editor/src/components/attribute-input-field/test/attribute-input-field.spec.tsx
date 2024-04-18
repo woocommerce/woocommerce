@@ -17,7 +17,6 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn().mockReturnValue( {
 		createErrorNotice: jest.fn(),
 		createProductAttribute: jest.fn(),
-		invalidateResolution: jest.fn(),
 	} ),
 } ) );
 
@@ -275,7 +274,7 @@ describe( 'AttributeInputField', () => {
 	} );
 
 	describe( 'createNewAttributesAsGlobal is true', () => {
-		it( 'should create a new global attribute and invalidate product attributes', async () => {
+		it( 'should create a new global attribute', async () => {
 			const onChangeMock = jest.fn();
 			( useSelect as jest.Mock ).mockReturnValue( {
 				isLoading: false,
@@ -294,11 +293,9 @@ describe( 'AttributeInputField', () => {
 						} );
 					}
 				);
-			const invalidateResolutionMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: jest.fn(),
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -311,11 +308,6 @@ describe( 'AttributeInputField', () => {
 			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
 				generate_slug: true,
-			} );
-			await waitFor( () => {
-				expect( invalidateResolutionMock ).toHaveBeenCalledWith(
-					'getProductAttributes'
-				);
 			} );
 			expect( onChangeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
@@ -339,12 +331,10 @@ describe( 'AttributeInputField', () => {
 						message: 'Duplicate slug',
 					} );
 				} );
-			const invalidateResolutionMock = jest.fn();
 			const createErrorNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: createErrorNoticeMock,
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -364,7 +354,6 @@ describe( 'AttributeInputField', () => {
 					{ explicitDismiss: true }
 				);
 			} );
-			expect( invalidateResolutionMock ).not.toHaveBeenCalled();
 			expect( onChangeMock ).not.toHaveBeenCalled();
 		} );
 	} );
