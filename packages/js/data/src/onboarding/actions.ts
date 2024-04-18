@@ -525,12 +525,10 @@ export function* coreProfilerCompleted() {
 	yield coreProfilerCompletedRequest();
 
 	try {
-		console.log("core profiler completed");
-		yield true; // TODO replace with api call
-		// yield apiFetch( {
-		// 	path: `${ WC_ADMIN_NAMESPACE }/onboarding/core-profiler-completed`,
-		// 	method: 'POST',
-		// } );
+		yield apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/launch-your-store/initialize-coming-soon`,
+			method: 'POST',
+		} );
 	} catch ( error ) {
 		yield coreProfilerCompletedError( error );
 		throw error;
