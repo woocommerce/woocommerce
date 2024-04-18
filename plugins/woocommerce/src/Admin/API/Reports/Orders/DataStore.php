@@ -563,7 +563,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				"SELECT order_id, meta_key, meta_value
 					FROM $order_meta_table
 					WHERE order_id IN ({$included_order_ids})
-					AND meta_key IN ('_wc_order_attribution_source_type', '_wc_order_attribution_utm_source')
+					AND meta_key IN ( '_wc_order_attribution_source_type', '_wc_order_attribution_utm_source' )
 					",
 				ARRAY_A
 			);
