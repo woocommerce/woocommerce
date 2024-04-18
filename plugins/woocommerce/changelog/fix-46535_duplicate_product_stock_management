@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix duplicate product endpoint args for item schema #46551

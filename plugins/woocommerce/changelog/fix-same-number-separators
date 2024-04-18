@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add a safety check for the numbers with the same value for the separators

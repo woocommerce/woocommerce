@@ -1,6 +1,5 @@
 ---
-category_title: Beta Testing
-category_slug: Beta Testing
+post_title: Beta Testing
 tags: how-to
 ---
 
@@ -24,6 +23,6 @@ This plugin will give you access to all of the WooCommerce versions uploaded to 
 
 During testing, if you come across a bug or want to propose or contribute an enhancement, [submit an issue on Github](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+). Ensure you read our guidelines on contributing and note which version you are using specifically. It is also possible to easily submit a new GitHub issue through the [beta tester plugin](https://wordpress.org/plugins/woocommerce-beta-tester/).
 
-Sometimes we may also ask for feedback via other means, such as the surveys and calls for testing on the [developer blog](https://developer.woo.com/blog/). We appreciate immediate feedback, comments, and responses to surveys as it helps us judge how well received our releases and betas are and will help us shape future versions.
+Sometimes we may also ask for feedback via other means, such as the surveys and calls for testing on the [developer blog](https://developer.woocommerce.com/blog/). We appreciate immediate feedback, comments, and responses to surveys as it helps us judge how well received our releases and betas are and will help us shape future versions.
 
 Thanks for testing WooCommerce!
