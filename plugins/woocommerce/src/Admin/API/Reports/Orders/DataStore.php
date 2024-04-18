@@ -555,7 +555,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function get_order_attributions_by_order_ids( $order_ids ) {
 		global $wpdb;
 		$order_meta_table   = OrdersTableDataStore::get_meta_table_name();
-		$included_order_ids = implode( ',', $order_ids );
+		$included_order_ids = implode( ',', array_map( 'absint', $order_ids ) );
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
