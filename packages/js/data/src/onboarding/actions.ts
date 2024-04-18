@@ -502,6 +502,43 @@ export function setJetpackAuthUrl(
 	};
 }
 
+export function coreProfilerCompletedError( error: unknown ) {
+	return {
+		type: TYPES.CORE_PROFILER_COMPLETED_ERROR,
+		error,
+	};
+}
+
+export function coreProfilerCompletedRequest() {
+	return {
+		type: TYPES.CORE_PROFILER_COMPLETED_REQUEST,
+	};
+}
+
+export function coreProfilerCompletedSuccess() {
+	return {
+		type: TYPES.CORE_PROFILER_COMPLETED_SUCCESS,
+	};
+}
+
+export function* coreProfilerCompleted() {
+	yield coreProfilerCompletedRequest();
+
+	try {
+		console.log("core profiler completed");
+		yield true; // TODO replace with api call
+		// yield apiFetch( {
+		// 	path: `${ WC_ADMIN_NAMESPACE }/onboarding/core-profiler-completed`,
+		// 	method: 'POST',
+		// } );
+	} catch ( error ) {
+		yield coreProfilerCompletedError( error );
+		throw error;
+	} finally {
+		yield coreProfilerCompletedSuccess();
+	}
+}
+
 export type Action = ReturnType<
 	| typeof getFreeExtensionsError
 	| typeof getFreeExtensionsSuccess
@@ -539,4 +576,7 @@ export type Action = ReturnType<
 	| typeof getProductTypesError
 	| typeof getProductTypesSuccess
 	| typeof setJetpackAuthUrl
+	| typeof coreProfilerCompletedRequest
+	| typeof coreProfilerCompletedSuccess
+	| typeof coreProfilerCompletedError
 >;
