@@ -20,6 +20,7 @@ export type EnhancedProductAttribute = ProductAttribute & {
 	isDefault?: boolean;
 	terms?: ProductAttributeTerm[];
 	visible?: boolean;
+	takenBy?: number;
 };
 
 type useProductAttributesProps = {

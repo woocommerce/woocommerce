@@ -209,6 +209,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
+	const sortCriteria = { order_by: 'name' };
+
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
@@ -216,8 +218,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 		);
 		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
 		};
 	} );
 
@@ -301,33 +305,30 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					}
 
 					/*
-					 * Get the attribute ids that should be ignored when filtering the attributes
-					 * to show in the attribute input field.
+					 * Get the attribute ids that are already selected
+					 * by other form fields.
 					 */
-					const ignoredAttributeIds = [
-						...selectedAttributeIds,
-						...values.attributes
-							.map( ( attr ) => attr?.id )
-							.filter(
-								( attrId ): attrId is number =>
-									attrId !== undefined
-							),
-					];
+					const attributeBelongTo = values.attributes.map( ( attr ) =>
+						attr ? attr.id : null
+					);
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
-					 * filtering out the ignored attributes and marking the disabled ones.
+					 * filtering out the ignored attributes,
+					 * marking the disabled ones,
+					 * and setting the takenBy property.
 					 */
 					const availableAttributes = attributes
 						?.filter(
 							( attribute: EnhancedProductAttribute ) =>
-								! ignoredAttributeIds.includes( attribute.id )
+								! selectedAttributeIds.includes( attribute.id )
 						)
-						.map( ( attribute: EnhancedProductAttribute ) => ( {
+						?.map( ( attribute: EnhancedProductAttribute ) => ( {
 							...attribute,
 							isDisabled: disabledAttributeIds.includes(
 								attribute.id
 							),
+							takenBy: attributeBelongTo.indexOf( attribute.id ),
 						} ) );
 
 					return (
@@ -373,9 +374,16 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															placeholder={
 																attributePlaceholder
 															}
-															items={
-																availableAttributes
-															}
+															items={ availableAttributes?.filter(
+																(
+																	attr: EnhancedProductAttribute
+																) =>
+																	( attr.takenBy &&
+																		attr.takenBy <
+																			0 ) ||
+																	attr.takenBy ===
+																		index
+															) }
 															currentItem={
 																attribute
 															}

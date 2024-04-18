@@ -16,6 +16,7 @@ export type NarrowedQueryAttribute = Pick<
 > & {
 	slug?: string;
 	isDisabled?: boolean;
+	takenBy: number;
 };
 
 export type AttributeComboboxProps = {

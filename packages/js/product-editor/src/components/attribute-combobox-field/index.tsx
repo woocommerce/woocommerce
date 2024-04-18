@@ -65,18 +65,9 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 
 	const options = useMemo( () => {
 		if ( ! temporaryOption.label.length ) {
-			// Populate the items with the current item if it exists.
-			if ( currentItem ) {
-				return [
-					...attributeOptions,
-					mapAttributeToComboboxOption( currentItem ),
-				].sort( ( a, b ) => a.label.localeCompare( b.label ) );
-			}
-
 			return attributeOptions;
 		}
 
-		// Populate the items with the "Create..." option if the user is typing.
 		return [
 			...attributeOptions,
 			{
@@ -90,8 +81,8 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 						: temporaryOption.label,
 				value: temporaryOption.value,
 			},
-		].sort( ( a, b ) => a.label.localeCompare( b.label ) );
-	}, [ currentItem, attributeOptions, temporaryOption ] );
+		];
+	}, [ attributeOptions, temporaryOption ] );
 
 	let currentValue =
 		temporaryOption.state === 'creating' ? 'create-attribute' : '';
@@ -116,13 +107,8 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 				}
 			).then(
 				( newAttr ) => {
-					updateCreateOption( {
-						label: newAttr.name,
-						value: `attr-${ newAttr.id }`,
-						state: 'justCreated',
-					} );
-
 					onChange( { ...newAttr, options: [] } );
+					clearCreateOption();
 				},
 				( error ) => {
 					let message = __(
