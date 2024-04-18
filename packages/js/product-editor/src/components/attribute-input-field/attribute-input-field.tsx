@@ -46,6 +46,8 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	const { createProductAttribute, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
+
+	const sortCriteria = { order_by: 'name' };
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
@@ -53,8 +55,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 		);
 		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes' ),
-			attributes: getProductAttributes(),
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
 		};
 	} );
 
@@ -118,10 +122,15 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( {
-				name: attribute.name,
-				generate_slug: true,
-			} ).then(
+			createProductAttribute(
+				{
+					name: attribute.name,
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: sortCriteria,
+				}
+			).then(
 				( newAttr ) => {
 					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
