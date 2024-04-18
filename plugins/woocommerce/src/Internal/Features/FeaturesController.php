@@ -717,6 +717,8 @@ class FeaturesController {
 							),
 							admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' )
 						);
+					} else {
+						$auto_enable_experimental['desc_tip'] = __( '⚠️ <b>We do not recommend using this option in live stores.</b>', 'woocommerce' );
 					}
 
 					$feature_settings[] = $auto_enable_experimental;
