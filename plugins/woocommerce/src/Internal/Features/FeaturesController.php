@@ -632,6 +632,13 @@ class FeaturesController {
 	}
 
 	/**
+	 * Local shorthand for whether tracking is enabled, might possibly be useful globally.
+	 */
+	private static function is_tracking_allowed(): bool {
+		return ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) );
+	}
+
+	/**
 	 * Handler for the 'woocommerce_get_settings_advanced' hook,
 	 * it adds the settings UI for all the existing features.
 	 *
@@ -698,17 +705,16 @@ class FeaturesController {
 						'id'    => 'experimental_features_options',
 					);
 
-					$is_tracking_allowed = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
 					$auto_enable_experimental = array(
 						'title'   => __( 'All Experimental Features', 'woocommerce' ),
 						'desc'    => __( 'Automatically enable all experimental features', 'woocommerce' ),
 						'id'      => 'woocommerce_experimental_features_auto_enable',
 						'type'    => 'checkbox',
 						'default' => 'no',
-						'disabled' => ! ( $is_tracking_allowed ),
+						'disabled' => ! ( self::is_tracking_allowed() ),
 					);
 			
-					if ( ! $is_tracking_allowed ) {
+					if ( ! self::is_tracking_allowed() ) {
 						$auto_enable_experimental['desc_tip'] = sprintf(
 						// translators: Placeholders are URLs.
 							__(
