@@ -12,7 +12,7 @@
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
-const { keys } = require( 'lodash' );
+
 /**
  * Path to root project directory.
  *
@@ -67,7 +67,7 @@ const TOKEN_PATTERN = new RegExp( START_TOKEN + '[^]*' + END_TOKEN );
  * @return {string[]} Array of truthy keys
  */
 function getTruthyKeys( obj ) {
-	return keys( obj )
+	return Object.keys( obj )
 		.filter( ( key ) => ! key.startsWith( '__exp' ) )
 		.map( ( key ) => ( obj[ key ] ? key : `~~${ key }~~` ) );
 }
