@@ -189,7 +189,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			page.locator(
 				'.wc-block-components-radio-control__description > .wc-block-components-formatted-money-amount'
 			)
-		).toContainText( '$0.00' );
+		).toContainText( 'Free' );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -242,7 +242,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			page.locator(
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
-		).toContainText( '$0.00' );
+		).toContainText( 'Free' );
 		let totalPrice = await page
 			.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -356,7 +356,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 			page.locator(
 				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
 			)
-		).toContainText( '$0.00' );
+		).toContainText( 'Free' );
 		totalPrice = await page
 			.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
