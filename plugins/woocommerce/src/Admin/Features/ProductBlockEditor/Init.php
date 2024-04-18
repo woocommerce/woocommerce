@@ -115,9 +115,9 @@ class Init {
 		);
 		wp_tinymce_inline_scripts();
 		wp_enqueue_media();
-		wp_register_style( 'wc-gutenberg-global-presets', false ); // phpcs:ignore
-		wp_add_inline_style( 'wc-gutenberg-global-presets', gutenberg_get_global_stylesheet( array( 'presets' ) ) );
-		wp_enqueue_style( 'wc-gutenberg-global-presets' );
+		wp_register_style( 'wc-global-presets', false ); // phpcs:ignore
+		wp_add_inline_style( 'wc-global-presets', wp_get_global_stylesheet( array( 'presets' ) ) );
+		wp_enqueue_style( 'wc-global-presets' );
 	}
 
 	/**
