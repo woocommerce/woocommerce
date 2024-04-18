@@ -142,12 +142,13 @@ function readBlockJSON( filename ) {
 	const attributes = getTruthyKeys( blockjson.attributes );
 
 	return `
-## ${ blockjson.title }
+## ${ blockjson.title } - ${ blockjson.name }
 
-${ blockjson.description }
+${ blockjson.description || '' }
 
 -	**Name:** ${ blockjson.name }
--	**Category:** ${ blockjson.category }
+-	**Category:** ${ blockjson.category || '' }
+-   **Ancestor:** ${ blockjson.ancestor || '' }
 -	**Supports:** ${ supportsList.sort().join( ', ' ) }
 -	**Attributes:** ${ attributes.sort().join( ', ' ) }
 `;
