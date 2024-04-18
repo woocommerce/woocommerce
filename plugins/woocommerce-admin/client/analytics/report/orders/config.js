@@ -235,7 +235,7 @@ export const advancedFilters = applyFilters(
 			},
 			customer_type: {
 				labels: {
-					add: __( 'Customer type', 'woocommerce' ),
+					add: __( 'Customer Type', 'woocommerce' ),
 					remove: __( 'Remove customer filter', 'woocommerce' ),
 					rule: __( 'Select a customer filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
