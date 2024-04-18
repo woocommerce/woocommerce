@@ -6,7 +6,12 @@
  * @since 3.5.0
  */
 
+ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+
 class WC_Tests_API_Reports_Orders_Totals extends WC_REST_Unit_Test_Case {
+
+	use HPOSToggleTrait;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -58,6 +63,41 @@ class WC_Tests_API_Reports_Orders_Totals extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( count( wc_get_order_statuses() ), count( $report ) );
 		$this->assertEquals( $data, $report );
+	}
+
+	/**
+	 * Test getting order totals with HPOS enabled and some orders pending sync.
+	 *
+	 * @since 8.9.0
+	 */
+	public function test_get_reports_with_hpos_enabled_and_sync_off() {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		wp_set_current_user( $this->user );
+
+		// Create some orders with HPOS enabled.
+		$order_counts = array( 'wc-pending' => 3, 'wc-processing' => 2, 'wc-on-hold' => 1 );
+		foreach ( $order_counts as $status => $count ) {
+			for ( $i = 0; $i < $count; $i++ ) {
+				$order = OrderHelper::create_order();
+				$order->set_status( $status );
+				$order->save();
+			}
+		}
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/reports/orders/totals' ) );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( count( wc_get_order_statuses() ), count( $report ) );
+		foreach ( $report as $data ) {
+			if ( array_key_exists( 'wc-' . $data['slug'], $order_counts ) ) {
+				$this->assertEquals( $order_counts[ 'wc-' . $data['slug'] ], $data['total'], 'Status: ' . $data['slug'] );
+			} else {
+				$this->assertEquals( 0, $data['total'], 'Status: ' . $data['slug'] );
+			}
+		}
 	}
 
 	/**
