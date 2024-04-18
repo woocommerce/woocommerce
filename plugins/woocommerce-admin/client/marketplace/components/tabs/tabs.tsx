@@ -60,6 +60,12 @@ const tabs: Tabs = {
 		showUpdateCount: false,
 		updateCount: 0,
 	},
+	'business-services': {
+		name: 'business-services',
+		title: __( 'Business services', 'woocommerce' ),
+		showUpdateCount: false,
+		updateCount: 0,
+	},
 	'my-subscriptions': {
 		name: 'my-subscriptions',
 		title: __( 'My subscriptions', 'woocommerce' ),
