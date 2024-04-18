@@ -702,7 +702,7 @@ class FeaturesController {
 					$auto_enable_experimental = array(
 						'title'   => __( 'All Experimental Features', 'woocommerce' ),
 						'desc'    => __( 'Automatically enable all experimental features', 'woocommerce' ),
-						'id'      => 'experimental_features_auto_enable',
+						'id'      => 'woocommerce_experimental_features_auto_enable',
 						'type'    => 'checkbox',
 						'default' => 'no',
 						'disabled' => ! ( $is_tracking_allowed ),
