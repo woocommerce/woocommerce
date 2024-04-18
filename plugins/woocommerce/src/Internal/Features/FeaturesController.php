@@ -357,6 +357,8 @@ class FeaturesController {
 
 	/**
 	 * Enable or disable all experimental features.
+	 *
+	 * @param bool $enable True to enable, false to disable all experimental features.
 	 */
 	public function enable_experimental_features( bool $enable = true ): void {
 		$features = $this->get_features( true );
@@ -369,6 +371,9 @@ class FeaturesController {
 
 	/**
 	 * Enable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `yes`.
+	 *
+	 * @param string $old_value The old value of the option.
+	 * @param string $value The new value of the option.
 	 */
 	public function woocommerce_experimental_features_auto_enable_updated( $old_value, $value ): void {
 		if ( 'yes' === $value ) {
@@ -380,6 +385,9 @@ class FeaturesController {
 
 	/**
 	 * Disable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `no`.
+	 *
+	 * @param string $old_value The old value of the option.
+	 * @param string $value The new value of the option.
 	 */
 	public function woocommerce_allow_tracking_updated( $old_value, $value ): void {
 		if ( 'no' === $value ) {
@@ -741,14 +749,14 @@ class FeaturesController {
 					);
 
 					$auto_enable_experimental = array(
-						'title'   => __( 'All Experimental Features', 'woocommerce' ),
-						'desc'    => __( 'Automatically enable all experimental features', 'woocommerce' ),
-						'id'      => 'woocommerce_experimental_features_auto_enable',
-						'type'    => 'checkbox',
-						'default' => 'no',
+						'title'    => __( 'All Experimental Features', 'woocommerce' ),
+						'desc'     => __( 'Automatically enable all experimental features', 'woocommerce' ),
+						'id'       => 'woocommerce_experimental_features_auto_enable',
+						'type'     => 'checkbox',
+						'default'  => 'no',
 						'disabled' => ! ( self::is_tracking_allowed() ),
 					);
-			
+
 					if ( ! self::is_tracking_allowed() ) {
 						$auto_enable_experimental['desc_tip'] = sprintf(
 						// translators: Placeholders are URLs.
