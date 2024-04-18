@@ -36,7 +36,7 @@ class WC_Tests_API_Reports_Orders_Totals extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting all product reviews.
+	 * Test getting order totals.
 	 *
 	 * @since 3.5.0
 	 */
