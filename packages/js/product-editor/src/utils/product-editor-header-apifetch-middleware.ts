@@ -14,7 +14,7 @@ export const productEditorHeaderApiFetchMiddleware = () => {
 	apiFetch.use( ( options, next ) => {
 		if ( isProductEditor() ) {
 			options.headers = options.headers || {};
-			options.headers[ 'X-Wc-Product-Editor' ] = '1';
+			options.headers[ 'X-Wc-From-Product-Editor' ] = '1';
 		}
 		return next( options );
 	} );
