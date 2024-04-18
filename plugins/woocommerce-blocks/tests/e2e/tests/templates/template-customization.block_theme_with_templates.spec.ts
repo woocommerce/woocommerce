@@ -10,7 +10,6 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 test.describe( 'Template customization', () => {
-	test.describe.configure({ mode: 'parallel' });
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 	} );
