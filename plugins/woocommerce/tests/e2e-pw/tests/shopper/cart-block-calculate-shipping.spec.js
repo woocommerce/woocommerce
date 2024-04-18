@@ -187,9 +187,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		).toBeVisible();
 		await expect(
 			page.locator(
-				'.wc-block-components-radio-control__description > .wc-block-components-formatted-money-amount'
+				'.wc-block-components-radio-control__description > .wc-block-components-shipping-rates-control__package__description--free'
 			)
-		).toContainText( 'FREE' );
+		).toContainText( 'Free' );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
