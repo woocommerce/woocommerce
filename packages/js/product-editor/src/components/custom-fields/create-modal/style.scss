@@ -1,27 +1,51 @@
 .woocommerce-product-custom-fields__create-modal {
 	min-width: 75%;
 
-	&-list {
-		&-item {
-			display: flex;
-			gap: $grid-unit-20;
-			border-bottom: 1px solid $gray-200;
-			padding-top: $grid-unit-30;
-			padding-bottom: $grid-unit;
-			margin-bottom: 0;
+	[role="table"] {
+		width: 100%;
 
-			&:first-child {
-				padding-top: 0;
-			}
+		[role="rowheader"],
+		[role="row"] {
+			display: grid;
+			grid-template-columns: 1fr 1fr 36px;
+			gap: $grid-unit-20;
+		}
+
+		[role="row"] {
+			border-top: 1px solid $gray-200;
+			border-bottom: 1px solid transparent;
+			padding-top: $grid-unit-40;
+		}
+
+		[role="columnheader"] {
+			text-transform: uppercase;
+			color: $gray-700;
+			padding-top: $grid-unit-30;
+			padding-bottom: $grid-unit-20;
+		}
+
+		[role="cell"] {
+			height: $grid-unit-80;
 
 			.components-base-control {
 				width: 100%;
+				margin-bottom: 0;
+
+				.components-input-base {
+					gap: 0;
+				}
 			}
 
-			.components-button {
-				margin-top: 20px;
+			.components-button.has-icon {
+				min-width: $grid-unit-40;
+				width: $grid-unit-40;
+				height: $grid-unit-40;
 			}
 		}
+	}
+
+	&-add-another {
+		margin-top: $grid-unit-40;
 	}
 
 	&-actions {

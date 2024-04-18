@@ -4,6 +4,10 @@
 		padding: 0.875em 0.875em 0.875em em($gap-huge);
 	}
 
+	.wc-block-checkout__shipping-option--free {
+		text-transform: uppercase;
+	}
+
 	.wc-block-components-shipping-rates-control__no-results-notice {
 		margin: em($gap-small) 0;
 	}
