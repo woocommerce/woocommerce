@@ -697,6 +697,29 @@ class FeaturesController {
 						'desc'  => __( 'These features are either experimental or incomplete, enable them at your own risk!', 'woocommerce' ),
 						'id'    => 'experimental_features_options',
 					);
+
+					$is_tracking_allowed = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
+					$auto_enable_experimental = array(
+						'title'   => __( 'All Experimental Features', 'woocommerce' ),
+						'desc'    => __( 'Automatically enable all experimental features', 'woocommerce' ),
+						'id'      => 'experimental_features_auto_enable',
+						'type'    => 'checkbox',
+						'default' => 'no',
+						'disabled' => ! ( $is_tracking_allowed ),
+					);
+			
+					if ( ! $is_tracking_allowed ) {
+						$auto_enable_experimental['desc_tip'] = sprintf(
+						// translators: Placeholders are URLs.
+							__(
+								'⚠️ <b>To enable this you need to <a href="%1$s">opt in to usage tracking here</a>.</b>',
+								'woocommerce'
+							),
+							admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' )
+						);
+					}
+
+					$feature_settings[] = $auto_enable_experimental;
 				}
 				continue;
 			}
