@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Implement dismiss button for the coming soon banner and restrict the banner on the store pages only when 'Restrict to store pages only' option is selected.

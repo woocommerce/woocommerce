@@ -384,7 +384,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		foreach ( $coupons as $coupon ) {
 			if ( ! isset( $mapped_data[ $coupon['order_id'] ] ) ) {
-				$mapped_data[ $product['order_id'] ]['coupons'] = array();
+				$mapped_data[ $coupon['order_id'] ]['coupons'] = array();
 			}
 
 			$mapped_data[ $coupon['order_id'] ]['coupons'][] = array(

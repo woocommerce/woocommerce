@@ -229,7 +229,6 @@
 		"expect-puppeteer": "6.1.1",
 		"fast-glob": "^3.3.2",
 		"fast-xml-parser": "4.2.4",
-		"follow-redirects": "1.15.1",
 		"fs-extra": "11.1.1",
 		"gh-pages": "4.0.0",
 		"github-label-sync": "^2.3.1",
@@ -278,7 +277,7 @@
 		"zenhub-api": "0.2.0"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"dependencies": {
