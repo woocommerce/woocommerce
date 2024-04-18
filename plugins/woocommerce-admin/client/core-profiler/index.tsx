@@ -375,7 +375,9 @@ const handleGeolocation = assign( {
 const redirectToWooHome = raise( 'REDIRECT_TO_WOO_HOME' );
 
 const exitToWooHome = async () => {
-	await dispatch( ONBOARDING_STORE_NAME ).coreProfilerCompleted();
+	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
+		await dispatch( ONBOARDING_STORE_NAME ).coreProfilerCompleted();
+	}
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
@@ -1406,9 +1408,13 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				sendToJetpackAuthPage: {
 					invoke: {
 						src: async () => {
-							await dispatch(
-								ONBOARDING_STORE_NAME
-							).coreProfilerCompleted();
+							if (
+								window.wcAdminFeatures[ 'launch-your-store' ]
+							) {
+								await dispatch(
+									ONBOARDING_STORE_NAME
+								).coreProfilerCompleted();
+							}
 							return await resolveSelect(
 								ONBOARDING_STORE_NAME
 							).getJetpackAuthUrl( {
