@@ -719,9 +719,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		REDIRECT_TO_WOO_HOME: {
 			target: 'redirectingToWooHome',
 		},
-		REDIRECT_TO_JETPACK_AUTH_PAGE: {
-			target: 'redirectingToJetpackAuthPage',
-		},
 	},
 	context: {
 		// these are safe default values if for some reason the steps fail to complete correctly
@@ -1543,7 +1540,6 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				src: 'exitToWooHome',
 			},
 		},
-		redirectingToJetpackAuthPage: {},
 	},
 } );
 
