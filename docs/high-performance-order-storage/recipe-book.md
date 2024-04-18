@@ -39,7 +39,7 @@ While developing, you might want to use the `trunk` branch from the WooCommerce 
 
 
 
-### Detecting whether HPOS tables are being used in the store:
+### Detecting whether HPOS tables are being used in the store
 
 While the WooCommerce CRUD API will let you support both posts and custom tables without additional effort most of the time, in some cases (like when you are writing a SQL query for better performance) you would want to know whether the store is using HPOS tables or not. In this case, you can use the following pattern:
 
@@ -65,6 +65,7 @@ wpdb|get_post|get_post_field|get_post_status|get_post_type|get_post_type_object|
 Please note that you will find lots of false positives, but this regular expression is quite thorough and should catch most of the true positives.
 
 Search for the above regular expression in your source code, and:
+
 1. Go through the matches one by one and check whether the occurrence relates to an order. Most of the matches will probably be false positives i.e. they won't be related to orders.
 2. If you see one of the matches are directly accessing or modifying order data, you will need to change it to use WooCommerce's CRUD API instead.
 
@@ -163,25 +164,22 @@ function render_xyz_metabox( $post_or_order_object ) {
 Once you examined the extension's code, you can declare whether it's compatible with HPOS or not. We've prepared an API to make this easy. To **declare your extension compatible**, place the following code into your **main plugin file**:
 
 ```php
-
 add_action( 'before_woocommerce_init', function() {
 	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 	}
 } );
-
 ```
 
 
 If you know your code doesn't support HPOS, you should declare **incompatibility** in the following way. Place the following code into your **main plugin file**:
-```php
 
+```php
 add_action( 'before_woocommerce_init', function() {
 	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, false );
 	}
 } );
-
 ```
 
 If you prefer to include the compatibility declaration outside of your main plugin file, please pass 'my-plugin-slug/my-plugin.php' instead of the `__FILE__` parameter in the snippets above.

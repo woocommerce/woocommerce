@@ -10,6 +10,7 @@ All the new query types are implemented as additional query arguments that can b
 ## The new query types
 
 ### Metadata queries (`meta_query`)
+
 With the introduction of HPOS, order fields that were previously stored as post metadata have been moved to their own tables, but the remaining metadata (custom, or from other extensions) can now be queried through the `meta_query `argument.
 
 At its core, `meta_query` is an array that can contain one or more arrays with keys:
@@ -179,6 +180,3 @@ $orders = wc_get_orders(
     )
 );
 ```
-</details>
-
-

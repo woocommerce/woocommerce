@@ -12,30 +12,29 @@ Keep in mind that the commands themselves have documentation and examples that c
 
 |Command|Use this command to...|
 |----|-----|
-|[`wc hpos status`](#wc-hpos-status)|Get an overview of all HPOS matters on your site.|
-|[`wc cot enable`](#wc-cot-enable)|Enable HPOS (and possibly compatibility mode).|
-|[`wc cot disable`](#wc-cot-disable)|Disable HPOS (and possibly compatibility mode).|
-|[`wc cot count_unmigrated`](#wc-cot-count_unmigrated)|Get a count of all orders pending sync.|
-|[`wc cot sync`](#wc-cot-sync)|Performantly sync orders from the currently active order storage to the other.|
-|[`wc cot verify_cot_data`](#wc-cot-verify_cot_data)|Verify data between datastores.|
-|[`wc hpos diff`](#wc-hpos-diff)|Get an user friendly version of the differences for an order between both order storages.|
-|[`wc hpos backfill`](#wc-hpos-backfill)|Copy over whole orders or specific bits of order data from any order storage to the other.|
-|[`wc hpos cleanup`](#wc-hpos-cleanup)|Remove order data from legacy tables.|
+|`wc hpos status`|Get an overview of all HPOS matters on your site.|
+|`wc cot enable`|Enable HPOS (and possibly compatibility mode).|
+|`wc cot disable`|Disable HPOS (and possibly compatibility mode).|
+|`wc cot count_unmigrated`|Get a count of all orders pending sync.|
+|`wc cot sync`|Performantly sync orders from the currently active order storage to the other.|
+|`wc cot verify_cot_data`|Verify data between datastores.|
+|`wc hpos diff`|Get an user friendly version of the differences for an order between both order storages.|
+|`wc hpos backfill`|Copy over whole orders or specific bits of order data from any order storage to the other.|
+|`wc hpos cleanup`|Remove order data from legacy tables.|
 
 ## Usage and examples
 
 ### `wc hpos status`
+
 Use this to get an overview of HPOS settings and status on your site. The command will output whether HPOS and compatibility mode are enabled or not, and other useful information such as orders pending sync or subject to cleanup.
 
 **Note:** Remember that, if desired, orders pending sync can be synced using [`wc cot sync`](#wc-cot-sync) and, similarly, you can perform a cleanup on those subject to cleanup (provided compatibility mode is disabled) by running [`wc hpos cleanup all`](#wc-hpos-cleanup).
 
 
-#### Example
+#### Example 1 - HPOS status output
 
-```
-wp wc hpos status
-```
-```
+```plaintext
+$ wp wc hpos status
 HPOS enabled?: yes
 Compatibility mode enabled?: no
 Unsynced orders: 651
@@ -46,13 +45,12 @@ Orders subject to cleanup: 348
 
 Use this command to enable HPOS and compatibility mode (if desired) from the command line.
 
-#### Example
+#### Example 1 - Enable HPOS via CLI
 
-```
-# Enables HPOS and compatibility mode too (--with-sync flag).
+Enables HPOS and compatibility mode too (`--with-sync` flag).
+
+```plaintext
 $ wp wc cot enable --with-sync
-```
-```
 Running pre-enable checks...
 Success: Sync enabled.
 Success: HPOS enabled.
@@ -62,24 +60,20 @@ Success: HPOS enabled.
 
 Similarly to the prior command, this can be used to disable HPOS.
 
-#### Example
+#### Example 1 - Attempt to disable HPOS (with orders pending sync)
 
 If there are any orders pending sync, you won't be allowed to disable HPOS until those orders have been synced (via `wp wc cot sync`).
 
-```
+```plaintext
 $ wp wc cot disable
-```
-```
 Running pre-disable checks...
 Error: [Failed] There are orders pending sync. Please run `wp wc cot sync` to sync pending orders.
 ```
 
-#### Example
+#### Example 2 - Disable HPOS
 
-```
+```plaintext
 $ wp wc cot disable
-```
-```
 Running pre-disable checks...
 Success: HPOS disabled.
 ```
@@ -88,12 +82,10 @@ Success: HPOS disabled.
 
 Prints the number of orders pending sync.
 
-#### Example
+#### Example 1 - Obtain number of orders pending sync
 
-```
+```plaintext
 $ wp wc cot count_unmigrated
-```
-```
 There are 651 orders to be synced.
 ```
 
@@ -106,12 +98,10 @@ Note that enabling compatibility mode in the settings will eventually take care 
 
 If you need more control over which datastore to use as source (or destination) regardless of settings, or want to migrate just a few orders or properties, use [`wp wc hpos backfill`](#wc-hpos-backfill) instead.
 
-#### Example
+#### Example 1 - Sync all orders
 
-```
+```plaintext
 $ wp wc cot sync
-```
-```
 There are 999 orders to be synced.
 Order Data Sync  100% [============================================================================================] 0:08 / 0:08
 Sync completed.
@@ -125,27 +115,23 @@ Use this command to check that order data in both the legacy (posts) datastore a
 
 This command operates on all orders. For a user friendlier alternative that operates on individual orders, refer to [`wp wc hpos diff`](#wc-hpos-diff).
 
-#### Example
+#### Example 1 - Verify data on a migrated site
 
 All orders are identical between datastores.
 
-```
+```plaintext
 $ wp wc cot verify_cot_data
-```
-```
 Order Data Verification  100% [====================================================================================] 0:00 / 0:00
 Verification completed.
 Success: 999 orders were verified in 0 seconds.
 ```
 
-#### Example
+#### Example 2 - Verification failures
+
 An order (with ID 100126) fails verification due to differences in order total, tax, modification date and billing information.
 
-```
+```plaintext
 $ wp wc cot verify_cot_data
-```
-
-```
 Order Data Verification  100% [====================================================================================] 0:00 / 0:00
 Verification completed.
 Error: 999 orders were verified in 0 seconds. 1 error found: {
@@ -179,14 +165,12 @@ Error: 999 orders were verified in 0 seconds. 1 error found: {
 }. Please review the error above.
 ```
 
-#### Example
+#### Example 3 - Re-migrate during verification
 
 The verification command also admits a `--re-migrate` flag that will attempt to sync orders that have differences. This could effectively overwrite an order in the database, so use with care.
 
-```
+```plaintext
 $ wp wc cot verify_cot_data --re-migrate
-```
-```
 Order Data Verification  100% [====================================================================================] 0:00 / 0:00
 Verification completed.
 Success: 999 orders were verified in 0 seconds.
@@ -200,28 +184,23 @@ The `wp wc hpos diff`  tool can be used to look into those (possible) difference
 
 The tool itself doesn't reconcile the differences. For that you should use [`wp wc hpos backfill`](#wc-hpos-backfill).
 
-#### Example
+#### Example 1 - No difference between orders
 
 Order is the same in both datastores (legacy and HPOS).
 
-```shell
+```plaintext
 $ wp wc hpos diff 100087
-```
-
-```
 Success: No differences found.
 ```
 
-#### Example
-<a name="wc-hpos-diff-example-2"></a>
+#### Example 2 - Mismatch in order properties between datastores
+
 This examples shows that order `100126`  differs in various fields between both datastores. For example, its HPOS version has status `completed` while the post is still in `pending` status. Similarly, there are differences in other fields and there's even some metadata (`post_only_meta`) that only exists in the post/legacy version.
 
 Any other order fields or metadata not listed are understood to be equal in both order versions.
 
-```
+```plaintext
 $ wp wc hpos diff 100126
-```
-```
 Warning: Differences found for order 100126:
 +--------------------+---------------------------+---------------------------+
 | property           | hpos                      | post                      |
@@ -234,15 +213,12 @@ Warning: Differences found for order 100126:
 +--------------------+---------------------------+---------------------------+
 ```
 
-#### Example
+#### Example 3 - JSON output
 
 You can also get the output in various formats (`json`, `csv` or `list` -the default-), which can be useful for exporting differences from various orders to a file.
 
-```
+```plaintext
 $ wp wc hpos diff 100126 --format=json
-```
-
-```
 Warning: Differences found for order 100126:
 [{"property":"status","hpos":"completed","post":"pending"},{"property":"total","hpos":"567.25","post":"267.25"},{"property":"date_modified","hpos":"2024-04-04T15:32:27+00:00","post":"2024-04-04T19:00:26+00:00"},{"property":"billing_first_name","hpos":"Hans","post":"Jans"},{"property":"post_only_meta","hpos":"","post":"why not?"}]
 ```
@@ -253,7 +229,7 @@ The backfill command can be used to selectively migrate order data (or whole ord
 
 The exact syntax for this command is as follows:
 
-```
+```plaintext
 wp wc hpos backfill <order_id> --from=<datastore> --to=<datastore> [--meta_keys=<meta_keys>] [--props=<props>]
 ```
 
@@ -265,35 +241,26 @@ Note that `wp wc hpos backfill` differs from `wp wc cot sync` in various ways:
 - It lets you move order data between datastores irrespective of what the current order storage is in WC settings. In contrast, `wp wc cot sync` will only sync data from the current datastore to the other.
 - In addition to letting you migrate full orders, it lets you choose which bits of data (order fields or metadata) to migrate.
 
-#### Example
+#### Example 1 - Migrate a full order from HPOS to posts
 
-Migrate a full order from HPOS to posts.
-
-```
+```plaintext
 $ wp wc hpos backfill 99709
-```
-```
 Success: Order 99709 backfilled from hpos to posts.
 ```
 
-#### Example
+#### Example 2 - Migrate metadata
 
-Continuing the example [from a previous section](#wc-hpos-diff-example-2), we can see how to migrate just one key of metadata from posts to HPOS.
+Continuing with example 2 from the previous section, we can see how to migrate just one key of metadata from posts to HPOS.
 
-```
+```plaintext
 $ wp wc hpos backfill 100126 --from=posts --to=hpos --meta_keys=post_only_meta
-```
-```
 Success: Order 100126 backfilled from posts to hpos.
 ```
 
 If you now run `wp wc hpos diff` on this order, you can see that the bit of metadata is no longer listed as a difference.
 
-```
+```plaintext
 $ wp wc hpos diff 100126
-```
-
-```
 Warning: Differences found for order 100126:
 +--------------------+---------------------------+---------------------------+
 | property           | hpos                      | post                      |
@@ -305,34 +272,31 @@ Warning: Differences found for order 100126:
 +--------------------+---------------------------+---------------------------+
 ```
 
-#### Example
+#### Example 3
 
 Also following the previous example, we can now reconcile all the data as we see fit. For example, we can migrate the status from posts to HPOS and the other bits of info in the other direction.
 In the end, the orders will be identical, as can be confirmed through `wp wc hpos diff`.
 
-```shell
-# Sync order status from posts to HPOS. This means the order will become "pending" in both datastores.
-wp wc hpos backfill 100126 --from=posts --to=hpos --props=status
-```
-```
-Success: Order 100126 backfilled from posts to hpos.
-```
+1. Sync order status from posts to HPOS. This means the order will become "pending" in both datastores.
 
-```shell
-# Sync the other properties from HPOS to posts.
-wp wc hpos backfill 100126 --from=hpos --to=posts --props=total,date_modified,billing_first_name
-```
-```
-Success: Order 100126 backfilled from hpos to posts.
-```
+   ```plaintext
+   $ wp wc hpos backfill 100126 --from=posts --to=hpos --props=status
+   Success: Order 100126 backfilled from posts to hpos.
+   ```
 
-```shell
-# Are we all sync'ed yet?
-wp wc hpos diff 100126
-```
-```
-Success: No differences found.
-```
+2. Sync the other properties from HPOS to posts.
+
+   ```plaintext
+   $ wp wc hpos backfill 100126 --from=hpos --to=posts --props=total,date_modified,billing_first_name
+   Success: Order 100126 backfilled from hpos to posts.
+   ```
+
+3. Are we all sync'ed yet?
+
+   ```plaintext
+   $ wp wc hpos diff 100126
+   Success: No differences found.
+   ```
 
 ### `wc hpos cleanup`
 
@@ -344,24 +308,20 @@ The tool will also verify orders before removal, stopping if the post version se
 
 **Note:** This command won't remove placeholder records (posts with type `shop_order_placehold`) from the posts table. We're working on allowing this in the near future, but for now leave placeholders so that datastores can be switched if necessary. Metadata is removed, which is where most data is stored in the legacy order storage, so the remaining placeholder post is very lightweight.
 
-#### Example
+#### Example 1 - Error during cleanup
 
 Cleaning up of an order that seems more recent on the posts datastore is prevented by default.
 
-```
+```plaintext
 $ wp wc hpos cleanup 100126
-```
-```
 Starting cleanup for 1 order...
 Warning: An error occurred while cleaning up order 100126: Data in posts table appears to be more recent than in HPOS tables.
 ```
 
 You can investigate the differences with `wp wc hpos diff`:
 
-```
+```plaintext
 $ wp wc hpos diff 100126
-```
-```
 Warning: Differences found for order 100126:
 +---------------+---------------------------+---------------------------+
 | property      | hpos                      | post                      |
@@ -372,36 +332,26 @@ Warning: Differences found for order 100126:
 
 If reconciling is not necessary, the `--force` flag can be used to skip the verification checks:
 
-```
+```plaintext
 $ wp wc hpos cleanup 100126 --force
-```
-```
 Starting cleanup for 1 order...
 HPOS cleanup  100% [=====================================================================================================================] 0:00 / 0:00
 Success: Cleanup completed for 1 order.
 ```
 
-#### Example
+#### Example 2 - Cleaning up a range of order IDs
 
-Cleaning up a range of order IDs.
-
-```
+```plaintext
 $ wp wc hpos cleanup 90000-100000
-```
-```
 Starting cleanup for 865 orders...
 HPOS cleanup  100% [=====================================================================================================================] 0:01 / 0:12
 Success: Cleanup completed for 865 orders.
 ```
 
-#### Example
+#### Example 3 -Cleaning up all orders
 
-Cleaning up all orders.
-
-```
+```plaintext
 $ wp wc hpos cleanup all
-```
-```
 Starting cleanup for 999 orders...
 HPOS cleanup  100% [=====================================================================================================================] 0:01 / 0:05
 Success: Cleanup completed for 999 orders.
