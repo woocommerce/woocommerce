@@ -100,6 +100,8 @@ class FeaturesController {
 		self::add_filter( 'views_plugins', array( $this, 'handle_plugins_page_views_list' ), 10, 1 );
 		self::add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		self::add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
+		self::add_filter( 'update_option_woocommerce_allow_tracking', array( $this, 'woocommerce_allow_tracking_updated' ), 999, 2 );
+		self::add_filter( 'update_option_woocommerce_experimental_features_auto_enable', array( $this, 'woocommerce_experimental_features_auto_enable_updated' ), 999, 2 );
 	}
 
 	/**
@@ -351,6 +353,39 @@ class FeaturesController {
 		}
 
 		return update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no' );
+	}
+
+	/**
+	 * Enable or disable all experimental features.
+	 */
+	public function enable_experimental_features( bool $enable = true ): void {
+		$features = $this->get_features( true );
+		foreach ( $features as $feature_id => $feature ) {
+			if ( $feature['is_experimental'] ) {
+				$this->change_feature_enable( $feature_id, $enable );
+			}
+		}
+	}
+
+	/**
+	 * Enable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `yes`.
+	 */
+	public function woocommerce_experimental_features_auto_enable_updated( $old_value, $value ): void {
+		if ( 'yes' === $value ) {
+			$this->enable_experimental_features( true );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ) );
+			exit();
+		}
+	}
+
+	/**
+	 * Disable all experimental features if the `woocommerce_experimental_features_auto_enable` option was set to `no`.
+	 */
+	public function woocommerce_allow_tracking_updated( $old_value, $value ): void {
+		if ( 'no' === $value ) {
+			update_option( 'woocommerce_experimental_features_auto_enable', 'no' );
+			$this->enable_experimental_features( false );
+		}
 	}
 
 	/**
