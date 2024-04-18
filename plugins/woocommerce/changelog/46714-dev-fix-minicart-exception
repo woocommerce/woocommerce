@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix a bug in blocks where mini-cart would load a tree-shaken module and throw an exception.
+
