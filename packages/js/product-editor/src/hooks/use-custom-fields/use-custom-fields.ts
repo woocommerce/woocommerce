@@ -41,13 +41,13 @@ export function useCustomFields<
 		setCustomFields( ( current ) => [ ...current, ...value ] );
 	}
 
-	function updateCustomField( customField: T ) {
+	function updateCustomField( customField: T, index?: number ) {
 		setCustomFields( ( current ) =>
-			current.map( ( field ) => {
+			current.map( ( field, fieldIndex ) => {
 				if ( customField.id && field.id === customField.id ) {
 					return customField;
 				}
-				if ( field.key === customField.key ) {
+				if ( index === fieldIndex ) {
 					return customField;
 				}
 				return field;
