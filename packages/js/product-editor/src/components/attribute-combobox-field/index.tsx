@@ -31,6 +31,12 @@ function mapAttributeToComboboxOption(
 	};
 }
 
+const temporaryOptionInitialState: ComboboxAttributeProps = {
+	label: '',
+	value: '',
+	state: 'draft',
+};
+
 const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	currentItem = null,
 	items = [],
@@ -42,18 +48,11 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
 
-	const [ createOption, updateCreateOption ] =
-		useState< ComboboxAttributeProps >( {
-			label: '',
-			value: '',
-		} );
+	const [ temporaryOption, updateCreateOption ] =
+		useState< ComboboxAttributeProps >( temporaryOptionInitialState );
 
-	const clearCreateOption = () => {
-		updateCreateOption( {
-			label: '',
-			value: '',
-		} );
-	};
+	const clearCreateOption = () =>
+		updateCreateOption( temporaryOptionInitialState );
 
 	/**
 	 * Map the items to the Combobox options.
@@ -65,7 +64,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	);
 
 	const options = useMemo( () => {
-		if ( ! createOption.label.length ) {
+		if ( ! temporaryOption.label.length ) {
 			// Populate the items with the current item if it exists.
 			if ( currentItem ) {
 				return [
@@ -81,30 +80,48 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 		return [
 			...attributeOptions,
 			{
-				label: sprintf(
-					/* translators: The name of the new attribute term to be created */
-					__( 'Create "%s"', 'woocommerce' ),
-					createOption.label
-				),
-				value: createOption.value,
+				label:
+					temporaryOption.state === 'draft'
+						? sprintf(
+								/* translators: The name of the new attribute term to be created */
+								__( 'Create "%s"', 'woocommerce' ),
+								temporaryOption.label
+						  )
+						: temporaryOption.label,
+				value: temporaryOption.value,
 			},
-		];
-	}, [ currentItem, attributeOptions, createOption ] );
+		].sort( ( a, b ) => a.label.localeCompare( b.label ) );
+	}, [ currentItem, attributeOptions, temporaryOption ] );
 
-	const currentValue = currentItem ? `attr-${ currentItem.id }` : '';
+	let currentValue =
+		temporaryOption.state === 'creating' ? 'create-attribute' : '';
 
+	if ( currentItem ) {
+		currentValue = `attr-${ currentItem.id }`;
+	}
 	const addNewAttribute = ( name: string ) => {
 		recordEvent( 'product_attribute_add_custom_attribute', {
 			source: TRACKS_SOURCE,
 		} );
 		if ( createNewAttributesAsGlobal ) {
-			createProductAttribute( {
-				name,
-				generate_slug: true,
-			} ).then(
+			createProductAttribute(
+				{
+					name,
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: {},
+				}
+			).then(
 				( newAttr ) => {
-					invalidateResolution( 'getProductAttributes' );
+					updateCreateOption( {
+						label: newAttr.name,
+						value: `attr-${ newAttr.id }`,
+						state: 'justCreated',
+					} );
+
 					onChange( { ...newAttr, options: [] } );
+					// invalidateResolution( 'getProductAttributes' );
 				},
 				( error ) => {
 					let message = __(
@@ -137,8 +154,12 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 					return;
 				}
 
-				if ( newValue === 'attribute-create' ) {
-					addNewAttribute( createOption.label );
+				if ( newValue === 'create-attribute' ) {
+					updateCreateOption( {
+						...temporaryOption,
+						state: 'creating',
+					} );
+					addNewAttribute( temporaryOption.label );
 					return;
 				}
 
@@ -161,7 +182,8 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 			onFilterValueChange={ ( filterValue: string ) => {
 				updateCreateOption( {
 					label: filterValue,
-					value: 'attribute-create',
+					value: 'create-attribute',
+					state: 'draft',
 				} );
 			} }
 		/>

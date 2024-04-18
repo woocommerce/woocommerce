@@ -250,6 +250,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								value &&
 								! ( typeof value === 'string' )
 							) {
+								console.log( 'Value: ', value );
 								/*
 								 * Set value optimistically to avoid waiting for the terms to load
 								 * It will be updated when the terms are fetched

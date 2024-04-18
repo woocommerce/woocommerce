@@ -40,4 +40,5 @@ export type AttributeComboboxProps = {
 export type ComboboxAttributeProps = {
 	label: string;
 	value: string;
+	state?: 'draft' | 'creating' | 'justCreated';
 };
