@@ -17,7 +17,6 @@
 		"./assets/js/atomic/blocks/**",
 		"./assets/js/filters/**",
 		"./assets/js/middleware/**",
-		"./assets/js/types/**",
 		"./assets/js/blocks/checkout/inner-blocks/**/index.tsx",
 		"./assets/js/blocks/checkout/inner-blocks/register-components.ts",
 		"./assets/js/blocks/cart/inner-blocks/**/index.tsx",
