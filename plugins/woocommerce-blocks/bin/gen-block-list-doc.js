@@ -10,7 +10,6 @@
  * External dependencies
  */
 const path = require( 'path' );
-const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
 
 /**
@@ -136,10 +135,24 @@ function augmentSupports( supports ) {
  */
 function readBlockJSON( filename ) {
 	const blockjson = require( filename );
+	let supportsList = [];
+	let attributes = [];
 
-	const supportsAugmented = augmentSupports( blockjson.supports );
-	const supportsList = processObjWithInnerKeys( supportsAugmented );
-	const attributes = getTruthyKeys( blockjson.attributes );
+	if ( typeof blockjson.name === 'undefined' ) {
+		return ``;
+	}
+
+	if ( typeof blockjson.supports !== 'undefined' ) {
+		const supportsAugmented = augmentSupports( blockjson.supports );
+
+		if ( supportsAugmented ) {
+			supportsList = processObjWithInnerKeys( supportsAugmented );
+		}
+	}
+
+	if ( typeof blockjson.attributes !== 'undefined' ) {
+		attributes = getTruthyKeys( blockjson.attributes );
+	}
 
 	return `
 ## ${ blockjson.title } - ${ blockjson.name }
@@ -149,16 +162,29 @@ ${ blockjson.description || '' }
 -	**Name:** ${ blockjson.name }
 -	**Category:** ${ blockjson.category || '' }
 -   **Ancestor:** ${ blockjson.ancestor || '' }
--	**Supports:** ${ supportsList.sort().join( ', ' ) }
--	**Attributes:** ${ attributes.sort().join( ', ' ) }
+-	**Supports:** ${ supportsList || supportsList.sort().join( ', ' ) }
+-	**Attributes:** ${ attributes || attributes.sort().join( ', ' ) }
 `;
 }
 
-// Generate block docs.
-// Note: The replace() is to translate Windows back to Unix for fast-glob.
-const files = glob.sync(
-	path.join( BLOCK_LIBRARY_DIR, '**', 'block.json' ).replace( /\\/g, '/' )
-);
+function getFiles( dir, filesArray, fileExtension ) {
+	const files = fs.readdirSync( dir );
+
+	files.forEach( ( file ) => {
+		const filePath = path.join( dir, file );
+		const fileStat = fs.statSync( filePath );
+
+		if ( fileStat.isDirectory() ) {
+			getFiles( filePath, filesArray, fileExtension );
+		} else if ( path.extname( file ) === fileExtension ) {
+			filesArray.push( filePath.replace( /\\/g, '/' ) );
+		}
+	} );
+
+	return filesArray;
+}
+
+const files = getFiles( BLOCK_LIBRARY_DIR, [], '.json' );
 
 let autogen = '';
 

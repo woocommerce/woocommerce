@@ -227,7 +227,6 @@
 		"eslint-plugin-woocommerce": "file:bin/eslint-plugin-woocommerce",
 		"eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
 		"expect-puppeteer": "6.1.1",
-		"fast-glob": "^3.3.2",
 		"fast-xml-parser": "4.2.4",
 		"fs-extra": "11.1.1",
 		"gh-pages": "4.0.0",
