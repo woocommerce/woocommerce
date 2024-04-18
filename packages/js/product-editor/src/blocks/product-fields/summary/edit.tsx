@@ -23,7 +23,6 @@ import { ParagraphRTLControl } from './paragraph-rtl-control';
 import { SummaryAttributes } from './types';
 import { ALIGNMENT_CONTROLS } from './constants';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 
 export function SummaryBlockEdit( {
 	attributes,
@@ -44,11 +43,6 @@ export function SummaryBlockEdit( {
 		context.postType || 'product',
 		attributes.property
 	);
-
-	// This is a workaround to hide the toolbar when the block is blurred.
-	// This is a temporary solution until using Gutenberg 18 with the
-	// fix from https://github.com/WordPress/gutenberg/pull/59800
-	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
 
 	function handleAlignmentChange( value: SummaryAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
@@ -120,7 +114,6 @@ export function SummaryBlockEdit( {
 						} ) }
 						dir={ direction }
 						allowedFormats={ allowedFormats }
-						onBlur={ hideToolbar }
 					/>
 				</div>
 			</BaseControl>
