@@ -43,7 +43,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	createNewAttributesAsGlobal = false,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
-	const { createProductAttribute, invalidateResolution } = useDispatch(
+	const { createProductAttribute } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
 
@@ -132,7 +132,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				}
 			).then(
 				( newAttr ) => {
-					invalidateResolution( 'getProductAttributes' );
 					onChange( { ...newAttr, options: [] } );
 				},
 				( error ) => {
