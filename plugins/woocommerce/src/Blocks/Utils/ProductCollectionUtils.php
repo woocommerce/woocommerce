@@ -134,8 +134,8 @@ class ProductCollectionUtils {
 
 			$name = $post->post_name;
 			if ( false !== strpos( $name, SingleProductTemplate::SLUG ) ) {
-				$context = 'product';			
-			} elseif( ProductAttributeTemplate::SLUG === $name ) {
+				$context = 'product';
+			} elseif ( ProductAttributeTemplate::SLUG === $name ) {
 				$context = 'product-archive';
 			} elseif ( false !== strpos( $name, 'taxonomy-' ) ) { // Including the '-' in the check to avoid false positives.
 				$taxonomy           = str_replace( 'taxonomy-', '', $name );
@@ -143,13 +143,13 @@ class ProductCollectionUtils {
 				if ( in_array( $taxonomy, $product_taxonomies, true ) ) {
 					$context = 'product-archive';
 				}
-			} elseif( in_array( $name, array( CartTemplate::SLUG, MiniCartTemplate::SLUG ), true ) ) {
+			} elseif ( in_array( $name, array( CartTemplate::SLUG, MiniCartTemplate::SLUG ), true ) ) {
 				$context = 'cart';
-			} elseif( CheckoutTemplate::SLUG === $name ) {
+			} elseif ( CheckoutTemplate::SLUG === $name ) {
 				$context = 'checkout';
-			} elseif( ProductCatalogTemplate::SLUG === $name ) {
+			} elseif ( ProductCatalogTemplate::SLUG === $name ) {
 				$context = 'catalog';
-			} elseif( OrderConfirmationTemplate::SLUG === $name ) {
+			} elseif ( OrderConfirmationTemplate::SLUG === $name ) {
 				$context = 'order';
 			}
 		}
@@ -167,8 +167,8 @@ class ProductCollectionUtils {
 	/**
 	 * Track usage of the Product Collection block within the given blocks.
 	 *
-	 * @param array  $blocks     The parsed blocks to check.
-	 * @param bool   $in_single  Whether we are in a single product container (used for keeping state in the recurring process.)
+	 * @param array $blocks     The parsed blocks to check.
+	 * @param bool  $in_single  Whether we are in a single product container (used for keeping state in the recurring process.)
 	 *
 	 * @return array Parsed instances of the Product Collection block.
 	 */
@@ -182,7 +182,7 @@ class ProductCollectionUtils {
 				$instances[] = array(
 					'collection'        => $block['attrs']['collection'] ?? 'catalog',
 					'in-single-product' => $in_single,
-					'filters'           => self::get_query_filters_track_data( $block )
+					'filters'           => self::get_query_filters_track_data( $block ),
 				);
 			}
 
@@ -221,35 +221,35 @@ class ProductCollectionUtils {
 			'price'        => 0,
 		);
 
-		if ( ! empty( $query_attrs['woocommerceOnSale'])){
+		if ( ! empty( $query_attrs['woocommerceOnSale'] ) ) {
 			$filters['on-sale'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['woocommerceStockStatus'])){
+		if ( ! empty( $query_attrs['woocommerceStockStatus'] ) ) {
 			$filters['stock-status'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['woocommerceAttributes'])){
+		if ( ! empty( $query_attrs['woocommerceAttributes'] ) ) {
 			$filters['attributes'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['timeFrame'])){
+		if ( ! empty( $query_attrs['timeFrame'] ) ) {
 			$filters['created'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['taxQuery'])){
+		if ( ! empty( $query_attrs['taxQuery'] ) ) {
 			$filters['taxonomy'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'])){
+		if ( ! empty( $query_attrs['woocommerceHandPickedProducts'] ) ) {
 			$filters['handpicked'] = 1;
 		}
 
-		if ( ! empty( $query_attrs['search'])){
+		if ( ! empty( $query_attrs['search'] ) ) {
 			$filters['keyword'] = 1;
 		}
 
-		if ( true === $query_attrs['featured'] ){
+		if ( ! empty( $query_attrs['featured'] ) ) {
 			$filters['featured'] = 1;
 		}
 

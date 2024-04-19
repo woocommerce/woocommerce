@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Utils\ProductCollectionUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -609,7 +610,7 @@ class WC_Tracker {
 		// Sort keys by length and then by characters within the same length keys.
 		usort(
 			$keys,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				if ( strlen( $a ) === strlen( $b ) ) {
 					return strcmp( $a, $b );
 				}
@@ -711,7 +712,7 @@ class WC_Tracker {
 			// Convert into an associative array with a combination of currency and gateway as key.
 			array_reduce(
 				$orders_and_gateway_details,
-				function( $result, $item ) {
+				function ( $result, $item ) {
 					$item->gateway = preg_replace( '/\s+/', ' ', $item->gateway );
 
 					// Introduce currency as a prefix for the key.
@@ -800,7 +801,7 @@ class WC_Tracker {
 			// Convert into an associative array with the origin as key.
 			array_reduce(
 				$orders_origin,
-				function( $result, $item ) {
+				function ( $result, $item ) {
 					$key = $item->origin;
 
 					$result[ $key ] = $item;
@@ -925,7 +926,7 @@ class WC_Tracker {
 		$all_features     = FeaturesUtil::get_features( true, true );
 		$enabled_features = array_filter(
 			$all_features,
-			function( $feature ) {
+			function ( $feature ) {
 				return $feature['is_enabled'];
 			}
 		);
@@ -1138,6 +1139,85 @@ class WC_Tracker {
 			'pickup_location'                           => $pickup_location_data,
 			'additional_fields'                         => $additional_fields_data,
 		);
+	}
+
+	/**
+	 * Get info about the Product Collection Block.
+	 *
+	 * TODO: Make it private once testing done.
+	 *
+	 * @return array
+	 */
+	public static function get_product_collection_info() {
+
+		/**
+		 * Follows the 'template_id' => 'location_context' pattern.
+		 */
+		$home_template_id = get_stylesheet() . '//home';
+		$woo_prefix       = 'woocommerce/woocommerce';
+		$templates        = array(
+			$home_template_id                            => 'home',
+			$woo_prefix . '//single-product'             => 'product',
+			$woo_prefix . '//archive-product'            => 'product-catalog',
+			$woo_prefix . '//page-cart'                  => 'cart',
+			$woo_prefix . '//mini-cart'                  => 'cart',
+			$woo_prefix . '//page-checkout'              => 'checkout',
+			$woo_prefix . '//taxonomy-product_attribute' => 'product-archive',
+			$woo_prefix . '//taxonomy-product_cat'       => 'product-archive',
+			$woo_prefix . '//taxonomy-product_tag'       => 'product-archive',
+			$woo_prefix . '//taxonomy-product_brand'     => 'product-archive',
+			$woo_prefix . '//order-confirmation'         => 'order',
+		);
+
+		$instances = array();
+		foreach ( $templates as $template_id => $template_name ) {
+			$template_type = 'woocommerce/woocommerce//mini-cart' === $template_id ? 'wp_template_part' : 'wp_template';
+			$template      = get_block_template( $template_id, $template_type );
+			if ( ! $template instanceof \WP_Block_Template ) {
+				continue;
+			}
+
+			if ( empty( $template->content ) ) {
+				continue;
+			}
+
+			if ( ! has_block( 'woocommerce/product-collection', $template->content ) ) {
+				$instances[] = array(
+					'collection'       => '',
+					'location_context' => $template_name,
+				);
+				continue;
+			}
+
+			$blocks     = parse_blocks( $template->content );
+			$track_data = ProductCollectionUtils::parse_blocks_track_data( $blocks );
+			// Decorate.
+			$track_data = array_map(
+				function ( $data ) use ( $template_name ) {
+					$data['location_context'] = $template_name;
+					return $data;
+				},
+				$track_data
+			);
+
+			$instances = array_merge( $instances, $track_data );
+		}
+
+		error_log( '************ DEBUG SNAPSHOT ************' );
+		error_log(
+			print_r(
+				array_map(
+					function ( $i ) {
+						return array( $i['collection'], $i['location_context'] );
+					},
+					$instances
+				),
+				true
+			)
+		);
+		error_log( '************ DEBUG SNAPSHOT END ************' );
+
+		return $instances;
 	}
 
 	/**

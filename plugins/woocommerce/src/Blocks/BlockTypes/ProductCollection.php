@@ -121,7 +121,7 @@ class ProductCollection extends AbstractBlock {
 			return;
 		}
 
-		$blocks  = parse_blocks( $post->post_content );
+		$blocks = parse_blocks( $post->post_content );
 		if ( empty( $blocks ) ) {
 			return;
 		}
@@ -131,13 +131,13 @@ class ProductCollection extends AbstractBlock {
 		foreach ( wc_get_order_statuses() as $status_slug => $status_name ) {
 			$order_count += wc_orders_count( $status_slug );
 		}
-		$additional_data  = array(
+		$additional_data = array(
 			'editor_location' => ProductCollectionUtils::parse_editor_location_context( $post ),
 			'order_count'     => $order_count,
 		);
-		$instances   = ProductCollectionUtils::parse_blocks_track_data( $blocks );
+		$instances       = ProductCollectionUtils::parse_blocks_track_data( $blocks );
 
-		foreach( $instances as $instance ) {
+		foreach ( $instances as $instance ) {
 
 			$event_properties = array_merge(
 				$additional_data,
@@ -145,7 +145,7 @@ class ProductCollection extends AbstractBlock {
 			);
 
 			\WC_Tracks::record_event(
-				'product_collection_instance', 
+				'product_collection_instance',
 				$event_properties
 			);
 		}
