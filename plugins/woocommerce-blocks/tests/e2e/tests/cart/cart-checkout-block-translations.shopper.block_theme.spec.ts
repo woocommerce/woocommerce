@@ -69,7 +69,7 @@ test.describe( 'Shopper → Translations', () => {
 		const beanieAddToCartButton = page.getByLabel(
 			'Toevoegen aan winkelwagen: “Beanie“'
 		);
-
+		await page.pause();
 		await beanieAddToCartButton.click();
 		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
 
@@ -113,7 +113,6 @@ test.describe( 'Shopper → Translations', () => {
 		).toBeVisible();
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
-
 		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
