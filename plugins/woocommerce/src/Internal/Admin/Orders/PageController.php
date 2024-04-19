@@ -63,7 +63,8 @@ class PageController {
 			wp_die( esc_html__( 'You attempted to edit an order that does not exist. Perhaps it was deleted?', 'woocommerce' ) );
 		}
 
-		if ( $this->order->get_type() !== $this->order_type ) {
+		$order_class_name = wc_get_order_type( $this->order_type )['class_name'];
+		if ( ! ( $this->order instanceof $order_class_name ) ) {
 			wp_die( esc_html__( 'Order type mismatch.', 'woocommerce' ) );
 		}
 
