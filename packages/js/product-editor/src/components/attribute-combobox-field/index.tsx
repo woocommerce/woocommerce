@@ -150,7 +150,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 
 	return (
 		<ComboboxControl
-			className="woocommerce-attribute-input-field__combobox"
+			className="woocommerce-attribute-combobox"
 			allowReset={ false }
 			options={ options }
 			value={ currentValue }

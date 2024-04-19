@@ -1,41 +1,27 @@
-.woocommerce-attribute-input-field__combobox {
-	position: relative;
+.woocommerce-attribute-combobox {
+	position: absolute;
+	width: 100%;
 
 	.components-combobox-control__suggestions-container {
 		margin: 0;
-		height: 36px;
+		padding: 0;
+		background-color: white;
 
-		.components-combobox-control__input {
+		> .components-flex {
 			height: 34px;
 		}
 	}
 
-	.components-combobox-control__suggestions-container {
-		padding: 0;
-	}
-
 	.components-form-token-field__suggestions-list {
-		position: absolute;
-		top: 32px;
-		left: 0;
-		z-index: 1;
-		box-shadow: inset -1px 1px 0 0 #949494, inset 1px -1px 0 0 #949494;
-		background-color: white;
+		box-shadow: none;
+		border-top: 1px solid #949494;
 	}
 
 	.components-form-token-field__suggestion {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-
 		padding: 0;
-		border: 0;
-		margin: 1px;
-		background-color: transparent;
 
 		.item-wrapper {
-			padding: 8px 12px;
-			width: 100%;
+			padding: 9px 12px;
 
 			&.is-disabled {
 				background-color: #fafafa;
@@ -44,13 +30,8 @@
 			}
 		}
 
-		&.is-selected {
-			.item-wrapper {
-				background-color: var( --wp-admin-theme-color, #007cba );
-				&.is-disabled {
-					background-color: #fafafa;
-				}
-			}
+		&.is-selected .item-wrapper .is-disabled {
+			background-color: #fafafa;
 		}
 	}
 }
