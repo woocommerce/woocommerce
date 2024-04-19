@@ -104,7 +104,7 @@ export const advancedFilters = applyFilters(
 		filters: {
 			status: {
 				labels: {
-					add: __( 'Order Status', 'woocommerce' ),
+					add: __( 'Order status', 'woocommerce' ),
 					remove: __( 'Remove order status filter', 'woocommerce' ),
 					rule: __(
 						'Select an order status filter match',
@@ -204,7 +204,7 @@ export const advancedFilters = applyFilters(
 			},
 			coupon: {
 				labels: {
-					add: __( 'Coupon Codes', 'woocommerce' ),
+					add: __( 'Coupon codes', 'woocommerce' ),
 					placeholder: __( 'Search coupons', 'woocommerce' ),
 					remove: __( 'Remove coupon filter', 'woocommerce' ),
 					rule: __( 'Select a coupon filter match', 'woocommerce' ),
@@ -235,7 +235,7 @@ export const advancedFilters = applyFilters(
 			},
 			customer_type: {
 				labels: {
-					add: __( 'Customer Type', 'woocommerce' ),
+					add: __( 'Customer type', 'woocommerce' ),
 					remove: __( 'Remove customer filter', 'woocommerce' ),
 					rule: __( 'Select a customer filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
@@ -296,7 +296,7 @@ export const advancedFilters = applyFilters(
 			},
 			tax_rate: {
 				labels: {
-					add: __( 'Tax Rates', 'woocommerce' ),
+					add: __( 'Tax rates', 'woocommerce' ),
 					placeholder: __( 'Search tax rates', 'woocommerce' ),
 					remove: __( 'Remove tax rate filter', 'woocommerce' ),
 					rule: __( 'Select a tax rate filter match', 'woocommerce' ),
