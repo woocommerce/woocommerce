@@ -87,7 +87,7 @@ class CLIRunner {
 	 *
 	 * @return bool Whether the COT feature is enabled.
 	 */
-	private function is_enabled( $log = true ) : bool {
+	private function is_enabled( $log = true ): bool {
 		if ( ! $this->controller->custom_orders_table_usage_is_enabled() ) {
 			if ( $log ) {
 				WP_CLI::log(
@@ -108,7 +108,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc cot count_unmigrated
+	 *     wp wc hpos count_unmigrated
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 *
@@ -116,7 +116,7 @@ class CLIRunner {
 	 *
 	 * @return int The number of orders to be migrated.*
 	 */
-	public function count_unmigrated( $args = array(), $assoc_args = array() ) : int {
+	public function count_unmigrated( $args = array(), $assoc_args = array() ): int {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$order_count = $this->synchronizer->get_current_orders_pending_sync_count();
 
@@ -157,7 +157,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc cot sync --batch-size=500
+	 *     wp wc hpos sync --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -222,7 +222,7 @@ class CLIRunner {
 				)
 			);
 
-			$batch_count ++;
+			++$batch_count;
 			$total_time += $batch_total_time;
 
 			$progress->tick();
@@ -262,7 +262,7 @@ class CLIRunner {
 	}
 
 	/**
-	 * [Deprecated] Use `wp wc cot sync` instead.
+	 * [Deprecated] Use `wp wc hpos sync` instead.
 	 * Copy order data into the postmeta table.
 	 *
 	 * Note that this could dramatically increase the size of your postmeta table, but is recommended
@@ -280,11 +280,8 @@ class CLIRunner {
 	 *
 	 *     # Copy all order data into the post meta table, 500 posts at a time.
 	 *     wp wc cot migrate --batch-size=500
-	 *
-	 * @param array $args Positional arguments passed to the command.
-	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function migrate( $args = array(), $assoc_args = array() ) {
+	public function migrate() {
 		WP_CLI::log( __( 'Migrate command is deprecated. Please use `sync` instead.', 'woocommerce' ) );
 	}
 
@@ -329,7 +326,7 @@ class CLIRunner {
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
-	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
+	 *     wp wc hpos verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -424,7 +421,7 @@ class CLIRunner {
 			$error_processing            = $error_processing || ! empty( $failed_ids_in_current_batch );
 			$processed                  += count( $order_ids );
 			$batch_total_time            = microtime( true ) - $batch_start_time;
-			$batch_count ++;
+			++$batch_count;
 			$total_time += $batch_total_time;
 
 			if ( count( $failed_ids_in_current_batch ) > 0 ) {
@@ -477,7 +474,7 @@ class CLIRunner {
 						} else {
 							array_walk(
 								$errors_in_remigrate_batch,
-								function( &$errors_for_order ) {
+								function ( &$errors_for_order ) {
 									$errors_for_order[] = array( 'remigrate_failed' => true );
 								}
 							);
@@ -569,7 +566,7 @@ class CLIRunner {
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ) : int {
+	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ): int {
 		global $wpdb;
 
 		$order_types_placeholder = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
@@ -615,7 +612,7 @@ class CLIRunner {
 	 *
 	 * @return array Failed IDs with meta details.
 	 */
-	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
+	private function verify_meta_data( array $order_ids, array $failed_ids ): array {
 		$meta_keys_to_ignore = $this->synchronizer->get_ignored_order_props();
 
 		global $wpdb;
@@ -695,7 +692,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * @return array Normalized data.
 	 */
-	private function normalize_raw_meta_data( array $data ) : array {
+	private function normalize_raw_meta_data( array $data ): array {
 		$clubbed_data = array();
 		foreach ( $data as $row ) {
 			if ( ! isset( $clubbed_data[ $row['entity_id'] ] ) ) {
@@ -729,7 +726,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ### EXAMPLES
 	 *
 	 *      # Enable HPOS on new shops.
-	 *      wp wc cot enable --for-new-shop
+	 *      wp wc hpos enable --for-new-shop
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -788,7 +785,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				sprintf(
 					// translators: %s is the command to run (wp wc cot sync).
 					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
-					'wp wc cot sync',
+					'wp wc hpos sync',
 				)
 			);
 			$enable_hpos = false;
@@ -836,7 +833,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ### EXAMPLES
 	 *
 	 *  # Disable HPOS.
-	 *  wp wc cot disable
+	 *  wp wc hpos disable
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -859,7 +856,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				sprintf(
 					// translators: %s is the command to run (wp wc cot sync).
 					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
-					'wp wc cot sync',
+					'wp wc hpos sync',
 				)
 			);
 		}
@@ -968,7 +965,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			foreach ( $order_ids as $order_id ) {
 				try {
 					$handler->cleanup_post_data( $order_id, $force );
-					$count++;
+					++$count;
 
 					// translators: %d is an order ID.
 					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
@@ -1018,11 +1015,8 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * Displays a summary of HPOS situation on this site.
 	 *
 	 * @since 8.6.0
-	 *
-	 * @param array $args       Positional arguments passed to the command.
-	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function status( array $args = array(), array $assoc_args = array() ) {
+	public function status() {
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
 		// translators: %s is either 'yes' or 'no'.
@@ -1094,7 +1088,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		// Format the diff array.
 		$diff = array_map(
-			function( $key, $hpos_value, $cpt_value ) {
+			function ( $key, $hpos_value, $cpt_value ) {
 				// Format for dates.
 				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
 				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
@@ -1213,5 +1207,4 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			)
 		);
 	}
-
 }
