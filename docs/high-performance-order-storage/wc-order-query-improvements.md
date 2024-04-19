@@ -40,7 +40,6 @@ $orders = wc_get_orders(
 );
 ```
 
-
 ### Order field queries (`field_query`)
 
 This query type has a syntax similar to that of meta queries (`meta_query`) but instead of `key` you’d use `field` inside the different clauses. Here, `field` refers to any order property (such as `billing_first_name`, `total` or `order_key`, etc.) which are also accessible as top-level keys in the query arguments as usual. The difference between directly querying those properties and using a `field_query` is that you can create more complex queries by implementing comparison operators and combining or nesting.

@@ -108,7 +108,6 @@ Sync completed.
 Success: 999 orders were synced in 14 seconds.
 ```
 
-
 ### `wc cot verify_cot_data`
 
 Use this command to check that order data in both the legacy (posts) datastore and HPOS is in sync. This is only relevant if you have "compatibility mode" enabled and orders might've been modified outside of the usual WooCommerce flows.

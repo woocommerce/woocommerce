@@ -34,11 +34,6 @@ To help with this, we have provided a few guidelines for extension developers to
 
 **Note:** We recommend you use the development version of WooCommerce while working on your extension, in order to get all of the latest HPOS fixes and APIs. Refer to our [development guide](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md) to understand how the WooCommerce repo is structured and how to build the plugin from source.
 
-
-While developing, you might want to use the `trunk` branch from the WooCommerce monorepo in order to be up to date with the latest HPOS fixes. If you choose to do this, We recommend you develop your extension using the `trunk` brach
-
-
-
 ### Detecting whether HPOS tables are being used in the store
 
 While the WooCommerce CRUD API will let you support both posts and custom tables without additional effort most of the time, in some cases (like when you are writing a SQL query for better performance) you would want to know whether the store is using HPOS tables or not. In this case, you can use the following pattern:
@@ -52,7 +47,6 @@ if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 	// Traditional CPT-based orders are in use.
 }
 ```
-
 
 ### Auditing the code base for direct DB access usage
 
@@ -81,7 +75,6 @@ $order = wc_get_order( $post_id ); // returns WC_Order object.
 ```
 
 For interacting with metadata, use the `update_`/`add_`/`delete_metadata` methods on the order object, followed by a `save` call. WooCommerce will take care of figuring out which tables are active, and saving data in appropriate locations.
-
 
 ```php
 // Instead of following update/add/delete methods, use:
@@ -115,7 +108,6 @@ OrderUtil::is_order( $post_id, wc_get_order_types() );
 ### Audit for order administration screen functions
 
 As WC can't use the WordPress-provided post list and post edit screens, we have also added new screens for order administration. These screens are very similar to the one you see in the WooCommerce admin currently (except for the fact that they are using HPOS tables). You can use the following regular expression to perform this audit:
-
 
 ```regexp
 post_updated_messages|do_meta_boxes|enter_title_here|edit_form_before_permalink|edit_form_after_title|edit_form_after_editor|submitpage_box|submitpost_box|edit_form_advanced|dbx_post_sidebar|manage_shop_order_posts_columns|manage_shop_order_posts_custom_column
@@ -156,7 +148,6 @@ function render_xyz_metabox( $post_or_order_object ) {
 
     // ... rest of the code. $post_or_order_object should not be used directly below this point.
 }
-
 ```
 
 ### Declaring extension (in)compatibility
@@ -170,7 +161,6 @@ add_action( 'before_woocommerce_init', function() {
 	}
 } );
 ```
-
 
 If you know your code doesn't support HPOS, you should declare **incompatibility** in the following way. Place the following code into your **main plugin file**:
 
