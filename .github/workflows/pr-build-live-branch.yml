@@ -99,7 +99,7 @@ jobs:
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   script: |
-                      const {generateWordpressPlaygroundBlueprint} = require('./.github/workflows/scripts/genereate-wp-playground-blueprint');
+                      const {generateWordpressPlaygroundBlueprint} = require('./.github/workflows/scripts/generate-playground-blueprint');
                       const defaultSchema = generateWordpressPlaygroundBlueprint('${{ steps.create-plugin-artifact.outputs.artifact-url }}');
 
                       const url = `https://playground.wordpress.net/#${encodeURIComponent(JSON.stringify(defaultSchema))}`;
