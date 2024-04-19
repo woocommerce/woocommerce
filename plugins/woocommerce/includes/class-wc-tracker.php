@@ -195,6 +195,11 @@ class WC_Tracker {
 		// Cart & checkout tech (blocks or shortcodes).
 		$data['cart_checkout'] = self::get_cart_checkout_info();
 
+		// Product Collection tracking on FSE themes.
+		if ( wc_current_theme_is_fse_theme() ) {
+			$data['product_collection_block'] = self::get_product_collection_info();
+		}
+
 		// Mini Cart block, which only exists since wp 5.9.
 		if ( version_compare( get_bloginfo( 'version' ), '5.9', '>=' ) ) {
 			$data['mini_cart_block'] = self::get_mini_cart_info();

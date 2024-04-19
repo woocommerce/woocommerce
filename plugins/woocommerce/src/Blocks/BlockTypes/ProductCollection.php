@@ -99,7 +99,7 @@ class ProductCollection extends AbstractBlock {
 	 */
 	public function track_collection_instances( $post_id, $post ) {
 
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! wc_current_theme_is_fse_theme() ) {
 			return;
 		}
 
