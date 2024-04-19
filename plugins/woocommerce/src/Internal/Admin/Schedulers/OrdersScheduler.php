@@ -81,6 +81,21 @@ class OrdersScheduler extends ImportScheduler {
 			$items = self::get_items_from_posts_table( $limit, $page, $days, $skip_existing );
 		}
 
+		/**
+		 * Filters the object of orders count and array of ids for orders analytics stats.
+		 *
+		 * Returns an object of count and ids of order for order analytics stats.
+		 *
+		 * If any modification is needed for orders analytics data, this hook can be used.
+		 *
+		 * @since 8.8.3
+		 *
+		 * @param object   $items         Total count of order ids and array of those ids.
+		 * @param int      $limit         Number of records to retrieve.
+		 * @param int      $page          Page number.
+		 * @param int|bool $days          Number of days prior to current date to limit search results.
+		 * @param bool     $skip_existing Skip already imported orders.
+		 */
 		return apply_filters(
             'woocommerce_analytics_orders_schedule_items',
             $items,
