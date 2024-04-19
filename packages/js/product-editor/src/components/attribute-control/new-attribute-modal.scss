@@ -78,10 +78,14 @@
 		}
 	}
 
+	&__table-attribute-column {
+		position: relative;
+	}
+
 	&__table-attribute-trash-column {
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items: start;
 
 		@include breakpoint( '<782px' ) {
 			position: absolute;
