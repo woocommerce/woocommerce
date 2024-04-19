@@ -7,7 +7,7 @@ This handbook is a guide for extension developers looking to add support for the
 
 The product editor's UI consists of Groups (currently rendered as tabs), Sections, and Fields, which are all blocks. For guidelines on how to extend the product editor (e.g. where to add blocks), please refer to the [Product Editor Extensibility Guidelines](./product-editor-extensibility-guidelines.md).
 
-![Product editor structure](https://woocommerce.files.wordpress.com/2023/09/groups-sections-fields.jpg)
+![Product editor structure](https://developer.woocommerce.com/wp-content/uploads/sites/2/2023/09/groups-sections-fields.jpg)
 
 The form's structure is defined in PHP using a Template, which is a tree structure of blocks. The template can be modified by using the Template API to add new Groups, Sections, and Fields as well as remove existing ones.
 
