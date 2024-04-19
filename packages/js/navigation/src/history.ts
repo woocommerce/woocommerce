@@ -16,7 +16,7 @@ interface WooLocation extends Location {
  */
 export interface WooBrowserHistory extends BrowserHistory {
 	location: WooLocation;
-	readonly __experimentLocationStack: WooLocation[];
+	readonly __experimentalLocationStack: WooLocation[];
 }
 
 let _history: WooBrowserHistory;
@@ -93,7 +93,7 @@ function getHistory(): WooBrowserHistory {
 					pathname,
 				};
 			},
-			get __experimentLocationStack() {
+			get __experimentalLocationStack() {
 				return [ ...locationStack ];
 			},
 			createHref: browserHistory.createHref,

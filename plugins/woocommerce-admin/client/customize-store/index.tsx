@@ -88,9 +88,9 @@ const redirectToWooHome = () => {
 const goBack = () => {
 	const history = getHistory();
 	if (
-		history.__experimentLocationStack.length >= 2 &&
-		! history.__experimentLocationStack[
-			history.__experimentLocationStack.length - 2
+		history.__experimentalLocationStack.length >= 2 &&
+		! history.__experimentalLocationStack[
+			history.__experimentalLocationStack.length - 2
 		].search.includes( 'customize-store' )
 	) {
 		// If the previous location is not a customize-store step, go back in history.
