@@ -169,7 +169,7 @@ export function CustomFields( {
 				/>
 			) }
 
-			{ selectedCustomFieldIndex != undefined && (
+			{ selectedCustomFieldIndex !== undefined && (
 				<EditModal
 					initialValue={ customFields[ selectedCustomFieldIndex ] }
 					values={ customFields }
