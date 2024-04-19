@@ -173,7 +173,8 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 						item.id === Number( newValue.replace( 'attr-', '' ) )
 				);
 
-				if ( ! selectedAttribute ) {
+				// Do not select when it is disabled.
+				if ( ! selectedAttribute || selectedAttribute.isDisabled ) {
 					return;
 				}
 
