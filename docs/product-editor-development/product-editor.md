@@ -13,7 +13,7 @@ The form's structure is defined in PHP using a Template, which is a tree structu
 
 For more information about when to perform template modifications, see the [block template lifecycle](./block-template-lifecycle.md).
 
-Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
+Many extensibility implementations can be done using only the PHP-based Block Template API alongside our library of [generic blocks](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/product-editor/src/blocks/generic/README.md). More complex interactivity can be implemented using JavaScript and React (the same library used to implement the core blocks used in the product editor). [@woocommerce/create-product-editor-block](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/create-product-editor-block/README.md) can help scaffold a development environment with JavaScript and React.
 
 ## Declaring compatibility with the product editor
 
