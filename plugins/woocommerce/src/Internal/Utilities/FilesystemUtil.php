@@ -51,62 +51,14 @@ class FilesystemUtil {
 		if ( 'direct' === $method ) {
 			$initialized = WP_Filesystem();
 		} elseif ( false !== $method ) {
-			$initialized = WP_Filesystem( self::get_credentials( $method ) );
+			// See https://core.trac.wordpress.org/changeset/56341.
+			ob_start();
+			$credentials = request_filesystem_credentials( '' );
+			ob_end_clean();
+
+			$initialized = $credentials && WP_Filesystem( $credentials );
 		}
 
 		return is_null( $initialized ) ? false : $initialized;
-	}
-
-	/**
-	 * Attempt to get credentials for accessing the filesystem when using a non-direct method (FTP, SSH, etc.).
-	 *
-	 * This is largely copied from the `request_filesystem_credentials()` method in WordPress core.
-	 *
-	 * @param string $method The method to use for accessing the filesystem.
-	 *
-	 * @return array
-	 */
-	protected static function get_credentials( string $method ): array {
-		$credentials = get_option(
-			'ftp_credentials',
-			array(
-				'hostname' => '',
-				'username' => '',
-			)
-		);
-
-		$ftp_constants = array(
-			'hostname'    => 'FTP_HOST',
-			'username'    => 'FTP_USER',
-			'password'    => 'FTP_PASS',
-			'public_key'  => 'FTP_PUBKEY',
-			'private_key' => 'FTP_PRIKEY',
-		);
-
-		foreach ( $ftp_constants as $key => $constant ) {
-			if ( Constants::is_defined( $constant ) ) {
-				$credentials[ $key ] = Constants::get_constant( $constant );
-			} elseif ( ! isset( $credentials[ $key ] ) ) {
-				$credentials[ $key ] = '';
-			}
-		}
-
-		// Sanitize the hostname, some people might pass in odd data.
-		$credentials['hostname'] = preg_replace( '|\w+://|', '', $credentials['hostname'] ); // Strip any schemes off.
-
-		if ( strpos( $credentials['hostname'], ':' ) ) {
-			list( $credentials['hostname'], $credentials['port'] ) = explode( ':', $credentials['hostname'], 2 );
-			if ( ! is_numeric( $credentials['port'] ) ) {
-				unset( $credentials['port'] );
-			}
-		} else {
-			unset( $credentials['port'] );
-		}
-
-		if ( Constants::get_constant( 'FTP_SSL' ) && 'ftpext' === $method ) { // Only the FTP Extension understands SSL.
-			$credentials['connection_type'] = 'ftps';
-		}
-
-		return $credentials;
 	}
 }
