@@ -99,6 +99,10 @@ class ProductCollection extends AbstractBlock {
 	 */
 	public function track_collection_instances( $post_id, $post ) {
 
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+			return;
+		}
+
 		if ( ! $post instanceof \WP_Post ) {
 			return;
 		}
@@ -106,10 +110,6 @@ class ProductCollection extends AbstractBlock {
 		// Important: don't track revisions.
 		$post_type = $post->post_type;
 		if ( ! in_array( $post_type, array( 'post', 'page', 'wp_template', 'wp_template_part' ), true ) ) {
-			return;
-		}
-
-		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
 			return;
 		}
 

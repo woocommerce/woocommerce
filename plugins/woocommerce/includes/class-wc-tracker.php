@@ -1171,7 +1171,7 @@ class WC_Tracker {
 
 		$instances = array();
 		foreach ( $templates as $template_id => $template_name ) {
-			$template_type = 'woocommerce/woocommerce//mini-cart' === $template_id ? 'wp_template_part' : 'wp_template';
+			$template_type = $woo_prefix . '//mini-cart' === $template_id ? 'wp_template_part' : 'wp_template';
 			$template      = get_block_template( $template_id, $template_type );
 			if ( ! $template instanceof \WP_Block_Template ) {
 				continue;
