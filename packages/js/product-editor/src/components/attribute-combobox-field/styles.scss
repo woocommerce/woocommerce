@@ -13,4 +13,35 @@
 		box-shadow: inset -1px 1px 0 0 #949494, inset 1px -1px 0 0 #949494;
 		background-color: white;
 	}
+
+	.components-form-token-field__suggestion {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		padding: 0;
+		border: 0;
+		margin: 1px;
+		background-color: transparent;
+
+		.item-wrapper {
+			padding: 8px 12px;
+			width: 100%;
+
+			&.is-disabled {
+				background-color: #fafafa;
+				color: #949494;
+				cursor: not-allowed;
+			}
+		}
+
+		&.is-selected {
+			.item-wrapper {
+				background-color: var( --wp-admin-theme-color, #007cba );
+				&.is-disabled {
+					background-color: #fafafa;
+				}
+			}
+		}
+	}
 }

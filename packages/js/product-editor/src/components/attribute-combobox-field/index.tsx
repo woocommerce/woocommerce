@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
-import { ComboboxControl } from '@wordpress/components';
+import { ComboboxControl as CoreComboboxControl } from '@wordpress/components';
 import { createElement, useMemo, useState } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
@@ -28,6 +28,7 @@ function mapAttributeToComboboxOption(
 	return {
 		label: attr.name,
 		value: `attr-${ attr.id }`,
+		disabled: !! attr.isDisabled,
 	};
 }
 
@@ -36,6 +37,15 @@ const temporaryOptionInitialState: ComboboxAttributeProps = {
 	value: '',
 	state: 'draft',
 };
+
+interface ComboboxControlProps extends CoreComboboxControl.Props {
+	__experimentalRenderItem?: ( args: {
+		item: ComboboxAttributeProps;
+	} ) => string | JSX.Element;
+}
+
+const ComboboxControl =
+	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
 
 const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	currentItem = null,
@@ -172,6 +182,17 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 					value: 'create-attribute',
 					state: 'draft',
 				} );
+			} }
+			__experimentalRenderItem={ ( { item } ) => {
+				if ( item.disabled ) {
+					return (
+						<div className="item-wrapper is-disabled">
+							{ item.label }
+						</div>
+					);
+				}
+
+				return <div className="item-wrapper">{ item.label }</div>;
 			} }
 		/>
 	);
