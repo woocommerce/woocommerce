@@ -43,3 +43,9 @@ if ( wc_current_theme_is_fse_theme() ) {
 	echo '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
 }
 ?>
+
+<style>
+	.woocommerce-breadcrumb {
+		display: none;
+	}
+</style>
