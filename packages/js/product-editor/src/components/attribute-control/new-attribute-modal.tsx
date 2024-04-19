@@ -371,8 +371,12 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 												>
 													<td className="woocommerce-new-attribute-modal__table-attribute-column">
 														<AttributeCombobox
+															instanceId={ index }
 															placeholder={
 																attributePlaceholder
+															}
+															currentItem={
+																attribute
 															}
 															items={ availableAttributes?.filter(
 																(
@@ -384,9 +388,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																	attr.takenBy ===
 																		index
 															) }
-															currentItem={
-																attribute
-															}
 															isLoading={
 																isLoading
 															}
@@ -398,9 +399,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															) }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
-															}
-															disabledAttributeIds={
-																disabledAttributeIds
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage

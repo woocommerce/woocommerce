@@ -1,6 +1,9 @@
+.woocommerce-attribute-combobox-container {
+	position: relative;
+}
+
 .woocommerce-attribute-combobox {
 	position: absolute;
-	width: 100%;
 
 	.components-combobox-control__suggestions-container {
 		margin: 0;

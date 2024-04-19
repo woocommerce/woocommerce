@@ -59,6 +59,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	currentItem = null,
 	items = [],
 	createNewAttributesAsGlobal = false,
+	instanceId = 0,
 	onChange,
 } ) => {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -148,52 +149,68 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 		}
 	};
 
+	/*
+	 * Hack to handle AttributeCombobox instances
+	 * don't overlap each other.
+	 */
+	const style = { zIndex: 1000 - instanceId };
+
 	return (
-		<ComboboxControl
-			className="woocommerce-attribute-combobox"
-			allowReset={ false }
-			options={ options }
-			value={ currentValue }
-			onChange={ ( newValue ) => {
-				if ( ! newValue ) {
-					return;
-				}
+		<div
+			className="woocommerce-attribute-combobox-container"
+			style={ style }
+		>
+			<ComboboxControl
+				className="woocommerce-attribute-combobox"
+				allowReset={ false }
+				options={ options }
+				value={ currentValue }
+				onChange={ ( newValue ) => {
+					if ( ! newValue ) {
+						return;
+					}
 
-				if ( newValue === 'create-attribute' ) {
-					updateCreateOption( {
-						...temporaryOption,
-						state: 'creating',
+					if ( newValue === 'create-attribute' ) {
+						updateCreateOption( {
+							...temporaryOption,
+							state: 'creating',
+						} );
+						addNewAttribute( temporaryOption.label );
+						return;
+					}
+
+					const selectedAttribute = items?.find(
+						( item ) =>
+							item.id ===
+							Number( newValue.replace( 'attr-', '' ) )
+					);
+
+					/*
+					 * Do not select when it is disabled.
+					 * `disabled` item option should be
+					 * handled by the core ComboboxControl component.
+					 */
+					if ( ! selectedAttribute || selectedAttribute.isDisabled ) {
+						return;
+					}
+
+					onChange( {
+						id: selectedAttribute.id,
+						name: selectedAttribute.name,
+						slug: selectedAttribute.slug as string,
+						options: [],
 					} );
-					addNewAttribute( temporaryOption.label );
-					return;
-				}
-
-				const selectedAttribute = items?.find(
-					( item ) =>
-						item.id === Number( newValue.replace( 'attr-', '' ) )
-				);
-
-				// Do not select when it is disabled.
-				if ( ! selectedAttribute || selectedAttribute.isDisabled ) {
-					return;
-				}
-
-				onChange( {
-					id: selectedAttribute.id,
-					name: selectedAttribute.name,
-					slug: selectedAttribute.slug as string,
-					options: [],
-				} );
-			} }
-			onFilterValueChange={ ( filterValue: string ) => {
-				updateCreateOption( {
-					label: filterValue,
-					value: 'create-attribute',
-					state: 'draft',
-				} );
-			} }
-			__experimentalRenderItem={ ComboboxControlItem }
-		/>
+				} }
+				onFilterValueChange={ ( filterValue: string ) => {
+					updateCreateOption( {
+						label: filterValue,
+						value: 'create-attribute',
+						state: 'draft',
+					} );
+				} }
+				__experimentalRenderItem={ ComboboxControlItem }
+			/>
+		</div>
 	);
 };
 

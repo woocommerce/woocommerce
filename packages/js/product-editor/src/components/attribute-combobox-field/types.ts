@@ -23,12 +23,11 @@ export type AttributeComboboxProps = {
 	label?: string;
 	currentItem: EnhancedProductAttribute | null;
 	items: NarrowedQueryAttribute[];
+	instanceId?: number;
 	isLoading: boolean;
 	placeholder?: string;
 	disabled?: boolean;
-	disabledAttributeIds?: number[];
 	disabledAttributeMessage?: string;
-	ignoredAttributeIds?: number[];
 	createNewAttributesAsGlobal?: boolean;
 
 	onChange: (
