@@ -968,6 +968,11 @@
       "categories": []
     },
     {
+      "category_slug": "utilities",
+      "category_title": "Utilities",
+      "categories": []
+    },
+    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1266,5 +1271,5 @@
       "categories": []
     }
   ],
-  "hash": "22dc26fbd0e387183beec01e381506771318c236ba6a63b573ffb888dcc1d1d0"
+  "hash": "05621c308414a34776d141252c0d0b8f618eaf28961758d3432e23e58ae5861d"
 }
