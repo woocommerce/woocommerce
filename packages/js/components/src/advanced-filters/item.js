@@ -14,6 +14,7 @@ import SearchFilter from './search-filter';
 import NumberFilter from './number-filter';
 import DateFilter from './date-filter';
 import AttributeFilter from './attribute-filter';
+import OrderAttributionFilter from './order-attribution-filter';
 
 const AdvancedFilterItem = ( props ) => {
 	const {
@@ -34,6 +35,7 @@ const AdvancedFilterItem = ( props ) => {
 		Date: DateFilter,
 		Number: NumberFilter,
 		ProductAttribute: AttributeFilter,
+		OrderAttributionFilter,
 		Search: SearchFilter,
 		SelectControl: SelectFilter,
 	};
