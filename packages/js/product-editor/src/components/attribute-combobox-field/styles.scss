@@ -1,5 +1,9 @@
 .woocommerce-attribute-combobox-container {
 	position: relative;
+
+	&:not( .no-items ) .components-form-token-field__suggestions-list {
+		border-top: 1px solid #949494;
+	}
 }
 
 .woocommerce-attribute-combobox {
@@ -17,7 +21,6 @@
 
 	.components-form-token-field__suggestions-list {
 		box-shadow: none;
-		border-top: 1px solid #949494;
 	}
 
 	.components-form-token-field__suggestion {

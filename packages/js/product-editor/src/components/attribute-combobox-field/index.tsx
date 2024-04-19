@@ -21,6 +21,7 @@ import type {
 	ComboboxAttributeProps,
 	NarrowedQueryAttribute,
 } from './types';
+import classNames from 'classnames';
 
 function mapAttributeToComboboxOption(
 	attr: NarrowedQueryAttribute
@@ -157,7 +158,12 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 
 	return (
 		<div
-			className="woocommerce-attribute-combobox-container"
+			className={ classNames(
+				'woocommerce-attribute-combobox-container',
+				{
+					'no-items': ! options.length,
+				}
+			) }
 			style={ style }
 		>
 			<ComboboxControl
