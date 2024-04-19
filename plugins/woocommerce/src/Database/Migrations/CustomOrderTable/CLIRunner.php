@@ -58,16 +58,26 @@ class CLIRunner {
 	 * Registers commands for CLI.
 	 */
 	public function register_commands() {
-		WP_CLI::add_command( 'wc cot count_unmigrated', array( $this, 'count_unmigrated' ) );
-		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) );
-		WP_CLI::add_command( 'wc cot sync', array( $this, 'sync' ) );
-		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
-		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
-		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
+		$legacy_commands = array( 'count_unmigrated', 'sync', 'verify_cot_data', 'enable', 'disable' );
+		foreach ( $legacy_commands as $cmd ) {
+			$new_cmd_name = 'verify_cot_data' === $cmd ? 'verify_data' : $cmd;
+
+			WP_CLI::add_command( "wc hpos {$new_cmd_name}", array( $this, $cmd ) );
+			WP_CLI::add_command(
+				"wc cot {$cmd}",
+				function ( array $args = array(), array $assoc_args = array() ) use ( $cmd, $new_cmd_name ) {
+					WP_CLI::warning( "Command `wc cot {$cmd}` is deprecated since 8.9.0. Please use `wc hpos {$new_cmd_name}` instead." );
+					return call_user_func( array( $this, $cmd ), $args, $assoc_args );
+				}
+			);
+		}
+
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
 		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
+
+		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) ); // Fully deprecated. No longer works.
 	}
 
 	/**
