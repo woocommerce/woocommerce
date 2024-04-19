@@ -47,6 +47,14 @@ interface ComboboxControlProps extends CoreComboboxControl.Props {
 const ComboboxControl =
 	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
 
+function ComboboxControlItem( { item }: { item: ComboboxAttributeProps } ) {
+	if ( item.disabled ) {
+		return <div className="item-wrapper is-disabled">{ item.label }</div>;
+	}
+
+	return <div className="item-wrapper">{ item.label }</div>;
+}
+
 const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	currentItem = null,
 	items = [],
@@ -183,17 +191,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 					state: 'draft',
 				} );
 			} }
-			__experimentalRenderItem={ ( { item } ) => {
-				if ( item.disabled ) {
-					return (
-						<div className="item-wrapper is-disabled">
-							{ item.label }
-						</div>
-					);
-				}
-
-				return <div className="item-wrapper">{ item.label }</div>;
-			} }
+			__experimentalRenderItem={ ComboboxControlItem }
 		/>
 	);
 };
