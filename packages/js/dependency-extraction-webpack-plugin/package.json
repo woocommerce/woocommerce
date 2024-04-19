@@ -22,7 +22,8 @@
 	},
 	"main": "src/index.js",
 	"files": [
-		"src/"
+		"src/",
+		"assets/"
 	],
 	"dependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "^3.7.0"
