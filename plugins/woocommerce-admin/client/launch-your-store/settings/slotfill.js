@@ -24,9 +24,10 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
 import './style.scss';
-import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
-import { SITE_VISIBILITY_DOC_LINK } from '../constants';
-import { LAUNCH_YOUR_STORE_DOC_LINK } from '../constants';
+import {
+	COMING_SOON_PAGE_EDITOR_LINK,
+	SITE_VISIBILITY_DOC_LINK,
+} from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
