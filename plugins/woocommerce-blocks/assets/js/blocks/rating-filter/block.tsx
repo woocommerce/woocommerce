@@ -66,6 +66,9 @@ const RatingFilterBlock = ( {
 } ) => {
 	const setWrapperVisibility = useSetWraperVisibility();
 
+	// TODO - REMOVE THIS LINE.
+	console.log( 'For testing, to see WP playground works.' );
+
 	const filteringForPhpTemplate = getSettingWithCoercion(
 		'isRenderingPhpTemplate',
 		false,
