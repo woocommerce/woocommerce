@@ -113,7 +113,7 @@ test.describe( 'Publish dropdown options', () => {
 			page.getByLabel( 'Dismiss this notice' ).first()
 		).toContainText( 'Product scheduled for' );
 	} );
-	test( 'can dupicate a product', async ( { page, product } ) => {
+	test( 'can duplicate a product', async ( { page, product } ) => {
 		await page.goto( `wp-admin/post.php?post=${ product.id }&action=edit` );
 		await page
 			.locator( '.woocommerce-product-header__actions' )
