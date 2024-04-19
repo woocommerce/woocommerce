@@ -86,10 +86,14 @@ const redirectToWooHome = () => {
 };
 
 const goBack = () => {
-	// If the user navigated to the customize store from a WC admin page, we want to go back to that page.
-	// Otherwise, we go back to the home page.
 	const history = getHistory();
-	if ( history.action === 'PUSH' ) {
+	if (
+		history.__experimentLocationStack.length >= 2 &&
+		! history.__experimentLocationStack[
+			history.__experimentLocationStack.length - 2
+		].search.includes( 'customize-store' )
+	) {
+		// If the previous location is not a customize-store step, go back in history.
 		history.back();
 		return;
 	}
