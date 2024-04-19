@@ -21,7 +21,10 @@ jobs:
         if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-20.04
         permissions:
-            contents: read
+            contents: write
+            pull-requests: write
+            repository-projects: write
+            id-token: write
         steps:
             - uses: actions/checkout@v3
 
