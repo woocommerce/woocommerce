@@ -362,6 +362,53 @@ export const advancedFilters = applyFilters(
 					component: 'ProductAttribute',
 				},
 			},
+			attribution: {
+				labels: {
+					add: __( 'Order attribution', 'woocommerce' ),
+					remove: __(
+						'Remove order attribution filter',
+						'woocommerce'
+					),
+					rule: __(
+						'Select an order attribution filter match',
+						'woocommerce'
+					),
+					/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
+					title: __(
+						'<title>Order attribution</title> <rule/> <filter/>',
+						'woocommerce'
+					),
+					filter: __( 'Select an order attribution', 'woocommerce' ),
+				},
+				rules: [
+					{
+						value: 'is',
+						/* translators: Sentence fragment, logical, "Is" refers to searching for orders matching a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x( 'Is', 'order attribution', 'woocommerce' ),
+					},
+					{
+						value: 'is_not',
+						/* translators: Sentence fragment, logical, "Is Not" refers to searching for orders that don\'t match a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
+						label: _x(
+							'Is Not',
+							'order attribution',
+							'woocommerce'
+						),
+					},
+				],
+				input: {
+					component: 'SelectControl',
+					getOptions: async () => {
+						// TODO: call API to get list of options.
+						return [
+							{
+								value: 'direct',
+								label: 'Direct',
+							},
+						];
+					},
+				},
+			},
 		},
 	}
 );
