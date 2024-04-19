@@ -49,10 +49,10 @@ You can modify template instances in a hook for the following action:
 
 The following actions are fired when blocks are added to or removed from a template, to support extensibility:
 
--  `woocommerce_product_editor_block_template_{template_name}_after_add_block_{block_id}`
--  `woocommerce_product_editor_block_template_after_add_block`
--  `woocommerce_product_editor_block_template_{template_name}_after_remove_block_{block_id}`
--  `woocommerce_product_editor_block_template_after_remove_block`
+-  `woocommerce_block_template_area_{template_area_name}_after_add_block_{block_id}`
+-  `woocommerce_block_template_after_add_block`
+-  `woocommerce_block_template_area_{template_area_name}_after_remove_block_{block_id}`
+-  `woocommerce_block_template_after_remove_block`
 
 **In order for your action hooks to be called for all block additions and removals for a template, you should call `add_action()` for each of these hooks before the template is instantiated, in or before an `rest_api_init` action hook, priority 9 or lower. If your hooks are not being called, verify that you are hooking them up in an action that is called when REST API endpoints are called.**
 
