@@ -106,7 +106,7 @@ jobs:
                       const commentInfo = {
                           owner: context.repo.owner,
                           repo: context.repo.repo,
-                          issue_number,
+                          issue_number: context.issue.number,
                       };
 
                       const comments = ( await github.rest.issues.listComments( commentInfo ) ).data;
