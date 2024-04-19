@@ -11,6 +11,7 @@ import {
 	WPDataActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
+import classnames from 'classnames';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import type {
 	ComboboxAttributeProps,
 	NarrowedQueryAttribute,
 } from './types';
-import classNames from 'classnames';
 
 function mapAttributeToComboboxOption(
 	attr: NarrowedQueryAttribute
@@ -104,12 +104,11 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 		];
 	}, [ attributeOptions, temporaryOption ] );
 
-	let currentValue =
-		temporaryOption.state === 'creating' ? 'create-attribute' : '';
-
-	if ( currentItem ) {
-		currentValue = `attr-${ currentItem.id }`;
+	let currentValue = currentItem ? `attr-${ currentItem.id }` : '';
+	if ( temporaryOption.state === 'creating' ) {
+		currentValue = 'create-attribute';
 	}
+
 	const addNewAttribute = ( name: string ) => {
 		recordEvent( 'product_attribute_add_custom_attribute', {
 			source: TRACKS_SOURCE,
@@ -158,7 +157,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ classnames(
 				'woocommerce-attribute-combobox-container',
 				{
 					'no-items': ! options.length,
