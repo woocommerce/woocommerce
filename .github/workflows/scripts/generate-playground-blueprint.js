@@ -48,7 +48,7 @@ const generateWordpressPlaygroundBlueprint = ( artifactUrl ) => {
 	return defaultSchema;
 };
 
-async function run() {
+async function run( { github, context, core } ) {
 	// Retrieve the PR branch name from the GitHub context
 	const prBranchName = context.payload.pull_request.head.ref;
 	const branchesUrl =

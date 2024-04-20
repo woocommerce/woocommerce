@@ -102,4 +102,4 @@ jobs:
               with:
                   script: |
                       const { run } = require('./.github/workflows/scripts/generate-playground-blueprint');
-                      run();
+                      run({ github, context, core });
