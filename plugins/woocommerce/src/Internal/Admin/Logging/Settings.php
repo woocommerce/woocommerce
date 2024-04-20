@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Admin_Settings;
 use WC_Log_Handler_DB, WC_Log_Handler_File, WC_Log_Levels;
+use WP_Filesystem_Direct;
 
 /**
  * Settings class.
@@ -292,10 +293,18 @@ class Settings {
 		$location_info = array();
 		$directory     = self::get_log_directory();
 
+		$status_info = array();
 		try {
-			FilesystemUtil::get_wp_filesystem();
+			$filesystem = FilesystemUtil::get_wp_filesystem();
+			if ( $filesystem instanceof WP_Filesystem_Direct ) {
+				$status_info[] = __( '✅ Ready', 'woocommerce' );
+			} else {
+				$status_info[] = __( '⚠️ The file system is not configured for direct writes. This could cause problems for the logger.', 'woocommerce' );
+				$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
+			}
 		} catch ( Exception $exception ) {
-			$location_info[] = __( '⚠️ The file system connection could not be initialized. You may want to switch to the database for log storage.', 'woocommerce' );
+			$status_info[] = __( '⚠️ The file system connection could not be initialized.', 'woocommerce' );
+			$status_info[] = __( 'You may want to switch to the database for log storage.', 'woocommerce' );
 		}
 
 		$location_info[] = sprintf(
@@ -322,6 +331,11 @@ class Settings {
 				'title' => __( 'File system settings', 'woocommerce' ),
 				'id'    => self::PREFIX . 'settings',
 				'type'  => 'title',
+			),
+			'file_status'   => array(
+				'title' => __( 'Status', 'woocommerce' ),
+				'type'  => 'info',
+				'text'  => implode( "\n\n", $status_info ),
 			),
 			'log_directory' => array(
 				'title' => __( 'Location', 'woocommerce' ),
