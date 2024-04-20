@@ -101,40 +101,5 @@ jobs:
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   script: |
-                      const {generateWordpressPlaygroundBlueprint} = require('./.github/workflows/scripts/generate-playground-blueprint');
-                      const defaultSchema = generateWordpressPlaygroundBlueprint('${{ steps.create-plugin-artifact.outputs.artifact-url }}');
-
-                      const url = `https://playground.wordpress.net/#${Buffer.from(JSON.stringify(defaultSchema)).toString('base64')}`;
-
-                      const commentInfo = {
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          issue_number: context.issue.number,
-                      };
-
-                      const comments = ( await github.rest.issues.listComments( commentInfo ) ).data;
-
-                      for ( const currentComment of comments ) {
-                        if ( currentComment.user.type === 'Bot' && currentComment.body.includes( 'Test using WordPress Playground' ) ) {
-                            return;
-                        }
-                      }
-
-                      commentInfo.body = `## Test using WordPress Playground
-                      The changes in this pull request can previewed and tested using a [WordPress Playground](https://developer.wordpress.org/playground/) instance.
-                      [WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser.
-
-                      ### Some things to be aware of
-                      - The Plugin and Theme Directories cannot be accessed within Playground.
-                      - All changes will be lost when closing a tab with a Playground instance.
-                      - All changes will be lost when refreshing the page.
-                      - A fresh instance is created each time the link below is clicked.
-                      - Every time this pull request is updated, a new ZIP file containing all changes is created. If changes are not reflected in the Playground instance, it's possible that the most recent build failed, or has not completed. Check the [list of workflow runs to be sure](
-                      it's possible that the most recent build failed, or has not completed. Check the [list of workflow runs to be sure](https://github.com/woocommerce/woocommerce/actions/workflows/build-live-branch.yml).
-
-                      For more details about these limitations and more, check out the [Limitations page](https://wordpress.github.io/wordpress-playground/limitations/) in the WordPress Playground documentation.
-
-                      [Test this pull request with WordPress Playground](${url}).
-                      `;
-
-                      github.rest.issues.createComment( commentInfo );
+                      const { run } = require('./.github/workflows/scripts/generate-playground-blueprint');
+                      run();
