@@ -104,7 +104,7 @@ jobs:
                       const {generateWordpressPlaygroundBlueprint} = require('./.github/workflows/scripts/generate-playground-blueprint');
                       const defaultSchema = generateWordpressPlaygroundBlueprint('${{ steps.create-plugin-artifact.outputs.artifact-url }}');
 
-                      const url = `https://playground.wordpress.net/#${encodeURIComponent(JSON.stringify(defaultSchema))}`;
+                      const url = `https://playground.wordpress.net/#${Buffer.from(JSON.stringify(defaultSchema)).toString('base64')}`;
 
                       const commentInfo = {
                           owner: context.repo.owner,
