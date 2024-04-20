@@ -94,6 +94,12 @@ async function run( { github, context, core } ) {
 			return;
 		}
 
+		const commentInfo = {
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			issue_number: context.issue.number,
+		};
+
 		const comments = (
 			await github.rest.issues.listComments( commentInfo )
 		 ).data;
@@ -115,16 +121,11 @@ async function run( { github, context, core } ) {
 			JSON.stringify( defaultSchema )
 		).toString( 'base64' ) }`;
 
-		const commentInfo = {
-			owner: context.repo.owner,
-			repo: context.repo.repo,
-			issue_number: context.issue.number,
-			body: `## Test using WordPress Playground
+		commentInfo.body = `## Test using WordPress Playground
             The changes in this pull request can be previewed and tested using a [WordPress Playground](https://developer.wordpress.org/playground/) instance.
             [WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser.
             
-            [Test this pull request with WordPress Playground](${ url }).`,
-		};
+            [Test this pull request with WordPress Playground](${ url }).`;
 
 		await github.rest.issues.createComment( commentInfo );
 	} catch ( error ) {
