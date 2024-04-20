@@ -1080,7 +1080,7 @@ class ListTable extends WP_List_Table {
 		$address = $order->get_formatted_billing_address();
 
 		if ( $address ) {
-			echo esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) );
+			echo wc_get_address_plain_text( $address );
 
 			if ( $order->get_payment_method() ) {
 				/* translators: %s: payment method */
@@ -1102,7 +1102,7 @@ class ListTable extends WP_List_Table {
 		$address = $order->get_formatted_shipping_address();
 
 		if ( $address ) {
-			echo '<a target="_blank" href="' . esc_url( $order->get_shipping_address_map_url() ) . '">' . esc_html( preg_replace( '#<br\s*/?>#i', ', ', $address ) ) . '</a>';
+			echo '<a target="_blank" href="' . esc_url( $order->get_shipping_address_map_url() ) . '">' . wc_get_address_plain_text( $address ) . '</a>';
 			if ( $order->get_shipping_method() ) {
 				/* translators: %s: shipping method */
 				echo '<span class="description">' . sprintf( esc_html__( 'via %s', 'woocommerce' ), esc_html( $order->get_shipping_method() ) ) . '</span>';

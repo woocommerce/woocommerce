@@ -1574,3 +1574,23 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_ed
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_payment_methods_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_lost_password_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_logout_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
+
+/**
+ * Get the address in plain text, stripped of tags.
+ *
+ * @param $address string Address to format.
+ * @return string
+ */
+function wc_get_address_plain_text( $address, $replace = ', ' ) {
+	$p = new WP_HTML_Tag_Processor( $address );
+	$content = '';
+	while ( $p->next_token() )  {
+		if( 'BR' === $p->get_tag() ) {
+			$content .= $replace;
+			continue;
+		}
+		$token    = $p->get_modifiable_text();
+		$content .= $token;
+	}
+	return $content;
+}
