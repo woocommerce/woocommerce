@@ -134,7 +134,7 @@ jobs:
 
                       For more details about these limitations and more, check out the [Limitations page](https://wordpress.github.io/wordpress-playground/limitations/) in the WordPress Playground documentation.
 
-                      [Test this pull request with WordPress Playground](https://playground.wordpress.net/#${defaultSchema}).
+                      [Test this pull request with WordPress Playground](url).
                       `;
 
                       github.rest.issues.createComment( commentInfo );
