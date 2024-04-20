@@ -18,6 +18,7 @@ export interface NoticeProps {
 	icon?: string;
 	isDismissible: boolean;
 	variant: string;
+	onClose?: () => void;
 }
 
 type IconKey = keyof typeof iconMap;
@@ -37,6 +38,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 		icon,
 		isDismissible = true,
 		variant = 'info',
+		onClose,
 	} = props;
 	const [ isVisible, setIsVisible ] = useState(
 		localStorage.getItem( `wc-marketplaceNoticeClosed-${ id }` ) !== 'true'
@@ -45,6 +47,9 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 	const handleClose = () => {
 		setIsVisible( false );
 		localStorage.setItem( `wc-marketplaceNoticeClosed-${ id }`, 'true' );
+		if ( typeof onClose === 'function' ) {
+			onClose();
+		}
 	};
 
 	if ( ! isVisible ) return null;

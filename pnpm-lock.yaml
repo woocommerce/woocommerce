@@ -1647,6 +1647,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^5.62.0
         version: 5.62.0(eslint@8.55.0)(typescript@5.3.3)
+      '@woocommerce/e2e-environment':
+        specifier: workspace:*
+        version: link:../e2e-environment
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
@@ -4330,9 +4333,6 @@ importers:
       fast-xml-parser:
         specifier: 4.2.4
         version: 4.2.4
-      follow-redirects:
-        specifier: 1.15.1
-        version: 1.15.1(debug@4.3.4)
       fs-extra:
         specifier: 11.1.1
         version: 11.1.1
@@ -4471,6 +4471,12 @@ importers:
       zenhub-api:
         specifier: 0.2.0
         version: 0.2.0
+
+  plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce:
+    devDependencies:
+      eslint:
+        specifier: ^8.55.0
+        version: 8.55.0
 
   plugins/woocommerce/client/legacy:
     dependencies:
@@ -52852,7 +52858,7 @@ packages:
   file:plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce:
     resolution: {directory: plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce, type: directory}
     name: eslint-plugin-woocommerce
-    engines: {node: ^16.13.0, npm: ^8.0.0}
+    engines: {node: ^20.11.1, npm: ^8.0.0}
     dev: true
 
   github.com/Automattic/puppeteer-utils/0f3ec50(react-native@0.73.0):

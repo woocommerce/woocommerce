@@ -117,9 +117,9 @@ describe( 'useProductTemplate', () => {
 		expect( result.current.productTemplate ).toBeUndefined();
 	} );
 
-	it( 'should use the standard product template if the product type is variable', () => {
+	it( 'should use the standard product template if no templateId is provided', () => {
 		const { result } = renderHook( () =>
-			useProductTemplate( 'template-1', { type: 'variable' } )
+			useProductTemplate( undefined, { type: 'simple' } )
 		);
 
 		expect( result.current.productTemplate?.id ).toEqual(

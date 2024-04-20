@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/block-templates",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Utilities for working with block templates in WooCommerce admin.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
