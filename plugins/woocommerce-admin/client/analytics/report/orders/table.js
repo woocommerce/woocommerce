@@ -91,6 +91,13 @@ class OrdersReportTable extends Component {
 				isSortable: true,
 				isNumeric: true,
 			},
+			{
+				label: __( 'Origin', 'woocommerce' ),
+				screenReaderLabel: __( 'Origin', 'woocommerce' ),
+				key: 'origin',
+				required: false,
+				isSortable: false,
+			},
 		];
 	}
 
@@ -240,6 +247,10 @@ class OrdersReportTable extends Component {
 				{
 					display: renderCurrency( netTotal, currency ),
 					value: netTotal,
+				},
+				{
+					display: extendedInfo.attribution.origin,
+					value: extendedInfo.attribution.origin,
 				},
 			];
 		} );

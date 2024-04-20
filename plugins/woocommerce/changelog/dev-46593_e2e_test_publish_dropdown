@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add E2E tests to cover Publish dropdown options #46658

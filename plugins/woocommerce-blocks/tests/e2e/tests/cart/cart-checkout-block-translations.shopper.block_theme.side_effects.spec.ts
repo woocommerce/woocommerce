@@ -114,7 +114,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
 
-		await expect( page.getByText( 'Verzendmethoden' ) ).toBeVisible();
+		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
 			page.getByText( 'Totaal', { exact: true } )
