@@ -78,7 +78,7 @@ async function run( { github, context, core } ) {
 	// Fetch the branches data and extract the download URL
 	try {
 		const payload = await fetchJson( branchesUrl );
-		const branches = Object.values( payload );
+		const branches = Object.values( payload.pr );
 
 		const branch = branches.find( ( branch ) => {
 			return branch.branch === prBranchName;
