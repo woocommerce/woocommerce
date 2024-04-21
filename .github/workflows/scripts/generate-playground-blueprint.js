@@ -1,6 +1,6 @@
 const https = require( 'https' );
 
-const generateWordpressPlaygroundBlueprint = ( artifactUrl ) => {
+const generateWordpressPlaygroundBlueprint = ( prNumber ) => {
 	const defaultSchema = {
 		$schema: 'https://playground.wordpress.net/blueprint-schema.json',
 
@@ -18,7 +18,7 @@ const generateWordpressPlaygroundBlueprint = ( artifactUrl ) => {
 				step: 'installPlugin',
 				pluginZipFile: {
 					resource: 'url',
-					url: artifactUrl,
+					url: `https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins&pr=${ prNumber }`,
 				},
 				options: {
 					activate: true,
@@ -50,49 +50,49 @@ const generateWordpressPlaygroundBlueprint = ( artifactUrl ) => {
 
 async function run( { github, context, core } ) {
 	// Retrieve the PR branch name from the GitHub context
-	const prBranchName = context.payload.pull_request.head.ref;
-	const branchesUrl =
-		'https://betadownload.jetpack.me/woocommerce-branches.json';
+	// const prBranchName = context.payload.pull_request.head.ref;
+	// const branchesUrl =
+	// 	'https://betadownload.jetpack.me/woocommerce-branches.json';
 
 	// Function to fetch JSON data using https
-	async function fetchJson( url ) {
-		return new Promise( ( resolve, reject ) => {
-			https.get( url, ( res ) => {
-				let data = '';
+	// async function fetchJson( url ) {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		https.get( url, ( res ) => {
+	// 			let data = '';
 
-				res.on( 'data', ( chunk ) => {
-					data += chunk;
-				} );
+	// 			res.on( 'data', ( chunk ) => {
+	// 				data += chunk;
+	// 			} );
 
-				res.on( 'end', () => {
-					resolve( JSON.parse( data ) );
-				} );
+	// 			res.on( 'end', () => {
+	// 				resolve( JSON.parse( data ) );
+	// 			} );
 
-				res.on( 'error', ( err ) => {
-					reject( err );
-				} );
-			} );
-		} );
-	}
+	// 			res.on( 'error', ( err ) => {
+	// 				reject( err );
+	// 			} );
+	// 		} );
+	// 	} );
+	// }
 
 	// Fetch the branches data and extract the download URL
 	try {
-		const payload = await fetchJson( branchesUrl );
-		const branches = Object.values( payload.pr );
+		// const payload = await fetchJson( branchesUrl );
+		// const branches = Object.values( payload.pr );
 
-		const branch = branches.find( ( branch ) => {
-			return branch.branch === prBranchName;
-		} );
+		// const branch = branches.find( ( branch ) => {
+		// 	return branch.branch === prBranchName;
+		// } );
 
-		const artifactUrl = branch?.download_url;
+		// const artifactUrl = branch?.download_url;
 
-		if ( ! artifactUrl ) {
-			console.error(
-				'Download URL not found for the branch:',
-				prBranchName
-			);
-			return;
-		}
+		// if ( ! artifactUrl ) {
+		// 	console.error(
+		// 		'Download URL not found for the branch:',
+		// 		prBranchName
+		// 	);
+		// 	return;
+		// }
 
 		const commentInfo = {
 			owner: context.repo.owner,
@@ -115,17 +115,21 @@ async function run( { github, context, core } ) {
 			}
 		}
 
-		const defaultSchema =
-			generateWordpressPlaygroundBlueprint( artifactUrl );
+		const defaultSchema = generateWordpressPlaygroundBlueprint(
+			context.issue.number
+		);
+
 		const url = `https://playground.wordpress.net/#${ Buffer.from(
 			JSON.stringify( defaultSchema )
 		).toString( 'base64' ) }`;
 
-		commentInfo.body = `## Test using WordPress Playground
-            The changes in this pull request can be previewed and tested using a [WordPress Playground](https://developer.wordpress.org/playground/) instance.
-            [WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser.
-            
-            [Test this pull request with WordPress Playground](${ url }).`;
+		const proxyUrl = ( commentInfo.body = `
+## Test using WordPress Playground
+The changes in this pull request can be previewed and tested using a [WordPress Playground](https://developer.wordpress.org/playground/) instance.
+[WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser.
+
+[Test this pull request with WordPress Playground](${ url }).
+` );
 
 		await github.rest.issues.createComment( commentInfo );
 	} catch ( error ) {
