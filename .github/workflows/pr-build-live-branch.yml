@@ -1,4 +1,4 @@
-name: Build PR Live Branch
+name: Build Live Branch
 on:
     pull_request:
         paths-ignore:
