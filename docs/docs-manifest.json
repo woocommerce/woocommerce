@@ -560,6 +560,22 @@
       "category_title": "High Performance Order Storage",
       "posts": [
         {
+          "post_title": "HPOS order querying APIs",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "hash": "0e7d4f6ed88da1607aef79d72f2f8289ce3717f405f5e028b4be654654a80289",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "id": "94261c0a5d954f409ce6c207c9ae624dd577cf64"
+        },
+        {
+          "post_title": "HPOS extension recipe book",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "hash": "07491c9e8ee2dd78d7f242ad4cc8c3aa9a604837287a6af4eba85017c8d70951",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "id": "991c19edd20b1df6683f31f106d74689248cd102"
+        },
+        {
           "post_title": "A large store's guide to enable HPOS on WooCommerce",
           "menu_title": "Enable HPOS for large stores",
           "tags": "how-to",
@@ -576,6 +592,14 @@
           "hash": "c8c75c274eb52a48729589220cfd6b5c091b6699d3bf44e6c808cf62f1680310",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/enable-hpos.md",
           "id": "9d41c63f3d0cb17ada82a65bf4a26a1978cc34b0"
+        },
+        {
+          "post_title": "HPOS CLI Tools",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "hash": "8cd823759ce20551d582c39f57ae79f9e0227a8cb0131146e6b7dac5e7312708",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "id": "cdd9d9ad5777d978ba953e3478fbb61cab8fdf59"
         }
       ],
       "categories": []
@@ -944,6 +968,11 @@
       "categories": []
     },
     {
+      "category_slug": "utilities",
+      "category_title": "Utilities",
+      "categories": []
+    },
+    {
       "content": "\nThis section covers general guidelines, and best practices to follow in order to ensure your product experience aligns with WooCommerce for ease of use, seamless integration, and strong adoption.\n\nWe strongly recommend you review the current [WooCommerce setup experience](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/) to get familiar with the user experience and taxonomy.\n\nWe also recommend you review the [WordPress core guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) to ensure your product isn't breaking any rules, and review [this helpful resource](https://woocommerce.com/document/grammar-punctuation-style-guide/) on content style.\n\n## General\n\nUse existing WordPress/WooCommerce UI, built in components (text fields, checkboxes, etc) and existing menu structures.\n\nPlugins which draw on WordPress' core design aesthetic will benefit from future updates to this design as WordPress continues to evolve. If you need to make an exception for your product, be prepared to provide a valid use case.\n\n- [WordPress Components library](https://wordpress.github.io/gutenberg/?path=/story/docs-introduction--page)\n- [Figma for WordPress](https://make.wordpress.org/design/2018/11/19/figma-for-wordpress/) | ([WordPress Design Library Figma](https://www.figma.com/file/e4tLacmlPuZV47l7901FEs/WordPress-Design-Library))\n- [WooCommerce Component Library](https://woocommerce.github.io/woocommerce-admin/)\n",
       "category_slug": "user-experience-extensions",
       "category_title": "Extension Guidelines",
@@ -1242,5 +1271,5 @@
       "categories": []
     }
   ],
-  "hash": "4d3e84c2d89db384ddd068a068dfa2e284e7d339b46bd59e6bda1f0dff53de99"
+  "hash": "05621c308414a34776d141252c0d0b8f618eaf28961758d3432e23e58ae5861d"
 }
