@@ -90,7 +90,7 @@ $order->delete_meta_data( $meta_key_3, $meta_value_3 );
 $order->save();
 ```
 
-💡 Calling the `save()` method is a relatively expensive operation, so you may wish to avoid calling it more times than necessary (for example, if you know it will be called later in the same flow, you may wish to avoid additional earlier calls when operating on the same object).
+**Note:** Calling the `save()` method is a relatively expensive operation, so you may wish to avoid calling it more times than necessary (for example, if you know it will be called later in the same flow, you may wish to avoid additional earlier calls when operating on the same object).
 
 When getting exact type of an order, or checking if given ID is an order, you can use methods from `OrderUtil` class.
 
@@ -115,7 +115,7 @@ post_updated_messages|do_meta_boxes|enter_title_here|edit_form_before_permalink|
 
 You will see a lot of false positives here as well. However, if you do encounter a usage where these methods are called for the order screen then to upgrade them to HPOS, the following changes have to be done:
 
-Instead of a `$post` object of the `WP_Post` class, you will need to use an `$order` object of the `WC_Order` class. If it’s a filter or an action, then we will implement a similar filter in the new WooCommerce screen as well and instead of passing the post object, it will accept a WC_Order object instead.
+Instead of a `$post` object of the `WP_Post` class, you will need to use an `$order` object of the `WC_Order` class. If it's a filter or an action, then we will implement a similar filter in the new WooCommerce screen as well and instead of passing the post object, it will accept a WC_Order object instead.
 
 The following snippet shows a way to add meta boxes to the legacy order editor screen when legacy orders are in effect, and to the new HPOS-powered editor screen otherwise:
 
@@ -179,4 +179,4 @@ As many WordPress extensions aren't WooCommerce related, WC will only display th
 
 ### New order querying APIs
 
-HPOS, through `WC_Order_Query`, introduces new query types that allow for more complex order queries involving dates, metadata and order fields. Head over to [HPOS: new order querying APIs](https://github.com/woocommerce/woocommerce/wiki/HPOS:-new-order-querying-APIs) for details and examples.
+HPOS, through `WC_Order_Query`, introduces new query types that allow for more complex order queries involving dates, metadata and order fields. Head over to [HPOS: new order querying APIs](https://developer.woocommerce.com/docs/hpos-order-querying-apis/) for details and examples.
