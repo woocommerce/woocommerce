@@ -30,7 +30,7 @@ import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-u
 import {
 	type PostPayload,
 	createPostFromTemplate,
-	updateTemplatesContent,
+	updateTemplateContents,
 	updateProductCatalogContent,
 	deletePost,
 } from '../utils/create-dynamic-content';
@@ -143,7 +143,7 @@ const test = base.extend<
 				data: unknown
 			) => Promise< Post >;
 			deletePost: ( id: number ) => Promise< void >;
-			updateTemplatesContent: (
+			updateTemplateContents: (
 				templateId: string,
 				templatePath: string,
 				data: unknown
@@ -222,12 +222,12 @@ const test = base.extend<
 			const utilDeletePost = ( id: number ) =>
 				deletePost( requestUtils, id );
 
-			const utilUpdateTemplatesContent = (
+			const utilUpdateTemplateContents = (
 				template: TemplatePayload,
 				templatePath: string,
 				data: unknown
 			) =>
-				updateTemplatesContent(
+				updateTemplateContents(
 					requestUtils,
 					template,
 					templatePath,
@@ -243,7 +243,7 @@ const test = base.extend<
 			await use( {
 				...requestUtils,
 				createPostFromTemplate: utilCreatePostFromTemplate,
-				updateTemplatesContent: utilUpdateTemplatesContent,
+				updateTemplateContents: utilUpdateTemplateContents,
 				updateProductCatalogContent: utilUpdateProductCatalogContent,
 				deletePost: utilDeletePost,
 			} );

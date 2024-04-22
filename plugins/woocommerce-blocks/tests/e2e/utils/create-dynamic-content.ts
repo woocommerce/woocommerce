@@ -64,7 +64,7 @@ export const createPostFromTemplate = async (
 	return createPost( requestUtils, payload );
 };
 
-export const updateTemplatesContent = async (
+export const updateTemplateContents = async (
 	requestUtils: RequestUtils,
 	templateId: string,
 	templatePath: string,
@@ -92,7 +92,7 @@ export const updateProductCatalogContent = async (
 	const productCatalogTemplateId = 'woocommerce/woocommerce//archive-product';
 	const productCatalogLink = '/shop';
 
-	const template = await updateTemplatesContent(
+	const template = await updateTemplateContents(
 		requestUtils,
 		productCatalogTemplateId,
 		templatePath,
