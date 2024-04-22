@@ -250,7 +250,7 @@ export function IframeEditor( {
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">
 								<BlockInspector />
-								{ true && (
+								{ isRightSidebarOpen && (
 									<ComplementaryArea.Slot scope="woocommerce/product-editor-iframe-editor" />
 								) }
 							</div>
