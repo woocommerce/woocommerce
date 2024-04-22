@@ -11,6 +11,7 @@ import {
 	getNewPath,
 	getQuery,
 	updateQueryString,
+	getHistory,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -84,6 +85,22 @@ const redirectToWooHome = () => {
 	navigateOrParent( window, url );
 };
 
+const goBack = () => {
+	const history = getHistory();
+	if (
+		history.__experimentalLocationStack.length >= 2 &&
+		! history.__experimentalLocationStack[
+			history.__experimentalLocationStack.length - 2
+		].search.includes( 'customize-store' )
+	) {
+		// If the previous location is not a customize-store step, go back in history.
+		history.back();
+		return;
+	}
+
+	redirectToWooHome();
+};
+
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
 	if ( isWooExpress() ) {
 		window.location.href =
@@ -130,6 +147,7 @@ export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
 	redirectToThemes,
+	goBack,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -330,7 +348,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				CLICKED_ON_BREADCRUMB: {
-					actions: 'redirectToWooHome',
+					actions: 'goBack',
 				},
 				DESIGN_WITH_AI: {
 					actions: [ 'recordTracksDesignWithAIClicked' ],

@@ -298,6 +298,8 @@ test.describe( 'Assembler -> Color Pickers', () => {
 
 			await colorPicker.click();
 
+			await assembler.locator( '[aria-label="Back"]' ).click();
+
 			const saveButton = assembler.getByText( 'Save' );
 
 			const waitResponse = page.waitForResponse(
@@ -382,51 +384,6 @@ test.describe( 'Assembler -> Color Pickers', () => {
 		await expect( colorPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'Picking a color should activate the save button', async ( {
-		assemblerPageObject,
-	} ) => {
-		const assembler = await assemblerPageObject.getAssembler();
-		const colorPicker = assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.nth( 2 );
-
-		await colorPicker.click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		await expect( saveButton ).toBeEnabled();
-	} );
-
-	test( 'The Done button should be visible after clicking save', async ( {
-		assemblerPageObject,
-		page,
-	} ) => {
-		const assembler = await assemblerPageObject.getAssembler();
-		const colorPicker = assembler
-			.locator(
-				'.woocommerce-customize-store_global-styles-variations_item'
-			)
-			.nth( 2 );
-
-		await colorPicker.click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
-	} );
-
 	test( 'Selected color palette should be applied on the frontend', async ( {
 		assemblerPageObject,
 		page,
@@ -441,6 +398,8 @@ test.describe( 'Assembler -> Color Pickers', () => {
 			.last();
 
 		await colorPicker.click();
+
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 

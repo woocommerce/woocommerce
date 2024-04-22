@@ -560,6 +560,22 @@
       "category_title": "High Performance Order Storage",
       "posts": [
         {
+          "post_title": "HPOS order querying APIs",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "hash": "e6a82fd1551296d1f104cb70921ecf13d63e04760ed2f24a3d57d4b2da2217e3",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "id": "94261c0a5d954f409ce6c207c9ae624dd577cf64"
+        },
+        {
+          "post_title": "HPOS extension recipe book",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "hash": "f5dc57939c8278a9de9a7ddd9fdd968ca672e998ba43a080a03203c499d98709",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "id": "991c19edd20b1df6683f31f106d74689248cd102"
+        },
+        {
           "post_title": "A large store's guide to enable HPOS on WooCommerce",
           "menu_title": "Enable HPOS for large stores",
           "tags": "how-to",
@@ -576,6 +592,14 @@
           "hash": "c8c75c274eb52a48729589220cfd6b5c091b6699d3bf44e6c808cf62f1680310",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/enable-hpos.md",
           "id": "9d41c63f3d0cb17ada82a65bf4a26a1978cc34b0"
+        },
+        {
+          "post_title": "HPOS CLI Tools",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "hash": "8cd823759ce20551d582c39f57ae79f9e0227a8cb0131146e6b7dac5e7312708",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "id": "cdd9d9ad5777d978ba953e3478fbb61cab8fdf59"
         }
       ],
       "categories": []
@@ -1242,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "4d3e84c2d89db384ddd068a068dfa2e284e7d339b46bd59e6bda1f0dff53de99"
+  "hash": "814c3cc3f8b107aa3e1c160a4dbf81c9d13ac7a14e1ee58d03f149d053217b35"
 }
