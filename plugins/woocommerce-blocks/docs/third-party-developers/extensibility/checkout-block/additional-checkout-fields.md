@@ -5,7 +5,7 @@
 - [Available field locations](#available-field-locations)
     - [Contact information](#contact-information)
     - [Address](#address)
-    - [Additional information](#additional-information)
+    - [Order information](#order-information)
 - [Supported field types](#supported-field-types)
 - [Using the API](#using-the-api)
     - [Options](#options)
