@@ -209,6 +209,7 @@ async function runPerformanceTests( branches, options ) {
 	);
 	await SimpleGit( testRunnerDir ).raw( 'checkout', testRunnerBranch );
 
+	console.log( config.setupTestRunner );
 	logAtIndent( 2, 'Installing dependencies and building' );
 	await runShellScript(
 		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.setupTestRunner }"`,
