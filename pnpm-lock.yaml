@@ -4331,8 +4331,8 @@ importers:
         specifier: 6.1.1
         version: 6.1.1
       fast-xml-parser:
-        specifier: 4.2.4
-        version: 4.2.4
+        specifier: 4.2.5
+        version: 4.2.5
       fs-extra:
         specifier: 11.1.1
         version: 11.1.1
@@ -14306,7 +14306,7 @@ packages:
       '@react-native-community/cli-tools': 12.1.1
       chalk: 4.1.2
       execa: 5.1.1
-      fast-xml-parser: 4.2.4
+      fast-xml-parser: 4.2.5
       glob: 7.2.3
       logkitty: 0.7.1
     transitivePeerDependencies:
@@ -14318,7 +14318,7 @@ packages:
       '@react-native-community/cli-tools': 12.1.1
       chalk: 4.1.2
       execa: 5.1.1
-      fast-xml-parser: 4.2.4
+      fast-xml-parser: 4.2.5
       glob: 7.2.3
       ora: 5.4.1
     transitivePeerDependencies:
@@ -32904,8 +32904,8 @@ packages:
     resolution: {integrity: sha512-c/cMBGA5mH3OYjaXedtLIM3hQjv+KuZuiD2QEH5GofNOZeQVDIYIN7Okc2AW1KPhk44g5PTZnXp8t2lOMl8qhQ==}
     dev: false
 
-  /fast-xml-parser@4.2.4:
-    resolution: {integrity: sha512-fbfMDvgBNIdDJLdLOwacjFAPYt67tr31H9ZhWSm45CDAxvd0I6WTlSOUo7K2P/K5sA5JgMKG64PI3DMcaFdWpQ==}
+  /fast-xml-parser@4.2.5:
+    resolution: {integrity: sha512-B9/wizE4WngqQftFPmdaMYlXoJlJOYxGQOanC77fq9k8+Z0v5dDSVh+3glErdIROP//s/jgb7ZuxKfB8nVyo0g==}
     hasBin: true
     dependencies:
       strnum: 1.0.5
