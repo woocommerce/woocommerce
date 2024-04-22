@@ -79,18 +79,10 @@ class LaunchYourStore {
 		$private_link     = 'no';
 		$share_key        = wp_generate_password( 32, false );
 
-		if ( false === get_option( 'woocommerce_coming_soon', false ) ) {
-			add_option( 'woocommerce_coming_soon', $coming_soon );
-		}
-		if ( false === get_option( 'woocommerce_store_pages_only', false ) ) {
-			add_option( 'woocommerce_store_pages_only', $store_pages_only );
-		}
-		if ( false === get_option( 'woocommerce_private_link', false ) ) {
-			add_option( 'woocommerce_private_link', $private_link );
-		}
-		if ( false === get_option( 'woocommerce_share_key', false ) ) {
-			add_option( 'woocommerce_share_key', $share_key );
-		}
+		add_option( 'woocommerce_coming_soon', $coming_soon );
+		add_option( 'woocommerce_store_pages_only', $store_pages_only );
+		add_option( 'woocommerce_private_link', $private_link );
+		add_option( 'woocommerce_share_key', $share_key );
 
 		wc_admin_record_tracks_event(
 			'launch_your_store_initialize_coming_soon',
