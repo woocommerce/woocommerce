@@ -23,6 +23,7 @@ import CHECKOUT_ORDER_SUMMARY_SHIPPING from './checkout-order-summary-shipping/b
 import CHECKOUT_ORDER_SUMMARY_COUPON_FORM from './checkout-order-summary-coupon-form/block.json';
 import CHECKOUT_ORDER_SUMMARY_TAXES from './checkout-order-summary-taxes/block.json';
 import CHECKOUT_ORDER_SUMMARY_CART_ITEMS from './checkout-order-summary-cart-items/block.json';
+import CHECKOUT_ORDER_SUMMARY_TOTALS from './checkout-order-summary-totals/block.json';
 
 export default {
 	CHECKOUT_ACTIONS,
@@ -47,4 +48,5 @@ export default {
 	CHECKOUT_ORDER_SUMMARY_COUPON_FORM,
 	CHECKOUT_ORDER_SUMMARY_TAXES,
 	CHECKOUT_ORDER_SUMMARY_CART_ITEMS,
+	CHECKOUT_ORDER_SUMMARY_TOTALS,
 };
