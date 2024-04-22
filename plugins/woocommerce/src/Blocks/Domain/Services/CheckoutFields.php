@@ -46,7 +46,7 @@ class CheckoutFields {
 	 *
 	 * @var array
 	 */
-	protected $groups = [ 'billing', 'shipping', 'additional' ];
+	protected $groups = [ 'billing', 'shipping', 'other' ];
 
 	/**
 	 * Instance of the asset data registry.
@@ -73,8 +73,16 @@ class CheckoutFields {
 	 * Additional fields meta key.
 	 *
 	 * @var string
+	 * @deprecated 8.9.0 Use OTHER_FIELDS_PREFIX instead.
 	 */
 	const ADDITIONAL_FIELDS_PREFIX = '_wc_additional/';
+
+	/**
+	 * Other fields meta key.
+	 *
+	 * @var string
+	 */
+	const OTHER_FIELDS_PREFIX = '_wc_other/';
 
 	/**
 	 * Sets up core fields.
@@ -222,7 +230,7 @@ class CheckoutFields {
 			// omit email from shipping and billing fields.
 			'address'    => array_merge( \array_diff_key( array_keys( $this->core_fields ), array( 'email' ) ) ),
 			'contact'    => array( 'email' ),
-			'additional' => [],
+			'order' => [],
 		];
 
 		add_filter( 'woocommerce_get_country_locale_default', array( $this, 'update_default_locale_with_fields' ) );
@@ -261,7 +269,7 @@ class CheckoutFields {
 					$meta_keys[] = self::BILLING_FIELDS_PREFIX . $field_key;
 					$meta_keys[] = self::SHIPPING_FIELDS_PREFIX . $field_key;
 				} else {
-					$meta_keys[] = self::ADDITIONAL_FIELDS_PREFIX . $field_key;
+					$meta_keys[] = self::OTHER_FIELDS_PREFIX . $field_key;
 				}
 			}
 		} catch ( \Throwable $e ) {
@@ -414,6 +422,11 @@ class CheckoutFields {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
 			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
+		}
+
+		if ( 'additional' === $options['location'] ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$options['location'] = 'order';
 		}
 
 		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
@@ -793,18 +806,34 @@ class CheckoutFields {
 	 * Returns an array of fields keys for the additional area group.
 	 *
 	 * @return array An array of fields keys.
+	 * @deprecated 8.9.0 Use get_order_fields_keys instead.
 	 */
 	public function get_additional_fields_keys() {
-		return $this->fields_locations['additional'];
+		wc_deprecated_function( __METHOD__, '8.9.0', 'get_order_fields_keys' );
+		return $this->get_order_fields_keys();
+	}
+
+	/**
+	 * Returns an array of fields keys for the additional area group.
+	 *
+	 * @return array An array of fields keys.
+	 */
+	public function get_order_fields_keys() {
+		return $this->fields_locations['order'];
 	}
 
 	/**
 	 * Returns an array of fields for a given group.
 	 *
-	 * @param string $location The location to get fields for (address|contact|additional).
+	 * @param string $location The location to get fields for (address|contact|order).
 	 * @return array An array of fields definitions.
 	 */
 	public function get_fields_for_location( $location ) {
+		if ( 'additional' === $location ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$location = 'order';
+		}
+
 		if ( in_array( $location, array_keys( $this->fields_locations ), true ) ) {
 			$order_fields_keys = $this->fields_locations[ $location ];
 
@@ -823,12 +852,22 @@ class CheckoutFields {
 	 * Validates a set of fields for a given location against custom validation rules.
 	 *
 	 * @param array  $fields Array of key value pairs of field values to validate.
-	 * @param string $location The location being validated (address|contact|additional).
-	 * @param string $group The group to get the field value for (shipping|billing|additional).
+	 * @param string $location The location being validated (address|contact|order).
+	 * @param string $group The group to get the field value for (shipping|billing|other).
 	 * @return WP_Error
 	 */
-	public function validate_fields_for_location( $fields, $location, $group = 'additional' ) {
+	public function validate_fields_for_location( $fields, $location, $group = 'other' ) {
 		$errors = new WP_Error();
+
+		if ( 'additional' === $location ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$location = 'order';
+		}
+
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
 
 		try {
 			/**
@@ -836,19 +875,30 @@ class CheckoutFields {
 			 *
 			 * @param WP_Error $errors  A WP_Error object that extensions may add errors to.
 			 * @param mixed    $fields  List of fields (key value pairs) in this location.
-			 * @param string   $group   The group of this location (shipping|billing|'').
+			 * @param string   $group   The group of this location (shipping|billing|other).
 			 *
 			 * @since 8.6.0
-			 * @deprecated 8.7.0 Use woocommerce_blocks_validate_location_{location}_fields instead.
+			 * @deprecated 8.9.0 Use woocommerce_blocks_validate_location_order_fields instead.
 			 */
-			wc_do_deprecated_action( '__experimental_woocommerce_blocks_validate_location_' . $location . '_fields', array( $errors, $fields, $group ), '8.7.0', 'woocommerce_blocks_validate_location_' . $location . '_fields', 'This action has been graduated, use woocommerce_blocks_validate_location_' . $location . '_fields instead.' );
+			wc_do_deprecated_action( 'woocommerce_blocks_validate_location_additional_fields', array( $errors, $fields, $group ), '8.9.0', 'woocommerce_blocks_validate_location_additional_fields', 'This action has been graduated, use woocommerce_blocks_validate_location_additional_fields instead.' );
+			/**
+			 * Pass an error object to allow validation of an additional field.
+			 *
+			 * @param WP_Error $errors  A WP_Error object that extensions may add errors to.
+			 * @param mixed    $fields  List of fields (key value pairs) in this location.
+			 * @param string   $group   The group of this location (shipping|billing|other).
+			 *
+			 * @since 8.6.0
+			 * @deprecated 8.9.0 Use woocommerce_blocks_validate_location_{location}_fields instead.
+			 */
+			wc_do_deprecated_action( '__experimental_woocommerce_blocks_validate_location_' . $location . '_fields', array( $errors, $fields, $group ), '8.9.0', 'woocommerce_blocks_validate_location_' . $location . '_fields', 'This action has been graduated, use woocommerce_blocks_validate_location_' . $location . '_fields instead.' );
 
 			/**
 			 * Pass an error object to allow validation of an additional field.
 			 *
 			 * @param WP_Error $errors  A WP_Error object that extensions may add errors to.
 			 * @param mixed    $fields  List of fields (key value pairs) in this location.
-			 * @param string   $group   The group of this location (shipping|billing|'').
+			 * @param string   $group   The group of this location (shipping|billing|other).
 			 *
 			 * @since 8.7.0
 			 */
@@ -879,11 +929,16 @@ class CheckoutFields {
 	 *
 	 * @param string $key The field key.
 	 * @param mixed  $value The field value.
-	 * @param string $location The location to validate the field for (address|contact|additional).
+	 * @param string $location The location to validate the field for (address|contact|order).
 	 *
 	 * @return true|WP_Error True if the field is valid, a WP_Error otherwise.
 	 */
 	public function validate_field_for_location( $key, $value, $location ) {
+		if ( 'additional' === $location ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$location = 'order';
+		}
+
 		if ( ! $this->is_field( $key ) ) {
 			return new WP_Error(
 				'woocommerce_blocks_checkout_field_invalid',
@@ -952,12 +1007,17 @@ class CheckoutFields {
 	 * @param string   $key The field key.
 	 * @param mixed    $value The field value.
 	 * @param WC_Order $order The order to persist the field for.
-	 * @param string   $group The group to persist the field for (shipping|billing|additional).
+	 * @param string   $group The group to persist the field for (shipping|billing|other).
 	 * @param bool     $set_customer Whether to set the field value on the customer or not.
 	 *
 	 * @return void
 	 */
-	public function persist_field_for_order( string $key, $value, WC_Order $order, string $group = 'additional', bool $set_customer = true ) {
+	public function persist_field_for_order( string $key, $value, WC_Order $order, string $group = 'other', bool $set_customer = true ) {
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
+
 		$this->set_array_meta( $key, $value, $order, $group );
 		if ( $set_customer && $order->get_customer_id() ) {
 			$customer = new WC_Customer( $order->get_customer_id() );
@@ -971,11 +1031,16 @@ class CheckoutFields {
 	 * @param string      $key The field key.
 	 * @param mixed       $value The field value.
 	 * @param WC_Customer $customer The customer to persist the field for.
-	 * @param string      $group The group to persist the field for (shipping|billing|additional).
+	 * @param string      $group The group to persist the field for (shipping|billing|other).
 	 *
 	 * @return void
 	 */
-	public function persist_field_for_customer( string $key, $value, WC_Customer $customer, string $group = 'additional' ) {
+	public function persist_field_for_customer( string $key, $value, WC_Customer $customer, string $group = 'other' ) {
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
+
 		$this->set_array_meta( $key, $value, $customer, $group );
 	}
 
@@ -985,7 +1050,7 @@ class CheckoutFields {
 	 * @param string               $key The field key.
 	 * @param mixed                $value The field value.
 	 * @param WC_Customer|WC_Order $wc_object The object to set the field value for.
-	 * @param string               $group The group to set the field value for (shipping|billing|additional).
+	 * @param string               $group The group to set the field value for (shipping|billing|other).
 	 *
 	 * @return void
 	 */
@@ -1005,11 +1070,16 @@ class CheckoutFields {
 	 *
 	 * @param string               $key The field key.
 	 * @param WC_Customer|WC_Order $wc_object The customer or order to get the field value for.
-	 * @param string               $group The group to get the field value for (shipping|billing|additional).
+	 * @param string               $group The group to get the field value for (shipping|billing|other).
 	 *
 	 * @return mixed The field value.
 	 */
-	public function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'additional' ) {
+	public function get_field_from_object( string $key, WC_Data $wc_object, string $group = 'other' ) {
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
+
 		$meta_key = self::get_group_key( $group ) . $key;
 
 		$meta_data = $wc_object->get_meta( $meta_key, true );
@@ -1030,12 +1100,17 @@ class CheckoutFields {
 	 * Returns an array of all fields values for a given object in a group.
 	 *
 	 * @param WC_Data $wc_object The object or order to get the fields for.
-	 * @param string  $group The group to get the fields for (shipping|billing|additional).
+	 * @param string  $group The group to get the fields for (shipping|billing|other).
 	 * @param bool    $all Whether to return all fields or only the ones that are still registered. Default false.
 	 *
 	 * @return array An array of fields.
 	 */
-	public function get_all_fields_from_object( WC_Data $wc_object, string $group = 'additional', bool $all = false ) {
+	public function get_all_fields_from_object( WC_Data $wc_object, string $group = 'other', bool $all = false ) {
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
+
 		$meta_data = [];
 
 		$prefix = self::get_group_key( $group );
@@ -1096,10 +1171,15 @@ class CheckoutFields {
 	 * From a set of fields, returns only the ones for a given location.
 	 *
 	 * @param array  $fields The fields to filter.
-	 * @param string $location The location to validate the field for (address|contact|additional).
+	 * @param string $location The location to validate the field for (address|contact|order).
 	 * @return array The filtered fields.
 	 */
 	public function filter_fields_for_location( array $fields, string $location ) {
+		if ( 'additional' === $location ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$location = 'order';
+		}
+
 		return array_filter(
 			$fields,
 			function ( $key ) use ( $location ) {
@@ -1128,12 +1208,22 @@ class CheckoutFields {
 	 * Get additional fields for an order.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @param string   $location The location to get fields for (address|contact|additional).
-	 * @param string   $group The group to get the field value for (shipping|billing|additional).
+	 * @param string   $location The location to get fields for (address|contact|order).
+	 * @param string   $group The group to get the field value for (shipping|billing|other).
 	 * @param string   $context The context to get the field value for (edit|view).
 	 * @return array An array of fields definitions as well as their values formatted for display.
 	 */
-	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'additional', string $context = 'edit' ) {
+	public function get_order_additional_fields_with_values( WC_Order $order, string $location, string $group = 'other', string $context = 'edit' ) {
+		if ( 'additional' === $location ) {
+			wc_deprecated_argument( 'location', '8.9.0', 'The "additional" location is deprecated. Use "order" instead.' );
+			$location = 'order';
+		}
+
+		if ( 'additional' === $group ) {
+			wc_deprecated_argument( 'group', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group = 'other';
+		}
+
 		$fields             = $this->get_fields_for_location( $location );
 		$fields_with_values = [];
 
@@ -1178,32 +1268,42 @@ class CheckoutFields {
 	/**
 	 * Returns a group meta prefix based on its name.
 	 *
-	 * @param string $group_name The group name (billing|shipping|additional).
+	 * @param string $group_name The group name (billing|shipping|other).
 	 * @return string The group meta prefix.
 	 */
 	public static function get_group_key( $group_name ) {
+		if ( 'additional' === $group_name ) {
+			wc_deprecated_argument( 'group_name', '8.9.0', 'The "additional" group is deprecated. Use "other" instead.' );
+			$group_name = 'other';
+		}
+
 		if ( 'billing' === $group_name ) {
 			return self::BILLING_FIELDS_PREFIX;
 		}
 		if ( 'shipping' === $group_name ) {
 			return self::SHIPPING_FIELDS_PREFIX;
 		}
-		return self::ADDITIONAL_FIELDS_PREFIX;
+		return self::OTHER_FIELDS_PREFIX;
 	}
 
 	/**
 	 * Returns a group name based on passed group key.
 	 *
-	 * @param string $group_key The group name (_wc_billing|_wc_shipping|_wc_additional).
+	 * @param string $group_key The group name (_wc_billing|_wc_shipping|_wc_other).
 	 * @return string The group meta prefix.
 	 */
 	public static function get_group_name( $group_key ) {
+		if ( '_wc_additional' === $group_key ) {
+			wc_deprecated_argument( 'group_key', '8.9.0', 'The "_wc_additional" group key is deprecated. Use "_wc_other" instead.' );
+			$group_key = '_wc_other';
+		}
+
 		if ( 0 === \strpos( self::BILLING_FIELDS_PREFIX, $group_key ) ) {
 			return 'billing';
 		}
 		if ( 0 === \strpos( self::SHIPPING_FIELDS_PREFIX, $group_key ) ) {
 			return 'shipping';
 		}
-		return 'additional';
+		return 'other';
 	}
 }

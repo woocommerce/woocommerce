@@ -38,16 +38,13 @@ A common use-case for developers and merchants is to add a new field to the Chec
 
 This document will outline the steps an extension should take to register some additional checkout fields.
 
-> [!NOTE]
-> Additional Checkout fields is still in the testing phases, use it to test the API and leave feedback in this [public discussion.](https://github.com/woocommerce/woocommerce/discussions/42995)
-
 ## Available field locations
 
 Additional checkout fields can be registered in three different places:
 
 - Contact information
 - Addresses (Shipping **and** Billing)
-- Additional information
+- Order information
 
 A field can only be shown in one location, it is not possible to render the same field in multiple locations in the same registration.
 
@@ -71,19 +68,19 @@ If a field is registered in the `address` location it will appear in both the sh
 
 You will also end up collecting two values for this field, one for shipping and one for billing.
 
-### Additional information
+### Order information
 
-As part of the additional checkout fields feature, the checkout block has a new inner block called the "Additional information block".
+As part of the additional checkout fields feature, the checkout block has a new inner block called the "Order information block".
 
 This block is used to render fields that aren't part of the contact information or address information, for example it may be a "How did you hear about us" field or a "Gift message" field.
 
 Fields rendered here will be saved to the order. They will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled.
 
-![The additional order information section containing an additional checkout field](https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f)
+![The order information section containing an additional checkout field](https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f)
 
 By default, this block will render as the last step in the Checkout form, however it can be moved using the Gutenberg block controls in the editor.
 
-![The additional order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
+![The order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
 
 ## Accessing values
 
@@ -91,7 +88,7 @@ Additional fields are saved to individual meta keys in both the customer meta an
 
 For address fields, two values are saved: one for shipping, and one for billing. If the customer has selected 'Use same address for billing` then the values will be the same, but still saved independently of each other.
 
-For contact and additional fields, only one value is saved per field.
+For contact and order fields, only one value is saved per field.
 
 ### Helper methods
 
@@ -159,7 +156,7 @@ $order = wc_get_order( 1234 );
 $checkout_fields = Package::container()->get( CheckoutFields::class );
 $order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' );
 $order_additional_shipping_fields = $checkout_fields->get_all_fields_from_object( $order, 'shipping' );
-$order_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'additional' ); // Contact and Additional are saved in the same place under the additional group.
+$order_other_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'other' ); // Contact and Order are saved in the same place under the additional group.
 ```
 
 This will return an array of all values, it will only include fields currently registered, if you want to include fields no longer registered, you can pass a third `true` parameter.
@@ -182,16 +179,16 @@ Values are saved under a predefined prefix, this is needed to able to query fiel
 - `_wc_billing/my-plugin-namespace/my-field`
 - `_wc_shipping/my-plugin-namespace/my-field`
 
-Or the following if it's a contact/additional field:
+Or the following if it's a contact/order field:
 
-- `_wc_additional/my-plugin-namespace/my-field`.
+- `_wc_other/my-plugin-namespace/my-field`.
 
 Those prefixes are part of `CheckoutFields` class, and can be accessed using the following constants:
 
 ```php
 echo ( CheckoutFields::BILLING_FIELDS_PREFIX ); // _wc_billing/
 echo ( CheckoutFields::SHIPPING_FIELDS_PREFIX ); // _wc_shipping/
-echo ( CheckoutFields::ADDITIONAL_FIELDS_PREFIX ); // _wc_additional/
+echo ( CheckoutFields::OTHER_FIELDS_PREFIX ); // _wc_other/
 ```
 
 `CheckoutFields` provides a couple of helpers to get the group name or key based on one or the other:
@@ -206,7 +203,7 @@ CheckoutFields::get_group_key( "shipping" ); // "_wc_shipping/"
 Use cases here would be to build the key name to access the meta directly:
 
 ```php
-$key      = CheckoutFields::get_group_key( "additional" ) . 'my-plugin/is-opt-in';
+$key      = CheckoutFields::get_group_key( "other" ) . 'my-plugin/is-opt-in';
 $opted_in = get_user_meta( 123, $key, true ) === "1" ? true : false;
 ```
 
@@ -243,7 +240,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `id`                | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`. | Yes       | `plugin-namespace/how-did-you-hear`          | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `label`             | The label shown on your field. This will be the placeholder too.                                                                    | Yes       | `How did you hear about us?`                 | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `optionalLabel`     | The label shown on your field if it is optional. This will be the placeholder too.                                                  | No        | `How did you hear about us? (Optional)`      | The default value will be the value of `label` with `(optional)` appended.                                                                                                                                                                                                                     |
-| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `additional`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
+| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
 | `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
@@ -404,7 +401,7 @@ Note that because an `optionalLabel` was not supplied, the string `(optional)` i
 
 ### Rendering a select field
 
-This example demonstrates rendering a select field in the additional information section:
+This example demonstrates rendering a select field in the order information section:
 
 ```php
 add_action(
@@ -414,7 +411,7 @@ add_action(
 			array(
 				'id'       => 'namespace/how-did-you-hear-about-us',
 				'label'    => 'How did you hear about us?',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'options'  => [
 					[
@@ -440,7 +437,7 @@ add_action(
 );
 ```
 
-This results in the additional information section being rendered like so:
+This results in the order information section being rendered like so:
 
 ### The select input before being focused
 
@@ -547,7 +544,7 @@ To solve this, it is possible to validate a field in the context of the location
 
 ##### Using the `woocommerce_blocks_validate_location_{location}_fields` action
 
-This action will be fired for each location that additional fields can render in (`address`, `contact`, and `additional`). For `address` it fires twice, once for the billing address and once for the shipping address.
+This action will be fired for each location that additional fields can render in (`address`, `contact`, and `order`). For `address` it fires twice, once for the billing address and once for the shipping address.
 
 The callback receives the keys and values of the other additional fields in the same location.
 
@@ -557,14 +554,14 @@ It is important to note that any fields rendered in other locations will not be 
 |----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `$errors`  | `WP_Error`                  | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
 | `$fields`  | `array`                     | The fields rendered in this locations.                                                                                                                                                |
-| `$group`   | `'billing'\|'shipping'\|'additional'` | If the action is for the address location, the type of address will be set here. If it is for contact or additional, this will be 'additional'.                                   |
+| `$group`   | `'billing'\|'shipping'\|'other'` | If the action is for the address location, the type of address will be set here. If it is for contact or order, this will be 'other'.                                   |
 
 There are several places where these hooks are fired.
 
 - When checking out using the Checkout block or Store API.
     - `woocommerce_blocks_validate_location_address_fields` (x2)
     - `woocommerce_blocks_validate_location_contact_fields`
-    - `woocommerce_blocks_validate_location_additional_fields`
+    - `woocommerce_blocks_validate_location_other_fields`
 - When updating addresses in the "My account" area
     - `woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
 - When updating the "Account details" section in the "My account" area
