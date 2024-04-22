@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid unnecessary query when HPOS compatibility mode is disabled.

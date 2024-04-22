@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add safety check to prevent rare occurences of a fatal in WooSubscriptionsNotes

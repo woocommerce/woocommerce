@@ -128,7 +128,6 @@ class WCAdminHelper {
 	 *
 	 * Store pages are defined as:
 	 *
-	 * - My Account
 	 * - Shop
 	 * - Cart
 	 * - Checkout
@@ -153,12 +152,12 @@ class WCAdminHelper {
 
 		// WC store pages.
 		$store_pages = array(
-			'myaccount' => wc_get_page_id( 'myaccount' ),
-			'shop'      => wc_get_page_id( 'shop' ),
-			'cart'      => wc_get_page_id( 'cart' ),
-			'checkout'  => wc_get_page_id( 'checkout' ),
-			'privacy'   => wc_privacy_policy_page_id(),
-			'terms'     => wc_terms_and_conditions_page_id(),
+			'shop'        => wc_get_page_id( 'shop' ),
+			'cart'        => wc_get_page_id( 'cart' ),
+			'checkout'    => wc_get_page_id( 'checkout' ),
+			'privacy'     => wc_privacy_policy_page_id(),
+			'terms'       => wc_terms_and_conditions_page_id(),
+			'coming_soon' => wc_get_page_id( 'coming_soon' ),
 		);
 
 		/**
@@ -237,7 +236,7 @@ class WCAdminHelper {
 	private static function get_normalized_url_path( $url ) {
 		$query           = wp_parse_url( $url, PHP_URL_QUERY );
 		$path            = wp_parse_url( $url, PHP_URL_PATH ) . ( $query ? '?' . $query : '' );
-		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH );
+		$home_path       = wp_parse_url( site_url(), PHP_URL_PATH ) ?? '';
 		$normalized_path = trim( substr( $path, strlen( $home_path ) ), '/' );
 		return $normalized_path;
 	}

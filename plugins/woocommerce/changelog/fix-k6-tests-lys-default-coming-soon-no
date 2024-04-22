@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix K6 test with coming soon feature flag enabled
