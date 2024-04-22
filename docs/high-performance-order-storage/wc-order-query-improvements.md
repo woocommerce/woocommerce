@@ -3,9 +3,9 @@ post_title: HPOS order querying APIs
 tags: reference
 ---
 
-With the introduction of HPOS, we’ve enhanced the querying functionality in WC. Now, in addition to the well-known [existing APIs](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query), we’re adding a few features that would make it easier to create complex queries on orders or their properties, including the ability to query custom order metadata.
+With the introduction of HPOS, we've enhanced the querying functionality in WC. Now, in addition to the well-known [existing APIs](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query), we're adding a few features that would make it easier to create complex queries on orders or their properties, including the ability to query custom order metadata.
 
-All the new query types are implemented as additional query arguments that can be passed to `wc_get_orders()` and are heavily inspired by similar functionality in WordPress’ own `WP_Query`. As regular query arguments, they can be combined with other arguments to produce complex queries that, until now, would have required writing custom code and SQL.
+All the new query types are implemented as additional query arguments that can be passed to `wc_get_orders()` and are heavily inspired by similar functionality in WordPress' own `WP_Query`. As regular query arguments, they can be combined with other arguments to produce complex queries that, until now, would have required writing custom code and SQL.
 
 ## The new query types
 
@@ -19,11 +19,11 @@ At its core, `meta_query` is an array that can contain one or more arrays with k
 `compare` (optional) an operator to use for comparison purposes such as LIKE, RLIKE, NOT BETWEEN, BETWEEN, etc.
 `type` to cast the meta value to a specific SQL type in the query
 
-The different arrays can also be combined using `relation` (which admits 'AND' or 'OR' values) to produce more complex queries. The syntax for this new argument is exactly the same as for WP_Query’s `meta_query`. As such, you can refer to the [`meta_query` docs](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters) for more details.
+The different arrays can also be combined using `relation` (which admits 'AND' or 'OR' values) to produce more complex queries. The syntax for this new argument is exactly the same as for WP_Query's `meta_query`. As such, you can refer to the [`meta_query` docs](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters) for more details.
 
 ```php
 // Example: obtain all orders which have metadata with the "color" key (any value) and have metadata
-// with key "size" containing "small" (so it’d match "extra-small" as well as "small", for example).
+// with key "size" containing "small" (so it'd match "extra-small" as well as "small", for example).
 $orders = wc_get_orders(
     array(
         'meta_query' => array(
@@ -42,10 +42,10 @@ $orders = wc_get_orders(
 
 ### Order field queries (`field_query`)
 
-This query type has a syntax similar to that of meta queries (`meta_query`) but instead of `key` you’d use `field` inside the different clauses. Here, `field` refers to any order property (such as `billing_first_name`, `total` or `order_key`, etc.) which are also accessible as top-level keys in the query arguments as usual. The difference between directly querying those properties and using a `field_query` is that you can create more complex queries by implementing comparison operators and combining or nesting.
+This query type has a syntax similar to that of meta queries (`meta_query`) but instead of `key` you'd use `field` inside the different clauses. Here, `field` refers to any order property (such as `billing_first_name`, `total` or `order_key`, etc.) which are also accessible as top-level keys in the query arguments as usual. The difference between directly querying those properties and using a `field_query` is that you can create more complex queries by implementing comparison operators and combining or nesting.
 
 ```php
-// Example. For a simple query, you’d be better off by using the order properties directly, even though there's a `field_query` equivalent.
+// Example. For a simple query, you'd be better off by using the order properties directly, even though there's a `field_query` equivalent.
 $orders = wc_get_orders(
     array(
         'billing_first_name' => 'Lauren',
@@ -150,7 +150,7 @@ $orders = wc_get_orders( $query_args );
 ```
 
 ```php
-// Obtain orders where the first name in the billing details contains "laur" (so it’d both match "lauren" and "laura", for example), and where the order’s total is less than 10.0 and the total discount is >= 5.0.
+// Obtain orders where the first name in the billing details contains "laur" (so it'd both match "lauren" and "laura", for example), and where the order's total is less than 10.0 and the total discount is >= 5.0.
 
 $orders = wc_get_orders(
     array(
