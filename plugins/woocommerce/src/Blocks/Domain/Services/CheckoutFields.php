@@ -393,32 +393,32 @@ class CheckoutFields {
 	 */
 	private function validate_options( $options ) {
 		if ( empty( $options['id'] ) ) {
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
 			return false;
 		}
 
 		// Having fewer than 2 after exploding around a / means there is no namespace.
 		if ( count( explode( '/', $options['id'] ) ) < 2 ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'A checkout field id must consist of namespace/name.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
 		if ( empty( $options['label'] ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field label is required.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
 		if ( empty( $options['location'] ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is required.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
 		if ( ! in_array( $options['location'], array_keys( $this->fields_locations ), true ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $options['id'], 'The field location is invalid.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
@@ -429,7 +429,7 @@ class CheckoutFields {
 		// Check to see if field is already in the array.
 		if ( ! empty( $this->additional_fields[ $id ] ) || in_array( $id, $this->fields_locations[ $location ], true ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The field is already registered.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
@@ -441,27 +441,27 @@ class CheckoutFields {
 					$options['type'],
 					implode( ', ', $this->supported_field_types )
 				);
-				_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 				return false;
 			}
 		}
 
 		if ( ! empty( $options['sanitize_callback'] ) && ! is_callable( $options['sanitize_callback'] ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The sanitize_callback must be a valid callback.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
 		if ( ! empty( $options['validate_callback'] ) && ! is_callable( $options['validate_callback'] ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'The validate_callback must be a valid callback.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 
 		// Hidden fields are not supported right now. They will be registered with hidden => false.
 		if ( ! empty( $options['hidden'] ) && true === $options['hidden'] ) {
 			$message = sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			// Don't return here unlike the other fields because this is not an issue that will prevent registration.
 		}
 
@@ -481,7 +481,7 @@ class CheckoutFields {
 
 		if ( empty( $options['options'] ) || ! is_array( $options['options'] ) ) {
 			$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return false;
 		}
 		$cleaned_options = [];
@@ -491,7 +491,7 @@ class CheckoutFields {
 		foreach ( $options['options'] as $option ) {
 			if ( ! isset( $option['value'] ) || ! isset( $option['label'] ) ) {
 				$message = sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' );
-				_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 				return false;
 			}
 
@@ -500,7 +500,7 @@ class CheckoutFields {
 
 			if ( in_array( $sanitized_value, $added_values, true ) ) {
 				$message = sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, $sanitized_value );
-				_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+				_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 				continue;
 			}
 
@@ -546,7 +546,7 @@ class CheckoutFields {
 
 		if ( isset( $options['required'] ) && true === $options['required'] ) {
 			$message = sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 		}
 
 		return $field_data;
@@ -569,7 +569,7 @@ class CheckoutFields {
 
 		if ( ! is_array( $attributes ) || 0 === count( $attributes ) ) {
 			$message = sprintf( 'An invalid attributes value was supplied when registering field with id: "%s". %s', $id, 'Attributes must be a non-empty array.' );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 			return [];
 		}
 
@@ -595,7 +595,7 @@ class CheckoutFields {
 		if ( count( $attributes ) !== count( $valid_attributes ) ) {
 			$invalid_attributes = array_keys( array_diff_key( $attributes, $valid_attributes ) );
 			$message            = sprintf( 'Invalid attribute found when registering field with id: "%s". Attributes: %s are not allowed.', $id, implode( ', ', $invalid_attributes ) );
-			_doing_it_wrong( '__experimental_woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
+			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', esc_html( $message ), '8.6.0' );
 		}
 
 		// Escape attributes to remove any malicious code and return them.

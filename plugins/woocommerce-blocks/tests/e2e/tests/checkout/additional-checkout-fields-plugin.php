@@ -49,7 +49,7 @@ class Additional_Checkout_Fields_Test_Helper {
 	 */
 	public function register_custom_checkout_fields() {
 		// Address fields, checkbox, textbox, select
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'                => 'first-plugin-namespace/government-ID',
 				'label'             => 'Government ID',
@@ -67,7 +67,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				},
 			),
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'first-plugin-namespace/confirm-government-ID',
 				'label'    => 'Confirm government ID',
@@ -85,7 +85,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				},
 			),
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'first-plugin-namespace/truck-size-ok',
 				'label'    => 'Can a truck fit down your road?',
@@ -93,7 +93,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				'type'     => 'checkbox',
 			)
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'first-plugin-namespace/road-size',
 				'label'    => 'How wide is your road?',
@@ -155,7 +155,7 @@ class Additional_Checkout_Fields_Test_Helper {
 		);
 
 		// Contact fields, one checkbox, select, and text input.
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'second-plugin-namespace/marketing-opt-in',
 				'label'    => 'Do you want to subscribe to our newsletter?',
@@ -163,7 +163,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				'type'     => 'checkbox',
 			)
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'second-plugin-namespace/gift-message-in-package',
 				'label'    => 'Enter a gift message to include in the package',
@@ -171,7 +171,7 @@ class Additional_Checkout_Fields_Test_Helper {
 				'type'     => 'text',
 			)
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'second-plugin-namespace/type-of-purchase',
 				'label'    => 'Is this a personal purchase or a business purchase?',
@@ -193,7 +193,7 @@ class Additional_Checkout_Fields_Test_Helper {
 
 		// A field of each type in additional information section.
 
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'third-plugin-namespace/please-send-me-a-free-gift',
 				'label'    => 'Would you like a free gift with your order?',
@@ -202,7 +202,7 @@ class Additional_Checkout_Fields_Test_Helper {
 			)
 		);
 
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'third-plugin-namespace/what-is-your-favourite-colour',
 				'label'    => 'What is your favourite colour?',
@@ -211,7 +211,7 @@ class Additional_Checkout_Fields_Test_Helper {
 			)
 		);
 
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => 'third-plugin-namespace/how-did-you-hear-about-us',
 				'label'    => 'How did you hear about us?',
