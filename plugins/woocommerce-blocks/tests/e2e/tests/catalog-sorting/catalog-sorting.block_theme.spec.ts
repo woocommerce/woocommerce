@@ -36,9 +36,11 @@ test.describe( `${ blockData.slug } Block`, () => {
 			blockData.slug
 		);
 		await expect( alreadyPresentBlock ).toHaveText( 'Default Sorting' );
-		await editorUtils.removeBlocks( {
-			name: blockData.slug,
-		} );
+
+		await editorUtils.removeBlockByClientId(
+			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
+		);
+
 		await editor.insertBlock( {
 			name: blockData.slug,
 		} );

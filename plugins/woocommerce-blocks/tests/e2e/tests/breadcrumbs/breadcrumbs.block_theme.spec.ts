@@ -38,13 +38,15 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const alreadyPresentBlock = await editorUtils.getBlockByName(
 			blockData.slug
 		);
+
 		await expect( alreadyPresentBlock ).toHaveText(
 			'Breadcrumbs / Navigation / Path'
 		);
 
-		await editorUtils.removeBlocks( {
-			name: blockData.slug,
-		} );
+		await editorUtils.removeBlockByClientId(
+			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
+		);
+
 		await editor.insertBlock( { name: blockData.slug } );
 		const block = await editorUtils.getBlockByName( blockData.slug );
 		await expect( block ).toHaveText( 'Breadcrumbs / Navigation / Path' );

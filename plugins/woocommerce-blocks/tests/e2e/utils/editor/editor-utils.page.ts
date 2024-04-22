@@ -126,6 +126,17 @@ export class EditorUtils {
 		);
 	}
 
+	async removeBlockByClientId( clientId: string ) {
+		await this.page.evaluate(
+			( { clientId: _clientId } ) => {
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( _clientId );
+			},
+			{ clientId }
+		);
+	}
+
 	async closeModalByName( name: string ) {
 		const isModalOpen = await this.page.getByLabel( name ).isVisible();
 
