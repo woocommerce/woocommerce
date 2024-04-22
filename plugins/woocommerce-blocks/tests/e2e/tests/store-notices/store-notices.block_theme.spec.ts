@@ -25,7 +25,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const block = await editorUtils.getBlockByName( blockData.slug );
 		await expect( block ).toBeVisible();
 		await expect( block ).toHaveText(
-			'Notices added by WooCommerce or extensions will show up here'
+			'Notices added by WooCommerce or extensions will show up here.'
 		);
 	} );
 } );
