@@ -15,12 +15,12 @@ class LocalPickupUtils {
 			'woocommerce_pickup_location_settings',
 			[
 				'enabled' => 'no',
-				'title'   => __( 'Local Pickup', 'woocommerce' ),
+				'title'   => __( 'Pickup', 'woocommerce' ),
 			]
 		);
 
 		if ( empty( $pickup_location_settings['title'] ) ) {
-			$pickup_location_settings['title'] = __( 'Local Pickup', 'woocommerce' );
+			$pickup_location_settings['title'] = __( 'Pickup', 'woocommerce' );
 		}
 
 		if ( empty( $pickup_location_settings['enabled'] ) ) {

@@ -27,7 +27,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 
 	test.afterEach( async ( { localPickupUtils } ) => {
 		await localPickupUtils.deleteLocations();
-		await localPickupUtils.setLocalPickupTitle( 'Local Pickup' );
+		await localPickupUtils.setLocalPickupTitle( 'Pickup' );
 	} );
 
 	test( 'Updating the title in WC Settings updates the local pickup text in the block and vice/versa', async ( {
@@ -49,7 +49,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			'woocommerce/checkout-shipping-method-block'
 		);
 		await editor.selectBlocks( block );
-		const fakeInput = editor.canvas.getByLabel( 'Local Pickup' );
+		const fakeInput = editor.canvas.getByLabel( 'Pickup' );
 		await fakeInput.click();
 
 		const isMacOS = process.platform === 'darwin'; // darwin is macOS
