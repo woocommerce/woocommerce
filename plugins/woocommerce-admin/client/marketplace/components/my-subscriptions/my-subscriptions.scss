@@ -249,7 +249,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	max-width: 495px;
+	max-width: 584px;
 	padding: $grid-unit-80 $grid-unit-40;
 	margin: 0 auto;
 
@@ -270,9 +270,10 @@
 		font-size: $default-font-size;
 		line-height: 20px;
 		font-weight: 400;
-		color: var(--gutenberg-gray-700);
+		color: $gray-700;
 		margin-top: 0;
 		margin-bottom: $grid-unit-30;
+		max-width: 520px;
 	}
 }
 
