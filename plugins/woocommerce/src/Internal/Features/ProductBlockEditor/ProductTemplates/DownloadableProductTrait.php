@@ -38,7 +38,7 @@ trait DownloadableProductTrait {
 			$product_downloads_section_group->add_block(
 				array(
 					'id'         => 'product-downloadable',
-					'blockName'  => 'woocommerce/product-checkbox-field',
+					'blockName'  => 'woocommerce/product-toggle-field',
 					'order'      => 10,
 					'attributes' => array(
 						'property' => 'downloadable',

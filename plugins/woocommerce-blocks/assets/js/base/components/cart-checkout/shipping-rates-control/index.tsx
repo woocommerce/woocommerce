@@ -33,6 +33,7 @@ const Packages = ( {
 	collapsible,
 	noResultsMessage,
 	renderOption,
+	context = '',
 }: PackagesProps ): JSX.Element | null => {
 	// If there are no packages, return nothing.
 	if ( ! packages.length ) {
@@ -42,6 +43,7 @@ const Packages = ( {
 		<>
 			{ packages.map( ( { package_id: packageId, ...packageData } ) => (
 				<ShippingRatesControlPackage
+					highlightChecked={ context !== 'woocommerce/cart' }
 					key={ packageId }
 					packageId={ packageId }
 					packageData={ packageData }

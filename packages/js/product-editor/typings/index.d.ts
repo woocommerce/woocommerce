@@ -23,5 +23,9 @@ declare module '@wordpress/core-data' {
 		kind: string,
 		name: string,
 		id: number | string
-	): { record: T };
+	): { record: T, editedRecord: T };
+}
+declare module '@wordpress/keyboard-shortcuts' {
+	function useShortcut(name: string, callback: (event: KeyboardEvent) => void): void;
+	const store;
 }

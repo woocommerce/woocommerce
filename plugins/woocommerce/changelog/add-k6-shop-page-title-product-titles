@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+In k6 perf tests, add checks for the Shop page title and presence of product headers.

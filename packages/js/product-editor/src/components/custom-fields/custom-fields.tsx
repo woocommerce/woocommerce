@@ -5,11 +5,13 @@ import { Button } from '@wordpress/components';
 import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 import classNames from 'classnames';
 
 /**
  * Internal dependencies
  */
+import { TRACKS_SOURCE } from '../../constants';
 import { useCustomFields } from '../../hooks/use-custom-fields';
 import { CreateModal } from './create-modal';
 import { EditModal } from './edit-modal';
@@ -30,18 +32,28 @@ export function CustomFields( {
 	} = useCustomFields();
 
 	const [ showCreateModal, setShowCreateModal ] = useState( false );
-	const [ selectedCustomField, setSelectedCustomField ] =
-		useState< Metadata< string > >();
+	const [ selectedCustomFieldIndex, setSelectedCustomFieldIndex ] =
+		useState< number >();
 
 	function handleAddNewButtonClick() {
 		setShowCreateModal( true );
+
+		recordEvent( 'product_custom_fields_show_add_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
-	function customFieldEditButtonClickHandler(
-		customField: Metadata< string >
-	) {
+	function customFieldEditButtonClickHandler( customFieldIndex: number ) {
 		return function handleCustomFieldEditButtonClick() {
-			setSelectedCustomField( customField );
+			setSelectedCustomFieldIndex( customFieldIndex );
+
+			const customField = customFields[ customFieldIndex ];
+
+			recordEvent( 'product_custom_fields_show_edit_modal', {
+				source: TRACKS_SOURCE,
+				custom_field_id: customField.id,
+				custom_field_name: customField.key,
+			} );
 		};
 	}
 
@@ -50,6 +62,12 @@ export function CustomFields( {
 	) {
 		return function handleCustomFieldRemoveButtonClick() {
 			removeCustomField( customField );
+
+			recordEvent( 'product_custom_fields_remove_button_click', {
+				source: TRACKS_SOURCE,
+				custom_field_id: customField.id,
+				custom_field_name: customField.key,
+			} );
 		};
 	}
 
@@ -60,15 +78,23 @@ export function CustomFields( {
 
 	function handleCreateModalCancel() {
 		setShowCreateModal( false );
+
+		recordEvent( 'product_custom_fields_cancel_add_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	function handleEditModalUpdate( customField: Metadata< string > ) {
-		updateCustomField( customField );
-		setSelectedCustomField( undefined );
+		updateCustomField( customField, selectedCustomFieldIndex );
+		setSelectedCustomFieldIndex( undefined );
 	}
 
 	function handleEditModalCancel() {
-		setSelectedCustomField( undefined );
+		setSelectedCustomFieldIndex( undefined );
+
+		recordEvent( 'product_custom_fields_cancel_edit_modal', {
+			source: TRACKS_SOURCE,
+		} );
 	}
 
 	return (
@@ -97,7 +123,7 @@ export function CustomFields( {
 						</tr>
 					</thead>
 					<tbody>
-						{ customFields.map( ( customField ) => (
+						{ customFields.map( ( customField, index ) => (
 							<tr
 								className="woocommerce-product-custom-fields__table-row"
 								key={ customField.id ?? customField.key }
@@ -112,7 +138,7 @@ export function CustomFields( {
 									<Button
 										variant="tertiary"
 										onClick={ customFieldEditButtonClickHandler(
-											customField
+											index
 										) }
 									>
 										{ __( 'Edit', 'woocommerce' ) }
@@ -137,14 +163,16 @@ export function CustomFields( {
 
 			{ showCreateModal && (
 				<CreateModal
+					values={ customFields }
 					onCreate={ handleCreateModalCreate }
 					onCancel={ handleCreateModalCancel }
 				/>
 			) }
 
-			{ selectedCustomField && (
+			{ selectedCustomFieldIndex !== undefined && (
 				<EditModal
-					initialValue={ selectedCustomField }
+					initialValue={ customFields[ selectedCustomFieldIndex ] }
+					values={ customFields }
 					onUpdate={ handleEditModalUpdate }
 					onCancel={ handleEditModalCancel }
 				/>

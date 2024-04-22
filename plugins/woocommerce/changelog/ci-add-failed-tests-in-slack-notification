@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Include list of failed tests in Slack notifications

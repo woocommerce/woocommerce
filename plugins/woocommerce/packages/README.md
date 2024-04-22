@@ -24,7 +24,7 @@ Edit `composer.json` in the root directory and add the package and package versi
 {
   "name": "woocommerce/woocommerce",
   "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
-  "homepage": "https://woo.com/",
+  "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,

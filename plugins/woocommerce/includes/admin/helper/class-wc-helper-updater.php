@@ -1,6 +1,6 @@
 <?php
 /**
- * The update helper for Woo.com plugins.
+ * The update helper for WooCommerce.com plugins.
  *
  * @class WC_Helper_Updater
  * @package WooCommerce\Admin\Helper
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Helper_Updater Class
  *
  * Contains the logic to fetch available updates and hook into Core's update
- * routines to serve Woo.com-provided packages.
+ * routines to serve WooCommerce.com-provided packages.
  */
 class WC_Helper_Updater {
 
@@ -33,7 +33,7 @@ class WC_Helper_Updater {
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
 	public static function add_hook_for_modifying_update_notices() {
-		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() || ! WC_Helper::is_site_connected() ) {
 			add_action( 'load-plugins.php', array( __CLASS__, 'setup_update_plugins_messages' ), 11 );
 		}
 	}
@@ -103,7 +103,7 @@ class WC_Helper_Updater {
 
 	/**
 	 * Runs on pre_set_site_transient_update_themes, provides custom
-	 * packages for Woo.com-hosted extensions.
+	 * packages for WooCommerce.com-hosted extensions.
 	 *
 	 * @param object $transient The update_themes transient object.
 	 *
@@ -150,15 +150,49 @@ class WC_Helper_Updater {
 	}
 
 	/**
-	 * Runs on load-plugins.php, adds a hook to show a custom plugin update message for Woo.com hosted plugins.
+	 * Runs on load-plugins.php, adds a hook to show a custom plugin update message for WooCommerce.com hosted plugins.
 	 *
 	 * @return void.
 	 */
 	public static function setup_update_plugins_messages() {
+		$is_site_connected = WC_Helper::is_site_connected();
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			$filename = $plugin['_filename'];
-			add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			if ( $is_site_connected ) {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_install_marketplace_plugin_message' ), 10, 2 );
+			} else {
+				add_action( 'in_plugin_update_message-' . $filename, array( __CLASS__, 'add_connect_woocom_plugin_message' ) );
+			}
 		}
+	}
+
+	/**
+	 * Runs on in_plugin_update_message-{file-name}, show a message to connect to woocommerce.com for unconnected stores
+	 *
+	 * @return void.
+	 */
+	public static function add_connect_woocom_plugin_message() {
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		printf(
+			wp_kses(
+			/* translators: 1: Woo Update Manager plugin install URL */
+				__( ' <a href="%1$s">Connect your store</a> to woocommerce.com to update.', 'woocommerce' ),
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
+			esc_url( $connect_page_url ),
+		);
 	}
 
 	/**
@@ -179,7 +213,7 @@ class WC_Helper_Updater {
 			printf(
 				wp_kses(
 					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install Woo.com Update Manager</a> to update.', 'woocommerce' ),
+					__( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' ),
 					array(
 						'a' => array(
 							'href' => array(),
@@ -192,7 +226,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate Woo.com Update Manager to update.', 'woocommerce' );
+			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
 		}
 	}
 
@@ -422,13 +456,22 @@ class WC_Helper_Updater {
 			'errors'   => array(),
 		);
 
-		$request = WC_Helper_API::post(
-			'update-check',
-			array(
-				'body'          => wp_json_encode( array( 'products' => $payload ) ),
-				'authenticated' => true,
-			)
-		);
+		if ( WC_Helper::is_site_connected() ) {
+			$request = WC_Helper_API::post(
+				'update-check',
+				array(
+					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'authenticated' => true,
+				)
+			);
+		} else {
+			$request = WC_Helper_API::post(
+				'update-check-public',
+				array(
+					'body' => wp_json_encode( array( 'products' => $payload ) ),
+				)
+			);
+		}
 
 		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			$data['errors'][] = 'http-error';
@@ -515,6 +558,45 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Get the type of woo connect notice to be shown in the WC Settings and Marketplace pages.
+	 * - If a store is connected to woocommerce.com or has no installed woo plugins, return 'none'.
+	 * - If a store has installed woo plugins but no updates, return 'short'.
+	 * - If a store has an installed woo plugin with update, return 'long'.
+	 *
+	 * @return string The notice type, 'none', 'short', or 'long'.
+	 */
+	public static function get_woo_connect_notice_type() {
+		if ( WC_Helper::is_site_connected() ) {
+			return 'none';
+		}
+
+		$woo_plugins = WC_Helper::get_local_woo_plugins();
+
+		if ( empty( $woo_plugins ) ) {
+			return 'none';
+		}
+
+		$update_data = self::get_update_data();
+
+		if ( empty( $update_data ) ) {
+			return 'short';
+		}
+
+		// Scan local plugins.
+		foreach ( $woo_plugins as $plugin ) {
+			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
+				return 'long';
+			}
+		}
+
+		return 'short';
+	}
+
+	/**
 	 * Return the updates count markup.
 	 *
 	 * @return string Updates count markup, empty string if no updates avairable.
@@ -567,7 +649,7 @@ class WC_Helper_Updater {
 		return new WP_Error(
 			'woocommerce_subscription_expired',
 			sprintf(
-				// translators: %s: URL of Woo.com subscriptions tab.
+				// translators: %s: URL of WooCommerce.com subscriptions tab.
 				__( 'Please visit the <a href="%s" target="_blank">subscriptions page</a> and renew to continue receiving updates.', 'woocommerce' ),
 				esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) )
 			)

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * The main entry-point for all things related to the Helper.
  * The Helper manages the connection between the store and
- * an account on Woo.com.
+ * an account on WooCommerce.com.
  */
 class WC_Helper_Admin {
 
@@ -50,6 +50,8 @@ class WC_Helper_Admin {
 			$installed_products
 		);
 
+		$woo_connect_notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+
 		$settings['wccomHelper'] = array(
 			'isConnected'                => WC_Helper::is_site_connected(),
 			'connectURL'                 => self::get_connection_url(),
@@ -63,13 +65,14 @@ class WC_Helper_Admin {
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'wooUpdateCount'             => WC_Helper_Updater::get_updates_count_based_on_site_status(),
+			'woocomConnectNoticeType'    => $woo_connect_notice_type,
 		);
 
 		return $settings;
 	}
 
 	/**
-	 * Generates the URL for connecting or disconnecting the store to/from Woo.com.
+	 * Generates the URL for connecting or disconnecting the store to/from WooCommerce.com.
 	 * Approach taken from existing helper code that isn't exposed.
 	 *
 	 * @return string
@@ -123,7 +126,7 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Fetch featured products from Woo.com and serve them
+	 * Fetch featured products from WooCommerce.com and serve them
 	 * as JSON.
 	 */
 	public static function get_featured() {
