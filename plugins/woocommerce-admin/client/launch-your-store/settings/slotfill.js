@@ -17,13 +17,17 @@ import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '../../settings/settings-slots';
-import { useComingSoonEditorLink } from '../hooks/use-coming-soon-editor-link';
 import './style.scss';
+import {
+	COMING_SOON_PAGE_EDITOR_LINK,
+	SITE_VISIBILITY_DOC_LINK,
+} from '../constants';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -48,7 +52,6 @@ const SiteVisibility = () => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
 	const copied = __( 'Copied!', 'woocommerce' );
 	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
-	const [ commingSoonPageLink ] = useComingSoonEditorLink();
 
 	const getPrivateLink = () => {
 		if ( storePagesOnly === 'yes' ) {
@@ -111,17 +114,22 @@ const SiteVisibility = () => {
 					selected={ comingSoon }
 				/>
 				<p className="site-visibility-settings-slotfill-section-description">
-					{ createInterpolateElement(
-						__(
-							'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
-							'woocommerce'
-						),
-						{
-							a: createElement( 'a', {
-								href: commingSoonPageLink,
-							} ),
-						}
-					) }
+					{ getSetting( 'currentThemeIsFSETheme' )
+						? createInterpolateElement(
+								__(
+									'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing. You can customize your “Coming soon” landing page via the <a>Editor</a>.',
+									'woocommerce'
+								),
+								{
+									a: createElement( 'a', {
+										href: COMING_SOON_PAGE_EDITOR_LINK,
+									} ),
+								}
+						  )
+						: __(
+								'Your site is hidden from visitors behind a “Coming soon” landing page until it’s ready for viewing.',
+								'woocommerce'
+						  ) }
 				</p>
 				<div
 					className={ classNames(
@@ -139,9 +147,16 @@ const SiteVisibility = () => {
 									'woocommerce'
 								) }
 								<p>
-									{ __(
-										'Hide store pages only behind a “Coming soon” page. The rest of your site will remain public.',
-										'woocommerce'
+									{ createInterpolateElement(
+										__(
+											'Display a "coming soon" message on your <a>store pages</a> — the rest of your site will remain visible.',
+											'woocommerce'
+										),
+										{
+											a: createElement( 'a', {
+												href: SITE_VISIBILITY_DOC_LINK,
+											} ),
+										}
 									) }
 								</p>
 							</>
@@ -168,7 +183,7 @@ const SiteVisibility = () => {
 								) }
 								<p>
 									{ __(
-										'“Coming soon” sites are only visible to Admins and Shop managers. Enable “Share site” to let other users view your site.',
+										'Share your site with anyone using a private link.',
 										'woocommerce'
 									) }
 								</p>

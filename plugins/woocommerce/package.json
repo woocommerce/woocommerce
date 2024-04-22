@@ -59,6 +59,7 @@
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
+		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:unit": "pnpm test:php",
@@ -244,6 +245,21 @@
 					"testEnv": {
 						"start": "env:perf"
 					}
+				},
+				{
+					"name": "Metrics",
+					"testType": "performance",
+					"command": "test:metrics:ci",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/metrics/**"
+					]
 				}
 			]
 		}
@@ -298,7 +314,7 @@
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"browserslist": [

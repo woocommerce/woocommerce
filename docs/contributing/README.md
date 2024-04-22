@@ -32,7 +32,7 @@ Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/tru
 - [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)
 - [Bug Report template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/1-bug-report.yml)
 - [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)
-- [Feature requests](https://woo.com/feature-requests/woocommerce/)
+- [Feature requests](https://woocommerce.com/feature-requests/woocommerce/)
 
 ### Security
 

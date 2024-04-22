@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Always use productTemplateId when available and use editedRecord in useEntityRecord hooks

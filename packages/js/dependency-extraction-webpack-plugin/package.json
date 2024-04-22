@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/dependency-extraction-webpack-plugin",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"description": "WooCommerce Dependency Extraction Webpack Plugin",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -9,7 +9,7 @@
 		"woocommerce"
 	],
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin/README.md",
