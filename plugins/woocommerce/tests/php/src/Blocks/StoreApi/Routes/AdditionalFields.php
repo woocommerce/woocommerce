@@ -142,7 +142,7 @@ class AdditionalFields extends MockeryTestCase {
 				'type'     => 'checkbox',
 			),
 		);
-		array_map( 'woocommerce_blocks_register_checkout_field', $this->fields );
+		array_map( '__experimental_woocommerce_blocks_register_checkout_field', $this->fields );
 	}
 
 	/**
