@@ -26,7 +26,7 @@ export const MoreMenu = () => {
 			{ () => (
 				<>
 					{ ! isLargeViewport && (
-						<PinnedItems.Slot scope="woocommerce-product-editor-iframe-editor" />
+						<PinnedItems.Slot scope="woocommerce/product-editor-iframe-editor" />
 					) }
 					{ renderBlockToolbar && <WritingMenu /> }
 					<ToolsMenuGroup />

@@ -221,7 +221,7 @@ export function HeaderToolbar( {
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
-				<PinnedItems.Slot scope="woocommerce-product-editor-iframe-editor" />
+				<PinnedItems.Slot scope="woocommerce/product-editor-iframe-editor" />
 				<ToolbarItem
 					as={ ShowBlockInspectorPanel }
 					className="woocommerce-show-block-inspector-panel"

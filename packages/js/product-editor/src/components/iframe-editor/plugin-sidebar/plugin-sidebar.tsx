@@ -17,7 +17,7 @@ export function PluginSidebar( {
 		<ComplementaryArea
 			panelClassName={ className }
 			className="TODO"
-			scope="woocommerce-product-editor-iframe-editor"
+			scope="woocommerce/product-editor-iframe-editor"
 			{ ...props }
 		/>
 	);

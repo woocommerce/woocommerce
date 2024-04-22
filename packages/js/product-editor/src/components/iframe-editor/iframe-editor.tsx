@@ -122,7 +122,7 @@ export function IframeEditor( {
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
 			isRightSidebarOpen: getActiveComplementaryArea(
-				'woocommerce-product-editor-iframe-editor'
+				'woocommerce/product-editor-iframe-editor'
 			),
 		};
 	}, [] );
@@ -250,8 +250,8 @@ export function IframeEditor( {
 						{ isSidebarOpened && (
 							<div className="woocommerce-iframe-editor__sidebar">
 								<BlockInspector />
-								{ isRightSidebarOpen && (
-									<ComplementaryArea.Slot scope="woocommerce-product-editor-iframe-editor" />
+								{ true && (
+									<ComplementaryArea.Slot scope="woocommerce/product-editor-iframe-editor" />
 								) }
 							</div>
 						) }
