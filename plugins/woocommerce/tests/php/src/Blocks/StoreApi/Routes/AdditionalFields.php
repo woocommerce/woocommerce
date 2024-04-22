@@ -287,7 +287,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_optional_field_in_schema() {
 		$id = 'plugin-namespace/optional-field';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Optional Field',
@@ -338,7 +338,7 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'label'    => 'Invalid ID',
 				'location' => 'additional',
@@ -381,7 +381,7 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid ID',
@@ -424,7 +424,7 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'location' => 'additional',
@@ -466,7 +466,7 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'    => $id,
 				'label' => 'Missing Location',
@@ -508,7 +508,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Location',
@@ -553,7 +553,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Government ID',
@@ -602,7 +602,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Type',
@@ -647,7 +647,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Invalid Sanitize',
@@ -693,7 +693,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Invalid Validate',
@@ -739,7 +739,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'         => $id,
 				'label'      => 'Invalid Attribute',
@@ -809,7 +809,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'         => $id,
 				'label'      => 'Invalid Attribute Values',
@@ -883,7 +883,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Missing Options',
@@ -928,7 +928,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Options',
@@ -975,7 +975,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Duplicate Options',
@@ -1026,7 +1026,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_optional_select_has_empty_value() {
 		$id = 'plugin-namespace/optional-select';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Optional Select',
@@ -1083,7 +1083,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Checkbox Only Optional',
@@ -1142,7 +1142,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Hidden Field',
@@ -1280,7 +1280,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_placing_order_sanitize_text() {
 		$id = 'plugin-namespace/sanitize-text';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Sanitize Text',
@@ -1346,7 +1346,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_placing_order_validate_text() {
 		$id = 'plugin-namespace/validate-text';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Validate Text',
@@ -1415,7 +1415,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_sanitize_filter() {
 		$id = 'plugin-namespace/filter-sanitize';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Filter Sanitize',
@@ -1492,7 +1492,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_validate_filter() {
 		$id = 'plugin-namespace/filter-validate';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Filter Validate',
@@ -1569,7 +1569,7 @@ class AdditionalFields extends MockeryTestCase {
 	public function test_place_order_required_address_field() {
 		$id    = 'plugin-namespace/my-required-field';
 		$label = 'My Required Field';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => $label,
@@ -1633,7 +1633,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_place_order_required_contact_field() {
 		$id = 'plugin-namespace/my-required-contact-field';
-		\woocommerce_blocks_register_checkout_field(
+		\__experimental_woocommerce_blocks_register_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'My Required Field',

@@ -663,9 +663,20 @@ class CheckoutFields {
 			 * @param mixed  $field_value The value of the field being sanitized.
 			 * @param string $field_key   Key of the field being sanitized.
 			 *
+			 * @since 8.6.0
+			 * @deprecated 8.7.0 Use woocommerce_blocks_sanitize_additional_field instead.
+			 */
+			$field_value = apply_filters_deprecated( '__experimental_woocommerce_blocks_sanitize_additional_field', array( $field_value, $field_key ), '8.7.0', 'woocommerce_blocks_sanitize_additional_field', 'This action has been graduated, use woocommerce_blocks_sanitize_additional_field instead.' );
+
+			/**
+			 * Allow custom sanitization of an additional field.
+			 *
+			 * @param mixed  $field_value The value of the field being sanitized.
+			 * @param string $field_key   Key of the field being sanitized.
+			 *
 			 * @since 8.7.0
 			 */
-			return apply_filters( '__experimental_woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
+			return apply_filters_deprecated( 'woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
 
 		} catch ( \Throwable $e ) {
 			// One of the filters errored so skip it. This allows the checkout process to continue.
@@ -713,9 +724,20 @@ class CheckoutFields {
 			 * @param string   $field_key   Key of the field being sanitized.
 			 * @param mixed    $field_value The value of the field being validated.
 			 *
+			 * @since 8.6.0
+			 * @deprecated 8.7.0 Use woocommerce_blocks_validate_additional_field instead.
+			 */
+			wc_do_deprecated_action( '__experimental_woocommerce_blocks_validate_additional_field', array( $errors, $field_key, $field_value ), '8.7.0', 'woocommerce_blocks_validate_additional_field', 'This action has been graduated, use woocommerce_blocks_validate_additional_field instead.' );
+			/**
+			 * Pass an error object to allow validation of an additional field.
+			 *
+			 * @param WP_Error $errors      A WP_Error object that extensions may add errors to.
+			 * @param string   $field_key   Key of the field being sanitized.
+			 * @param mixed    $field_value The value of the field being validated.
+			 *
 			 * @since 8.7.0
 			 */
-			do_action( '__experimental_woocommerce_blocks_validate_additional_field', $errors, $field_key, $field_value );
+			do_action( 'woocommerce_blocks_validate_additional_field', $errors, $field_key, $field_value );
 
 		} catch ( \Throwable $e ) {
 
@@ -816,9 +838,21 @@ class CheckoutFields {
 			 * @param mixed    $fields  List of fields (key value pairs) in this location.
 			 * @param string   $group   The group of this location (shipping|billing|'').
 			 *
+			 * @since 8.6.0
+			 * @deprecated 8.7.0 Use woocommerce_blocks_validate_location_{location}_fields instead.
+			 */
+			wc_do_deprecated_action( '__experimental_woocommerce_blocks_validate_location_' . $location . '_fields', array( $errors, $fields, $group ), '8.7.0', 'woocommerce_blocks_validate_location_' . $location . '_fields', 'This action has been graduated, use woocommerce_blocks_validate_location_' . $location . '_fields instead.' );
+
+			/**
+			 * Pass an error object to allow validation of an additional field.
+			 *
+			 * @param WP_Error $errors  A WP_Error object that extensions may add errors to.
+			 * @param mixed    $fields  List of fields (key value pairs) in this location.
+			 * @param string   $group   The group of this location (shipping|billing|'').
+			 *
 			 * @since 8.7.0
 			 */
-			do_action( '__experimental_woocommerce_blocks_validate_location_' . $location . '_fields', $errors, $fields, $group );
+			do_action( 'woocommerce_blocks_validate_location_' . $location . '_fields', $errors, $fields, $group );
 
 		} catch ( \Throwable $e ) {
 

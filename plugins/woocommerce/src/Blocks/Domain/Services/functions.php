@@ -42,7 +42,7 @@ if ( ! function_exists( '__experimental_woocommerce_blocks_register_checkout_fie
 	 * @deprecated 5.6.0 Use woocommerce_blocks_register_checkout_field() instead.
 	 */
 	function __experimental_woocommerce_blocks_register_checkout_field( $options ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionDoubleUnderscore,PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames.FunctionDoubleUnderscore
-		_deprecated_function( __FUNCTION__, '8.9.0', 'woocommerce_blocks_register_checkout_field' );
+		wc_deprecated_function( __FUNCTION__, '8.9.0', 'woocommerce_blocks_register_checkout_field' );
 		woocommerce_blocks_register_checkout_field( $options );
 	}
 }
