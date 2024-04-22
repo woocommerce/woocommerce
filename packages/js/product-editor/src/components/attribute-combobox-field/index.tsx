@@ -5,6 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { ComboboxControl as CoreComboboxControl } from '@wordpress/components';
 import { createElement, useMemo, useState } from '@wordpress/element';
+import { Icon, tip } from '@wordpress/icons';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	ProductAttributesActions,
@@ -155,6 +156,16 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 	 */
 	const style = { zIndex: 1000 - instanceId };
 
+	let help = null;
+	if ( ! items.length ) {
+		help = (
+			<div className="woocommerce-attribute-combobox-help">
+				<Icon icon={ tip } size={ 20 } />
+				{ __( 'Nothing yet. Type to create.', 'woocommerce' ) }
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className={ classnames(
@@ -170,6 +181,7 @@ const AttributeCombobox: React.FC< AttributeComboboxProps > = ( {
 				allowReset={ false }
 				options={ options }
 				value={ currentValue }
+				help={ help }
 				onChange={ ( newValue ) => {
 					if ( ! newValue ) {
 						return;

@@ -1,5 +1,6 @@
 .woocommerce-attribute-combobox-container {
 	position: relative;
+	min-height: 60px;
 
 	&:not( .no-items ) .components-form-token-field__suggestions-list {
 		border-top: 1px solid #949494;
@@ -19,10 +20,6 @@
 		}
 	}
 
-	.components-form-token-field__suggestions-list {
-		box-shadow: none;
-	}
-
 	.components-form-token-field__suggestion {
 		padding: 0;
 
@@ -38,6 +35,24 @@
 
 		&.is-selected .item-wrapper .is-disabled {
 			background-color: #fafafa;
+		}
+	}
+
+	.components-form-token-field__suggestions-list {
+		box-shadow: none;
+		z-index: 10;
+	}
+
+	.components-base-control__help {
+		position: absolute;	
+		left: 0;
+		top: 36px;	
+	}
+	.woocommerce-attribute-combobox-help {
+		display: flex;
+	
+		> svg {
+			fill: #949494;
 		}
 	}
 }
