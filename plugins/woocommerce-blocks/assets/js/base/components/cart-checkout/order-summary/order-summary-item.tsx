@@ -41,8 +41,6 @@ const OrderSummaryItem = ( { cartItem }: OrderSummaryProps ): JSX.Element => {
 		permalink,
 		prices,
 		quantity,
-		short_description: shortDescription,
-		description: fullDescription,
 		item_data: itemData,
 		variation,
 		totals,
