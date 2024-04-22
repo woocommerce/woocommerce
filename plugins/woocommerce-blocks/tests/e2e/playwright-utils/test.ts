@@ -223,13 +223,13 @@ const test = base.extend<
 				deletePost( requestUtils, id );
 
 			const utilUpdateTemplateContents = (
-				template: TemplatePayload,
+				templateId: string,
 				templatePath: string,
 				data: unknown
 			) =>
 				updateTemplateContents(
 					requestUtils,
-					template,
+					templateId,
 					templatePath,
 					data
 				);
