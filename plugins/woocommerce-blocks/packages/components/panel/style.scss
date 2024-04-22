@@ -38,6 +38,7 @@
 		@include reset-typography();
 		background: transparent;
 		box-shadow: none;
+		cursor: pointer;
 	}
 
 	> .wc-block-components-panel__button-icon {
@@ -59,7 +60,8 @@
 }
 
 // Extra classes for specificity.
-.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone .wc-block-components-panel__button {
+.theme-twentytwentyone.theme-twentytwentyone.theme-twentytwentyone
+	.wc-block-components-panel__button {
 	background-color: inherit;
 	color: inherit;
 }
