@@ -228,9 +228,9 @@ class CheckoutFields {
 
 		$this->fields_locations = [
 			// omit email from shipping and billing fields.
-			'address'    => array_merge( \array_diff_key( array_keys( $this->core_fields ), array( 'email' ) ) ),
-			'contact'    => array( 'email' ),
-			'order' => [],
+			'address' => array_merge( \array_diff_key( array_keys( $this->core_fields ), array( 'email' ) ) ),
+			'contact' => array( 'email' ),
+			'order'   => [],
 		];
 
 		add_filter( 'woocommerce_get_country_locale_default', array( $this, 'update_default_locale_with_fields' ) );
