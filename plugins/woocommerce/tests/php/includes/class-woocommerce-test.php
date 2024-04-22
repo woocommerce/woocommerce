@@ -27,11 +27,4 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( $property->isPublic() );
 		$this->assertInstanceOf( WC_API::class, $property->getValue( WC() ) );
 	}
-
-	/**
-	 * Tear down.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-	}
 }
