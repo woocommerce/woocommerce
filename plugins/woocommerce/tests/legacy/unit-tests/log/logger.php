@@ -82,23 +82,13 @@ class WC_Tests_Logger extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_clear() {
-		$logger = new WC_Logger();
-		$source = 'clear-test';
-		$logger->log( 'debug', 'Clear test', array( 'source' => $source ) );
-		$logger->log( 'debug', 'Other log', array( 'source' => 'other-source' ) );
-
-		$files = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 2, $files );
-		$files = glob( Settings::get_log_directory() . $source . '*.log' );
-		$this->assertCount( 1, $files );
-
-		$logger->clear( $source );
-
-		// The clear method creates a log entry upon completion, so there are still 2 log files.
-		$files = glob( Settings::get_log_directory() . '*.log' );
-		$this->assertCount( 2, $files );
-		$files = glob( Settings::get_log_directory() . $source . '*.log' );
-		$this->assertCount( 0, $files );
+		$path = Settings::get_log_directory() . 'unit-tests.log';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
+		file_put_contents( $path, 'Test file content.' );
+		$this->assertFileExists( $path );
+		$log = new WC_Logger();
+		$log->clear( 'unit-tests' );
+		$this->assertFileDoesNotExist( $path );
 	}
 
 	/**
