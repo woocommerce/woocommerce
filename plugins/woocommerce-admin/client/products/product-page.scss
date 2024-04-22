@@ -75,12 +75,6 @@
 	}
 }
 
-.woocommerce-admin-page__product_product-id_variation_variation-id {
-	.interface-interface-skeleton__content {
-		overflow: hidden;
-	}
-}
-
 html.interface-interface-skeleton__html-container {
 	@include breakpoint( "<782px" ) {
 		position: inherit;

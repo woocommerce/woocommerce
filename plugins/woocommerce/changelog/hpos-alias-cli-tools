@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Deprecate CLI tools under "cot" namespace and add aliases in "hpos" namespace.

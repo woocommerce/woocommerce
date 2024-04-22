@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Doesn't change functionality, just avoids running queries that won't be used anyway.
+

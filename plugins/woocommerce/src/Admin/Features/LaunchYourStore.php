@@ -70,6 +70,9 @@ class LaunchYourStore {
 		$is_setting_page = $current_screen && 'woocommerce_page_wc-settings' === $current_screen->id;
 
 		if ( $is_setting_page ) {
+			// Regnerate the share key if it's not set.
+			add_option( 'woocommerce_share_key', wp_generate_password( 32, false ) );
+
 			$settings['siteVisibilitySettings'] = array(
 				'shop_permalink'               => get_permalink( wc_get_page_id( 'shop' ) ),
 				'woocommerce_coming_soon'      => get_option( 'woocommerce_coming_soon' ),
@@ -174,7 +177,7 @@ class LaunchYourStore {
 			self::BANNER_DISMISS_USER_META_KEY,
 			array(
 				'type'         => 'string',
-				'description'  => 'Indicate wheter user has dismissed coming soon notice or not',
+				'description'  => 'Indicate whether the user has dismissed the coming soon notice or not.',
 				'single'       => true,
 				'show_in_rest' => true,
 			)
@@ -190,9 +193,9 @@ class LaunchYourStore {
 	 * @param object $user user object.
 	 */
 	public function reset_woocommerce_coming_soon_banner_dismissed( $user_login, $user ) {
-		$existing_meta = get_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, true );
+		$existing_meta = get_user_meta( $user->ID, self::BANNER_DISMISS_USER_META_KEY, true );
 		if ( 'yes' === $existing_meta ) {
-			update_user_meta( $user->id, self::BANNER_DISMISS_USER_META_KEY, 'no' );
+			update_user_meta( $user->ID, self::BANNER_DISMISS_USER_META_KEY, 'no' );
 		}
 	}
 }

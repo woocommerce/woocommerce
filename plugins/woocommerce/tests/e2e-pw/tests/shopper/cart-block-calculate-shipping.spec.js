@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -166,6 +165,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );
@@ -187,9 +187,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		).toBeVisible();
 		await expect(
 			page.locator(
-				'.wc-block-components-radio-control__description > .wc-block-components-formatted-money-amount'
+				'.wc-block-components-radio-control__description > .wc-block-components-shipping-rates-control__package__description--free'
 			)
-		).toContainText( '$0.00' );
+		).toContainText( 'Free' );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -204,6 +204,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );
@@ -265,6 +266,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );
@@ -307,9 +309,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await context.clearCookies();
 
 		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );
