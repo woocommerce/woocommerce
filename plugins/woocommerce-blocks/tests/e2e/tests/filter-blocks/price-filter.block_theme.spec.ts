@@ -15,7 +15,7 @@ const test = base.extend< {
 	defaultBlockTemplate: ExtendedTemplate;
 } >( {
 	defaultBlockTemplate: async ( { requestUtils, templateApiUtils }, use ) => {
-		const testingTemplate = await requestUtils.updateProductCatalogContent(
+		const testingTemplate = await requestUtils.updateProductCatalogTemplate(
 			TEMPLATE_PATH,
 			{
 				attributes: {

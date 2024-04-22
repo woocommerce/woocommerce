@@ -84,7 +84,7 @@ export const updateTemplateContents = async (
 	} );
 };
 
-export const updateProductCatalogContent = async (
+export const updateProductCatalogTemplate = async (
 	requestUtils: RequestUtils,
 	templatePath: string,
 	data: unknown
