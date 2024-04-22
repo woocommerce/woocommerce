@@ -35,7 +35,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const alreadyPresentBlock = await editorUtils.getBlockByName(
 			blockData.slug
 		);
-		await expect( alreadyPresentBlock ).toHaveText( 'Default Sorting' );
+		await expect( alreadyPresentBlock ).toHaveText( 'Default sorting' );
 
 		await editorUtils.removeBlockByClientId(
 			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
@@ -46,6 +46,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} );
 
 		const block = await editorUtils.getBlockByName( blockData.slug );
-		await expect( block ).toHaveText( 'Default Sorting' );
+		await expect( block ).toHaveText( 'Default sorting' );
 	} );
 } );
