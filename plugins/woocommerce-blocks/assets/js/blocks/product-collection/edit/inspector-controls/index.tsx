@@ -15,12 +15,12 @@ import {
 	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
 	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
 } from '@woocommerce/blocks/migration-products-to-product-collection';
+import { recordEvent } from '@woocommerce/tracks';
 import {
 	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -86,7 +86,7 @@ const ProductCollectionInspectorControls = (
 	);
 
 	const displayControlProps = {
-		setAttributes: setAttributes,
+		setAttributes,
 		displayLayout,
 	};
 
