@@ -280,8 +280,11 @@ class CLIRunner {
 	 *
 	 *     # Copy all order data into the post meta table, 500 posts at a time.
 	 *     wp wc cot migrate --batch-size=500
+	 *
+	 * @param array $args Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function migrate() {
+	public function migrate( array $args = array(), array $assoc_args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- for backwards compat.
 		WP_CLI::log( __( 'Migrate command is deprecated. Please use `sync` instead.', 'woocommerce' ) );
 	}
 
@@ -1015,8 +1018,11 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * Displays a summary of HPOS situation on this site.
 	 *
 	 * @since 8.6.0
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function status() {
+	public function status( array $args = array(), array $assoc_args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- for backwards compat.
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
 		// translators: %s is either 'yes' or 'no'.
