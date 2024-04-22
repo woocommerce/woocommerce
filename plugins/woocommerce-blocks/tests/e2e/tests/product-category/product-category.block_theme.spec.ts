@@ -18,13 +18,13 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
 		const blockLocator = await editorUtils.getBlockByName( blockData.slug );
-		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 9 );
+		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 4 );
 		await editorUtils.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
 			blockData.slug
 		);
 		await expect(
 			blockLocatorFrontend.getByRole( 'listitem' )
-		).toHaveCount( 9 );
+		).toHaveCount( 4 );
 	} );
 } );
