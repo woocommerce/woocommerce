@@ -21,7 +21,7 @@ export default function Edit( { attributes, setAttributes } ) {
 							setAttributes( { color: newColor } )
 						}
 						enableAlpha
-						defaultValue="${"
+						defaultValue="#bea0f2"
 					/>
 				</PanelBody>
 			</InspectorControls>
