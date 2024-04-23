@@ -334,7 +334,6 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }&tab=variations`
 			);
 
-			// eslint-disable-next-line playwright/no-waitforselector
 			await expect(
 				page.getByText(
 					'variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
