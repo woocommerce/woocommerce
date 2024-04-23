@@ -93,7 +93,6 @@ registerBlockType( metadata, {
                     display: flex;
                     height: 40px;
                     width: 74px;
-                    padding: 17px 16px;
                     justify-content: center;
                     align-items: center;
                     gap: 10px;
