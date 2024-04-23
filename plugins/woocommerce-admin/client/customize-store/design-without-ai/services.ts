@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Sender } from 'xstate';
-import { recordEvent } from '@woocommerce/tracks';
 import apiFetch from '@wordpress/api-fetch';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
@@ -33,6 +32,7 @@ import {
 	FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 } from '../assembler-hub/sidebar/global-styles/font-pairing-variations/constants';
 import { DesignWithoutAIStateMachineContext, Theme } from './types';
+import { trackEvent } from '../tracking';
 
 const assembleSite = async () => {
 	await updateTemplate( {
@@ -135,7 +135,7 @@ const installAndActivateTheme = async (
 		await setTheme( THEME_SLUG );
 		await updateGlobalStylesWithDefaultValues( context );
 	} catch ( error ) {
-		recordEvent(
+		trackEvent(
 			'customize_your_store__no_ai_install_and_activate_theme_error',
 			{
 				theme: THEME_SLUG,
