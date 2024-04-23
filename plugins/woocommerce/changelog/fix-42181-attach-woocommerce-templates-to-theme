@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Attach WooCommerce block templates to themes, so they don't persist after a theme switch
