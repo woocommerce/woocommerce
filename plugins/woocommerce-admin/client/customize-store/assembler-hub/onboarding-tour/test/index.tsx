@@ -3,12 +3,12 @@
  */
 import { createContext } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
-import { trackEvent } from '~/customize-store/tracking';
 /**
  * Internal dependencies
  */
 import { OnboardingTour } from '../index';
 import { FlowType } from '~/customize-store/types';
+import { trackEvent } from '~/customize-store/tracking';
 
 jest.mock( '~/customize-store/tracking', () => ( { trackEvent: jest.fn() } ) );
 jest.mock( '../../', () => ( {

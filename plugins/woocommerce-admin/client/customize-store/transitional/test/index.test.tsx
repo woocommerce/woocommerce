@@ -3,11 +3,11 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { trackEvent } from '~/customize-store/tracking';
 /**
  * Internal dependencies
  */
 import { Transitional } from '../index';
+import { trackEvent } from '~/customize-store/tracking';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	__esModule: true,
