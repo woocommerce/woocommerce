@@ -59,7 +59,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
-	 * @var bool Whether the `stamp_checkout_html_element` method has been called.
+	 *  Whether the `stamp_checkout_html_element` method has been called.
+	 *
+	 * @var bool
 	 */
 	private static $is_stamp_checkout_html_called = false;
 
