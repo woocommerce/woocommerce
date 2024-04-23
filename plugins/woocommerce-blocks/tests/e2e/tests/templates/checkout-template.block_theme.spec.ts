@@ -4,19 +4,15 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const permalink = '/checkout';
-const templatePath = 'woocommerce/woocommerce//page-checkout';
+const templateName = 'Page: Checkout';
 const templateType = 'wp_template';
 
 test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
-		admin,
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
+		await editorUtils.visitTemplateEditor( templateName, templateType );
 		await editorUtils.enterEditMode();
 		await expect(
 			page
@@ -32,11 +28,8 @@ test.describe( 'Test the checkout template', () => {
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await admin.visitSiteEditor( { path: '/page' } );
+		await editorUtils.visitTemplateEditor( templateName, templateType );
+		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
@@ -74,14 +67,10 @@ test.describe( 'Test the checkout template', () => {
 
 test.describe( 'Test editing the checkout template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
-		admin,
 		editorUtils,
 		editor,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
+		await editorUtils.visitTemplateEditor( templateName, templateType );
 		await editorUtils.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'

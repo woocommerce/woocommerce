@@ -4,20 +4,15 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 
 const permalink = '/cart';
-const templatePath = 'woocommerce/woocommerce//page-cart';
+const templateName = 'Page: Cart';
 const templateType = 'wp_template';
 
 test.describe( 'Test the cart template', () => {
 	test( 'Template can be opened in the site editor', async ( {
-		admin,
 		page,
 		editorUtils,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
-		await editorUtils.enterEditMode();
+		await editorUtils.visitTemplateEditor( templateName, templateType );
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
@@ -65,14 +60,10 @@ test.describe( 'Test the cart template', () => {
 
 test.describe( 'Test editing the cart template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
-		admin,
 		editorUtils,
 		editor,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-		} );
+		await editorUtils.visitTemplateEditor( templateName, templateType );
 		await editorUtils.enterEditMode();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->'

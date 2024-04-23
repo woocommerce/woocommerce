@@ -7,12 +7,11 @@ test.describe( 'Test the order confirmation template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		page,
 		editorUtils,
-		admin,
 	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//order-confirmation',
-			postType: 'wp_template',
-		} );
+		await editorUtils.visitTemplateEditor(
+			'Order Confirmation',
+			'wp_template'
+		);
 		await editorUtils.enterEditMode();
 		await editorUtils.transformIntoBlocks();
 		await expect(
