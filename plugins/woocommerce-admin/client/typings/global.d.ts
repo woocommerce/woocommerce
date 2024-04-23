@@ -58,6 +58,7 @@ declare global {
 			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
+			'launch-your-store': boolean;
 		};
 		wp: {
 			updates?: {

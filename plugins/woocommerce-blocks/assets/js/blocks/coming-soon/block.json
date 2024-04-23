@@ -1,0 +1,16 @@
+{
+	"name": "woocommerce/coming-soon",
+	"category": "woocommerce",
+	"title": "Coming Soon",
+	"attributes": {
+		"color": {
+			"type": "string"
+		}
+	},
+	"supports": {
+		"color": {
+			"background": false,
+			"text": true
+		}
+	}
+}
