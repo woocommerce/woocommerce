@@ -9,7 +9,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import {
 	ENTREPRENEUR_FLOW_QUERY_PARAM_VALUE,
 	isEntrepreneurFlow,
-} from '../design-with-ai/entrepreneur-flow';
+} from '~/customize-store/design-with-ai/entrepreneur-flow';
 import { isWooExpress } from '~/utils/is-woo-express';
 
 export const trackEvent = (
@@ -24,5 +24,9 @@ export const trackEvent = (
 		return;
 	}
 
-	recordEvent( eventName, properties );
+	if ( properties ) {
+		recordEvent( eventName, properties );
+	} else {
+		recordEvent( eventName );
+	}
 };
