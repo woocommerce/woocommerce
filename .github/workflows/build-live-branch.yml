@@ -64,7 +64,7 @@ jobs:
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins
-                  path: zips
+                  path: zips/woocommerce.zip
                   # Only need to retain for a day since the beta builder slurps it up to distribute.
                   retention-days: 1
 
