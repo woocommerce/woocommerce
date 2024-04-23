@@ -75,7 +75,7 @@ export default function Edit( { attributes, setAttributes } ) {
                     align-items: center;
                     margin: 0;
                 }
-                .wp-site-blocks > .wp-block-group {
+                .wp-block-woocommerce-coming-soon > .wp-block-group {
                     padding: 20px min(6.5rem, 8vw);
                 }
                 .wp-block-site-title p {
