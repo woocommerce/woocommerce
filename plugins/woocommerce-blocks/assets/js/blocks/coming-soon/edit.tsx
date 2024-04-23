@@ -8,18 +8,17 @@ import {
 	InnerBlocks,
 } from '@wordpress/block-editor';
 import { PanelBody, ColorPicker } from '@wordpress/components';
-import { Icon, styles } from '@wordpress/icons';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { color } = attributes;
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'copyright-date-block' ) }>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ColorPicker
 						color={ color }
-						onChange={ ( color: string ) =>
-							setAttributes( { color } )
+						onChange={ ( newColor: string ) =>
+							setAttributes( { color: newColor } )
 						}
 						enableAlpha
 						defaultValue="#bea0f2"
