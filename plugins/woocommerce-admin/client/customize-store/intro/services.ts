@@ -7,14 +7,16 @@ import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
-import { aiStatusResponse } from '../types';
+import { FlowType, aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
+import { isWooExpress } from '~/utils/is-woo-express';
 
-export const fetchAiStatus = () => async (): Promise< aiStatusResponse > => {
+export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
 		'https://status.openai.com/api/v2/status.json'
 	);
@@ -164,4 +166,31 @@ export const setFlags = async () => {
 		// all of them to resolve before returning.
 		await Promise.all( Object.values( _featureFlags ) );
 	}
+
+	// Set FlowType flag. We want to set the flag only in the parent window.
+	if ( isWooExpress() && ! isIframe( window ) ) {
+		try {
+			const { status } = await fetchAiStatus();
+
+			const isAiOnline =
+				status.indicator !== 'critical' && status.indicator !== 'major';
+
+			// @ts-expect-error temp workaround;
+			window.cys_aiOnline = status;
+			recordEvent( 'customize_your_store_ai_status', {
+				online: isAiOnline ? 'yes' : 'no',
+			} );
+
+			return isAiOnline ? FlowType.AIOnline : FlowType.AIOffline;
+		} catch ( e ) {
+			// @ts-expect-error temp workaround;
+			window.cys_aiOnline = false;
+			recordEvent( 'customize_your_store_ai_status', {
+				online: 'no',
+			} );
+			return FlowType.AIOffline;
+		}
+	}
+
+	return FlowType.noAI;
 };

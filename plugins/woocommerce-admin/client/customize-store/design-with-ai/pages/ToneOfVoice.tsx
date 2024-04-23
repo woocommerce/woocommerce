@@ -14,6 +14,7 @@ import { Tone, designWithAiStateMachineContext } from '../types';
 import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
+import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
 export type toneOfVoiceCompleteEvent = {
 	type: 'TONE_OF_VOICE_COMPLETE';
@@ -86,14 +87,16 @@ export const ToneOfVoice = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-			<CloseButton
-				onClick={ () => {
-					sendEvent( {
-						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-						payload: { step: 'tone-of-voice' },
-					} );
-				} }
-			/>
+			{ ! isEntrepreneurFlow() && (
+				<CloseButton
+					onClick={ () => {
+						sendEvent( {
+							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+							payload: { step: 'tone-of-voice' },
+						} );
+					} }
+				/>
+			) }
 			<div className="woocommerce-cys-design-with-ai-tone-of-voice woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>

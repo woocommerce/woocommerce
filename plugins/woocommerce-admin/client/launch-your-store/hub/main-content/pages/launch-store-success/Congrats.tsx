@@ -14,6 +14,8 @@ import { closeSmall } from '@wordpress/icons';
 import { CustomerFeedbackSimple } from '@woocommerce/customer-effort-score';
 import { useCopyToClipboard } from '@wordpress/compose';
 import { Button, TextareaControl, Icon, Dashicon } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
+import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -64,6 +66,10 @@ export const Congrats = ( {
 		}
 	);
 
+	const { invalidateResolutionForStoreSelector } = useDispatch(
+		ONBOARDING_STORE_NAME
+	);
+
 	const sendData = () => {
 		const emojis = {
 			1: 'very_difficult',
@@ -96,6 +102,7 @@ export const Congrats = ( {
 						recordEvent(
 							'launch_your_store_congrats_back_to_home_click'
 						);
+						invalidateResolutionForStoreSelector( 'getTaskLists' );
 						navigateTo( { url: '/' } );
 					} }
 					className="back-to-home-button"

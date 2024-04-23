@@ -195,7 +195,7 @@ const getTourConfig = ( {
 	 *
 	 * @filter experimental_woocommerce_admin_product_tour_steps
 	 * @param {Object} WooStep Array of Woo tour guide steps.
-	 * @param string tutorialType The type of tutorial to display.
+	 * @param          string  tutorialType The type of tutorial to display.
 	 */
 	const steps: TourKitTypes.WooStep[] = applyFilters(
 		'experimental_woocommerce_admin_product_tour_steps',

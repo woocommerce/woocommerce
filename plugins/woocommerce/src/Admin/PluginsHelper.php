@@ -13,7 +13,10 @@ use ActionScheduler_QueueRunner;
 use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\PluginsInstallLogger;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Plugin_Upgrader;
+use WC_Helper;
+use WC_Helper_Updater;
 use WP_Error;
 use WP_Upgrader;
 
@@ -35,6 +38,8 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_callback', array( __CLASS__, 'install_plugins' ), 10, 2 );
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 	}
 
 	/**
@@ -530,6 +535,69 @@ class PluginsHelper {
 		);
 
 		return self::get_action_data( $actions );
+	}
+
+	/**
+	 * Show notices to connect to woocommerce.com for unconnected store in the plugin list.
+	 *
+	 * @return void
+	 */
+	public static function maybe_show_connect_notice_in_plugin_list() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+
+		if ( 'none' === $notice_type ) {
+			return;
+		}
+
+		$notice_string = '';
+
+		if ( 'long' === $notice_type ) {
+			$notice_string .= __( 'Your store might be at risk as you are running old versions of WooCommerce plugins.', 'woocommerce' );
+			$notice_string .= ' ';
+		}
+
+		$connect_page_url = add_query_arg(
+			array(
+				'page' => 'wc-admin',
+				'tab'  => 'my-subscriptions',
+				'path' => rawurlencode( '/extensions' ),
+			),
+			admin_url( 'admin.php' )
+		);
+
+		$notice_string .= sprintf(
+			/* translators: %s: Connect page URL */
+			__( '<a href="%s">Connect your store</a> to WooCommerce.com to get updates and streamlined support for your subscriptions.', 'woocommerce' ),
+			esc_url( $connect_page_url )
+		);
+
+		echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $notice_string ) . '</p>
+	    	</div>';
+	}
+
+	/**
+	 * Enqueue scripts for connect notice.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_connect_notice() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$notice_type = WC_Helper_Updater::get_woo_connect_notice_type();
+
+		if ( 'none' === $notice_type ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-connect-notice' );
+		wp_enqueue_script( 'woo-connect-notice' );
 	}
 
 }

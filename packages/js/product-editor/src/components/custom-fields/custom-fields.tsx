@@ -32,8 +32,8 @@ export function CustomFields( {
 	} = useCustomFields();
 
 	const [ showCreateModal, setShowCreateModal ] = useState( false );
-	const [ selectedCustomField, setSelectedCustomField ] =
-		useState< Metadata< string > >();
+	const [ selectedCustomFieldIndex, setSelectedCustomFieldIndex ] =
+		useState< number >();
 
 	function handleAddNewButtonClick() {
 		setShowCreateModal( true );
@@ -43,11 +43,11 @@ export function CustomFields( {
 		} );
 	}
 
-	function customFieldEditButtonClickHandler(
-		customField: Metadata< string >
-	) {
+	function customFieldEditButtonClickHandler( customFieldIndex: number ) {
 		return function handleCustomFieldEditButtonClick() {
-			setSelectedCustomField( customField );
+			setSelectedCustomFieldIndex( customFieldIndex );
+
+			const customField = customFields[ customFieldIndex ];
 
 			recordEvent( 'product_custom_fields_show_edit_modal', {
 				source: TRACKS_SOURCE,
@@ -85,12 +85,12 @@ export function CustomFields( {
 	}
 
 	function handleEditModalUpdate( customField: Metadata< string > ) {
-		updateCustomField( customField );
-		setSelectedCustomField( undefined );
+		updateCustomField( customField, selectedCustomFieldIndex );
+		setSelectedCustomFieldIndex( undefined );
 	}
 
 	function handleEditModalCancel() {
-		setSelectedCustomField( undefined );
+		setSelectedCustomFieldIndex( undefined );
 
 		recordEvent( 'product_custom_fields_cancel_edit_modal', {
 			source: TRACKS_SOURCE,
@@ -123,7 +123,7 @@ export function CustomFields( {
 						</tr>
 					</thead>
 					<tbody>
-						{ customFields.map( ( customField ) => (
+						{ customFields.map( ( customField, index ) => (
 							<tr
 								className="woocommerce-product-custom-fields__table-row"
 								key={ customField.id ?? customField.key }
@@ -138,7 +138,7 @@ export function CustomFields( {
 									<Button
 										variant="tertiary"
 										onClick={ customFieldEditButtonClickHandler(
-											customField
+											index
 										) }
 									>
 										{ __( 'Edit', 'woocommerce' ) }
@@ -163,14 +163,16 @@ export function CustomFields( {
 
 			{ showCreateModal && (
 				<CreateModal
+					values={ customFields }
 					onCreate={ handleCreateModalCreate }
 					onCancel={ handleCreateModalCancel }
 				/>
 			) }
 
-			{ selectedCustomField && (
+			{ selectedCustomFieldIndex !== undefined && (
 				<EditModal
-					initialValue={ selectedCustomField }
+					initialValue={ customFields[ selectedCustomFieldIndex ] }
+					values={ customFields }
 					onUpdate={ handleEditModalUpdate }
 					onCancel={ handleEditModalCancel }
 				/>
