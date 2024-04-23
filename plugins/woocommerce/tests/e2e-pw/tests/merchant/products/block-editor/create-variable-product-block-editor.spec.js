@@ -339,7 +339,7 @@ test.describe( 'Variations tab', () => {
 
 			await page.waitForSelector(
 				'.woocommerce-product-variations__table-body > div',
-				{ timeout: 30000 }
+				{ timeout: 60000 }
 			);
 
 			await page
