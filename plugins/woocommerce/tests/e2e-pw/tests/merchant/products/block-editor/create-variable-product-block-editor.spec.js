@@ -335,10 +335,11 @@ test.describe( 'Variations tab', () => {
 			);
 
 			// eslint-disable-next-line playwright/no-waitforselector
-			await page.waitForSelector(
-				'.woocommerce-product-variations__table-body > div',
-				{ timeout: 60000 }
-			);
+			await expect(
+				page.getByText(
+					'variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
+				)
+			).toBeVisible();
 
 			await page
 				.getByRole( 'link', { name: 'Edit', exact: true } )
