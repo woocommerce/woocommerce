@@ -58,7 +58,7 @@ module.exports = async ( config ) => {
 	const customerPage = await customerContext.newPage();
 
 	// Ensure live mode state (coming soon = no)
-	await setOption( request, baseURL, 'woocommerce_coming_soon', 'no' );
+	// await setOption( request, baseURL, 'woocommerce_coming_soon', 'no' );
 
 	// Sign in as admin user and save state
 	const adminRetries = 5;
