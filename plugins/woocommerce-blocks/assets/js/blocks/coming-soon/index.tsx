@@ -2,10 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
-import { Icon } from '@wordpress/icons';
-import { sparkles } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
