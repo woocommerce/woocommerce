@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Blocks: Isolate performance tests from E2E tests
