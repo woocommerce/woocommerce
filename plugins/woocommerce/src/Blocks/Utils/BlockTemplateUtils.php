@@ -153,8 +153,7 @@ class BlockTemplateUtils {
 			return new \WP_Error( 'template_missing_theme', __( 'No theme is defined for this template.', 'woocommerce' ) );
 		}
 
-		$theme          = $terms[0]->name;
-		$has_theme_file = true;
+		$theme = $terms[0]->name;
 
 		$template                 = new \WP_Block_Template();
 		$template->wp_id          = $post->ID;
@@ -163,11 +162,12 @@ class BlockTemplateUtils {
 		$template->content        = $post->post_content;
 		$template->slug           = $post->post_name;
 		$template->source         = 'custom';
+		$template->origin         = 'theme';
 		$template->type           = $post->post_type;
 		$template->description    = $post->post_excerpt;
 		$template->title          = $post->post_title;
 		$template->status         = $post->post_status;
-		$template->has_theme_file = $has_theme_file;
+		$template->has_theme_file = true;
 		$template->is_custom      = false;
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 
@@ -230,8 +230,7 @@ class BlockTemplateUtils {
 		if ( ProductCatalogTemplate::SLUG === $template_file->slug ) {
 			$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
 		}
-		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
-		$template->source         = $template_file->source ? $template_file->source : 'plugin';
+		$template->source         = 'theme';
 		$template->slug           = $template_file->slug;
 		$template->type           = $template_type;
 		$template->title          = ! empty( $template_file->title ) ? $template_file->title : self::get_block_template_title( $template_file->slug );
@@ -279,9 +278,9 @@ class BlockTemplateUtils {
 			'id'          => $theme_name . '//' . $template_slug,
 			'path'        => $template_file,
 			'type'        => $template_type,
-			'theme'       => $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG,
+			'theme'       => $theme_name,
 			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
-			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
+			'source'      => 'theme',
 			'origin'      => 'theme',
 			'title'       => self::get_block_template_title( $template_slug ),
 			'description' => self::get_block_template_description( $template_slug ),
@@ -605,9 +604,7 @@ class BlockTemplateUtils {
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				if ( self::template_is_eligible_for_product_archive_fallback_from_theme( $template->slug ) ) {
-					$query_result_template->has_theme_file = true;
-				}
+				$query_result_template->has_theme_file = true;
 
 				return true;
 			}
