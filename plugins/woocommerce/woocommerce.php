@@ -69,3 +69,31 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
+
+
+function add_p_block_to_order_summary( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
+
+	print_r( $anchor_block_type );
+	if ( 'Page: Checkout' === $context->title && 'after' === $relative_position ) {
+		$hooked_block_types[] = 'core/paragraph';
+		// print_r( $context );
+	}
+
+	return $hooked_block_types;
+}
+
+add_filter( 'hooked_block_types', 'add_p_block_to_order_summary', 10, 4 );
+
+function modify_hooked_p( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+	if ( is_null( $parsed_hooked_block ) ) {
+		return $parsed_hooked_block;
+	}
+
+		$parsed_hooked_block['innerContent'] = array( 
+			'<p><a href="#">' . __( 'Back to top' ) . '</a></p>' 
+		);
+
+	return $parsed_hooked_block;
+}
+
+add_filter( 'hooked_block_core/paragraph', 'modify_hooked_p', 10, 5 );
