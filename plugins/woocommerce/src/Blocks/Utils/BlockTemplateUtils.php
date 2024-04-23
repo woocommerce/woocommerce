@@ -213,11 +213,7 @@ class BlockTemplateUtils {
 	 */
 	public static function build_template_result_from_file( $template_file, $template_type ) {
 		$template_file = (object) $template_file;
-
-		// If the theme has an archive-products.html template but does not have product taxonomy templates
-		// then we will load in the archive-product.html template from the theme to use for product taxonomies on the frontend.
-		$template_is_from_theme = 'theme' === $template_file->source;
-		$theme_name             = wp_get_theme()->get( 'TextDomain' );
+		$theme_name    = wp_get_theme()->get( 'TextDomain' );
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content  = file_get_contents( $template_file->path );
@@ -266,11 +262,10 @@ class BlockTemplateUtils {
 	 * @param string $template_file Block template file path.
 	 * @param string $template_type wp_template or wp_template_part.
 	 * @param string $template_slug Block template slug e.g. single-product.
-	 * @param bool   $template_is_from_theme If the block template file is being loaded from the current theme instead of Woo Blocks.
 	 *
 	 * @return object Block template object.
 	 */
-	public static function create_new_block_template_object( $template_file, $template_type, $template_slug, $template_is_from_theme = false ) {
+	public static function create_new_block_template_object( $template_file, $template_type, $template_slug ) {
 		$theme_name = wp_get_theme()->get( 'TextDomain' );
 
 		$new_template_item = array(
@@ -794,7 +789,6 @@ class BlockTemplateUtils {
 		if ( count( $templates_from_db ) > 0 ) {
 			$template_slug_to_load = $templates_from_db[0]->theme;
 		} else {
-			$theme_has_template    = self::theme_has_template_part( $slug );
 			$template_slug_to_load = get_stylesheet();
 		}
 		$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );

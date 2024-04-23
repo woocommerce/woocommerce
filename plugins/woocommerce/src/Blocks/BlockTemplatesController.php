@@ -257,7 +257,7 @@ class BlockTemplatesController {
 		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
 			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
+			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
 
@@ -467,7 +467,7 @@ class BlockTemplatesController {
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
 				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
+				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug );
 				continue;
 			}
 
@@ -475,7 +475,7 @@ class BlockTemplatesController {
 			// let's use the archive-product.html template from Blocks.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
 				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
-				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
+				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug );
 				continue;
 			}
 
