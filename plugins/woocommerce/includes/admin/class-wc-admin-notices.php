@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -68,7 +69,7 @@ class WC_Admin_Notices {
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
+		self::add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_notices' ), 20 );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -156,6 +157,7 @@ class WC_Admin_Notices {
 		self::add_min_version_notice();
 		self::add_maxmind_missing_license_key_notice();
 		self::maybe_add_legacy_api_removal_notice();
+		self::maybe_add_legacy_api_hpos_incompatibility_notice();
 	}
 
 	// phpcs:disable Generic.Commenting.Todo.TaskFound
@@ -213,13 +215,42 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Remove the admin notice about the removal of the Legacy REST API if the said API is disabled
-	 * or if the Legacy REST API extension is installed, and remove the notice about Legacy webhooks
-	 * if no such webhooks exist anymore or if the Legacy REST API extension is installed.
-	 *
-	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
+	 * Add a notice about the incompatibility between the Legacy REST API and HPOS if both are active
+	 * (regardless of whether the LEgacy REST API is in core or in the dedicated plugin )
 	 */
-	private static function maybe_remove_legacy_api_removal_notice() {
+	private static function maybe_add_legacy_api_hpos_incompatibility_notice() {
+		if ( ! ( 'yes' === get_option( 'woocommerce_api_enabled' ) && 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) ) {
+			return;
+		}
+
+		if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
+			$message = __( 'The Legacy REST API plugin and HPOS are both active on this site', 'woocommerce' );
+		} else {
+			$message = __( 'The Legacy REST API and HPOS are both active on this site', 'woocommerce' );
+		}
+
+		$features_page_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+		self::add_custom_notice(
+			'legacy_rest_api_is_incompatible_with_hpos',
+			sprintf(
+			// translators: 1 = "the legacy API plugin are both active on this site" message, 2 = URL
+				wpautop( __( '⚠ <b>%1$s.</b><br/><br/>Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS. <a target="_blank" href="%2$s">Manage features</a>', 'woocommerce' ) ),
+				$message,
+				$features_page_url
+			)
+		);
+	}
+
+	/**
+	 * - Remove the admin notice about the removal of the Legacy REST API if the said API is disabled
+	 *   or if the Legacy REST API extension is installed
+	 * - Rremove the notice about Legacy webhooks if no such webhooks exist anymore
+	 *   or if the Legacy REST API extension is installed.
+	 * - Remove the notice about the Legacy REST API incompatibility with HPOS if either of the two is disabled.
+	 *
+	 * TODO: Change this method in WooCommerce 9.0 so that the first two notices get removed if the Legacy REST API extension is installed and active.
+	 */
+	private static function maybe_remove_legacy_api_notices() {
 		$plugin_is_active = is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 
 		if ( self::has_notice( 'legacy_api_removed_in_woo_90' ) && ( $plugin_is_active || 'yes' !== get_option( 'woocommerce_api_enabled' ) ) ) {
@@ -228,6 +259,11 @@ class WC_Admin_Notices {
 
 		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( $plugin_is_active || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
 			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
+		}
+
+		if ( self::has_notice( 'legacy_rest_api_is_incompatible_with_hpos' ) &&
+			! ( 'yes' === get_option( 'woocommerce_api_enabled' ) && 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) ) {
+			self::remove_notice( 'legacy_rest_api_is_incompatible_with_hpos' );
 		}
 	}
 
