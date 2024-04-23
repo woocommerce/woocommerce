@@ -24,6 +24,10 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const getCanvas = async ( page ) => {
+	return page.frame( 'editor-canvas' ) || page;
+};
+
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
@@ -36,9 +40,17 @@ const goToPostEditor = async ( { page } ) => {
 	await disableWelcomeModal( { page } );
 };
 
+const fillPageTitle = async ( { page, title } ) => {
+	await ( await getCanvas( page ) )
+		.getByRole( 'textbox', { name: 'Add title' } )
+		.fill( title );
+};
+
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	getCanvas,
+	fillPageTitle,
 };
