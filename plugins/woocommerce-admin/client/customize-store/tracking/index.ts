@@ -14,7 +14,7 @@ import { isWooExpress } from '~/utils/is-woo-express';
 
 export const trackEvent = (
 	eventName: string,
-	properties?: Record< string, string >
+	properties?: Record< string, unknown >
 ) => {
 	if ( isWooExpress() && isEntrepreneurFlow() ) {
 		recordEvent( eventName, {
