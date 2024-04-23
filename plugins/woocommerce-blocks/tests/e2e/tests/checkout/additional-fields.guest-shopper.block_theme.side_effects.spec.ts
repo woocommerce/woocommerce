@@ -67,7 +67,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -119,7 +119,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
