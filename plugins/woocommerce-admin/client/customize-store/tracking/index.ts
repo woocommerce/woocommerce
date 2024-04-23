@@ -24,9 +24,5 @@ export const trackEvent = (
 		return;
 	}
 
-	if ( properties ) {
-		recordEvent( eventName, properties );
-	} else {
-		recordEvent( eventName );
-	}
+	recordEvent( eventName, properties );
 };
