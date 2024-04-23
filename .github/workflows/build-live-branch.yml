@@ -53,12 +53,6 @@ jobs:
 
                   mkdir "$GITHUB_WORKSPACE/zips"
                   cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
-                  cd "$GITHUB_WORKSPACE/zips"
-                  unzip woocommerce.zip
-                  rm woocommerce.zip
-                  mv woocommerce woocommerce-dev
-                  zip -q -r "woocommerce-dev.zip" "woocommerce-dev/"
-                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
 
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          
