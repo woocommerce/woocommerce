@@ -187,7 +187,8 @@ const Block = ( {
 	return (
 		<div
 			id="shipping-method"
-			className="wc-block-checkout__shipping-method-container"
+			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
+			className="components-button-group wc-block-checkout__shipping-method-container"
 			role="radiogroup"
 		>
 			<ShippingSelector
