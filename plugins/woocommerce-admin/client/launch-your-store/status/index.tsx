@@ -108,7 +108,6 @@ export const LaunchYourStoreStatus = ( {
 											) }
 										</MenuItem>
 									) }
-
 							</MenuGroup>
 						</>
 					) }
