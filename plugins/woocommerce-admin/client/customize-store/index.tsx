@@ -564,8 +564,6 @@ export const CustomizeStoreController = ( {
 				isAiOffline: ( _ctx ) => {
 					return _ctx.flowType === FlowType.AIOffline;
 				},
-				isWooExpress: () => isWooExpress(),
-				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
 					return !! _ctx.activeThemeHasMods;
 				},
