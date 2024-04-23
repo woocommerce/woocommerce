@@ -1,7 +1,7 @@
 {
 	"phpVersion": "7.4",
 	"plugins": [
-		"."
+		".", "WordPress/gutenberg"
 	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,

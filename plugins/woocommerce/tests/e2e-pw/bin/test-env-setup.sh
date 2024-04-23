@@ -41,3 +41,6 @@ fi
 echo -e 'Upload test images \n'
 wp-env run tests-cli wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'
 
+echo -e 'Active plugins: \n'
+wp-env run tests-cli wp plugin list
+
