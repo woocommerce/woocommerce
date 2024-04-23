@@ -1,5 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const { goToPageEditor, getCanvas } = require( '../../utils/editor' );
 
 const transformedCartBlockTitle = `Transformed Cart ${ Date.now() }`;
 const transformedCartBlockSlug = transformedCartBlockTitle
@@ -11,18 +11,17 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 
 	test( 'can transform classic cart to cart block', async ( { page } ) => {
 		// go to create a new page
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await goToPageEditor( { page } );
 
-		await disableWelcomeModal( { page } );
+		const canvas = await getCanvas( page );
 
-		// fill page title
-		await page
+		await canvas
 			.getByRole( 'textbox', { name: 'Add title' } )
 			.fill( transformedCartBlockTitle );
 
 		// add classic cart block
-		await page.getByRole( 'textbox', { name: 'Add title' } ).click();
-		await page.getByLabel( 'Add block' ).click();
+		await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
+		await canvas.getByLabel( 'Add block' ).click();
 		await page
 			.getByPlaceholder( 'Search', { exact: true } )
 			.fill( 'classic cart' );
@@ -33,14 +32,15 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 
 		// transform into blocks
 		await expect(
-			page.locator(
+			canvas.locator(
 				'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
 			)
 		).toBeVisible();
-		await page
+		await canvas
 			.getByRole( 'button' )
 			.filter( { hasText: 'Transform into blocks' } )
 			.click();
+
 		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
 			'Classic shortcode transformed to blocks.'
 		);
