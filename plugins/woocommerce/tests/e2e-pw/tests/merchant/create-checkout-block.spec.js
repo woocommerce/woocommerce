@@ -1,5 +1,11 @@
 const { test, expect } = require( '@playwright/test' );
-const { goToPageEditor, getCanvas } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	getCanvas,
+	fillPageTitle,
+	insertBlock,
+	transformIntoBlocks,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const transformedCheckoutBlockTitle = `Transformed Checkout ${ Date.now() }`;
@@ -83,37 +89,12 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 
 		await goToPageEditor( { page } );
 
+		await fillPageTitle( page, transformedCheckoutBlockTitle );
+		await insertBlock( page, 'Classic Checkout' );
+		await transformIntoBlocks( page );
+
+		// When Gutenberg is active, the canvas is in an iframe
 		let canvas = await getCanvas( page );
-
-		// fill page title
-		await canvas
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( transformedCheckoutBlockTitle );
-
-		// add classic checkout block
-		await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
-		await canvas.getByLabel( 'Add block' ).click();
-		await page
-			.getByPlaceholder( 'Search', { exact: true } )
-			.fill( 'classic checkout' );
-		await page
-			.getByRole( 'option' )
-			.filter( { hasText: 'Classic Checkout' } )
-			.click();
-
-		// transform into blocks
-		await expect(
-			canvas.locator(
-				'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
-			)
-		).toBeVisible();
-		await canvas
-			.getByRole( 'button' )
-			.filter( { hasText: 'Transform into blocks' } )
-			.click();
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Classic shortcode transformed to blocks.'
-		);
 
 		// Activate the terms and conditions checkbox
 		await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
