@@ -62,15 +62,10 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
-		const connectMessage = ! wccomSettings?.wooUpdateManagerInstalled
-			? __(
-					'Connect your WooCommerce.com account to easily manage your subscriptions from your store admin. To give you access to product updates and streamlined support, the WooCommerce.com Update Manager will be installed.',
-					'woocommerce'
-			  )
-			: __(
-					'Connect your WooCommerce.com account to easily manage your subscriptions from your store admin, to get product updates and streamlined support.',
-					'woocommerce'
-			  );
+		const connectMessage = __(
+			"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
+			'woocommerce'
+		);
 
 		return (
 			<div className="woocommerce-marketplace__my-subscriptions--connect">
