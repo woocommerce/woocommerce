@@ -8,12 +8,14 @@ import {
 	fromCallback,
 	fromPromise,
 	assign,
+	spawnChild,
 } from 'xstate5';
 import React from 'react';
 import classnames from 'classnames';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME, TaskListType, TaskType } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -23,13 +25,21 @@ import type { LaunchYourStoreComponentProps } from '..';
 import type { mainContentMachine } from '../main-content/xstate';
 import { updateQueryParams, createQueryParamsListener } from '../common';
 import { taskClickedAction, getLysTasklist } from './tasklist';
+import { fetchCongratsData } from '../main-content/pages/launch-store-success/services';
+import { getTimeFrame } from '~/utils';
+
+export type LYSAugmentedTaskListType = TaskListType & {
+	recentlyActionedTasks: string[];
+	fullLysTaskList: TaskType[];
+};
 
 export type SidebarMachineContext = {
 	externalUrl: string | null;
 	mainContentMachineRef: ActorRefFrom< typeof mainContentMachine >;
-	tasklist?: TaskListType;
+	tasklist?: LYSAugmentedTaskListType;
 	testOrderCount: number;
 	removeTestOrders?: boolean;
+	launchStoreAttemptTimestamp?: number;
 	launchStoreError?: {
 		message: string;
 	};
@@ -54,7 +64,6 @@ const sidebarQueryParamListener = fromCallback( ( { sendBack } ) => {
 const launchStoreAction = async () => {
 	const results = await dispatch( OPTIONS_STORE_NAME ).updateOptions( {
 		woocommerce_coming_soon: 'no',
-		'launch-status': 'launched',
 	} );
 	if ( results.success ) {
 		return results;
@@ -62,6 +71,45 @@ const launchStoreAction = async () => {
 	throw new Error( JSON.stringify( results ) );
 };
 
+const recordStoreLaunchAttempt = ( {
+	context,
+}: {
+	context: SidebarMachineContext;
+} ) => {
+	const total_count = context.tasklist?.fullLysTaskList.length || 0;
+	const incomplete_tasks =
+		context.tasklist?.tasks
+			.filter( ( task ) => ! task.isComplete )
+			.map( ( task ) => task.id ) || [];
+
+	const completed =
+		context.tasklist?.fullLysTaskList
+			.filter( ( task ) => task.isComplete )
+			.map( ( task ) => task.id ) || [];
+
+	const tasks_completed_in_lys = completed.filter( ( task ) =>
+		context.tasklist?.recentlyActionedTasks.includes( task )
+	); // recently actioned tasks can include incomplete tasks
+
+	recordEvent( 'launch_your_store_hub_store_launch_attempted', {
+		tasks_total_count: total_count, // all lys eligible tasks
+		tasks_completed: completed, // all lys eligible tasks that are completed
+		tasks_completed_count: completed.length,
+		tasks_completed_in_lys,
+		tasks_completed_in_lys_count: tasks_completed_in_lys.length,
+		incomplete_tasks,
+		incomplete_tasks_count: incomplete_tasks.length,
+		delete_test_orders: context.removeTestOrders || false,
+	} );
+	return performance.now();
+};
+
+const recordStoreLaunchResults = ( timestamp: number, success: boolean ) => {
+	recordEvent( 'launch_your_store_hub_store_launch_results', {
+		success,
+		duration: getTimeFrame( performance.now() - timestamp ),
+	} );
+};
 export const sidebarMachine = setup( {
 	types: {} as {
 		context: SidebarMachineContext;
@@ -103,6 +151,18 @@ export const sidebarMachine = setup( {
 		windowHistoryBack: () => {
 			window.history.back();
 		},
+		recordStoreLaunchAttempt: assign( {
+			launchStoreAttemptTimestamp: recordStoreLaunchAttempt,
+		} ),
+		recordStoreLaunchResults: (
+			{ context },
+			{ success }: { success: boolean }
+		) => {
+			recordStoreLaunchResults(
+				context.launchStoreAttemptTimestamp || 0,
+				success
+			);
+		},
 	},
 	guards: {
 		hasSidebarLocation: (
@@ -117,6 +177,7 @@ export const sidebarMachine = setup( {
 		sidebarQueryParamListener,
 		getTasklist: fromPromise( getLysTasklist ),
 		updateLaunchStoreOptions: fromPromise( launchStoreAction ),
+		fetchCongratsData,
 	},
 } ).createMachine( {
 	id: 'sidebar',
@@ -156,6 +217,11 @@ export const sidebarMachine = setup( {
 			initial: 'preLaunchYourStoreHub',
 			states: {
 				preLaunchYourStoreHub: {
+					entry: [
+						spawnChild( 'fetchCongratsData', {
+							id: 'prefetch-congrats-data ',
+						} ),
+					],
 					invoke: {
 						src: 'getTasklist',
 						onDone: {
@@ -185,20 +251,39 @@ export const sidebarMachine = setup( {
 			initial: 'launching',
 			states: {
 				launching: {
-					entry: assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+					entry: [
+						assign( { launchStoreError: undefined } ), // clear the errors if any from previously
+						'recordStoreLaunchAttempt',
+					],
 					invoke: {
 						src: 'updateLaunchStoreOptions',
 						onDone: {
 							target: '#storeLaunchSuccessful',
+							actions: [
+								{
+									type: 'recordStoreLaunchResults',
+									params: { success: true },
+								},
+							],
 						},
 						onError: {
-							actions: assign( {
-								launchStoreError: ( { event } ) => {
-									return {
-										message: JSON.stringify( event.error ), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
-									};
+							actions: [
+								assign( {
+									launchStoreError: ( { event } ) => {
+										return {
+											message: JSON.stringify(
+												event.error
+											), // for some reason event.error is an empty object, worth investigating if we decide to use the error message somewhere
+										};
+									},
+								} ),
+								{
+									type: 'recordStoreLaunchResults',
+									params: {
+										success: false,
+									},
 								},
-							} ),
+							],
 							target: '#launchYourStoreHub',
 						},
 					},

@@ -3,6 +3,7 @@ packages:
     - 'packages/php/*'
     - 'plugins/*'
     - 'plugins/woocommerce/client/legacy'
+    - 'plugins/woocommerce-blocks/bin/eslint-plugin-woocommerce'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'

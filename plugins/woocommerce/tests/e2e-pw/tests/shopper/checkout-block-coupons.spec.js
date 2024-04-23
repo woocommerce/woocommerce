@@ -36,6 +36,7 @@ const checkoutBlockPageSlug = checkoutBlockPageTitle
 let productId, orderId, limitedCouponId;
 
 test.describe( 'Checkout Block Applying Coupons', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 	const couponBatchId = [];
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -116,17 +117,9 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		} );
 	} );
 
-	test.beforeEach( async ( { context } ) => {
-		// Shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-	} );
-
 	test( 'can create checkout block page', async ( { page } ) => {
 		// create a new page with checkout block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
 		await disableWelcomeModal( { page } );
 
@@ -154,7 +147,9 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'allows checkout block to apply coupon of any type', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
 		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
@@ -198,7 +193,9 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'allows checkout block to apply multiple coupons', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
@@ -250,7 +247,9 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'prevents checkout block applying same coupon twice', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
 		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );
@@ -288,7 +287,9 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'prevents checkout block applying coupon with usage limit', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
 		// add product to cart block and go to checkout
 		await page.goto( `/shop/?add-to-cart=${ productId }` );
 		await page.waitForLoadState( 'networkidle' );

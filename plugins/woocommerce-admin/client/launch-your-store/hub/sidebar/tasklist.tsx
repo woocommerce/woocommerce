@@ -16,6 +16,7 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  */
 import { createStorageUtils } from '~/utils/localStorage';
 import { taskCompleteIcon, taskIcons } from './components/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -70,6 +71,10 @@ export const getLysTasklist = async () => {
 	return {
 		...tasklist[ 0 ],
 		tasks: visibleTasks,
+		recentlyActionedTasks,
+		fullLysTaskList: tasklist[ 0 ].tasks.filter( ( task ) =>
+			filteredTasks.includes( task.id )
+		),
 	};
 };
 
@@ -79,6 +84,9 @@ export function taskClickedAction( event: {
 } ) {
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
 	saveRecentlyActionedTask( [ ...recentlyActionedTasks, event.task.id ] );
+	recordEvent( 'launch_your_store_hub_task_clicked', {
+		task: event.task.id,
+	} );
 	if ( event.task.actionUrl ) {
 		navigateTo( { url: event.task.actionUrl } );
 	} else {

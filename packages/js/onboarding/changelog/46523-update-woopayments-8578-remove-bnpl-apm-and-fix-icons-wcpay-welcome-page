@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove BNPL (Klarna) additional payment method from WooPayments welcome page, update payment method icons

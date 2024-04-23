@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 
 /**
  * BlockTypesController class.
@@ -29,6 +30,7 @@ class BlockTemplatesController {
 		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
+		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
 
 		if ( wc_current_theme_is_fse_theme() ) {
 			// By default, the Template Part Block only supports template parts that are in the current theme directory.
@@ -330,12 +332,13 @@ class BlockTemplatesController {
 	 * @return array
 	 */
 	public function add_block_templates( $query_result, $query, $template_type ) {
-		if ( ! BlockTemplateUtils::supports_block_templates( $template_type ) ) {
+		$slugs = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
+
+		if ( ! BlockTemplateUtils::supports_block_templates( $template_type ) && ! in_array( ComingSoonTemplate::SLUG, $slugs, true ) ) {
 			return $query_result;
 		}
 
 		$post_type      = isset( $query['post_type'] ) ? $query['post_type'] : '';
-		$slugs          = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
 		$template_files = $this->get_block_templates( $slugs, $template_type );
 		$theme_slug     = wp_get_theme()->get_stylesheet();
 
@@ -550,6 +553,30 @@ class BlockTemplatesController {
 		return is_readable(
 			$directory
 		) || $this->get_block_templates( array( $template_name ), $template_type );
+	}
+
+	/**
+	 * Update the product archive title to "Shop".
+	 *
+	 * Attention: this method is run in classic themes as well, so it
+	 * can't be moved to the ProductCatalogTemplate class. See:
+	 * https://github.com/woocommerce/woocommerce/pull/46429
+	 *
+	 * @param string $post_type_name Post type 'name' label.
+	 * @param string $post_type      Post type.
+	 *
+	 * @return string
+	 */
+	public function update_product_archive_title( $post_type_name, $post_type ) {
+		if (
+			function_exists( 'is_shop' ) &&
+			is_shop() &&
+			'product' === $post_type
+		) {
+			return __( 'Shop', 'woocommerce' );
+		}
+
+		return $post_type_name;
 	}
 
 	/**
