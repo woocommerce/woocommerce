@@ -11,6 +11,8 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 
 		phpExtensionBundles: [ 'kitchen-sink' ],
 
+		features: { networking: true },
+
 		steps: [
 			{
 				step: 'installPlugin',
