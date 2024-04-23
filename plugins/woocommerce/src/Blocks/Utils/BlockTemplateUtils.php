@@ -599,7 +599,10 @@ class BlockTemplateUtils {
 				$query_result_template->slug === $template->slug
 				&& $query_result_template->theme === $template->theme
 			) {
-				$query_result_template->has_theme_file = true;
+				$registry_template = self::get_template( $template->slug );
+				if ( $registry_template ) {
+					$query_result_template->has_theme_file = true;
+				}
 
 				return true;
 			}
