@@ -106,7 +106,7 @@
 		margin: 0;
 	}
 	.wc-block-components-shipping-rates-control
-		.wc-block-components-radio-control__option {
+	.wc-block-components-radio-control__option {
 		padding: 0 0 0 em($gap-huge);
 	}
 }
@@ -193,9 +193,7 @@
 	.wp-block-woocommerce-cart-items-block {
 		box-sizing: border-box;
 		margin: 0;
-		padding-right: math.percentage(
-			math.div($gap-largest, 1060px)
-		); // ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(math.div($gap-largest, 1060px)); // ~1060px is the default width of the content area in Storefront.
 		width: 65%;
 		min-height: 10em;
 	}
