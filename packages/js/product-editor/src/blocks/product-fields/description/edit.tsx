@@ -28,6 +28,7 @@ import ModalEditorWelcomeGuide from '../../../components/modal-editor-welcome-gu
 import { store } from '../../../store/product-editor-ui';
 import type { DescriptionBlockEditComponent } from './types';
 import FullEditorToolbarButton from './components/full-editor-toolbar-button';
+import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
 
 /**
  * Check whether the parsed blocks become from the summary block.
@@ -96,6 +97,18 @@ export function DescriptionBlockEdit( {
 		},
 		[]
 	);
+
+	useEffect( () => {
+		if ( getGutenbergVersion() === 17.9 ) {
+			// eslint-disable-next-line no-alert
+			alert(
+				__(
+					'The version of the Gutenberg plugin installed causes a crash when interacting with the description field. You are proceeding at your own risk and may experience crashes. Please update the Gutenberg plugin to the latest version if possible.',
+					'woocommerce'
+				)
+			);
+		}
+	}, [] );
 
 	// Parse the description into blocks.
 	useEffect( () => {
