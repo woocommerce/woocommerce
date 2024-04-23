@@ -28,8 +28,7 @@
 				".",
 				"https://downloads.wordpress.org/plugin/akismet.zip",
 				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",
-				"Wordpress/gutenberg"
+				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
 			],
 			"themes": [
 				"https://downloads.wordpress.org/theme/twentynineteen.zip"
