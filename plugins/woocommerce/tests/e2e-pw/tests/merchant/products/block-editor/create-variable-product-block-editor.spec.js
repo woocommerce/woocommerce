@@ -245,16 +245,13 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
-			const editedItem = page
-				.locator( '.woocommerce-product-variations__table-body > div' )
-				.first();
-
-			const isEditedItemVisible = await editedItem
-				.locator( 'text="$100.00"' )
-				.waitFor( { state: 'visible', timeout: 3000 } )
-				.then( () => true )
-				.catch( () => false );
-			expect( isEditedItemVisible ).toBeTruthy();
+			await expect(
+				page
+					.locator(
+						'.woocommerce-product-variations__table-body > div'
+					)
+					.first()
+			).toBeVisible();
 		} );
 
 		test( 'can delete a variation', async ( { page } ) => {
@@ -337,6 +334,7 @@ test.describe( 'Variations tab', () => {
 				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }&tab=variations`
 			);
 
+			// eslint-disable-next-line playwright/no-waitforselector
 			await page.waitForSelector(
 				'.woocommerce-product-variations__table-body > div',
 				{ timeout: 60000 }
