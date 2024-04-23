@@ -247,8 +247,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByText(
 				(
-					parseInt( firstProductPrice ) +
-					parseInt( firstProductPrice ) +
+					parseInt( firstProductPrice, 10 ) +
+					parseInt( firstProductPrice, 10 ) +
 					5
 				).toString()
 			)
@@ -286,8 +286,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByText(
 				(
-					parseInt( firstProductPrice ) +
-					parseInt( secondProductPrice ) +
+					parseInt( firstProductPrice, 10 ) +
+					parseInt( secondProductPrice, 10 ) +
 					5
 				).toString()
 			)
