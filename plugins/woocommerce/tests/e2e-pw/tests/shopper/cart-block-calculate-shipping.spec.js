@@ -7,8 +7,6 @@ const firstProductPrice = '10.00';
 const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
-const twoProductsTotal = +firstProductPrice + +secondProductPrice;
-const twoProductsWithFlatRate = twoProductsTotal + 5;
 
 const cartBlockPageTitle = 'Cart Block';
 const cartBlockPageSlug = cartBlockPageTitle
