@@ -11,7 +11,7 @@ import {
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
+import { trackEvent } from '~/customize-store/tracking';
 
 /**
  * Internal dependencies
@@ -88,7 +88,7 @@ export const SurveyForm = ( {
 		const surveyCompleteEvent = showAISurvey
 			? 'customize_your_store_transitional_survey_complete'
 			: 'customize_your_store_on_core_transitional_survey_complete';
-		recordEvent( surveyCompleteEvent, {
+		trackEvent( surveyCompleteEvent, {
 			rating,
 			choose_streamline: isStreamlineChecked,
 			choose_dislike_themes: isDislikeThemesChecked,
