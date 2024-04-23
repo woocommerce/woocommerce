@@ -61,12 +61,15 @@ jobs:
                   bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
+                  mkdir "$GITHUB_WORKSPACE/unzips"
                   cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
                   unzip woocommerce.zip
+                  cp -r woocommerce "$GITHUB_WORKSPACE/unzips/woocommerce"
                   rm woocommerce.zip
-                  zip -q -r "woocommerce.zip" "woocommerce/"
-                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce"
+                  mv woocommerce woocommerce-dev
+                  zip -q -r "woocommerce-dev.zip" "woocommerce-dev/"
+                  rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
 
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          
@@ -74,12 +77,21 @@ jobs:
                   echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
 
             - name: Create plugins artifact
-              id: create-plugin-artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v3
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
                   name: plugins
                   path: zips
+                  # Only need to retain for a day since the beta builder slurps it up to distribute.
+                  retention-days: 1
+
+            - name: Create playground artifact
+              uses: actions/upload-artifact@v4
+              if: steps.prepare.outputs.plugin-data != '{}'
+              with:
+                  name: plugins-{{ github.run_id }}
+                  path: zips
+                  retention-days: 7
 
             - name: Inform Beta Download webhook
               if: steps.prepare.outputs.plugin-data != '{}'

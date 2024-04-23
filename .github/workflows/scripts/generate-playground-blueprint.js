@@ -1,6 +1,6 @@
 const https = require( 'https' );
 
-const generateWordpressPlaygroundBlueprint = ( prNumber ) => {
+const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 	const defaultSchema = {
 		$schema: 'https://playground.wordpress.net/blueprint-schema.json',
 
@@ -18,7 +18,7 @@ const generateWordpressPlaygroundBlueprint = ( prNumber ) => {
 				step: 'installPlugin',
 				pluginZipFile: {
 					resource: 'url',
-					url: `https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins&pr=${ prNumber }`,
+					url: `https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins-${ runId }&pr=${ prNumber }`,
 				},
 				options: {
 					activate: true,
@@ -116,6 +116,7 @@ async function run( { github, context, core } ) {
 		}
 
 		const defaultSchema = generateWordpressPlaygroundBlueprint(
+			context.runId,
 			context.issue.number
 		);
 
