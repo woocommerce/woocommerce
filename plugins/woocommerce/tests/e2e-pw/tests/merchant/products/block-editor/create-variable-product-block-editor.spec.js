@@ -196,9 +196,10 @@ test.describe( 'Variations tab', () => {
 			await clickOnTab( 'Variations', page );
 
 			await page
-				.getByRole( 'button', {
-					name: 'Generate from options',
-				} )
+				.locator(
+					'.woocommerce-variations-table-error-or-empty-state__actions'
+				)
+				.getByRole( 'button', { name: 'Generate from options' } )
 				.click();
 
 			await clickOnTab( 'Variations', page );
@@ -214,17 +215,21 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'button', { name: 'Pricing' } )
 				.click();
 
-			await page
-				.getByLabel( 'Regular price', { exact: true } )
-				.fill( '100' );
+			const regularPrice = page.locator( 'input[name="regular_price"]' );
+			await regularPrice.waitFor( { state: 'visible' } );
+			await regularPrice.first().click();
+			await regularPrice.first().fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
 				.getByRole( 'button', { name: 'Inventory' } )
 				.click();
 
-			await page
-				.locator( '#inspector-input-control-2' )
+			const sku = page.locator( 'input[name="woocommerce-product-sku"]' );
+			await sku.waitFor( { state: 'visible' } );
+			await sku.first().click();
+			await sku
+				.first()
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page
@@ -342,8 +347,9 @@ test.describe( 'Variations tab', () => {
 			);
 
 			await page
-				.getByRole( 'link', { name: 'Edit', exact: true } )
+				.locator( '.woocommerce-product-variations__table-body > div' )
 				.first()
+				.getByText( 'Edit' )
 				.click();
 
 			const notices = page.getByText(
