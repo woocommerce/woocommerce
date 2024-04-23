@@ -2,9 +2,7 @@ const https = require( 'https' );
 
 const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 	const defaultSchema = {
-		$schema: 'https://playground.wordpress.net/blueprint-schema.json',
-
-		landingPage: '/wp-admin/',
+		landingPage: '/wp-admin/admin.php?page=wc-admin',
 
 		preferredVersions: {
 			php: '8.0',
@@ -24,7 +22,6 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 					activate: true,
 				},
 			},
-
 			{
 				step: 'installPlugin',
 				pluginZipFile: {
@@ -35,7 +32,6 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 					activate: true,
 				},
 			},
-
 			{
 				step: 'login',
 				username: 'admin',
@@ -72,9 +68,9 @@ async function run( { github, context, core } ) {
 		context.issue.number
 	);
 
-	const url = `https://playground.wordpress.net/#${ Buffer.from(
-		JSON.stringify( defaultSchema )
-	).toString( 'base64' ) }`;
+	const url = `https://playground.wordpress.net/#${ JSON.stringify(
+		defaultSchema
+	) }`;
 
 	commentInfo.body = `
 ## Test using WordPress Playground
