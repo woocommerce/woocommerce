@@ -100,8 +100,8 @@ class StoreTitle extends AbstractRoute {
 			);
 		}
 
-		$store_title                 = get_option( 'blogname' );
-		$previous_ai_generated_title = get_option( 'ai_generated_site_title' );
+		$store_title = html_entity_decode(get_option('blogname'));
+		$previous_ai_generated_title = html_entity_decode(get_option('ai_generated_site_title'));
 
 		if ( self::DEFAULT_TITLE === $store_title || ( ! empty( $store_title ) && $previous_ai_generated_title !== $store_title ) ) {
 			return rest_ensure_response( array( 'ai_content_generated' => false ) );
