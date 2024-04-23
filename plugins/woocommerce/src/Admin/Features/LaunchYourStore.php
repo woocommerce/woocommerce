@@ -56,7 +56,7 @@ class LaunchYourStore {
 
 					// log the transition if there is one.
 					if ( $current_value !== $new_value ) {
-						$enabled_or_disabled              = yes === $new_value ? 'enabled' : 'disabled';
+						$enabled_or_disabled              = 'yes' === $new_value ? 'enabled' : 'disabled';
 						$event_data[ $name . '_toggled' ] = $enabled_or_disabled;
 					}
 				}
