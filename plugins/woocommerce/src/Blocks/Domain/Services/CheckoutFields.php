@@ -399,7 +399,7 @@ class CheckoutFields {
 	 * @param array $options The options supplied during field registration.
 	 * @return bool false if an error was encountered, true otherwise.
 	 */
-	private function validate_options( $options ) {
+	private function validate_options( &$options ) {
 		if ( empty( $options['id'] ) ) {
 			_doing_it_wrong( 'woocommerce_blocks_register_checkout_field', 'A checkout field cannot be registered without an id.', '8.6.0' );
 			return false;
@@ -689,7 +689,7 @@ class CheckoutFields {
 			 *
 			 * @since 8.7.0
 			 */
-			return apply_filters_deprecated( 'woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
+			return apply_filters( 'woocommerce_blocks_sanitize_additional_field', $field_value, $field_key );
 
 		} catch ( \Throwable $e ) {
 			// One of the filters errored so skip it. This allows the checkout process to continue.
