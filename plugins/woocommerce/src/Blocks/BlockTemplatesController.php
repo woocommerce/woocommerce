@@ -263,7 +263,7 @@ class BlockTemplatesController {
 
 		// This is a real edge-case, we are supporting users who have saved templates under the deprecated slug. See its definition for more information.
 		// You can likely ignore this code unless you're supporting/debugging early customised templates.
-		if ( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === strtolower( $template_id ) ) {
+		if ( BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === strtolower( $template_id ) || BlockTemplateUtils::PLUGIN_SLUG === strtolower( $template_id ) ) {
 			// Because we are using get_block_templates we have to unhook this method to prevent a recursive loop where this filter is applied.
 			remove_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 			$template_with_deprecated_id = get_block_template( $id, $template_type );
@@ -276,7 +276,8 @@ class BlockTemplatesController {
 		}
 
 		// If we are not dealing with a WooCommerce template let's return early and let it continue through the process.
-		if ( BlockTemplateUtils::PLUGIN_SLUG !== $template_id ) {
+		$registry_template = BlockTemplateUtils::get_template( $template_slug );
+		if ( ! $registry_template ) {
 			return $template;
 		}
 

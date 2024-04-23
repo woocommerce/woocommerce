@@ -222,8 +222,8 @@ class BlockTemplateUtils {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content  = file_get_contents( $template_file->path );
 		$template          = new \WP_Block_Template();
-		$template->id      = $template_is_from_theme ? $theme_name . '//' . $template_file->slug : self::PLUGIN_SLUG . '//' . $template_file->slug;
-		$template->theme   = $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG;
+		$template->id      = $theme_name . '//' . $template_file->slug;
+		$template->theme   = $theme_name;
 		$template->content = self::inject_theme_attribute_in_content( $template_content );
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
@@ -238,7 +238,7 @@ class BlockTemplateUtils {
 		$template->description    = ! empty( $template_file->description ) ? $template_file->description : self::get_block_template_description( $template_file->slug );
 		$template->status         = 'publish';
 		$template->has_theme_file = true;
-		$template->origin         = $template_file->source;
+		$template->origin         = 'theme';
 		$template->is_custom      = false; // Templates loaded from the filesystem aren't custom, ones that have been edited and loaded from the DB are.
 		$template->post_types     = array(); // Don't appear in any Edit Post template selector dropdown.
 		$template->area           = self::get_block_template_area( $template->slug, $template_type );
@@ -276,12 +276,13 @@ class BlockTemplateUtils {
 
 		$new_template_item = array(
 			'slug'        => $template_slug,
-			'id'          => $template_is_from_theme ? $theme_name . '//' . $template_slug : self::PLUGIN_SLUG . '//' . $template_slug,
+			'id'          => $theme_name . '//' . $template_slug,
 			'path'        => $template_file,
 			'type'        => $template_type,
 			'theme'       => $template_is_from_theme ? $theme_name : self::PLUGIN_SLUG,
 			// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
 			'source'      => $template_is_from_theme ? 'theme' : 'plugin',
+			'origin'      => 'theme',
 			'title'       => self::get_block_template_title( $template_slug ),
 			'description' => self::get_block_template_description( $template_slug ),
 			'post_types'  => array(), // Don't appear in any Edit Post template selector dropdown.
@@ -797,7 +798,7 @@ class BlockTemplateUtils {
 			$template_slug_to_load = $templates_from_db[0]->theme;
 		} else {
 			$theme_has_template    = self::theme_has_template_part( $slug );
-			$template_slug_to_load = $theme_has_template ? get_stylesheet() : self::PLUGIN_SLUG;
+			$template_slug_to_load = get_stylesheet();
 		}
 		$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
 
