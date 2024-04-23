@@ -10,7 +10,6 @@ test.describe( 'Transform Classic Cart To Cart Block', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test( 'can transform classic cart to cart block', async ( { page } ) => {
-		// go to create a new page
 		await goToPageEditor( { page } );
 
 		const canvas = await getCanvas( page );
