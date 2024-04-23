@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal error on the Status page when the log directory contains an unreadable directory

@@ -45,7 +45,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute, invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-	) as ProductAttributesActions & WPDataActions;
+	) as unknown as ProductAttributesActions & WPDataActions;
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
