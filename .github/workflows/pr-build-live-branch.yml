@@ -89,7 +89,7 @@ jobs:
               uses: actions/upload-artifact@v4
               if: steps.prepare.outputs.plugin-data != '{}'
               with:
-                  name: plugins-{{ github.run_id }}
+                  name: plugins-${{ github.run_id }}
                   path: zips
                   retention-days: 7
 
