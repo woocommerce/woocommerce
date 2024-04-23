@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the red badge shown on extensions menu item when the site is not connected to WooCommerce.com
