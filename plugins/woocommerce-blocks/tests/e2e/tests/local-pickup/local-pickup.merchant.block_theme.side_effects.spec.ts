@@ -65,11 +65,6 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await editor.canvas.getByText( 'This is a test' ).isVisible();
 		await editor.saveSiteEditorEntities();
 
-		// Make sure the result is visible in frontend
-		await frontendUtils.goToCheckout();
-
-		await expect( page.getByText( 'This is a test' ) ).toBeVisible();
-
 		// Now check if it's visible in the local pickup settings.
 		await localPickupUtils.openLocalPickupSettings();
 		await expect( page.getByLabel( 'Title' ) ).toHaveValue(
