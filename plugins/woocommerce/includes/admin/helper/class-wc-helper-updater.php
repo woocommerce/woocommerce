@@ -546,7 +546,7 @@ class WC_Helper_Updater {
 	 */
 	public static function get_updates_count_based_on_site_status() {
 		if ( ! WC_Helper::is_site_connected() ) {
-			return 1;
+			return 0;
 		}
 
 		$count = self::get_updates_count() ?? 0;
