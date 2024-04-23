@@ -3,6 +3,7 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -362,7 +363,7 @@ export const advancedFilters = applyFilters(
 					component: 'ProductAttribute',
 				},
 			},
-			attribution: {
+			order_attribution: {
 				labels: {
 					add: __( 'Order attribution', 'woocommerce' ),
 					remove: __(
@@ -399,13 +400,9 @@ export const advancedFilters = applyFilters(
 				input: {
 					component: 'SelectControl',
 					getOptions: async () => {
-						// TODO: call API to get list of options.
-						return [
-							{
-								value: 'direct',
-								label: 'Direct',
-							},
-						];
+						return await apiFetch( {
+							path: '/wc-analytics/order-attributions',
+						} );
 					},
 				},
 			},
