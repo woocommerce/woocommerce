@@ -59,6 +59,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
+	 * @var bool Whether the `stamp_checkout_html_element` method has been called.
+	 */
+	private static $is_stamp_checkout_html_called = false;
+
+	/**
 	 * Initialization method.
 	 *
 	 * Takes the place of the constructor within WooCommerce Dependency injection.
@@ -111,7 +116,11 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_html_element' ) );
+		add_action( 'woocommerce_after_checkout_billing_form', array( $this, 'stamp_checkout_html_element' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this, 'stamp_checkout_html_element' ) );
+		add_action( 'woocommerce_after_order_notes', array( $this, 'stamp_checkout_html_element' ) );
+		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_checkout_html_element' ) );
+
 		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
 
 		// Update order based on submitted fields.
@@ -339,8 +348,25 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Add `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
-	 * Used for checkout & customer register forms.
+	 * Handles the `<wc-order-attribution-inputs>` element for checkout forms, ensuring that the field is only output once.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @return void
+	 */
+	public function stamp_checkout_html_element() {
+		if ( self::$is_stamp_checkout_html_called ) {
+			return;
+		}
+		$this->stamp_html_element();
+		self::$is_stamp_checkout_html_called = true;
+	}
+
+	/**
+	 * Output `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
+	 * Used customer register forms, and for checkout forms through `stamp_checkout_html_element()`.
+	 *
+	 * @return void
 	 */
 	public function stamp_html_element() {
 		printf( '<wc-order-attribution-inputs></wc-order-attribution-inputs>' );
