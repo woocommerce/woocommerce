@@ -437,7 +437,7 @@ class CustomOrdersTableController {
 			return array();
 		}
 
-		$get_value = function() {
+		$get_value = function () {
 			return $this->custom_orders_table_usage_is_enabled() ? 'yes' : 'no';
 		};
 
@@ -446,18 +446,20 @@ class CustomOrdersTableController {
 		 * gets called while it's still being instantiated and creates and endless loop.
 		 */
 
-		$get_desc = function() {
+		$get_desc = function () {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 
 			return $this->plugin_util->generate_incompatible_plugin_feature_warning( 'custom_order_tables', $plugin_compatibility );
 		};
 
-		$get_disabled = function() {
+		$get_disabled = function () {
 			$plugin_compatibility = $this->features_controller->get_compatible_plugins_for_feature( 'custom_order_tables', true );
 			$sync_complete        = 0 === $this->get_orders_pending_sync_count();
 			$disabled             = array();
 			// Changing something here? might also want to look at `enable|disable` functions in CLIRunner.
-			if ( count( array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] ) ) > 0 ) {
+			$incompatible_plugins = array_merge( $plugin_compatibility['uncertain'], $plugin_compatibility['incompatible'] );
+			$incompatible_plugins = array_diff( $incompatible_plugins, $this->plugin_util->get_plugins_excluded_from_compatibility_ui() );
+			if ( count( $incompatible_plugins ) > 0 ) {
 				$disabled = array( 'yes' );
 			}
 			if ( ! $sync_complete && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
@@ -493,11 +495,11 @@ class CustomOrdersTableController {
 			return array();
 		}
 
-		$get_value = function() {
+		$get_value = function () {
 			return get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		};
 
-		$get_sync_message = function() {
+		$get_sync_message = function () {
 			$orders_pending_sync_count = $this->get_orders_pending_sync_count();
 			$sync_in_progress          = $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) );
 			$sync_enabled              = $this->data_synchronizer->data_sync_is_enabled();
@@ -576,7 +578,7 @@ class CustomOrdersTableController {
 			return implode( '<br />', $sync_message );
 		};
 
-		$get_description_is_error = function() {
+		$get_description_is_error = function () {
 			$sync_is_pending = $this->get_orders_pending_sync_count() > 0;
 
 			return $sync_is_pending && $this->changing_data_source_with_sync_pending_is_allowed();

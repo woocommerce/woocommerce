@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Be less aggressive when checking for selected shipping rates in Store API. Reminder that shipping rate id should be on the shape of `method_id:instance_id`.
