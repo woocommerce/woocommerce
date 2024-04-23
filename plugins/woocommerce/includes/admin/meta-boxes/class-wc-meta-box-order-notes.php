@@ -28,6 +28,13 @@ class WC_Meta_Box_Order_Notes {
 
 		$args = array( 'order_id' => $order_id );
 
+		// Allow plugins to filter the maximum number of comments returned.
+		$limit = apply_filters( 'woocommerce_order_notes_query_limit', -1 );
+
+		if ( $limit > 0 ) {
+			$args['number'] = $limit;
+		}
+
 		if ( 0 !== $order_id ) {
 			$notes = wc_get_order_notes( $args );
 		} else {
