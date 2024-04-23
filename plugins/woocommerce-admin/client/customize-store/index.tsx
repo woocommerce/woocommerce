@@ -12,6 +12,7 @@ import {
 	getQuery,
 	updateQueryString,
 	getHistory,
+	getPersistedQuery,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -81,7 +82,7 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	const url = getNewPath( {}, '/', {} );
+	const url = getNewPath( getPersistedQuery(), '/', {} );
 	navigateOrParent( window, url );
 };
 
