@@ -227,12 +227,12 @@ function wc_list_pages( $pages ) {
 add_filter( 'wp_list_pages', 'wc_list_pages' );
 
 /**
- * Integrate hooked blocks into cart and checkout pages.
+ * Integrate hooked blocks into cart and checkout pages on the frontend.
  *
  * @param string $content Page content.
  * @return string
  */
-function add_hooked_blocks_into_cart_checkout( $content ) {
+function add_hooked_blocks_into_cart_checkout_page_render( $content ) {
 
 	if ( has_block( 'woocommerce/cart', $content ) || has_block( 'woocommerce/checkout', $content ) ) {
 		/*
@@ -252,4 +252,37 @@ function add_hooked_blocks_into_cart_checkout( $content ) {
 	return $content;
 }
 
-add_filter( 'the_content', 'add_hooked_blocks_into_cart_checkout', 1 );
+add_filter( 'the_content', 'add_hooked_blocks_into_cart_checkout_page_render', 1 );
+
+/**
+ * Integrate hooked blocks into cart and checkout pages for the editor.
+ *
+ * @param WP_REST_Response $response The response object.
+ * @param WP_Post          $post     Post object.
+ * @param WP_REST_Request  $request  Request object.
+ * @return WP_REST_Response
+ */
+function add_hooked_blocks_into_cart_checkout_page_rest_response( $response, $post, $request ) {
+	if ( ! isset( $response->data['content']['raw'] ) ) {
+		return $response;
+	}
+
+	if ( has_block( 'woocommerce/cart', $response->data['content']['raw'] ) || has_block( 'woocommerce/checkout', $response->data['content']['raw'] ) ) {
+		/*
+		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		*/
+		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
+			$hooked_blocks = get_hooked_blocks();
+			if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
+				$before_block_visitor             = make_before_block_visitor( $hooked_blocks, $response->data['content']['raw'] );
+				$after_block_visitor              = make_after_block_visitor( $hooked_blocks, $response->data['content']['raw'] );
+				$blocks                           = parse_blocks( $response->data['content']['raw'] );
+				$response->data['content']['raw'] = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
+			}
+		}
+	}
+
+	return $response;
+}
+
+add_filter( 'rest_prepare_page', 'add_hooked_blocks_into_cart_checkout_page_rest_response', 10, 3 );
