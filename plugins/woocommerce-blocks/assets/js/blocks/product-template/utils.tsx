@@ -67,7 +67,10 @@ export type WooCommerceBlockLocation = ReturnType<
 	typeof createLocationObject
 >;
 
-const createLocationObject = ( type: LocationType, sourceData = {} ) => ( {
+const createLocationObject = (
+	type: LocationType,
+	sourceData: Record< string, unknown > = {}
+) => ( {
 	type,
 	sourceData,
 } );

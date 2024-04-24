@@ -19,7 +19,10 @@ import {
 } from './types';
 import { coreQueryPaginationBlockName } from './constants';
 import blockJson from './block.json';
-import { WooCommerceBlockLocation } from '../product-template/utils';
+import {
+	LocationType,
+	WooCommerceBlockLocation,
+} from '../product-template/utils';
 
 /**
  * Sets the new query arguments of a Product Query block
@@ -154,6 +157,34 @@ export const useSetPreviewState = ( {
 		if ( cleanup ) {
 			return cleanup;
 		}
+		// We want this to run only once, adding deps will cause performance issues.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
+	/**
+	 * For all Product Collection blocks that inherit query from the template,
+	 * we want to show a preview message in the editor if the block is in
+	 * generic archive template i.e.
+	 * - Products by category
+	 * - Products by tag
+	 * - Products by attribute
+	 */
+	useLayoutEffect( () => {
+		if ( ! setPreviewState && attributes?.query?.inherit ) {
+			const isGenericArchiveTemplate =
+				location.type === LocationType.Archive &&
+				location.sourceData?.termId === null;
+			if ( isGenericArchiveTemplate ) {
+				setAttributes( {
+					previewState: {
+						isPreview: true,
+						previewMessage:
+							'Actual products will vary depending on the page being viewed.',
+					},
+				} );
+			}
+		}
+
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );

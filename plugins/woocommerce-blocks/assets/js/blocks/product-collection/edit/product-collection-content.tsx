@@ -92,9 +92,11 @@ const ProductCollectionContent = ( {
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
 				// If initialPreviewState is provided, use it, otherwise use default preview state.
-				previewState:
-					initialPreviewState ||
-					( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
+				...( !! attributes.collection && {
+					previewState:
+						initialPreviewState ||
+						( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
+				} ),
 			} );
 
 			isInitialAttributesSet.current = true;
