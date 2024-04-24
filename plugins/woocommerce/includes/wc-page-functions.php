@@ -225,3 +225,31 @@ function wc_list_pages( $pages ) {
 	return str_replace( $shop_page, $shop_page . ' current_page_parent', $pages );
 }
 add_filter( 'wp_list_pages', 'wc_list_pages' );
+
+/**
+ * Integrate hooked blocks into cart and checkout pages.
+ *
+ * @param string $content Page content.
+ * @return string
+ */
+function add_hooked_blocks_into_cart_checkout( $content ) {
+
+	if ( has_block( 'woocommerce/cart', $content ) || has_block( 'woocommerce/checkout', $content ) ) {
+		/*
+		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		*/
+		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
+			$hooked_blocks = get_hooked_blocks();
+			if ( ! empty( $hooked_blocks ) || has_filter( 'hooked_block_types' ) ) {
+				$before_block_visitor = make_before_block_visitor( $hooked_blocks, $content );
+				$after_block_visitor  = make_after_block_visitor( $hooked_blocks, $content );
+				$blocks               = parse_blocks( $content );
+				$content              = traverse_and_serialize_blocks( $blocks, $before_block_visitor, $after_block_visitor );
+			}
+		}
+	}
+
+	return $content;
+}
+
+add_filter( 'the_content', 'add_hooked_blocks_into_cart_checkout', 1 );
