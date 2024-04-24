@@ -10,7 +10,17 @@ import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 import { generateStyles } from './styles';
 
 export default function Save( { attributes } ) {
-	const { color } = attributes;
+	const { color, storeOnly } = attributes;
+
+	if ( storeOnly ) {
+		return (
+			<div { ...useBlockProps.save() }>
+				<InnerBlocks.Content />
+				<style>{ `.woocommerce-breadcrumb {display: none;}` }</style>
+			</div>
+		);
+	}
+
 	return (
 		<div { ...useBlockProps.save() }>
 			<InnerBlocks.Content />

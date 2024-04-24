@@ -15,7 +15,19 @@ import { PanelBody, ColorPicker } from '@wordpress/components';
 import { generateStyles } from './styles';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { color } = attributes;
+	const { color, storeOnly } = attributes;
+
+	if ( storeOnly ) {
+		return (
+			<>
+				<div { ...useBlockProps() }>
+					<InnerBlocks />
+				</div>
+				<style>{ `.woocommerce-breadcrumb {display: none;}` }</style>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<InspectorControls>
