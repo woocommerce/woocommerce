@@ -191,7 +191,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		).toBeVisible();
 		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
-			page.getByText( firstProductWithFlatRate.toString() )
+			page.getByText( `$${ firstProductWithFlatRate }` )
 		).toBeVisible();
 
 		// Set shipping to local pickup instead of flat rate
@@ -224,11 +224,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Increase quantity of First' ).click();
 		await expect(
 			page.getByText(
-				(
+				`$${
 					parseInt( firstProductPrice, 10 ) +
 					parseInt( firstProductPrice, 10 ) +
 					5
-				).toString()
+				}`.toString()
 			)
 		).toBeVisible();
 	} );
@@ -257,11 +257,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
 			page.getByText(
-				(
+				`$${
 					parseInt( firstProductPrice, 10 ) +
 					parseInt( secondProductPrice, 10 ) +
 					5
-				).toString()
+				}`.toString()
 			)
 		).toBeVisible();
 
