@@ -7,7 +7,7 @@ import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { generateCSS } from './edit';
+import { generateStyles } from './styles';
 
 export default function Save( { attributes } ) {
 	const { color } = attributes;
