@@ -1,4 +1,7 @@
-export const generateStyles = ( color = '#bea0f2' ) => {
+export const generateEntireSiteStyles = (
+	color = '#bea0f2',
+	fullPageHeading = true
+) => {
 	return `@font-face {
         font-family: 'Inter';
         src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
@@ -115,9 +118,9 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         max-width: 820px;
     }
     .coming-soon-is-vertically-aligned-center:not(.block-editor-block-list__block) {
-        position: absolute;
+        position: ${ fullPageHeading ? 'absolute' : 'relative' };
         top: 50%;
-        transform: translateY(-50%);
+        transform: ${ fullPageHeading ? 'translateY(-50%)' : 'none' };
         margin-block-start: 0;
         width: 100%;
     }

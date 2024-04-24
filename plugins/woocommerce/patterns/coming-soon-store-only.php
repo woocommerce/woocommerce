@@ -9,7 +9,7 @@
 
 ?>
 
-<!-- wp:woocommerce/coming-soon {"storeOnly":true} -->
+<!-- wp:woocommerce/coming-soon {"storeOnly":true,"fullPageHeading":false} -->
 <div class="wp-block-woocommerce-coming-soon">
 
 <?php

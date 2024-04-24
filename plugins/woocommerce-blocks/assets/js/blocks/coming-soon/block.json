@@ -9,6 +9,10 @@
 		"storeOnly": {
 			"type": "boolean",
 			"default": false
+		},
+		"fullPageHeading": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"supports": {

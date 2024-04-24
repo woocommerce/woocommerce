@@ -6,10 +6,10 @@ import { useBlockProps, InnerBlocks } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { generateStyles } from './styles';
+import { generateEntireSiteStyles } from './styles';
 
 export default function Save( { attributes } ) {
-	const { color, storeOnly } = attributes;
+	const { color, storeOnly, fullPageHeading } = attributes;
 	const blockProps = { ...useBlockProps.save() };
 
 	if ( storeOnly ) {
@@ -24,7 +24,9 @@ export default function Save( { attributes } ) {
 	return (
 		<div { ...blockProps }>
 			<InnerBlocks.Content />
-			<style>{ generateStyles( color ) }</style>
+			<style>
+				{ generateEntireSiteStyles( color, fullPageHeading ) }
+			</style>
 		</div>
 	);
 }

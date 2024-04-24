@@ -7,16 +7,20 @@ import {
 	useBlockProps,
 	InnerBlocks,
 } from '@wordpress/block-editor';
-import { PanelBody, ColorPicker } from '@wordpress/components';
+import { PanelBody, ColorPicker, ToggleControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { generateStyles } from './styles';
+import { generateEntireSiteStyles } from './styles';
 
 export default function Edit( { attributes, setAttributes } ) {
+<<<<<<< HEAD
 	const { color, storeOnly } = attributes;
 	const blockProps = { ...useBlockProps() };
+=======
+	const { color, storeOnly, fullPageHeading } = attributes;
+>>>>>>> 313ad95b71 (Add fullPageHeading attribute)
 
 	if ( storeOnly ) {
 		return (
@@ -32,7 +36,23 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
+				<PanelBody
+					title={ __( 'Coming soon page settings', 'woocommerce' ) }
+				>
+					<h3>{ __( 'Full page layout', 'woocommerce' ) }</h3>
+					<ToggleControl
+						label={ __(
+							'Display heading in full page mode',
+							'woocommerce'
+						) }
+						checked={ fullPageHeading }
+						onChange={ () =>
+							setAttributes( {
+								fullPageHeading: ! fullPageHeading,
+							} )
+						}
+					/>
+					<h3>{ __( 'Background color', 'woocommerce' ) }</h3>
 					<ColorPicker
 						color={ color }
 						onChange={ ( newColor: string ) =>
@@ -46,7 +66,9 @@ export default function Edit( { attributes, setAttributes } ) {
 			<div { ...blockProps }>
 				<InnerBlocks />
 			</div>
-			<style>{ generateStyles( color ) }</style>
+			<style>
+				{ generateEntireSiteStyles( color, fullPageHeading ) }
+			</style>
 		</>
 	);
 }
