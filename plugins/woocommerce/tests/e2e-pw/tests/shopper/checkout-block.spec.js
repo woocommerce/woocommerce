@@ -332,7 +332,7 @@ test.describe( 'Checkout Block page', () => {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
+			waitUntil: 'networkidle', // eslint-disable-line playwright/no-networkidle
 		} );
 		await page.goto( checkoutBlockPageSlug );
 		await expect(
@@ -368,7 +368,7 @@ test.describe( 'Checkout Block page', () => {
 
 		// go again to the checkout to verify details
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
+			waitUntil: 'networkidle', // eslint-disable-line playwright/no-networkidle
 		} );
 		await page.goto( checkoutBlockPageSlug );
 		await expect(
@@ -440,7 +440,7 @@ test.describe( 'Checkout Block page', () => {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
+			waitUntil: 'networkidle', // eslint-disable-line playwright/no-networkidle
 		} );
 		await page.goto( checkoutBlockPageSlug );
 		await expect(
@@ -467,7 +467,7 @@ test.describe( 'Checkout Block page', () => {
 		page,
 	} ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
+			waitUntil: 'networkidle', // eslint-disable-line playwright/no-networkidle
 		} );
 		await page.goto( checkoutBlockPageSlug );
 		await expect(
@@ -657,7 +657,7 @@ test.describe( 'Checkout Block page', () => {
 
 		// click to log in and make sure you are on the same page after logging in
 		await page.locator( 'text=Log in.' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( 'networkidle' ); // eslint-disable-line playwright/no-networkidle
 		await page
 			.locator( 'input[name="username"]' )
 			.fill( customer.username );
@@ -665,7 +665,7 @@ test.describe( 'Checkout Block page', () => {
 			.locator( 'input[name="password"]' )
 			.fill( customer.password );
 		await page.locator( 'text=Log in' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( 'networkidle' ); // eslint-disable-line playwright/no-networkidle
 		await expect(
 			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
@@ -750,7 +750,7 @@ test.describe( 'Checkout Block page', () => {
 
 	test( 'can create an account during checkout', async ( { page } ) => {
 		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
+			waitUntil: 'networkidle', // eslint-disable-line playwright/no-networkidle
 		} );
 		await page.goto( checkoutBlockPageSlug );
 		await expect(
@@ -798,7 +798,7 @@ test.describe( 'Checkout Block page', () => {
 
 		// sign in as admin to confirm account creation
 		await page.goto( 'wp-admin/users.php' );
-		await page.waitForLoadState( 'networkidle' );
+		await page.waitForLoadState( 'networkidle' ); // eslint-disable-line playwright/no-networkidle
 		await page.locator( 'input[name="log"]' ).fill( admin.username );
 		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
 		await page.locator( 'text=Log in' ).click();
