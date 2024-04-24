@@ -55,6 +55,17 @@ const insertBlock = async ( page, blockName ) => {
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 
+const insertBlockByShortcut = async ( page, blockShortcut ) => {
+	const canvas = await getCanvas( page );
+	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
+	await canvas
+		.getByRole( 'document', {
+			name: 'Empty block; start writing or type forward slash to choose a block',
+		} )
+		.fill( blockShortcut );
+	await page.keyboard.press( 'Enter' );
+};
+
 const transformIntoBlocks = async ( page ) => {
 	const canvas = await getCanvas( page );
 
@@ -92,6 +103,7 @@ module.exports = {
 	getCanvas,
 	fillPageTitle,
 	insertBlock,
+	insertBlockByShortcut,
 	transformIntoBlocks,
 	publishPage,
 };

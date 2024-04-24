@@ -1,5 +1,10 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const firstProductName = 'First Product';
@@ -8,7 +13,7 @@ const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
 
-const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageTitle = `Cart Block ${ Date.now() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -128,32 +133,12 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
+	// eslint-disable-next-line playwright/expect-expect,jest/expect-expect
 	test( 'create Cart Block page', async ( { page } ) => {
-		// create a new page with cart block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( cartBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/cart' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ cartBlockPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, cartBlockPageTitle );
+		await insertBlockByShortcut( page, '/cart' );
+		await publishPage( page, cartBlockPageTitle );
 	} );
 
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
