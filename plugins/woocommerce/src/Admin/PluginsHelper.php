@@ -39,6 +39,8 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_install_and_activate_async_callback', array( __CLASS__, 'install_and_activate_plugins_async_callback' ), 10, 2 );
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
+		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 	}
 
@@ -535,6 +537,134 @@ class PluginsHelper {
 		);
 
 		return self::get_action_data( $actions );
+	}
+
+	public static function maybe_show_expired_subscriptions_notice() {
+
+		if ( !WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$subscriptions = WC_Helper::get_subscription_list_data();
+		$expired_subscriptions = array_filter(
+			$subscriptions,
+			function ( $sub ) {
+				return $sub['expired'];
+			},
+		);
+
+		if( ! $expired_subscriptions ){
+			return;
+		}
+
+		$total_expired_subscriptions = count( $expired_subscriptions );
+
+		$message = self::get_subscriptions_message(
+			$subscriptions,
+			$expired_subscriptions,
+			$total_expired_subscriptions,
+			[
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
+				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+			]
+		);
+
+		echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $message ) . '</p>
+	    	</div>';
+
+	}
+
+	public static function maybe_show_expiring_subscriptions_notice(){
+		if ( !WC_Helper::is_site_connected() ) {
+			return;
+		}
+
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		$subscriptions = WC_Helper::get_subscription_list_data();
+		$expiring_subscriptions = array_filter(
+			$subscriptions,
+			function ( $sub ) {
+				return $sub['expiring'] && !$sub['autorenew'];
+			},
+		);
+
+		if ( !$expiring_subscriptions ) {
+			return;
+		}
+
+		$total_expiring_subscriptions = count( $expiring_subscriptions );
+
+		$message = self::get_subscriptions_message(
+			$subscriptions,
+			$expiring_subscriptions,
+			$total_expiring_subscriptions,
+			[
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) total expiring subscriptions 2) URL to My Subscriptions page */
+				'different_subscriptions' => __( 'You have %1$s subscriptions expiring soon. <a href="%2$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+			]
+		);
+
+		echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+	    		<p class="widefat">' . wp_kses_post( $message ) . '</p>
+	    	</div>';
+	}
+
+	public static function get_subscriptions_message ( array $all_subs, array $subs_to_show, int $total, array $messages ){
+		if ( 1 < $total ) {
+			return sprintf(
+				$messages['different_subscriptions'],
+				esc_attr( $total ),
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
+				esc_attr( $total ),
+			);
+		}
+
+		$subscription = reset( $subs_to_show );
+		$product_id = $subscription['product_id'];
+		// check if $all_subs has multiple subs for this product
+		$has_multiple_subs_for_product = 1 < count(
+			array_filter(
+				$all_subs,
+				function ( $sub ) use ( $product_id ) {
+					return $product_id === $sub['product_id'];
+				}
+			)
+		);
+
+		$can_renew    = true;
+		$message_key = $has_multiple_subs_for_product ? 'multiple' : 'single';
+		$message_key .= '_';
+		$message_key .= $can_renew ? 'manage' : 'read_only';
+		$price = $subscription['product_price'] ;
+		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
+
+		if ( isset( $messages[ $message_key ] ) ) {
+			return sprintf(
+				$messages[ $message_key ],
+				esc_attr( $subscription['product_name'] ),
+				esc_attr( $expiry_date ),
+				esc_url( 'https://woocommerce.com/my-account/my-subscriptions/' ),
+				esc_attr( $price ),
+			);
+		}
+
+		return '';
 	}
 
 	/**
