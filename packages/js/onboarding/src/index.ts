@@ -1,5 +1,4 @@
-export * from './components/WCPayCard';
-export * from './components/WCPayBanner';
+export * from './components/WCPayConnectCard';
 export * from './components/WCPayBenefits';
 export * from './components/RecommendedRibbon';
 export * from './components/SetupRequired';
