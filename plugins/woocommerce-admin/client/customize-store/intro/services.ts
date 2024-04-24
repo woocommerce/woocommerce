@@ -7,7 +7,6 @@ import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
 import { ONBOARDING_STORE_NAME, OPTIONS_STORE_NAME } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -15,6 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { FlowType, aiStatusResponse } from '../types';
 import { isIframe } from '~/customize-store/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { trackEvent } from '../tracking';
 
 export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
 	const response = await fetch(
@@ -177,7 +177,7 @@ export const setFlags = async () => {
 
 			// @ts-expect-error temp workaround;
 			window.cys_aiOnline = status;
-			recordEvent( 'customize_your_store_ai_status', {
+			trackEvent( 'customize_your_store_ai_status', {
 				online: isAiOnline ? 'yes' : 'no',
 			} );
 
@@ -185,7 +185,7 @@ export const setFlags = async () => {
 		} catch ( e ) {
 			// @ts-expect-error temp workaround;
 			window.cys_aiOnline = false;
-			recordEvent( 'customize_your_store_ai_status', {
+			trackEvent( 'customize_your_store_ai_status', {
 				online: 'no',
 			} );
 			return FlowType.AIOffline;

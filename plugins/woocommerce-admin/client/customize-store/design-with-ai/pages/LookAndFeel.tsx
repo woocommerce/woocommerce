@@ -5,7 +5,6 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { ProgressBar } from '@woocommerce/components';
 import { useState } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -15,6 +14,7 @@ import { Choice } from '../components/choice/choice';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
 import { isEntrepreneurFlow } from '../entrepreneur-flow';
+import { trackEvent } from '~/customize-store/tracking';
 
 export type lookAndFeelCompleteEvent = {
 	type: 'LOOK_AND_FEEL_COMPLETE';
@@ -112,7 +112,7 @@ export const LookAndFeel = ( {
 								context.lookAndFeel.aiRecommended &&
 								context.lookAndFeel.aiRecommended !== look
 							) {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_ai_wizard_changed_ai_option',
 									{
 										step: 'look-and-feel',
