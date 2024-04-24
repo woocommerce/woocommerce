@@ -5,6 +5,7 @@ const {
 	insertBlockByShortcut,
 	publishPage,
 } = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const firstProductName = 'First Product';
@@ -147,10 +148,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
+		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Netherlands
@@ -176,10 +174,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
+		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
@@ -214,10 +209,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
+		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
@@ -246,14 +238,8 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
+		await addAProductToCart( page, product1Id );
+		await addAProductToCart( page, product2Id );
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal

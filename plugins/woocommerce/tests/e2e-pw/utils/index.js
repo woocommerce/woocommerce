@@ -4,6 +4,7 @@ const variableProducts = require( './variable-products' );
 const features = require( './features' );
 const tours = require( './tours' );
 const login = require( './login' );
+const editor = require( './editor' );
 
 module.exports = {
 	api,
@@ -12,4 +13,5 @@ module.exports = {
 	features,
 	tours,
 	login,
+	editor,
 };
