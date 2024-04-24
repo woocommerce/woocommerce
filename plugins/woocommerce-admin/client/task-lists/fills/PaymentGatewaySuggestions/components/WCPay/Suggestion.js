@@ -1,12 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import {
-	WCPayConnectCard,
-} from '@woocommerce/onboarding';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { WCPayConnectCard } from '@woocommerce/onboarding';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -21,7 +17,6 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	const {
 		id,
 		needsSetup,
-		installed,
 		enabled: isEnabled,
 		installed: isInstalled,
 	} = paymentGateway;
@@ -33,7 +28,7 @@ export const Suggestion = ( { paymentGateway, onSetupCallback = null } ) => {
 	// when the user clicks on the "Finish setup" button.
 	// WCPay doesn't need to be configured in WCA.
 	// It should be configured in its onboarding flow.
-	if ( installed && onSetupCallback === null ) {
+	if ( isInstalled && onSetupCallback === null ) {
 		onSetupCallback = () => {
 			connectWcpay( createNotice );
 		};
