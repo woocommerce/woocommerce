@@ -12,17 +12,19 @@ import {
 	Visa,
 	MasterCard,
 	Amex,
-	WooPay,
 	ApplePay,
 	GooglePay,
 	CB,
 	Discover,
+} from '../../images/cards';
+import {
+	WooPay,
 	Ideal,
 	Klarna,
 	Affirm,
 	Clearpay,
 	Afterpay,
-} from './Icons';
+} from '../../images/payment-methods';
 
 export const PaymentMethodsIcons: React.VFC< {
 	businessCountry?: string;

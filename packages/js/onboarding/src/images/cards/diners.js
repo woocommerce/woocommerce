@@ -3,7 +3,8 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default () => (
+export const Diners = () => (
+	/* eslint-disable */
 	<svg
 		width="64"
 		height="40"
@@ -46,4 +47,5 @@ export default () => (
 			fill="white"
 		/>
 	</svg>
+	/* eslint-enable */
 );

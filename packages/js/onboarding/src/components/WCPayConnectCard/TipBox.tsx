@@ -8,7 +8,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Lightbulb from './Icons/lightbulb';
+import { Lightbulb } from '../../images/icons';
 
 interface Props {
 	color: 'purple' | 'blue' | 'gray' | 'yellow';
