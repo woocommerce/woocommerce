@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
@@ -298,7 +299,6 @@ class BlockTemplateUtils {
 	public static function get_template_paths( $template_type ) {
 		$wp_template_filenames      = array(
 			'archive-product.html',
-			'coming-soon.html',
 			'order-confirmation.html',
 			'page-cart.html',
 			'page-checkout.html',
@@ -308,6 +308,11 @@ class BlockTemplateUtils {
 			'taxonomy-product_cat.html',
 			'taxonomy-product_tag.html',
 		);
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$wp_template_filenames[] = 'coming-soon.html';
+		}
+
 		$wp_template_part_filenames = array(
 			'checkout-header.html',
 			'mini-cart.html',
