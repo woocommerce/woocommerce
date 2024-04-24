@@ -1864,6 +1864,9 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
 	}
 
+	/**
+	 * Ensures we can provide a default value if a field is not set.
+	 */
 	public function test_reading_values_externally() {
 		$id = 'plugin-namespace/my-external-field';
 		\woocommerce_register_additional_checkout_field(
@@ -1898,6 +1901,9 @@ class AdditionalFields extends MockeryTestCase {
 		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
+	/**
+	 * Ensures that we cannot overwrite existing fields.
+	 */
 	public function test_not_overwriting_values() {
 		$id = 'plugin-namespace/my-external-field';
 		\woocommerce_register_additional_checkout_field(
@@ -1948,7 +1954,6 @@ class AdditionalFields extends MockeryTestCase {
 					'postcode'                => 'cb241ab',
 					'country'                 => 'GB',
 					'phone'                   => '',
-					'email'                   => 'testaccount@test.com',
 					'plugin-namespace/gov-id' => 'gov id',
 				),
 				'payment_method'    => 'bacs',
@@ -1968,6 +1973,9 @@ class AdditionalFields extends MockeryTestCase {
 		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
+	/**
+	 * Ensures that we can react to saving a field.
+	 */
 	public function test_reacting_to_value_save() {
 		$this->unregister_fields();
 		$id = 'plugin-namespace/my-external-field';
@@ -2029,7 +2037,6 @@ class AdditionalFields extends MockeryTestCase {
 					'postcode'   => 'cb241ab',
 					'country'    => 'GB',
 					'phone'      => '',
-					'email'      => 'testaccount@test.com',
 				),
 				'payment_method'    => 'bacs',
 				'additional_fields' => array(

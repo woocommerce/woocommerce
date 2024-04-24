@@ -33,6 +33,8 @@
             - [Using the `woocommerce_blocks_validate_location_{location}_fields` action](#using-the-woocommerce_blocks_validate_location_location_fields-action)
             - [Example of location validation](#example-of-location-validation)
 - [Backward compatibility](#backward-compatibility)
+    - [React to to saving fields](#react-to-to-saving-fields)
+    - [React to reading fields](#react-to-reading-fields)
 - [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
@@ -671,6 +673,7 @@ add_filter(
 	3
 );
 ```
+
 ## A full example
 
 In this full example we will register the Government ID text field and verify that it conforms to a specific pattern.
