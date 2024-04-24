@@ -231,7 +231,7 @@ class PluginUtil {
 			$legacy_api_and_hpos_incompatibility_warning_text = apply_filters( 'woocommerce_legacy_api_and_hpos_incompatibility_warning_text', $legacy_api_and_hpos_incompatibility_warning_text );
 
 			if ( ! is_null( $legacy_api_and_hpos_incompatibility_warning_text ) ) {
-				$feature_warnings[] = "\n" . $legacy_api_and_hpos_incompatibility_warning_text;
+				$feature_warnings[] = $legacy_api_and_hpos_incompatibility_warning_text . "\n";
 			}
 		}
 
