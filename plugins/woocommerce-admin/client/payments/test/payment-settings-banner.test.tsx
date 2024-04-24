@@ -21,11 +21,11 @@ const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
 	const { container } = render( <PaymentsBannerWrapper /> );
 
 	await waitFor( () => {
-		container.querySelector( '.wcpay-connect-card' );
+		container.querySelector( '.wcpay-payments-settings-banner' );
 	} );
 
 	const banner = expect(
-		container.querySelector( '.woocommerce-recommended-payments-banner' )
+		container.querySelector( '.wcpay-payments-settings-banner' )
 	);
 
 	return status === 'visible'

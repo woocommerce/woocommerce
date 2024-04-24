@@ -4,8 +4,8 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import { WCPayConnectCard } from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
+import { WCPayConnectCard } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
