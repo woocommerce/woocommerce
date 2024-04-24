@@ -15,8 +15,8 @@ test.describe( 'Shop page', async () => {
 		);
 		const numberMatch = cliOutput.stdout.match( /\d+/ );
 		expect( numberMatch ).not.toBeNull();
-		
-		await admin.editPost( numberMatch[0] );
+
+		await admin.editPost( numberMatch[ 0 ] );
 
 		await expect( page.getByText( 'Template' ) ).toBeHidden();
 	} );
