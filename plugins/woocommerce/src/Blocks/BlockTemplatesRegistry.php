@@ -50,6 +50,8 @@ class BlockTemplatesRegistry {
 				OrderConfirmationTemplate::SLUG    => new OrderConfirmationTemplate(),
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);
+		} else {
+			$templates = array();
 		}
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
 			$templates[ ComingSoonTemplate::SLUG ] = new ComingSoonTemplate();
