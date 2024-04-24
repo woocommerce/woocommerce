@@ -16,4 +16,5 @@ registerBlockType( metadata, {
 	title: __( 'Coming Soon', 'woocommerce' ),
 	edit: Edit,
 	save: Save,
+	apiVersion: 2,
 } );

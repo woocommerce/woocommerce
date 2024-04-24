@@ -33,7 +33,7 @@ export default function Edit( { attributes, setAttributes } ) {
 			<div { ...useBlockProps() }>
 				<InnerBlocks />
 			</div>
-			<style>{ generateCSS( color ) }</style>
+			<style>{ generateStyles( color ) }</style>
 		</>
 	);
 }

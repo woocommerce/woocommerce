@@ -14,7 +14,7 @@ export default function Save( { attributes } ) {
 	return (
 		<div { ...useBlockProps.save() }>
 			<InnerBlocks.Content />
-			<style>{ generateCSS( color ) }</style>
+			<style>{ generateStyles( color ) }</style>
 		</div>
 	);
 }
