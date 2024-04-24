@@ -60,7 +60,7 @@ See the [Automattic\WooCommerce\Admin\BlockTemplates](https://github.com/woocomm
 
 ## Sent to client
 
-A template is sent to the client in the handler for the `/wcv3/layout-templates` REST API endpoint, after the `rest_request_before_callbacks` filter hook.
+A template is sent to the client in the handler for the `/wc/v3/layout-templates` REST API endpoint, after the `rest_request_before_callbacks` filter hook.
 
 Any template modification after this point will not be sent to the client.
 
