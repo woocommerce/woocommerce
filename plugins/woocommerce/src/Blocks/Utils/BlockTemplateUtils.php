@@ -297,7 +297,7 @@ class BlockTemplateUtils {
 	 * @return array $path_list A list of paths to all template part files.
 	 */
 	public static function get_template_paths( $template_type ) {
-		$wp_template_filenames      = array(
+		$wp_template_filenames = array(
 			'archive-product.html',
 			'order-confirmation.html',
 			'page-cart.html',
