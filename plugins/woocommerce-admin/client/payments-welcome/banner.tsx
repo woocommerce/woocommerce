@@ -3,6 +3,7 @@
  */
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { WCPayConnectCard } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -11,7 +12,6 @@ import { getAdminSetting } from '~/utils/admin-settings';
 import sanitizeHTML from '~/lib/sanitize-html';
 import ExitSurveyModal from './exit-survey-modal';
 import strings from './strings';
-import { WCPayConnectCard } from '@woocommerce/onboarding';
 
 interface Props {
 	isSubmitted: boolean;
