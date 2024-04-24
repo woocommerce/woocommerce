@@ -15,12 +15,8 @@ import { PanelBody, ColorPicker, ToggleControl } from '@wordpress/components';
 import { generateEntireSiteStyles } from './styles';
 
 export default function Edit( { attributes, setAttributes } ) {
-<<<<<<< HEAD
-	const { color, storeOnly } = attributes;
-	const blockProps = { ...useBlockProps() };
-=======
 	const { color, storeOnly, fullPageHeading } = attributes;
->>>>>>> 313ad95b71 (Add fullPageHeading attribute)
+	const blockProps = { ...useBlockProps() };
 
 	if ( storeOnly ) {
 		return (
