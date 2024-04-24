@@ -1,0 +1,303 @@
+// WooCommerce/Body Large
+@mixin wc-body-large {
+	font-size: 16px;
+	line-height: 24px;
+}
+
+// WooCommerce/Body Small
+@mixin wc-body-small {
+	font-size: 14px;
+	line-height: 18px;
+}
+
+// WooCommerce/Others/Caption
+@mixin wc-others-caption {
+	font-size: 12px;
+	line-height: 16px;
+	font-weight: 400;
+}
+
+// WordPress/Title Large
+@mixin wp-title-large {
+	font-size: 32px;
+	line-height: 40px;
+	font-weight: 400;
+}
+
+// WordPress/Title Medium
+@mixin wp-title-medium {
+	font-size: 24px;
+	line-height: 32px;
+	font-weight: 400;
+}
+
+// WordPress/Title Small
+@mixin wp-title-small {
+	font-size: 20px;
+	line-height: 28px;
+	font-weight: 400;
+}
+
+// WordPress/Label
+@mixin wp-label {
+	font-size: 13px;
+	line-height: 16px;
+	font-weight: 400;
+}
+
+// WordPress/Subtitle
+@mixin wp-subtitle {
+	@include wc-body-large;
+	font-weight: 600;
+}
+
+// WordPress/Subtitle Small
+@mixin wp-subtitle-small {
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 600;
+}
+
+// WordPress/Small Button
+@mixin wp-small-button {
+	font-size: 11px;
+	line-height: 16px;
+}
+
+.wcpay-connect-card {
+	margin-bottom: $gap-large;
+	animation: isLoaded;
+	animation-duration: 250ms;
+
+	h2 {
+		@include wp-title-small;
+		color: $gray-90;
+		margin: 0;
+	}
+
+	svg {
+		width: auto;
+		height: auto;
+	}
+
+	&__heading {
+		padding: $gap-large $gap-large;
+
+		svg {
+			height: 22px;
+			margin-bottom: $gap-large;
+		}
+
+		@media screen and (min-width: $break-small) {
+			h2 {
+				margin-right: 7%;
+				@include wp-title-large;
+			}
+		}
+	}
+
+	&__content {
+		max-width: 680px;
+		padding: 0 $gap-large $gap-large;
+	}
+
+	&__payment-methods {
+		max-width: 680px;
+		padding: 0 $gap-large;
+
+		p {
+			@include wp-small-button;
+			color: $gray-700;
+			margin-top: 0;
+		}
+
+		&__icons-container {
+			border: 1px solid $gray-300;
+			border-bottom: none;
+			padding: $gap-small;
+			display: grid;
+			column-gap: $gap-smaller;
+			row-gap: $gap;
+			grid-template-columns: repeat( auto-fill, minmax(39px, 1fr) );
+
+			svg {
+				height: 24px;
+
+				outline: 1px solid rgba( 0, 0, 0, 0.25 );
+				outline-offset: -1px;
+				border-radius: 3px;
+				display: block;
+
+				&.no-outline {
+					outline: none;
+					border-radius: 0;
+				}
+			}
+
+			span {
+				@include wc-others-caption;
+				color: $gray-700;
+				display: none;
+
+				@media screen and (min-width: $break-small) {
+					display: initial;
+					white-space: nowrap;
+					align-self: end;
+				}
+			}
+		}
+
+		&__description {
+			padding: $gap-small;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			border: 1px solid $gray-300;
+
+			p {
+				font-size: 11px;
+				line-height: 16px;
+				color: $gray-900;
+				font-weight: 600;
+				text-transform: uppercase;
+				margin-bottom: 0;
+			}
+
+			span {
+				@include wc-others-caption;
+				color: $gray-700;
+			}
+
+			&__divider {
+				border-top: 1px solid $gray-200;
+				@media screen and (min-width: $break-small) {
+					border-right: 1px solid $gray-200;
+				}
+			}
+
+			@media screen and (min-width: $break-small) {
+				flex-direction: row;
+			}
+		}
+	}
+
+	&__buttons {
+		padding: $gap-large;
+
+		button {
+			width: 100%;
+			justify-content: center;
+			@media screen and (min-width: $break-small) {
+				width: auto;
+				justify-content: left;
+			}
+		}
+	}
+
+	&__incentive {
+		background: #faf8ff;
+		border: 1px solid #ae7dd0;
+		border-radius: 2px;
+		padding: $gap-large;
+		margin-bottom: $gap-large;
+
+		&-pill {
+			display: inline-block;
+			padding: 0 $gap-small;
+			border: 1px solid #1d2327; // Gray 90
+			border-radius: 16px;
+			text-transform: uppercase;
+			font-size: 12px;
+			line-height: 22px;
+			font-weight: 600;
+			color: $gray-900;
+			margin-bottom: $gap-small;
+		}
+
+		p {
+			@include wc-others-caption;
+			color: #50575e;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+
+		@media screen and (min-width: $break-small) {
+			h2 {
+				margin-right: 10%;
+			}
+
+			p {
+				margin-right: 15%;
+			}
+		}
+	}
+
+	// Specific usages
+	.wcpay-payments-settings-banner & {
+		margin-top: $gap-large;
+
+		@media screen and (min-width: $break-small) {
+			margin-right: 15px;
+		}
+	}
+
+	.wcpay-component-tip-box {
+		display: grid;
+		grid-template-columns: 24px 1fr;
+		column-gap: $gap-smaller;
+		padding: $gap $gap-small;
+		margin: $gap 0;
+
+		&:first-child {
+			margin-top: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		&.purple {
+			fill: $studio-woocommerce-purple-50;
+			background-color: $studio-woocommerce-purple-0;
+		}
+
+		&.blue {
+			fill: #007cba; // Gutenberg/Blue - Missing from dependencies
+			background-color: #f0f6fc; // $wp-blue-0
+		}
+
+		&.gray {
+			fill: $gray-50;
+			background-color: $gray-0;
+			color: $gray-900;
+
+			.components-button.is-link {
+				color: #0063a1; // Gutenberg/Blue -10%
+			}
+		}
+		&.yellow {
+			fill: $gray-50;
+			background-color: #fef8ee;
+			color: $gray-900;
+			.components-button.is-link {
+				color: #0063a1; // Gutenberg/Blue -10%
+			}
+		}
+
+		&__content {
+			align-self: center;
+		}
+
+		a {
+			font-weight: 700;
+			color: $studio-woocommerce-purple-70;
+		}
+
+		.components-button.is-link {
+			font-size: inherit;
+			color: $studio-woocommerce-purple-50;
+		}
+	}
+}
