@@ -27,7 +27,6 @@ class BlockTemplatesController {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_block_templates' ), 10, 3 );
-		add_filter( 'current_theme_supports-block-templates', array( $this, 'remove_block_template_support_for_shop_page' ) );
 		add_filter( 'taxonomy_template_hierarchy', array( $this, 'add_archive_product_to_eligible_for_fallback_templates' ), 10, 1 );
 		add_action( 'after_switch_theme', array( $this, 'check_should_use_blockified_product_grid_templates' ), 10, 2 );
 		add_filter( 'post_type_archive_title', array( $this, 'update_product_archive_title' ), 10, 2 );
@@ -555,31 +554,5 @@ class BlockTemplatesController {
 		}
 
 		return $post_type_name;
-	}
-
-	/**
-	 * Remove the template panel from the Sidebar of the Shop page because
-	 * the Site Editor handles it.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/6278
-	 *
-	 * @param bool $is_support Whether the active theme supports block templates.
-	 *
-	 * @return bool
-	 */
-	public function remove_block_template_support_for_shop_page( $is_support ) {
-		global $pagenow, $post;
-
-		if (
-			is_admin() &&
-			'post.php' === $pagenow &&
-			function_exists( 'wc_get_page_id' ) &&
-			is_a( $post, 'WP_Post' ) &&
-			wc_get_page_id( 'shop' ) === $post->ID
-		) {
-			return false;
-		}
-
-		return $is_support;
 	}
 }
