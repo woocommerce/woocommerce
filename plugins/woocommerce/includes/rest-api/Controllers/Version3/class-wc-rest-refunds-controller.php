@@ -89,16 +89,16 @@ class WC_REST_Refunds_Controller extends WC_REST_Order_Refunds_Controller {
 	 *
 	 * @since  9.0.0
 	 *
-	 * @param  WC_Data         $object  Object data.
+	 * @param  WC_Order_Refund $refund  Refund data.
 	 * @param  WP_REST_Request $request Request object.
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function prepare_object_for_response( $object, $request ) {
+	public function prepare_object_for_response( $refund, $request ) {
 		$this->request       = $request;
 		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
 
-		$data    = $this->get_formatted_item_data( $object );
+		$data    = $this->get_formatted_item_data( $refund );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -106,39 +106,32 @@ class WC_REST_Refunds_Controller extends WC_REST_Order_Refunds_Controller {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $object, $request ) );
+		$response->add_links( $this->prepare_links( $refund, $request ) );
 
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type,
-		 * refers to object type being prepared for the response.
-		 *
-		 * @param WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+		/** This filter is documented in includes/rest-api/Controllers/Version2/class-wc-rest-order-refunds-v2-controller.php */
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $refund, $request );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param WC_Order_Refund $refund  Refund data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
-	protected function prepare_links( $object, $request ) {
-		$base  = str_replace( '(?P<order_id>[\d]+)', $object->get_parent_id(), 'orders/(?P<order_id>[\d]+)/refunds' );
+	protected function prepare_links( $refund, $request ) {
+		$base  = str_replace( '(?P<order_id>[\d]+)', $refund->get_parent_id(), 'orders/(?P<order_id>[\d]+)/refunds' );
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $object->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $refund->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'up'         => array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $object->get_parent_id() ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $refund->get_parent_id() ) ),
 			),
 		);
 
