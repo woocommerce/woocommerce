@@ -1378,6 +1378,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 						)
 					)
 				),
+				'aria-describedby_text' => $product->add_to_cart_aria_describedby(),
 				'attributes' => array(
 					'data-product_id'  => $product->get_id(),
 					'data-product_sku' => $product->get_sku(),
