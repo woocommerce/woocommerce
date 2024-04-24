@@ -547,14 +547,17 @@ class ProductCollection extends AbstractBlock {
 	 * @param WP_REST_Request $request Request.
 	 */
 	private function get_preview_query_args( $args, $request ) {
-		$product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
-		$collection_name                  = $product_collection_query_context['collection'] ?? '';
-
 		$collection_query = array();
 
-		if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
-			$collection_query = $this->get_on_sale_products_query( true );
-		}
+		/**
+		 * In future, Here we will modify the preview query based on the collection name. For example:
+		 *
+		 * $product_collection_query_context = $request->get_param( 'productCollectionQueryContext' );
+		 * $collection_name                  = $product_collection_query_context['collection'] ?? '';
+		 * if ( 'woocommerce/product-collection/on-sale' === $collection_name ) {
+		 *      $collection_query = $this->get_on_sale_products_query( true );
+		 * }.
+		 */
 
 		$args = $this->merge_queries( $args, $collection_query );
 		return $args;
