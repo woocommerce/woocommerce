@@ -13,6 +13,7 @@ declare module '@woocommerce/settings' {
 }
 
 declare module '@wordpress/core-data' {
+	function useEntityId( kind: string, name: unknown, id?: string ): any;
 	function useEntityProp< T = unknown >(
 		kind: string,
 		name: string,
