@@ -49,8 +49,9 @@ test.describe( 'Insert WooCommerce Patterns Into Page', () => {
 					} )
 				).toBeVisible();
 
+				const canvas = await getCanvas( page );
 				await expect(
-					page
+					canvas
 						.getByRole( 'textbox' )
 						.filter( { hasText: `${ wooPatterns[ i ].button }` } )
 				).toBeVisible();
