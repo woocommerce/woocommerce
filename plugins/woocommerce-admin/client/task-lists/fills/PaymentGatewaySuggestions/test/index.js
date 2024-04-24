@@ -125,12 +125,8 @@ describe( 'PaymentGatewaySuggestions', () => {
 		] );
 
 		expect(
-			container
-				.querySelector(
-					'.woocommerce-recommended-payments-banner__footer'
-				)
-				.textContent.includes( 'WooPayments' )
-		).toBe( true );
+			container.querySelector( '.woocommerce-task-payment-wcpay' )
+		).toBeInTheDocument();
 	} );
 
 	test( 'should render all payment gateways except WCPay', () => {
