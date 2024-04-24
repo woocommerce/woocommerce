@@ -196,7 +196,7 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
-		$cache_key        = 'wc-order-count-' . $order_type;
+		$cache_key        = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'order-count-' . $order_type;
 		$count_per_status = wp_cache_get( $cache_key, 'counts' );
 
 		if ( false === $count_per_status ) {
