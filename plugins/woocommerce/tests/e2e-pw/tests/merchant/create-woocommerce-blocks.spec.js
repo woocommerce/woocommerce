@@ -4,6 +4,7 @@ const {
 	fillPageTitle,
 	insertBlock,
 	getCanvas,
+	publishPage,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -225,17 +226,7 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 			} );
 		}
 
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ allWooBlocksPageTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, allWooBlocksPageTitle );
 
 		// check all blocks inside the page after publishing
 		// except the product price due to invisibility and false-positive
