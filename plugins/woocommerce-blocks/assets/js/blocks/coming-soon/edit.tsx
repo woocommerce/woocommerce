@@ -16,11 +16,12 @@ import { generateStyles } from './styles';
 
 export default function Edit( { attributes, setAttributes } ) {
 	const { color, storeOnly } = attributes;
+	const blockProps = { ...useBlockProps() };
 
 	if ( storeOnly ) {
 		return (
 			<>
-				<div { ...useBlockProps() }>
+				<div { ...blockProps }>
 					<InnerBlocks />
 				</div>
 				<style>{ `.woocommerce-breadcrumb {display: none;}` }</style>
@@ -42,7 +43,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<div { ...useBlockProps() }>
+			<div { ...blockProps }>
 				<InnerBlocks />
 			</div>
 			<style>{ generateStyles( color ) }</style>

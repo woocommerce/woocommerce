@@ -1,4 +1,4 @@
-export const generateStyles = ( color: string = '#bea0f2' ) => {
+export const generateStyles = ( color = '#bea0f2' ) => {
 	return `@font-face {
         font-family: 'Inter';
         src: url( <?php echo esc_url( WC()->plugin_url() . '/assets/fonts/Inter-VariableFont_slnt,wght.woff2' ); ?>) format('woff2');
