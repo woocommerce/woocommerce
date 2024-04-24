@@ -7,6 +7,7 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 const simpleProductName = 'Cart Coupons Product';
 const singleProductFullPrice = '110.00';
@@ -33,7 +34,7 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const cartBlockPageTitle = `Cart Block Coupons ${ Date.now() }`;
+const cartBlockPageTitle = `Cart Block Coupons ${ uuid.v1() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

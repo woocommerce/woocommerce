@@ -7,6 +7,7 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 const simpleProductName = 'Single Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -20,7 +21,7 @@ const singleProductWithCrossSellProducts =
 	+firstCrossSellProductPrice +
 	+secondCrossSellProductPrice;
 
-const cartBlockPageTitle = `Cart Block ${ Date.now() }`;
+const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

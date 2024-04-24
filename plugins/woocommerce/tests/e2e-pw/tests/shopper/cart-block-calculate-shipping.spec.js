@@ -7,6 +7,7 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 const firstProductName = 'First Product';
 const firstProductPrice = '10.00';
@@ -14,7 +15,7 @@ const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
 
-const cartBlockPageTitle = `Cart Block ${ Date.now() }`;
+const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

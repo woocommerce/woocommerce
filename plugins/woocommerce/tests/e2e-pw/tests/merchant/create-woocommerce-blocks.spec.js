@@ -7,8 +7,9 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
-const allWooBlocksPageTitle = `Insert All Woo Blocks ${ Date.now() }`;
+const allWooBlocksPageTitle = `Insert All Woo Blocks ${ uuid.v1() }`;
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';

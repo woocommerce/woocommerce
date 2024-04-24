@@ -1,11 +1,12 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { customer } = require( '../../test-data/data' );
+const uuid = require( 'uuid' );
 
-const productName = `Taxed products are awesome ${ Date.now() }`;
+const productName = `Taxed products are awesome ${ uuid.v1() }`;
 const productPrice = '200.00';
 const messyProductPrice = '13.47';
-const secondProductName = `Other products are also awesome ${ Date.now() }`;
+const secondProductName = `Other products are also awesome ${ uuid.v1() }`;
 
 let productId,
 	productId2,

@@ -1,6 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 const singleProductPrice1 = '10';
 const singleProductPrice2 = '50';
@@ -8,7 +9,7 @@ const singleProductPrice3 = '200';
 
 const simpleProductName = 'AAA Filter Products';
 
-const productsFilteringPageTitle = `Products Filtering ${ Date.now() }`;
+const productsFilteringPageTitle = `Products Filtering ${ uuid.v1() }`;
 const productsFilteringPageSlug = productsFilteringPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

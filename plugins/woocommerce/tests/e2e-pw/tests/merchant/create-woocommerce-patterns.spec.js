@@ -6,8 +6,9 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
+const uuid = require( 'uuid' );
 
-const wooPatternsPageTitle = `Insert Woo Patterns ${ Date.now() }`;
+const wooPatternsPageTitle = `Insert Woo Patterns ${ uuid.v1() }`;
 const wooPatternsPageSlug = wooPatternsPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
