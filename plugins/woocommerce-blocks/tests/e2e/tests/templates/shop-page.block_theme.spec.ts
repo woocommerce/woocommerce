@@ -13,15 +13,10 @@ test.describe( 'Shop page', async () => {
 		const cliOutput = await cli(
 			`npm run wp-env run tests-cli -- wp option get woocommerce_shop_page_id`
 		);
-		const lines = cliOutput.stdout.split( '\n' );
-		const shopPageId = lines.reverse().find( ( line ) => line !== '' );
-
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( ! shopPageId ) {
-			throw new Error( 'Shop page ID not found' );
-		}
-
-		await admin.editPost( shopPageId );
+		const numberMatch = cliOutput.stdout.match( /\d+/ );
+		expect( numberMatch ).not.toBeNull();
+		
+		await admin.editPost( numberMatch[0] );
 
 		await expect( page.getByText( 'Template' ) ).toHaveCount( 0 );
 	} );
