@@ -597,7 +597,7 @@ Assuming 2 fields, named `my-plugin-namespace/address-field` in the address step
 
 ### React to to saving fields
 
-You can react to those fields being saved by hooking into `updated_customer_meta` and `updated_order_meta` actions.
+You can react to those fields being saved by hooking into `woocommerce_set_additional_field_value` action.
 
 ```php
 add_action(
@@ -635,11 +635,12 @@ add_action(
 );
 ```
 
-This way, you can ensure existing systems will continue working and your integration will continue to work. However, ideally, you should migrate your existing data and systems to use the new meta fields. You can ensure they continue to work by reading from 2 places.
+This way, you can ensure existing systems will continue working and your integration will continue to work. However, ideally, you should migrate your existing data and systems to use the new meta fields.
+
 
 ### React to reading fields
 
-You can use the `woocommerce_get_default_value_for_{$key}` filters to read from the new meta keys.
+You can use the `woocommerce_get_default_value_for_{$key}` filters to provide a different default value (a value coming from another meta field for example):
 
 ```php
 add_filter(
