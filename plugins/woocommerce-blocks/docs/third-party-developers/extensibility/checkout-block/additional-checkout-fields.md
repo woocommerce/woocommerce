@@ -32,6 +32,7 @@
         - [Multiple field validation](#multiple-field-validation)
             - [Using the `woocommerce_blocks_validate_location_{location}_fields` action](#using-the-woocommerce_blocks_validate_location_location_fields-action)
             - [Example of location validation](#example-of-location-validation)
+- [Backward compatibility](#backward-compatibility)
 - [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
@@ -588,6 +589,87 @@ add_action(
 
 If these fields were rendered in the "contact" location instead, the code would be the same except the hook used would be: `woocommerce_blocks_validate_location_contact_fields`.
 
+## Backward compatibility
+
+Due to technical reasons, it's not yet possible to specify the meta key for fields, as we want them to be prefixed and managed. Plugins with existing fields in shortcode Checkout can be compatible and react to reading and saving fields using hooks.
+
+Assuming 2 fields, named `my-plugin-namespace/address-field` in the address step and `my-plugin-namespace/my-other-field` in the order step, you can:
+
+### React to to saving fields
+
+You can react to those fields being saved by hooking into `updated_customer_meta` and `updated_order_meta` actions.
+
+```php
+add_action(
+	'woocommerce_blocks_set_additional_field_value',
+	function ( $key, $value, $group, $wc_object ) {
+		if ( 'my-plugin-namespace/address-field' !== $key ) {
+			return;
+		}
+
+		if ( 'billing' === $group ) {
+			$my_plugin_address_key = 'existing_billing_address_field_key';
+		} else {
+			$my_plugin_address_key = 'existing_shipping_address_field_key';
+		}
+
+		$wc_object->update_meta_data( $my_plugin_address_key, $value, true );
+	},
+	10,
+	4
+);
+
+add_action(
+	'woocommerce_blocks_set_additional_field_value',
+	function ( $key, $value, $group, $wc_object ) {
+		if ( 'my-plugin-namespace/my-other-field' !== $key ) {
+			return;
+		}
+
+		$my_plugin_key = 'existing_order_field_key';
+
+		$wc_object->update_meta_data( $my_plugin_key, $value, true );
+	},
+	10,
+	4
+);
+```
+
+This way, you can ensure existing systems will continue working and your integration will continue to work. However, ideally, you should migrate your existing data and systems to use the new meta fields. You can ensure they continue to work by reading from 2 places.
+
+### React to reading fields
+
+You can use the `woocommerce_blocks_get_default_value_for_{$key}` filters to read from the new meta keys.
+
+```php
+add_filter(
+	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/address-field",
+	function ( $value, $group, $wc_object ) {
+
+		if ( 'billing' === $group ) {
+			$my_plugin_key = 'existing_billing_address_field_key';
+		} else {
+			$my_plugin_key = 'existing_shipping_address_field_key';
+		}
+
+		return $wc_object->get_meta( $my_plugin_key );
+	},
+	10,
+	3
+);
+
+add_filter(
+	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/my-other-field",
+	function ( $value, $group, $wc_object ) {
+
+		$my_plugin_key = 'existing_order_field_key';
+
+		return $wc_object->get_meta( $my_plugin_key );
+	},
+	10,
+	3
+);
+```
 ## A full example
 
 In this full example we will register the Government ID text field and verify that it conforms to a specific pattern.

@@ -785,7 +785,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of fields keys for the address group.
+	 * Returns an array of fields keys for the address location.
 	 *
 	 * @return array An array of fields keys.
 	 */
@@ -794,7 +794,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of fields keys for the contact group.
+	 * Returns an array of fields keys for the contact location.
 	 *
 	 * @return array An array of fields keys.
 	 */
@@ -803,7 +803,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of fields keys for the additional area group.
+	 * Returns an array of fields keys for the additional area location.
 	 *
 	 * @return array An array of fields keys.
 	 * @deprecated 8.9.0 Use get_order_fields_keys instead.
@@ -823,7 +823,7 @@ class CheckoutFields {
 	}
 
 	/**
-	 * Returns an array of fields for a given group.
+	 * Returns an array of fields for a given location.
 	 *
 	 * @param string $location The location to get fields for (address|contact|order).
 	 * @return array An array of fields definitions.
@@ -978,6 +978,28 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Returns all fields key for a given group.
+	 *
+	 * @param string $group The group to get the key for (shipping|billing|other).
+	 *
+	 * @return string[] Field keys.
+	 */
+	public function get_fields_for_group( $group = 'other' ) {
+		if ( 'shipping' === $group ) {
+			return $this->get_fields_for_location( 'address' );
+		}
+
+		if ( 'billing' === $group ) {
+			return $this->get_fields_for_location( 'address' );
+		}
+
+		return \array_merge(
+			$this->get_fields_for_location( 'contact' ),
+			$this->get_fields_for_location( 'order' )
+		);
+	}
+
+	/**
 	 * Returns true if the given key is a valid field.
 	 *
 	 * @param string $key The field key.
@@ -1057,6 +1079,17 @@ class CheckoutFields {
 	private function set_array_meta( string $key, $value, WC_Data $wc_object, string $group ) {
 		$meta_key = self::get_group_key( $group ) . $key;
 
+		/**
+		 * Allow reacting for saving an additional field value.
+		 *
+		 * @param string               $key The key of the field being saved.
+		 * @param mixed                $value The value of the field being saved.
+		 * @param string               $group The group of this location (shipping|billing|other).
+		 * @param WC_Customer|WC_Order $wc_object The object to set the field value for.
+		 *
+		 * @since 8.9.0
+		 */
+		do_action( 'woocommerce_blocks_set_additional_field_value', $key, $value, $group, $wc_object );
 		// Convert boolean values to strings because Data Stores will skip false values.
 		if ( is_bool( $value ) ) {
 			$value = $value ? '1' : '0';
@@ -1082,18 +1115,31 @@ class CheckoutFields {
 
 		$meta_key = self::get_group_key( $group ) . $key;
 
-		$meta_data = $wc_object->get_meta( $meta_key, true );
+		$value = $wc_object->get_meta( $meta_key, true );
+
+		if ( ! $value ) {
+			/**
+			 * Allow providing a default value for additional fields if no value is already set.
+			 *
+			 * @param null $value The default value for the filter, always null.
+			 * @param string $group The group of this key (shipping|billing|other).
+			 * @param WC_Data $wc_object The object to get the field value for.
+			 *
+			 * @since 8.9.0
+			 */
+			$value = apply_filters( "woocommerce_blocks_get_default_value_for_{$key}", null, $group, $wc_object );
+		}
 
 		// We cast the value to a boolean if the field is a checkbox.
 		if ( $this->is_field( $key ) && 'checkbox' === $this->additional_fields[ $key ]['type'] ) {
-			return '1' === $meta_data;
+			return '1' === $value;
 		}
 
-		if ( null === $meta_data ) {
+		if ( null === $value ) {
 			return '';
 		}
 
-		return $meta_data;
+		return $value;
 	}
 
 	/**
@@ -1124,6 +1170,25 @@ class CheckoutFields {
 						$meta_data[ $key ] = $meta_data_object->value;
 					}
 				}
+			}
+		}
+
+		$missing_fields = array_diff( array_keys( $this->get_fields_for_group( $group ) ), array_keys( $meta_data ) );
+
+		foreach ( $missing_fields as $missing_field ) {
+				/**
+				 * Allow providing a default value for additional fields if no value is already set.
+				 *
+				 * @param null $value The default value for the filter, always null.
+				 * @param string $group The group of this key (shipping|billing|other).
+				 * @param WC_Data $wc_object The object to get the field value for.
+				 *
+				 * @since 8.9.0
+				 */
+				$value = apply_filters( "woocommerce_blocks_get_default_value_for_{$missing_field}", null, $group, $wc_object );
+
+			if ( $value ) {
+				$meta_data[ $missing_field ] = $value;
 			}
 		}
 

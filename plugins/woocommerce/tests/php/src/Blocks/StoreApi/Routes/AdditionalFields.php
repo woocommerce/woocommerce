@@ -1863,4 +1863,105 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'engineering', ( (array) $data['additional_fields'] )['plugin-namespace/job-function'], print_r( $data, true ) );
 		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
 	}
+
+	public function test_reading_values_externally() {
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		add_filter(
+			"woocommerce_blocks_get_default_value_for_{$id}",
+			function () {
+				return 'external-value';
+			},
+			10,
+			2
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'external-value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
+
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+	}
+
+	public function test_not_overwriting_values() {
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_blocks_register_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		add_filter(
+			"woocommerce_blocks_get_default_value_for_{$id}",
+			function () {
+				return 'external-value';
+			},
+			10,
+			2
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
+
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+	}
 }
