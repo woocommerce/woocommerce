@@ -43,15 +43,12 @@ export function Editor( { product, productType = 'product' }: EditorProps ) {
 
 	const updatedLayoutContext = useExtendLayout( 'product-block-editor' );
 
+	const productId = product?.id || -1;
+
 	// Check if the prepublish sidebar is open from the store.
 	const isPrepublishPanelOpen = useSelect( ( select ) => {
 		return select( productEditorUiStore ).isPrepublishPanelOpen();
 	}, [] );
-
-	if ( product?.id === undefined ) {
-		return null;
-	}
-	const productId = product?.id || -1;
 
 	return (
 		<LayoutContextProvider value={ updatedLayoutContext }>
