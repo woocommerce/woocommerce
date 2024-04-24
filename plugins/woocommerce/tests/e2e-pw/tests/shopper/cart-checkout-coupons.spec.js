@@ -1,3 +1,4 @@
+const { addAProductToCart } = require( '../../utils/cart' );
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -64,7 +65,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			} );
 	} );
 
-	test.beforeEach( async ( { page, context } ) => {
+	test.beforeEach( async ( { context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
 	} );
@@ -91,8 +92,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			context,
 		} ) => {
 			await test.step( 'Load cart page and apply coupons', async () => {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
+				await addAProductToCart( page, firstProductId );
 
 				await page.goto( '/cart/' );
 				await page.locator( '#coupon_code' ).fill( coupons[ i ].code );
@@ -116,10 +116,9 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			await context.clearCookies();
 
 			await test.step( 'Load checkout page and apply coupons', async () => {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
+				await addAProductToCart( page, firstProductId );
 
-				await page.goto( '/checkout/', { waitUntil: 'networkidle' } );
+				await page.goto( '/checkout' );
 				await page
 					.locator( 'text=Click here to enter your code' )
 					.click();
@@ -144,8 +143,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try applying same coupon twice', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
@@ -154,12 +152,12 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			await expect(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
-			await page.waitForLoadState( 'networkidle' );
+
 			// try to apply the same coupon
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
-			await page.waitForLoadState( 'networkidle' );
+
 			// error received
 			await expect(
 				page.getByText( 'Coupon code already applied!' )
@@ -176,8 +174,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try applying same coupon twice', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
@@ -207,8 +204,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 
 	test( 'allows applying multiple coupons', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try applying multiple coupons', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
@@ -218,7 +214,6 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
-			await page.waitForLoadState( 'networkidle' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 			// successful
@@ -240,8 +235,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try applying multiple coupons', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
@@ -276,8 +270,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try restoring total when removed coupons', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page.locator( '#coupon_code' ).fill( coupons[ 0 ].code );
@@ -292,7 +285,6 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			).toContainText( totals[ 0 ] );
 
 			await page.locator( 'a.woocommerce-remove-coupon' ).click();
-			await page.waitForLoadState( 'networkidle' );
 
 			await expect(
 				page.locator( '.order-total .amount' )
@@ -302,8 +294,7 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try restoring total when removed coupons', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page.locator( 'text=Click here to enter your code' ).click();
