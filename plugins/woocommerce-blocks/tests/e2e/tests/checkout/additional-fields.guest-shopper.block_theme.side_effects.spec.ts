@@ -55,7 +55,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{
 					contact: {
 						'Enter a gift message to include in the package':
-							'This is for you!',
+							'For my non-ascii named friend: niño',
 					},
 					address: {
 						shipping: {
@@ -67,7 +67,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -105,7 +105,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{
 					contact: {
 						'Enter a gift message to include in the package':
-							'This is for you!',
+							'For my non-ascii named friend: niño',
 						'Is this a personal purchase or a business purchase?':
 							'business',
 					},
@@ -119,7 +119,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -188,7 +188,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					[ 'What is your favourite colour?', 'Blue' ],
 					[
 						'Enter a gift message to include in the package',
-						'This is for you!',
+						'For my non-ascii named friend: niño',
 					],
 					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
 					[ 'Would you like a free gift with your order?', 'Yes' ],
@@ -220,7 +220,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Enter a gift message to include in the package'
 					)
-			).toHaveValue( 'This is for you!' );
+			).toHaveValue( 'For my non-ascii named friend: niño' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {

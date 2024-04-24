@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add k6 perf test assertions to check for the correct page title and presence of footer.

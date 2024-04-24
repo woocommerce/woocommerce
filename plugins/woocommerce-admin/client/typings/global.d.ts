@@ -7,6 +7,7 @@ declare global {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
 			currentUserId: number;
+			currentThemeIsFSETheme: boolean;
 			admin: {
 				wcpay_welcome_page_connect_nonce: string;
 				currentUserData: {
@@ -57,6 +58,7 @@ declare global {
 			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
+			'launch-your-store': boolean;
 		};
 		wp: {
 			updates?: {

@@ -33,7 +33,7 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 		// Contact and additional fields are currently grouped in this section.
 		$additional_fields = array_merge(
 			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ),
-			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'additional' )
+			Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' )
 		);
 
 		return empty( $additional_fields ) ? '' : $content;
@@ -48,7 +48,7 @@ class AdditionalFieldsWrapper extends AbstractOrderConfirmationBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'additionalFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'additional' ) );
+		$this->asset_data_registry->add( 'additionalFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'order' ) );
 		$this->asset_data_registry->add( 'additionalContactFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'contact' ) );
 	}
 }

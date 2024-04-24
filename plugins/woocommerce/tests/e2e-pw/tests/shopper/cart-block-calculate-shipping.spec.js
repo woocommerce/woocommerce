@@ -1,5 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -22,6 +21,7 @@ const shippingZoneNamePT = 'Portugal Flat Local';
 const shippingCountryPT = 'PT';
 
 test.describe( 'Cart Block Calculate Shipping', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 	let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -130,21 +130,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	test.beforeEach( async ( { page, context } ) => {
-		// Shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-
-		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		await page.waitForLoadState( 'networkidle' );
-	} );
-
 	test( 'create Cart Block page', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
 		await disableWelcomeModal( { page } );
 
@@ -172,7 +160,14 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Netherlands
@@ -192,9 +187,9 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		).toBeVisible();
 		await expect(
 			page.locator(
-				'.wc-block-components-radio-control__description > .wc-block-components-formatted-money-amount'
+				'.wc-block-components-radio-control__description > .wc-block-components-shipping-rates-control__package__description--free'
 			)
-		).toContainText( '$0.00' );
+		).toContainText( 'Free' );
 		await expect(
 			page.locator(
 				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
@@ -204,7 +199,14 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 	test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
@@ -259,7 +261,14 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 	test( 'should show correct total cart block price after updating quantity', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
@@ -295,8 +304,16 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );

@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 8.7.0
+Stable tag: 8.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -57,9 +57,9 @@ Unlike hosted ecommerce solutions, WooCommerce store data is future-proof; youâ€
 Developers can use [WooCommerce](https://woocommerce.com/woocommerce/) to create, customize, and scale a store to meet a clientâ€™s exact specifications, making enhancements through extensions or custom solutions.
 
 - Leverage [hooks and filters](https://woocommerce.com/document/introduction-to-hooks-actions-and-filters/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) to modify or create functionality.
-- Integrate virtually any service using a robust [REST API](https://woocommerce.com/document/woocommerce-rest-api/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and webhooks.
+- Integrate virtually any service using a robust [REST API](https://developer.woocommerce.com/docs/getting-started-with-the-woocommerce-rest-api/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and webhooks.
 - Design and build custom content blocks with React.
-- [Inspect and modify](https://woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/extending/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) any aspect of the core plugin code.
+- [Inspect and modify](https://developer.woocommerce.com/docs/category/extension-development/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) any aspect of the core plugin code.
 - Speed up development with a lightning-fast [CLI](https://woocommerce.github.io/code-reference/classes/wc-cli-rest-command.html?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
 The core platform is tested rigorously and often, supported by a dedicated development team working across time zones. Comprehensive documentation is updated with each release, empowering you to build exactly the store required.
@@ -84,7 +84,7 @@ WooCommerce is translated into multiple languages, including Danish, Ukrainian, 
 
 For help setting up and configuring WooCommerce, please refer to [Getting Started](https://woocommerce.com/documentation/plugins/woocommerce/getting-started/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing) and the [New WooCommerce Store Owner Guide](https://woocommerce.com/guides/new-store/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
 
-For extending or theming WooCommerce, see our [codex](https://woocommerce.com/documentation/plugins/woocommerce/woocommerce-codex/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing), as well as the [Plugin Developer Handbook](https://woocommerce.com/document/create-a-plugin/?utm_medium=referral&utm_source=wordpress.org&utm_campaign=wp_org_repo_listing).
+For extending or theming WooCommerce, see our [documentation](https://github.com/woocommerce/woocommerce/tree/trunk/docs), as well as the [Plugin Developer Best Practices](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/extension-development-best-practices.md).
 
 = Where can I get help or talk to other users about WooCommerce Core? =
 
