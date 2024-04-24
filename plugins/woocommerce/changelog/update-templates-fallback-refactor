@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Only display Products by Category, Tag and Attribute in the Site Editor templates list when they have been customized

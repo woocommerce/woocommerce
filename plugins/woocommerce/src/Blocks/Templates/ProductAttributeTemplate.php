@@ -19,13 +19,6 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	const SLUG = 'taxonomy-product_attribute';
 
 	/**
-	 * The template used as a fallback if that one is customized.
-	 *
-	 * @var string
-	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
-
-	/**
 	 * Initialization method.
 	 */
 	public function init() {

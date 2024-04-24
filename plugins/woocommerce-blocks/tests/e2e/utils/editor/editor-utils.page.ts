@@ -391,6 +391,38 @@ export class EditorUtils {
 			.waitFor();
 	}
 
+	async createTemplate( templateName: string, templateType: TemplateType ) {
+		await this.page.goto(
+			`/wp-admin/site-editor.php?path=/${ templateType }/all`
+		);
+		await this.page.getByLabel( 'Add New Template' ).click();
+
+		const dialog = this.page.getByRole( 'dialog' );
+		await dialog.getByRole( 'button', { name: templateName } ).click();
+		// There is the chance that the Add template dialog is opened before
+		// product taxonomies could load. In that case, the screen to select
+		// whether to create a template for a specific taxonomy or for all of
+		// them won't be shown. That's why we click the 'All Categories' /
+		// 'All Tags' button only if visible.
+		const allButton = dialog.getByRole( 'button', { name: 'All' } );
+		if ( await allButton.isVisible() ) {
+			await allButton.click();
+		}
+		await this.page
+			.locator( '.block-editor-block-preview__container' )
+			.click();
+
+		await this.closeWelcomeGuideModal();
+		await this.waitForSiteEditorFinishLoading();
+
+		// Verify we are editing the correct template.
+		await this.page
+			.getByRole( 'heading', {
+				name: `Editing template: ${ templateName }`,
+			} )
+			.waitFor();
+	}
+
 	async visitTemplateEditor(
 		templateName: string,
 		templateType: TemplateType

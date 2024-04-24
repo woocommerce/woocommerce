@@ -17,6 +17,7 @@ type TemplateCustomizationTest = {
 		page: Page;
 	} ) => Promise< void | Response | null >;
 	templateName: string;
+	gutenbergTemplateName?: string;
 	templatePath: string;
 	templateType: TemplateType;
 	fallbackTemplate?: {
@@ -48,16 +49,17 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Products by Attribute',
 		templatePath: 'taxonomy-product_attribute',
 		templateType: 'wp_template',
-		fallbackTemplate: {
-			templateName: 'Product Catalog',
-			templatePath: 'archive-product',
-		},
+		// fallbackTemplate: {
+		// 	templateName: 'Product Catalog',
+		// 	templatePath: 'archive-product',
+		// },
 		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
 			await page.goto( '/product-category/clothing' ),
 		templateName: 'Products by Category',
+		gutenbergTemplateName: 'Category (product_cat)',
 		templatePath: 'taxonomy-product_cat',
 		templateType: 'wp_template',
 		fallbackTemplate: {
@@ -70,6 +72,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		visitPage: async ( { page } ) =>
 			await page.goto( '/product-tag/recommended/' ),
 		templateName: 'Products by Tag',
+		gutenbergTemplateName: 'Tag (product_tag)',
 		templatePath: 'taxonomy-product_tag',
 		templateType: 'wp_template',
 		fallbackTemplate: {
