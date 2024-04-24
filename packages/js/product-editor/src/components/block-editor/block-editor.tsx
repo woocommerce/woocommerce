@@ -177,6 +177,7 @@ export function BlockEditor( {
 		'postType',
 		postType,
 		productId,
+		// Only perform the query when the productId is valid.
 		{ enabled: productId !== -1 }
 	);
 
