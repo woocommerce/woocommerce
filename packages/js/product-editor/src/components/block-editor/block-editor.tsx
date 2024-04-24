@@ -176,7 +176,8 @@ export function BlockEditor( {
 	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
 		postType,
-		productId
+		productId,
+		{ enabled: productId !== -1 }
 	);
 
 	const { productTemplate } = useProductTemplate(
