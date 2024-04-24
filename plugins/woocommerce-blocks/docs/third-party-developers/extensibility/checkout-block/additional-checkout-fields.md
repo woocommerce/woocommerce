@@ -22,11 +22,11 @@
     - [The select input when focused](#the-select-input-when-focused)
 - [Validation and sanitization](#validation-and-sanitization)
     - [Sanitization](#sanitization)
-        - [Using the `woocommerce_blocks_sanitize_additional_field` filter](#using-the-woocommerce_blocks_sanitize_additional_field-filter)
+        - [Using the `woocommerce_sanitize_additional_field` filter](#using-the-woocommerce_sanitize_additional_field-filter)
             - [Example of sanitization](#example-of-sanitization)
     - [Validation](#validation)
         - [Single field validation](#single-field-validation)
-            - [Using the `woocommerce_blocks_validate_additional_field` action](#using-the-woocommerce_blocks_validate_additional_field-action)
+            - [Using the `woocommerce_validate_additional_field` action](#using-the-woocommerce_validate_additional_field-action)
                 - [The `WP_Error` object](#the-wp_error-object)
                 - [Example of single-field validation](#example-of-single-field-validation)
         - [Multiple field validation](#multiple-field-validation)
@@ -224,7 +224,7 @@ There are plans to expand this list, but for now these are the types available.
 
 ## Using the API
 
-To register additional checkout fields you must use the `woocommerce_blocks_register_checkout_field` function.
+To register additional checkout fields you must use the `woocommerce_register_additional_checkout_field` function.
 
 It is recommended to run this function after the `woocommerce_blocks_loaded` action.
 
@@ -339,7 +339,7 @@ This example demonstrates rendering a text field in the address section:
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -382,7 +382,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'namespace/marketing-opt-in',
 				'label'    => 'Do you want to subscribe to our newsletter?',
@@ -408,7 +408,7 @@ This example demonstrates rendering a select field in the order information sect
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'namespace/how-did-you-hear-about-us',
 				'label'    => 'How did you hear about us?',
@@ -463,9 +463,9 @@ These actions happen in two places:
 
 Sanitization is used to ensure the value of a field is in a specific format. An example is when taking a government ID, you may want to format it so that all letters are capitalized and there are no spaces. At this point, the value should **not** be checked for _validity_. That will come later. This step is only intended to set the field up for validation.
 
-#### Using the `woocommerce_blocks_sanitize_additional_field` filter
+#### Using the `woocommerce_sanitize_additional_field` filter
 
-To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `woocommerce_blocks_sanitize_additional_field` filter.
+To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `woocommerce_sanitize_additional_field` filter.
 
 | Argument     | Type              | Description                                                             |
 |--------------|-------------------|-------------------------------------------------------------------------|
@@ -478,7 +478,7 @@ This example shows how to remove whitespace and capitalize all letters in the ex
 
 ```php
 add_action(
-	'woocommerce_blocks_sanitize_additional_field',
+	'woocommerce_sanitize_additional_field',
 	function ( $field_value, $field_key ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$field_value = str_replace( ' ', '', $field_key );
@@ -497,9 +497,9 @@ There are two phases of validation in the additional checkout fields system. The
 
 #### Single field validation
 
-##### Using the `woocommerce_blocks_validate_additional_field` action
+##### Using the `woocommerce_validate_additional_field` action
 
-When the `woocommerce_blocks_validate_additional_field` action is fired  the callback receives the field's key, the field's value, and a `WP_Error` object.
+When the `woocommerce_validate_additional_field` action is fired  the callback receives the field's key, the field's value, and a `WP_Error` object.
 
 To add validation errors to the response, use the [`WP_Error::add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method.
 
@@ -519,7 +519,7 @@ The below example shows how to apply custom validation to the `namespace/gov-id`
 
 ```php
 add_action(
-'woocommerce_blocks_validate_additional_field',
+'woocommerce_validate_additional_field',
 	function ( WP_Error $errors, $field_key, $field_value ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
@@ -539,7 +539,7 @@ If no validation errors are encountered the function can just return void.
 
 #### Multiple field validation
 
-There are cases where the validity of a field depends on the value of another field, for example validating the format of a government ID based on what country the shopper is in. In this case, validating only single fields (as above) is not sufficient as the country may be unknown during the `woocommerce_blocks_validate_additional_field` action.
+There are cases where the validity of a field depends on the value of another field, for example validating the format of a government ID based on what country the shopper is in. In this case, validating only single fields (as above) is not sufficient as the country may be unknown during the `woocommerce_validate_additional_field` action.
 
 To solve this, it is possible to validate a field in the context of the location it renders in. The other fields in that location will be passed to this action.
 
@@ -601,7 +601,7 @@ You can react to those fields being saved by hooking into `updated_customer_meta
 
 ```php
 add_action(
-	'woocommerce_blocks_set_additional_field_value',
+	'woocommerce_set_additional_field_value',
 	function ( $key, $value, $group, $wc_object ) {
 		if ( 'my-plugin-namespace/address-field' !== $key ) {
 			return;
@@ -620,7 +620,7 @@ add_action(
 );
 
 add_action(
-	'woocommerce_blocks_set_additional_field_value',
+	'woocommerce_set_additional_field_value',
 	function ( $key, $value, $group, $wc_object ) {
 		if ( 'my-plugin-namespace/my-other-field' !== $key ) {
 			return;
@@ -639,7 +639,7 @@ This way, you can ensure existing systems will continue working and your integra
 
 ### React to reading fields
 
-You can use the `woocommerce_blocks_get_default_value_for_{$key}` filters to read from the new meta keys.
+You can use the `woocommerce_get_default_value_for_{$key}` filters to read from the new meta keys.
 
 ```php
 add_filter(
@@ -680,7 +680,7 @@ This example is just a combined version of the examples shared above.
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -693,7 +693,7 @@ add_action(
 				),
 			),
 		);
-		woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/confirm-gov-id',
 				'label'         => 'Confirm government ID',
@@ -708,7 +708,7 @@ add_action(
 		);
 
 		add_action(
-			'woocommerce_blocks_sanitize_additional_field',
+			'woocommerce_sanitize_additional_field',
 			function ( $field_value, $field_key ) {
 				if ( 'namespace/gov-id' === $field_key || 'namespace/confirm-gov-id' === $field_key ) {
 					$field_value = str_replace( ' ', '', $field_key );
@@ -721,7 +721,7 @@ add_action(
 		);
 
 		add_action(
-		'woocommerce_blocks_validate_additional_field',
+		'woocommerce_validate_additional_field',
 			function ( WP_Error $errors, $field_key, $field_value ) {
 				if ( 'namespace/gov-id' === $field_key ) {
 					$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
