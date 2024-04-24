@@ -63,11 +63,4 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
-	preview: {
-		initialPreviewState: {
-			isPreview: true,
-			previewMessage:
-				'Actual products will vary depending on the currently viewed page.',
-		},
-	},
 };

@@ -13,7 +13,6 @@ import {
 	INNER_BLOCKS_PRODUCT_TEMPLATE,
 } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
-import { ProductCollectionConfig } from './register-product-collection';
 
 const collection = {
 	name: CoreCollectionNames.FEATURED,
@@ -61,11 +60,4 @@ export default {
 	...collection,
 	attributes,
 	innerBlocks,
-	preview: {
-		initialPreviewState: {
-			isPreview: true,
-			previewMessage:
-				'Actual products will vary depending on the currently viewed page.',
-		},
-	},
-} as ProductCollectionConfig;
+};
