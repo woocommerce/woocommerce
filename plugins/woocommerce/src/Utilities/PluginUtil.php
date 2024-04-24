@@ -203,9 +203,35 @@ class PluginUtil {
 		$feature_warnings = array();
 		if ( 'custom_order_tables' === $feature_id && 'yes' === get_option( 'woocommerce_api_enabled' ) ) {
 			if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
-				$feature_warnings[] = __( "⚠ <b>The Legacy REST API plugin is installed and active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.\n", 'woocommerce' );
+				$legacy_api_and_hpos_incompatibility_warning_text =
+					sprintf(
+						// translators: %s is a URL.
+						__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API plugin</a> is installed and active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
+						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
+					);
 			} else {
-				$feature_warnings[] = __( "⚠ <b>The Legacy REST API is active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.\n", 'woocommerce' );
+				$legacy_api_and_hpos_incompatibility_warning_text =
+				sprintf(
+					// translators: %s is a URL.
+					__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API</a> is active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
+					admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' )
+				);
+			}
+
+			/**
+			 * Filter to modify the warning text that appears in the HPOS section of the features settings page
+			 * when both the Legacy REST API is active (via WooCommerce core or via the Legacy REST API plugin)
+			 * and the orders table is in use as the primary data store for orders.
+			 *
+			 * @param string $legacy_api_and_hpos_incompatibility_warning_text Original warning text.
+			 * @returns string|null Actual warning text to use, or null to suppress the warning.
+			 *
+			 * @since 8.9.0
+			 */
+			$legacy_api_and_hpos_incompatibility_warning_text = apply_filters( 'woocommerce_legacy_api_and_hpos_incompatibility_warning_text', $legacy_api_and_hpos_incompatibility_warning_text );
+
+			if ( ! is_null( $legacy_api_and_hpos_incompatibility_warning_text ) ) {
+				$feature_warnings[] = "\n" . $legacy_api_and_hpos_incompatibility_warning_text;
 			}
 		}
 
