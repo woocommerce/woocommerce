@@ -3,7 +3,8 @@
  */
 import { createElement } from '@wordpress/element';
 
-export default (): JSX.Element => (
+export const Lightbulb = (): JSX.Element => (
+	/* eslint-disable */
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		width="24"
@@ -16,4 +17,5 @@ export default (): JSX.Element => (
 			clipRule="evenodd"
 		/>
 	</svg>
+	/* eslint-enable */
 );
