@@ -6,6 +6,7 @@ import {
 	__experimentalInitBlocks as initBlocks,
 	__experimentalWooProductMoreMenuItem as WooProductMoreMenuItem,
 	productApiFetchMiddleware,
+	productEditorHeaderApiFetchMiddleware,
 	TRACKS_SOURCE,
 	__experimentalProductMVPCESFooter as FeedbackBar,
 	__experimentalEditorLoadingContext as EditorLoadingContext,
@@ -24,6 +25,7 @@ import { useProductEntityRecord } from './hooks/use-product-entity-record';
 import { MoreMenuFill } from './fills/product-block-editor-fills';
 import './product-page.scss';
 
+productEditorHeaderApiFetchMiddleware();
 productApiFetchMiddleware();
 
 // Lazy load components
