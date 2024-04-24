@@ -618,7 +618,11 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	/**
 	 * Gives plugins an opportunity verify SKU uniqueness themselves.
 	 *
-	 * @param bool|null $has_unique_sku Can be set to a bool result to short-circuit the default existing SKU check.
+	 * @since 9.0.0
+	 *
+	 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The SKU to check for uniqueness.
 	 */
 	$has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', null, $product_id, $sku );
 	if ( ! is_null( $has_unique_sku ) ) {
