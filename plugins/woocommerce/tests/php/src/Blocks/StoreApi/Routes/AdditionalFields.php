@@ -1168,7 +1168,7 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-			\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
 		// Ensures the field isn't registered.
 		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
@@ -1894,6 +1894,8 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'external-value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
 	}
 
 	public function test_not_overwriting_values() {
@@ -1963,5 +1965,90 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
 
 		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
+	}
+
+	public function test_reacting_to_value_save() {
+		$this->unregister_fields();
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		$set_value_mocker = \Mockery::mock( 'ActionCallback' );
+		$set_value_mocker->shouldReceive( 'woocommerce_set_additional_field_value' )->withArgs(
+			array(
+				$id,
+				'my-value',
+				'other',
+				\Mockery::type( 'WC_Order' ),
+			)
+		)->atLeast( 1 );
+
+		add_action(
+			'woocommerce_set_additional_field_value',
+			array(
+				$set_value_mocker,
+				'woocommerce_set_additional_field_value',
+			),
+			10,
+			4
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					$id => 'my-value',
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		\remove_action(
+			'woocommerce_set_additional_field_value',
+			array(
+				$set_value_mocker,
+				'woocommerce_set_additional_field_value',
+			)
+		);
 	}
 }
