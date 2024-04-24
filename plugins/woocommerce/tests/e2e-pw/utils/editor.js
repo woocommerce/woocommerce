@@ -32,13 +32,11 @@ const getCanvas = async ( page ) => {
 
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
 	await disableWelcomeModal( { page } );
 };
 
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
-
 	await disableWelcomeModal( { page } );
 };
 
@@ -75,6 +73,17 @@ const transformIntoBlocks = async ( page ) => {
 	);
 };
 
+const publishPage = async ( page, pageTitle ) => {
+	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'region', { name: 'Editor publish' } )
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.click();
+	await expect(
+		page.getByText( `${ pageTitle } is now live.` )
+	).toBeVisible();
+};
+
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
@@ -84,4 +93,5 @@ module.exports = {
 	fillPageTitle,
 	insertBlock,
 	transformIntoBlocks,
+	publishPage,
 };
