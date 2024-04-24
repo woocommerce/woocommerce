@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add support for hooking into reading and saving additional fields.
