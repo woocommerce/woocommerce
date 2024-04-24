@@ -18,6 +18,6 @@ test.describe( 'Shop page', async () => {
 		
 		await admin.editPost( numberMatch[0] );
 
-		await expect( page.getByText( 'Template' ) ).toHaveCount( 0 );
+		await expect( page.getByText( 'Template' ) ).toBeHidden();
 	} );
 } );
