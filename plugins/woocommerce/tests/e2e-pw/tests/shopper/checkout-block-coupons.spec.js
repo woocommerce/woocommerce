@@ -1,9 +1,15 @@
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
-const simpleProductName = 'Checkout Coupons Product';
+const simpleProductName = `Checkout Coupons Product ${ uuid.v1() }`;
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
@@ -28,7 +34,7 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const checkoutBlockPageTitle = 'Checkout Block';
+const checkoutBlockPageTitle = `Checkout Block ${ uuid.v1() }`;
 const checkoutBlockPageSlug = checkoutBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -117,32 +123,12 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		} );
 	} );
 
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create checkout block page', async ( { page } ) => {
-		// create a new page with checkout block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( checkoutBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/checkout' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ checkoutBlockPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, checkoutBlockPageTitle );
+		await insertBlockByShortcut( page, '/checkout' );
+		await publishPage( page, checkoutBlockPageTitle );
 	} );
 
 	test( 'allows checkout block to apply coupon of any type', async ( {
@@ -151,10 +137,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 	} ) => {
 		await context.clearCookies();
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+
+		await addAProductToCart( page, productId );
 		await page.goto( checkoutBlockPageSlug );
+
 		await expect(
 			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
@@ -199,10 +185,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+
+		await addAProductToCart( page, productId );
 		await page.goto( checkoutBlockPageSlug );
+
 		await expect(
 			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
@@ -250,10 +236,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		context,
 	} ) => {
 		await context.clearCookies();
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+
+		await addAProductToCart( page, productId );
 		await page.goto( checkoutBlockPageSlug );
+
 		await expect(
 			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();
@@ -290,10 +276,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		context,
 	} ) => {
 		await context.clearCookies();
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+
+		await addAProductToCart( page, productId );
 		await page.goto( checkoutBlockPageSlug );
+
 		await expect(
 			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
 		).toBeVisible();

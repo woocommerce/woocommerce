@@ -1,6 +1,13 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
 const simpleProductName = 'Single Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -14,7 +21,7 @@ const singleProductWithCrossSellProducts =
 	+firstCrossSellProductPrice +
 	+secondCrossSellProductPrice;
 
-const cartBlockPageTitle = `Cart Block ${ Date.now() }`;
+const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -85,31 +92,10 @@ test.describe( 'Cart Block page', () => {
 	test( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
 		page,
 	} ) => {
-		// create a new page with cart block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( cartBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/cart' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ cartBlockPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, cartBlockPageTitle );
+		await insertBlockByShortcut( page, '/cart' );
+		await publishPage( page, cartBlockPageTitle );
 
 		// go to the page to test empty cart block
 		await page.goto( cartBlockPageSlug );
@@ -127,8 +113,7 @@ test.describe( 'Cart Block page', () => {
 			page.getByRole( 'heading', { name: 'Shop' } )
 		).toBeVisible();
 
-		// add product to cart block
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		await addAProductToCart( page, product1Id );
 		await page.goto( cartBlockPageSlug );
 		await expect(
 			page.getByRole( 'heading', { name: cartBlockPageTitle } )

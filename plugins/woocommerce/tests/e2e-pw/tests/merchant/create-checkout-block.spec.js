@@ -7,8 +7,9 @@ const {
 	transformIntoBlocks,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
-const transformedCheckoutBlockTitle = `Transformed Checkout ${ Date.now() }`;
+const transformedCheckoutBlockTitle = `Transformed Checkout ${ uuid.v1() }`;
 const transformedCheckoutBlockSlug = transformedCheckoutBlockTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

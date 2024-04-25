@@ -5,8 +5,9 @@ const {
 	insertBlock,
 	transformIntoBlocks,
 } = require( '../../utils/editor' );
+const uuid = require( 'uuid' );
 
-const transformedCartBlockTitle = `Transformed Cart ${ Date.now() }`;
+const transformedCartBlockTitle = `Transformed Cart ${ uuid.v1() }`;
 const transformedCartBlockSlug = transformedCartBlockTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
