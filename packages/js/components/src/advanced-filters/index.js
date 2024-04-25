@@ -67,6 +67,7 @@ class AdvancedFilters extends Component {
 		this.onMatchChange = this.onMatchChange.bind( this );
 		this.onFilterChange = this.onFilterChange.bind( this );
 		this.getAvailableFilterKeys = this.getAvailableFilterKeys.bind( this );
+		this.getAvailableFilters = this.getAvailableFilters.bind( this );
 		this.addFilter = this.addFilter.bind( this );
 		this.removeFilter = this.removeFilter.bind( this );
 		this.clearFilters = this.clearFilters.bind( this );
@@ -176,6 +177,16 @@ class AdvancedFilters extends Component {
 		return [ ...inactiveFilterKeys, ...multipleValueFilterKeys ];
 	}
 
+	getAvailableFilters( availableFilterKeys ) {
+		const { config } = this.props;
+		const filters = availableFilterKeys.map( ( key ) => ( {
+			key,
+			...config.filters[ key ],
+		} ) );
+		filters.sort( ( a, b ) => a.labels.add.localeCompare( b.labels.add ) );
+		return filters;
+	}
+
 	addFilter( key, onClose ) {
 		const { onAdvancedFilterAction, config } = this.props;
 		const filterConfig = config.filters[ key ];
@@ -265,6 +276,8 @@ class AdvancedFilters extends Component {
 		const { config, query, currency } = this.props;
 		const { activeFilters, match } = this.state;
 		const availableFilterKeys = this.getAvailableFilterKeys();
+		const availableFilters =
+			this.getAvailableFilters( availableFilterKeys );
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled =
 			'admin.php' + window.location.search === updateHref ||
@@ -335,19 +348,16 @@ class AdvancedFilters extends Component {
 								) }
 								renderContent={ ( { onClose } ) => (
 									<ul className="woocommerce-filters-advanced__add-dropdown">
-										{ availableFilterKeys.map( ( key ) => (
-											<li key={ key }>
+										{ availableFilters.map( ( filter ) => (
+											<li key={ filter.key }>
 												<Button
 													onClick={ partial(
 														this.addFilter,
-														key,
+														filter.key,
 														onClose
 													) }
 												>
-													{
-														config.filters[ key ]
-															.labels.add
-													}
+													{ filter.labels.add }
 												</Button>
 											</li>
 										) ) }
