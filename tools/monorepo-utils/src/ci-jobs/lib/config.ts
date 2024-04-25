@@ -32,6 +32,7 @@ export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
  */
 export enum CommandVarOptions {
 	BaseRef = 'baseRef',
+	Event = 'event',
 }
 
 /**
@@ -52,6 +53,12 @@ interface BaseJobConfig {
 	 * The command to run for the job.
 	 */
 	command: string;
+
+	/**
+	 * The type of GitHub events this job is supposed to run on.
+	 * Example: push, pull_request
+	 */
+	events: string[];
 
 	/**
 	 * Indicates whether or not a job has been created for this config.
@@ -182,6 +189,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 		type: JobType.Lint,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
+		events: raw.events || [],
 	};
 }
 
@@ -270,12 +278,6 @@ export interface TestJobConfig extends BaseJobConfig {
 	 * The number of shards to be created for this job.
 	 */
 	shardingArguments: string[];
-
-	/**
-	 * The type of GitHub events this job is supposed to run on.
-	 * Example: push, pull_request
-	 */
-	events: string[];
 
 	/**
 	 * The configuration for the test environment if one is needed.

@@ -41,8 +41,11 @@ jobs:
                       if ( baseRef ) {
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
+                    
+                      let githubEvent = ${{ toJson( github.event_name ) }};
+                    
                       const child_process = require( 'node:child_process' );
-                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
+                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
         name: 'Lint - ${{ matrix.projectName }}'

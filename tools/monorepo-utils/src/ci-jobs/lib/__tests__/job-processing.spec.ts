@@ -35,6 +35,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -66,6 +67,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint <baseRef>',
+								events: [],
 							},
 						],
 					},
@@ -77,6 +79,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -101,6 +104,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint <invalid>',
+								events: [],
 							},
 						],
 					},
@@ -126,6 +130,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 								jobCreated: true,
 							},
 						],
@@ -153,6 +158,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -177,6 +183,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 						],
 					},
@@ -190,6 +197,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-a.js$/ ],
 										command: 'test-lint-a',
+										events: [],
 									},
 								],
 							},
@@ -204,6 +212,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-b.js$/ ],
 										command: 'test-lint-b',
+										events: [],
 									},
 								],
 							},
@@ -248,6 +257,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-a.js$/ ],
 										command: 'test-lint-a',
+										events: [],
 									},
 								],
 							},
@@ -262,6 +272,7 @@ describe( 'Job Processing', () => {
 										type: JobType.Lint,
 										changes: [ /test-b.js$/ ],
 										command: 'test-lint-b',
+										events: [],
 									},
 								],
 							},
@@ -361,6 +372,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -781,6 +793,7 @@ describe( 'Job Processing', () => {
 				{
 					commandVars: {
 						baseRef: 'test-base-ref',
+						event: '',
 					},
 				}
 			);
@@ -815,6 +828,7 @@ describe( 'Job Processing', () => {
 								type: JobType.Lint,
 								changes: [ /test.js$/ ],
 								command: 'test-lint',
+								events: [],
 							},
 							{
 								type: JobType.Test,

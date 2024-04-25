@@ -57,6 +57,7 @@ const program = new Command( 'ci-jobs' )
 		const jobs = await createJobsForChanges( projectGraph, fileChanges, {
 			commandVars: {
 				baseRef: options.baseRef,
+				event: options.event,
 			},
 		} );
 		Logger.endTask( true );
