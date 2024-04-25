@@ -1,13 +1,9 @@
 /**
  * External dependencies
  */
-import type { AttributeProductAttribute } from '@woocommerce/data';
-/**
- * Internal dependencies
- */
-import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import type { ProductAttribute } from '@woocommerce/data';
 
-export type AttributesComboboxControlItemProps = AttributeProductAttribute & {
+export type AttributesComboboxControlItemProps = ProductAttribute & {
 	isDisabled?: boolean;
 	takenBy?: number;
 };
@@ -20,13 +16,13 @@ export type AttributesComboboxControlProps = {
 	disabled?: boolean;
 	instanceNumber?: number;
 
-	current?: AttributeProductAttribute | EnhancedProductAttribute;
+	current?: ProductAttribute;
 	items: AttributesComboboxControlItemProps[];
 
 	disabledAttributeMessage?: string;
 	createNewAttributesAsGlobal?: boolean;
 
-	onChange: ( value?: AttributeProductAttribute | string ) => void;
+	onChange: ( value?: ProductAttribute | string ) => void;
 };
 
 export type ComboboxAttributeProps = {
