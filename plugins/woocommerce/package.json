@@ -208,6 +208,36 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - HPOS disabled",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"events": [
+						"push"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/legacy/unit-tests/**/*.php",
+						"tests/unit-tests/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
