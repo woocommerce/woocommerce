@@ -7,6 +7,7 @@ Requires PHP: 7.4
 Stable tag: 8.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
+Test: true
 
 Everything you need to launch an online store in days and keep it growing for years. From your first sale to millions in revenue, Woo is with you.
 
