@@ -75,9 +75,6 @@ export default function Edit( { attributes, setAttributes } ) {
                     align-items: center;
                     margin: 0;
                 }
-                .wp-block-woocommerce-coming-soon > .wp-block-group {
-                    padding: 20px min(6.5rem, 8vw);
-                }
                 .wp-block-site-title p {
                     line-height: normal;
                 }
@@ -118,16 +115,17 @@ export default function Edit( { attributes, setAttributes } ) {
                     margin: 0;
                 }
                 .woocommerce-coming-soon-banner-container {
-                    padding-inline: min(6.5rem, 8vw);
+                    padding-inline: min(5.5rem, 8vw);
                     margin: 0;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
                 }
                 .woocommerce-coming-soon-powered-by-woo {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
                     width: 100%;
                     --wp--preset--spacing--30: 0;
-                    --wp--preset--spacing--10: 35px;
+                    --wp--preset--spacing--10: 19px;
                 }
                 .woocommerce-coming-soon-powered-by-woo p {
                     font-style: normal;
@@ -144,15 +142,15 @@ export default function Edit( { attributes, setAttributes } ) {
                 body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
                     max-width: 820px;
                 }
-                .coming-soon-is-vertically-aligned-center:not(.block-editor-block-list__block) {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    margin-block-start: 0;
+                .coming-soon-is-vertically-aligned-center {
                     width: 100%;
+                    align-items: stretch;
                 }
-                .woocommerce-coming-soon-header, .coming-soon-cover .wp-block-cover__background {
+                .coming-soon-cover {
                     background-color: ${ color } !important;
+                }
+                .woocommerce-coming-soon-header {
+                    height: 40px;
                 }
                 .woocommerce-coming-soon-banner {
                     font-size: 48px;
@@ -164,6 +162,8 @@ export default function Edit( { attributes, setAttributes } ) {
                     font-style: normal;
                     max-width: 820px;
                     color: var(--wp--preset--color--contrast);
+                    margin: 0 auto;
+                    min-height: 100px;
                 }` }
 			</style>
 		</>
