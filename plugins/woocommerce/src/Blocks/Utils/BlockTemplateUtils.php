@@ -213,7 +213,7 @@ class BlockTemplateUtils {
 	 */
 	public static function build_template_result_from_file( $template_file, $template_type ) {
 		$template_file = (object) $template_file;
-		$theme_name    = wp_get_theme()->get( 'TextDomain' );
+		$theme_name    = get_stylesheet();
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$template_content  = file_get_contents( $template_file->path );
@@ -266,7 +266,7 @@ class BlockTemplateUtils {
 	 * @return object Block template object.
 	 */
 	public static function create_new_block_template_object( $template_file, $template_type, $template_slug ) {
-		$theme_name = wp_get_theme()->get( 'TextDomain' );
+		$theme_name = get_stylesheet();
 
 		$new_template_item = array(
 			'slug'        => $template_slug,
