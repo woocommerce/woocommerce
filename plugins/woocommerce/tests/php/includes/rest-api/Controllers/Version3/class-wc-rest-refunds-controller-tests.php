@@ -43,13 +43,13 @@ class WC_REST_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 			);
 
 			$refund_ids[] = $refund->get_id();
-			$orders_and_refunds_count ++;
+			++$orders_and_refunds_count;
 		}
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/refunds' );
 
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
