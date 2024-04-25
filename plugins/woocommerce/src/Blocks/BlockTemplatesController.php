@@ -277,7 +277,7 @@ class BlockTemplatesController {
 
 		// If we are not dealing with a WooCommerce template let's return early and let it continue through the process.
 		$registry_template = BlockTemplateUtils::get_template( $template_slug );
-		if ( ! $registry_template ) {
+		if ( ! $registry_template || ! ! BlockTemplateUtils::get_theme_template_path( $template_slug, $template_type ) ) {
 			return $template;
 		}
 
