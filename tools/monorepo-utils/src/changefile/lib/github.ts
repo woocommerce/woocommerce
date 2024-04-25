@@ -45,7 +45,7 @@ export const getPullRequestData = async (
  */
 export const shouldAutomateChangelog = ( body: string ) => {
 	const regex =
-		/\[x\] Automatically create a changelog entry from the details/gm;
+		/\[x\] Automatically create a changelog entry from the details/igm;
 	return regex.test( body );
 };
 

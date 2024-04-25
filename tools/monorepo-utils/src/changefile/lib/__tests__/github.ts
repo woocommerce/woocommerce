@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import {
+	shouldAutomateChangelog,
 	getChangelogSignificance,
 	getChangelogType,
 	getChangelogDetails,
@@ -15,6 +16,50 @@ jest.mock( '../../../core/logger', () => {
 			error: jest.fn(),
 		},
 	};
+} );
+
+describe( 'shouldAutomateChangelog', () => {
+	it( 'should return true when checked', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( true );
+	} );
+
+	it( 'should return true when checked with upper-case', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [X] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( true );
+	} );
+
+	it( 'should return false when unchecked', () => {
+		const body =
+			'### Changelog entry\r\n' +
+			'\r\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
+			'\r\n' +
+			'- [ ] Automatically create a changelog entry from the details below.\r\n' +
+			'\r\n';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( false );
+	} );
+
+	it( 'should return false when missing from body', () => {
+		const body = '';
+		const shouldAutomate = shouldAutomateChangelog( body );
+		expect( shouldAutomate ).toBe( false );
+	} );
 } );
 
 describe( 'getChangelogSignificance', () => {
@@ -63,7 +108,7 @@ describe( 'getChangelogSignificance', () => {
 			'\r\n' +
 			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\r\n' +
 			'\r\n' +
-			'- [x] Automatically create a changelog entry from the details below.\r\n' +
+			'- [X] Automatically create a changelog entry from the details below.\r\n' +
 			'\r\n' +
 			'<details>\r\n' +
 			'\r\n' +
