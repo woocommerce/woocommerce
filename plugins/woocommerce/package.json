@@ -29,7 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
-		"env:test:no-hpos": "ENABLE_HPOS=0 pnpm env:test",
+		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
