@@ -169,16 +169,6 @@ export const DefaultBanner = ( {
 }: {
 	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
 } ) => {
-	interface Theme {
-		is_block_theme?: boolean;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-
-	const isBlockTheme = currentTheme?.is_block_theme;
-
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __(
