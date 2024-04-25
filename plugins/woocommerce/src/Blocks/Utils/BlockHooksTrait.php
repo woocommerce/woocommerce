@@ -32,7 +32,16 @@ trait BlockHooksTrait {
 			$active_theme_name = wp_get_theme()->get( 'Name' );
 		}
 
-		if ( $context ) {
+		/**
+		 * A list of theme slugs to execute this with. This is a temporary
+		 * measure until improvements to the Block Hooks API allow for exposing
+		 * to all block themes.
+		 *
+		 * @since $VID:$
+		 */
+		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
+
+		if ( $context && in_array( $active_theme_name, $theme_include_list, true ) ) {
 			foreach ( $this->hooked_block_placements as $placement ) {
 
 				if ( $placement['position'] === $position && $placement['anchor'] === $anchor_block ) {
