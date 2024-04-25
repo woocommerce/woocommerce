@@ -406,6 +406,8 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCreation( templateName: string ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+
 		const templateRow = this.page.getByRole( 'row' ).filter( {
 			has: this.page.getByRole( 'link', {
 				name: templateName,

@@ -123,7 +123,7 @@ test.describe( 'Assembler - Loading Page', () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Done' } ).click();
+		await assembler.getByRole( 'button', { name: 'Save' } ).click();
 		await pageObject.setupSite( baseURL );
 
 		const requestToSetupStore = createRequestsToSetupStoreDictionary();

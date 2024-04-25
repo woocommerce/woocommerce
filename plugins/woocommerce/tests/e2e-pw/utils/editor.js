@@ -1,3 +1,5 @@
+const { expect } = require( '@playwright/test' );
+
 const closeWelcomeModal = async ( { page } ) => {
 	// Close welcome popup if prompted
 	try {
@@ -24,6 +26,10 @@ const disableWelcomeModal = async ( { page } ) => {
 	}
 };
 
+const getCanvas = async ( page ) => {
+	return page.frame( 'editor-canvas' ) || page;
+};
+
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 
@@ -36,9 +42,46 @@ const goToPostEditor = async ( { page } ) => {
 	await disableWelcomeModal( { page } );
 };
 
+const fillPageTitle = async ( page, title ) => {
+	await ( await getCanvas( page ) )
+		.getByRole( 'textbox', { name: 'Add title' } )
+		.fill( title );
+};
+
+const insertBlock = async ( page, blockName ) => {
+	const canvas = await getCanvas( page );
+	// Click the title to activate the block inserter.
+	await canvas.getByRole( 'textbox', { name: 'Add title' } ).click();
+	await canvas.getByLabel( 'Add block' ).click();
+	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
+	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+};
+
+const transformIntoBlocks = async ( page ) => {
+	const canvas = await getCanvas( page );
+
+	await expect(
+		canvas.locator(
+			'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
+		)
+	).toBeVisible();
+	await canvas
+		.getByRole( 'button' )
+		.filter( { hasText: 'Transform into blocks' } )
+		.click();
+
+	await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
+		'Classic shortcode transformed to blocks.'
+	);
+};
+
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
 	goToPostEditor,
 	disableWelcomeModal,
+	getCanvas,
+	fillPageTitle,
+	insertBlock,
+	transformIntoBlocks,
 };

@@ -25,6 +25,7 @@ const blocks = {
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
+	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -217,6 +218,7 @@ const entries = {
 		wcBlocksSharedContext: './assets/js/shared/context/index.js',
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
+		wcTypes: './assets/js/types/index.ts',
 
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':
