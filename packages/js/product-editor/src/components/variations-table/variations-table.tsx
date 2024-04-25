@@ -135,6 +135,8 @@ export const VariationsTable = forwardRef<
 		onPerPageChange,
 		onFilter,
 		getFilters,
+		hasFilters,
+		clearFilters,
 
 		selected,
 		isSelectingAll,
@@ -281,6 +283,43 @@ export const VariationsTable = forwardRef<
 		} );
 	}
 
+	function renderTableBody() {
+		return totalCount > 0 ? (
+			<Sortable
+				className="woocommerce-product-variations__table-body"
+				role="rowgroup"
+			>
+				{ variations.map( ( variation ) => (
+					<ListItem
+						key={ `${ variation.id }` }
+						className="woocommerce-product-variations__table-row"
+						role="row"
+					>
+						<VariationsTableRow
+							variation={ variation }
+							variableAttributes={ variableAttributes }
+							isUpdating={ isUpdating[ variation.id ] }
+							isSelected={ isSelected( variation ) }
+							isSelectionDisabled={ isSelectingAll }
+							hideActionButtons={ ! areSomeSelected }
+							onChange={ handleVariationChange }
+							onDelete={ handleDeleteVariationClick }
+							onEdit={ editVariationClickHandler( variation ) }
+							onSelect={ onSelect( variation ) }
+						/>
+					</ListItem>
+				) ) }
+			</Sortable>
+		) : (
+			<EmptyOrErrorTableState
+				isError={ false }
+				message={ __( 'No variations were found', 'woocommerce' ) }
+				actionText={ __( 'Clear filters', 'woocommerce' ) }
+				onActionClick={ clearFilters }
+			/>
+		);
+	}
+
 	return (
 		<div className="woocommerce-product-variations" ref={ ref }>
 			{ noticeText && (
@@ -300,7 +339,7 @@ export const VariationsTable = forwardRef<
 			) }
 
 			<div className="woocommerce-product-variations__table" role="table">
-				{ totalCount > 0 && (
+				{ ( hasFilters() || totalCount > 0 ) && (
 					<div
 						className="woocommerce-product-variations__table-header"
 						role="rowgroup"
@@ -388,47 +427,49 @@ export const VariationsTable = forwardRef<
 							</div>
 						</div>
 
-						<div
-							className="woocommerce-product-variations__table-row"
-							role="rowheader"
-						>
+						{ totalCount > 0 && (
 							<div
-								className="woocommerce-product-variations__table-column woocommerce-product-variations__selection"
-								role="columnheader"
+								className="woocommerce-product-variations__table-row woocommerce-product-variations__table-rowheader"
+								role="rowheader"
 							>
-								<CheckboxControl
-									value="all"
-									checked={ areAllSelected }
-									// @ts-expect-error Property 'indeterminate' does not exist
-									indeterminate={
-										! areAllSelected && areSomeSelected
-									}
-									onChange={ onSelectPage }
-									aria-label={ __(
-										'Select all',
-										'woocommerce'
-									) }
-								/>
+								<div
+									className="woocommerce-product-variations__table-column woocommerce-product-variations__selection"
+									role="columnheader"
+								>
+									<CheckboxControl
+										value="all"
+										checked={ areAllSelected }
+										// @ts-expect-error Property 'indeterminate' does not exist
+										indeterminate={
+											! areAllSelected && areSomeSelected
+										}
+										onChange={ onSelectPage }
+										aria-label={ __(
+											'Select all',
+											'woocommerce'
+										) }
+									/>
+								</div>
+								<div
+									className="woocommerce-product-variations__table-column"
+									role="columnheader"
+								>
+									{ __( 'Variation', 'woocommerce' ) }
+								</div>
+								<div
+									className="woocommerce-product-variations__table-column woocommerce-product-variations__price"
+									role="columnheader"
+								>
+									{ __( 'Price', 'woocommerce' ) }
+								</div>
+								<div
+									className="woocommerce-product-variations__table-column"
+									role="columnheader"
+								>
+									{ __( 'Stock', 'woocommerce' ) }
+								</div>
 							</div>
-							<div
-								className="woocommerce-product-variations__table-column"
-								role="columnheader"
-							>
-								{ __( 'Variation', 'woocommerce' ) }
-							</div>
-							<div
-								className="woocommerce-product-variations__table-column woocommerce-product-variations__price"
-								role="columnheader"
-							>
-								{ __( 'Price', 'woocommerce' ) }
-							</div>
-							<div
-								className="woocommerce-product-variations__table-column"
-								role="columnheader"
-							>
-								{ __( 'Stock', 'woocommerce' ) }
-							</div>
-						</div>
+						) }
 					</div>
 				) }
 
@@ -449,33 +490,7 @@ export const VariationsTable = forwardRef<
 						) }
 					</div>
 				) : (
-					<Sortable
-						className="woocommerce-product-variations__table-body"
-						role="rowgroup"
-					>
-						{ variations.map( ( variation ) => (
-							<ListItem
-								key={ `${ variation.id }` }
-								className="woocommerce-product-variations__table-row"
-								role="row"
-							>
-								<VariationsTableRow
-									variation={ variation }
-									variableAttributes={ variableAttributes }
-									isUpdating={ isUpdating[ variation.id ] }
-									isSelected={ isSelected( variation ) }
-									isSelectionDisabled={ isSelectingAll }
-									hideActionButtons={ ! areSomeSelected }
-									onChange={ handleVariationChange }
-									onDelete={ handleDeleteVariationClick }
-									onEdit={ editVariationClickHandler(
-										variation
-									) }
-									onSelect={ onSelect( variation ) }
-								/>
-							</ListItem>
-						) ) }
-					</Sortable>
+					renderTableBody()
 				) }
 
 				{ totalCount > 5 && (

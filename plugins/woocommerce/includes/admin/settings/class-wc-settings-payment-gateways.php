@@ -112,7 +112,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	 */
 	public function payment_gateways_banner() {
 		?>
-		<div id="wc_payment_gateways_banner_slotfill"> </div>
+		<div id="wc_payments_settings_slotfill"> </div>
 		<?php
 	}
 
@@ -202,7 +202,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 												$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 											}
 											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':
@@ -258,7 +258,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 							echo '<tr>';
 							// phpcs:ignore -- ignoring the error since the value is harded.
 							echo "<td style='border-top: 1px solid #c3c4c7; background-color: #fff' colspan='{$columns_count}'>";
-							echo "<a id='settings-other-payment-methods' href='https://woo.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
+							echo "<a id='settings-other-payment-methods' href='https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations' target='_blank' class='components-button is-tertiary'>";
 							// phpcs:ignore
 							echo $link_text;
 							// phpcs:ignore

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -10,31 +9,43 @@ import { BLOCK_THEME_WITH_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
 
 CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
-	if ( ! testData.canBeOverridenByThemes ) {
+	if ( ! testData.canBeOverriddenByThemes ) {
 		return;
 	}
 	const userText = `Hello World in the ${ testData.templateName } template`;
 	const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
+	const templateTypeName =
+		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
 	test.describe( `${ testData.templateName } template`, async () => {
+		test.afterAll( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( testData.templateType );
+		} );
+
 		test( "theme template has priority over WooCommerce's and can be modified", async ( {
 			admin,
+			editor,
 			editorUtils,
 			frontendUtils,
 			page,
 		} ) => {
 			// Edit the theme template.
-			await admin.visitSiteEditor( {
-				postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${ testData.templatePath }`,
-				postType: testData.templateType,
-			} );
-			await editorUtils.enterEditMode();
-			await editorUtils.closeWelcomeGuideModal();
-			await editorUtils.editor.insertBlock( {
+			await editorUtils.visitTemplateEditor(
+				testData.templateName,
+				testData.templateType
+			);
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
+			// Verify template name didn't change.
+			// See: https://github.com/woocommerce/woocommerce/issues/42221
+			await expect(
+				page.getByRole( 'heading', {
+					name: `Editing ${ templateTypeName }: ${ testData.templateName }`,
+				} )
+			).toBeVisible();
 
 			// Verify the template is the one modified by the user.
 			await testData.visitPage( { frontendUtils, page } );
@@ -64,25 +75,22 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			test( `theme template has priority over user-modified ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
 				frontendUtils,
+				editor,
 				editorUtils,
 				page,
 			} ) => {
 				// Edit default template and verify changes are not visible, as the theme template has priority.
-				await admin.visitSiteEditor( {
-					postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//${
-						testData.fallbackTemplate?.templatePath || ''
-					}`,
-					postType: testData.templateType,
-				} );
-				await editorUtils.enterEditMode();
-				await editorUtils.closeWelcomeGuideModal();
-				await editorUtils.editor.insertBlock( {
+				await editorUtils.visitTemplateEditor(
+					testData.fallbackTemplate?.templateName || '',
+					testData.templateType
+				);
+				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
 						content: fallbackTemplateUserText,
 					},
 				} );
-				await editorUtils.saveTemplate();
+				await editor.saveSiteEditorEntities();
 				await testData.visitPage( { frontendUtils, page } );
 				await expect(
 					page.getByText( fallbackTemplateUserText )

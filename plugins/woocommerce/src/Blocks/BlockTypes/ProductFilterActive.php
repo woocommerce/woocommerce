@@ -61,12 +61,18 @@ final class ProductFilterActive extends AbstractBlock {
 			)
 		);
 
+		$list_classes = 'filter-list';
+
+		if ( 'chips' === $attributes['displayStyle'] ) {
+			$list_classes .= ' list-chips';
+		}
+
 		ob_start();
 		?>
 
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( ! empty( $active_filters ) ) : ?>
-				<ul class="filter-list">
+				<ul class="<?php echo esc_attr( $list_classes ); ?>">
 					<?php foreach ( $active_filters as $filter ) : ?>
 					<li>
 						<span class="list-item-type"><?php echo esc_html( $filter['type'] ); ?>: </span>

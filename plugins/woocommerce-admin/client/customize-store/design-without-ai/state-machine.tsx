@@ -14,7 +14,7 @@ import { FlowType } from '../types';
 import { DesignWithoutAIStateMachineContext } from './types';
 import { services } from './services';
 import { actions } from './actions';
-import { hasFontLibraryInstalled } from './guards';
+import { isFontLibraryAvailable } from './guards';
 
 export const hasStepInUrl = (
 	_ctx: unknown,
@@ -29,8 +29,49 @@ export const hasStepInUrl = (
 	);
 };
 
+export const hasFontInstallInUrl = () => {
+	const { path = '' } = getQuery() as { path: string };
+	const pathFragments = path.split( '/' );
+	return (
+		pathFragments[ 2 ] === 'design' &&
+		pathFragments[ 3 ] === 'install-fonts'
+	);
+};
+
+const installFontFamiliesState = {
+	initial: 'checkFontLibrary',
+	states: {
+		checkFontLibrary: {
+			always: [
+				{
+					cond: {
+						type: 'isFontLibraryAvailable',
+					},
+					target: 'pending',
+				},
+				{ target: 'success' },
+			],
+		},
+		pending: {
+			invoke: {
+				src: 'installFontFamilies',
+				onDone: {
+					target: 'success',
+				},
+				onError: {
+					actions: 'redirectToIntroWithError',
+				},
+			},
+		},
+		success: {
+			type: 'final',
+		},
+	},
+};
+
 export type DesignWithoutAIStateMachineEvents =
 	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } };
 
 export const designWithNoAiStateMachineDefinition = createMachine(
@@ -49,6 +90,9 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			EXTERNAL_URL_UPDATE: {
 				target: 'navigate',
 			},
+			INSTALL_FONTS: {
+				target: 'installFontFamilies',
+			},
 		},
 		context: {
 			startLoadingTime: null,
@@ -56,11 +100,19 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 			apiCallLoader: {
 				hasErrors: false,
 			},
+			isFontLibraryAvailable: false,
 		},
 		initial: 'navigate',
 		states: {
 			navigate: {
 				always: [
+					{
+						cond: {
+							type: 'hasFontInstallInUrl',
+							step: 'design',
+						},
+						target: 'installFontFamilies',
+					},
 					{
 						cond: {
 							type: 'hasStepInUrl',
@@ -69,6 +121,31 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 						target: 'preAssembleSite',
 					},
 				],
+			},
+			installFontFamilies: {
+				meta: {
+					component: ApiCallLoader,
+				},
+				initial: 'enableTracking',
+				states: {
+					enableTracking: {
+						invoke: {
+							src: 'enableTracking',
+							onDone: {
+								target: 'checkFontLibrary',
+							},
+						},
+					},
+					checkFontLibrary:
+						installFontFamiliesState.states.checkFontLibrary,
+					pending: installFontFamiliesState.states.pending,
+					success: {
+						type: 'final',
+					},
+				},
+				onDone: {
+					target: '#designWithoutAI.showAssembleHub',
+				},
 			},
 			preAssembleSite: {
 				initial: 'preApiCallLoader',
@@ -99,26 +176,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 									success: { type: 'final' },
 								},
 							},
-							assembleSite: {
-								initial: 'pending',
-								states: {
-									pending: {
-										invoke: {
-											src: 'assembleSite',
-											onDone: {
-												target: 'success',
-											},
-											onError: {
-												actions:
-													'redirectToIntroWithError',
-											},
-										},
-									},
-									success: {
-										type: 'final',
-									},
-								},
-							},
 							createProducts: {
 								initial: 'pending',
 								states: {
@@ -140,37 +197,39 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 								},
 							},
 							installFontFamilies: {
-								initial: 'checkFontLibrary',
+								initial: installFontFamiliesState.initial,
 								states: {
-									checkFontLibrary: {
-										always: [
-											{
-												cond: {
-													type: 'hasFontLibraryInstalled',
-												},
-												target: 'pending',
-											},
-											{ target: 'success' },
-										],
-									},
-									pending: {
-										invoke: {
-											src: 'installFontFamilies',
-											onDone: {
-												target: 'success',
-											},
-											// TODO: Handle error case: https://github.com/woocommerce/woocommerce/issues/43780
-											// onError: {
-											// 	actions: [
-											// 		'assignAPICallLoaderError',
-											// 	],
-											// },
-										},
-									},
+									checkFontLibrary:
+										installFontFamiliesState.states
+											.checkFontLibrary,
+									pending:
+										installFontFamiliesState.states.pending,
 									success: {
 										type: 'final',
 									},
 								},
+							},
+						},
+						onDone: {
+							target: 'assembleSite',
+						},
+					},
+					assembleSite: {
+						initial: 'pending',
+						states: {
+							pending: {
+								invoke: {
+									src: 'assembleSite',
+									onDone: {
+										target: 'success',
+									},
+									onError: {
+										actions: 'redirectToIntroWithError',
+									},
+								},
+							},
+							success: {
+								type: 'final',
 							},
 						},
 						onDone: {
@@ -185,7 +244,6 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 					component: AssembleHubLoader,
 				},
 				entry: [ 'redirectToAssemblerHub' ],
-				type: 'final',
 			},
 		},
 	},
@@ -194,7 +252,8 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 		services,
 		guards: {
 			hasStepInUrl,
-			hasFontLibraryInstalled,
+			isFontLibraryAvailable,
+			hasFontInstallInUrl,
 		},
 	}
 );

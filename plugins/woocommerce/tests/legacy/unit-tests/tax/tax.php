@@ -269,7 +269,6 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 	 */
 	public function test_calc_compound_tax() {
 		update_option( 'woocommerce_default_country', 'CA' );
-		update_option( 'woocommerce_default_state', 'QC' );
 
 		$tax_rate_1 = array(
 			'tax_rate_country'  => 'CA',

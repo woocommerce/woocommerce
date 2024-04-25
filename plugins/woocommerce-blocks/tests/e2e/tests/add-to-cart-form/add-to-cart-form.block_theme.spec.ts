@@ -33,17 +33,11 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( 'can be added in the Post Editor only as inner block of the Single Product Block', async ( {
 		admin,
 		editor,
-		page,
 		editorUtils,
 	} ) => {
 		// Add to Cart with Options in the Post Editor is only available as inner block of the Single Product Block.
 		await admin.createNewPost( { legacyCanvas: true } );
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wc/store/v1/products' ) &&
-				response.status() === 200
-		);
 
 		await configureSingleProductBlock( editorUtils );
 

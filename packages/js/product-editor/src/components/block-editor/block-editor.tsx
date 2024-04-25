@@ -7,12 +7,14 @@ import {
 	useMemo,
 	useLayoutEffect,
 	useEffect,
+	useState,
 } from '@wordpress/element';
 import { useDispatch, useSelect, select as WPSelect } from '@wordpress/data';
 import { uploadMedia } from '@wordpress/media-utils';
 import { PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useLayoutTemplate } from '@woocommerce/block-templates';
+import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -32,6 +34,9 @@ import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore store should be included.
 	useEntityBlockEditor,
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore store should be included.
+	useEntityRecord,
 } from '@wordpress/core-data';
 
 /**
@@ -46,6 +51,7 @@ import { ModalEditor } from '../modal-editor';
 import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
+import { LoadingState } from './loading-state';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -62,11 +68,12 @@ function getLayoutTemplateId(
 	// Fallback to simple product if no layout template is set.
 	return 'simple-product';
 }
+
 export function BlockEditor( {
 	context,
-	settings: _settings,
 	postType,
 	productId,
+	setIsEditorLoading,
 }: BlockEditorProps ) {
 	useConfirmUnsavedProductChanges( postType );
 
@@ -88,7 +95,52 @@ export function BlockEditor( {
 		return () => window.removeEventListener( 'scroll', wpPinMenuEvent );
 	}, [] );
 
-	const settings = useMemo< Partial< ProductEditorSettings > >( () => {
+	// @ts-expect-error Type definitions are missing
+	const { registerShortcut } = useDispatch( keyboardShortcutsStore );
+
+	useEffect( () => {
+		if ( registerShortcut ) {
+			registerShortcut( {
+				name: 'core/editor/save',
+				category: 'global',
+				description: __( 'Save your changes.', 'woocommerce' ),
+				keyCombination: {
+					modifier: 'primary',
+					character: 's',
+				},
+			} );
+		}
+	}, [ registerShortcut ] );
+
+	const [ settingsGlobal, setSettingsGlobal ] = useState<
+		Partial< ProductEditorSettings > | undefined
+	>( undefined );
+
+	useEffect( () => {
+		let timeoutId: number;
+
+		const checkSettingsGlobal = () => {
+			if ( window.productBlockEditorSettings !== undefined ) {
+				setSettingsGlobal( window.productBlockEditorSettings );
+			} else {
+				timeoutId = setTimeout( checkSettingsGlobal, 100 );
+			}
+		};
+
+		checkSettingsGlobal();
+
+		return () => {
+			clearTimeout( timeoutId );
+		};
+	}, [] );
+
+	const settings = useMemo<
+		Partial< ProductEditorSettings > | undefined
+	>( () => {
+		if ( settingsGlobal === undefined ) {
+			return undefined;
+		}
+
 		const mediaSettings = canUserCreateMedia
 			? {
 					mediaUpload( {
@@ -101,7 +153,7 @@ export function BlockEditor( {
 						// @ts-ignore No types for this exist yet.
 						uploadMedia( {
 							wpAllowedMimeTypes:
-								_settings?.allowedMimeTypes || undefined,
+								settingsGlobal.allowedMimeTypes || undefined,
 							onError: ( { message } ) => onError( message ),
 							...rest,
 						} );
@@ -110,24 +162,26 @@ export function BlockEditor( {
 			: {};
 
 		return {
-			..._settings,
+			...settingsGlobal,
 			...mediaSettings,
 			templateLock: 'all',
 		};
-	}, [ canUserCreateMedia, _settings ] );
-
-	const [ productType ] = useProductEntityProp< Product[ 'type' ] >( 'type', {
-		postType,
-	} );
+	}, [ settingsGlobal, canUserCreateMedia ] );
 
 	const [ productTemplateId ] = useProductEntityProp< string >(
 		'meta_data._product_template_id',
 		{ postType }
 	);
 
+	const { editedRecord: product } = useEntityRecord< Product >(
+		'postType',
+		postType,
+		productId
+	);
+
 	const { productTemplate } = useProductTemplate(
 		productTemplateId,
-		productType
+		product
 	);
 
 	const { layoutTemplate } = useLayoutTemplate(
@@ -142,8 +196,15 @@ export function BlockEditor( {
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
 
+	const isEditorLoading =
+		! settings ||
+		! layoutTemplate ||
+		// variations don't have a product template
+		( postType !== 'product_variation' && ! productTemplate ) ||
+		productId === -1;
+
 	useLayoutEffect( () => {
-		if ( ! layoutTemplate ) {
+		if ( isEditorLoading ) {
 			return;
 		}
 
@@ -158,6 +219,8 @@ export function BlockEditor( {
 			...settings,
 			productTemplate,
 		} as Partial< ProductEditorSettings > );
+
+		setIsEditorLoading( isEditorLoading );
 
 		// We don't need to include onChange or updateEditorSettings in the dependencies,
 		// since we get new instances of them on every render, which would cause an infinite loop.
@@ -175,10 +238,6 @@ export function BlockEditor( {
 	}, [] );
 
 	const { closeModalEditor } = useDispatch( productEditorUiStore );
-
-	if ( ! blocks ) {
-		return null;
-	}
 
 	if ( isModalEditorOpen ) {
 		return (
@@ -204,7 +263,11 @@ export function BlockEditor( {
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>
-							<BlockList className="woocommerce-product-block-editor__block-list" />
+							{ isEditorLoading ? (
+								<LoadingState />
+							) : (
+								<BlockList className="woocommerce-product-block-editor__block-list" />
+							) }
 						</ObserveTyping>
 					</BlockTools>
 					{ /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ }

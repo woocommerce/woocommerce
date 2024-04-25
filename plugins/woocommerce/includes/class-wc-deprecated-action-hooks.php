@@ -175,14 +175,6 @@ class WC_Deprecated_Action_Hooks extends WC_Deprecated_Hooks {
 					do_action( $old_hook, $order_id, $item_id, $item, $item->get_product() );
 				}
 				break;
-			case 'woocommerce_order_update_coupon':
-			case 'woocommerce_order_update_shipping':
-			case 'woocommerce_order_update_fee':
-			case 'woocommerce_order_update_tax':
-				if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
-					do_action( $old_hook, $order_id, $item_id, $item );
-				}
-				break;
 			default:
 				do_action_ref_array( $old_hook, $new_callback_args );
 				break;

@@ -1,6 +1,5 @@
 const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const firstProductName = 'First Product';
@@ -8,8 +7,6 @@ const firstProductPrice = '10.00';
 const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
-const twoProductsTotal = +firstProductPrice + +secondProductPrice;
-const twoProductsWithFlatRate = twoProductsTotal + 5;
 
 const cartBlockPageTitle = 'Cart Block';
 const cartBlockPageSlug = cartBlockPageTitle
@@ -22,6 +19,7 @@ const shippingZoneNamePT = 'Portugal Flat Local';
 const shippingCountryPT = 'PT';
 
 test.describe( 'Cart Block Calculate Shipping', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 	let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -130,24 +128,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	test.beforeEach( async ( { page, context } ) => {
-		// Shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-
-		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		await page.waitForLoadState( 'networkidle' );
-	} );
-
 	test( 'create Cart Block page', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -173,15 +158,18 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Netherlands
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
+		await page.getByLabel( 'Add an address for shipping' ).click();
 		await page.getByRole( 'combobox' ).first().fill( 'Netherlands' );
 		await page.getByLabel( 'Postal code' ).fill( '1011AA' );
 		await page.getByLabel( 'City' ).fill( 'Amsterdam' );
@@ -191,29 +179,26 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByRole( 'group' ).getByText( 'Free shipping' )
 		).toBeVisible();
-		await expect(
-			page.locator(
-				'.wc-block-components-radio-control__description > .wc-block-components-formatted-money-amount'
-			)
-		).toContainText( '$0.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( firstProductPrice );
+		await expect( page.getByText( 'Free', { exact: true } ) ).toBeVisible();
+		await expect( page.getByText( '$' ).nth( 4 ) ).toContainText(
+			firstProductPrice
+		);
 	} );
 
 	test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
+		await page.getByLabel( 'Add an address for shipping' ).click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
@@ -223,91 +208,71 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByRole( 'group' ).getByText( 'Flat rate' )
 		).toBeVisible();
+		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
-			page.locator(
-				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
-			)
-		).toContainText( '$5.00' );
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-		).toContainText( firstProductWithFlatRate.toString() );
+			page.getByText( firstProductWithFlatRate.toString() )
+		).toBeVisible();
 
 		// Set shipping to local pickup instead of flat rate
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
 
 		// Verify updated shipping costs
-		await expect(
-			page.locator(
-				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
-			)
-		).toContainText( '$0.00' );
-		let totalPrice = await page
-			.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-			.last()
-			.textContent();
-		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( firstProductPrice )
-		);
-		await expect( totalPrice ).toBeLessThanOrEqual(
-			Number( firstProductPrice * 1.25 )
+		await expect( page.getByText( 'Shipping$0.00Local' ) ).toBeVisible();
+		await expect( page.getByText( '$' ).nth( 5 ) ).toContainText(
+			firstProductPrice
 		);
 	} );
 
 	test( 'should show correct total cart block price after updating quantity', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
+		await page.getByLabel( 'Add an address for shipping' ).click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
 		await page.getByRole( 'button', { name: 'Update' } ).click();
 
 		// Increase product quantity and verify the updated price
-		await page
-			.getByRole( 'button' )
-			.filter( { hasText: '＋', exact: true } )
-			.click();
-		let totalPrice = await page
-			.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+		await page.getByLabel( 'Increase quantity of First' ).click();
+		await expect(
+			page.getByText(
+				(
+					parseInt( firstProductPrice, 10 ) +
+					parseInt( firstProductPrice, 10 ) +
+					5
+				).toString()
 			)
-			.last()
-			.textContent();
-		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( firstProductPrice )
-		);
-		await expect( totalPrice ).toBeLessThanOrEqual(
-			Number( firstProductPrice * 1.25 )
-		);
+		).toBeVisible();
 	} );
 
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+
+		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
+		await page.waitForLoadState( 'networkidle' );
+
 		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
+		// eslint-disable-next-line playwright/no-networkidle
 		await page.waitForLoadState( 'networkidle' );
 
 		await page.goto( cartBlockPageSlug );
 
 		// Set shipping country to Portugal
-		await page
-			.locator(
-				'.wc-block-components-totals-shipping__change-address__link'
-			)
-			.click();
+		await page.getByLabel( 'Add an address for shipping' ).click();
 		await page.getByRole( 'combobox' ).first().fill( 'Portugal' );
 		await page.getByLabel( 'Postal code' ).fill( '1000-001' );
 		await page.getByLabel( 'City' ).fill( 'Lisbon' );
@@ -317,46 +282,27 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect(
 			page.getByRole( 'group' ).getByText( 'Flat rate' )
 		).toBeVisible();
+		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
-			page.locator(
-				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
+			page.getByText(
+				(
+					parseInt( firstProductPrice, 10 ) +
+					parseInt( secondProductPrice, 10 ) +
+					5
+				).toString()
 			)
-		).toContainText( '$5.00' );
-		let totalPrice = await page
-			.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-			.last()
-			.textContent();
-		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( twoProductsWithFlatRate )
-		);
-		await expect( totalPrice ).toBeLessThanOrEqual(
-			Number( twoProductsWithFlatRate * 1.25 )
-		);
+		).toBeVisible();
 
 		// Set shipping to local pickup instead of flat rate
 		await page.getByRole( 'group' ).getByText( 'Local pickup' ).click();
 
 		// Verify updated shipping costs
+		await expect( page.getByText( 'Shipping$0.00Local' ) ).toBeVisible();
 		await expect(
-			page.locator(
-				'.wc-block-components-totals-shipping > .wc-block-components-totals-item'
-			)
-		).toContainText( '$0.00' );
-		totalPrice = await page
-			.locator(
-				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
-			)
-			.last()
-			.textContent();
-		totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-		await expect( totalPrice ).toBeGreaterThanOrEqual(
-			Number( twoProductsTotal )
-		);
-		await expect( totalPrice ).toBeLessThanOrEqual(
-			Number( twoProductsTotal * 1.25 )
-		);
+			page
+				.locator( 'div' )
+				.filter( { hasText: /^\$30\.00$/ } )
+				.locator( 'span' )
+		).toBeVisible();
 	} );
 } );

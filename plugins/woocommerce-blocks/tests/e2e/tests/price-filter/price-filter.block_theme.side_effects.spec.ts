@@ -16,8 +16,8 @@ const blockData: BlockData< {
 		frontend: {},
 		editor: {},
 	},
-	urlSearchParamWhenFilterIsApplied: '?max_price=10',
-	endpointAPI: 'max_price=1000',
+	urlSearchParamWhenFilterIsApplied: '?max_price=5',
+	endpointAPI: 'max_price=500',
 	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
 };
 
@@ -35,7 +35,33 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 		await editor.publishPost();
 		const url = new URL( page.url() );
 		const postId = url.searchParams.get( 'post' );
-		await page.goto( `/?p=${ postId }`, { waitUntil: 'commit' } );
+
+		await page.goto( `/?p=${ postId }` );
+
+		await page
+			.waitForResponse(
+				async ( response ) => {
+					if (
+						response.url().includes( 'products/collection-data' )
+					) {
+						const payload = await response.json();
+						// Price range seems to be the last thing to be loaded.
+						const containsPriceRange = !! payload.price_range;
+
+						return containsPriceRange;
+					}
+					return false;
+				},
+				{ timeout: 3000 }
+			)
+			.catch( () => {
+				// Do nothing. This is only to ensure the products are loaded.
+				// There are multiple requests until the products are fully
+				// loaded. We need to ensure the page is ready to be interacted
+				// with, hence the extra check. Ideally, this should be signaled
+				// by the UI (e.g., by a loading spinner), but we don't have
+				// that yet.
+			} );
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -50,40 +76,54 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			blockData.placeholderUrl
 		);
 
-		const products = await allProductsBlock.getByRole( 'listitem' ).all();
+		const products = allProductsBlock.getByRole( 'listitem' );
 
-		expect( products ).toHaveLength( 9 );
+		await expect( products ).toHaveCount( 9 );
 	} );
 
 	test( 'should show only products that match the filter', async ( {
 		page,
 		frontendUtils,
 	} ) => {
+		// The price filter input is initially enabled, but it becomes disabled
+		// for the time it takes to fetch the data. To avoid setting the filter
+		// value before the input is properly initialized, we wait for the input
+		// to be disabled first. This is a safeguard to avoid flakiness which
+		// should be addressed in the code, but All Products block will be
+		// deprecated in the future, so we are not going to optimize it.
+		await page
+			.getByRole( 'textbox', {
+				name: 'Filter products by maximum price',
+				disabled: true,
+			} )
+			.waitFor( { timeout: 3000 } )
+			.catch( () => {
+				// Do not throw in case Playwright doesn't make it in time for the
+				// initial (pre-request) render.
+			} );
+
 		const maxPriceInput = page.getByRole( 'textbox', {
 			name: 'Filter products by maximum price',
 		} );
+		// await page.pause();
 
-		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.dblclick();
+		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
-		await page.waitForResponse( ( response ) =>
-			response.url().includes( blockData.endpointAPI )
-		);
 
 		const allProductsBlock = await frontendUtils.getBlockByName(
 			'woocommerce/all-products'
 		);
 
 		const img = allProductsBlock.locator( 'img' ).first();
-
 		await expect( img ).not.toHaveAttribute(
 			'src',
 			blockData.placeholderUrl
 		);
 
-		const products = await allProductsBlock.getByRole( 'listitem' ).all();
+		const allProducts = allProductsBlock.getByRole( 'listitem' );
 
-		expect( products ).toHaveLength( 2 );
+		await expect( allProducts ).toHaveCount( 1 );
 		expect( page.url() ).toContain(
 			blockData.urlSearchParamWhenFilterIsApplied
 		);
@@ -102,7 +142,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			postType: 'wp_template',
 		} );
 
-		await editor.canvas.click( 'body' );
+		await editor.canvas.locator( 'body' ).click();
 
 		await editor.insertBlock( {
 			name: 'woocommerce/filter-wrapper',
@@ -112,7 +152,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			},
 		} );
 		await editor.saveSiteEditorEntities();
-		await page.goto( `/shop`, { waitUntil: 'commit' } );
+		await page.goto( `/shop` );
 	} );
 
 	test.afterEach( async ( { templateApiUtils } ) => {
@@ -126,14 +166,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
-		legacyTemplate.waitFor();
-
-		const products = await legacyTemplate
+		const products = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 16 );
+		await expect( products ).toHaveCount( 16 );
 	} );
 
 	// eslint-disable-next-line playwright/no-skipped-test
@@ -146,7 +183,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 
 		await frontendUtils.selectTextInput( maxPriceInput );
-		await maxPriceInput.fill( '$10' );
+		await maxPriceInput.fill( '$5' );
 		await maxPriceInput.press( 'Tab' );
 		await page.waitForURL( ( url ) =>
 			url
@@ -158,12 +195,11 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			'woocommerce/legacy-template'
 		);
 
-		const products = await legacyTemplate
+		const products = legacyTemplate
 			.getByRole( 'list' )
-			.locator( '.product' )
-			.all();
+			.locator( '.product' );
 
-		expect( products ).toHaveLength( 1 );
+		await expect( products ).toHaveCount( 1 );
 	} );
 
 	test.afterAll( async () => {

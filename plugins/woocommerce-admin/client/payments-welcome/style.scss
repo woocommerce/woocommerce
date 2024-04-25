@@ -10,34 +10,10 @@
 		margin: 0 0 $gap-large 0;
 	}
 
-	h1,
-	h2 {
-		font-size: 20px;
-		font-weight: 400;
-		line-height: 28px;
-		color: $gray-900;
-	}
-
-	&__header {
-		padding: $gap-larger;
-
-		img {
-			width: 143px;
-		}
-
-		@media (min-width: #{ ($break-small) }) {
-			padding-right: $gap-larger + 217px;
-			background: url(./incentive.svg) no-repeat;
-			background-position: right $gap-larger center;
-		}
-	}
-
 	&__offer {
-		margin: $gap-large;
 		margin-top: $gap-smallest;
 		padding: $gap-large;
 		border: 1px solid #ae7dd0;
-		border-radius: 8px;
 		background-color: #faf8ff;
 
 		&-pill {
@@ -57,32 +33,15 @@
 		}
 
 		.components-button.is-tertiary {
-			margin-left: $gap-large;
+			@media screen and (min-width: $break-small) {
+				margin-left: $gap-large;
+			}
 		}
 
 		p {
 			font-size: 12px;
 			line-height: 16px;
 			color: #50575e; // Gray 60
-		}
-	}
-
-	&__payments {
-		padding: $gap-large;
-	}
-
-	&__payment-methods {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-
-		svg {
-			display: inline-block;
-			height: 24px;
-			width: auto;
-			border: 1px solid $gray-300;
-			border-radius: 2px;
-			margin: 0 $gap-smaller $gap-smaller 0;
 		}
 	}
 

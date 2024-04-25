@@ -57,6 +57,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-accounts.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-emails.php';
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-integrations.php';
+				if ( \Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'launch-your-store' ) ) {
+					$settings[] = include __DIR__ . '/settings/class-wc-settings-site-visibility.php';
+				}
 				$settings[] = include __DIR__ . '/settings/class-wc-settings-advanced.php';
 
 				self::$settings = apply_filters( 'woocommerce_get_settings_pages', $settings );
@@ -764,6 +767,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						break;
 
+					case 'slotfill_placeholder':
+						?>
+						<div
+							id="<?php echo esc_attr( $value['id'] ); ?>"
+							class="<?php echo esc_attr( $value['class'] ); ?>"
+						>
+						</div>
+						<?php
+						break;
 					// Default: run an action.
 					default:
 						do_action( 'woocommerce_admin_field_' . $value['type'], $value );

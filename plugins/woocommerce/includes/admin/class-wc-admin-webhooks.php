@@ -192,7 +192,7 @@ class WC_Admin_Webhooks {
 			$webhook_id = absint( $_GET['delete'] );
 
 			if ( $webhook_id ) {
-				$this->bulk_delete( array( $webhook_id ) );
+				self::bulk_delete( array( $webhook_id ) );
 			}
 		}
 	}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+refactor: `woocommerce_rest_checkout_process_payment_error` returns a `400` response code, instead of `402`.

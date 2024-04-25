@@ -95,6 +95,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 			array(
 				OrdersTableDataStore::class,
 				DataSynchronizer::class,
+				PostsToOrdersMigrationController::class,
 			)
 		);
 	}

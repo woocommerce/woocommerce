@@ -23,7 +23,7 @@ Setup tasks appear on the WooCommerce Admin home screen and prompt a merchant to
 
 ### Registering the task with PHP
 
-To register your task as an extended task list item, you’ll need to start by creating a new PHP class that extends the Task class. This class will define the properties and behavior of your custom task.
+To register your task as an extended task list item, you'll need to start by creating a new PHP class that extends the Task class. This class will define the properties and behavior of your custom task.
 
 ```php
 <?php
@@ -98,8 +98,8 @@ add_action('init', 'register_custom_task');
 The `TaskList` class represents a task list. It contains properties and methods for managing task list. We currently have three predefined task lists
 
 - `setup`: The default task list
-- `extended`: The “Things to do next” task list
-- `secret_tasklist`: The “Secret” task list that is used for having tasks that are accessed by other means.
+- `extended`: The "Things to do next" task list
+- `secret_tasklist`: The "Secret" task list that is used for having tasks that are accessed by other means.
 
 ### Adding the task using JavaScript
 
@@ -148,7 +148,7 @@ registerPlugin( 'add-task-list-item', {
 } );
 ```
 
-In the example above, the extension does a few different things. Let’s break it down:
+In the example above, the extension does a few different things. Let's break it down:
 
 #### Handle imports
 
@@ -165,7 +165,7 @@ import { registerPlugin } from '@wordpress/plugins';
 
 #### Construct the component
 
-Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we’re using here is called JSX. If you’re unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
+Next, we create a [functional component](https://reactjs.org/docs/components-and-props.html) that returns our task card. The intermixed JavaScript/HTML syntax we're using here is called JSX. If you're unfamiliar with it, you can [read more about it in the React docs](https://reactjs.org/docs/introducing-jsx.html).
 
 ```js
 const Task = ( { onComplete, task } ) => {
@@ -207,7 +207,7 @@ In the example above, we're using the `Card` and `CardBody` components to constr
 
 #### Register the Plugin for Task Content
 
-Next, we register the Task component as a plugin named “add-task-content” using [SlotFills](https://developer.wordpress.org/block-editor/reference-guides/slotfills/). This plugin nests the Task component within a WooOnboardingTask component and passes the necessary properties. We also specify the scope of the plugin as “woocommerce-tasks” to make it effective only within WooCommerce’s task list.
+Next, we register the Task component as a plugin named "add-task-content" using [SlotFills](https://developer.wordpress.org/block-editor/reference-guides/slotfills/). This plugin nests the Task component within a WooOnboardingTask component and passes the necessary properties. We also specify the scope of the plugin as "woocommerce-tasks" to make it effective only within WooCommerce's task list.
 
 ```js
 registerPlugin( 'add-task-content', {
@@ -227,7 +227,7 @@ registerPlugin( 'add-task-content', {
 
 #### Register the Plugin for Task List Item Customization
 
-Finally, we register another plugin named “my-task-list-item-plugin.” This plugin is used to customize the appearance of task list items. It also targets WooCommerce’s task list and wraps the DefaultTaskItem component within a custom wrapper with additional styling.
+Finally, we register another plugin named "my-task-list-item-plugin." This plugin is used to customize the appearance of task list items. It also targets WooCommerce's task list and wraps the DefaultTaskItem component within a custom wrapper with additional styling.
 
 ```js
 registerPlugin( 'my-task-list-item-plugin', {
@@ -250,11 +250,11 @@ registerPlugin( 'my-task-list-item-plugin', {
 } );
 ```
 
-In summary, the JavaScript file for a simple task extends and customizes the functionality of WooCommerce’s task list, allowing users to better manage tasks and personalize the appearance of task list items.
+In summary, the JavaScript file for a simple task extends and customizes the functionality of WooCommerce's task list, allowing users to better manage tasks and personalize the appearance of task list items.
 
 ### Registering the task with JavaScript
 
-In addition to registering the task in php, you’ll also need to register and enqueue the transpiled JavaScript file containing your task component and its configuration. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. Below is an annotated example of how this registration might look:
+In addition to registering the task in php, you'll also need to register and enqueue the transpiled JavaScript file containing your task component and its configuration. A common way to do this is to create a dedicated registration function that hooks into the `admin_enqueue_scripts` action in WordPress. Below is an annotated example of how this registration might look:
 
 ```php
 /**
@@ -285,9 +285,9 @@ add_action( 'admin_enqueue_scripts', 'add_task_register_script' );
 
 By following these steps, your custom task should appear in the WooCommerce onboarding tasklist.
 
-For a complete example of adding a custom task as a WordPress plugin, you can check out the [add-task examples directory](../../plugins/woocommerce-admin/docs/examples/extensions/add-task).
+For a complete example of adding a custom task as a WordPress plugin, you can check out the [add-task examples directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce-admin/docs/examples/extensions/add-task).
 
-To learn more about the tasklist, you can refer to the [tasklist documentation](../../plugins/woocommerce-admin/docs/features/onboarding-tasks.md).
+To learn more about the tasklist, you can refer to the [tasklist documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce-admin/docs/features/onboarding-tasks.md).
 
 
 ---

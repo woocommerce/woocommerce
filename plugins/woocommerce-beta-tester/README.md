@@ -15,7 +15,7 @@ pnpm --filter=@woocommerce/plugin-woocommerce-beta-tester install
 pnpm --filter=@woocommerce/plugin-woocommerce-beta-tester start
 ```
 
-See [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) for more usage information.
+See [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scripts) for more usage information.
 
 ## Usage
 

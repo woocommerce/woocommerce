@@ -585,6 +585,103 @@ test.describe( 'Analytics-related tests', () => {
 		).toBeVisible();
 	} );
 
+	test( 'use filter by single product on products report', async ( {
+		page,
+	} ) => {
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fproducts'
+		);
+
+		// FTUX tour on first run through
+		try {
+			await page.getByLabel( 'Close Tour' ).click( { timeout: 5000 } );
+		} catch ( e ) {
+			console.log( 'Tour was not visible, skipping.' );
+		}
+
+		// no filters applied
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Items sold 110 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $1,229.30 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+
+		// apply some filters
+		await page.getByRole( 'button', { name: 'All products' } ).click();
+		await page.getByText( 'Single product' ).click();
+
+		// Search for single product
+		await page
+			.getByPlaceholder( 'Type to search for a product' )
+			.last()
+			.fill( 'Variable Product' );
+
+		await page.getByRole( 'option', { name: 'Variable Product' } ).click();
+
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Items sold 40 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $260.00 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+
+		await page.getByText( 'All variations' ).click();
+
+		// Search for single product
+		await expect(
+			page.getByRole( 'button', { name: 'Single variation' } )
+		).toBeVisible();
+		await page.getByRole( 'button', { name: 'Single variation' } ).click();
+		await page
+			.getByPlaceholder( 'Type to search for a variation' )
+			.last()
+			.fill( 'Blue' );
+
+		await page
+			.getByRole( 'option', { name: 'Variable Product - Blue' } )
+			.click();
+
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Items sold 30 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Net sales $180.00 No change from Previous year:',
+			} )
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'menuitem', {
+				name: 'Orders 10 No change from Previous year:',
+			} )
+		).toBeVisible();
+	} );
+
 	test( 'analytics settings', async ( { page } ) => {
 		await page.goto(
 			'/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fsettings'

@@ -1,0 +1,105 @@
+name: Send a Slack notification when a PR is a release highlight
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  send-slack-notification-when-release-highlight-pr:
+    if: "${{ github.event.label.name == 'release: highlight' && (github.event.pull_request.state == 'open' || github.event.pull_request.merged) }}"
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Wait 2 minutes for other labelling jobs to finish
+        run: sleep 2m
+        shell: bash
+
+      - name: Calculate test date
+        id: calculate_date
+        run: |
+          #!/bin/bash
+          
+          # Get the day of the week of the merged PR (0 for Sunday, 1 for Monday, etc.)
+          MERGE_DAY_OF_WEEK=$(date -u -d "${{ github.event.pull_request.merged_at }}" +"%u")
+          
+          # Calculate days until the next Thursday after the merge
+          # If the merge is on Thursday, this will give 7 (i.e., next week's Thursday)
+          DAYS_UNTIL_NEXT_THURSDAY=$(( (4 + 7 - MERGE_DAY_OF_WEEK) % 7 ))
+          
+          # If DAYS_UNTIL_NEXT_THURSDAY is 0, the merge was on a Thursday, so we set it to 7 to get the next Thursday
+          if [ $DAYS_UNTIL_NEXT_THURSDAY -eq 0 ]; then
+            DAYS_UNTIL_NEXT_THURSDAY=7
+          fi
+          
+          # Calculate the date for the next Thursday after the merge
+          THURSDAY_AFTER_MERGE=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_THURSDAY days" +"%Y-%m-%d")
+          WOOAF_RELEASE_DATE=$(date -u -d "${THURSDAY_AFTER_MERGE} + 5 days" +"%Y-%m-%d")
+          TEST_DATE_MESSAGE="Thursday, $THURSDAY_AFTER_MERGE. (Targeting release on $WOOAF_RELEASE_DATE)"
+          echo "TEST_DATE_MESSAGE=${TEST_DATE_MESSAGE}" >> $GITHUB_ENV
+
+      - name: Determine Milestone Date
+        id: get_milestone_date
+        run: |
+          #!/bin/bash
+          
+          MILESTONE_TITLE="${{ github.event.pull_request.milestone.title }}"
+          MILESTONE_DATE="Undefined"
+          
+          # Mapping of milestone titles to release dates
+          declare -A MILESTONE_DATES
+          MILESTONE_DATES=(
+            ["8.0.0"]="2023-08-08"
+            ["8.1.0"]="2023-09-12"
+            ["8.2.0"]="2023-10-10"
+            ["8.3.0"]="2023-11-14"
+            ["8.4.0"]="2023-12-12"
+            ["8.5.0"]="2024-01-09"
+            ["8.6.0"]="2024-02-13"
+            ["8.7.0"]="2024-03-12"
+            ["8.8.0"]="2024-04-09"
+            ["8.9.0"]="2024-05-14"
+            ["9.0.0"]="2024-06-11"
+            ["9.1.0"]="2024-07-09"
+            ["9.2.0"]="2024-08-13"
+            ["9.3.0"]="2024-09-10"
+            ["9.4.0"]="2024-10-08"
+            ["9.5.0"]="2024-11-12"
+            ["9.6.0"]="2024-12-10"
+            ["9.7.0"]="2025-01-14"
+            ["9.8.0"]="2025-02-11"
+            ["9.9.0"]="2025-03-11"
+            ["10.0.0"]="2025-04-08"
+            ["10.1.0"]="2025-05-13"
+            ["10.2.0"]="2025-06-10"
+            ["10.3.0"]="2025-07-08"
+            ["10.4.0"]="2025-08-12"
+            ["10.5.0"]="2025-09-09"
+            ["10.6.0"]="2025-10-14"
+            ["10.7.0"]="2025-11-11"
+            ["10.8.0"]="2025-12-09"
+            ["10.9.0"]="2026-01-13"
+            ["11.0.0"]="2026-02-10"
+          )
+          
+          # Check if the milestone title exists in our predefined list and get the date
+          if [[ -v "MILESTONE_DATES[${MILESTONE_TITLE}]" ]]; then
+            MILESTONE_DATE=${MILESTONE_DATES[${MILESTONE_TITLE}]}
+          fi
+          
+          # Export for later steps
+          echo "MILESTONE_DATE=${MILESTONE_DATE}" >> $GITHUB_ENV
+
+      # Notify Slack Step
+      - name: Notify Slack
+        uses: archive/github-actions-slack@d9dae40827adf93bddf939db6552d1e392259d7d
+        id: notify
+        with:
+            slack-bot-user-oauth-access-token: ${{ secrets.TEST_ASSISTANCE_BOT_TOKEN }}
+            slack-channel: ${{ secrets.WOO_CORE_RELEASES_HIGHLIGHTS_SLACK_CHANNEL }}
+            slack-text: |
+                <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>
+                *Labels:* ${{ join(github.event.pull_request.labels.*.name, ', ') }}
+                *Monthly Release Milestone:* <${{ github.event.pull_request.milestone.html_url }}|${{ github.event.pull_request.milestone.title }}> (Release Date: ${{ env.MILESTONE_DATE }})
+            slack-optional-unfurl_links: false
+            slack-optional-unfurl_media: false

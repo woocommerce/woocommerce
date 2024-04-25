@@ -4,20 +4,21 @@ import { store as coreStore } from '@wordpress/core-data';
 /**
  * External dependencies
  */
-import { EventData, Sender, createMachine } from 'xstate';
+import { Sender, createMachine } from 'xstate';
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import { useMachine, useSelector } from '@xstate/react';
 import {
 	getNewPath,
 	getQuery,
 	updateQueryString,
+	getHistory,
+	getPersistedQuery,
 } from '@woocommerce/navigation';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -47,9 +48,10 @@ import {
 } from './types';
 import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners } from './utils';
+import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -58,6 +60,7 @@ export type customizeStoreStateMachineEvents =
 	| transitionalEvents
 	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
 	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean };
 
@@ -79,14 +82,36 @@ const updateQueryStep = (
 };
 
 const redirectToWooHome = () => {
-	const url = getNewPath( {}, '/', {} );
+	const url = getNewPath( getPersistedQuery(), '/', {} );
 	navigateOrParent( window, url );
 };
 
+const goBack = () => {
+	const history = getHistory();
+	if (
+		history.__experimentalLocationStack.length >= 2 &&
+		! history.__experimentalLocationStack[
+			history.__experimentalLocationStack.length - 2
+		].search.includes( 'customize-store' )
+	) {
+		// If the previous location is not a customize-store step, go back in history.
+		history.back();
+		return;
+	}
+
+	redirectToWooHome();
+};
+
 const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	window.location.href =
-		_context?.intro?.themeData?._links?.browse_all?.href ??
-		getAdminLink( 'themes.php' );
+	if ( isWooExpress() ) {
+		window.location.href =
+			_context?.intro?.themeData?._links?.browse_all?.href ??
+			getAdminLink( 'themes.php' );
+	} else {
+		window.location.href = getAdminLink(
+			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+		);
+	}
 };
 
 const markTaskComplete = async () => {
@@ -119,22 +144,11 @@ const CYSSpinner = () => (
 	</div>
 );
 
-const fetchIsFontLibraryAvailable = async () => {
-	try {
-		await apiFetch( {
-			path: '/wp/v2/font-collections',
-			method: 'GET',
-		} );
-
-		return true;
-	} catch ( err ) {
-		return false;
-	}
-};
 export const machineActions = {
 	updateQueryStep,
 	redirectToWooHome,
 	redirectToThemes,
+	goBack,
 };
 
 export const customizeStoreStateMachineActions = {
@@ -151,7 +165,7 @@ export const customizeStoreStateMachineServices = {
 };
 export const customizeStoreStateMachineDefinition = createMachine( {
 	id: 'customizeStore',
-	initial: 'navigate',
+	initial: 'setFlags',
 	predictableActionArguments: true,
 	preserveActionOrder: true,
 	schema: {
@@ -173,7 +187,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				},
 			},
 			activeTheme: '',
-			activeThemeHasMods: false,
 			customizeStoreTaskCompleted: false,
 			currentThemeIsAiGenerated: false,
 		},
@@ -182,11 +195,20 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
+		activeThemeHasMods: undefined,
 	} as customizeStoreStateMachineContext,
 	invoke: {
 		src: 'browserPopstateHandler',
 	},
 	on: {
+		GO_BACK_TO_DESIGN_WITH_AI: {
+			target: 'designWithAi',
+			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
+		},
+		GO_BACK_TO_DESIGN_WITHOUT_AI: {
+			target: 'intro',
+			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
+		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
 		},
@@ -201,11 +223,20 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				{ type: 'updateQueryStep', step: 'intro' },
 			],
 		},
-		IS_FONT_LIBRARY_AVAILABLE: {
-			actions: [ 'assignIsFontLibraryAvailable' ],
+		INSTALL_FONTS: {
+			target: 'designWithoutAi.installFonts',
 		},
 	},
 	states: {
+		setFlags: {
+			invoke: {
+				src: 'setFlags',
+				onDone: {
+					actions: 'assignFlags',
+					target: 'navigate',
+				},
+			},
+		},
 		navigate: {
 			always: [
 				{
@@ -250,41 +281,8 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		},
 		intro: {
 			id: 'intro',
-			initial: 'flowType',
+			initial: 'fetchIntroData',
 			states: {
-				flowType: {
-					always: [
-						{
-							target: 'fetchIntroData',
-							cond: 'isNotWooExpress',
-							actions: 'assignNoAI',
-						},
-						{
-							target: 'checkAiStatus',
-							cond: 'isWooExpress',
-						},
-					],
-				},
-				checkAiStatus: {
-					initial: 'pending',
-					states: {
-						pending: {
-							invoke: {
-								src: 'fetchAiStatus',
-								onDone: {
-									actions: 'assignAiStatus',
-									target: 'success',
-								},
-								onError: {
-									actions: 'assignAiOffline',
-									target: 'success',
-								},
-							},
-						},
-						success: { type: 'final' },
-					},
-					onDone: 'fetchIntroData',
-				},
 				fetchIntroData: {
 					initial: 'pending',
 					states: {
@@ -299,7 +297,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 									target: 'success',
 									actions: [
 										'assignThemeData',
-										'assignActiveThemeHasMods',
+										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
 									],
@@ -318,7 +316,7 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			},
 			on: {
 				CLICKED_ON_BREADCRUMB: {
-					actions: 'redirectToWooHome',
+					actions: 'goBack',
 				},
 				DESIGN_WITH_AI: {
 					actions: [ 'recordTracksDesignWithAIClicked' ],
@@ -358,6 +356,18 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						component: DesignWithoutAi,
 					},
 				},
+				// This state is used to install fonts and then redirect to the assembler hub.
+				installFonts: {
+					entry: [
+						{
+							type: 'updateQueryStep',
+							step: 'design/install-fonts',
+						},
+					],
+					meta: {
+						component: DesignWithoutAi,
+					},
+				},
 			},
 		},
 		designWithAi: {
@@ -388,49 +398,29 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			states: {
 				fetchActiveThemeHasMods: {
 					invoke: {
-						src: 'fetchIntroData',
+						src: 'fetchActiveThemeHasMods',
 						onDone: {
+							actions: 'assignActiveThemeHasMods',
 							target: 'checkActiveThemeHasMods',
-							actions: [ 'assignActiveThemeHasMods' ],
 						},
 					},
 				},
 				checkActiveThemeHasMods: {
 					always: [
 						{
-							cond: 'activeThemeIsNotModified',
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'activeThemeHasNoMods',
 							actions: [
 								{ type: 'updateQueryStep', step: 'intro' },
 							],
 							target: '#customizeStore.intro',
 						},
 						{
+							// Otherwise, proceed to the next step.
 							cond: 'activeThemeHasMods',
-							target: 'preCheckAiStatus',
-						},
-					],
-				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'assemblerHub' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
 							target: 'assemblerHub',
 						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'assemblerHub',
-						},
-					},
+					],
 				},
 				assemblerHub: {
 					entry: [
@@ -460,17 +450,37 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 				FINISH_CUSTOMIZATION: {
 					target: '.postAssemblerHub',
 				},
-				GO_BACK_TO_DESIGN_WITH_AI: {
-					target: 'designWithAi',
-				},
-				GO_BACK_TO_DESIGN_WITHOUT_AI: {
-					target: 'intro',
-				},
 			},
 		},
 		transitionalScreen: {
-			initial: 'preTransitional',
+			initial: 'fetchCustomizeStoreCompleted',
 			states: {
+				fetchCustomizeStoreCompleted: {
+					invoke: {
+						src: 'fetchCustomizeStoreCompleted',
+						onDone: {
+							actions: 'assignCustomizeStoreCompleted',
+							target: 'checkCustomizeStoreCompleted',
+						},
+					},
+				},
+				checkCustomizeStoreCompleted: {
+					always: [
+						{
+							// Redirect to the "intro step" if the active theme has no modifications.
+							cond: 'customizeTaskIsNotCompleted',
+							actions: [
+								{ type: 'updateQueryStep', step: 'intro' },
+							],
+							target: '#customizeStore.intro',
+						},
+						{
+							// Otherwise, proceed to the next step.
+							cond: 'customizeTaskIsCompleted',
+							target: 'preTransitional',
+						},
+					],
+				},
 				preTransitional: {
 					meta: {
 						component: CYSSpinner,
@@ -478,33 +488,11 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					invoke: {
 						src: 'fetchSurveyCompletedOption',
 						onError: {
-							target: 'preCheckAiStatus', // leave it as initialised default on error
+							target: 'transitional', // leave it as initialised default on error
 						},
 						onDone: {
-							target: 'preCheckAiStatus',
+							target: 'transitional',
 							actions: [ 'assignHasCompleteSurvey' ],
-						},
-					},
-				},
-				preCheckAiStatus: {
-					always: [
-						{
-							cond: 'isWooExpress',
-							target: 'checkAiStatus',
-						},
-						{ cond: 'isNotWooExpress', target: 'transitional' },
-					],
-				},
-				checkAiStatus: {
-					invoke: {
-						src: 'fetchAiStatus',
-						onDone: {
-							actions: 'assignAiStatus',
-							target: 'transitional',
-						},
-						onError: {
-							actions: 'assignAiOffline',
-							target: 'transitional',
 						},
 					},
 				},
@@ -534,50 +522,13 @@ declare global {
 	interface Window {
 		__wcCustomizeStore: {
 			isFontLibraryAvailable: boolean | null;
+			activeThemeHasMods: boolean | undefined;
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => void;
 		};
 	}
 }
-
-// HACK: This is a temporary solution to pass flags computed into the iframe instance state machines.
-// This is needed because the iframe loads the entire Customize Store app. This means that the iframe instance will have different state machines than the parent window.
-// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
-const setFlagsForIframeInstance = async (
-	send: (
-		event: customizeStoreStateMachineEvents,
-		payload?: EventData | undefined
-	) => void
-) => {
-	if ( ! window.frameElement ) {
-		// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to retrive flag value.
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const _featureFlags = {
-			FONT_LIBRARY_AVAILABLE: ( async () => {
-				const isFontLibraryAvailable =
-					await fetchIsFontLibraryAvailable();
-
-				window.__wcCustomizeStore = {
-					...window.__wcCustomizeStore,
-					isFontLibraryAvailable,
-				};
-			} )(),
-		};
-		return;
-	}
-
-	// To improve the readability of the code, we want to use a dictionary where the key is the feature flag name and the value is the function to send the event to set the flag value to the iframe instance state machine.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const _featureFlagsEvents = {
-		FONT_LIBRARY_AVAILABLE: ( async () => {
-			window.__wcCustomizeStore = window.__wcCustomizeStore ?? {};
-			const isFontLibraryAvailable =
-				window.__wcCustomizeStore.isFontLibraryAvailable || false;
-			send( {
-				type: 'IS_FONT_LIBRARY_AVAILABLE',
-				payload: isFontLibraryAvailable,
-			} );
-		} )(),
-	};
-};
 
 export const CustomizeStoreController = ( {
 	actionOverrides,
@@ -613,25 +564,47 @@ export const CustomizeStoreController = ( {
 				isAiOffline: ( _ctx ) => {
 					return _ctx.flowType === FlowType.AIOffline;
 				},
-				isWooExpress: () => isWooExpress(),
-				isNotWooExpress: () => ! isWooExpress(),
 				activeThemeHasMods: ( _ctx ) => {
-					return _ctx.intro.activeThemeHasMods;
+					return !! _ctx.activeThemeHasMods;
 				},
-				activeThemeIsNotModified: ( _ctx ) => {
-					return ! _ctx.intro.activeThemeHasMods;
+				activeThemeHasNoMods: ( _ctx ) => {
+					return ! _ctx.activeThemeHasMods;
+				},
+				customizeTaskIsCompleted: ( _ctx ) => {
+					return _ctx.intro.customizeStoreTaskCompleted;
+				},
+				customizeTaskIsNotCompleted: ( _ctx ) => {
+					return ! _ctx.intro.customizeStoreTaskCompleted;
 				},
 			},
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
 
 	useEffect( () => {
-		setFlagsForIframeInstance( send );
+		if ( isIframe( window ) ) {
+			return;
+		}
+		window.__wcCustomizeStore = {
+			...window.__wcCustomizeStore,
+			// This is needed because the iframe loads the entire Customize Store app.
+			// This means that the iframe instance will have different state machines
+			// than the parent window.
+			// Check https://github.com/woocommerce/woocommerce/issues/45278 for more details.
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => send( typeEvent ),
+		};
 	}, [ send ] );
+
+	window.__wcCustomizeStore = {
+		...window.__wcCustomizeStore,
+	};
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>

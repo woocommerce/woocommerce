@@ -21,11 +21,11 @@ const paymentsBannerShouldBe = async ( status: 'hidden' | 'visible' ) => {
 	const { container } = render( <PaymentsBannerWrapper /> );
 
 	await waitFor( () => {
-		container.querySelector( '.woocommerce-recommended-payments-banner' );
+		container.querySelector( '.wcpay-payments-settings-banner' );
 	} );
 
 	const banner = expect(
-		container.querySelector( '.woocommerce-recommended-payments-banner' )
+		container.querySelector( '.wcpay-payments-settings-banner' )
 	);
 
 	return status === 'visible'
@@ -82,7 +82,7 @@ describe( 'Payment Settings Banner', () => {
 		whenWcPay( { supported: true, activated: false, installed: true } );
 
 		const { getByText } = render( <PaymentsBannerWrapper /> );
-		fireEvent.click( getByText( 'Get started' ) );
+		fireEvent.click( getByText( 'Finish setup' ) );
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_banner_connect_click'

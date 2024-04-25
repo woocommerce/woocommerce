@@ -9,6 +9,7 @@ import type { FrontendUtils } from '@woocommerce/e2e-utils';
  */
 import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
+import type { TemplateType } from '../../utils/types';
 
 type TemplateCustomizationTest = {
 	visitPage: ( props: {
@@ -17,12 +18,12 @@ type TemplateCustomizationTest = {
 	} ) => Promise< void | Response | null >;
 	templateName: string;
 	templatePath: string;
-	templateType: string;
+	templateType: TemplateType;
 	fallbackTemplate?: {
 		templateName: string;
 		templatePath: string;
 	};
-	canBeOverridenByThemes: boolean;
+	canBeOverriddenByThemes: boolean;
 };
 
 export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
@@ -32,7 +33,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Catalog',
 		templatePath: 'archive-product',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -40,7 +41,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Search Results',
 		templatePath: 'product-search-results',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/color/blue' ),
@@ -51,7 +52,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -63,7 +64,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -75,14 +76,14 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
 		templateName: 'Single Product',
 		templatePath: 'single-product',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
@@ -97,7 +98,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Mini-Cart',
 		templatePath: 'mini-cart',
 		templateType: 'wp_template_part',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) =>
@@ -105,7 +106,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Cart',
 		templatePath: 'page-cart',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
@@ -117,7 +118,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Checkout',
 		templatePath: 'page-checkout',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
@@ -133,7 +134,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		// automatically override the checkout header. That's because the
 		// Page: Checkout template still points to the default `checkout-header`
 		// from WooCommerce.
-		canBeOverridenByThemes: false,
+		canBeOverriddenByThemes: false,
 	},
 	{
 		visitPage: async ( { frontendUtils, page } ) => {
@@ -147,7 +148,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Order Confirmation',
 		templatePath: 'order-confirmation',
 		templateType: 'wp_template',
-		canBeOverridenByThemes: true,
+		canBeOverriddenByThemes: true,
 	},
 ];
 

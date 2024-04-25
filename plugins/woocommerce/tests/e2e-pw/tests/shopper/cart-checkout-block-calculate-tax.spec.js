@@ -1,7 +1,7 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../../test-data/data' );
-const { closeWelcomeModal } = require( '../../utils/editor' );
+const { disableWelcomeModal } = require( '../../utils/editor' );
 
 const productName = 'First Product Cart Block Taxing';
 const productPrice = '100.00';
@@ -31,6 +31,7 @@ let productId,
 	shippingMethodId;
 
 test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
+	test.use( { storageState: process.env.ADMINSTATE } );
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -46,6 +47,9 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		} );
 		await api.put( 'settings/tax/woocommerce_tax_total_display', {
 			value: 'itemized',
+		} );
+		await api.put( 'settings/tax/woocommerce_tax_display_cart', {
+			value: 'incl',
 		} );
 		await api
 			.post( 'products', {
@@ -69,16 +73,6 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 			.then( ( response ) => {
 				nastyTaxId = response.data.id;
 			} );
-	} );
-
-	test.beforeEach( async ( { page, context } ) => {
-		// shopping cart is very sensitive to cookies, so be explicit
-		await context.clearCookies();
-
-		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -108,12 +102,8 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Cart Block page', async ( { page } ) => {
 		// create a new page with cart block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
-		await closeWelcomeModal( { page } );
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -140,19 +130,8 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'can create Checkout Block page', async ( { page } ) => {
 		// create a new page with checkout block
 		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-		await page.waitForLoadState( 'networkidle' );
-		await page.locator( 'input[name="log"]' ).fill( admin.username );
-		await page.locator( 'input[name="pwd"]' ).fill( admin.password );
-		await page.locator( 'text=Log In' ).click();
 
-		// Close welcome popup if prompted
-		try {
-			await page
-				.getByLabel( 'Close', { exact: true } )
-				.click( { timeout: 5000 } );
-		} catch ( error ) {
-			console.log( "Welcome modal wasn't present, skipping action." );
-		}
+		await disableWelcomeModal( { page } );
 
 		await page
 			.getByRole( 'textbox', { name: 'Add title' } )
@@ -178,7 +157,12 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 
 	test( 'that inclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
 		page,
+		context,
 	} ) => {
+		await context.clearCookies();
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await test.step( 'Load cart page and confirm price display', async () => {
 			await page.goto( cartBlockPageSlug );
 			await expect(
@@ -221,6 +205,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 	test( 'that exclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
 		page,
 		baseURL,
+		context,
 	} ) => {
 		const api = new wcApi( {
 			url: baseURL,
@@ -232,6 +217,10 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 			value: 'excl',
 		} );
 
+		await context.clearCookies();
+		await page.goto( `/shop/?add-to-cart=${ productId }`, {
+			waitUntil: 'networkidle',
+		} );
 		await test.step( 'Load cart page and confirm price display', async () => {
 			await page.goto( cartBlockPageSlug );
 			await expect(
@@ -693,9 +682,9 @@ test.describe( 'Shopper Cart & Checkout Block Tax Levels', () => {
 		await page
 			.getByRole( 'button', { name: 'Update', exact: true } )
 			.click();
-		await expect( page.locator( '.woocommerce-info' ) ).toContainText(
-			'Shipping costs updated.'
-		);
+		await expect(
+			page.getByText( 'Shipping costs updated' )
+		).toBeVisible();
 
 		await test.step( 'Load cart page and confirm price display', async () => {
 			await page.goto( cartBlockPageSlug );

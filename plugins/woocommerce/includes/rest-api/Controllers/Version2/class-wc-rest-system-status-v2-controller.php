@@ -558,19 +558,13 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							),
 						),
 						'wccom_connected'                => array(
-							'description' => __( 'Is store connected to Woo.com?', 'woocommerce' ),
+							'description' => __( 'Is store connected to WooCommerce.com?', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
 						'enforce_approved_download_dirs' => array(
 							'description' => __( 'Enforce approved download directories?', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view' ),
-							'readonly'    => true,
-						),
-						'HPOS_feature_screen_enabled'    => array(
-							'description' => __( 'Is HPOS feature screen enabled?', 'woocommerce' ),
 							'type'        => 'boolean',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -855,7 +849,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 			if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
 				$response = wp_safe_remote_get(
-					'https://woo.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
+					'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ),
 					array(
 						'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
 					)
@@ -870,6 +864,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$database_version = wc_get_server_database_version();
+		$log_directory    = LoggingUtil::get_log_directory();
 
 		// Return all environment info. Described by JSON Schema.
 		return array(
@@ -877,8 +872,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'site_url'                  => get_option( 'siteurl' ),
 			'store_id'                  => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			'version'                   => WC()->version,
-			'log_directory'             => WC_LOG_DIR,
-			'log_directory_writable'    => (bool) @fopen( WC_LOG_DIR . 'test-log.log', 'a' ), // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+			'log_directory'             => $log_directory,
+			'log_directory_writable'    => wp_is_writable( $log_directory ),
 			'wp_version'                => get_bloginfo( 'version' ),
 			'wp_multisite'              => is_multisite(),
 			'wp_memory_limit'           => $wp_memory_limit,
@@ -1069,7 +1064,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get a list of inplugins active on the site.
+	 * Get a list of inactive plugins.
 	 *
 	 * @return array
 	 */
@@ -1348,7 +1343,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'woocommerce_com_connected'      => ConnectionHelper::is_connected() ? 'yes' : 'no',
 			'enforce_approved_download_dirs' => wc_get_container()->get( Download_Directories::class )->get_mode() === Download_Directories::MODE_ENABLED,
 			'order_datastore'                => WC_Data_Store::load( 'order' )->get_current_class_name(),
-			'HPOS_feature_screen_enabled'    => wc_get_container()->get( Automattic\WooCommerce\Internal\Features\FeaturesController::class )->feature_is_enabled( 'custom_order_tables' ),
 			'HPOS_enabled'                   => OrderUtil::custom_orders_table_usage_is_enabled(),
 			'HPOS_sync_enabled'              => wc_get_container()->get( Order_DataSynchronizer::class )->data_sync_is_enabled(),
 		);

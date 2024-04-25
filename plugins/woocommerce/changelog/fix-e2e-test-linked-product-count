@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix linked product e2e tests #46286

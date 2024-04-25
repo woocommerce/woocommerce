@@ -89,6 +89,10 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 				'data-wc-on--click',
 				'actions.selectPreviousImage'
 			);
+			$p->set_attribute(
+				'aria-label',
+				__( 'Previous image', 'woocommerce' )
+			);
 			$prev_button = $p->get_updated_html();
 		}
 
@@ -99,6 +103,10 @@ class ProductGalleryLargeImageNextPrevious extends AbstractBlock {
 			$p->set_attribute(
 				'data-wc-on--click',
 				'actions.selectNextImage'
+			);
+			$p->set_attribute(
+				'aria-label',
+				__( 'Next image', 'woocommerce' )
 			);
 			$next_button = $p->get_updated_html();
 		}

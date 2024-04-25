@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useCollectionData } from '@woocommerce/base-context/hooks';
+import classNames from 'classnames';
 
 /**
  * Internal dependencies
@@ -14,7 +15,7 @@ import { getFormattedPrice } from '../utils';
  * reusing the EditProps type here.
  */
 export const PriceSlider = ( { attributes }: EditProps ) => {
-	const { showInputFields } = attributes;
+	const { inlineInput, showInputFields } = attributes;
 
 	const { results, isLoading } = useCollectionData( {
 		queryPrices: true,
@@ -33,7 +34,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="min"
 			type="text"
-			value={ minPrice }
+			value={ formattedMinPrice }
 			onChange={ onChange }
 		/>
 	) : (
@@ -44,7 +45,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 		<input
 			className="max"
 			type="text"
-			value={ maxPrice }
+			value={ formattedMaxPrice }
 			onChange={ onChange }
 		/>
 	) : (
@@ -52,8 +53,19 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 	);
 
 	return (
-		<div>
-			<div className="range">
+		<div
+			className={ classNames(
+				'wp-block-woocommerce-product-filter-price-content',
+				{
+					'wp-block-woocommerce-product-filter-price-content--inline':
+						inlineInput && showInputFields,
+				}
+			) }
+		>
+			<div className="wp-block-woocommerce-product-filter-price-content-left-input text">
+				{ priceMin }
+			</div>
+			<div className="wp-block-woocommerce-product-filter-price-content-price-range-slider range">
 				<div className="range-bar"></div>
 				<input
 					type="range"
@@ -72,8 +84,7 @@ export const PriceSlider = ( { attributes }: EditProps ) => {
 					onChange={ onChange }
 				/>
 			</div>
-			<div className="text">
-				{ priceMin }
+			<div className="wp-block-woocommerce-product-filter-price-content-right-input text">
 				{ priceMax }
 			</div>
 		</div>

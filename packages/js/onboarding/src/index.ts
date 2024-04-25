@@ -1,14 +1,9 @@
-export * from './components/WCPayCard';
-export * from './components/WCPayBanner';
-export * from './components/WCPayBenefits';
+export * from './components/WCPayConnectCard';
 export * from './components/RecommendedRibbon';
 export * from './components/SetupRequired';
-export * from './components/WCPayAcceptedMethods';
-export { default as Visa } from './images/cards/visa';
-export { default as MasterCard } from './images/cards/mastercard';
-export { default as Amex } from './images/cards/amex';
-export { default as ApplePay } from './images/cards/applepay';
-export { default as GooglePay } from './images/cards/googlepay';
+export * from './images/cards';
+export * from './images/payment-methods';
+export { WooPay as Woo } from './images/payment-methods/woopay';
 export { default as WCPayLogo } from './images/wcpay-logo';
 export { WooPaymentGatewaySetup } from './components/WooPaymentGatewaySetup';
 export { WooPaymentGatewayConfigure } from './components/WooPaymentGatewayConfigure';
