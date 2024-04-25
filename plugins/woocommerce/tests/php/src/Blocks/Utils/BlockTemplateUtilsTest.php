@@ -126,11 +126,11 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		switch_theme( 'storefront' );
 		$template_file = array(
 			'slug'        => 'single-product',
-			'id'          => 'woocommerce/woocommerce//single-product',
+			'id'          => 'twentywentytwo//single-product',
 			'path'        => __DIR__ . '/single-product.html',
 			'type'        => 'wp_template',
-			'theme'       => 'woocommerce/woocommerce',
-			'source'      => 'plugin',
+			'theme'       => 'twentywentytwo',
+			'source'      => 'theme',
 			'title'       => 'Single Product',
 			'description' => 'Displays a single product.',
 		);
@@ -197,11 +197,11 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	public function test_create_new_block_template_object() {
 		$expected_template = (object) array(
 			'slug'        => 'single-product',
-			'id'          => 'woocommerce/woocommerce//single-product',
+			'id'          => 'twentytwentytwo//single-product',
 			'path'        => __DIR__ . '/single-product.html',
 			'type'        => 'wp_template',
-			'theme'       => 'woocommerce/woocommerce',
-			'source'      => 'plugin',
+			'theme'       => 'twentytwentytwo',
+			'source'      => 'theme',
 			'title'       => 'Single Product',
 			'description' => 'Displays a single product.',
 			'post_types'  => array(),
