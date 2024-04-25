@@ -113,6 +113,12 @@ registerBlockType( metadata, {
                     flex-direction: column;
                     justify-content: space-between;
                 }
+                .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
                 .woocommerce-coming-soon-powered-by-woo {
                     width: 100%;
                     --wp--preset--spacing--30: 0;
@@ -137,9 +143,6 @@ registerBlockType( metadata, {
                     width: 100%;
                     align-items: stretch;
                 }
-                .coming-soon-cover {
-                    background-color: ${ color } !important;
-                }
                 .woocommerce-coming-soon-header {
                     height: 40px;
                 }
@@ -154,7 +157,6 @@ registerBlockType( metadata, {
                     max-width: 820px;
                     color: var(--wp--preset--color--contrast);
                     margin: 0 auto;
-                    min-height: 100px;
                 }` }
 				</style>
 			</div>

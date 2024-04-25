@@ -122,6 +122,12 @@ export default function Edit( { attributes, setAttributes } ) {
                     flex-direction: column;
                     justify-content: space-between;
                 }
+                .woocommerce-coming-soon-banner-container > .wp-block-group__inner-container {
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
                 .woocommerce-coming-soon-powered-by-woo {
                     width: 100%;
                     --wp--preset--spacing--30: 0;
@@ -146,9 +152,6 @@ export default function Edit( { attributes, setAttributes } ) {
                     width: 100%;
                     align-items: stretch;
                 }
-                .coming-soon-cover {
-                    background-color: ${ color } !important;
-                }
                 .woocommerce-coming-soon-header {
                     height: 40px;
                 }
@@ -163,7 +166,6 @@ export default function Edit( { attributes, setAttributes } ) {
                     max-width: 820px;
                     color: var(--wp--preset--color--contrast);
                     margin: 0 auto;
-                    min-height: 100px;
                 }` }
 			</style>
 		</>
