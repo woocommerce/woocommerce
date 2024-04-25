@@ -272,6 +272,12 @@ export interface TestJobConfig extends BaseJobConfig {
 	shardingArguments: string[];
 
 	/**
+	 * The type of GitHub events this job is supposed to run on.
+	 * Example: push, pull_request
+	 */
+	events: string[];
+
+	/**
 	 * The configuration for the test environment if one is needed.
 	 */
 	testEnv?: TestEnvConfig;
@@ -349,6 +355,7 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		type: JobType.Test,
 		testType,
 		shardingArguments: raw.shardingArguments || [],
+		events: raw.events || [],
 		name: raw.name,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
