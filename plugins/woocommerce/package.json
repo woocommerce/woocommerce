@@ -256,6 +256,27 @@
 					}
 				},
 				{
+					"name": "Core API tests - HPOS disabled",
+					"testType": "api",
+					"command": "test:api-pw",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/api-core-tests/**"
+					],
+					"events": [
+						"pull_request"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
