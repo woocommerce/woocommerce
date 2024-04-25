@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes order counts in the status widget for persistent caches.

@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Move logic to hide Template selector in Shop page into Product Catalog class and add e2e test
-
-
