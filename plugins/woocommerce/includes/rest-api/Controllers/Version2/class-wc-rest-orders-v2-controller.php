@@ -615,15 +615,19 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			if ( ! empty( $args['meta_query'] ) ) {
-				$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			}
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$args['customer_id'] = $request['customer'];
+			} else {
+				if ( ! empty( $args['meta_query'] ) ) {
+					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				}
 
-			$args['meta_query'][] = array(
-				'key'   => '_customer_user',
-				'value' => $request['customer'],
-				'type'  => 'NUMERIC',
-			);
+				$args['meta_query'][] = array(
+					'key'   => '_customer_user',
+					'value' => $request['customer'],
+					'type'  => 'NUMERIC',
+				);
+			}
 		}
 
 		// Search by product.
