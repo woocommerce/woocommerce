@@ -170,16 +170,22 @@ export const advancedFilters = applyFilters(
 			},
 			variation: {
 				labels: {
-					add: __( 'Variations', 'woocommerce' ),
-					placeholder: __( 'Search variations', 'woocommerce' ),
-					remove: __( 'Remove variations filter', 'woocommerce' ),
+					add: __( 'Product variation', 'woocommerce' ),
+					placeholder: __(
+						'Search product variations',
+						'woocommerce'
+					),
+					remove: __(
+						'Remove product variation filter',
+						'woocommerce'
+					),
 					rule: __(
-						'Select a variation filter match',
+						'Select a product variation filter match',
 						'woocommerce'
 					),
 					/* translators: A sentence describing a Variation filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Variation</title> <rule/> <filter/>',
+						'<title>Product variation</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select variation', 'woocommerce' ),
@@ -328,16 +334,22 @@ export const advancedFilters = applyFilters(
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Attribute', 'woocommerce' ),
-					placeholder: __( 'Search attributes', 'woocommerce' ),
-					remove: __( 'Remove attribute filter', 'woocommerce' ),
+					add: __( 'Product attribute', 'woocommerce' ),
+					placeholder: __(
+						'Search product attributes',
+						'woocommerce'
+					),
+					remove: __(
+						'Remove product attribute filter',
+						'woocommerce'
+					),
 					rule: __(
 						'Select a product attribute filter match',
 						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Attribute</title> <rule/> <filter/>',
+						'<title>Product attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select attributes', 'woocommerce' ),
