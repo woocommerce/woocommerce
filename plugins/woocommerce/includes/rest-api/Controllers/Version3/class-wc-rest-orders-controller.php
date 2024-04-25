@@ -219,7 +219,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			// Set status.
 			if ( ! empty( $request['status'] ) ) {
-				$object->set_status( $request['status'] );
+				$manual_update = isset( $request['manual_update'] ) ? $request['manual_update'] : false;
+				$object->set_status( $request['status'], '', $manual_update );
 			}
 
 			$object->save();
