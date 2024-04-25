@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
@@ -10,7 +10,7 @@ import { ProductAttribute } from '@woocommerce/data';
  * @return string|number
  */
 export function getAttributeKey(
-	attribute: ProductAttribute
+	attribute: ProductProductAttribute
 ): number | string {
 	return attribute.id !== 0 ? attribute.id : attribute.name;
 }
@@ -21,7 +21,7 @@ export function getAttributeKey(
  * @param attribute Product attribute.
  * @return string
  */
-export const getAttributeId = ( attribute: ProductAttribute ) =>
+export const getAttributeId = ( attribute: ProductProductAttribute ) =>
 	`${ attribute.id }-${ attribute.name }`;
 
 /**
@@ -32,10 +32,10 @@ export const getAttributeId = ( attribute: ProductAttribute ) =>
  */
 export function reorderSortableProductAttributePositions(
 	items: Record< number | string, number >,
-	attributeKeyValues: Record< number | string, ProductAttribute >
-): ProductAttribute[] {
+	attributeKeyValues: Record< number | string, ProductProductAttribute >
+): ProductProductAttribute[] {
 	return Object.keys( attributeKeyValues ).map(
-		( attributeKey: number | string ): ProductAttribute => {
+		( attributeKey: number | string ): ProductProductAttribute => {
 			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
 					...attributeKeyValues[ attributeKey ],
@@ -57,8 +57,8 @@ export function reorderSortableProductAttributePositions(
 export function getProductAttributeObject(
 	attribute:
 		| string
-		| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
-): Omit< ProductAttribute, 'position' | 'visible' | 'variation' > {
+		| Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' >
+): Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' > {
 	return typeof attribute === 'string'
 		? {
 				id: 0,

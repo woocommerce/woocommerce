@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { QueryProductAttribute, ProductAttribute } from '@woocommerce/data';
+import {
+	QueryProductAttribute,
+	ProductProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,7 +23,10 @@ export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
 	onChange: (
 		value?:
-			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+			| Omit<
+					ProductProductAttribute,
+					'position' | 'visible' | 'variation'
+			  >
 			| string
 	) => void;
 	label?: string;
