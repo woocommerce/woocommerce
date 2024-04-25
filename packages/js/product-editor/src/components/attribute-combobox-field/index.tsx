@@ -28,14 +28,42 @@ import classnames from 'classnames';
  */
 import { TRACKS_SOURCE } from '../../constants';
 import type {
-	AttributesComboboxControlItemProps,
-	AttributesComboboxControlProps,
-	ComboboxAttributeProps,
+	AttributesComboboxControlItem,
+	AttributesComboboxControlComponent,
+	ComboboxControlOption,
 } from './types';
 
-function mapAttributeToComboboxOption(
-	attr: AttributesComboboxControlItemProps
-): ComboboxAttributeProps {
+/*
+ * Create an interface that includes
+ * the `__experimentalRenderItem` property.
+ */
+interface ComboboxControlProps
+	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
+	__experimentalRenderItem?: ( args: {
+		item: ComboboxControlOption;
+	} ) => string | JSX.Element;
+}
+
+/*
+ * Create an alias for the CombobBoxControl core component,
+ * but with the custom ComboboxControlProps interface.
+ */
+const ComboboxControl =
+	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
+
+type ComboboxControlOptionProps = {
+	item: ComboboxControlOption;
+};
+
+/**
+ * Map the product attribute item to the Combobox core option.
+ *
+ * @param {AttributesComboboxControlItem} attr - Product attribute item.
+ * @return {ComboboxControlOption}               Combobox option.
+ */
+function mapItemToOption(
+	attr: AttributesComboboxControlItem
+): ComboboxControlOption {
 	return {
 		label: attr.name,
 		value: `attr-${ attr.id }`,
@@ -43,40 +71,21 @@ function mapAttributeToComboboxOption(
 	};
 }
 
-const createNewAttributeItemInitialState: ComboboxAttributeProps = {
+const createNewAttributeOptionDefault: ComboboxControlOption = {
 	label: '',
 	value: '',
 	state: 'draft',
 };
 
-/*
- * Create an interface that includes the `__experimentalRenderItem` prop
- */
-interface ComboboxControlProps
-	extends Omit< CoreComboboxControl.Props, 'label' | 'help' > {
-	__experimentalRenderItem?: ( args: {
-		item: ComboboxAttributeProps;
-	} ) => string | JSX.Element;
-}
-
-/*
- * Create an alias for the ComboBoxControl core component,
- * but with the new interface that includes the `__experimentalRenderItem` prop
- */
-const ComboboxControl =
-	CoreComboboxControl as React.ComponentType< ComboboxControlProps >;
-
-type ComboboxControlItemProps = {
-	item: ComboboxAttributeProps;
-};
-
 /**
- * ComboboxControlItem component.
+ * ComboboxControlOption component.
  *
- * @param {ComboboxControlItemProps} props - props.
- * @return {JSX.Element}                     Component item.
+ * @param {ComboboxControlOptionProps} props - props.
+ * @return {JSX.Element}                       Component item.
  */
-function ComboboxControlItem( props: ComboboxControlItemProps ): JSX.Element {
+function ComboboxControlOption(
+	props: ComboboxControlOptionProps
+): JSX.Element {
 	const { item } = props;
 	if ( item.disabled ) {
 		return <div className="item-wrapper is-disabled">{ item.label }</div>;
@@ -86,7 +95,7 @@ function ComboboxControlItem( props: ComboboxControlItemProps ): JSX.Element {
 }
 
 const AttributesComboboxControl: React.FC<
-	AttributesComboboxControlProps
+	AttributesComboboxControlComponent
 > = ( {
 	label,
 	help,
@@ -102,25 +111,22 @@ const AttributesComboboxControl: React.FC<
 		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
 	) as unknown as ProductAttributesActions & WPDataActions;
 
-	const [ createNewAttributeItem, updateCreateNewAttributeItem ] =
-		useState< ComboboxAttributeProps >(
-			createNewAttributeItemInitialState
-		);
+	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
+		useState< ComboboxControlOption >( createNewAttributeOptionDefault );
 
 	const clearCreateNewAttributeItem = () =>
-		updateCreateNewAttributeItem( createNewAttributeItemInitialState );
+		updateCreateNewAttributeOption( createNewAttributeOptionDefault );
 
 	/**
 	 * Map the items to the Combobox options.
 	 * Each option is an object with a label and value.
 	 * Both are strings.
 	 */
-	const attributeOptions: ComboboxAttributeProps[] = items?.map(
-		mapAttributeToComboboxOption
-	);
+	const attributeOptions: ComboboxControlOption[] =
+		items?.map( mapItemToOption );
 
 	const options = useMemo( () => {
-		if ( ! createNewAttributeItem.label.length ) {
+		if ( ! createNewAttributeOption.label.length ) {
 			return attributeOptions;
 		}
 
@@ -128,24 +134,24 @@ const AttributesComboboxControl: React.FC<
 			...attributeOptions,
 			{
 				label:
-					createNewAttributeItem.state === 'draft'
+					createNewAttributeOption.state === 'draft'
 						? sprintf(
 								/* translators: The name of the new attribute term to be created */
 								__( 'Create "%s"', 'woocommerce' ),
-								createNewAttributeItem.label
+								createNewAttributeOption.label
 						  )
-						: createNewAttributeItem.label,
-				value: createNewAttributeItem.value,
+						: createNewAttributeOption.label,
+				value: createNewAttributeOption.value,
 			},
 		];
-	}, [ attributeOptions, createNewAttributeItem ] );
+	}, [ attributeOptions, createNewAttributeOption ] );
 
 	// Attribute selected flag.
 	const [ attributeSelected, setAttributeSelected ] = useState( false );
 
 	// Get current of the selected item.
 	let currentValue = current ? `attr-${ current.id }` : '';
-	if ( createNewAttributeItem.state === 'creating' ) {
+	if ( createNewAttributeOption.state === 'creating' ) {
 		currentValue = 'create-attribute';
 	}
 
@@ -279,11 +285,11 @@ const AttributesComboboxControl: React.FC<
 						}
 
 						if ( newValue === 'create-attribute' ) {
-							updateCreateNewAttributeItem( {
-								...createNewAttributeItem,
+							updateCreateNewAttributeOption( {
+								...createNewAttributeOption,
 								state: 'creating',
 							} );
-							addNewAttribute( createNewAttributeItem.label );
+							addNewAttribute( createNewAttributeOption.label );
 							return;
 						}
 
@@ -310,13 +316,13 @@ const AttributesComboboxControl: React.FC<
 						onChange( selectedAttribute );
 					} }
 					onFilterValueChange={ ( filterValue: string ) => {
-						updateCreateNewAttributeItem( {
+						updateCreateNewAttributeOption( {
 							label: filterValue,
 							value: 'create-attribute',
 							state: 'draft',
 						} );
 					} }
-					__experimentalRenderItem={ ComboboxControlItem }
+					__experimentalRenderItem={ ComboboxControlOption }
 				/>
 			</BaseControl>
 		</div>

@@ -3,12 +3,12 @@
  */
 import type { ProductAttribute } from '@woocommerce/data';
 
-export type AttributesComboboxControlItemProps = ProductAttribute & {
+export type AttributesComboboxControlItem = ProductAttribute & {
 	isDisabled?: boolean;
 	takenBy?: number;
 };
 
-export type AttributesComboboxControlProps = {
+export type AttributesComboboxControlComponent = {
 	label?: string;
 	help?: JSX.Element | string | null;
 	isLoading: boolean;
@@ -17,7 +17,7 @@ export type AttributesComboboxControlProps = {
 	instanceNumber?: number;
 
 	current?: ProductAttribute;
-	items: AttributesComboboxControlItemProps[];
+	items: AttributesComboboxControlItem[];
 
 	disabledAttributeMessage?: string;
 	createNewAttributesAsGlobal?: boolean;
@@ -25,7 +25,7 @@ export type AttributesComboboxControlProps = {
 	onChange: ( value?: ProductAttribute | string ) => void;
 };
 
-export type ComboboxAttributeProps = {
+export type ComboboxControlOption = {
 	label: string;
 	value: string;
 	state?: 'draft' | 'creating' | 'justCreated';
