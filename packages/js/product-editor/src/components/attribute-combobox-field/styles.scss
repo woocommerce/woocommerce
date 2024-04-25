@@ -1,5 +1,6 @@
-.woocommerce-attribute-control {
+.woocommerce-attributes-combobox {
 	position: relative;
+	background-color: white;
 	
 	.components-base-control__field {
 		height: 36px;
@@ -43,7 +44,7 @@
 	}
 }
 
-.woocommerce-attribute-control-help {
+.woocommerce-attributes-combobox-help {
 	display: flex;
 	align-items: center;
 

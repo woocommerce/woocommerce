@@ -17,7 +17,7 @@ import {
 } from '@wordpress/element';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
-	ProductAttributesActions,
+	type ProductAttributesActions,
 	WPDataActions,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -239,7 +239,7 @@ const AttributesComboboxControl: React.FC<
 
 	if ( ! help ) {
 		help = ! attributeSelected ? (
-			<div className="woocommerce-attribute-control-help">
+			<div className="woocommerce-attributes-combobox-help">
 				{ __(
 					'Select an attribute or type to create.',
 					'woocommerce'
@@ -249,14 +249,14 @@ const AttributesComboboxControl: React.FC<
 
 		if ( isLoading ) {
 			help = (
-				<div className="woocommerce-attribute-control-help">
+				<div className="woocommerce-attributes-combobox-help">
 					<Spinner />
 					{ __( 'Loading…', 'woocommerce' ) }
 				</div>
 			);
 		} else if ( ! items.length ) {
 			help = (
-				<div className="woocommerce-attribute-control-help">
+				<div className="woocommerce-attributes-combobox-help">
 					{ __(
 						'No attributes yet. Type to create.',
 						'woocommerce'
@@ -268,14 +268,17 @@ const AttributesComboboxControl: React.FC<
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-attribute-control-container', {
-				'no-items': ! options.length,
-			} ) }
+			className={ classnames(
+				'woocommerce-attributes-combobox-container',
+				{
+					'no-items': ! options.length,
+				}
+			) }
 			ref={ comboRef }
 		>
 			<BaseControl label={ label } help={ help } id={ labelFor }>
 				<ComboboxControl
-					className="woocommerce-attribute-control"
+					className="woocommerce-attributes-combobox"
 					allowReset={ false }
 					options={ options }
 					value={ currentValue }
