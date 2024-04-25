@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix crashes in the mini-cart when combined with product and filter blocks. Closes #46542.
