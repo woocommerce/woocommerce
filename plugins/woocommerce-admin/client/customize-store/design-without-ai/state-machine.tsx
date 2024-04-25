@@ -101,6 +101,7 @@ export const designWithNoAiStateMachineDefinition = createMachine(
 				hasErrors: false,
 			},
 			isFontLibraryAvailable: false,
+			isBlockTheme: false,
 		},
 		initial: 'navigate',
 		states: {

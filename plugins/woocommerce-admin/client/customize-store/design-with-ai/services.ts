@@ -432,7 +432,13 @@ export const assembleSite = async (
 	}
 };
 
-const installAndActivateTheme = async () => {
+const installAndActivateTheme = async (
+	context: designWithAiStateMachineContext
+) => {
+	if ( context.isBlockTheme ) {
+		return;
+	}
+
 	try {
 		await setTheme( THEME_SLUG );
 	} catch ( error ) {
