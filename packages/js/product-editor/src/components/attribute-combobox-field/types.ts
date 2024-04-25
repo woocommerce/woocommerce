@@ -3,6 +3,11 @@
  */
 import type { ProductAttribute } from '@woocommerce/data';
 
+/*
+ * Define the attributes combobox control item type,
+ * which is a combination of the product attribute and
+ * additional properties.
+ */
 export type AttributesComboboxControlItem = ProductAttribute & {
 	isDisabled?: boolean;
 	takenBy?: number;
@@ -16,13 +21,13 @@ export type AttributesComboboxControlComponent = {
 	disabled?: boolean;
 	instanceNumber?: number;
 
-	current?: ProductAttribute;
+	current?: AttributesComboboxControlItem;
 	items: AttributesComboboxControlItem[];
 
 	disabledAttributeMessage?: string;
 	createNewAttributesAsGlobal?: boolean;
 
-	onChange: ( value?: ProductAttribute | string ) => void;
+	onChange: ( value?: AttributesComboboxControlItem ) => void;
 };
 
 export type ComboboxControlOption = {

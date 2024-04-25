@@ -85,9 +85,7 @@ export const Default = ( args: AttributesComboboxControlComponent ) => {
 		ProductAttribute | undefined
 	>();
 
-	function selectAttribute(
-		item: ProductAttribute | string | undefined
-	) {
+	function selectAttribute( item: ProductAttribute | string | undefined ) {
 		if ( typeof item === 'string' ) {
 			return;
 		}
