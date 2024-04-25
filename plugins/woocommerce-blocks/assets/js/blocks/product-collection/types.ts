@@ -152,9 +152,6 @@ export enum CoreFilterNames {
 export type CollectionName = CoreCollectionNames | string;
 export type FilterName = CoreFilterNames | string;
 
-/**
- * Preview state
- */
 export interface PreviewState {
 	isPreview: boolean;
 	previewMessage: string;

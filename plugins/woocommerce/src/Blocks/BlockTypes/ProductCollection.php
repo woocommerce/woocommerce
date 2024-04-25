@@ -539,9 +539,7 @@ class ProductCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Modifies the query arguments based on the collection name for preview requests.
-	 * For instance, for the 'On-sale' collection, products on sale should always be displayed
-	 * in preview mode, regardless of whether the intention is to display random products.
+	 * Get query args for preview mode. These query args will be used with WP_Query to fetch the products.
 	 *
 	 * @param array           $args    Query args.
 	 * @param WP_REST_Request $request Request.
