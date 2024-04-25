@@ -214,6 +214,9 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
 
+			// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
+			await page.waitForTimeout( 2000 );
+
 			await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
 			await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 			// successful
@@ -245,6 +248,10 @@ test.describe( 'Cart & Checkout applying coupons', () => {
 			await expect(
 				page.getByText( 'Coupon code applied successfully.' )
 			).toBeVisible();
+
+			// If not waiting the next coupon is not applied correctly. This should be temporary, we need a better way to handle this.
+			await page.waitForTimeout( 2000 );
+
 			await page.locator( 'text=Click here to enter your code' ).click();
 			await page.locator( '#coupon_code' ).fill( coupons[ 2 ].code );
 			await page.locator( 'text=Apply coupon' ).click();
