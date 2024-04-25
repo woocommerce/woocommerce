@@ -53,13 +53,6 @@ const formatMap: Record<
 	l: 'dddd',
 	N: 'E',
 
-	/**
-	 * Gets the ordinal suffix.
-	 *
-	 * @param {Moment} momentDate Moment instance.
-	 *
-	 * @return {string} Formatted date.
-	 */
 	S( momentDate: Moment ) {
 		// Do - D.
 		const num = momentDate.format( 'D' );
@@ -68,13 +61,6 @@ const formatMap: Record<
 	},
 
 	w: 'd',
-	/**
-	 * Gets the day of the year (zero-indexed).
-	 *
-	 * @param {Moment} momentDate Moment instance.
-	 *
-	 * @return {string} Formatted date.
-	 */
 	z( momentDate: Moment ) {
 		// DDD - 1.
 		return ( parseInt( momentDate.format( 'DDD' ), 10 ) - 1 ).toString();
@@ -92,14 +78,6 @@ const formatMap: Record<
 		return momentDate.daysInMonth();
 	},
 
-	// Year.
-	/**
-	 * Gets whether the current year is a leap year.
-	 *
-	 * @param {Moment} momentDate Moment instance.
-	 *
-	 * @return {string} Formatted date.
-	 */
 	L( momentDate: Moment ) {
 		return momentDate.isLeapYear() ? '1' : '0';
 	},
@@ -110,13 +88,6 @@ const formatMap: Record<
 	// Time.
 	a: 'a',
 	A: 'A',
-	/**
-	 * Gets the current time in Swatch Internet Time (.beats).
-	 *
-	 * @param {Moment} momentDate Moment instance.
-	 *
-	 * @return {number} Formatted date.
-	 */
 	B( momentDate: Moment ) {
 		const timezoned = moment( momentDate ).utcOffset( 60 );
 		const seconds = parseInt( timezoned.format( 's' ), 10 ),
@@ -164,13 +135,6 @@ const formatMap: Record<
 	},
 	// Full date/time.
 	c: 'YYYY-MM-DDTHH:mm:ssZ', // .toISOString.
-	/**
-	 * Formats the date as RFC2822.
-	 *
-	 * @param {Moment} momentDate Moment instance.
-	 *
-	 * @return {string} Formatted date.
-	 */
 	r( momentDate: Moment ) {
 		return momentDate
 			.locale( 'en' )
