@@ -45,7 +45,7 @@ type ProductAttributeActions = CrudActions<
 export type ProductAttributeSelectors = CrudSelectors<
 	'ProductAttribute',
 	'ProductAttributes',
-	QueryProductAttribute,
+	ProductAttribute,
 	Query,
 	MutableProperties
 >;
