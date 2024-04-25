@@ -128,7 +128,7 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+                  name: all-blob-e2e-reports-${{ matrix.name }}-${{ matrix.shardNumber }}
                   path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
                   retention-days: 1
                   compression-level: 9
