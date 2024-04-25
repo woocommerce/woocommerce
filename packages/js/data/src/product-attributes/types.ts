@@ -8,11 +8,19 @@ import { DispatchFromMap } from '@automattic/data-stores';
  */
 import { CrudActions, CrudSelectors } from '../crud/types';
 
-export type QueryProductAttribute = {
+export type ProductAttribute = {
 	id: number;
 	slug: string;
 	name: string;
 	type: string;
+	order_by: string;
+	has_archives: boolean;
+};
+
+export type QueryProductAttribute = {
+	slug: string;
+	name: string;
+	type: 'select' | string;
 	order_by: string;
 	has_archives: boolean;
 	generate_slug: boolean;
@@ -30,7 +38,7 @@ type MutableProperties = Partial<
 
 type ProductAttributeActions = CrudActions<
 	'ProductAttribute',
-	QueryProductAttribute,
+	ProductAttribute,
 	MutableProperties
 >;
 
@@ -50,9 +58,9 @@ export type ActionDispatchers = DispatchFromMap< ProductAttributeActions >;
  */
 export interface CustomActionDispatchers extends ActionDispatchers {
 	createProductAttribute: (
-		x: Partial< Omit< QueryProductAttribute, 'id' > >,
+		x: Partial< QueryProductAttribute >,
 		options?: {
 			optimisticQueryUpdate: Partial< QueryProductAttribute > | boolean;
 		}
-	) => Promise< QueryProductAttribute >;
+	) => Promise< ProductAttribute >;
 }
