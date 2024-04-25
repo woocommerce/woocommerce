@@ -45,7 +45,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
 			await expect(
 				page.getByRole( 'heading', {
-					name: `Editing ${ templateTypeName }: ${ testData.templateName }`,
+					name: `Editing ${ templateTypeName }: ${
+						testData.gutenbergTemplateName || testData.templateName
+					}`,
 				} )
 			).toBeVisible();
 
@@ -59,11 +61,11 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			// eslint-disable-next-line playwright/no-conditional-in-test
 			if ( testData.fallbackTemplate ) {
 				await editorUtils.revertTemplateCreation(
-					testData.templateName
+					testData.gutenbergTemplateName || testData.templateName
 				);
 			} else {
 				await editorUtils.revertTemplateCustomizations(
-					testData.templateName
+					testData.gutenbergTemplateName || testData.templateName
 				);
 			}
 			await testData.visitPage( { frontendUtils, page } );
