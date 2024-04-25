@@ -328,7 +328,7 @@ async function createJobsForProject(
 		// - a non-empty list of events is defined in the job config,
 		// - the event argument is not in the defined list of events.
 		if (
-			options.commandVars.event &&
+			options.commandVars?.event &&
 			jobConfig.events.length > 0 &&
 			! jobConfig.events
 				.map( ( e ) => e.toLowerCase() )
