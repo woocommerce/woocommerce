@@ -193,7 +193,7 @@ const AttributesComboboxControl: React.FC<
 				}
 			);
 		} else {
-			onChange( name );
+			onChange( items.find( ( i ) => i.name === name ) );
 		}
 	};
 
