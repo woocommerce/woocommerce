@@ -616,7 +616,7 @@ function wc_get_product_types() {
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
 	/**
-	 * Gives plugins an opportunity verify SKU uniqueness themselves.
+	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
 	 *
 	 * @since 9.0.0
 	 *
