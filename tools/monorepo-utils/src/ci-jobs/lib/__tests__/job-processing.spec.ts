@@ -926,6 +926,165 @@ describe( 'Job Processing', () => {
 				] )
 			);
 		} );
+
+		it( 'should trigger job with event configured but no event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+
+		it( 'should trigger job with event configured and matching event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{ commandVars: { baseRef: 'test-base-ref', event: 'push' } }
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs[ `${ testType }Test` ] ).toHaveLength( 2 );
+			expect( jobs[ `${ testType }Test` ] ).toEqual(
+				expect.arrayContaining( [
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 1/2',
+						command: 'test-cmd --shard=1/2',
+						shardNumber: 1,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+					{
+						projectName: 'test',
+						projectPath: 'test',
+						name: 'Default 2/2',
+						command: 'test-cmd --shard=2/2',
+						shardNumber: 2,
+						testEnv: {
+							shouldCreate: false,
+							envVars: {},
+						},
+					},
+				] )
+			);
+		} );
+
+		it( 'should not trigger job with event configured but not matching event cli argument', async () => {
+			const testType = 'default';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [
+									'--shard=1/2',
+									'--shard=2/2',
+								],
+								events: [ 'push' ],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'test.js' ],
+				},
+				{
+					commandVars: {
+						baseRef: 'test-base-ref',
+						event: 'pull_request',
+					},
+				}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
 	} );
 
 	describe( 'getShardedJobs', () => {
