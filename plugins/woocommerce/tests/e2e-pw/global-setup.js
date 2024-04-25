@@ -189,6 +189,7 @@ module.exports = async ( config ) => {
 	// (if a value for ENABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
+	console.log( `ENABLE_HPOS: ${ ENABLE_HPOS }` );
 	if ( ENABLE_HPOS ) {
 		const hposSettingRetries = 5;
 		const api = new wcApi( {

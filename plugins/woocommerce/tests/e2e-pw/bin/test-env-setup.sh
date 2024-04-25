@@ -38,5 +38,12 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	wp-env run tests-cli wp option update woocommerce_allow_tracking 'yes'
 fi
 
+ENABLE_HPOS="${ENABLE_HPOS:-0}"
+
+if [ $ENABLE_HPOS == 0 ]; then
+	echo -e 'Disabling HPOS\n'
+	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
+fi
+
 echo -e 'Upload test images \n'
 wp-env run tests-cli wp media import './test-data/images/image-01.png' './test-data/images/image-02.png' './test-data/images/image-03.png'
