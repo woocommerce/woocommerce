@@ -165,7 +165,7 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-api-reports-${{ matrix.shardNumber }}
+                  name: all-blob-api-reports-${{ strategy.job-index }}
                   path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
                   retention-days: 1
                   compression-level: 9
