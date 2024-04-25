@@ -7,10 +7,19 @@ import { createInterpolateElement } from '@wordpress/element';
 
 export default {
 	noThanks: __( 'No thanks', 'woocommerce' ),
+	heading: ( firstName?: string ) =>
+		sprintf(
+			/* translators: %s: first name of the merchant, if it exists. */
+			__(
+				'Hi%s, run your business and manage your payments all in one place, with no setup costs or monthly fees.',
+				'woocommerce'
+			),
+			firstName ? ` ${ firstName }` : ''
+		),
 	limitedTimeOffer: __( 'Limited time offer', 'woocommerce' ),
 	TosAndPp: createInterpolateElement(
 		__(
-			'The discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
+			'By using WooPayments you agree to our <a1>Terms of Service</a2> and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
 			'woocommerce'
 		),
 		{
@@ -26,6 +35,38 @@ export default {
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
 					href="https://automattic.com/privacy/"
+					target="_blank"
+					rel="noopener noreferrer"
+				/>
+			),
+		}
+	),
+	TosAndPpWooPay: createInterpolateElement(
+		__(
+			'By using WooPayments you agree to our <a1>Terms of Service</a2> (including WooPay <a3>merchant terms</a3>) and acknowledge that you have read our <a2>Privacy Policy</a2>. Discount will be applied to payments processed via WooPayments upon completion of installation, setup, and connection. ',
+			'woocommerce'
+		),
+		{
+			a1: (
+				// eslint-disable-next-line jsx-a11y/anchor-has-content
+				<a
+					href="https://wordpress.com/tos"
+					target="_blank"
+					rel="noopener noreferrer"
+				/>
+			),
+			a2: (
+				// eslint-disable-next-line jsx-a11y/anchor-has-content
+				<a
+					href="https://automattic.com/privacy/"
+					target="_blank"
+					rel="noopener noreferrer"
+				/>
+			),
+			a3: (
+				// eslint-disable-next-line jsx-a11y/anchor-has-content
+				<a
+					href="https://wordpress.com/tos/#more-woopay-specifically"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>
@@ -49,6 +90,7 @@ export default {
 		'WooPayments is pre-integrated with all popular payment options',
 		'woocommerce'
 	),
+	andMore: __( '& more', 'woocommerce' ),
 	learnMore: __( 'Learn more', 'woocommerce' ),
 	survey: {
 		title: __( 'No thanks, I don’t want WooPayments', 'woocommerce' ),

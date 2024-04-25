@@ -3,9 +3,10 @@
  */
 import { createElement } from '@wordpress/element';
 
-export const Maestro = () => (
-	/* eslint-disable */
+export default () => (
 	<svg
+		width="51"
+		height="35"
 		viewBox="0 0 51 35"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
@@ -66,5 +67,4 @@ export const Maestro = () => (
 			fill="#231F20"
 		/>
 	</svg>
-	/* eslint-enable */
 );
