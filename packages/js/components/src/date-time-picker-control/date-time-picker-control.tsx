@@ -32,6 +32,188 @@ export const defaultDateFormat = 'm/d/Y';
 export const default12HourDateTimeFormat = 'm/d/Y h:i a';
 export const default24HourDateTimeFormat = 'm/d/Y H:i';
 
+const MINUTE_IN_SECONDS = 60;
+const HOUR_IN_MINUTES = 60;
+const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS;
+
+/**
+ * Map of PHP formats to Moment.js formats.
+ *
+ * Copied from @wordpress/date, since it's not exposed. If this is exposed upstream,
+ * it should ideally be used from there.
+ */
+const formatMap: Record<
+	string,
+	string | ( ( momentDate: Moment ) => string | number )
+> = {
+	// Day.
+	d: 'DD',
+	D: 'ddd',
+	j: 'D',
+	l: 'dddd',
+	N: 'E',
+
+	/**
+	 * Gets the ordinal suffix.
+	 *
+	 * @param {Moment} momentDate Moment instance.
+	 *
+	 * @return {string} Formatted date.
+	 */
+	S( momentDate: Moment ) {
+		// Do - D.
+		const num = momentDate.format( 'D' );
+		const withOrdinal = momentDate.format( 'Do' );
+		return withOrdinal.replace( num, '' );
+	},
+
+	w: 'd',
+	/**
+	 * Gets the day of the year (zero-indexed).
+	 *
+	 * @param {Moment} momentDate Moment instance.
+	 *
+	 * @return {string} Formatted date.
+	 */
+	z( momentDate: Moment ) {
+		// DDD - 1.
+		return ( parseInt( momentDate.format( 'DDD' ), 10 ) - 1 ).toString();
+	},
+
+	// Week.
+	W: 'W',
+
+	// Month.
+	F: 'MMMM',
+	m: 'MM',
+	M: 'MMM',
+	n: 'M',
+	t( momentDate: Moment ) {
+		return momentDate.daysInMonth();
+	},
+
+	// Year.
+	/**
+	 * Gets whether the current year is a leap year.
+	 *
+	 * @param {Moment} momentDate Moment instance.
+	 *
+	 * @return {string} Formatted date.
+	 */
+	L( momentDate: Moment ) {
+		return momentDate.isLeapYear() ? '1' : '0';
+	},
+	o: 'GGGG',
+	Y: 'YYYY',
+	y: 'YY',
+
+	// Time.
+	a: 'a',
+	A: 'A',
+	/**
+	 * Gets the current time in Swatch Internet Time (.beats).
+	 *
+	 * @param {Moment} momentDate Moment instance.
+	 *
+	 * @return {number} Formatted date.
+	 */
+	B( momentDate: Moment ) {
+		const timezoned = moment( momentDate ).utcOffset( 60 );
+		const seconds = parseInt( timezoned.format( 's' ), 10 ),
+			minutes = parseInt( timezoned.format( 'm' ), 10 ),
+			hours = parseInt( timezoned.format( 'H' ), 10 );
+		return parseInt(
+			(
+				( seconds +
+					minutes * MINUTE_IN_SECONDS +
+					hours * HOUR_IN_SECONDS ) /
+				86.4
+			).toString(),
+			10
+		);
+	},
+	g: 'h',
+	G: 'H',
+	h: 'hh',
+	H: 'HH',
+	i: 'mm',
+	s: 'ss',
+	u: 'SSSSSS',
+	v: 'SSS',
+	// Timezone.
+	e: 'zz',
+	I( momentDate: Moment ) {
+		return momentDate.isDST() ? '1' : '0';
+	},
+	O: 'ZZ',
+	P: 'Z',
+	T: 'z',
+	Z( momentDate: Moment ) {
+		// Timezone offset in seconds.
+		const offset = momentDate.format( 'Z' );
+		const sign = offset[ 0 ] === '-' ? -1 : 1;
+		const parts = offset
+			.substring( 1 )
+			.split( ':' )
+			.map( ( n ) => parseInt( n, 10 ) );
+		return (
+			sign *
+			( parts[ 0 ] * HOUR_IN_MINUTES + parts[ 1 ] ) *
+			MINUTE_IN_SECONDS
+		);
+	},
+	// Full date/time.
+	c: 'YYYY-MM-DDTHH:mm:ssZ', // .toISOString.
+	/**
+	 * Formats the date as RFC2822.
+	 *
+	 * @param {Moment} momentDate Moment instance.
+	 *
+	 * @return {string} Formatted date.
+	 */
+	r( momentDate: Moment ) {
+		return momentDate
+			.locale( 'en' )
+			.format( 'ddd, DD MMM YYYY HH:mm:ss ZZ' );
+	},
+	U: 'X',
+};
+
+/**
+ * A modified version of the `format` function from @wordpress/date.
+ * This is needed to create a date object from the typed string and the date format,
+ * that needs to be mapped from the PHP format to moment's format.
+ */
+const createMomentDate = ( dateFormat: string, date: string ) => {
+	let i, char;
+	const newFormat = [];
+	for ( i = 0; i < dateFormat.length; i++ ) {
+		char = dateFormat[ i ];
+		// Is this an escape?
+		if ( char === '\\' ) {
+			// Add next character, then move on.
+			i++;
+			newFormat.push( '[' + dateFormat[ i ] + ']' );
+			continue;
+		}
+		if ( char in formatMap ) {
+			const formatter = formatMap[ char ];
+			if ( typeof formatter !== 'string' ) {
+				// If the format is a function, call it.
+				newFormat.push( '[' + formatter( moment( date ) ) + ']' );
+			} else {
+				// Otherwise, add as a formatting string.
+				newFormat.push( formatter );
+			}
+		} else {
+			newFormat.push( '[' + char + ']' );
+		}
+	}
+	// Join with [] between to separate characters, and replace
+	// unneeded separators with static text.
+	return moment( date, newFormat.join( '[]' ) );
+};
+
 export type DateTimePickerControlOnChangeHandler = (
 	dateTimeIsoString: string,
 	isValid: boolean
@@ -109,7 +291,9 @@ export const DateTimePickerControl = forwardRef(
 		function parseAsLocalDateTime( dateString: string | null ): Moment {
 			// parse input date string as local time;
 			// be lenient of user input and try to match any format Moment can
-			return moment( dateString );
+			return dateTimeFormat && dateString
+				? createMomentDate( dateTimeFormat, dateString )
+				: moment( dateString );
 		}
 
 		const maybeForceTime = useCallback(
