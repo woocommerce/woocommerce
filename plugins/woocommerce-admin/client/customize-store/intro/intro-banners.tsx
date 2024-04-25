@@ -225,14 +225,14 @@ export const NoAIBanner = ( {
 } ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 	interface Theme {
-		stylesheet?: string;
+		is_block_theme?: boolean;
 	}
 
 	const currentTheme = useSelect( ( select ) => {
 		return select( 'core' ).getCurrentTheme() as Theme;
 	}, [] );
 
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
+	const isBlockTheme = currentTheme?.is_block_theme;
 
 	return (
 		<>
@@ -245,7 +245,7 @@ export const NoAIBanner = ( {
 				bannerClass="no-ai-banner"
 				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
 				bannerButtonOnClick={ () => {
-					if ( ! isDefaultTheme ) {
+					if ( ! isBlockTheme ) {
 						setIsModalOpen( true );
 					} else {
 						redirectToCYSFlow();
