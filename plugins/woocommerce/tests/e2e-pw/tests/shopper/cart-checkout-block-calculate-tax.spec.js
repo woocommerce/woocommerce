@@ -105,7 +105,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		} );
 	} );
 
-	// eslint-disable-next-line playwright/expect-expect,jest/expect-expect
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create Cart Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, cartBlockPageTitle );
@@ -113,7 +113,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		await publishPage( page, cartBlockPageTitle );
 	} );
 
-	// eslint-disable-next-line playwright/expect-expect,jest/expect-expect
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create Checkout Block page', async ( { page } ) => {
 		await goToPageEditor( { page } );
 		await fillPageTitle( page, checkoutBlockPageTitle );
