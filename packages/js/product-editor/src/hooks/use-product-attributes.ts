@@ -4,7 +4,7 @@
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	Product,
-	ProductAttribute,
+	type ProductProductAttribute,
 	ProductAttributeTerm,
 	ProductDefaultAttribute,
 } from '@woocommerce/data';
@@ -16,24 +16,24 @@ import { useCallback, useEffect, useState } from '@wordpress/element';
  */
 import { sift } from '../utils';
 
-export type EnhancedProductAttribute = ProductAttribute & {
+export type EnhancedProductAttribute = ProductProductAttribute & {
 	isDefault?: boolean;
 	terms?: ProductAttributeTerm[];
 	visible?: boolean;
 };
 
 type useProductAttributesProps = {
-	allAttributes: ProductAttribute[];
+	allAttributes: ProductProductAttribute[];
 	isVariationAttributes?: boolean;
 	onChange: (
-		attributes: ProductAttribute[],
+		attributes: ProductProductAttribute[],
 		defaultAttributes: ProductDefaultAttribute[]
 	) => void;
 	productId?: number;
 };
 
 const getFilteredAttributes = (
-	attr: ProductAttribute[],
+	attr: ProductProductAttribute[],
 	isVariationAttributes: boolean
 ) => {
 	return isVariationAttributes
@@ -95,7 +95,7 @@ export function useProductAttributes( {
 	);
 
 	const enhanceAttribute = (
-		globalAttribute: ProductAttribute,
+		globalAttribute: ProductProductAttribute,
 		allTerms: ProductAttributeTerm[]
 	) => {
 		return {
@@ -110,7 +110,7 @@ export function useProductAttributes( {
 		atts: EnhancedProductAttribute[],
 		variation: boolean,
 		startPosition: number
-	): ProductAttribute[] => {
+	): ProductProductAttribute[] => {
 		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
 			variation,
@@ -168,11 +168,13 @@ export function useProductAttributes( {
 	};
 
 	useEffect( () => {
-		const [ localAttributes, globalAttributes ]: ProductAttribute[][] =
-			sift(
-				getFilteredAttributes( allAttributes, isVariationAttributes ),
-				( attr: ProductAttribute ) => attr.id === 0
-			);
+		const [
+			localAttributes,
+			globalAttributes,
+		]: ProductProductAttribute[][] = sift(
+			getFilteredAttributes( allAttributes, isVariationAttributes ),
+			( attr: ProductProductAttribute ) => attr.id === 0
+		);
 
 		Promise.all(
 			globalAttributes.map( ( attr ) => fetchTerms( attr.id ) )

@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttribute,
+	ProductProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
@@ -227,7 +227,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						return function handleAttributeChange(
 							value?:
 								| Omit<
-										ProductAttribute,
+										ProductProductAttribute,
 										'position' | 'visible' | 'variation'
 								  >
 								| string
