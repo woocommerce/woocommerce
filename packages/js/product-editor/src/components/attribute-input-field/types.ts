@@ -1,20 +1,14 @@
 /**
  * External dependencies
  */
-import {
-	QueryProductAttribute,
-	ProductProductAttribute,
-} from '@woocommerce/data';
+import { ProductAttribute, ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
-export type NarrowedQueryAttribute = Pick<
-	QueryProductAttribute,
-	'id' | 'name'
-> & {
+export type NarrowedQueryAttribute = Pick< ProductAttribute, 'id' | 'name' > & {
 	slug?: string;
 	isDisabled?: boolean;
 };
