@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: If either the upcoming Woo Shipping or Woo Tax are installed and active, don't suggest WooCommerce Shipping & Tax.
+
