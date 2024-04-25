@@ -170,14 +170,14 @@ export const useSetPreviewState = ( {
 	 * - Products by attribute
 	 */
 	useLayoutEffect( () => {
-		if ( ! setPreviewState && attributes?.query?.inherit ) {
+		if ( ! setPreviewState ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive &&
 				location.sourceData?.termId === null;
 			if ( isGenericArchiveTemplate ) {
 				setAttributes( {
 					previewState: {
-						isPreview: true,
+						isPreview: !! attributes?.query?.inherit,
 						previewMessage:
 							'Actual products will vary depending on the page being viewed.',
 					},
@@ -187,5 +187,9 @@ export const useSetPreviewState = ( {
 
 		// We want this to run only once, adding deps will cause performance issues.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, [
+		attributes?.query?.inherit,
+		location.sourceData?.termId,
+		location.type,
+	] );
 };
