@@ -1,5 +1,11 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlock,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const uuid = require( 'uuid' );
 
@@ -73,45 +79,11 @@ test.describe( 'Filter items in the shop by product price', () => {
 	} ) => {
 		const sortingProductsDropdown = '.wc-block-sort-select__select';
 
-		// go to create a new page with filtering products by price
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( productsFilteringPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/filter' );
-		await page
-			.getByRole( 'option' )
-			.filter( { hasText: 'Filter by Price' } )
-			.click();
-
-		await page.getByRole( 'textbox', { name: 'Add title' } ).click();
-		await page.getByLabel( 'Add block' ).click();
-		await page
-			.getByPlaceholder( 'Search', { exact: true } )
-			.fill( 'products' );
-		await page
-			.getByRole( 'option' )
-			.filter( { hasText: 'All Products' } )
-			.click();
-
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ productsFilteringPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, productsFilteringPageTitle );
+		await insertBlockByShortcut( page, '/filter' );
+		await insertBlock( page, 'All Products' );
+		await publishPage( page, productsFilteringPageTitle );
 
 		// go to the page to test filtering products by price
 		await page.goto( productsFilteringPageSlug );
