@@ -219,7 +219,7 @@
 						"--shard=5/5"
 					],
 					"events": [
-						"push"
+						"pull_request"
 					],
 					"changes": [
 						"client/admin/config/*.json",
