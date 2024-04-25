@@ -4,8 +4,12 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
+import {
+	WCPayBanner,
+	WCPayBannerBody,
+	WCPayBannerFooter,
+} from '@woocommerce/onboarding';
 import { recordEvent } from '@woocommerce/tracks';
-import { WCPayConnectCard } from '@woocommerce/onboarding';
 
 /**
  * Internal dependencies
@@ -25,27 +29,23 @@ const WCPaySettingBanner = () => {
 	);
 	const isWooPayEligible = getAdminSetting( 'isWooPayEligible' );
 
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-
-	const firstName = getAdminSetting( 'currentUserData' )?.first_name;
-
 	return (
-		<div className="wcpay-payments-settings-banner">
-			<WCPayConnectCard
+		<WCPayBanner>
+			<WCPayBannerBody
+				textPosition="right"
 				actionButton={
 					<Button
 						href={ WC_PAY_SETUP_URL }
-						variant={ 'primary' }
+						isPrimary
 						onClick={ recordTrack }
 					>
-						{ __( 'Finish setup', 'woocommerce' ) }
+						{ __( 'Get started', 'woocommerce' ) }
 					</Button>
 				}
-				firstName={ firstName }
-				businessCountry={ wccomSettings?.storeCountry ?? '' }
 				isWooPayEligible={ isWooPayEligible }
 			/>
-		</div>
+			<WCPayBannerFooter isWooPayEligible={ isWooPayEligible } />
+		</WCPayBanner>
 	);
 };
 
