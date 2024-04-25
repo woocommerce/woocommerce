@@ -70,7 +70,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -258,7 +258,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -351,7 +351,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '43210',
 						},
 					},
-					additional: {
+					order: {
 						'What is your favourite colour?': 'Red',
 					},
 				}
@@ -442,7 +442,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '543 21',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -629,7 +629,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '12345',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 
@@ -682,7 +682,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 
@@ -743,7 +743,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 

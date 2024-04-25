@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the wc/v3/reports/orders/totals endpoint is compatible with HPOS.

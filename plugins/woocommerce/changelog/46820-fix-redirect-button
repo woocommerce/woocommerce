@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+CYS - AI flow: keep persisted query param when redirecting.

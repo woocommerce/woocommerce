@@ -120,12 +120,10 @@ test.describe( 'Assembler -> Logo Picker', () => {
 		await expect(
 			logoPickerPageObject.getLogoLocator( editor )
 		).toBeVisible();
-		await expect( assembler.getByText( 'Save' ) ).toBeEnabled();
 
 		await expect( imageWidth ).toBeVisible();
 		await expect( linkLogoToHomepage ).toBeVisible();
 		await expect( useAsSiteIcon ).toBeVisible();
-		await assembler.getByText( 'Save' ).click();
 	} );
 
 	test( 'Changing the image width should update the site preview and the frontend', async ( {

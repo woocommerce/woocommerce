@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+E2E tests: fix tests that are failing with Gutenberg active

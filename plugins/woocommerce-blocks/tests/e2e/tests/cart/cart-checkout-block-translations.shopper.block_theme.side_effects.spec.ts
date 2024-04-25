@@ -65,7 +65,7 @@ test.describe( 'Shopper → Translations', () => {
 		await expect( page.getByText( 'Totalen winkelwagen' ) ).toBeVisible();
 
 		await expect(
-			page.getByLabel( 'Een waardebon toevoegen' )
+			page.getByRole( 'button', { name: 'Een waardebon toevoegen' } )
 		).toBeVisible();
 
 		await expect(
@@ -126,7 +126,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
 
-		await expect( page.getByText( 'Verzendmethoden' ) ).toBeVisible();
+		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
 			page.getByText( 'Totaal', { exact: true } )
