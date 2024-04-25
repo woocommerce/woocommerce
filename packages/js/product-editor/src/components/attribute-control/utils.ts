@@ -6,7 +6,7 @@ import { ProductProductAttribute } from '@woocommerce/data';
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
  *
- * @param { ProductAttribute } attribute product attribute.
+ * @param { ProductProductAttribute } attribute product attribute.
  * @return string|number
  */
 export function getAttributeKey(
