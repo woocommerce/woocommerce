@@ -4,7 +4,10 @@
 import { render, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, createElement } from '@wordpress/element';
-import { ProductAttribute, QueryProductAttribute } from '@woocommerce/data';
+import {
+	ProductProductAttribute,
+	QueryProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -104,7 +107,7 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-const attributeList: ProductAttribute[] = [
+const attributeList: ProductProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',
@@ -285,7 +288,9 @@ describe( 'AttributeInputField', () => {
 				.fn()
 				.mockImplementation(
 					(
-						newAttribute: Partial< Omit< ProductAttribute, 'id' > >
+						newAttribute: Partial<
+							Omit< ProductProductAttribute, 'id' >
+						>
 					) => {
 						return Promise.resolve( {
 							name: newAttribute.name,
