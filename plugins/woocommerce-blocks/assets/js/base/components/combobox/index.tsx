@@ -1,13 +1,20 @@
 /**
  * External dependencies
  */
+import {
+	Combobox as AriakitCombobox,
+	ComboboxLabel as AriakitComboboxLabel,
+	ComboboxPopover as AriakitComboboxPopover,
+	ComboboxProvider as AriakitComboboxProvider,
+} from '@ariakit/react';
+import type { ComboboxProps as AriakitComboboxProps } from '@ariakit/react';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { isObject } from '@woocommerce/types';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { use, useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 
 /**
@@ -15,40 +22,36 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
  */
 import './style.scss';
 
-export interface ComboboxControlOption {
+interface ComboboxControlOption {
 	label: string;
 	value: string;
 }
 
-export interface ComboboxProps {
-	autoComplete?: string;
-	className?: string;
+interface WCComboboxProps extends AriakitComboboxProps {
 	errorId: string | null;
 	errorMessage?: string | undefined;
-	id: string;
 	instanceId?: string;
-	label: string;
-	onChange: ( filterValue: string ) => void;
+	//onChange: ( filterValue: string ) => void;
 	options: ComboboxControlOption[];
-	required?: boolean;
 	value: string;
+	label: string;
 }
 
 /**
- * Wrapper for the WordPress ComboboxControl which supports validation.
+ * Wrapper for the Ariakit Combobox with validation support.
  */
 const Combobox = ( {
 	id,
-	className,
 	label,
 	onChange,
 	options,
 	value,
-	required = false,
 	errorId: incomingErrorId,
+	required = false,
 	autoComplete = 'off',
 	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
-}: ComboboxProps ): JSX.Element => {
+	...restOfProps
+}: WCComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
@@ -64,6 +67,10 @@ const Combobox = ( {
 			validationErrorId: store.getValidationErrorId( errorId ),
 		};
 	} );
+
+	const [ searchTerm, setSearchTerm ] = useState( '' );
+
+	const matches = useMemo( () => {}, [ searchTerm ] );
 
 	useEffect( () => {
 		if ( ! required || value ) {
@@ -88,72 +95,103 @@ const Combobox = ( {
 		setValidationErrors,
 	] );
 
-	// @todo Remove patch for ComboboxControl once https://github.com/WordPress/gutenberg/pull/33928 is released
-	// Also see https://github.com/WordPress/gutenberg/pull/34090
+	const wrapperClasses = classnames(
+		'wc-block-components-combobox',
+		restOfProps.className || '',
+		{
+			'is-active': value,
+			'has-error': error?.message && ! error?.hidden,
+		}
+	);
+
 	return (
-		<div
-			id={ controlId }
-			className={ classnames( 'wc-block-components-combobox', className, {
-				'is-active': value,
-				'has-error': error?.message && ! error?.hidden,
-			} ) }
-			ref={ controlRef }
-		>
-			<ComboboxControl
-				className={ 'wc-block-components-combobox-control' }
-				label={ label }
-				onChange={ onChange }
-				onFilterValueChange={ ( filterValue: string ) => {
-					if ( filterValue.length ) {
-						// If we have a value and the combobox is not focussed, this could be from browser autofill.
-						const activeElement = isObject( controlRef.current )
-							? controlRef.current.ownerDocument.activeElement
-							: undefined;
+		<div className={ wrapperClasses } ref={ controlRef }>
+			<AriakitComboboxProvider
+				setValue={ ( val ) => {
+					setSearchTerm( val );
 
-						if (
-							activeElement &&
-							isObject( controlRef.current ) &&
-							controlRef.current.contains( activeElement )
-						) {
-							return;
-						}
+					// Try to match.
+					const normalizedFilterValue = val.toLocaleUpperCase();
 
-						// Try to match.
-						const normalizedFilterValue =
-							filterValue.toLocaleUpperCase();
+					// Try to find an exact match first using values.
+					const foundValue = options.find(
+						( option ) =>
+							option.value.toLocaleUpperCase() ===
+							normalizedFilterValue
+					);
 
-						// Try to find an exact match first using values.
-						const foundValue = options.find(
-							( option ) =>
-								option.value.toLocaleUpperCase() ===
-								normalizedFilterValue
-						);
+					if ( foundValue ) {
+						onChange( foundValue.value );
+						return;
+					}
 
-						if ( foundValue ) {
-							onChange( foundValue.value );
-							return;
-						}
+					// Fallback to a label match.
+					const foundOption = options.find( ( option ) =>
+						option.label
+							.toLocaleUpperCase()
+							.startsWith( normalizedFilterValue )
+					);
 
-						// Fallback to a label match.
-						const foundOption = options.find( ( option ) =>
-							option.label
-								.toLocaleUpperCase()
-								.startsWith( normalizedFilterValue )
-						);
-
-						if ( foundOption ) {
-							onChange( foundOption.value );
-						}
+					if ( foundOption ) {
+						onChange( foundOption.value );
 					}
 				} }
-				options={ options }
-				value={ value || '' }
-				allowReset={ false }
-				autoComplete={ autoComplete }
-				// Note these aria properties are ignored by ComboboxControl. When we replace ComboboxControl we should support them.
-				aria-invalid={ error?.message && ! error?.hidden }
-				aria-errormessage={ validationErrorId }
-			/>
+			>
+				<AriakitComboboxLabel>{ label }</AriakitComboboxLabel>
+				<AriakitCombobox
+					className={ 'wc-block-components-combobox-control' }
+					onChange={ onChange }
+					onFilterValueChange={ ( filterValue: string ) => {
+						if ( filterValue.length ) {
+							// If we have a value and the combobox is not focussed, this could be from browser autofill.
+							const activeElement = isObject( controlRef.current )
+								? controlRef.current.ownerDocument.activeElement
+								: undefined;
+
+							if (
+								activeElement &&
+								isObject( controlRef.current ) &&
+								controlRef.current.contains( activeElement )
+							) {
+								return;
+							}
+
+							// Try to match.
+							const normalizedFilterValue =
+								filterValue.toLocaleUpperCase();
+
+							// Try to find an exact match first using values.
+							const foundValue = options.find(
+								( option ) =>
+									option.value.toLocaleUpperCase() ===
+									normalizedFilterValue
+							);
+
+							if ( foundValue ) {
+								onChange( foundValue.value );
+								return;
+							}
+
+							// Fallback to a label match.
+							const foundOption = options.find( ( option ) =>
+								option.label
+									.toLocaleUpperCase()
+									.startsWith( normalizedFilterValue )
+							);
+
+							if ( foundOption ) {
+								onChange( foundOption.value );
+							}
+						}
+					} }
+					value={ value || '' }
+					allowReset={ false }
+					autoComplete={ autoComplete }
+					aria-invalid={ error?.message && ! error?.hidden }
+					aria-errormessage={ validationErrorId }
+				/>
+				<AriakitComboboxPopover></AriakitComboboxPopover>
+			</AriakitComboboxProvider>
 			<ValidationInputError propertyName={ errorId } />
 		</div>
 	);
