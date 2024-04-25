@@ -131,7 +131,7 @@ test.describe( 'Cart performance', () => {
 				'button.wc-block-components-quantity-selector__button--plus'
 			)
 			.waitFor();
-		await page.click( '.wc-block-components-totals-coupon-link' );
+		await page.click( '.wc-block-components-totals-coupon button' );
 
 		const timesForResponse = [];
 		let i = 3;

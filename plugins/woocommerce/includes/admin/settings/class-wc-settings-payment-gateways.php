@@ -202,7 +202,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 												$setup_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . strtolower( $gateway->id ) );
 											}
 											/* Translators: %s Payment gateway name. */
-											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish set up', 'woocommerce' ) . '</a>';
+											echo '<a class="button alignright" aria-label="' . esc_attr( sprintf( __( 'Set up the "%s" payment method', 'woocommerce' ), $method_title ) ) . '" href="' . esc_url( $setup_url ) . '">' . esc_html__( 'Finish setup', 'woocommerce' ) . '</a>';
 										}
 										break;
 									case 'status':

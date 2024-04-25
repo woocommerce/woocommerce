@@ -58,6 +58,16 @@ export default {
 				},
 			},
 		},
+		state: {
+			control: 'text',
+			description:
+				'A tuple of a state variable and a setter method for managing opening/closing state externally.',
+			table: {
+				type: {
+					summary: 'array',
+				},
+			},
+		},
 	},
 } as Meta< PanelProps >;
 

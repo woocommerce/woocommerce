@@ -9,8 +9,10 @@ class LocalPickupUtils {
 
 	/**
 	 * Gets the local pickup location settings.
+	 *
+	 * @param string $context The context for the settings. Defaults to 'view'.
 	 */
-	public static function get_local_pickup_settings() {
+	public static function get_local_pickup_settings( $context = 'view' ) {
 		$pickup_location_settings = get_option(
 			'woocommerce_pickup_location_settings',
 			[
@@ -25,6 +27,11 @@ class LocalPickupUtils {
 
 		if ( empty( $pickup_location_settings['enabled'] ) ) {
 			$pickup_location_settings['enabled'] = 'no';
+		}
+
+		// Return settings as is if we're editing them.
+		if ( 'edit' === $context ) {
+			return $pickup_location_settings;
 		}
 
 		// All consumers of this turn it into a bool eventually. Doing it here removes the need for that.

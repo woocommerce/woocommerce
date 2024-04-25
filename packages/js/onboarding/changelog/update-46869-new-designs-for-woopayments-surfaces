@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added a new WCPayConnectCard component and removed previous WCPay banners and cards
