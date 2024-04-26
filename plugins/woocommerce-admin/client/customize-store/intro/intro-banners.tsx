@@ -322,7 +322,7 @@ export const ExistingNoAiThemeBanner = () => {
 
 	return (
 		<BaseIntroBanner
-			bannerTitle={ __( 'Edit your custom theme', 'woocommerce' ) }
+			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
 			bannerText={ __(
 				'Continue to customize your store using the store designer. Change your color palette, fonts, page layouts, and more.',
 				'woocommerce'

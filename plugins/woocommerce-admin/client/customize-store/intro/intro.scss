@@ -212,6 +212,45 @@
 	}
 }
 
+.woocommerce-customize-store-cards {
+	//display: flex;
+	//gap: 32px;
+	display: grid;
+	flex-wrap: wrap;
+	gap: 32px;
+	row-gap: 54px;
+	grid-template-columns: repeat(2, 1fr);
+
+	@media only screen and (min-width: 1600px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	.intro-card {
+		border-radius: 4px;
+		border: 1px solid #e9e9e9;
+		text-align: center;
+		padding: 36px 51px;
+		margin-top: 0;
+
+		img {
+			width: 100%;
+			margin-bottom: 20px;
+		}
+
+		div {
+			text-align: left;
+			.intro-card__title {
+				font-size: 14px;
+			}
+
+			.intro-card__link {
+				font-size: 13px;
+				cursor: pointer;
+			}
+		}
+	}
+}
+
 .woocommerce-customize-store-theme-cards {
 	display: grid;
 	flex-wrap: wrap;

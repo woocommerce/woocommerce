@@ -5,7 +5,8 @@ import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
-
+import { getNewPath } from '@woocommerce/navigation';
+import { Sender } from 'xstate';
 import {
 	Notice,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -36,6 +37,11 @@ import {
 	NoAIBanner,
 	ExistingNoAiThemeBanner,
 } from './intro-banners';
+import welcomeTourImg from '../assets/images/design-your-own.svg';
+import professionalThemeImg from '../assets/images/professional-theme.svg';
+import { navigateOrParent } from '~/customize-store/utils';
+import { RecommendThemesAPIResponse } from '~/customize-store/types';
+import { customizeStoreStateMachineEvents } from '~/customize-store';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -70,6 +76,145 @@ const MODAL_COMPONENTS = {
 };
 
 type ModalStatus = keyof typeof MODAL_COMPONENTS;
+
+const ThemeCards = ( {
+	sendEvent,
+	themeData,
+}: {
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
+	themeData: RecommendThemesAPIResponse;
+} ) => {
+	return (
+		<>
+			<p className="select-theme-text">
+				{ __(
+					'Or select a professionally designed theme to customize and make your own.',
+					'woocommerce'
+				) }
+			</p>
+
+			<div className="woocommerce-customize-store-theme-cards">
+				{ themeData.themes?.map( ( theme ) => (
+					<ThemeCard
+						key={ theme.slug }
+						slug={ theme.slug }
+						description={ theme.description }
+						thumbnail_url={ theme.thumbnail_url }
+						name={ theme.name }
+						color_palettes={ theme.color_palettes }
+						total_palettes={ theme.total_palettes }
+						link_url={ theme?.link_url }
+						is_active={ theme.is_active }
+						price={ theme.price }
+						onClick={ () => {
+							if ( theme.is_active ) {
+								sendEvent( {
+									type: 'SELECTED_ACTIVE_THEME',
+									payload: { theme: theme.slug },
+								} );
+							} else {
+								sendEvent( {
+									type: 'SELECTED_NEW_THEME',
+									payload: { theme: theme.slug },
+								} );
+							}
+						} }
+					/>
+				) ) }
+			</div>
+
+			<div className="woocommerce-customize-store-browse-themes">
+				<button
+					onClick={ () =>
+						sendEvent( {
+							type: 'SELECTED_BROWSE_ALL_THEMES',
+						} )
+					}
+				>
+					{ __( 'Browse all themes', 'woocommerce' ) }
+				</button>
+			</div>
+		</>
+	);
+};
+
+const CustomizedThemeBanners = ( {
+	sendEvent,
+}: {
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
+} ) => {
+	return (
+		<>
+			<p className="select-theme-text">
+				{ __( 'Or start new', 'woocommerce' ) }
+			</p>
+
+			<div className="woocommerce-customize-store-cards">
+				<div className="intro-card">
+					<img
+						src={ welcomeTourImg }
+						alt={ __(
+							'Design your own in a breeze',
+							'woocommerce'
+						) }
+					/>
+
+					<div>
+						<h2 className="intro-card__title">
+							{ __( 'Design your own in a breeze', 'woocommerce' ) }
+						</h2>
+
+						<a
+							className="intro-card__link"
+							onClick={ () => {
+								navigateOrParent(
+									window,
+									getNewPath(
+										{ customizing: true },
+										'/customize-store/assembler-hub',
+										{}
+									)
+								);
+							} }
+						>
+							{ __( 'Start designing', 'woocommerce' ) }
+						</a>
+					</div>
+				</div>
+
+				<div className="intro-card">
+					<img
+						src={ professionalThemeImg }
+						alt={ __(
+							'Choose a professionally designed theme',
+							'woocommerce'
+						) }
+					/>
+
+					<div>
+						<h2 className="intro-card__title">
+							{ __(
+								'Choose a professionally designed theme',
+								'woocommerce'
+							) }
+						</h2>
+
+						<a
+							className="intro-card__link"
+							onClick={ () =>
+								sendEvent( {
+									type: 'SELECTED_BROWSE_ALL_THEMES',
+								} )
+							}
+						>
+							{ __( 'Browse themes', 'woocommerce' ) }
+						</a>
+					</div>
+				</div>
+			</div>
+		</>
+	);
+};
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
@@ -107,11 +252,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
-			bannerStatus = FlowType.noAI;
-			break;
-		case context.flowType === FlowType.noAI &&
-			customizeStoreTaskCompleted &&
-			! isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -230,54 +370,14 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						sendEvent={ sendEvent }
 					/>
 
-					<p className="select-theme-text">
-						{ __(
-							'Or select a professionally designed theme to customize and make your own.',
-							'woocommerce'
-						) }
-					</p>
-
-					<div className="woocommerce-customize-store-theme-cards">
-						{ themeData.themes?.map( ( theme ) => (
-							<ThemeCard
-								key={ theme.slug }
-								slug={ theme.slug }
-								description={ theme.description }
-								thumbnail_url={ theme.thumbnail_url }
-								name={ theme.name }
-								color_palettes={ theme.color_palettes }
-								total_palettes={ theme.total_palettes }
-								link_url={ theme?.link_url }
-								is_active={ theme.is_active }
-								price={ theme.price }
-								onClick={ () => {
-									if ( theme.is_active ) {
-										sendEvent( {
-											type: 'SELECTED_ACTIVE_THEME',
-											payload: { theme: theme.slug },
-										} );
-									} else {
-										sendEvent( {
-											type: 'SELECTED_NEW_THEME',
-											payload: { theme: theme.slug },
-										} );
-									}
-								} }
-							/>
-						) ) }
-					</div>
-
-					<div className="woocommerce-customize-store-browse-themes">
-						<button
-							onClick={ () =>
-								sendEvent( {
-									type: 'SELECTED_BROWSE_ALL_THEMES',
-								} )
-							}
-						>
-							{ __( 'Browse all themes', 'woocommerce' ) }
-						</button>
-					</div>
+					{ ! customizeStoreTaskCompleted ? (
+						<ThemeCards
+							sendEvent={ sendEvent }
+							themeData={ themeData }
+						/>
+					) : (
+						<CustomizedThemeBanners sendEvent={ sendEvent } />
+					) }
 				</div>
 			</div>
 		</>
