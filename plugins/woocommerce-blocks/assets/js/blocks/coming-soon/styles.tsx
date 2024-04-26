@@ -122,6 +122,9 @@ export const generateStyles = ( color = '#bea0f2' ) => {
         width: 100%;
         align-items: stretch;
     }
+    .coming-soon-cover .wp-block-cover__background {
+        background-color: ${ color } !important;
+    }
     .woocommerce-coming-soon-header {
         height: 40px;
     }

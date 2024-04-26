@@ -177,6 +177,9 @@ body .is-layout-constrained > .woocommerce-coming-soon-banner.alignwide {
 	width: 100%;
 	align-items: stretch;
 }
+.coming-soon-cover .wp-block-cover__background {
+	background-color: #bea0f2 !important;
+}
 .woocommerce-coming-soon-header {
 	height: 40px;
 }
