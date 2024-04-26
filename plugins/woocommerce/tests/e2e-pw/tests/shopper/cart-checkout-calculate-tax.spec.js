@@ -2,12 +2,12 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { customer } = require( '../../test-data/data' );
 const { addAProductToCart } = require( '../../utils/cart' );
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
-const productName = `Taxed products are awesome ${ uuid.v1() }`;
+const productName = `Taxed products are awesome ${ random() }`;
 const productPrice = '200.00';
 const messyProductPrice = '13.47';
-const secondProductName = `Other products are also awesome ${ uuid.v1() }`;
+const secondProductName = `Other products are also awesome ${ random() }`;
 
 let productId,
 	productId2,
