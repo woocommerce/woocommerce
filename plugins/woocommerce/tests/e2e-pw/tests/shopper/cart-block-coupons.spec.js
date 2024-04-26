@@ -54,7 +54,7 @@ baseTest.describe( 'Cart Block Applying Coupons', () => {
 				page.getByRole( 'heading', { name: testPage.title } )
 			).toBeVisible();
 
-			await use( testPage );
+			await use( page );
 		},
 	} );
 
