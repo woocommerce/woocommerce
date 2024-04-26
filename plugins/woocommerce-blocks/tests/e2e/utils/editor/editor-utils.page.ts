@@ -408,11 +408,11 @@ export class EditorUtils {
 		if ( await allButton.isVisible() ) {
 			await allButton.click();
 		}
+		await this.closeWelcomeGuideModal();
 		await this.page
 			.locator( '.block-editor-block-preview__container' )
 			.click();
 
-		await this.closeWelcomeGuideModal();
 		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template.
