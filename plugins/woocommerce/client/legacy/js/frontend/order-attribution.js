@@ -152,10 +152,10 @@
 			this._fieldNames = Object.keys( wc_order_attribution.fields );
 			// Allow values to be lazily set before CE upgrade.
 			if ( this.hasOwnProperty( '_values' ) ) {
-			  let values = this.values;
-			  // Restore the setter.
-			  delete this.values;
-			  this.values = values || {};
+				let values = this.values;
+				// Restore the setter.
+				delete this.values;
+				this.values = values || {};
 			}
 		}
 		/**
@@ -167,7 +167,7 @@
 		connectedCallback() {
 			let inputs = '';
 			for( const fieldName of this._fieldNames ) {
-				const value = stringifyFalsyInputValue( this.values[ fieldName ] );
+				const value = stringifyFalsyInputValue( ( this.values && this.values[ fieldName ] ) || '' );
 				inputs += `<input type="hidden" name="${params.prefix}${fieldName}" value="${value}"/>`;
 			}
 			this.innerHTML = inputs;
