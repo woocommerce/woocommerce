@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Reverts auto-injecting specific Woo Blocks in every block theme and restores only auto-injecting in themes found in the allow list.

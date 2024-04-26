@@ -6,6 +6,7 @@ import { Button } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import type { Product } from '@woocommerce/data';
+import { useShortcut } from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
@@ -41,6 +42,9 @@ export function usePublish< T = Product >( {
 	const isDisabled =
 		prevStatus !== 'draft' && ( disabled || isBusy || ! isDirty );
 
+	const handlePublish = () =>
+		publish().then( onPublishSuccess ).catch( onPublishError );
+
 	function handleClick( event: MouseEvent< HTMLButtonElement > ) {
 		if ( isDisabled ) {
 			event.preventDefault?.();
@@ -51,7 +55,7 @@ export function usePublish< T = Product >( {
 			onClick( event );
 		}
 
-		publish().then( onPublishSuccess ).catch( onPublishError );
+		handlePublish();
 	}
 
 	function getButtonText() {
@@ -68,6 +72,16 @@ export function usePublish< T = Product >( {
 
 		return __( 'Publish', 'woocommerce' );
 	}
+
+	useShortcut( 'core/editor/save', ( event ) => {
+		event.preventDefault();
+		if (
+			! isDisabled &&
+			( prevStatus === 'publish' || prevStatus === 'future' )
+		) {
+			handlePublish();
+		}
+	} );
 
 	return {
 		children: getButtonText(),

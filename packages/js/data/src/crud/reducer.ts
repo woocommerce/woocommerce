@@ -84,26 +84,63 @@ export const createReducer = (
 						},
 					};
 
-				case TYPES.CREATE_ITEM_SUCCESS:
+				case TYPES.CREATE_ITEM_SUCCESS: {
 					const createItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.CREATE_ITEM,
 						payload.key,
 						payload.query
 					);
+
+					const { options } = payload;
+					const data = {
+						...itemData,
+						[ payload.key ]: {
+							...( itemData[ payload.key ] || {} ),
+							...payload.item,
+						},
+					};
+
+					let items = state.items;
+					let itemsCount = state.itemsCount;
+
+					if ( typeof options?.optimisticQueryUpdate === 'object' ) {
+						const getItemQuery = getRequestIdentifier(
+							CRUD_ACTIONS.GET_ITEMS,
+							options.optimisticQueryUpdate
+						);
+
+						const getItemCountQuery = getTotalCountResourceName(
+							CRUD_ACTIONS.GET_ITEMS,
+							options.optimisticQueryUpdate
+						);
+
+						items = {
+							...state.items,
+							[ getItemQuery ]: {
+								...state.items[ getItemQuery ],
+								data: Object.keys( data ).map(
+									( key ) => +key
+								),
+							},
+						};
+
+						itemsCount = {
+							...state.itemsCount,
+							[ getItemCountQuery ]: Object.keys( data ).length,
+						};
+					}
+
 					return {
 						...state,
-						data: {
-							...itemData,
-							[ payload.key ]: {
-								...( itemData[ payload.key ] || {} ),
-								...payload.item,
-							},
-						},
+						items,
+						itemsCount,
+						data,
 						requesting: {
 							...state.requesting,
 							[ createItemSuccessRequestId ]: false,
 						},
 					};
+				}
 
 				case TYPES.GET_ITEM_SUCCESS:
 					return {
