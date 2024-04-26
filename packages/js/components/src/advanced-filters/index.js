@@ -66,7 +66,6 @@ class AdvancedFilters extends Component {
 
 		this.onMatchChange = this.onMatchChange.bind( this );
 		this.onFilterChange = this.onFilterChange.bind( this );
-		this.getAvailableFilterKeys = this.getAvailableFilterKeys.bind( this );
 		this.getAvailableFilters = this.getAvailableFilters.bind( this );
 		this.addFilter = this.addFilter.bind( this );
 		this.removeFilter = this.removeFilter.bind( this );
@@ -161,7 +160,7 @@ class AdvancedFilters extends Component {
 		} );
 	}
 
-	getAvailableFilterKeys() {
+	getAvailableFilters() {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( ( f ) => f.key );
 		const multipleValueFilterKeys = Object.keys( config.filters ).filter(
@@ -173,12 +172,12 @@ class AdvancedFilters extends Component {
 			multipleValueFilterKeys
 		);
 
-		// Ensure filters that allow multiples are alway present.
-		return [ ...inactiveFilterKeys, ...multipleValueFilterKeys ];
-	}
+		// Ensure filters that allow multiples are always present.
+		const availableFilterKeys = [
+			...inactiveFilterKeys,
+			...multipleValueFilterKeys,
+		];
 
-	getAvailableFilters( availableFilterKeys ) {
-		const { config } = this.props;
 		const filters = availableFilterKeys.map( ( key ) => ( {
 			key,
 			...config.filters[ key ],
@@ -275,9 +274,7 @@ class AdvancedFilters extends Component {
 	render() {
 		const { config, query, currency } = this.props;
 		const { activeFilters, match } = this.state;
-		const availableFilterKeys = this.getAvailableFilterKeys();
-		const availableFilters =
-			this.getAvailableFilters( availableFilterKeys );
+		const availableFilters = this.getAvailableFilters();
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled =
 			'admin.php' + window.location.search === updateHref ||
@@ -328,7 +325,7 @@ class AdvancedFilters extends Component {
 						</ul>
 					</CardBody>
 				) }
-				{ availableFilterKeys.length > 0 && (
+				{ availableFilters.length > 0 && (
 					<CardBody>
 						<div className="woocommerce-filters-advanced__add-filter">
 							<Dropdown
