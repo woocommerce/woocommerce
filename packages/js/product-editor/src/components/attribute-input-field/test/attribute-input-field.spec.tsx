@@ -5,6 +5,7 @@ import { render, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, createElement } from '@wordpress/element';
 import {
+	ProductAttribute,
 	ProductProductAttribute,
 	QueryProductAttribute,
 } from '@woocommerce/data';
@@ -309,11 +310,21 @@ describe( 'AttributeInputField', () => {
 				/>
 			);
 			queryByText( 'Update Input' )?.click();
+
+			expect( createProductAttributeMock ).toHaveBeenCalledWith(
+				{
+					name: 'Co',
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: {
+						order_by: 'name',
+					},
+				}
+			);
+
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
+
 			expect( onChangeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
 				slug: 'co',
