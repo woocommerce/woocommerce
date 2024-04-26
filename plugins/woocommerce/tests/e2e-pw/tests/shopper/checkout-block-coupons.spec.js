@@ -6,7 +6,6 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { random } = require( '../../utils/helpers' );
 
 const simpleProductName = `Checkout Coupons Product ${ random() }`;
@@ -60,13 +59,7 @@ baseTest.describe( 'Checkout Block Applying Coupons', () => {
 
 	const couponBatchId = [];
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
@@ -120,13 +113,7 @@ baseTest.describe( 'Checkout Block Applying Coupons', () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ productId ],
 		} );

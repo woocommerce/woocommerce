@@ -6,7 +6,6 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -96,13 +95,7 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 		testPageTitlePrefix: 'Woocommerce Blocks',
 	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// add product attribute
 		await api
 			.post( 'products/attributes', {
@@ -172,13 +165,7 @@ baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );

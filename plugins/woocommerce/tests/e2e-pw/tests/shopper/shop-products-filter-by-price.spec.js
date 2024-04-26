@@ -6,7 +6,6 @@ const {
 	insertBlockByShortcut,
 	publishPage,
 } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const singleProductPrice1 = '10';
 const singleProductPrice2 = '50';
@@ -22,13 +21,7 @@ baseTest.describe( 'Filter items in the shop by product price', () => {
 		testPageTitlePrefix: 'Products filter',
 	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// add products
 		await api
 			.post( 'products', {
@@ -59,13 +52,7 @@ baseTest.describe( 'Filter items in the shop by product price', () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id, product3Id ],
 		} );
