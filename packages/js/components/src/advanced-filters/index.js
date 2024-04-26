@@ -12,7 +12,7 @@ import {
 	SelectControl,
 } from '@wordpress/components';
 import { createElement, Component, createRef } from '@wordpress/element';
-import { partial, difference, isEqual } from 'lodash';
+import { partial, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
 import {
