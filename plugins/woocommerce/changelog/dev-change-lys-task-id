@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Changed LYS task list task id from underscore to hyphens for consistency with the other tasks

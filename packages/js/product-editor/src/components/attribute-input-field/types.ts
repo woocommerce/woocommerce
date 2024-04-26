@@ -1,17 +1,14 @@
 /**
  * External dependencies
  */
-import { QueryProductAttribute, ProductAttribute } from '@woocommerce/data';
+import { ProductAttribute, ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
-export type NarrowedQueryAttribute = Pick<
-	QueryProductAttribute,
-	'id' | 'name'
-> & {
+export type NarrowedQueryAttribute = Pick< ProductAttribute, 'id' | 'name' > & {
 	slug?: string;
 	isDisabled?: boolean;
 };
@@ -20,7 +17,10 @@ export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
 	onChange: (
 		value?:
-			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+			| Omit<
+					ProductProductAttribute,
+					'position' | 'visible' | 'variation'
+			  >
 			| string
 	) => void;
 	label?: string;

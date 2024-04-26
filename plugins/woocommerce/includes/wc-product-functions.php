@@ -615,6 +615,20 @@ function wc_get_product_types() {
  * @return bool
  */
 function wc_product_has_unique_sku( $product_id, $sku ) {
+	/**
+	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+	 * @param int $product_id The ID of the current product.
+	 * @param string $sku The SKU to check for uniqueness.
+	 */
+	$has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', null, $product_id, $sku );
+	if ( ! is_null( $has_unique_sku ) ) {
+		return boolval( $has_unique_sku );
+	}
+
 	$data_store = WC_Data_Store::load( 'product' );
 	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
