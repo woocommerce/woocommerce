@@ -685,7 +685,7 @@
           "menu_title": "Block template lifecycle",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/block-template-lifecycle.md",
-          "hash": "8412c1fc634341ef4d4e81cd3212e368acca7e2c8c3ded15de1726cbec88424f",
+          "hash": "f4307cd57d6db60bb5bcce06f164d19e00b8292f25c519338492922200cbc14a",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/block-template-lifecycle.md",
           "id": "0c29c74a7e7e9fd88562df1afa489659f460879e"
         }
@@ -1266,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "24c95fd5e28dc3e1fd03ffa495e1487bafc1dc8c3ffa91334f05ac2ea3b12e78"
+  "hash": "299ae06253e491a4faab195a757a840af961a31286b638a27ab0653696224845"
 }
