@@ -40,6 +40,10 @@ type WithRequiredProperty< Type, Key extends keyof Type > = Type & {
 	[ Property in Key ]-?: Type[ Property ];
 };
 
+export type CrudActionOptions = {
+	optimisticQueryUpdate?: boolean | Partial< Item >;
+};
+
 export type CrudActions<
 	ResourceName,
 	ItemType,
@@ -47,7 +51,10 @@ export type CrudActions<
 	RequiredFields extends keyof MutableProperties | undefined = undefined
 > = MapActions<
 	{
-		create: ( query: Partial< ItemType > ) => Item;
+		create: (
+			query: Partial< ItemType >,
+			options?: CrudActionOptions
+		) => ItemType;
 		update: ( query: Partial< ItemType > ) => Item;
 	},
 	ResourceName,
