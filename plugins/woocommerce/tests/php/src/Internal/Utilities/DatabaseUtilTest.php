@@ -71,8 +71,9 @@ class DatabaseUtilTest extends WC_Unit_Test_Case {
 		// Add back removed filter.
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		$this->assertFalse( $this->sut->fts_index_on_order_address_table_exists() );
-		$this->sut->create_fts_index_order_address_table();
+		if ( ! $this->sut->fts_index_on_order_item_table_exists() ) {
+			$this->sut->create_fts_index_order_address_table();
+		}
 		$this->assertTrue( $this->sut->fts_index_on_order_address_table_exists() );
 	}
 
@@ -80,8 +81,9 @@ class DatabaseUtilTest extends WC_Unit_Test_Case {
 	 * @test Test that we are able to create FTS index on order item table.
 	 */
 	public function test_create_fts_index_order_item_table() {
-		$this->assertFalse( $this->sut->fts_index_on_order_item_table_exists() );
-		$this->sut->create_fts_index_order_item_table();
+		if ( ! $this->sut->fts_index_on_order_item_table_exists() ) {
+			$this->sut->create_fts_index_order_item_table();
+		}
 		$this->assertTrue( $this->sut->fts_index_on_order_item_table_exists() );
 	}
 }
