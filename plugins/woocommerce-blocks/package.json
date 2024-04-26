@@ -316,6 +316,7 @@
 		"prop-types": "^15.8.1",
 		"react-number-format": "4.9.3",
 		"react-transition-group": "^4.4.5",
+		"remove-accents": "^0.5.0",
 		"request": "2.88.2",
 		"trim-html": "0.1.9",
 		"use-debounce": "9.0.4",
