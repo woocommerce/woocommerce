@@ -21,7 +21,7 @@ The lifecycle of a template is as follows:
 
 ## Registration
 
-A template class can be registered with the `Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry`. All template classes must implement the `Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface` interface.
+A template class can be registered with the `Automattic\\WooCommerce\\LayoutTemplates\\LayoutTemplateRegistry`. All template classes must implement the `Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface` interface.
 
 Registration is required in order for the template to be available to be sent to the client (via the `/wc/v3/layout-templates` REST API endpoint).
 
