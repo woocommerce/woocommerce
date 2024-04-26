@@ -116,15 +116,19 @@ const Combobox = ( {
 		setValidationErrors,
 	] );
 
-	const wrapperClasses = classnames(
-		'components-base-control',
-		'wc-block-components-combobox-control',
-		'components-combobox-control',
+	const outerWrapperClasses = classnames(
+		'wc-block-components-combobox',
 		restOfProps.className || '',
 		{
 			'is-active': value,
 			'has-error': error?.message && ! error?.hidden,
 		}
+	);
+
+	const innerWrapperClasses = classnames(
+		'components-base-control',
+		'wc-block-components-combobox-control',
+		'components-combobox-control'
 	);
 
 	const comboboxClasses = classnames(
@@ -144,9 +148,11 @@ const Combobox = ( {
 
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
+	const initialOption = options.find( ( option ) => option.value === value );
+
 	return (
-		<div className="wc-block-components-combobox">
-			<div className={ wrapperClasses } ref={ controlRef }>
+		<div className={ outerWrapperClasses }>
+			<div className={ innerWrapperClasses } ref={ controlRef }>
 				<AriakitComboboxProvider
 					setValue={ ( val ) => {
 						setSearchTerm( val );
@@ -187,7 +193,7 @@ const Combobox = ( {
 							<AriakitCombobox
 								className={ comboboxClasses }
 								onChange={ onChange }
-								value={ value || '' }
+								value={ initialOption?.label || '' }
 								autoComplete={ autoComplete }
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
