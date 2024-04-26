@@ -25,7 +25,7 @@ const program = new Command( 'ci-jobs' )
 	)
 	.option(
 		'-e --event <event>',
-		'Github event for which to run the jobs. If not specified, all projects will with changes be considered.',
+		'Github event for which to run the jobs. If not specified, all events will be considered.',
 		''
 	)
 	.action( async ( options ) => {
