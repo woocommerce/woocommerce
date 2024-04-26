@@ -343,7 +343,7 @@ class AdvancedFilters extends Component {
 										aria-expanded={ isOpen }
 									>
 										<AddOutlineIcon />
-										{ __( 'Add a Filter', 'woocommerce' ) }
+										{ __( 'Add a filter', 'woocommerce' ) }
 									</Button>
 								) }
 								renderContent={ ( { onClose } ) => (
