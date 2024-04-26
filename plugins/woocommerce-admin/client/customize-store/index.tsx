@@ -565,13 +565,13 @@ export const CustomizeStoreController = ( {
 					return _ctx.flowType === FlowType.AIOffline;
 				},
 				activeThemeHasMods: ( _ctx ) => {
-					return !! _ctx.activeThemeHasMods;
+					return true;
 				},
 				activeThemeHasNoMods: ( _ctx ) => {
-					return ! _ctx.activeThemeHasMods;
+					return false;
 				},
 				customizeTaskIsCompleted: ( _ctx ) => {
-					return _ctx.intro.customizeStoreTaskCompleted;
+					return true;
 				},
 				customizeTaskIsNotCompleted: ( _ctx ) => {
 					return ! _ctx.intro.customizeStoreTaskCompleted;

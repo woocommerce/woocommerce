@@ -9,6 +9,7 @@ import { __experimentalGrid as Grid, Spinner } from '@wordpress/components';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -36,30 +37,28 @@ export const ColorPalette = () => {
 		[] as typeof COLOR_PALETTES
 	);
 
+	const variations = useSelect( ( select ) => {
+		return select(
+			coreStore
+			// @ts-ignore
+		).__experimentalGetCurrentThemeGlobalStylesVariations();
+	}, [] );
+
+	console.log( variations );
+
 	useEffect( () => {
 		if ( ! isLoading ) {
-			if (
-				aiSuggestions?.defaultColorPalette?.bestColors?.length > 0 &&
-				aiSuggestions?.defaultColorPalette?.default
-			) {
-				setColorPalettes(
-					COLOR_PALETTES.filter(
-						( palette ) =>
-							aiSuggestions.defaultColorPalette?.bestColors.includes(
-								palette.title
-							) ||
-							aiSuggestions.defaultColorPalette.default ===
-								palette.title
-					)
-				);
+			if ( false ) {
 			} else {
 				// seems that aiSuggestions weren't correctly populated, we'll just use the first 9
 				setColorPalettes(
-					DEFAULT_COLOR_PALETTES as typeof COLOR_PALETTES
+					variations !== undefined
+						? variations
+						: DEFAULT_COLOR_PALETTES
 				);
 			}
 		}
-	}, [ isLoading, aiSuggestions?.defaultColorPalette ] );
+	}, [ isLoading, variations, colorPalettes ] );
 
 	if ( isLoading ) {
 		return (
