@@ -320,6 +320,16 @@ export const ExistingAiThemeBanner = ( {
 export const ExistingNoAiThemeBanner = () => {
 	const siteUrl = getAdminSetting( 'siteUrl' ) + '?cys-hide-admin-bar=1';
 
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Customize your theme', 'woocommerce' ) }
@@ -331,14 +341,21 @@ export const ExistingNoAiThemeBanner = () => {
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
 				trackEvent( 'customize_your_store_intro_customize_click' );
-				navigateOrParent(
-					window,
-					getNewPath(
-						{ customizing: true },
-						'/customize-store/assembler-hub',
-						{}
-					)
-				);
+				if ( isBlockTheme ) {
+					navigateOrParent(
+						window,
+						getNewPath(
+							{ customizing: true },
+							'/customize-store/assembler-hub',
+							{}
+						)
+					);
+				} else {
+					navigateOrParent(
+						window,
+						'customize.php?return=/wp-admin/themes.php',
+					);
+				}
 			} }
 			bannerButtonText={ __( 'Customize your theme', 'woocommerce' ) }
 			showAIDisclaimer={ false }
