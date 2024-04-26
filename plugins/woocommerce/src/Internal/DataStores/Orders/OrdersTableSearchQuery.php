@@ -41,7 +41,7 @@ class OrdersTableSearchQuery {
 	public function __construct( OrdersTableQuery $query ) {
 		$this->query          = $query;
 		$this->search_term    = $query->get( 's' );
-		$this->search_filters = $this->sanitize_search_filters( $query->get( 'search_filter' ) );
+		$this->search_filters = $this->sanitize_search_filters( $query->get( 'search_filter' ) ?? '' );
 	}
 
 	/**
