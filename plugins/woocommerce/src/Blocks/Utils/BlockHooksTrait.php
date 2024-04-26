@@ -37,7 +37,7 @@ trait BlockHooksTrait {
 		 * measure until improvements to the Block Hooks API allow for exposing
 		 * to all block themes.
 		 *
-		 * @since $VID:$
+		 * @since 8.4.0
 		 */
 		$theme_include_list = apply_filters( 'woocommerce_hooked_blocks_theme_include_list', array( 'Twenty Twenty-Four', 'Twenty Twenty-Three', 'Twenty Twenty-Two', 'Tsubaki', 'Zaino', 'Thriving Artist', 'Amulet', 'Tazza' ) );
 
