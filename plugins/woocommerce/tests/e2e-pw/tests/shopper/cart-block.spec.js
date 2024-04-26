@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -6,8 +6,6 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
 
 const simpleProductName = 'Single Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -21,23 +19,15 @@ const singleProductWithCrossSellProducts =
 	+firstCrossSellProductPrice +
 	+secondCrossSellProductPrice;
 
-const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
-const cartBlockPageSlug = cartBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 let product1Id, product2Id, product3Id;
 
-test.describe( 'Cart Block page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Cart Block page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Cart Block',
+	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
@@ -77,13 +67,7 @@ test.describe( 'Cart Block page', () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id, product3Id ],
 		} );
@@ -91,16 +75,17 @@ test.describe( 'Cart Block page', () => {
 
 	test( 'can see empty cart, add and remove simple & cross sell product, increase to max quantity', async ( {
 		page,
+		testPage,
 	} ) => {
 		await goToPageEditor( { page } );
-		await fillPageTitle( page, cartBlockPageTitle );
+		await fillPageTitle( page, testPage.title );
 		await insertBlockByShortcut( page, '/cart' );
-		await publishPage( page, cartBlockPageTitle );
+		await publishPage( page, testPage.title );
 
 		// go to the page to test empty cart block
-		await page.goto( cartBlockPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			await page.getByText( 'Your cart is currently empty!' ).count()
@@ -114,9 +99,9 @@ test.describe( 'Cart Block page', () => {
 		).toBeVisible();
 
 		await addAProductToCart( page, product1Id );
-		await page.goto( cartBlockPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'link', { name: simpleProductName, exact: true } )
@@ -162,9 +147,9 @@ test.describe( 'Cart Block page', () => {
 				.getByText( `${ simpleProductName } Cross-Sell 2` )
 		).toBeVisible();
 
-		await page.goto( cartBlockPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'heading', { name: 'You may be interested in…' } )

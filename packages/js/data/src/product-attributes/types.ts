@@ -28,6 +28,7 @@ export type QueryProductAttribute = {
 
 type Query = {
 	context?: string;
+	order_by?: string;
 };
 
 type ReadOnlyProperties = 'id';
@@ -60,7 +61,7 @@ export interface CustomActionDispatchers extends ActionDispatchers {
 	createProductAttribute: (
 		x: Partial< QueryProductAttribute >,
 		options?: {
-			optimisticQueryUpdate: Partial< QueryProductAttribute > | boolean;
+			optimisticQueryUpdate: Partial< QueryProductAttribute >;
 		}
 	) => Promise< ProductAttribute >;
 }

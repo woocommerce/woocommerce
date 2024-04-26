@@ -293,7 +293,7 @@ jobs:
 
             - name: 'Send workflow dispatch'
               env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
               run: |
@@ -361,7 +361,7 @@ jobs:
 
             - name: 'Publish reports'
               env:
-                  GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
                   PR_NUMBER: ${{ github.event.pull_request.number }}
                   RUN_ID: ${{ github.run_id }}
               run: |
