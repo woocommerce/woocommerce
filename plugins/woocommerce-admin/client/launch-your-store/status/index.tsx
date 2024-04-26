@@ -15,7 +15,13 @@ import { SiteVisibilityTour } from '../tour';
 import { useSiteVisibilityTour } from '../tour/use-site-visibility-tour';
 import { COMING_SOON_PAGE_EDITOR_LINK } from '../constants';
 
-export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
+export const LaunchYourStoreStatus = ( {
+	comingSoon,
+	storePagesOnly,
+}: {
+	comingSoon: string;
+	storePagesOnly: string;
+} ) => {
 	const isComingSoon = comingSoon && comingSoon === 'yes';
 	const isStorePagesOnly =
 		isComingSoon && storePagesOnly && storePagesOnly === 'yes';
@@ -40,6 +46,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 			<div className="woocommerce-lys-status-pill-wrapper">
 				<Dropdown
 					className="woocommerce-lys-status-dropdown"
+					// @ts-expect-error Property does exists
 					focusOnMount={ true }
 					popoverProps={ { placement: 'bottom-start' } }
 					renderToggle={ ( { isOpen, onToggle } ) => (
@@ -59,6 +66,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 						<>
 							<MenuGroup className="woocommerce-lys-status-popover">
 								<MenuItem
+									// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
 									href={ getAdminLink(
 										'admin.php?page=wc-settings&tab=site-visibility'
 									) }
@@ -72,6 +80,7 @@ export const LaunchYourStoreStatus = ( { comingSoon, storePagesOnly } ) => {
 								{ isComingSoon &&
 									getSetting( 'currentThemeIsFSETheme' ) && (
 										<MenuItem
+											// @ts-expect-error Prop gets passed down to underlying button https://developer.wordpress.org/block-editor/reference-guides/components/menu-item/#props
 											href={
 												COMING_SOON_PAGE_EDITOR_LINK
 											}

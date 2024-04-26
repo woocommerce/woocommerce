@@ -10,6 +10,9 @@
 
 ?>
 
+<!-- wp:woocommerce/coming-soon {"storeOnly":true} -->
+<div class="wp-block-woocommerce-coming-soon">
+
 <?php
 if ( wc_current_theme_is_fse_theme() ) {
 	echo '<!-- wp:template-part {"slug":"header","tagName":"header"} /-->';
@@ -38,15 +41,11 @@ if ( wc_current_theme_is_fse_theme() ) {
 <!-- /wp:spacer --></div>
 <!-- /wp:group -->
 
-
 <?php
 if ( wc_current_theme_is_fse_theme() ) {
 	echo '<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->';
 }
 ?>
 
-<style>
-	.woocommerce-breadcrumb {
-		display: none;
-	}
-</style>
+<style>.woocommerce-breadcrumb {display: none;}</style></div>
+<!-- /wp:woocommerce/coming-soon -->
