@@ -131,12 +131,11 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 } );
 // These tests are disabled because there is an issue with the default contents of this page, possible caused by other tests.
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
-	test.beforeAll( async () => {
+	test.beforeEach( async ( { admin, page, editor } ) => {
 		await cli(
 			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
-	} );
-	test.beforeEach( async ( { admin, page, editor } ) => {
+
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//archive-product',
 			postType: 'wp_template',
@@ -153,12 +152,6 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		} );
 		await editor.saveSiteEditorEntities();
 		await page.goto( `/shop` );
-	} );
-
-	test.afterEach( async ( { templateApiUtils } ) => {
-		await templateApiUtils.revertTemplate(
-			'woocommerce/woocommerce//archive-product'
-		);
 	} );
 
 	test( 'should show all products', async ( { frontendUtils } ) => {
@@ -200,11 +193,5 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			.locator( '.product' );
 
 		await expect( products ).toHaveCount( 1 );
-	} );
-
-	test.afterAll( async () => {
-		await cli(
-			'npm run wp-env run tests-cli -- wp option delete wc_blocks_use_blockified_product_grid_block_as_template'
-		);
 	} );
 } );

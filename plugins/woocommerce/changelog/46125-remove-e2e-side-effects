@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Block E2E: Eliminate side effects through improved test isolation
