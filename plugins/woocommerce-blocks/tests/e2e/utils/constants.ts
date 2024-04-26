@@ -17,6 +17,8 @@ export const CLASSIC_CHILD_THEME_WITH_BLOCK_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_
 export const CLASSIC_CHILD_THEME_WITH_CLASSIC_NOTICES_TEMPLATE_SLUG = `${ CLASSIC_THEME_SLUG }-child__classic-notices-template`;
 export const BASE_URL = 'http://localhost:8889';
 
+export const WC_TEMPLATES_SLUG = 'woocommerce/woocommerce';
+
 export const WP_ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH ||
 	path.join( process.cwd(), 'tests/e2e/artifacts' );

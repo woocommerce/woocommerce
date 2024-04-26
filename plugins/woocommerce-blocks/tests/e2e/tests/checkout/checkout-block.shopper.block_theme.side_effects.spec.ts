@@ -3,7 +3,11 @@
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
-import { customerFile, guestFile } from '@woocommerce/e2e-utils';
+import {
+	customerFile,
+	guestFile,
+	WC_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -237,31 +241,34 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { editor, admin, editorUtils, page } ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
-			postType: 'wp_template',
-		} );
-		await editorUtils.enterEditMode();
-		await editor.openDocumentSettingsSidebar();
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				'  [data-type="woocommerce/checkout-shipping-address-block"]'
-		);
+	test.beforeEach(
+		async ( { editor, frontendUtils, admin, editorUtils, page } ) => {
+			await admin.visitSiteEditor( {
+				postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
+				postType: 'wp_template',
+			} );
+			await editorUtils.enterEditMode();
+			await editor.openDocumentSettingsSidebar();
+			await editor.selectBlocks(
+				blockSelectorInEditor +
+					'  [data-type="woocommerce/checkout-shipping-address-block"]'
+			);
 
-		const checkbox = page.getByRole( 'checkbox', {
-			name: 'Company',
-			exact: true,
-		} );
-		await checkbox.check();
-		await expect( checkbox ).toBeChecked();
-		await expect(
-			editor.canvas.locator(
-				'div.wc-block-components-address-form__company'
-			)
-		).toBeVisible();
-		await editorUtils.saveSiteEditorEntities();
-	} );
+			const checkbox = page.getByRole( 'checkbox', {
+				name: 'Company',
+				exact: true,
+			} );
+			await checkbox.check();
+			await expect( checkbox ).toBeChecked();
+			await expect(
+				editor.canvas.locator(
+					'div.wc-block-components-address-form__company'
+				)
+			).toBeVisible();
+			await editorUtils.saveSiteEditorEntities();
+			await frontendUtils.emptyCart();
+		}
+	);
 
 	test( 'User can add postcodes for different countries', async ( {
 		frontendUtils,
@@ -497,7 +504,7 @@ test.describe( 'Billing Address Form', () => {
 		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

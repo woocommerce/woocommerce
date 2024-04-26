@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { EditorUtils } from '@woocommerce/e2e-utils';
+import { EditorUtils, WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
 
 export const addBlock = async (
@@ -10,7 +10,7 @@ export const addBlock = async (
 	editorUtils: EditorUtils
 ) => {
 	await admin.visitSiteEditor( {
-		postId: `woocommerce/woocommerce//single-product`,
+		postId: `${ WC_TEMPLATES_SLUG }//single-product`,
 		postType: 'wp_template',
 	} );
 	await editorUtils.enterEditMode();

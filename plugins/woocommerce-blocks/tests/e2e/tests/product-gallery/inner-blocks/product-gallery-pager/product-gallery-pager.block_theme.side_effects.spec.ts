@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -46,7 +47,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
+			postId: `${ WC_TEMPLATES_SLUG }//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();

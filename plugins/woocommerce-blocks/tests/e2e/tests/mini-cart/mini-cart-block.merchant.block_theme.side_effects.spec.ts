@@ -3,6 +3,7 @@
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { BlockData } from '@woocommerce/e2e-types';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -25,7 +26,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 			admin,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//single-product`,
+				postId: `${ WC_TEMPLATES_SLUG }//single-product`,
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();
@@ -41,7 +42,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 
 		test( 'can only be inserted once', async ( { editorUtils, admin } ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//single-product`,
+				postId: `${ WC_TEMPLATES_SLUG }//single-product`,
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();

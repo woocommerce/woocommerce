@@ -3,11 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import { EditorUtils } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
+import { WC_TEMPLATES_SLUG, EditorUtils } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Add to Cart with Options',
@@ -60,7 +56,7 @@ test.describe( `${ blockData.name } Block`, () => {
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as inner block of the Single Product Block except for the Single Product Template
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ WC_TEMPLATES_SLUG }//archive-product`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -87,7 +83,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editorUtils,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//single-product`,
+			postId: `${ WC_TEMPLATES_SLUG }//single-product`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();

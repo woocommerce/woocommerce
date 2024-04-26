@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { EditorUtils } from '@woocommerce/e2e-utils';
+import { EditorUtils, WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import { Admin, Editor } from '@wordpress/e2e-test-utils-playwright';
 
 // Define a utility function to add the "woocommerce/product-gallery" block to the editor
@@ -12,7 +12,7 @@ export const addBlock = async (
 ) => {
 	// Visit the site editor for the specific product page
 	await admin.visitSiteEditor( {
-		postId: `woocommerce/woocommerce//single-product`,
+		postId: `${ WC_TEMPLATES_SLUG }//single-product`,
 		postType: 'wp_template',
 	} );
 

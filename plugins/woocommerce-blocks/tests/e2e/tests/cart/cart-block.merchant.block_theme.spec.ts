@@ -3,6 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Cart',
@@ -27,7 +28,7 @@ test.describe( 'Merchant → Cart', () => {
 	test.describe( 'in page editor', () => {
 		test.beforeEach( async ( { editorUtils, admin } ) => {
 			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-cart',
+				postId: `${ WC_TEMPLATES_SLUG }//page-cart`,
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();

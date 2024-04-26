@@ -3,6 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -63,7 +64,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		page,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ WC_TEMPLATES_SLUG }//archive-product`,
 			postType: 'wp_template',
 		} );
 
@@ -91,7 +92,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		page,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ WC_TEMPLATES_SLUG }//archive-product`,
 			postType: 'wp_template',
 		} );
 
@@ -130,7 +131,7 @@ for ( const {
 			editorUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ slug }`,
+				postId: `${ WC_TEMPLATES_SLUG }//${ slug }`,
 				postType: 'wp_template',
 			} );
 

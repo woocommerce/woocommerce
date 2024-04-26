@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { guestFile } from '@woocommerce/e2e-utils';
+import { guestFile, WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -42,7 +42,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await localPickupUtils.disableLocalPickup();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//order-confirmation',
+			postId: `${ WC_TEMPLATES_SLUG }//order-confirmation`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -99,7 +100,7 @@ test.describe( 'Compatibility Layer with Product Collection block', () => {
 			);
 
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
+				`${ WC_TEMPLATES_SLUG }//archive-product`
 			);
 			await pageObject.goToProductCatalogFrontend();
 		} );

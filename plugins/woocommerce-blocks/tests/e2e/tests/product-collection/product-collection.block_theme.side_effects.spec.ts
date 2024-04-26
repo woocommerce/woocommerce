@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 import type { Request, Locator } from '@playwright/test';
 
 /**
@@ -123,7 +124,7 @@ test.describe( 'Product Collection', () => {
 			editor,
 		} ) => {
 			await pageObject.replaceProductsWithProductCollectionInTemplate(
-				'woocommerce/woocommerce//archive-product'
+				`${ WC_TEMPLATES_SLUG }//archive-product`
 			);
 			await insertProductElements( pageObject );
 			await editor.saveSiteEditorEntities();
@@ -953,7 +954,7 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_cat`,
+				postId: `${ WC_TEMPLATES_SLUG }//taxonomy-product_cat`,
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();
@@ -982,7 +983,7 @@ test.describe( 'Product Collection', () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//taxonomy-product_tag`,
+				postId: `${ WC_TEMPLATES_SLUG }//taxonomy-product_tag`,
 				postType: 'wp_template',
 			} );
 			await editorUtils.enterEditMode();

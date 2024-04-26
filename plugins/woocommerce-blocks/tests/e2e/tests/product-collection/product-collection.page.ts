@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { Locator, Page } from '@playwright/test';
-import { TemplateApiUtils, EditorUtils } from '@woocommerce/e2e-utils';
+import {
+	TemplateApiUtils,
+	EditorUtils,
+	WC_TEMPLATES_SLUG,
+} from '@woocommerce/e2e-utils';
 import { Editor, Admin } from '@wordpress/e2e-test-utils-playwright';
 
 /**
@@ -234,7 +238,7 @@ class ProductCollectionPage {
 
 	async goToProductCatalogAndInsertCollection( collection?: Collections ) {
 		await this.goToTemplateAndInsertCollection(
-			'woocommerce/woocommerce//archive-product',
+			`${ WC_TEMPLATES_SLUG }//archive-product`,
 			collection
 		);
 	}

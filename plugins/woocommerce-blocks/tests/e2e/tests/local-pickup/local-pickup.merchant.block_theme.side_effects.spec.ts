@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 	} ) => {
 		// First update the title via the site editor then check the local pickup settings.
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -73,7 +74,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 		await localPickupUtils.saveLocalPickupSettings();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();

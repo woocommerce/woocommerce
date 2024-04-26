@@ -3,6 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -44,7 +45,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 	test.beforeEach( async ( { editorUtils, admin, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -145,7 +146,7 @@ test.describe( 'Merchant → Checkout', () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -188,7 +189,7 @@ test.describe( 'Merchant → Checkout', () => {
 		).toBeVisible();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ WC_TEMPLATES_SLUG }//page-checkout`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();

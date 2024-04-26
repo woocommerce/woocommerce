@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { cli, WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -23,7 +23,7 @@ test.describe( 'Legacy templates', () => {
 
 		await test.step( 'Customize existing template to create DB entry', async () => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.id }`,
+				postId: `${ WC_TEMPLATES_SLUG }//${ template.id }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -94,7 +94,7 @@ test.describe( 'Legacy templates', () => {
 				`npm run wp-env run tests-cli -- \
 					wp term update wp_theme woocommerce \
 						--by="slug" \
-						--name="woocommerce/woocommerce" \
+						--name="${ WC_TEMPLATES_SLUG }" \
 						--slug="woocommerce-woocommerce"`
 			);
 

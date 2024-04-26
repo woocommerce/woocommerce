@@ -3,6 +3,7 @@
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
 import { Locator } from '@playwright/test';
+import { WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -85,7 +86,7 @@ const getThumbnailImageIdByNth = async (
 test.describe( `${ blockData.name }`, () => {
 	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//${ blockData.slug }`,
+			postId: `${ WC_TEMPLATES_SLUG }//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -530,7 +531,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//product-gallery`,
+				postId: `${ WC_TEMPLATES_SLUG }//product-gallery`,
 				postType: 'wp_template_part',
 			} );
 			await editorUtils.enterEditMode();

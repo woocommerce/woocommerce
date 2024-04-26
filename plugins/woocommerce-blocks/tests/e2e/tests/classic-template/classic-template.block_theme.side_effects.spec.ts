@@ -3,7 +3,7 @@
  */
 import { BlockData } from '@woocommerce/e2e-types';
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
-import { cli } from '@woocommerce/e2e-utils';
+import { cli, WC_TEMPLATES_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -61,7 +61,7 @@ test.describe( `${ blockData.name } Block `, () => {
 			editor,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.slug }`,
+				postId: `${ WC_TEMPLATES_SLUG }//${ template.slug }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -84,7 +84,7 @@ test.describe( `${ blockData.name } Block `, () => {
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.slug }`,
+				postId: `${ WC_TEMPLATES_SLUG }//${ template.slug }`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
