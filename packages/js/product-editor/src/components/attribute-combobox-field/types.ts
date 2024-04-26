@@ -10,7 +10,6 @@ import type { ProductAttribute } from '@woocommerce/data';
  */
 export type AttributesComboboxControlItem = ProductAttribute & {
 	isDisabled?: boolean;
-	takenBy?: number;
 };
 
 export type AttributesComboboxControlComponent = {
