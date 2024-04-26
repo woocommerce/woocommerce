@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -42,7 +43,6 @@ import professionalThemeImg from '../assets/images/professional-theme.svg';
 import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
-import { useSelect } from '@wordpress/data';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -154,7 +154,6 @@ const CustomizedThemeBanners = ( {
 
 	const isBlockTheme = currentTheme?.is_block_theme;
 
-
 	return (
 		<>
 			<p className="select-theme-text">
@@ -173,10 +172,13 @@ const CustomizedThemeBanners = ( {
 
 					<div>
 						<h2 className="intro-card__title">
-							{ __( 'Design your own in a breeze', 'woocommerce' ) }
+							{ __(
+								'Design your own in a breeze',
+								'woocommerce'
+							) }
 						</h2>
 
-						<a
+						<button
 							className="intro-card__link"
 							onClick={ () => {
 								if ( isBlockTheme ) {
@@ -191,13 +193,13 @@ const CustomizedThemeBanners = ( {
 								} else {
 									navigateOrParent(
 										window,
-										'customize.php?return=/wp-admin/themes.php',
+										'customize.php?return=/wp-admin/themes.php'
 									);
 								}
 							} }
 						>
 							{ __( 'Start designing', 'woocommerce' ) }
-						</a>
+						</button>
 					</div>
 				</div>
 
@@ -218,7 +220,7 @@ const CustomizedThemeBanners = ( {
 							) }
 						</h2>
 
-						<a
+						<button
 							className="intro-card__link"
 							onClick={ () =>
 								sendEvent( {
@@ -227,7 +229,7 @@ const CustomizedThemeBanners = ( {
 							}
 						>
 							{ __( 'Browse themes', 'woocommerce' ) }
-						</a>
+						</button>
 					</div>
 				</div>
 			</div>

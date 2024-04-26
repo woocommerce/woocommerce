@@ -3,7 +3,7 @@
  */
 import { Sender } from 'xstate';
 import apiFetch from '@wordpress/api-fetch';
-import { resolveSelect, dispatch, useSelect } from '@wordpress/data';
+import { resolveSelect, dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 // @ts-expect-error -- No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group

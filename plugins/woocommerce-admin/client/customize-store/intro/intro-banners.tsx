@@ -353,7 +353,7 @@ export const ExistingNoAiThemeBanner = () => {
 				} else {
 					navigateOrParent(
 						window,
-						'customize.php?return=/wp-admin/themes.php',
+						'customize.php?return=/wp-admin/themes.php'
 					);
 				}
 			} }
