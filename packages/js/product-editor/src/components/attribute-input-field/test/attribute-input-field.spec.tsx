@@ -356,10 +356,18 @@ describe( 'AttributeInputField', () => {
 			);
 			queryByText( 'Update Input' )?.click();
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
+			expect( createProductAttributeMock ).toHaveBeenCalledWith(
+				{
+					name: 'Co',
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: {
+						order_by: 'name',
+					},
+				}
+			);
+
 			await waitFor( () => {
 				expect( createErrorNoticeMock ).toHaveBeenCalledWith(
 					'Duplicate slug',
