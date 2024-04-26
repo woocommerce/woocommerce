@@ -30,6 +30,7 @@ export * from './sort-fills-by-order';
 export * from './register-product-editor-block-type';
 export * from './init-block';
 export * from './product-apifetch-middleware';
+export * from './product-editor-header-apifetch-middleware';
 export * from './sift';
 export * from './truncate';
 

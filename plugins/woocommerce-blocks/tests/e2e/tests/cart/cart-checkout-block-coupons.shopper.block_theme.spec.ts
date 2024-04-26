@@ -35,7 +35,7 @@ test.describe( 'Shopper → Coupon', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
@@ -50,7 +50,7 @@ test.describe( 'Shopper → Coupon', () => {
 		).toBeHidden();
 
 		await frontendUtils.goToCheckout();
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
@@ -83,7 +83,7 @@ test.describe( 'Shopper → Coupon', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
@@ -99,7 +99,7 @@ test.describe( 'Shopper → Coupon', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByLabel( 'Add a coupon' ).click();
+		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page.getByLabel( 'Enter code' ).fill( 'single-use-coupon' );
 		await page.getByRole( 'button', { name: 'Apply' } ).click();
 
