@@ -164,7 +164,7 @@ class AdvancedFilters extends Component {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( ( f ) => f.key );
 		const multipleValueFilterKeys = Object.keys( config.filters ).filter(
-			( f ) => config.filters[ f ].allowMultiple || false
+			( f ) => config.filters[ f ].allowMultiple
 		);
 		const inactiveFilterKeys = difference(
 			Object.keys( config.filters ),
@@ -178,11 +178,15 @@ class AdvancedFilters extends Component {
 			...multipleValueFilterKeys,
 		];
 
+		// Get filter objects based on the filter keys.
 		const filters = availableFilterKeys.map( ( key ) => ( {
 			key,
 			...config.filters[ key ],
 		} ) );
+
+		// Sort the filter by the add label.
 		filters.sort( ( a, b ) => a.labels.add.localeCompare( b.labels.add ) );
+
 		return filters;
 	}
 
