@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Order search does not find orders with emails that include a plus.
