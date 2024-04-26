@@ -3,7 +3,6 @@
 namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Exception;
-use phpDocumentor\Reflection\Types\This;
 
 /**
  * Creates the join and where clauses needed to perform an order search using Custom Order Tables.
@@ -280,7 +279,7 @@ $orders_table.id in (
 				"
 $order_table.id IN (
 	SELECT order_id FROM $address_table WHERE
-	MATCH( $address_table.first_name, $address_table.last_name, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.postcode, $address_table.country, $address_table.state ) AGAINST ( %s IN BOOLEAN MODE )
+	MATCH( $address_table.first_name, $address_table.last_name, $address_table.company, $address_table.address_1, $address_table.address_2, $address_table.city, $address_table.state, $address_table.postcode, $address_table.country, $address_table.email ) AGAINST ( %s IN BOOLEAN MODE )
 )
 ",
 				'*' . $wpdb->esc_like( $this->search_term ) . '*'
