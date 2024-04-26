@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -34,15 +34,30 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const cartBlockPageTitle = `Cart Block Coupons ${ uuid.v1() }`;
-const cartBlockPageSlug = cartBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 let productId, orderId, limitedCouponId;
 
-test.describe( 'Cart Block Applying Coupons', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Cart Block Applying Coupons', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitle: `Cart Block ${ uuid.v1() }`,
+		page: async ( { context, page, testPage }, use ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, '/cart' );
+			await publishPage( page, testPage.title );
+
+			await context.clearCookies();
+
+			await addAProductToCart( page, productId );
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+
+			await use( testPage );
+		},
+	} );
+
 	const couponBatchId = [];
 
 	test.beforeAll( async ( { baseURL } ) => {
@@ -123,28 +138,10 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		} );
 	} );
 
-	// eslint-disable-next-line playwright/expect-expect,jest/expect-expect
-	test( 'can create Cart Block page', async ( { page } ) => {
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, cartBlockPageTitle );
-		await insertBlockByShortcut( page, '/cart' );
-		await publishPage( page, cartBlockPageTitle );
-	} );
-
 	test( 'allows cart block to apply coupon of any type', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
-
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
-
-		await addAProductToCart( page, productId );
-		await page.goto( cartBlockPageSlug );
-
-		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
-		).toBeVisible();
 
 		// apply all coupon types
 		for ( let i = 0; i < coupons.length; i++ ) {
@@ -178,22 +175,10 @@ test.describe( 'Cart Block Applying Coupons', () => {
 		}
 	} );
 
-	test( 'allows cart block to apply multiple coupons', async ( {
-		page,
-		context,
-	} ) => {
-		await context.clearCookies();
-
+	test( 'allows cart block to apply multiple coupons', async ( { page } ) => {
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
-
-		await addAProductToCart( page, productId );
-		await page.goto( cartBlockPageSlug );
-
-		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
-		).toBeVisible();
 
 		// add all coupons and verify prices
 		for ( let i = 0; i < coupons.length; i++ ) {
@@ -235,17 +220,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 
 	test( 'prevents cart block applying same coupon twice', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
-
-		await addAProductToCart( page, productId );
-		await page.goto( cartBlockPageSlug );
-
-		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
-		).toBeVisible();
-
 		// try to add two same coupons and verify the error message
 		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page
@@ -275,17 +250,7 @@ test.describe( 'Cart Block Applying Coupons', () => {
 
 	test( 'prevents cart block applying coupon with usage limit', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
-
-		await addAProductToCart( page, productId );
-		await page.goto( cartBlockPageSlug );
-
-		await expect(
-			page.getByRole( 'heading', { name: cartBlockPageTitle } )
-		).toBeVisible();
-
 		// add coupon with usage limit
 		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page
