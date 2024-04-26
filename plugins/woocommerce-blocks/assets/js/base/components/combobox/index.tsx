@@ -17,6 +17,7 @@ import {
 	useMemo,
 	useRef,
 	useState,
+	useTransition,
 } from '@wordpress/element';
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -33,7 +34,7 @@ interface ComboboxControlOption {
 	value: string;
 }
 
-type WCComboboxProps = AriakitComboboxProps & {
+type WCComboboxProps = Omit< AriakitComboboxProps, 'onChange' > & {
 	errorId: string | null;
 	errorMessage?: string | undefined;
 	instanceId?: string;
@@ -67,6 +68,8 @@ const Combobox = ( {
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
 
+	const [ , startTransition ] = useTransition();
+
 	const { error, validationErrorId } = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
 		return {
@@ -75,12 +78,17 @@ const Combobox = ( {
 		};
 	} );
 
-	const [ searchTerm, setSearchTerm ] = useState( '' );
+	const initialOption = options.find( ( option ) => option.value === value );
+
+	const [ searchTerm, setSearchTerm ] = useState(
+		initialOption?.label || ''
+	);
 
 	const matchingSuggestions = useMemo( () => {
 		const startsWithMatch: ComboboxControlOption[] = [];
 		const containsMatch: ComboboxControlOption[] = [];
 		const match = normalizeTextString( searchTerm );
+
 		options.forEach( ( option ) => {
 			const index = normalizeTextString( option.label ).indexOf( match );
 			if ( index === 0 ) {
@@ -148,39 +156,24 @@ const Combobox = ( {
 
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
-	const initialOption = options.find( ( option ) => option.value === value );
-
 	return (
 		<div className={ outerWrapperClasses }>
 			<div className={ innerWrapperClasses } ref={ controlRef }>
 				<AriakitComboboxProvider
+					value={ searchTerm }
+					selectedValue={ initialOption?.label || '' }
 					setValue={ ( val ) => {
-						setSearchTerm( val );
-
-						// Try to match.
-						const normalizedFilterValue = val.toLocaleUpperCase();
-
-						// Try to find an exact match first using values.
-						const foundValue = options.find(
-							( option ) =>
-								option.value.toLocaleUpperCase() ===
-								normalizedFilterValue
+						startTransition( () => {
+							setSearchTerm( val );
+						} );
+					} }
+					setSelectedValue={ ( val ) => {
+						const option = options.find(
+							( opt ) => opt.label === val
 						);
 
-						if ( foundValue ) {
-							onChange( foundValue.value );
-							return;
-						}
-
-						// Fallback to a label match.
-						const foundOption = options.find( ( option ) =>
-							option.label
-								.toLocaleUpperCase()
-								.startsWith( normalizedFilterValue )
-						);
-
-						if ( foundOption ) {
-							onChange( foundOption.value );
+						if ( option ) {
+							onChange( option.value );
 						}
 					} }
 				>
@@ -192,8 +185,6 @@ const Combobox = ( {
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
 								className={ comboboxClasses }
-								onChange={ onChange }
-								value={ initialOption?.label || '' }
 								autoComplete={ autoComplete }
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
@@ -202,14 +193,14 @@ const Combobox = ( {
 							<AriakitComboboxPopover
 								className={ popoverClasses }
 								sameWidth
+								flip={ false }
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<AriakitComboboxItem
 										className={ suggestionClasses }
 										key={ option.label }
-									>
-										{ option.label }
-									</AriakitComboboxItem>
+										value={ option.label }
+									/>
 								) ) }
 							</AriakitComboboxPopover>
 						</div>
