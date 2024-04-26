@@ -195,6 +195,7 @@ const Combobox = ( {
 							/>
 							<AriakitComboboxPopover
 								className={ popoverClasses }
+								sameWidth
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<AriakitComboboxItem
