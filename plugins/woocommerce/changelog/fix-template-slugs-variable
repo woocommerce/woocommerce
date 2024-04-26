@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Move templates slug into a variable instead of hardcoding it in blocks tests
+
+
