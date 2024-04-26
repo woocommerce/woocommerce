@@ -28,30 +28,40 @@ const templates = {
 	//	slug: 'taxonomy-product_attribute',
 	//	frontendPage: '/product-attribute/color/',
 	//	legacyBlockName: 'woocommerce/legacy-template',
+	//	needsToBeCreated: false,
+	//	gutenbergTemplateName: '',
 	//},
 	'taxonomy-product_cat': {
 		templateTitle: 'Product Category',
 		slug: 'taxonomy-product_cat',
 		frontendPage: '/product-category/music/',
 		legacyBlockName: 'woocommerce/legacy-template',
+		needsToBeCreated: true,
+		gutenbergTemplateName: 'Category (product_cat)',
 	},
 	// We don't have products with tags in the test site. Uncomment this when we have products with tags.
 	// 'taxonomy-product_tag': {
 	// 	templateTitle: 'Product Tag',
 	// 	slug: 'taxonomy-product_tag',
 	// 	frontendPage: '/product-tag/hoodie/',
+	//	needsToBeCreated: true,
+	// 	gutenbergTemplateName: 'Tag (product_tag)',
 	// },
 	'archive-product': {
 		templateTitle: 'Product Catalog',
 		slug: 'archive-product',
 		frontendPage: '/shop/',
 		legacyBlockName: 'woocommerce/legacy-template',
+		needsToBeCreated: false,
+		gutenbergTemplateName: '',
 	},
 	'product-search-results': {
 		templateTitle: 'Product Search Results',
 		slug: 'product-search-results',
 		frontendPage: '/?s=shirt&post_type=product',
 		legacyBlockName: 'woocommerce/legacy-template',
+		needsToBeCreated: false,
+		gutenbergTemplateName: '',
 	},
 };
 
@@ -121,6 +131,8 @@ for ( const {
 	slug,
 	frontendPage,
 	legacyBlockName,
+	needsToBeCreated,
+	gutenbergTemplateName,
 } of Object.values( templates ) ) {
 	test.describe( `${ templateTitle } template`, () => {
 		test( 'Products block matches with classic template block', async ( {
@@ -129,10 +141,20 @@ for ( const {
 			page,
 			editorUtils,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ slug }`,
-				postType: 'wp_template',
-			} );
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( needsToBeCreated ) {
+				// Create a new template.
+				await editorUtils.createTemplate(
+					gutenbergTemplateName,
+					'wp_template'
+				);
+			} else {
+				// Edit the WooCommerce default template.
+				await admin.visitSiteEditor( {
+					postId: `woocommerce/woocommerce//${ slug }`,
+					postType: 'wp_template',
+				} );
+			}
 
 			await editor.canvas.locator( 'body' ).click();
 			const block = await editorUtils.getBlockByName( blockData.name );
