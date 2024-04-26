@@ -7,7 +7,7 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 const simpleProductName = 'Cart Coupons Product';
 const singleProductFullPrice = '110.00';
@@ -39,7 +39,7 @@ let productId, orderId, limitedCouponId;
 baseTest.describe( 'Cart Block Applying Coupons', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Cart Block ${ uuid.v1() }`,
+		testPageTitle: `Cart Block ${ random() }`,
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );

@@ -6,7 +6,7 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -31,7 +31,7 @@ const wooPatterns = [
 baseTest.describe( 'Add WooCommerce Patterns Into Page', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Woocommerce Patterns ${ uuid.v1() }`,
+		testPageTitle: `Woocommerce Patterns ${ random() }`,
 	} );
 
 	test( 'can insert WooCommerce patterns into page', async ( {

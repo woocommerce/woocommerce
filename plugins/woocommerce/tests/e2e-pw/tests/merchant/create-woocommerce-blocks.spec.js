@@ -7,7 +7,7 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -94,7 +94,7 @@ let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Woocommerce Blocks ${ uuid.v1() }`,
+		testPageTitle: `Woocommerce Blocks ${ random() }`,
 	} );
 
 	test.beforeAll( async ( { baseURL } ) => {

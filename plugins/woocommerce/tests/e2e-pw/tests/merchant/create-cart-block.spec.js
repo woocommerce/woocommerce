@@ -6,12 +6,12 @@ const {
 	transformIntoBlocks,
 	publishPage,
 } = require( '../../utils/editor' );
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 baseTest.describe( 'Transform Classic Cart To Cart Block', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Transformed cart ${ uuid.v1() }`,
+		testPageTitle: `Transformed cart ${ random() }`,
 	} );
 
 	test( 'can transform classic cart to cart block', async ( {

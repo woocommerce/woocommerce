@@ -7,7 +7,7 @@ const {
 	transformIntoBlocks,
 	publishPage,
 } = require( '../../utils/editor' );
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 const simpleProductName = 'Very Simple Product';
 const singleProductPrice = '999.00';
@@ -17,7 +17,7 @@ let productId, shippingZoneId;
 baseTest.describe( 'Transform Classic Checkout To Checkout Block', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Transformed checkout ${ uuid.v1() }`,
+		testPageTitle: `Transformed checkout ${ random() }`,
 	} );
 
 	test.beforeAll( async ( { api } ) => {

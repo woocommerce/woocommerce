@@ -7,9 +7,9 @@ const {
 const { addAProductToCart } = require( '../../utils/cart' );
 const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
-const simpleProductName = `Checkout Coupons Product ${ uuid.v1() }`;
+const simpleProductName = `Checkout Coupons Product ${ random() }`;
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
@@ -39,7 +39,7 @@ let productId, orderId, limitedCouponId;
 baseTest.describe( 'Checkout Block Applying Coupons', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Checkout Block ${ uuid.v1() }`,
+		testPageTitle: `Checkout Block ${ random() }`,
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );
