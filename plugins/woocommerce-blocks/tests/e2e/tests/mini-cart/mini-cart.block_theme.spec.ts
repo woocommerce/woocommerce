@@ -112,7 +112,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -135,7 +134,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -150,7 +148,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -171,7 +168,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -206,7 +202,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -229,7 +224,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -242,7 +236,6 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
