@@ -1,8 +1,15 @@
 const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	getCanvas,
+	fillPageTitle,
+	insertBlock,
+	transformIntoBlocks,
+} = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const uuid = require( 'uuid' );
 
-const transformedCheckoutBlockTitle = `Transformed Checkout ${ Date.now() }`;
+const transformedCheckoutBlockTitle = `Transformed Checkout ${ uuid.v1() }`;
 const transformedCheckoutBlockSlug = transformedCheckoutBlockTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -81,44 +88,18 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 			version: 'wc/v3',
 		} );
 
-		// go to create a new page
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await goToPageEditor( { page } );
 
-		await disableWelcomeModal( { page } );
+		await fillPageTitle( page, transformedCheckoutBlockTitle );
+		await insertBlock( page, 'Classic Checkout' );
+		await transformIntoBlocks( page );
 
-		// fill page title
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( transformedCheckoutBlockTitle );
+		// When Gutenberg is active, the canvas is in an iframe
+		let canvas = await getCanvas( page );
 
-		// add classic checkout block
-		await page.getByRole( 'textbox', { name: 'Add title' } ).click();
-		await page.getByLabel( 'Add block' ).click();
-		await page
-			.getByPlaceholder( 'Search', { exact: true } )
-			.fill( 'classic checkout' );
-		await page
-			.getByRole( 'option' )
-			.filter( { hasText: 'Classic Checkout' } )
-			.click();
-
-		// transform into blocks
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
-			)
-		).toBeVisible();
-		await page
-			.getByRole( 'button' )
-			.filter( { hasText: 'Transform into blocks' } )
-			.click();
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Classic shortcode transformed to blocks.'
-		);
-
-		// set terms & conditions and privacy policy as mandatory option
-		await page.locator( '.wc-block-checkout__terms' ).click();
-		await page.getByLabel( 'Require checkbox' ).click();
+		// Activate the terms and conditions checkbox
+		await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
+		await page.getByLabel( 'Require checkbox' ).check();
 
 		// save and publish the page
 		await page
@@ -138,17 +119,16 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		} );
 		await page.reload();
 
-		// verify that enabled payment options are in the block
+		// Mandatory to wait for the editor content, to ensure the iframe is loaded (if Gutenberg is active)
+		await expect( page.getByLabel( 'Editor content' ) ).toBeVisible();
+
+		// Get the canvas again after the page reload
+		canvas = await getCanvas( page );
+
 		await expect(
-			page.locator(
-				'#radio-control-wc-payment-method-options-bacs__label'
-			)
-		).toContainText( 'Direct bank transfer' );
-		await expect(
-			page.locator(
-				'#radio-control-wc-payment-method-options-cod__label'
-			)
-		).toContainText( 'Cash on delivery' );
+			canvas.getByText( 'Direct bank transfer' )
+		).toBeVisible();
+		await expect( canvas.getByText( 'Cash on delivery' ) ).toBeVisible();
 
 		// add additional shipping methods after page creation
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {

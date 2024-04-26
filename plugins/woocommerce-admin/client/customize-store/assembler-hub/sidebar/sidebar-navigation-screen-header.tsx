@@ -12,7 +12,6 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 // @ts-expect-error No types for this exist yet.
@@ -33,6 +32,7 @@ import BlockPatternList from '../block-pattern-list';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { FlowType } from '~/customize-store/types';
 import { headerTemplateId } from '~/customize-store/data/homepageTemplates';
+import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_HEADER_PATTERNS = [
 	'woocommerce-blocks/header-centered-menu',
@@ -138,7 +138,7 @@ export const SidebarNavigationScreenHeader = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'header',

@@ -41,8 +41,7 @@ const products = [
 ];
 
 for ( const { classes, product, frontendPage } of products ) {
-	// eslint-disable-next-line playwright/valid-describe-callback
-	test.describe( `The Single Product page of the ${ product }`, () =>
+	test.describe( `The Single Product page of the ${ product }`, () => {
 		test( 'add product specific classes to the body', async ( {
 			page,
 		} ) => {
@@ -53,7 +52,8 @@ for ( const { classes, product, frontendPage } of products ) {
 			classes.forEach( ( className ) => {
 				expect( bodyClasses?.split( ' ' ) ).toContain( className );
 			} );
-		} ) );
+		} );
+	} );
 }
 
 test( 'shows password form in products protected with password', async ( {
