@@ -42,6 +42,7 @@ import professionalThemeImg from '../assets/images/professional-theme.svg';
 import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
+import { useSelect } from '@wordpress/data';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -143,6 +144,17 @@ const CustomizedThemeBanners = ( {
 }: {
 	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
+	interface Theme {
+		is_block_theme?: boolean;
+	}
+
+	const currentTheme = useSelect( ( select ) => {
+		return select( 'core' ).getCurrentTheme() as Theme;
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
+
+
 	return (
 		<>
 			<p className="select-theme-text">
@@ -167,14 +179,21 @@ const CustomizedThemeBanners = ( {
 						<a
 							className="intro-card__link"
 							onClick={ () => {
-								navigateOrParent(
-									window,
-									getNewPath(
-										{ customizing: true },
-										'/customize-store/assembler-hub',
-										{}
-									)
-								);
+								if ( isBlockTheme ) {
+									navigateOrParent(
+										window,
+										getNewPath(
+											{ customizing: true },
+											'/customize-store/assembler-hub',
+											{}
+										)
+									);
+								} else {
+									navigateOrParent(
+										window,
+										'customize.php?return=/wp-admin/themes.php',
+									);
+								}
 							} }
 						>
 							{ __( 'Start designing', 'woocommerce' ) }
