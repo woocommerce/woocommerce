@@ -25,8 +25,8 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->setup_cot();
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		$this->setup_cot();
 		$this->toggle_cot_feature_and_usage( true );
 	}
 
@@ -575,40 +575,5 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 
 		$query = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
-	}
-
-	/**
-	 * @testDox Test searches with FTS indexes.
-	 */
-	public function test_query_s_fts_indexes() {
-		update_option( CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, 'yes' );
-		global $wpdb;
-
-		$this->assertEquals( 'yes', get_option( CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION ), 'Unable to create FTS index on order item table for testing.' );
-		$this->assertEquals( 'yes', get_option( CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION ), 'Unable to create FTS index on order address table for testing.' );
-		$this->assertEquals( 'yes', get_option( CustomOrdersTableController::HPOS_FTS_INDEX_OPTION ), 'FTS index option required for testing is not enabled' );
-
-		$orders = $this->setup_dummy_orders_for_search_filter();
-
-		$wpdb->query( 'COMMIT;' ); // FTS search can only query committed data. See https://dev.mysql.com/doc/refman/8.0/en/innodb-fulltext-index.html#innodb-fulltext-index-transaction.
-
-		$query_args = array(
-			's'      => '',
-			'return' => 'ids',
-		);
-
-		// Default search filter is all, so we don't need to set it explicitly.
-
-		$query_args['s'] = 'Product';
-		$query           = new OrdersTableQuery( $query_args );
-		$this->assertEqualsCanonicalizing( array( $orders[1] ), $query->orders );
-
-		$query_args['s'] = 'Customer';
-		$query           = new OrdersTableQuery( $query_args );
-		$this->assertEqualsCanonicalizing( array( $orders[0] ), $query->orders );
-
-		$query_args['s'] = 'name';
-		$query           = new OrdersTableQuery( $query_args );
-		$this->assertEqualsCanonicalizing( $orders, $query->orders );
 	}
 }

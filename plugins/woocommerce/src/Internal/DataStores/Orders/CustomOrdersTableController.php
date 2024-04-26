@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 use WC_Admin_Settings;
 
@@ -327,6 +328,14 @@ class CustomOrdersTableController {
 			return;
 		}
 
+		if ( ! $this->custom_orders_table_usage_is_enabled() ) {
+			update_option( self::HPOS_FTS_INDEX_OPTION, 'no', true );
+			if ( class_exists( 'WC_Admin_Settings' ) ) {
+				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on orders table. This feature is only available when High-performance order storage is enabled.', 'woocommerce' ) );
+			}
+			return;
+		}
+
 		if ( ! $this->db_util->fts_index_on_order_address_table_exists() ) {
 			$this->db_util->create_fts_index_order_address_table();
 		}
@@ -336,7 +345,9 @@ class CustomOrdersTableController {
 			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'yes', true );
 		} else {
 			update_option( self::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, 'no', true );
-			\WC_Admin_Notices::add_notice( 'error', __( 'Failed to create FTS index on address table', 'woocommerce' ) );
+			if ( class_exists( 'WC_Admin_Settings ' ) ) {
+				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on address table', 'woocommerce' ) );
+			}
 		}
 
 		if ( ! $this->db_util->fts_index_on_order_item_table_exists() ) {
@@ -348,7 +359,9 @@ class CustomOrdersTableController {
 			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'yes', true );
 		} else {
 			update_option( self::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, 'no', true );
-			\WC_Admin_Notices::add_notice( 'error', __( 'Failed to create FTS index on order item table', 'woocommerce' ) );
+			if ( class_exists( 'WC_Admin_Settings ' ) ) {
+				WC_Admin_Settings::add_error( __( 'Failed to create FTS index on order item table', 'woocommerce' ) );
+			}
 		}
 	}
 
