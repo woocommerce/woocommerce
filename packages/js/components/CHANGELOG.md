@@ -169,7 +169,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Move file picker by clicking card into the MediaUploader component [#36124]
 -   Minor - Fix up initial block selection in RichTextEditor and add media blocks [#36124]
 -   Minor - Add noDataLabel property into table.js component to allow No Data label customization. [#36124]
--    - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
+-   Minor - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
 
 ## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24 
 
