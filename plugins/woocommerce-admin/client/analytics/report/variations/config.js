@@ -154,7 +154,7 @@ export const advancedFilters = applyFilters(
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Product attribute', 'woocommerce' ),
+					add: __( 'Attribute', 'woocommerce' ),
 					placeholder: __(
 						'Search product attributes',
 						'woocommerce'
@@ -169,7 +169,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product attribute</title> <rule/> <filter/>',
+						'<title>Attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select product attributes', 'woocommerce' ),
@@ -196,7 +196,7 @@ export const advancedFilters = applyFilters(
 			},
 			category: {
 				labels: {
-					add: __( 'Product category', 'woocommerce' ),
+					add: __( 'Category', 'woocommerce' ),
 					placeholder: __(
 						'Search product categories',
 						'woocommerce'
@@ -211,7 +211,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing a Category filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product category</title> <rule/> <filter/>',
+						'<title>Category</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select product categories', 'woocommerce' ),
