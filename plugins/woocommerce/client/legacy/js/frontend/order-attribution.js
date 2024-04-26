@@ -19,7 +19,7 @@
 	 *
 	 * @returns {Object} Schema compatible object.
 	 */
-	function getData() {
+	wc_order_attribution.getAttributionData = function() {
 		const accessor = params.allowTracking ? propertyAccessor : returnNull;
 		const entries = Object.entries( wc_order_attribution.fields )
 				.map( ( [ key, property ] ) => [ key, accessor( sbjs.get, property ) ] );
@@ -75,7 +75,7 @@
 				timezone_offset: '0', // utc
 			} );
 		}
-		const values = getData();
+		const values = wc_order_attribution.getAttributionData();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
 	}
@@ -117,7 +117,7 @@
 			// Update checkout block data once more if the checkout store was loaded after this script.
 			const unsubscribe = window.wp.data.subscribe( function () {
 				unsubscribe();
-				updateCheckoutBlockData( getData() );
+				updateCheckoutBlockData( wc_order_attribution.getAttributionData() );
 			}, CHECKOUT_STORE_KEY );
 		}
 	};
