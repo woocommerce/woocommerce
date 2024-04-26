@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 8.7.0
+Stable tag: 8.8.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -165,6 +165,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 8.9.0 2024-XX-XX =
+= 9.0.0 2024-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).

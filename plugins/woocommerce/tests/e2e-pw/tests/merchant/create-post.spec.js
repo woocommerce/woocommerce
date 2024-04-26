@@ -1,6 +1,10 @@
 const { test, expect, request } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
-const { goToPostEditor } = require( '../../utils/editor' );
+const {
+	goToPostEditor,
+	fillPageTitle,
+	getCanvas,
+} = require( '../../utils/editor' );
 
 const postTitle = `Post-${ new Date().getTime().toString() }`;
 
@@ -36,13 +40,15 @@ test.describe( 'Can create a new post', () => {
 	test( 'can create new post', async ( { page } ) => {
 		await goToPostEditor( { page } );
 
-		await page
-			.getByRole( 'textbox', { name: 'Add Title' } )
-			.fill( postTitle );
+		await fillPageTitle( page, postTitle );
 
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
+		const canvas = await getCanvas( page );
 
-		await page
+		await canvas
+			.getByRole( 'button', { name: 'Add default block' } )
+			.click();
+
+		await canvas
 			.getByRole( 'document', {
 				name: 'Empty block; start writing or type forward slash to choose a block',
 			} )
