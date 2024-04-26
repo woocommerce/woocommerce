@@ -7,7 +7,6 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { random } = require( '../../utils/helpers' );
 
 const simpleProductName = 'Single Simple Product';
 const simpleProductDesc = 'Lorem ipsum dolor sit amet.';
@@ -26,7 +25,7 @@ let product1Id, product2Id, product3Id;
 baseTest.describe( 'Cart Block page', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Cart Block ${ random() }`,
+		testPageTitlePrefix: 'Cart Block',
 	} );
 
 	test.beforeAll( async ( { baseURL } ) => {

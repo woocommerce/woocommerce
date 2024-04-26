@@ -39,7 +39,7 @@ let productId, orderId, limitedCouponId;
 baseTest.describe( 'Checkout Block Applying Coupons', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Checkout Block ${ random() }`,
+		testPageTitlePrefix: 'Checkout Block',
 		page: async ( { context, page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );

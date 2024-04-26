@@ -7,7 +7,6 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { random } = require( '../../utils/helpers' );
 
 const singleProductPrice1 = '10';
 const singleProductPrice2 = '50';
@@ -20,7 +19,7 @@ let product1Id, product2Id, product3Id;
 baseTest.describe( 'Filter items in the shop by product price', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Products filter ${ random() }`,
+		testPageTitlePrefix: 'Products filter',
 	} );
 
 	test.beforeAll( async ( { baseURL } ) => {

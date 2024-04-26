@@ -7,7 +7,6 @@ const {
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { random } = require( '../../utils/helpers' );
 
 const firstProductName = 'First Product';
 const firstProductPrice = '10.00';
@@ -23,7 +22,7 @@ const shippingCountryPT = 'PT';
 baseTest.describe( 'Cart Block Calculate Shipping', () => {
 	const test = baseTest.extend( {
 		storageState: process.env.ADMINSTATE,
-		testPageTitle: `Cart Block ${ random() }`,
+		testPageTitlePrefix: 'Cart Block',
 		cartBlockPage: async ( { page, testPage }, use ) => {
 			await goToPageEditor( { page } );
 			await fillPageTitle( page, testPage.title );

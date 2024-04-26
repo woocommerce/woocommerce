@@ -1,7 +1,7 @@
 const base = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../test-data/data' );
-const uuid = require( 'uuid' );
+const { random } = require( '../utils/helpers' );
 
 exports.test = base.test.extend( {
 	api: async ( { baseURL }, use ) => {
@@ -45,12 +45,13 @@ exports.test = base.test.extend( {
 		await use( wpApi );
 	},
 
-	testPageTitle: [ `Test page ${ uuid.v1() }`, { option: true } ],
+	testPageTitlePrefix: [ '', { option: true } ],
 
-	testPage: async ( { wpApi, testPageTitle }, use ) => {
-		const pageSlug = testPageTitle.replace( / /gi, '-' ).toLowerCase();
+	testPage: async ( { wpApi, testPageTitlePrefix }, use ) => {
+		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`;
+		const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
 
-		await use( { title: testPageTitle, slug: pageSlug } );
+		await use( { title: pageTitle, slug: pageSlug } );
 
 		// Cleanup
 		const pages = await wpApi.get(
