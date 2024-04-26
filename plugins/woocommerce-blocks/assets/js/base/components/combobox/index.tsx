@@ -117,7 +117,9 @@ const Combobox = ( {
 	] );
 
 	const wrapperClasses = classnames(
-		'wc-block-components-combobox',
+		'components-base-control',
+		'wc-block-components-combobox-control',
+		'components-combobox-control',
 		restOfProps.className || '',
 		{
 			'is-active': value,
@@ -125,58 +127,88 @@ const Combobox = ( {
 		}
 	);
 
+	const comboboxClasses = classnames(
+		'components-combobox-control__input',
+		'components-form-token-field__input'
+	);
+
+	const popoverClasses = classnames(
+		'components-form-token-field__suggestions-list'
+	);
+
+	const suggestionClasses = classnames(
+		'components-form-token-field__suggestion'
+	);
+
+	const labelClasses = classnames( 'components-base-control__label' );
+
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
 	return (
-		<div className={ wrapperClasses } ref={ controlRef }>
-			<AriakitComboboxProvider
-				setValue={ ( val ) => {
-					setSearchTerm( val );
+		<div className="wc-block-components-combobox">
+			<div className={ wrapperClasses } ref={ controlRef }>
+				<AriakitComboboxProvider
+					setValue={ ( val ) => {
+						setSearchTerm( val );
 
-					// Try to match.
-					const normalizedFilterValue = val.toLocaleUpperCase();
+						// Try to match.
+						const normalizedFilterValue = val.toLocaleUpperCase();
 
-					// Try to find an exact match first using values.
-					const foundValue = options.find(
-						( option ) =>
-							option.value.toLocaleUpperCase() ===
-							normalizedFilterValue
-					);
+						// Try to find an exact match first using values.
+						const foundValue = options.find(
+							( option ) =>
+								option.value.toLocaleUpperCase() ===
+								normalizedFilterValue
+						);
 
-					if ( foundValue ) {
-						onChange( foundValue.value );
-						return;
-					}
+						if ( foundValue ) {
+							onChange( foundValue.value );
+							return;
+						}
 
-					// Fallback to a label match.
-					const foundOption = options.find( ( option ) =>
-						option.label
-							.toLocaleUpperCase()
-							.startsWith( normalizedFilterValue )
-					);
+						// Fallback to a label match.
+						const foundOption = options.find( ( option ) =>
+							option.label
+								.toLocaleUpperCase()
+								.startsWith( normalizedFilterValue )
+						);
 
-					if ( foundOption ) {
-						onChange( foundOption.value );
-					}
-				} }
-			>
-				<AriakitComboboxLabel>{ label }</AriakitComboboxLabel>
-				<AriakitCombobox
-					className={ 'wc-block-components-combobox-control' }
-					onChange={ onChange }
-					value={ value || '' }
-					autoComplete={ autoComplete }
-					aria-invalid={ ariaInvalid }
-					aria-errormessage={ validationErrorId }
-				/>
-				<AriakitComboboxPopover>
-					{ matchingSuggestions.map( ( option ) => (
-						<AriakitComboboxItem key={ option.label }>
-							{ option.label }
-						</AriakitComboboxItem>
-					) ) }
-				</AriakitComboboxPopover>
-			</AriakitComboboxProvider>
+						if ( foundOption ) {
+							onChange( foundOption.value );
+						}
+					} }
+				>
+					<div className="components-base-control__field">
+						<AriakitComboboxLabel className={ labelClasses }>
+							{ label }
+						</AriakitComboboxLabel>
+
+						<div className="components-combobox-control__suggestions-container">
+							<AriakitCombobox
+								className={ comboboxClasses }
+								onChange={ onChange }
+								value={ value || '' }
+								autoComplete={ autoComplete }
+								aria-invalid={ ariaInvalid }
+								aria-errormessage={ validationErrorId }
+								type="text"
+							/>
+							<AriakitComboboxPopover
+								className={ popoverClasses }
+							>
+								{ matchingSuggestions.map( ( option ) => (
+									<AriakitComboboxItem
+										className={ suggestionClasses }
+										key={ option.label }
+									>
+										{ option.label }
+									</AriakitComboboxItem>
+								) ) }
+							</AriakitComboboxPopover>
+						</div>
+					</div>
+				</AriakitComboboxProvider>
+			</div>
 			<ValidationInputError propertyName={ errorId } />
 		</div>
 	);
