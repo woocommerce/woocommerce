@@ -14,7 +14,11 @@ import type { FocusEvent } from 'react';
  */
 import { TRACKS_SOURCE } from '../../../constants';
 import { TextControl } from '../../text-control';
-import { validate, type ValidationErrors } from '../utils/validations';
+import {
+	ValidationError,
+	validate,
+	type ValidationErrors,
+} from '../utils/validations';
 import type { Metadata } from '../../../types';
 import type { CreateModalProps } from './types';
 
@@ -25,6 +29,7 @@ const DEFAULT_CUSTOM_FIELD = {
 } satisfies Metadata< string >;
 
 export function CreateModal( {
+	values,
 	onCreate,
 	onCancel,
 	...props
@@ -86,14 +91,20 @@ export function CreateModal( {
 		prop: keyof Metadata< string >
 	) {
 		return function handleBlur( event: FocusEvent< HTMLInputElement > ) {
-			const error = validate( {
-				...customField,
-				[ prop ]: event.target.value,
-			} );
+			const error = validate(
+				{
+					...customField,
+					[ prop ]: event.target.value,
+				},
+				[ ...customFields, ...values ]
+			);
 			const id = String( customField.id );
 			setValidationError( ( current ) => ( {
 				...current,
-				[ id ]: error,
+				[ id ]: {
+					...( current[ id ] as ValidationError ),
+					[ prop ]: error[ prop ],
+				},
 			} ) );
 		};
 	}
@@ -133,7 +144,10 @@ export function CreateModal( {
 	function handleAddButtonClick() {
 		const { errors, hasErrors } = customFields.reduce(
 			( prev, customField ) => {
-				const _errors = validate( customField );
+				const _errors = validate( customField, [
+					...customFields,
+					...values,
+				] );
 				prev.errors[ String( customField.id ) ] = _errors;
 
 				if ( _errors.key ) {
@@ -165,7 +179,10 @@ export function CreateModal( {
 		}
 
 		onCreate(
-			customFields.map( ( { id, ...customField } ) => customField )
+			customFields.map( ( { id, ...customField } ) => ( {
+				key: customField.key.trim(),
+				value: customField.value?.trim(),
+			} ) )
 		);
 
 		recordEvent( 'product_custom_fields_add_new_button_click', {
@@ -188,44 +205,78 @@ export function CreateModal( {
 				props.className
 			) }
 		>
-			<ul className="woocommerce-product-custom-fields__create-modal-list">
-				{ customFields.map( ( customField ) => (
-					<li
-						key={ customField.id }
-						className="woocommerce-product-custom-fields__create-modal-list-item"
-					>
-						<TextControl
-							ref={ getRef( customField, 'key' ) }
-							label={ __( 'Name', 'woocommerce' ) }
-							error={ getValidationError( customField, 'key' ) }
-							value={ customField.key }
-							onChange={ changeHandler( customField, 'key' ) }
-							onBlur={ blurHandler( customField, 'key' ) }
+			<div role="table">
+				<div role="rowgroup">
+					<div role="rowheader">
+						<div role="columnheader">
+							{ __( 'Name', 'woocommerce' ) }
+						</div>
+						<div role="columnheader">
+							{ __( 'Value', 'woocommerce' ) }
+						</div>
+						<div
+							role="columnheader"
+							aria-label={ __( 'Actions', 'woocommerce' ) }
 						/>
-
-						<TextControl
-							ref={ getRef( customField, 'value' ) }
-							label={ __( 'Value', 'woocommerce' ) }
-							error={ getValidationError( customField, 'value' ) }
-							value={ customField.value }
-							onChange={ changeHandler( customField, 'value' ) }
-							onBlur={ blurHandler( customField, 'value' ) }
-						/>
-
-						<Button
-							icon={ closeSmall }
-							disabled={ customFields.length <= 1 }
-							aria-label={ __(
-								'Remove custom field',
-								'woocommerce'
-							) }
-							onClick={ removeCustomFieldButtonClickHandler(
-								customField
-							) }
-						/>
-					</li>
-				) ) }
-			</ul>
+					</div>
+				</div>
+				<div role="rowgroup">
+					{ customFields.map( ( customField ) => (
+						<div key={ customField.id } role="row">
+							<div role="cell">
+								<TextControl
+									ref={ getRef( customField, 'key' ) }
+									label={ '' }
+									aria-label={ __( 'Name', 'woocommerce' ) }
+									error={ getValidationError(
+										customField,
+										'key'
+									) }
+									value={ customField.key }
+									onChange={ changeHandler(
+										customField,
+										'key'
+									) }
+									onBlur={ blurHandler( customField, 'key' ) }
+								/>
+							</div>
+							<div role="cell">
+								<TextControl
+									ref={ getRef( customField, 'value' ) }
+									label={ '' }
+									aria-label={ __( 'Value', 'woocommerce' ) }
+									error={ getValidationError(
+										customField,
+										'value'
+									) }
+									value={ customField.value }
+									onChange={ changeHandler(
+										customField,
+										'value'
+									) }
+									onBlur={ blurHandler(
+										customField,
+										'value'
+									) }
+								/>
+							</div>
+							<div role="cell">
+								<Button
+									icon={ closeSmall }
+									disabled={ customFields.length <= 1 }
+									aria-label={ __(
+										'Remove custom field',
+										'woocommerce'
+									) }
+									onClick={ removeCustomFieldButtonClickHandler(
+										customField
+									) }
+								/>
+							</div>
+						</div>
+					) ) }
+				</div>
+			</div>
 
 			<div className="woocommerce-product-custom-fields__create-modal-add-another">
 				<Button

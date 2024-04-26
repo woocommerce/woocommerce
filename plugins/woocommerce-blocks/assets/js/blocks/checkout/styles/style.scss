@@ -11,6 +11,17 @@
 	}
 }
 
+.is-large {
+	.wp-block-woocommerce-checkout-order-summary-block {
+		border: 1px solid $universal-border-light;
+		border-radius: 5px;
+
+		.wc-block-components-totals-wrapper:first-of-type {
+			border-top: 0;
+		}
+	}
+}
+
 .wp-block-woocommerce-checkout.is-loading {
 	display: flex;
 	flex-wrap: wrap;
@@ -101,7 +112,8 @@
 
 // For Twenty Twenty we need to increase specificity a bit more.
 .theme-twentytwenty .wp-block-woocommerce-checkout.is-loading {
-	.wp-block-woocommerce-checkout-totals-block .wc-block-components-panel > h2 {
+	.wp-block-woocommerce-checkout-totals-block
+	.wc-block-components-panel > h2 {
 		@include font-size(large);
 		@include reset-box();
 	}

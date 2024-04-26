@@ -22,7 +22,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Rating Filter Block', async () => {
+test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,

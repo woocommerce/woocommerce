@@ -211,23 +211,29 @@ class Controller extends ReportsController implements ExportableInterface {
 					'readonly'    => true,
 				),
 				'extended_info'    => array(
-					'products' => array(
+					'products'    => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order product IDs, names, quantities.', 'woocommerce' ),
 					),
-					'coupons'  => array(
+					'coupons'     => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'List of order coupons.', 'woocommerce' ),
 					),
-					'customer' => array(
+					'customer'    => array(
 						'type'        => 'object',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Order customer information.', 'woocommerce' ),
+					),
+					'attribution' => array(
+						'type'        => 'object',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Order attribution information.', 'woocommerce' ),
 					),
 				),
 			),
@@ -526,6 +532,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'num_items_sold'  => __( 'Items sold', 'woocommerce' ),
 			'coupons'         => __( 'Coupon(s)', 'woocommerce' ),
 			'net_total'       => __( 'N. Revenue', 'woocommerce' ),
+			'attribution'     => __( 'Attribution', 'woocommerce' ),
 		);
 
 		/**
@@ -558,6 +565,7 @@ class Controller extends ReportsController implements ExportableInterface {
 			'num_items_sold'  => $item['num_items_sold'],
 			'coupons'         => isset( $item['extended_info']['coupons'] ) ? $this->get_coupons( $item['extended_info']['coupons'] ) : null,
 			'net_total'       => $item['net_total'],
+			'attribution'     => $item['extended_info']['attribution']['origin'],
 		);
 
 		/**

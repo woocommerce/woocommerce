@@ -93,7 +93,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 		const fontPickers = assembler.locator(
 			'.woocommerce-customize-store_global-styles-variations_item'
 		);
-		await expect( fontPickers ).toHaveCount( 8 );
+		await expect( fontPickers ).toHaveCount( 2 );
 	} );
 
 	test( 'Picking a font should trigger an update of fonts on the site preview', async ( {
@@ -154,47 +154,6 @@ test.describe( 'Assembler -> Font Picker', () => {
 		await expect( fontPicker ).toHaveClass( /is-active/ );
 	} );
 
-	test( 'Picking a font should activate the save button', async ( {
-		pageObject,
-	} ) => {
-		const assembler = await pageObject.getAssembler();
-		const fontPicker = assembler.locator(
-			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
-		);
-
-		await fontPicker.first().click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		await expect( saveButton ).toBeEnabled();
-	} );
-
-	test( 'The Done button should be visible after clicking save', async ( {
-		pageObject,
-		page,
-	} ) => {
-		const assembler = await pageObject.getAssembler();
-		const fontPicker = assembler.locator(
-			'.woocommerce-customize-store_global-styles-variations_item:not(.is-active)'
-		);
-
-		await fontPicker.first().click();
-
-		const saveButton = assembler.getByText( 'Save' );
-
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/global-styles' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
-	} );
-
 	test( 'Selected font palette should be applied on the frontend', async ( {
 		pageObject,
 		page,
@@ -208,13 +167,15 @@ test.describe( 'Assembler -> Font Picker', () => {
 			)
 			.last();
 
-		await fontPicker.first().click();
+		await fontPicker.click();
 
 		const [ primaryFont, secondaryFont ] = (
 			await fontPicker.getAttribute( 'aria-label' )
 		 )
 			.split( '+' )
 			.map( ( e ) => e.trim() );
+
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
@@ -240,7 +201,7 @@ test.describe( 'Assembler -> Font Picker', () => {
 			secondaryFont.includes( slugFontMap[ font ] )
 		);
 
-		expect( isPrimaryFontUsed ).toBe( false );
-		expect( isSecondaryFontUsed ).toBe( false );
+		expect( isPrimaryFontUsed ).toBe( true );
+		expect( isSecondaryFontUsed ).toBe( true );
 	} );
 } );

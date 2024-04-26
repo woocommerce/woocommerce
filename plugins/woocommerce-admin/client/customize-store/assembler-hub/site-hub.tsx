@@ -21,7 +21,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { forwardRef } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
-import { getNewPath } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
@@ -87,7 +87,11 @@ export const SiteHub = forwardRef(
 							) }
 						>
 							<Link
-								href={ getNewPath( {}, '/', {} ) }
+								href={ getNewPath(
+									getPersistedQuery(),
+									'/',
+									{}
+								) }
 								type="wp-admin"
 							>
 								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />

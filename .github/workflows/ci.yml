@@ -1,388 +1,389 @@
 name: 'CI'
 on:
-  pull_request:
-  push:
-    branches:
-      - 'trunk'
-      - 'release/*'
+    pull_request:
+    push:
+        branches:
+            - 'trunk'
+            - 'release/*'
 concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: true
+    group: '${{ github.workflow }}-${{ github.ref }}'
+    cancel-in-progress: true
 
 jobs:
-  project-jobs:
-    # Since this is a monorepo, not every pull request or change is going to impact every project.
-    # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
-    # which projects have changed and what kind of change occurred. This lets us build the
-    # matrices that we can use to run CI tasks only on the projects that need them.
-    name: 'Build Project Jobs'
-    runs-on: 'ubuntu-20.04'
-    outputs:
-      lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
-      default-test-jobs: ${{ steps.project-jobs.outputs.default-test-jobs }}
-      e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
-      api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
-      performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-        with:
-          fetch-depth: 0
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        with:
-          php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
-      - uses: actions/github-script@v6
-        name: 'Build Matrix'
-        id: 'project-jobs'
-        with:
-          script: |
-            let baseRef = ${{ toJson( github.base_ref ) }};
-            if ( baseRef ) {
-              baseRef = `--base-ref origin/${ baseRef }`;
-            }
-            const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
+    project-jobs:
+        # Since this is a monorepo, not every pull request or change is going to impact every project.
+        # Instead of running CI tasks on all projects indiscriminately, we use a command to detect
+        # which projects have changed and what kind of change occurred. This lets us build the
+        # matrices that we can use to run CI tasks only on the projects that need them.
+        name: 'Build Project Jobs'
+        runs-on: 'ubuntu-20.04'
+        outputs:
+            lint-jobs: ${{ steps.project-jobs.outputs.lint-jobs }}
+            default-test-jobs: ${{ steps.project-jobs.outputs.default-test-jobs }}
+            e2e-test-jobs: ${{ steps.project-jobs.outputs.e2e-test-jobs }}
+            api-test-jobs: ${{ steps.project-jobs.outputs.api-test-jobs }}
+            performance-test-jobs: ${{ steps.project-jobs.outputs.performance-test-jobs }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              with:
+                  fetch-depth: 0
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              with:
+                  php-version: false # We don't want to waste time installing PHP since we aren't using it in this job.
+            - uses: actions/github-script@v7
+              name: 'Build Matrix'
+              id: 'project-jobs'
+              with:
+                  script: |
+                      let baseRef = ${{ toJson( github.base_ref ) }};
+                      if ( baseRef ) {
+                        baseRef = `--base-ref origin/${ baseRef }`;
+                      }
+                      const child_process = require( 'node:child_process' );
+                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
 
-  project-lint-jobs:
-    name: 'Lint - ${{ matrix.projectName }}'
-    runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-        with:
-          fetch-depth: 0
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        id: 'setup-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
-      - name: 'Lint'
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+    project-lint-jobs:
+        name: 'Lint - ${{ matrix.projectName }}'
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.lint-jobs != '[]' }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.lint-jobs ) }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+              with:
+                  fetch-depth: 0
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
+            - name: 'Lint'
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-  project-default-test-jobs:
-    name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
-    runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.default-test-jobs ) }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        id: 'setup-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
-      - name: 'Prepare Test Environment'
-        id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        env: ${{ matrix.testEnv.envVars }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
-      - name: 'Test'
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-  
-  project-e2e-test-jobs:
-    name: 'E2E - ${{ matrix.name }}'
-    runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.e2e-test-jobs ) }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
+    project-default-test-jobs:
+        name: 'Test - ${{ matrix.projectName }} - ${{ matrix.name }}'
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.default-test-jobs != '[]' }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.default-test-jobs ) }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
+            - name: 'Prepare Test Environment'
+              id: 'prepare-test-environment'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              env: ${{ matrix.testEnv.envVars }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+            - name: 'Test'
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        id: 'setup-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
+    project-e2e-test-jobs:
+        name: 'E2E - ${{ matrix.name }}'
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.e2e-test-jobs != '[]' }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.e2e-test-jobs ) }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
 
-      - name: 'Prepare Test Environment'
-        id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
 
-      - name: 'Run tests'
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+            - name: 'Prepare Test Environment'
+              id: 'prepare-test-environment'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
-      - name: 'Upload artifacts'
+            - name: 'Run tests'
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+
+            - name: 'Upload artifacts'
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+                  path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
+                  retention-days: 1
+                  compression-level: 9
+
+    project-api-test-jobs:
+        name: 'API - ${{ matrix.name }}'
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.api-test-jobs ) }}
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
+
+            - name: 'Prepare Test Environment'
+              id: 'prepare-test-environment'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+
+            - name: 'Run tests'
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+
+            - name: 'Upload artifacts'
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: all-blob-api-reports-${{ matrix.shardNumber }}
+                  path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
+                  retention-days: 1
+                  compression-level: 9
+
+    project-performance-test-jobs:
+        name: 'Performance - ${{ matrix.name }}'
+        runs-on: 'ubuntu-20.04'
+        needs: 'project-jobs'
+        if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
+        env:
+            WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
+
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Setup Monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '${{ matrix.projectName }}...'
+                  build: '${{ matrix.projectName }}'
+
+            - name: 'Prepare Test Environment'
+              id: 'prepare-test-environment'
+              if: ${{ matrix.testEnv.shouldCreate }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+
+            - name: 'Run tests'
+              env:
+                  CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }}
+              run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+
+            - name: 'Archive metrics results'
+              if: ${{ success() && matrix.name == 'Metrics' }}
+              uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+              with:
+                  name: metrics-results
+                  path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
+
+    evaluate-project-jobs:
+        # In order to add a required status check we need a consistent job that we can grab onto.
+        # Since we are dynamically generating a matrix for the project jobs, however, we can't
+        # rely on any specific job being present. We can get around this limitation by
+        # using a job that runs after all the others and either passes or fails based
+        # on the results of the other jobs in the workflow.
+        name: 'Evaluate Project Job Statuses'
+        runs-on: 'ubuntu-20.04'
+        needs:
+            [
+                'project-jobs',
+                'project-lint-jobs',
+                'project-default-test-jobs',
+                'project-e2e-test-jobs',
+                'project-api-test-jobs',
+            ]
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-blob-e2e-reports-${{ matrix.shardNumber }}
-          path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
-          retention-days: 1
-          compression-level: 9
-          
-  project-api-test-jobs:
-    name: 'API - ${{ matrix.name }}'
-    runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.api-test-jobs != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.api-test-jobs ) }}
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
+        steps:
+            - name: 'Evaluation'
+              run: |
+                  result="${{ needs.project-jobs.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "An error occurred generating the CI jobs."
+                    exit 1
+                  fi
+                  result="${{ needs.project-lint-jobs.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "One or more lint jobs have failed."
+                    exit 1
+                  fi
+                  result="${{ needs.project-default-test-jobs.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "One or more test jobs have failed."
+                    exit 1
+                  fi
+                  result="${{ needs.project-e2e-test-jobs.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "One or more e2e test jobs have failed."
+                    exit 1
+                  fi
+                  result="${{ needs.project-api-test-jobs.result }}"
+                  if [[ $result != "success" && $result != "skipped" ]]; then
+                    echo "One or more api test jobs have failed."
+                    exit 1
+                  fi
+                  echo "All jobs have completed successfully."
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        id: 'setup-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
+    e2e-test-reports:
+        name: 'Report e2e tests results'
+        needs: [project-e2e-test-jobs]
+        if: ${{ ! cancelled() && needs.project-e2e-test-jobs.result != 'skipped' }}
+        runs-on: ubuntu-latest
 
-      - name: 'Prepare Test Environment'
-        id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: 'Run tests'
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
+            - name: 'Install Allure CLI'
+              env:
+                  DESTINATION_PATH: ../
+              run: ./.github/workflows/scripts/install-allure.sh
 
-      - name: 'Upload artifacts'
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-blob-api-reports-${{ matrix.shardNumber }}
-          path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
-          retention-days: 1
-          compression-level: 9
-          
-  project-performance-test-jobs:
-    name: 'Performance - ${{ matrix.name }}'
-    runs-on: 'ubuntu-20.04'
-    needs: 'project-jobs'
-    if: ${{ needs.project-jobs.outputs.performance-test-jobs != '[]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJSON( needs.project-jobs.outputs.performance-test-jobs ) }}
-    env: 
-      WP_ARTIFACTS_PATH: ${{ github.workspace }}/artifacts
-    
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
+            - name: 'Download blob reports from artifacts'
+              uses: actions/download-artifact@v4
+              with:
+                  path: ./out
+                  pattern: all-blob-e2e-reports-*
+                  run-id: project-e2e-test-jobs
+                  merge-multiple: true
 
-      - uses: './.github/actions/setup-woocommerce-monorepo'
-        name: 'Setup Monorepo'
-        id: 'setup-monorepo'
-        with:
-          install: '${{ matrix.projectName }}...'
-          build: '${{ matrix.projectName }}'
+            - name: 'Generate Allure report'
+              id: generate_allure_report
+              run: allure generate --clean ./out/allure-results --output ./out/allure-report
 
-      - name: 'Prepare Test Environment'
-        id: 'prepare-test-environment'
-        if: ${{ matrix.testEnv.shouldCreate }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
+            - name: 'Archive reports'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: e2e-test-report
+                  path: ./out
+                  if-no-files-found: ignore
+                  retention-days: 5
 
-      - name: 'Run tests'
-        env:
-          CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }}
-        run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
-        
-      - name: 'Archive metrics results'
-        if: ${{ success() && matrix.name == 'Metrics' }}
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
-        with:
-          name: metrics-results
-          path: ${{ env.WP_ARTIFACTS_PATH }}/*.performance-results*.json
-  
-  evaluate-project-jobs:
-    # In order to add a required status check we need a consistent job that we can grab onto.
-    # Since we are dynamically generating a matrix for the project jobs, however, we can't
-    # rely on any specific job being present. We can get around this limitation by
-    # using a job that runs after all the others and either passes or fails based
-    # on the results of the other jobs in the workflow.
-    name: 'Evaluate Project Job Statuses'
-    runs-on: 'ubuntu-20.04'
-    needs: [
-      'project-jobs',
-      'project-lint-jobs',
-      'project-default-test-jobs',
-      'project-e2e-test-jobs',
-      'project-api-test-jobs'
-    ]
-    if: ${{ always() }}
-    steps:
-      - name: 'Evaluation'
-        run: |
-          result="${{ needs.project-jobs.result }}"
-          if [[ $result != "success" && $result != "skipped" ]]; then
-            echo "An error occurred generating the CI jobs."
-            exit 1
-          fi
-          result="${{ needs.project-lint-jobs.result }}"
-          if [[ $result != "success" && $result != "skipped" ]]; then
-            echo "One or more lint jobs have failed."
-            exit 1
-          fi
-          result="${{ needs.project-default-test-jobs.result }}"
-          if [[ $result != "success" && $result != "skipped" ]]; then
-            echo "One or more test jobs have failed."
-            exit 1
-          fi
-          result="${{ needs.project-e2e-test-jobs.result }}"
-          if [[ $result != "success" && $result != "skipped" ]]; then
-            echo "One or more e2e test jobs have failed."
-            exit 1
-          fi
-          result="${{ needs.project-api-test-jobs.result }}"
-          if [[ $result != "success" && $result != "skipped" ]]; then
-            echo "One or more api test jobs have failed."
-            exit 1
-          fi
-          echo "All jobs have completed successfully."
+            - name: 'Send workflow dispatch'
+              env:
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  RUN_ID: ${{ github.run_id }}
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
+                    gh workflow run publish-test-reports-pr.yml \
+                      -f run_id=$RUN_ID \
+                      -f e2e_artifact=e2e-test-report \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f s3_root=public \
+                      --repo woocommerce/woocommerce-test-reports
+                  else
+                    gh workflow run publish-test-reports-trunk-merge.yml \
+                      -f run_id=$RUN_ID \
+                      -f artifact=e2e-test-report \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f test_type="e2e" \
+                      --repo woocommerce/woocommerce-test-reports
+                  fi
 
-  e2e-test-reports:
-    name: 'Report e2e tests results'
-    needs: [ project-e2e-test-jobs ]
-    if: ${{ ! cancelled() && needs.project-e2e-test-jobs.result != 'skipped' }}
-    runs-on: ubuntu-latest
+            - name: 'Send Slack notification'
+              if: github.event_name != 'pull_request'
+              uses: automattic/action-test-results-to-slack@v0.3.0
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
+                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+                  playwright_report_path: ./out/test-results-*.json
+                  playwright_output_dir: ./out/results-data
 
-    steps:
-      - uses: actions/checkout@v4
+    api-test-reports:
+        name: 'Report API tests results'
+        needs: [project-api-test-jobs]
+        if: ${{ ! cancelled() && needs.project-api-test-jobs.result != 'skipped'}}
+        runs-on: ubuntu-latest
 
-      - name: 'Install Allure CLI'
-        env:
-          DESTINATION_PATH: ../
-        run: ./.github/workflows/scripts/install-allure.sh
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: 'Download blob reports from artifacts'
-        uses: actions/download-artifact@v4
-        with:
-          path: ./out
-          pattern: all-blob-e2e-reports-*
-          run-id: project-e2e-test-jobs
-          merge-multiple: true
+            - name: 'Install Allure CLI'
+              env:
+                  DESTINATION_PATH: ../
+              run: ./.github/workflows/scripts/install-allure.sh
 
-      - name: 'Generate Allure report'
-        id: generate_allure_report
-        run: allure generate --clean ./out/allure-results --output ./out/allure-report
+            - name: 'Download blob reports from artifacts'
+              uses: actions/download-artifact@v4
+              with:
+                  path: ./out/allure-results
+                  pattern: all-blob-api-reports-*
+                  run-id: project-api-test-jobs
+                  merge-multiple: true
 
-      - name: 'Archive reports'
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-test-report
-          path: ./out
-          if-no-files-found: ignore
-          retention-days: 5
-          
-      - name: 'Send workflow dispatch'
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
-            gh workflow run publish-test-reports-pr.yml \
-              -f run_id=$RUN_ID \
-              -f e2e_artifact=e2e-test-report \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f s3_root=public \
-              --repo woocommerce/woocommerce-test-reports
-          else
-            gh workflow run publish-test-reports-trunk-merge.yml \
-              -f run_id=$RUN_ID \
-              -f artifact=e2e-test-report \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f test_type="e2e" \
-              --repo woocommerce/woocommerce-test-reports
-          fi
-          
-      - name: 'Send Slack notification'
-        if: github.event_name != 'pull_request'
-        uses: automattic/action-test-results-to-slack@v0.3.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-          slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
-          playwright_report_path: ./out/test-results-*.json
-          playwright_output_dir: ./out/results-data
+            - name: 'Generate Allure report'
+              id: generate_allure_report
+              run: allure generate --clean ./out/allure-results --output ./out/allure-report
 
-  api-test-reports:
-    name: 'Report API tests results'
-    needs: [ project-api-test-jobs ]
-    if: ${{ ! cancelled() && needs.project-api-test-jobs.result != 'skipped'}}
-    runs-on: ubuntu-latest
+            - name: 'Archive reports'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: api-test-report
+                  path: ./out
+                  if-no-files-found: ignore
+                  retention-days: 5
 
-    steps:
-      - uses: actions/checkout@v4
+            - name: 'Publish reports'
+              env:
+                  GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  RUN_ID: ${{ github.run_id }}
+              run: |
+                  if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
+                    gh workflow run publish-test-reports-pr.yml \
+                      -f run_id=$RUN_ID \
+                      -f api_artifact=api-test-report \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f s3_root=public \
+                      --repo woocommerce/woocommerce-test-reports
+                  else
+                    gh workflow run publish-test-reports-trunk-merge.yml \
+                      -f run_id=$RUN_ID \
+                      -f artifact=api-test-report \
+                      -f pr_number=$PR_NUMBER \
+                      -f commit_sha=$GITHUB_SHA \
+                      -f test_type="api" \
+                      --repo woocommerce/woocommerce-test-reports
+                  fi
 
-      - name: 'Install Allure CLI'
-        env:
-          DESTINATION_PATH: ../
-        run: ./.github/workflows/scripts/install-allure.sh
-
-      - name: 'Download blob reports from artifacts'
-        uses: actions/download-artifact@v4
-        with:
-          path: ./out/allure-results
-          pattern: all-blob-api-reports-*
-          run-id: project-api-test-jobs
-          merge-multiple: true
-
-      - name: 'Generate Allure report'
-        id: generate_allure_report
-        run: allure generate --clean ./out/allure-results --output ./out/allure-report
-
-      - name: 'Archive reports'
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-test-report
-          path: ./out
-          if-no-files-found: ignore
-          retention-days: 5
-          
-      - name: 'Publish reports'
-        env:
-          GITHUB_TOKEN: ${{ secrets.REPORTS_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          if [ "$GITHUB_EVENT_NAME" == pull_request ]; then
-            gh workflow run publish-test-reports-pr.yml \
-              -f run_id=$RUN_ID \
-              -f api_artifact=api-test-report \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f s3_root=public \
-              --repo woocommerce/woocommerce-test-reports
-          else
-            gh workflow run publish-test-reports-trunk-merge.yml \
-              -f run_id=$RUN_ID \
-              -f artifact=api-test-report \
-              -f pr_number=$PR_NUMBER \
-              -f commit_sha=$GITHUB_SHA \
-              -f test_type="api" \
-              --repo woocommerce/woocommerce-test-reports
-          fi
-          
-      - name: 'Send Slack notification'
-        if: github.event_name != 'pull_request'
-        uses: automattic/action-test-results-to-slack@v0.3.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
-          slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}
+            - name: 'Send Slack notification'
+              if: github.event_name != 'pull_request'
+              uses: automattic/action-test-results-to-slack@v0.3.0
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  slack_token: ${{ secrets.E2E_SLACK_TOKEN }}
+                  slack_channel: ${{ secrets.E2E_TRUNK_SLACK_CHANNEL }}

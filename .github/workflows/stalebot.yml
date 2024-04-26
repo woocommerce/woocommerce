@@ -1,32 +1,45 @@
 name: 'Process stale needs-feedback issues'
 on:
-  schedule:
-    - cron: '21 0 * * *'
+    schedule:
+        - cron: '21 0 * * *'
 
 permissions: {}
 
 jobs:
-  stale:
-    runs-on: ubuntu-20.04
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-    steps:
-      - name: Scan issues
-        uses: actions/stale@v8
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
-          close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
-          operations-per-run: 140
-          days-before-stale: -1
-          days-before-close: -1
-          days-before-issue-stale: 7
-          days-before-issue-close: 7
-          stale-issue-label: 'status: stale'
-          stale-pr-label: 'status: stale'
-          exempt-issue-labels: 'type: enhancement'
-          only-issue-labels: 'needs: author feedback'
-          close-issue-label: "status: can't reproduce"
-          ascending: true
+    stale:
+        runs-on: ubuntu-20.04
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        steps:
+            - name: Scan issues
+              uses: actions/stale@v9.0.0
+              with:
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  stale-issue-message: "As a part of this repository's maintenance, this issue is being marked as stale due to inactivity. Please feel free to comment on it in case we missed something.\n\n###### After 7 days with no activity this issue will be automatically be closed."
+                  close-issue-message: 'This issue was closed because it has been 14 days with no activity.'
+                  operations-per-run: 140
+                  days-before-stale: -1
+                  days-before-close: -1
+                  days-before-issue-stale: 7
+                  days-before-issue-close: 7
+                  stale-issue-label: 'status: stale'
+                  stale-pr-label: 'status: stale'
+                  exempt-issue-labels: 'type: enhancement'
+                  only-issue-labels: 'needs: author feedback'
+                  close-issue-label: "status: can't reproduce"
+                  ascending: true
+            - name: Close Stale Flaky Test Issues
+              uses: actions/stale@v9.0.0
+              with:
+                  only-labels: 'metric: flaky e2e test, team: Vortex'
+                  days-before-stale: 5
+                  days-before-close: 7
+                  stale-issue-label: 'metric: stale flaky e2e test report'
+                  stale-issue-message: 'This test may have just been a one-time failure. It will be auto-closed if no further activity occurs within the next 2 days.'
+                  close-issue-message: 'Auto-closed due to inactivity. Please re-open if you believe this issue is still valid.'
+                  close-issue-reason: 'not_planned'
+                  remove-stale-when-updated: true
+                  exempt-all-assignees: true
+                  enable-statistics: true
