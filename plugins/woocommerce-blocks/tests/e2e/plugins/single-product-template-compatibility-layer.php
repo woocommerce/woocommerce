@@ -1,8 +1,11 @@
 <?php
 /**
- * Plugin Name: Compatibility Layer Plugin
+ * Plugin Name: WooCommerce Blocks Test Single Product Template Compatibility Layer
  * Description: Adds custom content to the Shop page with Product Collection included
- * @package     WordPress
+ * Plugin URI: https://github.com/woocommerce/woocommerce
+ * Author: WooCommerce
+ *
+ * @package woocommerce-blocks-test-single-product-template-compatibility-layer
  */
 
 add_action(

@@ -10,7 +10,7 @@
 
 ?>
 
-<!-- wp:woocommerce/coming-soon {"color":"#bea0f2","className":"wp-block-woocommerce-background-color"} -->
+<!-- wp:woocommerce/coming-soon {"color":"#bea0f2","storeOnly":false,"className":"wp-block-woocommerce-background-color"} -->
 <div class="wp-block-woocommerce-coming-soon wp-block-woocommerce-background-color"><!-- wp:cover {"customOverlayColor":"#bea0f2","isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","isDark":false,"className":"coming-soon-is-vertically-aligned-center coming-soon-cover","layout":{"type":"default"}} -->
 <div class="wp-block-cover is-light coming-soon-is-vertically-aligned-center coming-soon-cover" style="min-height:100vh"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim" style="background-color:#bea0f2"></span><div class="wp-block-cover__inner-container"><!-- wp:group {"className":"woocommerce-coming-soon-banner-container","layout":{"type":"default"}} -->
 <div class="wp-block-group woocommerce-coming-soon-banner-container"><!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"3px","bottom":"20px"}}},"className":"woocommerce-coming-soon-header","layout":{"type":"constrained"}} -->
