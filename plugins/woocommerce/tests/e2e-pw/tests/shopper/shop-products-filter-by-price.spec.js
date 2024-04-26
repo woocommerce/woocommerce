@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -15,15 +15,13 @@ const singleProductPrice3 = '200';
 
 const simpleProductName = 'AAA Filter Products';
 
-const productsFilteringPageTitle = `Products Filtering ${ uuid.v1() }`;
-const productsFilteringPageSlug = productsFilteringPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 let product1Id, product2Id, product3Id;
 
-test.describe( 'Filter items in the shop by product price', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Filter items in the shop by product price', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitle: `Products filter ${ uuid.v1() }`,
+	} );
 
 	test.beforeAll( async ( { baseURL } ) => {
 		const api = new wcApi( {
@@ -76,19 +74,20 @@ test.describe( 'Filter items in the shop by product price', () => {
 
 	test( 'filter products by prices on the created page', async ( {
 		page,
+		testPage,
 	} ) => {
 		const sortingProductsDropdown = '.wc-block-sort-select__select';
 
 		await goToPageEditor( { page } );
-		await fillPageTitle( page, productsFilteringPageTitle );
+		await fillPageTitle( page, testPage.title );
 		await insertBlockByShortcut( page, '/filter' );
 		await insertBlock( page, 'All Products' );
-		await publishPage( page, productsFilteringPageTitle );
+		await publishPage( page, testPage.title );
 
 		// go to the page to test filtering products by price
-		await page.goto( productsFilteringPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: productsFilteringPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// The price filter input is initially enabled, but it becomes disabled
