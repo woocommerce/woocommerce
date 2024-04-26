@@ -1,11 +1,13 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { customer } = require( '../../test-data/data' );
+const { addAProductToCart } = require( '../../utils/cart' );
+const uuid = require( 'uuid' );
 
-const productName = `Taxed products are awesome ${ Date.now() }`;
+const productName = `Taxed products are awesome ${ uuid.v1() }`;
 const productPrice = '200.00';
 const messyProductPrice = '13.47';
-const secondProductName = `Other products are also awesome ${ Date.now() }`;
+const secondProductName = `Other products are also awesome ${ uuid.v1() }`;
 
 let productId,
 	productId2,
@@ -92,11 +94,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeEach( async ( { page, context } ) => {
 			// Shopping cart is very sensitive to cookies, so be explicit
 			await context.clearCookies();
-
 			// all tests use the first product
-			await page.goto( `/shop/?add-to-cart=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
+			await addAProductToCart( page, productId );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
@@ -378,16 +377,9 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 			// Shopping cart is very sensitive to cookies, so be explicit
 			await context.clearCookies();
 
-			// all tests use the first product
-			await page.goto( `/shop/?add-to-cart=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
-			await page.goto( `/shop/?add-to-cart=${ productId2 }`, {
-				waitUntil: 'networkidle',
-			} );
-			await page.goto( `/shop/?add-to-cart=${ productId2 }`, {
-				waitUntil: 'networkidle',
-			} );
+			await addAProductToCart( page, productId );
+			await addAProductToCart( page, productId2 );
+			await addAProductToCart( page, productId2 );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
@@ -607,11 +599,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeEach( async ( { page, context } ) => {
 			// Shopping cart is very sensitive to cookies, so be explicit
 			await context.clearCookies();
-
 			// all tests use the first product
-			await page.goto( `/shop/?add-to-cart=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
+			await addAProductToCart( page, productId );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
@@ -899,11 +888,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 		test.beforeEach( async ( { page, context } ) => {
 			// Shopping cart is very sensitive to cookies, so be explicit
 			await context.clearCookies();
-
 			// all tests use the first product
-			await page.goto( `/shop/?add-to-cart=${ productId }`, {
-				waitUntil: 'networkidle',
-			} );
+			await addAProductToCart( page, productId );
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
