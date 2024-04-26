@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add woocommerce_order_received_verify_known_shoppers filter to Order Confirmation template
