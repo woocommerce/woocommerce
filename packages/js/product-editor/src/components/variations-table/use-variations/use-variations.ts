@@ -4,7 +4,7 @@
 import {
 	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
 	PartialProductVariation,
-	ProductAttribute,
+	ProductProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -208,7 +208,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 
 	// Filters
 
-	function onFilter( attribute: ProductAttribute ) {
+	function onFilter( attribute: ProductProductAttribute ) {
 		return function handleFilter( options: string[] ) {
 			let isPresent = false;
 
@@ -244,7 +244,7 @@ export function useVariations( { productId }: UseVariationsProps ) {
 		};
 	}
 
-	function getFilters( attribute: ProductAttribute ) {
+	function getFilters( attribute: ProductProductAttribute ) {
 		return (
 			filters.find( ( filter ) => filter.attribute === attribute.slug )
 				?.terms ?? []

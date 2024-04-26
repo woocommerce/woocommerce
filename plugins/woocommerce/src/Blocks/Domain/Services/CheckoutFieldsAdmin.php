@@ -32,7 +32,7 @@ class CheckoutFieldsAdmin {
 		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'admin_address_fields' ), 10, 3 );
 		add_filter( 'woocommerce_admin_billing_fields', array( $this, 'admin_contact_fields' ), 10, 3 );
 		add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'admin_address_fields' ), 10, 3 );
-		add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'admin_additional_fields' ), 10, 3 );
+		add_filter( 'woocommerce_admin_shipping_fields', array( $this, 'admin_order_fields' ), 10, 3 );
 	}
 
 	/**
@@ -125,10 +125,10 @@ class CheckoutFieldsAdmin {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'additional', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'contact', 'other', $context );
 
 		foreach ( $additional_fields as $key => $field ) {
-			$prefixed_key              = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$prefixed_key              = CheckoutFields::get_group_key( 'other' ) . $key;
 			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $prefixed_key );
 		}
 
@@ -143,15 +143,15 @@ class CheckoutFieldsAdmin {
 	 * @param string            $context The context to show the fields for.
 	 * @return array
 	 */
-	public function admin_additional_fields( $fields, $order = null, $context = 'edit' ) {
+	public function admin_order_fields( $fields, $order = null, $context = 'edit' ) {
 		if ( ! $order instanceof \WC_Order ) {
 			return $fields;
 		}
 
-		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'additional', 'additional', $context );
+		$additional_fields = $this->checkout_fields_controller->get_order_additional_fields_with_values( $order, 'order', 'other', $context );
 
 		foreach ( $additional_fields as $key => $field ) {
-			$prefixed_key              = CheckoutFields::get_group_key( 'additional' ) . $key;
+			$prefixed_key              = CheckoutFields::get_group_key( 'other' ) . $key;
 			$additional_fields[ $key ] = $this->format_field_for_meta_box( $field, $prefixed_key );
 		}
 
