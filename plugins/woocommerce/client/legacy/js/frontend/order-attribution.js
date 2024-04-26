@@ -15,14 +15,15 @@
 	/**
 	 * Get the order attribution data.
 	 *
-	 * Returns object full of `null`s if tracking is disabled.
+	 * Returns object full of `null`s if tracking is disabled or if sourcebuster.js is blocked.
 	 *
 	 * @returns {Object} Schema compatible object.
 	 */
 	wc_order_attribution.getAttributionData = function() {
-		const accessor = params.allowTracking ? propertyAccessor : returnNull;
+		const accessor = params.allowTracking && isSbjsAvailable() ? propertyAccessor : returnNull;
+		const getter  = isSbjsAvailable() ? sbjs.get : {};
 		const entries = Object.entries( wc_order_attribution.fields )
-				.map( ( [ key, property ] ) => [ key, accessor( sbjs.get, property ) ] );
+			.map( ( [ key, property ] ) => [ key, accessor( getter, property ) ] );
 		return Object.fromEntries( entries );
 	}
 
@@ -56,6 +57,15 @@
 	}
 
 	/**
+	 * Determin whether sourcebuster.js is available.
+	 *
+	 * @returns {boolean} Whether sourcebuster.js is available.
+	 */
+	function isSbjsAvailable() {
+		return typeof sbjs !== 'undefined';
+	}
+
+	/**
 	 * Initialize sourcebuster & set data, or clear cookies & data.
 	 *
 	 * @param {boolean} allow Whether to allow tracking or disable it.
@@ -65,7 +75,7 @@
 		if ( ! allow ) {
 			// Reset cookies, and clear form data.
 			removeTrackingCookies();
-		} else if ( typeof sbjs === 'undefined' ) {
+		} else if ( ! isSbjsAvailable() ) {
 			return; // Do nothing, as sourcebuster.js is not loaded.
 		} else {
 			// If not done yet, initialize sourcebuster.js which populates `sbjs.get` object.
