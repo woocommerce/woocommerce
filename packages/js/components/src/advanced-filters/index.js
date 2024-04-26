@@ -163,13 +163,11 @@ class AdvancedFilters extends Component {
 	getAvailableFilters() {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( ( f ) => f.key );
-		const allFilterKeys = Object.keys( config.filters );
 
 		// Get filter objects with keys.
-		const allFilters = allFilterKeys.map( ( key ) => ( {
-			key,
-			...config.filters[ key ],
-		} ) );
+		const allFilters = Object.entries( config.filters ).map(
+			( [ key, value ] ) => ( { key, ...value } )
+		);
 
 		// Available filters are those that allow multiple instances or are not already active.
 		const availableFilters = allFilters.filter( ( filter ) => {
