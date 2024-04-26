@@ -1,16 +1,13 @@
 <?php
 /**
- * Plugin Name: Custom Add to Cart Text
+ * Plugin Name: WooCommerce Blocks Test Custom Add to Cart Button Text
  * Description: Modifies the "Add to Cart" button text for WooCommerce products.
- * @package    WordPress
+ * Plugin URI: https://github.com/woocommerce/woocommerce
+ * Author: WooCommerce
+ *
+ * @package woocommerce-blocks-test-custom-add-to-cart-button-text
  */
 
-/**
- * Modifies the "Add to Cart" button text
- *
- *
- * @return string The new text.
- */
 function woocommerce_add_to_cart_button_text_archives() {
 	return 'Buy Now';
 }
