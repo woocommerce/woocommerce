@@ -304,7 +304,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update LYS site visibility settings copies. [#46095](https://github.com/woocommerce/woocommerce/pull/46095)
 * Update - Update lys status badge padding and only show it on WooCommerce home' [#46359](https://github.com/woocommerce/woocommerce/pull/46359)
 * Update - Update the shipping selector to show FREE instead of a zero amount [#46345](https://github.com/woocommerce/woocommerce/pull/46345)
-* Update - Update the WooPayments surfaces to up-to-date designs. [#46873](https://github.com/woocommerce/woocommerce/pull/46873)
 * Update - Update to use template_include instead, handle 404 for restrict store pages only [#46667](https://github.com/woocommerce/woocommerce/pull/46667)
 * Update - Update WC Admin Homescreen header icons [#46353](https://github.com/woocommerce/woocommerce/pull/46353)
 * Update - Update Woo.com references to WooCommerce.com. [#46259](https://github.com/woocommerce/woocommerce/pull/46259)
