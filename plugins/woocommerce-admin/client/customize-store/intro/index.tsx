@@ -240,7 +240,6 @@ const CustomizedThemeBanners = ( {
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
-			activeTheme,
 			themeData,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
@@ -261,8 +260,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
-
-	const isDefaultTheme = activeTheme === 'twentytwentyfour';
 
 	switch ( true ) {
 		case isNetworkOffline:

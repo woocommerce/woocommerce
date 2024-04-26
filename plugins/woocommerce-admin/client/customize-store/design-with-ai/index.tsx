@@ -3,8 +3,9 @@
  */
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useState } from '@wordpress/element';
-import { AnyInterpreter, Sender } from 'xstate';
 import { getNewPath } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
+import { AnyInterpreter, Sender } from 'xstate';
 
 /**
  * Internal dependencies
@@ -28,7 +29,6 @@ import { isAIFlow } from '../guards';
 import { navigateOrParent } from '../utils';
 import { useXStateInspect } from '~/xstate';
 import './entrepreneur-flow';
-import { useSelect } from '@wordpress/data';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
