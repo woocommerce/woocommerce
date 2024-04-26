@@ -287,11 +287,7 @@ describe( 'AttributeInputField', () => {
 			const createProductAttributeMock = jest
 				.fn()
 				.mockImplementation(
-					(
-						newAttribute: Partial<
-							Omit< ProductProductAttribute, 'id' >
-						>
-					) => {
+					( newAttribute: Partial< ProductAttribute > ) => {
 						return Promise.resolve( {
 							name: newAttribute.name,
 							id: 123,
@@ -310,20 +306,20 @@ describe( 'AttributeInputField', () => {
 				/>
 			);
 			queryByText( 'Update Input' )?.click();
-
-			expect( createProductAttributeMock ).toHaveBeenCalledWith(
-				{
-					name: 'Co',
-					generate_slug: true,
-				},
-				{
-					optimisticQueryUpdate: {
-						order_by: 'name',
-					},
-				}
-			);
-
 			queryByText( 'Create "Co"' )?.click();
+			await waitFor( () => {
+				expect( createProductAttributeMock ).toHaveBeenCalledWith(
+					{
+						name: 'Co',
+						generate_slug: true,
+					},
+					{
+						optimisticQueryUpdate: {
+							order_by: 'name',
+						},
+					}
+				);
+			} );
 
 			expect( onChangeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
