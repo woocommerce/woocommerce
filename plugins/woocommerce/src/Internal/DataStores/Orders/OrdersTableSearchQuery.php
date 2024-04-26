@@ -40,7 +40,7 @@ class OrdersTableSearchQuery {
 	 */
 	public function __construct( OrdersTableQuery $query ) {
 		$this->query          = $query;
-		$this->search_term    = urldecode( $query->get( 's' ) );
+		$this->search_term    = urldecode( urlencode( $query->get( 's' ) ) ); // Make sure search data are url encoded.
 		$this->search_filters = $this->sanitize_search_filters( urldecode( $query->get( 'search_filter' ) ) );
 	}
 
