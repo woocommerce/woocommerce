@@ -274,7 +274,12 @@ class BatchProcessingController {
 	 * @throws \Exception If it's not possible to get an instance of the class.
 	 */
 	private function get_processor_instance( string $processor_class_name ) : BatchProcessorInterface {
-		$processor = wc_get_container()->get( $processor_class_name );
+
+		try {
+			$processor = wc_get_container()->get( $processor_class_name );
+		} catch ( \Exception $e) {
+			$processor = null;
+		}
 
 		/**
 		 * Filters the instance of a processor for a given class name.
