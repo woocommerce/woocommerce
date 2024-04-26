@@ -2,6 +2,7 @@ const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../../test-data/data' );
 const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 
 const billingEmail = 'marge-test-account@example.com';
 
@@ -132,8 +133,7 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 	} );
 
 	test( 'can create an account during checkout', async ( { page } ) => {
