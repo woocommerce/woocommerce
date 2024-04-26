@@ -13,7 +13,7 @@ test.describe( 'Single Product template', () => {
 		const testData = {
 			productName: 'Belt',
 			permalink: '/product/belt',
-			templateName: 'Single Product Belt',
+			templateName: 'Product: Belt',
 			templatePath: 'single-product-belt',
 			templateType: 'wp_template',
 		};
