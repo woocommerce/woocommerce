@@ -27,6 +27,10 @@ import {
 import { getProductAttributeObject } from './utils';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+<<<<<<< HEAD
+=======
+import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+>>>>>>> a80661bf90 (rename TS prop name)
 
 type NewAttributeModalProps = {
 	title?: string;
