@@ -8,7 +8,13 @@ import { ProductAttribute, ProductProductAttribute } from '@woocommerce/data';
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
-export type NarrowedQueryAttribute = Pick< ProductAttribute, 'id' | 'name' > & {
+/*
+ * AttributeInputField item props.
+ */
+export type AttributeInputFieldItemProps = Pick<
+	ProductAttribute,
+	'id' | 'name'
+> & {
 	slug?: string;
 	isDisabled?: boolean;
 };
@@ -33,12 +39,12 @@ export type AttributeInputFieldProps = {
 };
 
 export type MenuAttributeListProps = {
-	renderItems: NarrowedQueryAttribute[];
+	renderItems: AttributeInputFieldItemProps[];
 	highlightedIndex: number;
 	disabledAttributeMessage?: string;
 	getItemProps: (
 		options: UseComboboxGetMenuPropsOptions
-	) => getItemPropsType< NarrowedQueryAttribute >;
+	) => getItemPropsType< AttributeInputFieldItemProps >;
 };
 
 export interface GetPropsWithRefKey {

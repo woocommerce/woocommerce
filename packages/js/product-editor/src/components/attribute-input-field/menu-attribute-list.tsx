@@ -12,11 +12,11 @@ import { __experimentalSelectControlMenuItem as MenuItem } from '@woocommerce/co
  */
 import {
 	MenuAttributeListProps,
-	NarrowedQueryAttribute,
+	AttributeInputFieldItemProps,
 	UseComboboxGetMenuPropsOptions,
 } from './types';
 
-function isNewAttributeListItem( attribute: NarrowedQueryAttribute ): boolean {
+function isNewAttributeListItem( attribute: AttributeInputFieldItemProps ): boolean {
 	return attribute.id === -99;
 }
 
