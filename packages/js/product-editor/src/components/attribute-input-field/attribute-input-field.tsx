@@ -134,14 +134,10 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 			selected={ value }
 			onSelect={ ( attribute: AttributeInputFieldItemProps ) => {
 				if ( isNewAttributeListItem( attribute ) ) {
-					addNewAttribute( attribute );
-				} else {
-					onChange( {
-						id: attribute.id,
-						name: attribute.name,
-						slug: attribute.slug as string,
-					} );
+					return addNewAttribute( attribute );
 				}
+
+				onChange( attribute );
 			} }
 			onRemove={ () => onChange() }
 			__experimentalOpenMenuOnFocus
