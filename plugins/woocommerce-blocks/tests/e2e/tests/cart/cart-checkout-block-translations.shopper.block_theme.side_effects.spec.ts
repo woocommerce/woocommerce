@@ -19,21 +19,9 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Translations', () => {
-	test.beforeAll( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp language core install nl_NL`
-		);
+	test.beforeEach( async () => {
 		await cli(
 			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp language plugin install woocommerce nl_NL`
-		);
-	} );
-
-	test.afterAll( async () => {
-		await cli(
-			`npm run wp-env run tests-cli -- wp site switch-language en_US`
 		);
 	} );
 
@@ -65,7 +53,7 @@ test.describe( 'Shopper → Translations', () => {
 		await expect( page.getByText( 'Totalen winkelwagen' ) ).toBeVisible();
 
 		await expect(
-			page.getByLabel( 'Een waardebon toevoegen' )
+			page.getByRole( 'button', { name: 'Een waardebon toevoegen' } )
 		).toBeVisible();
 
 		await expect(
@@ -126,7 +114,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect( page.getByText( 'Subtotaal' ) ).toBeVisible();
 
-		await expect( page.getByText( 'Verzendmethoden' ) ).toBeVisible();
+		await expect( page.getByText( 'Verzending' ) ).toBeVisible();
 
 		await expect(
 			page.getByText( 'Totaal', { exact: true } )

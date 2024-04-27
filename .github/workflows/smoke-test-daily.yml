@@ -11,7 +11,7 @@ env:
     PLUGIN_SLACK_BLOCKS_ARTIFACT: plugin-blocks
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
+    group: '${{ github.workflow }}-${{ github.ref }}'
     cancel-in-progress: true
 
 permissions: {}
@@ -237,13 +237,17 @@ jobs:
                   ./k6 run plugins/woocommerce/tests/performance/tests/gh-action-daily-ext-requests.js
 
     test-plugins:
-        name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed
+        name: E2E tests with ${{ matrix.plugin }} plugin installed
         runs-on: ubuntu-latest
         permissions:
             contents: read
         env:
             ALLURE_RESULTS_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-results
             ALLURE_REPORT_DIR: ${{ github.workspace }}/plugins/woocommerce/tests/e2e-pw/allure-report
+            PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
+            PLUGIN_NAME: ${{ matrix.plugin }}
+            PLUGIN_SLUG: ${{ matrix.slug }}
+            GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
         strategy:
             fail-fast: false
             matrix:
@@ -257,16 +261,12 @@ jobs:
                     - plugin: 'WooCommerce Shipping & Tax'
                       repo: 'automattic/woocommerce-services'
                       slug: woocommerce-services
-                    - plugin: 'Woo Subscriptions'
-                      repo: WC_SUBSCRIPTIONS_REPO
-                      private: true
-                      slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       repo: 'WordPress/gutenberg'
                       slug: gutenberg
                     - plugin: 'Gutenberg - Nightly'
                       repo: 'bph/gutenberg'
-                      slug: gutenberg-nightly
+                      slug: gutenberg
         steps:
             - uses: actions/checkout@v3
 
@@ -280,19 +280,19 @@ jobs:
               uses: ./.github/actions/tests/setup-local-test-environment
               with:
                   test-type: e2e
+                  
+            - name: Setup plugin for the main e2e suite
+              working-directory: ./plugins/woocommerce
+              run: ./tests/e2e-pw/bin/install-plugin.sh
 
             - name: Run 'Upload plugin' test
               id: run-upload-plugin-test
+              if: ${{ failure() }} # only if the plugin setup failed to check if the plugin really cannot be installed
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   report-name: Smoke tests on trunk with ${{ matrix.plugin }} plugin installed (run ${{ github.run_number }})
                   tests: upload-plugin.spec.js
-              env:
-                  PLUGIN_REPOSITORY: ${{ matrix.private && secrets[matrix.repo] || matrix.repo }}
-                  PLUGIN_NAME: ${{ matrix.plugin }}
-                  PLUGIN_SLUG: ${{ matrix.slug }}
-                  GITHUB_TOKEN: ${{ secrets.E2E_GH_TOKEN }}
-
+                  
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
               timeout-minutes: 60
@@ -403,8 +403,6 @@ jobs:
                       slug: woocommerce-paypal-payments
                     - plugin: 'WooCommerce Shipping & Tax'
                       slug: woocommerce-services
-                    - plugin: 'Woo Subscriptions'
-                      slug: woocommerce-subscriptions
                     - plugin: 'Gutenberg'
                       slug: gutenberg
                     - plugin: 'Gutenberg - Nightly'

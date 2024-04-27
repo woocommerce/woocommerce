@@ -313,32 +313,91 @@ describe( 'crud reducer', () => {
 		expect( state.requesting[ requestId ] ).toEqual( false );
 	} );
 
-	it( 'should handle CREATE_ITEM_SUCCESS', () => {
-		const item: Item = {
-			id: 2,
-			name: 'Off the hook!',
-			status: 'draft',
-		};
-		const query = {
-			name: 'Off the hook!',
-			status: 'draft',
-		};
-		const resourceName = getRequestIdentifier(
-			CRUD_ACTIONS.CREATE_ITEM,
-			item.id,
-			query
-		);
+	describe( 'should handle CREATE_ITEM_SUCCESS', () => {
+		it( 'when no options are passed', () => {
+			const item: Item = {
+				id: 2,
+				name: 'Off the hook!',
+				status: 'draft',
+			};
+			const query = {
+				name: 'Off the hook!',
+				status: 'draft',
+			};
 
-		const state = reducer( defaultState, {
-			type: TYPES.CREATE_ITEM_SUCCESS,
-			key: item.id,
-			item,
-			query,
+			const options = {
+				optimisticQueryUpdate: {},
+			};
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+
+			const state = reducer( defaultState, {
+				type: TYPES.CREATE_ITEM_SUCCESS,
+				key: item.id,
+				item,
+				query,
+				options,
+			} );
+
+			expect( state.data[ 2 ].name ).toEqual( item.name );
+			expect( state.data[ 2 ].status ).toEqual( item.status );
+			expect( state.requesting[ resourceName ] ).toEqual( false );
 		} );
 
-		expect( state.data[ 2 ].name ).toEqual( item.name );
-		expect( state.data[ 2 ].status ).toEqual( item.status );
-		expect( state.requesting[ resourceName ] ).toEqual( false );
+		it( 'when optimisticQueryUpdate is {}', () => {
+			const item: Item = {
+				id: 7,
+				name: 'Off the hook!',
+				status: 'draft',
+			};
+			const query = {
+				name: 'Off the hook!',
+				status: 'draft',
+			};
+
+			const options = {
+				optimisticQueryUpdate: {},
+			};
+
+			const state = reducer( defaultState, {
+				type: TYPES.CREATE_ITEM_SUCCESS,
+				key: item.id,
+				item,
+				query,
+				options,
+			} );
+
+			const itemQuery = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			const itemsCountQuery = getRequestIdentifier(
+				CRUD_ACTIONS.GET_ITEMS,
+				options.optimisticQueryUpdate
+			);
+
+			expect( state.data[ 7 ].name ).toEqual( item.name );
+			expect( state.data[ 7 ].status ).toEqual( item.status );
+
+			const resourceName = getRequestIdentifier(
+				CRUD_ACTIONS.CREATE_ITEM,
+				item.id,
+				query
+			);
+			expect( state.requesting[ resourceName ] ).toEqual( false );
+
+			// Items
+			expect( state.items[ itemQuery ].data ).toHaveLength( 1 );
+			expect( state.items[ itemQuery ].data[ 0 ] ).toEqual( item.id );
+
+			// Items Count
+			expect( state.itemsCount[ itemsCountQuery ] ).toEqual( 1 );
+		} );
 	} );
 
 	it( 'should handle DELETE_ITEM_SUCCESS', () => {

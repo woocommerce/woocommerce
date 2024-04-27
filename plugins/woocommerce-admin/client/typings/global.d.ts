@@ -1,10 +1,29 @@
 declare global {
 	interface Window {
+		location: Location;
 		pagenow: string;
 		adminpage: string;
 		wcSettings: {
 			preloadOptions: Record< string, unknown >;
 			adminUrl: string;
+			currentUserId: number;
+			currentThemeIsFSETheme: boolean;
+			admin: {
+				wcpay_welcome_page_connect_nonce: string;
+				currentUserData: {
+					first_name: string;
+				};
+				wcpayWelcomePageIncentive: {
+					id: string;
+					description: string;
+					cta_label: string;
+					tc_url: string;
+				};
+				currency?: {
+					symbol: string;
+				};
+				currentUserId: number;
+			};
 		};
 		wcAdminFeatures: {
 			'activity-panels': boolean;
@@ -39,6 +58,7 @@ declare global {
 			'woo-mobile-welcome': boolean;
 			'shipping-smart-defaults': boolean;
 			'shipping-setting-tour': boolean;
+			'launch-your-store': boolean;
 		};
 		wp: {
 			updates?: {

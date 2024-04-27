@@ -11,6 +11,7 @@ export type ProductTemplate = {
 	icon: string | null;
 	order: number;
 	layoutTemplateId: string;
+	isSelectableByUser: boolean;
 	productData: Partial< Product >;
 };
 

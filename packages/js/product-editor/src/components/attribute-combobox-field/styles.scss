@@ -1,0 +1,61 @@
+.woocommerce-attributes-combobox {
+	position: relative;
+	background-color: white;
+	
+	.components-base-control__field {
+		height: 36px;
+	}
+
+	.components-combobox-control__suggestions-container {
+		position: absolute;
+		padding: 0;
+		background-color: white;
+
+		> .components-flex {
+			height: 32px;
+		}
+	}
+
+	.components-combobox-control__suggestions-container {
+		margin: 0px;
+		padding: 0px;
+		max-height: 128px;
+	}
+
+	.components-form-token-field__suggestion {
+		padding: 0;
+		min-height: 32px;
+		display: flex;
+		align-items: center;
+
+		.item-wrapper {
+			padding: 8px 12px;
+
+			&.is-disabled {
+				background-color: #fafafa;
+				color: #949494;
+				cursor: default;
+			}
+		}
+
+		&.is-selected .item-wrapper .is-disabled {
+			background-color: #fafafa;
+		}
+	}
+}
+
+.woocommerce-attributes-combobox-help {
+	display: flex;
+	align-items: center;
+
+	> svg {
+		fill: #949494;
+	}
+
+	.components-spinner {
+		margin: 0 4px 0 0;
+		padding: 2px;
+		width: 20px;
+		height: 20px;
+	}
+}

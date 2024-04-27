@@ -17,7 +17,6 @@ import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 // @ts-expect-error Missing type in core-data.
 import { __experimentalBlockPatternsList as BlockPatternList } from '@wordpress/block-editor';
-import { recordEvent } from '@woocommerce/tracks';
 // @ts-expect-error Missing type in core-data.
 import { useIsSiteEditorLoading } from '@wordpress/edit-site/build-module/components/layout/hooks';
 
@@ -34,6 +33,7 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { useSelect } from '@wordpress/data';
+import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -95,7 +95,13 @@ export const SidebarNavigationScreenHomepage = () => {
 	}, [ homeTemplates ] );
 
 	useEffect( () => {
-		if ( selectedPattern || ! blocks.length || ! homePatterns.length ) {
+		if (
+			selectedPattern ||
+			! blocks.length ||
+			! homePatterns.length ||
+			isLoading ||
+			isEditorLoading
+		) {
 			return;
 		}
 
@@ -117,7 +123,7 @@ export const SidebarNavigationScreenHomepage = () => {
 
 		setSelectedPattern( currentSelectedPattern );
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when currentSelectedPattern changes
-	}, [ blocks, homePatterns ] );
+	}, [ blocks, homePatterns, isLoading, isEditorLoading ] );
 
 	const { context } = useContext( CustomizeStoreContext );
 	const aiOnline = context.flowType === FlowType.AIOnline;
@@ -142,7 +148,7 @@ export const SidebarNavigationScreenHomepage = () => {
 				EditorLink: (
 					<Link
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_assembler_hub_editor_link_click',
 								{
 									source: 'homepage',

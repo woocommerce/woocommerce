@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Data: sort the items when updating optimistically

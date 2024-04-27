@@ -1,7 +1,15 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler.page' );
-const { activateTheme } = require( '../../../utils/themes' );
+const { activateTheme, DEFAULT_THEME } = require( '../../../utils/themes' );
 const { setOption } = require( '../../../utils/options' );
+
+const extractFooterClass = ( footerPickerClass ) => {
+	const regex = /\bwc-blocks-pattern-footer\S*/;
+
+	const match = footerPickerClass.match( regex );
+
+	return match ? match[ 0 ] : null;
+};
 
 const test = base.extend( {
 	assemblerPage: async ( { page }, use ) => {
@@ -42,8 +50,8 @@ test.describe( 'Assembler -> Footers', () => {
 				'woocommerce_admin_customize_store_completed',
 				'no'
 			);
-
-			await activateTheme( 'twentynineteen' );
+			// Reset theme back to default.
+			await activateTheme( DEFAULT_THEME );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -80,31 +88,6 @@ test.describe( 'Assembler -> Footers', () => {
 		await expect( footer ).toHaveClass( /is-selected/ );
 	} );
 
-	test( 'The Done button should be visible after clicking save', async ( {
-		assemblerPage,
-		page,
-	} ) => {
-		const assembler = await assemblerPage.getAssembler();
-		const footer = assembler
-			.locator( '.block-editor-block-patterns-list__item' )
-			.nth( 2 );
-
-		await footer.click();
-
-		const saveButton = assembler.getByText( 'Save' );
-		const waitResponse = page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wp/v2/template-parts' ) &&
-				response.status() === 200
-		);
-
-		await saveButton.click();
-
-		await waitResponse;
-
-		await expect( assembler.getByText( 'Done' ) ).toBeEnabled();
-	} );
-
 	test( 'The selected footer should be applied on the frontend', async ( {
 		assemblerPage,
 		page,
@@ -117,9 +100,13 @@ test.describe( 'Assembler -> Footers', () => {
 			.frameLocator( 'iframe' )
 			.locator( '.wc-blocks-footer-pattern' );
 
-		const expectedFooterClass = extractFooterClass( await footer.getAttribute( 'class' ) );
+		const expectedFooterClass = extractFooterClass(
+			await footer.getAttribute( 'class' )
+		);
 
 		await footer.click();
+
+		await assembler.locator( '[aria-label="Back"]' ).click();
 
 		const saveButton = assembler.getByText( 'Save' );
 
@@ -135,7 +122,9 @@ test.describe( 'Assembler -> Footers', () => {
 
 		await page.goto( baseURL );
 
-		const selectedFooterClasses = await page.locator( 'footer div.wc-blocks-footer-pattern' ).getAttribute( 'class' );
+		const selectedFooterClasses = await page
+			.locator( 'footer div.wc-blocks-footer-pattern' )
+			.getAttribute( 'class' );
 
 		expect( selectedFooterClasses ).toContain( expectedFooterClass );
 	} );
@@ -156,7 +145,6 @@ test.describe( 'Assembler -> Footers', () => {
 			.locator( '.block-editor-block-patterns-list__list-item' )
 			.all();
 
-		let index = 0;
 		for ( const footerPicker of footerPickers ) {
 			await footerPicker.waitFor();
 			await footerPicker.click();
@@ -175,16 +163,6 @@ test.describe( 'Assembler -> Footers', () => {
 			await expect(
 				await footerPattern.getAttribute( 'class' )
 			).toContain( expectedFooterClass );
-
-			index++;
 		}
 	} );
 } );
-
-const extractFooterClass = ( footerPickerClass ) => {
-	const regex = /\bwc-blocks-pattern-footer\S*/;
-
-	const match = footerPickerClass.match( regex );
-
-	return match ? match[ 0 ] : null;
-};

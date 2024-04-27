@@ -6,6 +6,7 @@
 -   [Internal developers](#internal-developers)
 -   [Third-party developers](#third-party-developers)
 -   [Designers](#designers)
+-   [Block References](#block-references)
 -   [Developer Resources](#developer-resources)
     -   [Tools](#tools)
     -   [Articles](#articles)
@@ -119,6 +120,10 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
     -   [Class names update in 2.8.0](designers/theming/class-names-update-280.md)
     -   [Product grid blocks style update in 2.7.0](designers/theming/product-grid-270.md)
 
+## Block References
+
+- [Block References](block-references/block-references.md)
+
 ## Developer Resources
 
 ### Tools
@@ -127,27 +132,27 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ### Articles
 
-The following posts from [developer.woo.com](https://developer.woo.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
+The following posts from [developer.woo.com](https://developer.woocommerce.com/category/developer-resources/) provide deeper insights into the WooCommerce Blocks development.
 
--   [Store API is now considered stable](https://developer.woo.com/2022/03/25/store-api-is-now-considered-stable/)
--   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woo.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
--   [How The Checkout Block Processes An Order](https://developer.woo.com/2022/10/06/how-the-checkout-block-processes-an-order/)
--   [New @wordpress/data stores in WooCommerce Blocks](https://developer.woo.com/2022/10/17/new-wordpress-data-stores-in-woocommerce-blocks/)
+-   [Store API is now considered stable](https://developer.woocommerce.com/2022/03/25/store-api-is-now-considered-stable/)
+-   [Available Extensibility Interfaces for The Cart and Checkout Blocks](https://developer.woocommerce.com/2021/11/09/available-extensibility-interfaces-for-the-cart-and-checkout-blocks/)
+-   [How The Checkout Block Processes An Order](https://developer.woocommerce.com/2022/10/06/how-the-checkout-block-processes-an-order/)
+-   [New @wordpress/data stores in WooCommerce Blocks](https://developer.woocommerce.com/2022/10/17/new-wordpress-data-stores-in-woocommerce-blocks/)
 
 ### Tutorials
 
-The following tutorials from [developer.woo.com](https://developer.woo.com/category/tutorials/) help you with extending the WooCommerce Blocks plugin.
+The following tutorials from [developer.woo.com](https://developer.woocommerce.com/) help you with extending the WooCommerce Blocks plugin.
 
--   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
--   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woo.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
--   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woo.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
--   [Exposing Payment Options in the Checkout Block](https://developer.woo.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
+-   [📺 Tutorial: Extending the WooCommerce Checkout Block](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/)
+-   [Hiding Shipping and Payment Options in the Cart and Checkout Blocks](https://developer.woocommerce.com/2022/05/20/hiding-shipping-and-payment-options-in-the-cart-and-checkout-blocks/)
+-   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
+-   [Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
 
 <!-- FEEDBACK -->
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/README.md)
 

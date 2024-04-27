@@ -1,27 +1,25 @@
-const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
-const transformedCheckoutBlockTitle = `Transformed Checkout ${ Date.now() }`;
-const transformedCheckoutBlockSlug = transformedCheckoutBlockTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const {
+	goToPageEditor,
+	getCanvas,
+	fillPageTitle,
+	insertBlock,
+	transformIntoBlocks,
+	publishPage,
+} = require( '../../utils/editor' );
 
 const simpleProductName = 'Very Simple Product';
 const singleProductPrice = '999.00';
 
 let productId, shippingZoneId;
 
-test.describe( 'Transform Classic Checkout To Checkout Block', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Transform Classic Checkout To Checkout Block', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Transformed checkout',
+	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// enable COD
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
@@ -49,13 +47,7 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
@@ -72,65 +64,23 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 
 	test( 'can transform classic checkout to checkout block', async ( {
 		page,
-		baseURL,
+		api,
+		testPage,
 	} ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+		await goToPageEditor( { page } );
 
-		// go to create a new page
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
+		await fillPageTitle( page, testPage.title );
+		await insertBlock( page, 'Classic Checkout' );
+		await transformIntoBlocks( page );
 
-		await disableWelcomeModal( { page } );
+		// When Gutenberg is active, the canvas is in an iframe
+		let canvas = await getCanvas( page );
 
-		// fill page title
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( transformedCheckoutBlockTitle );
+		// Activate the terms and conditions checkbox
+		await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
+		await page.getByLabel( 'Require checkbox' ).check();
 
-		// add classic checkout block
-		await page.getByRole( 'textbox', { name: 'Add title' } ).click();
-		await page.getByLabel( 'Add block' ).click();
-		await page
-			.getByPlaceholder( 'Search', { exact: true } )
-			.fill( 'classic checkout' );
-		await page
-			.getByRole( 'option' )
-			.filter( { hasText: 'Classic Checkout' } )
-			.click();
-
-		// transform into blocks
-		await expect(
-			page.locator(
-				'.wp-block-woocommerce-classic-shortcode__placeholder-copy'
-			)
-		).toBeVisible();
-		await page
-			.getByRole( 'button' )
-			.filter( { hasText: 'Transform into blocks' } )
-			.click();
-		await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
-			'Classic shortcode transformed to blocks.'
-		);
-
-		// set terms & conditions and privacy policy as mandatory option
-		await page.locator( '.wc-block-checkout__terms' ).click();
-		await page.getByLabel( 'Require checkbox' ).click();
-
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ transformedCheckoutBlockTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// add additional payment option after page creation
 		await api.put( 'payment_gateways/bacs', {
@@ -138,17 +88,16 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		} );
 		await page.reload();
 
-		// verify that enabled payment options are in the block
+		// Mandatory to wait for the editor content, to ensure the iframe is loaded (if Gutenberg is active)
+		await expect( page.getByLabel( 'Editor content' ) ).toBeVisible();
+
+		// Get the canvas again after the page reload
+		canvas = await getCanvas( page );
+
 		await expect(
-			page.locator(
-				'#radio-control-wc-payment-method-options-bacs__label'
-			)
-		).toContainText( 'Direct bank transfer' );
-		await expect(
-			page.locator(
-				'#radio-control-wc-payment-method-options-cod__label'
-			)
-		).toContainText( 'Cash on delivery' );
+			canvas.getByText( 'Direct bank transfer' )
+		).toBeVisible();
+		await expect( canvas.getByText( 'Cash on delivery' ) ).toBeVisible();
 
 		// add additional shipping methods after page creation
 		await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
@@ -172,9 +121,9 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		// go to frontend to verify transformed checkout block
 		// before that add product to cart to be able to visit checkout page
 		await page.goto( `/cart/?add-to-cart=${ productId }` );
-		await page.goto( transformedCheckoutBlockSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: transformedCheckoutBlockTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			page

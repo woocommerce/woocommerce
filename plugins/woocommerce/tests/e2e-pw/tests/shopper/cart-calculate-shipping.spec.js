@@ -1,3 +1,4 @@
+const { addAProductToCart } = require( '../../utils/cart' );
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -97,10 +98,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 	test.beforeEach( async ( { page, context } ) => {
 		// Shopping cart is very sensitive to cookies, so be explicit
 		await context.clearCookies();
-
-		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, firstProductId );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -194,8 +192,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 	test( 'should show correct total cart price with 2 products and flat rate', async ( {
 		page,
 	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, secondProductId );
 
 		await page.goto( '/cart/' );
 		await page.locator( 'a.shipping-calculator-button' ).click();
@@ -215,8 +212,7 @@ test.describe( 'Cart Calculate Shipping', () => {
 	test( 'should show correct total cart price with 2 products without flat rate', async ( {
 		page,
 	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, secondProductId );
 
 		// Set shipping country to Spain
 		await page.goto( '/cart/' );
