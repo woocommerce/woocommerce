@@ -134,11 +134,9 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				{
 					optimisticQueryUpdate: sortCriteria,
 				}
-			).then(
-				( newAttr ) => {
-					onChange( { ...newAttr } );
-				},
-				( error ) => {
+			)
+				.then( onChange )
+				.catch( ( error ) => {
 					let message = __(
 						'Failed to create new attribute.',
 						'woocommerce'
@@ -150,8 +148,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 					createErrorNotice( message, {
 						explicitDismiss: true,
 					} );
-				}
-			);
+				} );
 		} else {
 			onChange( attribute.name );
 		}

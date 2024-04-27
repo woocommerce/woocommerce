@@ -234,7 +234,6 @@ describe( 'AttributeInputField', () => {
 			id: attributeList[ 0 ].id,
 			name: attributeList[ 0 ].name,
 			slug: attributeList[ 0 ].slug,
-			options: [],
 		} );
 	} );
 
@@ -325,7 +324,6 @@ describe( 'AttributeInputField', () => {
 				name: 'Co',
 				slug: 'co',
 				id: 123,
-				options: [],
 			} );
 		} );
 
