@@ -35,11 +35,13 @@ class PatternsHelper {
 	 * @return \WP_Post|null
 	 */
 	public static function get_patterns_ai_data_post() {
-		$posts = get_posts( array(
-			'post_type'      => 'patterns_ai_data',
-			'posts_per_page' => 1,
-			'cache_results'  => true,
-		) );
+		$posts = get_posts(
+			array(
+				'post_type'      => 'patterns_ai_data',
+				'posts_per_page' => 1,
+				'cache_results'  => true,
+			)
+		);
 
 		return $posts[0] ?? null;
 	}
