@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductAttribute, ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -21,14 +21,7 @@ export type AttributeInputFieldItemProps = Pick<
 
 export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
-	onChange: (
-		value?:
-			| Omit<
-					ProductProductAttribute,
-					'position' | 'visible' | 'variation'
-			  >
-			| string
-	) => void;
+	onChange: ( value?: AttributeInputFieldItemProps | string ) => void;
 	label?: string;
 	placeholder?: string;
 	disabled?: boolean;

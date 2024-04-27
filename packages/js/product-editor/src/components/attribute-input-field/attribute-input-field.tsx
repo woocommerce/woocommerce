@@ -136,7 +136,7 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 				}
 			).then(
 				( newAttr ) => {
-					onChange( { ...newAttr, options: [] } );
+					onChange( { ...newAttr } );
 				},
 				( error ) => {
 					let message = __(
@@ -176,7 +176,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 						id: attribute.id,
 						name: attribute.name,
 						slug: attribute.slug as string,
-						options: [],
 					} );
 				}
 			} }
