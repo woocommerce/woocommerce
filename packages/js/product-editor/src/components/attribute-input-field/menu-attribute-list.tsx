@@ -16,9 +16,13 @@ import type {
 	UseComboboxGetMenuPropsOptions,
 } from './types';
 
+<<<<<<< HEAD
 function isNewAttributeListItem(
 	attribute: AttributeInputFieldItemProps
 ): boolean {
+=======
+function isNewAttributeListItem( attribute: AttributeInputFieldItemProps ): boolean {
+>>>>>>> a80661bf90 (rename TS prop name)
 	return attribute.id === -99;
 }
 
