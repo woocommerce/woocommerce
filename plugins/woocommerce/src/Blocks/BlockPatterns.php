@@ -95,43 +95,11 @@ class BlockPatterns {
 			return;
 		}
 
-		register_post_type(
-			self::PATTERNS_AI_DATA_POST_TYPE,
-			array(
-				'labels'           => array(
-					'name'          => __( 'Patterns AI Data', 'woocommerce' ),
-					'singular_name' => __( 'Patterns AI Data', 'woocommerce' ),
-				),
-				'public'           => false,
-				'hierarchical'     => false,
-				'rewrite'          => false,
-				'query_var'        => false,
-				'delete_with_user' => false,
-				'can_export'       => true,
-			)
-		);
-
 		$patterns     = wp_safe_remote_get( 'https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wordpress.com' );
 		$body         = wp_remote_retrieve_body( $patterns );
 		$decoded_body = json_decode( $body );
-		$dictionary   = PatternsHelper::get_patterns_dictionary();
 
 		foreach ( $decoded_body as $data ) {
-			if ( empty( $data->name ) ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %s: file name. */
-							__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
-							$data->name
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
 			if ( ! preg_match( self::SLUG_REGEX, $data->name ) ) {
 				_doing_it_wrong(
 					'register_block_patterns',
@@ -150,41 +118,6 @@ class BlockPatterns {
 
 			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $data->name ) ) {
 				continue;
-			}
-
-			// Title is a required property.
-			if ( ! $data->title ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register the "%s" block pattern ("Title" field missing)', 'woocommerce' ),
-							$data->name
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
-			$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $data->name );
-
-			/*
-				For patterns that can have AI-generated content, we need to get its content from the dictionary and pass
-				it to the pattern file through the "$content" and "$images" variables.
-				This is to avoid having to access the dictionary for each pattern when it's registered or inserted.
-				Before the "$content" and "$images" variables were populated in each pattern. Since the pattern
-				registration happens in the init hook, the dictionary was being access one for each pattern and
-				for each page load. This way we only do it once on registration.
-				For more context: https://github.com/woocommerce/woocommerce-blocks/pull/11733
-			*/
-
-			$content = array();
-			$images  = array();
-			if ( ! is_null( $pattern_data_from_dictionary ) ) {
-				$content = $pattern_data_from_dictionary['content'];
-				$images  = $pattern_data_from_dictionary['images'] ?? array();
 			}
 
 			$pattern_categories = array();
