@@ -50,7 +50,7 @@ class BlockPatterns {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		add_action( 'init', array( $this, 'register_block_patterns' ) );
+		add_action( 'init', array( $this, 'fetch_and_register_block_patterns' ) );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'update_ai_connection_allowed_option' ), 10, 2 );
 		add_action( 'upgrader_process_complete', array( $this, 'schedule_on_plugin_update' ), 10, 2 );
@@ -84,13 +84,11 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Fetch the WooCommerce patterns from the Patterns Tool Kit (PTK) API and register them.
+	 * Fetch the WooCommerce patterns from the Patterns Toolkit (PTK) API.
+	 *
+	 * @return array|\WP_Error
 	 */
-	public function register_block_patterns() {
-		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
-			return;
-		}
-
+	public function fetch_patterns_from_the_ptk() {
 		$locale     = get_user_locale();
 		$lang       = preg_replace( '/(_.*)$/', '', $locale );
 		$ptk_source = self::PATTERNS_TOOLKIT_URL . $lang;
@@ -98,52 +96,93 @@ class BlockPatterns {
 		$patterns   = wp_safe_remote_get( esc_url( $ptk_url ) );
 
 		if ( is_wp_error( $patterns ) || 200 !== wp_remote_retrieve_response_code( $patterns ) ) {
-			return;
+			return new \WP_Error(
+				'patterns_toolkit_api_error',
+				__( 'Failed to connect with the Patterns Toolkit API: try again later.', 'woocommerce' )
+			);
 		}
 
 		$body = wp_remote_retrieve_body( $patterns );
 
 		if ( empty( $body ) ) {
-			return;
+			return new \WP_Error(
+				'patterns_toolkit_api_error',
+				__( 'Failed to connect with the Patterns Toolkit API: try again later.', 'woocommerce' )
+			);
 		}
 
 		$decoded_body = json_decode( $body );
 
 		if ( ! is_array( $decoded_body ) ) {
+			return new \WP_Error(
+				'patterns_toolkit_api_error',
+				__( 'Failed to connect with the Patterns Toolkit API: try again later.', 'woocommerce' )
+			);
+		}
+
+		return $decoded_body;
+	}
+
+	/**
+	 * Fetch the WooCommerce patterns from the Patterns Toolkit (PTK) API and register them.
+	 */
+	public function fetch_and_register_block_patterns() {
+		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
 			return;
 		}
 
-		foreach ( $decoded_body as $data ) {
-			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $data->name ) ) {
+		$patterns = $this->fetch_patterns_from_the_ptk();
+		foreach ( $patterns as $pattern ) {
+			if ( ! isset( $pattern->name ) ) {
 				continue;
 			}
 
-			$required_properties = [ 'title', 'name', 'description', 'html', 'categories' ];
+			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern->name ) ) {
+				return;
+			}
+
+			$required_properties = [ 'title', 'description', 'html', 'categories' ];
 			foreach ( $required_properties as $property ) {
-				if ( ! isset( $data->$property ) ) {
-					continue 2;
+				if ( ! isset( $pattern->$property ) ) {
+					return;
 				}
 			}
 
-			$pattern_categories = array();
-			foreach ( $data->categories as $category ) {
-				if ( ! isset( $category->slug ) || ! isset( $category->title ) ) {
-					continue;
-				}
+			$pattern_categories = $this->register_block_pattern_categories( $pattern->categories );
 
-				$pattern_categories[] = $category->slug;
-
-				register_block_pattern_category( $category->slug, array( 'label' => _x( $category->title, 'Block pattern category' ) ) );
-			}
-
-			register_block_pattern( $data->name, [
-				'title'       => $data->title,
-				'slug'        => $data->name,
-				'description' => $data->description,
-				'content'     => $data->html,
+			register_block_pattern( $pattern->name, [
+				'title'       => $pattern->title,
+				'slug'        => $pattern->name,
+				'description' => $pattern->description,
+				'content'     => $pattern->html,
 				'categories'  => $pattern_categories,
 			] );
 		}
+	}
+
+	/**
+	 * Register block pattern categories.
+	 *
+	 * @param $categories
+	 *
+	 * @return array
+	 */
+	public function register_block_pattern_categories( $categories ) {
+		$pattern_categories = array();
+		foreach ( $categories as $category ) {
+			if ( ! isset( $category->slug ) || ! isset( $category->title ) ) {
+				continue;
+			}
+
+			$pattern_categories[] = $category->slug;
+			if ( \WP_Block_Pattern_Categories_Registry::get_instance()->is_registered( $category->slug ) ) {
+				continue;
+			} else {
+				register_block_pattern_category( $category->slug, array( 'label' => _x( $category->title, 'Block pattern category' ) ) );
+			}
+		}
+
+		return $pattern_categories;
 	}
 
 	/**
