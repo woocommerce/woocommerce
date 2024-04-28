@@ -229,6 +229,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					),
 					'nonces'                            => array(
 						'gateway_toggle' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-toggle-payment-gateway-enabled' ) : null,
+						'subscriptions_notice' => current_user_can( 'manage_woocommerce' ) ? wp_create_nonce( 'woocommerce-subscriptions-notice' ) : null,
 					),
 					'urls'                              => array(
 						'add_product'     => Features::is_enabled( 'new-product-management-experience' ) || \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ? esc_url_raw( admin_url( 'admin.php?page=wc-admin&path=/add-product' ) ) : null,

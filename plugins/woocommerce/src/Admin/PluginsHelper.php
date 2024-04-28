@@ -42,6 +42,8 @@ class PluginsHelper {
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expired_subscriptions_notice' ), 10 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_expiring_subscriptions_notice' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
+		add_action( 'wp_ajax_dismiss_woo_subscriptions_notice', array( __CLASS__, 'dismiss_woo_subscriptions_notice' ) );
 	}
 
 	/**
@@ -552,7 +554,7 @@ class PluginsHelper {
 		$notice =  self::get_expired_subscription_notice();
 
 		if( isset($notice['description']) ){
-			echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice notice notice-error is-dismissible">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
@@ -570,7 +572,7 @@ class PluginsHelper {
 		$notice =  self::get_expiring_subscription_notice();
 
 		if( isset($notice['description']) ){
-			echo '<div class="woo-connect-notice notice notice-error is-dismissible">
+			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice notice notice-error is-dismissible">
 	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
@@ -615,8 +617,13 @@ class PluginsHelper {
 		return '';
 	}
 
-	public static function get_expiring_subscription_notice( $allowed_link = true  ){
+	public static function get_expiring_subscription_notice( $allowed_link = true  ) {
 		if ( !WC_Helper::is_site_connected() ) {
+			return [];
+		}
+
+		$is_notice_dismiss = get_user_meta( get_current_user_id(), 'woo_subscription_expiring_notice', true );
+		if ( !empty( $is_notice_dismiss ) ){
 			return [];
 		}
 
@@ -624,7 +631,7 @@ class PluginsHelper {
 		$expiring_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return !$sub[ 'expiring' ] && !$sub[ 'autorenew' ];
+				return $sub[ 'expiring' ] && !$sub[ 'autorenew' ];
 			},
 		);
 
@@ -657,6 +664,11 @@ class PluginsHelper {
 
 	public static function get_expired_subscription_notice( $allowed_link = true ){
 		if ( !WC_Helper::is_site_connected() ) {
+			return [];
+		}
+
+		$is_notice_dismiss = get_user_meta( get_current_user_id(), 'woo_subscription_expired_notice', true );
+		if ( !empty( $is_notice_dismiss ) ) {
 			return [];
 		}
 
@@ -758,4 +770,31 @@ class PluginsHelper {
 		wp_enqueue_script( 'woo-connect-notice' );
 	}
 
+	/**
+	 * Enqueue scripts for connect notice.
+	 *
+	 * @return void
+	 */
+	public static function maybe_enqueue_scripts_for_subscription_notice() {
+		if ( 'woocommerce_page_wc-settings' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-subscriptions-notice' );
+		wp_enqueue_script( 'woo-subscriptions-notice' );
+	}
+
+	public static function dismiss_woo_subscriptions_notice() {
+		check_ajax_referer( 'woocommerce-subscriptions-notice', 'security' );
+		$notice_id  = isset( $_POST[ 'notice_id' ] ) ? sanitize_text_field( wp_unslash( $_POST[ 'notice_id' ] ) ) : '';
+		switch ( $notice_id ) {
+			case 'woo-subscription-expired-notice':
+				update_user_meta( get_current_user_id(), 'woo_subscription_expired_notice', time() );
+				break;
+			case 'woo-subscription-expiring-notice':
+				update_user_meta( get_current_user_id(), 'woo_subscription_expiring_notice', time() );
+				break;
+		}
+		wp_die();
+	}
 }
