@@ -69,3 +69,25 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
+
+function add_paragraph_after_order_summary_heading( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
+	if ( 'woocommerce/cart-order-summary-heading-block' === $anchor_block_type && 'after' === $relative_position ) {
+		$hooked_block_types[] = 'core/paragraph';
+	}
+	return $hooked_block_types;
+}
+add_filter( 'hooked_block_types', 'add_paragraph_after_order_summary_heading', 10, 4 );
+
+function modify_hooked_paragraph_block_after_order_summary_heading( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block, $context ) {
+
+	// Has the hooked block been suppressed by a previous filter?
+	if ( is_null( $parsed_hooked_block ) ) {
+		return $parsed_hooked_block;
+	}
+	$parsed_hooked_block['innerContent'] = array(
+		'<p>Hello</p>',
+	);
+
+		return $parsed_hooked_block;
+}
+add_filter( 'hooked_block_core/paragraph', 'modify_hooked_paragraph_block_after_order_summary_heading', 10, 5 );
