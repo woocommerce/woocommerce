@@ -100,22 +100,6 @@ class BlockPatterns {
 		$decoded_body = json_decode( $body );
 
 		foreach ( $decoded_body as $data ) {
-			if ( ! preg_match( self::SLUG_REGEX, $data->name ) ) {
-				_doing_it_wrong(
-					'register_block_patterns',
-					esc_html(
-						sprintf(
-						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register the "%1$s" block pattern (invalid slug "%2$s")', 'woocommerce' ),
-							$data->title,
-							$data->name
-						)
-					),
-					'6.0.0'
-				);
-				continue;
-			}
-
 			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $data->name ) ) {
 				continue;
 			}
