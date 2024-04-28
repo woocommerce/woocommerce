@@ -24,6 +24,8 @@ import {
 import InstallNewProductModal from '../install-flow/install-new-product-modal';
 import Promotions from '../promotions/promotions';
 import ConnectNotice from '~/marketplace/components/connect-notice/connect-notice';
+import SubscriptionsExpiredNotice from '../my-subscriptions/subscriptions-expired-notice';
+import SubscriptionsExpiringNotice from '../my-subscriptions/subscriptions-expiring-notice';
 
 export default function Content(): JSX.Element {
 	const marketplaceContextValue = useContext( MarketplaceContext );
@@ -139,6 +141,8 @@ export default function Content(): JSX.Element {
 			<Promotions />
 			<InstallNewProductModal products={ products } />
 			<ConnectNotice />
+			<SubscriptionsExpiredNotice />
+			<SubscriptionsExpiringNotice />
 			{ renderContent() }
 		</div>
 	);
