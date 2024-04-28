@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -58,17 +59,29 @@ export default function ConnectNotice(): JSX.Element | null {
 		)
 	);
 
+	const handleClick = () => {
+		recordEvent( 'woo_connect_notice_in_marketplace_clicked' );
+		return true;
+	};
+
+	const handleClose = () => {
+		localStorage.setItem( localStorageKey, new Date().toString() );
+		recordEvent( 'woo_connect_notice_in_marketplace_dismissed' );
+	};
+
 	return (
 		<Notice
 			id="woo-connect-notice"
 			description={ description }
 			isDismissible={ true }
 			variant="error"
-			onClose={ () => {
-				localStorage.setItem( localStorageKey, new Date().toString() );
-			} }
+			onClose={ handleClose }
 		>
-			<Button href={ connectUrl() } variant="secondary">
+			<Button
+				href={ connectUrl() }
+				variant="secondary"
+				onClick={ handleClick }
+			>
 				{ __( 'Connect', 'woocommerce' ) }
 			</Button>
 		</Notice>
