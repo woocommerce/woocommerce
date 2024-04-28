@@ -88,7 +88,7 @@ class BlockPatterns {
 	}
 
 	/**
-	 * Registers the block patterns and categories under `./patterns/`.
+	 * Fetch the WooCommerce patterns from the Patterns Tool Kit (PTK) API and register them.
 	 */
 	public function register_block_patterns() {
 		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
@@ -111,40 +111,20 @@ class BlockPatterns {
 			)
 		);
 
-		$default_headers = array(
-			'title'         => 'Title',
-			'slug'          => 'Slug',
-			'description'   => 'Description',
-			'viewportWidth' => 'Viewport Width',
-			'categories'    => 'Categories',
-			'keywords'      => 'Keywords',
-			'blockTypes'    => 'Block Types',
-			'inserter'      => 'Inserter',
-			'featureFlag'   => 'Feature Flag',
-		);
+		$patterns     = wp_safe_remote_get( 'https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wordpress.com' );
+		$body         = wp_remote_retrieve_body( $patterns );
+		$decoded_body = json_decode( $body );
+		$dictionary   = PatternsHelper::get_patterns_dictionary();
 
-		if ( ! file_exists( $this->patterns_path ) ) {
-			return;
-		}
-
-		$files = glob( $this->patterns_path . '/*.php' );
-		if ( ! $files ) {
-			return;
-		}
-
-		$dictionary = PatternsHelper::get_patterns_dictionary();
-
-		foreach ( $files as $file ) {
-			$pattern_data = get_file_data( $file, $default_headers );
-
-			if ( empty( $pattern_data['slug'] ) ) {
+		foreach ( $decoded_body as $data ) {
+			if ( empty( $data->name ) ) {
 				_doing_it_wrong(
 					'register_block_patterns',
 					esc_html(
 						sprintf(
 						/* translators: %s: file name. */
 							__( 'Could not register file "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
-							$file
+							$data->name
 						)
 					),
 					'6.0.0'
@@ -152,15 +132,15 @@ class BlockPatterns {
 				continue;
 			}
 
-			if ( ! preg_match( self::SLUG_REGEX, $pattern_data['slug'] ) ) {
+			if ( ! preg_match( self::SLUG_REGEX, $data->name ) ) {
 				_doing_it_wrong(
 					'register_block_patterns',
 					esc_html(
 						sprintf(
 						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
-							$file,
-							$pattern_data['slug']
+							__( 'Could not register the "%1$s" block pattern (invalid slug "%2$s")', 'woocommerce' ),
+							$data->title,
+							$data->name
 						)
 					),
 					'6.0.0'
@@ -168,23 +148,19 @@ class BlockPatterns {
 				continue;
 			}
 
-			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern_data['slug'] ) ) {
-				continue;
-			}
-
-			if ( $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
+			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $data->name ) ) {
 				continue;
 			}
 
 			// Title is a required property.
-			if ( ! $pattern_data['title'] ) {
+			if ( ! $data->title ) {
 				_doing_it_wrong(
 					'register_block_patterns',
 					esc_html(
 						sprintf(
 						/* translators: %1s: file name; %2s: slug value found. */
-							__( 'Could not register file "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
-							$file
+							__( 'Could not register the "%s" block pattern ("Title" field missing)', 'woocommerce' ),
+							$data->name
 						)
 					),
 					'6.0.0'
@@ -192,53 +168,7 @@ class BlockPatterns {
 				continue;
 			}
 
-			// For properties of type array, parse data as comma-separated.
-			foreach ( array( 'categories', 'keywords', 'blockTypes' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = array_filter(
-						preg_split(
-							self::COMMA_SEPARATED_REGEX,
-							(string) $pattern_data[ $property ]
-						)
-					);
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// Parse properties of type int.
-			foreach ( array( 'viewportWidth' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = (int) $pattern_data[ $property ];
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// Parse properties of type bool.
-			foreach ( array( 'inserter' ) as $property ) {
-				if ( ! empty( $pattern_data[ $property ] ) ) {
-					$pattern_data[ $property ] = in_array(
-						strtolower( $pattern_data[ $property ] ),
-						array( 'yes', 'true' ),
-						true
-					);
-				} else {
-					unset( $pattern_data[ $property ] );
-				}
-			}
-
-			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-			$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
-			if ( ! empty( $pattern_data['description'] ) ) {
-				// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-				$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
-			}
-
-			$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $pattern_data['slug'] );
-
-			// The actual pattern content is the output of the file.
-			ob_start();
+			$pattern_data_from_dictionary = $this->get_pattern_from_dictionary( $dictionary, $data->name );
 
 			/*
 				For patterns that can have AI-generated content, we need to get its content from the dictionary and pass
@@ -256,26 +186,21 @@ class BlockPatterns {
 				$content = $pattern_data_from_dictionary['content'];
 				$images  = $pattern_data_from_dictionary['images'] ?? array();
 			}
-			include $file;
-			$pattern_data['content'] = ob_get_clean();
 
-			if ( ! $pattern_data['content'] ) {
-				continue;
+			$pattern_categories = array();
+			foreach ( $data->categories as $key => $category ) {
+				$pattern_categories[] = $category->slug;
+
+				register_block_pattern_category( $category->slug, array( 'label' => _x( $category->title, 'Block pattern category' ) ) );
 			}
 
-			foreach ( $pattern_data['categories'] as $key => $category ) {
-				$category_slug = _wp_to_kebab_case( $category );
-
-				$pattern_data['categories'][ $key ] = $category_slug;
-
-				register_block_pattern_category(
-					$category_slug,
-					// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
-					array( 'label' => __( $category, 'woocommerce' ) )
-				);
-			}
-
-			register_block_pattern( $pattern_data['slug'], $pattern_data );
+			register_block_pattern( $data->name, [
+				'title'       => $data->title,
+				'slug'        => $data->name,
+				'description' => $data->description,
+				'content'     => $data->html,
+				'categories'  => $pattern_categories,
+			] );
 		}
 	}
 
