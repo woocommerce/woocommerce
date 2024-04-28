@@ -1,11 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\Images\Pexels;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\AIContent\UpdatePatterns;
 use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
 
@@ -35,16 +33,16 @@ use Automattic\WooCommerce\Blocks\AIContent\UpdateProducts;
  * @internal
  */
 class BlockPatterns {
-	const SLUG_REGEX                 = '/^[A-z0-9\/_-]+$/';
-	const COMMA_SEPARATED_REGEX      = '/[\s,]+/';
-	const PATTERNS_AI_DATA_POST_TYPE = 'patterns_ai_data';
 
 	/**
-	 * Path to the patterns directory.
-	 *
-	 * @var string $patterns_path
+	 *  The Patterns Toolkit API URL
 	 */
-	private $patterns_path;
+	const PATTERNS_TOOLKIT_URL = 'https://public-api.wordpress.com/rest/v1/ptk/patterns/';
+
+	/**
+	 * The source site for WooCommerce patterns
+	 */
+	const PATTERNS_SOURCE_SITE = 'wooblockpatterns.wordpress.com';
 
 	/**
 	 * Constructor for class
@@ -52,8 +50,6 @@ class BlockPatterns {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		$this->patterns_path = $package->get_path( 'patterns' );
-
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'update_ai_connection_allowed_option' ), 10, 2 );
@@ -95,17 +91,46 @@ class BlockPatterns {
 			return;
 		}
 
-		$patterns     = wp_safe_remote_get( 'https://public-api.wordpress.com/rest/v1/ptk/patterns/en?site=wooblockpatterns.wordpress.com' );
-		$body         = wp_remote_retrieve_body( $patterns );
+		$locale     = get_user_locale();
+		$lang       = preg_replace( '/(_.*)$/', '', $locale );
+		$ptk_source = self::PATTERNS_TOOLKIT_URL . $lang;
+		$ptk_url    = add_query_arg( 'site', self::PATTERNS_SOURCE_SITE, $ptk_source );
+		$patterns   = wp_safe_remote_get( esc_url( $ptk_url ) );
+
+		if ( is_wp_error( $patterns ) || 200 !== wp_remote_retrieve_response_code( $patterns ) ) {
+			return;
+		}
+
+		$body = wp_remote_retrieve_body( $patterns );
+
+		if ( empty( $body ) ) {
+			return;
+		}
+
 		$decoded_body = json_decode( $body );
+
+		if ( ! is_array( $decoded_body ) ) {
+			return;
+		}
 
 		foreach ( $decoded_body as $data ) {
 			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $data->name ) ) {
 				continue;
 			}
 
+			$required_properties = [ 'title', 'name', 'description', 'html', 'categories' ];
+			foreach ( $required_properties as $property ) {
+				if ( ! isset( $data->$property ) ) {
+					continue 2;
+				}
+			}
+
 			$pattern_categories = array();
-			foreach ( $data->categories as $key => $category ) {
+			foreach ( $data->categories as $category ) {
+				if ( ! isset( $category->slug ) || ! isset( $category->title ) ) {
+					continue;
+				}
+
 				$pattern_categories[] = $category->slug;
 
 				register_block_pattern_category( $category->slug, array( 'label' => _x( $category->title, 'Block pattern category' ) ) );
