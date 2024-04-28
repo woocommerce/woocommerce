@@ -50,7 +50,7 @@ class BlockPatterns {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		add_action( 'init', array( $this, 'fetch_and_register_block_patterns' ) );
+		add_action( 'init', array( $this, 'register_block_patterns' ) );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'schedule_on_option_update' ), 10, 2 );
 		add_action( 'update_option_woo_ai_describe_store_description', array( $this, 'update_ai_connection_allowed_option' ), 10, 2 );
 		add_action( 'upgrader_process_complete', array( $this, 'schedule_on_plugin_update' ), 10, 2 );
@@ -126,7 +126,7 @@ class BlockPatterns {
 	/**
 	 * Fetch the WooCommerce patterns from the Patterns Toolkit (PTK) API and register them.
 	 */
-	public function fetch_and_register_block_patterns() {
+	public function register_block_patterns() {
 		if ( ! class_exists( 'WP_Block_Patterns_Registry' ) ) {
 			return;
 		}
