@@ -3,10 +3,10 @@
  */
 import {
 	Combobox as AriakitCombobox,
-	ComboboxLabel as AriakitComboboxLabel,
-	ComboboxPopover as AriakitComboboxPopover,
-	ComboboxProvider as AriakitComboboxProvider,
-	ComboboxItem as AriakitComboboxItem,
+	ComboboxLabel,
+	ComboboxPopover,
+	ComboboxProvider,
+	ComboboxItem,
 } from '@ariakit/react';
 import type { ComboboxProps as AriakitComboboxProps } from '@ariakit/react';
 import classnames from 'classnames';
@@ -149,7 +149,7 @@ const Combobox = ( {
 	return (
 		<div className={ outerWrapperClasses }>
 			<div className={ innerWrapperClasses } ref={ controlRef }>
-				<AriakitComboboxProvider
+				<ComboboxProvider
 					value={ searchTerm }
 					selectedValue={ initialOption?.label || '' }
 					setValue={ ( val ) => {
@@ -168,9 +168,9 @@ const Combobox = ( {
 					} }
 				>
 					<div className="components-base-control__field">
-						<AriakitComboboxLabel className="components-base-control__label">
+						<ComboboxLabel className="components-base-control__label">
 							{ label }
-						</AriakitComboboxLabel>
+						</ComboboxLabel>
 
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
@@ -180,22 +180,22 @@ const Combobox = ( {
 								aria-errormessage={ validationErrorId }
 								type="text"
 							/>
-							<AriakitComboboxPopover
+							<ComboboxPopover
 								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
 							>
 								{ matchingSuggestions.map( ( option ) => (
-									<AriakitComboboxItem
+									<ComboboxItem
 										className="components-form-token-field__suggestion"
 										key={ option.label }
 										value={ option.label }
 									/>
 								) ) }
-							</AriakitComboboxPopover>
+							</ComboboxPopover>
 						</div>
 					</div>
-				</AriakitComboboxProvider>
+				</ComboboxProvider>
 			</div>
 			<ValidationInputError propertyName={ errorId } />
 		</div>
