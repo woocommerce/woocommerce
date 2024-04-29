@@ -17,11 +17,11 @@
 	flex-basis: 0;
 	gap: 4px;
 	padding: 16px 12px;
-	color: inherit;
+	color: inherit !important; // Overwriting Gutenberg styles
 	background-color: transparent;
 	border: none;
 	box-shadow: none !important;
-	outline: 1px solid $universal-border-light;
+	outline: 1px solid $universal-border-light !important; // Overwriting Gutenberg styles
 	border-radius: $universal-border-radius;
 	&.components-button:hover:not(:disabled),
 	&.components-button:focus:not(:disabled),
