@@ -1,8 +1,11 @@
 <?php
 /**
- * Plugin Name: Additional checkout fields plugin
- * Description: Add additional checkout fields
- * @package     WordPress
+ * Plugin Name: WooCommerce Blocks Test Additional Checkout Fields
+ * Description: Adds custom checkout fields to the checkout form.
+ * Plugin URI: https://github.com/woocommerce/woocommerce
+ * Author: WooCommerce
+ *
+ * @package woocommerce-blocks-test-additional-checkout-fields
  */
 
 class Additional_Checkout_Fields_Test_Helper {

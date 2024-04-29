@@ -3,10 +3,6 @@
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { customerFile } from '@woocommerce/e2e-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -26,19 +22,12 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
-		test.beforeAll( async () => {
-			await installPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
-		test.afterAll( async () => {
-			await uninstallPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
 
-		test.beforeEach( async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
+		test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-additional-checkout-fields'
+			);
+
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
