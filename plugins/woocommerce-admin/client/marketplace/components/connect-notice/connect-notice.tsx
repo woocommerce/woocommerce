@@ -69,6 +69,10 @@ export default function ConnectNotice(): JSX.Element | null {
 		recordEvent( 'woo_connect_notice_in_marketplace_dismissed' );
 	};
 
+	const handleLoad = () => {
+		recordEvent( 'woo_connect_notice_in_marketplace_shown' );
+	};
+
 	return (
 		<Notice
 			id="woo-connect-notice"
@@ -76,6 +80,7 @@ export default function ConnectNotice(): JSX.Element | null {
 			isDismissible={ true }
 			variant="error"
 			onClose={ handleClose }
+			onLoad={ handleLoad }
 		>
 			<Button
 				href={ connectUrl() }
