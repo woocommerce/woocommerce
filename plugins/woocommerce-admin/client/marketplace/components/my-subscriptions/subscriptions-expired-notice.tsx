@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { connectUrl } from '~/marketplace/utils/functions';
 import Notice from '~/marketplace/components/notice/notice';
 import { getAdminSetting } from '~/utils/admin-settings';
 
@@ -18,12 +18,23 @@ export default function SubscriptionsExpiredNotice(): JSX.Element | null {
 	if (!wccomSettings.isConnected || !notice?.description) {
 		return null;
 	}
+
+	const handleClose = () => {
+		const data = {notice_id:'woo-subscription-expired-notice'}
+		apiFetch( {
+			path: `/wc-admin/woo_subscription_notice_dissmiss/`,
+			method: 'POST',
+			data,
+		} )
+	};
+
 	return (
 		<Notice
 			id="woo-subscription-expired-notice"
 			description={ notice.description }
 			isDismissible={ true }
 			variant="error"
+			onClose={ handleClose }
 		>
 			<Button href={ notice.button_link } variant="secondary">
 				{ __( notice.button_text, 'woocommerce' ) }

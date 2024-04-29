@@ -1,23 +1,18 @@
-( function ( $, woocommerce_admin ) {
-
+( function ( $ ) {
 	$( document ).on( 'click', '.woo-subscription-expiring-notice,.woo-subscription-expired-notice', function ( e ) {
 		const notice_id = this.id;
 		if ( !notice_id ) {
 			return;
 		}
+
 		var data = {
-			action: 'dismiss_woo_subscriptions_notice',
-			security: woocommerce_admin.nonces.subscriptions_notice,
 			notice_id: notice_id,
 		};
-		$.ajax( {
-	        url: woocommerce_admin.ajax_url,
-	        data: data,
-	        dataType: 'json',
-	        type: 'POST',
-	        success: function ( response ) {
-		        $( notice_id ).remove();
-	        },
-        } );
+
+		window.wp.apiFetch( {
+	          path: `/wc-admin/woo_subscription_notice_dissmiss/`,
+	          method: 'POST',
+	          data,
+	      } )
 	} )
-} )( jQuery, woocommerce_admin );
+} )( jQuery );
