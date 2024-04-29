@@ -32,13 +32,11 @@ const getCanvas = async ( page ) => {
 
 const goToPageEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
 	await disableWelcomeModal( { page } );
 };
 
 const goToPostEditor = async ( { page } ) => {
 	await page.goto( 'wp-admin/post-new.php' );
-
 	await disableWelcomeModal( { page } );
 };
 
@@ -55,6 +53,17 @@ const insertBlock = async ( page, blockName ) => {
 	await canvas.getByLabel( 'Add block' ).click();
 	await page.getByPlaceholder( 'Search', { exact: true } ).fill( blockName );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
+};
+
+const insertBlockByShortcut = async ( page, blockShortcut ) => {
+	const canvas = await getCanvas( page );
+	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
+	await canvas
+		.getByRole( 'document', {
+			name: 'Empty block; start writing or type forward slash to choose a block',
+		} )
+		.fill( blockShortcut );
+	await page.keyboard.press( 'Enter' );
 };
 
 const transformIntoBlocks = async ( page ) => {
@@ -75,6 +84,17 @@ const transformIntoBlocks = async ( page ) => {
 	);
 };
 
+const publishPage = async ( page, pageTitle ) => {
+	await page.getByRole( 'button', { name: 'Publish', exact: true } ).click();
+	await page
+		.getByRole( 'region', { name: 'Editor publish' } )
+		.getByRole( 'button', { name: 'Publish', exact: true } )
+		.click();
+	await expect(
+		page.getByText( `${ pageTitle } is now live.` )
+	).toBeVisible();
+};
+
 module.exports = {
 	closeWelcomeModal,
 	goToPageEditor,
@@ -83,5 +103,7 @@ module.exports = {
 	getCanvas,
 	fillPageTitle,
 	insertBlock,
+	insertBlockByShortcut,
 	transformIntoBlocks,
+	publishPage,
 };

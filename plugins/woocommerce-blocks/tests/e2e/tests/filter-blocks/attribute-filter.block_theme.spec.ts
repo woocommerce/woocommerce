@@ -70,7 +70,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Attribute Block', async () => {
+test.describe( 'Product Filter: Attribute Block', () => {
 	test.describe( 'With default display style', () => {
 		test.describe( 'With show counts enabled', () => {
 			test( 'Renders checkboxes with associated product counts', async ( {
