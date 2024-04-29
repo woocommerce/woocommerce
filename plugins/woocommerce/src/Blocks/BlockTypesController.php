@@ -304,6 +304,7 @@ final class BlockTypesController {
 			$block_types[] = 'ProductFilterAttribute';
 			$block_types[] = 'ProductFilterRating';
 			$block_types[] = 'ProductFilterActive';
+			$block_types[] = 'ProductFilterClearButton';
 		}
 
 		/**
