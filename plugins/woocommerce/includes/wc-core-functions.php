@@ -1560,7 +1560,7 @@ function wc_get_credit_card_type_label( $type ) {
  * @param string $url   URL of the page to return to.
  */
 function wc_back_link( $label, $url ) {
-	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;</a></small>';
+	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;&#xfe0e;</a></small>';
 }
 
 /**

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link, useFormContext } from '@woocommerce/components';
-import { Product, ProductAttribute } from '@woocommerce/data';
+import { Product, ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -18,16 +18,14 @@ export const ProductVariationsSection: React.FC = () => {
 		values: { id: productId },
 	} = useFormContext< Product >();
 
-	const { value: attributes }: { value: ProductAttribute[] } = getInputProps(
-		'attributes',
-		{
+	const { value: attributes }: { value: ProductProductAttribute[] } =
+		getInputProps( 'attributes', {
 			productId,
-		}
-	);
+		} );
 
 	const options = attributes
 		? attributes.filter(
-				( attribute: ProductAttribute ) => attribute.variation
+				( attribute: ProductProductAttribute ) => attribute.variation
 		  )
 		: [];
 

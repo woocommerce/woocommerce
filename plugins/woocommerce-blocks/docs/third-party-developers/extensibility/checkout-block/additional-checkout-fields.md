@@ -5,7 +5,7 @@
 - [Available field locations](#available-field-locations)
     - [Contact information](#contact-information)
     - [Address](#address)
-    - [Additional information](#additional-information)
+    - [Order information](#order-information)
 - [Supported field types](#supported-field-types)
 - [Using the API](#using-the-api)
     - [Options](#options)
@@ -22,24 +22,24 @@
     - [The select input when focused](#the-select-input-when-focused)
 - [Validation and sanitization](#validation-and-sanitization)
     - [Sanitization](#sanitization)
-        - [Using the `_experimental_woocommerce_blocks_sanitize_additional_field` filter](#using-the-_experimental_woocommerce_blocks_sanitize_additional_field-filter)
+        - [Using the `woocommerce_sanitize_additional_field` filter](#using-the-woocommerce_sanitize_additional_field-filter)
             - [Example of sanitization](#example-of-sanitization)
     - [Validation](#validation)
         - [Single field validation](#single-field-validation)
-            - [Using the `__experimental_woocommerce_blocks_validate_additional_field` action](#using-the-__experimental_woocommerce_blocks_validate_additional_field-action)
+            - [Using the `woocommerce_validate_additional_field` action](#using-the-woocommerce_validate_additional_field-action)
                 - [The `WP_Error` object](#the-wp_error-object)
                 - [Example of single-field validation](#example-of-single-field-validation)
         - [Multiple field validation](#multiple-field-validation)
-            - [Using the `__experimental_woocommerce_blocks_validate_location_{location}_fields` action](#using-the-__experimental_woocommerce_blocks_validate_location_location_fields-action)
+            - [Using the `woocommerce_blocks_validate_location_{location}_fields` action](#using-the-woocommerce_blocks_validate_location_location_fields-action)
             - [Example of location validation](#example-of-location-validation)
+- [Backward compatibility](#backward-compatibility)
+    - [React to to saving fields](#react-to-to-saving-fields)
+    - [React to reading fields](#react-to-reading-fields)
 - [A full example](#a-full-example)
 
 A common use-case for developers and merchants is to add a new field to the Checkout form to collect additional data about a customer or their order.
 
 This document will outline the steps an extension should take to register some additional checkout fields.
-
-> [!NOTE]
-> Additional Checkout fields is still in the testing phases, use it to test the API and leave feedback in this [public discussion.](https://github.com/woocommerce/woocommerce/discussions/42995)
 
 ## Available field locations
 
@@ -47,7 +47,7 @@ Additional checkout fields can be registered in three different places:
 
 - Contact information
 - Addresses (Shipping **and** Billing)
-- Additional information
+- Order information
 
 A field can only be shown in one location, it is not possible to render the same field in multiple locations in the same registration.
 
@@ -71,19 +71,19 @@ If a field is registered in the `address` location it will appear in both the sh
 
 You will also end up collecting two values for this field, one for shipping and one for billing.
 
-### Additional information
+### Order information
 
-As part of the additional checkout fields feature, the checkout block has a new inner block called the "Additional information block".
+As part of the additional checkout fields feature, the checkout block has a new inner block called the "Order information block".
 
 This block is used to render fields that aren't part of the contact information or address information, for example it may be a "How did you hear about us" field or a "Gift message" field.
 
 Fields rendered here will be saved to the order. They will not be part of the customer's saved address or account information. New orders will not have any previously used values pre-filled.
 
-![The additional order information section containing an additional checkout field](https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f)
+![The order information section containing an additional checkout field](https://github.com/woocommerce/woocommerce/assets/5656702/295b3048-a22a-4225-96b0-6b0371a7cd5f)
 
 By default, this block will render as the last step in the Checkout form, however it can be moved using the Gutenberg block controls in the editor.
 
-![The additional order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
+![The order information block in the post editor"](https://github.com/woocommerce/woocommerce/assets/5656702/05a3d7d9-b3af-4445-9318-443ae2c4d7d8)
 
 ## Accessing values
 
@@ -91,7 +91,7 @@ Additional fields are saved to individual meta keys in both the customer meta an
 
 For address fields, two values are saved: one for shipping, and one for billing. If the customer has selected 'Use same address for billing` then the values will be the same, but still saved independently of each other.
 
-For contact and additional fields, only one value is saved per field.
+For contact and order fields, only one value is saved per field.
 
 ### Helper methods
 
@@ -159,7 +159,7 @@ $order = wc_get_order( 1234 );
 $checkout_fields = Package::container()->get( CheckoutFields::class );
 $order_additional_billing_fields = $checkout_fields->get_all_fields_from_object( $order, 'billing' );
 $order_additional_shipping_fields = $checkout_fields->get_all_fields_from_object( $order, 'shipping' );
-$order_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'additional' ); // Contact and Additional are saved in the same place under the additional group.
+$order_other_additional_fields = $checkout_fields->get_all_fields_from_object( $order, 'other' ); // Contact and Order are saved in the same place under the additional group.
 ```
 
 This will return an array of all values, it will only include fields currently registered, if you want to include fields no longer registered, you can pass a third `true` parameter.
@@ -182,16 +182,16 @@ Values are saved under a predefined prefix, this is needed to able to query fiel
 - `_wc_billing/my-plugin-namespace/my-field`
 - `_wc_shipping/my-plugin-namespace/my-field`
 
-Or the following if it's a contact/additional field:
+Or the following if it's a contact/order field:
 
-- `_wc_additional/my-plugin-namespace/my-field`.
+- `_wc_other/my-plugin-namespace/my-field`.
 
 Those prefixes are part of `CheckoutFields` class, and can be accessed using the following constants:
 
 ```php
 echo ( CheckoutFields::BILLING_FIELDS_PREFIX ); // _wc_billing/
 echo ( CheckoutFields::SHIPPING_FIELDS_PREFIX ); // _wc_shipping/
-echo ( CheckoutFields::ADDITIONAL_FIELDS_PREFIX ); // _wc_additional/
+echo ( CheckoutFields::OTHER_FIELDS_PREFIX ); // _wc_other/
 ```
 
 `CheckoutFields` provides a couple of helpers to get the group name or key based on one or the other:
@@ -206,7 +206,7 @@ CheckoutFields::get_group_key( "shipping" ); // "_wc_shipping/"
 Use cases here would be to build the key name to access the meta directly:
 
 ```php
-$key      = CheckoutFields::get_group_key( "additional" ) . 'my-plugin/is-opt-in';
+$key      = CheckoutFields::get_group_key( "other" ) . 'my-plugin/is-opt-in';
 $opted_in = get_user_meta( 123, $key, true ) === "1" ? true : false;
 ```
 
@@ -226,7 +226,7 @@ There are plans to expand this list, but for now these are the types available.
 
 ## Using the API
 
-To register additional checkout fields you must use the `__experimental_woocommerce_blocks_register_checkout_field` function.
+To register additional checkout fields you must use the `woocommerce_register_additional_checkout_field` function.
 
 It is recommended to run this function after the `woocommerce_blocks_loaded` action.
 
@@ -243,7 +243,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `id`                | The field's ID. This should be a unique identifier for your field. It is composed of a namespace and field name separated by a `/`. | Yes       | `plugin-namespace/how-did-you-hear`          | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `label`             | The label shown on your field. This will be the placeholder too.                                                                    | Yes       | `How did you hear about us?`                 | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `optionalLabel`     | The label shown on your field if it is optional. This will be the placeholder too.                                                  | No        | `How did you hear about us? (Optional)`      | The default value will be the value of `label` with `(optional)` appended.                                                                                                                                                                                                                     |
-| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `additional`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
+| `location`          | The location to render your field.                                                                                                  | Yes       | `contact`, `address`, or `order`        | No default - this must be provided.                                                                                                                                                                                                                                                            |
 | `type`              | The type of field you're rendering. It defaults to `text` and must match one of the supported field types.                          | No        | `text`, `select`, or `checkbox`              | `text`                                                                                                                                                                                                                                                                                         |
 | `attributes`        | An array of additional attributes to render on the field's input element. This is _not_ supported for `select` fields.              | No        | `[	'data-custom-data' => 'my-custom-data' ]` | `[]`                                                                                                                                                                                                                                                                                           |
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
@@ -341,7 +341,7 @@ This example demonstrates rendering a text field in the address section:
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -384,7 +384,7 @@ This example demonstrates rendering a checkbox field in the contact information 
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'namespace/marketing-opt-in',
 				'label'    => 'Do you want to subscribe to our newsletter?',
@@ -404,17 +404,17 @@ Note that because an `optionalLabel` was not supplied, the string `(optional)` i
 
 ### Rendering a select field
 
-This example demonstrates rendering a select field in the additional information section:
+This example demonstrates rendering a select field in the order information section:
 
 ```php
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => 'namespace/how-did-you-hear-about-us',
 				'label'    => 'How did you hear about us?',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'options'  => [
 					[
@@ -440,7 +440,7 @@ add_action(
 );
 ```
 
-This results in the additional information section being rendered like so:
+This results in the order information section being rendered like so:
 
 ### The select input before being focused
 
@@ -465,9 +465,9 @@ These actions happen in two places:
 
 Sanitization is used to ensure the value of a field is in a specific format. An example is when taking a government ID, you may want to format it so that all letters are capitalized and there are no spaces. At this point, the value should **not** be checked for _validity_. That will come later. This step is only intended to set the field up for validation.
 
-#### Using the `_experimental_woocommerce_blocks_sanitize_additional_field` filter
+#### Using the `woocommerce_sanitize_additional_field` filter
 
-To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `__experimental_woocommerce_blocks_sanitize_additional_field` filter.
+To run a custom sanitization function for a field you can use the `sanitize_callback` function on registration, or the `woocommerce_sanitize_additional_field` filter.
 
 | Argument     | Type              | Description                                                             |
 |--------------|-------------------|-------------------------------------------------------------------------|
@@ -480,7 +480,7 @@ This example shows how to remove whitespace and capitalize all letters in the ex
 
 ```php
 add_action(
-	'_experimental_woocommerce_blocks_sanitize_additional_field',
+	'woocommerce_sanitize_additional_field',
 	function ( $field_value, $field_key ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$field_value = str_replace( ' ', '', $field_key );
@@ -499,9 +499,9 @@ There are two phases of validation in the additional checkout fields system. The
 
 #### Single field validation
 
-##### Using the `__experimental_woocommerce_blocks_validate_additional_field` action
+##### Using the `woocommerce_validate_additional_field` action
 
-When the `__experimental_woocommerce_blocks_validate_additional_field` action is fired  the callback receives the field's key, the field's value, and a `WP_Error` object.
+When the `woocommerce_validate_additional_field` action is fired  the callback receives the field's key, the field's value, and a `WP_Error` object.
 
 To add validation errors to the response, use the [`WP_Error::add`](https://developer.wordpress.org/reference/classes/wp_error/add/) method.
 
@@ -521,7 +521,7 @@ The below example shows how to apply custom validation to the `namespace/gov-id`
 
 ```php
 add_action(
-'__experimental_woocommerce_blocks_validate_additional_field',
+'woocommerce_validate_additional_field',
 	function ( WP_Error $errors, $field_key, $field_value ) {
 		if ( 'namespace/gov-id' === $field_key ) {
 			$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
@@ -541,13 +541,13 @@ If no validation errors are encountered the function can just return void.
 
 #### Multiple field validation
 
-There are cases where the validity of a field depends on the value of another field, for example validating the format of a government ID based on what country the shopper is in. In this case, validating only single fields (as above) is not sufficient as the country may be unknown during the `__experimental_woocommerce_blocks_validate_additional_field` action.
+There are cases where the validity of a field depends on the value of another field, for example validating the format of a government ID based on what country the shopper is in. In this case, validating only single fields (as above) is not sufficient as the country may be unknown during the `woocommerce_validate_additional_field` action.
 
 To solve this, it is possible to validate a field in the context of the location it renders in. The other fields in that location will be passed to this action.
 
-##### Using the `__experimental_woocommerce_blocks_validate_location_{location}_fields` action
+##### Using the `woocommerce_blocks_validate_location_{location}_fields` action
 
-This action will be fired for each location that additional fields can render in (`address`, `contact`, and `additional`). For `address` it fires twice, once for the billing address and once for the shipping address.
+This action will be fired for each location that additional fields can render in (`address`, `contact`, and `order`). For `address` it fires twice, once for the billing address and once for the shipping address.
 
 The callback receives the keys and values of the other additional fields in the same location.
 
@@ -557,18 +557,18 @@ It is important to note that any fields rendered in other locations will not be 
 |----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `$errors`  | `WP_Error`                  | An error object containing errors that were already encountered while processing the request. If no errors were added yet, it will still be a `WP_Error` object but it will be empty. |
 | `$fields`  | `array`                     | The fields rendered in this locations.                                                                                                                                                |
-| `$group`   | `'billing'\|'shipping'\|'additional'` | If the action is for the address location, the type of address will be set here. If it is for contact or additional, this will be 'additional'.                                   |
+| `$group`   | `'billing'\|'shipping'\|'other'` | If the action is for the address location, the type of address will be set here. If it is for contact or order, this will be 'other'.                                   |
 
 There are several places where these hooks are fired.
 
 - When checking out using the Checkout block or Store API.
-    - `__experimental_woocommerce_blocks_validate_location_address_fields` (x2)
-    - `__experimental_woocommerce_blocks_validate_location_contact_fields`
-    - `__experimental_woocommerce_blocks_validate_location_additional_fields`
+    - `woocommerce_blocks_validate_location_address_fields` (x2)
+    - `woocommerce_blocks_validate_location_contact_fields`
+    - `woocommerce_blocks_validate_location_other_fields`
 - When updating addresses in the "My account" area
-    - `__experimental_woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
+    - `woocommerce_blocks_validate_location_address_fields` (**x1** - only the address being edited)
 - When updating the "Account details" section in the "My account" area
-    - `__experimental_woocommerce_blocks_validate_location_contact_fields`
+    - `woocommerce_blocks_validate_location_contact_fields`
 
 ##### Example of location validation
 
@@ -578,7 +578,7 @@ The example below illustrates how to verify that the value of the confirmation f
 
 ```php
 add_action(
-	'__experimental_woocommerce_blocks_validate_location_address_fields',
+	'woocommerce_blocks_validate_location_address_fields',
 	function ( \WP_Error $errors, $fields, $group ) {
 		if ( $fields['namespace/gov-id'] !== $fields['namespace/confirm-gov-id'] ) {
 			$errors->add( 'gov_id_mismatch', 'Please ensure your government ID matches the confirmation.' );
@@ -589,7 +589,90 @@ add_action(
 );
 ```
 
-If these fields were rendered in the "contact" location instead, the code would be the same except the hook used would be: `__experimental_woocommerce_blocks_validate_location_contact_fields`.
+If these fields were rendered in the "contact" location instead, the code would be the same except the hook used would be: `woocommerce_blocks_validate_location_contact_fields`.
+
+## Backward compatibility
+
+Due to technical reasons, it's not yet possible to specify the meta key for fields, as we want them to be prefixed and managed. Plugins with existing fields in shortcode Checkout can be compatible and react to reading and saving fields using hooks.
+
+Assuming 2 fields, named `my-plugin-namespace/address-field` in the address step and `my-plugin-namespace/my-other-field` in the order step, you can:
+
+### React to to saving fields
+
+You can react to those fields being saved by hooking into `woocommerce_set_additional_field_value` action.
+
+```php
+add_action(
+	'woocommerce_set_additional_field_value',
+	function ( $key, $value, $group, $wc_object ) {
+		if ( 'my-plugin-namespace/address-field' !== $key ) {
+			return;
+		}
+
+		if ( 'billing' === $group ) {
+			$my_plugin_address_key = 'existing_billing_address_field_key';
+		} else {
+			$my_plugin_address_key = 'existing_shipping_address_field_key';
+		}
+
+		$wc_object->update_meta_data( $my_plugin_address_key, $value, true );
+	},
+	10,
+	4
+);
+
+add_action(
+	'woocommerce_set_additional_field_value',
+	function ( $key, $value, $group, $wc_object ) {
+		if ( 'my-plugin-namespace/my-other-field' !== $key ) {
+			return;
+		}
+
+		$my_plugin_key = 'existing_order_field_key';
+
+		$wc_object->update_meta_data( $my_plugin_key, $value, true );
+	},
+	10,
+	4
+);
+```
+
+This way, you can ensure existing systems will continue working and your integration will continue to work. However, ideally, you should migrate your existing data and systems to use the new meta fields.
+
+
+### React to reading fields
+
+You can use the `woocommerce_get_default_value_for_{$key}` filters to provide a different default value (a value coming from another meta field for example):
+
+```php
+add_filter(
+	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/address-field",
+	function ( $value, $group, $wc_object ) {
+
+		if ( 'billing' === $group ) {
+			$my_plugin_key = 'existing_billing_address_field_key';
+		} else {
+			$my_plugin_key = 'existing_shipping_address_field_key';
+		}
+
+		return $wc_object->get_meta( $my_plugin_key );
+	},
+	10,
+	3
+);
+
+add_filter(
+	"woocommerce_blocks_get_default_value_for_my-plugin-namespace/my-other-field",
+	function ( $value, $group, $wc_object ) {
+
+		$my_plugin_key = 'existing_order_field_key';
+
+		return $wc_object->get_meta( $my_plugin_key );
+	},
+	10,
+	3
+);
+```
 
 ## A full example
 
@@ -601,7 +684,7 @@ This example is just a combined version of the examples shared above.
 add_action(
 	'woocommerce_blocks_loaded',
 	function() {
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/gov-id',
 				'label'         => 'Government ID',
@@ -614,7 +697,7 @@ add_action(
 				),
 			),
 		);
-		__experimental_woocommerce_blocks_register_checkout_field(
+		woocommerce_register_additional_checkout_field(
 			array(
 				'id'            => 'namespace/confirm-gov-id',
 				'label'         => 'Confirm government ID',
@@ -629,7 +712,7 @@ add_action(
 		);
 
 		add_action(
-			'_experimental_woocommerce_blocks_sanitize_additional_field',
+			'woocommerce_sanitize_additional_field',
 			function ( $field_value, $field_key ) {
 				if ( 'namespace/gov-id' === $field_key || 'namespace/confirm-gov-id' === $field_key ) {
 					$field_value = str_replace( ' ', '', $field_key );
@@ -642,7 +725,7 @@ add_action(
 		);
 
 		add_action(
-		'__experimental_woocommerce_blocks_validate_additional_field',
+		'woocommerce_validate_additional_field',
 			function ( WP_Error $errors, $field_key, $field_value ) {
 				if ( 'namespace/gov-id' === $field_key ) {
 					$match = preg_match( '/[A-Z0-9]{5}/', $field_value );
@@ -659,7 +742,7 @@ add_action(
 );
 
 add_action(
-	'__experimental_woocommerce_blocks_validate_location_address_fields',
+	'woocommerce_blocks_validate_location_address_fields',
 	function ( \WP_Error $errors, $fields, $group ) {
 		if ( $fields['namespace/gov-id'] !== $fields['namespace/confirm-gov-id'] ) {
 			$errors->add( 'gov_id_mismatch', 'Please ensure your government ID matches the confirmation.' );
