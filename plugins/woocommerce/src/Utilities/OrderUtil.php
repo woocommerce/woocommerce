@@ -196,8 +196,8 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
-		$cache_key        = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'order-count-' . $order_type;
-		$count_per_status = wp_cache_get( $cache_key, 'counts' );
+		$cache_key        = 'order-count-' . $order_type;
+		$count_per_status = wp_cache_get( $cache_key, 'orders' );
 
 		if ( false === $count_per_status ) {
 			if ( self::custom_orders_table_usage_is_enabled() ) {
@@ -222,7 +222,7 @@ final class OrderUtil {
 				$count_per_status
 			);
 
-			wp_cache_set( $cache_key, $count_per_status, 'counts' );
+			wp_cache_set( $cache_key, $count_per_status, 'orders' );
 		}
 
 		return $count_per_status;
