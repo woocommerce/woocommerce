@@ -4,7 +4,7 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 
-test.describe( 'Shop page', async () => {
+test.describe( 'Shop page', () => {
 	test( 'template selector is not visible in the Page editor', async ( {
 		admin,
 		page,
@@ -14,7 +14,10 @@ test.describe( 'Shop page', async () => {
 			`npm run wp-env run tests-cli -- wp option get woocommerce_shop_page_id`
 		);
 		const numberMatch = cliOutput.stdout.match( /\d+/ );
-		expect( numberMatch ).not.toBeNull();
+		// eslint-disable-next-line playwright/no-conditional-in-test
+		if ( numberMatch === null ) {
+			throw new Error( 'Shop page ID not found' );
+		}
 
 		await admin.editPost( numberMatch[ 0 ] );
 

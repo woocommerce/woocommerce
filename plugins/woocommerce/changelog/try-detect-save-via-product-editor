@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add wc_rest_is_from_product_editor() function to check if REST request was made by product editor.

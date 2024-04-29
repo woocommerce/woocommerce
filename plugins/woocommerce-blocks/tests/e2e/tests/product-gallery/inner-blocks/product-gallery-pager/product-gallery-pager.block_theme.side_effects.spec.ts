@@ -44,11 +44,6 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
@@ -56,11 +51,6 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 		await editorUtils.enterEditMode();
 		await editor.openDocumentSettingsSidebar();
-	} );
-
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 	} );
 
 	test( 'Renders Product Gallery Pager block on the editor and frontend side', async ( {
