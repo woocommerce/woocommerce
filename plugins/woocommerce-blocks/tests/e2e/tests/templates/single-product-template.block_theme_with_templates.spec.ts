@@ -19,7 +19,7 @@ const testData = {
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
-test.describe( 'Single Product Template', async () => {
+test.describe( 'Single Product Template', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 	} );

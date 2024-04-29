@@ -25,7 +25,7 @@ test.describe( 'Template customization', () => {
 				? 'template'
 				: 'template part';
 
-		test.describe( `${ testData.templateName } template`, async () => {
+		test.describe( `${ testData.templateName } template`, () => {
 			test( "theme template has priority over WooCommerce's and can be modified", async ( {
 				admin,
 				editor,

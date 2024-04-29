@@ -19,14 +19,14 @@ export function cli( command: string ): Promise< ExecResult > {
 			( error: ExecException | null, stdout: string, stderr: string ) => {
 				if ( error ) {
 					reject( {
-						error: error,
-						stdout: stdout,
-						stderr: stderr,
+						error,
+						stdout,
+						stderr,
 					} as ExecError );
 				} else {
 					resolve( {
-						stdout: stdout,
-						stderr: stderr,
+						stdout,
+						stderr,
 					} as ExecResult );
 				}
 			}
