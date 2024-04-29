@@ -69,7 +69,6 @@ test.describe( 'Shopper → Translations', () => {
 		const beanieAddToCartButton = page.getByLabel(
 			'Toevoegen aan winkelwagen: “Beanie“'
 		);
-		await page.pause();
 		await beanieAddToCartButton.click();
 		await page.getByLabel( 'Toevoegen aan winkelwagen: “Beanie“' ).click();
 
