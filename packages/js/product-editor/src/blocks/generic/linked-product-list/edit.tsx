@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useReducer,
 	useState,
+	useRef,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
@@ -79,6 +80,8 @@ export function LinkedProductListBlockEdit( {
 		searchedProducts: [],
 	} );
 
+	const [ shouldFilter, setShouldFilter ] = useState( false );
+	const elementRef = useRef( null );
 	const productId = useEntityId( 'postType', postType );
 
 	const loadLinkedProductsDispatcher =
@@ -99,6 +102,31 @@ export function LinkedProductListBlockEdit( {
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
+	useEffect( () => {
+		const currentElement = elementRef.current;
+		const observer = new IntersectionObserver(
+			( entries ) => {
+				const [ entry ] = entries;
+				if ( entry.isIntersecting ) {
+					setShouldFilter( true );
+				}
+			},
+			{
+				threshold: 0.1, // It is active when 10% of the element is visible.
+			}
+		);
+
+		if ( currentElement ) {
+			observer.observe( currentElement );
+		}
+
+		return () => {
+			if ( currentElement ) {
+				observer.disconnect();
+			}
+		};
+	}, [] );
+
 	const filter = useCallback(
 		( search = '' ) => {
 			// Exclude the current product and any already linked products.
@@ -112,8 +140,10 @@ export function LinkedProductListBlockEdit( {
 	);
 
 	useEffect( () => {
-		filter();
-	}, [ filter ] );
+		if ( shouldFilter ) {
+			filter();
+		}
+	}, [ filter, shouldFilter ] );
 
 	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
@@ -216,7 +246,7 @@ export function LinkedProductListBlockEdit( {
 	}
 
 	return (
-		<div { ...blockProps }>
+		<div { ...blockProps } ref={ elementRef }>
 			<SectionActions>
 				<Button
 					variant="tertiary"
