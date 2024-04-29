@@ -252,7 +252,7 @@ abstract class CustomMetaDataStore {
 		if ( ! $include_private ) {
 			$query .= $wpdb->prepare( "WHERE meta_key NOT BETWEEN '_' AND '_z' HAVING meta_key NOT LIKE %s ", $wpdb->esc_like( '_' ) . '%' );
 		} else {
-			$query .= "WHERE meta_key != '' ";
+			$query .= "WHERE meta_key NOT BETWEEN '_' AND '_z' ";
 		}
 
 		$order  = in_array( strtoupper( $order ), array( 'ASC', 'DESC' ), true ) ? $order : 'ASC';
