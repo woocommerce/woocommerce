@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -6,12 +6,6 @@ const {
 	getCanvas,
 	publishPage,
 } = require( '../../utils/editor' );
-const uuid = require( 'uuid' );
-
-const wooPatternsPageTitle = `Insert Woo Patterns ${ uuid.v1() }`;
-const wooPatternsPageSlug = wooPatternsPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
 
 // some WooCommerce Patterns to use
 const wooPatterns = [
@@ -33,12 +27,18 @@ const wooPatterns = [
 	},
 ];
 
-test.describe( 'Insert WooCommerce Patterns Into Page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Add WooCommerce Patterns Into Page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Woocommerce Patterns',
+	} );
 
-	test( 'can insert WooCommerce patterns into page', async ( { page } ) => {
+	test( 'can insert WooCommerce patterns into page', async ( {
+		page,
+		testPage,
+	} ) => {
 		await goToPageEditor( { page } );
-		await fillPageTitle( page, wooPatternsPageTitle );
+		await fillPageTitle( page, testPage.title );
 
 		for ( let i = 0; i < wooPatterns.length; i++ ) {
 			await test.step( `Insert ${ wooPatterns[ i ].name } pattern`, async () => {
@@ -59,7 +59,7 @@ test.describe( 'Insert WooCommerce Patterns Into Page', () => {
 			} );
 		}
 
-		await publishPage( page, wooPatternsPageTitle );
+		await publishPage( page, testPage.title );
 
 		// check again added patterns after publishing
 		const canvas = await getCanvas( page );
@@ -72,9 +72,9 @@ test.describe( 'Insert WooCommerce Patterns Into Page', () => {
 		}
 
 		// go to the frontend page to verify patterns
-		await page.goto( wooPatternsPageSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: wooPatternsPageTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 
 		// check some elements from added patterns

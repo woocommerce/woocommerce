@@ -8,6 +8,7 @@ import { getCheckboxTracks } from './get-checkbox-tracks';
 import { getCurrencySymbolProps } from './get-currency-symbol-props';
 import { getDerivedProductType } from './get-derived-product-type';
 import { getHeaderTitle } from './get-header-title';
+import { getPermalinkParts } from './get-permalink-parts';
 import { getProductStatus, PRODUCT_STATUS_LABELS } from './get-product-status';
 import {
 	getProductStockStatus,
@@ -42,6 +43,7 @@ export {
 	getCurrencySymbolProps,
 	getDerivedProductType,
 	getHeaderTitle,
+	getPermalinkParts,
 	getProductStatus,
 	getProductStockStatus,
 	getProductStockStatusClass,
