@@ -118,10 +118,26 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		add_action( 'woocommerce_after_checkout_billing_form', array( $this, 'stamp_checkout_html_element_once' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this, 'stamp_checkout_html_element_once' ) );
-		add_action( 'woocommerce_after_order_notes', array( $this, 'stamp_checkout_html_element_once' ) );
-		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_checkout_html_element_once' ) );
+		/**
+		 * Filter set of actions used to stamp the unique checkout order attribution HTML container element.
+		 *
+		 * @since 9.0.0
+		 *
+		 * @param array $stamp_checkout_html_actions The set of actions used to stamp the unique checkout order attribution HTML container element.
+		 */
+		$stamp_checkout_html_actions = apply_filters(
+			'wc_order_attribution_stamp_checkout_html_actions',
+			array(
+				'woocommerce_checkout_billing',
+				'woocommerce_after_checkout_billing_form',
+				'woocommerce_checkout_shipping',
+				'woocommerce_after_order_notes',
+				'woocommerce_checkout_after_customer_details',
+			)
+		);
+		foreach ( $stamp_checkout_html_actions as $action ) {
+			add_action( $action, array( $this, 'stamp_checkout_html_element_once' ) );
+		}
 
 		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
 
