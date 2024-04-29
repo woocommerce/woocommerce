@@ -1,0 +1,5 @@
+Significance: patch
+Type: fixed
+Comment: Fix phpdoc comments to make Phan happier. No change to functionality.
+
+

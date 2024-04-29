@@ -112,7 +112,7 @@ class Universal {
 	 * @param string $url Full HTML a tag of the link to remove an item from the cart.
 	 * @param string $key Unique Key ID for a cart item.
 	 *
-	 * @return mixed.
+	 * @return string
 	 */
 	public function remove_from_cart_attributes( $url, $key ) {
 		if ( str_contains( $url, 'data-product_id' ) ) {

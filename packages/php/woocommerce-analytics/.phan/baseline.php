@@ -14,12 +14,11 @@ return [
     // PhanUndeclaredMethod : 2 occurrences
     // PhanTypeSuspiciousNonTraversableForeach : 1 occurrence
     // PhanUndeclaredMethodInCallable : 1 occurrence
-    // PhanUnextractableAnnotationSuffix : 1 occurrence
 
     // Currently, file_suppressions and directory_suppressions are the only supported suppressions
     'file_suppressions' => [
         'src/class-checkout-flow.php' => ['PhanPluginRedundantAssignment'],
-        'src/class-universal.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredMethod', 'PhanUndeclaredMethodInCallable', 'PhanUnextractableAnnotationSuffix'],
+        'src/class-universal.php' => ['PhanPluginRedundantAssignment', 'PhanUndeclaredMethod', 'PhanUndeclaredMethodInCallable'],
         'src/class-woo-analytics-trait.php' => ['PhanTypeSuspiciousNonTraversableForeach', 'PhanUndeclaredFunction', 'PhanUndeclaredMethod'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.
