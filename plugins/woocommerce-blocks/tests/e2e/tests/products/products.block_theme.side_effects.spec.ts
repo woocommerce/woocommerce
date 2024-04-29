@@ -123,10 +123,6 @@ for ( const {
 	legacyBlockName,
 } of Object.values( templates ) ) {
 	test.describe( `${ templateTitle } template`, () => {
-		test.afterAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( 'wp_template' );
-			await requestUtils.deleteAllTemplates( 'wp_template_part' );
-		} );
 		test( 'Products block matches with classic template block', async ( {
 			admin,
 			editor,

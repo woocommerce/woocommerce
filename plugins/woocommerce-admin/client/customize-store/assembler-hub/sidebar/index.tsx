@@ -33,6 +33,8 @@ import {
 	updateQueryString,
 	useQuery,
 } from '@woocommerce/navigation';
+// In some cases, the assembler is loaded in an iframe, so we have to re-apply the filter.
+import '~/customize-store/design-with-ai/entrepreneur-flow';
 
 function isSubset(
 	subset: {

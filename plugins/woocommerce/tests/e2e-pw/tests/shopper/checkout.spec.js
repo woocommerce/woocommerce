@@ -3,6 +3,7 @@ const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin, customer } = require( '../../test-data/data' );
 const { setFilterValue, clearFilters } = require( '../../utils/filters' );
 const { addProductsToCart } = require( '../../utils/pdp' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const { getOrderIdFromUrl } = require( '../../utils/order' );
 
 const guestEmail = 'checkout-guest@example.com';
@@ -119,8 +120,7 @@ test.describe( 'Checkout page', () => {
 	} );
 
 	test( 'should display cart items in order review', async ( { page } ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, productId );
 
 		await page.goto( '/checkout/' );
 
@@ -201,9 +201,7 @@ test.describe( 'Checkout page', () => {
 	test( 'warn when customer is missing required details', async ( {
 		page,
 	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await addAProductToCart( page, productId );
 
 		await page.goto( '/checkout/' );
 
@@ -450,7 +448,12 @@ test.describe( 'Checkout page', () => {
 			.locator( 'input[name="password"]' )
 			.fill( customer.password );
 		await page.locator( 'text=Log In' ).click();
-		await page.waitForLoadState( 'networkidle' );
+		await expect(
+			page.getByText(
+				`Hello ${ customer.first_name } ${ customer.last_name }`
+			)
+		).toBeVisible();
+
 		await addProductsToCart( page, simpleProductName, '2' );
 
 		await page.goto( '/checkout/' );

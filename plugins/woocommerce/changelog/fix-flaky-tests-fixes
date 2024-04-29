@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip mini cart e2e tests, flaky test fixes

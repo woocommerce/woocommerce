@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttribute,
+	ProductProductAttribute,
 	ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
@@ -227,7 +227,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						return function handleAttributeChange(
 							value?:
 								| Omit<
-										ProductAttribute,
+										ProductProductAttribute,
 										'position' | 'visible' | 'variation'
 								  >
 								| string
@@ -237,6 +237,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								value &&
 								! ( typeof value === 'string' )
 							) {
+								const selectedAttribute =
+									getProductAttributeObject(
+										value
+									) as EnhancedProductAttribute;
+
+								setValue( 'attributes[' + index + ']', {
+									...selectedAttribute,
+								} );
+
 								resolveSelect(
 									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 								)
@@ -250,10 +259,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 										attribute_id: value.id,
 									} )
 									.then( ( terms ) => {
-										const selectedAttribute =
-											getProductAttributeObject(
-												value
-											) as EnhancedProductAttribute;
 										if ( termsAutoSelection === 'all' ) {
 											selectedAttribute.terms = terms;
 										} else if ( terms.length > 0 ) {
