@@ -63,6 +63,18 @@ async function globalSetup() {
 	console.log( 'Running global setup:' );
 	console.time( '└ Total time' );
 
+	let databaseImported = false;
+
+	try {
+		console.log( '├ Attempting database import…' );
+		await cli(
+			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
+		);
+		databaseImported = true;
+	} catch ( _error ) {
+		// noop
+	}
+
 	const requestContext = await request.newContext( {
 		baseURL: BASE_URL,
 	} );
@@ -78,11 +90,13 @@ async function globalSetup() {
 	} );
 	await requestUtils.setupRest();
 
-	console.log( '├ Activating default theme…' );
-	await requestUtils.activateTheme( BLOCK_THEME_SLUG );
+	if ( ! databaseImported ) {
+		console.log( '├ Activating default theme…' );
+		await requestUtils.activateTheme( BLOCK_THEME_SLUG );
 
-	console.log( '├ Preparing product attributes…' );
-	await prepareAttributes();
+		console.log( '├ Preparing product attributes…' );
+		await prepareAttributes();
+	}
 
 	console.log( '├ Exporting database…' );
 	await cli(
