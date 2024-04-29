@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 8.8.3 2024-04-29 =
 
+* Fix - Fixes order counts in the status widget for persistent caches.
 * Update - Reverts auto-injecting specific Woo Blocks in every block theme and restores only auto-injecting in themes found in the allow list. 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
