@@ -167,6 +167,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 8.8.3 2024-04-29 =
 
+* Fix - Fix HPOS order searches involving terms with characters resembling URL-encoded characters. [#46972](https://github.com/woocommerce/woocommerce/pull/46972)
 * Fix - Fixes order counts in the status widget for persistent caches. [#46860](https://github.com/woocommerce/woocommerce/pull/46860)
 * Update - Reverts auto-injecting specific Woo Blocks in every block theme and restores only auto-injecting in themes found in the allow list. [#46935](https://github.com/woocommerce/woocommerce/pull/46935)
 
