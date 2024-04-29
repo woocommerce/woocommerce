@@ -38,6 +38,7 @@ if [ $ENABLE_TRACKING == 1 ]; then
 	wp-env run tests-cli wp option update woocommerce_allow_tracking 'yes'
 fi
 
+echo -e 'Disabling coming soon option\n'
 wp-env run tests-cli wp option update woocommerce_coming_soon 'no'
 
 echo -e 'Upload test images \n'
