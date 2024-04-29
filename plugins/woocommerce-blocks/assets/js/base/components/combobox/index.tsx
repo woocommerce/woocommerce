@@ -144,16 +144,6 @@ const Combobox = ( {
 		'components-form-token-field__input'
 	);
 
-	const popoverClasses = classnames(
-		'components-form-token-field__suggestions-list'
-	);
-
-	const suggestionClasses = classnames(
-		'components-form-token-field__suggestion'
-	);
-
-	const labelClasses = classnames( 'components-base-control__label' );
-
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
 	return (
@@ -178,7 +168,7 @@ const Combobox = ( {
 					} }
 				>
 					<div className="components-base-control__field">
-						<AriakitComboboxLabel className={ labelClasses }>
+						<AriakitComboboxLabel className="components-base-control__label">
 							{ label }
 						</AriakitComboboxLabel>
 
@@ -191,13 +181,13 @@ const Combobox = ( {
 								type="text"
 							/>
 							<AriakitComboboxPopover
-								className={ popoverClasses }
+								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<AriakitComboboxItem
-										className={ suggestionClasses }
+										className="components-form-token-field__suggestion"
 										key={ option.label }
 										value={ option.label }
 									/>
