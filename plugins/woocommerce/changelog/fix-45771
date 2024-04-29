@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix HPOS order searches involving terms with characters resembling URL-encoded characters.
