@@ -1679,9 +1679,10 @@ add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_pro
  * @since 8.5.0
  * @param int        $attachment_id Media attachment ID.
  * @param WC_Product $product Optional product object.
+ * @param bool       $save_product If true, the changes in the product will be saved before the method returns.
  * @return void
  */
-function wc_product_attach_featured_image( $attachment_id, $product = null ) {
+function wc_product_attach_featured_image( $attachment_id, $product = null, $save_product = true ) {
 	$attachment_post = get_post( $attachment_id );
 	if ( ! $attachment_post ) {
 		return;
@@ -1703,7 +1704,9 @@ function wc_product_attach_featured_image( $attachment_id, $product = null ) {
 	}
 
 	$product->set_image_id( $attachment_id );
-	$product->save();
+	if ( $save_product ) {
+		$product->save();
+	}
 	if ( 0 === $attachment_post->post_parent ) {
 		wp_update_post(
 			array(
