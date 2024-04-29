@@ -118,10 +118,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 			}
 		);
 
-		add_action( 'woocommerce_after_checkout_billing_form', array( $this, 'stamp_checkout_html_element' ) );
-		add_action( 'woocommerce_checkout_shipping', array( $this, 'stamp_checkout_html_element' ) );
-		add_action( 'woocommerce_after_order_notes', array( $this, 'stamp_checkout_html_element' ) );
-		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_checkout_html_element' ) );
+		add_action( 'woocommerce_after_checkout_billing_form', array( $this, 'stamp_checkout_html_element_once' ) );
+		add_action( 'woocommerce_checkout_shipping', array( $this, 'stamp_checkout_html_element_once' ) );
+		add_action( 'woocommerce_after_order_notes', array( $this, 'stamp_checkout_html_element_once' ) );
+		add_action( 'woocommerce_checkout_after_customer_details', array( $this, 'stamp_checkout_html_element_once' ) );
 
 		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
 
@@ -356,7 +356,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 *
 	 * @return void
 	 */
-	public function stamp_checkout_html_element() {
+	public function stamp_checkout_html_element_once() {
 		if ( self::$is_stamp_checkout_html_called ) {
 			return;
 		}
