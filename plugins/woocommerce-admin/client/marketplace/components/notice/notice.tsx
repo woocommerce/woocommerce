@@ -54,7 +54,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 		}
 	};
 
-	useEffect(() => {
+	useEffect( () => {
 		if ( isVisible && typeof onLoad === 'function' ) {
 			onLoad();
 		}
