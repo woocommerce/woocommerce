@@ -258,10 +258,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 */
 					function setAttributeValues(
 						value: AttributeInputFieldItemProps,
-						index: number
+						index: number,
+						populateTerms = true
 					) {
-						const isNewAttribute = value.id === -99;
-						if ( termsAutoSelection && ! isNewAttribute ) {
+						if ( termsAutoSelection && populateTerms ) {
 							const selectedAttribute = getProductAttributeObject(
 								value
 							) as EnhancedProductAttribute;
@@ -297,12 +297,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								} );
 						}
 
-						setValue( 'attributes[' + index + ']', {
-							id: 0,
-							name: value.name,
-							slug: value.name,
-						} );
-
+						setValue( 'attributes[' + index + ']', value );
 						focusValueField( index );
 					}
 
@@ -314,39 +309,52 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							source: TRACKS_SOURCE,
 						} );
 
-						const isNewAttribute = nextAttribute.id === -99;
-						if ( isNewAttribute && createNewAttributesAsGlobal ) {
-							return createProductAttribute(
-								{
-									name: nextAttribute.name,
-									generate_slug: true,
-								},
-								{
-									optimisticQueryUpdate: sortCriteria,
-								}
-							)
-								.then( ( newAttribute ) => {
-									setAttributeValues( newAttribute, index );
-								} )
-								.catch( ( error ) => {
-									let message = __(
-										'Failed to create new attribute.',
-										'woocommerce'
-									);
-									if (
-										error.code ===
-										'woocommerce_rest_cannot_create'
-									) {
-										message = error.message;
-									}
+						const attributeExists = nextAttribute.id !== -99;
 
-									createErrorNotice( message, {
-										explicitDismiss: true,
-									} );
-								} );
+						if ( attributeExists ) {
+							return setAttributeValues( nextAttribute, index );
 						}
 
-						setAttributeValues( nextAttribute, index );
+						if ( ! createNewAttributesAsGlobal ) {
+							return setAttributeValues(
+								{
+									id: 0,
+									name: nextAttribute.name,
+									slug: nextAttribute.name,
+								},
+								index,
+								false
+							);
+						}
+
+						createProductAttribute(
+							{
+								name: nextAttribute.name,
+								generate_slug: true,
+							},
+							{
+								optimisticQueryUpdate: sortCriteria,
+							}
+						)
+							.then( ( newAttribute ) => {
+								setAttributeValues( newAttribute, index );
+							} )
+							.catch( ( error ) => {
+								let message = __(
+									'Failed to create new attribute.',
+									'woocommerce'
+								);
+								if (
+									error.code ===
+									'woocommerce_rest_cannot_create'
+								) {
+									message = error.message;
+								}
+
+								createErrorNotice( message, {
+									explicitDismiss: true,
+								} );
+							} );
 					}
 
 					/*
