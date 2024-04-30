@@ -5,10 +5,6 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { cli } from '@woocommerce/e2e-utils';
 
 test.describe( 'Legacy templates', () => {
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
 	test( 'woocommerce//* slug is supported', async ( {
 		admin,
 		page,
@@ -85,16 +81,6 @@ test.describe( 'Legacy templates', () => {
 			await page.goto( template.frontendPath );
 
 			await expect( page.getByText( template.customText ) ).toBeVisible();
-		} );
-
-		await test.step( 'Revert term update', async () => {
-			await cli(
-				`npm run wp-env run tests-cli -- \
-					wp term update wp_theme woocommerce \
-						--by="slug" \
-						--name="woocommerce/woocommerce" \
-						--slug="woocommerce-woocommerce"`
-			);
 		} );
 	} );
 } );
