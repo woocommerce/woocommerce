@@ -6,7 +6,7 @@ import { PartialProductVariation, ProductVariation } from '@woocommerce/data';
 export type VariationActionsMenuProps = {
 	disabled?: boolean;
 	selection: ProductVariation[];
-	onChange( values: PartialProductVariation[], showSuccess: boolean ): void;
+	onChange( values: PartialProductVariation[], showSuccess?: boolean ): void;
 	onDelete( values: PartialProductVariation[] ): void;
 };
 
@@ -14,7 +14,7 @@ export type VariationQuickUpdateSlotProps = {
 	group: string;
 	supportsMultipleSelection: boolean;
 	selection: ProductVariation[];
-	onChange( values: PartialProductVariation[], showSuccess: boolean ): void;
+	onChange( values: PartialProductVariation[], showSuccess?: boolean ): void;
 	onClose: () => void;
 };
 
