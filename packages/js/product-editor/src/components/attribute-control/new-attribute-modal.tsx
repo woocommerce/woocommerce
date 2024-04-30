@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect, useSelect } from '@wordpress/data';
+import { resolveSelect, useSelect, useDispatch } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
@@ -12,9 +12,12 @@ import {
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	type ProductAttributesActions,
+	type WPDataActions,
 	type ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -25,6 +28,7 @@ import {
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
 import { getProductAttributeObject } from './utils';
+import { TRACKS_SOURCE } from '../../constants';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
@@ -225,6 +229,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		};
 	} );
 
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as unknown as ProductAttributesActions & WPDataActions;
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -240,57 +249,104 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					function getAttributeOnChange( index: number ) {
-						return function handleAttributeChange(
-							value: AttributeInputFieldItemProps | string
-						) {
-							if (
-								termsAutoSelection &&
-								! ( typeof value === 'string' )
-							) {
-								const selectedAttribute =
-									getProductAttributeObject(
-										value
-									) as EnhancedProductAttribute;
+					/**
+					 * Set the attribute values in the form state,
+					 * and populate the terms if termsAutoSelection is enabled.
+					 *
+					 * @param {AttributeInputFieldItemProps} value - The attribute value.
+					 * @param {number}                       index - The index of the attribute in the form state.
+					 */
+					function setAttributeValues(
+						value: AttributeInputFieldItemProps,
+						index: number
+					) {
+						const isNewAttribute = value.id === -99;
+						if ( termsAutoSelection && ! isNewAttribute ) {
+							const selectedAttribute = getProductAttributeObject(
+								value
+							) as EnhancedProductAttribute;
 
-								setValue( 'attributes[' + index + ']', {
-									...selectedAttribute,
-								} );
+							setValue( 'attributes[' + index + ']', {
+								...selectedAttribute,
+							} );
 
-								resolveSelect(
-									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-								)
-									.getProductAttributeTerms<
-										ProductAttributeTerm[]
-									>( {
-										// Send search parameter as empty to avoid a second
-										// request when focusing the attribute-term-input-field
-										// which perform the same request to get all the terms
-										search: '',
-										attribute_id: value.id,
-									} )
-									.then( ( terms ) => {
-										if ( termsAutoSelection === 'all' ) {
-											selectedAttribute.terms = terms;
-										} else if ( terms.length > 0 ) {
-											selectedAttribute.terms = [
-												terms[ 0 ],
-											];
-										}
-										setValue( 'attributes[' + index + ']', {
-											...selectedAttribute,
-										} );
-										focusValueField( index );
+							return resolveSelect(
+								EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+							)
+								.getProductAttributeTerms<
+									ProductAttributeTerm[]
+								>( {
+									// Send search parameter as empty to avoid a second
+									// request when focusing the attribute-term-input-field
+									// which perform the same request to get all the terms
+									search: '',
+									attribute_id: value.id,
+								} )
+								.then( ( terms ) => {
+									if ( termsAutoSelection === 'all' ) {
+										selectedAttribute.terms = terms;
+									} else if ( terms.length > 0 ) {
+										selectedAttribute.terms = [
+											terms[ 0 ],
+										];
+									}
+									setValue( 'attributes[' + index + ']', {
+										...selectedAttribute,
 									} );
-							} else {
-								setValue(
-									'attributes[' + index + ']',
-									value && getProductAttributeObject( value )
-								);
+									focusValueField( index );
+								} );
+						}
 
-								focusValueField( index );
-							}
-						};
+						setValue( 'attributes[' + index + ']', {
+							id: 0,
+							name: value.name,
+							slug: value.name,
+						} );
+
+						focusValueField( index );
+					}
+
+					function selectAttributeHandler(
+						nextAttribute: AttributeInputFieldItemProps,
+						index: number
+					) {
+						recordEvent( 'product_attribute_add_custom_attribute', {
+							source: TRACKS_SOURCE,
+						} );
+
+						const isNewAttribute = nextAttribute.id === -99;
+						if ( isNewAttribute && createNewAttributesAsGlobal ) {
+							return createProductAttribute(
+								{
+									name: nextAttribute.name,
+									generate_slug: true,
+								},
+								{
+									optimisticQueryUpdate: sortCriteria,
+								}
+							)
+								.then( ( newAttribute ) => {
+									setAttributeValues( newAttribute, index );
+								} )
+								.catch( ( error ) => {
+									let message = __(
+										'Failed to create new attribute.',
+										'woocommerce'
+									);
+									if (
+										error.code ===
+										'woocommerce_rest_cannot_create'
+									) {
+										message = error.message;
+									}
+
+									createErrorNotice( message, {
+										explicitDismiss: true,
+									} );
+								} );
+						}
+
+						setAttributeValues( nextAttribute, index );
 					}
 
 					/*
@@ -376,11 +432,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															label={
 																attributeLabel
 															}
-															onChange={ getAttributeOnChange(
-																index
-															) }
-															createNewAttributesAsGlobal={
-																createNewAttributesAsGlobal
+															onChange={ (
+																nextAttribute
+															) =>
+																selectAttributeHandler(
+																	nextAttribute,
+																	index
+																)
 															}
 															disabledAttributeIds={
 																disabledAttributeIds
