@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online, storefront, che
 Requires at least: 6.4
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 8.8.2
+Stable tag: 8.8.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
