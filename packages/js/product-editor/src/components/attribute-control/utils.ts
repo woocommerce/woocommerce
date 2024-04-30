@@ -53,23 +53,3 @@ export function reorderSortableProductAttributePositions(
 		}
 	);
 }
-
-/**
- * Helper function to return an EnhancedProductAttribute object,
- * based on the provided attribute object.
- *
- * If attribute is a string it will create an object.
- *
- * @param { Object | string } attribute product attribute as string or object.
- */
-export function getProductAttributeObject(
-	attribute: string | AttributeInputFieldItemProps
-): AttributeInputFieldItemProps {
-	return typeof attribute === 'string'
-		? {
-				id: 0,
-				name: attribute,
-				slug: attribute,
-		  }
-		: attribute;
-}

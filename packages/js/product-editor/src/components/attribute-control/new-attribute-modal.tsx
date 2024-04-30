@@ -266,9 +266,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						 * set the attribute in the form state and populate the terms.
 						 */
 						if ( termsAutoSelection && populateTerms ) {
-							const selectedAttribute = getProductAttributeObject(
-								attribute
-							) as EnhancedProductAttribute;
+							const selectedAttribute =
+								attribute as EnhancedProductAttribute;
 
 							setValue( 'attributes[' + index + ']', {
 								...selectedAttribute,
