@@ -70,8 +70,8 @@ class WC_Helper_Admin {
 		);
 
 		if ( WC_Helper::is_site_connected() ) {
-			$settings[ 'wccomHelper' ][ 'subscription_expired_notice' ]  = PluginsHelper::get_expired_subscription_notice( false );
-			$settings[ 'wccomHelper' ][ 'subscription_expiring_notice' ] = PluginsHelper::get_expiring_subscription_notice( false );
+			$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
+			$settings['wccomHelper']['subscription_expiring_notice'] = PluginsHelper::get_expiring_subscription_notice( false );
 		}
 
 		return $settings;

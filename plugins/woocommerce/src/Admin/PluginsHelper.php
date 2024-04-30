@@ -41,12 +41,12 @@ class PluginsHelper {
 	/**
 	 * The URL for the WooCommerce subscription page.
 	 */
-	const WOO_SUBSCRIPTION_PAGE_URL    = 'https://woocommerce.com/my-account/my-subscriptions/';
+	const WOO_SUBSCRIPTION_PAGE_URL = 'https://woocommerce.com/my-account/my-subscriptions/';
 
 	/**
 	 * Meta key for dismissing expired subscription notices.
 	 */
-	const DISMISS_EXPIRED_SUBS_NOTICE  = 'woo_subscription_expired_notice_dismiss';
+	const DISMISS_EXPIRED_SUBS_NOTICE = 'woo_subscription_expired_notice_dismiss';
 
 	/**
 	 * Meta key for dismissing expiring subscription notices
@@ -627,7 +627,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Show notice about to expired subscription on WC settings page
+	 * Show notice about to expired subscription on WC settings page.
 	 *
 	 * @return void
 	 */
@@ -651,7 +651,7 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Show notice about to expiring subscription on WC settings page
+	 * Show notice about to expiring subscription on WC settings page.
 	 *
 	 * @return void
 	 */
@@ -705,7 +705,7 @@ class PluginsHelper {
 		);
 
 		$message_key = sprintf( '%s_manage', $has_multiple_subs_for_product ? 'multiple' : 'single' );
-		$price       = $subscription[ 'product_price' ] ?? '';
+		$price       = $subscription['product_price'] ?? '';
 		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
 
 		if ( isset( $messages[ $message_key ] ) ) {
@@ -729,28 +729,28 @@ class PluginsHelper {
 	 */
 	public static function get_expiring_subscription_notice( $allowed_link = true ) {
 		if ( ! WC_Helper::is_site_connected() ) {
-			return [];
+			return array();
 		}
 
-		if ( !self::$can_show_expiring_subs_notice ) {
-			return [];
+		if ( ! self::$can_show_expiring_subs_notice ) {
+			return array();
 		}
 
 		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, true );
-		if ( !empty( $is_notice_dismiss ) ) {
-			return [];
+		if ( ! empty( $is_notice_dismiss ) ) {
+			return array();
 		}
 
 		$subscriptions          = WC_Helper::get_subscriptions();
 		$expiring_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub['expiring'] && !$sub['autorenew'];
+				return $sub['expiring'] && ! $sub['autorenew'];
 			},
 		);
 
 		if ( ! $expiring_subscriptions ) {
-			return [];
+			return array();
 		}
 
 		$total_expiring_subscriptions = count( $expiring_subscriptions );
@@ -759,73 +759,73 @@ class PluginsHelper {
 			$subscriptions,
 			$expiring_subscriptions,
 			$total_expiring_subscriptions,
-			[
+			array(
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
 				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> expires on %2$s. <a href="%3$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) total expiring subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> expiring soon. <a href="%2$s">Enable auto-renewal</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
-			]
+			)
 		);
 
-		return [
+		return array(
 			'description' => $allowed_link ? $message : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $message ),
 			'button_text' => __( 'Enable auto-renewal', 'woocommerce' ),
-			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL
-		];
+			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL,
+		);
 	}
 
 	/**
 	 * Get formatted notice information for expired subscription.
 	 *
-	 * @param boolean $allowed_link whether the notice description should include a link
-	 * @return array notice information
+	 * @param boolean $allowed_link whether the notice description should include a link.
+	 * @return array notice information.
 	 */
 	public static function get_expired_subscription_notice( $allowed_link = true ) {
 		if ( ! WC_Helper::is_site_connected() ) {
-			return [];
+			return array();
 		}
 
 		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRED_SUBS_NOTICE, true );
-		if ( !empty( $is_notice_dismiss ) ) {
-			return [];
+		if ( ! empty( $is_notice_dismiss ) ) {
+			return array();
 		}
 
 		$subscriptions         = WC_Helper::get_subscriptions();
 		$expired_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub['expired' ] && !$sub['lifetime'];
+				return $sub['expired'] && ! $sub['lifetime'];
 			},
 		);
 
-		if ( !$expired_subscriptions ) {
-			return [];
+		if ( ! $expired_subscriptions ) {
+			return array();
 		}
 
-		$total_expired_subscriptions = count( $expired_subscriptions );
+		$total_expired_subscriptions         = count( $expired_subscriptions );
 		self::$can_show_expiring_subs_notice = false;
 
 		$message = self::get_subscriptions_message(
 			$subscriptions,
 			$expired_subscriptions,
 			$total_expired_subscriptions,
-			[
+			array(
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
 				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support', 'woocommerce' ),
-			],
+			),
 		);
 
-		return [
+		return array(
 			'description' => $allowed_link ? $message : preg_replace( '#<a.*?>(.*?)</a>#i', '\1', $message ),
 			'button_text' => __( 'Renew', 'woocommerce' ),
-			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL
-		];
+			'button_link' => self::WOO_SUBSCRIPTION_PAGE_URL,
+		);
 	}
 
 	/**
@@ -853,7 +853,7 @@ class PluginsHelper {
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( static::class, 'dismiss_woo_subscription_notice' ),
-					'permission_callback' => array( static::class, 'user_permissions_check' ),
+					'permission_callback' => array( static::class, 'get_permission' ),
 				),
 			)
 		);
@@ -884,18 +884,11 @@ class PluginsHelper {
 	}
 
 	/**
-	 * Check user has the necessary permissions to perform this action
+	 * Check user has the necessary permissions to perform this action.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool
 	 */
-	public static function user_permissions_check() {
-		if ( !current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error(
-				'invalid_permission_to_disimiss_button',
-				esc_html__( 'you are not allowed to perform this action', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-		return true;
+	public static function get_permission(): bool {
+		return current_user_can( 'manage_woocommerce' );
 	}
 }
