@@ -4,7 +4,11 @@
 import { render, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState, createElement } from '@wordpress/element';
-import { ProductAttribute, QueryProductAttribute } from '@woocommerce/data';
+import {
+	ProductAttribute,
+	ProductProductAttribute,
+	QueryProductAttribute,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,7 +21,6 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn().mockReturnValue( {
 		createErrorNotice: jest.fn(),
 		createProductAttribute: jest.fn(),
-		invalidateResolution: jest.fn(),
 	} ),
 } ) );
 
@@ -104,7 +107,7 @@ jest.mock( '@woocommerce/components', () => {
 	};
 } );
 
-const attributeList: ProductAttribute[] = [
+const attributeList: ProductProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',
@@ -275,7 +278,7 @@ describe( 'AttributeInputField', () => {
 	} );
 
 	describe( 'createNewAttributesAsGlobal is true', () => {
-		it( 'should create a new global attribute and invalidate product attributes', async () => {
+		it( 'should create a new global attribute', async () => {
 			const onChangeMock = jest.fn();
 			( useSelect as jest.Mock ).mockReturnValue( {
 				isLoading: false,
@@ -284,9 +287,7 @@ describe( 'AttributeInputField', () => {
 			const createProductAttributeMock = jest
 				.fn()
 				.mockImplementation(
-					(
-						newAttribute: Partial< Omit< ProductAttribute, 'id' > >
-					) => {
+					( newAttribute: Partial< ProductAttribute > ) => {
 						return Promise.resolve( {
 							name: newAttribute.name,
 							id: 123,
@@ -294,11 +295,9 @@ describe( 'AttributeInputField', () => {
 						} );
 					}
 				);
-			const invalidateResolutionMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: jest.fn(),
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -308,15 +307,20 @@ describe( 'AttributeInputField', () => {
 			);
 			queryByText( 'Update Input' )?.click();
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
 			await waitFor( () => {
-				expect( invalidateResolutionMock ).toHaveBeenCalledWith(
-					'getProductAttributes'
+				expect( createProductAttributeMock ).toHaveBeenCalledWith(
+					{
+						name: 'Co',
+						generate_slug: true,
+					},
+					{
+						optimisticQueryUpdate: {
+							order_by: 'name',
+						},
+					}
 				);
 			} );
+
 			expect( onChangeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
 				slug: 'co',
@@ -339,12 +343,10 @@ describe( 'AttributeInputField', () => {
 						message: 'Duplicate slug',
 					} );
 				} );
-			const invalidateResolutionMock = jest.fn();
 			const createErrorNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: createErrorNoticeMock,
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -354,17 +356,24 @@ describe( 'AttributeInputField', () => {
 			);
 			queryByText( 'Update Input' )?.click();
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
+			expect( createProductAttributeMock ).toHaveBeenCalledWith(
+				{
+					name: 'Co',
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: {
+						order_by: 'name',
+					},
+				}
+			);
+
 			await waitFor( () => {
 				expect( createErrorNoticeMock ).toHaveBeenCalledWith(
 					'Duplicate slug',
 					{ explicitDismiss: true }
 				);
 			} );
-			expect( invalidateResolutionMock ).not.toHaveBeenCalled();
 			expect( onChangeMock ).not.toHaveBeenCalled();
 		} );
 	} );

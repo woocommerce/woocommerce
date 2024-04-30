@@ -1,9 +1,14 @@
-const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { random } = require( '../../utils/helpers' );
 
-const simpleProductName = 'Checkout Coupons Product';
+const simpleProductName = `Checkout Coupons Product ${ random() }`;
 const singleProductFullPrice = '110.00';
 const singleProductSalePrice = '55.00';
 const coupons = [
@@ -28,24 +33,33 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-const checkoutBlockPageTitle = 'Checkout Block';
-const checkoutBlockPageSlug = checkoutBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 let productId, orderId, limitedCouponId;
 
-test.describe( 'Checkout Block Applying Coupons', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Checkout Block Applying Coupons', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Checkout Block',
+		page: async ( { context, page, testPage }, use ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, '/checkout' );
+			await publishPage( page, testPage.title );
+
+			await context.clearCookies();
+
+			await addAProductToCart( page, productId );
+			await page.goto( testPage.slug );
+			await expect(
+				page.getByRole( 'heading', { name: testPage.title } )
+			).toBeVisible();
+
+			await use( page );
+		},
+	} );
+
 	const couponBatchId = [];
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
@@ -99,13 +113,7 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 			} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ productId ],
 		} );
@@ -117,47 +125,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 		} );
 	} );
 
-	test( 'can create checkout block page', async ( { page } ) => {
-		// create a new page with checkout block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( checkoutBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/checkout' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ checkoutBlockPageTitle } is now live.` )
-		).toBeVisible();
-	} );
-
 	test( 'allows checkout block to apply coupon of any type', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
 		const totals = [ '$50.00', '$27.50', '$45.00' ];
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
-		await page.goto( checkoutBlockPageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
-		).toBeVisible();
 
 		// apply all coupon types
 		for ( let i = 0; i < coupons.length; i++ ) {
@@ -193,19 +164,10 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'allows checkout block to apply multiple coupons', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
 		const totals = [ '$50.00', '$22.50', '$12.50' ];
 		const totalsReverse = [ '$17.50', '$45.00', '$55.00' ];
 		const discounts = [ '-$5.00', '-$32.50', '-$42.50' ];
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
-		await page.goto( checkoutBlockPageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
-		).toBeVisible();
 
 		// add all coupons and verify prices
 		for ( let i = 0; i < coupons.length; i++ ) {
@@ -247,17 +209,7 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'prevents checkout block applying same coupon twice', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
-		await page.goto( checkoutBlockPageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
-		).toBeVisible();
-
 		// try to add two same coupons and verify the error message
 		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page
@@ -287,17 +239,7 @@ test.describe( 'Checkout Block Applying Coupons', () => {
 
 	test( 'prevents checkout block applying coupon with usage limit', async ( {
 		page,
-		context,
 	} ) => {
-		await context.clearCookies();
-		// add product to cart block and go to checkout
-		await page.goto( `/shop/?add-to-cart=${ productId }` );
-		await page.waitForLoadState( 'networkidle' );
-		await page.goto( checkoutBlockPageSlug );
-		await expect(
-			page.getByRole( 'heading', { name: checkoutBlockPageTitle } )
-		).toBeVisible();
-
 		// add coupon with usage limit
 		await page.getByRole( 'button', { name: 'Add a coupon' } ).click();
 		await page
