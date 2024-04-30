@@ -44,6 +44,7 @@ import {
 } from './types';
 import { getSuggestedProductsFor } from '../../../utils/get-related-products';
 import { SectionActions } from '../../../components/block-slot-fill';
+import { useVisibilityObserver } from '../../../hooks/use-visibility-observer';
 
 export function EmptyStateImage( {
 	image,
@@ -79,9 +80,8 @@ export function LinkedProductListBlockEdit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
-
-	const [ shouldFilter, setShouldFilter ] = useState( false );
 	const elementRef = useRef( null );
+	const isVisible = useVisibilityObserver( elementRef );
 	const productId = useEntityId( 'postType', postType );
 
 	const loadLinkedProductsDispatcher =
@@ -102,31 +102,6 @@ export function LinkedProductListBlockEdit( {
 		}
 	}, [ linkedProductIds, state.selectedProduct ] );
 
-	useEffect( () => {
-		const currentElement = elementRef.current;
-		const observer = new IntersectionObserver(
-			( entries ) => {
-				const [ entry ] = entries;
-				if ( entry.isIntersecting ) {
-					setShouldFilter( true );
-				}
-			},
-			{
-				threshold: 0.1, // It is active when 10% of the element is visible.
-			}
-		);
-
-		if ( currentElement ) {
-			observer.observe( currentElement );
-		}
-
-		return () => {
-			if ( currentElement ) {
-				observer.disconnect();
-			}
-		};
-	}, [] );
-
 	const filter = useCallback(
 		( search = '' ) => {
 			// Exclude the current product and any already linked products.
@@ -140,10 +115,10 @@ export function LinkedProductListBlockEdit( {
 	);
 
 	useEffect( () => {
-		if ( shouldFilter ) {
+		if ( isVisible ) {
 			filter();
 		}
-	}, [ filter, shouldFilter ] );
+	}, [ filter, isVisible ] );
 
 	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
