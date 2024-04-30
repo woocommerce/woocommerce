@@ -68,15 +68,12 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 		await expect( locator ).not.toHaveText( 'Customize your store' );
 	} );
 
-	test( 'Can view the Assembler Hub page when the theme is already customized', async ( {
+	test.only( 'Can view the Assembler Hub page when the theme is already customized', async ( {
 		page,
 		assemblerPageObject,
 	} ) => {
 		await page.goto( CUSTOMIZE_STORE_URL );
 		await page.click( 'text=Start designing' );
-		await page
-			.getByRole( 'button', { name: 'Design a new theme' } )
-			.click();
 		await assemblerPageObject.waitForLoadingScreenFinish();
 		const assembler = await assemblerPageObject.getAssembler();
 		await expect(

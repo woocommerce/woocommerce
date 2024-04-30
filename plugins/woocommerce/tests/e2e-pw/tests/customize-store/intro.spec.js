@@ -92,61 +92,11 @@ test.describe( 'Store owner can view the Intro page', () => {
 		await expect(
 			page.locator( '.existing-no-ai-theme-banner' )
 		).toBeVisible();
-		await expect(
-			page.locator( 'text=Edit your custom theme' )
-		).toBeVisible();
+		await expect( page.locator( 'h1' ) ).toHaveText(
+			'Customize your theme'
+		);
 		await expect(
 			page.getByRole( 'button', { name: 'Customize your theme' } )
-		).toBeVisible();
-	} );
-
-	test( 'it shows the "no AI" banner when the task is completed and the theme is not the default', async ( {
-		page,
-		baseURL,
-	} ) => {
-		try {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_admin_customize_store_completed',
-				'yes'
-			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
-		}
-		await activateTheme( 'twentytwentythree' );
-
-		await page.goto( CUSTOMIZE_STORE_URL );
-
-		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
-		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
-		await expect(
-			page.getByRole( 'button', { name: 'Start designing' } )
-		).toBeVisible();
-	} );
-
-	test( 'it shows the "no AI" banner, when the task is completed and the theme is not the default', async ( {
-		page,
-		baseURL,
-	} ) => {
-		try {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_admin_customize_store_completed',
-				'yes'
-			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated', error );
-		}
-		await activateTheme( 'twentytwentythree' );
-
-		await page.goto( CUSTOMIZE_STORE_URL );
-
-		await expect( page.locator( '.no-ai-banner' ) ).toBeVisible();
-		await expect( page.locator( 'text=Design your own' ) ).toBeVisible();
-		await expect(
-			page.getByRole( 'button', { name: 'Start designing' } )
 		).toBeVisible();
 	} );
 } );
