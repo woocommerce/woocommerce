@@ -27,7 +27,6 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { getProductAttributeObject } from './utils';
 import { TRACKS_SOURCE } from '../../constants';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
@@ -318,10 +317,19 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 
 						const attributeExists = nextAttribute.id !== -99;
 
+						/*
+						 * When the attribute exists,
+						 * set the attribute values.
+						 */
 						if ( attributeExists ) {
 							return setAttributeValues( nextAttribute, index );
 						}
 
+						/*
+						 * When the attribute does not exist,
+						 * and it should not be created as a global attribute,
+						 * only set the attribute values.
+						 */
 						if ( ! createNewAttributesAsGlobal ) {
 							return setAttributeValues(
 								{
@@ -334,6 +342,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							);
 						}
 
+						/*
+						 * If the attribute does not exist,
+						 * and it should be created as a global attribute,
+						 * create the new attribute and set the attribute values.
+						 */
 						createProductAttribute(
 							{
 								name: nextAttribute.name,
