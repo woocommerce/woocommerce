@@ -140,7 +140,6 @@ test.describe( 'Store owner can view the Intro page', () => {
 
 	test( 'clicking on "Customize your theme" with a classic theme should go to the customizer', async ( {
 		page,
-		assemblerPageObject,
 		baseURL,
 	} ) => {
 		await activateTheme( 'twentytwenty' );
@@ -161,9 +160,7 @@ test.describe( 'Store owner can view the Intro page', () => {
 			.getByRole( 'button', { name: 'Customize your theme' } )
 			.click();
 
-		//wait for loading state
 		await page.waitForNavigation();
-		//check url
 		await expect( page.url() ).toContain( 'customize.php' );
 	} );
 } );

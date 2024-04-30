@@ -164,18 +164,12 @@ const CustomizedThemeBanners = ( {
 				<div className="intro-card">
 					<img
 						src={ welcomeTourImg }
-						alt={ __(
-							'Design your own theme',
-							'woocommerce'
-						) }
+						alt={ __( 'Design your own theme', 'woocommerce' ) }
 					/>
 
 					<div>
 						<h2 className="intro-card__title">
-							{ __(
-								'Design your own theme',
-								'woocommerce'
-							) }
+							{ __( 'Design your own theme', 'woocommerce' ) }
 						</h2>
 
 						<button
@@ -198,7 +192,7 @@ const CustomizedThemeBanners = ( {
 								}
 							} }
 						>
-							{ __( ' Use the store designer', 'woocommerce' ) }
+							{ __( 'Use the store designer', 'woocommerce' ) }
 						</button>
 					</div>
 				</div>
