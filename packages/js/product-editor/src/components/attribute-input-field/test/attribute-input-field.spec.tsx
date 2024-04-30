@@ -2,9 +2,10 @@
  * External dependencies
  */
 import { render, waitFor } from '@testing-library/react';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { useState, createElement } from '@wordpress/element';
-import {
+import type {
+	ProductAttribute,
 	ProductProductAttribute,
 	QueryProductAttribute,
 } from '@woocommerce/data';
@@ -13,14 +14,13 @@ import {
  * Internal dependencies
  */
 import { AttributeInputField } from '../attribute-input-field';
+import type { AttributeInputFieldItemProps } from '../types';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
 	useDispatch: jest.fn().mockReturnValue( {
 		createErrorNotice: jest.fn(),
 		createProductAttribute: jest.fn(),
-		invalidateResolution: jest.fn(),
 	} ),
 } ) );
 
@@ -141,60 +141,47 @@ const attributeList: ProductProductAttribute[] = [
 	},
 ];
 
+const items: AttributeInputFieldItemProps[] = attributeList.map(
+	( attribute, i ) => ( {
+		id: attribute.id,
+		name: attribute.name,
+		slug: attribute.slug,
+		isDisabled: ! Boolean( i % 2 ),
+	} )
+);
+
 describe( 'AttributeInputField', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 	} );
 
 	it( 'should show spinner while attributes are loading', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: true,
-			attributes: undefined,
-		} );
 		const { queryByText } = render(
-			<AttributeInputField onChange={ jest.fn() } />
+			<AttributeInputField isLoading={ true } onChange={ jest.fn() } />
 		);
 		expect( queryByText( 'spinner' ) ).toBeInTheDocument();
 	} );
 
 	it( 'should render attributes when finished loading', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
-		const { queryByText } = render(
-			<AttributeInputField onChange={ jest.fn() } />
-		);
-		expect( queryByText( 'spinner' ) ).not.toBeInTheDocument();
-		expect( queryByText( attributeList[ 0 ].name ) ).toBeInTheDocument();
-		expect( queryByText( attributeList[ 1 ].name ) ).toBeInTheDocument();
-	} );
-
-	it( 'should filter out attribute ids passed into ignoredAttributeIds', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
 		const { queryByText } = render(
 			<AttributeInputField
+				items={ items }
+				isLoading={ false }
 				onChange={ jest.fn() }
-				ignoredAttributeIds={ [ attributeList[ 0 ].id ] }
 			/>
 		);
 		expect( queryByText( 'spinner' ) ).not.toBeInTheDocument();
-		expect(
-			queryByText( attributeList[ 0 ].name )
-		).not.toBeInTheDocument();
-		expect( queryByText( attributeList[ 1 ].name ) ).toBeInTheDocument();
+		expect( queryByText( items[ 0 ].name ) ).toBeInTheDocument();
+		expect( queryByText( items[ 1 ].name ) ).toBeInTheDocument();
 	} );
 
 	it( 'should filter attributes by name case insensitive', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
 		const { queryByText } = render(
-			<AttributeInputField onChange={ jest.fn() } />
+			<AttributeInputField
+				items={ items }
+				isLoading={ false }
+				onChange={ jest.fn() }
+			/>
 		);
 		queryByText( 'Update Input' )?.click();
 		expect(
@@ -203,47 +190,25 @@ describe( 'AttributeInputField', () => {
 		expect( queryByText( attributeList[ 1 ].name ) ).toBeInTheDocument();
 	} );
 
-	it( 'should filter out attributes ids from ignoredAttributeIds', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
-		const { queryByText } = render(
-			<AttributeInputField
-				onChange={ jest.fn() }
-				ignoredAttributeIds={ [ attributeList[ 1 ].id ] }
-			/>
-		);
-		expect( queryByText( attributeList[ 0 ].name ) ).toBeInTheDocument();
-		expect(
-			queryByText( attributeList[ 1 ].name )
-		).not.toBeInTheDocument();
-	} );
-
 	it( 'should trigger onChange when onSelect is triggered with attribute value', () => {
 		const onChangeMock = jest.fn();
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
+
 		const { queryByText } = render(
-			<AttributeInputField onChange={ onChangeMock } />
+			<AttributeInputField
+				items={ items }
+				isLoading={ false }
+				onChange={ onChangeMock }
+			/>
 		);
-		queryByText( attributeList[ 0 ].name )?.click();
-		expect( onChangeMock ).toHaveBeenCalledWith( {
-			id: attributeList[ 0 ].id,
-			name: attributeList[ 0 ].name,
-			slug: attributeList[ 0 ].slug,
-			options: [],
-		} );
+
+		queryByText( items[ 0 ].name )?.click();
+
+		expect( onChangeMock ).toHaveBeenCalledWith( items[ 0 ] );
 	} );
 
 	it( 'should trigger onChange when onRemove is triggered with undefined', () => {
 		const onChangeMock = jest.fn();
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: attributeList,
-		} );
+
 		const { queryByText } = render(
 			<AttributeInputField onChange={ onChangeMock } />
 		);
@@ -252,10 +217,6 @@ describe( 'AttributeInputField', () => {
 	} );
 
 	it( 'should show the create option when the search value does not match any attributes', () => {
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: [ attributeList[ 0 ] ],
-		} );
 		const { queryByText } = render(
 			<AttributeInputField onChange={ jest.fn() } />
 		);
@@ -265,12 +226,12 @@ describe( 'AttributeInputField', () => {
 
 	it( 'trigger the onChange callback when the create new value is clicked with only a string', async () => {
 		const onChangeMock = jest.fn();
-		( useSelect as jest.Mock ).mockReturnValue( {
-			isLoading: false,
-			attributes: [ attributeList[ 0 ] ],
-		} );
 		const { queryByText } = render(
-			<AttributeInputField onChange={ onChangeMock } />
+			<AttributeInputField
+				items={ items }
+				isLoading={ false }
+				onChange={ onChangeMock }
+			/>
 		);
 		queryByText( 'Update Input' )?.click();
 		queryByText( 'Create "Co"' )?.click();
@@ -278,32 +239,20 @@ describe( 'AttributeInputField', () => {
 	} );
 
 	describe( 'createNewAttributesAsGlobal is true', () => {
-		it( 'should create a new global attribute and invalidate product attributes', async () => {
+		it( 'should create a new global attribute', async () => {
 			const onChangeMock = jest.fn();
-			( useSelect as jest.Mock ).mockReturnValue( {
-				isLoading: false,
-				attributes: [ attributeList[ 0 ] ],
-			} );
 			const createProductAttributeMock = jest
 				.fn()
-				.mockImplementation(
-					(
-						newAttribute: Partial<
-							Omit< ProductProductAttribute, 'id' >
-						>
-					) => {
-						return Promise.resolve( {
-							name: newAttribute.name,
-							id: 123,
-							slug: newAttribute.name?.toLowerCase(),
-						} );
-					}
-				);
-			const invalidateResolutionMock = jest.fn();
+				.mockImplementation( ( newAttribute: ProductAttribute ) => {
+					return Promise.resolve( {
+						name: newAttribute.name,
+						id: 123,
+						slug: newAttribute.name?.toLowerCase(),
+					} );
+				} );
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: jest.fn(),
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -313,29 +262,29 @@ describe( 'AttributeInputField', () => {
 			);
 			queryByText( 'Update Input' )?.click();
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
 			await waitFor( () => {
-				expect( invalidateResolutionMock ).toHaveBeenCalledWith(
-					'getProductAttributes'
+				expect( createProductAttributeMock ).toHaveBeenCalledWith(
+					{
+						name: 'Co',
+						generate_slug: true,
+					},
+					{
+						optimisticQueryUpdate: {
+							order_by: 'name',
+						},
+					}
 				);
 			} );
+
 			expect( onChangeMock ).toHaveBeenCalledWith( {
 				name: 'Co',
 				slug: 'co',
 				id: 123,
-				options: [],
 			} );
 		} );
 
 		it( 'should show an error notice and not call onChange when creation failed', async () => {
 			const onChangeMock = jest.fn();
-			( useSelect as jest.Mock ).mockReturnValue( {
-				isLoading: false,
-				attributes: [ attributeList[ 0 ] ],
-			} );
 			const createProductAttributeMock = jest
 				.fn()
 				.mockImplementation( () => {
@@ -344,12 +293,10 @@ describe( 'AttributeInputField', () => {
 						message: 'Duplicate slug',
 					} );
 				} );
-			const invalidateResolutionMock = jest.fn();
 			const createErrorNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
 				createErrorNotice: createErrorNoticeMock,
 				createProductAttribute: createProductAttributeMock,
-				invalidateResolution: invalidateResolutionMock,
 			} );
 			const { queryByText } = render(
 				<AttributeInputField
@@ -359,17 +306,24 @@ describe( 'AttributeInputField', () => {
 			);
 			queryByText( 'Update Input' )?.click();
 			queryByText( 'Create "Co"' )?.click();
-			expect( createProductAttributeMock ).toHaveBeenCalledWith( {
-				name: 'Co',
-				generate_slug: true,
-			} );
+			expect( createProductAttributeMock ).toHaveBeenCalledWith(
+				{
+					name: 'Co',
+					generate_slug: true,
+				},
+				{
+					optimisticQueryUpdate: {
+						order_by: 'name',
+					},
+				}
+			);
+
 			await waitFor( () => {
 				expect( createErrorNoticeMock ).toHaveBeenCalledWith(
 					'Duplicate slug',
 					{ explicitDismiss: true }
 				);
 			} );
-			expect( invalidateResolutionMock ).not.toHaveBeenCalled();
 			expect( onChangeMock ).not.toHaveBeenCalled();
 		} );
 	} );

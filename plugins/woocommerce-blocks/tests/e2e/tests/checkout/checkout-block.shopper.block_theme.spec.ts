@@ -138,7 +138,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
 		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
 		await page.getByLabel( 'Testing' ).last().check();
 
@@ -160,7 +160,9 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page
+			.getByRole( 'radio', { name: 'Pickup', exact: true } )
+			.click();
 		await page
 			.getByLabel( 'Email address' )
 			.fill( 'thisShouldRemainHere@mail.com' );
@@ -168,19 +170,21 @@ test.describe( 'Shopper → Local pickup', () => {
 			'thisShouldRemainHere@mail.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Shipping from free' } ).click();
+		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'thisShouldRemainHere@mail.com'
 		);
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page
+			.getByRole( 'radio', { name: 'Pickup', exact: true } )
+			.click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Shipping from free' } ).click();
+		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);

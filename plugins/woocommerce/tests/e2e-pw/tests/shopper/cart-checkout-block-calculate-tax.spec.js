@@ -7,18 +7,18 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
-const uuid = require( 'uuid' );
+const { random } = require( '../../utils/helpers' );
 
 const productName = 'First Product Cart Block Taxing';
 const productPrice = '100.00';
 const messyProductPrice = '13.47';
 const secondProductName = 'Second Product Cart Block Taxing';
 
-const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
+const cartBlockPageTitle = `Cart Block ${ random() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
-const checkoutBlockPageTitle = `Checkout Block ${ uuid.v1() }`;
+const checkoutBlockPageTitle = `Checkout Block ${ random() }`;
 const checkoutBlockPageSlug = checkoutBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();

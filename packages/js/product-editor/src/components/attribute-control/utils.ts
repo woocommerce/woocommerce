@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { ProductProductAttribute } from '@woocommerce/data';
+import type { ProductProductAttribute } from '@woocommerce/data';
+
+/**
+ * Internal dependencies
+ */
+import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
@@ -50,21 +55,21 @@ export function reorderSortableProductAttributePositions(
 }
 
 /**
- * Helper function to return the product attribute object. If attribute is a string it will create an object.
+ * Helper function to return an EnhancedProductAttribute object,
+ * based on the provided attribute object.
+ *
+ * If attribute is a string it will create an object.
  *
  * @param { Object | string } attribute product attribute as string or object.
  */
 export function getProductAttributeObject(
-	attribute:
-		| string
-		| Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' >
-): Omit< ProductProductAttribute, 'position' | 'visible' | 'variation' > {
+	attribute: string | AttributeInputFieldItemProps
+): AttributeInputFieldItemProps {
 	return typeof attribute === 'string'
 		? {
 				id: 0,
 				name: attribute,
 				slug: attribute,
-				options: [],
 		  }
 		: attribute;
 }
