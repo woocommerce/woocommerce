@@ -1,11 +1,9 @@
 /**
  * External dependencies
  */
-import { render, waitFor } from '@testing-library/react';
-import { useDispatch } from '@wordpress/data';
+import { render } from '@testing-library/react';
 import { useState, createElement } from '@wordpress/element';
 import type {
-	ProductAttribute,
 	ProductProductAttribute,
 	QueryProductAttribute,
 } from '@woocommerce/data';
