@@ -31,8 +31,26 @@ if ( ! function_exists( 'get_plugins' ) ) {
  */
 class PluginsHelper {
 
-	const WOO_SUBSCRIPTION_PAGE_URL    = 'wccom_dashboard_notice_expired_subsriptions';
+	/**
+	 * Indicates whether the expiration notice for subscriptions can be displayed.
+	 *
+	 * @var bool
+	 */
+	public static $can_show_expiring_subs_notice = true;
+
+	/**
+	 * The URL for the WooCommerce subscription page.
+	 */
+	const WOO_SUBSCRIPTION_PAGE_URL    = 'https://woocommerce.com/my-account/my-subscriptions/';
+
+	/**
+	 * Meta key for dismissing expired subscription notices.
+	 */
 	const DISMISS_EXPIRED_SUBS_NOTICE  = 'woo_subscription_expired_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing expiring subscription notices
+	 */
 	const DISMISS_EXPIRING_SUBS_NOTICE = 'woo_subscription_expiring_notice_dismiss';
 
 	/**
@@ -48,7 +66,6 @@ class PluginsHelper {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_subscription_notice' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'woo_subscriptions_notice_dismiss_api' ) );
-
 	}
 
 	/**
@@ -616,7 +633,7 @@ class PluginsHelper {
 	 */
 	public static function maybe_show_expired_subscriptions_notice() {
 
-		if ( !WC_Helper::is_site_connected() ) {
+		if ( ! WC_Helper::is_site_connected() ) {
 			return;
 		}
 
@@ -626,9 +643,9 @@ class PluginsHelper {
 
 		$notice = self::get_expired_subscription_notice();
 
-		if ( isset( $notice[ 'description' ] ) ) {
+		if ( isset( $notice['description'] ) ) {
 			echo '<div id="woo-subscription-expired-notice" class="woo-subscription-expired-notice notice notice-error is-dismissible">
-	    		<p class="widefat">' . wp_kses_post( $notice[ 'description' ] ) . '</p>
+	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
 	}
@@ -639,7 +656,7 @@ class PluginsHelper {
 	 * @return void
 	 */
 	public static function maybe_show_expiring_subscriptions_notice() {
-		if ( !WC_Helper::is_site_connected() ) {
+		if ( ! WC_Helper::is_site_connected() ) {
 			return;
 		}
 
@@ -649,9 +666,9 @@ class PluginsHelper {
 
 		$notice = self::get_expiring_subscription_notice();
 
-		if ( isset( $notice[ 'description' ] ) ) {
+		if ( isset( $notice['description'] ) ) {
 			echo '<div id="woo-subscription-expiring-notice" class="woo-subscription-expiring-notice notice notice-error is-dismissible">
-	    		<p class="widefat">' . wp_kses_post( $notice[ 'description' ] ) . '</p>
+	    		<p class="widefat">' . wp_kses_post( $notice['description'] ) . '</p>
 	    	</div>';
 		}
 	}
@@ -661,14 +678,14 @@ class PluginsHelper {
 	 *
 	 * @param array $all_subs all subscription data.
 	 * @param array $subs_to_show filtered subscriptions as condition.
-	 * @param int $total total subscription count.
+	 * @param int   $total total subscription count.
 	 * @param array $messages message.
 	 * @return string message to return.
 	 */
 	public static function get_subscriptions_message( array $all_subs, array $subs_to_show, int $total, array $messages ) {
 		if ( 1 < $total ) {
 			return sprintf(
-				$messages[ 'different_subscriptions' ],
+				$messages['different_subscriptions'],
 				esc_attr( $total ),
 				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
 				esc_attr( $total ),
@@ -676,25 +693,25 @@ class PluginsHelper {
 		}
 
 		$subscription = reset( $subs_to_show );
-		$product_id   = $subscription[ 'product_id' ];
-		// check if $all_subs has multiple subs for this product
+		$product_id   = $subscription['product_id'];
+		// check if $all_subs has multiple subs for this product.
 		$has_multiple_subs_for_product = 1 < count(
-				array_filter(
-					$all_subs,
-					function ( $sub ) use ( $product_id ) {
-						return $product_id === $sub[ 'product_id' ];
-					}
-				)
-			);
+			array_filter(
+				$all_subs,
+				function ( $sub ) use ( $product_id ) {
+					return $product_id === $sub['product_id'];
+				}
+			)
+		);
 
-		$message_key = sprintf( "%s_manage", $has_multiple_subs_for_product ? 'multiple' : 'single' );
-		$price       = $subscription[ 'product_price' ];
-		$expiry_date = date_i18n( 'F jS', $subscription[ 'expires' ] );
+		$message_key = sprintf( '%s_manage', $has_multiple_subs_for_product ? 'multiple' : 'single' );
+		$price       = $subscription[ 'product_price' ] ?? '';
+		$expiry_date = date_i18n( 'F jS', $subscription['expires'] );
 
 		if ( isset( $messages[ $message_key ] ) ) {
 			return sprintf(
 				$messages[ $message_key ],
-				esc_attr( $subscription[ 'product_name' ] ),
+				esc_attr( $subscription['product_name'] ),
 				esc_attr( $expiry_date ),
 				esc_url( self::WOO_SUBSCRIPTION_PAGE_URL ),
 				esc_attr( $price ),
@@ -707,13 +724,18 @@ class PluginsHelper {
 	/**
 	 * Get formatted notice information for expiring subscription.
 	 *
-	 * @param boolean $allowed_link whether the notice description should include a link
-	 * @return array notice information
+	 * @param boolean $allowed_link whether the notice description should include a link.
+	 * @return array notice information.
 	 */
 	public static function get_expiring_subscription_notice( $allowed_link = true ) {
-		if ( !WC_Helper::is_site_connected() ) {
+		if ( ! WC_Helper::is_site_connected() ) {
 			return [];
 		}
+
+		if ( !self::$can_show_expiring_subs_notice ) {
+			return [];
+		}
+
 		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, true );
 		if ( !empty( $is_notice_dismiss ) ) {
 			return [];
@@ -723,11 +745,11 @@ class PluginsHelper {
 		$expiring_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub[ 'expiring' ] && !$sub[ 'autorenew' ];
+				return $sub['expiring'] && !$sub['autorenew'];
 			},
 		);
 
-		if ( !$expiring_subscriptions ) {
+		if ( ! $expiring_subscriptions ) {
 			return [];
 		}
 
@@ -761,7 +783,7 @@ class PluginsHelper {
 	 * @return array notice information
 	 */
 	public static function get_expired_subscription_notice( $allowed_link = true ) {
-		if ( !WC_Helper::is_site_connected() ) {
+		if ( ! WC_Helper::is_site_connected() ) {
 			return [];
 		}
 
@@ -774,7 +796,7 @@ class PluginsHelper {
 		$expired_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub[ 'expired' ] && !$sub[ 'lifetime' ] && $sub['product_key'];
+				return $sub['expired' ] && !$sub['lifetime'];
 			},
 		);
 
@@ -783,6 +805,7 @@ class PluginsHelper {
 		}
 
 		$total_expired_subscriptions = count( $expired_subscriptions );
+		self::$can_show_expiring_subs_notice = false;
 
 		$message = self::get_subscriptions_message(
 			$subscriptions,
@@ -795,7 +818,7 @@ class PluginsHelper {
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support', 'woocommerce' ),
-			]
+			],
 		);
 
 		return [
@@ -843,7 +866,7 @@ class PluginsHelper {
 	 * @return mixed
 	 */
 	public static function dismiss_woo_subscription_notice( $request ) {
-		$notice_id = isset( $request[ 'notice_id' ] ) ? sanitize_text_field( wp_unslash( $request[ 'notice_id' ] ) ) : '';
+		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
 		switch ( $notice_id ) {
 			case 'woo-subscription-expired-notice':
 				update_user_meta( get_current_user_id(), self::DISMISS_EXPIRED_SUBS_NOTICE, time() );
