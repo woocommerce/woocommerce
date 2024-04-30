@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Features;
 
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Admin\Features\Navigation\Init;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -232,6 +233,17 @@ class FeaturesController {
 					'is_legacy'          => true,
 					'is_experimental'    => false,
 				),
+				'hpos_fts_indexes'     => array(
+					'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
+					'description'        => __(
+						'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
+						'woocommerce'
+					),
+					'is_experimental'    => true,
+					'enabled_by_default' => false,
+					'is_legacy'          => true,
+					'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
+				),
 			);
 
 			foreach ( $legacy_features as $slug => $definition ) {
@@ -392,7 +404,7 @@ class FeaturesController {
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_name ], $opposite_key );
 
 		if ( in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $opposite_key ], true ) ) {
-			throw new \Exception( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" );
+			throw new \Exception( esc_html( "Plugin $plugin_name is trying to declare itself as $key with the '$feature_id' feature, but it already declared itself as $opposite_key" ) );
 		}
 
 		if ( ! in_array( $feature_id, $this->compatibility_info_by_plugin[ $plugin_name ][ $key ], true ) ) {
@@ -487,14 +499,15 @@ class FeaturesController {
 	/**
 	 * Check if the 'woocommerce_init' has run or is running, do a 'wc_doing_it_wrong' if not.
 	 *
-	 * @param string|null $function Name of the invoking method, if not null, 'wc_doing_it_wrong' will be invoked if 'woocommerce_init' has not run and is not running.
+	 * @param string|null $function_name Name of the invoking method, if not null, 'wc_doing_it_wrong' will be invoked if 'woocommerce_init' has not run and is not running.
+	 *
 	 * @return bool True if 'woocommerce_init' has run or is running, false otherwise.
 	 */
-	private function verify_did_woocommerce_init( string $function = null ): bool {
+	private function verify_did_woocommerce_init( string $function_name = null ): bool {
 		if ( ! $this->proxy->call_function( 'did_action', 'woocommerce_init' ) &&
 			! $this->proxy->call_function( 'doing_action', 'woocommerce_init' ) ) {
-			if ( ! is_null( $function ) ) {
-				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function;
+			if ( ! is_null( $function_name ) ) {
+				$class_and_method = ( new \ReflectionClass( $this ) )->getShortName() . '::' . $function_name;
 				/* translators: 1: class::method 2: plugins_loaded */
 				$this->proxy->call_function( 'wc_doing_it_wrong', $class_and_method, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), $class_and_method, 'woocommerce_init' ), '7.0' );
 			}
@@ -869,41 +882,41 @@ class FeaturesController {
 	 * if we are in the plugins page and the query string of the current request
 	 * looks like '?plugin_status=incompatible_with_feature&feature_id=<feature id>'.
 	 *
-	 * @param array $list The original list of plugins.
+	 * @param array $plugin_list The original list of plugins.
 	 */
-	private function filter_plugins_list( $list ): array {
+	private function filter_plugins_list( $plugin_list ): array {
 		if ( ! $this->verify_did_woocommerce_init() ) {
-			return $list;
+			return $plugin_list;
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput
 		if ( ! function_exists( 'get_current_screen' ) || get_current_screen() && 'plugins' !== get_current_screen()->id || 'incompatible_with_feature' !== ArrayUtil::get_value_or_default( $_GET, 'plugin_status' ) ) {
-			return $list;
+			return $plugin_list;
 		}
 
 		$feature_id = $_GET['feature_id'] ?? 'all';
 		if ( 'all' !== $feature_id && ! $this->feature_exists( $feature_id ) ) {
-			return $list;
+			return $plugin_list;
 		}
 
-		return $this->get_incompatible_plugins( $feature_id, $list );
+		return $this->get_incompatible_plugins( $feature_id, $plugin_list );
 	}
 
 	/**
 	 * Returns the list of plugins incompatible with a given feature.
 	 *
 	 * @param string $feature_id ID of the feature. Can also be `all` to denote all features.
-	 * @param array  $list       List of plugins to filter.
+	 * @param array  $plugin_list       List of plugins to filter.
 	 *
 	 * @return array List of plugins incompatible with the given feature.
 	 */
-	private function get_incompatible_plugins( $feature_id, $list ) {
+	private function get_incompatible_plugins( $feature_id, $plugin_list ) {
 		$incompatibles = array();
 
-		$list = array_diff_key( $list, array_flip( $this->plugins_excluded_from_compatibility_ui ) );
+		$plugin_list = array_diff_key( $plugin_list, array_flip( $this->plugins_excluded_from_compatibility_ui ) );
 
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-		foreach ( array_keys( $list ) as $plugin_name ) {
+		foreach ( array_keys( $plugin_list ) as $plugin_name ) {
 			if ( ! $this->plugin_util->is_woocommerce_aware_plugin( $plugin_name ) || ! $this->proxy->call_function( 'is_plugin_active', $plugin_name ) ) {
 				continue;
 			}
@@ -921,7 +934,7 @@ class FeaturesController {
 			}
 		}
 
-		return array_intersect_key( $list, array_flip( $incompatibles ) );
+		return array_intersect_key( $plugin_list, array_flip( $incompatibles ) );
 	}
 
 	/**

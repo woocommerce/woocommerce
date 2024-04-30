@@ -1,43 +1,33 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
 	insertBlock,
 	transformIntoBlocks,
+	publishPage,
 } = require( '../../utils/editor' );
-const uuid = require( 'uuid' );
 
-const transformedCartBlockTitle = `Transformed Cart ${ uuid.v1() }`;
-const transformedCartBlockSlug = transformedCartBlockTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
+baseTest.describe( 'Transform Classic Cart To Cart Block', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Transformed cart',
+	} );
 
-test.describe( 'Transform Classic Cart To Cart Block', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
-
-	test( 'can transform classic cart to cart block', async ( { page } ) => {
+	test( 'can transform classic cart to cart block', async ( {
+		page,
+		testPage,
+	} ) => {
 		await goToPageEditor( { page } );
 
-		await fillPageTitle( page, transformedCartBlockTitle );
+		await fillPageTitle( page, testPage.title );
 		await insertBlock( page, 'Classic Cart' );
 		await transformIntoBlocks( page );
-
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ transformedCartBlockTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// go to frontend to verify transformed cart block
-		await page.goto( transformedCartBlockSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: transformedCartBlockTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			page.getByRole( 'heading', {
