@@ -257,13 +257,13 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 * @param {number}                       index - The index of the attribute in the form state.
 					 */
 					function setAttributeValues(
-						value: AttributeInputFieldItemProps,
+						attribute: AttributeInputFieldItemProps,
 						index: number,
 						populateTerms = true
 					) {
 						if ( termsAutoSelection && populateTerms ) {
 							const selectedAttribute = getProductAttributeObject(
-								value
+								attribute
 							) as EnhancedProductAttribute;
 
 							setValue( 'attributes[' + index + ']', {
@@ -280,7 +280,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									// request when focusing the attribute-term-input-field
 									// which perform the same request to get all the terms
 									search: '',
-									attribute_id: value.id,
+									attribute_id: attribute.id,
 								} )
 								.then( ( terms ) => {
 									if ( termsAutoSelection === 'all' ) {
@@ -297,7 +297,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								} );
 						}
 
-						setValue( 'attributes[' + index + ']', value );
+						setValue( 'attributes[' + index + ']', attribute );
 						focusValueField( index );
 					}
 
