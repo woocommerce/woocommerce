@@ -78,7 +78,7 @@ class Init {
 			add_action( 'rest_api_init', array( $this, 'register_layout_templates' ) );
 			add_action( 'rest_api_init', array( $this, 'register_user_metas' ) );
 
-			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );			
+			add_filter( 'register_block_type_args', array( $this, 'register_metadata_attribute' ) );
 			add_filter( 'woocommerce_get_block_types', array( $this, 'get_block_types' ), 999, 1 );
 
 			// Make sure the block registry is initialized so that core blocks are registered.
@@ -453,14 +453,14 @@ class Init {
 
 	/**
 	 * Filters woocommerce block types.
-	 * 
+	 *
 	 * @param string[] $block_types Array of woocommerce block types.
 	 * @return array
 	 */
 	public function get_block_types( $block_types ) {
 		if ( PageController::is_admin_page() ) {
 			// Ignore all woocommerce blocks.
-			return [];
+			return array();
 		}
 
 		return $block_types;
