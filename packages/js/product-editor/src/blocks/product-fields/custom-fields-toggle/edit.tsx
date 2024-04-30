@@ -30,7 +30,10 @@ export function Edit( {
 			className:
 				'wp-block-woocommerce-product-custom-fields-toggle-field__inner-blocks',
 		},
-		{ templateLock: 'all' }
+		{
+			templateLock: 'all',
+			renderAppender: false,
+		}
 	);
 
 	const { isLoading, metaboxhiddenProduct, saveMetaboxhiddenProduct } =

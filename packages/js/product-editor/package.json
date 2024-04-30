@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/product-editor",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "React components for the WooCommerce admin product editor.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",

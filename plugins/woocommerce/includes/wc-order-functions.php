@@ -287,8 +287,6 @@ function wc_get_order_type( $type ) {
  * post types are types of orders, and having them treated as such.
  *
  * $args are passed to register_post_type, but there are a few specific to this function:
- *      - exclude_from_orders_screen (bool) Whether or not this order type also get shown in the main.
- *      orders screen.
  *      - add_order_meta_boxes (bool) Whether or not the order type gets shop_order meta boxes.
  *      - exclude_from_order_count (bool) Whether or not this order type is excluded from counts.
  *      - exclude_from_order_views (bool) Whether or not this order type is visible by customers when.
@@ -320,7 +318,6 @@ function wc_register_order_type( $type, $args = array() ) {
 
 	// Register for WC usage.
 	$order_type_args = array(
-		'exclude_from_orders_screen'       => false,
 		'add_order_meta_boxes'             => true,
 		'exclude_from_order_count'         => false,
 		'exclude_from_order_views'         => false,

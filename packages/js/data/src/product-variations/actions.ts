@@ -19,7 +19,7 @@ import type {
 import CRUD_ACTIONS from './crud-actions';
 import {
 	Product,
-	ProductAttribute,
+	ProductProductAttribute,
 	ProductDefaultAttribute,
 } from '../products/types';
 
@@ -50,7 +50,7 @@ export const generateProductVariations = function* (
 	idQuery: IdQuery,
 	productData: {
 		type?: string;
-		attributes: ProductAttribute[];
+		attributes: ProductProductAttribute[];
 		default_attributes?: ProductDefaultAttribute[];
 		meta_data?: Product[ 'meta_data' ];
 	},
