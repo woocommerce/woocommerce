@@ -9,7 +9,7 @@ import { useEffect, useRef } from '@wordpress/element';
  */
 import { useVisibilityObserver } from './use-visibility-observer';
 
-type useConditionalExecutionProps = {
+type UseConditionalExecutionProps = {
 	elementOrSelector?: RefObject< HTMLInputElement > | string;
 	onVisible?: () => void;
 	onHidden?: () => void;
@@ -21,7 +21,7 @@ export function useConditionalExecution( {
 	onVisible,
 	onHidden,
 	isMemorized = false,
-}: useConditionalExecutionProps ) {
+}: UseConditionalExecutionProps ) {
 	const elementRef = useRef( null );
 	const isVisible = useVisibilityObserver( elementOrSelector ?? elementRef );
 
