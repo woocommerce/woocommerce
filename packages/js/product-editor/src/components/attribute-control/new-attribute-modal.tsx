@@ -11,8 +11,7 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductProductAttribute,
-	ProductAttributeTerm,
+	type ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
 
@@ -24,8 +23,9 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
+import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -225,12 +225,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				} ) => {
 					function getAttributeOnChange( index: number ) {
 						return function handleAttributeChange(
-							value?:
-								| Omit<
-										ProductProductAttribute,
-										'position' | 'visible' | 'variation'
-								  >
-								| string
+							value?: AttributeInputFieldItemProps | string
 						) {
 							if (
 								termsAutoSelection &&
