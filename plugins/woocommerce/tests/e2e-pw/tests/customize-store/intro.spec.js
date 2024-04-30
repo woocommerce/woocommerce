@@ -117,12 +117,10 @@ test.describe( 'Store owner can view the Intro page', () => {
 		await assemblerPageObject.waitForLoadingScreenFinish();
 
 		await page.goto( CUSTOMIZE_STORE_URL );
-
 		await page
 			.getByRole( 'button', { name: 'Customize your theme' } )
 			.click();
 
-		await assemblerPageObject.waitForLoadingScreenFinish();
 		const assembler = await assemblerPageObject.getAssembler();
 		await expect(
 			assembler.locator( "text=Let's get creative" )
