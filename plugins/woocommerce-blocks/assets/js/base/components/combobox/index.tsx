@@ -7,11 +7,13 @@ import {
 	ComboboxPopover,
 	ComboboxProvider,
 	ComboboxItem,
+	useComboboxStore,
 } from '@ariakit/react';
 import type { ComboboxProps as AriakitComboboxProps } from '@ariakit/react';
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import {
+	useCallback,
 	useEffect,
 	useId,
 	useMemo,
@@ -146,12 +148,47 @@ const Combobox = ( {
 
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
+	const store = useComboboxStore();
+	const state = store.useState();
+
+	const onClose = useCallback( () => {
+		const selectedValue = state.selectedValue;
+
+		// If a value is not selected and there is no search term, fire an onChange to ensure we update
+		// the value in the parent component.
+		if ( ! searchTerm && ! selectedValue ) {
+			onChange( '' );
+			// If there is no search term but a selected value, set the search to match the selected value.
+		} else if ( ! searchTerm && selectedValue ) {
+			const opt = options.find(
+				( option ) => option.value === selectedValue
+			);
+
+			if ( opt ) {
+				setSearchTerm( opt.label );
+			}
+			// Otherwise if there is a search term see if it matches the selected value, if not reset it to the selected value.
+		} else if ( searchTerm ) {
+			const opt = options.find(
+				( option ) => option.value === searchTerm
+			);
+
+			if ( ! opt ) {
+				const lastOpt = options.find(
+					( option ) => option.value === selectedValue
+				);
+				setSearchTerm( lastOpt?.label || '' );
+			}
+		}
+	}, [ searchTerm, state.selectedValue, onChange, options ] );
+
 	return (
 		<div className={ outerWrapperClasses }>
 			<div className={ innerWrapperClasses } ref={ controlRef }>
 				<ComboboxProvider
+					store={ store }
 					value={ searchTerm }
-					selectedValue={ initialOption?.label || '' }
+					selectedValue={ initialOption?.value || '' }
 					setValue={ ( val ) => {
 						startTransition( () => {
 							setSearchTerm( val );
@@ -163,6 +200,7 @@ const Combobox = ( {
 						);
 
 						if ( option ) {
+							setSearchTerm( option.label );
 							onChange( option.value );
 						}
 					} }
@@ -184,6 +222,7 @@ const Combobox = ( {
 								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
+								onClose={ onClose }
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<ComboboxItem
