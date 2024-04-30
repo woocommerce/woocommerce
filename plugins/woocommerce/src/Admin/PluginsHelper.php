@@ -714,13 +714,12 @@ class PluginsHelper {
 		if ( !WC_Helper::is_site_connected() ) {
 			return [];
 		}
-
 		$is_notice_dismiss = get_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, true );
 		if ( !empty( $is_notice_dismiss ) ) {
 			return [];
 		}
 
-		$subscriptions          = WC_Helper::get_subscription_list_data();
+		$subscriptions          = WC_Helper::get_subscriptions();
 		$expiring_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
@@ -771,11 +770,11 @@ class PluginsHelper {
 			return [];
 		}
 
-		$subscriptions         = WC_Helper::get_subscription_list_data();
+		$subscriptions         = WC_Helper::get_subscriptions();
 		$expired_subscriptions = array_filter(
 			$subscriptions,
 			function ( $sub ) {
-				return $sub[ 'expired' ] && !$sub[ 'lifetime' ];
+				return $sub[ 'expired' ] && !$sub[ 'lifetime' ] && $sub['product_key'];
 			},
 		);
 
@@ -791,7 +790,7 @@ class PluginsHelper {
 			$total_expired_subscriptions,
 			[
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
-				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
+				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
