@@ -23,6 +23,8 @@ export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
 	onChange: ( value?: AttributeInputFieldItemProps | string ) => void;
 	label?: string;
+	items?: AttributeInputFieldItemProps[];
+	isLoading?: boolean;
 	placeholder?: string;
 	disabled?: boolean;
 	disabledAttributeIds?: number[];
