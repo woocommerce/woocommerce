@@ -24,23 +24,19 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 	} );
 
 	test( 'user can change the title', async ( { page, localPickupUtils } ) => {
-		await page
-			.getByPlaceholder( 'Local Pickup' )
-			.fill( 'Local Pickup Test #1' );
+		await page.getByPlaceholder( 'Pickup' ).fill( 'Local Pickup Test #1' );
 
 		await localPickupUtils.saveLocalPickupSettings();
 
-		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
+		await expect( page.getByPlaceholder( 'Pickup' ) ).toHaveValue(
 			'Local Pickup Test #1'
 		);
 
-		await page
-			.getByPlaceholder( 'Local Pickup' )
-			.fill( 'Local Pickup Test #2' );
+		await page.getByPlaceholder( 'Pickup' ).fill( 'Local Pickup Test #2' );
 
 		await localPickupUtils.saveLocalPickupSettings();
 
-		await expect( page.getByPlaceholder( 'Local Pickup' ) ).toHaveValue(
+		await expect( page.getByPlaceholder( 'Pickup' ) ).toHaveValue(
 			'Local Pickup Test #2'
 		);
 	} );
