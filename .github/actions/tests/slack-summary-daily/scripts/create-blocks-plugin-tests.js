@@ -19,7 +19,7 @@ module.exports = ( { core } ) => {
 			elements: [
 				{
 					type: 'mrkdwn',
-					text: `"Other E2E tests ${ emoji_E2E }`,
+					text: `E2E tests ${ emoji_E2E }`,
 				},
 			],
 		},
