@@ -7,7 +7,6 @@ import {
 	useEffect,
 	useReducer,
 	useState,
-	useRef,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
@@ -44,7 +43,7 @@ import {
 } from './types';
 import { getSuggestedProductsFor } from '../../../utils/get-related-products';
 import { SectionActions } from '../../../components/block-slot-fill';
-import { useVisibilityObserver } from '../../../hooks/use-visibility-observer';
+import { useConditionalExecution } from '../../../hooks/use-conditional-execution';
 
 export function EmptyStateImage( {
 	image,
@@ -80,8 +79,6 @@ export function LinkedProductListBlockEdit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
-	const elementRef = useRef( null );
-	const isVisible = useVisibilityObserver( elementRef );
 	const productId = useEntityId( 'postType', postType );
 
 	const loadLinkedProductsDispatcher =
@@ -114,11 +111,10 @@ export function LinkedProductListBlockEdit( {
 		[ linkedProductIds ]
 	);
 
-	useEffect( () => {
-		if ( isVisible ) {
-			filter();
-		}
-	}, [ filter, isVisible ] );
+	const elementRef = useConditionalExecution( {
+		onVisible: filter,
+		isMemorized: true,
+	} );
 
 	function handleSelect( product: Product ) {
 		const newLinkedProductIds = selectSearchedProductDispatcher(
