@@ -365,14 +365,23 @@ class WC_Admin_Webhooks {
 			</p>
 			<p>
 				<?php
-				echo wp_kses_data(
-					_n(
-						'This webhook has the ⚠ symbol in front of its name in the list below. Please either edit the webhook to use a different delivery format, or install and activate the WooCommerce Legacy REST API extension.',
-						'These webhooks have the ⚠ symbol in front of their names in the list below. Please either edit the webhooks to use a different delivery format, or install and activate the WooCommerce Legacy REST API extension.',
-						$legacy_api_webhooks_count,
-						'woocommerce'
+				echo wp_kses(
+					sprintf(
+						/* translators: %s = URL */
+						_n(
+							'This webhook has the ⚠ symbol in front of its name in the list below. Please either edit the webhook to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							'These webhooks have the ⚠ symbol in front of their names in the list below. Please either edit the webhooks to use a different delivery format, or install and activate <a href="%s" target="_blank">the WooCommerce Legacy REST API extension</a>.',
+							$legacy_api_webhooks_count,
+							'woocommerce'
+						),
+						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
 					),
-					'woocommerce'
+					array(
+						'a' => array(
+							'href'   => array(),
+							'target' => array(),
+						),
+					)
 				);
 				?>
 			</p>

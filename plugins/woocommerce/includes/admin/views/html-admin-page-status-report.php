@@ -80,15 +80,15 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 		</tr>
 		<tr>
 			<td data-export-label="Legacy REST API Package Version"><?php esc_html_e( 'WooCommerce Legacy REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API package running on your site.', 'woocommerce' ) ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Legacy REST API plugin running on this site.', 'woocommerce' ) ); ?></td>
 			<td>
 				<?php
-				$version = is_null( wc()->api ) ? null : wc()->api->get_rest_api_package_version();
+				$version = is_null( wc()->api ) ? null : get_plugin_data( WP_PLUGIN_DIR . '/woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' )['Version'] ?? '';
 
 				if ( ! is_null( $version ) ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
-					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API is not installed on your site.', 'woocommerce' ) . '</mark>';
+					echo '<mark class="info-icon"><span class="dashicons dashicons-info"></span> ' . esc_html__( 'The Legacy REST API plugin is not installed on this site.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>

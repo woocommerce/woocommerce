@@ -183,7 +183,7 @@ class WC_Admin_Notices {
 					),
 					sprintf(
 					// translators: Placeholders are URLs.
-						wpautop( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to keep it enabled. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
+						wpautop( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled on this site</a>, will be removed in WooCommerce 9.0. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to keep it enabled. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
 						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
 						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'

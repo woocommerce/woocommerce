@@ -394,8 +394,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ?
 			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
 			sprintf(
-				/* translators: %s is an URL */
-				__( '⚠️ The WooCommerce Legacy REST API has been moved to a dedicated extension. <b><a target=”_blank” href="%s">Learn more about this change</a></b>', 'woocommerce' ),
+				/* translators: placeholders are URLs */
+				__( '⚠️ The WooCommerce Legacy REST API has been moved to <a target=”_blank” href="%1$s">a dedicated extension</a>. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ),
+				'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
 				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 			);
 

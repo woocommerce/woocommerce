@@ -79,7 +79,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			is_null( wc()->api ) && $this->uses_legacy_rest_api( $webhook ) ?
 			sprintf(
 				"<span title='%s'>⚠</span>️ ",
-				esc_html__( 'This webhook is configured to be delivered using the Legacy REST API, but the Legacy REST API extension is not installed on this site.', 'woocommerce' )
+				esc_html__( 'This webhook is configured to be delivered using the Legacy REST API, but the Legacy REST API plugin is not installed on this site.', 'woocommerce' )
 			) : '';
 		$output        .= '<strong>' . $warning_prefix . '<a href="' . esc_url( $edit_link ) . '" class="row-title">' . esc_html( $webhook->get_name() ) . '</a></strong>';
 
@@ -349,6 +349,8 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 	/**
 	 * Get how many of the existing webhooks are configured to use the legacy payload format.
+	 *
+	 * @since 9.0.0
 	 *
 	 * @return int Count of existing webhooks are configured to use the legacy payload format.
 	 */

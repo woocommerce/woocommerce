@@ -12,6 +12,7 @@ class RestApiUtil {
 	 * This method used to be part of the WooCommerce Legacy REST API.
 	 *
 	 * @since 9.0.0
+	 *
 	 * @param string $endpoint Endpoint.
 	 * @param array  $params Params to pass with request.
 	 * @return array|\WP_Error
