@@ -111,20 +111,11 @@ test.describe( 'Store owner can view the Intro page', () => {
 	test( 'Clicking on "Customize your theme" with a block theme should go to the assembler', async ( {
 		page,
 		assemblerPageObject,
-		baseURL,
 	} ) => {
-		await activateTheme( DEFAULT_THEME );
+		await page.goto( CUSTOMIZE_STORE_URL );
+		await page.click( 'text=Start designing' );
+		await assemblerPageObject.waitForLoadingScreenFinish();
 
-		try {
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_admin_customize_store_completed',
-				'yes'
-			);
-		} catch ( error ) {
-			console.log( 'Store completed option not updated' );
-		}
 		await page.goto( CUSTOMIZE_STORE_URL );
 
 		await page
