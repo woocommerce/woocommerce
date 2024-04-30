@@ -350,6 +350,6 @@ final class BlockTypesController {
 			);
 		}
 
-		return $block_types;
+		return apply_filters( 'woocommerce_get_block_types', $block_types );
 	}
 }
