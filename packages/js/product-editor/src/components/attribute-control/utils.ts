@@ -4,11 +4,6 @@
 import type { ProductProductAttribute } from '@woocommerce/data';
 
 /**
- * Internal dependencies
- */
-import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
-
-/**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
  *
  * @param { ProductProductAttribute } attribute product attribute.
