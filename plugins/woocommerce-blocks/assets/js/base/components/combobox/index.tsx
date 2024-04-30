@@ -149,10 +149,9 @@ const Combobox = ( {
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
 
 	const store = useComboboxStore();
-	const state = store.useState();
 
 	const onClose = useCallback( () => {
-		const selectedValue = state.selectedValue;
+		const { selectedValue } = store.getState();
 
 		// If a value is not selected and there is no search term, fire an onChange to ensure we update
 		// the value in the parent component.
@@ -167,20 +166,34 @@ const Combobox = ( {
 			if ( opt ) {
 				setSearchTerm( opt.label );
 			}
-			// Otherwise if there is a search term see if it matches the selected value, if not reset it to the selected value.
+			// Otherwise if there is a search term see if it matches the selected value, (or label fallback),
+			// if not reset it to the selected value.
 		} else if ( searchTerm ) {
 			const opt = options.find(
 				( option ) => option.value === searchTerm
 			);
 
-			if ( ! opt ) {
+			// Fallback to a label match
+			const labelFallback = options.find( ( foundOpt ) => {
+				return normalizeTextString( foundOpt.label ).startsWith(
+					normalizeTextString( searchTerm )
+				);
+			} );
+
+			if ( opt ) {
+				setSearchTerm( opt.label );
+				onChange( opt.value );
+			} else if ( labelFallback ) {
+				setSearchTerm( labelFallback.label );
+				onChange( labelFallback.value );
+			} else {
 				const lastOpt = options.find(
 					( option ) => option.value === selectedValue
 				);
 				setSearchTerm( lastOpt?.label || '' );
 			}
 		}
-	}, [ searchTerm, state.selectedValue, onChange, options ] );
+	}, [ searchTerm, store, onChange, options ] );
 
 	return (
 		<div className={ outerWrapperClasses }>
@@ -193,6 +206,33 @@ const Combobox = ( {
 						startTransition( () => {
 							setSearchTerm( val );
 						} );
+
+						const option = options.find(
+							( opt ) =>
+								normalizeTextString( opt.label ) ===
+								normalizeTextString( val )
+						);
+
+						// If we find an exact match, change the selected value on behalf of user
+						if ( option ) {
+							store.setState( 'selectedValue', option.value );
+							onChange( option.value );
+						} else if ( val.length ) {
+							// Fallback to a label match
+							const foundOption = options.find( ( foundOpt ) => {
+								return normalizeTextString(
+									foundOpt.label
+								).startsWith( normalizeTextString( val ) );
+							} );
+
+							if ( foundOption ) {
+								store.setState(
+									'selectedValue',
+									foundOption.value
+								);
+								onChange( foundOption.value );
+							}
+						}
 					} }
 					setSelectedValue={ ( val ) => {
 						const option = options.find(
