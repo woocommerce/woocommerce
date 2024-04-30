@@ -66,8 +66,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 			name: blockData.slug,
 		} );
 
-		await expect(
-			editor.canvas.getByLabel( 'Breadcrumbs / Navigation / Path' )
-		).toBeVisible();
+		const block = await editorUtils.getBlockByName( blockData.slug );
+
+		await expect( block ).toHaveText( 'Breadcrumbs / Navigation / Path' );
 	} );
 } );

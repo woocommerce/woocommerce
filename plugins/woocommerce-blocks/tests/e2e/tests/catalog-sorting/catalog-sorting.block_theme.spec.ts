@@ -61,8 +61,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 			name: blockData.slug,
 		} );
 
-		await expect(
-			editor.canvas.getByLabel( 'Default sorting' )
-		).toBeVisible();
+		const block = await editorUtils.getBlockByName( blockData.slug );
+
+		await expect( block ).toHaveText( 'Default sorting' );
 	} );
 } );
