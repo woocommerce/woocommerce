@@ -22,9 +22,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block can be inserted in Site Editor', async ( {
+	test( 'block should be already added in the Product Catalog Template', async ( {
 		editorUtils,
-		editor,
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
@@ -35,17 +34,35 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const alreadyPresentBlock = await editorUtils.getBlockByName(
 			blockData.slug
 		);
-		await expect( alreadyPresentBlock ).toHaveText( 'Default sorting' );
 
-		await editorUtils.removeBlockByClientId(
-			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
-		);
+		await expect( alreadyPresentBlock ).toHaveText( 'Default sorting' );
+	} );
+
+	test( 'block can be inserted in the Site Editor', async ( {
+		admin,
+		requestUtils,
+		editorUtils,
+		editor,
+	} ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'sorter',
+			title: 'Sorter',
+			content: 'howdy',
+		} );
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+		} );
+
+		await editorUtils.enterEditMode();
 
 		await editor.insertBlock( {
 			name: blockData.slug,
 		} );
 
-		const block = await editorUtils.getBlockByName( blockData.slug );
-		await expect( block ).toHaveText( 'Default sorting' );
+		await expect(
+			editor.canvas.getByLabel( 'Default sorting' )
+		).toBeVisible();
 	} );
 } );
