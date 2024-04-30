@@ -169,6 +169,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
+* Fix - Fix HPOS order searches involving terms with characters resembling URL-encoded characters. [#46972](https://github.com/woocommerce/woocommerce/pull/46972)
 * Fix - Add a bailout to prevent JavaScript errors if Sourcebuster isn't loaded [#46723](https://github.com/woocommerce/woocommerce/pull/46723)
 * Fix - Add a safety check for the numbers with the same value for the separators [#46241](https://github.com/woocommerce/woocommerce/pull/46241)
 * Fix - Addresses a fatal error that can occur when applying a coupon within the order editor (where one of the products has been deleted). [#46251](https://github.com/woocommerce/woocommerce/pull/46251)
