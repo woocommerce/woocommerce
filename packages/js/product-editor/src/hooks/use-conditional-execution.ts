@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { RefObject } from 'react';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import { useEffect, useRef } from '@wordpress/element';
 import { useVisibilityObserver } from './use-visibility-observer';
 
 type UseConditionalExecutionProps = {
-	elementOrSelector?: RefObject< HTMLInputElement > | string;
+	elementOrSelector: RefObject< HTMLInputElement > | string;
 	onVisible?: () => void;
 	onHidden?: () => void;
 	isMemorized?: boolean;
@@ -22,8 +22,7 @@ export function useConditionalExecution( {
 	onHidden,
 	isMemorized = false,
 }: UseConditionalExecutionProps ) {
-	const elementRef = useRef( null );
-	const isVisible = useVisibilityObserver( elementOrSelector ?? elementRef );
+	const isVisible = useVisibilityObserver( elementOrSelector );
 
 	function getDependencies() {
 		const dependenciesList = [];
@@ -47,6 +46,4 @@ export function useConditionalExecution( {
 			onHidden();
 		}
 	}, [ isVisible, ...dependencies ] );
-
-	return elementRef;
 }

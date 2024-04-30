@@ -7,6 +7,7 @@ import {
 	useEffect,
 	useReducer,
 	useState,
+	useRef,
 } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Product } from '@woocommerce/data';
@@ -79,6 +80,7 @@ export function LinkedProductListBlockEdit( {
 		linkedProducts: [],
 		searchedProducts: [],
 	} );
+	const elementRef = useRef( null );
 	const productId = useEntityId( 'postType', postType );
 
 	const loadLinkedProductsDispatcher =
@@ -111,7 +113,8 @@ export function LinkedProductListBlockEdit( {
 		[ linkedProductIds ]
 	);
 
-	const elementRef = useConditionalExecution( {
+	useConditionalExecution( {
+		elementOrSelector: elementRef,
 		onVisible: filter,
 		isMemorized: true,
 	} );
