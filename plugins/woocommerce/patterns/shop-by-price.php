@@ -2,7 +2,7 @@
 /**
  * Title: Shop by Price
  * Slug: woocommerce-blocks/shop-by-price
- * Categories: WooCommerce
+ * Categories: WooCommerce, assembler-footer-section
  */
 
 $first_title  = $content['titles'][0]['default'] ?? '';

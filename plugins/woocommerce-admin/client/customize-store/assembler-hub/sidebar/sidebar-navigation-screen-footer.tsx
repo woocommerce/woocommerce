@@ -46,7 +46,9 @@ export const SidebarNavigationScreenFooter = () => {
 		scrollDirection: 'bottom',
 	} );
 
-	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
+	const { isLoading, patterns } = usePatternsByCategory(
+		'assembler-footer-section'
+	);
 
 	const currentTemplate = useSelect(
 		( select ) =>
@@ -83,19 +85,7 @@ export const SidebarNavigationScreenFooter = () => {
 		setHighlightedBlockClientId,
 	] );
 
-	const footerPatterns = useMemo(
-		() =>
-			patterns
-				.filter( ( pattern ) =>
-					SUPPORTED_FOOTER_PATTERNS.includes( pattern.name )
-				)
-				.sort(
-					( a, b ) =>
-						SUPPORTED_FOOTER_PATTERNS.indexOf( a.name ) -
-						SUPPORTED_FOOTER_PATTERNS.indexOf( b.name )
-				),
-		[ patterns ]
-	);
+	const footerPatterns = useMemo( () => patterns, [ patterns ] );
 
 	useEffect( () => {
 		// Set the selected pattern when the footer screen is loaded.
