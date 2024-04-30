@@ -203,19 +203,12 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			'woocommerce/checkout-shipping-method-block'
 		);
 		await editor.selectBlocks( block );
+
 		const fakeInput = editor.canvas.getByLabel( 'Pickup', { exact: true } );
-		await fakeInput.click();
+		await fakeInput.focus();
+		await fakeInput.dblclick(); // Select all text.
+		await fakeInput.pressSequentially( 'This is a test' ); // We can't use locator.fill() because it's not a valid input element.
 
-		const isMacOS = process.platform === 'darwin'; // darwin is macOS
-
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( isMacOS ) {
-			await fakeInput.press( 'Meta+a' );
-		} else {
-			await fakeInput.press( 'Control+a' );
-		}
-		await fakeInput.press( 'Backspace' );
-		await fakeInput.pressSequentially( 'This is a test' );
 		await editor.canvas.getByText( 'This is a test' ).isVisible();
 		await editor.saveSiteEditorEntities();
 
