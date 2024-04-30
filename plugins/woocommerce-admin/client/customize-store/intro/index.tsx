@@ -157,7 +157,7 @@ const CustomizedThemeBanners = ( {
 	return (
 		<>
 			<p className="select-theme-text">
-				{ __( 'Or start new', 'woocommerce' ) }
+				{ __( 'Design or choose a new theme', 'woocommerce' ) }
 			</p>
 
 			<div className="woocommerce-customize-store-cards">
@@ -165,7 +165,7 @@ const CustomizedThemeBanners = ( {
 					<img
 						src={ welcomeTourImg }
 						alt={ __(
-							'Design your own in a breeze',
+							'Design your own theme',
 							'woocommerce'
 						) }
 					/>
@@ -173,7 +173,7 @@ const CustomizedThemeBanners = ( {
 					<div>
 						<h2 className="intro-card__title">
 							{ __(
-								'Design your own in a breeze',
+								'Design your own theme',
 								'woocommerce'
 							) }
 						</h2>
@@ -198,7 +198,7 @@ const CustomizedThemeBanners = ( {
 								}
 							} }
 						>
-							{ __( 'Start designing', 'woocommerce' ) }
+							{ __( ' Use the store designer', 'woocommerce' ) }
 						</button>
 					</div>
 				</div>
@@ -312,7 +312,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					'woocommerce'
 			  )
 			: __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using our store designer.',
+					'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
 					'woocommerce'
 			  );
 
