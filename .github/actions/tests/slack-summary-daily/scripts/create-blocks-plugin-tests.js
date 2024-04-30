@@ -11,17 +11,8 @@ module.exports = ( { core } ) => {
 			type: 'section',
 			text: {
 				type: 'mrkdwn',
-				text: `<${ reportURL }|*${ PLUGIN_NAME }*>`,
+				text: `<${ reportURL }|*${ PLUGIN_NAME }*>: E2E tests ${ emoji_E2E }`,
 			},
-		},
-		{
-			type: 'context',
-			elements: [
-				{
-					type: 'mrkdwn',
-					text: `E2E tests ${ emoji_E2E }`,
-				},
-			],
 		},
 		{
 			type: 'divider',
