@@ -253,14 +253,18 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 * Set the attribute values in the form state,
 					 * and populate the terms if termsAutoSelection is enabled.
 					 *
-					 * @param {AttributeInputFieldItemProps} value - The attribute value.
-					 * @param {number}                       index - The index of the attribute in the form state.
+					 * @param {AttributeInputFieldItemProps} attribute - The attribute value.
+					 * @param {number}                       index     - The index of the attribute in the form state.
 					 */
 					function setAttributeValues(
 						attribute: AttributeInputFieldItemProps,
 						index: number,
 						populateTerms = true
 					) {
+						/*
+						 * When the attribute exists,
+						 * set the attribute in the form state and populate the terms.
+						 */
 						if ( termsAutoSelection && populateTerms ) {
 							const selectedAttribute = getProductAttributeObject(
 								attribute
@@ -297,6 +301,10 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								} );
 						}
 
+						/*
+						 * When the attribute does not exist,
+						 * set the attribute in the form state without terms.
+						 */
 						setValue( 'attributes[' + index + ']', attribute );
 						focusValueField( index );
 					}
