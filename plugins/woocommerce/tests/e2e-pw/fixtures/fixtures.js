@@ -1,6 +1,7 @@
 const base = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../test-data/data' );
+const { random } = require( '../utils/helpers' );
 
 exports.test = base.test.extend( {
 	api: async ( { baseURL }, use ) => {
@@ -42,6 +43,35 @@ exports.test = base.test.extend( {
 		} );
 
 		await use( wpApi );
+	},
+
+	testPageTitlePrefix: [ '', { option: true } ],
+
+	testPage: async ( { wpApi, testPageTitlePrefix }, use ) => {
+		const pageTitle = `${ testPageTitlePrefix } Page ${ random() }`;
+		const pageSlug = pageTitle.replace( / /gi, '-' ).toLowerCase();
+
+		await use( { title: pageTitle, slug: pageSlug } );
+
+		// Cleanup
+		const pages = await wpApi.get(
+			`/wp-json/wp/v2/pages?slug=${ pageSlug }`,
+			{
+				data: {
+					_fields: [ 'id' ],
+				},
+				failOnStatusCode: false,
+			}
+		);
+
+		for ( const page of await pages.json() ) {
+			console.log( `Deleting page ${ page.id }` );
+			await wpApi.delete( `/wp-json/wp/v2/pages/${ page.id }`, {
+				data: {
+					force: true,
+				},
+			} );
+		}
 	},
 } );
 

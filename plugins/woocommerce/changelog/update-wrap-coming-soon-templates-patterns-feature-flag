@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add feature flag check for patterns and wrap coming soon template and patterns under feature flag

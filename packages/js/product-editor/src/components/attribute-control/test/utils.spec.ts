@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductAttribute } from '@woocommerce/data';
+import { ProductProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -11,7 +11,7 @@ import {
 	reorderSortableProductAttributePositions,
 } from '../utils';
 
-const attributeList: Record< number | string, ProductAttribute > = {
+const attributeList: Record< number | string, ProductProductAttribute > = {
 	15: {
 		id: 15,
 		name: 'Automotive',

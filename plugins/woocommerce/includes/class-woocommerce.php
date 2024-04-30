@@ -44,7 +44,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.9.0';
+	public $version = '9.0.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -260,6 +260,8 @@ final class WooCommerce {
 		self::add_action( 'woocommerce_init', array( $this, 'register_wp_admin_settings' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
+
+		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -1325,5 +1327,21 @@ final class WooCommerce {
 		foreach ( $emails->get_emails() as $email ) {
 			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
+	}
+
+	/*
+	 * Converts the WooCommerce slug to the correct slug for the current version.
+	 * This ensures that when the plugin is installed in a different folder name, the correct slug is used so that dependent plugins can be installed/activated.
+	 *
+	 * @since 9.0.0
+	 * @param string $slug The plugin slug to convert.
+	 *
+	 * @return string
+	 */
+	public function convert_woocommerce_slug( $slug ) {
+		if ( 'woocommerce' === $slug ) {
+			$slug = dirname( WC_PLUGIN_BASENAME );
+		}
+		return $slug;
 	}
 }
