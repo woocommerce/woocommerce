@@ -246,7 +246,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						) {
 							if (
 								termsAutoSelection &&
-								value &&
 								! ( typeof value === 'string' )
 							) {
 								const selectedAttribute =
@@ -288,9 +287,8 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									'attributes[' + index + ']',
 									value && getProductAttributeObject( value )
 								);
-								if ( value ) {
-									focusValueField( index );
-								}
+
+								focusValueField( index );
 							}
 						};
 					}
