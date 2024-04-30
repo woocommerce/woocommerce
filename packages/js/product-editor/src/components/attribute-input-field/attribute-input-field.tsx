@@ -139,7 +139,6 @@ export const AttributeInputField: React.FC< AttributeInputFieldProps > = ( {
 
 				onChange( attribute );
 			} }
-			onRemove={ () => onChange() }
 			__experimentalOpenMenuOnFocus
 		>
 			{ ( {

@@ -242,7 +242,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				} ) => {
 					function getAttributeOnChange( index: number ) {
 						return function handleAttributeChange(
-							value?: AttributeInputFieldItemProps | string
+							value: AttributeInputFieldItemProps | string
 						) {
 							if (
 								termsAutoSelection &&
