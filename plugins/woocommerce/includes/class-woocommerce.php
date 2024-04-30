@@ -1179,6 +1179,7 @@ final class WooCommerce {
 	 * Converts the WooCommerce slug to the correct slug for the current version.
 	 * This ensures that when the plugin is installed in a different folder name, the correct slug is used so that dependent plugins can be installed/activated.
 	 *
+	 * @since 9.0.0
 	 * @param string $slug The plugin slug to convert.
 	 *
 	 * @return string
