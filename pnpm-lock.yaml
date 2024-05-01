@@ -121,7 +121,7 @@ importers:
         version: 1.1.2(webpack@5.89.0)
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@4.10.0)
+        version: 5.89.0(webpack-cli@3.3.12)
 
   packages/js/admin-e2e-tests:
     dependencies:
@@ -2217,7 +2217,7 @@ importers:
         version: 5.3.3
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@4.10.0)
+        version: 5.89.0(webpack-cli@3.3.12)
       wireit:
         specifier: 0.14.3
         version: 0.14.3
@@ -4088,8 +4088,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2(react-dom@17.0.2)(react-test-renderer@17.0.2)(react@17.0.2)
       '@testing-library/user-event':
-        specifier: 13.5.0
-        version: 13.5.0(@testing-library/dom@9.3.3)
+        specifier: 14.5.2
+        version: 14.5.2(@testing-library/dom@9.3.3)
       '@types/classnames':
         specifier: 2.3.0
         version: 2.3.0
@@ -5014,7 +5014,7 @@ importers:
         version: 5.3.3
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@4.10.0)
+        version: 5.89.0(webpack-cli@3.3.12)
       wireit:
         specifier: 0.14.3
         version: 0.14.3
@@ -18838,6 +18838,15 @@ packages:
       '@testing-library/dom': 9.3.3
     dev: true
 
+  /@testing-library/user-event@14.5.2(@testing-library/dom@9.3.3):
+    resolution: {integrity: sha512-YAh82Wh4TIrxYLmfGcixwD18oIjyC1pFQC2Y01F2lzV2HTMiYrI0nze0FD0ocB//CKS/7jIUgae+adPqxK5yCQ==}
+    engines: {node: '>=12', npm: '>=6'}
+    peerDependencies:
+      '@testing-library/dom': '>=7.21.4'
+    dependencies:
+      '@testing-library/dom': 9.3.3
+    dev: true
+
   /@tootallnate/once@1.1.2:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
     engines: {node: '>= 6'}
@@ -26668,7 +26677,7 @@ packages:
       loader-utils: 2.0.4
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
     dev: true
 
   /babel-loader@8.3.0(@babel/core@7.23.5)(webpack@4.47.0):
@@ -29303,7 +29312,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
     dev: true
 
   /copy-webpack-plugin@10.2.4(webpack@5.91.0):
@@ -29743,7 +29752,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
     dev: true
 
   /css-loader@6.8.1(webpack@5.91.0):
@@ -43799,7 +43808,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /postcss-loader@4.3.0(postcss@8.4.32)(webpack@5.91.0):
     resolution: {integrity: sha512-M/dSoIiNDOo8Rk0mUqoj4kpGq91gcxCfb9PoyZVdZ76/AuhxylHDYZblNE8o+EQ9AMSASeMFEKxZf5aU6wlx1Q==}
@@ -47316,7 +47325,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /sass-loader@10.5.0(sass@1.69.5)(webpack@5.91.0):
     resolution: {integrity: sha512-VsU71W7VR6SChMJZUqtrfLeMSA8ns7QTHbnA7cfevtjb3c392mX93lr0Dmr4uU1ch5uIbEmfmHjdrDYcXXkQ7w==}
@@ -50752,7 +50761,7 @@ packages:
       loader-utils: 1.4.2
       mime: 2.6.0
       schema-utils: 1.0.0
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
     dev: true
 
   /url-loader@3.0.0(webpack@4.47.0):
@@ -51913,7 +51922,7 @@ packages:
       webpack: '>=5.32.0'
     dependencies:
       ansis: 1.5.6
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /webpack-rtl-plugin@2.0.0:
     resolution: {integrity: sha512-lROgFkiPjapg9tcZ8FiLWeP5pJoG00018aEjLTxSrVldPD1ON+LPlhKPHjb7eE8Bc0+KL23pxcAjWDGOv9+UAw==}
@@ -52101,7 +52110,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.6
       acorn: 8.11.2
       acorn-import-assertions: 1.9.0(acorn@8.11.2)
-      browserslist: 4.22.2
+      browserslist: 4.19.3
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.15.0
       es-module-lexer: 1.4.1
