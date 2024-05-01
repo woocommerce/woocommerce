@@ -48,7 +48,6 @@ import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
-import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
 import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
 
@@ -222,10 +221,6 @@ export function HeaderToolbar( {
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
 				<PinnedItems.Slot scope="woocommerce/product-editor-iframe-editor" />
-				<ToolbarItem
-					as={ ShowBlockInspectorPanel }
-					className="woocommerce-show-block-inspector-panel"
-				/>
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>
