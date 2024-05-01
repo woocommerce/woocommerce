@@ -128,8 +128,6 @@ export function IframeEditor( {
 		};
 	}, [] );
 
-	console.log( 'isRightSidebarOpen', isRightSidebarOpen );
-
 	useEffect( () => {
 		// Manually update the settings so that __unstableResolvedAssets gets added to the data store.
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
