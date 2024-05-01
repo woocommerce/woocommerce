@@ -19,7 +19,7 @@ const SettingsHeader = () => {
 export const SettingsSidebar = () => {
 	return (
 		<PluginSidebar
-			name="woocommerce-product-editor-settings-sidebar"
+			identifier="woocommerce-product-editor-settings-sidebar"
 			title={ __( 'Settings', 'woocommerce' ) }
 			icon={ isRTL() ? drawerRight : drawerLeft }
 			isActiveByDefault={ true }

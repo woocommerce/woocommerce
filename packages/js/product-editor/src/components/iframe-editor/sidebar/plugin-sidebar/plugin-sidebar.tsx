@@ -13,6 +13,7 @@ type PluginSidebarProps = {
 	closeLabel?: string;
 	header?: React.ReactNode;
 	icon?: string | React.ReactNode;
+	identifier?: string;
 	isActiveByDefault?: boolean;
 	name?: string;
 	title?: string;
