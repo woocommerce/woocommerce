@@ -812,9 +812,9 @@ class PluginsHelper {
 			$expired_subscriptions,
 			$total_expired_subscriptions,
 			array(
-				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				/* translators: 1) product name 2) URL to My Subscriptions page 3) Product price */
 				'single_manage'           => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s" >Renew for %4$s</a> to continue receiving updates and streamlined support', 'woocommerce' ),
-				/* translators: 1) product name 2) expiry date 3) URL to My Subscriptions page */
+				/* translators: 1) product name 2) URL to My Subscriptions page 3) Product price */
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">Renew for %4$s.</a> to continue receiving updates and streamlined support', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support', 'woocommerce' ),
