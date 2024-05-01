@@ -29,7 +29,7 @@ class BlockInserter {
                 continue;
             }
 
-            $post->post_content = $this->get_content_with_block_insertions( $post->post_content );
+            $post->post_content = $this->get_content_with_block_insertions( $post->post_content, $post );
             $posts[ $index ]    = $post;
         }
 
@@ -39,10 +39,11 @@ class BlockInserter {
     /**
      * Get the post content with added block insertions.
      *
+     * @param string  $content Content.
      * @param WP_Post $post Post.
      * @return string
      */
-    private function get_content_with_block_insertions( $content ) {
+    private function get_content_with_block_insertions( $content, $post ) {
         $new_content = '';
         $p           = new \WP_HTML_Tag_Processor( $content );
 
@@ -58,8 +59,10 @@ class BlockInserter {
                                 'block_insertions',
                                 '',
                                 $block_name,
-                                $is_closer ? 'last_child' : 'before'
-                            )
+                                $is_closer ? 'last_child' : 'before',
+                                $post
+                            ),
+                            $post
                         );
                     }
 
@@ -71,8 +74,10 @@ class BlockInserter {
                                 'block_insertions',
                                 '',
                                 $block_name,
-                                $is_closer ? 'after' : 'first_child'
-                            )
+                                $is_closer ? 'after' : 'first_child',
+                                $post
+                            ),
+                            $post
                         );
                     }
 
