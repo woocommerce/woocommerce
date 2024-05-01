@@ -136,6 +136,27 @@ const Combobox = ( {
 	const store = useComboboxStore();
 	const activeValue = store.useState( 'activeValue' );
 
+	const onClose = useCallback( () => {
+		if ( searchTerm.length ) {
+			const bestMatch = findBestMatchByLabel( searchTerm, options );
+
+			if ( bestMatch ) {
+				setSearchTerm( bestMatch.label );
+				setSelectedOption( bestMatch );
+				onChange( bestMatch.value );
+			} else {
+				setSearchTerm( selectedOption?.label || '' );
+			}
+		}
+	}, [
+		searchTerm,
+		options,
+		onChange,
+		setSelectedOption,
+		setSearchTerm,
+		selectedOption,
+	] );
+
 	return (
 		<div className={ outerWrapperClasses }>
 			<div
@@ -146,26 +167,26 @@ const Combobox = ( {
 					store={ store }
 					value={ searchTerm }
 					selectedValue={ selectedOption?.value || '' }
-					setValue={ ( val ) => {
-						console.log( 'set value happen', val );
+					setValue={ ( val: string ) => {
 						startTransition( () => {
 							setSearchTerm( val );
 
 							if ( val && val.length ) {
-								const bestMatch =
-									findExactMatchByLabel( val, options ) ||
-									findBestMatchByLabel( val, options );
+								const exactMatch = findExactMatchByLabel(
+									val,
+									options
+								);
 
 								if (
-									bestMatch &&
-									bestMatch.value !== selectedOption?.value
+									exactMatch &&
+									exactMatch.value !== selectedOption?.value
 								) {
 									store.setState(
 										'selectedValue',
-										bestMatch.value
+										exactMatch.value
 									);
-									setSelectedOption( bestMatch );
-									onChange( bestMatch.value );
+									setSelectedOption( exactMatch );
+									onChange( exactMatch.value );
 								}
 							}
 						} );
@@ -202,6 +223,7 @@ const Combobox = ( {
 								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
+								onClose={ onClose }
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<ComboboxItem
