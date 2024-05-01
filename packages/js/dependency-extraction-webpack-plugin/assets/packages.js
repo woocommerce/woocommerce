@@ -23,5 +23,6 @@ module.exports = [
 	'@woocommerce/blocks-components',
 	'@woocommerce/block-data',
 	'@woocommerce/blocks-registry',
+	'@woocommerce/price-format',
 	'@woocommerce/settings',
 ];
