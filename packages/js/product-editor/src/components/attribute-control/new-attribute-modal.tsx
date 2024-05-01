@@ -22,7 +22,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
@@ -30,6 +29,8 @@ import {
 import { TRACKS_SOURCE } from '../../constants';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import AttributesComboboxControl from '../attribute-combobox-field';
+import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -308,7 +309,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					}
 
 					function selectAttributeHandler(
-						nextAttribute: AttributeInputFieldItemProps,
+						nextAttribute: AttributesComboboxControlItem,
 						index: number
 					) {
 						recordEvent( 'product_attribute_add_custom_attribute', {
@@ -446,19 +447,18 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
 													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributeInputField
+														<AttributesComboboxControl
 															placeholder={
 																attributePlaceholder
 															}
-															value={ attribute }
+															current={
+																attribute
+															}
 															items={
 																availableAttributes
 															}
 															isLoading={
 																isLoading
-															}
-															label={
-																attributeLabel
 															}
 															onChange={ (
 																nextAttribute
@@ -467,9 +467,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																	nextAttribute,
 																	index
 																)
-															}
-															disabledAttributeIds={
-																disabledAttributeIds
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage
