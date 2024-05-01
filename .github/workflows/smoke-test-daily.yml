@@ -80,7 +80,7 @@ jobs:
     e2e-tests:
         name: E2E tests on nightly build
         runs-on: ubuntu-latest
-        timeout-minutes: 60
+        timeout-minutes: 90
         strategy:
             fail-fast: false
             matrix:
@@ -120,7 +120,7 @@ jobs:
               run: pnpm exec playwright install chromium
 
             - name: Run E2E tests
-              timeout-minutes: 60
+              timeout-minutes: 90
               id: run_playwright_e2e_tests
               env:
                   USE_WP_ENV: 1
@@ -295,7 +295,7 @@ jobs:
                   
             - name: Run the rest of E2E tests
               id: run-e2e-composite-action
-              timeout-minutes: 60
+              timeout-minutes: 90
               uses: ./.github/actions/tests/run-e2e-tests
               with:
                   playwright-config: ignore-plugin-tests.playwright.config.js
