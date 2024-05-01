@@ -442,7 +442,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
 
-		$query_args['s'] = urlencode( 'test_user+shop@woo.test' );
+		$query_args['s'] = rawurlencode( 'test_user+shop@woo.test' );
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertCount( 0, $query->orders );
 
