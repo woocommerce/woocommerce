@@ -1929,6 +1929,8 @@ FROM $order_meta_table
 		$default_taxonomies = $this->init_default_taxonomies( $order, array() );
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
+		// We still need this even though it's callers also end up invalidating the cache because we don't know what
+		// inheriting datastores may be overriding.
 		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
 	}
 
@@ -2370,7 +2372,14 @@ FROM $order_meta_table
 				array( '%d' )
 			);
 
-			$this->invalidate_cache_for_objects( $child_order_ids );
+			$order_cache = $order_cache = wc_get_container()->get( OrderCache::class );
+			foreach ( $child_order_ids as $child_order_id ) {
+				$order_cache->remove( $child_order_id );
+			}
+			// Because existing extensions may already assume caching of an order should be cleared through
+			// the OrderCache, OrderCache::remove() must end up calling $this->invalidate_cache_for_objects()
+			// so we're removing this to avoid the duplicate call.
+			//$this->invalidate_cache_for_objects( array( $child_order_ids ) );
 		} else {
 			foreach ( $child_order_ids as $child_order_id ) {
 				$child_order = wc_get_order( $child_order_id );
@@ -2428,7 +2437,7 @@ FROM $order_meta_table
 			wp_trash_post( $order->get_id() );
 		}
 
-		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+		$this->clear_caches( $order );
 	}
 
 	/**
@@ -2529,7 +2538,6 @@ FROM $order_meta_table
 	 */
 	public function delete_order_data_from_custom_order_tables( $order_id ) {
 		global $wpdb;
-		$order_cache = wc_get_container()->get( OrderCache::class );
 
 		// Delete COT-specific data.
 		foreach ( $this->get_all_table_names() as $table ) {
@@ -2540,10 +2548,13 @@ FROM $order_meta_table
 					: array( 'order_id' => $order_id ),
 				array( '%d' )
 			);
-			$order_cache->remove( $order_id );
 		}
-
-		$this->invalidate_cache_for_objects( array( $order_id ) );
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		$order_cache->remove( $order_id );
+		// Because existing extensions may already assume caching of an order should be cleared through
+		// the OrderCache, OrderCache::remove() must end up calling $this->invalidate_cache_for_objects()
+		// so we're removing this to avoid the duplicate call.
+		//$this->invalidate_cache_for_objects( array( $order_id ) );
 	}
 
 	/**
@@ -2684,6 +2695,17 @@ FROM $order_meta_table
 	}
 
 	/**
+	 * Clear any caches.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @since 3.0.0
+	 */
+	protected function clear_caches( &$order ) {
+		parent::clear_caches( $order );
+		$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+	}
+
+	/**
 	 * Helper method that is responsible for persisting order updates to the database.
 	 *
 	 * This is expected to be reused by other order types, and should not contain any specific metadata updates or actions.
@@ -2709,9 +2731,9 @@ FROM $order_meta_table
 
 		$order->save_meta_data();
 
+		$this->clear_caches( $order );
 		if ( $backfill ) {
 			self::$backfilling_order_ids[] = $order->get_id();
-			$this->clear_caches( $order );
 			$r_order = wc_get_order( $order->get_id() ); // Refresh order to account for DB changes from post hooks.
 			$this->maybe_backfill_post_record( $r_order );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $order->get_id() ) );
@@ -3139,7 +3161,10 @@ CREATE TABLE $meta_table (
 		} else {
 			$order_cache = wc_get_container()->get( OrderCache::class );
 			$order_cache->remove( $order->get_id() );
-			$this->invalidate_cache_for_objects( array( $order->get_id() ) );
+			// Because existing extensions may already assume caching of an order should be cleared through
+			// the OrderCache, OrderCache::remove() must end up calling $this->invalidate_cache_for_objects()
+			// so we're removing this to avoid the duplicate call.
+			//$this->invalidate_cache_for_objects( array( $order_id ) );
 		}
 
 		return false;

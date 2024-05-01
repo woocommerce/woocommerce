@@ -42,4 +42,19 @@ class OrderCache extends ObjectCache {
 
 		return null;
 	}
+
+	/**
+	 * Remove an object from the cache.
+	 *
+	 * @param int|string $id The id of the object to remove.
+	 * @return bool True if the object is removed from the cache successfully, false otherwise (because the object wasn't cached or for other reason).
+	 */
+	public function remove( $id ): bool {
+		$datastore = \WC_Data_Store::load( $this->get_object_type() );
+		if ( method_exists( $datastore, 'invalidate_cache_for_objects' ) ) {
+			$datastore->invalidate_cache_for_objects( array( $id ) );
+		}
+
+		return parent::remove( $id ); //$this->get_cache_engine()->delete_cached_object( $id, $this->get_object_type() );
+	}
 }
