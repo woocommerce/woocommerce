@@ -15,6 +15,7 @@ import {
 	type ProductAttributesActions,
 	type WPDataActions,
 	type ProductAttributeTerm,
+	type ProductAttribute,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -379,33 +380,30 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					}
 
 					/*
-					 * Get the attribute ids that should be ignored when filtering the attributes
-					 * to show in the attribute input field.
+					 * Get the attribute ids that are already selected
+					 * by other form fields.
 					 */
-					const ignoredAttributeIds = [
-						...selectedAttributeIds,
-						...values.attributes
-							.map( ( attr ) => attr?.id )
-							.filter(
-								( attrId ): attrId is number =>
-									attrId !== undefined
-							),
-					];
+					const attributeBelongTo = values.attributes.map( ( attr ) =>
+						attr ? attr.id : null
+					);
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
-					 * filtering out the ignored attributes and marking the disabled ones.
+					 * filtering out the ignored attributes,
+					 * marking the disabled ones,
+					 * and setting the takenBy property.
 					 */
 					const availableAttributes = attributes
 						?.filter(
-							( attribute: EnhancedProductAttribute ) =>
-								! ignoredAttributeIds.includes( attribute.id )
+							( attribute: ProductAttribute ) =>
+								! selectedAttributeIds.includes( attribute.id )
 						)
-						.map( ( attribute: EnhancedProductAttribute ) => ( {
+						?.map( ( attribute: ProductAttribute ) => ( {
 							...attribute,
 							isDisabled: disabledAttributeIds.includes(
 								attribute.id
 							),
+							takenBy: attributeBelongTo.indexOf( attribute.id ),
 						} ) );
 
 					return (
