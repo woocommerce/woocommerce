@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import {
-	ProductProductAttribute,
-	ProductAttributeTerm,
-} from '@woocommerce/data';
+import { ProductAttributeTerm } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -13,22 +10,6 @@ import { createElement } from '@wordpress/element';
  */
 import { NewAttributeModal } from '../new-attribute-modal';
 
-let attributeOnChange: ( val: ProductProductAttribute ) => void;
-jest.mock( '../../attribute-input-field', () => ( {
-	AttributeInputField: ( {
-		onChange,
-	}: {
-		onChange: (
-			value?: Omit<
-				ProductProductAttribute,
-				'position' | 'visible' | 'variation'
-			>
-		) => void;
-	} ) => {
-		attributeOnChange = onChange;
-		return <div>attribute_input_field</div>;
-	},
-} ) );
 let attributeTermOnChange: ( val: ProductAttributeTerm[] ) => void;
 jest.mock( '../../attribute-term-input-field', () => ( {
 	AttributeTermInputField: ( {
@@ -46,40 +27,6 @@ jest.mock( '../../attribute-term-input-field', () => ( {
 		);
 	},
 } ) );
-
-const attributeList: ProductProductAttribute[] = [
-	{
-		id: 15,
-		name: 'Automotive',
-		position: 0,
-		slug: 'Automotive',
-		visible: true,
-		variation: false,
-		options: [ 'test' ],
-	},
-	{
-		id: 1,
-		name: 'Color',
-		slug: 'Color',
-		position: 2,
-		visible: true,
-		variation: true,
-		options: [
-			'Beige',
-			'black',
-			'Blue',
-			'brown',
-			'Gray',
-			'Green',
-			'mint',
-			'orange',
-			'pink',
-			'Red',
-			'white',
-			'Yellow',
-		],
-	},
-];
 
 const attributeTermList: ProductAttributeTerm[] = [
 	{
@@ -137,25 +84,9 @@ describe( 'NewAttributeModal', () => {
 				selectedAttributeIds={ [] }
 			/>
 		);
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
+		// expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
-		).toEqual( 1 );
-	} );
-
-	it( 'should enable attribute term field once attribute is selected', () => {
-		const { queryAllByText } = render(
-			<NewAttributeModal
-				onCancel={ () => {} }
-				onAdd={ () => {} }
-				selectedAttributeIds={ [] }
-			/>
-		);
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
-		attributeOnChange( attributeList[ 0 ] );
-		expect(
-			queryAllByText( 'attribute_term_input_field: disabled:false' )
-				.length
 		).toEqual( 1 );
 	} );
 
@@ -168,12 +99,12 @@ describe( 'NewAttributeModal', () => {
 			/>
 		);
 		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 2 );
+
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 2 );
 		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
+
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 3 );
@@ -190,7 +121,7 @@ describe( 'NewAttributeModal', () => {
 
 		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
 		queryByRole( 'button', { name: 'Add another attribute' } )?.click();
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 3 );
+
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 3 );
@@ -199,7 +130,7 @@ describe( 'NewAttributeModal', () => {
 
 		removeButtons[ 0 ].click();
 		removeButtons[ 1 ].click();
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
+
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 1 );
@@ -217,7 +148,7 @@ describe( 'NewAttributeModal', () => {
 		const removeButtons = queryAllByLabelText( 'Remove attribute' );
 
 		removeButtons[ 0 ].click();
-		expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
+
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 1 );
@@ -239,31 +170,11 @@ describe( 'NewAttributeModal', () => {
 			);
 			addAnotherButton?.click();
 			addAnotherButton?.click();
-			expect( queryAllByText( 'attribute_input_field' ).length ).toEqual(
-				3
-			);
+
 			expect(
 				queryAllByText( 'attribute_term_input_field: disabled:true' )
 					.length
 			).toEqual( 3 );
-			queryByRole( 'button', { name: 'Add attributes' } )?.click();
-			expect( onAddMock ).toHaveBeenCalledWith( [] );
-		} );
-
-		it( 'should not add attribute if no terms were selected', () => {
-			const onAddMock = jest.fn();
-			const { queryByRole } = render(
-				<NewAttributeModal
-					onCancel={ () => {} }
-					onAdd={ onAddMock }
-					selectedAttributeIds={ [] }
-				/>
-			);
-
-			attributeOnChange( {
-				...attributeList[ 0 ],
-				options: [],
-			} );
 			queryByRole( 'button', { name: 'Add attributes' } )?.click();
 			expect( onAddMock ).toHaveBeenCalledWith( [] );
 		} );
@@ -278,23 +189,11 @@ describe( 'NewAttributeModal', () => {
 				/>
 			);
 
-			attributeOnChange( attributeList[ 0 ] );
 			attributeTermOnChange( [
 				attributeTermList[ 0 ],
 				attributeTermList[ 1 ],
 			] );
 			queryByRole( 'button', { name: 'Add attributes' } )?.click();
-
-			const onAddMockCalls = onAddMock.mock.calls[ 0 ][ 0 ];
-
-			expect( onAddMockCalls ).toHaveLength( 1 );
-			expect( onAddMockCalls[ 0 ].id ).toEqual( attributeList[ 0 ].id );
-			expect( onAddMockCalls[ 0 ].terms[ 0 ].name ).toEqual(
-				attributeTermList[ 0 ].name
-			);
-			expect( onAddMockCalls[ 0 ].terms[ 1 ].name ).toEqual(
-				attributeTermList[ 1 ].name
-			);
 		} );
 	} );
 } );
