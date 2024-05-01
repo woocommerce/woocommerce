@@ -67,4 +67,28 @@ describe( 'Combobox', () => {
 		expect( options[ 2 ] ).toHaveTextContent( 'Bordj Bou Arréridj' );
 		expect( options[ 3 ] ).toHaveTextContent( 'Oum El Bouaghi' );
 	} );
+
+	test( 'Typing a search that is an exact match will clear all results and set the value', async () => {
+		const user = userEvent.setup();
+
+		const onChange = jest.fn();
+
+		const { getByRole, queryAllByRole } = render(
+			<Combobox
+				options={ OPTIONS }
+				value={ OPTIONS[ 0 ].value }
+				label={ OPTIONS[ 0 ].label }
+				onChange={ onChange }
+				errorId={ null }
+			/>
+		);
+
+		const input = getByRole( 'combobox' );
+		await act( () => user.type( input, 'Bouira' ) );
+
+		const options = queryAllByRole( 'option' );
+		expect( options ).toHaveLength( 0 );
+
+		expect( onChange ).toHaveBeenCalledWith( 'DZ-10' );
+	} );
 } );
