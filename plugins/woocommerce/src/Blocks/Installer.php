@@ -33,11 +33,11 @@ class Installer {
 	 */
 	public function create_pages( $pages ) {
 
-		if ( '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' === $pages['cart']['content'] ) {
+		if ( isset( $pages['cart']['content'] ) && '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' === $pages['cart']['content'] ) {
 			$pages['cart']['content'] = '<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->';
 		}
 
-		if ( '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->' === $pages['checkout']['content'] ) {
+		if ( isset( $pages['checkout']['content'] ) && '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->' === $pages['checkout']['content'] ) {
 			$pages['checkout']['content'] = '<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->';
 		}
 
