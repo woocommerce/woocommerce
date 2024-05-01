@@ -44,7 +44,7 @@ class WC_Helper_Updater {
 	/**
 	 * Add the hook for modifying default WPCore update notices on the plugins management page.
 	 */
-	public static function maybe_display_message_for_expiry_plugins(){
+	public static function maybe_display_message_for_expiry_plugins() {
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
 			add_action( 'in_plugin_update_message-' . $plugin['_filename'], array( __CLASS__, 'display_subscription_expiry_message' ), 10, 2 );
 		}
@@ -250,20 +250,22 @@ class WC_Helper_Updater {
 	 *
 	 * @return void.
 	 */
-	public static function display_subscription_expiry_message ( $plugin_data, $response ){
+	public static function display_subscription_expiry_message( $plugin_data, $response ) {
 
 		// Extract product ID from the response.
 		$product_id = preg_replace( '/[^0-9]/', '', $response->id );
 
 		// Get the subscription details based on product ID.
-		$subscription = current( wp_list_filter(
-			WC_Helper::get_subscriptions(),
-			array( 'product_id' => $product_id )
-		) );
+		$subscription = current(
+			wp_list_filter(
+				WC_Helper::get_subscriptions(),
+				array( 'product_id' => $product_id )
+			)
+		);
 
 		// Check if subscription is empty.
 		if ( empty( $subscription ) ) {
-			return false;
+			return;
 		}
 
 		// Prepare the expiry notice based on subscription status.
@@ -271,22 +273,29 @@ class WC_Helper_Updater {
 		if ( ! empty( $subscription['expired'] ) && ! $subscription['lifetime'] ) {
 			$expiry_notice = sprintf(
 			/* translators: 1: URL to My Subscriptions page 2: Product price */
-				__( ' Your subscription expired, <a href="%1$s">renew for %2$s</a> to update.' ),
+				__( ' Your subscription expired, <a href="%1$s">renew for %2$s</a> to update.', 'woocommerce' ),
 				'https://woocommerce.com/my-account/my-subscriptions/',
 				$subscription['product_price']
 			);
-		}else if( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ){
+		} elseif ( ! empty( $subscription['expiring'] ) && ! $subscription['autorenew'] ) {
 			$expiry_notice = sprintf(
 			/* translators: 1: Expiry date 1: URL to My Subscriptions page */
-				__( ' Your subscription expires on %1$s, <a href="%2$s">enable auto-renew</a> to continue receiving updates.' ),
+				__( ' Your subscription expires on %1$s, <a href="%2$s">enable auto-renew</a> to continue receiving updates.', 'woocommerce' ),
 				date_i18n( 'F jS', $subscription['expires'] ),
 				'https://woocommerce.com/my-account/my-subscriptions/'
 			);
 		}
 
-		// Display the expiry notice
+		// Display the expiry notice.
 		if ( ! empty( $expiry_notice ) ) {
-			echo $expiry_notice;
+			echo wp_kses(
+				$expiry_notice,
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			);
 		}
 	}
 
