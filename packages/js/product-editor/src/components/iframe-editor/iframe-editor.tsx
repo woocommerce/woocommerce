@@ -44,7 +44,7 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { RegisterStores } from './RegisterStores';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
-import { SettingsSidebar } from './settings-sidebar';
+import { SettingsSidebar } from './sidebar/settings-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
