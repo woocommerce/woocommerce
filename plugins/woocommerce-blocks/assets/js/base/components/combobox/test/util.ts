@@ -7,7 +7,7 @@ import {
 	findMatchingSuggestions,
 } from '../util';
 
-const OPTIONS = [
+export const OPTIONS = [
 	{
 		value: 'DZ-01',
 		label: 'Adrar',
