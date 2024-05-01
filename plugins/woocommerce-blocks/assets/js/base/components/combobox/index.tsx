@@ -29,9 +29,13 @@ import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import './style.scss';
-import { normalizeTextString } from '../../utils/string';
+import {
+	findBestMatchByLabel,
+	findExactMatchByLabel,
+	findMatchingSuggestions,
+} from './util';
 
-interface ComboboxControlOption {
+export interface ComboboxControlOption {
 	label: string;
 	value: string;
 }
@@ -86,21 +90,14 @@ const Combobox = ( {
 		initialOption?.label || ''
 	);
 
+	useEffect( () => {
+		setSearchTerm( initialOption?.label || '' );
+	}, [ initialOption ] );
+
+	const [ selectedOption, setSelectedOption ] = useState( initialOption );
+
 	const matchingSuggestions = useMemo( () => {
-		const startsWithMatch: ComboboxControlOption[] = [];
-		const containsMatch: ComboboxControlOption[] = [];
-		const match = normalizeTextString( searchTerm );
-
-		options.forEach( ( option ) => {
-			const index = normalizeTextString( option.label ).indexOf( match );
-			if ( index === 0 ) {
-				startsWithMatch.push( option );
-			} else if ( index > 0 ) {
-				containsMatch.push( option );
-			}
-		} );
-
-		return startsWithMatch.concat( containsMatch );
+		return findMatchingSuggestions( searchTerm, options );
 	}, [ searchTerm, options ] );
 
 	useEffect( () => {
@@ -135,112 +132,52 @@ const Combobox = ( {
 		}
 	);
 
-	const innerWrapperClasses = classnames(
-		'components-base-control',
-		'wc-block-components-combobox-control',
-		'components-combobox-control'
-	);
-
-	const comboboxClasses = classnames(
-		'components-combobox-control__input',
-		'components-form-token-field__input'
-	);
-
 	const ariaInvalid = error?.message && ! error?.hidden ? 'true' : 'false';
-
 	const store = useComboboxStore();
-
-	const onClose = useCallback( () => {
-		const { selectedValue } = store.getState();
-
-		// If a value is not selected and there is no search term, fire an onChange to ensure we update
-		// the value in the parent component.
-		if ( ! searchTerm && ! selectedValue ) {
-			onChange( '' );
-			// If there is no search term but a selected value, set the search to match the selected value.
-		} else if ( ! searchTerm && selectedValue ) {
-			const opt = options.find(
-				( option ) => option.value === selectedValue
-			);
-
-			if ( opt ) {
-				setSearchTerm( opt.label );
-			}
-			// Otherwise if there is a search term see if it matches the selected value, (or label fallback),
-			// if not reset it to the selected value.
-		} else if ( searchTerm ) {
-			const opt = options.find(
-				( option ) => option.value === searchTerm
-			);
-
-			// Fallback to a label match
-			const labelFallback = options.find( ( foundOpt ) => {
-				return normalizeTextString( foundOpt.label ).startsWith(
-					normalizeTextString( searchTerm )
-				);
-			} );
-
-			if ( opt ) {
-				setSearchTerm( opt.label );
-				onChange( opt.value );
-			} else if ( labelFallback ) {
-				setSearchTerm( labelFallback.label );
-				onChange( labelFallback.value );
-			} else {
-				const lastOpt = options.find(
-					( option ) => option.value === selectedValue
-				);
-				setSearchTerm( lastOpt?.label || '' );
-			}
-		}
-	}, [ searchTerm, store, onChange, options ] );
+	const activeValue = store.useState( 'activeValue' );
 
 	return (
 		<div className={ outerWrapperClasses }>
-			<div className={ innerWrapperClasses } ref={ controlRef }>
+			<div
+				className="components-combobox-control components-base-control wc-block-components-combobox-control"
+				ref={ controlRef }
+			>
 				<ComboboxProvider
 					store={ store }
 					value={ searchTerm }
-					selectedValue={ initialOption?.value || '' }
+					selectedValue={ selectedOption?.value || '' }
 					setValue={ ( val ) => {
+						console.log( 'set value happen', val );
 						startTransition( () => {
 							setSearchTerm( val );
-						} );
 
-						const option = options.find(
-							( opt ) =>
-								normalizeTextString( opt.label ) ===
-								normalizeTextString( val )
-						);
+							if ( val && val.length ) {
+								const bestMatch =
+									findExactMatchByLabel( val, options ) ||
+									findBestMatchByLabel( val, options );
 
-						// If we find an exact match, change the selected value on behalf of user
-						if ( option ) {
-							store.setState( 'selectedValue', option.value );
-							onChange( option.value );
-						} else if ( val.length ) {
-							// Fallback to a label match
-							const foundOption = options.find( ( foundOpt ) => {
-								return normalizeTextString(
-									foundOpt.label
-								).startsWith( normalizeTextString( val ) );
-							} );
-
-							if ( foundOption ) {
-								store.setState(
-									'selectedValue',
-									foundOption.value
-								);
-								onChange( foundOption.value );
+								if (
+									bestMatch &&
+									bestMatch.value !== selectedOption?.value
+								) {
+									store.setState(
+										'selectedValue',
+										bestMatch.value
+									);
+									setSelectedOption( bestMatch );
+									onChange( bestMatch.value );
+								}
 							}
-						}
+						} );
 					} }
 					setSelectedValue={ ( val ) => {
 						const option = options.find(
-							( opt ) => opt.label === val
+							( opt ) => opt.value === val
 						);
 
 						if ( option ) {
 							setSearchTerm( option.label );
+							setSelectedOption( option );
 							onChange( option.value );
 						}
 					} }
@@ -252,24 +189,38 @@ const Combobox = ( {
 
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
-								className={ comboboxClasses }
+								className="components-combobox-control__input components-form-token-field__input"
 								autoComplete={ autoComplete }
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
+								onFocus={ () => {
+									setSearchTerm( '' );
+								} }
 							/>
 							<ComboboxPopover
 								className="components-form-token-field__suggestions-list"
 								sameWidth
 								flip={ false }
-								onClose={ onClose }
 							>
 								{ matchingSuggestions.map( ( option ) => (
 									<ComboboxItem
-										className="components-form-token-field__suggestion"
+										// For backwards compatibility we retain the is-selected class, in future we could target aria or data attributes in CSS instead.
+										className={ `components-form-token-field__suggestion ${
+											activeValue === option.value
+												? 'is-selected'
+												: ''
+										}` }
 										key={ option.label }
-										value={ option.label }
-									/>
+										value={ option.value }
+										setValueOnClick={ () => {
+											setSearchTerm( option.label );
+
+											return false;
+										} }
+									>
+										{ option.label }
+									</ComboboxItem>
 								) ) }
 							</ComboboxPopover>
 						</div>
