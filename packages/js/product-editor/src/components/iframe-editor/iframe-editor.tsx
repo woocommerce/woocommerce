@@ -101,7 +101,6 @@ export function IframeEditor( {
 	} );
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
-	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore This action exists in the block editor store.
 	const { clearSelectedBlock, updateSettings } =
@@ -152,8 +151,6 @@ export function IframeEditor( {
 					setIsInserterOpened,
 					setIsDocumentOverviewOpened: setIsListViewOpened,
 					undo,
-					isSidebarOpened,
-					setIsSidebarOpened,
 				} }
 			>
 				<BlockEditorProvider
