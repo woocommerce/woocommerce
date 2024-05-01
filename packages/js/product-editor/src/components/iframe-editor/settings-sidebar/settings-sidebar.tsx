@@ -12,6 +12,10 @@ import drawerLeft from './drawer-left';
 import drawerRight from './drawer-right';
 import { PluginSidebar } from '../plugin-sidebar';
 
+const SettingsHeader = () => {
+	return <strong>{ __( 'Settings', 'woocommerce' ) }</strong>;
+};
+
 export const SettingsSidebar = () => {
 	return (
 		<PluginSidebar
@@ -19,6 +23,8 @@ export const SettingsSidebar = () => {
 			title={ __( 'Settings', 'woocommerce' ) }
 			icon={ isRTL() ? drawerRight : drawerLeft }
 			isActiveByDefault={ true }
+			header={ <SettingsHeader /> }
+			closeLabel={ __( 'Close settings', 'woocommerce' ) }
 		>
 			<BlockInspector />
 		</PluginSidebar>

@@ -10,6 +10,8 @@ import { ComplementaryArea } from '@wordpress/interface';
 type PluginSidebarProps = {
 	children: React.ReactNode;
 	className?: string;
+	closeLabel?: string;
+	header?: React.ReactNode;
 	icon?: string | React.ReactNode;
 	isActiveByDefault?: boolean;
 	name?: string;
