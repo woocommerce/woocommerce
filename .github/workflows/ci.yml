@@ -41,8 +41,11 @@ jobs:
                       if ( baseRef ) {
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
+                    
+                      let githubEvent = ${{ toJson( github.event_name ) }};
+                    
                       const child_process = require( 'node:child_process' );
-                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef }` );
+                      child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
     project-lint-jobs:
         name: 'Lint - ${{ matrix.projectName }}'
@@ -125,7 +128,7 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-e2e-reports-${{ matrix.shardNumber }}
+                  name: all-blob-e2e-reports-${{ strategy.job-index }}
                   path: ${{ matrix.projectPath }}/tests/e2e-pw/test-results
                   retention-days: 1
                   compression-level: 9
@@ -162,7 +165,7 @@ jobs:
               if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
-                  name: all-blob-api-reports-${{ matrix.shardNumber }}
+                  name: all-blob-api-reports-${{ strategy.job-index }}
                   path: ${{ matrix.projectPath }}/tests/api-core-tests/test-results/allure-results
                   retention-days: 1
                   compression-level: 9

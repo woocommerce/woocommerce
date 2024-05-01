@@ -1,4 +1,4 @@
-name: Run tests against PR in an environment with HPOS disabled
+name: Run tests with HPOS disabled
 on:
     push:
       branches:

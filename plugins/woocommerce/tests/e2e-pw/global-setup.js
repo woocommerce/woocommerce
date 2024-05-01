@@ -189,14 +189,17 @@ module.exports = async ( config ) => {
 	// (if a value for ENABLE_HPOS was set)
 	// This was always being set to 'yes' after login in wp-env so this step ensures the
 	// correct value is set before we begin our tests
+	console.log( `ENABLE_HPOS: ${ ENABLE_HPOS }` );
+
+	const api = new wcApi( {
+		url: baseURL,
+		consumerKey: process.env.CONSUMER_KEY,
+		consumerSecret: process.env.CONSUMER_SECRET,
+		version: 'wc/v3',
+	} );
+
 	if ( ENABLE_HPOS ) {
 		const hposSettingRetries = 5;
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
 
 		const value = ENABLE_HPOS === '0' ? 'no' : 'yes';
 
@@ -235,6 +238,12 @@ module.exports = async ( config ) => {
 			process.exit( 1 );
 		}
 	}
+
+	const response = await api.get(
+		'settings/advanced/woocommerce_custom_orders_table_enabled'
+	);
+
+	console.log( `HPOS configuration ${ response.data.value }` );
 
 	await site.useCartCheckoutShortcodes( baseURL, userAgent, admin );
 

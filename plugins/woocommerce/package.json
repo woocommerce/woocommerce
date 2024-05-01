@@ -29,7 +29,7 @@
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
 		"env:test": "pnpm env:dev && pnpm playwright install chromium",
-		"env:test:cot": "ENABLE_HPOS=1 pnpm env:test",
+		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
@@ -208,6 +208,34 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - HPOS disabled",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"events": [
+						"push"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
@@ -225,6 +253,27 @@
 					],
 					"testEnv": {
 						"start": "env:test"
+					}
+				},
+				{
+					"name": "Core API tests - HPOS disabled",
+					"testType": "api",
+					"command": "test:api-pw",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/api-core-tests/**"
+					],
+					"events": [
+						"push"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
 					}
 				},
 				{
