@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Ensure the package can only be initialized once

@@ -29,7 +29,7 @@ class Woocommerce_Analytics {
 	 * @return void
 	 */
 	public static function init() {
-		if ( ! self::should_track_store() ) {
+		if ( ! self::should_track_store() || did_action( 'woocommerce_analytics_init' ) ) {
 			return;
 		}
 
@@ -47,6 +47,13 @@ class Woocommerce_Analytics {
 		) {
 			add_action( 'init', array( new Checkout_Flow(), 'init_hooks' ) );
 		}
+
+		/**
+		 * Fires after the WooCommerce Analytics package is initialized
+		 *
+		 * @since $$next-version$$
+		 */
+		do_action( 'woocommerce_analytics_init' );
 	}
 
 	/**
