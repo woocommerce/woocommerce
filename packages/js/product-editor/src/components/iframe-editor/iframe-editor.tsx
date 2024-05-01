@@ -42,6 +42,7 @@ import { BackButton } from './back-button';
 import { EditorCanvas } from './editor-canvas';
 import { EditorContext } from './context';
 import { HeaderToolbar } from './header-toolbar/header-toolbar';
+import { RegisterStores } from './RegisterStores';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
@@ -177,6 +178,7 @@ export function IframeEditor( {
 					} }
 					useSubRegistry={ true }
 				>
+					<RegisterStores />
 					<HeaderToolbar
 						onSave={ () => {
 							appendEdit( temporalBlocks );
