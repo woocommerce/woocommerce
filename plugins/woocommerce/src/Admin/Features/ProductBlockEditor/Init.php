@@ -86,6 +86,9 @@ class Init {
 			$tracks = new Tracks();
 			$tracks->init();
 
+			$block_inserter = new BlockInserter();
+			$block_inserter->init();
+
 			$this->register_product_templates();
 		}
 	}
