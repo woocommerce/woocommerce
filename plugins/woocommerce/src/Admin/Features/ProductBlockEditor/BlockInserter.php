@@ -84,7 +84,7 @@ class BlockInserter {
                     break;
                 case '#tag':
                     $new_content .= ! $p->is_tag_closer()
-                        ? '<' . strtolower( $p->get_tag() ) . '>'
+                        ? '<' . strtolower( $p->get_tag() ) . $this->get_attributes_string( $p ) . '>'
                         : '</' . strtolower( $p->get_tag() ) . '>';
                     break;
                 case '#text':
@@ -94,6 +94,26 @@ class BlockInserter {
         }
 
         return $new_content;
+    }
+
+    /**
+     * Get the attributes string used in tags.
+     *
+     * @param \WP_HTML_Tag_Processor $p WP HTML Tag Processor.
+     * @return string
+     */
+    public function get_attributes_string( $p ) {
+        $string = '';
+
+        if ( ! method_exists( $p, 'get_attributes' ) ) {
+            return $string;
+        }
+
+        $html   = $p->get_updated_html();
+        foreach ( $p->get_attributes() as $attribute ) {
+            $string .= ' ' . substr( $html, $attribute->start, $attribute->length );
+        }
+        return $string;
     }
 
     /**
