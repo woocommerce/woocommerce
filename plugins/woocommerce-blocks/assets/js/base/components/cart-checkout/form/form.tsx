@@ -164,7 +164,6 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 							{ ...fieldProps }
 							value={ values.country }
 							onChange={ ( newCountry ) => {
-								console.log( 'newCountry', newCountry );
 								const newValues = {
 									...values,
 									country: newCountry,

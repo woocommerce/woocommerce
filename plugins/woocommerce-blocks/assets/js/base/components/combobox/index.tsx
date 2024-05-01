@@ -44,7 +44,7 @@ type WCComboboxProps = Omit< AriakitComboboxProps, 'onChange' > & {
 	errorId: string | null;
 	errorMessage?: string | undefined;
 	instanceId?: string;
-	onChange: ( filterValue: string ) => void;
+	onChange: ( newValue: string ) => void;
 	options: ComboboxControlOption[];
 	value: string;
 	label: string;
@@ -58,7 +58,7 @@ const Combobox = ( {
 	label,
 	options,
 	value,
-	// Not the native onChange, a custom onChange that is called when the filter value changes.
+	// Not the native onChange, a custom onChange that is called when the selected value changes.
 	onChange,
 	errorId: incomingErrorId,
 	required = false,
