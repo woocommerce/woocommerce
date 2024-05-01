@@ -410,7 +410,7 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 	public function test_query_s_argument() {
 		$order1 = new \WC_Order();
 		$order1->set_billing_first_name( '%ir Woo' );
-		$order1->set_billing_email( 'test_user@woo.test' );
+		$order1->set_billing_email( 'test_user+shop@woo.test' );
 		$order1->save();
 
 		$order2 = new \WC_Order();
@@ -433,6 +433,22 @@ class OrdersTableQueryTests extends WC_Unit_Test_Case {
 		$query_args['s'] = 'test_user';
 		$query           = new OrdersTableQuery( $query_args );
 		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user+shop';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = 'test_user+shop@woo.test';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		$query_args['s'] = urlencode( 'test_user+shop@woo.test' );
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertCount( 0, $query->orders );
+
+		$query_args['s'] = 'other_user';
+		$query           = new OrdersTableQuery( $query_args );
+		$this->assertEqualsCanonicalizing( array( $order2->get_id() ), $query->orders );
 
 		$query_args['s'] = 'woo.test';
 		$query           = new OrdersTableQuery( $query_args );
