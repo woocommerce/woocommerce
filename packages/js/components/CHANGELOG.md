@@ -1,17 +1,57 @@
-# Changelog
+# Changelog 
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [12.2.0](https://www.npmjs.com/package/@woocommerce/components/v/12.2.0) - 2023-10-17
+## [12.3.0](https://www.npmjs.com/package/@woocommerce/components/v/12.3.0) - 2024-04-26 
+
+-   Minor - Add className prop to Tooltip component #41435 [#41435]
+-   Minor - Add popoverProps to DatePicker #41404 [#41404]
+-   Minor - Add props to date-range-filter-picker #41372 [#41372]
+-   Patch - Corrected build configuration for packages that weren't outputting minified code. [#43716]
+-   Patch - Fix "Add a filter" UI issue in Analytics. [#46750]
+-   Patch - Fix a few broken links. [#46381]
+-   Patch - Fix badge size issue when a number larger than 3 digits is used. [#40624]
+-   Patch - Fix invalid date format errors in certain languages [#46932]
+-   Patch - Fix sizing of `<SelectControl>`. [#42969]
+-   Minor - Fix toggle chart views within Analytics Overview #41329 [#41329]
+-   Patch - Fix unable to select the values from the select tree control [#41093]
+-   Patch - Set maximum width on Tooltip. [#45358]
+-   Minor - Add additionalData prop to MediaUploader component [#42702]
+-   Minor - Add className to the MenuItem component [#41653]
+-   Minor - Add confetti component and dependency from canvas-confetti package [#46103]
+-   Minor - Add support for disabled state in SelectTree [#41307]
+-   Minor - Fix non nedded extra SortableItem wrapper [#41550]
+-   Minor - Set passed props to the inner div in DisplayState component [#42909]
+-   Minor - Bump node version. [#45148]
+-   Patch - bump php version in packages/js/*/composer.json [#42020]
+-   Minor - Change current page to 1 after selecting a diferent per page amount [#41008]
+-   Minor - Improve keyboard interaction of Tree Select Control component. [#41480]
+-   Minor - Remove dependency on Jetpack from WooCommerce Shipping & Tax onboarding tasks [#39992]
+-   Minor - Remove deprecated use of position for Dropdown component, using popoverProps.placement instead. [#41845]
+-   Minor - Remove legacy context API usage from Link component. [#41845]
+-   Patch - update references to woocommerce.com to now reference woo.com [#41241]
+-   Minor - Update Tree Select Control to allow for searching parent values when `individuallySelectParent` is turned on. [#41559]
+-   Patch - Update Woo.com references to WooCommerce.com. [#46259]
+-   Minor - Add 'helperText' prop to Tooltip #41251 [#41251]
+-   Patch - Fix all lint rule violations for @wordpress/i18n lint rules [#41450]
+-   Patch - Fixed some i18n related lint rule violations. [#41450]
+-   Patch - Update / tweak a few more links in docs and comments. [#41598]
+-   Patch - Update Tree Select Control component to handle accented characters in search. [#41495]
+
+## [12.2.0](https://www.npmjs.com/package/@woocommerce/components/v/12.2.0) - 2023-10-17 
 
 -   Patch - Add class back in for increase specificity of css for dropdown button. [#40494]
--   Minor - Categories dropdown display error #39810 [#39811]
 -   Patch - Fixed empty component logo color, used generic rather than old pink [#39182]
 -   Patch - Fix invalid focus state of the experimental select control [#40519]
--   Minor - Fix new category name field [#39857]
 -   Patch - Fix select control dropdown menu double scroll and width [#39989]
+-   Patch - TreeSelectControl Component
+-   Patch - Make eslint emit JSON report for annotating PRs. [#39704]
+-   Patch - Upgraded Storybook to 6.5.17-alpha.0 for TypeScript 5 compatibility [#39745]
+-   Patch - Add z-index=1 to tour-kit close btn to ensure it's clickable [#40456]
+-   Patch - Small condition change in the date time picker to avoid edge case where inputControl is null. [#40642]
+-   Minor - Categories dropdown display error #39810 [#39811]
+-   Minor - Fix new category name field [#39857]
 -   Minor - Select attribute after pressing their names #39456 [#39574]
--   Patch - TreeSelectControl Component - Make sure individuallySelectParent prop is respected [#40301]
 -   Minor - Add AI wizard business info step for Customize Your Store task [#39979]
 -   Minor - Add customize store assembler hub onboarding tour [#39981]
 -   Minor - Add ProgressBar component [#39979]
@@ -23,31 +63,44 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Set button optional in MediaUploader component [#40526]
 -   Minor - Update ImageGallery block toolbar, moving some options to an ellipsis dropdown menu. [#39753]
 -   Minor - Allow users to select multiple items from the media library while adding images #39741 [#39741]
--   Patch - Make eslint emit JSON report for annotating PRs. [#39704]
 -   Minor - Update pnpm to 8.6.7 [#39245]
--   Patch - Upgraded Storybook to 6.5.17-alpha.0 for TypeScript 5 compatibility [#39745]
 -   Minor - Upgrade TypeScript to 5.1.6 [#39531]
--   Patch - Add z-index=1 to tour-kit close btn to ensure it's clickable [#40456]
 -   Minor - Remove unnecessary use of woocommerce-page selector for DropdownButton styling. [#40218]
--   Patch - Small condition change in the date time picker to avoid edge case where inputControl is null. [#40642]
 
-## [12.1.0](https://www.npmjs.com/package/@woocommerce/components/v/12.1.0) - 2023-07-13
+## [12.1.0](https://www.npmjs.com/package/@woocommerce/components/v/12.1.0) - 2023-07-13 
 
 -   Patch - Altering styles to correctly target fields within slot fills on product editor. [#36500]
 -   Patch - Fix collapsible content heading alignment [#38325]
+-   Patch - Fix SelectControl and TreeControl styles. [#36718]
+-   Patch - Include CSS for experimental tree control so it renders properly in Storybook. [#36517]
+-   Patch - Replace isElevated prop with elevation for tour-kit step component [#38963]
+-   Patch - Add ability to focus the first step after opening for tourkit [#38963]
+-   Patch - Add an optional "InputProps" to experimental SelectControl component [#36470]
+-   Patch - Add onKeyDown and readOnlyWhenClosed options to experimentalSelectControl [#38328]
+-   Patch - Opt out of Reset and Help buttons in DateTimePickerControl, as these will be removed in a future @wordpress/components version. [#38480]
+-   Patch - Add instructions on how to run the tests when using @woocommerce/components [#38821]
+-   Patch - Lint fixes [#38523]
+-   Patch - Migrate ellipsis-menu component to TS [#36405]
+-   Patch - Migrate Link component to TS [#36285]
+-   Patch - Migrate ProductImage component to TS [#36305]
+-   Patch - Migrate Rating component to TS [#36301]
+-   Patch - Migrate Section component to TS [#36298]
+-   Patch - Migrate select control component to TS [#37751]
+-   Patch - Migrate Table component to TS [#36370]
+-   Patch - Migrate Tag component to TS [#36265]
+-   Patch - Update eslint to 8.32.0 across the monorepo. [#36700]
+-   Patch - Update TourKit README to correct primaryButton example and formatting. [#37427]
+-   Patch - Update webpack config to use @woocommerce/internal-style-build's parser config [#37195]
+-   Patch - Correct spelling errors [#37887]
+-   Patch - Update positioning of DateTimePickerControl's dropdown. [#38466]
 -   Minor - Fix issue where single item can not be cleared and text can not be selected upon click. [#36869]
 -   Minor - Fix issue where width of select control dropdown was not correctly calculated when rendering was delayed. [#37295]
--   Patch - Fix SelectControl and TreeControl styles. [#36718]
 -   Minor - Fix SortableItem duplicated id [#36262]
--   Patch - Include CSS for experimental tree control so it renders properly in Storybook. [#36517]
 -   Minor - Prevent duplicate registration of core blocks in client [#37350]
 -   Minor - Refactor createOrderedChildren [#36707]
--   Patch - Replace isElevated prop with elevation for tour-kit step component [#38963]
 -   Minor - Wrap selected items in experimental select control [#38284]
 -   Minor - Add 6 basic fields to the product fields registry for use in extensibility within the new Product MVP. [#36392]
--   Patch - Add ability to focus the first step after opening for tourkit [#38963]
 -   Minor - Add allowDragging option to ImageGallery to support disabling drag and drop of images. [#38045]
--   Patch - Add an optional "InputProps" to experimental SelectControl component [#36470]
 -   Minor - Add callback for the media uploader component when gallery is opened [#38728]
 -   Minor - Added LearnMore option as well as made it possible to use this button multiple instances on the page [#36873]
 -   Minor - Adding experimental component SlotContext [#36333]
@@ -56,7 +109,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Adding WooProductFieldItem slotfill. [#36315]
 -   Minor - Add minFilterQueryLength, individuallySelectParent, and clearOnSelect props. [#36869]
 -   Minor - Add new WooProductTabItem component for slot filling tab items. [#36551]
--   Patch - Add onKeyDown and readOnlyWhenClosed options to experimentalSelectControl [#38328]
 -   Minor - Add product field store and helper functions for rendering fields from config. [#36362]
 -   Minor - Add single selection mode to SelectTree [#38140]
 -   Minor - Create SelectTree component that uses TreeControl [#37319]
@@ -68,7 +120,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Add deprecated message to product slot fill components [#36830]
 -   Minor - Apply wccom experimental select control changes [#36521]
 -   Minor - Export TreeSelectControl component and add additional props: onInputChange, alwaysShowPlaceholder, includeParent. [#36932]
--   Patch - Opt out of Reset and Help buttons in DateTimePickerControl, as these will be removed in a future @wordpress/components version. [#38480]
 -   Minor - Show comma separated list in ready only mode of select tree control [#38052]
 -   Minor - Updated AdvancedFilter to use createInterpolateElement instead of interpolateComponents. [#37967]
 -   Minor - Update select tree control dropdown menu for custom slot fill support for display within Modals [#37574]
@@ -76,31 +127,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Updating WooProductFieldItem to uniquely generate IDs with different sections. [#36646]
 -   Minor - Add a11y support for the Tree component [#36459]
 -   Minor - Add custom rendering logic to the item label [#36476]
--   Patch - Add instructions on how to run the tests when using @woocommerce/components [#38821]
 -   Minor - Adjust eslintrc for changes to eslint plugin. [#36988]
 -   Minor - Create tree-control component [#36432]
--   Patch - Lint fixes [#38523]
--   Patch - Migrate ellipsis-menu component to TS [#36405]
--   Patch - Migrate Link component to TS [#36285]
--   Patch - Migrate ProductImage component to TS [#36305]
--   Patch - Migrate Rating component to TS [#36301]
--   Patch - Migrate Section component to TS [#36298]
--   Patch - Migrate select control component to TS [#37751]
--   Patch - Migrate Table component to TS [#36370]
--   Patch - Migrate Tag component to TS [#36265]
 -   Minor - Sync @wordpress package versions via syncpack. [#37034]
--   Patch - Update eslint to 8.32.0 across the monorepo. [#36700]
 -   Minor - Update pnpm monorepo-wide to 8.6.5 [#38990]
 -   Minor - Update pnpm to version 8. [#37915]
--   Patch - Update TourKit README to correct primaryButton example and formatting. [#37427]
--   Patch - Update webpack config to use @woocommerce/internal-style-build's parser config [#37195]
--   Patch - Correct spelling errors [#37887]
 -   Minor - Improve a11y support to collapsible content component [#37760]
 -   Minor - Small tweak to update reference to currencyContext component. [#36959]
--   Patch - Update positioning of DateTimePickerControl's dropdown. [#38466]
 -   Minor - Use BaseControl in the SelectTree label [#38261]
 
-## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28
+## [12.0.0](https://www.npmjs.com/package/@woocommerce/components/v/12.0.0) - 2022-12-28 
 
 -   Patch - Add name to exported popover slot used to display SelectControl Menu, so it is only used for SelectControl menus. [#36124]
 -   Patch - Close DateTimePickerControl's dropdown when blurring from input. [#36124]
@@ -133,13 +169,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Move file picker by clicking card into the MediaUploader component [#36124]
 -   Minor - Fix up initial block selection in RichTextEditor and add media blocks [#36124]
 -   Minor - Add noDataLabel property into table.js component to allow No Data label customization. [#36124]
--   Major [ **BREAKING CHANGE** ] - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
+-   Minor - Switch DateTimePickerControl formatting to PHP style, for WP compatibility. [#36124]
 
-## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24
+## [11.1.0](https://www.npmjs.com/package/@woocommerce/components/v/11.1.0) - 2022-10-24 
 
 -   Minor - Allow passing of additional props to form inputs [#35160]
 
-## [11.0.0](https://www.npmjs.com/package/@woocommerce/components/v/11.0.0) - 2022-10-20
+## [11.0.0](https://www.npmjs.com/package/@woocommerce/components/v/11.0.0) - 2022-10-20 
 
 -   Patch - Export StepperProps for external usage [#35140]
 -   Patch - Fixed the initial setting of DateTimePickerControl's input field. [#35140]
@@ -186,9 +222,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
 -   Minor - Improve experimental SelectControl accessibility [#35140]
 -   Minor - Improve Sortable component acessibility [#35140]
--   Major - Create new experimental SelectControl component [#35140]
+-   Major [ **BREAKING CHANGE** ] - Create new experimental SelectControl component [#35140]
 
-## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12
+## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12 
 
 -   Patch - Added in missing TS definitions in package.json [#34279]
 -   Patch - fixed button rendering for 1 step tour which was not showing completion button due to bug in logic [#34279]
@@ -197,11 +233,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update types for Form component and allow Form state to be reset. [#34279]
 -   Minor - Removed Step 1 of 1 step description for 1 step tours [#34279]
 
-## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19
+## [10.2.1](https://www.npmjs.com/package/@woocommerce/components/v/10.2.1) - 2022-07-19 
 
 -   Patch - Fix missing text domain
 
-## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08
+## [10.2.0](https://www.npmjs.com/package/@woocommerce/components/v/10.2.0) - 2022-07-08 
 
 -   Minor - Add step name to tour kit step type and export CloseHandler type to be reused elsewhere
 -   Minor - Tree Select Control Component
@@ -210,7 +246,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Remove PHP and Composer dependencies for packaged JS packages
 -   Patch - Tweak tour kit gap between content and controls
 
-## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09
+## [10.1.0](https://www.npmjs.com/package/@woocommerce/components/v/10.1.0) - 2022-06-09 
 
 -   Minor - Add tour kit component
 -   Minor - Update dependency `memoize-one` to ^6.0.0. #32936
