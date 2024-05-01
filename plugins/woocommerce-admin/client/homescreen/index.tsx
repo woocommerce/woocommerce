@@ -10,8 +10,6 @@ import {
 	WCDataSelector,
 } from '@woocommerce/data';
 import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
-import { getCurrency } from '@woocommerce/price-format';
-console.log( getCurrency() );
 
 /**
  * Internal dependencies
