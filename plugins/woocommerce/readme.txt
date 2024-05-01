@@ -263,6 +263,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Use a public helper API endpoint update-check-public to check latest versions of WooCommerce extensions and show a plugin update message in the plugin table list to connect to woocommerce.com. [#46082](https://github.com/woocommerce/woocommerce/pull/46082)
 * Add - Use state names in Checkout Block address cards. [#45799](https://github.com/woocommerce/woocommerce/pull/45799)
 * Add - [Product Block Editor]: register `metadata` attribute for all blocks [#45657](https://github.com/woocommerce/woocommerce/pull/45657)
+* Update - Reverts auto-injecting specific Woo Blocks in every block theme and restores only auto-injecting in themes found in the allow list. [#46935](https://github.com/woocommerce/woocommerce/pull/46935)
 * Update - Add coming soon banner on the frontend when coming soon mode is enabled. [#46096](https://github.com/woocommerce/woocommerce/pull/46096)
 * Update - Add feature flag check for patterns and wrap coming soon template and patterns under feature flag [#46856](https://github.com/woocommerce/woocommerce/pull/46856)
 * Update - Additional Checkout Fields has been graduated to stable. [#46805](https://github.com/woocommerce/woocommerce/pull/46805)
