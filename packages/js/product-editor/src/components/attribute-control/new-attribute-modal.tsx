@@ -452,9 +452,16 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															current={
 																attribute
 															}
-															items={
-																availableAttributes
-															}
+															items={ availableAttributes?.filter(
+																(
+																	attr: AttributesComboboxControlItem
+																) =>
+																	( attr.takenBy &&
+																		attr.takenBy <
+																			0 ) ||
+																	attr.takenBy ===
+																		index
+															) }
 															isLoading={
 																isLoading
 															}

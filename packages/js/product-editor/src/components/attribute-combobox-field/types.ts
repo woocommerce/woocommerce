@@ -13,6 +13,7 @@ export type AttributesComboboxControlItem = Pick<
 	'id' | 'name'
 > & {
 	isDisabled?: boolean;
+	takenBy?: number;
 };
 
 export type AttributesComboboxControlComponent = {
