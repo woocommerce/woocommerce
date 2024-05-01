@@ -16,7 +16,6 @@ import {
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	BlockEditorProvider,
-	BlockInspector,
 	BlockList,
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
@@ -45,6 +44,7 @@ import { HeaderToolbar } from './header-toolbar/header-toolbar';
 import { RegisterStores } from './RegisterStores';
 import { ResizableEditor } from './resizable-editor';
 import { SecondarySidebar } from './secondary-sidebar/secondary-sidebar';
+import { SettingsSidebar } from './settings-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
@@ -249,17 +249,15 @@ export function IframeEditor( {
 								 bounds. */ }
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
-						{ isSidebarOpened && (
+						{ isRightSidebarOpen && (
 							<div className="woocommerce-iframe-editor__sidebar">
-								<BlockInspector />
-								{ isRightSidebarOpen && (
-									<ComplementaryArea.Slot scope="woocommerce/product-editor-iframe-editor" />
-								) }
+								<ComplementaryArea.Slot scope="woocommerce/product-editor-iframe-editor" />
 							</div>
 						) }
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
 					<PluginArea scope="woocommerce-product-editor-iframe-editor" />
+					<SettingsSidebar />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
 		</div>

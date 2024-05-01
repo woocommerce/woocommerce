@@ -7,12 +7,15 @@ import { createElement } from '@wordpress/element';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { ComplementaryArea } from '@wordpress/interface';
 
-export function PluginSidebar( {
-	className,
-	...props
-}: {
+type PluginSidebarProps = {
+	children: React.ReactNode;
 	className?: string;
-} ) {
+	icon?: string | React.ReactNode;
+	name?: string;
+	title?: string;
+};
+
+export function PluginSidebar( { className, ...props }: PluginSidebarProps ) {
 	return (
 		<ComplementaryArea
 			panelClassName={ className }

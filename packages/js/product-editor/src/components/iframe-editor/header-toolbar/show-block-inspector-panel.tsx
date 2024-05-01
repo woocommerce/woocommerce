@@ -10,7 +10,7 @@ import { Ref } from 'react';
  * Internal dependencies
  */
 import { EditorContext } from '../context';
-import drawerRight from './drawer-right';
+import drawerRight from '../settings-sidebar/drawer-right';
 
 export const ShowBlockInspectorPanel = forwardRef(
 	function ForwardedRefSidebarOpened(
