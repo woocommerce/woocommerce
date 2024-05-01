@@ -11,6 +11,7 @@ type PluginSidebarProps = {
 	children: React.ReactNode;
 	className?: string;
 	icon?: string | React.ReactNode;
+	isActiveByDefault?: boolean;
 	name?: string;
 	title?: string;
 };

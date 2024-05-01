@@ -18,6 +18,7 @@ export const SettingsSidebar = () => {
 			name="woocommerce-product-editor-settings-sidebar"
 			title={ __( 'Settings', 'woocommerce' ) }
 			icon={ isRTL() ? drawerRight : drawerLeft }
+			isActiveByDefault={ true }
 		>
 			<BlockInspector />
 		</PluginSidebar>
