@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -15,17 +14,17 @@ export default function SubscriptionsExpiredNotice(): JSX.Element | null {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const notice = wccomSettings?.subscription_expired_notice || {};
 
-	if (!wccomSettings.isConnected || !notice?.description) {
+	if ( ! wccomSettings.isConnected || ! notice?.description ) {
 		return null;
 	}
 
 	const handleClose = () => {
-		const data = {notice_id:'woo-subscription-expired-notice'}
+		const data = { notice_id: 'woo-subscription-expired-notice' };
 		apiFetch( {
 			path: `/wc-admin/woo_subscription_notice_dissmiss/`,
 			method: 'POST',
 			data,
-		} )
+		} );
 	};
 
 	return (
@@ -37,7 +36,7 @@ export default function SubscriptionsExpiredNotice(): JSX.Element | null {
 			onClose={ handleClose }
 		>
 			<Button href={ notice.button_link } variant="secondary">
-				{ __( notice.button_text, 'woocommerce' ) }
+				{ notice.button_text }
 			</Button>
 		</Notice>
 	);
