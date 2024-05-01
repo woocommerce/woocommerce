@@ -81,7 +81,7 @@
 	&__table-attribute-trash-column {
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items:flex-start;
 
 		@include breakpoint( '<782px' ) {
 			position: absolute;

@@ -10,10 +10,9 @@
 		position: absolute;
 		padding: 0;
 		background-color: white;
-		max-height: 128px;
 
 		> .components-flex {
-			height: 32px;
+			height: 34px;
 		}
 	}
 
@@ -24,7 +23,10 @@
 		align-items: center;
 
 		.item-wrapper {
-			padding: 8px 12px;
+			padding: 0 12px;
+			height: 36px;
+			line-height: 36px;
+			width: 100%;
 
 			&.is-disabled {
 				background-color: #fafafa;
