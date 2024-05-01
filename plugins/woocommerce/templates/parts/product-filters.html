@@ -1,9 +1,45 @@
-<!-- wp:group {"tagName":"header","area":"header","metadata":{"name":"Product Filters"},"layout":{"type":"constrained"}} -->
-<header class="wp-block-group">
-	<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|40"}}},"layout":{"type":"flex","justifyContent":"space-between"}} -->
-	<div class="wp-block-group alignwide" style="padding-bottom:var(--wp--preset--spacing--40)">
-		<!-- wp:site-title {"level":0} /-->
-	</div>
-	<!-- /wp:group -->
-</header>
-<!-- /wp:group -->
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filters</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter {"filterType":"active-filters","heading":"Active filters"} -->
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Active filters</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter-active {"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
+
+<!-- wp:woocommerce/product-filter {"filterType":"price-filter","heading":"Filter by Price"} -->
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by Price</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter-price {"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
+
+<!-- wp:woocommerce/product-filter {"filterType":"stock-filter","heading":"Filter by Stock Status"} -->
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by Stock Status</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter-stock-status {"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
+
+<!-- wp:woocommerce/filter-wrapper {"filterType":"attribute-filter","heading":"Filter by attribute"} -->
+<div class="wp-block-woocommerce-filter-wrapper"><!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by attribute</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/attribute-filter {"attributeId":1,"heading":"","lock":{"remove":true}} -->
+<div class="wp-block-woocommerce-attribute-filter is-loading"></div>
+<!-- /wp:woocommerce/attribute-filter --></div>
+<!-- /wp:woocommerce/filter-wrapper -->
+
+<!-- wp:woocommerce/product-filter {"filterType":"rating-filter","heading":"Filter by Rating"} -->
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">Filter by Rating</h3>
+<!-- /wp:heading -->
+
+<!-- wp:woocommerce/product-filter-rating {"lock":{"remove":true}} /-->
+<!-- /wp:woocommerce/product-filter -->
