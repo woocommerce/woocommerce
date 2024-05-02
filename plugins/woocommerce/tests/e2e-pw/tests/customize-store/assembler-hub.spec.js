@@ -82,11 +82,16 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 
 	test( 'Visiting change header should show a list of block patterns to choose from', async ( {
 		page,
+		assemblerPageObject,
 	} ) => {
-		await page.goto( ASSEMBLER_HUB_URL );
-		await page.click( 'text=Choose your header' );
+		await page.goto( CUSTOMIZE_STORE_URL );
+		await page.click( 'text=Start designing' );
+		await assemblerPageObject.waitForLoadingScreenFinish();
 
-		const locator = page.locator(
+		const assembler = await assemblerPageObject.getAssembler();
+		await assembler.locator( 'text=Choose your header' ).click();
+
+		const locator = assembler.locator(
 			'.block-editor-block-patterns-list__list-item'
 		);
 
