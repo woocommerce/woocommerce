@@ -35,10 +35,8 @@ final class ProductFilterClearButton extends AbstractBlock {
 
 		$p = new \WP_HTML_Tag_Processor( $content );
 
-		if ( $p->next_tag( array( 'class_name' => 'wp-block-buttons' ) ) ) {
-			if ( $p->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
-				$p->set_attribute( 'data-wc-on--click', 'actions.clear' );
-			}
+		if ( $p->next_tag( array( 'class_name' => 'wp-block-button__link' ) ) ) {
+			$p->set_attribute( 'data-wc-on--click', 'actions.clear' );
 
 			$content = $p->get_updated_html();
 		}
