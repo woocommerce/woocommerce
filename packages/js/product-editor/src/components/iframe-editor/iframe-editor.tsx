@@ -48,6 +48,7 @@ import { SettingsSidebar } from './sidebar/settings-sidebar';
 import { useEditorHistory } from './hooks/use-editor-history';
 import { store as productEditorUiStore } from '../../store/product-editor-ui';
 import { getGutenbergVersion } from '../../utils/get-gutenberg-version';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from './constants';
 
 type IframeEditorProps = {
 	initialBlocks?: BlockInstance[];
@@ -122,7 +123,7 @@ export function IframeEditor( {
 		return {
 			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
 			isRightSidebarOpen: getActiveComplementaryArea(
-				'woocommerce/product-editor-iframe-editor'
+				SIDEBAR_COMPLEMENTARY_AREA_SCOPE
 			),
 		};
 	}, [] );
@@ -246,7 +247,9 @@ export function IframeEditor( {
 						</BlockTools>
 						{ isRightSidebarOpen && (
 							<div className="woocommerce-iframe-editor__sidebar">
-								<ComplementaryArea.Slot scope="woocommerce/product-editor-iframe-editor" />
+								<ComplementaryArea.Slot
+									scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
+								/>
 							</div>
 						) }
 					</div>

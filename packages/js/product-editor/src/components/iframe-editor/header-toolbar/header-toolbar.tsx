@@ -50,6 +50,7 @@ import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
 import { MoreMenu } from './more-menu';
 import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -220,7 +221,7 @@ export function HeaderToolbar( {
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
-				<PinnedItems.Slot scope="woocommerce/product-editor-iframe-editor" />
+				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>

@@ -7,6 +7,11 @@ import { createElement } from '@wordpress/element';
 // eslint-disable-next-line @woocommerce/dependency-group
 import { ComplementaryArea } from '@wordpress/interface';
 
+/**
+ * Internal dependencies
+ */
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../../constants';
+
 type PluginSidebarProps = {
 	children: React.ReactNode;
 	className?: string;
@@ -24,7 +29,7 @@ export function PluginSidebar( { className, ...props }: PluginSidebarProps ) {
 		<ComplementaryArea
 			panelClassName={ className }
 			className="TODO"
-			scope="woocommerce/product-editor-iframe-editor"
+			scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
 			{ ...props }
 		/>
 	);

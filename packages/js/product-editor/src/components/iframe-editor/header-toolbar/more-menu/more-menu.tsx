@@ -18,6 +18,7 @@ import {
 import { ToolsMenuGroup } from './tools-menu-group';
 import { WritingMenu } from '../writing-menu';
 import { getGutenbergVersion } from '../../../../utils/get-gutenberg-version';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../../constants';
 
 export const MoreMenu = () => {
 	const renderBlockToolbar =
@@ -30,7 +31,7 @@ export const MoreMenu = () => {
 					{ renderBlockToolbar && <WritingMenu /> }
 
 					<ActionItem.Slot
-						name="woocommerce/product-editor-iframe-editor/plugin-more-menu"
+						name={ `${ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }/plugin-more-menu` }
 						label={ __( 'Plugins', 'woocommerce' ) }
 						as={ MenuGroup }
 						fillProps={ { onClick: onClose } }
