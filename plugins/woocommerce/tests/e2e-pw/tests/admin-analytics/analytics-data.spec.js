@@ -528,8 +528,8 @@ test.describe( 'Analytics-related tests', () => {
 		await page.getByRole( 'button', { name: 'All orders' } ).click();
 		await page.getByText( 'Advanced filters' ).click();
 
-		await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
-		await page.getByRole( 'button', { name: 'Order Status' } ).click();
+		await page.getByRole( 'button', { name: 'Add a filter' } ).click();
+		await page.getByRole( 'button', { name: 'Order status' } ).click();
 		await page
 			.getByLabel( 'Select an order status filter match' )
 			.selectOption( 'Is' );
