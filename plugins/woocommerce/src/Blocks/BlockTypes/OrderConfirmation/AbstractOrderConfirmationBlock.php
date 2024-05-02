@@ -111,24 +111,23 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return false; // Always disallow access to invalid orders and those without a valid key.
 		}
 
-		/**
-		 * Indicates if known (non-guest) shoppers need to be logged in before we let
-		 * them access the order received page.
-		 *
-		 * @param bool $verify_known_shoppers If verification is required.
-		 *
-		 * @since 8.4.0
-		 */
-		$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
+		if ( $this->is_customer_order( $order ) ) {
+			/**
+			 * Indicates if known (non-guest) shoppers need to be logged in before we let
+			 * them access the order received page.
+			 *
+			 * @param bool $verify_known_shoppers If verification is required.
+			 *
+			 * @since 8.4.0
+			 */
+			$verify_known_shoppers = apply_filters( 'woocommerce_order_received_verify_known_shoppers', true );
 
-		// For customers with accounts, verify the order belongs to the current user or disallow access.
-		if ( $verify_known_shoppers && $this->is_customer_order( $order ) ) {
+			// If verification for known shoppers is disabled, we can show the order details.
+			if ( ! $verify_known_shoppers ) {
+				return 'full';
+			}
+
 			return $this->is_current_customer_order( $order ) ? 'full' : false;
-		}
-
-		// If verification for known shoppers is disabled, we can show the order details.
-		if ( ! $verify_known_shoppers ) {
-			return 'full';
 		}
 
 		// Guest orders are displayed only within the grace period or after verification. If email verification is required, return false.
