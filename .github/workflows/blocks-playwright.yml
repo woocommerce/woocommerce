@@ -64,5 +64,4 @@ jobs:
               uses: actions/upload-artifact/merge@v4
               with:
                   name: failures-artifacts
-                  pattern: failures-artifacts-shard-*
                   delete-merged: true
