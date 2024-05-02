@@ -21,6 +21,7 @@ import {
 	useMemo,
 	useRef,
 	useState,
+	Fragment,
 } from '@wordpress/element';
 import { useInstanceId } from '@wordpress/compose';
 import { useShallowEqual } from '@woocommerce/base-hooks';
@@ -176,7 +177,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				if ( field.key === 'address_2' ) {
 					return (
-						<>
+						<Fragment key={ field.key + '-fragment' }>
 							{ isAddress2Visible ? (
 								<ValidatedTextInput
 									key={ field.key }
@@ -218,7 +219,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									) }
 								</button>
 							) }
-						</>
+						</Fragment>
 					);
 				}
 
