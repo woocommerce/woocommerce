@@ -246,11 +246,9 @@ export function IframeEditor( {
 							<div className="woocommerce-iframe-editor__content-inserter-clipper" />
 						</BlockTools>
 						{ isRightSidebarOpen && (
-							<div className="woocommerce-iframe-editor__sidebar">
-								<ComplementaryArea.Slot
-									scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
-								/>
-							</div>
+							<ComplementaryArea.Slot
+								scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE }
+							/>
 						) }
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
