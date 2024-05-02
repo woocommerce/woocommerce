@@ -38,6 +38,8 @@ export type NumberProps = {
 	tooltip?: string;
 	disabled?: boolean;
 	step?: number;
+	min?: number;
+	max?: number;
 };
 
 const MEDIUM_DELAY = 500;
@@ -57,6 +59,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 	placeholder,
 	disabled,
 	step = 1,
+	min = -Infinity,
+	max = +Infinity,
 }: NumberProps ) => {
 	const id = useInstanceId( BaseControl, 'product_number_field' ) as string;
 	const [ isFocused, setIsFocused ] = useState( false );
@@ -74,6 +78,8 @@ export const NumberControl: React.FC< NumberProps > = ( {
 		value: value || '',
 		onChange,
 		onFocus: () => setIsFocused( true ),
+		min,
+		max,
 	} );
 
 	const [ increment, setIncrement ] = useState( 0 );
@@ -82,8 +88,11 @@ export const NumberControl: React.FC< NumberProps > = ( {
 
 	const isInitialClick = useRef< boolean >( false );
 
-	const incrementValue = () =>
-		onChange( String( parseFloat( value || '0' ) + increment ) );
+	const incrementValue = () => {
+		const newValue = parseFloat( value || '0' ) + increment;
+		if ( newValue >= min && newValue <= max )
+			onChange( String( newValue ) );
+	};
 
 	useEffect( () => {
 		if ( increment !== 0 ) {
