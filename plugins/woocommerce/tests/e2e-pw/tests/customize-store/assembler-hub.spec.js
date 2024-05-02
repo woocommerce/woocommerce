@@ -27,7 +27,7 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 				'woocommerce_customize_store_onboarding_tour_hidden',
 				'yes'
 			);
-			await activateTheme( 'twentytwentythree' );
+			await activateTheme( 'twentytwentyfour' );
 		} catch ( error ) {
 			console.log( 'Store completed option not updated' );
 		}
@@ -47,9 +47,6 @@ test.describe( 'Store owner can view Assembler Hub for store customization', () 
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		// Reset theme back to default.
-		await activateTheme( DEFAULT_THEME );
-
 		// Reset tour to visible.
 		await setOption(
 			request,
