@@ -46,23 +46,41 @@ jobs:
             - name: Run Playwright tests
               run: pnpm test:e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
-            - name: Archive debug artifacts (screenshots, traces)
+            - name: Upload blob report
               uses: actions/upload-artifact@v4
               if: ${{ !cancelled() }}
               with:
-                  name: failures-artifacts-shard-${{ matrix.shardIndex }}
-                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/test-results
-                  if-no-files-found: ignore
-    merge-artifacts:
-        name: Merge Artifacts
+                  name: blob-report--${{ matrix.shardIndex }}
+                  path: plugins/woocommerce-blocks/tests/e2e/artifacts/blob-report
+                  retention-days: 1
+
+    merge-reports:
+        name: Merge Reports
         if: ${{ !cancelled() }}
         needs: [blocks-playwright-tests]
 
         runs-on: ubuntu-latest
         steps:
-            - name: Merge Artifacts
-              uses: actions/upload-artifact/merge@v4
+            - uses: actions/setup-node@v4
               with:
-                  name: failures-artifacts
-                  pattern: failures-artifacts-shard-*
-                  delete-merged: true
+                  node-version: 20
+
+            - name: Install Playwright
+              run: npm install @playwright/test
+
+            - name: Download blob reports
+              uses: actions/download-artifact@v4
+              with:
+                  path: all-blob-reports
+                  pattern: blob-report--*
+                  merge-multiple: true
+
+            - name: Merge into HTML Report
+              run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+            - name: Upload HTML report
+              uses: actions/upload-artifact@v4
+              with:
+                  name: html-report--attempt-${{ github.run_attempt }}
+                  path: playwright-report
+                  retention-days: 14

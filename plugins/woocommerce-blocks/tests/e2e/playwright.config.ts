@@ -21,7 +21,13 @@ const config: PlaywrightTestConfig = {
 	fullyParallel: false,
 	// Don't report slow test "files", as we're running our tests in serial.
 	reportSlowTests: null,
-	reporter: process.env.CI ? [ [ 'github' ], [ 'list' ] ] : 'list',
+	reporter: process.env.CI
+		? [
+				[ 'github' ],
+				[ 'list' ],
+				[ 'blob', { outputDir: './artifacts/blob-report' } ],
+		  ]
+		: 'list',
 	use: {
 		baseURL: BASE_URL,
 		screenshot: 'only-on-failure',
