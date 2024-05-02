@@ -64,7 +64,7 @@ const Combobox = ( {
 	required = false,
 	autoComplete = 'off',
 	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
-	...restOfProps
+	className,
 }: WCComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
@@ -125,7 +125,7 @@ const Combobox = ( {
 
 	const outerWrapperClasses = classnames(
 		'wc-block-components-combobox',
-		restOfProps.className || '',
+		className || '',
 		{
 			'is-active': value,
 			'has-error': error?.message && ! error?.hidden,
