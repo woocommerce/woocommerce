@@ -13,37 +13,23 @@ type UseConditionalExecutionProps = {
 	elementOrSelector: RefObject< HTMLInputElement > | string;
 	onVisible?: () => void;
 	onHidden?: () => void;
-	isMemorized?: boolean;
 };
 
+// WARNING: Ensure `onVisible` and `onHidden` are memoized when passed to this hook.
+// Not memoizing these functions can lead to infinite re-render loops due to them
+// being dependencies in this effect.
 export function useConditionalExecution( {
 	elementOrSelector,
 	onVisible,
 	onHidden,
-	isMemorized = false,
 }: UseConditionalExecutionProps ) {
 	const isVisible = useVisibilityObserver( elementOrSelector );
 
-	function getDependencies() {
-		const dependenciesList = [];
-		if ( isMemorized ) {
-			if ( onVisible !== undefined ) {
-				dependenciesList.push( onVisible );
-			}
-			if ( onHidden !== undefined ) {
-				dependenciesList.push( onHidden );
-			}
-		}
-		return dependenciesList;
-	}
-
-	const dependencies = getDependencies();
-
 	useEffect( () => {
-		if ( isVisible && onVisible !== undefined ) {
-			onVisible();
-		} else if ( onHidden !== undefined ) {
-			onHidden();
+		if ( isVisible ) {
+			onVisible?.();
+		} else {
+			onHidden?.();
 		}
-	}, [ isVisible, ...dependencies ] );
+	}, [ isVisible, onVisible, onHidden ] );
 }
