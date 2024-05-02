@@ -218,6 +218,7 @@
 	gap: 32px;
 	row-gap: 54px;
 	grid-template-columns: repeat(2, 1fr);
+	margin-bottom: 40px;
 
 	@media only screen and (min-width: 1600px) {
 		grid-template-columns: repeat(4, 1fr);
