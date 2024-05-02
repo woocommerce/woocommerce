@@ -125,55 +125,55 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 				'payment_method' => 'dummy',
 			)
 		);
-		
+
 		$order = new WC_Order( $order_id );
-		$order->apply_coupon($coupon);
-		
+		$order->apply_coupon( $coupon );
+
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
-	
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
 		$order->update_status( 'processing' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'cancelled' );
 		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 0, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'pending' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'failed' );
 		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 0, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'processing' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'completed' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'refunded' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		$order->update_status( 'processing' );
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		// Test trashing the order.
 		$order->delete( false );
 		$this->assertEquals( 0, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 0, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 
 		// To successfully untrash, we need to grab a new instance of the order.
 		$order = wc_get_order( $order_id );
 		$order->untrash();
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
-		$this->assertEquals( 1, ( new WC_Coupon('test') )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
 	}
 
 }
