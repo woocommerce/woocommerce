@@ -14,12 +14,7 @@ import {
 	previewCart,
 	previewSavedPaymentMethods,
 } from '@woocommerce/resource-previews';
-import {
-	PanelBody,
-	ToggleControl,
-	CheckboxControl,
-	RadioControl,
-} from '@wordpress/components';
+import { PanelBody, ToggleControl, RadioControl } from '@wordpress/components';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
 import { useEffect, useRef } from '@wordpress/element';
