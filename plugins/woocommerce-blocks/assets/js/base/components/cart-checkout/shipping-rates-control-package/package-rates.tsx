@@ -64,6 +64,14 @@ const PackageRates = ( {
 		}
 	}, [ onSelectRate, selectedOption ] );
 
+	// Update the selected option if there is no rate selected on mount.
+	useEffect( () => {
+		if ( ! selectedOption && rates.length > 0 ) {
+			setSelectedOption( rates[ 0 ].rate_id );
+			onSelectRate( rates[ 0 ].rate_id );
+		}
+	}, [ onSelectRate, rates, selectedOption ] );
+
 	if ( rates.length === 0 ) {
 		return noResultsMessage;
 	}
