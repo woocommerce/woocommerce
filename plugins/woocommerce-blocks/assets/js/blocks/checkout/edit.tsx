@@ -128,7 +128,7 @@ export const Edit = ( {
 						onChange={ () =>
 							toggleAttribute( 'requireCompanyField' )
 						}
-						className="components-base-control--nested"
+						className="components-base-control--nested wc-block-components-require-company-field"
 					/>
 				) }
 				<ToggleControl
@@ -155,7 +155,7 @@ export const Edit = ( {
 						onChange={ () =>
 							toggleAttribute( 'requireApartmentField' )
 						}
-						className="components-base-control--nested"
+						className="components-base-control--nested wc-block-components-require-apartment-field"
 					/>
 				) }
 				<ToggleControl
@@ -182,7 +182,7 @@ export const Edit = ( {
 						onChange={ () =>
 							toggleAttribute( 'requirePhoneField' )
 						}
-						className="components-base-control--nested"
+						className="components-base-control--nested wc-block-components-require-phone-field"
 					/>
 				) }
 			</PanelBody>

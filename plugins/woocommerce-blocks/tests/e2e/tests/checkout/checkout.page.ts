@@ -327,6 +327,10 @@ export class CheckoutPage {
 		const country = billingForm.getByLabel( 'Country/Region' );
 		const address1 = billingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = billingForm.getByLabel( 'Apartment, suite, etc.' );
+		const address2Link = billingForm.getByText(
+			'+ Add apartment, suite, etc.'
+		);
+
 		const city = billingForm.getByLabel( 'City' );
 		const phone = billingForm.getByLabel( 'Phone' );
 
@@ -335,7 +339,15 @@ export class CheckoutPage {
 		await lastName.fill( customerBillingDetails.lastname );
 		await country.fill( customerBillingDetails.country );
 		await address1.fill( customerBillingDetails.addressfirstline );
-		await address2.fill( customerBillingDetails.addresssecondline );
+
+		if ( customerBillingDetails.addresssecondline ) {
+			if ( await address2Link.isVisible() ) {
+				address2Link.click();
+			}
+
+			await address2.fill( customerBillingDetails.addresssecondline );
+		}
+
 		await city.fill( customerBillingDetails.city );
 		await phone.fill( customerBillingDetails.phone );
 
@@ -387,6 +399,9 @@ export class CheckoutPage {
 		const country = shippingForm.getByLabel( 'Country/Region' );
 		const address1 = shippingForm.getByLabel( 'Address', { exact: true } );
 		const address2 = shippingForm.getByLabel( 'Apartment, suite, etc.' );
+		const address2Link = shippingForm.getByText(
+			'+ Add apartment, suite, etc.'
+		);
 		const city = shippingForm.getByLabel( 'City' );
 		const phone = shippingForm.getByLabel( 'Phone' );
 
@@ -394,7 +409,15 @@ export class CheckoutPage {
 		await lastName.fill( customerShippingDetails.lastname );
 		await country.fill( customerShippingDetails.country );
 		await address1.fill( customerShippingDetails.addressfirstline );
-		await address2.fill( customerShippingDetails.addresssecondline );
+
+		if ( customerShippingDetails.addresssecondline ) {
+			if ( await address2Link.isVisible() ) {
+				address2Link.click();
+			}
+
+			await address2.fill( customerShippingDetails.addresssecondline );
+		}
+
 		await city.fill( customerShippingDetails.city );
 		await phone.fill( customerShippingDetails.phone );
 
