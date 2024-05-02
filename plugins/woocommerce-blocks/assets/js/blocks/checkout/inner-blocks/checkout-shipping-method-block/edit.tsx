@@ -263,7 +263,7 @@ export const Edit = ( {
 					<ExternalLinkCard
 						key={ 'pickup_location' }
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
-						title={ __( 'Local Pickup', 'woocommerce' ) }
+						title={ __( 'Pickup', 'woocommerce' ) }
 						description={ __(
 							'Allow customers to choose a local pickup location during checkout.',
 							'woocommerce'

@@ -75,16 +75,16 @@ class BlockPatterns {
 		$site_id = $ai_connection->get_site_id();
 
 		if ( is_wp_error( $site_id ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
+			return update_option( 'woocommerce_blocks_allow_ai_connection', false, true );
 		}
 
 		$token = $ai_connection->get_jwt_token( $site_id );
 
 		if ( is_wp_error( $token ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
+			return update_option( 'woocommerce_blocks_allow_ai_connection', false, true );
 		}
 
-		return update_option( 'woocommerce_blocks_allow_ai_connection', true );
+		return update_option( 'woocommerce_blocks_allow_ai_connection', true, true );
 	}
 
 	/**

@@ -44,7 +44,7 @@ test.describe( 'Merchant → Local Pickup Settings', () => {
 			'woocommerce/checkout-shipping-method-block'
 		);
 		await editor.selectBlocks( block );
-		const fakeInput = editor.canvas.getByLabel( 'Local Pickup' );
+		const fakeInput = editor.canvas.getByLabel( 'Pickup', { exact: true } );
 		await fakeInput.click();
 
 		const isMacOS = process.platform === 'darwin'; // darwin is macOS
