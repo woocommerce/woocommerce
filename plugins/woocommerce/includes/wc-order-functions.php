@@ -934,7 +934,19 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
-	$invalid_statuses = apply_filters('woocommerce_update_coupon_usage_invalid_statuses', array('cancelled', 'failed', 'trash'));
+	$invalid_statuses = array( 'cancelled', 'failed', 'trash' );
+
+	/**
+	 * Allow invalid order status filtering for updating coupon usage.
+	 *
+	 * @since 9.0.0
+	 *
+	 * @param array $invalid_statuses Array of statuses to consider invalid.
+	 */
+	$invalid_statuses = apply_filters(
+		'woocommerce_update_coupon_usage_invalid_statuses',
+		$invalid_statuses
+	);
 
 	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
