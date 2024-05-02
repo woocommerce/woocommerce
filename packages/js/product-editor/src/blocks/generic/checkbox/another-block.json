@@ -1,8 +1,8 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "woocommerce/variant-product-checkbox-field",
-	"title": "Product checkbox control (variant)",
+	"name": "woocommerce/another-product-checkbox-field",
+	"title": "Product checkbox control (New Block)",
 	"category": "woocommerce",
 	"description": "A reusable checkbox for the product editor.",
 	"keywords": [ "products", "checkbox", "input" ],

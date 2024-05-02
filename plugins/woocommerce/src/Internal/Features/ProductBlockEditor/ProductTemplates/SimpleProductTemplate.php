@@ -1009,18 +1009,18 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		$product_inventory_advanced_wrapper->add_block(
 			array(
 				'id'         => 'product-limit-purchase-2',
-				'blockName'  => 'woocommerce/variant-product-checkbox-field',
+				'blockName'  => 'woocommerce/another-product-checkbox-field',
 				'order'      => 20,
 				'attributes' => array(
 					'title'    => __(
-						'Restrictions (Variant)',
+						'Restrictions (Newly Registered Block)',
 						'woocommerce'
 					),
 					'label'    => __(
 						'Limit purchases to 1 item per order',
 						'woocommerce'
 					),
-					'property' => 'sold_individually_variant',
+					'property' => 'sold_individually_secondary',
 					'tooltip'  => __(
 						'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
 						'woocommerce'

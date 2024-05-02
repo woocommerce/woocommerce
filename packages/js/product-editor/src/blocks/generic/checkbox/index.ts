@@ -2,13 +2,12 @@
  * Internal dependencies
  */
 import blockConfiguration from './block.json';
-import variantBlockConfiguration from './variant-block.json';
+import anotherBlockConfiguration from './another-block.json';
 import { Edit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
 
 const { name, ...metadata } = blockConfiguration;
-const { name: variantBlockName, ...variantBlockMetadata } =
-	variantBlockConfiguration;
+const { name: anotherName, ...anotherBlockMetadata } = anotherBlockConfiguration;
 
 export { metadata, name };
 
@@ -17,7 +16,7 @@ export const settings = {
 	edit: Edit,
 };
 
-export const variantSettings = {
+export const anotherSettings = {
 	example: {},
 	edit: Edit,
 };
@@ -29,8 +28,8 @@ export const init = () => {
 		settings: settings as never,
 	} );
 	registerProductEditorBlockType( {
-		name: variantBlockName,
-		metadata: variantBlockMetadata as never,
-		settings: variantSettings as never,
+		name: anotherName,
+		metadata: anotherBlockMetadata as never,
+		settings: anotherSettings as never,
 	} );
 };
