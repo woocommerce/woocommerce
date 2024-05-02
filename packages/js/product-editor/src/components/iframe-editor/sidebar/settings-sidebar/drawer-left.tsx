@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 
+// Copied from @wordpress/icons@wp-6.2. We can delete this after we update to this version.
 const drawerLeft = (
 	<svg
 		width="24"
