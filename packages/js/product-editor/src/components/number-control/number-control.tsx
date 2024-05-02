@@ -113,6 +113,15 @@ export const NumberControl: React.FC< NumberProps > = ( {
 
 	const resetIncrement = () => setIncrement( 0 );
 
+	const handleIncrement = ( thisStep: number ) => {
+		const newValue = parseFloat( value || '0' ) + thisStep;
+		if ( newValue >= min && newValue <= max ) {
+			onChange( String( parseFloat( value || '0' ) + thisStep ) );
+			setIncrement( thisStep );
+			isInitialClick.current = true;
+		}
+	};
+
 	return (
 		<BaseControl
 			className={ classNames( {
@@ -143,16 +152,9 @@ export const NumberControl: React.FC< NumberProps > = ( {
 								<Button
 									className="woocommerce-number-control__increment"
 									icon={ plus }
-									onMouseDown={ () => {
-										onChange(
-											String(
-												parseFloat( value || '0' ) +
-													step
-											)
-										);
-										setIncrement( step );
-										isInitialClick.current = true;
-									} }
+									onMouseDown={ () =>
+										handleIncrement( step )
+									}
 									onMouseLeave={ resetIncrement }
 									onMouseUp={ resetIncrement }
 									onBlur={ unfocusIfOutside }
@@ -168,16 +170,9 @@ export const NumberControl: React.FC< NumberProps > = ( {
 									icon={ reset }
 									className="woocommerce-number-control__decrement"
 									onBlur={ unfocusIfOutside }
-									onMouseDown={ () => {
-										onChange(
-											String(
-												parseFloat( value || '0' ) -
-													step
-											)
-										);
-										setIncrement( -step );
-										isInitialClick.current = true;
-									} }
+									onMouseDown={ () =>
+										handleIncrement( -step )
+									}
 									onMouseLeave={ resetIncrement }
 									onMouseUp={ resetIncrement }
 									isSmall
