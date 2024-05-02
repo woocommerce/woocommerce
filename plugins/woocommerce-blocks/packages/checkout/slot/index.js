@@ -11,6 +11,8 @@ import {
 	// @ts-expect-error useSlot is not exported, We shouldn't export non-existent export like this, but
 	// it's to catch if the experimental API is promoted to stable.
 	useSlot as __useSlot, //eslint-disable-line
+	//eslint-disable-next-line
+	__experimentalUseSlotFills as useSlotFills,
 } from '@wordpress/components';
 
 /**
@@ -64,7 +66,7 @@ if ( typeof __useSlot === 'function' ) {
 	useSlot = mockedUseSlot;
 }
 
-export { useSlot };
+export { useSlot, useSlotFills };
 
 /**
  * Abstracts @wordpress/components createSlotFill, wraps Fill in an error boundary and passes down fillProps.
@@ -79,7 +81,7 @@ export const createSlotFill = ( slotName, onError = null ) => {
 
 	/**
 	 * A Fill that will get rendered inside associate slot.
-	 * If the code inside has a error, it would be caught ad removed.
+	 * If the code inside has a error, it would be caught and removed.
 	 * The error is only visible to admins.
 	 *
 	 * @param {Object} props          Items props.
