@@ -116,7 +116,6 @@ export function LinkedProductListBlockEdit( {
 	useConditionalExecution( {
 		elementOrSelector: elementRef,
 		onVisible: filter,
-		isMemorized: true,
 	} );
 
 	function handleSelect( product: Product ) {
