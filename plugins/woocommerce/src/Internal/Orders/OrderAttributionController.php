@@ -89,6 +89,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 			return;
 		}
 
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 */
+	public function on_init() {
 		// Bail if the feature is not enabled.
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;

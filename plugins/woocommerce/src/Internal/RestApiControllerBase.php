@@ -89,33 +89,6 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	protected string $route_namespace = 'wc/v3';
 
 	/**
-	 * Holds authentication error messages for each HTTP verb.
-	 *
-	 * @var array
-	 */
-	protected array $authentication_errors_by_method;
-
-	/**
-	 * Class constructor.
-	 */
-	public function __construct() {
-		$this->authentication_errors_by_method = array(
-			'GET'    => array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
-			),
-			'POST'   => array(
-				'code'    => 'woocommerce_rest_cannot_create',
-				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
-			),
-			'DELETE' => array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
-			),
-		);
-	}
-
-	/**
 	 * Register the hooks used by the class.
 	 */
 	public function register() {
@@ -194,6 +167,30 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Returns an authentication error message for a given HTTP verb.
+	 *
+	 * @return array|null Error information on success, null otherwise.
+	 */
+	protected function get_authentication_error_by_method( string $method ) {
+		$errors = array(
+			'GET'    => array(
+				'code'    => 'woocommerce_rest_cannot_view',
+				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
+			),
+			'POST'   => array(
+				'code'    => 'woocommerce_rest_cannot_create',
+				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
+			),
+			'DELETE' => array(
+				'code'    => 'woocommerce_rest_cannot_delete',
+				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
+			),
+		);
+
+		return $errors[ $method ] ?? null;
+	}
+
+	/**
 	 * Permission check for REST API endpoints, given the request method.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
@@ -206,7 +203,7 @@ abstract class RestApiControllerBase implements RegisterHooksInterface {
 			return true;
 		}
 
-		$error_information = $this->authentication_errors_by_method[ $request->get_method() ] ?? null;
+		$error_information = $this->get_authentication_error_by_method( $request->get_method() );
 		if ( is_null( $error_information ) ) {
 			return false;
 		}
