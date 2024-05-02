@@ -1,6 +1,6 @@
 const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( './assembler/assembler.page' );
-const { activateTheme, DEFAULT_THEME } = require( '../../utils/themes' );
+const { activateTheme } = require( '../../utils/themes' );
 const { setOption } = require( '../../utils/options' );
 
 const ASSEMBLER_HUB_URL =
