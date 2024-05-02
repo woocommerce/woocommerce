@@ -58,7 +58,7 @@ module.exports = {
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
-					from: './src/**/block.json',
+					from: './src/**/*block.json',
 					to( { absoluteFilename } ) {
 						const blockMetaData = getBlockMetaData(
 							path.resolve( __dirname, absoluteFilename )

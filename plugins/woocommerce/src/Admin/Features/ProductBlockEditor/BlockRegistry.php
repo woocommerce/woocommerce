@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Admin\Features\ProductBlockEditor;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use DirectoryIterator;
 
 /**
  * Product block registration and style registration functionality.
@@ -25,6 +26,7 @@ class BlockRegistry {
 	 */
 	const GENERIC_BLOCKS = array(
 		'woocommerce/conditional',
+		'woocommerce/product-checkbox-field',
 		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
 		'woocommerce/product-radio-field',
@@ -106,6 +108,30 @@ class BlockRegistry {
 	 */
 	private function get_file_path( $path, $dir ) {
 		return WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
+	}
+
+	/**
+	 * Get all block json files for a given block directory.
+	 *
+	 * @param string $path File path.
+	 * @param string $dir File directory.
+	 */
+	private function get_block_metadata_files( $path, $dir ) {
+		$block_json_files = array();
+
+		$dir_path = WC_ABSPATH . WCAdminAssets::get_path( 'js' ) . trailingslashit( $dir ) . $path;
+
+		try {
+			foreach ( new DirectoryIterator( $dir_path ) as $item ) {
+				if ( ! $item->isDot() && $item->isFile() && 'json' === $item->getExtension() && str_contains( $item->getFilename(), 'block.json' ) ) {
+					array_push( $block_json_files, $item->getPathname() );
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
+		return $block_json_files;
 	}
 
 	/**
@@ -213,10 +239,14 @@ class BlockRegistry {
 	 * @return WP_Block_Type|false The registered block type on success, or false on failure.
 	 */
 	private function register_block( $block_name, $block_dir ) {
-		$block_name      = $this->remove_block_prefix( $block_name );
-		$block_json_file = $this->get_file_path( $block_name . '/block.json', $block_dir );
+		$block_name       = $this->remove_block_prefix( $block_name );
+		$block_json_files = $this->get_block_metadata_files( $block_name, $block_dir );
 
-		return $this->register_block_type_from_metadata( $block_json_file );
+		foreach ( $block_json_files as $block_json_file ) {
+			$this->register_block_type_from_metadata( $block_json_file );
+		}
+
+		return true;
 	}
 
 	/**
