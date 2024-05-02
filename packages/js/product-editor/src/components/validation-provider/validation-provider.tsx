@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import Ajv, { ErrorObject } from 'ajv';
+import { ErrorObject } from 'ajv';
 import apiFetch from '@wordpress/api-fetch';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { Product } from '@woocommerce/data';
@@ -20,8 +20,7 @@ import {
 } from './types';
 import { ValidationContext } from './validation-context';
 import { getErrorDictionary } from './get-error-dictionary';
-
-const ajv = new Ajv( { strict: false, allErrors: true } );
+import { validator } from './validator';
 
 export function ValidationProvider( {
 	children,
@@ -66,7 +65,7 @@ export function ValidationProvider( {
 			return;
 		}
 
-		const validate = ajv.compile( schema );
+		const validate = validator.compile( schema );
 		const valid = validate( product );
 		const newErrors =
 			! valid && validate.errors
