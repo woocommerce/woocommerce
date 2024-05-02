@@ -53,11 +53,37 @@
 		display: grid;
 		grid-template-columns: 40% 55% 5%;
 		border-bottom: 1px solid $gray-300;
-	}
-	&__table-row {
+
 		padding: $gap-large 0;
 		td:not(:last-child) {
 			margin-right: $gap;
+		}
+
+		.components-form-token-field {
+			position: relative;
+		}
+
+		.components-form-token-field__input-container {
+			position: absolute;
+			top: 0;
+
+			&.is-active {
+				z-index: 10;
+			}
+
+			&:not(.is-disabled) {
+				background-color: white;
+			}
+		}
+
+		.components-form-token-field__input {
+			margin: 1px 0;
+		}
+
+		.components-form-token-field__help {
+			position: absolute;
+			top: 32px;
+			z-index: 0;
 		}
 
 		@include breakpoint( '<782px' ) {

@@ -3,14 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect, useSelect, useDispatch } from '@wordpress/data';
-import { closeSmall } from '@wordpress/icons';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	Form,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
 } from '@woocommerce/components';
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
 	type ProductAttributesActions,
 	type WPDataActions,
@@ -23,15 +21,10 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import {
-	AttributeTermInputField,
-	CustomAttributeTermInputField,
-} from '../attribute-term-input-field';
 import { TRACKS_SOURCE } from '../../constants';
-import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+import { AttributeTableRow } from './attribute-table-row';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
-import AttributesComboboxControl from '../attribute-combobox-field';
-import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
+import type { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -184,20 +177,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		}
 	};
 
-	const focusValueField = ( index: number ) => {
-		setTimeout( () => {
-			const valueInputField: HTMLInputElement | null =
-				document.querySelector(
-					'.woocommerce-new-attribute-modal__table-row-' +
-						index +
-						' .woocommerce-new-attribute-modal__table-attribute-value-column .woocommerce-experimental-select-control__input'
-				);
-			if ( valueInputField ) {
-				valueInputField.focus();
-			}
-		}, 0 );
-	};
-
 	useEffect( function focusFirstAttributeField() {
 		const firstAttributeFieldLabel =
 			document.querySelector< HTMLLabelElement >(
@@ -214,21 +193,26 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const sortCriteria = { order_by: 'name' };
+	const attributeSortCriteria = { order_by: 'name' };
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
-		const { getProductAttributes, hasFinishedResolution } = select(
-			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
-		);
-		return {
-			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
-				sortCriteria,
-			] ),
-			attributes: getProductAttributes( sortCriteria ),
-		};
-	} );
+	const { attributes, isLoadingAttributes } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		( select: WCDataSelector ) => {
+			const {
+				getProductAttributes: getAttributes,
+				hasFinishedResolution: hasLoadedAttributes,
+			} = select( EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME );
+
+			return {
+				isLoadingAttributes: ! hasLoadedAttributes(
+					'getProductAttributes',
+					[ attributeSortCriteria ]
+				),
+				attributes: getAttributes( attributeSortCriteria ),
+			};
+		}
+	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute } = useDispatch(
@@ -250,65 +234,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					/**
-					 * Set the attribute values in the form state,
-					 * and populate the terms if termsAutoSelection is enabled.
-					 *
-					 * @param {AttributeInputFieldItemProps} attribute - The attribute value.
-					 * @param {number}                       index     - The index of the attribute in the form state.
-					 */
-					function setAttributeValues(
-						attribute: AttributeInputFieldItemProps,
-						index: number,
-						populateTerms = true
-					) {
-						/*
-						 * When the attribute exists,
-						 * set the attribute in the form state and populate the terms.
-						 */
-						if ( termsAutoSelection && populateTerms ) {
-							const selectedAttribute =
-								attribute as EnhancedProductAttribute;
-
-							setValue( 'attributes[' + index + ']', {
-								...selectedAttribute,
-							} );
-
-							return resolveSelect(
-								EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-							)
-								.getProductAttributeTerms<
-									ProductAttributeTerm[]
-								>( {
-									// Send search parameter as empty to avoid a second
-									// request when focusing the attribute-term-input-field
-									// which perform the same request to get all the terms
-									search: '',
-									attribute_id: attribute.id,
-								} )
-								.then( ( terms ) => {
-									if ( termsAutoSelection === 'all' ) {
-										selectedAttribute.terms = terms;
-									} else if ( terms.length > 0 ) {
-										selectedAttribute.terms = [
-											terms[ 0 ],
-										];
-									}
-									setValue( 'attributes[' + index + ']', {
-										...selectedAttribute,
-									} );
-									focusValueField( index );
-								} );
-						}
-
-						/*
-						 * When the attribute does not exist,
-						 * set the attribute in the form state without terms.
-						 */
-						setValue( 'attributes[' + index + ']', attribute );
-						focusValueField( index );
-					}
-
 					function selectAttributeHandler(
 						nextAttribute: AttributesComboboxControlItem,
 						index: number
@@ -319,12 +244,14 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 
 						const attributeExists = nextAttribute.id !== -99;
 
+						const fieldName = `attributes[${ index }]`;
+
 						/*
 						 * When the attribute exists,
 						 * set the attribute values.
 						 */
 						if ( attributeExists ) {
-							return setAttributeValues( nextAttribute, index );
+							return setValue( fieldName, nextAttribute );
 						}
 
 						/*
@@ -333,15 +260,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						 * only set the attribute values.
 						 */
 						if ( ! createNewAttributesAsGlobal ) {
-							return setAttributeValues(
-								{
-									id: 0,
-									name: nextAttribute.name,
-									slug: nextAttribute.name,
-								},
-								index,
-								false
-							);
+							return setValue( fieldName, {
+								id: 0,
+								name: nextAttribute.name,
+								slug: nextAttribute.name,
+							} );
 						}
 
 						/*
@@ -355,12 +278,12 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								generate_slug: true,
 							},
 							{
-								optimisticQueryUpdate: sortCriteria,
+								optimisticQueryUpdate: attributeSortCriteria,
 							}
 						)
-							.then( ( newAttribute ) => {
-								setAttributeValues( newAttribute, index );
-							} )
+							.then( ( newAttribute ) =>
+								setValue( fieldName, newAttribute )
+							)
 							.catch( ( error ) => {
 								let message = __(
 									'Failed to create new attribute.',
@@ -440,150 +363,35 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 									<tbody>
 										{ values.attributes.map(
 											( attribute, index ) => (
-												<tr
+												<AttributeTableRow
 													key={ index }
-													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
-												>
-													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributesComboboxControl
-															placeholder={
-																attributePlaceholder
-															}
-															current={
-																attribute
-															}
-															instanceNumber={
-																index
-															}
-															items={ availableAttributes?.filter(
-																(
-																	attr: AttributesComboboxControlItem
-																) =>
-																	( attr.takenBy &&
-																		attr.takenBy <
-																			0 ) ||
-																	attr.takenBy ===
-																		index
-															) }
-															isLoading={
-																isLoading
-															}
-															onChange={ (
-																nextAttribute
-															) =>
-																selectAttributeHandler(
-																	nextAttribute,
-																	index
-																)
-															}
-															disabledAttributeMessage={
-																disabledAttributeMessage
-															}
-														/>
-													</td>
-													<td className="woocommerce-new-attribute-modal__table-attribute-value-column">
-														{ ! attribute ||
-														attribute.id !== 0 ? (
-															<AttributeTermInputField
-																placeholder={
-																	attribute?.terms &&
-																	attribute
-																		?.terms
-																		.length >
-																		0
-																		? ''
-																		: termPlaceholder
-																}
-																disabled={
-																	attribute
-																		? ! attribute.id
-																		: true
-																}
-																attributeId={
-																	attribute
-																		? attribute.id
-																		: undefined
-																}
-																value={
-																	attribute ===
-																		null ||
-																	attribute ===
-																		undefined
-																		? []
-																		: attribute.terms
-																}
-																label={
-																	valueLabel
-																}
-																onChange={ (
-																	val
-																) =>
-																	setValue(
-																		'attributes[' +
-																			index +
-																			'].terms',
-																		val
-																	)
-																}
-															/>
-														) : (
-															<CustomAttributeTermInputField
-																placeholder={
-																	attribute?.options &&
-																	attribute
-																		?.options
-																		.length >
-																		0
-																		? ''
-																		: termPlaceholder
-																}
-																disabled={
-																	! attribute.name
-																}
-																value={
-																	attribute.options
-																}
-																label={
-																	valueLabel
-																}
-																onChange={ (
-																	val
-																) =>
-																	setValue(
-																		'attributes[' +
-																			index +
-																			'].options',
-																		val
-																	)
-																}
-															/>
-														) }
-													</td>
-													<td className="woocommerce-new-attribute-modal__table-attribute-trash-column">
-														<Button
-															icon={ closeSmall }
-															disabled={
-																values
-																	.attributes
-																	.length ===
-																	1 &&
-																values
-																	.attributes[ 0 ] ===
-																	null
-															}
-															label={
-																removeLabel
-															}
-															onClick={ () =>
-																onRemove(
-																	index,
-																	values,
-																	setValue
-																)
-															}
-														></Button>
-													</td>
-												</tr>
+													index={ index }
+													attribute={ attribute }
+													attributePlaceholder={
+														attributePlaceholder
+													}
+													disabledAttributeMessage={
+														disabledAttributeMessage
+													}
+													isLoadingAttributes={
+														isLoadingAttributes
+													}
+													attributes={
+														availableAttributes
+													}
+													onAttributeSelect={
+														selectAttributeHandler
+													}
+													termPlaceholder={
+														termPlaceholder
+													}
+													removeLabel={ removeLabel }
+													onTermSelect={ setValue }
+													onRemove={ console.log }
+													termsAutoSelection={
+														termsAutoSelection
+													}
+												/>
 											)
 										) }
 									</tbody>
