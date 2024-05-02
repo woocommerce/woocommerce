@@ -3,4 +3,4 @@ export * from './utils';
 export * from './slot';
 export * from './filter-registry';
 export * from './blocks-registry';
-export { SlotFillProvider } from 'wordpress-components';
+export { SlotFillProvider } from '@wordpress/components';
