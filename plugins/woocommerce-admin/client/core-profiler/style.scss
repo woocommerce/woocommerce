@@ -417,6 +417,12 @@
 			height: 100%;
 			max-width: 404px;
 			width: 100%;
+
+			&:has(.woocommerce-profiler-geolocation-notice) {
+				@include breakpoint( "<782px" ) {
+					margin-bottom: 82px;
+				}
+			}
 		}
 
 		.woocommerce-profiler-question-label,
@@ -541,10 +547,6 @@
 			margin-bottom: 0;
 			padding-right: 0;
 			color: $gray-900;
-
-			@include breakpoint( "<782px" ) {
-				margin-bottom: 100px;
-			}
 
 			.components-notice__dismiss > svg {
 				height: 16px;
