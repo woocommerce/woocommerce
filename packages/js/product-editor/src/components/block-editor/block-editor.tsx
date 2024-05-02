@@ -52,6 +52,7 @@ import { ProductEditorSettings } from '../editor';
 import { BlockEditorProps } from './types';
 import { ProductTemplate } from '../../types';
 import { LoadingState } from './loading-state';
+import { ErrorList } from '../error-list';
 
 function getLayoutTemplateId(
 	productTemplate: ProductTemplate | undefined,
@@ -250,6 +251,7 @@ export function BlockEditor( {
 
 	return (
 		<div className="woocommerce-product-block-editor">
+			<ErrorList />
 			<BlockContextProvider value={ context }>
 				<BlockEditorProvider
 					value={ blocks }

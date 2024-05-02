@@ -900,7 +900,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$weight_unit_label    = I18nUtil::get_weight_unit_label( get_option( 'woocommerce_weight_unit', 'kg' ) );
 		$dimension_unit_label = I18nUtil::get_dimensions_unit_label( get_option( 'woocommerce_dimension_unit', 'cm' ) );
 		$schema               = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'$schema'    => 'http://json-schema.org/draft-07/schema#',
 			'title'      => $this->post_type,
 			'type'       => 'object',
 			'properties' => array(
@@ -929,23 +929,27 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'date_created'          => array(
 					'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created_gmt'      => array(
 					'description' => __( 'The date the product was created, as GMT.', 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_modified'         => array(
 					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified_gmt'     => array(
 					'description' => __( 'The date the product was last modified, as GMT.', 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -998,9 +1002,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'readonly'    => true,
 				),
 				'regular_price'         => array(
-					'description' => __( 'Product regular price.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'description'  => __( 'Product regular price.', 'woocommerce' ),
+					'type'         => 'string',
+					'context'      => array( 'view', 'edit' ),
+					'pattern'      => '^(?!-)[0-9.]+$',
+					'errorMessage' => array(
+						'pattern' => __(
+							'List price must be greater than or equals to zero.',
+							'woocommerce'
+						),
+					),
 				),
 				'sale_price'            => array(
 					'description' => __( 'Product sale price.', 'woocommerce' ),
@@ -1009,22 +1020,30 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'date_on_sale_from'     => array(
 					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'nullable'    => true,
+					'format'      => 'datetime',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from_gmt' => array(
 					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'nullable'    => true,
+					'format'      => 'datetime',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to'       => array(
 					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'nullable'    => true,
+					'format'      => 'datetime',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to_gmt'   => array(
 					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
-					'type'        => 'date-time',
+					'type'        => 'string',
+					'nullable'    => true,
+					'format'      => 'datetime',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'price_html'            => array(
@@ -1132,6 +1151,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'stock_quantity'        => array(
 					'description' => __( 'Stock quantity.', 'woocommerce' ),
 					'type'        => 'integer',
+					'nullable'    => true,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
@@ -1221,7 +1241,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'shipping_class_id'     => array(
 					'description' => __( 'Shipping class ID.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => array( 'string', 'integer' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -1351,25 +1371,29 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 							),
 							'date_created'      => array(
 								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
+								'type'        => 'string',
+								'format'      => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_created_gmt'  => array(
 								'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
+								'type'        => 'string',
+								'format'      => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified'     => array(
 								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
+								'type'        => 'string',
+								'format'      => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified_gmt' => array(
 								'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
+								'type'        => 'string',
+								'format'      => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
@@ -1511,7 +1535,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'mixed',
+								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),
