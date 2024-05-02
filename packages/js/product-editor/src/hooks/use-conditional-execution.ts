@@ -11,13 +11,16 @@ import { useVisibilityObserver } from './use-visibility-observer';
 
 type UseConditionalExecutionProps = {
 	elementOrSelector: RefObject< HTMLInputElement > | string;
+	/**
+	 * Must be memoized to prevent infinite re-render loops.
+	 */
 	onVisible?: () => void;
+	/**
+	 * Must be memoized to prevent infinite re-render loops.
+	 */
 	onHidden?: () => void;
 };
 
-// WARNING: Ensure `onVisible` and `onHidden` are memoized when passed to this hook.
-// Not memoizing these functions can lead to infinite re-render loops due to them
-// being dependencies in this effect.
 export function useConditionalExecution( {
 	elementOrSelector,
 	onVisible,
