@@ -867,18 +867,21 @@ class PluginsHelper {
 	 */
 	public static function dismiss_woo_subscription_notice( $request ) {
 		$notice_id = isset( $request['notice_id'] ) ? sanitize_text_field( wp_unslash( $request['notice_id'] ) ) : '';
+		$dismissed = false;
 		switch ( $notice_id ) {
 			case 'woo-subscription-expired-notice':
 				update_user_meta( get_current_user_id(), self::DISMISS_EXPIRED_SUBS_NOTICE, time() );
+				$dismissed = true;
 				break;
 			case 'woo-subscription-expiring-notice':
 				update_user_meta( get_current_user_id(), self::DISMISS_EXPIRING_SUBS_NOTICE, time() );
+				$dismissed = true;
 				break;
 		}
 
 		return rest_ensure_response(
 			array(
-				'code' => 'success',
+				'success' => $dismissed,
 			)
 		);
 	}
