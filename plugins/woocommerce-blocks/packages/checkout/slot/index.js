@@ -6,7 +6,6 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { Children, cloneElement } from '@wordpress/element';
 import {
 	createSlotFill as baseCreateSlotFill,
-	// @ts-expect-error useSlot is not exported, We shouldn't export non-existent export like this, but
 	//eslint-disable-next-line
 	__experimentalUseSlot,
 	// @ts-expect-error useSlot is not exported, We shouldn't export non-existent export like this, but
