@@ -251,7 +251,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		} );
 
 		await test.step( 'Add a filter for email', async () => {
-			await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
+			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
 			await page
 				.locator( 'li' )
 				.filter( { hasText: 'Email' } )
@@ -268,7 +268,7 @@ baseTest.describe( 'Merchant > Customer List', () => {
 		} );
 
 		await test.step( 'Add a filter for country', async () => {
-			await page.getByRole( 'button', { name: 'Add a Filter' } ).click();
+			await page.getByRole( 'button', { name: 'Add a filter' } ).click();
 			await page
 				.locator( 'li' )
 				.filter( { hasText: 'Country / Region' } )
