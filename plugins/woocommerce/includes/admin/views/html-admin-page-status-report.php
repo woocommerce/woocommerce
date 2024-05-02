@@ -49,6 +49,9 @@ $inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_p
 			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
 			</button>
+			<button id="copy-for-github" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
+				<?php esc_html_e( 'Copy for GitHub', 'woocommerce' ); ?>
+			</button>
 		</p>
 		<p class="copy-error hidden">
 			<?php esc_html_e( 'Copying to clipboard failed. Please press Ctrl/Cmd+C to copy.', 'woocommerce' ); ?>
