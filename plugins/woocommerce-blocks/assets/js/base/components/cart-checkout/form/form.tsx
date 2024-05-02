@@ -177,7 +177,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 
 				if ( field.key === 'address_2' ) {
 					return (
-						<Fragment key={ field.key + '-fragment' }>
+						<Fragment key={ field.key }>
 							{ isAddress2Visible ? (
 								<ValidatedTextInput
 									key={ field.key }
@@ -207,7 +207,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 								/>
 							) : (
 								<button
-									key={ `${ field.key }-toggle` }
+									key={ field.key }
 									className={
 										'wc-block-components-address-form__address_2-toggle'
 									}
