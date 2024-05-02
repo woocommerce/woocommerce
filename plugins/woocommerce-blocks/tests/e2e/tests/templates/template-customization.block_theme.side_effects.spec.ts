@@ -19,7 +19,7 @@ const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
 for ( const testData of testToRun ) {
 	const userText = `Hello World in the ${ testData.templateName } template`;
 
-	test.describe( `${ testData.templateName } template`, async () => {
+	test.describe( `${ testData.templateName } template`, () => {
 		test( `user-modified ${ testData.templateName } template is attached to the theme`, async ( {
 			page,
 			editor,

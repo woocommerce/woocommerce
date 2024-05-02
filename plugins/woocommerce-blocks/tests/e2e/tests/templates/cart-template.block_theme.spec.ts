@@ -13,6 +13,7 @@ test.describe( 'Test the cart template', () => {
 		editorUtils,
 	} ) => {
 		await editorUtils.visitTemplateEditor( templateName, templateType );
+		await editorUtils.enterEditMode();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
