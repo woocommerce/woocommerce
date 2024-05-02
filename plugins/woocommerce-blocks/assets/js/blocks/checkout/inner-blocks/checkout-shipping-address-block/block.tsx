@@ -28,15 +28,17 @@ import CustomerAddress from './customer-address';
 
 const Block = ( {
 	showCompanyField = false,
-	showApartmentField = false,
-	showPhoneField = false,
 	requireCompanyField = false,
+	showApartmentField = false,
+	requireApartmentField = false,
+	showPhoneField = false,
 	requirePhoneField = false,
 }: {
 	showCompanyField: boolean;
-	showApartmentField: boolean;
-	showPhoneField: boolean;
 	requireCompanyField: boolean;
+	showApartmentField: boolean;
+	requireApartmentField: boolean;
+	showPhoneField: boolean;
 	requirePhoneField: boolean;
 } ): JSX.Element => {
 	const {
@@ -94,6 +96,7 @@ const Block = ( {
 			},
 			address_2: {
 				hidden: ! showApartmentField,
+				required: requireApartmentField,
 			},
 			phone: {
 				hidden: ! showPhoneField,
@@ -104,6 +107,7 @@ const Block = ( {
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	] ) as FormFieldsConfig;

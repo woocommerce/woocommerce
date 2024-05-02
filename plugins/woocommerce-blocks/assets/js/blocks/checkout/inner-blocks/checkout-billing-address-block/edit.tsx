@@ -38,8 +38,9 @@ export const Edit = ( {
 } ): JSX.Element | null => {
 	const {
 		showCompanyField,
-		showApartmentField,
 		requireCompanyField,
+		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 	} = useCheckoutBlockContext();
@@ -72,8 +73,9 @@ export const Edit = ( {
 			<Controls />
 			<Block
 				showCompanyField={ showCompanyField }
-				showApartmentField={ showApartmentField }
 				requireCompanyField={ requireCompanyField }
+				showApartmentField={ showApartmentField }
+				requireApartmentField={ requireApartmentField }
 				showPhoneField={ showPhoneField }
 				requirePhoneField={ requirePhoneField }
 			/>

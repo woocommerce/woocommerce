@@ -79,8 +79,13 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		};
 	}, [ currentFields, currentFieldConfig, currentCountry, addressType ] );
 
+	const address2Field = addressFormFields.fields.find(
+		( field ) => field.key === 'address_2'
+	);
+	const address2Required = address2Field ? address2Field.required : false;
 	const [ isAddress2Visible, setIsAddress2Visible ] = useState(
-		objectHasProp( values, 'address_2' ) && values.address_2 !== ''
+		objectHasProp( values, 'address_2' ) &&
+			( values.address_2 !== '' || address2Required )
 	);
 
 	const toggleAddress2Visibility = useCallback(

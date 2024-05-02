@@ -18,6 +18,7 @@ import {
 	PanelBody,
 	ToggleControl,
 	CheckboxControl,
+	RadioControl,
 } from '@wordpress/components';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import type { TemplateArray } from '@wordpress/blocks';
@@ -61,6 +62,7 @@ export const Edit = ( {
 		showCompanyField,
 		requireCompanyField,
 		showApartmentField,
+		requireApartmentField,
 		showPhoneField,
 		requirePhoneField,
 		showOrderNotes,
@@ -113,9 +115,21 @@ export const Edit = ( {
 					onChange={ () => toggleAttribute( 'showCompanyField' ) }
 				/>
 				{ showCompanyField && (
-					<CheckboxControl
-						label={ __( 'Require company name?', 'woocommerce' ) }
-						checked={ requireCompanyField }
+					<RadioControl
+						selected={ requireCompanyField }
+						options={ [
+							{
+								label: __(
+									'Optional (Recommended)',
+									'woocommerce'
+								),
+								value: false,
+							},
+							{
+								label: __( 'Required', 'woocommerce' ),
+								value: true,
+							},
+						] }
 						onChange={ () =>
 							toggleAttribute( 'requireCompanyField' )
 						}
@@ -127,15 +141,49 @@ export const Edit = ( {
 					checked={ showApartmentField }
 					onChange={ () => toggleAttribute( 'showApartmentField' ) }
 				/>
+				{ showApartmentField && (
+					<RadioControl
+						selected={ requireApartmentField }
+						options={ [
+							{
+								label: __(
+									'Optional (Recommended)',
+									'woocommerce'
+								),
+								value: false,
+							},
+							{
+								label: __( 'Required', 'woocommerce' ),
+								value: true,
+							},
+						] }
+						onChange={ () =>
+							toggleAttribute( 'requireApartmentField' )
+						}
+						className="components-base-control--nested"
+					/>
+				) }
 				<ToggleControl
 					label={ __( 'Phone', 'woocommerce' ) }
 					checked={ showPhoneField }
 					onChange={ () => toggleAttribute( 'showPhoneField' ) }
 				/>
 				{ showPhoneField && (
-					<CheckboxControl
-						label={ __( 'Require phone number?', 'woocommerce' ) }
-						checked={ requirePhoneField }
+					<RadioControl
+						selected={ requirePhoneField }
+						options={ [
+							{
+								label: __(
+									'Optional (Recommended)',
+									'woocommerce'
+								),
+								value: false,
+							},
+							{
+								label: __( 'Required', 'woocommerce' ),
+								value: true,
+							},
+						] }
 						onChange={ () =>
 							toggleAttribute( 'requirePhoneField' )
 						}
@@ -170,10 +218,11 @@ export const Edit = ( {
 							>
 								<CheckoutBlockContext.Provider
 									value={ {
-										showCompanyField,
-										requireCompanyField,
 										showApartmentField,
+										showCompanyField,
 										showPhoneField,
+										requireApartmentField,
+										requireCompanyField,
 										requirePhoneField,
 										showOrderNotes,
 										showPolicyLinks,
