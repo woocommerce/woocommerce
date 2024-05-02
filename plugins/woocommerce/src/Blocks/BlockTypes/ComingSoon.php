@@ -20,7 +20,6 @@ class ComingSoon extends AbstractBlock {
 			$this->register_chunk_translations( [ $this->block_name ] );
 	}
 
-
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
