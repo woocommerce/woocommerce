@@ -1,4 +1,4 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
@@ -6,8 +6,6 @@ const {
 	publishPage,
 } = require( '../../utils/editor' );
 const { addAProductToCart } = require( '../../utils/cart' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const uuid = require( 'uuid' );
 
 const firstProductName = 'First Product';
 const firstProductPrice = '10.00';
@@ -15,28 +13,28 @@ const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
 
-const cartBlockPageTitle = `Cart Block ${ uuid.v1() }`;
-const cartBlockPageSlug = cartBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 const shippingZoneNameES = 'Netherlands Free Shipping';
 const shippingCountryNL = 'NL';
 const shippingZoneNamePT = 'Portugal Flat Local';
 const shippingCountryPT = 'PT';
 
-test.describe( 'Cart Block Calculate Shipping', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Cart Block Calculate Shipping', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Cart Block',
+		cartBlockPage: async ( { page, testPage }, use ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, '/cart' );
+			await publishPage( page, testPage.title );
+
+			await use( testPage );
+		},
+	} );
+
 	let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
+	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
@@ -117,13 +115,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id ],
 		} );
@@ -135,22 +127,15 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	// eslint-disable-next-line playwright/expect-expect,jest/expect-expect
-	test( 'create Cart Block page', async ( { page } ) => {
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, cartBlockPageTitle );
-		await insertBlockByShortcut( page, '/cart' );
-		await publishPage( page, cartBlockPageTitle );
-	} );
-
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
 		await addAProductToCart( page, product1Id );
-		await page.goto( cartBlockPageSlug );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Netherlands
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -172,11 +157,12 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
 		await addAProductToCart( page, product1Id );
-		await page.goto( cartBlockPageSlug );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -207,11 +193,12 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'should show correct total cart block price after updating quantity', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
 		await addAProductToCart( page, product1Id );
-		await page.goto( cartBlockPageSlug );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -236,12 +223,13 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
 		await addAProductToCart( page, product1Id );
 		await addAProductToCart( page, product2Id );
-		await page.goto( cartBlockPageSlug );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();

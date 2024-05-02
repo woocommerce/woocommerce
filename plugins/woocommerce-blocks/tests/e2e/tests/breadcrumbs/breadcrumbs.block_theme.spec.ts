@@ -25,9 +25,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block can be inserted in Site Editor', async ( {
+	test( 'block should be already added in the Product Catalog Template', async ( {
 		editorUtils,
-		editor,
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
@@ -42,13 +41,33 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await expect( alreadyPresentBlock ).toHaveText(
 			'Breadcrumbs / Navigation / Path'
 		);
+	} );
 
-		await editorUtils.removeBlockByClientId(
-			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
-		);
+	test( 'block can be inserted in the Site Editor', async ( {
+		admin,
+		requestUtils,
+		editorUtils,
+		editor,
+	} ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'sorter',
+			title: 'Sorter',
+			content: 'howdy',
+		} );
 
-		await editor.insertBlock( { name: blockData.slug } );
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+		} );
+
+		await editorUtils.enterEditMode();
+
+		await editor.insertBlock( {
+			name: blockData.slug,
+		} );
+
 		const block = await editorUtils.getBlockByName( blockData.slug );
+
 		await expect( block ).toHaveText( 'Breadcrumbs / Navigation / Path' );
 	} );
 } );
