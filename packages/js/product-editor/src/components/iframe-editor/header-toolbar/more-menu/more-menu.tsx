@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useViewportMatch } from '@wordpress/compose';
 import { MenuGroup } from '@wordpress/components';
 import { createElement, Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -10,7 +9,6 @@ import { isWpVersion } from '@woocommerce/settings';
 import {
 	ActionItem,
 	MoreMenuDropdown,
-	PinnedItems,
 	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/interface';
 
@@ -22,24 +20,22 @@ import { WritingMenu } from '../writing-menu';
 import { getGutenbergVersion } from '../../../../utils/get-gutenberg-version';
 
 export const MoreMenu = () => {
-	const isLargeViewport = useViewportMatch( 'large' );
-
 	const renderBlockToolbar =
 		isWpVersion( '6.5', '>=' ) || getGutenbergVersion() > 17.3;
+
 	return (
 		<MoreMenuDropdown>
 			{ ( { onClose }: { onClose: () => void } ) => (
 				<>
-					{ ! isLargeViewport && (
-						<PinnedItems.Slot scope="woocommerce/product-editor-iframe-editor" />
-					) }
 					{ renderBlockToolbar && <WritingMenu /> }
+
 					<ActionItem.Slot
 						name="woocommerce/product-editor-iframe-editor/plugin-more-menu"
 						label={ __( 'Plugins', 'woocommerce' ) }
 						as={ MenuGroup }
 						fillProps={ { onClick: onClose } }
 					/>
+
 					<ToolsMenuGroup />
 				</>
 			) }
