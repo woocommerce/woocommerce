@@ -111,6 +111,7 @@ abstract class AbstractOrderConfirmationBlock extends AbstractBlock {
 			return false; // Always disallow access to invalid orders and those without a valid key.
 		}
 
+		// For customers with accounts, verify the order belongs to the current user or disallow access.
 		if ( $this->is_customer_order( $order ) ) {
 			/**
 			 * Indicates if known (non-guest) shoppers need to be logged in before we let
