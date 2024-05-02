@@ -1013,14 +1013,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'order'      => 20,
 				'attributes' => array(
 					'title'    => __(
-						'Restrictions',
+						'Restrictions (Variant)',
 						'woocommerce'
 					),
 					'label'    => __(
 						'Limit purchases to 1 item per order',
 						'woocommerce'
 					),
-					'property' => 'sold_individually',
+					'property' => 'sold_individually_variant',
 					'tooltip'  => __(
 						'When checked, customers will be able to purchase only 1 item in a single order. This is particularly useful for items that have limited quantity, like art or handmade goods.',
 						'woocommerce'
