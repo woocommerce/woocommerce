@@ -202,6 +202,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'type'        => 'wp_template',
 			'theme'       => 'twentytwentytwo',
 			'source'      => 'theme',
+			'origin'      => 'theme',
 			'title'       => 'Single Product',
 			'description' => 'Displays a single product.',
 			'post_types'  => array(),
