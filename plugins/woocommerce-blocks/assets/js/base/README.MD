@@ -1,11 +1,7 @@
 # Base Components/Context/Hooks
 
-Base components are designed to be used on the frontend of a store. Due to this, we need to avoid using heavy WordPress externals as dependencies (wp-components, wp-block-editor, etc). To get around this, import from a local package instead.
+Base components are designed to be used on the frontend of a store. Due to this, we need to avoid using heavy WordPress externals as dependencies (@wordpress/blocks, @wordpress/block-editor, etc).
 
-e.g. Instead of importing from `@wordpress/components`, use:
-
-```js
-import { Component } from 'wordpress-components';
-```
+Note one exception, we do use the `SlotFill` components which we import and bundle from the latest version of @wordpress/components. Otherwise you should avoid importing anything else from that package. If you need primitive/low-level components to build components in this library, please use Ariakit to build them.
 
 Check the built `*.assets.php` files to ensure extra dependencies aren't being added to the build.
