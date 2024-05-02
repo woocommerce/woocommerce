@@ -137,7 +137,7 @@ export const Edit = ( {
 					/>
 				) }
 				<ToggleControl
-					label={ __( 'Apartment, suite, etc.', 'woocommerce' ) }
+					label={ __( 'Address line 2', 'woocommerce' ) }
 					checked={ showApartmentField }
 					onChange={ () => toggleAttribute( 'showApartmentField' ) }
 				/>
