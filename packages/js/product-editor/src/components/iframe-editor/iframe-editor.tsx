@@ -251,7 +251,7 @@ export function IframeEditor( {
 						) }
 					</div>
 					{ /* @ts-expect-error 'scope' does exist. @types/wordpress__plugins is outdated. */ }
-					<PluginArea scope="woocommerce-product-editor-iframe-editor" />
+					<PluginArea scope="woocommerce-product-editor-modal-block-editor" />
 					<SettingsSidebar />
 				</BlockEditorProvider>
 			</EditorContext.Provider>
