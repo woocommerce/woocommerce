@@ -7,8 +7,6 @@
     -   [Return value](#return-value)
 -   [get_block_file_template( $template, $id, \$template_type )](#get_block_file_template-template-id-template_type-)
     -   [Return value](#return-value-1)
--   [render_block_template()](#render_block_template)
-    -   [Return value](#return-value-2)
 
 The `BlockTemplateController` class contains all the business logic which loads the templates into the Site Editor or on the front-end through various hooks available in WordPress & WooCommerce core. Without documenting every method individually, I will look to provide some insight into key functionality.
 
@@ -65,22 +63,3 @@ During step 2 it's important we hook into the `pre_get_block_file_template`. If 
 ### Return value
 
 This method will return `WP_Block_Template` or `null`.
-
-## render_block_template()
-
-This method is applied to the filter `template_redirect` and executed before WordPress determines which template to load.
-
-This allows us to hook into WooCommerce core through the filter `woocommerce_has_block_template` where we can determine if a specific block template exists and should be loaded.
-
-**Typically executed when:**
-
--   A user loads a page on the front-end.
-
-**This method is responsible for:**
-
--   Determining if the current page has an appropriate WooCommerce block template available to render.
--   Checking if the currently loaded page is from WooCommerce. It then checks if the theme has an appropriate template to use: if it does not, then it finally checks if WooCommerce has a default block template available. If so, we override the value through `woocommerce_has_block_template` to resolve `true`.
-
-### Return value
-
-Void. This method does not return a value but rather sets up hooks to render block templates on the front-end.
