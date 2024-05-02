@@ -1,19 +1,14 @@
 /**
  * External dependencies
  */
-import { ErrorObject } from 'ajv';
+import { ErrorObject, ValidateFunction } from 'ajv';
 import { createElement, useEffect, useState } from '@wordpress/element';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useCallback, useMemo } from 'react';
 
 /**
  * Internal dependencies
  */
-import {
-	EntityConfig,
-	Schema,
-	OptionsResponse,
-	ValidationProviderProps,
-} from './types';
+import { ValidationProviderProps } from './types';
 import { ValidationContext } from './validation-context';
 import { getErrorDictionary } from './get-error-dictionary';
 import { validator } from './validator';
@@ -27,15 +22,18 @@ export function ValidationProvider( {
 		{}
 	);
 
+	const validate = useMemo< ValidateFunction | null >( () => {
+		if ( ! schema ) {
+			return null;
+		}
+		return validator.compile( schema );
+	}, [ schema ] );
+
 	useEffect( () => {
-		console.log('changing');
-		console.log(record);
-		console.log(schema);
-		if ( ! schema || ! record ) {
+		if ( ! validate || ! record || ! schema ) {
 			return;
 		}
 
-		const validate = validator.compile( schema );
 		const valid = validate( record );
 		const newErrors =
 			! valid && validate.errors
@@ -43,7 +41,7 @@ export function ValidationProvider( {
 				: {};
 
 		setErrors( newErrors );
-	}, [ record, schema ] );
+	}, [ record, validate, schema ] );
 
 	return (
 		<ValidationContext.Provider
