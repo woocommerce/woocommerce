@@ -65,9 +65,6 @@ export function ValidationProvider( {
 		if ( ! schema || ! product ) {
 			return;
 		}
-		console.log( schema );
-		// console.log( 'changing' );
-		console.log( product );
 
 		const validate = ajv.compile( schema );
 		const valid = validate( product );
@@ -75,6 +72,7 @@ export function ValidationProvider( {
 			! valid && validate.errors
 				? getErrorDictionary( validate.errors, schema )
 				: {};
+
 		setErrors( newErrors );
 	}, [ product, schema ] );
 

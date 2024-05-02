@@ -1003,11 +1003,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				),
 				'regular_price'         => array(
 					'description'  => __( 'Product regular price.', 'woocommerce' ),
-					'type'         => 'string',
+					'type'         => 'number',
 					'context'      => array( 'view', 'edit' ),
-					'pattern'      => '^(?!-)[0-9.]+$',
+					'minLength'    => 1,
+					'pattern'      => '^$|^(?!-)[0-9.]+$',
 					'errorMessage' => array(
-						'pattern' => __(
+						'minLength' => __(
+							'Regular price is required',
+							'woocommerce'
+						),
+						'pattern'  => __(
 							'List price must be greater than or equals to zero.',
 							'woocommerce'
 						),
@@ -1541,6 +1546,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						),
 					),
 				),
+			),
+			'required' => array(
+				'regular_price'
 			),
 		);
 

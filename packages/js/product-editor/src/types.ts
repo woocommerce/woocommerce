@@ -4,6 +4,11 @@
 import { BlockAttributes, BlockEditProps } from '@wordpress/blocks';
 import { Product } from '@woocommerce/data';
 
+/**
+ * Internal dependencies
+ */
+import { ErrorDictionary } from './components/validation-provider/types';
+
 export type ProductTemplate = {
 	id: string;
 	title: string;
@@ -19,6 +24,7 @@ export interface ProductEditorContext {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
+	validationErrors: ErrorDictionary;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
