@@ -102,4 +102,4 @@ export {
 	CustomFieldsProps,
 } from './custom-fields';
 
-export { PluginSidebar as __experimentalIframeEditorPluginSidebar } from './iframe-editor';
+export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';
