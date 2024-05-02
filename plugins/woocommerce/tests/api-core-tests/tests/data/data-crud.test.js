@@ -1,6 +1,4 @@
 const { test, expect } = require( '@playwright/test' );
-const { API_BASE_URL } = process.env;
-const shouldSkip = API_BASE_URL != undefined;
 
 // 259 countries total
 const countryCodes = [
