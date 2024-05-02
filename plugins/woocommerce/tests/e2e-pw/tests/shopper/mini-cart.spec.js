@@ -1,8 +1,9 @@
 const { test, expect } = require( '@playwright/test' );
 const { disableWelcomeModal } = require( '../../utils/editor' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { random } = require( '../../utils/helpers' );
 
-const miniCartPageTitle = `Mini Cart ${ Date.now() }`;
+const miniCartPageTitle = `Mini Cart ${ random() }`;
 const miniCartPageSlug = miniCartPageTitle.replace( / /gi, '-' ).toLowerCase();
 const miniCartButton = 'main .wc-block-mini-cart__button';
 const miniCartBadge = 'main .wc-block-mini-cart__badge';

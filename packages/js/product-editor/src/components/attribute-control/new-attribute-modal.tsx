@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
@@ -11,8 +11,8 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductProductAttribute,
-	ProductAttributeTerm,
+	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	type ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
 
@@ -24,8 +24,9 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 import { getProductAttributeObject } from './utils';
+import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -208,6 +209,22 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
+	const sortCriteria = { order_by: 'name' };
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
+		const { getProductAttributes, hasFinishedResolution } = select(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+		);
+		return {
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
+		};
+	} );
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -225,12 +242,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				} ) => {
 					function getAttributeOnChange( index: number ) {
 						return function handleAttributeChange(
-							value?:
-								| Omit<
-										ProductProductAttribute,
-										'position' | 'visible' | 'variation'
-								  >
-								| string
+							value?: AttributeInputFieldItemProps | string
 						) {
 							if (
 								termsAutoSelection &&
@@ -283,6 +295,36 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 						};
 					}
 
+					/*
+					 * Get the attribute ids that should be ignored when filtering the attributes
+					 * to show in the attribute input field.
+					 */
+					const ignoredAttributeIds = [
+						...selectedAttributeIds,
+						...values.attributes
+							.map( ( attr ) => attr?.id )
+							.filter(
+								( attrId ): attrId is number =>
+									attrId !== undefined
+							),
+					];
+
+					/*
+					 * Compute the available attributes to show in the attribute input field,
+					 * filtering out the ignored attributes and marking the disabled ones.
+					 */
+					const availableAttributes = attributes
+						?.filter(
+							( attribute: EnhancedProductAttribute ) =>
+								! ignoredAttributeIds.includes( attribute.id )
+						)
+						.map( ( attribute: EnhancedProductAttribute ) => ( {
+							...attribute,
+							isDisabled: disabledAttributeIds.includes(
+								attribute.id
+							),
+						} ) );
+
 					return (
 						<Modal
 							title={ title }
@@ -327,29 +369,18 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																attributePlaceholder
 															}
 															value={ attribute }
+															items={
+																availableAttributes
+															}
+															isLoading={
+																isLoading
+															}
 															label={
 																attributeLabel
 															}
 															onChange={ getAttributeOnChange(
 																index
 															) }
-															ignoredAttributeIds={ [
-																...selectedAttributeIds,
-																...values.attributes
-																	.map(
-																		(
-																			attr
-																		) =>
-																			attr?.id
-																	)
-																	.filter(
-																		(
-																			attrId
-																		): attrId is number =>
-																			attrId !==
-																			undefined
-																	),
-															] }
 															createNewAttributesAsGlobal={
 																createNewAttributesAsGlobal
 															}

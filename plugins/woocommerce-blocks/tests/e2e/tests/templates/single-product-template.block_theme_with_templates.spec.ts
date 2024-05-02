@@ -18,11 +18,7 @@ const testData = {
 const userText = 'Hello World in the Belt template';
 const themeTemplateText = 'Single Product Belt template loaded from theme';
 
-test.describe( 'Single Product Template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
+test.describe( 'Single Product Template', () => {
 	test( 'loads the theme template for a specific product using the product slug and it can be customized', async ( {
 		admin,
 		editor,
@@ -48,10 +44,9 @@ test.describe( 'Single Product Template', async () => {
 		await expect( page.getByText( userText ).first() ).toBeVisible();
 
 		// Revert edition and verify the template from the theme is used.
-		await admin.visitAdminPage(
-			'site-editor.php',
-			`path=/${ testData.templateType }/all`
-		);
+		await admin.visitSiteEditor( {
+			path: `/${ testData.templateType }/all`,
+		} );
 		await editorUtils.revertTemplateCustomizations( testData.templateName );
 		await page.goto( testData.permalink );
 

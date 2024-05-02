@@ -76,6 +76,7 @@ class OrdersDataStoreServiceProvider extends AbstractServiceProvider {
 				OrderCache::class,
 				OrderCacheController::class,
 				PluginUtil::class,
+				DatabaseUtil::class,
 			)
 		);
 		$this->share( OrderCache::class );
