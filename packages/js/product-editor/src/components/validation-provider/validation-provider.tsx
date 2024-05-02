@@ -2,12 +2,8 @@
  * External dependencies
  */
 import { ErrorObject } from 'ajv';
-import apiFetch from '@wordpress/api-fetch';
 import { createElement, useEffect, useState } from '@wordpress/element';
-import { Product } from '@woocommerce/data';
 import { PropsWithChildren } from 'react';
-import { useEntityProp, useEntityRecord } from '@wordpress/core-data';
-import { useSelect, select as WPSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -23,57 +19,31 @@ import { getErrorDictionary } from './get-error-dictionary';
 import { validator } from './validator';
 
 export function ValidationProvider( {
+	schema,
+	record,
 	children,
 }: PropsWithChildren< ValidationProviderProps > ) {
 	const [ errors, setErrors ] = useState< { [ key: string ]: ErrorObject } >(
 		{}
 	);
-	const [ schema, setSchema ] = useState< Schema | null >( null );
-	const [ productId ] = useEntityProp< number >(
-		'postType',
-		'product',
-		'id'
-	);
-
-	const productConfig: EntityConfig = useSelect(
-		( select: typeof WPSelect ) => {
-			const { getEntityConfig } = select( 'core' );
-			return getEntityConfig( 'postType', 'product' );
-		}
-	);
 
 	useEffect( () => {
-		if ( ! productConfig?.baseURL ) {
-			return;
-		}
-		apiFetch< OptionsResponse >( {
-			path: productConfig.baseURL,
-			method: 'OPTIONS',
-		} ).then( ( results ) => {
-			setSchema( results.schema );
-		} );
-	}, [ productConfig ] );
-
-	const { editedRecord: product } = useEntityRecord< Product >(
-		'postType',
-		'product',
-		productId
-	);
-
-	useEffect( () => {
-		if ( ! schema || ! product ) {
+		console.log('changing');
+		console.log(record);
+		console.log(schema);
+		if ( ! schema || ! record ) {
 			return;
 		}
 
 		const validate = validator.compile( schema );
-		const valid = validate( product );
+		const valid = validate( record );
 		const newErrors =
 			! valid && validate.errors
 				? getErrorDictionary( validate.errors, schema )
 				: {};
 
 		setErrors( newErrors );
-	}, [ product, schema ] );
+	}, [ record, schema ] );
 
 	return (
 		<ValidationContext.Provider

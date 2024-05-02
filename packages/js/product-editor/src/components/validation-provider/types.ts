@@ -23,7 +23,8 @@ export type OptionsResponse = {
 export type ErrorDictionary = { [ key: string ]: ErrorObject };
 
 export type ValidationProviderProps = {
-	schema?: Schema;
+	schema: Schema | null;
+	record: unknown | null;
 };
 
 export type ValidationContextProps = {
