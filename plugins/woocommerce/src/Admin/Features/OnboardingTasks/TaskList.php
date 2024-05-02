@@ -416,7 +416,8 @@ class TaskList {
 		$tasks_json = array();
 
 		// We have no use for hidden lists, it's expensive to compute individual tasks completion.
-		if ( $this->is_visible() ) {
+		// Exception: Secret tasklist is always hidden.
+		if ( $this->is_visible() || $this->id === 'secret_tasklist' ) {
 			foreach ( $this->tasks as $task ) {
 				$json = $task->get_json();
 				if ( $json['canView'] ) {
