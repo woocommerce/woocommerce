@@ -12,3 +12,4 @@ export { useProductManager as __experimentalUseProductManager } from './use-prod
 export { useMetaboxHiddenProduct as __experimentalUseMetaboxHiddenProduct } from './use-metabox-hidden-product';
 export { useClearSelectedBlockOnBlur as __experimentalClearSelectedBlockOnBlur } from './use-clear-selected-block-on-blur';
 export { useProductEdits as __experimentalUseProductEdits } from './use-product-edits';
+export { useVisibilityObserver as __experimentalUseVisibilityObserver } from './use-visibility-observer';
