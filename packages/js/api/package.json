@@ -6,7 +6,7 @@
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/api/README.md",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.0.6"
 	},
 	"repository": {
 		"type": "git",

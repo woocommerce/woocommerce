@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.0.6"
 	},
 	"repository": {
 		"type": "git",

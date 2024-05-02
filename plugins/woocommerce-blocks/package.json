@@ -277,7 +277,7 @@
 	},
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.0.6"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.1.0",

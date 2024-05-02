@@ -10,7 +10,7 @@
 	"license": "GPL-3.0+",
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.0.6"
 	},
 	"main": "build/index.js",
 	"module": "build-module/index.js",

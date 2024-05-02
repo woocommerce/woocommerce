@@ -11,7 +11,7 @@
 	],
 	"engines": {
 		"node": "^20.11.1",
-		"pnpm": "^8.12.1"
+		"pnpm": "^9.0.6"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/currency/README.md",
 	"repository": {
