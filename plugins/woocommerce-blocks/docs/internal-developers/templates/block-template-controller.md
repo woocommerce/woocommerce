@@ -4,9 +4,7 @@
 
 -   [Overview](#overview)
 -   [add_block_templates( $query_result, $query, \$template_type )](#add_block_templates-query_result-query-template_type-)
-    -   [Return value](#return-value)
 -   [get_block_file_template( $template, $id, \$template_type )](#get_block_file_template-template-id-template_type-)
-    -   [Return value](#return-value-1)
 
 The `BlockTemplateController` class contains all the business logic which loads the templates into the Site Editor or on the front-end through various hooks available in WordPress & WooCommerce core. Without documenting every method individually, I will look to provide some insight into key functionality.
 
@@ -37,7 +35,7 @@ This method is applied to the filter `get_block_templates`, which is executed be
 -   In the event the theme has a `archive-product.html` template file, but not category/tag/attribute template files, it is eligible to use the `archive-product.html` file in their place. So we trick Gutenberg in thinking some templates (e.g. category/tag/attribute) have a theme file available if it is using the `archive-product.html` template, even though _technically_ the theme does not have a specific file for them.
 -   Ensuring we do not add irrelevant WooCommerce templates in the returned list. For example, if `$query['post_type']` has a value (e.g. `product`) this means the query is requesting templates related to that specific post type, so we filter out any irrelevant ones. This _could_ be used to show/hide templates from the template dropdown on the "Edit Product" screen in WP Admin.
 
-### Return value
+**Return value:**
 
 This method will return an array of `WP_Block_Template` values
 
@@ -60,6 +58,6 @@ During step 2 it's important we hook into the `pre_get_block_file_template`. If 
 
 -   Loading the template files from the filesystem, and building a `WP_Block_Template` version of it.
 
-### Return value
+**Return value:**
 
 This method will return `WP_Block_Template` or `null`.

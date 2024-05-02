@@ -25,6 +25,6 @@ This allows us to hook into WooCommerce core through the filter `woocommerce_has
 * Determining if the block template has to be rendered in the current page. If so, we override the value through `woocommerce_has_block_template` to resolve `true`.
 * Determining if the page that will be rendered contains a Legacy Template block, in which case we disable the compatibility layer through the `woocommerce_disable_compatibility_layer` filter.
 
-### Return value
+**Return value:**
 
 Void. This method does not return a value but rather sets up hooks to render block templates on the front-end.
