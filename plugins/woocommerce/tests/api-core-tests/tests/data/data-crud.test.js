@@ -2940,7 +2940,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -3000,7 +3000,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -3120,7 +3120,7 @@ test.describe( 'Data API tests', () => {
 							name: 'CFP franc',
 							currency_code: 'XPF',
 							currency_pos: 'right_space',
-							decimal_sep: ',',
+							decimal_sep: '.',
 							dimension_unit: 'cm',
 							num_decimals: 0,
 							thousand_sep: ' ',
@@ -7992,7 +7992,7 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'XPF',
 					name: 'CFP franc',
-					symbol: 'Fr',
+					symbol: 'XPF',
 					_links: {
 						self: [
 							{

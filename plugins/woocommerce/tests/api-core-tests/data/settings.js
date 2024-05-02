@@ -166,7 +166,7 @@ const currencies = {
 	XAF: 'Central African CFA franc (CFA) — XAF',
 	XCD: 'East Caribbean dollar (&#36;) — XCD',
 	XOF: 'West African CFA franc (CFA) — XOF',
-	XPF: 'CFP franc (Fr) — XPF',
+	XPF: 'CFP franc (XPF) — XPF',
 	YER: 'Yemeni rial (&#xfdfc;) — YER',
 	ZAR: 'South African rand (&#82;) — ZAR',
 	ZMW: 'Zambian kwacha (ZK) — ZMW',
