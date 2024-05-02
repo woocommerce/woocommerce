@@ -38,6 +38,9 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	// Override dewp handlers if needed.
+	requestToExternalFn = requestToExternal,
+	requestToHandleFn = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
@@ -58,8 +61,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: requestToExternalFn,
+			requestToHandle: requestToHandleFn,
 		} ),
 	].filter( Boolean );
 
@@ -346,6 +349,7 @@ const getFrontConfig = ( options = {} ) => {
 			},
 			uniqueName: 'webpackWcBlocksFrontendJsonp',
 			library: [ 'wc', '[name]' ],
+			libraryTarget: 'this',
 		},
 		module: {
 			rules: [
@@ -430,6 +434,18 @@ const getFrontConfig = ( options = {} ) => {
 		plugins: [
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Frontend',
+				requestToExternalFn: ( req ) => {
+					//  We don't want to use the WP bundled wp components in front-end.
+					if ( req !== '@wordpress/components' ) {
+						return requestToExternal( req );
+					}
+				},
+				requestToHandleFn: ( req ) => {
+					//  We don't want to use the WP bundled wp components in front-end.
+					if ( req !== '@wordpress/components' ) {
+						return requestToHandle( req );
+					}
+				},
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
 		],
