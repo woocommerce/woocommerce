@@ -33,7 +33,6 @@ interface SelectTreeProps extends TreeControlProps {
 export const SelectTree = function SelectTree( {
 	items,
 	treeRef: ref,
-	suffix = <SuffixIcon icon={ chevronDown } />,
 	isLoading,
 	disabled,
 	initialInputValue,
