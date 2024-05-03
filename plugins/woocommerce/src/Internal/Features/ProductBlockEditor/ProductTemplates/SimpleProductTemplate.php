@@ -149,17 +149,15 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Linked Products tab.
-		if ( Features::is_enabled( 'product-linked' ) ) {
-			$this->add_group(
-				array(
-					'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
-					'order'      => 70,
-					'attributes' => array(
-						'title' => __( 'Linked products', 'woocommerce' ),
-					),
-				)
-			);
-		}
+		$this->add_group(
+			array(
+				'id'         => $this::GROUP_IDS['LINKED_PRODUCTS'],
+				'order'      => 70,
+				'attributes' => array(
+					'title' => __( 'Linked products', 'woocommerce' ),
+				),
+			)
+		);
 	}
 
 	/**
