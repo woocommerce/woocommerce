@@ -13,17 +13,7 @@ const blockData = {
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
-	test( "block can't be inserted in Post Editor", async ( {
-		editorUtils,
-		admin,
-	} ) => {
-		await admin.createNewPost();
-		await expect(
-			editorUtils.insertBlockUsingGlobalInserter( blockData.name )
-		).rejects.toThrow();
-	} );
-
-	test( 'block can be inserted in Site Editor', async ( {
+	test( 'should be visible on the Product Catalog template', async ( {
 		editorUtils,
 		admin,
 	} ) => {
@@ -32,8 +22,10 @@ test.describe( `${ blockData.slug } Block`, () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await expect(
-			editorUtils.insertBlockUsingGlobalInserter( blockData.name )
-		).resolves.not.toThrow();
+		const block = await editorUtils.getBlockByName( blockData.slug );
+		await expect( block ).toBeVisible();
+		await expect( block ).toHaveText(
+			'Notices added by WooCommerce or extensions will show up here.'
+		);
 	} );
 } );
