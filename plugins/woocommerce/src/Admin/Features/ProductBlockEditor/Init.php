@@ -89,6 +89,9 @@ class Init {
 			$block_inserter = new BlockInserter();
 			$block_inserter->init();
 
+			$block_inserter_profiler = new BlockInserterProfiler();
+			$block_inserter_profiler->init();
+
 			$this->register_product_templates();
 		}
 	}
