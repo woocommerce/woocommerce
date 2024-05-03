@@ -29,7 +29,8 @@ final class ProductFilterClearButton extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+				'data-wc-interactive'  => wp_json_encode( array( 'namespace' => 'woocommerce/product-filter' ) ),
+				'data-wc-bind--hidden' => '!state.hasSelectedFilter',
 			)
 		);
 
@@ -47,7 +48,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 		$content = str_replace( array( '<a', '</a>' ), array( '<button', '</button>' ), $content );
 
 		return sprintf(
-			'<div %1$s>%2$s</div>',
+			'<div %1$s hidden>%2$s</div>',
 			$wrapper_attributes,
 			$content
 		);

@@ -66,8 +66,11 @@ final class ProductFilter extends AbstractBlock {
 			return $content;
 		}
 
+		$has_selected_filter = $block->context['hasSelectedFilter'] ?? false;
+
 		$attributes_data = array(
 			'data-wc-interactive' => wp_json_encode( array( 'namespace' => $this->get_full_block_name() ) ),
+			'data-wc-context'     => wp_json_encode( array( 'hasSelectedFilter' => $has_selected_filter ) ),
 			'class'               => 'wc-block-product-filters',
 		);
 

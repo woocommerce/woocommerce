@@ -38,7 +38,9 @@ const getQueryParams = ( e: Event ) => {
 	}
 };
 
-store( 'woocommerce/product-filter-clear-button', {
+const { state } = store( 'woocommerce/product-filter' );
+
+store( 'woocommerce/product-filter', {
 	actions: {
 		clear: ( e: Event ) => {
 			const params = getQueryParams( e );
@@ -53,6 +55,8 @@ store( 'woocommerce/product-filter-clear-button', {
 					needsNavigate = true;
 				}
 			} );
+
+			state.hasSelectedFilter = false;
 
 			if ( needsNavigate ) {
 				navigate( url.href );
