@@ -160,6 +160,10 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					items={ attributes }
 					isLoading={ isLoadingAttributes }
 					onChange={ ( nextAttribute ) => {
+						if ( nextAttribute.id === attribute?.id ) {
+							return;
+						}
+
 						onAttributeSelect( nextAttribute, index );
 						setInitiallyPopulated( false );
 					} }
