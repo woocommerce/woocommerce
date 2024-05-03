@@ -3,10 +3,13 @@
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
 
+/**
+ * Internal dependencies
+ */
+
 const blockData = {
-	name: 'Catalog Sorting',
-	slug: 'woocommerce/catalog-sorting',
-	class: '.wc-block-catalog-sorting',
+	name: 'Product Details',
+	slug: 'woocommerce/product-details',
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
@@ -22,12 +25,12 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block should be already added in the Product Catalog Template', async ( {
+	test( 'block should be already added in the Single Product Template', async ( {
 		editorUtils,
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: 'woocommerce/woocommerce//single-product',
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
@@ -35,7 +38,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 			blockData.slug
 		);
 
-		await expect( alreadyPresentBlock ).toHaveText( 'Default sorting' );
+		await expect( alreadyPresentBlock ).toHaveText(
+			/This block lists description, attributes and reviews for a single product./
+		);
 	} );
 
 	test( 'block can be inserted in the Site Editor', async ( {
@@ -45,7 +50,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'sorter',
+			// Single Product Details block is addable only in Single Product Templates
+			slug: 'single-product-v-neck-t-shirt',
 			title: 'Sorter',
 			content: 'howdy',
 		} );
@@ -62,6 +68,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} );
 
 		const block = await editorUtils.getBlockByName( blockData.slug );
-		await expect( block ).toHaveText( 'Default sorting' );
+
+		await expect( block ).toHaveText(
+			/This block lists description, attributes and reviews for a single product./
+		);
 	} );
 } );
