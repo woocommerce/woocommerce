@@ -85,7 +85,7 @@ final class ProductFilter extends AbstractBlock {
 			return $content;
 		}
 
-		$tags = new WP_HTML_Tag_Processor( $content );
+		$tags                = new WP_HTML_Tag_Processor( $content );
 		$has_selected_filter = false;
 
 		while ( $tags->next_tag( 'div' ) ) {
