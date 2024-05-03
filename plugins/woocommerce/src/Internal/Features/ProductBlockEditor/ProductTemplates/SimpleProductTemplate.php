@@ -1026,32 +1026,30 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 			)
 		);
 		// Virtual section.
-		if ( Features::is_enabled( 'product-virtual-downloadable' ) ) {
-			$shipping_group->add_section(
-				array(
-					'id'             => 'product-virtual-section',
-					'order'          => 10,
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "simple"',
-						),
+		$shipping_group->add_section(
+			array(
+				'id'             => 'product-virtual-section',
+				'order'          => 10,
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "simple"',
 					),
-				)
-			)->add_block(
-				array(
-					'id'         => 'product-virtual',
-					'blockName'  => 'woocommerce/product-toggle-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property'       => 'virtual',
-						'checkedValue'   => false,
-						'uncheckedValue' => true,
-						'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
-						'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
-					),
-				)
-			);
-		}
+				),
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-virtual',
+				'blockName'  => 'woocommerce/product-toggle-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'       => 'virtual',
+					'checkedValue'   => false,
+					'uncheckedValue' => true,
+					'label'          => __( 'This product requires shipping or pickup', 'woocommerce' ),
+					'uncheckedHelp'  => __( 'This product will not trigger your customer\'s shipping calculator in cart or at checkout. This product also won\'t require your customers to enter their shipping details at checkout. <a href="https://woocommerce.com/document/managing-products/#adding-a-virtual-product" target="_blank" rel="noreferrer">Read more about virtual products</a>.', 'woocommerce' ),
+				),
+			)
+		);
 		// Product Shipping Section.
 		$product_fee_and_dimensions_section = $shipping_group->add_section(
 			array(
