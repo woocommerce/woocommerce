@@ -49,9 +49,7 @@ class Init {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			array_push( $this->supported_product_types, 'variable' );
-		}
+		array_push( $this->supported_product_types, 'variable' );
 
 		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
 			array_push( $this->supported_product_types, 'external' );

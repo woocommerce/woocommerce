@@ -104,18 +104,16 @@ const Tabs = () => {
 					fillProps={ { product } }
 				/>
 			</WooProductTabItem>
-			{ window.wcAdminFeatures[ 'product-variation-management' ] ? (
-				<WooProductTabItem
-					id={ TAB_OPTIONS_ID }
-					templates={ [ { name: TAB_GENERAL_ID, order: 9 } ] }
-					pluginId={ PLUGIN_ID }
-					tabProps={ tabPropData.options }
-				>
-					<>
-						<ProductVariationsSection />
-					</>
-				</WooProductTabItem>
-			) : null }
+			<WooProductTabItem
+				id={ TAB_OPTIONS_ID }
+				templates={ [ { name: TAB_GENERAL_ID, order: 9 } ] }
+				pluginId={ PLUGIN_ID }
+				tabProps={ tabPropData.options }
+			>
+				<>
+					<ProductVariationsSection />
+				</>
+			</WooProductTabItem>
 		</>
 	);
 };

@@ -78,30 +78,28 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Variations tab.
-		if ( Features::is_enabled( 'product-variation-management' ) ) {
-			$variations_hide_conditions = array();
-			if ( Features::is_enabled( 'product-grouped' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "grouped"',
-				);
-			}
-			if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-				$variations_hide_conditions[] = array(
-					'expression' => 'editedProduct.type === "external"',
-				);
-			}
-
-			$this->add_group(
-				array(
-					'id'             => $this::GROUP_IDS['VARIATIONS'],
-					'order'          => 20,
-					'attributes'     => array(
-						'title' => __( 'Variations', 'woocommerce' ),
-					),
-					'hideConditions' => $variations_hide_conditions,
-				)
+		$variations_hide_conditions = array();
+		if ( Features::is_enabled( 'product-grouped' ) ) {
+			$variations_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "grouped"',
 			);
 		}
+		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
+			$variations_hide_conditions[] = array(
+				'expression' => 'editedProduct.type === "external"',
+			);
+		}
+
+		$this->add_group(
+			array(
+				'id'             => $this::GROUP_IDS['VARIATIONS'],
+				'order'          => 20,
+				'attributes'     => array(
+					'title' => __( 'Variations', 'woocommerce' ),
+				),
+				'hideConditions' => $variations_hide_conditions,
+			)
+		);
 
 		$this->add_group(
 			array(
