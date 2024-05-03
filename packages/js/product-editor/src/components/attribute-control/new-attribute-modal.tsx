@@ -452,6 +452,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 															current={
 																attribute
 															}
+															instanceNumber={
+																index
+															}
 															items={ availableAttributes?.filter(
 																(
 																	attr: AttributesComboboxControlItem
