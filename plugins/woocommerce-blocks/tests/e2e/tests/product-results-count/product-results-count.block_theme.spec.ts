@@ -4,9 +4,9 @@
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
 
 const blockData = {
-	name: 'Catalog Sorting',
-	slug: 'woocommerce/catalog-sorting',
-	class: '.wc-block-catalog-sorting',
+	name: 'Product Results Count',
+	slug: 'woocommerce/product-results-count',
+	class: '.wc-block-product-results-count',
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
@@ -35,7 +35,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 			blockData.slug
 		);
 
-		await expect( alreadyPresentBlock ).toHaveText( 'Default sorting' );
+		await expect( alreadyPresentBlock ).toHaveText(
+			'Showing 1-X of X results'
+		);
 	} );
 
 	test( 'block can be inserted in the Site Editor', async ( {
@@ -62,6 +64,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		} );
 
 		const block = await editorUtils.getBlockByName( blockData.slug );
-		await expect( block ).toHaveText( 'Default sorting' );
+
+		await expect( block ).toHaveText( 'Showing 1-X of X results' );
 	} );
 } );
