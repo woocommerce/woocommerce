@@ -430,7 +430,7 @@ class File {
 	 * @return bool
 	 */
 	public function write( string $text ): bool {
-		if ( $text === '' ) {
+		if ( '' === $text ) {
 			return true;
 		}
 
