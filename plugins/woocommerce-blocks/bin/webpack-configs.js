@@ -435,16 +435,20 @@ const getFrontConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Frontend',
 				requestToExternalFn: ( req ) => {
-					//  We don't want to use the WP bundled wp components in front-end.
-					if ( req !== '@wordpress/components' ) {
-						return requestToExternal( req );
+					//  We don't want to use the WordPress bundled `@wordpress/components` in front-end.
+					if ( req === '@wordpress/components' ) {
+						return false;
 					}
+
+					return requestToExternal( req );
 				},
 				requestToHandleFn: ( req ) => {
-					//  We don't want to use the WP bundled wp components in front-end.
-					if ( req !== '@wordpress/components' ) {
-						return requestToHandle( req );
+					//  We don't want to use the WordPress bundled `@wordpress/components` in front-end.
+					if ( req === '@wordpress/components' ) {
+						return false;
 					}
+
+					return requestToHandle( req );
 				},
 			} ),
 			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
