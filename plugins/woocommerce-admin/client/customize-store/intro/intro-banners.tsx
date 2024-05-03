@@ -340,7 +340,9 @@ export const ExistingNoAiThemeBanner = () => {
 			bannerClass="existing-no-ai-theme-banner"
 			buttonIsLink={ false }
 			bannerButtonOnClick={ () => {
-				trackEvent( 'customize_your_store_intro_customize_click' );
+				trackEvent( 'customize_your_store_intro_customize_click', {
+					theme_type: isBlockTheme ? 'block' : 'classic',
+				} );
 				if ( isBlockTheme ) {
 					navigateOrParent(
 						window,

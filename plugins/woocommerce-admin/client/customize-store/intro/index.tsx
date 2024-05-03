@@ -43,6 +43,7 @@ import professionalThemeImg from '../assets/images/professional-theme.svg';
 import { navigateOrParent } from '~/customize-store/utils';
 import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
+import { trackEvent } from '~/customize-store/tracking';
 
 export type events =
 	| { type: 'DESIGN_WITH_AI' }
@@ -175,6 +176,14 @@ const CustomizedThemeBanners = ( {
 						<button
 							className="intro-card__link"
 							onClick={ () => {
+								trackEvent(
+									'customize_your_store_intro_design_theme',
+									{
+										theme_type: isBlockTheme
+											? 'block'
+											: 'classic',
+									}
+								);
 								if ( isBlockTheme ) {
 									navigateOrParent(
 										window,
@@ -216,11 +225,14 @@ const CustomizedThemeBanners = ( {
 
 						<button
 							className="intro-card__link"
-							onClick={ () =>
+							onClick={ () => {
+								trackEvent(
+									'customize_your_store_intro_browse_themes'
+								);
 								sendEvent( {
 									type: 'SELECTED_BROWSE_ALL_THEMES',
-								} )
-							}
+								} );
+							} }
 						>
 							{ __( 'Browse themes', 'woocommerce' ) }
 						</button>
