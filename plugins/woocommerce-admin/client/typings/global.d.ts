@@ -39,7 +39,6 @@ declare global {
 			onboarding: boolean;
 			'onboarding-tasks': boolean;
 			'payment-gateway-suggestions': boolean;
-			'product-grouped': boolean;
 			'product-linked': boolean;
 			'product-pre-publish-modal': boolean;
 			'product-custom-fields': boolean;

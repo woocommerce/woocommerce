@@ -51,10 +51,7 @@ class Init {
 	public function __construct() {
 		array_push( $this->supported_product_types, 'variable' );
 		array_push( $this->supported_product_types, 'external' );
-
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			array_push( $this->supported_product_types, 'grouped' );
-		}
+		array_push( $this->supported_product_types, 'grouped' );
 
 		$this->redirection_controller = new RedirectionController();
 

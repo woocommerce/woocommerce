@@ -78,12 +78,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Variations tab.
-		$variations_hide_conditions = array();
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$variations_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$variations_hide_conditions   = array();
+		$variations_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$variations_hide_conditions[] = array(
 			'expression' => 'editedProduct.type === "external"',
 		);
@@ -115,11 +113,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'attributes'     => array(
 					'title' => __( 'Pricing', 'woocommerce' ),
 				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 			)
 		);
 		$this->add_group(
@@ -131,12 +129,10 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$shipping_hide_conditions = array();
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$shipping_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$shipping_hide_conditions   = array();
+		$shipping_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$shipping_hide_conditions[] = array(
 			'expression' => 'editedProduct.type === "external"',
 		);
@@ -342,34 +338,32 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// Product list section.
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_list_section = $general_group->add_section(
-				array(
-					'id'             => 'product-list-section',
-					'order'          => 35,
-					'attributes'     => array(
-						'title'       => __( 'Products in this group', 'woocommerce' ),
-						'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+		$product_list_section = $general_group->add_section(
+			array(
+				'id'             => 'product-list-section',
+				'order'          => 35,
+				'attributes'     => array(
+					'title'       => __( 'Products in this group', 'woocommerce' ),
+					'description' => __( 'Make a collection of related products, enabling customers to purchase multiple items together.', 'woocommerce' ),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "grouped"',
 					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "grouped"',
-						),
-					),
-				)
-			);
+				),
+			)
+		);
 
-			$product_list_section->add_block(
-				array(
-					'id'         => 'product-list',
-					'blockName'  => 'woocommerce/product-list-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property' => 'grouped_products',
-					),
-				)
-			);
-		}
+		$product_list_section->add_block(
+			array(
+				'id'         => 'product-list',
+				'blockName'  => 'woocommerce/product-list-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'grouped_products',
+				),
+			)
+		);
 
 		// Images section.
 		$images_section = $general_group->add_section(
@@ -819,11 +813,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					) : null,
 				),
-				'hideConditions'    => Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions'    => array(
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 				'disableConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "variable"',
@@ -831,16 +825,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				),
 			)
 		);
-		$product_inventory_quantity_hide_conditions = array(
+		$product_inventory_quantity_hide_conditions   = array(
 			array(
 				'expression' => 'editedProduct.manage_stock === false',
 			),
 		);
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_inventory_quantity_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$product_inventory_quantity_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$product_inventory_inner_section->add_block(
 			array(
 				'id'             => 'product-inventory-quantity',
@@ -849,16 +841,14 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'hideConditions' => $product_inventory_quantity_hide_conditions,
 			)
 		);
-		$product_stock_status_hide_conditions = array(
+		$product_stock_status_hide_conditions   = array(
 			array(
 				'expression' => 'editedProduct.manage_stock === true',
 			),
 		);
-		if ( Features::is_enabled( 'product-grouped' ) ) {
-			$product_stock_status_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "grouped"',
-			);
-		}
+		$product_stock_status_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "grouped"',
+		);
 		$product_inventory_section->add_block(
 			array(
 				'id'                => 'product-stock-status',
@@ -914,11 +904,11 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 					'initialCollapsed' => true,
 					'persistRender'    => true,
 				),
-				'hideConditions' => Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions' => array(
 					array(
 						'expression' => 'editedProduct.type === "grouped"',
 					),
-				) : null,
+				),
 			)
 		);
 		$product_inventory_advanced_wrapper = $product_inventory_advanced->add_block(
