@@ -148,6 +148,18 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		termsFieldName,
 	] );
 
+	/*
+	 * Filter the attributes to exclude
+	 * attributes that are already taken,
+	 * less the current attribute.
+	 */
+	const filteredAttributes = attributes?.filter( ( item ) => {
+		return (
+			item.id === attribute?.id ||
+			( typeof item?.takenBy !== 'undefined' ? item.takenBy < 0 : true )
+		);
+	} );
+
 	return (
 		<tr
 			key={ index }
@@ -157,7 +169,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 				<AttributesComboboxControl
 					placeholder={ attributePlaceholder }
 					current={ attribute }
-					items={ attributes }
+					items={ filteredAttributes }
 					isLoading={ isLoadingAttributes }
 					onChange={ ( nextAttribute ) => {
 						if ( nextAttribute.id === attribute?.id ) {
