@@ -335,6 +335,7 @@
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
+				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
 				"node_modules/@woocommerce/date/build",
 				"node_modules/@woocommerce/date/build-module",
 				"node_modules/@woocommerce/date/build-types",
