@@ -39,7 +39,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 
 		await expect( alreadyPresentBlock ).toHaveText(
-			'This block lists description, attributes and reviews for a single product'
+			/This block lists description, attributes and reviews for a single product./
 		);
 	} );
 
@@ -50,7 +50,8 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'sorter',
+			// Single Product Details block is addable only in Single Product Templates
+			slug: 'single-product-v-neck-t-shirt',
 			title: 'Sorter',
 			content: 'howdy',
 		} );
@@ -69,7 +70,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const block = await editorUtils.getBlockByName( blockData.slug );
 
 		await expect( block ).toHaveText(
-			'This block lists description, attributes and reviews for a single product'
+			/This block lists description, attributes and reviews for a single product./
 		);
 	} );
 } );
