@@ -1865,18 +1865,6 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'woocommerce_api_enabled',
-						label: 'Legacy API',
-						description: 'Enable the legacy REST API',
-						type: 'checkbox',
-						default: 'no',
-						value: 'no',
-					} ),
-				] )
-			);
 			if ( ! shouldSkip ) {
 				expect( responseJSON ).toEqual(
 					expect.arrayContaining( [
