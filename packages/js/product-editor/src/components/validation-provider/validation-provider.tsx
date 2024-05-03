@@ -1,9 +1,11 @@
 /**
  * External dependencies
  */
-import { ErrorObject, ValidateFunction } from 'ajv';
 import { createElement, useEffect, useState } from '@wordpress/element';
-import { PropsWithChildren, useCallback, useMemo } from 'react';
+import { ErrorObject, ValidateFunction } from 'ajv';
+import { isEqual } from 'lodash';
+import { PropsWithChildren, useMemo } from 'react';
+import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -29,7 +31,7 @@ export function ValidationProvider( {
 		return validator.compile( schema );
 	}, [ schema ] );
 
-	useEffect( () => {
+	const debouncedValidate = useDebounce( () => {
 		if ( ! validate || ! record || ! schema ) {
 			return;
 		}
@@ -40,7 +42,15 @@ export function ValidationProvider( {
 				? getErrorDictionary( validate.errors, schema )
 				: {};
 
+		if ( isEqual( errors, newErrors ) ) {
+			return;
+		}
+
 		setErrors( newErrors );
+	}, 250 );
+
+	useEffect( () => {
+		debouncedValidate();
 	}, [ record, validate, schema ] );
 
 	return (
