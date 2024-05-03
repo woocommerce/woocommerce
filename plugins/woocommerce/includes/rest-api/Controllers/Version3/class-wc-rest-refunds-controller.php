@@ -118,16 +118,16 @@ class WC_REST_Refunds_Controller extends WC_REST_Order_Refunds_Controller {
 	 * Get formatted item data.
 	 *
 	 * @since  9.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @param  WC_Order_Refund $refund The refund object.
 	 * @return array
 	 */
-	protected function get_formatted_item_data( $object ) {
-		$data = parent::get_formatted_item_data( $object );
+	protected function get_formatted_item_data( $refund ) {
+		$data = parent::get_formatted_item_data( $refund );
 
 		$data = array_merge(
 			array_slice( $data, 0, 1, true ),
 			array(
-				'parent_id' => $object->get_parent_id(),
+				'parent_id' => $refund->get_parent_id(),
 			),
 			array_slice( $data, 1, null, true )
 		);
