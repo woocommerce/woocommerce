@@ -121,7 +121,7 @@ importers:
         version: 1.1.2(webpack@5.89.0)
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@3.3.12)
+        version: 5.89.0(webpack-cli@4.10.0)
 
   packages/js/admin-e2e-tests:
     dependencies:
@@ -2217,7 +2217,7 @@ importers:
         version: 5.3.3
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@3.3.12)
+        version: 5.89.0(webpack-cli@4.10.0)
       wireit:
         specifier: 0.14.3
         version: 0.14.3
@@ -3859,7 +3859,7 @@ importers:
     dependencies:
       '@ariakit/react':
         specifier: ^0.4.4
-        version: 0.4.6(react-dom@17.0.2)(react@17.0.2)
+        version: 0.4.5(react-dom@17.0.2)(react@17.0.2)
       '@dnd-kit/core':
         specifier: ^6.1.0
         version: 6.1.0(react-dom@17.0.2)(react@17.0.2)
@@ -5014,7 +5014,7 @@ importers:
         version: 5.3.3
       webpack:
         specifier: ^5.89.0
-        version: 5.89.0(webpack-cli@3.3.12)
+        version: 5.89.0(webpack-cli@4.10.0)
       wireit:
         specifier: 0.14.3
         version: 0.14.3
@@ -5075,8 +5075,8 @@ packages:
   /@ariakit/core@0.3.8:
     resolution: {integrity: sha512-LlSCwbyyozMX4ZEobpYGcv1LFqOdBTdTYPZw3lAVgLcFSNivsazi3NkKM9qNWNIu00MS+xTa0+RuIcuWAjlB2Q==}
 
-  /@ariakit/core@0.4.6:
-    resolution: {integrity: sha512-L2WIZZlxDs611m3YLSv2xvJyQrkkVQJlxn8Y4DlI1G65VLTEH7hysw3RYUNdXsl0gP6S20id3zBMJCHT9BCRcg==}
+  /@ariakit/core@0.4.5:
+    resolution: {integrity: sha512-e294+bEcyzt/H/kO4fS5/czLAlkF7PY+Kul3q2z54VY+GGay8NlVs9UezAB7L4jUBlYRAXwp7/1Sq3R7b+MZ7w==}
     dev: false
 
   /@ariakit/react-core@0.3.9(react-dom@17.0.2)(react@17.0.2):
@@ -5091,13 +5091,13 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
       use-sync-external-store: 1.2.0(react@17.0.2)
 
-  /@ariakit/react-core@0.4.6(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-2Ca327IzSOxQEd3gEr59JJj0y8fXDMLYd+948wyOzIsk2/yoTnA4+R7Vhs361w3KzOjBQM44KmnNL7ckBMtT0w==}
+  /@ariakit/react-core@0.4.5(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-ciTYPwpj/+mdA+EstveEnoygbx5e4PXQJxfkLKy4lkTkDJJUS9GcbYhdnIFJVUta6P1YFvzkIKo+/y9mcbMKJg==}
     peerDependencies:
       react: ^17.0.2
       react-dom: ^17.0.0 || ^18.0.0
     dependencies:
-      '@ariakit/core': 0.4.6
+      '@ariakit/core': 0.4.5
       '@floating-ui/dom': 1.5.3
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
@@ -5114,13 +5114,13 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
 
-  /@ariakit/react@0.4.6(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-7lZQew9n+nxswgJ5aL87xo42I+t3A8gWzaxIIZY+c58SLCASh1IdDkGLhGPcyhmXWRIjs/8L1h6cMbRMEBrtJQ==}
+  /@ariakit/react@0.4.5(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-GUHxaOY1JZrJUHkuV20IY4NWcgknhqTQM0qCQcVZDCi+pJiWchUjTG+UyIr/Of02hU569qnQ7yovskCf+V3tNg==}
     peerDependencies:
       react: ^17.0.2
       react-dom: ^17.0.0 || ^18.0.0
     dependencies:
-      '@ariakit/react-core': 0.4.6(react-dom@17.0.2)(react@17.0.2)
+      '@ariakit/react-core': 0.4.5(react-dom@17.0.2)(react@17.0.2)
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
     dev: false
@@ -26677,7 +26677,7 @@ packages:
       loader-utils: 2.0.4
       make-dir: 3.1.0
       schema-utils: 2.7.1
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
     dev: true
 
   /babel-loader@8.3.0(@babel/core@7.23.5)(webpack@4.47.0):
@@ -29312,7 +29312,7 @@ packages:
       normalize-path: 3.0.0
       schema-utils: 4.2.0
       serialize-javascript: 6.0.1
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
     dev: true
 
   /copy-webpack-plugin@10.2.4(webpack@5.91.0):
@@ -29752,7 +29752,7 @@ packages:
       postcss-modules-values: 4.0.0(postcss@8.4.32)
       postcss-value-parser: 4.2.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
     dev: true
 
   /css-loader@6.8.1(webpack@5.91.0):
@@ -43808,7 +43808,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
 
   /postcss-loader@4.3.0(postcss@8.4.32)(webpack@5.91.0):
     resolution: {integrity: sha512-M/dSoIiNDOo8Rk0mUqoj4kpGq91gcxCfb9PoyZVdZ76/AuhxylHDYZblNE8o+EQ9AMSASeMFEKxZf5aU6wlx1Q==}
@@ -47325,7 +47325,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
 
   /sass-loader@10.5.0(sass@1.69.5)(webpack@5.91.0):
     resolution: {integrity: sha512-VsU71W7VR6SChMJZUqtrfLeMSA8ns7QTHbnA7cfevtjb3c392mX93lr0Dmr4uU1ch5uIbEmfmHjdrDYcXXkQ7w==}
@@ -50761,7 +50761,7 @@ packages:
       loader-utils: 1.4.2
       mime: 2.6.0
       schema-utils: 1.0.0
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
     dev: true
 
   /url-loader@3.0.0(webpack@4.47.0):
@@ -51922,7 +51922,7 @@ packages:
       webpack: '>=5.32.0'
     dependencies:
       ansis: 1.5.6
-      webpack: 5.89.0(webpack-cli@3.3.12)
+      webpack: 5.89.0(webpack-cli@4.10.0)
 
   /webpack-rtl-plugin@2.0.0:
     resolution: {integrity: sha512-lROgFkiPjapg9tcZ8FiLWeP5pJoG00018aEjLTxSrVldPD1ON+LPlhKPHjb7eE8Bc0+KL23pxcAjWDGOv9+UAw==}
@@ -52110,7 +52110,7 @@ packages:
       '@webassemblyjs/wasm-parser': 1.11.6
       acorn: 8.11.2
       acorn-import-assertions: 1.9.0(acorn@8.11.2)
-      browserslist: 4.19.3
+      browserslist: 4.22.2
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.15.0
       es-module-lexer: 1.4.1

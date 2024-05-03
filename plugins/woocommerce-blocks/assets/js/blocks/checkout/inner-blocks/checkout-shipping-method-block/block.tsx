@@ -45,7 +45,6 @@ const LocalPickupSelector = ( {
 	return (
 		<Button
 			role="radio"
-			value="pickup"
 			removeTextWrap
 			onClick={ onClick }
 			className={ classnames(

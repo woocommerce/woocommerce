@@ -435,7 +435,6 @@ class WC_Post_Types {
 					'public'                           => false,
 					'hierarchical'                     => false,
 					'supports'                         => false,
-					'exclude_from_orders_screen'       => false,
 					'add_order_meta_boxes'             => false,
 					'exclude_from_order_count'         => true,
 					'exclude_from_order_views'         => false,

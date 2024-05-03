@@ -179,9 +179,7 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await pageObject.page
-			.getByRole( 'radio', { name: 'Local Pickup free' } )
-			.click();
+		await pageObject.page.getByRole( 'radio', { name: 'Pickup' } ).click();
 		await pageObject.fillInCheckoutWithTestData();
 		await pageObject.placeOrder();
 		await expect(
