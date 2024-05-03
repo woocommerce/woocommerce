@@ -25,10 +25,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block can be inserted in Site Editor', async ( {
+	test( 'block should be already added in the Single Product Template', async ( {
 		editorUtils,
 		admin,
-		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//single-product',
@@ -38,15 +37,37 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const alreadyPresentBlock = await editorUtils.getBlockByName(
 			blockData.slug
 		);
+
 		await expect( alreadyPresentBlock ).toHaveText(
 			'This block lists description, attributes and reviews for a single product'
 		);
-		await editorUtils.removeBlockByClientId(
-			( await alreadyPresentBlock.getAttribute( 'data-block' ) ) ?? ''
-		);
+	} );
 
-		await editor.insertBlock( { name: blockData.slug } );
+	test( 'block can be inserted in the Site Editor', async ( {
+		admin,
+		requestUtils,
+		editorUtils,
+		editor,
+	} ) => {
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: 'sorter',
+			title: 'Sorter',
+			content: 'howdy',
+		} );
+
+		await admin.visitSiteEditor( {
+			postId: template.id,
+			postType: 'wp_template',
+		} );
+
+		await editorUtils.enterEditMode();
+
+		await editor.insertBlock( {
+			name: blockData.slug,
+		} );
+
 		const block = await editorUtils.getBlockByName( blockData.slug );
+
 		await expect( block ).toHaveText(
 			'This block lists description, attributes and reviews for a single product'
 		);
