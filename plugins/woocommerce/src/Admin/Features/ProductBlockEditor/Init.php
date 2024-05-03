@@ -50,10 +50,7 @@ class Init {
 	 */
 	public function __construct() {
 		array_push( $this->supported_product_types, 'variable' );
-
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			array_push( $this->supported_product_types, 'external' );
-		}
+		array_push( $this->supported_product_types, 'external' );
 
 		if ( Features::is_enabled( 'product-grouped' ) ) {
 			array_push( $this->supported_product_types, 'grouped' );

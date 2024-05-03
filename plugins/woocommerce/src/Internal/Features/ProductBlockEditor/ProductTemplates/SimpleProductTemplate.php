@@ -84,11 +84,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'expression' => 'editedProduct.type === "grouped"',
 			);
 		}
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			$variations_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "external"',
-			);
-		}
+		$variations_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "external"',
+		);
 
 		$this->add_group(
 			array(
@@ -139,11 +137,9 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 				'expression' => 'editedProduct.type === "grouped"',
 			);
 		}
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			$shipping_hide_conditions[] = array(
-				'expression' => 'editedProduct.type === "external"',
-			);
-		}
+		$shipping_hide_conditions[] = array(
+			'expression' => 'editedProduct.type === "external"',
+		);
 
 		$this->add_group(
 			array(
@@ -277,75 +273,73 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 		);
 
 		// External/Affiliate section.
-		if ( Features::is_enabled( 'product-external-affiliate' ) ) {
-			$buy_button_section = $general_group->add_section(
-				array(
-					'id'             => 'product-buy-button-section',
-					'order'          => 30,
-					'attributes'     => array(
-						'title'       => __( 'Buy button', 'woocommerce' ),
-						'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+		$buy_button_section = $general_group->add_section(
+			array(
+				'id'             => 'product-buy-button-section',
+				'order'          => 30,
+				'attributes'     => array(
+					'title'       => __( 'Buy button', 'woocommerce' ),
+					'description' => __( 'Add a link and choose a label for the button linked to a product sold elsewhere.', 'woocommerce' ),
+				),
+				'hideConditions' => array(
+					array(
+						'expression' => 'editedProduct.type !== "external"',
 					),
-					'hideConditions' => array(
-						array(
-							'expression' => 'editedProduct.type !== "external"',
-						),
+				),
+			)
+		);
+
+		$buy_button_section->add_block(
+			array(
+				'id'         => 'product-external-url',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property'    => 'external_url',
+					'label'       => __( 'Link to the external product', 'woocommerce' ),
+					'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
+					'suffix'      => true,
+					'type'        => array(
+						'value'   => 'url',
+						'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
 					),
-				)
-			);
+				),
+			)
+		);
 
-			$buy_button_section->add_block(
-				array(
-					'id'         => 'product-external-url',
-					'blockName'  => 'woocommerce/product-text-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property'    => 'external_url',
-						'label'       => __( 'Link to the external product', 'woocommerce' ),
-						'placeholder' => __( 'Enter the external URL to the product', 'woocommerce' ),
-						'suffix'      => true,
-						'type'        => array(
-							'value'   => 'url',
-							'message' => __( 'Link to the external product is an invalid URL.', 'woocommerce' ),
-						),
-					),
-				)
-			);
+		$button_text_columns = $buy_button_section->add_block(
+			array(
+				'id'        => 'product-button-text-columns',
+				'blockName' => 'core/columns',
+				'order'     => 20,
+			)
+		);
 
-			$button_text_columns = $buy_button_section->add_block(
-				array(
-					'id'        => 'product-button-text-columns',
-					'blockName' => 'core/columns',
-					'order'     => 20,
-				)
-			);
+		$button_text_columns->add_block(
+			array(
+				'id'        => 'product-button-text-column1',
+				'blockName' => 'core/column',
+				'order'     => 10,
+			)
+		)->add_block(
+			array(
+				'id'         => 'product-button-text',
+				'blockName'  => 'woocommerce/product-text-field',
+				'order'      => 10,
+				'attributes' => array(
+					'property' => 'button_text',
+					'label'    => __( 'Buy button text', 'woocommerce' ),
+				),
+			)
+		);
 
-			$button_text_columns->add_block(
-				array(
-					'id'        => 'product-button-text-column1',
-					'blockName' => 'core/column',
-					'order'     => 10,
-				)
-			)->add_block(
-				array(
-					'id'         => 'product-button-text',
-					'blockName'  => 'woocommerce/product-text-field',
-					'order'      => 10,
-					'attributes' => array(
-						'property' => 'button_text',
-						'label'    => __( 'Buy button text', 'woocommerce' ),
-					),
-				)
-			);
-
-			$button_text_columns->add_block(
-				array(
-					'id'        => 'product-button-text-column2',
-					'blockName' => 'core/column',
-					'order'     => 20,
-				)
-			);
-		}
+		$button_text_columns->add_block(
+			array(
+				'id'        => 'product-button-text-column2',
+				'blockName' => 'core/column',
+				'order'     => 20,
+			)
+		);
 
 		// Product list section.
 		if ( Features::is_enabled( 'product-grouped' ) ) {
@@ -825,7 +819,7 @@ class SimpleProductTemplate extends AbstractProductFormTemplate implements Produ
 						'</a>'
 					) : null,
 				),
-				'hideConditions'    => Features::is_enabled( 'product-external-affiliate' ) || Features::is_enabled( 'product-grouped' ) ? array(
+				'hideConditions'    => Features::is_enabled( 'product-grouped' ) ? array(
 					array(
 						'expression' => 'editedProduct.type === "external" || editedProduct.type === "grouped"',
 					),
