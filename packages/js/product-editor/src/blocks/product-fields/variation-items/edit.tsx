@@ -49,6 +49,11 @@ export function Edit( {
 		'product',
 		'status'
 	);
+	const [ productHasOptions ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'has_options'
+	);
 	const [ productAttributes ] =
 		useProductEntityProp< Product[ 'attributes' ] >( 'attributes' );
 
@@ -78,13 +83,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					getProductVariationsTotalCount< number >(
-						totalCountWithoutPriceRequestParams
-					),
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[ totalCountWithoutPriceRequestParams ]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
