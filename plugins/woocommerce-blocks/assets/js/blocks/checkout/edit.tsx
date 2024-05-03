@@ -114,10 +114,7 @@ export const Edit = ( {
 						selected={ requireCompanyField }
 						options={ [
 							{
-								label: __(
-									'Optional (Recommended)',
-									'woocommerce'
-								),
+								label: __( 'Optional', 'woocommerce' ),
 								value: false,
 							},
 							{
@@ -141,10 +138,7 @@ export const Edit = ( {
 						selected={ requireApartmentField }
 						options={ [
 							{
-								label: __(
-									'Optional (Recommended)',
-									'woocommerce'
-								),
+								label: __( 'Optional', 'woocommerce' ),
 								value: false,
 							},
 							{
@@ -168,10 +162,7 @@ export const Edit = ( {
 						selected={ requirePhoneField }
 						options={ [
 							{
-								label: __(
-									'Optional (Recommended)',
-									'woocommerce'
-								),
+								label: __( 'Optional', 'woocommerce' ),
 								value: false,
 							},
 							{

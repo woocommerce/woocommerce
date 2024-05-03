@@ -343,7 +343,7 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				const shippingCompanyOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Optional (Recommended)"'
+					'.wc-block-components-require-company-field >> text="Optional"'
 				);
 
 				const shippingCompanyRequiredToggle = editor.page.locator(
@@ -402,7 +402,7 @@ test.describe( 'Merchant → Checkout', () => {
 				);
 
 				const billingCompanyOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Optional (Recommended)"'
+					'.wc-block-components-require-company-field >> text="Optional"'
 				);
 
 				const billingCompanyRequiredToggle = editor.page.locator(
@@ -520,7 +520,7 @@ test.describe( 'Merchant → Checkout', () => {
 				} );
 
 				const shippingPhoneOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Optional (Recommended)"'
+					'.wc-block-components-require-phone-field >> text="Optional"'
 				);
 
 				const shippingPhoneRequiredToggle = editor.page.locator(
@@ -574,7 +574,7 @@ test.describe( 'Merchant → Checkout', () => {
 				} );
 
 				const billingPhoneOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Optional (Recommended)"'
+					'.wc-block-components-require-phone-field >> text="Optional"'
 				);
 
 				const billingPhoneRequiredToggle = editor.page.locator(
