@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
-import { useEntityProp } from '@wordpress/core-data';
+import { useEntityId, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import {
 	createElement,
@@ -49,37 +49,30 @@ export function Header( {
 }: HeaderProps ) {
 	const isEditorLoading = useContext( EditorLoadingContext );
 
-	const [ productId ] = useEntityProp< number >(
+	const productId = useEntityId( 'postType', productType );
+
+	const { editedRecord: product } = useEntityRecord< Product >(
 		'postType',
 		productType,
-		'id'
+		productId,
+		{ enabled: productId !== -1 }
 	);
 
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return getEntityRecord( 'postType', productType, productId );
+			return productId !== -1
+				? getEntityRecord( 'postType', productType, productId )
+				: null;
 		},
-		[ productId ]
+		[ productType, productId ]
 	);
 
-	const [ editedProductName ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'name'
-	);
+	const editedProductName = product?.name;
+	const catalogVisibility = product?.catalog_visibility;
+	const productStatus = product?.status;
 
 	const { showPrepublishChecks } = useShowPrepublishChecks();
-
-	const [ catalogVisibility ] = useEntityProp<
-		Product[ 'catalog_visibility' ]
-	>( 'postType', productType, 'catalog_visibility' );
-
-	const [ productStatus ] = useEntityProp< string >(
-		'postType',
-		productType,
-		'status'
-	);
 
 	const sidebarWidth = useAdminSidebarWidth();
 
@@ -97,11 +90,7 @@ export function Header( {
 
 	const isVariation = lastPersistedProduct?.parent_id > 0;
 
-	const [ selectedImage ] = useEntityProp< Image | Image[] | null >(
-		'postType',
-		productType,
-		isVariation ? 'image' : 'images'
-	);
+	const selectedImage = isVariation ? product?.image : product?.images;
 
 	if ( isEditorLoading ) {
 		return <LoadingState />;
