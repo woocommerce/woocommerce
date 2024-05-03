@@ -78,10 +78,6 @@ export function IframeEditor( {
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
 		useDispatch( productEditorUiStore );
 
-	const { appendEdit } = useEditorHistory( {
-		setBlocks,
-	} );
-
 	const {
 		appendEdit: tempAppendEdit,
 		hasRedo,
@@ -163,14 +159,12 @@ export function IframeEditor( {
 				>
 					<HeaderToolbar
 						onSave={ () => {
-							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();
 						} }
 						onCancel={ () => {
-							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );
