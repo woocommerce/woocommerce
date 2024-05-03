@@ -148,7 +148,7 @@ export function IframeEditor( {
 							hasFixedToolbar || ! inlineFixedBlockToolbar,
 						templateLock: false,
 					} }
-					value={ blocks }
+					value={ temporalBlocks }
 					onChange={ ( updatedBlocks: BlockInstance[] ) => {
 						tempAppendEdit( updatedBlocks );
 						setTemporalBlocks( updatedBlocks );
