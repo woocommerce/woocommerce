@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Set some fields as optional on ProductVariationImage type
