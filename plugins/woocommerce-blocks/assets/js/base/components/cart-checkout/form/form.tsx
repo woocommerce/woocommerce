@@ -83,16 +83,23 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	const address2Field = addressFormFields.fields.find(
 		( field ) => field.key === 'address_2'
 	);
-	const address2Required = address2Field ? address2Field.required : false;
-	const [ isAddress2Visible, setIsAddress2Visible ] = useState(
-		objectHasProp( values, 'address_2' ) &&
-			( values.address_2 !== '' || address2Required )
+
+	const hasAddress2FieldValue = useCallback( () => {
+		return objectHasProp( values, 'address_2' ) && values.address_2 !== '';
+	}, [ values ] );
+
+	const isAddress2FieldRequired = address2Field
+		? address2Field.required
+		: false;
+
+	const [ isAddress2FieldVisible, setIsAddress2FieldVisible ] = useState(
+		hasAddress2FieldValue || isAddress2FieldRequired
 	);
 
-	const toggleAddress2Visibility = useCallback(
+	const toggleAddress2FieldVisibility = useCallback(
 		( event: React.MouseEvent< HTMLElement > ) => {
 			event.preventDefault();
-			setIsAddress2Visible( ( prevVisibility ) => ! prevVisibility );
+			setIsAddress2FieldVisible( ( prevVisibility ) => ! prevVisibility );
 		},
 		[]
 	);
@@ -101,6 +108,13 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	const fieldsRef = useRef<
 		Record< string, ValidatedTextInputHandle | null >
 	>( {} );
+
+	// Toggle address 2 visibility.
+	useEffect( () => {
+		setIsAddress2FieldVisible(
+			isAddress2FieldRequired || hasAddress2FieldValue()
+		);
+	}, [ isAddress2FieldRequired, hasAddress2FieldValue ] );
 
 	// Clear values for hidden fields.
 	useEffect( () => {
@@ -178,7 +192,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 				if ( field.key === 'address_2' ) {
 					return (
 						<Fragment key={ field.key }>
-							{ isAddress2Visible ? (
+							{ isAddress2FieldVisible ? (
 								<ValidatedTextInput
 									key={ field.key }
 									ref={ ( el ) =>
@@ -211,7 +225,7 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									className={
 										'wc-block-components-address-form__address_2-toggle'
 									}
-									onClick={ toggleAddress2Visibility }
+									onClick={ toggleAddress2FieldVisibility }
 								>
 									{ __(
 										'+ Add apartment, suite, etc.',
