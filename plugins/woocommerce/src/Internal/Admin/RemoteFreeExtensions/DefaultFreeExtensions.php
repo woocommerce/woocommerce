@@ -97,7 +97,7 @@ class DefaultFreeExtensions {
 				'description'     => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Drive sales with %1$sGoogle Listings and Ads%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/google-listings-and-ads" target="_blank">',
+					'<a href="https://woo.com/products/google-listings-and-ads" target="_blank">',
 					'</a>'
 				),
 				'image_url'       => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
@@ -124,7 +124,7 @@ class DefaultFreeExtensions {
 			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
-				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
+				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woo.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/onboarding/facebook.png', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-facebook',
 				'is_visible'     => false,
@@ -180,7 +180,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Accept credit cards and other popular payment methods with %1$sWooPayments%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/woocommerce-payments" target="_blank">',
+					'<a href="https://woo.com/products/woocommerce-payments" target="_blank">',
 					'</a>'
 				),
 				'is_visible'     => array(
@@ -395,7 +395,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 				/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Print shipping labels with %1$sWooCommerce Shipping%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/shipping" target="_blank">',
+					'<a href="https://woo.com/products/shipping" target="_blank">',
 					'</a>'
 				),
 				'is_visible'     => array(
@@ -464,7 +464,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Get automated sales tax with %1$sWooCommerce Tax%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/tax" target="_blank">',
+					'<a href="https://woo.com/products/tax" target="_blank">',
 					'</a>'
 				),
 				'is_visible'     => array(
@@ -546,7 +546,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Enhance speed and security with %1$sJetpack%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/jetpack" target="_blank">',
+					'<a href="https://woo.com/products/jetpack" target="_blank">',
 					'</a>'
 				),
 				'is_visible'     => array(
@@ -569,7 +569,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Level up your email marketing with %1$sMailPoet%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/mailpoet" target="_blank">',
+					'<a href="https://woo.com/products/mailpoet" target="_blank">',
 					'</a>'
 				),
 				'manage_url'     => 'admin.php?page=mailpoet-newsletters',
@@ -814,7 +814,7 @@ class DefaultFreeExtensions {
 				'description'    => sprintf(
 					/* translators: 1: opening product link tag. 2: closing link tag */
 					__( 'Create ad campaigns and reach one billion global users with %1$sTikTok for WooCommerce%2$s', 'woocommerce' ),
-					'<a href="https://woocommerce.com/products/tiktok-for-woocommerce" target="_blank">',
+					'<a href="https://woo.com/products/tiktok-for-woocommerce" target="_blank">',
 					'</a>'
 				),
 				'manage_url'     => 'admin.php?page=tiktok',
@@ -846,56 +846,56 @@ class DefaultFreeExtensions {
 				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-woo.svg', WC_PLUGIN_FILE ),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments',
+				'learn_more_link'  => 'https://woo.com/products/woocommerce-payments',
 				'install_priority' => 5,
 			),
 			'woocommerce-services:shipping' => array(
 				'label'            => __( 'Print shipping labels with WooCommerce Shipping', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-woo.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Print USPS and DHL labels directly from your dashboard and save on shipping.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/woocommerce-shipping',
+				'learn_more_link'  => 'https://woo.com/woocommerce-shipping',
 				'install_priority' => 3,
 			),
 			'jetpack'                       => array(
 				'label'            => __( 'Boost content creation with Jetpack AI Assistant', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-jetpack.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Save time on content creation — unlock high-quality blog posts and pages using AI.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/jetpack',
+				'learn_more_link'  => 'https://woo.com/products/jetpack',
 				'install_priority' => 8,
 			),
 			'pinterest-for-woocommerce'     => array(
 				'label'            => __( 'Showcase your products with Pinterest', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-pinterest.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Get your products in front of a highly engaged audience.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/pinterest-for-woocommerce',
+				'learn_more_link'  => 'https://woo.com/products/pinterest-for-woocommerce',
 				'install_priority' => 2,
 			),
 			'mailpoet'                      => array(
 				'label'            => __( 'Reach your customers with MailPoet', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-mailpoet.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Send purchase follow-up emails, newsletters, and promotional campaigns.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/mailpoet',
+				'learn_more_link'  => 'https://woo.com/products/mailpoet',
 				'install_priority' => 7,
 			),
 			'tiktok-for-business'           => array(
 				'label'            => __( 'Create ad campaigns with TikTok', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-tiktok.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Create advertising campaigns and reach one billion global users.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/tiktok-for-woocommerce',
+				'learn_more_link'  => 'https://woo.com/products/tiktok-for-woocommerce',
 				'install_priority' => 1,
 			),
 			'google-listings-and-ads'       => array(
 				'label'            => __( 'Drive sales with Google Listings & Ads', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-google.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads',
+				'learn_more_link'  => 'https://woo.com/products/google-listings-and-ads',
 				'install_priority' => 6,
 			),
 			'woocommerce-services:tax'      => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-woo.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Automatically calculate how much sales tax should be collected – by city, country, or state.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/tax',
+				'learn_more_link'  => 'https://woo.com/products/tax',
 				'install_priority' => 4,
 			),
 		);

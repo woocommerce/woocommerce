@@ -13,16 +13,11 @@ export type SectionActionsProps = Omit<
 	BlockFillProps,
 	'name' | 'slotContainerBlockName'
 > & {
-	containerBlockName?: string | string[];
+	containerBlockName?: string;
 };
 
-const DEFAULT_SECTION_BLOCKS = [
-	'woocommerce/product-section',
-	'woocommerce/product-subsection',
-];
-
 export function SectionActions( {
-	containerBlockName = DEFAULT_SECTION_BLOCKS,
+	containerBlockName = 'woocommerce/product-section',
 	...restProps
 }: SectionActionsProps ) {
 	return (

@@ -11,8 +11,6 @@ import {
 	ACTION_MODAL_EDITOR_OPEN,
 	ACTION_MODAL_EDITOR_SET_BLOCKS,
 	ACTION_MODAL_EDITOR_CONTENT_HAS_CHANGED,
-	ACTION_PANEL_PREPUBLISH_OPEN,
-	ACTION_PANEL_PREPUBLISH_CLOSE,
 } from './constants';
 
 const modalEditorActions = {
@@ -35,17 +33,6 @@ const modalEditorActions = {
 	} ),
 };
 
-const prepublishPanelActions = {
-	openPrepublishPanel: () => ( {
-		type: ACTION_PANEL_PREPUBLISH_OPEN,
-	} ),
-
-	closePrepublishPanel: () => ( {
-		type: ACTION_PANEL_PREPUBLISH_CLOSE,
-	} ),
-};
-
 export default {
 	...modalEditorActions,
-	...prepublishPanelActions,
 };

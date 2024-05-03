@@ -3,7 +3,7 @@
  * DownloadableProductTrait
  */
 
-namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\GroupInterface;
@@ -38,19 +38,16 @@ trait DownloadableProductTrait {
 			$product_downloads_section_group->add_block(
 				array(
 					'id'         => 'product-downloadable',
-					'blockName'  => 'woocommerce/product-toggle-field',
+					'blockName'  => 'woocommerce/product-checkbox-field',
 					'order'      => 10,
 					'attributes' => array(
-						'property'      => 'downloadable',
-						'label'         => __( 'Include downloads', 'woocommerce' ),
-						'checkedHelp'   => __( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info.', 'woocommerce' ),
-						'uncheckedHelp' => __( 'Add any files you\'d like to make available for the customer to download after purchasing, such as instructions or warranty info.', 'woocommerce' ),
-
+						'property' => 'downloadable',
+						'label'    => __( 'Include downloads', 'woocommerce' ),
 					),
 				)
 			);
 
-			$product_downloads_section_group->add_subsection(
+			$product_downloads_section_group->add_section(
 				array(
 					'id'             => 'product-downloads-section',
 					'order'          => 20,

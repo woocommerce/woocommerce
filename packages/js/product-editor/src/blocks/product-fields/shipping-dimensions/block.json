@@ -11,16 +11,12 @@
 		"__contentEditable": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"disabled": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {
 		"align": false,
 		"html": false,
-		"multiple": true,
+		"multiple": false,
 		"reusable": false,
 		"inserter": false,
 		"lock": false,

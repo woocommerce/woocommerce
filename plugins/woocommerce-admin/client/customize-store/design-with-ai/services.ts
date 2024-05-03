@@ -5,6 +5,7 @@
  */
 import { __experimentalRequestJetpackToken as requestJetpackToken } from '@woocommerce/ai';
 import apiFetch from '@wordpress/api-fetch';
+import { recordEvent } from '@woocommerce/tracks';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { Sender, assign, createMachine, actions } from 'xstate';
 import { dispatch, resolveSelect } from '@wordpress/data';
@@ -22,7 +23,6 @@ import { HOMEPAGE_TEMPLATES } from '../data/homepageTemplates';
 import { updateTemplate } from '../data/actions';
 import { installAndActivateTheme as setTheme } from '../data/service';
 import { THEME_SLUG } from '../data/constants';
-import { trackEvent } from '../tracking';
 
 const { escalate } = actions;
 
@@ -75,7 +75,7 @@ export const getCompletion = async < ValidResponseObject >( {
 			signal: abortSignal,
 		} );
 	} catch ( error ) {
-		trackEvent( 'customize_your_store_ai_completion_api_error', {
+		recordEvent( 'customize_your_store_ai_completion_api_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -87,7 +87,7 @@ export const getCompletion = async < ValidResponseObject >( {
 	try {
 		parsedCompletionJson = JSON.parse( data.completion );
 	} catch {
-		trackEvent( 'customize_your_store_ai_completion_response_error', {
+		recordEvent( 'customize_your_store_ai_completion_response_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -101,14 +101,14 @@ export const getCompletion = async < ValidResponseObject >( {
 
 	try {
 		const validatedResponse = responseValidation( parsedCompletionJson );
-		trackEvent( 'customize_your_store_ai_completion_success', {
+		recordEvent( 'customize_your_store_ai_completion_success', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
 		} );
 		return validatedResponse;
 	} catch ( error ) {
-		trackEvent( 'customize_your_store_ai_completion_response_error', {
+		recordEvent( 'customize_your_store_ai_completion_response_error', {
 			query_id: queryId,
 			version,
 			retry_count: retryCount,
@@ -253,8 +253,8 @@ export const updateStorePatterns = async (
 			method: 'GET',
 		} );
 
-		if ( ! images ) {
-			if ( ! is_ai_generated ) {
+		if ( ! images.images.length ) {
+			if ( is_ai_generated ) {
 				throw new Error(
 					'AI content not generated: images not available'
 				);
@@ -338,7 +338,7 @@ export const updateStorePatterns = async (
 			);
 		}
 	} catch ( error ) {
-		trackEvent( 'customize_your_store_update_store_pattern_api_error', {
+		recordEvent( 'customize_your_store_update_store_pattern_api_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 		throw error;
@@ -402,11 +402,11 @@ export const assembleSite = async (
 			colorPaletteName: context.aiSuggestions.defaultColorPalette.default,
 			fontPairingName: context.aiSuggestions.fontPairing,
 		} );
-		trackEvent( 'customize_your_store_ai_update_global_styles_success' );
+		recordEvent( 'customize_your_store_ai_update_global_styles_success' );
 	} catch ( error ) {
 		// eslint-disable-next-line no-console
 		console.error( error );
-		trackEvent(
+		recordEvent(
 			'customize_your_store_ai_update_global_styles_response_error',
 			{
 				error: error instanceof Error ? error.message : 'unknown',
@@ -421,11 +421,11 @@ export const assembleSite = async (
 			homepageTemplateId: context.aiSuggestions
 				.homepageTemplate as keyof typeof HOMEPAGE_TEMPLATES,
 		} );
-		trackEvent( 'customize_your_store_ai_update_template_success' );
+		recordEvent( 'customize_your_store_ai_update_template_success' );
 	} catch ( error ) {
 		// eslint-disable-next-line no-console
 		console.error( error );
-		trackEvent( 'customize_your_store_ai_update_template_response_error', {
+		recordEvent( 'customize_your_store_ai_update_template_response_error', {
 			error: error instanceof Error ? error.message : 'unknown',
 		} );
 		throw error;
@@ -436,7 +436,7 @@ const installAndActivateTheme = async () => {
 	try {
 		await setTheme( THEME_SLUG );
 	} catch ( error ) {
-		trackEvent(
+		recordEvent(
 			'customize_your_store_ai_install_and_activate_theme_error',
 			{
 				theme: THEME_SLUG,

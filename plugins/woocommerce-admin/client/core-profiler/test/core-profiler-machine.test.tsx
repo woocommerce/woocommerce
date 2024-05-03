@@ -138,7 +138,6 @@ describe( 'All states in CoreProfilerMachine should be reachable', () => {
 				test( `${ path.description }`, async () => {
 					const rendered = render(
 						<CoreProfilerController
-							// @ts-expect-error -- types are wrong
 							actionOverrides={ actionOverrides }
 							servicesOverrides={ servicesOverrides }
 						/>

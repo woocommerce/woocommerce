@@ -20,15 +20,6 @@ class CartApplyCoupon extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return self::get_path_regex();
-	}
-
-	/**
-	 * Get the path of this rest route.
-	 *
-	 * @return string
-	 */
-	public static function get_path_regex() {
 		return '/cart/apply-coupon';
 	}
 
@@ -67,6 +58,7 @@ class CartApplyCoupon extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
+		$cart        = $this->cart_controller->get_cart_instance();
 		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
 
 		try {
@@ -75,7 +67,6 @@ class CartApplyCoupon extends AbstractCartRoute {
 			throw new RouteException( $e->getErrorCode(), $e->getMessage(), $e->getCode() );
 		}
 
-		$cart = $this->cart_controller->get_cart_instance();
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
 	}
 }

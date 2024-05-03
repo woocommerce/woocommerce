@@ -9,7 +9,7 @@ This is a WordPress plugin header comment. It's used to provide WordPress with m
 ```php
 /**
 * Plugin Name: WooCommerce Extension
-* Plugin URI: https://woocommerce.com/products/woocommerce-extension/
+* Plugin URI: https://woo.com/products/woocommerce-extension/
 * Description: Your extension's description text.
 * Version: 1.0.0
 * Author: Your Name

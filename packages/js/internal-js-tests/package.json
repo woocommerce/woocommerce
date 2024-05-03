@@ -5,7 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-js-tests/README.md",
@@ -57,7 +57,7 @@
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"resize-observer-polyfill": "1.5.1",
-		"rimraf": "5.0.5",
+		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"wireit": "0.14.3"

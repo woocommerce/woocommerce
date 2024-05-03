@@ -27,7 +27,6 @@ import { useEntityProp } from '@wordpress/core-data';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { PlaceHolder } from './place-holder';
 import { SectionActions } from '../../../components/block-slot-fill';
-import { mapUploadImageToImage } from '../../../utils/map-upload-image-to-image';
 
 type UploadImage = {
 	id?: number;
@@ -38,6 +37,16 @@ export interface Image {
 	src: string;
 	name: string;
 	alt: string;
+}
+
+function mapUploadImageToImage( upload: UploadImage ): Image | null {
+	if ( ! upload.id ) return null;
+	return {
+		id: upload.id,
+		name: upload.title,
+		src: upload.url,
+		alt: upload.alt,
+	};
 }
 
 export function ImageBlockEdit( {

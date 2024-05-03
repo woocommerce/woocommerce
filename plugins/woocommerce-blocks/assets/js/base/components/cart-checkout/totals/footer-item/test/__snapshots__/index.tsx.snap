@@ -10,15 +10,11 @@ exports[`TotalsFooterItem Does not show the "including %s of tax" line if tax is
     >
       Total
     </span>
-    <div
-      class="wc-block-components-totals-item__value"
+    <span
+      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
     >
-      <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
-      >
-        £85.00
-      </span>
-    </div>
+      £85.00
+    </span>
     <div
       class="wc-block-components-totals-item__description"
     />
@@ -36,15 +32,11 @@ exports[`TotalsFooterItem Does not show the "including %s of tax" line if tax is
     >
       Total
     </span>
-    <div
-      class="wc-block-components-totals-item__value"
+    <span
+      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
     >
-      <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
-      >
-        £85.00
-      </span>
-    </div>
+      £85.00
+    </span>
     <div
       class="wc-block-components-totals-item__description"
     />
@@ -62,15 +54,11 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABEL" line with single ta
     >
       Total
     </span>
-    <div
-      class="wc-block-components-totals-item__value"
+    <span
+      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
     >
-      <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
-      >
-        £85.00
-      </span>
-    </div>
+      £85.00
+    </span>
     <div
       class="wc-block-components-totals-item__description"
     >
@@ -94,15 +82,11 @@ exports[`TotalsFooterItem Shows the "including %s TAX LABELS" line with multiple
     >
       Total
     </span>
-    <div
-      class="wc-block-components-totals-item__value"
+    <span
+      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
     >
-      <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
-      >
-        £85.00
-      </span>
-    </div>
+      £85.00
+    </span>
     <div
       class="wc-block-components-totals-item__description"
     >
@@ -126,15 +110,11 @@ exports[`TotalsFooterItem Shows the "including %s of tax" line if tax is greater
     >
       Total
     </span>
-    <div
-      class="wc-block-components-totals-item__value"
+    <span
+      class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value"
     >
-      <span
-        class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-footer-item-tax-value"
-      >
-        £85.00
-      </span>
-    </div>
+      £85.00
+    </span>
     <div
       class="wc-block-components-totals-item__description"
     >

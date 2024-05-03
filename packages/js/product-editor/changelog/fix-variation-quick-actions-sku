@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Variation quick actions update properly when variation inherits sku of parent; slot fills always deal with arrays

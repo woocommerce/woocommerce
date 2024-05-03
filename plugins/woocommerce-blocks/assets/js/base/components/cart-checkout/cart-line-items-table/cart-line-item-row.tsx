@@ -13,10 +13,7 @@ import {
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import {
-	applyCheckoutFilter,
-	productPriceValidation,
-} from '@woocommerce/blocks-checkout';
+import { applyCheckoutFilter, mustContain } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
@@ -45,6 +42,9 @@ const getAmountFromRawPrice = (
 ) => {
 	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
 };
+
+const productPriceValidation = ( value: string ) =>
+	mustContain( value, '<price/>' );
 
 interface CartLineItemRowProps {
 	lineItem: CartItem | Record< string, never >;

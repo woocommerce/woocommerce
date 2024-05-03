@@ -1,7 +1,7 @@
 .woocommerce-navigation-intro-modal {
 	width: 670px;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		width: 350px;
 	}
 
@@ -51,7 +51,7 @@
 			max-width: 100%;
 		}
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			grid-template-columns: 1fr;
 
 			.woocommerce-navigation-intro-modal__image-wrapper {

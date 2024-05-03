@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { sort } from 'fast-sort';
-import { __, sprintf, _n, _x } from '@wordpress/i18n';
+import { __, sprintf, _n } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import {
 	InspectorControls,
@@ -201,19 +201,11 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ _x(
-								'Multiple',
-								'Number of filters',
-								'woocommerce'
-							) }
+							label={ __( 'Multiple', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ _x(
-								'Single',
-								'Number of filters',
-								'woocommerce'
-							) }
+							label={ __( 'Single', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					{ selectType === 'multiple' && (
@@ -239,12 +231,12 @@ const Edit = ( {
 							className="wc-block-attribute-filter__conditions-toggle"
 						>
 							<ToggleGroupControlOption
-								value="or"
-								label={ __( 'Any', 'woocommerce' ) }
-							/>
-							<ToggleGroupControlOption
 								value="and"
 								label={ __( 'All', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="or"
+								label={ __( 'Any', 'woocommerce' ) }
 							/>
 						</ToggleGroupControl>
 					) }
@@ -324,7 +316,7 @@ const Edit = ( {
 			<Button
 				className="wc-block-attribute-filter__read_more_button"
 				variant="tertiary"
-				href="https://woocommerce.com/document/managing-product-taxonomies/"
+				href="https://woo.com/document/managing-product-taxonomies/"
 				target="_blank"
 			>
 				{ __( 'Learn more', 'woocommerce' ) }

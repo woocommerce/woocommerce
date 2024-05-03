@@ -25,24 +25,6 @@ $logging            = $report['logging'];
 $wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, Constants::get_constant( 'WC_SSR_PLUGIN_UPDATE_RELEASE_VERSION_TYPE' ) );
-
-$active_plugins_count   = is_countable( $active_plugins ) ? count( $active_plugins ) : 0;
-$inactive_plugins_count = is_countable( $inactive_plugins ) ? count( $inactive_plugins ) : 0;
-
-// Include necessary WordPress file to use get_plugin_data()
-if ( ! function_exists( 'get_plugin_data' ) ) {
-    require_once ABSPATH . 'wp-admin/includes/plugin.php';
-}
-// Define the path to the main WooCommerce plugin file using the correct constant
-$plugin_path = WP_PLUGIN_DIR . '/woocommerce/woocommerce.php';
-// Initialize the WooCommerce version variable
-$wc_version = '';
-// Check if the plugin file exists before trying to access it
-if (file_exists($plugin_path)) {
-    $plugin_data = get_plugin_data($plugin_path);
-    $wc_version = $plugin_data["Version"] ?? ''; // Use null coalescing operator to handle undefined index
-}
-
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -50,7 +32,7 @@ if (file_exists($plugin_path)) {
 	</p>
 	<p class="submit">
 		<a href="#" class="button-primary debug-report"><?php esc_html_e( 'Get system report', 'woocommerce' ); ?></a>
-		<a class="button-secondary docs" href="https://woocommerce.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
+		<a class="button-secondary docs" href="https://woo.com/document/understanding-the-woocommerce-system-status-report/" target="_blank">
 			<?php esc_html_e( 'Understanding the status report', 'woocommerce' ); ?>
 		</a>
 	</p>
@@ -62,9 +44,6 @@ if (file_exists($plugin_path)) {
 			</button>
 			<button id="copy-for-support" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
 				<?php esc_html_e( 'Copy for support', 'woocommerce' ); ?>
-			</button>
-			<button id="copy-for-github" class="button" href="#" data-tip="<?php esc_attr_e( 'Copied!', 'woocommerce' ); ?>">
-				<?php esc_html_e( 'Copy for GitHub', 'woocommerce' ); ?>
 			</button>
 		</p>
 		<p class="copy-error hidden">
@@ -92,8 +71,7 @@ if (file_exists($plugin_path)) {
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce version', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce installed on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( !empty($wc_version) ? $wc_version : $environment['version'] ); ?></td>
-
+			<td><?php echo esc_html( $environment['version'] ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="REST API Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
@@ -106,6 +84,26 @@ if (file_exists($plugin_path)) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( wc()->api->get_rest_api_package_path() ) . '</code></mark> ';
 				} else {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the REST API package.', 'woocommerce' ) . '</mark>';
+				}
+				?>
+			</td>
+		</tr>
+		<tr>
+			<td data-export-label="WC Blocks Version"><?php esc_html_e( 'WooCommerce Blocks package', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce Blocks package running on your site.', 'woocommerce' ) ); ?></td>
+			<td>
+				<?php
+				if ( class_exists( '\Automattic\WooCommerce\Blocks\Package' ) ) {
+					$version = \Automattic\WooCommerce\Blocks\Package::get_version();
+					$path    = \Automattic\WooCommerce\Blocks\Package::get_path(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				} else {
+					$version = null;
+				}
+
+				if ( ! is_null( $version ) ) {
+					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> ' . esc_html( $version ) . ' <code class="private">' . esc_html( $path ) . '</code></mark> ';
+				} else {
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Blocks package.', 'woocommerce' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -138,14 +136,8 @@ if (file_exists($plugin_path)) {
 				if ( $environment['log_directory_writable'] ) {
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span> <code class="private">' . esc_html( $environment['log_directory'] ) . '</code></mark> ';
 				} else {
-					printf(
-						'<mark class="error"><span class="dashicons dashicons-warning"></span> %s</mark>',
-						sprintf(
-							// Translators: %s: Log directory path.
-							esc_html__( 'To allow logging, make %s writable.', 'woocommerce' ),
-							'<code>' . esc_html( $environment['log_directory'] ) . '</code>'
-						)
-					);
+					/* Translators: %1$s: Log directory, %2$s: Log directory constant */
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'To allow logging, make %1$s writable or define a custom %2$s.', 'woocommerce' ), '<code>' . esc_html( $environment['log_directory'] ) . '</code>', '<code>WC_LOG_DIR</code>' ) . '</mark>';
 				}
 				?>
 			</td>
@@ -470,7 +462,7 @@ if (file_exists($plugin_path)) {
 				<?php
 				if ( strlen( $database['database_prefix'] ) > 20 ) {
 					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
-					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woocommerce.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
+					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend using a prefix with less than 20 characters. See: %2$s', 'woocommerce' ), esc_html( $database['database_prefix'] ), '<a href="https://woo.com/document/completed-order-email-doesnt-contain-download-links/#section-2" target="_blank">' . esc_html__( 'How to update your database table prefix', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {
 					echo '<mark class="yes">' . esc_html( $database['database_prefix'] ) . '</mark>';
 				}
@@ -581,7 +573,7 @@ if (file_exists($plugin_path)) {
 					<mark class="error"><span class="dashicons dashicons-warning"></span>
 					<?php
 					/* Translators: %s: docs link. */
-					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woocommerce.com/document/ssl-and-https/' ) );
+					echo wp_kses_post( sprintf( __( 'Your store is not using HTTPS. <a href="%s" target="_blank">Learn more about HTTPS and SSL Certificates</a>.', 'woocommerce' ), 'https://woo.com/document/ssl-and-https/' ) );
 					?>
 					</mark>
 				<?php endif; ?>
@@ -603,7 +595,7 @@ if (file_exists($plugin_path)) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Active Plugins (<?php echo esc_attr( $active_plugins_count ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $active_plugins_count ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Active Plugins (<?php echo count( $active_plugins ); ?>)"><h2><?php esc_html_e( 'Active plugins', 'woocommerce' ); ?> (<?php echo count( $active_plugins ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -613,7 +605,7 @@ if (file_exists($plugin_path)) {
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
-			<th colspan="3" data-export-label="Inactive Plugins (<?php echo esc_attr( $inactive_plugins_count ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $inactive_plugins_count ); ?>)</h2></th>
+			<th colspan="3" data-export-label="Inactive Plugins (<?php echo count( $inactive_plugins ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo count( $inactive_plugins ); ?>)</h2></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -621,13 +613,12 @@ if (file_exists($plugin_path)) {
 	</tbody>
 </table>
 <?php
-$dropins_count = is_countable( $dropins_mu_plugins['dropins'] ) ? count( $dropins_mu_plugins['dropins'] ) : 0;
-if ( 0 < $dropins_count ) :
+if ( 0 < count( $dropins_mu_plugins['dropins'] ) ) :
 	?>
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-label="Dropin Plugins (<?php $dropins_count; ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php $dropins_count; ?>)</h2></th>
+				<th colspan="3" data-export-label="Dropin Plugins (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -646,14 +637,12 @@ if ( 0 < $dropins_count ) :
 	</table>
 	<?php
 endif;
-
-$mu_plugins_count = is_countable( $dropins_mu_plugins['mu_plugins'] ) ? count( $dropins_mu_plugins['mu_plugins'] ) : 0;
-if ( 0 < $mu_plugins_count ) :
+if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 	?>
 	<table class="wc_status_table widefat" cellspacing="0">
 		<thead>
 			<tr>
-				<th colspan="3" data-export-label="Must Use Plugins (<?php echo esc_attr( $mu_plugins_count ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo esc_attr( $mu_plugins_count ); ?>)</h2></th>
+				<th colspan="3" data-export-label="Must Use Plugins (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)</h2></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -749,8 +738,8 @@ if ( 0 < $mu_plugins_count ) :
 			</td>
 		</tr>
 		<tr>
-			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td data-export-label="Connected to Woo.com"><?php esc_html_e( 'Connected to Woo.com', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is your site connected to Woo.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo 'yes' === $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
@@ -759,6 +748,11 @@ if ( 0 < $mu_plugins_count ) :
 			<td><?php echo $settings['enforce_approved_download_dirs'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 
+		<tr>
+			<td data-export-label="HPOS feature screen enabled"><?php esc_html_e( 'HPOS feature screen enabled:', 'woocommerce' ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS feature screen enabled?', 'woocommerce' ) ); ?></td>
+			<td><?php echo $settings['HPOS_feature_screen_enabled'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
 		<tr>
 			<td data-export-label="HPOS feature enabled"><?php esc_html_e( 'HPOS enabled:', 'woocommerce' ); ?></td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'Is HPOS enabled?', 'woocommerce' ) ); ?></td>
@@ -985,7 +979,7 @@ if ( 0 < $mu_plugins_count ) :
 				<td class="help">&nbsp;</td>
 				<td>
 					<?php
-					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
+					$total_overrides = count( $theme['overrides'] );
 					for ( $i = 0; $i < $total_overrides; $i++ ) {
 						$override = $theme['overrides'][ $i ];
 						if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
@@ -1000,8 +994,7 @@ if ( 0 < $mu_plugins_count ) :
 						} else {
 							echo esc_html( $override['file'] );
 						}
-
-						if ( ( $total_overrides - 1 ) !== $i ) {
+						if ( ( count( $theme['overrides'] ) - 1 ) !== $i ) {
 							echo ', ';
 						}
 						echo '<br />';
@@ -1025,7 +1018,7 @@ if ( 0 < $mu_plugins_count ) :
 					<mark class="error">
 						<span class="dashicons dashicons-warning"></span>
 					</mark>
-					<a href="https://woocommerce.com/document/fix-outdated-templates-woocommerce/" target="_blank">
+					<a href="https://woo.com/document/fix-outdated-templates-woocommerce/" target="_blank">
 						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
 					</a>
 				</td>

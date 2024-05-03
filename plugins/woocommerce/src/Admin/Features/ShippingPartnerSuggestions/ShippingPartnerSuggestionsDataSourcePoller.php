@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
+use Automattic\WooCommerce\Admin\DataSourcePoller;
 
 /**
  * Specs data source poller class for shipping partner suggestions.
@@ -18,7 +18,7 @@ class ShippingPartnerSuggestionsDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/2.0/suggestions.json',
+		'https://woocommerce.com/wp-json/wccom/shipping-partner-suggestions/1.0/suggestions.json',
 	);
 
 	/**

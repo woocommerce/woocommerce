@@ -26,8 +26,6 @@ import { customizeStoreStateMachineEvents } from '..';
 import './style.scss';
 import { isAIFlow } from '../guards';
 import { navigateOrParent } from '../utils';
-import { useXStateInspect } from '~/xstate';
-import './entrepreneur-flow';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =
@@ -50,12 +48,10 @@ export const DesignWithAiController = ( {
 	// Assign aiOnline value from the parent context if it exists. Otherwise, ai is online by default.
 	designWithAiStateMachineDefinition.context.aiOnline =
 		parentContext?.flowType === FlowType.AIOnline;
-
-	const { versionEnabled } = useXStateInspect();
 	const [ state, send, service ] = useMachine(
 		designWithAiStateMachineDefinition,
 		{
-			devTools: versionEnabled === 'V4',
+			devTools: process.env.NODE_ENV === 'development',
 			parent: parentMachine,
 		}
 	);

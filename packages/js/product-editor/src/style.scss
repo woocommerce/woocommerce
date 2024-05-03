@@ -9,7 +9,6 @@
 @import "components/product-section-layout/style.scss";
 @import "components/header/style.scss";
 @import "components/add-new-shipping-class-modal/style.scss";
-@import "components/section-header/styles.scss";
 
 /* Components */
 
@@ -35,6 +34,7 @@
 @import "components/remove-confirmation-modal/style.scss";
 @import "components/manage-download-limits-modal/style.scss";
 @import "components/label/style.scss";
+@import "components/product-page-skeleton/styles.scss";
 @import "components/modal-editor-welcome-guide/style.scss";
 @import "components/attribute-control/attribute-skeleton.scss";
 @import "components/checkbox-control/style.scss";
@@ -45,11 +45,6 @@
 @import "components/product-list/styles.scss";
 @import "components/product-select/styles.scss";
 @import "components/product-image/styles.scss";
-@import "components/prepublish-panel/style.scss";
-@import "components/require-password/styles.scss";
-@import "components/schedule-publish-modal/style.scss";
-@import "components/custom-fields/style.scss";
-@import "components/text-control/style.scss";
 
 /* Field Blocks */
 

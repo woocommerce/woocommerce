@@ -196,9 +196,7 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 		page,
 	} ) => {
 		await page.goto( 'shop/' );
-		await expect(
-			page.getByRole( 'heading', { name: 'Shop' } )
-		).toBeVisible();
+		await expect( page.locator( 'h1.page-title' ) ).toContainText( 'Shop' );
 		await expect( page.locator( '.woocommerce-ordering' ) ).toBeVisible();
 
 		const addToCart = page.getByRole( 'add_to_cart_button' );
@@ -225,14 +223,18 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 	} ) => {
 		await page.goto( 'shop/' );
 		await page.locator( `text=${ simpleProductName } 1` ).click();
-		await page.getByRole( 'link', { name: productTagName1 } ).click();
+		await page
+			.locator( 'span.tagged_as > a', { hasText: productTagName1 } )
+			.click();
+		await expect( page.locator( 'h1.page-title' ) ).toContainText(
+			productTagName1
+		);
+		await expect( page.locator( '.woocommerce-breadcrumb' ) ).toContainText(
+			` / Products tagged “${ productTagName1 }”`
+		);
 		await expect(
-			page.getByRole( 'heading', { name: productTagName1 } )
-		).toBeVisible();
-		await expect(
-			page.getByText( `Products tagged “${ productTagName1 }”` )
-		).toBeVisible();
-		await expect( page.getByText( 'Showing all 3 results' ) ).toBeVisible();
+			page.locator( '.woocommerce-result-count' )
+		).toContainText( 'Showing all 3 results' );
 	} );
 
 	test( 'should see and sort attributes page with all its products', async ( {
@@ -251,13 +253,15 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 				hasText: productAttributeTerm,
 			} )
 			.click();
-		await expect(
-			page.getByRole( 'heading', { name: productAttributeTerm } )
-		).toBeVisible();
+		await expect( page.locator( 'h1.page-title' ) ).toContainText(
+			productAttributeTerm
+		);
 		await expect( page.locator( '.woocommerce-breadcrumb' ) ).toContainText(
 			` / Product ${ productAttributeName } / ${ productAttributeTerm }`
 		);
-		await expect( page.getByText( 'Showing all 3 results' ) ).toBeVisible();
+		await expect(
+			page.locator( '.woocommerce-result-count' )
+		).toContainText( 'Showing all 3 results' );
 	} );
 
 	test( 'can see products showcase', async ( { page } ) => {
@@ -287,27 +291,29 @@ test.describe( 'Browse product tags and attributes from the product page', () =>
 			.click();
 
 		await expect(
-			page.getByRole( 'button', { name: 'Update', exact: true } )
+			page.getByText( `${ pageTitle } is now live.` )
 		).toBeVisible();
 
 		// go to created page with products showcase
 		await page.goto( 'product-showcase' );
-		await expect(
-			page.getByRole( 'heading', { name: pageTitle } )
-		).toBeVisible();
-		await expect(
-			await page.getByRole( 'button', { name: 'Add to cart' } ).count()
-		).toBeGreaterThan( 0 );
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			pageTitle
+		);
+		const addToCart = page.getByRole( 'add_to_cart_button' );
+		for ( let i = 0; i < addToCart.count(); ++i )
+			await expect( addToCart.nth( i ) ).toBeVisible();
 
-		const productPrice = page.locator( '.woocommerce-Price-amount' );
+		const productPrice = page.getByRole( 'woocommerce-Price-amount' );
 		for ( let i = 0; i < productPrice.count(); ++i )
 			await expect( productPrice.nth( i ) ).toBeVisible();
 
-		const productTitle = page.locator( '.woocommerce-loop-product__title' );
+		const productTitle = page.getByRole(
+			'woocommerce-loop-product__title'
+		);
 		for ( let i = 0; i < productTitle.count(); ++i )
 			await expect( productTitle.nth( i ) ).toBeVisible();
 
-		const productImage = page.locator( '.wp-post-image' );
+		const productImage = page.getByRole( 'wp-post-image' );
 		for ( let i = 0; i < productImage.count(); ++i )
 			await expect( productImage.nth( i ) ).toBeVisible();
 	} );

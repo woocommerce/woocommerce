@@ -1,17 +1,8 @@
 /**
- * External dependencies
- */
-import { addFilter } from '@wordpress/hooks';
-
-/**
  * Internal dependencies
  */
 import { getProductTypes, getSurfacedProductTypeKeys } from '../utils';
-import {
-	productTypes,
-	onboardingProductTypesToSurfaced,
-	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
-} from '../constants';
+import { productTypes, onboardingProductTypesToSurfaced } from '../constants';
 
 describe( 'getProductTypes', () => {
 	it( 'should return the product types', () => {
@@ -24,30 +15,6 @@ describe( 'getProductTypes', () => {
 				( p ) => p.key
 			)
 		).toEqual( [ 'physical', 'variable', 'grouped' ] );
-	} );
-
-	it( 'should return the product types with extras from filter and excluded items', () => {
-		const customProduct = {
-			key: 'custom-product',
-			title: 'Custom product',
-			content: 'A custom product',
-			before: '',
-			after: '',
-		};
-
-		addFilter(
-			SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
-			'wc/admin/tests',
-			( filteredProductTypes ) => {
-				return [ ...filteredProductTypes, customProduct ];
-			}
-		);
-
-		expect(
-			getProductTypes( { exclude: [ 'external', 'digital' ] } ).map(
-				( p ) => p.key
-			)
-		).toEqual( [ 'physical', 'variable', 'grouped', 'custom-product' ] );
 	} );
 } );
 

@@ -10,7 +10,6 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,10 +21,7 @@ class WC_Admin_Notices {
 	use AccessiblePrivateMethods;
 
 	/**
-	 * Local notices cache.
-	 *
-	 * DON'T manipulate this field directly!
-	 * Always use get_notices and set_notices instead.
+	 * Stores notices.
 	 *
 	 * @var array
 	 */
@@ -52,18 +48,10 @@ class WC_Admin_Notices {
 	);
 
 	/**
-	 * Stores a flag indicating if the code is running in a multisite setup.
-	 *
-	 * @var bool
-	 */
-	private static bool $is_multisite;
-
-	/**
-	 * Initializes the class.
+	 * Constructor.
 	 */
 	public static function init() {
-		self::$is_multisite = is_multisite();
-		self::set_notices( get_option( 'woocommerce_admin_notices', array() ) );
+		self::$notices = get_option( 'woocommerce_admin_notices', array() );
 
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
@@ -97,50 +85,26 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Store the locally cached notices to DB.
+	 * Store notices to DB
 	 */
 	public static function store_notices() {
 		update_option( 'woocommerce_admin_notices', self::get_notices() );
 	}
 
 	/**
-	 * Get the value of the locally cached notices array for the current site.
+	 * Get notices
 	 *
 	 * @return array
 	 */
 	public static function get_notices() {
-		if ( ! self::$is_multisite ) {
-			return self::$notices;
-		}
-
-		$blog_id = get_current_blog_id();
-		$notices = self::$notices[ $blog_id ] ?? null;
-		if ( ! is_null( $notices ) ) {
-			return $notices;
-		}
-
-		self::$notices[ $blog_id ] = get_option( 'woocommerce_admin_notices', array() );
-		return self::$notices[ $blog_id ];
+		return self::$notices;
 	}
 
 	/**
-	 * Set the locally cached notices array for the current site.
-	 *
-	 * @param array $notices New value for the locally cached notices array.
-	 */
-	private static function set_notices( array $notices ) {
-		if ( self::$is_multisite ) {
-			self::$notices[ get_current_blog_id() ] = $notices;
-		} else {
-			self::$notices = $notices;
-		}
-	}
-
-	/**
-	 * Remove all notices from the locally cached notices array.
+	 * Remove all notices.
 	 */
 	public static function remove_all_notices() {
-		self::set_notices( array() );
+		self::$notices = array();
 	}
 
 	/**
@@ -186,7 +150,7 @@ class WC_Admin_Notices {
 						wpautop( __( 'The WooCommerce Legacy REST API, <a href="%1$s">currently enabled in this site</a>, will be removed in WooCommerce 9.0. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to keep it enabled. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ),
 						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
-						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 					)
 				)
 			);
@@ -206,7 +170,7 @@ class WC_Admin_Notices {
 						wpautop( __( 'The WooCommerce Legacy REST API will be removed in WooCommerce 9.0, and this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
 						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
 						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
-						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
+						'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
 					)
 				)
 			);
@@ -218,7 +182,7 @@ class WC_Admin_Notices {
 	 * or if the Legacy REST API extension is installed, and remove the notice about Legacy webhooks
 	 * if no such webhooks exist anymore or if the Legacy REST API extension is installed.
 	 *
-	 * TODO: Change this method in WooCommerce 9.0 so that the notice get removed if the Legacy REST API extension is installed and active.
+	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
 	 */
 	private static function maybe_remove_legacy_api_removal_notice() {
 		$plugin_is_active = is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
@@ -229,11 +193,6 @@ class WC_Admin_Notices {
 
 		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( $plugin_is_active || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
 			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
-		}
-
-		if ( self::has_notice( 'legacy_rest_api_is_incompatible_with_hpos' ) &&
-			! ( 'yes' === get_option( 'woocommerce_api_enabled' ) && 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) ) {
-			self::remove_notice( 'legacy_rest_api_is_incompatible_with_hpos' );
 		}
 	}
 
@@ -246,7 +205,7 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function add_notice( $name, $force_save = false ) {
-		self::set_notices( array_unique( array_merge( self::get_notices(), array( $name ) ) ) );
+		self::$notices = array_unique( array_merge( self::get_notices(), array( $name ) ) );
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
@@ -261,30 +220,8 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
-		self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
+		self::$notices = array_diff( self::get_notices(), array( $name ) );
 		delete_option( 'woocommerce_admin_notice_' . $name );
-
-		if ( $force_save ) {
-			// Adding early save to prevent more race conditions with notices.
-			self::store_notices();
-		}
-	}
-
-	/**
-	 * Remove a given set of notices.
-	 *
-	 * An array of notice names or a regular expression string can be passed, in the later case
-	 * all the notices whose name matches the regular expression will be removed.
-	 *
-	 * @param array|string $names_array_or_regex An array of notice names, or a string representing a regular expression.
-	 * @param bool         $force_save Force saving inside this method instead of at the 'shutdown'.
-	 * @return void
-	 */
-	public static function remove_notices( $names_array_or_regex, $force_save = false ) {
-		if ( ! is_array( $names_array_or_regex ) ) {
-			$names_array_or_regex = array_filter( self::get_notices(), fn( $notice_name ) => 1 === preg_match( $names_array_or_regex, $notice_name ) );
-		}
-		self::set_notices( array_diff( self::get_notices(), $names_array_or_regex ) );
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
@@ -307,12 +244,12 @@ class WC_Admin_Notices {
 	 * Hide a notice if the GET variable is set.
 	 */
 	public static function hide_notices() {
-		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
-			if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'woocommerce_hide_notices_nonce' ) ) {
+		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) { // WPCS: input var ok, CSRF ok.
+			if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wc_notice_nonce'] ) ), 'woocommerce_hide_notices_nonce' ) ) { // WPCS: input var ok, CSRF ok.
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
 			}
 
-			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) );
+			$notice_name = sanitize_text_field( wp_unslash( $_GET['wc-hide-notice'] ) ); // WPCS: input var ok, CSRF ok.
 
 			/**
 			 * Filter the capability required to dismiss a given notice.
@@ -368,8 +305,6 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-
 		$screen          = get_current_screen();
 		$screen_id       = $screen ? $screen->id : '';
 		$show_on_screens = array(
@@ -419,7 +354,7 @@ class WC_Admin_Notices {
 					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
 
 					if ( $notice_html ) {
-						include __DIR__ . '/views/html-notice-custom.php';
+						include dirname( __FILE__ ) . '/views/html-notice-custom.php';
 					}
 				}
 			}
@@ -439,14 +374,13 @@ class WC_Admin_Notices {
 		if ( WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) {
-				include __DIR__ . '/views/html-notice-updating.php';
+			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
 			} else {
-				include __DIR__ . '/views/html-notice-update.php';
+				include dirname( __FILE__ ) . '/views/html-notice-update.php';
 			}
 		} else {
-			include __DIR__ . '/views/html-notice-updated.php';
+			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
 		}
 	}
 
@@ -491,7 +425,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $outdated ) {
-			include __DIR__ . '/views/html-notice-template-check.php';
+			include dirname( __FILE__ ) . '/views/html-notice-template-check.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -514,7 +448,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $enabled ) {
-			include __DIR__ . '/views/html-notice-legacy-shipping.php';
+			include dirname( __FILE__ ) . '/views/html-notice-legacy-shipping.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -524,13 +458,12 @@ class WC_Admin_Notices {
 	 * No shipping methods.
 	 */
 	public static function no_shipping_methods_notice() {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
+		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) { // WPCS: input var ok, CSRF ok.
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
-				include __DIR__ . '/views/html-notice-no-shipping-methods.php';
+				include dirname( __FILE__ ) . '/views/html-notice-no-shipping-methods.php';
 			}
 
 			if ( $method_count > 0 ) {
@@ -543,7 +476,7 @@ class WC_Admin_Notices {
 	 * Notice shown when regenerating thumbnails background process is running.
 	 */
 	public static function regenerating_thumbnails_notice() {
-		include __DIR__ . '/views/html-notice-regenerating-thumbnails.php';
+		include dirname( __FILE__ ) . '/views/html-notice-regenerating-thumbnails.php';
 	}
 
 	/**
@@ -554,7 +487,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include __DIR__ . '/views/html-notice-secure-connection.php';
+		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
 	}
 
 	/**
@@ -569,7 +502,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include __DIR__ . '/views/html-notice-regenerating-lookup-table.php';
+		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
 	}
 
 	/**
@@ -656,7 +589,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include __DIR__ . '/views/html-notice-maxmind-license-key.php';
+		include dirname( __FILE__ ) . '/views/html-notice-maxmind-license-key.php';
 	}
 
 	/**
@@ -670,7 +603,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include __DIR__ . '/views/html-notice-redirect-only-download.php';
+		include dirname( __FILE__ ) . '/views/html-notice-redirect-only-download.php';
 	}
 
 	/**
@@ -684,7 +617,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include __DIR__ . '/views/html-notice-uploads-directory-is-unprotected.php';
+		include dirname( __FILE__ ) . '/views/html-notice-uploads-directory-is-unprotected.php';
 	}
 
 	/**
@@ -699,7 +632,7 @@ class WC_Admin_Notices {
 			self::remove_notice( 'base_tables_missing' );
 		}
 
-		include __DIR__ . '/views/html-notice-base-table-missing.php';
+		include dirname( __FILE__ ) . '/views/html-notice-base-table-missing.php';
 	}
 
 	/**

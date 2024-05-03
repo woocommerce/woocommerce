@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory
  * @package WooCommerce\Templates
- * @version 8.7.0
+ * @version 8.4.0
  */
 
 declare( strict_types=1 );
@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Variables used in this file.
  *
- * @var int   $orders_count   The number of paid orders placed by the current customer.
- * @var float $total_spend   The total money spent by the current customer.
- * @var float $avg_order_value The average money spent by the current customer.
+ * @var int   $order_count   The number of paid orders placed by the current customer.
+ * @var float $total_spent   The total money spent by the current customer.
+ * @var float $average_spent The average money spent by the current customer.
  */
 ?>
 
@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
 	</h4>
 
 	<span class="order-attribution-total-orders">
-		<?php echo esc_html( $orders_count ); ?>
+		<?php echo esc_html( $order_count ); ?>
 	</span>
 
 	<h4>
@@ -49,11 +49,11 @@ defined( 'ABSPATH' ) || exit;
 		?>
 	</h4>
 	<span class="order-attribution-total-spend">
-		<?php echo wp_kses_post( wc_price( $total_spend ) ); ?>
+		<?php echo wp_kses_post( wc_price( $total_spent ) ); ?>
 	</span>
 
 	<h4><?php esc_html_e( 'Average order value', 'woocommerce' ); ?></h4>
 	<span class="order-attribution-average-order-value">
-		<?php echo wp_kses_post( wc_price( $avg_order_value ) ); ?>
+		<?php echo wp_kses_post( wc_price( $average_spent ) ); ?>
 	</span>
 </div>

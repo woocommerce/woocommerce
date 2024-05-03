@@ -49,13 +49,6 @@ class ExtendedContainer extends BaseContainer {
 	);
 
 	/**
-	 * A list of tags that have already been fully resolved, see 'get' for details.
-	 *
-	 * @var array
-	 */
-	private array $known_tags = array();
-
-	/**
 	 * Register a class in the container.
 	 *
 	 * @param string    $class_name Class name.
@@ -160,17 +153,6 @@ class ExtendedContainer extends BaseContainer {
 	public function get( $id, bool $new = false ) {
 		if ( false === strpos( $id, '\\' ) ) {
 			throw new ContainerException( "Attempt to get an instance of the non-namespaced class '$id' from the container, did you forget to add a namespace import?" );
-		}
-
-		// This is a workaround for an issue that arises when using service providers inheriting from AbstractInterfaceServiceProvider:
-		// if one of these providers registers classes both by name and by tag, and one of its registered classes is requested
-		// with 'get' by name before a list of classes is requested by tag, then that service provider gets locked as
-		// the only one providing that tag, and the others get ignored. This is due to the fact that container definitions
-		// are created "on the fly" as needed and the base 'get' method won't try to register additional providers
-		// if the requested tag is already provided by at least one of the already existing definitions.
-		if ( $this->definitions->hasTag( $id ) && ! in_array( $id, $this->known_tags, true ) && $this->providers->provides( $id ) ) {
-			$this->providers->register( $id );
-			$this->known_tags[] = $id;
 		}
 
 		return parent::get( $id, $new );

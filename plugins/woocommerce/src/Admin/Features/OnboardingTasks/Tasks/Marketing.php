@@ -11,13 +11,6 @@ use Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions\Init as RemoteFre
  */
 class Marketing extends Task {
 	/**
-	 * Used to cache is_complete() method result.
-	 *
-	 * @var null
-	 */
-	private $is_complete_result = null;
-
-	/**
 	 * ID.
 	 *
 	 * @return string
@@ -32,7 +25,13 @@ class Marketing extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Grow your business', 'woocommerce' );
+		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+			if ( $this->is_complete() ) {
+				return __( 'You added sales channels', 'woocommerce' );
+			}
+			return __( 'Get more sales', 'woocommerce' );
+		}
+		return __( 'Set up marketing tools', 'woocommerce' );
 	}
 
 	/**
@@ -62,11 +61,7 @@ class Marketing extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_installed_extensions();
-		}
-
-		return $this->is_complete_result;
+		return self::has_installed_extensions();
 	}
 
 	/**

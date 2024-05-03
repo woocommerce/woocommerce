@@ -8,4 +8,5 @@ export * from './mini-cart';
 export * from './performance';
 export * from './shipping';
 export * from './storeApi';
+export * from './use-block-theme';
 export * from './wpCli';

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use ActionScheduler;
 use Automattic\Jetpack\Connection\Manager;
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsynPluginsInstallLogger;
 use WC_REST_Data_Controller;
@@ -124,6 +125,30 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 			)
 		);
+
+		/*
+		 * This is a temporary solution to override /jetpack/v4/connection/data endpoint
+		 * registered by Jetpack Connection when Jetpack is not installed.
+		 *
+		 * For more details, see https://github.com/woocommerce/woocommerce/issues/38979
+		 */
+		if ( Constants::get_constant( 'JETPACK__VERSION' ) === null && wp_is_mobile() ) {
+			register_rest_route(
+				'jetpack/v4',
+				'/connection/data',
+				array(
+					array(
+						'methods'             => 'GET',
+						'permission_callback' => '__return_true',
+						'callback'            => function() {
+							return new WP_REST_Response( null, 404 );
+						},
+					),
+				),
+				true
+			);
+		}
+		
 		add_action( 'woocommerce_plugins_install_error', array( $this, 'log_plugins_install_error' ), 10, 4 );
 		add_action( 'woocommerce_plugins_install_api_error', array( $this, 'log_plugins_install_api_error' ), 10, 2 );
 	}

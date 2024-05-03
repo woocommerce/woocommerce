@@ -1,4 +1,4 @@
-@import "../../shared.scss";
+@import '../../shared.scss';
 
 .woocommerce-experimental-select-control {
 	&:hover,
@@ -79,7 +79,7 @@
 				}
 
 				.components-checkbox-control.is-selected {
-					input[type="checkbox"] {
+					input[type='checkbox'] {
 						border: none !important;
 					}
 				}
@@ -97,7 +97,7 @@
 					padding: 1px;
 					width: 20px !important;
 
-					.components-checkbox-control__input[type="checkbox"] {
+					.components-checkbox-control__input[type='checkbox'] {
 						border: 1px solid #757575;
 						height: 20px !important;
 						width: 20px !important;
@@ -113,7 +113,7 @@
 						width: 22px;
 					}
 
-					@include breakpoint( "<782px" ) {
+					@include breakpoint( '<782px' ) {
 						svg {
 							width: 18px;
 						}

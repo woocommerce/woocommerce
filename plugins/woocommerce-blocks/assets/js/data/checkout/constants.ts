@@ -5,7 +5,6 @@ import {
 	BillingAddress,
 	getSetting,
 	ShippingAddress,
-	AdditionalValues,
 } from '@woocommerce/settings';
 
 import { CheckoutResponseSuccess } from '@woocommerce/types';
@@ -35,6 +34,5 @@ export const checkoutData = {
 	customer_id: 0,
 	billing_address: {} as BillingAddress,
 	shipping_address: {} as ShippingAddress,
-	additional_fields: {} as AdditionalValues,
 	...( preloadedCheckoutData || {} ),
 };

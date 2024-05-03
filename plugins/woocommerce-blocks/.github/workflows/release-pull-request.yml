@@ -1,0 +1,35 @@
+name: Release Pull Request Automation
+
+# Controls when the action will run. Triggers the workflow on create branch or tag
+# events but only acts on branch create.
+on:
+    create:
+jobs:
+    release-pull-request-automation:
+        if: ${{ github.event.ref_type == 'branch' && contains( github.ref, 'release/' ) }}
+        env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: act10ns/slack@v2
+              with:
+                  status: starting
+              if: ${{ always() }}
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: Create changeset for pull request
+              run: |
+                  git config user.name github-actions
+                  git config user.email github-actions@github.com
+                  git commit -m 'Empty commit for release pull request' --allow-empty
+                  git push
+            - name: Create Release Pull Request
+              uses: woocommerce/automations@v1
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  automations: release
+            - uses: act10ns/slack@v2
+              with:
+                  status: ${{ job.status }}
+                  steps: ${{ toJson(steps) }}
+              if: ${{ always() }}

@@ -47,4 +47,4 @@ if ( ! function_exists( 'YOUR_PREFIX_woocommerce_available_variation' ) ) {
 }
 ```
 
-If you are looking for a little more power, check out our [Min/Max Quantities](https://woocommerce.com/products/minmax-quantities) extension!
+If you are looking for a little more power, check out our [Min/Max Quantities](https://woo.com/products/minmax-quantities) extension!

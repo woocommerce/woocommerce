@@ -74,7 +74,6 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_properties() {
-		$additional_field_schema = $this->get_additional_fields_schema();
 		return [
 			'order_id'          => [
 				'description' => __( 'The order ID to process during checkout.', 'woocommerce' ),
@@ -183,12 +182,12 @@ class CheckoutSchema extends AbstractSchema {
 				'description' => __( 'Additional fields to be persisted on the order.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => [ 'view', 'edit' ],
-				'properties'  => $additional_field_schema,
+				'properties'  => $this->get_additional_fields_schema(),
 				'arg_options' => [
 					'sanitize_callback' => [ $this, 'sanitize_additional_fields' ],
 					'validate_callback' => [ $this, 'validate_additional_fields' ],
 				],
-				'required'    => $this->schema_has_required_property( $additional_field_schema ),
+				'required'    => $this->is_additional_fields_required(),
 			],
 			self::EXTENDING_KEY => $this->get_extended_schema( self::IDENTIFIER ),
 		];
@@ -243,7 +242,7 @@ class CheckoutSchema extends AbstractSchema {
 	 */
 	protected function prepare_payment_details_for_response( array $payment_details ) {
 		return array_map(
-			function ( $key, $value ) {
+			function( $key, $value ) {
 				return (object) [
 					'key'   => $key,
 					'value' => $value,
@@ -261,26 +260,17 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields = wp_parse_args(
-			$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
-			$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
-		);
+		$fields   = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$response = [];
 
-		$additional_field_schema = $this->get_additional_fields_schema();
 		foreach ( $fields as $key => $value ) {
-			if ( ! isset( $additional_field_schema[ $key ] ) ) {
-				unset( $fields[ $key ] );
+			if ( 0 === strpos( $key, '/billing/' ) || 0 === strpos( $key, '/shipping/' ) ) {
 				continue;
 			}
-			// This makes sure we're casting checkboxes from "1" and "0" to boolean. In the frontend, "0" is treated as truthy.
-			if ( isset( $additional_field_schema[ $key ]['type'] ) && 'boolean' === $additional_field_schema[ $key ]['type'] ) {
-				$fields[ $key ] = (bool) $value;
-			} else {
-				$fields[ $key ] = $this->prepare_html_response( $value );
-			}
+			$response[ $key ] = $value;
 		}
 
-		return $fields;
+		return $response;
 	}
 
 	/**
@@ -289,22 +279,10 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_additional_fields_schema() {
-		return $this->generate_additional_fields_schema(
-			$this->additional_fields_controller->get_fields_for_location( 'contact' ),
-			$this->additional_fields_controller->get_fields_for_location( 'order' )
-		);
-	}
+		$order_only_fields = $this->additional_fields_controller->get_order_only_fields();
 
-	/**
-	 * Generate the schema for additional fields.
-	 *
-	 * @param array[] ...$args One or more arrays of additional fields.
-	 * @return array
-	 */
-	protected function generate_additional_fields_schema( ...$args ) {
-		$additional_fields = array_merge( ...$args );
-		$schema            = [];
-		foreach ( $additional_fields as $key => $field ) {
+		$schema = [];
+		foreach ( $order_only_fields as $key => $field ) {
 			$field_schema = [
 				'description' => $field['label'],
 				'type'        => 'string',
@@ -314,7 +292,7 @@ class CheckoutSchema extends AbstractSchema {
 
 			if ( 'select' === $field['type'] ) {
 				$field_schema['enum'] = array_map(
-					function ( $option ) {
+					function( $option ) {
 						return $option['value'];
 					},
 					$field['options']
@@ -333,13 +311,13 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Check if any additional field is required, so that the parent item is required as well.
 	 *
-	 * @param array $additional_fields_schema Additional fields schema.
 	 * @return bool
 	 */
-	protected function schema_has_required_property( $additional_fields_schema ) {
+	public function is_additional_fields_required() {
+		$additional_fields_schema = $this->get_additional_fields_schema();
 		return array_reduce(
 			array_keys( $additional_fields_schema ),
-			function ( $carry, $key ) use ( $additional_fields_schema ) {
+			function( $carry, $key ) use ( $additional_fields_schema ) {
 				return $carry || $additional_fields_schema[ $key ]['required'];
 			},
 			false
@@ -355,21 +333,19 @@ class CheckoutSchema extends AbstractSchema {
 	public function sanitize_additional_fields( $fields ) {
 		$properties         = $this->get_additional_fields_schema();
 		$sanitization_utils = new SanitizationUtils();
-		$fields             = $sanitization_utils->wp_kses_array(
-			array_reduce(
-				array_keys( $fields ),
-				function ( $carry, $key ) use ( $fields, $properties ) {
-					if ( ! isset( $properties[ $key ] ) ) {
-						return $carry;
-					}
-					$field_schema   = $properties[ $key ];
-					$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
-					$rest_sanitized = $this->additional_fields_controller->sanitize_field( $key, $rest_sanitized );
-					$carry[ $key ]  = $rest_sanitized;
+
+		$fields = array_reduce(
+			array_keys( $fields ),
+			function( $carry, $key ) use ( $fields, $properties ) {
+				if ( ! isset( $properties[ $key ] ) ) {
 					return $carry;
-				},
-				[]
-			)
+				}
+				$field_schema   = $properties[ $key ];
+				$rest_sanitized = rest_sanitize_value_from_schema( wp_unslash( $fields[ $key ] ), $field_schema, $key );
+				$carry[ $key ]  = $rest_sanitized;
+				return $carry;
+			},
+			[]
 		);
 
 		return $sanitization_utils->wp_kses_array( $fields );
@@ -385,33 +361,32 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return true|\WP_Error
 	 */
 	public function validate_additional_fields( $fields, $request ) {
-		$errors                  = new \WP_Error();
-		$fields                  = $this->sanitize_additional_fields( $fields );
-		$additional_field_schema = $this->get_additional_fields_schema();
+		$errors     = new \WP_Error();
+		$fields     = $this->sanitize_additional_fields( $fields, $request );
+		$properties = $this->get_additional_fields_schema();
 
-		// Loop over the schema instead of the fields. This is to ensure missing fields are validated.
-		foreach ( $additional_field_schema as $key => $schema ) {
-			if ( ! isset( $fields[ $key ] ) && ! $schema['required'] ) {
-				// Optional fields can go missing.
+		foreach ( array_keys( $properties ) as $key ) {
+			if ( ! isset( $fields[ $key ] ) && false === $properties[ $key ]['required'] ) {
 				continue;
 			}
 
 			$field_value = isset( $fields[ $key ] ) ? $fields[ $key ] : null;
-			$result      = rest_validate_value_from_schema( $field_value, $schema, $key );
+
+			$result = rest_validate_value_from_schema( $field_value, $properties[ $key ], $key );
 
 			// Only allow custom validation on fields that pass the schema validation.
 			if ( true === $result ) {
-				$result = $this->additional_fields_controller->validate_field( $key, $field_value );
+				$result = $this->additional_fields_controller->validate_field( $key, $field_value, $request );
 			}
 
 			if ( is_wp_error( $result ) && $result->has_errors() ) {
 				$location = $this->additional_fields_controller->get_field_location( $key );
 				foreach ( $result->get_error_codes() as $code ) {
 					$result->add_data(
-						array(
+						[
 							'location' => $location,
 							'key'      => $key,
-						),
+						],
 						$code
 					);
 				}
@@ -419,18 +394,6 @@ class CheckoutSchema extends AbstractSchema {
 			}
 		}
 
-		// Validate groups of properties per registered location.
-		$locations = array( 'contact', 'order' );
-
-		foreach ( $locations as $location ) {
-			$location_fields = $this->additional_fields_controller->filter_fields_for_location( $fields, $location );
-			$result          = $this->additional_fields_controller->validate_fields_for_location( $location_fields, $location, 'other' );
-
-			if ( is_wp_error( $result ) && $result->has_errors() ) {
-				$errors->merge_from( $result );
-			}
-		}
-
-		return $errors->has_errors() ? $errors : true;
+		return $errors->has_errors( $errors ) ? $errors : true;
 	}
 }

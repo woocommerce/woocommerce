@@ -7,7 +7,7 @@
 		grid-template-columns: 1fr;
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		grid-template-columns: 1fr;
 	}
 }
@@ -36,7 +36,7 @@
 	justify-content: center;
 	margin: 0;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		flex-direction: column;
 	}
 
@@ -50,19 +50,19 @@
 		}
 
 		&::after {
-			content: "•";
+			content: '•';
 			color: #bbb;
 			margin-left: 4px;
 
-			@include breakpoint( "<782px" ) {
-				content: "";
+			@include breakpoint( '<782px' ) {
+				content: '';
 			}
 		}
 
 		&:last-child {
 			margin-right: 0;
 			&::after {
-				content: "";
+				content: '';
 			}
 		}
 	}

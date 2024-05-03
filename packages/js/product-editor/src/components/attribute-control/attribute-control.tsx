@@ -9,7 +9,7 @@ import {
 	createInterpolateElement,
 } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
-import { ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 import {
 	Sortable,
 	__experimentalSelectControlMenuSlot as SelectControlMenuSlot,
@@ -53,7 +53,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	onRemove = () => {},
 	onRemoveCancel = () => {},
 	onNoticeDismiss = () => {},
-	renderCustomEmptyState,
+	renderCustomEmptyState = () => <AttributeEmptyStateSkeleton />,
 	uiStrings,
 	createNewAttributesAsGlobal = false,
 	useRemoveConfirmationModal = false,
@@ -77,7 +77,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 	const [ defaultAttributeSearch, setDefaultAttributeSearch ] =
 		useState< string >();
 	const [ removingAttribute, setRemovingAttribute ] =
-		useState< null | ProductProductAttribute >();
+		useState< null | ProductAttribute >();
 	const [ currentAttributeId, setCurrentAttributeId ] = useState<
 		null | string
 	>( null );
@@ -97,7 +97,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		);
 	};
 
-	const handleRemove = ( attribute: ProductProductAttribute ) => {
+	const handleRemove = ( attribute: ProductAttribute ) => {
 		handleChange(
 			value.filter(
 				( attr ) =>
@@ -108,7 +108,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		setRemovingAttribute( null );
 	};
 
-	const showRemoveConfirmation = ( attribute: ProductProductAttribute ) => {
+	const showRemoveConfirmation = ( attribute: ProductAttribute ) => {
 		if ( useRemoveConfirmationModal ) {
 			setRemovingAttribute( attribute );
 			return;
@@ -132,7 +132,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onNewModalClose();
 	};
 
-	const openEditModal = ( attribute: ProductProductAttribute ) => {
+	const openEditModal = ( attribute: ProductAttribute ) => {
 		recordEvent( 'product_options_edit', {
 			source: TRACKS_SOURCE,
 			attribute: attribute.name,
@@ -141,7 +141,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		onEditModalOpen( attribute );
 	};
 
-	const closeEditModal = ( attribute: ProductProductAttribute ) => {
+	const closeEditModal = ( attribute: ProductAttribute ) => {
 		setCurrentAttributeId( null );
 		onEditModalClose( attribute );
 	};
@@ -150,7 +150,7 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 		const addedAttributesOnly = newAttributes.filter(
 			( newAttr ) =>
 				! value.some(
-					( current: ProductProductAttribute ) =>
+					( current: ProductAttribute ) =>
 						getAttributeId( newAttr ) === getAttributeId( current )
 				)
 		);
@@ -188,13 +188,13 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const attributeKeyValues = value.reduce(
 		(
-			keyValue: Record< number | string, ProductProductAttribute >,
-			attribute: ProductProductAttribute
+			keyValue: Record< number | string, ProductAttribute >,
+			attribute: ProductAttribute
 		) => {
 			keyValue[ getAttributeKey( attribute ) ] = attribute;
 			return keyValue;
 		},
-		{} as Record< number | string, ProductProductAttribute >
+		{} as Record< number | string, ProductAttribute >
 	);
 
 	const currentAttribute = value.find(
@@ -203,43 +203,19 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 
-	function renderEmptyState() {
-		if ( isMobileViewport || value.length ) return null;
-
-		if ( renderCustomEmptyState ) {
-			return renderCustomEmptyState( {
-				addAttribute( search ) {
-					setDefaultAttributeSearch( search );
-					openNewModal();
-				},
-			} );
-		}
-
-		return <AttributeEmptyStateSkeleton />;
-	}
-
-	function renderSectionActions() {
-		if ( renderCustomEmptyState && value.length === 0 ) return null;
-
-		return (
-			<SectionActions>
-				{ uiStrings?.newAttributeListItemLabel && (
-					<Button
-						variant="secondary"
-						className="woocommerce-add-attribute-list-item__add-button"
-						onClick={ openNewModal }
-					>
-						{ uiStrings.newAttributeListItemLabel }
-					</Button>
-				) }
-			</SectionActions>
-		);
-	}
-
 	return (
 		<div className="woocommerce-attribute-field">
-			{ renderSectionActions() }
-
+			<SectionActions>
+				<Button
+					variant="secondary"
+					className="woocommerce-add-attribute-list-item__add-button"
+					onClick={ () => {
+						openNewModal();
+					} }
+				>
+					{ uiStrings.newAttributeListItemLabel }
+				</Button>
+			</SectionActions>
 			{ uiStrings.notice && (
 				<Notice
 					isDismissible={ true }
@@ -369,7 +345,14 @@ export const AttributeControl: React.FC< AttributeControlProps > = ( {
 					} }
 				/>
 			) }
-			{ renderEmptyState() }
+			{ ! isMobileViewport &&
+				value.length === 0 &&
+				renderCustomEmptyState( {
+					addAttribute( search ) {
+						setDefaultAttributeSearch( search );
+						openNewModal();
+					},
+				} ) }
 		</div>
 	);
 };

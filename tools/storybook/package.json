@@ -18,7 +18,7 @@
 		"storybook-rtl": "USE_RTL_STYLE=true pnpm storybook"
 	},
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"bugs": {

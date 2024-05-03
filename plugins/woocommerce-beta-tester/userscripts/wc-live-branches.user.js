@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WooCommerce Live Branches
 // @namespace    https://wordpress.com/
-// @version      1.1
+// @version      1.0
 // @description  Adds links to PRs pointing to Jurassic Ninja sites for live-testing a changeset
 // @grant        GM_xmlhttpRequest
 // @connect      jurassic.ninja
@@ -16,7 +16,7 @@
 ( function () {
 	const $ = jQuery.noConflict();
 	const markdownBodySelector = '.pull-discussion-timeline .markdown-body';
-	const pluginsList = null;
+	let pluginsList = null;
 
 	// Watch for relevant DOM changes that indicate we need to re-run `doit()`:
 	// - Adding a new `.markdown-body`.
@@ -55,7 +55,7 @@
 	 *
 	 * Currently looks at the URL, expecting it to match a `@match` pattern from the script header.
 	 *
-	 * @return {string|null} Repo name.
+	 * @returns {string|null} Repo name.
 	 */
 	function determineRepo() {
 		const m = location.pathname.match( /^\/([^/]+\/[^/]+)\/pull\// );
@@ -104,16 +104,6 @@
 				'<p><strong>Cannot determine the repository for this PR.</strong></p>'
 			);
 		} else {
-			// TODO: Fetch the list of feature flags dynamically from the API or something.
-			const featureFlags = [
-				'async-product-editor-category-field',
-				'launch-your-store',
-				'minified-js',
-				'new-product-management-experience',
-				'product-custom-fields',
-				'settings',
-			];
-
 			const contents = `
 					<details>
 						<summary>Expand for JN site options:</summary>
@@ -203,15 +193,6 @@
 							],
 							33
 						) }
-						<h4>Enable additional feature flags</h4>
-						${ getOptionsList(
-							featureFlags.map( ( flag ) => ( {
-								label: flag,
-								name: 'woocommerce-beta-tester-feature-flags',
-								value: flag,
-							} ) ),
-							50
-						) }
 					</details>
 					<p>
 						<a id="woocommerce-beta-branch-link" target="_blank" rel="nofollow noopener" href="#">…</a>
@@ -225,7 +206,7 @@
 		 * Encode necessary HTML entities in a string.
 		 *
 		 * @param {string} s - String to encode.
-		 * @return {string} Encoded string.
+		 * @returns {string} Encoded string.
 		 */
 		function encodeHtmlEntities( s ) {
 			return s.replace(
@@ -237,7 +218,7 @@
 		/**
 		 * Build the JN create URI.
 		 *
-		 * @return {string} URI.
+		 * @returns {string} URI.
 		 */
 		function getLink() {
 			const query = [
@@ -245,16 +226,9 @@
 				`woocommerce-beta-tester-live-branch=${ currentBranch }`,
 			];
 
-			const enabledFeatureFlags = [];
-
 			$(
 				'#woocommerce-live-branches input[type=checkbox]:checked:not([data-invert]), #woocommerce-live-branches input[type=checkbox][data-invert]:not(:checked)'
 			).each( ( i, input ) => {
-				if ( input.name === 'woocommerce-beta-tester-feature-flags' ) {
-					enabledFeatureFlags.push( input.value );
-					return;
-				}
-
 				if ( input.value ) {
 					query.push(
 						encodeURIComponent( input.name ) +
@@ -265,15 +239,6 @@
 					query.push( encodeURIComponent( input.name ) );
 				}
 			} );
-
-			if ( enabledFeatureFlags.length ) {
-				query.push(
-					`woocommerce-beta-tester-feature-flags=${ encodeURIComponent(
-						enabledFeatureFlags.join( ',' )
-					) }`
-				);
-			}
-
 			// prettier-ignore
 			return `${ host }/create?${ query.join( '&' ).replace( /%(2F|5[BD])/g, m => decodeURIComponent( m ) ) }`;
 		}
@@ -281,15 +246,15 @@
 		/**
 		 * Build HTML for a single option checkbox.
 		 *
-		 * @param {Object}  opts            - Options.
-		 * @param {string}  opts.label      - Checkbox label HTML.
-		 * @param {string}  opts.name       - Checkbox name.
-		 * @param {string}  [opts.value]    - Checkbox value, if any.
-		 * @param {boolean} [opts.checked]  - Whether the checkbox is default checked.
+		 * @param {object} opts - Options.
+		 * @param {string} opts.label - Checkbox label HTML.
+		 * @param {string} opts.name - Checkbox name.
+		 * @param {string} [opts.value] - Checkbox value, if any.
+		 * @param {boolean} [opts.checked] - Whether the checkbox is default checked.
 		 * @param {boolean} [opts.disabled] - Whether the checkbox is disabled.
-		 * @param {boolean} [opts.invert]   - Whether the sense of the checkbox is inverted.
-		 * @param {number}  columnWidth     - Column width.
-		 * @return {string} HTML.
+		 * @param {boolean} [opts.invert] - Whether the sense of the checkbox is inverted.
+		 * @param {number} columnWidth - Column width.
+		 * @returns {string} HTML.
 		 */
 		function getOption(
 			{
@@ -316,9 +281,9 @@
 		/**
 		 * Build HTML for a set of option checkboxes.
 		 *
-		 * @param {object[]} options     - Array of options for `getOption()`.
-		 * @param {number}   columnWidth - Column width.
-		 * @return {string} HTML.
+		 * @param {object[]} options - Array of options for `getOption()`.
+		 * @param {number} columnWidth - Column width.
+		 * @returns {string} HTML.
 		 */
 		function getOptionsList( options, columnWidth ) {
 			return `
@@ -337,8 +302,8 @@
 		 *
 		 * Also registers `onInputChanged()` as a change handler for all checkboxes in the HTML.
 		 *
-		 * @param {HTMLElement} el       - Element.
-		 * @param {string}      contents - HTML to append.
+		 * @param {HTMLElement} el - Element.
+		 * @param {string} contents - HTML to append.
 		 */
 		function appendHtml( el, contents ) {
 			const $el = $( el );

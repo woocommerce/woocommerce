@@ -59,7 +59,8 @@ class WCAdminSharedSettings {
 				$this->settings_prefix,
 				function() {
 					return apply_filters( 'woocommerce_admin_shared_settings', array() );
-				}
+				},
+				true
 			);
 		}
 	}

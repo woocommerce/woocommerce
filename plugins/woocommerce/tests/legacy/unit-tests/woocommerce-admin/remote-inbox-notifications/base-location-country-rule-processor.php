@@ -5,11 +5,11 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationCountryRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\BaseLocationCountryRuleProcessor;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 /**
- * class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor
+ * class WC_Admin_Tests_RemoteInboxNotifications_PublishBeforeTimeRuleProcessor
  */
 class WC_Admin_Tests_RemoteInboxNotifications_BaseLocationCountryRuleProcessor extends WC_Unit_Test_Case {
 	/**

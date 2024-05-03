@@ -21,7 +21,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { forwardRef } from '@wordpress/element';
 // @ts-ignore No types for this exist yet.
 import SiteIcon from '@wordpress/edit-site/build-module/components/site-icon';
-import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { getNewPath } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
@@ -78,25 +78,29 @@ export const SiteHub = forwardRef(
 						className="edit-site-site-hub__text-content"
 						spacing="0"
 					>
-						<div
+						<motion.div
 							className={ classnames(
 								'edit-site-site-hub__view-mode-toggle-container',
 								{
 									'has-transparent-background': isTransparent,
 								}
 							) }
+							layout
+							transition={ {
+								type: 'tween',
+								duration: disableMotion
+									? 0
+									: HUB_ANIMATION_DURATION,
+								ease: 'easeOut',
+							} }
 						>
 							<Link
-								href={ getNewPath(
-									getPersistedQuery(),
-									'/',
-									{}
-								) }
+								href={ getNewPath( {}, '/', {} ) }
 								type="wp-admin"
 							>
 								<SiteIcon className="edit-site-layout__view-mode-toggle-icon" />
 							</Link>
-						</div>
+						</motion.div>
 
 						<AnimatePresence>
 							<motion.div

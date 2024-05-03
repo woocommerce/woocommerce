@@ -1,5 +1,5 @@
 .woocommerce-product-block-editor {
-	padding-top: 108px; // required space to locate the dashboard just below the admin bar. @todo: find a better way to do this.
+	padding-top: 43px; // required space to locate the dashboard just below the admin bar. @todo: find a better way to do this.
 
 	h1,
 	h2,
@@ -138,10 +138,6 @@
 		margin-bottom: 0;
 	}
 
-	.wp-block-column {
-		word-break: normal;
-	}
-
 	.woocommerce-experimental-select-control__label {
 		text-transform: uppercase;
 		font-size: 11px;
@@ -151,76 +147,15 @@
 
 	.block-editor-block-list__layout {
 		&.is-root-container {
-			padding-left: 0;
-			padding-right: 0;
 			padding-bottom: 128px;
-			margin-left: calc(2 * $gap);
-			margin-right: calc(2 * $gap);
-
-			@include breakpoint(">782px") {
-				max-width: 650px;
-				margin-left: auto;
-				margin-right: auto;
-			}
 		}
 
-		.block-editor-block-list__block {
-			/* Remove the outline for the block when it is focused */
-			&:not([contenteditable]):focus {
-				&::after {
-					display: none;
-				}
-			}
-
-			/* Address overflow issue */
-			fieldset {
-				min-width: 0;
-			}
-
-			/* Remove the outline for the block when it is editable */
-			&.has-editable-outline {
-				&::after {
-					display: none;
-				}
-			}
-		}
-	}
-}
-
-.woocommerce-product-block-editor {
-	.block-editor-block-list__layout.is-root-container.is-loading {
-		.wp-block-woocommerce-product-section__heading-title {
-			@include placeholder();
-			background-color: $gray-200;
-			border-radius: $grid-unit-05;
-			width: 300px;
-			height: 28px;
-			margin-bottom: $gap-smaller;
+		.block-editor-block-list__block:not([contenteditable]):focus:after {
+			display: none; // use important or increase specificity.
 		}
 
-		.woocommerce-product-form-label__label {
-			@include placeholder();
-			background-color: $gray-200;
-			border-radius: $grid-unit-05;
-			width: $grid-unit-80;
-			height: 28px;
-			margin-bottom: $gap-smaller;
-		}
-
-		.woocommerce-product-form-input {
-			@include placeholder();
-			background-color: $gray-200;
-			border-radius: $grid-unit-05;
-			width: 100%;
-			height: 36px;
-		}
-
-		.woocommerce-product-form-textarea {
-			@include placeholder();
-			background-color: $gray-200;
-			border-radius: $grid-unit-05;
-			width: 100%;
-			height: 108px;
+		.block-editor-block-list__block fieldset {
+			min-width: 0;
 		}
 	}
 }

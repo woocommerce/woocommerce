@@ -32,7 +32,7 @@ export type CheckoutState = {
 	prefersCollection?: boolean | undefined;
 	// Custom checkout data passed to the store API on processing.
 	extensionData: Record< string, Record< string, unknown > >;
-	// Additional fields values that are collected on Checkout.
+	// Additional fields to be displayed on the checkout.
 	additionalFields: AdditionalValues;
 };
 
@@ -51,5 +51,5 @@ export const defaultState: CheckoutState = {
 	shouldCreateAccount: false,
 	prefersCollection: undefined,
 	extensionData: {},
-	additionalFields: checkoutData.additional_fields || {},
+	additionalFields: {},
 };

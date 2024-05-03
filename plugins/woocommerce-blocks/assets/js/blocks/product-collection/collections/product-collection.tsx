@@ -25,6 +25,7 @@ const attributes = {
 	...DEFAULT_ATTRIBUTES,
 	query: {
 		...DEFAULT_ATTRIBUTES.query,
+		inherit: true,
 	},
 	collection: collection.name,
 	hideControls: [],

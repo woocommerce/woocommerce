@@ -3,13 +3,9 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
-import {
-	CART_STORE_KEY,
-	VALIDATION_STORE_KEY,
-	CHECKOUT_STORE_KEY,
-} from '@woocommerce/block-data';
+import { CART_STORE_KEY, VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { StoreCartCoupon, ApiErrorResponse } from '@woocommerce/types';
+import type { StoreCartCoupon } from '@woocommerce/types';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 
 /**
@@ -45,19 +41,6 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 		);
 
 	const { applyCoupon, removeCoupon } = useDispatch( CART_STORE_KEY );
-	const orderId = useSelect( ( select ) =>
-		select( CHECKOUT_STORE_KEY ).getOrderId()
-	);
-
-	// Return cart, checkout or generic error message.
-	const getCouponErrorMessage = ( error: ApiErrorResponse ) => {
-		if ( orderId && orderId > 0 && error?.data?.details?.checkout ) {
-			return error.data.details.checkout;
-		} else if ( error?.data?.details?.cart ) {
-			return error.data.details.cart;
-		}
-		return error.message;
-	};
 
 	const applyCouponWithNotices = ( couponCode: string ) => {
 		return applyCoupon( couponCode )
@@ -89,10 +72,9 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 				return Promise.resolve( true );
 			} )
 			.catch( ( error ) => {
-				const errorMessage = getCouponErrorMessage( error );
 				setValidationErrors( {
 					coupon: {
-						message: decodeEntities( errorMessage ), // TODO fix the circular loop with ApiErrorResponseData and ApiErrorResponseDataDetails
+						message: decodeEntities( error.message ),
 						hidden: false,
 					},
 				} );

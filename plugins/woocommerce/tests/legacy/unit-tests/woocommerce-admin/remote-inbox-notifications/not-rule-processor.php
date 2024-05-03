@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\NotRuleProcessor;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\NotRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_NotRuleProcessor

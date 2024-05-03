@@ -17,7 +17,7 @@
 		"@types/wordpress__plugins": "3.0.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "^9.0.7",
+		"@wordpress/env": "^8.13.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",
@@ -88,7 +88,7 @@
 		"uglify": "rm -f $npm_package_assets_js_min && for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done"
 	},
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"lint-staged": {

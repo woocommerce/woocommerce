@@ -4,13 +4,13 @@
 import { MouseEvent } from 'react';
 import {
 	PartialProductVariation,
-	ProductProductAttribute,
+	ProductAttribute,
 	ProductVariation,
 } from '@woocommerce/data';
 
 export type VariationsTableRowProps = {
 	variation: ProductVariation;
-	variableAttributes: ProductProductAttribute[];
+	variableAttributes: ProductAttribute[];
 	isUpdating?: boolean;
 	isSelected?: boolean;
 	isSelectionDisabled?: boolean;

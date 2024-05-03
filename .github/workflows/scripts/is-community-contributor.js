@@ -6,10 +6,6 @@ const core = require( '@actions/core' );
 // this won't work.
 const octokit = new Octokit();
 
-const ignoredUsernames = [ 'dependabot[bot]', 'gglobalstep' ];
-const checkIfIgnoredUsername = ( username ) =>
-	ignoredUsernames.includes( username );
-
 const getIssueAuthor = ( payload ) => {
 	return (
 		payload?.issue?.user?.login ||
@@ -19,7 +15,7 @@ const getIssueAuthor = ( payload ) => {
 };
 
 const isCommunityContributor = async ( owner, repo, username ) => {
-	if ( username && ! checkIfIgnoredUsername( username ) ) {
+	if ( username ) {
 		const {
 			data: { permission },
 		} = await octokit.rest.repos.getCollaboratorPermissionLevel( {
@@ -31,7 +27,6 @@ const isCommunityContributor = async ( owner, repo, username ) => {
 		return permission === 'read' || permission === 'none';
 	}
 
-	console.log( 'Not a community contributor!' );
 	return false;
 };
 

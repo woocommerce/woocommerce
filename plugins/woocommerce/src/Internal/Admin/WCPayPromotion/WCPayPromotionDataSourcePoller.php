@@ -1,5 +1,4 @@
 <?php
-
 namespace Automattic\WooCommerce\Internal\Admin\WCPayPromotion;
 
 use Automattic\WooCommerce\Admin\DataSourcePoller;
@@ -15,13 +14,13 @@ class WCPayPromotionDataSourcePoller extends DataSourcePoller {
 	 * Default data sources array.
 	 */
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/2.0/payment-method/promotions.json',
+		'https://woocommerce.com/wp-json/wccom/payment-gateway-suggestions/1.0/payment-method/promotions.json',
 	);
 
 	/**
 	 * Class instance.
 	 *
-	 * @var WCPayPromotionDataSourcePoller instance
+	 * @var Analytics instance
 	 */
 	protected static $instance = null;
 

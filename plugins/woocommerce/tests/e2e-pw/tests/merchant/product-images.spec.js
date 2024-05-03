@@ -1,4 +1,5 @@
-const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const { test: baseTest, expect } = require( '@playwright/test' );
+const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 async function addImageFromLibrary( page, imageName, actionButtonName ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
@@ -12,8 +13,19 @@ async function addImageFromLibrary( page, imageName, actionButtonName ) {
 }
 
 baseTest.describe( 'Products > Product Images', () => {
+	baseTest.use( { storageState: process.env.ADMINSTATE } );
+
 	const test = baseTest.extend( {
-		storageState: process.env.ADMINSTATE,
+		api: async ( { baseURL }, use ) => {
+			const api = new wcApi( {
+				url: baseURL,
+				consumerKey: process.env.CONSUMER_KEY,
+				consumerSecret: process.env.CONSUMER_SECRET,
+				version: 'wc/v3',
+			} );
+
+			await use( api );
+		},
 		product: async ( { api }, use ) => {
 			let product = {
 				id: 0,
@@ -222,7 +234,7 @@ baseTest.describe( 'Products > Product Images', () => {
 			await page.goto( productWithImage.permalink );
 			await expect(
 				page
-					.locator( `.woocommerce-product-gallery ol img` )
+					.locator( `#product-${ productWithImage.id } ol img` )
 					.nth( images.length ),
 				'all gallery images should be visible'
 			).toBeVisible(); // +1 for the featured image
@@ -259,7 +271,7 @@ baseTest.describe( 'Products > Product Images', () => {
 		await test.step( 'Verify product gallery', async () => {
 			// Verify gallery in store frontend
 			await page.goto( productWithGallery.permalink );
-			const selector = `.woocommerce-product-gallery ol img`;
+			const selector = `#product-${ productWithGallery.id } ol img`;
 			await expect(
 				page.locator( selector ).nth( imagesCount - 1 ),
 				'gallery images should be visible'

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+This aims to add more checks to confirm that a completed order email is received, as well as its content.

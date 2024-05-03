@@ -41,7 +41,7 @@ function ProductCardFooter( props: { product: Product } ) {
 			return false;
 		}
 
-		// This value is sent from the WooCommerce.com API.
+		// This value is sent from the Woo.com API.
 		if ( ! productToCheck.isInstallable ) {
 			return false;
 		}

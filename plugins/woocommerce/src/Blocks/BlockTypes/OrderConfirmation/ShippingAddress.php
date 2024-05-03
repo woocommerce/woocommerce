@@ -51,6 +51,6 @@ class ShippingAddress extends AbstractOrderConfirmationBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'additionalAddressFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'address' ) );
+		$this->asset_data_registry->add( 'additionalAddressFields', Package::container()->get( CheckoutFields::class )->get_fields_for_location( 'address' ), true );
 	}
 }

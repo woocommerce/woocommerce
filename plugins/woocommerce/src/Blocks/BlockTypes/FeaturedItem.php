@@ -322,6 +322,6 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'defaultHeight', wc_get_theme_support( 'featured_block::default_height', 500 ) );
+		$this->asset_data_registry->add( 'defaultHeight', wc_get_theme_support( 'featured_block::default_height', 500 ), true );
 	}
 }

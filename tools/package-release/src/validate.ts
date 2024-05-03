@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
 import { execSync } from 'child_process';
 import { gt as greaterVersionThan } from 'semver';
 
@@ -11,63 +12,13 @@ import { gt as greaterVersionThan } from 'semver';
 import { MONOREPO_ROOT, excludedPackages } from './const';
 
 /**
- * Get pnpm's package data.
- *
- * @param {string} name package name.
- * @return {Object|Array} A package object or an array of package objects.
- */
-const getPackageData = ( name?: string ) => {
-	try {
-		const rawData = execSync( 'pnpm m ls --json --depth=-1', {
-			cwd: MONOREPO_ROOT,
-			encoding: 'utf-8',
-		} );
-
-		const data = JSON.parse( rawData );
-
-		if ( ! name ) {
-			return data;
-		}
-
-		return data.find( ( p: { name: string } ) => p.name === name );
-	} catch ( e ) {
-		if ( e instanceof Error ) {
-			// eslint-disable-next-line no-console
-			console.log( e );
-			throw e;
-		}
-	}
-};
-
-/**
- * Determine if package is JS or PHP.
- *
- * @param {string} name package name.
- * @return {undefined|string} Package type js or php.
- */
-export const getPackageType = ( name: string ) => {
-	const packageData = getPackageData( name );
-	if ( ! packageData ) {
-		return;
-	}
-	if ( packageData.path.includes( 'packages/js' ) ) {
-		return 'js';
-	}
-	if ( packageData.path.includes( 'packages/php' ) ) {
-		return 'php';
-	}
-};
-
-/**
  * Get filepath for a given package name.
  *
  * @param {string} name package name.
  * @return {string} Absolute path for the package.
  */
-export const getFilepathFromPackageName = ( name: string ): string => {
-	const packageData = getPackageData( name );
-	return packageData?.path;
-};
+export const getFilepathFromPackageName = ( name: string ): string =>
+	join( MONOREPO_ROOT, 'packages/js', name.replace( '@woocommerce', '' ) );
 
 /**
  * Get a package's package.json file in JSON format.
@@ -87,20 +38,51 @@ export const getPackageJson = ( name: string ) => {
 };
 
 /**
- * Get a package's composer.json file in JSON format.
+ * Check if package is valid and can be deployed to NPM.
  *
  * @param {string} name package name.
- * @return {Object|false} JSON object or false if it fails.
+ * @return {boolean} true if the package is private.
  */
-export const getComposerJson = ( name: string ) => {
-	const filepath = getFilepathFromPackageName( name );
-	const composerJsonFilepath = `${ filepath }/composer.json`;
-	const composerJsonExists = existsSync( composerJsonFilepath );
-	if ( ! composerJsonExists ) {
+export const isValidPackage = ( name: string ): boolean => {
+	const packageJson = getPackageJson( name );
+
+	if ( ! packageJson ) {
 		return false;
 	}
 
-	return JSON.parse( readFileSync( composerJsonFilepath, 'utf8' ) );
+	if ( name !== packageJson.name ) {
+		return false;
+	}
+
+	const isPrivatePackage = !! packageJson.private;
+
+	if ( isPrivatePackage ) {
+		return false;
+	}
+
+	return true;
+};
+
+/**
+ * Validate package name.
+ *
+ * @param {string}   name  package name.
+ * @param {Function} error Error logging function.
+ */
+export const validatePackageName = (
+	name: string,
+	error: ( s: string ) => void
+) => {
+	const filepath = getFilepathFromPackageName( name );
+
+	try {
+		const exists = existsSync( filepath );
+		if ( ! exists ) {
+			throw new Error();
+		}
+	} catch ( e ) {
+		error( `${ name } does not exist as a package.` );
+	}
 };
 
 /**
@@ -108,14 +90,22 @@ export const getComposerJson = ( name: string ) => {
  *
  * @return {Array<string>} Package names.
  */
-export const getAllPackages = (): Array< string > => {
-	const packageData = getPackageData();
-	if ( ! packageData ) {
-		return [];
-	}
-	return packageData
-		.map( ( p: { name: string } ) => p.name )
-		.filter( ( name: string ) => ! excludedPackages.includes( name ) );
+export const getAllPackges = (): Array< string > => {
+	const jsPackageFolders = readdirSync(
+		join( MONOREPO_ROOT, 'packages/js' ),
+		{
+			encoding: 'utf-8',
+		}
+	);
+
+	return jsPackageFolders
+		.map( ( folder ) => '@woocommerce/' + folder )
+		.filter( ( name ) => {
+			if ( excludedPackages.includes( name ) ) {
+				return false;
+			}
+			return isValidPackage( name );
+		} );
 };
 
 /**
@@ -128,19 +118,13 @@ export const validatePackage = (
 	name: string,
 	error: ( s: string ) => void
 ) => {
-	const packageData = getPackageData( name );
+	validatePackageName( name, error );
 
-	if ( ! packageData ) {
-		error( `${ name } is not a valid package.` );
-	}
-
-	if ( packageData.private ) {
+	if ( ! isValidPackage( name ) ) {
 		error(
-			`${ name } is a private package, no need to prepare for a release.`
+			`${ name } is not a valid package. It may be private or incorrectly configured.`
 		);
 	}
-
-	return true;
 };
 
 /**

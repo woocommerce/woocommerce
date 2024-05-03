@@ -5,8 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
 
-use Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingEngine;
-use Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController;
+use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 
@@ -22,8 +21,6 @@ class EnginesServiceProvider extends AbstractInterfaceServiceProvider {
 	 */
 	protected $provides = array(
 		TransientFilesEngine::class,
-		ReceiptRenderingEngine::class,
-		ReceiptRenderingRestController::class,
 	);
 
 	/**
@@ -31,7 +28,5 @@ class EnginesServiceProvider extends AbstractInterfaceServiceProvider {
 	 */
 	public function register() {
 		$this->share_with_implements_tags( TransientFilesEngine::class )->addArgument( LegacyProxy::class );
-		$this->share( ReceiptRenderingEngine::class )->addArguments( array( TransientFilesEngine::class, LegacyProxy::class ) );
-		$this->share_with_implements_tags( ReceiptRenderingRestController::class );
 	}
 }

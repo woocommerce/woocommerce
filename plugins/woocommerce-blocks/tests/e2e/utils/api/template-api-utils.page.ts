@@ -42,7 +42,7 @@ export class TemplateApiUtils {
 			{
 				data: {
 					id: slug,
-					content: content?.raw,
+					content: content.raw,
 					source: 'theme',
 				},
 				headers: {

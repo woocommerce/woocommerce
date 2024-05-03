@@ -2,19 +2,17 @@
  * External dependencies
  */
 import { intersection } from 'lodash';
-import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import {
-	productTypes as baseProductTypes,
+	productTypes,
 	ProductType,
 	ProductTypeKey,
 	onboardingProductTypesToSurfaced,
 	supportedOnboardingProductTypes,
 	defaultSurfacedProductTypes,
-	SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
 } from './constants';
 
 export const getProductTypes = ( {
@@ -22,26 +20,13 @@ export const getProductTypes = ( {
 }: {
 	exclude?: ProductTypeKey[];
 } = {} ): ProductType[] => {
-	/**
-	 * Experimental: Filter for adding custom product types to tasklist.
-	 *
-	 * @filter woocommerce_tasklist_experimental_product_types
-	 * @param {Object} productTypes Array of product types.
-	 */
-	const injectedProductTypes = applyFilters(
-		SETUP_TASKLIST_PRODUCT_TYPES_FILTER,
-		[]
-	) as ProductType[];
-
-	let productTypes = [ ...baseProductTypes, ...injectedProductTypes ];
-
 	if ( exclude && exclude?.length > 0 ) {
-		productTypes = productTypes.filter(
+		return productTypes.filter(
 			( productType ) => ! exclude.includes( productType.key )
 		);
 	}
 
-	return productTypes;
+	return [ ...productTypes ];
 };
 
 /**

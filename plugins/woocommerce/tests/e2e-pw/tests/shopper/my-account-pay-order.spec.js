@@ -89,13 +89,13 @@ test.describe( 'Customer can pay for their order through My Account', () => {
 
 		await page.locator( 'a.pay' ).click();
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Checkout' } )
-		).toBeVisible();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Pay for order'
+		);
 		await page.locator( '#place_order' ).click();
 
-		await expect(
-			page.getByText( 'Your order has been received' )
-		).toBeVisible();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Order received'
+		);
 	} );
 } );

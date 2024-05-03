@@ -31,7 +31,6 @@ export type ProductState = {
 	pending: {
 		createProduct?: boolean;
 		updateProduct?: Record< number, boolean >;
-		duplicateProduct?: Record< number, boolean >;
 		deleteProduct?: Record< number, boolean >;
 	};
 
@@ -72,20 +71,9 @@ const reducer: Reducer< ProductState, Actions > = (
 						},
 					},
 				};
-			case TYPES.DUPLICATE_PRODUCT_START:
-				return {
-					...state,
-					pending: {
-						duplicateProduct: {
-							...( state.pending.duplicateProduct || {} ),
-							[ payload.id ]: true,
-						},
-					},
-				};
 			case TYPES.CREATE_PRODUCT_SUCCESS:
 			case TYPES.GET_PRODUCT_SUCCESS:
 			case TYPES.UPDATE_PRODUCT_SUCCESS:
-			case TYPES.DUPLICATE_PRODUCT_SUCCESS:
 				const productData = state.data || {};
 				return {
 					...state,
@@ -98,10 +86,6 @@ const reducer: Reducer< ProductState, Actions > = (
 					},
 					pending: {
 						createProduct: false,
-						duplicateProduct: {
-							...( state.pending.duplicateProduct || {} ),
-							[ payload.id ]: false,
-						},
 						updateProduct: {
 							...( state.pending.updateProduct || {} ),
 							[ payload.id ]: false,
@@ -172,14 +156,6 @@ const reducer: Reducer< ProductState, Actions > = (
 					errors: {
 						...state.errors,
 						[ `update/${ payload.id }` ]: payload.error,
-					},
-				};
-			case TYPES.DUPLICATE_PRODUCT_ERROR:
-				return {
-					...state,
-					errors: {
-						...state.errors,
-						[ `duplicate/${ payload.id }` ]: payload.error,
 					},
 				};
 			case TYPES.DELETE_PRODUCT_START:

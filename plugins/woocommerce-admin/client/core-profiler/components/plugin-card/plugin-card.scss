@@ -1,4 +1,4 @@
-@import "../../shared.scss";
+@import '../../shared.scss';
 
 .woocommerce-profiler-plugins-plugin-card {
 	max-width: 492px;
@@ -11,7 +11,7 @@
 	align-items: flex-start;
 	flex: 0 0 48%;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		width: 100%;
 		padding: 16px;
 		flex: 100%;
@@ -37,7 +37,7 @@
 	img {
 		margin-right: 12px;
 		width: 28px;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			align-self: center;
 		}
 	}
@@ -47,7 +47,7 @@
 		font-weight: 500;
 		margin: 0;
 		padding: 0;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			margin: 0;
 		}
 	}
@@ -59,7 +59,7 @@
 		color: $gray-700;
 		margin: 0;
 		padding: 0;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			display: none;
 		}
 	}
@@ -67,7 +67,7 @@
 	a {
 		color: $gray-700;
 		margin-left: 5px;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			display: none;
 		}
 	}
@@ -75,21 +75,21 @@
 	.components-checkbox-control__input-container {
 		margin-right: 24px;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			margin-right: 16px;
 		}
 	}
 
 	.components-checkbox-control {
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			align-self: center;
 		}
 		.components-base-control__field {
-			@include breakpoint( "<782px" ) {
+			@include breakpoint( '<782px' ) {
 				margin-bottom: 0 !important;
 			}
 			.components-checkbox-control__input-container {
-				@include breakpoint( "<782px" ) {
+				@include breakpoint( '<782px' ) {
 					height: inherit;
 				}
 			}
@@ -103,7 +103,7 @@
 
 	.woocommerce-profiler-plugins-plugin-card-text {
 		margin: 4px 0 0 80px;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			align-self: center;
 		}
 		&.smaller-margin-left {
@@ -124,7 +124,7 @@
 				font-size: 11px;
 				font-weight: 500;
 				line-height: 20px;
-				@include breakpoint( "<782px" ) {
+				@include breakpoint( '<782px' ) {
 					display: none;
 				}
 			}

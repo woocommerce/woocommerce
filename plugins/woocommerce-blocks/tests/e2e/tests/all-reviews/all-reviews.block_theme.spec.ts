@@ -6,80 +6,50 @@ import { expect, test } from '@woocommerce/e2e-playwright-utils';
 /**
  * Internal dependencies
  */
-import { allReviews } from '../../test-data/data/data';
+import { reviews } from '../../test-data/data/data';
 
-const BLOCK_NAME = 'woocommerce/all-reviews';
+const blockData = {
+	name: 'woocommerce/all-reviews',
+	selectors: {
+		frontend: {
+			firstReview:
+				'.wc-block-review-list-item__item:first-child .wc-block-review-list-item__text p',
+		},
+	},
+};
 
-const latestReview = allReviews[ allReviews.length - 1 ];
-
-const highestRating = [ ...allReviews ].sort(
-	( a, b ) => b.rating - a.rating
-)[ 0 ];
-
-const lowestRating = [ ...allReviews ].sort(
-	( a, b ) => a.rating - b.rating
-)[ 0 ];
-
-test.describe( `${ BLOCK_NAME } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
+test.describe( `${ blockData.name } Block`, () => {
+	test( 'block can be inserted and it successfully renders a review in the editor and the frontend', async ( {
+		admin,
+		editor,
+		page,
+		editorUtils,
+	} ) => {
 		await admin.createNewPost();
-		await editor.insertBlock( { name: BLOCK_NAME } );
-	} );
+		await editor.insertBlock( { name: blockData.name } );
 
-	test( 'block can be inserted and it sorts reviews by most recent by default', async ( {
-		frontendUtils,
-		page,
-		editorUtils,
-	} ) => {
-		await expect( page.getByText( allReviews[ 0 ].review ) ).toBeVisible();
+		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
 
 		await editorUtils.publishAndVisitPost();
 
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
+		await expect( page.getByText( reviews[ 0 ].review ) ).toBeVisible();
 	} );
 
-	test( 'can sort by highest rating in the frontend', async ( {
+	test( 'can change sort order in the frontend', async ( {
 		page,
 		frontendUtils,
-		editorUtils,
 	} ) => {
-		await editorUtils.publishAndVisitPost();
+		await page.goto( '/all-reviews-block/' );
 
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
+		const block = await frontendUtils.getBlockByName( blockData.name );
+		let firstReview;
+		firstReview = block.locator( blockData.selectors.frontend.firstReview );
+		await expect( firstReview ).toHaveText( reviews[ 1 ].review );
 
 		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Highest rating' );
+		select.selectOption( 'Highest rating' );
 
-		await expect( reviews.first() ).toHaveText( highestRating.review );
-	} );
-
-	test( 'can sort by lowest rating in the frontend', async ( {
-		page,
-		frontendUtils,
-		editorUtils,
-	} ) => {
-		await editorUtils.publishAndVisitPost();
-
-		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
-		const reviews = block.locator(
-			'.wc-block-components-review-list-item__text'
-		);
-
-		await expect( reviews.first() ).toHaveText( latestReview.review );
-
-		const select = page.getByLabel( 'Order by' );
-		await select.selectOption( 'Lowest rating' );
-
-		await expect( reviews.first() ).toHaveText( lowestRating.review );
+		firstReview = block.locator( blockData.selectors.frontend.firstReview );
+		await expect( firstReview ).toHaveText( reviews[ 0 ].review );
 	} );
 } );

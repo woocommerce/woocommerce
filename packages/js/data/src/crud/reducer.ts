@@ -84,99 +84,26 @@ export const createReducer = (
 						},
 					};
 
-				case TYPES.CREATE_ITEM_SUCCESS: {
+				case TYPES.CREATE_ITEM_SUCCESS:
 					const createItemSuccessRequestId = getRequestIdentifier(
 						CRUD_ACTIONS.CREATE_ITEM,
 						payload.key,
 						payload.query
 					);
-
-					const { options } = payload;
-					const data = {
-						...itemData,
-						[ payload.key ]: {
-							...( itemData[ payload.key ] || {} ),
-							...payload.item,
-						},
-					};
-
-					let items = state.items;
-					let queryItems = Object.keys( data ).map( ( key ) => +key );
-
-					let itemsCount = state.itemsCount;
-
-					/*
-					 * Check it needs to update the store with the new item,
-					 * optimistically.
-					 */
-					if ( options?.optimisticQueryUpdate ) {
-						/*
-						 * If the query has an order_by property, sort the items
-						 * by the order_by property.
-						 *
-						 * The sort criteria could be different from the
-						 * the server side.
-						 * Ensure to keep in sync with the server side, for instance,
-						 * by invalidating the cache.
-						 *
-						 * Todo: Add a mechanism to use the server side sorting criteria.
-						 */
-						if ( options.optimisticQueryUpdate?.order_by ) {
-							type OrderBy = keyof Item;
-							const order_by = options.optimisticQueryUpdate
-								?.order_by as OrderBy;
-
-							let sortingData = Object.values( data );
-							sortingData = sortingData.sort( ( a, b ) =>
-								( a[ order_by ] as string )
-									.toLowerCase()
-									.localeCompare(
-										(
-											b[ order_by ] as string
-										 ).toLowerCase()
-									)
-							);
-
-							queryItems = sortingData.map( ( item ) =>
-								Number( item.id )
-							);
-						}
-
-						const getItemQuery = getRequestIdentifier(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
-						const getItemCountQuery = getTotalCountResourceName(
-							CRUD_ACTIONS.GET_ITEMS,
-							options.optimisticQueryUpdate
-						);
-
-						items = {
-							...state.items,
-							[ getItemQuery ]: {
-								...state.items[ getItemQuery ],
-								data: queryItems,
-							},
-						};
-
-						itemsCount = {
-							...state.itemsCount,
-							[ getItemCountQuery ]: Object.keys( data ).length,
-						};
-					}
-
 					return {
 						...state,
-						items,
-						itemsCount,
-						data,
+						data: {
+							...itemData,
+							[ payload.key ]: {
+								...( itemData[ payload.key ] || {} ),
+								...payload.item,
+							},
+						},
 						requesting: {
 							...state.requesting,
 							[ createItemSuccessRequestId ]: false,
 						},
 					};
-				}
 
 				case TYPES.GET_ITEM_SUCCESS:
 					return {

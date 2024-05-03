@@ -10,10 +10,7 @@ const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 /**
  * Internal dependencies
  */
-const {
-	webpackConfig,
-	StyleAssetPlugin,
-} = require( '@woocommerce/internal-style-build' );
+const { webpackConfig } = require( '@woocommerce/internal-style-build' );
 const {
 	blockEntryPoints,
 	getBlockMetaData,
@@ -72,6 +69,5 @@ module.exports = {
 				},
 			],
 		} ),
-		new StyleAssetPlugin(),
 	],
 };

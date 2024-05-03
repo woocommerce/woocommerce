@@ -3,6 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const defaultLocalPickupText = __( 'Pickup', 'woocommerce' );
+export const defaultLocalPickupText = __( 'Local Pickup', 'woocommerce' );
 
-export const defaultShippingText = __( 'Ship', 'woocommerce' );
+export const defaultShippingText = __( 'Shipping', 'woocommerce' );

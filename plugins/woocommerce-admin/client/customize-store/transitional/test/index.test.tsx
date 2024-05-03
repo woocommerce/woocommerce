@@ -3,11 +3,12 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
 import { Transitional } from '../index';
-import { trackEvent } from '~/customize-store/tracking';
 
 jest.mock( '../../assembler-hub/site-hub', () => ( {
 	__esModule: true,
@@ -24,7 +25,7 @@ jest.mock(
 	} )
 );
 
-jest.mock( '~/customize-store/tracking', () => ( { trackEvent: jest.fn() } ) );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 describe( 'Transitional', () => {
 	let props: {
@@ -47,15 +48,10 @@ describe( 'Transitional', () => {
 
 		expect(
 			screen.getByRole( 'button', {
-				name: /View store/i,
+				name: /Preview store/i,
 			} )
 		).toBeInTheDocument();
 
-		expect(
-			screen.getByRole( 'button', {
-				name: /Go to Products/i,
-			} )
-		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'button', {
 				name: /Go to the Editor/i,
@@ -69,18 +65,18 @@ describe( 'Transitional', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record an event when clicking on "View store" button', () => {
+	it( 'should record an event when clicking on "Preview store" button', () => {
 		window.open = jest.fn();
 		// @ts-ignore
 		render( <Transitional { ...props } /> );
 
 		screen
 			.getByRole( 'button', {
-				name: /View store/i,
+				name: /Preview store/i,
 			} )
 			.click();
 
-		expect( trackEvent ).toHaveBeenCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'customize_your_store_transitional_preview_store_click'
 		);
 	} );
@@ -102,7 +98,7 @@ describe( 'Transitional', () => {
 			} )
 			.click();
 
-		expect( trackEvent ).toHaveBeenCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'customize_your_store_transitional_editor_click'
 		);
 	} );
@@ -120,7 +116,7 @@ describe( 'Transitional', () => {
 		expect( props.sendEvent ).toHaveBeenCalledWith( {
 			type: 'GO_BACK_TO_HOME',
 		} );
-		expect( trackEvent ).toHaveBeenCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'customize_your_store_transitional_home_click'
 		);
 	} );

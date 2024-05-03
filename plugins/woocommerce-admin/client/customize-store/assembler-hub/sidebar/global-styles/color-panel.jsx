@@ -6,7 +6,6 @@ import { privateApis as blockEditorPrivateApis } from '@wordpress/block-editor';
 import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 import { useContext } from '@wordpress/element';
 import { mergeBaseAndUserConfigs } from '@wordpress/edit-site/build-module/components/global-styles/global-styles-provider';
-import { debounce } from 'lodash';
 
 const {
 	useGlobalStyle,
@@ -58,7 +57,7 @@ export const ColorPanel = () => {
 		<StylesColorPanel
 			inheritedValue={ inheritedStyle }
 			value={ style }
-			onChange={ debounce( onChange, 100 ) }
+			onChange={ onChange }
 			settings={ settings }
 		/>
 	);

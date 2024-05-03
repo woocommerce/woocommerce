@@ -12,9 +12,8 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 import { Spinner } from '@wordpress/components';
-// @ts-expect-error No types for this exist yet.
-import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -28,15 +27,10 @@ import { useEditorScroll } from '../hooks/use-editor-scroll';
 import { useSelectedPattern } from '../hooks/use-selected-pattern';
 import { findPatternByBlock } from './utils';
 import BlockPatternList from '../block-pattern-list';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
-import { footerTemplateId } from '~/customize-store/data/homepageTemplates';
-import { useSelect } from '@wordpress/data';
-import { trackEvent } from '~/customize-store/tracking';
 
 const SUPPORTED_FOOTER_PATTERNS = [
-	'woocommerce-blocks/footer-with-3-menus',
 	'woocommerce-blocks/footer-simple-menu',
+	'woocommerce-blocks/footer-with-3-menus',
 	'woocommerce-blocks/footer-large',
 ];
 
@@ -47,41 +41,18 @@ export const SidebarNavigationScreenFooter = () => {
 	} );
 
 	const { isLoading, patterns } = usePatternsByCategory( 'woo-commerce' );
-
-	const currentTemplate = useSelect(
-		( select ) =>
-			// @ts-expect-error No types for this exist yet.
-			select( coreStore ).__experimentalGetTemplateForLink( '/' ),
-		[]
+	const [ blocks, , onChange ] = useEditorBlocks();
+	const { setHighlightedBlockIndex, resetHighlightedBlockIndex } = useContext(
+		HighlightedBlockContext
 	);
-
-	const [ mainTemplateBlocks ] = useEditorBlocks(
-		'wp_template',
-		currentTemplate.id
-	);
-
-	const [ blocks, , onChange ] = useEditorBlocks(
-		'wp_template_part',
-		footerTemplateId
-	);
-
-	const footerTemplatePartBlockClientId = mainTemplateBlocks.find(
-		( block ) => block.attributes.slug === 'footer'
-	);
-
-	const { setHighlightedBlockClientId, resetHighlightedBlockClientId } =
-		useContext( HighlightedBlockContext );
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const { selectedPattern, setSelectedPattern } = useSelectedPattern();
 
 	useEffect( () => {
-		setHighlightedBlockClientId(
-			footerTemplatePartBlockClientId?.clientId ?? null
-		);
-	}, [
-		footerTemplatePartBlockClientId?.clientId,
-		setHighlightedBlockClientId,
-	] );
+		if ( blocks && blocks.length ) {
+			setHighlightedBlockIndex( blocks.length - 1 );
+		}
+	}, [ setHighlightedBlockIndex, blocks ] );
 
 	const footerPatterns = useMemo(
 		() =>
@@ -122,47 +93,36 @@ export const SidebarNavigationScreenFooter = () => {
 		[ blocks, onChange, setSelectedPattern, scroll ]
 	);
 
-	const { context } = useContext( CustomizeStoreContext );
-	const aiOnline = context.flowType === FlowType.AIOnline;
-
-	const title = aiOnline
-		? __( 'Change your footer', 'woocommerce' )
-		: __( 'Choose your footer', 'woocommerce' );
-
-	const description = aiOnline
-		? __(
-				"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
-				'woocommerce'
-		  )
-		: __(
-				"Select a footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink> later.",
-				'woocommerce'
-		  );
-
 	return (
 		<SidebarNavigationScreen
-			title={ title }
-			onNavigateBackClick={ resetHighlightedBlockClientId }
-			description={ createInterpolateElement( description, {
-				EditorLink: (
-					<Link
-						onClick={ () => {
-							trackEvent(
-								'customize_your_store_assembler_hub_editor_link_click',
-								{
-									source: 'footer',
-								}
-							);
-							window.open(
-								`${ ADMIN_URL }site-editor.php`,
-								'_blank'
-							);
-							return false;
-						} }
-						href=""
-					/>
+			title={ __( 'Change your footer', 'woocommerce' ) }
+			onNavigateBackClick={ resetHighlightedBlockIndex }
+			description={ createInterpolateElement(
+				__(
+					"Select a new footer from the options below. Your footer includes your site's secondary navigation and will be added to every page. You can continue customizing this via the <EditorLink>Editor</EditorLink>.",
+					'woocommerce'
 				),
-			} ) }
+				{
+					EditorLink: (
+						<Link
+							onClick={ () => {
+								recordEvent(
+									'customize_your_store_assembler_hub_editor_link_click',
+									{
+										source: 'footer',
+									}
+								);
+								window.open(
+									`${ ADMIN_URL }site-editor.php`,
+									'_blank'
+								);
+								return false;
+							} }
+							href=""
+						/>
+					),
+				}
+			) }
 			content={
 				<>
 					<div className="woocommerce-customize-store__sidebar-footer-content">

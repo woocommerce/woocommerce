@@ -747,7 +747,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			// Unlimited, set to 32GB.
 			$memory_limit = '32000M';
 		}
-		return wp_convert_hr_to_bytes( $memory_limit );
+		return intval( $memory_limit ) * 1024 * 1024;
 	}
 
 	/**

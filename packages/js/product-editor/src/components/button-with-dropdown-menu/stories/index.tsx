@@ -29,7 +29,7 @@ export const Default = ( args: ButtonWithDropdownMenuProps ) => {
 };
 
 Default.args = {
-	children: 'Add to store',
+	text: 'Add to store',
 	dropdownButtonLabel: 'More options',
 	variant: 'secondary',
 	defaultOpen: false,
@@ -49,5 +49,5 @@ Default.args = {
 		},
 	],
 	className: 'my-custom-classname',
-	onClick: console.log, // eslint-disable-line no-console
+	onButtonClick: console.log, // eslint-disable-line no-console
 };

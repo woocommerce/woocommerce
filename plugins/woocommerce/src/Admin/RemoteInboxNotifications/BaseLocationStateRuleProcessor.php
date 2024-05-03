@@ -6,28 +6,50 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Rule processor that performs a comparison operation against the base
  * location - state.
- *
- * @deprecated 8.8.0
  */
-class BaseLocationStateRuleProcessor extends DeprecatedClassFacade {
+class BaseLocationStateRuleProcessor implements RuleProcessorInterface {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Performs a comparison operation against the base location - state.
 	 *
-	 * @var string
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
+	 *
+	 * @return bool The result of the operation.
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationStateRuleProcessor';
+	public function process( $rule, $stored_state ) {
+		$base_location = wc_get_base_location();
+		if ( ! $base_location ) {
+			return false;
+		}
+
+		return ComparisonOperation::compare(
+			$base_location['state'],
+			$rule->value,
+			$rule->operation
+		);
+	}
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Validates the rule.
 	 *
-	 * @var string
+	 * @param object $rule The rule to validate.
+	 *
+	 * @return bool Pass/fail.
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function validate( $rule ) {
+		if ( ! isset( $rule->value ) ) {
+			return false;
+		}
+
+		if ( ! isset( $rule->operation ) ) {
+			return false;
+		}
+
+		return true;
+	}
 }

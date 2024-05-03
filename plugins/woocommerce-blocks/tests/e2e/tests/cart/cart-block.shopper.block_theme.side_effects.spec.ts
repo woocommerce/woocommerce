@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import {
+	installPluginFromPHPFile,
+	uninstallPluginFromPHPFile,
+} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -29,6 +33,7 @@ test.describe( 'Shopper → Cart block', () => {
 		frontendUtils,
 	} ) => {
 		await frontendUtils.goToShop();
+		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -63,14 +68,13 @@ test.describe( 'Shopper → Cart block', () => {
 
 	test( 'Products with updated prices should not display a discount label', async ( {
 		pageObject,
-		requestUtils,
 		frontendUtils,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-update-price'
+		await installPluginFromPHPFile(
+			`${ __dirname }/update-price-plugin.php`
 		);
-
 		await frontendUtils.goToShop();
+		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -121,12 +125,17 @@ test.describe( 'Shopper → Cart block', () => {
 		// Get the text content of the price element and check the price
 		const hoodiePriceText = await hoodiePriceElement.textContent();
 		expect( hoodiePriceText ).toBe( '$50.00' );
+
+		await uninstallPluginFromPHPFile(
+			`${ __dirname }/update-price-plugin.php`
+		);
 	} );
 
 	test( 'User can view empty cart message', async ( {
 		frontendUtils,
 		page,
 	} ) => {
+		await frontendUtils.emptyCart();
 		await frontendUtils.goToCart();
 
 		// Verify cart is empty
@@ -173,7 +182,7 @@ test.describe( 'Shopper → Cart block', () => {
 
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
@@ -195,7 +204,7 @@ test.describe( 'Shopper → Cart block', () => {
 			.click();
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
@@ -215,7 +224,7 @@ test.describe( 'Shopper → Cart block', () => {
 			.click();
 		// Verify the "Proceed to Checkout" button is disabled during network request
 		await expect(
-			page.getByRole( 'link', { name: 'Proceed to Checkout' } )
+			page.getByRole( 'button', { name: 'Proceed to Checkout' } )
 		).toBeDisabled();
 
 		// Verify the "Proceed to Checkout" button is enabled after network request
@@ -248,6 +257,7 @@ test.describe( 'Shopper → Cart block', () => {
 		frontendUtils,
 		page,
 	} ) => {
+		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();

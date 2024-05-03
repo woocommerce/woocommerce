@@ -30,7 +30,9 @@
 				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
 			],
-			"themes": [],
+			"themes": [
+				"https://downloads.wordpress.org/theme/twentynineteen.zip"
+			],
 			"config": {
 				"WP_TESTS_DOMAIN": "localhost",
 				"ALTERNATE_WP_CRON": false

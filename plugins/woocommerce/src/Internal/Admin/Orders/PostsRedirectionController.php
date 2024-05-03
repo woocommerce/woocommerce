@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * When {@see OrdersTableDataStore} is in use, this class takes care of redirecting admins from CPT-based URLs
@@ -127,16 +126,11 @@ class PostsRedirectionController {
 	 */
 	private function maybe_redirect_to_edit_order_page(): void {
 		$post_id = absint( $_GET['post'] ?? 0 );
-		if ( ! $post_id ) {
-			return;
-		}
 
 		$redirect_from_types   = wc_get_order_types( 'admin-menu' );
 		$redirect_from_types[] = 'shop_order_placehold';
 
-		$post_type  = get_post_type( $post_id );
-		$order_type = $post_type ? $post_type : OrderUtil::get_order_type( $post_id );
-		if ( ! in_array( $order_type, $redirect_from_types, true ) || ! isset( $_GET['action'] ) ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), $redirect_from_types, true ) || ! isset( $_GET['action'] ) ) {
 			return;
 		}
 

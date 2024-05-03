@@ -225,15 +225,6 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--albert-sans)',
-						fontSize: 'var(--wp--preset--font-size--medium)',
-					},
-				},
-			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--lora)',
 				fontStyle: 'normal',
@@ -266,7 +257,8 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 			elements: {
 				button: {
 					typography: {
-						fontFamily: 'var(--wp--preset--font-family--arvo)',
+						fontFamily:
+							'var(--wp--preset--font-family--montserrat)',
 						fontStyle: 'normal',
 						fontWeight: '500',
 					},
@@ -391,14 +383,6 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily:
-							'var(--wp--preset--font-family--newsreader)',
-					},
-				},
-			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--newsreader)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
@@ -433,13 +417,6 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 						fontFamily: 'var(--wp--preset--font-family--cormorant)',
 						fontStyle: 'normal',
 						fontWeight: '500',
-					},
-				},
-			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--cormorant)',
 					},
 				},
 			},
@@ -478,93 +455,10 @@ export const FONT_PAIRINGS_WHEN_AI_IS_OFFLINE = [
 					},
 				},
 			},
-			blocks: {
-				'core/site-title': {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--raleway)',
-					},
-				},
-			},
 			typography: {
 				fontFamily: 'var(--wp--preset--font-family--cormorant)',
 				fontSize: 'var(--wp--preset--font-size--medium)',
 				lineHeight: '1.67',
-			},
-		},
-	},
-];
-
-export const FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING = [
-	{
-		title: 'Cardo Font + System Sans-serif',
-		version: 2,
-		lookAndFeel: [] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Cardo',
-							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L240
-							slug: 'heading',
-						},
-						{
-							fontFamily: 'System Sans-serif',
-							slug: 'system-sans-serif',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--heading)',
-						fontStyle: 'normal',
-						fontWeight: '300',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--system-sans-serif)',
-			},
-		},
-	},
-	{
-		title: 'Inter + Cardo Font',
-		version: 2,
-		lookAndFeel: [] as Look[],
-		settings: {
-			typography: {
-				fontFamilies: {
-					theme: [
-						{
-							fontFamily: 'Inter',
-							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L215
-							slug: 'body',
-						},
-						{
-							fontFamily: 'Cardo',
-							// Use the theme-defined variable: https://github.com/WordPress/twentytwentyfour/blob/trunk/theme.json#L240
-							slug: 'heading',
-						},
-					],
-				},
-			},
-		},
-		styles: {
-			elements: {
-				heading: {
-					typography: {
-						fontFamily: 'var(--wp--preset--font-family--body)',
-						fontStyle: 'normal',
-						fontWeight: '300',
-					},
-				},
-			},
-			typography: {
-				fontFamily: 'var(--wp--preset--font-family--heading)',
 			},
 		},
 	},
@@ -596,7 +490,7 @@ export const FONT_PAIRINGS = [
 				button: {
 					typography: {
 						fontFamily:
-							'var(--wp--preset--font-family--crimson-pro)',
+							'var(--wp--preset--font-family--commissioner)',
 						fontWeight: '400',
 						lineHeight: '1',
 					},
@@ -1028,5 +922,4 @@ export const FONT_PAIRINGS = [
 		},
 	},
 	...FONT_PAIRINGS_WHEN_AI_IS_OFFLINE,
-	...FONT_PAIRINGS_WHEN_USER_DID_NOT_ALLOW_TRACKING,
 ];

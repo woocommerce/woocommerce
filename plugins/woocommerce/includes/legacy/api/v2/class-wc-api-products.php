@@ -37,7 +37,7 @@ class WC_API_Products extends WC_API_Resource {
 		# GET/POST /products
 		$routes[ $this->base ] = array(
 			array( array( $this, 'get_products' ), WC_API_Server::READABLE ),
-			array( array( $this, 'create_product' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_product' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /products/count
@@ -75,7 +75,7 @@ class WC_API_Products extends WC_API_Resource {
 		# GET/POST /products/attributes
 		$routes[ $this->base . '/attributes' ] = array(
 			array( array( $this, 'get_product_attributes' ), WC_API_Server::READABLE ),
-			array( array( $this, 'create_product_attribute' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_product_attribute' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET/PUT/DELETE /attributes/<id>

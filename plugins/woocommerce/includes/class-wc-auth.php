@@ -385,20 +385,19 @@ class WC_Auth {
 				wc_get_template(
 					'auth/form-grant-access.php',
 					array(
-						'app_name'     => wc_clean( $data['app_name'] ),
-						'callback_url' => $this->get_formatted_url( $data['callback_url'] ),
-						'return_url'   => add_query_arg(
+						'app_name'    => wc_clean( $data['app_name'] ),
+						'return_url'  => add_query_arg(
 							array(
 								'success' => 0,
 								'user_id' => wc_clean( $data['user_id'] ),
 							),
 							$this->get_formatted_url( $data['return_url'] )
 						),
-						'scope'        => $this->get_i18n_scope( wc_clean( $data['scope'] ) ),
-						'permissions'  => $this->get_permissions_in_scope( wc_clean( $data['scope'] ) ),
-						'granted_url'  => wp_nonce_url( $this->build_url( $data, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
-						'logout_url'   => wp_logout_url( $this->build_url( $data, 'login' ) ),
-						'user'         => wp_get_current_user(),
+						'scope'       => $this->get_i18n_scope( wc_clean( $data['scope'] ) ),
+						'permissions' => $this->get_permissions_in_scope( wc_clean( $data['scope'] ) ),
+						'granted_url' => wp_nonce_url( $this->build_url( $data, 'access_granted' ), 'wc_auth_grant_access', 'wc_auth_nonce' ),
+						'logout_url'  => wp_logout_url( $this->build_url( $data, 'login' ) ),
+						'user'        => wp_get_current_user(),
 					)
 				);
 				exit;

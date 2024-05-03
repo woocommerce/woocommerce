@@ -46,13 +46,6 @@ export const PreloadFonts = () => {
 		} ) => void
 	] = useGlobalSetting( 'typography.fontFamilies' );
 
-	// theme.json file font families
-	const [ baseFontFamilies ] = useGlobalSetting(
-		'typography.fontFamilies',
-		undefined,
-		'base'
-	);
-
 	const { context } = useContext( CustomizeStoreContext );
 
 	const { globalStylesId, installedFontFamilies } = useSelect( ( select ) => {
@@ -64,7 +57,7 @@ export const PreloadFonts = () => {
 			installedFontFamilies: getEntityRecords(
 				'postType',
 				'wp_font_family',
-				{ _embed: true, per_page: -1 }
+				{ _embed: true }
 			) as Array< {
 				id: number;
 				font_family_settings: FontFamily;
@@ -101,10 +94,11 @@ export const PreloadFonts = () => {
 			return;
 		}
 
-		const { custom } = enabledFontFamilies;
+		const { custom, theme } = enabledFontFamilies;
 
 		const enabledFontSlugs = [
 			...( custom ? custom.map( ( font ) => font.slug ) : [] ),
+			...( theme ? theme.map( ( font ) => font.slug ) : [] ),
 		];
 
 		const fontFamiliesToEnable = parsedInstalledFontFamilies.reduce(
@@ -152,12 +146,6 @@ export const PreloadFonts = () => {
 		( fontPair ) => fontPair?.settings?.typography?.fontFamilies?.theme
 	);
 
-	const iframeInstance = useMemo( () => {
-		return document.querySelector(
-			'.block-editor-block-preview__content iframe'
-		) as HTMLObjectElement | null;
-	}, [] );
-
 	const fontFamilies = allFontChoices.map( ( fontPair ) => {
 		return [
 			...fontPair.map( ( font ) => {
@@ -183,11 +171,7 @@ export const PreloadFonts = () => {
 				) ) }
 			{ isNoAIFlow( context.flowType ) && (
 				<FontFamiliesLoader
-					fontFamilies={ [
-						...( enabledFontFamilies.custom ?? [] ),
-						...baseFontFamilies.theme,
-					] }
-					iframeInstance={ iframeInstance }
+					fontFamilies={ enabledFontFamilies.custom }
 				/>
 			) }
 		</>

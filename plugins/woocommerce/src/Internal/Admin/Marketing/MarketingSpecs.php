@@ -2,7 +2,7 @@
 /**
  * Marketing Specs Handler
  *
- * Fetches the specifications for the marketing feature from WooCommerce.com API.
+ * Fetches the specifications for the marketing feature from Woo.com API.
  */
 
 namespace Automattic\WooCommerce\Internal\Admin\Marketing;
@@ -22,7 +22,7 @@ class MarketingSpecs {
 	const KNOWLEDGE_BASE_TRANSIENT = 'wc_marketing_knowledge_base';
 
 	/**
-	 * Load knowledge base posts from WooCommerce.com
+	 * Load knowledge base posts from Woo.com
 	 *
 	 * @param string|null $topic The topic of marketing knowledgebase to retrieve.
 	 * @return array

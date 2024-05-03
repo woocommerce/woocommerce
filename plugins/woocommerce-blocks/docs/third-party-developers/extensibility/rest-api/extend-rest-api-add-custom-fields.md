@@ -5,7 +5,7 @@ This document describes how a developer can insert an input field into the Check
 ## Overview
 
 Developers can extend the Checkout block to add new inner blocks and process additional data through the checkout POST request. This involves leveraging the extensibility interfaces provided by Gutenberg and WooCommerce Blocks. This is demonstrated in more detail in our tutorial: [Tutorial: Extending the WooCommerce Checkout Block
-](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/).
+](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/).
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ Ensure you have the following files in your project:
 - `block.js`: Manages the block's state and user interactions.
 - `frontend.js`: Registers the checkout block component for the frontend.
 
-Refer to [this tutorial](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) for an example of adding a custom shipping option to the checkout block.
+Refer to [this tutorial](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) for an example of adding a custom shipping option to the checkout block.
 
 ### 2. Add a new field block to the Checkout Block
 
@@ -255,7 +255,7 @@ add_action(
 // ... Some code here
 ```
 
-Here is an example from our [tutorial](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) of how to get this custom field's data while processing the checkout. This example is from the `shipping-workshop-blocks-integration.php` file. The complete code can be found in this [GitHub repository](https://github.com/woocommerce/wceu23-shipping-workshop-final/blob/main/shipping-workshop-blocks-integration.php#L42-L83).
+Here is an example from our [tutorial](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) of how to get this custom field's data while processing the checkout. This example is from the `shipping-workshop-blocks-integration.php` file. The complete code can be found in this [GitHub repository](https://github.com/woocommerce/wceu23-shipping-workshop-final/blob/main/shipping-workshop-blocks-integration.php#L42-L83).
 
 ```php
 private function save_shipping_instructions() {
@@ -282,4 +282,4 @@ private function save_shipping_instructions() {
 
 ## Conclusion
 
-By following the steps above, you can add and process new field blocks in the WooCommerce checkout block. For complete implementation and additional examples, refer to the provided [tutorial](https://developer.woocommerce.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) and the corresponding [GitHub repository](https://github.com/woocommerce/wceu23-shipping-workshop-final/).
+By following the steps above, you can add and process new field blocks in the WooCommerce checkout block. For complete implementation and additional examples, refer to the provided [tutorial](https://developer.woo.com/2023/08/07/extending-the-woocommerce-checkout-block-to-add-custom-shipping-options/) and the corresponding [GitHub repository](https://github.com/woocommerce/wceu23-shipping-workshop-final/).

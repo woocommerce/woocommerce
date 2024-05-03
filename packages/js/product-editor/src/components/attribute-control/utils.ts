@@ -1,21 +1,16 @@
 /**
  * External dependencies
  */
-import type { ProductProductAttribute } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Returns the attribute key. The key will be the `id` or the `name` when the id is 0.
  *
- * @param { ProductProductAttribute } attribute product attribute.
+ * @param { ProductAttribute } attribute product attribute.
  * @return string|number
  */
 export function getAttributeKey(
-	attribute: ProductProductAttribute
+	attribute: ProductAttribute
 ): number | string {
 	return attribute.id !== 0 ? attribute.id : attribute.name;
 }
@@ -26,7 +21,7 @@ export function getAttributeKey(
  * @param attribute Product attribute.
  * @return string
  */
-export const getAttributeId = ( attribute: ProductProductAttribute ) =>
+export const getAttributeId = ( attribute: ProductAttribute ) =>
 	`${ attribute.id }-${ attribute.name }`;
 
 /**
@@ -37,10 +32,10 @@ export const getAttributeId = ( attribute: ProductProductAttribute ) =>
  */
 export function reorderSortableProductAttributePositions(
 	items: Record< number | string, number >,
-	attributeKeyValues: Record< number | string, ProductProductAttribute >
-): ProductProductAttribute[] {
+	attributeKeyValues: Record< number | string, ProductAttribute >
+): ProductAttribute[] {
 	return Object.keys( attributeKeyValues ).map(
-		( attributeKey: number | string ): ProductProductAttribute => {
+		( attributeKey: number | string ): ProductAttribute => {
 			if ( ! isNaN( items[ attributeKey ] ) ) {
 				return {
 					...attributeKeyValues[ attributeKey ],
@@ -55,21 +50,21 @@ export function reorderSortableProductAttributePositions(
 }
 
 /**
- * Helper function to return an EnhancedProductAttribute object,
- * based on the provided attribute object.
- *
- * If attribute is a string it will create an object.
+ * Helper function to return the product attribute object. If attribute is a string it will create an object.
  *
  * @param { Object | string } attribute product attribute as string or object.
  */
 export function getProductAttributeObject(
-	attribute: string | AttributeInputFieldItemProps
-): AttributeInputFieldItemProps {
+	attribute:
+		| string
+		| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
+): Omit< ProductAttribute, 'position' | 'visible' | 'variation' > {
 	return typeof attribute === 'string'
 		? {
 				id: 0,
 				name: attribute,
 				slug: attribute,
+				options: [],
 		  }
 		: attribute;
 }

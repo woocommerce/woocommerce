@@ -31,7 +31,7 @@ import {
 	FilterName,
 } from '../../types';
 import { setQueryAttribute } from '../../utils';
-import { getDefaultSettings } from '../../constants';
+import { DEFAULT_FILTERS, getDefaultSettings } from '../../constants';
 import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import InheritQueryControl from './inherit-query-control';
@@ -107,9 +107,10 @@ const ProductCollectionInspectorControls = (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
-						resetAllFilters.forEach( ( resetFilter ) => {
-							resetFilter();
-						} );
+						setQueryAttribute( props, DEFAULT_FILTERS );
+						resetAllFilters.forEach( ( resetFilter ) =>
+							resetFilter()
+						);
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>

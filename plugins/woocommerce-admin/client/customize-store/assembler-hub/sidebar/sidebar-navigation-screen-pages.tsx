@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
 import { createInterpolateElement } from '@wordpress/element';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarNavigationScreenPages = () => {
 	return (
@@ -25,7 +25,7 @@ export const SidebarNavigationScreenPages = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'pages',

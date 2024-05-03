@@ -8,8 +8,6 @@
  * @since   3.5.0
  */
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -41,18 +39,18 @@ class WC_REST_Report_Orders_Totals_Controller extends WC_REST_Reports_Controller
 	 * @return array
 	 */
 	protected function get_reports() {
-		$totals = OrderUtil::get_count_for_type( 'shop_order' );
+		$totals = wp_count_posts( 'shop_order' );
 		$data   = array();
 
 		foreach ( wc_get_order_statuses() as $slug => $name ) {
-			if ( ! array_key_exists( $slug, $totals ) ) {
+			if ( ! isset( $totals->$slug ) ) {
 				continue;
 			}
 
 			$data[] = array(
 				'slug'  => str_replace( 'wc-', '', $slug ),
 				'name'  => $name,
-				'total' => (int) $totals[ $slug ],
+				'total' => (int) $totals->$slug,
 			);
 		}
 

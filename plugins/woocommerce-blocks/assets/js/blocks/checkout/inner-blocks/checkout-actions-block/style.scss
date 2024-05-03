@@ -38,6 +38,6 @@
 .is-large {
 	.wc-block-checkout__actions {
 		border-top: 1px solid $universal-border-light;
-		padding: $gap-larger 0;
+		padding: em($gap-large) 0;
 	}
 }

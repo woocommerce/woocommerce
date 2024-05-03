@@ -10,7 +10,7 @@
 		@include set-grid-item-position( 2, 2 );
 	}
 
-	@include breakpoint( "<960px" ) {
+	@include breakpoint( '<960px' ) {
 		grid-template-columns: 100%;
 
 		.woocommerce-settings-historical-data__column {

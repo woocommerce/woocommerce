@@ -17,6 +17,29 @@ import './style.scss';
 import { getAdminSetting } from '~/utils/admin-settings';
 import FrequentlyAskedQuestionsSimple from './faq-simple';
 
+declare global {
+	interface Window {
+		location: Location;
+		wcSettings: {
+			admin: {
+				wcpay_welcome_page_connect_nonce: string;
+				currentUserData: {
+					first_name: string;
+				};
+				wcpayWelcomePageIncentive: {
+					id: string;
+					description: string;
+					cta_label: string;
+					tc_url: string;
+				};
+				currency?: {
+					symbol: string;
+				};
+			};
+		};
+	}
+}
+
 interface activatePromoResponse {
 	success: boolean;
 }

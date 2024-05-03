@@ -1,4 +1,5 @@
 .wc-block-components-totals-coupon {
+
 	.wc-block-components-panel__button {
 		margin-top: 0;
 		padding-top: 0;
@@ -21,6 +22,7 @@
 	}
 
 	.wc-block-components-totals-coupon__button {
+		height: em(48px);
 		flex-shrink: 0;
 		margin-left: $gap-smaller;
 		padding-left: $gap-large;
@@ -37,3 +39,4 @@
 	flex-direction: column;
 	position: relative;
 }
+

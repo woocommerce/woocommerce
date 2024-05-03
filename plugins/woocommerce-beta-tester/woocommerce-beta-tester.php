@@ -5,7 +5,7 @@
  * Description: Run bleeding edge versions of WooCommerce. This will replace your installed version of WooCommerce with the latest tagged release - use with caution, and not on production sites.
  * Version: 2.3.0
  * Author: WooCommerce
- * Author URI: https://woocommerce.com/
+ * Author URI: https://woo.com/
  * Requires at least: 5.8
  * Tested up to: 6.0
  * WC requires at least: 6.7

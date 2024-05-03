@@ -2,27 +2,48 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
+use InvalidArgumentException;
+use stdClass;
 
 /**
  * Searches a given a given value in the array.
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
- *
- * @deprecated 8.8.0
  */
-class ArraySearch extends DeprecatedClassFacade {
+class ArraySearch implements TransformerInterface {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Search a given value in the array.
 	 *
-	 * @var string
+	 * @param mixed         $value a value to transform.
+	 * @param stdClass|null $arguments required argument 'value'.
+	 * @param string|null   $default default value.
+	 *
+	 * @throws InvalidArgumentException Throws when the required 'value' is missing.
+	 *
+	 * @return mixed|null
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayColumn';
+	public function transform( $value, stdClass $arguments = null, $default = null ) {
+		$key = array_search( $arguments->value, $value, true );
+		if ( false !== $key ) {
+			return $value[ $key ];
+		}
+
+		return null;
+	}
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Validate Transformer arguments.
 	 *
-	 * @var string
+	 * @param stdClass|null $arguments arguments to validate.
+	 *
+	 * @return mixed
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function validate( stdClass $arguments = null ) {
+		if ( ! isset( $arguments->value ) ) {
+			return false;
+		}
+
+		return true;
+	}
 }

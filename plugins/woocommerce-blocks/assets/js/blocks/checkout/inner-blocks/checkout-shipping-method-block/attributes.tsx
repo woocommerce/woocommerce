@@ -11,7 +11,7 @@ import { defaultShippingText, defaultLocalPickupText } from './constants';
 
 export default {
 	...formStepAttributes( {
-		defaultTitle: __( 'Delivery', 'woocommerce' ),
+		defaultTitle: __( 'Shipping method', 'woocommerce' ),
 		defaultDescription: __(
 			'Select how you would like to receive your order.',
 			'woocommerce'
@@ -27,7 +27,7 @@ export default {
 	},
 	showPrice: {
 		type: 'boolean',
-		default: false,
+		default: true,
 	},
 	localPickupText: {
 		type: 'string',

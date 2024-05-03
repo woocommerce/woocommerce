@@ -18,18 +18,14 @@ export const AUTOMATION_PLUGINS = [ 'woocommerce-services' ];
  * @param {Object} generalSettings.woocommerce_store_postcode  Store postal code.
  */
 export const hasCompleteAddress = (
-	generalSettings: Record< string, string >,
-	requiresPostcode = true
+	generalSettings: Record< string, string >
 ): boolean => {
 	const {
 		woocommerce_store_address: storeAddress,
 		woocommerce_default_country: defaultCountry,
 		woocommerce_store_postcode: storePostCode,
 	} = generalSettings;
-	if ( requiresPostcode ) {
-		return Boolean( storeAddress && defaultCountry && storePostCode );
-	}
-	return Boolean( storeAddress && defaultCountry );
+	return Boolean( storeAddress && defaultCountry && storePostCode );
 };
 
 /**

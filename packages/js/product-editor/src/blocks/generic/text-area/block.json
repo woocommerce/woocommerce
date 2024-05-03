@@ -24,9 +24,6 @@
 		"required": {
 			"type": "string"
 		},
-		"tooltip": {
-			"type": "string"
-		},
 		"disabled": {
 			"type": "boolean"
 		},

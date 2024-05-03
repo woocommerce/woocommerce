@@ -20,7 +20,6 @@ import { DownloadsMenuItem } from '../downloads-menu-item';
 import { VariationQuickUpdateMenuItem } from './variation-quick-update-menu-item';
 import { UpdateStockMenuItem } from '../update-stock-menu-item';
 import { SetListPriceMenuItem } from '../set-list-price-menu-item';
-import { AddImageMenuItem } from '../add-image-menu-item';
 
 export function VariationActions( {
 	selection,
@@ -62,11 +61,6 @@ export function VariationActions( {
 							onClose={ onClose }
 						/>
 						<SetListPriceMenuItem
-							selection={ selection }
-							onChange={ onChange }
-							onClose={ onClose }
-						/>
-						<AddImageMenuItem
 							selection={ selection }
 							onChange={ onChange }
 							onClose={ onClose }

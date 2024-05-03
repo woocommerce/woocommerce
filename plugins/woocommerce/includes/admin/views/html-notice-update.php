@@ -32,7 +32,7 @@ $update_url = wp_nonce_url(
 		<a href="<?php echo esc_url( $update_url ); ?>" class="wc-update-now button-primary">
 			<?php esc_html_e( 'Update WooCommerce Database', 'woocommerce' ); ?>
 		</a>
-		<a href="https://woocommerce.com/document/how-to-update-woocommerce/" class="button-secondary">
+		<a href="https://woo.com/document/how-to-update-woocommerce/" class="button-secondary">
 			<?php esc_html_e( 'Learn more about updates', 'woocommerce' ); ?>
 		</a>
 	</p>

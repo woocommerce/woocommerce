@@ -74,12 +74,11 @@ const NoticeBanner = ( {
 			{ !! isDismissible && (
 				<Button
 					className="wc-block-components-notice-banner__dismiss"
-					aria-label={ __( 'Dismiss this notice', 'woocommerce' ) }
+					icon={ close }
+					label={ __( 'Dismiss this notice', 'woocommerce' ) }
 					onClick={ dismiss }
-					removeTextWrap
-				>
-					<Icon icon={ close } />
-				</Button>
+					showTooltip={ false }
+				/>
 			) }
 		</div>
 	);

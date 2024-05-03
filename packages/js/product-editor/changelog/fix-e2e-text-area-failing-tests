@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+[Product Block Editor]: fix e2e test that happens in the text-area block

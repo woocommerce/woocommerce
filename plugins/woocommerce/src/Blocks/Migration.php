@@ -70,7 +70,7 @@ class Migration {
 	 * Rename `checkout` template to `page-checkout`.
 	 */
 	public static function wc_blocks_update_1120_rename_checkout_template() {
-		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
+		$template = BlockTemplateUtils::get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//checkout', 'wp_template' );
 
 		if ( $template && ! empty( $template->wp_id ) ) {
 			if ( ! defined( 'WP_POST_REVISIONS' ) ) {
@@ -90,7 +90,7 @@ class Migration {
 	 * Rename `cart` template to `page-cart`.
 	 */
 	public static function wc_blocks_update_1120_rename_cart_template() {
-		$template = get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
+		$template = BlockTemplateUtils::get_block_template( BlockTemplateUtils::PLUGIN_SLUG . '//cart', 'wp_template' );
 
 		if ( $template && ! empty( $template->wp_id ) ) {
 			if ( ! defined( 'WP_POST_REVISIONS' ) ) {

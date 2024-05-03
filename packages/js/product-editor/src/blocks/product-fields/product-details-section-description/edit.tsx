@@ -42,7 +42,6 @@ import type {
 	ProductTemplate,
 } from '../../../types';
 import { ProductDetailsSectionDescriptionBlockAttributes } from './types';
-import * as wooIcons from '../../../icons';
 
 export function ProductDetailsSectionDescriptionBlockEdit( {
 	attributes,
@@ -60,12 +59,10 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const [ supportedProductTemplates, unsupportedProductTemplates ] =
 		productTemplates.reduce< [ ProductTemplate[], ProductTemplate[] ] >(
 			( [ supported, unsupported ], productTemplate ) => {
-				if ( productTemplate.isSelectableByUser ) {
-					if ( productTemplate.layoutTemplateId ) {
-						supported.push( productTemplate );
-					} else {
-						unsupported.push( productTemplate );
-					}
+				if ( productTemplate.layoutTemplateId ) {
+					supported.push( productTemplate );
+				} else {
+					unsupported.push( productTemplate );
 				}
 				return [ supported, unsupported ];
 			},
@@ -179,9 +176,9 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		if ( /^https?:\/\//.test( iconId ) ) {
 			icon = <img src={ iconId } alt={ alt } />;
 		} else {
-			if ( ! ( iconId in icons || iconId in wooIcons ) ) return undefined;
+			if ( ! ( iconId in icons ) ) return undefined;
 
-			icon = icons[ iconId as never ] || wooIcons[ iconId as never ];
+			icon = icons[ iconId as never ];
 		}
 
 		return <Icon icon={ icon } size={ 24 } />;

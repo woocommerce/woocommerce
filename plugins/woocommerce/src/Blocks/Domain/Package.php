@@ -56,12 +56,7 @@ class Package {
 	}
 
 	/**
-	 * Returns the version of WooCommerce Blocks.
-	 *
-	 * Note: since Blocks was merged into WooCommerce Core, the version of
-	 * WC Blocks doesn't update anymore. Use
-	 * `Constants::get_constant( 'WC_VERSION' )` when possible to get the
-	 * WooCommerce Core version.
+	 * Returns the version of the plugin.
 	 *
 	 * @return string
 	 */
@@ -70,7 +65,7 @@ class Package {
 	}
 
 	/**
-	 * Returns the version of WooCommerce Blocks stored in the database.
+	 * Returns the version of the plugin stored in the database.
 	 *
 	 * @return string
 	 */
@@ -79,11 +74,12 @@ class Package {
 	}
 
 	/**
-	 * Sets the version of WooCommerce Blocks in the database.
+	 * Set the version of the plugin stored in the database.
 	 * This is useful during the first installation or after the upgrade process.
 	 */
 	public function set_version_stored_on_db() {
 		update_option( Options::WC_BLOCK_VERSION, $this->get_version() );
+
 	}
 
 	/**

@@ -2,7 +2,7 @@
 
 This folder contains the components used in the Marketplace page found in `WooCommerce > Extensions`.
 
-The page contains two parts, the WooCommerce.com marketplace and a list of products the user purchased.
+The page contains two parts, the Woo.com marketplace and a list of products the user purchased.
 
 ## Marketplace Tabs
 
@@ -15,13 +15,13 @@ The page contains two parts, the WooCommerce.com marketplace and a list of produ
 
 The data for the Discover section is fetched from the `/wc/v3/marketplace/featured` endpoint. This behaves as a proxy to fetch and cache the content from the `woocommerce.com/wp-json/wccom-extensions` endpoint.
 
-Themes, extensions, and search results are fetched directly from WooCommerce.com.
+Themes, extensions, and search results are fetched directly from Woo.com.
 
 ## My Subscriptions
 
-This tab contains the list of all the extensions and themes the WooCommerce merchant has purchased from the WooCommerce.com Marketplace.
+This tab contains the list of all the extensions and themes the WooCommerce merchant has purchased from the Woo.com Marketplace.
 
-The merchant needs to connect the site to their WooCommerce.com account to view this list and install, update, and enable the products.
+The merchant needs to connect the site to their Woo.com account to view this list and install, update, and enable the products.
 
 If a subscription is expired, the merchant will be prompted to renew it.
 

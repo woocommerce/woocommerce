@@ -45,16 +45,15 @@ The following screenshot shows which parts the individual filters affect:
 
 The following [Totals Footer Item filter](./available-filters/totals-footer-item.md) is available:
 
--   [`totalLabel`](./available-filters/totals-footer-item.md#totallabel)
--   [`totalValue`](./available-filters/totals-footer-item.md#totalvalue)
+-   [totalLabel](./available-filters/totals-footer-item.md#totallabel)
 
 ## Checkout and place order button filters
 
 The following [Checkout and place order button filters](./available-filters/checkout-and-place-order-button.md) are available:
 
--   [`proceedToCheckoutButtonLabel`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
--   [`proceedToCheckoutButtonLink`](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
--   [`placeOrderButtonLabel`](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
+-   [proceedToCheckoutButtonLabel](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlabel)
+-   [proceedToCheckoutButtonLink](./available-filters/checkout-and-place-order-button.md#proceedtocheckoutbuttonlink)
+-   [placeOrderButtonLabel](./available-filters/checkout-and-place-order-button.md#placeorderbuttonlabel)
 
 ## Coupon filters
 
@@ -126,7 +125,7 @@ working correctly. The error will also be shown in your console.
 
 ---
 
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+[We're hiring!](https://woo.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/checkout-block/available-filters.md)
 

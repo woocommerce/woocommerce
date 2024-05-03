@@ -56,12 +56,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await editorUtils.publishAndVisitPost();
 
-		// We have specified the parent block name as 'main' to ensure that the
-		// block is found within the main content area of the page and not the hooked block in the header.
-		const block = await frontendUtils.getBlockByName(
-			blockData.name,
-			'main'
-		);
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )
@@ -85,12 +80,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await editorUtils.publishAndVisitPost();
 
-		// We have specified the parent block name as 'main' to ensure that the
-		// block is found within the main content area of the page and not the hooked block in the header.
-		const block = await frontendUtils.getBlockByName(
-			blockData.name,
-			'main'
-		);
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )
@@ -114,12 +104,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await editorUtils.publishAndVisitPost();
 
-		// We have specified the parent block name as 'main' to ensure that the
-		// block is found within the main content area of the page and not the hooked block in the header.
-		const block = await frontendUtils.getBlockByName(
-			blockData.name,
-			'main'
-		);
+		const block = await frontendUtils.getBlockByName( blockData.name );
 
 		await expect(
 			block.locator( blockData.selectors.frontend.label )

@@ -8,7 +8,7 @@
  * 2. Remove check for development mode - we always want unminified files.
  * 3. Remove BannerPlugin support - we don't use it.
  * 4. Remove the 'min' suffix from the chunk loaded in the new `mainEntry` option.
- * 5. Hook into compilation later so we're running after Source Map generation. (https://webpack.js.org/api/compilation-hooks/: PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE)
+ * 5. Hook into compilation later so we're running after Source Map generation. (https://webpack.js.org/api/compilation-hooks/: PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE) 
  */
 const path = require( 'path' );
 const ModuleFilenameHelpers = require( 'webpack/lib/ModuleFilenameHelpers' );
@@ -39,7 +39,7 @@ class UnminifyWebpackPlugin {
 
 	apply( compiler ) {
 		const options = this.options;
-		let outputNormal = {};
+		const outputNormal = {};
 
 		compiler.hooks.compilation.tap(
 			'UnminifyWebpackPlugin',
@@ -107,8 +107,6 @@ class UnminifyWebpackPlugin {
 								value.filename,
 								new webpack.sources.RawSource( value.content )
 							);
-							// Reset the outputNormal object to avoid writing to file that only differs in casing or query string from already written file.
-							outputNormal = {};
 						}
 					}
 				);

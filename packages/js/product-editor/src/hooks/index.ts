@@ -1,4 +1,3 @@
-export { useCustomFields as __experimentalUseCustomFields } from './use-custom-fields';
 export { useProductHelper as __experimentalUseProductHelper } from './use-product-helper';
 export { useFeedbackBar as __experimentalUseFeedbackBar } from './use-feedback-bar';
 export { useVariationsOrder as __experimentalUseVariationsOrder } from './use-variations-order';
@@ -7,8 +6,3 @@ export { useVariationSwitcher as __experimentalUseVariationSwitcher } from './us
 export { default as __experimentalUseProductEntityProp } from './use-product-entity-prop';
 export { default as __experimentalUseProductMetadata } from './use-product-metadata';
 export { useProductTemplate as __experimentalUseProductTemplate } from './use-product-template';
-export { useProductScheduled as __experimentalUseProductScheduled } from './use-product-scheduled';
-export { useProductManager as __experimentalUseProductManager } from './use-product-manager';
-export { useMetaboxHiddenProduct as __experimentalUseMetaboxHiddenProduct } from './use-metabox-hidden-product';
-export { useClearSelectedBlockOnBlur as __experimentalClearSelectedBlockOnBlur } from './use-clear-selected-block-on-blur';
-export { useProductEdits as __experimentalUseProductEdits } from './use-product-edits';

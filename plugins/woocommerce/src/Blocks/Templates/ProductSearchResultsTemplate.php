@@ -1,68 +1,27 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-
 /**
  * ProductSearchResultsTemplate class.
  *
  * @internal
  */
-class ProductSearchResultsTemplate extends AbstractTemplate {
+class ProductSearchResultsTemplate {
 
-	/**
-	 * The slug of the template.
-	 *
-	 * @var string
-	 */
 	const SLUG = 'product-search-results';
 
 	/**
-	 * The template used as a fallback if that one is customized.
-	 *
-	 * @var string
+	 * Constructor.
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	public function __construct() {
+		$this->init();
+	}
 
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
+	protected function init() {
 		add_filter( 'search_template_hierarchy', array( $this, 'update_search_template_hierarchy' ), 10, 3 );
-	}
-
-	/**
-	 * Returns the title of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_title() {
-		return _x( 'Product Search Results', 'Template name', 'woocommerce' );
-	}
-
-	/**
-	 * Returns the description of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_description() {
-		return __( 'Displays search results for your store.', 'woocommerce' );
-	}
-
-	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
-	 */
-	public function render_block_template() {
-		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
-
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		}
 	}
 
 	/**

@@ -10,10 +10,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useCreateProductByType } from './use-create-product-by-type';
 import { ProductType, ProductTypeKey } from './constants';
 
-type ProductTypeWithOnclick = ProductType & {
-	onClick?: () => void;
-};
-
 const useProductTypeListItems = (
 	_productTypes: ProductType[],
 	suggestedProductTypes: ProductTypeKey[] = [],
@@ -27,14 +23,10 @@ const useProductTypeListItems = (
 
 	const productTypes = useMemo(
 		() =>
-			_productTypes.map( ( productType: ProductTypeWithOnclick ) => ( {
+			_productTypes.map( ( productType ) => ( {
 				...productType,
 				onClick: () => {
-					if ( typeof productType?.onClick === 'function' ) {
-						productType.onClick();
-					} else {
-						createProductByType( productType.key );
-					}
+					createProductByType( productType.key );
 					recordEvent( 'tasklist_add_product', {
 						method: 'product_template',
 					} );
@@ -49,7 +41,7 @@ const useProductTypeListItems = (
 					}
 				},
 			} ) ),
-		[ _productTypes, createProductByType, onClick, suggestedProductTypes ]
+		[ createProductByType ]
 	);
 
 	return { productTypes, isRequesting };

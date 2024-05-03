@@ -17,8 +17,8 @@ import { useVariationSwitcher } from '../../hooks/use-variation-switcher';
 
 export type VariationSwitcherProps = {
 	parentProductType?: string;
-	variationId?: number;
-	parentId?: number;
+	variationId: number;
+	parentId: number;
 };
 
 export function VariationSwitcherFooter( {

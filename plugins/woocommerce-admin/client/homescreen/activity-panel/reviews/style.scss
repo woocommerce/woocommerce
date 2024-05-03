@@ -32,7 +32,7 @@
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		.woocommerce-review-activity-card__image-overlay {
 			margin-top: $gap-smallest;
 		}

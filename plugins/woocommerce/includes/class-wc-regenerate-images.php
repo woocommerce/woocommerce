@@ -263,7 +263,7 @@ class WC_Regenerate_Images {
 	private static function get_full_size_image_dimensions( $attachment_id ) {
 		$imagedata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( ! is_array( $imagedata ) ) {
+		if ( ! $imagedata ) {
 			return array();
 		}
 

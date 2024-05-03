@@ -1,103 +1,3 @@
-.wc-block-components-radio-control--highlight-checked {
-	position: relative;
-
-	div.wc-block-components-radio-control-accordion-option {
-		position: relative;
-
-		// This ::after element is to fake a transparent border-top on each option.
-		// We can't just use border-top on the option itself because of the border around the entire accordion.
-		// Both borders have transparency so there's an overlap where the border is darker (due to adding two
-		// transparent colours together). Doing it with an ::after lets us bring the "border" in by one pixel on each
-		// side to avoid the overlap.
-		&::after {
-			content: "";
-			background: $universal-border-light;
-			height: 1px;
-			right: 1px;
-			left: 1px;
-			top: 0;
-			position: absolute;
-		}
-
-		// The first child doesn't need a fake border-top because it's handled by its parent's border-top. This stops
-		// a double border.
-		&:first-child::after {
-			display: none;
-		}
-
-		// This rule removes the fake border-top from the selected element to prevent a double border.
-		&.wc-block-components-radio-control-accordion-option--checked-option-highlighted + div.wc-block-components-radio-control-accordion-option::after {
-			display: none;
-		}
-	}
-
-	// Adds a "border" around the selected option. This is done with a box-shadow to prevent a double border on the left
-	// and right of the selected element, and top and bottom of the first/last elements.
-	label.wc-block-components-radio-control__option--checked-option-highlighted,
-	.wc-block-components-radio-control-accordion-option--checked-option-highlighted {
-		box-shadow: 0 0 0 2px currentColor inset;
-		border-radius: 4px;
-	}
-
-	// Defines a border around the radio control. Cannot be done with normal CSS borders or outlines because when
-	// selecting an item we get a double border on the left and right. It's not possible to remove the outer border just
-	// for the selected element, but using a pseudo element gives us more control.
-	&::after {
-		content: "";
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		pointer-events: none;
-		position: absolute;
-		border: 1px solid $universal-border-light;
-		border-radius: 4px;
-		width: 100%;
-		box-sizing: border-box;
-	}
-
-	// Remove the top border when the first element is selected, this is so we don't get a double border with the
-	// box-shadow.
-	&.wc-block-components-radio-control--highlight-checked--first-selected::after {
-		border-top: 0;
-		margin-top: 2px;
-	}
-
-	// Remove the bottom border when the last element is selected, this is so we don't get a double border with the
-	// box-shadow.
-	&.wc-block-components-radio-control--highlight-checked--last-selected::after {
-		margin-bottom: 2px;
-		border-bottom: 0;
-	}
-
-	// Remove the fake border-top from the item after the selected element, this is to prevent a double border with the
-	// selected element's box-shadow.
-	.wc-block-components-radio-control__option--checked-option-highlighted + .wc-block-components-radio-control__option::after {
-		display: none;
-	}
-
-	.wc-block-components-radio-control__option {
-
-		// Add a fake border to the top of each radio option. This is because using CSS borders would result in an
-		// overlap and two transparent borders combining to make a darker pixel. This fake border allows us to bring the
-		// border in by one pixel on each side to avoid the overlap.
-		&::after {
-			content: "";
-			background: $universal-border-light;
-			height: 1px;
-			right: 1px;
-			left: 1px;
-			top: 0;
-			position: absolute;
-		}
-
-		// The first child doesn't need a fake border-top because it's handled by its parent's border-top.
-		&:first-child::after {
-			display: none;
-		}
-	}
-}
-
 .wc-block-components-radio-control__option {
 	@include reset-color();
 	@include reset-typography();
@@ -105,6 +5,7 @@
 	margin: em($gap) 0;
 	margin-top: 0;
 	padding: 0 0 0 em($gap-larger);
+
 	position: relative;
 	cursor: pointer;
 

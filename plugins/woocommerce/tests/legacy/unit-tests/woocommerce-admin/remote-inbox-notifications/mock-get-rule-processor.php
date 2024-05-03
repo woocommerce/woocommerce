@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PublishAfterTimeRuleProcessor;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\FailRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PublishAfterTimeRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\FailRuleProcessor;
 
 /**
  * MockGetRuleProcessor.

@@ -70,21 +70,10 @@ export function checkoutCustomerLogin() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
 			'body contains checkout class': ( response ) =>
 				response.body.includes(
 					'class="checkout woocommerce-checkout"'
 				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -273,23 +262,12 @@ export function checkoutCustomerLogin() {
 			tags: { name: 'Shopper - Order Received' },
 		} );
 		check( response, {
-			'title is: "Checkout – WooCommerce Core E2E Test Suite"': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Checkout – WooCommerce Core E2E Test Suite',
 			"body contains: 'Thank you. Your order has been received.'": (
 				response
 			) =>
 				response.body.includes(
 					'Thank you. Your order has been received.'
 				),
-			'footer contains: Built with WooCommerce': ( response ) =>
-				response
-					.html()
-					.find( 'body footer' )
-					.text()
-					.includes( 'Built with WooCommerce' ),
 		} );
 
 		const requestHeadersPost = Object.assign(

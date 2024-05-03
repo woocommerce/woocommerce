@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -17,16 +17,16 @@ export type AttributeControlProps = {
 	onAdd?: ( attribute: EnhancedProductAttribute[] ) => void;
 	onAddAnother?: () => void;
 	onRemoveItem?: () => void;
-	onChange: ( value: ProductProductAttribute[] ) => void;
-	onEdit?: ( attribute: ProductProductAttribute ) => void;
-	onRemove?: ( attribute: ProductProductAttribute ) => void;
-	onRemoveCancel?: ( attribute: ProductProductAttribute ) => void;
+	onChange: ( value: ProductAttribute[] ) => void;
+	onEdit?: ( attribute: ProductAttribute ) => void;
+	onRemove?: ( attribute: ProductAttribute ) => void;
+	onRemoveCancel?: ( attribute: ProductAttribute ) => void;
 	onNewModalCancel?: () => void;
 	onNewModalClose?: () => void;
 	onNewModalOpen?: () => void;
-	onEditModalCancel?: ( attribute?: ProductProductAttribute ) => void;
-	onEditModalClose?: ( attribute?: ProductProductAttribute ) => void;
-	onEditModalOpen?: ( attribute?: ProductProductAttribute ) => void;
+	onEditModalCancel?: ( attribute?: ProductAttribute ) => void;
+	onEditModalClose?: ( attribute?: ProductAttribute ) => void;
+	onEditModalOpen?: ( attribute?: ProductAttribute ) => void;
 	onNoticeDismiss?: () => void;
 	renderCustomEmptyState?: ( props: AttributeControlEmptyStateProps ) => void;
 	createNewAttributesAsGlobal?: boolean;

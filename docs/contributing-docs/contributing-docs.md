@@ -66,7 +66,7 @@ tags: tag1, tag2, tag3
 
 To help reduce sidebar clutter, you can optionally tag content types in Front Matter. The supported tags are `reference`, `how-to`, and `code-snippet`. Content tagged with one of these types will appear under a sub-heading in its category on the sidebar and on the category's page. Untagged pages will appear at the top of the category.
 
-![Untagged docs appear at the top of the sidebar and category page, and tagged docs appear under with a heading](https://developer.woocommerce.com/docs/wp-content/uploads/sites/3/2024/01/CleanShot-2024-01-15-at-14.01.16@2x.png)
+![Untagged docs appear at the top of the sidebar and category page, and tagged docs appear under with a heading](https://developer.woo.com/docs/wp-content/uploads/sites/3/2024/01/CleanShot-2024-01-15-at-14.01.16@2x.png)
 
 Tags other than `reference`, `how-to` and `code-snippet` will function like regular WordPress tags. While you're welcome to include any tags you think are relevant, you should only tag a page with a maximum of one of the three special tags.
 

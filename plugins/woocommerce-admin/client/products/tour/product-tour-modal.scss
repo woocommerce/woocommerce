@@ -6,11 +6,11 @@
 	// This puts the modal on top of the RichTextEditor toolbars.
 	z-index: 31;
 
-	@include breakpoint( "<960px" ) {
+	@include breakpoint( '<960px' ) {
 		left: $admin-menu-width-collapsed + $gap-large;
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		display: none;
 	}
 

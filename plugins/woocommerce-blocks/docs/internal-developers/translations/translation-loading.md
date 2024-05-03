@@ -31,6 +31,11 @@ The POT file is human-readable and named `woo-gutenberg-products-block.pot`. It 
 "X-Poedit-SearchPathExcluded-1: vendor\n"
 "X-Poedit-SearchPathExcluded-2: node_modules\n"
 
+#: assets/js/atomic/blocks/product-elements/add-to-cart/constants.js:8
+msgid "Add to Cart"
+msgstr ""
+
+#: assets/js/atomic/blocks/product-elements/add-to-cart/edit.js:39
 #: assets/js/blocks/handpicked-products/block.js:42
 #: assets/js/blocks/product-best-sellers/block.js:34
 #: assets/js/blocks/product-category/block.js:157

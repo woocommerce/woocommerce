@@ -29,7 +29,7 @@
 	margin: $gutter-large 0 128px $fallback-gutter-large;
 	margin: $gutter-large 0 128px $gutter-large;
 
-	@include breakpoint("<782px") {
+	@include breakpoint('<782px') {
 		margin-top: 20px;
 	}
 }
@@ -78,8 +78,8 @@
 .woocommerce-admin-full-screen {
 	background: $studio-gray-0;
 	color: $studio-gray-60;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 
 	#wpwrap {
 		top: 0;
@@ -126,7 +126,7 @@
 
 .wp-toolbar .is-wp-toolbar-disabled {
 	margin-top: -$adminbar-height;
-	@include breakpoint("<600px") {
+	@include breakpoint('<600px') {
 		margin-top: -$adminbar-height-mobile;
 	}
 }

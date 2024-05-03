@@ -4,7 +4,6 @@
 @import "./table-empty-or-error-state/styles.scss";
 @import "./variations-filter/styles.scss";
 @import "./table-row-skeleton/styles.scss";
-@import "./add-image-menu-item/style.scss";
 
 .woocommerce-product-variations {
 	display: flex;
@@ -15,14 +14,15 @@
 		&-header {
 			.woocommerce-product-variations__table-row {
 				min-height: auto;
-			}
-			.woocommerce-product-variations__table-rowheader {
-				text-transform: uppercase;
-				color: $gray-700;
-				font-weight: 500;
-				font-size: 11px;
-				line-height: $grid-unit-20;
-				border-bottom: 1px solid $gray-200;
+
+				&:last-child {
+					text-transform: uppercase;
+					color: $gray-700;
+					font-weight: 500;
+					font-size: 11px;
+					line-height: $grid-unit-20;
+					border-bottom: 1px solid $gray-200;
+				}
 			}
 		}
 		&-body {

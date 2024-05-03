@@ -17,11 +17,7 @@ import type { FilterType } from './types';
 const Edit = ( {
 	attributes,
 	clientId,
-}: BlockEditProps< {
-	heading: string;
-	filterType: FilterType;
-	isPreview: boolean;
-} > ) => {
+}: BlockEditProps< { heading: string; filterType: FilterType } > ) => {
 	const blockProps = useBlockProps();
 
 	const isNested = useSelect( ( select ) => {
@@ -54,7 +50,6 @@ const Edit = ( {
 							lock: {
 								remove: true,
 							},
-							isPreview: attributes.isPreview,
 						},
 					],
 				] }

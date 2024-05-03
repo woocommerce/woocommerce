@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Traits;
 
 use Automattic\WooCommerce\Vendor\Detection\MobileDetect;
+use Automattic\WooCommerce\Admin\API\Reports\Controller as ReportsController;
 use Exception;
 use WC_Meta_Data;
 use WC_Order;
@@ -297,12 +298,6 @@ trait OrderAttributionMeta {
 					__( 'Direct', 'woocommerce' )
 					: 'Direct';
 				break;
-			case 'mobile_app':
-				$label  = '';
-				$source = $translated ?
-					__( 'Mobile app', 'woocommerce' )
-					: 'Mobile app';
-				break;
 			case 'admin':
 				$label  = '';
 				$source = $translated ?
@@ -380,5 +375,53 @@ trait OrderAttributionMeta {
 		 * @param string $field_name  The field name.
 		 */
 		return (string) apply_filters( 'wc_order_attribution_field_description', $description, $field_name );
+	}
+
+	/**
+	 * Get the order history for the customer (data matches Customers report).
+	 *
+	 * @param mixed $customer_identifier The customer ID or billing email.
+	 *
+	 * @return array Order count, total spend, and average spend per order.
+	 */
+	private function get_customer_history( $customer_identifier ): array {
+		/*
+		 * Exclude the statuses that aren't valid for the Customers report.
+		 * 'checkout-draft' is the checkout block's draft order status. `any` is added by V2 Orders REST.
+		 * @see /Automattic/WooCommerce/Admin/API/Report/DataStore::get_excluded_report_order_statuses()
+		 */
+		$all_order_statuses = ReportsController::get_order_statuses();
+		$excluded_statuses  = array( 'pending', 'failed', 'cancelled', 'auto-draft', 'trash', 'checkout-draft', 'any' );
+
+		// Get the valid customer orders.
+		$args = array(
+			'limit'  => - 1,
+			'return' => 'objects',
+			'status' => array_diff( $all_order_statuses, $excluded_statuses ),
+			'type'   => 'shop_order',
+		);
+
+		// If the customer_identifier is a valid ID, use it. Otherwise, use the billing email.
+		if ( is_numeric( $customer_identifier ) && $customer_identifier > 0 ) {
+			$args['customer_id'] = $customer_identifier;
+		} else {
+			$args['billing_email'] = $customer_identifier;
+			$args['customer_id']   = 0;
+		}
+
+		$orders = wc_get_orders( $args );
+
+		// Populate the order_count and total_spent variables with the valid orders.
+		$order_count = count( $orders );
+		$total_spent = 0;
+		foreach ( $orders as $order ) {
+			$total_spent += $order->get_total() - $order->get_total_refunded();
+		}
+
+		return array(
+			'order_count'   => $order_count,
+			'total_spent'   => $total_spent,
+			'average_spent' => $order_count ? $total_spent / $order_count : 0,
+		);
 	}
 }

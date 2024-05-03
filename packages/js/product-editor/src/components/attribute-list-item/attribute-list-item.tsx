@@ -3,7 +3,7 @@
  */
 import { DragEventHandler } from 'react';
 import { ListItem, Tag } from '@woocommerce/components';
-import { ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 import { sprintf, __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { closeSmall } from '@wordpress/icons';
@@ -16,13 +16,13 @@ import NotFilterableIcon from './not-filterable-icon';
 import SeenIcon from '../../icons/seen-icon';
 
 type AttributeListItemProps = {
-	attribute: ProductProductAttribute;
+	attribute: ProductAttribute;
 	editLabel?: string;
 	removeLabel?: string;
 	onDragStart?: DragEventHandler< HTMLDivElement >;
 	onDragEnd?: DragEventHandler< HTMLDivElement >;
-	onEditClick?: ( attribute: ProductProductAttribute ) => void;
-	onRemoveClick?: ( attribute: ProductProductAttribute ) => void;
+	onEditClick?: ( attribute: ProductAttribute ) => void;
+	onRemoveClick?: ( attribute: ProductAttribute ) => void;
 };
 
 const VISIBLE_TEXT = __( 'Visible in product details', 'woocommerce' );

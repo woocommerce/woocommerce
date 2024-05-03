@@ -12,7 +12,7 @@ export default {
 		type: 'object',
 		default: {
 			remove: true,
-			move: true,
+			move: false,
 		},
 	},
 };

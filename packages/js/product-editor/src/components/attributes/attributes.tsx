@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import { ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -13,8 +13,8 @@ import { AttributeControl } from '../attribute-control';
 import { useProductAttributes } from '../../hooks/use-product-attributes';
 
 type AttributesProps = {
-	value: ProductProductAttribute[];
-	onChange: ( value: ProductProductAttribute[] ) => void;
+	value: ProductAttribute[];
+	onChange: ( value: ProductAttribute[] ) => void;
 	productId?: number;
 };
 

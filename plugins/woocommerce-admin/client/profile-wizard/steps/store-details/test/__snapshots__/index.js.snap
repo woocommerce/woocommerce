@@ -144,7 +144,7 @@ Object {
                       <input
                         autocomplete="address-line1"
                         class="components-text-control__input"
-                        id="woocommerce-store-address-form-address_1"
+                        id="inspector-text-control-0"
                         placeholder="Address"
                         type="text"
                         value=""
@@ -168,7 +168,7 @@ Object {
                       <input
                         autocomplete="postal-code"
                         class="components-text-control__input"
-                        id="woocommerce-store-address-form-postcode"
+                        id="inspector-text-control-1"
                         placeholder="Post code"
                         type="text"
                         value=""
@@ -192,7 +192,7 @@ Object {
                       <input
                         autocomplete="address-level2"
                         class="components-text-control__input"
-                        id="woocommerce-store-address-form-city"
+                        id="inspector-text-control-2"
                         placeholder="City"
                         type="text"
                         value=""
@@ -459,7 +459,7 @@ Object {
                     <input
                       autocomplete="address-line1"
                       class="components-text-control__input"
-                      id="woocommerce-store-address-form-address_1"
+                      id="inspector-text-control-0"
                       placeholder="Address"
                       type="text"
                       value=""
@@ -483,7 +483,7 @@ Object {
                     <input
                       autocomplete="postal-code"
                       class="components-text-control__input"
-                      id="woocommerce-store-address-form-postcode"
+                      id="inspector-text-control-1"
                       placeholder="Post code"
                       type="text"
                       value=""
@@ -507,7 +507,7 @@ Object {
                     <input
                       autocomplete="address-level2"
                       class="components-text-control__input"
-                      id="woocommerce-store-address-form-city"
+                      id="inspector-text-control-2"
                       placeholder="City"
                       type="text"
                       value=""

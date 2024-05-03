@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\AI\Connection;
 use Automattic\WooCommerce\Blocks\Images\Pexels;
 use Automattic\WooCommerce\Blocks\Domain\Package;
@@ -75,16 +74,16 @@ class BlockPatterns {
 		$site_id = $ai_connection->get_site_id();
 
 		if ( is_wp_error( $site_id ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false, true );
+			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
 		}
 
 		$token = $ai_connection->get_jwt_token( $site_id );
 
 		if ( is_wp_error( $token ) ) {
-			return update_option( 'woocommerce_blocks_allow_ai_connection', false, true );
+			return update_option( 'woocommerce_blocks_allow_ai_connection', false );
 		}
 
-		return update_option( 'woocommerce_blocks_allow_ai_connection', true, true );
+		return update_option( 'woocommerce_blocks_allow_ai_connection', true );
 	}
 
 	/**
@@ -120,7 +119,6 @@ class BlockPatterns {
 			'keywords'      => 'Keywords',
 			'blockTypes'    => 'Block Types',
 			'inserter'      => 'Inserter',
-			'featureFlag'   => 'Feature Flag',
 		);
 
 		if ( ! file_exists( $this->patterns_path ) ) {
@@ -169,10 +167,6 @@ class BlockPatterns {
 			}
 
 			if ( \WP_Block_Patterns_Registry::get_instance()->is_registered( $pattern_data['slug'] ) ) {
-				continue;
-			}
-
-			if ( $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
 				continue;
 			}
 
@@ -304,7 +298,7 @@ class BlockPatterns {
 	public function schedule_on_plugin_update( $upgrader_object, $options ) {
 		if ( 'update' === $options['action'] && 'plugin' === $options['type'] && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
-				if ( str_contains( $plugin, 'woocommerce.php' ) ) {
+				if ( str_contains( $plugin, 'woocommerce-gutenberg-products-block.php' ) || str_contains( $plugin, 'woocommerce.php' ) ) {
 					$business_description = get_option( 'woo_ai_describe_store_description' );
 
 					if ( $business_description ) {

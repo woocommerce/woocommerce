@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\File;
-use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 use WC_Unit_Test_Case;
 
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fclose
@@ -21,7 +20,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		// Delete all created files and directories.
-		$files = glob( Settings::get_log_directory() . '*' );
+		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*' );
 		foreach ( $files as $file ) {
 			if ( is_dir( $file ) ) {
 				rmdir( $file );
@@ -42,7 +41,7 @@ class FileTest extends WC_Unit_Test_Case {
 		$hash = wp_hash( 'cheddar' );
 
 		yield 'standard filename, no rotation' => array(
-			Settings::get_log_directory() . 'test-Source_1-1-2023-10-23-' . $hash . '.log',
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-2023-10-23-' . $hash . '.log',
 			array(
 				'basename' => 'test-Source_1-1-2023-10-23-' . $hash . '.log',
 				'source'   => 'test-Source_1-1',
@@ -53,7 +52,7 @@ class FileTest extends WC_Unit_Test_Case {
 			),
 		);
 		yield 'standard filename, with rotation' => array(
-			Settings::get_log_directory() . 'test-Source_1-1.3-2023-10-23-' . $hash . '.log',
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1.3-2023-10-23-' . $hash . '.log',
 			array(
 				'basename' => 'test-Source_1-1.3-2023-10-23-' . $hash . '.log',
 				'source'   => 'test-Source_1-1',
@@ -64,7 +63,7 @@ class FileTest extends WC_Unit_Test_Case {
 			),
 		);
 		yield 'non-standard filename, no rotation' => array(
-			Settings::get_log_directory() . 'test-Source_1-1-' . $hash . '.log',
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . $hash . '.log',
 			array(
 				'basename' => 'test-Source_1-1-' . $hash . '.log',
 				'source'   => 'test-Source_1-1-' . $hash,
@@ -75,7 +74,7 @@ class FileTest extends WC_Unit_Test_Case {
 			),
 		);
 		yield 'non-standard filename, with rotation' => array(
-			Settings::get_log_directory() . 'test-Source_1-1-' . $hash . '.5.log',
+			Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . $hash . '.5.log',
 			array(
 				'basename' => 'test-Source_1-1-' . $hash . '.5.log',
 				'source'   => 'test-Source_1-1-' . $hash,
@@ -146,7 +145,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 *          and whether the file is readable and writable.
 	 */
 	public function test_file_readable_writable() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$file     = new File( $filename );
 
 		$this->assertFalse( $file->is_readable() );
@@ -163,7 +162,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that writing to a file that doesn't exist yet creates that file.
 	 */
 	public function test_write_new_file() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$content  = "You can't take the sky from me";
 		$file     = new File( $filename );
 
@@ -184,7 +183,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that writing to a file that already exists appends the new content to the existing content.
 	 */
 	public function test_write_existing_file() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$content1 = 'Shiny';
 		$content2 = 'Scratch';
 
@@ -213,8 +212,8 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that the has_standard_filename method correctly identifies standard and nonstandard filenames.
 	 */
 	public function test_has_standard_filename() {
-		$standard    = Settings::get_log_directory() . 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
-		$nonstandard = Settings::get_log_directory() . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log';
+		$standard    = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1.3-2023-10-23-' . wp_hash( 'cheddar' ) . '.log';
+		$nonstandard = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-Source_1-1-' . wp_hash( 'cheddar' ) . '.5.log';
 
 		$file = new File( $standard );
 		$this->assertTrue( $file->has_standard_filename() );
@@ -227,7 +226,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that get_stream returns a PHP resource representation of the file.
 	 */
 	public function test_get_and_close_stream() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$file     = new File( $filename );
 
 		// File doesn't exist yet.
@@ -249,7 +248,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that rotating a file without a rotation market will rename it to include a rotation marker.
 	 */
 	public function test_rotate_current_file() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$file     = new File( $filename );
 		$file->write( 'test' );
 
@@ -273,7 +272,7 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox Check that rotating a file with a rotation market will rename it to increment the rotation marker.
 	 */
 	public function test_rotate_older_file() {
-		$filename = Settings::get_log_directory() . 'test-file.2.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.2.log';
 		$file     = new File( $filename );
 		$file->write( 'test' );
 
@@ -297,19 +296,19 @@ class FileTest extends WC_Unit_Test_Case {
 	 * @testdox The delete method should delete the file from the filesystem.
 	 */
 	public function test_delete_existing_file() {
-		$filename = Settings::get_log_directory() . 'test-file.log';
+		$filename = Constants::get_constant( 'WC_LOG_DIR' ) . 'test-file.log';
 		$file     = new File( $filename );
 		$file->write( 'test' );
 
 		$this->assertTrue( $file->is_readable() );
-		$files = glob( Settings::get_log_directory() . '*.log' );
+		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		$this->assertCount( 1, $files );
 
 		$result = $file->delete();
 
 		$this->assertTrue( $result );
 		$this->assertFalse( $file->is_readable() );
-		$files = glob( Settings::get_log_directory() . '*.log' );
+		$files = glob( trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) ) . '*.log' );
 		$this->assertCount( 0, $files );
 	}
 }

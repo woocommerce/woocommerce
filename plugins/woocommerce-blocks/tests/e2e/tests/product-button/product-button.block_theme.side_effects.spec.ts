@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
+import {
+	installPluginFromPHPFile,
+	uninstallPluginFromPHPFile,
+} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -9,7 +13,8 @@ import { expect, test } from '@woocommerce/e2e-playwright-utils';
 import { blockData, handleAddToCartAjaxSetting } from './utils';
 
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { frontendUtils } ) => {
+	test.beforeEach( async ( { frontendUtils, storeApiUtils } ) => {
+		await storeApiUtils.cleanCart();
 		await frontendUtils.goToShop();
 	} );
 
@@ -55,7 +60,6 @@ test.describe( `${ blockData.name } Block`, () => {
 			state: 'detached',
 		} );
 		await block.click();
-		await expect( block.locator( 'loading' ) ).toBeHidden();
 		await expect( block.getByRole( 'button' ) ).toHaveText( '1 in cart' );
 		await expect( block.getByRole( 'link' ) ).toHaveText( 'View cart' );
 
@@ -112,17 +116,23 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 
 	test( 'the filter `woocommerce_product_add_to_cart_text` should be applied', async ( {
-		requestUtils,
 		frontendUtils,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-custom-add-to-cart-button-text'
+		await installPluginFromPHPFile(
+			`${ __dirname }/update-product-button-text.php`
 		);
 		await frontendUtils.goToShop();
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const buttonWithNewText = blocks.getByText( 'Buy Now' );
 		await expect( buttonWithNewText ).toHaveCount(
 			blockData.selectors.frontend.productsToDisplay
+		);
+	} );
+
+	test.afterAll( async ( { storeApiUtils } ) => {
+		await storeApiUtils.cleanCart();
+		await uninstallPluginFromPHPFile(
+			`${ __dirname }/update-product-button-text.php`
 		);
 	} );
 } );

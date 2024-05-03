@@ -17,13 +17,13 @@
 		min-height: $header-height;
 	}
 
-	@include breakpoint("<782px") {
+	@include breakpoint( '<782px' ) {
 		flex-flow: row wrap;
 		top: $adminbar-height-mobile;
 		width: 100%;
 	}
 
-	@include breakpoint("782px-960px") {
+	@include breakpoint( '782px-960px' ) {
 		width: calc(100% - 36px);
 	}
 
@@ -38,21 +38,18 @@
 		align-items: center;
 		padding: 0 0 0 $fallback-gutter-large;
 		padding: 0 0 0 $gutter-large;
+		flex: 1 auto;
 		height: $header-height;
 		background: $studio-white;
 		font-weight: 600;
 		font-size: 14px;
-
-		&.woocommerce-layout__header-left-align {
-			flex: 1 auto;
-		}
 	}
 }
 
 .folded .woocommerce-layout__header {
 	width: calc(100% - 36px);
 
-	@include breakpoint("<782px") {
+	@include breakpoint( '<782px' ) {
 		width: 100%;
 	}
 }

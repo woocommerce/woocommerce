@@ -1,66 +1,66 @@
 name: 'Setup WooCommerce Monorepo'
 description: 'A composite action bundling together the setup of dependencies and optional installation and building of projects.'
 inputs:
-    php-version:
-        description: 'The PHP version that should be installed. Use "false" to skip PHP installation.'
-        default: '7.4'
-    install:
-        description: 'Given a boolean or PNPM filter, runs the install command for monorepo project(s).'
-        default: false
-    build:
-        description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
-        default: false
+  php-version:
+    description: 'The PHP version that should be installed. Use "false" to skip PHP installation.'
+    default: '7.4'
+  install:
+    description: 'Given a boolean or PNPM filter, runs the install command for monorepo project(s).'
+    default: false
+  build:
+    description: 'Given a boolean or PNPM filter, runs the build command for monorepo project(s).'
+    default: false
 runs:
-    using: 'composite'
-    steps:
-        - name: 'Read PNPM Version'
-          id: 'read-pnpm-version'
-          shell: 'bash'
-          run: 'echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
-        - name: 'Setup PNPM'
-          uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
-          with:
-              version: ${{ steps.read-pnpm-version.outputs.version }}
-        - name: 'Setup Node'
-          uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
-          with:
-              node-version-file: '.nvmrc'
-              # We only want to use the cache if something is being installed.
-              cache: ${{ inputs.install != 'false' && 'pnpm' || '' }}
-        - name: 'Setup PHP'
-          if: ${{ inputs.php-version != 'false' }}
-          uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
-          with:
-              php-version: '${{ inputs.php-version }}'
-              coverage: 'none'
-        - name: 'Cache Composer Dependencies'
-          if: ${{ inputs.php-version != 'false' }}
-          uses: 'actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319'
-          with:
-              path: '~/.cache/composer/files'
-              key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
-              restore-keys: '${{ runner.os }}-composer-'
-        - name: 'Parse Project Filters'
-          id: 'project-filters'
-          shell: 'bash'
-          run: |
-              echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
-              echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
-        - name: 'Install Project Dependencies'
-          # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
-          if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
-          shell: 'bash'
-          run: 'pnpm install'
-          # `pnpm install` filtering is broken: https://github.com/pnpm/pnpm/issues/6300
-          # run: 'pnpm install ${{ steps.project-filters.outputs.install }}'
-        # We want to include an option to build projects using this action so that we can make
-        # sure that the build cache is always used when building projects.
-        - name: 'Cache Build Output'
-          # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
-          if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
-          uses: 'google/wireit@4aad131006ea85c1e42af927534ebb13426dd730'
-        - name: 'Build'
-          # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
-          if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
-          shell: 'bash'
-          run: 'pnpm ${{ steps.project-filters.outputs.build }} build'
+  using: 'composite'
+  steps:
+    - name: 'Read PNPM Version'
+      id: 'read-pnpm-version'
+      shell: 'bash'
+      run: 'echo "version=$(./.github/actions/setup-woocommerce-monorepo/scripts/read-pnpm-version.sh package.json)" >> $GITHUB_OUTPUT'
+    - name: 'Setup PNPM'
+      uses: 'pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598'
+      with:
+        version: ${{ steps.read-pnpm-version.outputs.version }}
+    - name: 'Setup Node'
+      uses: 'actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65'
+      with:
+        node-version-file: '.nvmrc'
+        # We only want to use the cache if something is being installed.
+        cache: ${{ inputs.install != 'false' && 'pnpm' || '' }}
+    - name: 'Setup PHP'
+      if: ${{ inputs.php-version != 'false' }}
+      uses: 'shivammathur/setup-php@a36e1e52ff4a1c9e9c9be31551ee4712a6cb6bd0'
+      with:
+        php-version: '${{ inputs.php-version }}'
+        coverage: 'none'
+    - name: 'Cache Composer Dependencies'
+      if: ${{ inputs.php-version != 'false' }}
+      uses: 'actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84'
+      with:
+        path: '~/.cache/composer/files'
+        key: "${{ runner.os }}-composer-${{ hashFiles( '**/composer.lock' ) }}"
+        restore-keys: '${{ runner.os }}-composer-'
+    - name: 'Parse Project Filters'
+      id: 'project-filters'
+      shell: 'bash'
+      run: |
+        echo "install=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.install }}')" >> $GITHUB_OUTPUT
+        echo "build=$(node ./.github/actions/setup-woocommerce-monorepo/scripts/parse-input-filter.js '${{ inputs.build }}')" >> $GITHUB_OUTPUT
+    - name: 'Install Project Dependencies'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.install == 'true' || steps.project-filters.outputs.install != '' }}
+      shell: 'bash'
+      run: 'pnpm install'
+      # `pnpm install` filtering is broken: https://github.com/pnpm/pnpm/issues/6300
+      # run: 'pnpm install ${{ steps.project-filters.outputs.install }}'
+    # We want to include an option to build projects using this action so that we can make
+    # sure that the build cache is always used when building projects.
+    - name: 'Cache Build Output'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+      uses: 'google/wireit@f3a3c79c553122e2fe5829eeac7d815326502903'
+    - name: 'Build'
+      # Boolean inputs aren't parsed into filters so it'll either be "true" or there will be a filter.
+      if: ${{ inputs.build == 'true' || steps.project-filters.outputs.build != '' }}
+      shell: 'bash'
+      run: 'pnpm ${{ steps.project-filters.outputs.build }} build'

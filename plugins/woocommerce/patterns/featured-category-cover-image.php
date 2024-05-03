@@ -14,8 +14,8 @@ $description    = $content['descriptions'][0]['default'] ?? '';
 $button         = $content['buttons'][0]['default'] ?? '';
 ?>
 
-<!-- wp:cover {"url":"<?php echo esc_url( $image1 ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":1},"minHeight":600,"align":"full","style":{"spacing":{"padding":{"top":"3%","right":"0%","bottom":"10%","left":"5%"},"margin":{"top":"0","bottom":"80px"},"blockGap":"1%"}},"layout":{"type":"default"}} -->
-<div class="wp-block-cover alignfull" style="margin-top:0;margin-bottom:80px;padding-top:3%;padding-right:0%;padding-bottom:10%;padding-left:5%;min-height:600px">
+<!-- wp:cover {"url":"<?php echo esc_url( $image1 ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":1},"align":"full","style":{"spacing":{"padding":{"top":"3%","right":"0%","bottom":"10%","left":"5%"},"margin":{"top":"0","bottom":"80px"},"blockGap":"1%"}},"layout":{"type":"default"}} -->
+<div class="wp-block-cover alignfull" style="margin-top:0;margin-bottom:80px;padding-top:3%;padding-right:0%;padding-bottom:10%;padding-left:5%">
 	<span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span>
 	<img class="wp-block-cover__image-background" alt="" src="<?php echo esc_url( $image1 ); ?>" style="object-position:50% 100%" data-object-fit="cover" data-object-position="50% 100%"/>
 	<div class="wp-block-cover__inner-container">

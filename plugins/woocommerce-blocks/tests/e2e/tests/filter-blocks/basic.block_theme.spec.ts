@@ -6,61 +6,61 @@ import { test, expect } from '@woocommerce/e2e-playwright-utils';
 const filterBlocks = [
 	{
 		name: 'woocommerce/product-filter-price',
-		title: 'Product Filter: Price (Beta)',
+		title: 'Product Filter: Price',
 		heading: 'Filter by Price',
 	},
 	{
 		name: 'woocommerce/product-filter-stock-status',
-		title: 'Product Filter: Stock Status (Beta)',
+		title: 'Product Filter: Stock Status',
 		heading: 'Filter by Stock Status',
 	},
 	{
 		name: 'woocommerce/product-filter-rating',
-		title: 'Product Filter: Rating (Beta)',
+		title: 'Product Filter: Rating',
 		heading: 'Filter by Rating',
 	},
 	{
 		name: 'woocommerce/product-filter-attribute',
-		title: 'Product Filter: Attribute (Beta)',
+		title: 'Product Filter: Attribute',
 		heading: 'Filter by Attribute',
 	},
 	{
 		name: 'woocommerce/product-filter-active',
-		title: 'Product Filter: Active Filters (Beta)',
+		title: 'Product Filter: Active Filters',
 		heading: 'Active Filters',
 	},
 ];
 
-test.describe( 'Filter blocks registration', () => {
+test.describe( 'Filter blocks registration', async () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
 	test( 'Variations can be inserted through the inserter.', async ( {
-		page,
+		editor,
 		editorUtils,
 	} ) => {
 		for ( const block of filterBlocks ) {
 			await editorUtils.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
-				page.getByLabel( `Block: ${ block.title }` )
+				editor.canvas.getByLabel( `Block: ${ block.title }` )
 			).toBeVisible();
 		}
 	} );
 
 	test( 'Each filter block comes with a default title', async ( {
+		editor,
 		editorUtils,
-		page,
 	} ) => {
 		for ( const block of filterBlocks ) {
 			await editorUtils.insertBlockUsingGlobalInserter( block.title );
 
 			await expect(
-				page
+				editor.canvas
 					.getByLabel( `Block: Product Filter` )
 					.getByLabel( 'Block: Heading' )
-					.and( page.getByText( block.heading ) )
+					.and( editor.canvas.getByText( block.heading ) )
 			).toBeVisible();
 		}
 	} );

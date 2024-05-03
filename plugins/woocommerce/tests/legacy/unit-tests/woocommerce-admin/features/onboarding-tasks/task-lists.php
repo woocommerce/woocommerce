@@ -26,16 +26,6 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down
-	 */
-	public function tearDown(): void {
-		TaskLists::clear_lists();
-		TaskLists::init_default_lists();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Tests that the "woocommerce_admin_experimental_onboarding_tasklists" filter is able to append tasks to any tasklist.
 	 */
 	public function test_default_tasklists_can_be_add_by_onboarding_filter() {
@@ -65,77 +55,5 @@ class WC_Tests_OnboardingTasks_TaskLists extends WC_Unit_Test_Case {
 
 		// Assert that the new task list is added.
 		$this->assertNotEmpty( TaskLists::get_list( 'test' ) );
-	}
-
-	/**
-	 * Tests that hidden task lists don't return their tasks.
-	 */
-	public function test_tasklists_get_json_hidden_list() {
-		// Create a new task list.
-		$task_list = new TaskList(
-			array(
-				'id'    => 'test',
-				'title' => 'Test',
-			)
-		);
-
-		// Create a new task.
-		$task = new TestTask(
-			$task_list,
-			array(
-				'id' => 'wc-unit-test_tasklists_get_json_hidden_list',
-			)
-		);
-
-		// Add task to task list.
-		$task_list->add_task( $task );
-
-		// Hide the task list.
-		$task_list->hide();
-
-		// Get the task list as JSON.
-		$json = $task_list->get_json();
-
-		// Assert that the task list is empty because it is hidden.
-		$this->assertEmpty( $json['tasks'] );
-
-		// Assert list is hidden.
-		$this->assertTrue( $json['isHidden'] );
-	}
-
-	/**
-	 * Tests that visible tasks do return their tasks.
-	 */
-	public function test_tasklists_get_json_visible_list() {
-		// Create a new task list.
-		$task_list = new TaskList(
-			array(
-				'id'    => 'test',
-				'title' => 'Test',
-			)
-		);
-
-		// Create a new task.
-		$task = new TestTask(
-			$task_list,
-			array(
-				'id' => 'wc-unit-test_tasklists_get_json_visible_list',
-			)
-		);
-
-		// Add task to task list.
-		$task_list->add_task( $task );
-
-		// Make sure the list is visible.
-		$task_list->unhide();
-
-		// Get the task list as JSON.
-		$json = $task_list->get_json();
-
-		// Assert that the task list has one task.
-		$this->assertCount( 1, $json['tasks'] );
-
-		// Assert we have the task we added.
-		$this->assertEquals( 'wc-unit-test_tasklists_get_json_visible_list', $json['tasks'][0]['id'] );
 	}
 }

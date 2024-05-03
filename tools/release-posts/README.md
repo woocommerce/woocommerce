@@ -1,7 +1,7 @@
 # Release Post Generator CLI tool
 
 This is a cli tool designed to generate draft release posts for WooCommerce.
-Posts generated via the tool will be draft posted to <https://developer.woocommerce.com>.
+Posts generated via the tool will be draft posted to <https://developer.woo.com>.
 
 You can also generate an HTML representation of the post if you
 don't have access to a WordPress.com auth token.
@@ -17,7 +17,7 @@ don't have access to a WordPress.com auth token.
 
 ## Publishing Draft Posts
 
-This tool will publish draft posts to `https://developer.woocommerce.com` for you if you omit the `--outputOnly` flag. There is some minimal first time setup for this though:
+This tool will publish draft posts to `https://developer.woo.com` for you if you omit the `--outputOnly` flag. There is some minimal first time setup for this though:
 
 1. Create an app on WordPress.com [here](https://developer.wordpress.com/apps/).
 2. Recommended settings:

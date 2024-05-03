@@ -31,7 +31,9 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
+	test.beforeEach( async ( { requestUtils, admin, editorUtils, editor } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -40,9 +42,14 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
+	test.afterEach( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	} );
+
 	test( 'Renders Product Gallery Large Image block on the editor and frontend side', async ( {
 		page,
-		editor,
+		editorUtils,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
@@ -53,9 +60,11 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editor.saveSiteEditorEntities();
+		await editorUtils.saveTemplate();
 
-		await page.goto( blockData.productPage );
+		await page.goto( blockData.productPage, {
+			waitUntil: 'commit',
+		} );
 
 		const blockFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
@@ -74,14 +83,16 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 		test( 'should work on frontend when is enabled', async ( {
 			pageObject,
-			editor,
+			editorUtils,
 			page,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await pageObject.toggleZoomWhileHoveringSetting( true );
-			await editor.saveSiteEditorEntities();
+			await editorUtils.saveTemplate();
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -104,18 +115,21 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
-			editor,
+			editorUtils,
 			page,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await pageObject.toggleZoomWhileHoveringSetting( false );
-			const buttonElement = pageObject.getZoomWhileHoveringSetting();
+			const buttonElement =
+				await pageObject.getZoomWhileHoveringSetting();
 
 			await expect( buttonElement ).not.toBeChecked();
 
-			await editor.saveSiteEditorEntities();
+			await editorUtils.saveTemplate();
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const blockFrontend = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -138,7 +152,7 @@ test.describe( `${ blockData.name }`, () => {
 
 	test( 'Renders correct image when selecting a product variation in the Add to Cart With Options block', async ( {
 		page,
-		editor,
+		editorUtils,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: false } );
@@ -150,9 +164,11 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editor.saveSiteEditorEntities();
+		await editorUtils.saveTemplate();
 
-		await page.goto( blockData.productPage );
+		await page.goto( blockData.productPage, {
+			waitUntil: 'commit',
+		} );
 
 		const largeImageBlockOnFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',

@@ -7,50 +7,13 @@ namespace Automattic\WooCommerce\Blocks\Templates;
  * @internal
  */
 class CheckoutTemplate extends AbstractPageTemplate {
-
 	/**
-	 * The slug of the template.
-	 *
-	 * @var string
-	 */
-	const SLUG = 'page-checkout';
-
-	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		parent::init();
-
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-	}
-
-	/**
-	 * Returns the title of the template.
+	 * Template slug.
 	 *
 	 * @return string
 	 */
-	public function get_template_title() {
-		return _x( 'Page: Checkout', 'Template name', 'woocommerce' );
-	}
-
-	/**
-	 * Returns the description of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_description() {
-		return __( 'The Checkout template guides users through the final steps of the purchase process. It enables users to enter shipping and billing information, select a payment method, and review order details.', 'woocommerce' );
-	}
-
-	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
-	 */
-	public function render_block_template() {
-		if (
-			! is_embed() && is_checkout()
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		}
+	public static function get_slug() {
+		return 'page-checkout';
 	}
 
 	/**
@@ -85,7 +48,7 @@ class CheckoutTemplate extends AbstractPageTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, self::SLUG );
+			array_unshift( $templates, $this->get_slug() );
 			array_unshift( $templates, 'checkout' );
 		}
 		return $templates;

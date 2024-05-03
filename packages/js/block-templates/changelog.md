@@ -2,12 +2,6 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0](https://www.npmjs.com/package/@woocommerce/block-templates/v/1.1.0) - 2024-04-12 
-
--   Patch - Corrected build configuration for packages that weren't outputting minified code. [#43716]
--   Minor - Added useLayoutTemplate React hook, to load layout templates via the REST API [#43347]
--   Patch - bump php version in packages/js/*/composer.json [#42020]
-
 ## [1.0.0](https://www.npmjs.com/package/@woocommerce/block-templates/v/1.0.0) - 2023-11-27 
 
 -   Minor - New product editor: Disable focus on root blocks, fixing unnecessary tab between fields in new product editor [#41436]

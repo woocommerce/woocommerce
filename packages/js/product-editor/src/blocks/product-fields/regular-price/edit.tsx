@@ -3,10 +3,17 @@
  */
 import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { Link } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
+import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	createInterpolateElement,
+	useEffect,
+} from '@wordpress/element';
 import { sprintf, __ } from '@wordpress/i18n';
 import {
 	BaseControl,
@@ -17,12 +24,11 @@ import {
 /**
  * Internal dependencies
  */
-import { Label } from '../../../components/label/label';
 import { useValidation } from '../../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
-import { sanitizeHTML } from '../../../utils/sanitize-html';
-import type { ProductEditorBlockEditProps } from '../../../types';
-import type { SalePriceBlockAttributes } from './types';
+import { SalePriceBlockAttributes } from './types';
+import { ProductEditorBlockEditProps } from '../../../types';
+import { Label } from '../../../components/label/label';
 
 export function Edit( {
 	attributes,
@@ -30,7 +36,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, isRequired, tooltip, disabled } = attributes;
+	const { label, help, isRequired, tooltip } = attributes;
 	const [ regularPrice, setRegularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -46,11 +52,18 @@ export function Edit( {
 		onChange: setRegularPrice,
 	} );
 
-	function renderHelp() {
-		if ( help ) {
-			return <span dangerouslySetInnerHTML={ sanitizeHTML( help ) } />;
-		}
-	}
+	const interpolatedHelp = help
+		? createInterpolateElement( help, {
+				PricingTab: (
+					<Link
+						href={ getNewPath( { tab: 'pricing' } ) }
+						onClick={ () => {
+							recordEvent( 'product_pricing_help_click' );
+						} }
+					/>
+				),
+		  } )
+		: null;
 
 	const regularPriceId = useInstanceId(
 		BaseControl,
@@ -102,7 +115,7 @@ export function Edit( {
 				help={
 					regularPriceValidationError
 						? regularPriceValidationError
-						: renderHelp()
+						: interpolatedHelp
 				}
 				className={ classNames( {
 					'has-error': regularPriceValidationError,
@@ -120,7 +133,6 @@ export function Edit( {
 							label
 						)
 					}
-					disabled={ disabled }
 					onBlur={ validateRegularPrice }
 				/>
 			</BaseControl>

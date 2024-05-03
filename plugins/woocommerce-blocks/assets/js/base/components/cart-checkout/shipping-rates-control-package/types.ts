@@ -46,6 +46,4 @@ export interface PackageProps {
 	collapsible?: TernaryFlag;
 	noResultsMessage: ReactElement;
 	showItems?: TernaryFlag;
-	// Should the selected rate be highlighted.
-	highlightChecked?: boolean;
 }

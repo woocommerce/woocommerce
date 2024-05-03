@@ -38,13 +38,13 @@ tags: reference
 
 - Check for typos and verify the command syntax with --help. If the issue persists, consult the Command Reference or seek support from the WooCommerce community.
 
-### What do I do if I get 404 errors when using commands?
+**What do I do if I get 404 errors when using commands?
 
 If you are getting a 401 error like `Error: Sorry, you cannot list resources. {"status":401}`, you are trying to use the command unauthenticated. The WooCommerce CLI as of 3.0 requires you to provide a proper user to run the action as. Pass in your user ID using the `--user` flag.
 
-### I am trying to update a list of X, but it's not saving
+### I am trying to update a list of X, but it’s not saving
 
-Some ‘lists' are actually objects. For example, if you want to set categories for a product, the REST API expects an array of objects.
+Some ‘lists’ are actually objects. For example, if you want to set categories for a product, the REST API expects an array of objects.
 
 To set this you would use JSON like this:
 

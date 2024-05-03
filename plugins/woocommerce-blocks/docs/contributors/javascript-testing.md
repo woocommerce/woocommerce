@@ -30,7 +30,7 @@ Use the following command to run the unit tests:
 npm run test
 ```
 
-The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/trunk/packages/scripts) to run jest for component and unit testing.
+The test scripts use [wp-scripts](https://github.com/WordPress/gutenberg/tree/master/packages/scripts) to run jest for component and unit testing.
 
 Additionally,
 
@@ -59,7 +59,7 @@ When you're done, you may want to shut down the test environment:
 
 -   `npm run wp-env stop` to stop the test environment
 
-**Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/trunk/packages/env/README.md).
+**Note:** There are a number of other useful `wp-env` commands. You can find out more in the [wp-env docs](https://github.com/WordPress/gutenberg/blob/master/packages/env/README.md).
 
 ## How to run end-to-end tests
 
@@ -113,7 +113,7 @@ When preparing for a new version of WordPress, it's a good practice to search fo
 
 ---
 
-[We're hiring!](https://woocommerce.com/careers/) Come work with us!
+[We're hiring!](https://woo.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/contributors/javascript-testing.md)
 

@@ -15,8 +15,8 @@ import {
 import * as utils from '~/customize-store/utils';
 import { DesignWithAi } from '../';
 
-jest.mock( '~/customize-store/tracking', () => ( {
-	trackEvent: jest.fn(),
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/ai', () => ( {

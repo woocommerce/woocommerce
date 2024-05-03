@@ -197,9 +197,7 @@ describe( 'Payment recommendations', () => {
 		} );
 
 		afterEach( () => {
-			if ( oldLocation !== undefined ) {
-				Object.defineProperty( global.window, 'location', oldLocation );
-			}
+			Object.defineProperty( global.window, 'location', oldLocation );
 		} );
 
 		it( 'should install plugin and trigger event and redirect when finished, when clicking the action button', async () => {

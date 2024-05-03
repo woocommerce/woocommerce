@@ -22,9 +22,8 @@ jobs:
         working-directory: 'tools/code-analyzer'
         run: |
           HEAD_REF=$(git rev-parse HEAD)
-          exclude="plugins/woocommerce/tests plugins/woocommerce-admin/tests plugins/woocommerce-blocks/tests"
           version=$(pnpm analyzer major-minor "$HEAD_REF" "plugins/woocommerce/woocommerce.php" | tail -n 1)
-          pnpm analyzer "$HEAD_REF" $version -o "github" -e $exclude
+          pnpm analyzer "$HEAD_REF" $version -o "github"
       - uses: 'actions/github-script@v6'
         name: 'Validate'
         with:

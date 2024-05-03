@@ -1,10 +1,16 @@
 /**
  * External dependencies
  */
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, PluginArea } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Button, Card, CardBody, createSlotFill } from '@wordpress/components';
+import {
+	Button,
+	Card,
+	CardBody,
+	createSlotFill,
+	SlotFillProvider,
+} from '@wordpress/components';
 import { Icon, closeSmall } from '@wordpress/icons';
 import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
@@ -16,13 +22,12 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './conflict-error-slotfill.scss';
 import warningIcon from './alert-triangle-icon.svg';
-import { SETTINGS_SLOT_FILL_CONSTANT } from './settings-slots';
 
-const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const { Fill, Slot } = createSlotFill( '__EXPERIMENTAL__WcAdminConflictError' );
 
 const LearnMore = () => (
 	<Button
-		href="https://woocommerce.com/document/setting-up-taxes-in-woocommerce/"
+		href="https://woo.com/document/setting-up-taxes-in-woocommerce/"
 		target="_blank"
 	>
 		{ __( 'Learn more', 'woocommerce' ) }
@@ -35,7 +40,7 @@ const SettingsErrorFill = () => {
 
 	const [ pricesEnteredWithTaxSetting, setMainVal ] = useState(
 		document.forms.mainform.elements.woocommerce_prices_include_tax
-			?.value === 'yes'
+			.value === 'yes'
 			? 'incl'
 			: 'excl'
 	);
@@ -191,9 +196,18 @@ const SettingsErrorFill = () => {
 	);
 };
 
-export const registerTaxSettingsConflictErrorFill = () => {
-	registerPlugin( 'woocommerce-admin-tax-settings-conflict-warning', {
-		scope: 'woocommerce-tax-settings',
-		render: SettingsErrorFill,
-	} );
+export const WcAdminConflictErrorSlot = () => {
+	return (
+		<>
+			<SlotFillProvider>
+				<Slot />
+				<PluginArea scope="woocommerce-settings" />
+			</SlotFillProvider>
+		</>
+	);
 };
+
+registerPlugin( 'woocommerce-admin-tax-settings-conflict-warning', {
+	scope: 'woocommerce-settings',
+	render: SettingsErrorFill,
+} );

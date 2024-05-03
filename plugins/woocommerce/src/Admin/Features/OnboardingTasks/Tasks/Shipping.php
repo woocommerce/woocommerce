@@ -45,7 +45,13 @@ class Shipping extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Select your shipping options', 'woocommerce' );
+		if ( true === $this->get_parent_option( 'use_completed_title' ) ) {
+			if ( $this->is_complete() ) {
+				return __( 'You added shipping costs', 'woocommerce' );
+			}
+			return __( 'Add shipping costs', 'woocommerce' );
+		}
+		return __( 'Set up shipping', 'woocommerce' );
 	}
 
 	/**

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect, useId, useRef } from '@wordpress/element';
 import { ComboboxControl } from 'wordpress-components';
 import { ValidationInputError } from '@woocommerce/blocks-components';
@@ -47,7 +47,11 @@ const Combobox = ( {
 	required = false,
 	errorId: incomingErrorId,
 	autoComplete = 'off',
-	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
+	errorMessage = sprintf(
+		/* translators: %s select label */
+		__( 'Please select a valid %s', 'woocommerce' ),
+		label.toLowerCase()
+	),
 }: ComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
@@ -56,13 +60,9 @@ const Combobox = ( {
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
-
-	const { error, validationErrorId } = useSelect( ( select ) => {
+	const error = useSelect( ( select ) => {
 		const store = select( VALIDATION_STORE_KEY );
-		return {
-			error: store.getValidationError( errorId ),
-			validationErrorId: store.getValidationErrorId( errorId ),
-		};
+		return store.getValidationError( errorId );
 	} );
 
 	useEffect( () => {
@@ -150,9 +150,7 @@ const Combobox = ( {
 				value={ value || '' }
 				allowReset={ false }
 				autoComplete={ autoComplete }
-				// Note these aria properties are ignored by ComboboxControl. When we replace ComboboxControl we should support them.
 				aria-invalid={ error?.message && ! error?.hidden }
-				aria-errormessage={ validationErrorId }
 			/>
 			<ValidationInputError propertyName={ errorId } />
 		</div>

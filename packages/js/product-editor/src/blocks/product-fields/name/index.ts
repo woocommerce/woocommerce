@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import metadata from './block.json';
-import { NameBlockEdit } from './edit';
+import { Edit } from './edit';
 import { registerProductEditorBlockType } from '../../../utils';
 
 const { name } = metadata;
@@ -11,7 +11,7 @@ export { metadata, name };
 
 export const settings = {
 	example: {},
-	edit: NameBlockEdit,
+	edit: Edit,
 };
 
 export const init = () =>

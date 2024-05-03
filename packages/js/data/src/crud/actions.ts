@@ -9,7 +9,7 @@ import { apiFetch } from '@wordpress/data-controls';
 import { cleanQuery, getUrlParameters, getRestPath, parseId } from './utils';
 import CRUD_ACTIONS from './crud-actions';
 import TYPES from './action-types';
-import { IdType, IdQuery, Item, ItemQuery, CrudActionOptions } from './types';
+import { IdType, IdQuery, Item, ItemQuery } from './types';
 
 type ResolverOptions = {
 	resourceName: string;
@@ -35,15 +35,13 @@ export function createItemRequest( query: Partial< ItemQuery > ) {
 export function createItemSuccess(
 	key: IdType,
 	item: Item,
-	query: Partial< ItemQuery >,
-	options: CrudActionOptions
+	query: Partial< ItemQuery >
 ) {
 	return {
 		type: TYPES.CREATE_ITEM_SUCCESS as const,
 		key,
 		item,
 		query,
-		options,
 	};
 }
 
@@ -178,10 +176,7 @@ export const createDispatchActions = ( {
 	namespace,
 	resourceName,
 }: ResolverOptions ) => {
-	const createItem = function* (
-		query: Partial< ItemQuery >,
-		options: CrudActionOptions
-	) {
+	const createItem = function* ( query: Partial< ItemQuery > ) {
 		yield createItemRequest( query );
 		const urlParameters = getUrlParameters( namespace, query );
 
@@ -196,7 +191,7 @@ export const createDispatchActions = ( {
 			} );
 			const { key } = parseId( item.id, urlParameters );
 
-			yield createItemSuccess( key, item, query, options );
+			yield createItemSuccess( key, item, query );
 			return item;
 		} catch ( error ) {
 			yield createItemError( query, error );

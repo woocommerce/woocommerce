@@ -29,6 +29,7 @@ export type ProductEditorSettings = Partial<
 };
 
 export type EditorProps = {
-	product?: Pick< Product, 'id' | 'type' > | null;
+	product: Pick< Product, 'id' | 'type' >;
 	productType?: string;
+	settings?: ProductEditorSettings;
 };

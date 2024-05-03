@@ -1,0 +1,22 @@
+{
+	"name": "create-extension",
+	"version": "0.0.0",
+	"description": "A tool to scaffold out an Admin ready WooCommerce extension",
+	"author": "Automattic",
+	"homepage": "https://github.com/woocommerce/woocommerce",
+	"license": "GPLv2",
+	"main": "index.js",
+	"repository": "woocommerce/woocommerce",
+	"dependencies": {
+		"chalk": "^4.1.2",
+		"fs-extra": "10.1.0",
+		"promptly": "^3.2.0"
+	},
+	"engines": {
+		"node": "^16.14.1",
+		"pnpm": "^8.12.1"
+	},
+	"devDependencies": {
+		"wireit": "0.14.3"
+	}
+}

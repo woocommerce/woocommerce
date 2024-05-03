@@ -9,7 +9,6 @@ import './appearance';
 import './tax';
 import './woocommerce-payments';
 import './deprecated-tasks';
-import './launch-your-store';
 
 const possiblyImportProductTask = async () => {
 	if ( isImportProduct() ) {

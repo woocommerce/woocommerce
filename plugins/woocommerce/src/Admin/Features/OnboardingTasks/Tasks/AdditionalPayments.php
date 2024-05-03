@@ -115,14 +115,6 @@ class AdditionalPayments extends Payments {
 		return $this->can_view_result;
 	}
 
-	/**
-	 * Action URL.
-	 *
-	 * @return string
-	 */
-	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-admin&task=payments' );
-	}
 
 	/**
 	 * Check if the store has any enabled gateways in other category.

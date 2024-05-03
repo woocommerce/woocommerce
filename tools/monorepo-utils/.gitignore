@@ -1,5 +1,4 @@
 # We are going to include the bundled version of the tool so that we don't need
 # to build the tool in order to use it. This saves a lot of time in CI since
 # we don't need to install any dependencies.
-!dist/index.js
-!dist/index.js.LICENSE.txt
+!dist

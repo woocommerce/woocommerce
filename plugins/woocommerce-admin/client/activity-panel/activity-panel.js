@@ -338,6 +338,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 		const help = {
 			name: 'help',
+			title: __( 'Help', 'woocommerce' ),
 			icon: <Icon icon={ helpIcon } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
@@ -373,6 +374,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const previewStore = {
 			name: 'previewStore',
 			title: __( 'Preview store', 'woocommerce' ),
+			icon: <Icon icon={ external } />,
 			visible: isHomescreen() && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );

@@ -9,17 +9,8 @@ import {
 	getContext,
 } from '@woocommerce/interactivity';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 export type ProductCollectionStoreContext = {
 	isPrefetchNextOrPreviousLink: boolean;
-	animation: 'start' | 'finish';
-	accessibilityMessage: string;
-	accessibilityLoadingMessage: string;
-	accessibilityLoadedMessage: string;
 };
 
 const isValidLink = ( ref: HTMLAnchorElement ) =>
@@ -36,13 +27,6 @@ const isValidEvent = ( event: MouseEvent ) =>
 	! event.altKey && // Download.
 	! event.shiftKey &&
 	! event.defaultPrevented;
-
-const forcePageReload = ( href: string ) => {
-	window.location.assign( href );
-	// It's function called in generator expecting asyncFunc return.
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	return new Promise( () => {} );
-};
 
 /**
  * Ensures the visibility of the first product in the collection.
@@ -79,20 +63,6 @@ function scrollToFirstProductIfNotVisible( wcNavigationId?: string ) {
 }
 
 const productCollectionStore = {
-	state: {
-		get startAnimation() {
-			return (
-				getContext< ProductCollectionStoreContext >().animation ===
-				'start'
-			);
-		},
-		get finishAnimation() {
-			return (
-				getContext< ProductCollectionStoreContext >().animation ===
-				'finish'
-			);
-		},
-	},
 	actions: {
 		*navigate( event: MouseEvent ) {
 			const ctx = getContext< ProductCollectionStoreContext >();
@@ -100,39 +70,11 @@ const productCollectionStore = {
 			const wcNavigationId = (
 				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
 			 )?.dataset?.wcNavigationId;
-			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
-			 )?.dataset.wcNavigationDisabled;
-
-			if ( isDisabled ) {
-				yield forcePageReload( ref.href );
-			}
 
 			if ( isValidLink( ref ) && isValidEvent( event ) ) {
 				event.preventDefault();
-
-				// Don't start animation if it doesn't take long to navigate.
-				const timeout = setTimeout( () => {
-					ctx.accessibilityMessage = ctx.accessibilityLoadingMessage;
-					ctx.animation = 'start';
-				}, 400 );
-
 				yield navigate( ref.href );
 
-				// Clear the timeout if the navigation is fast.
-				clearTimeout( timeout );
-
-				// Announce that the page has been loaded. If the message is the
-				// same, we use a no-break space similar to the @wordpress/a11y
-				// package: https://github.com/WordPress/gutenberg/blob/c395242b8e6ee20f8b06c199e4fc2920d7018af1/packages/a11y/src/filter-message.js#L20-L26
-				ctx.accessibilityMessage =
-					ctx.accessibilityLoadedMessage +
-					( ctx.accessibilityMessage ===
-					ctx.accessibilityLoadedMessage
-						? '\u00A0'
-						: '' );
-
-				ctx.animation = 'finish';
 				ctx.isPrefetchNextOrPreviousLink = !! ref.href;
 
 				scrollToFirstProductIfNotVisible( wcNavigationId );
@@ -144,15 +86,6 @@ const productCollectionStore = {
 		 */
 		*prefetchOnHover() {
 			const { ref } = getElement();
-
-			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
-			 )?.dataset.wcNavigationDisabled;
-
-			if ( isDisabled ) {
-				return;
-			}
-
 			if ( isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}
@@ -164,17 +97,8 @@ const productCollectionStore = {
 		 * Reduces perceived load times for subsequent page navigations.
 		 */
 		*prefetch() {
-			const { ref } = getElement();
-			const isDisabled = (
-				ref?.closest( '[data-wc-navigation-id]' ) as HTMLDivElement
-			 )?.dataset.wcNavigationDisabled;
-
-			if ( isDisabled ) {
-				return;
-			}
-
 			const context = getContext< ProductCollectionStoreContext >();
-
+			const { ref } = getElement();
 			if ( context?.isPrefetchNextOrPreviousLink && isValidLink( ref ) ) {
 				yield prefetch( ref.href );
 			}

@@ -6,4 +6,4 @@
 -   [Features](features/)
 -   [Layout](layout.md)
 -   [Page Controller](page-controller.md)
--   [WooCommerce.com](https://woocommerce.com/)
+-   [Woo.com](https://woo.com/)

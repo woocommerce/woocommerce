@@ -232,7 +232,7 @@ function wc_trim_zeros( $price ) {
  * @return float
  */
 function wc_round_tax_total( $value, $precision = null ) {
-	$precision   = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
+	$precision = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 	$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 
 	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
@@ -371,17 +371,15 @@ function wc_format_coupon_code( $value ) {
 /**
  * Sanitize a coupon code.
  *
- * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
- *
- * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
  *
  * @since  3.6.0
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
-	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
+	return wp_filter_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ) );
 }
 
 /**
@@ -979,9 +977,6 @@ function wc_format_postcode( $postcode, $country ) {
 	$postcode = wc_normalize_postcode( $postcode ?? '' );
 
 	switch ( $country ) {
-		case 'SE':
-			$postcode = substr_replace( $postcode, ' ', -2, 0 );
-			break;
 		case 'CA':
 		case 'GB':
 			$postcode = substr_replace( $postcode, ' ', -3, 0 );
@@ -1007,12 +1002,9 @@ function wc_format_postcode( $postcode, $country ) {
 			$postcode = substr_replace( $postcode, ' ', 4, 0 );
 			break;
 		case 'LV':
-			$postcode = preg_replace( '/^(LV)?-?(\d+)$/', 'LV-${2}', $postcode );
-			break;
-		case 'CZ':
-		case 'SK':
-			$postcode = preg_replace( "/^({$country})-?(\d+)$/", '${1}-${2}', $postcode );
-			$postcode = substr_replace( $postcode, ' ', -2, 0 );
+			if ( preg_match( '/(?:LV)?-?(\d+)/i', $postcode, $matches ) ) {
+				$postcode = count( $matches ) >= 2 ? "LV-$matches[1]" : $postcode;
+			}
 			break;
 		case 'DK':
 			$postcode = preg_replace( '/^(DK)(.+)$/', '${1}-${2}', $postcode );
@@ -1296,28 +1288,7 @@ function wc_format_stock_quantity_for_display( $stock_quantity, $product ) {
  * @return string
  */
 function wc_format_sale_price( $regular_price, $sale_price ) {
-	// Format the prices.
-	$formatted_regular_price = is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price;
-	$formatted_sale_price    = is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price;
-
-	// Strikethrough pricing.
-	$price = '<del aria-hidden="true">' . $formatted_regular_price . '</del> ';
-
-	// For accessibility (a11y) we'll also display that information to screen readers.
-	$price .= '<span class="screen-reader-text">';
-	// translators: %s is a product's regular price.
-	$price .= esc_html( sprintf( __( 'Original price was: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_regular_price ) ) );
-	$price .= '</span>';
-
-	// Add the sale price.
-	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
-
-	// For accessibility (a11y) we'll also display that information to screen readers.
-	$price .= '<span class="screen-reader-text">';
-	// translators: %s is a product's current (sale) price.
-	$price .= esc_html( sprintf( __( 'Current price is: %s.', 'woocommerce' ), wp_strip_all_tags( $formatted_sale_price ) ) );
-	$price .= '</span>';
-
+	$price = '<del aria-hidden="true">' . ( is_numeric( $regular_price ) ? wc_price( $regular_price ) : $regular_price ) . '</del> <ins>' . ( is_numeric( $sale_price ) ? wc_price( $sale_price ) : $sale_price ) . '</ins>';
 	return apply_filters( 'woocommerce_format_sale_price', $price, $regular_price, $sale_price );
 }
 

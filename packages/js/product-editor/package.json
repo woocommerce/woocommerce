@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/product-editor",
-	"version": "1.5.0",
+	"version": "1.2.0",
 	"description": "React components for the WooCommerce admin product editor.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -119,7 +119,7 @@
 		"postcss-loader": "^4.3.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"rimraf": "5.0.5",
+		"rimraf": "^3.0.2",
 		"sass-loader": "^10.5.0",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",

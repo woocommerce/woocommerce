@@ -72,13 +72,22 @@ const getBoundingClientRect = async ( {
 };
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
-		test.beforeEach( async ( { admin, editorUtils, editor } ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ blockData.slug }`,
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.setContent( '' );
+		test.beforeEach(
+			async ( { requestUtils, admin, editorUtils, editor } ) => {
+				await requestUtils.deleteAllTemplates( 'wp_template' );
+				await requestUtils.deleteAllTemplates( 'wp_template_part' );
+				await admin.visitSiteEditor( {
+					postId: `woocommerce/woocommerce//${ blockData.slug }`,
+					postType: 'wp_template',
+				} );
+				await editorUtils.enterEditMode();
+				await editor.setContent( '' );
+			}
+		);
+
+		test.afterEach( async ( { requestUtils } ) => {
+			await requestUtils.deleteAllTemplates( 'wp_template' );
+			await requestUtils.deleteAllTemplates( 'wp_template_part' );
 		} );
 
 		test( 'should be rendered on the editor side', async ( {
@@ -107,9 +116,16 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				editor.page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -129,9 +145,16 @@ test.describe( `${ blockData.name }`, () => {
 
 			await pageObject.toggleFullScreenOnClickSetting( false );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPageNotOnSale );
+			await page.goto( blockData.productPageNotOnSale, {
+				waitUntil: 'commit',
+			} );
 
 			const block = await frontendUtils.getBlockByName( blockData.name );
 
@@ -168,9 +191,16 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadge.x - blockData.margin
 			).toEqual( editorBoundingClientRect.productSaleBadgeContainer.x );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -215,9 +245,16 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadgeContainer.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,
@@ -258,9 +295,16 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.productSaleBadgeContainer.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const clientBoundingClientRect = await getBoundingClientRect( {
 				frontendUtils,

@@ -19,5 +19,5 @@ export type FontFace = {
 	fontStretch?: string;
 	fontStyle: string;
 	fontWeight: string;
-	src: Array< string > | string;
+	src: string;
 };

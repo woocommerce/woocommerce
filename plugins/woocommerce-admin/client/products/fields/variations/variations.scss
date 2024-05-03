@@ -54,7 +54,7 @@
 			color: var(--wp-admin-theme-color);
 
 			&:disabled,
-			&[aria-disabled="true"] {
+			&[aria-disabled='true'] {
 				opacity: 1;
 			}
 

@@ -12,7 +12,6 @@ import { ProgressBar } from '@woocommerce/components';
 import { designWithAiStateMachineContext } from '../types';
 import { CloseButton } from '../components/close-button/close-button';
 import { aiWizardClosedBeforeCompletionEvent } from '../events';
-import { isEntrepreneurFlow } from '../entrepreneur-flow';
 
 export type businessInfoDescriptionCompleteEvent = {
 	type: 'BUSINESS_INFO_DESCRIPTION_COMPLETE';
@@ -41,16 +40,14 @@ export const BusinessInfoDescription = ( {
 				color={ 'var(--wp-admin-theme-color)' }
 				bgcolor={ 'transparent' }
 			/>
-			{ ! isEntrepreneurFlow() && (
-				<CloseButton
-					onClick={ () => {
-						sendEvent( {
-							type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
-							payload: { step: 'business-info-description' },
-						} );
-					} }
-				/>
-			) }
+			<CloseButton
+				onClick={ () => {
+					sendEvent( {
+						type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION',
+						payload: { step: 'business-info-description' },
+					} );
+				} }
+			/>
 			<div className="woocommerce-cys-design-with-ai woocommerce-cys-layout">
 				<div className="woocommerce-cys-page">
 					<h1>

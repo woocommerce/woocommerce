@@ -74,12 +74,11 @@ type ModalStatus = keyof typeof MODAL_COMPONENTS;
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
 		intro: {
-			activeTheme,
 			themeData,
+			activeThemeHasMods,
 			customizeStoreTaskCompleted,
 			currentThemeIsAiGenerated,
 		},
-		activeThemeHasMods,
 	} = context;
 
 	const isJetpackOffline = false;
@@ -96,8 +95,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	let modalStatus: ModalStatus = 'no-modal';
 	let bannerStatus: BannerStatus = 'default';
 
-	const isDefaultTheme = activeTheme === 'twentytwentyfour';
-
 	switch ( true ) {
 		case isNetworkOffline:
 			bannerStatus = 'network-offline';
@@ -107,11 +104,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 		case context.flowType === FlowType.noAI &&
 			! customizeStoreTaskCompleted:
-			bannerStatus = FlowType.noAI;
-			break;
-		case context.flowType === FlowType.noAI &&
-			customizeStoreTaskCompleted &&
-			! isDefaultTheme:
 			bannerStatus = FlowType.noAI;
 			break;
 		case context.flowType === FlowType.noAI && customizeStoreTaskCompleted:
@@ -150,7 +142,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const sidebarMessage =
 		context.flowType === FlowType.AIOnline
 			? __(
-					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI.',
+					'Create a store that reflects your brand and business. Select one of our professionally designed themes to customize, or create your own using AI',
 					'woocommerce'
 			  )
 			: __(
@@ -224,9 +216,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 						setOpenDesignChangeWarningModal={
 							setOpenDesignChangeWarningModal
 						}
-						redirectToCYSFlow={ () =>
-							sendEvent( 'DESIGN_WITHOUT_AI' )
-						}
 						sendEvent={ sendEvent }
 					/>
 
@@ -249,7 +238,6 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 								total_palettes={ theme.total_palettes }
 								link_url={ theme?.link_url }
 								is_active={ theme.is_active }
-								price={ theme.price }
 								onClick={ () => {
 									if ( theme.is_active ) {
 										sendEvent( {

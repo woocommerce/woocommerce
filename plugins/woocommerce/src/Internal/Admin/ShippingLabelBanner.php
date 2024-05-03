@@ -128,7 +128,14 @@ class ShippingLabelBanner {
 	 * @param string $hook current page hook.
 	 */
 	public function add_print_shipping_label_script( $hook ) {
-		WCAdminAssets::register_style( 'print-shipping-label-banner', 'style', array( 'wp-components' ) );
+		$rtl = is_rtl() ? '.rtl' : '';
+		wp_enqueue_style(
+			'print-shipping-label-banner-style',
+			WCAdminAssets::get_url( "print-shipping-label-banner/style{$rtl}", 'css' ),
+			array( 'wp-components' ),
+			WCAdminAssets::get_file_version( 'css' )
+		);
+
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'print-shipping-label-banner', true );
 
 		$payload = array(

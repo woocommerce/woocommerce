@@ -368,7 +368,6 @@ class Segmenter {
 
 			if (
 				isset( $this->query_args['product_includes'] ) &&
-				is_array( $this->query_args['product_includes'] ) &&
 				count( $this->query_args['product_includes'] ) === 1
 			) {
 				$args['parent'] = $this->query_args['product_includes'][0];

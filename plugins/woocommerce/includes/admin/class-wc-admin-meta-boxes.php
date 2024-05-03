@@ -283,7 +283,7 @@ class WC_Admin_Meta_Boxes {
 	 * @return string[] Templates array excluding block-based templates.
 	 */
 	public function remove_block_templates( $templates ) {
-		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() ) {
+		if ( count( $templates ) === 0 || ! wc_current_theme_is_fse_theme() || ( ! function_exists( 'gutenberg_get_block_template' ) && ! function_exists( 'get_block_template' ) ) ) {
 			return $templates;
 		}
 
@@ -296,7 +296,9 @@ class WC_Admin_Meta_Boxes {
 				continue;
 			}
 
-			$block_template = get_block_template( $theme . '//' . $template_key );
+			$block_template = function_exists( 'gutenberg_get_block_template' ) ?
+				gutenberg_get_block_template( $theme . '//' . $template_key ) :
+				get_block_template( $theme . '//' . $template_key );
 
 			// If the block template has the product post type specified, include it.
 			if ( $block_template && is_array( $block_template->post_types ) && in_array( 'product', $block_template->post_types ) ) {

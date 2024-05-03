@@ -9,7 +9,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -470,7 +469,7 @@ function wc_get_loop_class() {
 	$loop_index = wc_get_loop_prop( 'loop', 0 );
 	$columns    = absint( max( 1, wc_get_loop_prop( 'columns', wc_get_default_products_per_row() ) ) );
 
-	++$loop_index;
+	$loop_index ++;
 	wc_set_loop_prop( 'loop', $loop_index );
 
 	if ( 0 === ( $loop_index - 1 ) % $columns || 1 === $columns ) {
@@ -897,11 +896,10 @@ function wc_terms_and_conditions_page_content() {
 		return;
 	}
 
-	$sanitizer = wc_get_container()->get( HtmlSanitizer::class );
-	$page      = get_post( $terms_page_id );
+	$page = get_post( $terms_page_id );
 
 	if ( $page && 'publish' === $page->post_status && $page->post_content && ! has_shortcode( $page->post_content, 'woocommerce_checkout' ) ) {
-		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wc_format_content( $sanitizer->styled_post_content( $page->post_content ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<div class="woocommerce-terms-and-conditions" style="display: none; max-height: 200px; overflow: auto;">' . wc_format_content( wp_kses_post( $page->post_content ) ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -1247,15 +1245,6 @@ if ( ! function_exists( 'woocommerce_template_loop_category_link_close' ) ) {
 	}
 }
 
-if ( ! function_exists( 'woocommerce_product_taxonomy_archive_header' ) ) {
-	/**
-	 * Output the products header on taxonomy archives.
-	 */
-	function woocommerce_product_taxonomy_archive_header() {
-		wc_get_template( 'loop/header.php' );
-	}
-}
-
 if ( ! function_exists( 'woocommerce_taxonomy_archive_description' ) ) {
 	/**
 	 * Show an archive description on taxonomy archives.
@@ -1365,8 +1354,8 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 
 		if ( $product ) {
 			$defaults = array(
-				'quantity'              => 1,
-				'class'                 => implode(
+				'quantity'   => 1,
+				'class'      => implode(
 					' ',
 					array_filter(
 						array(
@@ -1378,11 +1367,11 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 						)
 					)
 				),
-				'aria-describedby_text' => $product->add_to_cart_aria_describedby(),
-				'attributes'            => array(
+				'attributes' => array(
 					'data-product_id'  => $product->get_id(),
 					'data-product_sku' => $product->get_sku(),
 					'aria-label'       => $product->add_to_cart_description(),
+					'aria-describedby' => $product->add_to_cart_aria_describedby(),
 					'rel'              => 'nofollow',
 				),
 			);
@@ -2841,8 +2830,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			'default'           => '',
 			'autofocus'         => '',
 			'priority'          => '',
-			'unchecked_value'   => null,
-			'checked_value'     => '1',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -2969,24 +2956,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'checkbox':
-				$field = '<label class="checkbox ' . esc_attr( implode( ' ', $args['label_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . '>';
-
-				// Output a hidden field so a value is POSTed if the box is not checked.
-				if ( ! is_null( $args['unchecked_value'] ) ) {
-					$field .= sprintf( '<input type="hidden" name="%1$s" value="%2$s" />', esc_attr( $key ), esc_attr( $args['unchecked_value'] ) );
-				}
-
-				$field .= sprintf(
-					'<input type="checkbox" name="%1$s" id="%2$s" value="%3$s" class="%4$s" %5$s /> %6$s',
-					esc_attr( $key ),
-					esc_attr( $args['id'] ),
-					esc_attr( $args['checked_value'] ),
-					esc_attr( 'input-checkbox ' . implode( ' ', $args['input_class'] ) ),
-					checked( $value, $args['checked_value'], false ),
-					wp_kses_post( $args['label'] )
-				);
-
-				$field .= $required . '</label>';
+				$field = '<label class="checkbox ' . implode( ' ', $args['label_class'] ) . '" ' . implode( ' ', $custom_attributes ) . '>
+						<input type="' . esc_attr( $args['type'] ) . '" class="input-checkbox ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="1" ' . checked( $value, 1, false ) . ' /> ' . $args['label'] . $required . '</label>';
 
 				break;
 			case 'text':
@@ -3519,7 +3490,7 @@ if ( ! function_exists( 'wc_display_item_downloads' ) ) {
 		if ( ! empty( $downloads ) ) {
 			$i = 0;
 			foreach ( $downloads as $file ) {
-				++$i;
+				$i ++;
 
 				if ( $args['show_url'] ) {
 					$strings[] = '<strong class="wc-item-download-label">' . esc_html( $file['name'] ) . ':</strong> ' . esc_html( $file['download_url'] );
@@ -3989,7 +3960,7 @@ function wc_get_pay_buttons() {
 
 	echo '<div class="woocommerce-pay-buttons">';
 	foreach ( $supported_gateways as $pay_button_id ) {
-		printf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
+		echo sprintf( '<div class="woocommerce-pay-button__%1$s %1$s" id="%1$s"></div>', esc_attr( $pay_button_id ) );
 	}
 	echo '</div>';
 }

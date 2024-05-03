@@ -74,25 +74,5 @@ post_id=$(wp post create \
 	${script_dir}/mini-cart.html
 )
 
-post_id=$(wp post create \
-	--porcelain \
-	--menu_order=8 \
-	--post_type=page \
-	--post_status=publish \
-	--post_author=1 \
-	--post_title='Cart Shortcode' \
-	${script_dir}/cart-shortcode.html
-)
-
-post_id=$(wp post create \
-	--porcelain \
-	--menu_order=8 \
-	--post_type=page \
-	--post_status=publish \
-	--post_author=1 \
-	--post_title='Checkout Shortcode' \
-	${script_dir}/checkout-shortcode.html
-)
-
 # Create renaming WooCommerce pages using tool
 wp wc tool run install_pages --user=1

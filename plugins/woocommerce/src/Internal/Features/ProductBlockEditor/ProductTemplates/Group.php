@@ -3,7 +3,7 @@
  * WooCommerce Product Group Block class.
  */
 
-namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
 use Automattic\WooCommerce\Admin\BlockTemplates\ContainerInterface;

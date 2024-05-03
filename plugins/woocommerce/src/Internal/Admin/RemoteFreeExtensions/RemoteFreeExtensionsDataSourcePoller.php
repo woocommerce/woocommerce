@@ -2,16 +2,15 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
 /**
  * Specs data source poller class for remote free extensions.
  */
-class RemoteFreeExtensionsDataSourcePoller extends DataSourcePoller {
+class RemoteFreeExtensionsDataSourcePoller extends \Automattic\WooCommerce\Admin\DataSourcePoller {
 
 	const ID = 'remote_free_extensions';
 
 	const DATA_SOURCES = array(
-		'https://woocommerce.com/wp-json/wccom/obw-free-extensions/4.0/extensions.json',
+		'https://woocommerce.com/wp-json/wccom/obw-free-extensions/3.0/extensions.json',
 	);
 
 	/**

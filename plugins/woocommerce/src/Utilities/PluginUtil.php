@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
-use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -38,20 +37,11 @@ class PluginUtil {
 	private $woocommerce_aware_active_plugins = null;
 
 	/**
-	 * List of plugins excluded from feature compatibility warnings in UI.
-	 *
-	 * @var string[]
-	 */
-	private $plugins_excluded_from_compatibility_ui;
-
-	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
 		self::add_action( 'activated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
 		self::add_action( 'deactivated_plugin', array( $this, 'handle_plugin_de_activation' ), 10, 0 );
-
-		$this->plugins_excluded_from_compatibility_ui = array( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
 	}
 
 	/**
@@ -183,71 +173,32 @@ class PluginUtil {
 	}
 
 	/**
-	 * Utility method to generate warning string for incompatible features based on active plugins.
-	 *
-	 * Additionally, this method will manually print a warning message on the HPOS feature if both
-	 * the Legacy REST API and HPOS are active.
+	 * Util function to generate warning string for incompatible features based on active plugins.
 	 *
 	 * @param string $feature_id Feature id.
 	 * @param array  $plugin_feature_info Array of plugin feature info. See FeaturesControllers->get_compatible_plugins_for_feature() for details.
 	 *
 	 * @return string Warning string.
 	 */
-	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ): string {
+	public function generate_incompatible_plugin_feature_warning( string $feature_id, array $plugin_feature_info ) : string {
 		$feature_warning    = '';
 		$incompatibles      = array_merge( $plugin_feature_info['incompatible'], $plugin_feature_info['uncertain'] );
 		$incompatibles      = array_filter( $incompatibles, 'is_plugin_active' );
-		$incompatibles      = array_values( array_diff( $incompatibles, $this->get_plugins_excluded_from_compatibility_ui() ) );
 		$incompatible_count = count( $incompatibles );
-
-		$feature_warnings = array();
-		if ( 'custom_order_tables' === $feature_id && 'yes' === get_option( 'woocommerce_api_enabled' ) ) {
-			if ( is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) ) {
-				$legacy_api_and_hpos_incompatibility_warning_text =
-					sprintf(
-						// translators: %s is a URL.
-						__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API plugin</a> is installed and active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
-						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/'
-					);
-			} else {
-				$legacy_api_and_hpos_incompatibility_warning_text =
-				sprintf(
-					// translators: %s is a URL.
-					__( '⚠ <b><a target="_blank" href="%s">The Legacy REST API</a> is active on this site.</b> Please be aware that the WooCommerce Legacy REST API is <b>not</b> compatible with HPOS.', 'woocommerce' ),
-					admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' )
-				);
-			}
-
-			/**
-			 * Filter to modify the warning text that appears in the HPOS section of the features settings page
-			 * when both the Legacy REST API is active (via WooCommerce core or via the Legacy REST API plugin)
-			 * and the orders table is in use as the primary data store for orders.
-			 *
-			 * @param string $legacy_api_and_hpos_incompatibility_warning_text Original warning text.
-			 * @returns string|null Actual warning text to use, or null to suppress the warning.
-			 *
-			 * @since 8.9.0
-			 */
-			$legacy_api_and_hpos_incompatibility_warning_text = apply_filters( 'woocommerce_legacy_api_and_hpos_incompatibility_warning_text', $legacy_api_and_hpos_incompatibility_warning_text );
-
-			if ( ! is_null( $legacy_api_and_hpos_incompatibility_warning_text ) ) {
-				$feature_warnings[] = $legacy_api_and_hpos_incompatibility_warning_text . "\n";
-			}
-		}
-
 		if ( $incompatible_count > 0 ) {
 			if ( 1 === $incompatible_count ) {
 				/* translators: %s = printable plugin name */
-				$feature_warnings[] = sprintf( __( '⚠ 1 Incompatible plugin detected (%s).', 'woocommerce' ), $this->get_plugin_name( $incompatibles[0] ) );
+				$feature_warning = sprintf( __( '⚠ 1 Incompatible plugin detected (%s).', 'woocommerce' ), $this->get_plugin_name( $incompatibles[0] ) );
 			} elseif ( 2 === $incompatible_count ) {
-				$feature_warnings[] = sprintf(
+				$feature_warning = sprintf(
 					/* translators: %1\$s, %2\$s = printable plugin names */
 					__( '⚠ 2 Incompatible plugins detected (%1$s and %2$s).', 'woocommerce' ),
 					$this->get_plugin_name( $incompatibles[0] ),
 					$this->get_plugin_name( $incompatibles[1] )
 				);
 			} else {
-				$feature_warnings[] = sprintf(
+
+				$feature_warning = sprintf(
 					/* translators: %1\$s, %2\$s = printable plugin names, %3\$d = plugins count */
 					_n(
 						'⚠ Incompatible plugins detected (%1$s, %2$s and %3$d other).',
@@ -268,25 +219,17 @@ class PluginUtil {
 				),
 				admin_url( 'plugins.php' )
 			);
-			$feature_warnings[]       = sprintf(
+			$extra_desc_tip           = '<br>' . sprintf(
 				/* translators: %1$s opening link tag %2$s closing link tag. */
 				__( '%1$sView and manage%2$s', 'woocommerce' ),
 				'<a href="' . esc_url( $incompatible_plugins_url ) . '">',
 				'</a>'
 			);
+
+			$feature_warning .= $extra_desc_tip;
+
 		}
 
-		return str_replace( "\n", '<br>', implode( "\n", $feature_warnings ) );
-	}
-
-	/**
-	 * Get the names of the plugins that are excluded from the feature compatibility UI.
-	 * These plugins won't be considered as incompatible with any existing feature for the purposes
-	 * of displaying compatibility warning in UI, even if they declare incompatibilities explicitly.
-	 *
-	 * @return string[] Plugin names relative to the root plugins directory.
-	 */
-	public function get_plugins_excluded_from_compatibility_ui() {
-		return $this->plugins_excluded_from_compatibility_ui;
+		return $feature_warning;
 	}
 }

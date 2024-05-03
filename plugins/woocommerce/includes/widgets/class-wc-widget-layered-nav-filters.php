@@ -87,17 +87,8 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 						}
 
 						$filter_classes = array( 'chosen', 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) ), 'chosen-' . sanitize_html_class( str_replace( 'pa_', '', $taxonomy ) . '-' . $term_slug ) );
-						/**
-						 * Allows the attribute term name to be modified before being output.
-						 *
-						 * @param string $term_name The name of the term.
-						 * @param WP_Term $term The term object.
-						 * @param string $taxonomy The taxonomy name.
-						 *
-						 * @since 8.8.0
-						 */
-						$anchor_text = apply_filters( 'woocommerce_widget_layered_nav_term_anchor_text', $term->name, $term, $taxonomy );
-						echo '<li class="' . esc_attr( implode( ' ', $filter_classes ) ) . '"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $anchor_text ) . '</a></li>';
+
+						echo '<li class="' . esc_attr( implode( ' ', $filter_classes ) ) . '"><a rel="nofollow" aria-label="' . esc_attr__( 'Remove filter', 'woocommerce' ) . '" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a></li>';
 					}
 				}
 			}

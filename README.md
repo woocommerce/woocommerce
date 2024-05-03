@@ -1,10 +1,10 @@
 # WooCommerce Monorepo
 
-![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
+![WooCommerce](https://woo.com/wp-content/themes/woo/images/logo-woocommerce@2x.png)
 
 Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
-We recommend all developers to follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+We recommend all developers to follow the [WooCommerce development blog](https://woocommerce.wordpress.com/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
 
 ## Getting Started
 
@@ -47,18 +47,18 @@ To disclose a security issue to our team, [please submit a report via HackerOne 
 
 This repository is not suitable for support. Please don't use our issue tracker for support requests, but for core WooCommerce issues only. Support can take place through the appropriate channels:
 
--   If you have a problem, you may want to start with the [self help guide](https://woocommerce.com/document/woocommerce-self-service-guide/).
--   The [WooCommerce.com premium support portal](https://woocommerce.com/contact-us/) for customers who have purchased themes or extensions.
+-   If you have a problem, you may want to start with the [self help guide](https://woo.com/document/woocommerce-self-service-guide/).
+-   The [Woo.com premium support portal](https://woo.com/contact-us/) for customers who have purchased themes or extensions.
 -   [Our community forum on wp.org](https://wordpress.org/support/plugin/woocommerce) which is available for all WooCommerce users.
 -   [The Official WooCommerce Facebook Group](https://www.facebook.com/groups/advanced.woocommerce).
--   For customizations, you may want to check our list of [WooExperts](https://woocommerce.com/experts/) or [Codeable](https://codeable.io/).
+-   For customizations, you may want to check our list of [WooExperts](https://woo.com/experts/) or [Codeable](https://codeable.io/).
 
 NOTE: Unfortunately, we are unable to honor support requests in issues on this repository; as a result, any requests submitted in this manner will be closed.
 
 ## Community
 
-For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woocommerce.com/community-slack/)!
+For peer to peer support, real-time announcements, and office hours, please [join our slack community](https://woo.com/community-slack/)!
 
 ## Contributing to WooCommerce
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.
+If you have a patch or have stumbled upon an issue with WooCommerce core, you can contribute this back to the code. Please read our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) for more information on how you can do this.

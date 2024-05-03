@@ -18,7 +18,7 @@
 
 .wc-block-components-sidebar {
 	box-sizing: border-box;
-	margin-top: $gap-smaller;
+	margin: 0;
 	padding-left: math.percentage(math.div($gap-large, 1060px));
 	width: 35%;
 

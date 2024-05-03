@@ -4,7 +4,7 @@
 	"description": "API tests for WooCommerce",
 	"main": "index.js",
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"scripts": {

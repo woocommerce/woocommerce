@@ -23,4 +23,3 @@ import './checkout-order-summary-shipping';
 import './checkout-order-summary-coupon-form';
 import './checkout-order-summary-taxes';
 import './checkout-order-summary-cart-items';
-import './checkout-order-summary-totals';

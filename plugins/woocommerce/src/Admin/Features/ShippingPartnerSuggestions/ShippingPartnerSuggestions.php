@@ -2,13 +2,12 @@
 
 namespace Automattic\WooCommerce\Admin\Features\ShippingPartnerSuggestions;
 
-use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\EvaluateSuggestion;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RuleEvaluator;
 
 /**
  * Class ShippingPartnerSuggestions
  */
-class ShippingPartnerSuggestions extends RemoteSpecsEngine {
+class ShippingPartnerSuggestions {
 
 	/**
 	 * Go through the specs and run them.
@@ -16,34 +15,31 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 	 * @param array|null $specs shipping partner suggestion spec array.
 	 * @return array
 	 */
-	public static function get_suggestions( array $specs = null ) {
-		$locale = get_user_locale();
-
-		$specs           = is_array( $specs ) ? $specs : self::get_specs();
-		$results         = EvaluateSuggestion::evaluate_specs( $specs );
-		$specs_to_return = $results['suggestions'];
-		$specs_to_save   = null;
-
-		if ( empty( $specs_to_return ) ) {
-			// When suggestions is empty, replace it with defaults and save for 3 hours.
-			$specs_to_save   = DefaultShippingPartners::get_all();
-			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save )['suggestions'];
-		} elseif ( count( $results['errors'] ) > 0 ) {
-			// When suggestions is not empty but has errors, save it for 3 hours.
-			$specs_to_save = $specs;
+	public static function get_suggestions( $specs = null ) {
+		$suggestions = array();
+		if ( null === $specs ) {
+			$specs = self::get_specs_from_datasource();
 		}
 
-		if ( $specs_to_save ) {
-			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
+		$rule_evaluator = new RuleEvaluator();
+		foreach ( $specs as &$spec ) {
+			$spec = is_array( $spec ) ? (object) $spec : $spec;
+			if ( isset( $spec->is_visible ) ) {
+				$is_visible = $rule_evaluator->evaluate( $spec->is_visible );
+				if ( $is_visible ) {
+					$spec->is_visible = true;
+					$suggestions[]    = $spec;
+				}
+			}
 		}
 
-		return $specs_to_return;
+		return $suggestions;
 	}
 
 	/**
 	 * Get specs or fetch remotely if they don't exist.
 	 */
-	public static function get_specs() {
+	public static function get_specs_from_datasource() {
 		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
 			/**
 			 * It can be used to modify shipping partner suggestions spec.

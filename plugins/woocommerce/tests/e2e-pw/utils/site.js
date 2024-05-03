@@ -214,7 +214,7 @@ const deleteAllTaxRates = async () => {
 /**
  * Reset the test site. Useful when running E2E tests on a hosted test site to reset it to a somewhat pristine state prior to running tests.
  *
- * @param {string} cKey    Consumer key
+ * @param {string} cKey Consumer key
  * @param {string} cSecret Consumer secret
  */
 const reset = async ( cKey, cSecret ) => {
@@ -241,6 +241,13 @@ const reset = async ( cKey, cSecret ) => {
  * Convert Cart and Checkout pages to shortcode.
  */
 const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
+	/**
+	 * A WordPress page.
+	 * @typedef {Object} WPPage
+	 * @property {number} id
+	 * @property {string} slug
+	 */
+
 	const { request: apiRequest } = require( '@playwright/test' );
 	const { encodeCredentials } = require( './plugin-utils' );
 
@@ -257,16 +264,16 @@ const useCartCheckoutShortcodes = async ( baseURL, userAgent, admin ) => {
 	const request = await apiRequest.newContext( options );
 
 	// List all pages
-	const response_list = await request.get(
-		'/wp-json/wp/v2/pages?slug=cart,checkout',
-		{
-			data: {
-				_fields: [ 'id', 'slug' ],
-			},
-			failOnStatusCode: true,
-		}
-	);
+	const response_list = await request.get( '/wp-json/wp/v2/pages', {
+		data: {
+			_fields: [ 'id', 'slug' ],
+		},
+		failOnStatusCode: true,
+	} );
 
+	/**
+	 * @type {WPPage[]}
+	 */
 	const list = await response_list.json();
 
 	// Find the cart and checkout pages

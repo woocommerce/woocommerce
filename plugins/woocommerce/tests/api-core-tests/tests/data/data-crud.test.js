@@ -650,7 +650,7 @@ test.describe( 'Data API tests', () => {
 							num_decimals: 2,
 							thousand_sep: '.',
 							weight_unit: 'kg',
-							states: expect.arrayContaining( [] ),
+							states: [],
 						},
 						{
 							code: 'MG',

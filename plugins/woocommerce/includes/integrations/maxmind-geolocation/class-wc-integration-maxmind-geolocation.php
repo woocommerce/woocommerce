@@ -106,7 +106,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 						'The key that will be used when dealing with MaxMind Geolocation services. You can read how to generate one in <a href="%1$s">MaxMind Geolocation Integration documentation</a>.',
 						'woocommerce'
 					),
-					'https://woocommerce.com/document/maxmind-geolocation-integration/'
+					'https://woo.com/document/maxmind-geolocation-integration/'
 				),
 				'desc_tip'    => false,
 				'default'     => '',

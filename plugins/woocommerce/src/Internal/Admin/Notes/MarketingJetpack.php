@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
  *
  * Note: This should probably live in the Jetpack plugin in the future.
  *
- * @see  https://developer.woocommerce.com/2020/10/16/using-the-admin-notes-inbox-in-woocommerce/
+ * @see  https://developer.woo.com/2020/10/16/using-the-admin-notes-inbox-in-woocommerce/
  */
 class MarketingJetpack {
 	// Shared Note Traits.

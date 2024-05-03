@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _x } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
@@ -79,19 +79,11 @@ const Edit = ( {
 					>
 						<ToggleGroupControlOption
 							value="multiple"
-							label={ _x(
-								'Multiple',
-								'Number of filters',
-								'woocommerce'
-							) }
+							label={ __( 'Multiple', 'woocommerce' ) }
 						/>
 						<ToggleGroupControlOption
 							value="single"
-							label={ _x(
-								'Single',
-								'Number of filters',
-								'woocommerce'
-							) }
+							label={ __( 'Single', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
 					<ToggleGroupControl

@@ -1,6 +1,4 @@
 .wc-block-cart {
-	padding-top: $gap;
-
 	.wc-block-components-shipping-calculator {
 		white-space: nowrap;
 	}
@@ -23,7 +21,7 @@
 	table.wc-block-cart-items,
 	table.wc-block-cart-items th,
 	table.wc-block-cart-items td {
-		margin: 0 0 $gap * 2.5;
+		margin: 0 0 2em;
 	}
 }
 
@@ -91,10 +89,6 @@
 	}
 }
 
-.wc-block-components-sidebar-layout.wc-block-cart {
-	padding-top: 0;
-}
-
 .is-small,
 .is-mobile {
 	.wc-block-cart-item__total {
@@ -104,10 +98,6 @@
 	}
 	table.wc-block-cart-items {
 		margin: 0;
-	}
-	.wc-block-components-shipping-rates-control
-	.wc-block-components-radio-control__option {
-		padding: 0 0 0 em($gap-huge);
 	}
 }
 
@@ -133,36 +123,23 @@
 
 	.wc-block-cart__totals-title {
 		@include text-heading();
-		@include font-size(smaller);
+		@include font-size( smaller );
 		display: block;
 		font-weight: 700;
-		padding: $gap-smaller $gap $gap-smaller 0;
-		text-align: left;
+		padding: 0.25rem 0;
+		text-align: right;
 		text-transform: uppercase;
+
+		textarea {
+			font-weight: 700; // Ensure correct font-weight in site-editor.
+		}
 	}
 
 	.wc-block-components-sidebar {
-		margin-top: 0;
-
 		.wc-block-components-shipping-calculator,
 		.wc-block-components-shipping-rates-control__package:not(.wc-block-components-panel) {
 			padding-left: $gap;
 			padding-right: $gap;
-		}
-
-		.wc-block-components-totals-item__description.wc-block-components-totals-shipping__via,
-		.wc-block-components-totals-shipping__change-address__link {
-			padding-top: $gap-smallest;
-		}
-
-		.wc-block-components-totals-shipping__options {
-			margin-top: $gap;
-		}
-		.wc-block-components-radio-control > * {
-			margin-bottom: $gap;
-		}
-		.wc-block-components-radio-control > *:last-child {
-			margin-bottom: 0;
 		}
 	}
 
@@ -224,7 +201,7 @@
 }
 
 // Skeleton is shown before mobile classes are appended.
-@media only screen and (max-width: 700px) {
+@media only screen and ( max-width: 700px ) {
 	.wp-block-woocommerce-cart.is-loading {
 		padding-top: $gap;
 

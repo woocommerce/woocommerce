@@ -23,6 +23,11 @@ const wooBlockwithFullEditorToolbarButton =
 					return <BlockEdit { ...props } />;
 				}
 
+				// Only add the `Full editor` button when the block is selected
+				if ( ! props?.isSelected ) {
+					return <BlockEdit { ...props } />;
+				}
+
 				/*
 				 * Extend the toolbar only to the sumary field block instance
 				 * that has the `woocommerce/product-description-field__content` template block ID.

@@ -119,7 +119,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 		wc_add_notice( 'One True Notice', 'notice' );
 		wc_add_notice( 'Second True Notice', 'notice', array( 'id' => 'second_notice' ) );
 
-		$this->expectOutputString( '<div class="woocommerce-info">One True Notice</div><div class="woocommerce-info" data-id="second_notice">Second True Notice</div>' );
+		$this->expectOutputString( '<div class="wc-block-components-notice-banner is-info" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">One True Notice</div></div><div class="wc-block-components-notice-banner is-info" data-id="second_notice" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">Second True Notice</div></div>' );
 
 		wc_print_notices();
 
@@ -131,7 +131,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * when first parameter is set to true.
 	 */
 	public function test_wc_print_notices_should_return_notices() {
-		$expected_return = "\n	<div class=\"woocommerce-info\">\n		One True Notice	</div>\n";
+		$expected_return = '<div class="wc-block-components-notice-banner is-info" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">One True Notice</div></div>';
 
 		wc_add_notice( 'One True Notice', 'notice' );
 
@@ -149,7 +149,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_success_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-message" role="alert">Success!</div>' );
+		$this->expectOutputString( '<div class="wc-block-components-notice-banner is-success" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z"></path></svg><div class="wc-block-components-notice-banner__content">Success!</div></div>' );
 
 		wc_print_notice( 'Success!' );
 	}
@@ -161,7 +161,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_print_info_notice() {
 
-		$this->expectOutputString( '<div class="woocommerce-info">Info!</div>' );
+		$this->expectOutputString( '<div class="wc-block-components-notice-banner is-info" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">Info!</div></div>' );
 
 		wc_print_notice( 'Info!', 'notice' );
 	}
@@ -174,7 +174,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function test_wc_print_error_notice() {
 
 		// Specific type.
-		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li>Error!</li></ul>' );
+		$this->expectOutputString( '<div class="wc-block-components-notice-banner is-error" role="alert"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">Error!</div></div>' );
 
 		wc_print_notice( 'Error!', 'error' );
 	}
@@ -187,7 +187,7 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	public function test_wc_print_notice_data() {
 
 		// Specific type.
-		$this->expectOutputString( '<ul class="woocommerce-error" role="alert"><li data-id="billing_postcode">Error!</li></ul>' );
+		$this->expectOutputString( '<div class="wc-block-components-notice-banner is-error" role="alert" data-id="billing_postcode"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z"></path></svg><div class="wc-block-components-notice-banner__content">Error!</div></div>' );
 
 		wc_print_notice( 'Error!', 'error', array( 'id' => 'billing_postcode' ) );
 	}

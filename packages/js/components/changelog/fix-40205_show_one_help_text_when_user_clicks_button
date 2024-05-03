@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Add className prop to Tooltip component #41435

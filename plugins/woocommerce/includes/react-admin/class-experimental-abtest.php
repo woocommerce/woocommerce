@@ -121,7 +121,6 @@ final class Experimental_Abtest {
 	 *
 	 * @param string $test_name Name of the A/B test.
 	 * @return mixed|null A/B test variation, or null on failure.
-	 * @throws \Exception If there is an error retrieving the variation and the environment is not production.
 	 */
 	public function get_variation( $test_name ) {
 		// Default to the control variation when users haven't consented to tracking.
@@ -132,11 +131,7 @@ final class Experimental_Abtest {
 		$variation = $this->fetch_variation( $test_name );
 
 		// If there was an error retrieving a variation, conceal the error for the consumer.
-		// If there was an error retrieving a variation, throw an exception in non-production environments.
 		if ( is_wp_error( $variation ) ) {
-			if ( 'production' !== wp_get_environment_type() ) {
-				throw new \Exception( $variation->get_error_message() );
-			}
 			return 'control';
 		}
 
@@ -199,7 +194,7 @@ final class Experimental_Abtest {
 		}
 
 		// Make sure test name is a valid one.
-		if ( ! preg_match( '/^[a-z0-9_]+$/', $test_name ) ) {
+		if ( ! preg_match( '/^[A-Za-z0-9_]+$/', $test_name ) ) {
 			return new \WP_Error( 'invalid_test_name', 'Invalid A/B test name.' );
 		}
 

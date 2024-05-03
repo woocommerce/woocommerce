@@ -125,44 +125,42 @@ const Edit = ( {
 							/>
 						</ToggleGroupControl>
 					) }
-					<ToggleGroupControl
-						label={ __( 'Image Sizing', 'woocommerce' ) }
-						help={
-							! isBlockThemeEnabled
-								? createInterpolateElement(
-										__(
-											'Product image cropping can be modified in the <a>Customizer</a>.',
-											'woocommerce'
-										),
-										{
-											a: (
-												// eslint-disable-next-line jsx-a11y/anchor-has-content
-												<a
-													href={ `${ getAdminLink(
-														'customize.php'
-													) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
-													target="_blank"
-													rel="noopener noreferrer"
-												/>
-											),
-										}
-								  )
-								: null
-						}
-						value={ imageSizing }
-						onChange={ ( value: ImageSizing ) =>
-							setAttributes( { imageSizing: value } )
-						}
-					>
-						<ToggleGroupControlOption
-							value={ ImageSizing.SINGLE }
-							label={ __( 'Full Size', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value={ ImageSizing.THUMBNAIL }
-							label={ __( 'Cropped', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
+					{ ! isBlockThemeEnabled && (
+						<ToggleGroupControl
+							label={ __( 'Image Sizing', 'woocommerce' ) }
+							help={ createInterpolateElement(
+								__(
+									'Product image cropping can be modified in the <a>Customizer</a>.',
+									'woocommerce'
+								),
+								{
+									a: (
+										// eslint-disable-next-line jsx-a11y/anchor-has-content
+										<a
+											href={ `${ getAdminLink(
+												'customize.php'
+											) }?autofocus[panel]=woocommerce&autofocus[section]=woocommerce_product_images` }
+											target="_blank"
+											rel="noopener noreferrer"
+										/>
+									),
+								}
+							) }
+							value={ imageSizing }
+							onChange={ ( value: ImageSizing ) =>
+								setAttributes( { imageSizing: value } )
+							}
+						>
+							<ToggleGroupControlOption
+								value={ ImageSizing.SINGLE }
+								label={ __( 'Full Size', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value={ ImageSizing.THUMBNAIL }
+								label={ __( 'Cropped', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					) }
 				</PanelBody>
 			</InspectorControls>
 			<Disabled>

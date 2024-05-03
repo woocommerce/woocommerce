@@ -28,9 +28,7 @@
 		"test:js": "jest --config client/jest.config.js",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "wireit",
-		"watch:build:project:feature-config": "WC_ADMIN_PHASE=development php ../woocommerce/bin/generate-feature-config.php",
-		"postinstall": "node ./bin/xstate5-react-script.js"
+		"watch:build:project:bundle": "wireit"
 	},
 	"lint-staged": {
 		"*.scss": [
@@ -43,8 +41,8 @@
 	},
 	"dependencies": {
 		"@automattic/components": "^2.0.1",
-		"@automattic/explat-client": "^0.0.5",
-		"@automattic/explat-client-react-helpers": "^0.0.6",
+		"@automattic/explat-client": "^0.0.3",
+		"@automattic/explat-client-react-helpers": "^0.0.4",
 		"@automattic/interpolate-components": "^1.2.1",
 		"@react-spring/web": "^9.7.3",
 		"@types/wordpress__blocks": "11.0.7",
@@ -78,7 +76,6 @@
 		"@wordpress/viewport": "wp-6.0",
 		"@wordpress/warning": "wp-6.0",
 		"@xstate/react": "3.2.1",
-		"@xstate5/react": "npm:@xstate/react@4",
 		"classnames": "^2.3.2",
 		"core-js": "^3.34.0",
 		"debug": "^4.3.4",
@@ -98,7 +95,6 @@
 		"react-visibility-sensor": "^5.1.1",
 		"redux": "^4.2.1",
 		"xstate": "4.37.1",
-		"xstate5": "npm:xstate@^5.9.1",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
@@ -115,7 +111,6 @@
 		"@babel/runtime": "^7.23.5",
 		"@octokit/core": "^3.6.0",
 		"@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
-		"@statelyai/inspect": "^0.2.5",
 		"@testing-library/dom": "8.11.3",
 		"@testing-library/jest-dom": "5.16.2",
 		"@testing-library/react": "12.1.3",
@@ -173,7 +168,7 @@
 		"@wordpress/postcss-themes": "^1.0.5",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^12.6.1",
-		"@wordpress/stylelint-config": "^21.36.0",
+		"@wordpress/stylelint-config": "^20.0.3",
 		"@xstate/inspect": "0.8.0",
 		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.16",
@@ -197,7 +192,6 @@
 		"eslint-plugin-xstate": "^1.1.3",
 		"expose-loader": "^3.1.0",
 		"fork-ts-checker-webpack-plugin": "^8.0.0",
-		"fs-extra": "11.1.1",
 		"jest": "~27.5.1",
 		"jest-environment-jsdom": "~27.5.1",
 		"jest-environment-node": "~27.5.1",
@@ -219,7 +213,7 @@
 		"react-refresh": "^0.14.0",
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
-		"rimraf": "5.0.5",
+		"rimraf": "^3.0.2",
 		"rtlcss": "^2.6.2",
 		"sass": "^1.69.5",
 		"sass-loader": "^10.5.0",
@@ -241,14 +235,14 @@
 		"@wordpress/data": "wp-6.0"
 	},
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "client/**/*.{js,ts,tsx,scss}"
+				"changes": "client/**/*{js,ts,tsx,scss}"
 			},
 			"tests": [
 				{
@@ -259,7 +253,7 @@
 						"webpack.config.js",
 						"babel.config.js",
 						"tsconfig.json",
-						"client/**/*.{js,jsx,ts,tsx,scss,json}"
+						"client/**/*.{js,jsx,ts,tsx,scss}"
 					],
 					"cascade": "test:js"
 				}

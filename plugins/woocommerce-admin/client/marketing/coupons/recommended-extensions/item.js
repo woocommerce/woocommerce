@@ -9,7 +9,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import './style.scss';
 import { ProductIcon } from '~/marketing/components';
-import { getRecommendationSource } from '~/marketing/utils';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 
 const RecommendedExtensionsItem = ( {
@@ -20,10 +19,7 @@ const RecommendedExtensionsItem = ( {
 	category,
 } ) => {
 	const onProductClick = () => {
-		recordEvent( 'marketing_recommended_extension', {
-			name: title,
-			source: getRecommendationSource(),
-		} );
+		recordEvent( 'marketing_recommended_extension', { name: title } );
 	};
 
 	const classNameBase = 'woocommerce-marketing-recommended-extensions-item';

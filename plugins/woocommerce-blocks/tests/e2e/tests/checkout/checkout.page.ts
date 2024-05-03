@@ -52,21 +52,7 @@ export class CheckoutPage {
 		return nameIsVisible && priceIsVisible;
 	}
 
-	async fillInCheckoutWithTestData(
-		overrideData = {},
-		additionalFields: {
-			address?: {
-				shipping?: Record< string, string >;
-				billing?: Record< string, string >;
-			};
-			contact?: Record< string, string >;
-			order?: Record< string, string >;
-		} = {
-			address: { shipping: {}, billing: {} },
-			order: {},
-			contact: {},
-		}
-	) {
+	async fillInCheckoutWithTestData( overrideData = {} ) {
 		const isShippingOpen = await this.page
 			.getByRole( 'group', {
 				name: 'Shipping address',
@@ -81,99 +67,15 @@ export class CheckoutPage {
 
 		const testData = { ...this.testData, ...overrideData };
 
-		await this.fillContactInformation(
-			testData.email,
-			additionalFields.contact || {}
-		);
+		await this.page.getByLabel( 'Email address' ).fill( testData.email );
 		if ( isShippingOpen ) {
-			await this.fillShippingDetails(
-				testData,
-				additionalFields.address?.shipping || {}
-			);
+			await this.fillShippingDetails( testData );
 		}
 		if ( isBillingOpen ) {
-			// Additional billing details
-			await this.fillBillingDetails( testData, {
-				...( additionalFields.address?.shipping || {} ),
-				...( additionalFields.address?.billing || {} ),
-			} );
+			await this.fillBillingDetails( testData );
 		}
-
-		if (
-			typeof additionalFields.order !== 'undefined' &&
-			Object.keys( additionalFields.order ).length > 0
-		) {
-			await this.fillAdditionalInformationSection(
-				additionalFields.order
-			);
-		}
-
 		// Blur active field to trigger shipping rates update, then wait for requests to finish.
 		await this.page.evaluate( 'document.activeElement.blur()' );
-	}
-
-	async fillContactInformation(
-		email: string,
-		additionalFields: Record< string, string >
-	) {
-		const contactSection = this.page.getByRole( 'group', {
-			name: 'Contact information',
-		} );
-		await contactSection.getByLabel( 'Email address' ).fill( email );
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = contactSection.getByLabel( label );
-			await field.fill( value );
-		}
-	}
-
-	async fillAdditionalInformationSection(
-		additionalFields: Record< string, string >
-	) {
-		const contactSection = this.page.getByRole( 'group', {
-			name: 'Additional order information',
-		} );
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = contactSection.getByLabel( label );
-			await field.fill( value );
-		}
-	}
-
-	async fillAdditionalInformation(
-		email: string,
-		additionalFields: { label: string; value: string }[]
-	) {
-		await this.page.getByLabel( 'Email address' ).fill( email );
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const { label, value } of additionalFields ) {
-			const field = this.page.getByLabel( label );
-			await field.fill( value );
-		}
-	}
-
-	/**
-	 * Blurs the current input and waits for the checkout to finish any loading or calculating.
-	 */
-	async waitForCheckoutToFinishUpdating() {
-		await this.page.evaluate( 'document.activeElement.blur()' );
-
-		await this.page.waitForFunction( () => {
-			return (
-				! window.wp.data
-					.select( 'wc/store/checkout' )
-					.isCalculating() &&
-				! window.wp.data
-					.select( 'wc/store/cart' )
-					.isShippingRateBeingSelected() &&
-				! window.wp.data
-					.select( 'wc/store/cart' )
-					.isCustomerDataUpdating()
-			);
-		} );
 	}
 
 	/**
@@ -183,42 +85,10 @@ export class CheckoutPage {
 	 *                        when testing for errors on the checkout page.
 	 */
 	async placeOrder( waitForRedirect = true ) {
-		await this.page
-			.waitForRequest(
-				( request ) => {
-					return request.url().includes( 'batch' );
-				},
-				{ timeout: 3000 }
-			)
-			.catch( () => {
-				// Do nothing. This is just in case there's a debounced request
-				// still to be made, e.g. from checking "Can a truck fit down
-				// your road?" field.
-			} );
-		await this.waitForCheckoutToFinishUpdating();
 		await this.page.getByText( 'Place Order', { exact: true } ).click();
 		if ( waitForRedirect ) {
 			await this.page.waitForURL( /order-received/ );
 		}
-	}
-
-	/**
-	 * Verifies that the additional field values are visible on the confirmation page.
-	 */
-	async verifyAdditionalFieldsDetails( values: [ string, string ][] ) {
-		for ( const [ label, value ] of values ) {
-			const visible = await this.page
-				.getByText(
-					`${ label }${ value }` // No space between these due to the way the markup is output on the confirmation page.
-				)
-				.isVisible();
-
-			if ( ! visible ) {
-				return false;
-			}
-		}
-		// If one of the fields above is false the function would have returned early.
-		return true;
 	}
 
 	async verifyAddressDetails(
@@ -281,22 +151,6 @@ export class CheckoutPage {
 		}
 	}
 
-	async waitForCustomerDataUpdate() {
-		// Wait for data to start updating.
-		await this.page.waitForFunction( () => {
-			return !! window.wp.data
-				.select( 'wc/store/cart' )
-				.isCustomerDataUpdating();
-		} );
-
-		// Wait for data to finish updating
-		await this.page.waitForFunction( () => {
-			return ! window.wp.data
-				.select( 'wc/store/cart' )
-				.isCustomerDataUpdating();
-		} );
-	}
-
 	async editShippingDetails() {
 		const editButton = this.page.locator(
 			'.wc-block-checkout__shipping-fields .wc-block-components-address-address-wrapper:not(.is-editing) .wc-block-components-address-card__edit'
@@ -307,17 +161,14 @@ export class CheckoutPage {
 		}
 	}
 
-	async fillBillingDetails(
-		customerBillingDetails: Record< string, string >,
-		additionalFields: Record< string, string > = {}
-	) {
+	async fillBillingDetails( customerBillingDetails ) {
 		await this.editBillingDetails();
 		const billingForm = this.page.getByRole( 'group', {
 			name: 'Billing address',
 		} );
+		const companyInputField = billingForm.getByLabel( 'Company' );
 
-		if ( customerBillingDetails.company ) {
-			const companyInputField = billingForm.getByLabel( 'Company' );
+		if ( await companyInputField.isVisible() ) {
 			await companyInputField.fill( customerBillingDetails.company );
 		}
 
@@ -330,6 +181,9 @@ export class CheckoutPage {
 		const city = billingForm.getByLabel( 'City' );
 		const phone = billingForm.getByLabel( 'Phone' );
 
+		// Using locator here since the label of this form changes depending on the country.
+		const postcode = billingForm.locator( '#billing-postcode' );
+
 		await email.fill( customerBillingDetails.email );
 		await firstName.fill( customerBillingDetails.firstname );
 		await lastName.fill( customerBillingDetails.lastname );
@@ -339,46 +193,35 @@ export class CheckoutPage {
 		await city.fill( customerBillingDetails.city );
 		await phone.fill( customerBillingDetails.phone );
 
-		if ( customerBillingDetails.state ) {
-			const state = billingForm.getByLabel( 'State', {
-				exact: true,
-			} );
-			const province = billingForm.getByLabel( 'Province', {
-				exact: true,
-			} );
-			const county = billingForm.getByLabel( 'County' );
+		let state = billingForm.getByLabel( 'State', {
+			exact: true,
+		} );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerBillingDetails.state );
+		if ( ! ( await state.isVisible() ) ) {
+			state = billingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
 		}
 
-		if ( customerBillingDetails.postcode ) {
-			// Using locator here since the label of this form changes depending
-			// on the country.
-			const postcode = billingForm.locator( '#billing-postcode' );
+		if ( await state.isVisible() ) {
+			await state.fill( customerBillingDetails.state );
+		}
+
+		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerBillingDetails.postcode );
 		}
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = billingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
-		}
+		// Blur active field to trigger customer address update.
+		await this.page.evaluate( 'document.activeElement.blur()' );
 	}
 
-	async fillShippingDetails(
-		customerShippingDetails: Record< string, string >,
-		additionalFields: Record< string, string > = {}
-	) {
+	async fillShippingDetails( customerShippingDetails ) {
 		await this.editShippingDetails();
 		const shippingForm = this.page.getByRole( 'group', {
 			name: 'Shipping address',
 		} );
+		const companyInputField = shippingForm.getByLabel( 'Company' );
 
-		if ( customerShippingDetails.company ) {
-			const companyInputField = shippingForm.getByLabel( 'Company' );
+		if ( await companyInputField.isVisible() ) {
 			await companyInputField.fill( customerShippingDetails.company );
 		}
 
@@ -390,6 +233,9 @@ export class CheckoutPage {
 		const city = shippingForm.getByLabel( 'City' );
 		const phone = shippingForm.getByLabel( 'Phone' );
 
+		// Using locator here since the label of this form changes depending on the country.
+		const postcode = shippingForm.locator( '#shipping-postcode' );
+
 		await firstName.fill( customerShippingDetails.firstname );
 		await lastName.fill( customerShippingDetails.lastname );
 		await country.fill( customerShippingDetails.country );
@@ -398,32 +244,22 @@ export class CheckoutPage {
 		await city.fill( customerShippingDetails.city );
 		await phone.fill( customerShippingDetails.phone );
 
-		if ( customerShippingDetails.state ) {
-			const state = shippingForm.getByLabel( 'State', {
-				exact: true,
-			} );
-			const province = shippingForm.getByLabel( 'Province', {
-				exact: true,
-			} );
-			const county = shippingForm.getByLabel( 'County' );
+		let state = shippingForm.getByLabel( 'State', {
+			exact: true,
+		} );
 
-			await state
-				.or( province )
-				.or( county )
-				.fill( customerShippingDetails.state );
+		if ( ! ( await state.isVisible() ) ) {
+			state = shippingForm.getByLabel( 'Province', {
+				exact: true,
+			} );
 		}
 
-		if ( customerShippingDetails.postcode ) {
-			// Using locator here since the label of this form changes depending
-			// on the country.
-			const postcode = shippingForm.locator( '#shipping-postcode' );
+		if ( await state.isVisible() ) {
+			await state.fill( customerShippingDetails.state );
+		}
+
+		if ( await postcode.isVisible() ) {
 			await postcode.fill( customerShippingDetails.postcode );
-		}
-
-		// Rest of additional data passed in from the overrideData object.
-		for ( const [ label, value ] of Object.entries( additionalFields ) ) {
-			const field = shippingForm.getByLabel( label, { exact: true } );
-			await field.fill( value );
 		}
 
 		// Blur active field to trigger customer address update.
@@ -443,6 +279,10 @@ export class CheckoutPage {
 			) )
 		) {
 			await shipping.click();
+			await this.page.waitForResponse( ( request ) => {
+				const url = request.url();
+				return url.includes( 'wc/store/v1/batch' );
+			} );
 			await this.page.waitForFunction( () => {
 				return ! window.wp.data
 					.select( 'wc/store/cart' )

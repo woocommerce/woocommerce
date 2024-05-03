@@ -1,4 +1,5 @@
 .wp-block-woocommerce-cart-cross-sells-products-block {
+
 	.cross-sells-product {
 		display: inline-block;
 		margin-bottom: 2em;
@@ -18,6 +19,19 @@
 
 			.wc-block-components-product-price {
 				display: block;
+			}
+		}
+
+		.wc-block-components-product-add-to-cart-button:not(.is-link) {
+			background-color: #eee;
+			color: #333;
+			margin-top: 1em;
+
+			&:focus,
+			&:hover {
+				background-color: #d5d5d5;
+				border-color: #d5d5d5;
+				color: #333;
 			}
 		}
 	}

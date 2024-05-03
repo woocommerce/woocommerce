@@ -84,7 +84,6 @@ class ProductCollectionData extends ControllerTestCase {
 		);
 		$fixtures->get_taxonomy_and_term( $product, 'pa_size', 'large', 'large' );
 
-		// AND query type.
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
 		$request->set_param(
 			'calculate_attribute_counts',
@@ -92,30 +91,6 @@ class ProductCollectionData extends ControllerTestCase {
 				array(
 					'taxonomy'   => 'pa_size',
 					'query_type' => 'and',
-				),
-			),
-		);
-
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( null, $data['price_range'] );
-		$this->assertEquals( null, $data['rating_counts'] );
-
-		$this->assertIsArray( $data );
-
-		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'term' ) );
-		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'count' ) );
-
-		// OR query type.
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/collection-data' );
-		$request->set_param(
-			'calculate_attribute_counts',
-			array(
-				array(
-					'taxonomy'   => 'pa_size',
-					'query_type' => 'or',
 				),
 			),
 		);
@@ -139,7 +114,6 @@ class ProductCollectionData extends ControllerTestCase {
 		$this->assertEquals( null, $data['rating_counts'] );
 
 		$this->assertIsArray( $data );
-
 		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'term' ) );
 		$this->assertTrue( property_exists( $data['attribute_counts'][0], 'count' ) );
 	}

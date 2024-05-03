@@ -34,7 +34,7 @@ jobs:
           
           # Calculate the date for the next Thursday after the merge
           THURSDAY_AFTER_MERGE=$(date -u -d "${{ github.event.pull_request.merged_at }} + $DAYS_UNTIL_NEXT_THURSDAY days" +"%Y-%m-%d")
-          WOOAF_RELEASE_DATE=$(date -u -d "${THURSDAY_AFTER_MERGE} + 5 days" +"%Y-%m-%d")
+          WOOAF_RELEASE_DATE=$(date -u -d "${THURSDAY_AFTER_MERGE} + 6 days" +"%Y-%m-%d")
           TEST_DATE_MESSAGE="Thursday, $THURSDAY_AFTER_MERGE. (Targeting release on $WOOAF_RELEASE_DATE)"
           echo "TEST_DATE_MESSAGE=${TEST_DATE_MESSAGE}" >> $GITHUB_ENV
 
@@ -60,26 +60,6 @@ jobs:
             ["8.8.0"]="2024-04-09"
             ["8.9.0"]="2024-05-14"
             ["9.0.0"]="2024-06-11"
-            ["9.1.0"]="2024-07-09"
-            ["9.2.0"]="2024-08-13"
-            ["9.3.0"]="2024-09-10"
-            ["9.4.0"]="2024-10-08"
-            ["9.5.0"]="2024-11-12"
-            ["9.6.0"]="2024-12-10"
-            ["9.7.0"]="2025-01-14"
-            ["9.8.0"]="2025-02-11"
-            ["9.9.0"]="2025-03-11"
-            ["10.0.0"]="2025-04-08"
-            ["10.1.0"]="2025-05-13"
-            ["10.2.0"]="2025-06-10"
-            ["10.3.0"]="2025-07-08"
-            ["10.4.0"]="2025-08-12"
-            ["10.5.0"]="2025-09-09"
-            ["10.6.0"]="2025-10-14"
-            ["10.7.0"]="2025-11-11"
-            ["10.8.0"]="2025-12-09"
-            ["10.9.0"]="2026-01-13"
-            ["11.0.0"]="2026-02-10"
           )
           
           # Check if the milestone title exists in our predefined list and get the date

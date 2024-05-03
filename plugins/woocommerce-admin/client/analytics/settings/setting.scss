@@ -1,7 +1,7 @@
 .woocommerce-setting {
 	display: flex;
 	margin-bottom: $gap-large;
-	@include breakpoint( "<1280px" ) {
+	@include breakpoint( '<1280px' ) {
 		flex-direction: column;
 	}
 }
@@ -11,7 +11,7 @@
 	margin-bottom: $gap;
 	padding-right: $gap;
 	font-weight: bold;
-	@include breakpoint( ">1280px" ) {
+	@include breakpoint( '>1280px' ) {
 		width: 15%;
 	}
 }
@@ -19,7 +19,7 @@
 .woocommerce-setting__input {
 	display: flex;
 	flex-direction: column;
-	@include breakpoint( ">1280px" ) {
+	@include breakpoint( '>1280px' ) {
 		width: 35%;
 
 		.woocommerce-filters-filter {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent `wc_get_chosen_shipping_method_ids` from causing fatal errors if chosen methods are not strings.

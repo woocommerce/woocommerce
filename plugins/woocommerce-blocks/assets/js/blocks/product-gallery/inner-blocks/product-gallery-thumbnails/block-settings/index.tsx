@@ -103,7 +103,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 					value={ context.thumbnailsNumberOfThumbnails }
 					onChange={ ( value: number ) =>
 						updateBlockAttributes( productGalleryClientId, {
-							thumbnailsNumberOfThumbnails: Math.round( value ),
+							thumbnailsNumberOfThumbnails: value,
 						} )
 					}
 					help={ __(
@@ -112,7 +112,6 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 					) }
 					max={ maxNumberOfThumbnails }
 					min={ minNumberOfThumbnails }
-					step={ 1 }
 				/>
 			) }
 		</>

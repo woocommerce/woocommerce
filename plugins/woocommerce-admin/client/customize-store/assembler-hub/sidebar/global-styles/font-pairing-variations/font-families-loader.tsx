@@ -14,7 +14,6 @@ import { FontFamily } from '~/customize-store/types/font';
 
 type Props = {
 	fontFamilies: Array< FontFamily >;
-	iframeInstance: HTMLObjectElement | null;
 	onLoad?: () => void;
 	preload?: boolean;
 };
@@ -41,11 +40,7 @@ const getDisplaySrcFromFontFace = ( input: string, urlPrefix: string ) => {
 
 	return ! isUrlEncoded( input ) ? encodeURI( input ) : input;
 };
-export const FontFamiliesLoader = ( {
-	fontFamilies,
-	iframeInstance,
-	onLoad,
-}: Props ) => {
+export const FontFamiliesLoader = ( { fontFamilies, onLoad }: Props ) => {
 	const { site, currentTheme } = useSelect( ( select ) => {
 		return {
 			// @ts-expect-error No types for this exist yet.
@@ -55,19 +50,19 @@ export const FontFamiliesLoader = ( {
 		};
 	} );
 
+	const themeUrl =
+		site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
+
 	useEffect( () => {
-		if ( ! Array.isArray( fontFamilies ) || ! site ) {
+		if ( ! Array.isArray( fontFamilies ) ) {
 			return;
 		}
-
-		const themeUrl =
-			site?.url + '/wp-content/themes/' + currentTheme?.stylesheet;
 		fontFamilies.forEach( async ( fontFamily ) => {
 			fontFamily.fontFace?.forEach( async ( fontFace ) => {
-				const src = Array.isArray( fontFace.src )
-					? fontFace.src[ 0 ]
-					: fontFace.src;
-				const srcFont = getDisplaySrcFromFontFace( src, themeUrl );
+				const srcFont = getDisplaySrcFromFontFace(
+					fontFace.src,
+					themeUrl
+				);
 				const dataSource = `url(${ srcFont })`;
 				const newFont = new FontFace( fontFace.fontFamily, dataSource, {
 					style: fontFace.fontStyle,
@@ -77,21 +72,12 @@ export const FontFamiliesLoader = ( {
 				const loadedFace = await newFont.load();
 
 				document.fonts.add( loadedFace );
-				if ( iframeInstance ) {
-					iframeInstance.contentDocument?.fonts.add( loadedFace );
-				}
 				if ( onLoad ) {
 					onLoad();
 				}
 			} );
 		} );
-	}, [
-		currentTheme?.stylesheet,
-		fontFamilies,
-		iframeInstance,
-		onLoad,
-		site,
-	] );
+	}, [ fontFamilies, onLoad, themeUrl ] );
 
 	return <></>;
 };

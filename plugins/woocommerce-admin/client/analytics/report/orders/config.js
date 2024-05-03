@@ -104,7 +104,7 @@ export const advancedFilters = applyFilters(
 		filters: {
 			status: {
 				labels: {
-					add: __( 'Order status', 'woocommerce' ),
+					add: __( 'Order Status', 'woocommerce' ),
 					remove: __( 'Remove order status filter', 'woocommerce' ),
 					rule: __(
 						'Select an order status filter match',
@@ -112,7 +112,7 @@ export const advancedFilters = applyFilters(
 					),
 					/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Order status</title> <rule/> <filter/>',
+						'<title>Order Status</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select an order status', 'woocommerce' ),
@@ -139,9 +139,9 @@ export const advancedFilters = applyFilters(
 			},
 			product: {
 				labels: {
-					add: __( 'Product', 'woocommerce' ),
+					add: __( 'Products', 'woocommerce' ),
 					placeholder: __( 'Search products', 'woocommerce' ),
-					remove: __( 'Remove product filter', 'woocommerce' ),
+					remove: __( 'Remove products filter', 'woocommerce' ),
 					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
@@ -170,22 +170,16 @@ export const advancedFilters = applyFilters(
 			},
 			variation: {
 				labels: {
-					add: __( 'Product variation', 'woocommerce' ),
-					placeholder: __(
-						'Search product variations',
-						'woocommerce'
-					),
-					remove: __(
-						'Remove product variation filter',
-						'woocommerce'
-					),
+					add: __( 'Variations', 'woocommerce' ),
+					placeholder: __( 'Search variations', 'woocommerce' ),
+					remove: __( 'Remove variations filter', 'woocommerce' ),
 					rule: __(
-						'Select a product variation filter match',
+						'Select a variation filter match',
 						'woocommerce'
 					),
 					/* translators: A sentence describing a Variation filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product variation</title> <rule/> <filter/>',
+						'<title>Variation</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select variation', 'woocommerce' ),
@@ -210,7 +204,7 @@ export const advancedFilters = applyFilters(
 			},
 			coupon: {
 				labels: {
-					add: __( 'Coupon code', 'woocommerce' ),
+					add: __( 'Coupon Codes', 'woocommerce' ),
 					placeholder: __( 'Search coupons', 'woocommerce' ),
 					remove: __( 'Remove coupon filter', 'woocommerce' ),
 					rule: __( 'Select a coupon filter match', 'woocommerce' ),
@@ -268,11 +262,11 @@ export const advancedFilters = applyFilters(
 			},
 			refunds: {
 				labels: {
-					add: __( 'Refund', 'woocommerce' ),
-					remove: __( 'Remove refund filter', 'woocommerce' ),
+					add: __( 'Refunds', 'woocommerce' ),
+					remove: __( 'Remove refunds filter', 'woocommerce' ),
 					rule: __( 'Select a refund filter match', 'woocommerce' ),
 					title: __(
-						'<title>Refund</title> <filter/>',
+						'<title>Refunds</title> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select a refund type', 'woocommerce' ),
@@ -302,7 +296,7 @@ export const advancedFilters = applyFilters(
 			},
 			tax_rate: {
 				labels: {
-					add: __( 'Tax rate', 'woocommerce' ),
+					add: __( 'Tax Rates', 'woocommerce' ),
 					placeholder: __( 'Search tax rates', 'woocommerce' ),
 					remove: __( 'Remove tax rate filter', 'woocommerce' ),
 					rule: __( 'Select a tax rate filter match', 'woocommerce' ),
@@ -334,22 +328,16 @@ export const advancedFilters = applyFilters(
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Product attribute', 'woocommerce' ),
-					placeholder: __(
-						'Search product attributes',
-						'woocommerce'
-					),
-					remove: __(
-						'Remove product attribute filter',
-						'woocommerce'
-					),
+					add: __( 'Attribute', 'woocommerce' ),
+					placeholder: __( 'Search attributes', 'woocommerce' ),
+					remove: __( 'Remove attribute filter', 'woocommerce' ),
 					rule: __(
 						'Select a product attribute filter match',
 						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product attribute</title> <rule/> <filter/>',
+						'<title>Attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
 					filter: __( 'Select attributes', 'woocommerce' ),

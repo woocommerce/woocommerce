@@ -33,13 +33,9 @@ export const TextControl = forwardRef( function ForwardedTextControl(
 		<InputControl
 			{ ...props }
 			ref={ ref }
-			className={ classNames(
-				'woocommerce-product-text-control',
-				className,
-				{
-					'has-error': error,
-				}
-			) }
+			className={ classNames( className, {
+				'has-error': error,
+			} ) }
 			label={
 				<Label
 					label={ label }

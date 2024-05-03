@@ -1099,11 +1099,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
-		if ( 'variation' === $product->get_type() ) {
-			// Can't get a variation of a variation.
-			return 0;
-		}
-
 		global $wpdb;
 
 		$meta_attribute_names = array();
@@ -1193,11 +1188,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
-	 * @param  array      $default_values Key value pairs to set on created variations.
-	 * @param  array      $metadata Key value pairs to set as meta data on created variations.
+	 * @param  array  	  $default_values Key value pairs to set on created variations.
 	 * @return int        Number of created variations.
 	 */
-	public function create_all_product_variations( $product, $limit = -1, $default_values = array(), $metadata = array() ) {
+	public function create_all_product_variations( $product, $limit = -1, $default_values = array() ) {
 		$count = 0;
 
 		if ( ! $product ) {
@@ -1227,9 +1221,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			$variation = wc_get_product_object( 'variation' );
 			$variation->set_props( $default_values );
-			foreach ( $metadata as $meta ) {
-				$variation->add_meta_data( $meta['key'], $meta['value'] );
-			}
 			$variation->set_parent_id( $product->get_id() );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();

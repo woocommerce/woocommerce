@@ -12,7 +12,7 @@ const PAYMENT_METHOD_PROMOTIONS = [
 	{
 		gatewayId: 'pre_install_woocommerce_payments_promotion',
 		pluginSlug: 'woocommerce-payments',
-		url: 'https://woocommerce.com/payments/?utm_medium=product',
+		url: 'https://woo.com/payments/?utm_medium=product',
 	},
 ];
 

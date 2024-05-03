@@ -170,7 +170,7 @@ class DatabaseUtil {
 				$value = $value ? ( new DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
 				break;
 			default:
-				throw new \Exception( esc_html( 'Invalid type received: ' . $type ) );
+				throw new \Exception( 'Invalid type received: ' . $type );
 		}
 
 		return $value;
@@ -194,7 +194,7 @@ class DatabaseUtil {
 		);
 
 		if ( ! isset( $wpdb_placeholder_for_type[ $type ] ) ) {
-			throw new \Exception( esc_html( 'Invalid column type: ' . $type ) );
+			throw new \Exception( 'Invalid column type: ' . $type );
 		}
 
 		return $wpdb_placeholder_for_type[ $type ];
@@ -231,7 +231,7 @@ class DatabaseUtil {
 	 *
 	 * @return int Returns the value of DB's  ON DUPLICATE KEY UPDATE clause.
 	 */
-	public function insert_on_duplicate_key_update( $table_name, $data, $format ): int {
+	public function insert_on_duplicate_key_update( $table_name, $data, $format ) : int {
 		global $wpdb;
 		if ( empty( $data ) ) {
 			return 0;
@@ -249,7 +249,7 @@ class DatabaseUtil {
 				$values[]       = $value;
 				$value_format[] = $format[ $index ];
 			}
-			++$index;
+			$index++;
 		}
 		$column_clause       = '`' . implode( '`, `', $columns ) . '`';
 		$value_format_clause = implode( ', ', $value_format );
@@ -273,7 +273,7 @@ $on_duplicate_clause
 	 *
 	 * @return int Max index length.
 	 */
-	public function get_max_index_length(): int {
+	public function get_max_index_length() : int {
 		/**
 		 * Filters the maximum index length in the database.
 		 *
@@ -290,53 +290,5 @@ $on_duplicate_clause
 		$max_index_length = apply_filters( 'woocommerce_database_max_index_length', 191 );
 		// Index length cannot be more than 768, which is 3078 bytes in utf8mb4 and max allowed by InnoDB engine.
 		return min( absint( $max_index_length ), 767 );
-	}
-
-	/**
-	 * Create a fulltext index on order address table.
-	 *
-	 * @return void
-	 */
-	public function create_fts_index_order_address_table(): void {
-		global $wpdb;
-		$address_table = $wpdb->prefix . 'wc_order_addresses';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $address_table is hardcoded.
-		$wpdb->query( "CREATE FULLTEXT INDEX order_addresses_fts ON $address_table (first_name, last_name, company, address_1, address_2, city, state, postcode, country, email)" );
-	}
-
-	/**
-	 * Check if fulltext index with key `order_addresses_fts` on order address table exists.
-	 *
-	 * @return bool
-	 */
-	public function fts_index_on_order_address_table_exists(): bool {
-		global $wpdb;
-		$address_table = $wpdb->prefix . 'wc_order_addresses';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $address_table is hardcoded.
-		return ! empty( $wpdb->get_results( "SHOW INDEX FROM $address_table WHERE Key_name = 'order_addresses_fts'" ) );
-	}
-
-	/**
-	 * Create a fulltext index on order item table.
-	 *
-	 * @return void
-	 */
-	public function create_fts_index_order_item_table(): void {
-		global $wpdb;
-		$order_item_table = $wpdb->prefix . 'woocommerce_order_items';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_item_table is hardcoded.
-		$wpdb->query( "CREATE FULLTEXT INDEX order_item_fts ON $order_item_table (order_item_name)" );
-	}
-
-	/**
-	 * Check if fulltext index with key `order_item_fts` on order item table exists.
-	 *
-	 * @return bool
-	 */
-	public function fts_index_on_order_item_table_exists(): bool {
-		global $wpdb;
-		$order_item_table = $wpdb->prefix . 'woocommerce_order_items';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_item_table is hardcoded.
-		return ! empty( $wpdb->get_results( "SHOW INDEX FROM $order_item_table WHERE Key_name = 'order_item_fts'" ) );
 	}
 }

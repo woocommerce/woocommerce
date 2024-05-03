@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
-use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
 use WC_Order;
 
 /**
@@ -12,6 +12,8 @@ use WC_Order;
  */
 class CustomerHistory {
 
+	use OrderAttributionMeta;
+
 	/**
 	 * Output the customer history template for the order.
 	 *
@@ -20,47 +22,34 @@ class CustomerHistory {
 	 * @return void
 	 */
 	public function output( WC_Order $order ): void {
-		// No history when adding a new order.
-		if ( 'auto-draft' === $order->get_status() ) {
-			return;
-		}
-
-		$customer_history = null;
-
-		if ( method_exists( $order, 'get_report_customer_id' ) ) {
-			$customer_history = $this->get_customer_history( $order->get_report_customer_id() );
-		}
-
-		if ( ! $customer_history ) {
-			$customer_history = array(
-				'orders_count'    => 0,
-				'total_spend'     => 0,
-				'avg_order_value' => 0,
-			);
-		}
-
-		wc_get_template( 'order/customer-history.php', $customer_history );
+		$this->display_customer_history( $order->get_customer_id(), $order->get_billing_email() );
 	}
 
 	/**
-	 * Get the order history for the customer (data matches Customers report).
+	 * Display the customer history template for the customer.
 	 *
-	 * @param int $customer_report_id The reports customer ID (not necessarily User ID).
+	 * @param int    $customer_id The customer ID.
+	 * @param string $billing_email The customer billing email.
 	 *
-	 * @return array|null Order count, total spend, and average spend per order.
+	 * @return void
 	 */
-	private function get_customer_history( $customer_report_id ): ?array {
+	private function display_customer_history( int $customer_id, string $billing_email ): void {
+		$has_customer_id = false;
+		if ( $customer_id ) {
+			$has_customer_id = true;
+			$args            = $this->get_customer_history( $customer_id );
+		} elseif ( $billing_email ) {
+			$args = $this->get_customer_history( $billing_email );
+		} else {
+			$args = array(
+				'order_count'   => 0,
+				'total_spent'   => 0,
+				'average_spent' => 0,
+			);
+		}
 
-		$args = array(
-			'customers'    => array( $customer_report_id ),
-			// If unset, these params have default values that affect the results.
-			'order_after'  => null,
-			'order_before' => null,
-		);
-
-		$customers_query = new CustomersQuery( $args );
-		$customer_data   = $customers_query->get_data();
-		return $customer_data->data[0] ?? null;
+		$args['has_customer_id'] = $has_customer_id;
+		wc_get_template( 'order/customer-history.php', $args );
 	}
 
 }

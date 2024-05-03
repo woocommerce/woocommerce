@@ -8,14 +8,14 @@ import {
 	createElement,
 	Fragment,
 } from '@wordpress/element';
-import { ProductProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { AttributeControl } from '../attribute-control';
 
-const attributeList: ProductProductAttribute[] = [
+const attributeList: ProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',

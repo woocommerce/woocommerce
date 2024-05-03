@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update Tree Select Control to allow for searching parent values when `individuallySelectParent` is turned on.

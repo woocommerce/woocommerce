@@ -11,14 +11,16 @@ export async function addProductsToCart( page, productName, quantityCount ) {
 	await page.goto(
 		`product/${ productName.replace( / /gi, '-' ).toLowerCase() }`
 	);
-	await expect(
-		await page.getByRole( 'heading', { name: productName } ).count()
-	).toBeGreaterThan( 0 );
+	await expect( page.locator( '.product_title' ) ).toContainText(
+		productName
+	);
 	await page.getByLabel( 'Product quantity' ).fill( quantityCount );
-	await page.locator( 'button[name="add-to-cart"]' ).click();
+	await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 	await expect(
-		page.getByText(
-			`${ quantityCount } × “${ productName }” have been added to your cart.`
-		)
+		page
+			.getByRole( 'alert' )
+			.getByText(
+				`${ quantityCount } × “${ productName }” have been added to your cart.`
+			)
 	).toBeVisible();
 }

@@ -71,14 +71,6 @@ interface BlockInterface {
 	public function set_attributes( array $attributes );
 
 	/**
-	 * Set a block attribute value without replacing the entire attributes object.
-	 *
-	 * @param string $key The attribute key.
-	 * @param mixed  $value The attribute value.
-	 */
-	public function set_attribute( string $key, $value );
-
-	/**
 	 * Get the parent container that the block belongs to.
 	 */
 	public function &get_parent(): ContainerInterface;

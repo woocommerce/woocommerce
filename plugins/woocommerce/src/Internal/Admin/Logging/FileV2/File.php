@@ -4,8 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Admin\Logging\FileV2;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
-use Exception;
+use WP_Filesystem_Direct;
 
 /**
  * File class.
@@ -61,6 +60,14 @@ class File {
 	 * @param string $path The absolute path of the file.
 	 */
 	public function __construct( $path ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		global $wp_filesystem;
+
+		if ( ! $wp_filesystem instanceof WP_Filesystem_Direct ) {
+			WP_Filesystem();
+		}
+
 		$this->path = $path;
 		$this->ingest_path();
 	}
@@ -230,33 +237,27 @@ class File {
 	/**
 	 * Check if the file represented by the class instance is a file and is readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool
 	 */
 	public function is_readable(): bool {
-		try {
-			$filesystem  = FilesystemUtil::get_wp_filesystem();
-			$is_readable = $filesystem->is_file( $this->path ) && $filesystem->is_readable( $this->path );
-		} catch ( Exception $exception ) {
-			return false;
-		}
+		global $wp_filesystem;
 
-		return $is_readable;
+		return $wp_filesystem->is_file( $this->path ) && $wp_filesystem->is_readable( $this->path );
 	}
 
 	/**
 	 * Check if the file represented by the class instance is a file and is writable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool
 	 */
 	public function is_writable(): bool {
-		try {
-			$filesystem  = FilesystemUtil::get_wp_filesystem();
-			$is_writable = $filesystem->is_file( $this->path ) && $filesystem->is_writable( $this->path );
-		} catch ( Exception $exception ) {
-			return false;
-		}
+		global $wp_filesystem;
 
-		return $is_writable;
+		return $wp_filesystem->is_file( $this->path ) && $wp_filesystem->is_writable( $this->path );
 	}
 
 	/**
@@ -371,38 +372,31 @@ class File {
 	/**
 	 * Get the time of the last modification of the file, as a Unix timestamp. Or false if the file isn't readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return int|false
 	 */
 	public function get_modified_timestamp() {
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
-			$timestamp  = $filesystem->mtime( $this->path );
-		} catch ( Exception $exception ) {
-			return false;
-		}
+		global $wp_filesystem;
 
-		return $timestamp;
+		return $wp_filesystem->mtime( $this->path );
 	}
 
 	/**
 	 * Get the size of the file in bytes. Or false if the file isn't readable.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return int|false
 	 */
 	public function get_file_size() {
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
+		global $wp_filesystem;
 
-			if ( ! $filesystem->is_readable( $this->path ) ) {
-				return false;
-			}
-
-			$size = $filesystem->size( $this->path );
-		} catch ( Exception $exception ) {
+		if ( ! $wp_filesystem->is_readable( $this->path ) ) {
 			return false;
 		}
 
-		return $size;
+		return $wp_filesystem->size( $this->path );
 	}
 
 	/**
@@ -411,13 +405,10 @@ class File {
 	 * @return bool
 	 */
 	protected function create(): bool {
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
-			$created    = $filesystem->touch( $this->path );
-			$modded     = $filesystem->chmod( $this->path );
-		} catch ( Exception $exception ) {
-			return false;
-		}
+		global $wp_filesystem;
+
+		$created = $wp_filesystem->touch( $this->path );
+		$modded  = $wp_filesystem->chmod( $this->path );
 
 		return $created && $modded;
 	}
@@ -472,6 +463,8 @@ class File {
 			return false;
 		}
 
+		global $wp_filesystem;
+
 		$created = 0;
 		if ( $this->has_standard_filename() ) {
 			$created = $this->get_created_timestamp();
@@ -496,13 +489,7 @@ class File {
 		$new_filename = str_replace( $search, $replace, $old_filename );
 		$new_path     = str_replace( $old_filename, $new_filename, $this->path );
 
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
-			$moved      = $filesystem->move( $this->path, $new_path, true );
-		} catch ( Exception $exception ) {
-			return false;
-		}
-
+		$moved = $wp_filesystem->move( $this->path, $new_path, true );
 		if ( ! $moved ) {
 			return false;
 		}
@@ -516,16 +503,13 @@ class File {
 	/**
 	 * Delete the file from the filesystem.
 	 *
+	 * @global WP_Filesystem_Direct $wp_filesystem
+	 *
 	 * @return bool True on success, false on failure.
 	 */
 	public function delete(): bool {
-		try {
-			$filesystem = FilesystemUtil::get_wp_filesystem();
-			$deleted    = $filesystem->delete( $this->path, false, 'f' );
-		} catch ( Exception $exception ) {
-			return false;
-		}
+		global $wp_filesystem;
 
-		return $deleted;
+		return $wp_filesystem->delete( $this->path, false, 'f' );
 	}
 }

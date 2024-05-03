@@ -12,23 +12,18 @@ export default {
 	isModalEditorOpen: function isModalEditorOpen(
 		state: ProductEditorUIStateProps
 	) {
-		return state.modalEditor?.isOpen;
+		return state.modalEditor.isOpen;
 	},
 
 	getModalEditorBlocks: function getModalEditorBlocks(
 		state: ProductEditorUIStateProps
 	): BlockInstance[] {
-		return state.modalEditor?.blocks || [];
+		return state.modalEditor.blocks;
 	},
 
 	getModalEditorContentHasChanged: function getModalEditorContentHasChanged(
 		state: ProductEditorUIStateProps
 	): boolean {
-		return !! state.modalEditor?.hasChanged;
-	},
-	isPrepublishPanelOpen: function isPrepublishPanelOpen(
-		state: ProductEditorUIStateProps
-	) {
-		return state.prepublishPanel?.isOpen;
+		return !! state.modalEditor.hasChanged;
 	},
 };

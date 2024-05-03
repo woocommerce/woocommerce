@@ -4,7 +4,7 @@
 	"title": "Product Meta",
 	"icon": "product",
 	"description": "Display a product’s SKU, categories, tags, and more.",
-	"category": "woocommerce-product-elements",
+	"category": "woocommerce",
 	"supports": {
 		"align": true,
 		"reusable": false

@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayKeys;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\TransformerService;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers\ArrayKeys;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerService;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_TransformerService
@@ -34,7 +34,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 	public function test_it_throw_exception_when_transformer_config_is_missing_use() {
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Missing required config value: use' );
-		TransformerService::apply( array( 'value' ), array( new stdClass() ), false, null );
+		TransformerService::apply( array( 'value' ), array( new stdClass() ), null );
 	}
 
 	/**
@@ -43,65 +43,22 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 	public function test_it_throws_exception_when_transformer_is_not_found() {
 		$this->expectExceptionMessage( 'Unable to find a transformer by name: i_do_not_exist' );
 		$transformer = $this->transformer_config( 'i_do_not_exist' );
-		TransformerService::apply( array( 'value' ), array( $transformer ), false, null );
+		TransformerService::apply( array( 'value' ), array( $transformer ), null );
 	}
 
 	/**
 	 * Given two transformers
 	 * When the second transformer returns null
-	 * Then the default value should be returned.
+	 * Then the value transformed by the first transformer should be returned.
 	 */
-	public function test_it_returns_default_when_transformer_returns_null() {
+	public function test_it_returns_previously_transformed_value_when_transformer_returns_null() {
 		$dot_notation = $this->transformer_config( 'dot_notation', array( 'path' => 'industries' ) );
 		$array_search = $this->transformer_config( 'array_search', array( 'value' => 'i_do_not_exist' ) );
 		$items        = array(
 			'industries' => array( 'item1', 'item2' ),
 		);
-		$result       = TransformerService::apply( $items, array( $dot_notation, $array_search ), true, 'default' );
-		$this->assertEquals( $result, 'default' );
-	}
-
-	/**
-	 * Given two transformers
-	 * When the second transformer returns null but no default is set
-	 * Then the final result should returned.
-	 */
-	public function test_it_returns_null_when_transformer_returns_null() {
-		$dot_notation = $this->transformer_config( 'dot_notation', array( 'path' => 'industries' ) );
-		$array_search = $this->transformer_config( 'array_search', array( 'value' => 'i_do_not_exist' ) );
-		$items        = array(
-			'industries' => array( 'item1', 'item2' ),
-		);
-		$result       = TransformerService::apply( $items, array( $dot_notation, $array_search ), false, null );
-		$this->assertEquals( $result, null );
-	}
-
-	/**
-	 * Given two transformers
-	 * When the transformed value type is different from the default value type and default is set
-	 * Then the default value should be returned.
-	 */
-	public function test_it_returns_default_when_transformer_returns_different_type() {
-		$dot_notation = $this->transformer_config( 'dot_notation', array( 'path' => 'industries' ) );
-		$items        = array(
-			'industries' => array(),
-		);
-		$result       = TransformerService::apply( $items, array( $dot_notation ), true, 'clothing' );
-		$this->assertEquals( $result, 'clothing' );
-	}
-
-	/**
-	 * Given two transformers
-	 * When the transformed value type is the same with the default value type and default is set
-	 * Then the transformed value should be returned.
-	 */
-	public function test_it_returns_default_when_transformer_returns_same_type() {
-		$dot_notation = $this->transformer_config( 'dot_notation', array( 'path' => 'industries' ) );
-		$items        = array(
-			'industries' => 'food_and_beverage',
-		);
-		$result       = TransformerService::apply( $items, array( $dot_notation ), true, 'clothing' );
-		$this->assertEquals( $result, 'food_and_beverage' );
+		$result       = TransformerService::apply( $items, array( $dot_notation, $array_search ), null );
+		$this->assertEquals( $result, $items['industries'] );
 	}
 
 	/**
@@ -137,7 +94,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_TransformerService extends WC_Unit
 		$array_flatten = $this->transformer_config( 'array_flatten' );
 		$array_search  = $this->transformer_config( 'array_search', array( 'value' => 'mothra-member' ) );
 
-		$result = TransformerService::apply( $items, array( $dot_notation, $array_column, $array_flatten, $array_search ), false, null );
+		$result = TransformerService::apply( $items, array( $dot_notation, $array_column, $array_flatten, $array_search ), null );
 
 		// Then.
 		$this->assertEquals( 'mothra-member', $result );

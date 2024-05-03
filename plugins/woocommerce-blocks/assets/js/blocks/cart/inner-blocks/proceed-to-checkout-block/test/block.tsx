@@ -23,16 +23,12 @@ describe( 'Proceed to checkout block', () => {
 		render(
 			<Block checkoutPageId={ 0 } buttonLabel={ '' } className={ '' } />
 		);
-
-		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
-		expect( console ).toHaveWarned();
-
 		expect( screen.getByText( 'Proceed to step two' ) ).toBeInTheDocument();
 	} );
 	it( 'allows the link to be filtered', () => {
 		registerCheckoutFilters( 'test-extension', {
 			proceedToCheckoutButtonLink: () => {
-				return 'https://woocommerce.com';
+				return 'https://woo.com';
 			},
 		} );
 		render(
@@ -40,7 +36,7 @@ describe( 'Proceed to checkout block', () => {
 		);
 		const button = screen.getByText( 'Proceed to Checkout' );
 		const link = button.closest( 'a' );
-		expect( link?.href ).toBe( 'https://woocommerce.com/' );
+		expect( link?.href ).toBe( 'https://woo.com/' );
 	} );
 	it( 'does not allow incorrect types to be applied to either button label or button link', () => {
 		registerCheckoutFilters( 'test-extension', {

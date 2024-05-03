@@ -7,50 +7,13 @@ namespace Automattic\WooCommerce\Blocks\Templates;
  * @internal
  */
 class CartTemplate extends AbstractPageTemplate {
-
 	/**
-	 * The slug of the template.
-	 *
-	 * @var string
-	 */
-	const SLUG = 'page-cart';
-
-	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-
-		parent::init();
-	}
-
-	/**
-	 * Returns the title of the template.
+	 * Template slug.
 	 *
 	 * @return string
 	 */
-	public function get_template_title() {
-		return _x( 'Page: Cart', 'Template name', 'woocommerce' );
-	}
-
-	/**
-	 * Returns the description of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_description() {
-		return __( 'The Cart template displays the items selected by the user for purchase, including quantities, prices, and discounts. It allows users to review their choices before proceeding to checkout.', 'woocommerce' );
-	}
-
-	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
-	 */
-	public function render_block_template() {
-		if (
-			! is_embed() && is_cart()
-		) {
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
-		}
+	public static function get_slug() {
+		return 'page-cart';
 	}
 
 	/**
@@ -85,7 +48,7 @@ class CartTemplate extends AbstractPageTemplate {
 	 */
 	public function page_template_hierarchy( $templates ) {
 		if ( $this->is_active_template() ) {
-			array_unshift( $templates, self::SLUG );
+			array_unshift( $templates, $this->get_slug() );
 			array_unshift( $templates, 'cart' );
 		}
 		return $templates;

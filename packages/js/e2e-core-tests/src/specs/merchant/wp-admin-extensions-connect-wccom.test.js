@@ -20,7 +20,7 @@ const runInitiateWccomConnectionTest = () => {
 			// Click on a tab to choose WooCommerce Subscriptions extension
 			await Promise.all( [
 				expect( page ).toClick( 'a.nav-tab', {
-					text: 'WooCommerce.com Subscriptions',
+					text: 'Woo.com Subscriptions',
 				} ),
 				page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			] );

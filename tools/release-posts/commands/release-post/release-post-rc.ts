@@ -193,7 +193,7 @@ const program = new Command()
 					finalReleaseDate,
 					lastReleasePostUrl:
 						lastReleasePost?.URL ||
-						'https://developer.woocommerce.com/category/release-posts/',
+						'https://developer.woocommerce.com/category/woocommerce-core-release-notes/',
 				} );
 
 				if ( isOutputOnly ) {

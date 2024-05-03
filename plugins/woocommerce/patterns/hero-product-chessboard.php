@@ -31,7 +31,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<div class="wp-block-cover is-light">
 				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 1 out of 2.', 'woocommerce' ); ?>" src="<?php echo esc_url( $image1 ); ?>" style="object-position:54% 52%" data-object-fit="cover" data-object-position="54% 52%"/>
 				<div class="wp-block-cover__inner-container">
-					<!-- wp:paragraph {"align":"center","placeholder":" ","fontSize":"large"} -->
+					<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
 						<p class="has-text-align-center has-large-font-size"> </p>
 					<!-- /wp:paragraph -->
 				</div>
@@ -72,28 +72,28 @@ $button = $content['buttons'][0]['default'] ?? '';
 	<div class="wp-block-columns alignfull are-vertically-aligned-center" style="margin-top:0;margin-bottom:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
 		<!-- wp:column {"verticalAlignment":"center","style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"}}}} -->
 		<div class="wp-block-column is-vertically-aligned-center" style="padding-top:0;padding-right:0;padding-bottom:0;padding-left:0">
-			<!-- wp:group {"style":{"spacing":{"padding":{"right":"50px","left":"50px","top":"50px","bottom":"50px"},"blockGap":"50px"}},"layout":{"type":"constrained"}} -->
+			<!-- wp:group {"style":{"spacing":{"padding":{"right":"50px","left":"50px","top":"50px","bottom":"50px"},"blockGap":"32px"}},"layout":{"type":"constrained"}} -->
 			<div class="wp-block-group" style="padding-top:50px;padding-right:50px;padding-bottom:50px;padding-left:50px">
-				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"layout":{"type":"flex","orientation":"vertical"}} -->
+				<!-- wp:group {"style":{"spacing":{"blockGap":"16px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group">
-					<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize"}}} -->
-					<h5 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $first_title ); ?></strong></h5>
+					<!-- wp:heading {"level":6,"style":{"typography":{"textTransform":"capitalize"}}} -->
+					<h6 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $first_title ); ?></strong></h6>
 					<!-- /wp:heading -->
 
-					<!-- wp:paragraph {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"margin":{"top":"25px","right":"0","bottom":"0","left":"0"}}}} -->
-					<p style="margin-top:25px;margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><?php echo esc_html( $first_description ); ?></p>
+					<!-- wp:paragraph {"style":{"spacing":{"padding":{"top":"0","right":"0","bottom":"0","left":"0"},"margin":{"top":"var:preset|spacing|20","right":"0","bottom":"0","left":"0"}}}} -->
+					<p style="margin-top:var(--wp--preset--spacing--20);margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0"><?php echo esc_html( $first_description ); ?></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
 
-				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"layout":{"type":"flex","orientation":"vertical"}} -->
+				<!-- wp:group {"style":{"dimensions":{"minHeight":""},"spacing":{"blockGap":"16px"}},"layout":{"type":"flex","orientation":"vertical"}} -->
 				<div class="wp-block-group">
-					<!-- wp:heading {"level":5,"style":{"typography":{"textTransform":"capitalize"}}} -->
-					<h5 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $second_title ); ?></strong></h5>
+					<!-- wp:heading {"level":6,"style":{"typography":{"textTransform":"capitalize"}}} -->
+					<h6 class="wp-block-heading" style="text-transform:capitalize"><strong><?php echo esc_html( $second_title ); ?></strong></h6>
 					<!-- /wp:heading -->
 
-					<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"25px"}}}} -->
-					<p style="margin-top:25px"><?php echo esc_html( $second_description ); ?></p>
+					<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"var:preset|spacing|20"}}}} -->
+					<p style="margin-top:var(--wp--preset--spacing--20)"><?php echo esc_html( $second_description ); ?></p>
 					<!-- /wp:paragraph -->
 				</div>
 				<!-- /wp:group -->
@@ -108,7 +108,7 @@ $button = $content['buttons'][0]['default'] ?? '';
 			<div class="wp-block-cover">
 				<img class="wp-block-cover__image-background" alt="<?php esc_attr_e( 'Placeholder image used to represent a product being showcased in a hero section. 2 out of 2.', 'woocommerce' ); ?>" src="<?php echo esc_url( $image2 ); ?>" style="object-position:33% 6%" data-object-fit="cover" data-object-position="33% 6%"/>
 				<div class="wp-block-cover__inner-container">
-					<!-- wp:paragraph {"align":"center","placeholder":" ","fontSize":"large"} -->
+					<!-- wp:paragraph {"align":"center","placeholder":"Write title…","fontSize":"large"} -->
 						<p class="has-text-align-center has-large-font-size"> </p>
 					<!-- /wp:paragraph -->
 				</div>

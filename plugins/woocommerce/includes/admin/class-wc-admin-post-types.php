@@ -782,7 +782,7 @@ class WC_Admin_Post_Types {
 		if ( $post && absint( $post->ID ) === $shop_page_id ) {
 			echo '<div class="notice notice-info">';
 			/* translators: %s: URL to read more about the shop page. */
-			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://woocommerce.com/document/woocommerce-pages/#section-4' ) . '</p>';
+			echo '<p>' . sprintf( wp_kses_post( __( 'This is the WooCommerce shop page. The shop page is a special archive that lists your products. <a href="%s">You can read more about this here</a>.', 'woocommerce' ) ), 'https://woo.com/document/woocommerce-pages/#section-4' ) . '</p>';
 			echo '</div>';
 		}
 	}

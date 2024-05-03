@@ -10,6 +10,7 @@ import { chevronDown, chevronUp } from '@wordpress/icons';
  * Internal dependencies
  */
 import { DownloadsMenuProps } from './types';
+import { MediaLibraryMenuItem } from '../media-library-menu-item';
 import { InsertUrlMenuItem } from '../insert-url-menu-item';
 import { UploadFilesMenuItem } from '../upload-files-menu-item';
 
@@ -48,6 +49,13 @@ export function DownloadsMenu( {
 								onClose();
 							} }
 							onUploadError={ onUploadError }
+						/>
+						<MediaLibraryMenuItem
+							allowedTypes={ allowedTypes }
+							onUploadSuccess={ ( files ) => {
+								onUploadSuccess( files );
+								onClose();
+							} }
 						/>
 
 						<InsertUrlMenuItem

@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-shipping-method-block",
 	"version": "1.0.0",
-	"title": "Delivery",
+	"title": "Shipping Method",
 	"description": "Select between shipping or local pickup.",
 	"category": "woocommerce",
 	"supports": {

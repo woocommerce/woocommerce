@@ -375,7 +375,6 @@ export function StoreAddress( {
 
 			{ ! locale?.address_1?.hidden && (
 				<TextControl
-					id={ 'woocommerce-store-address-form-address_1' }
 					label={
 						locale?.address_1?.label ||
 						__( 'Address', 'woocommerce' )
@@ -387,7 +386,6 @@ export function StoreAddress( {
 
 			{ ! locale?.postcode?.hidden && (
 				<TextControl
-					id={ 'woocommerce-store-address-form-postcode' }
 					label={
 						locale?.postcode?.label ||
 						__( 'Post code', 'woocommerce' )
@@ -399,7 +397,6 @@ export function StoreAddress( {
 
 			{ ! locale?.city?.hidden && (
 				<TextControl
-					id={ 'woocommerce-store-address-form-city' }
 					label={ locale?.city?.label || __( 'City', 'woocommerce' ) }
 					{ ...getInputProps( 'city' ) }
 					autoComplete="address-level2"

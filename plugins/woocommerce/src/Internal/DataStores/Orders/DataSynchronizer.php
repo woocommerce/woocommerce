@@ -105,7 +105,6 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		self::add_filter( 'pre_delete_post', array( $this, 'maybe_prevent_deletion_of_post' ), 10, 2 );
 		self::add_action( 'deleted_post', array( $this, 'handle_deleted_post' ), 10, 2 );
 		self::add_action( 'woocommerce_new_order', array( $this, 'handle_updated_order' ), 100 );
 		self::add_action( 'woocommerce_refund_created', array( $this, 'handle_updated_order' ), 100 );
@@ -442,7 +441,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	 *
 	 * @return int
 	 */
-	public function get_current_orders_pending_sync_count_cached(): int {
+	public function get_current_orders_pending_sync_count_cached() : int {
 		return $this->get_current_orders_pending_sync_count( true );
 	}
 
@@ -483,14 +482,14 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return 0;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQL.NotPrepared --
-		// -- $order_post_type_placeholder, $orders_table, self::PLACEHOLDER_ORDER_POST_TYPE are all safe to use in queries.
 		if ( ! $this->get_table_exists() ) {
 			$count = $wpdb->get_var(
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
 				$wpdb->prepare(
 					"SELECT COUNT(*) FROM $wpdb->posts where post_type in ( $order_post_type_placeholder )",
 					$order_post_types
 				)
+				// phpcs:enable
 			);
 			return $count;
 		}
@@ -499,28 +498,30 @@ class DataSynchronizer implements BatchProcessorInterface {
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
 SELECT COUNT(1) FROM $wpdb->posts posts
-RIGHT JOIN $orders_table orders ON posts.ID=orders.id
-WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
- AND orders.status NOT IN ( 'auto-draft' )
+INNER JOIN $orders_table orders ON posts.id=orders.id
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
+ AND orders.status not in ( 'auto-draft' )
  AND orders.type IN ($order_post_type_placeholder)",
 				$order_post_types
 			);
 			$operator                 = '>';
 		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholder is prepared.
 			$missing_orders_count_sql = $wpdb->prepare(
 				"
 SELECT COUNT(1) FROM $wpdb->posts posts
-LEFT JOIN $orders_table orders ON posts.ID=orders.id
+LEFT JOIN $orders_table orders ON posts.id=orders.id
 WHERE
   posts.post_type in ($order_post_type_placeholder)
   AND posts.post_status != 'auto-draft'
   AND orders.id IS NULL",
 				$order_post_types
 			);
-
+			// phpcs:enable
 			$operator = '<';
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $missing_orders_count_sql is prepared.
 		$sql = $wpdb->prepare(
 			"
 SELECT(
@@ -602,9 +603,10 @@ SELECT(
 		$order_post_types             = wc_get_order_types( 'cot-migration' );
 		$order_post_type_placeholders = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		switch ( $type ) {
 			case self::ID_TYPE_MISSING_IN_ORDERS_TABLE:
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholders is prepared.
 				$sql = $wpdb->prepare(
 					"
 SELECT posts.ID FROM $wpdb->posts posts
@@ -616,22 +618,23 @@ WHERE
 ORDER BY posts.ID ASC",
 					$order_post_types
 				);
+				// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				break;
 			case self::ID_TYPE_MISSING_IN_POSTS_TABLE:
 				$sql = $wpdb->prepare(
 					"
-SELECT orders.id FROM $wpdb->posts posts
-RIGHT JOIN $orders_table orders ON posts.ID=orders.id
-WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
-AND orders.status NOT IN ( 'auto-draft' )
+SELECT posts.ID FROM $wpdb->posts posts
+INNER JOIN $orders_table orders ON posts.id=orders.id
+WHERE posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "'
+AND orders.status not in ( 'auto-draft' )
 AND orders.type IN ($order_post_type_placeholders)
-ORDER BY posts.ID ASC",
+ORDER BY posts.id ASC",
 					$order_post_types
 				);
 				break;
 			case self::ID_TYPE_DIFFERENT_UPDATE_DATE:
 				$operator = $this->custom_orders_table_is_authoritative() ? '>' : '<';
-
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $order_post_type_placeholders is prepared.
 				$sql = $wpdb->prepare(
 					"
 SELECT orders.id FROM $orders_table orders
@@ -643,6 +646,7 @@ ORDER BY orders.id ASC
 ",
 					$order_post_types
 				);
+				// phpcs:enable
 				break;
 			case self::ID_TYPE_DELETED_FROM_ORDERS_TABLE:
 				return $this->get_deleted_order_ids( true, $limit );
@@ -651,7 +655,7 @@ ORDER BY orders.id ASC
 			default:
 				throw new \Exception( 'Invalid $type, must be one of the ID_TYPE_... constants.' );
 		}
-		// phpcs:enable
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// phpcs:ignore WordPress.DB
 		return array_map( 'intval', $wpdb->get_col( $sql . " LIMIT $limit" ) );
@@ -696,7 +700,7 @@ ORDER BY orders.id ASC
 	 *
 	 * @param array $batch Batch details.
 	 */
-	public function process_batch( array $batch ): void {
+	public function process_batch( array $batch ) : void {
 		if ( empty( $batch ) ) {
 			return;
 		}
@@ -895,26 +899,6 @@ ORDER BY orders.id ASC
 	 */
 	public function get_description(): string {
 		return 'Synchronizes orders between posts and custom order tables.';
-	}
-
-	/**
-	 * Prevents deletion of order backup posts (regardless of sync setting) when HPOS is authoritative and the order
-	 * still exists in HPOS.
-	 * This should help with edge cases where wp_delete_post() would delete the HPOS record too or backfill would sync
-	 * incorrect data from an order with no metadata from the posts table.
-	 *
-	 * @since 8.8.0
-	 *
-	 * @param WP_Post|false|null $delete Whether to go forward with deletion.
-	 * @param WP_Post            $post   Post object.
-	 * @return WP_Post|false|null
-	 */
-	private function maybe_prevent_deletion_of_post( $delete, $post ) {
-		if ( self::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type && $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
-			$delete = false;
-		}
-
-		return $delete;
 	}
 
 	/**

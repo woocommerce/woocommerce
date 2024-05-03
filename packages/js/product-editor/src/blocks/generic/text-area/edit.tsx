@@ -1,10 +1,9 @@
 /**
  * External dependencies
  */
-import { LegacyRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import { createElement, useRef } from '@wordpress/element';
+import { createElement } from '@wordpress/element';
 import { BaseControl, TextareaControl } from '@wordpress/components';
 import { useInstanceId } from '@wordpress/compose';
 import { BlockControls, RichText } from '@wordpress/block-editor';
@@ -19,7 +18,6 @@ import type {
 	TextAreaBlockEditProps,
 } from './types';
 import AligmentToolbarButton from './toolbar/toolbar-button-alignment';
-import { useClearSelectedBlockOnBlur } from '../../../hooks/use-clear-selected-block-on-blur';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { Label } from '../../../components/label/label';
 
@@ -36,7 +34,7 @@ export function TextAreaBlockEdit( {
 		required,
 		note,
 		tooltip,
-		disabled = false,
+		disabled,
 		align,
 		allowedFormats,
 		direction,
@@ -52,8 +50,6 @@ export function TextAreaBlockEdit( {
 		'wp-block-woocommerce-product-content-field__content'
 	);
 
-	const labelId = contentId.toString() + '__label';
-
 	// `property` attribute is required.
 	if ( ! property ) {
 		throw new Error(
@@ -65,11 +61,6 @@ export function TextAreaBlockEdit( {
 		postType,
 	} );
 
-	// This is a workaround to hide the toolbar when the block is blurred.
-	// This is a temporary solution until using Gutenberg 18 with the
-	// fix from https://github.com/WordPress/gutenberg/pull/59800
-	const { handleBlur: hideToolbar } = useClearSelectedBlockOnBlur();
-
 	function setAlignment( value: TextAreaBlockEditAttributes[ 'align' ] ) {
 		setAttributes( { align: value } );
 	}
@@ -78,17 +69,6 @@ export function TextAreaBlockEdit( {
 		value: TextAreaBlockEditAttributes[ 'direction' ]
 	) {
 		setAttributes( { direction: value } );
-	}
-
-	const richTextRef = useRef< HTMLParagraphElement >( null );
-	const textAreaRef = useRef< HTMLTextAreaElement >( null );
-
-	function focusRichText() {
-		richTextRef.current?.focus();
-	}
-
-	function focusTextArea() {
-		textAreaRef.current?.focus();
 	}
 
 	const blockControlsBlockProps = { group: 'block' };
@@ -117,22 +97,16 @@ export function TextAreaBlockEdit( {
 				label={
 					<Label
 						label={ label || '' }
-						labelId={ labelId }
 						required={ required }
 						note={ note }
 						tooltip={ tooltip }
-						onClick={
-							isRichTextMode ? focusRichText : focusTextArea
-						}
 					/>
 				}
 				help={ help }
 			>
 				{ isRichTextMode && (
 					<RichText
-						ref={ richTextRef as unknown as LegacyRef< 'p' > }
 						id={ contentId.toString() }
-						aria-labelledby={ labelId }
 						identifier="content"
 						tagName="p"
 						value={ content || '' }
@@ -145,22 +119,17 @@ export function TextAreaBlockEdit( {
 						allowedFormats={ allowedFormats }
 						placeholder={ placeholder }
 						required={ required }
-						aria-required={ required }
-						readOnly={ disabled }
-						onBlur={ hideToolbar }
+						disabled={ disabled }
 					/>
 				) }
 
 				{ isPlainTextMode && (
 					<TextareaControl
-						ref={ textAreaRef }
-						aria-labelledby={ labelId }
 						value={ content || '' }
 						onChange={ setContent }
 						placeholder={ placeholder }
 						required={ required }
 						disabled={ disabled }
-						onBlur={ hideToolbar }
 					/>
 				) }
 			</BaseControl>

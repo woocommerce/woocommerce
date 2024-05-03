@@ -59,22 +59,22 @@ class WC_API_Customers extends WC_API_Resource {
 
 		# GET /customers
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_customers' ),     WC_API_Server::READABLE ),
+			array( array( $this, 'get_customers' ),     WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/count
 		$routes[ $this->base . '/count' ] = array(
-			array( array( $this, 'get_customers_count' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_customer' ),  WC_API_Server::READABLE ),
+			array( array( $this, 'get_customer' ),  WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/<id>/orders
 		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
-			array( array( $this, 'get_customer_orders' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
 		);
 
 		return $routes;

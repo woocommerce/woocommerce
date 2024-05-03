@@ -54,13 +54,6 @@ add_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20, 0 )
 add_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
 /**
- * Archive header.
- *
- * @see woocommerce_product_taxonomy_archive_header()
- */
-add_action( 'woocommerce_shop_loop_header', 'woocommerce_product_taxonomy_archive_header' );
-
-/**
  * Archive descriptions.
  *
  * @see woocommerce_taxonomy_archive_description()

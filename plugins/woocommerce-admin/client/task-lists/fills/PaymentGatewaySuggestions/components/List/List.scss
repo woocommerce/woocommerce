@@ -83,7 +83,7 @@
 		flex: 1;
 	}
 
-	@include breakpoint( "<600px" ) {
+	@include breakpoint( '<600px' ) {
 		flex-wrap: wrap;
 
 		.woocommerce-task-payment__content {

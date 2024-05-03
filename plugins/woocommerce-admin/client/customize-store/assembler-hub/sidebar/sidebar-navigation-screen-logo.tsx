@@ -110,7 +110,6 @@ const useLogoEdit = ( {
 		}
 
 		setLogo( media.id, shouldForceSync );
-		setAttributes( { width: DEFAULT_LOGO_WIDTH } );
 	};
 
 	const onInitialSelectLogo = ( media: { id: string; url: string } ) => {

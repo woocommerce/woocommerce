@@ -1,5 +1,5 @@
 .woocommerce-layout .woocommerce-layout__main {
-	@include breakpoint("<782px") {
+	@include breakpoint('<782px') {
 		padding-top: 0 !important;
 	}
 
@@ -180,8 +180,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 }
 
 .woocommerce-customize-store__onboarding-welcome-modal,
-.woocommerce-customize-store__design-change-warning-modal,
-.woocommerce-customize-store__theme-switch-warning-modal {
+.woocommerce-customize-store__design-change-warning-modal {
 	width: 480px;
 	max-width: 480px;
 
@@ -214,57 +213,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		font-weight: 700;
 	}
 
-	.woocommerce-customize-store__design-change-warning-modal-footer,
-	.woocommerce-customize-store__theme-switch-warning-modal-footer {
-		display: flex;
-		gap: 12px;
-		justify-content: flex-end;
-	}
-}
-
-.woocommerce-customize-store__opt-in-usage-tracking-modal {
-	width: 480px;
-	max-width: 480px;
-
-	a {
-		text-decoration: underline;
-		color: inherit;
-	}
-
-	.components-modal__header {
-		padding: 32px 32px 16px 32px;
-	}
-
-	.components-modal__content {
-		padding: 0;
-	}
-
-	.core-profiler__checkbox {
-		padding: 16px 32px 16px 32px;
-
-		div {
-			display: flex;
-
-			.components-checkbox-control__input-container {
-				display: block;
-			}
-		}
-	}
-
 	.woocommerce-customize-store__design-change-warning-modal-footer {
-		border-top: 1px solid #ddd;
-		padding: 24px 32px 32px 32px;
-		width: 100%;
 		display: flex;
 		gap: 12px;
 		justify-content: flex-end;
-
-		button.is-link {
-			padding: 6px 12px;
-			text-decoration: none;
-		}
 	}
-
 }
 
 .woocommerce-onboarding-loader {

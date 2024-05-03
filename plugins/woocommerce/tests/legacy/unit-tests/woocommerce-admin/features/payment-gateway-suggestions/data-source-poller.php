@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\PaymentGatewaySuggestions
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
+use Automattic\WooCommerce\Admin\DataSourcePoller;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaySuggestionsDataSourcePoller;
 
 /**

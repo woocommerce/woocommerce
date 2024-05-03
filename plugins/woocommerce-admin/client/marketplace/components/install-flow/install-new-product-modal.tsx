@@ -52,7 +52,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 
 	const query = useQuery();
 
-	// Check if the store is connected to WooCommerce.com. This is run once, when the component is mounted.
+	// Check if the store is connected to Woo.com. This is run once, when the component is mounted.
 	useEffect( () => {
 		const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
@@ -63,7 +63,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 	/**
 	 * Listen for changes in the query, and show the modal if the installProduct query param is set.
 	 * If it's set, try to find the product in the products prop. We need it to be able to
-	 * display title, icon and send product ID to WooCommerce.com to create an order.
+	 * display title, icon and send product ID to Woo.com to create an order.
 	 */
 	useEffect( () => {
 		setShowModal( false );
@@ -198,7 +198,7 @@ function InstallNewProductModal( props: { products: Product[] } ) {
 					setNotice( {
 						status: 'warning',
 						message: __(
-							'We need your address to complete installing this product. We will redirect you to WooCommerce.com checkout. Afterwards, you will be able to install the product.',
+							'We need your address to complete installing this product. We will redirect you to Woo.com checkout. Afterwards, you will be able to install the product.',
 							'woocommerce'
 						),
 					} );

@@ -251,6 +251,17 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$statuses = $request['status'];
 		unset( $request['status'] );
 
+		// Prevents WC_REST_Orders_V2_Controller::prepare_objects_query() from generating a meta_query for 'customer'.
+		// which COT can handle as a native field.
+		$cot_customer =
+			( OrderUtil::custom_orders_table_usage_is_enabled() && isset( $request['customer'] ) )
+			? $request['customer']
+			: null;
+
+		if ( ! is_null( $cot_customer ) ) {
+			unset( $request['customer'] );
+		}
+
 		$args = parent::prepare_objects_query( $request );
 
 		$args['post_status'] = array();
@@ -268,6 +279,12 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
+
+		// Add back 'customer' to args and request.
+		if ( ! is_null( $cot_customer ) ) {
+			$args['customer']    = $cot_customer;
+			$request['customer'] = $cot_customer;
+		}
 
 		return $args;
 	}

@@ -1,0 +1,151 @@
+[
+	{
+		"name": "category: accessibility",
+		"color": "5804ea",
+		"aliases": [ "scope: accessibility" ],
+		"description": "The issue/PR is related to accessibility."
+	},
+	{
+		"name": "category: duplicate",
+		"color": "5804ea",
+		"aliases": [],
+		"description": "The issue/PR is a duplicate of another issue."
+	},
+	{
+		"name": "category: i18n",
+		"color": "5804ea",
+		"aliases": [ "scope: i18n" ],
+		"description": "The issue/PR is related to internationalization."
+	},
+	{
+		"name": "category: performance",
+		"color": "5804ea",
+		"aliases": [ "type: performance" ],
+		"description": "The issue/PR is related to performance."
+	},
+	{
+		"name": "category: refactor",
+		"color": "5804ea",
+		"aliases": [ "type: refactor" ],
+		"description": "The issue/PR is related to refactoring."
+	},
+	{
+		"name": "category: won't fix",
+		"color": "5804ea",
+		"aliases": [],
+		"description": "The issue won’t be fixed."
+	},
+	{
+		"name": "good first issue",
+		"color": "1eff05",
+		"aliases": [ "type: good first issue", "[Type] Good First Change" ],
+		"description": "The issue is a good candidate for the first community contribution/for a newcomer to the team."
+	},
+	{
+		"name": "impact: high",
+		"color": "d73a4a",
+		"aliases": [],
+		"description": "This issue impacts a lot of users as reported by our Happiness Engineers."
+	},
+	{
+		"name": "needs design",
+		"color": "ed95d2",
+		"aliases": [ "action: needs design", "[Status] Needs Design" ],
+		"description": "The issue requires design input/work from a designer."
+	},
+	{
+		"name": "needs docs",
+		"color": "ed95d2",
+		"aliases": [],
+		"description": "The issue/PR requires documentation to be added."
+	},
+	{
+		"name": "needs feedback",
+		"color": "ed95d2",
+		"aliases": [ "action: needs feedback", "[Status] Needs Discussion" ],
+		"description": "The issue/PR needs a response from any of the parties involved in the issue."
+	},
+	{
+		"name": "needs tests",
+		"color": "ed95d2",
+		"aliases": [ "scope: tests", "[Type] E2E" ],
+		"description": "The issue/PR needs tests before it can move forward."
+	},
+	{
+		"name": "priority: critical",
+		"color": "d73a4a",
+		"aliases": [ "[Pri] CRITICAL" ],
+		"description": "The issue is critical—e.g. a fatal error, security problem affecting many customers."
+	},
+	{
+		"name": "priority: high",
+		"color": "d93f0b",
+		"aliases": [ "[Pri] High" ],
+		"description": "The issue/PR is high priority—it affects lots of customers substantially, but not critically."
+	},
+	{
+		"name": "priority: low",
+		"color": "e2f78c",
+		"aliases": [ "[Pri] Low" ],
+		"description": "The issue/PR is low priority—not many people are affected or there’s a workaround, etc."
+	},
+	{
+		"name": "status: blocked",
+		"color": "d73a4a",
+		"aliases": [ "status: blocked", "[Status] Blocked" ],
+		"description": "The issue is blocked from progressing, waiting for another piece of work to be done."
+	},
+	{
+		"name": "status: on hold",
+		"color": "d93f0b",
+		"aliases": [],
+		"description": "The issue is currently not prioritized."
+	},
+	{
+		"name": "type: bug",
+		"color": "d73a4a",
+		"aliases": [ "type: bug", "[Type] Bug" ],
+		"description": "The issue is a confirmed bug."
+	},
+	{
+		"name": "type: documentation",
+		"color": "0075ca",
+		"aliases": [ "scope: documentation" ],
+		"description": "This issue is a request for better documentation."
+	},
+	{
+		"name": "type: enhancement",
+		"color": "0075ca",
+		"aliases": [ "type: enhancement", "[Type] Enhancement" ],
+		"description": "The issue is a request for an enhancement."
+	},
+	{
+		"name": "type: question",
+		"color": "0075ca",
+		"aliases": [ "type: support", "[Type] Question" ],
+		"description": "The issue is a question about how code works."
+	},
+	{
+		"name": "type: task",
+		"color": "0075ca",
+		"aliases": [ "[Type] Task" ],
+		"description": "The issue is an internally driven task (e.g. from another A8c team)."
+	},
+	{
+		"name": "type: technical debt",
+		"color": "0075ca",
+		"aliases": [ "[Type] Technical Debt" ],
+		"description": "This issue/PR represents/solves the technical debt of the project."
+	},
+	{
+		"name": "type: compatibility",
+		"color": "0075ca",
+		"aliases": [ "[Type] Compatibility" ]
+	},
+	{
+		"name": "status: needs review",
+		"color": "fbca04",
+		"aliases": [ "[Status] Needs Review" ],
+		"description": "PR that needs review"
+	}
+]

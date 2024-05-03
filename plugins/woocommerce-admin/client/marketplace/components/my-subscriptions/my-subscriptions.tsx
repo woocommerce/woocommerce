@@ -25,7 +25,6 @@ import { RefreshButton } from './table/actions/refresh-button';
 import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
-import PluginInstallNotice from '../woo-update-manager-plugin/plugin-install-notice';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -33,13 +32,13 @@ export default function MySubscriptions(): JSX.Element {
 
 	const installedTableDescription = createInterpolateElement(
 		__(
-			'WooCommerce.com extensions and themes installed on this store. To see all your subscriptions go to <a>your account<custom_icon /></a> on WooCommerce.com.',
+			'Woo.com extensions and themes installed on this store. To see all your subscriptions go to <a>your account<custom_icon /></a> on Woo.com.',
 			'woocommerce'
 		),
 		{
 			a: (
 				<a
-					href="https://woocommerce.com/my-account/my-subscriptions"
+					href="https://woo.com/my-account/my-subscriptions"
 					target="_blank"
 					rel="nofollow noopener noreferrer"
 				>
@@ -55,18 +54,10 @@ export default function MySubscriptions(): JSX.Element {
 	);
 
 	const subscriptionsAvailable: Array< Subscription > = subscriptions.filter(
-		( subscription: Subscription ) =>
-			! subscription.subscription_installed &&
-			wccomSettings?.wooUpdateManagerPluginSlug !==
-				subscription.product_slug
+		( subscription: Subscription ) => ! subscription.subscription_installed
 	);
 
 	if ( ! wccomSettings?.isConnected ) {
-		const connectMessage = __(
-			"Connect your store to WooCommerce.com using the WooCommerce.com Update Manager. Once connected, you'll be able to manage your subscriptions, receive product updates, and access streamlined support from this screen.",
-			'woocommerce'
-		);
-
 		return (
 			<div className="woocommerce-marketplace__my-subscriptions--connect">
 				<InstallModal />
@@ -75,10 +66,13 @@ export default function MySubscriptions(): JSX.Element {
 					{ __( 'Manage your subscriptions', 'woocommerce' ) }
 				</h2>
 				<p className="woocommerce-marketplace__my-subscriptions__description">
-					{ connectMessage }
+					{ __(
+						'Connect your account to get updates, manage your subscriptions, and get seamless support. Once connected, your Woo.com subscriptions will appear here.',
+						'woocommerce'
+					) }
 				</p>
 				<Button href={ connectUrl() } variant="primary">
-					{ __( 'Connect your store', 'woocommerce' ) }
+					{ __( 'Connect Account', 'woocommerce' ) }
 				</Button>
 			</div>
 		);
@@ -90,7 +84,6 @@ export default function MySubscriptions(): JSX.Element {
 			<section className="woocommerce-marketplace__my-subscriptions__notices">
 				<Notices />
 			</section>
-			<PluginInstallNotice />
 			<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 				<header className="woocommerce-marketplace__my-subscriptions__header">
 					<div className="woocommerce-marketplace__my-subscriptions__header-content">
@@ -121,7 +114,7 @@ export default function MySubscriptions(): JSX.Element {
 					</h2>
 					<p className="woocommerce-marketplace__my-subscriptions__table-description">
 						{ __(
-							"WooCommerce.com subscriptions you haven't used yet.",
+							"Woo.com subscriptions you haven't used yet.",
 							'woocommerce'
 						) }
 					</p>

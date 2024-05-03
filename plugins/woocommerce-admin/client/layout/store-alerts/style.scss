@@ -7,7 +7,7 @@
 	box-shadow: 0 0 8px -2px rgba(0, 0, 0, 0.3);
 
 	&::before {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -24,7 +24,7 @@
 		min-height: 36px;
 		padding: 4px 16px;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			min-height: 36px;
 			font-size: 16px;
 			line-height: 1.625;
@@ -40,7 +40,7 @@
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		margin-bottom: $gap-large;
 		padding: $gap;
 
@@ -55,7 +55,7 @@
 .woocommerce-embed-page {
 	.woocommerce-store-alerts {
 		margin: 40px 20px 20px;
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			margin-top: $gap-large;
 		}
 	}
@@ -121,7 +121,7 @@
 		@include font-size( 14 );
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		margin-left: 0;
 		margin-bottom: 14px;
 
@@ -189,7 +189,7 @@
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		.components-card__header h2 {
 			width: 100%;
 

@@ -11,7 +11,7 @@ import {
 	__experimentalRadioGroup as RadioGroup,
 } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
-import { ADMIN_URL, getSetting } from '@woocommerce/settings';
+import { ADMIN_URL } from '@woocommerce/settings';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 import {
 	InspectorControls,
@@ -23,7 +23,6 @@ import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
 import ExternalLinkCard from '@woocommerce/editor-components/external-link-card';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -164,16 +163,6 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
-	useEffect( () => {
-		const localPickupTitle = getSetting< string >(
-			'localPickupText',
-			attributes.localPickupText
-		);
-		setAttributes( { localPickupText: localPickupTitle } );
-		// Disable the exhaustive deps rule because we only want to run this on first mount to set the attribute, not
-		// each time the attribute changes.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ setAttributes ] );
 	const { setPrefersCollection } = useDispatch( CHECKOUT_STORE_KEY );
 	const { prefersCollection } = useSelect( ( select ) => {
 		const checkoutStore = select( CHECKOUT_STORE_KEY );
@@ -263,7 +252,7 @@ export const Edit = ( {
 					<ExternalLinkCard
 						key={ 'pickup_location' }
 						href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=shipping&section=pickup_location` }
-						title={ __( 'Pickup', 'woocommerce' ) }
+						title={ __( 'Local Pickup', 'woocommerce' ) }
 						description={ __(
 							'Allow customers to choose a local pickup location during checkout.',
 							'woocommerce'

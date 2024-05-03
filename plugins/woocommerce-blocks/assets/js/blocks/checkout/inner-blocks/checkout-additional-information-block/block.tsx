@@ -5,7 +5,7 @@ import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { CHECKOUT_STORE_KEY } from '@woocommerce/block-data';
-import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
+import { ADDITIONAL_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import type { FunctionComponent } from 'react';
 
@@ -27,21 +27,21 @@ const Block: FunctionComponent = () => {
 		...additionalFields,
 	};
 
-	if ( ORDER_FORM_KEYS.length === 0 ) {
+	if ( ADDITIONAL_FORM_KEYS.length === 0 ) {
 		return null;
 	}
 
 	return (
 		<>
 			<StoreNoticesContainer
-				context={ noticeContexts.ORDER_INFORMATION }
+				context={ noticeContexts.ADDITIONAL_INFORMATION }
 			/>
 			<Form
 				id="additional-information"
 				addressType="additional-information"
 				onChange={ onChangeForm }
 				values={ additionalFieldValues }
-				fields={ ORDER_FORM_KEYS }
+				fields={ ADDITIONAL_FORM_KEYS }
 			/>
 		</>
 	);

@@ -13,12 +13,11 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:assets": "wireit",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
-		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:assets": "pnpm build:project --watch"
+		"watch:build:project": "pnpm build:project --watch"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.68",
-		"@wordpress/stylelint-config": "^21.36.0",
+		"@wordpress/stylelint-config": "19.1.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
 		"caniuse-lite": "1.0.30001146",
@@ -38,7 +37,7 @@
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
 		"sass": "^1.69.5",
-		"stylelint": "^14.16.1",
+		"stylelint": "13.8.0",
 		"wireit": "0.14.3"
 	},
 	"dependencies": {

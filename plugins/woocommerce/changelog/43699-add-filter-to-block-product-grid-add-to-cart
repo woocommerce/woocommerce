@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Added new woocommerce_blocks_product_grid_add_to_cart_attributes filter to block product grid to allow the add to cart buttons to have extra HTML attributes

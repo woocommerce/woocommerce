@@ -5,13 +5,9 @@
  * @package WooCommerce\Admin\Logs
  */
 
-use Automattic\WooCommerce\Utilities\LoggingUtil;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-$log_directory = LoggingUtil::get_log_directory();
 
 ?>
 <?php if ( $logs ) : ?>
@@ -29,7 +25,7 @@ $log_directory = LoggingUtil::get_log_directory();
 				<select class="wc-enhanced-select" name="log_file">
 					<?php foreach ( $logs as $log_key => $log_file ) : ?>
 						<?php
-							$timestamp = filemtime( $log_directory . $log_file );
+							$timestamp = filemtime( WC_LOG_DIR . $log_file );
 							$date      = sprintf(
 								/* translators: 1: last access date 2: last access time 3: last access timezone abbreviation */
 								__( '%1$s at %2$s %3$s', 'woocommerce' ),
@@ -47,7 +43,7 @@ $log_directory = LoggingUtil::get_log_directory();
 		<div class="clear"></div>
 	</div>
 	<div id="log-viewer">
-		<pre><?php echo esc_html( file_get_contents( $log_directory . $viewed_log ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents ?></pre>
+		<pre><?php echo esc_html( file_get_contents( WC_LOG_DIR . $viewed_log ) ); ?></pre>
 	</div>
 <?php else : ?>
 	<div class="updated woocommerce-message inline"><p><?php esc_html_e( 'There are currently no logs to view.', 'woocommerce' ); ?></p></div>

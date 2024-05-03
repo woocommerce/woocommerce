@@ -240,7 +240,7 @@ export const ProductNameSuggestions = () => {
 			'Return a short and concise reason for each suggestion in seven words in the "reason" part of your response.',
 			"The product's properties are:",
 			`${ JSON.stringify( validProductData ) }`,
-			'Write your response in valid JSON. Here is an example of a valid response:',
+			'Here is an example of a valid response:',
 			'{"suggestions": [{"content": "An improved alternative to the product\'s title", "reason": "Reason for the suggestion"}, {"content": "Another improved alternative to the product title", "reason": "Reason for this suggestion"}]}',
 		];
 
@@ -262,7 +262,7 @@ export const ProductNameSuggestions = () => {
 		} );
 
 		try {
-			await requestCompletion( buildPrompt(), undefined, 'json_object' );
+			await requestCompletion( buildPrompt() );
 		} catch ( e ) {
 			setSuggestionsState( SuggestionsState.Failed );
 		}

@@ -1,6 +1,4 @@
 <?php
-use Automattic\Jetpack\Constants;
-
 /**
  * Move interactive scripts to the footer. This is a temporary measure to make
  * it work with `wc_store` and it should be replaced with deferred scripts or
@@ -38,8 +36,7 @@ function woocommerce_interactivity_register_runtime() {
 	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $file_path ) ) {
 		$version = filemtime( $file_path );
 	} else {
-		// Use wc- prefix here to prevent collisions when WC Core version catches up to a version previously used by the WC Blocks feature plugin.
-		$version = 'wc-' . Constants::get_constant( 'WC_VERSION' );
+		$version = \Automattic\WooCommerce\Blocks\Package::get_version();
 	}
 
 	wp_register_script(

@@ -24,10 +24,6 @@
 			},
 			"default": [],
 			"__experimentalRole": "content"
-		},
-		"disabled": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {

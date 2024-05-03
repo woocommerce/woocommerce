@@ -5,17 +5,19 @@ import { createElement } from '@wordpress/element';
 import { chevronDown } from '@wordpress/icons';
 import { Button, DropdownMenu, Flex, FlexItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-
 /**
  * Internal dependencies
  */
 import type { ButtonWithDropdownMenuProps } from './types';
 
-export * from './types';
-
-export function ButtonWithDropdownMenu( {
+export const ButtonWithDropdownMenu: React.FC<
+	ButtonWithDropdownMenuProps
+> = ( {
+	text,
 	dropdownButtonLabel = __( 'More options', 'woocommerce' ),
-	controls,
+	onButtonClick = () => {},
+	controls = [],
+	variant = 'primary',
 	defaultOpen = false,
 	popoverProps: {
 		placement = 'bottom-end',
@@ -27,9 +29,7 @@ export function ButtonWithDropdownMenu( {
 		offset: 0,
 	},
 	className,
-	renderMenu,
-	...props
-}: ButtonWithDropdownMenuProps ) {
+} ) => {
 	return (
 		<Flex
 			className={ `woocommerce-button-with-dropdown-menu${
@@ -42,9 +42,12 @@ export function ButtonWithDropdownMenu( {
 		>
 			<FlexItem role="none">
 				<Button
-					{ ...props }
+					variant={ variant }
+					onClick={ onButtonClick }
 					className="woocommerce-button-with-dropdown-menu__main-button"
-				/>
+				>
+					{ text }
+				</Button>
 			</FlexItem>
 
 			<FlexItem role="none">
@@ -52,7 +55,7 @@ export function ButtonWithDropdownMenu( {
 					toggleProps={ {
 						className:
 							'woocommerce-button-with-dropdown-menu__dropdown-button',
-						variant: props.variant,
+						variant,
 					} }
 					controls={ controls }
 					icon={ chevronDown }
@@ -64,10 +67,8 @@ export function ButtonWithDropdownMenu( {
 						offset,
 					} }
 					defaultOpen={ defaultOpen }
-				>
-					{ renderMenu }
-				</DropdownMenu>
+				/>
 			</FlexItem>
 		</Flex>
 	);
-}
+};

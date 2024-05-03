@@ -1,7 +1,7 @@
 .woocommerce-dashboard__store-performance {
 	margin-bottom: $gap-large;
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		border-width: 0;
 	}
 
@@ -16,7 +16,7 @@
 		background-color: $gray-100;
 		margin: 0;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			&.is-placeholder {
 				border-top: 0;
 			}

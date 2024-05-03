@@ -3387,46 +3387,4 @@ class OrdersTableDataStoreTests extends HposTestCase {
 		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 	}
 
-	/**
-	 * Tests that OrderUtil::get_count_for_type() counts orders correctly.
-	 *
-	 * @testWith ["hpos"]
-	 *           ["posts"]
-	 *
-	 * @param string $datastore_to_use Which datastore to use. Either 'hpos' or 'posts'.
-	 */
-	public function test_order_util_get_count_for_type( $datastore_to_use ) {
-		$this->disable_cot_sync();
-
-		if ( 'hpos' === $datastore_to_use ) {
-			$this->toggle_cot_authoritative( true );
-		} else {
-			$this->toggle_cot_authoritative( false );
-		}
-
-		// Create a few orders in various states.
-		$order_statuses = array_keys( wc_get_order_statuses() );
-
-		$expected_counts = array_combine( $order_statuses, array_fill( 0, count( $order_statuses ), 0 ) );
-		foreach ( $order_statuses as $i => $status ) {
-			foreach ( range( 0, $i ) as $_ ) {
-				$expected_counts[ $status ] = $i + 1;
-
-				$order = WC_Helper_Order::create_order();
-				$order->set_status( $status );
-				$order->save();
-			}
-		}
-
-		$real_counts = OrderUtil::get_count_for_type( 'shop_order' );
-		foreach ( $expected_counts as $status => $count ) {
-			$this->assertArrayHasKey( $status, $real_counts );
-			$this->assertEquals( $count, $real_counts[ $status ] );
-		}
-
-		$other_counts = OrderUtil::get_count_for_type( 'shop_something' );
-		$this->assertEquals( 0, array_pop( $other_counts ) );
-
-	}
-
 }

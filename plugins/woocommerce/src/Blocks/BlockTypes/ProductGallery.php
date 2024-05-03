@@ -77,25 +77,25 @@ class ProductGallery extends AbstractBlock {
 
 		$gallery_dialog = strtr(
 			'
-			<dialog data-wc-bind--open="context.isDialogOpen" role="dialog" aria-modal="true" aria-label="{{dialog_aria_label}}" hidden data-wc-bind--hidden="!context.isDialogOpen" data-wc-watch="callbacks.keyboardAccess" data-wc-watch--dialog-focus-trap="callbacks.dialogFocusTrap" data-wc-class--wc-block-product-gallery--dialog-open="context.isDialogOpen">
-				<div class="wc-block-product-gallery-dialog__header">
-				<div class="wc-block-product-galler-dialog__header-right">
-					<button class="wc-block-product-gallery-dialog__close" data-wc-on--click="actions.closeDialog" aria-label="{{close_dialog_aria_label}}">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<rect width="24" height="24" rx="2"/>
-							<path d="M13 11.8L19.1 5.5L18.1 4.5L12 10.7L5.9 4.5L4.9 5.5L11 11.8L4.5 18.5L5.5 19.5L12 12.9L18.5 19.5L19.5 18.5L13 11.8Z" fill="black"/>
-						</svg>
-					</button>
-				</div>
-				</div>
-				<div class="wc-block-product-gallery-dialog__body">
-					{{html}}
-				</div>
-			</dialog>',
+		<div class="wc-block-product-gallery-dialog__overlay" hidden data-wc-bind--hidden="!context.isDialogOpen" data-wc-watch="callbacks.keyboardAccess">
+			<dialog data-wc-bind--open="context.isDialogOpen">
+			<div class="wc-block-product-gallery-dialog__header">
+			<div class="wc-block-product-galler-dialog__header-right">
+				<button class="wc-block-product-gallery-dialog__close" data-wc-on--click="actions.closeDialog">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect width="24" height="24" rx="2"/>
+						<path d="M13 11.8L19.1 5.5L18.1 4.5L12 10.7L5.9 4.5L4.9 5.5L11 11.8L4.5 18.5L5.5 19.5L12 12.9L18.5 19.5L19.5 18.5L13 11.8Z" fill="black"/>
+					</svg>
+				</button>
+			</div>
+			</div>
+			<div class="wc-block-product-gallery-dialog__body">
+				{{html}}
+			</div>
+			</dialog>
+		</div>',
 			array(
-				'{{html}}'                    => $html_processor->get_updated_html(),
-				'{{dialog_aria_label}}'       => __( 'Product gallery', 'woocommerce' ),
-				'{{close_dialog_aria_label}}' => __( 'Close Product Gallery dialog', 'woocommerce' ),
+				'{{html}}' => $html_processor->get_updated_html(),
 			)
 		);
 		return $gallery_dialog;
@@ -146,7 +146,6 @@ class ProductGallery extends AbstractBlock {
 						'dialogVisibleImagesIds'          => ProductGalleryUtils::get_product_gallery_image_ids( $product, null, false ),
 						'mouseIsOverPreviousOrNextButton' => false,
 						'productId'                       => $product_id,
-						'elementThatTriggeredDialogOpening' => null,
 					)
 				)
 			);

@@ -31,7 +31,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 
 		$block_hooks = array_filter(
 			$this->hook_data,
-			function ( $hook ) use ( $block_name ) {
+			function( $hook ) use ( $block_name ) {
 				return in_array( $block_name, $hook['block_names'], true );
 			}
 		);
@@ -279,7 +279,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 		$grouped_blocks = self::group_blocks( $parsed_blocks );
 
 		$wrapped_blocks = array_map(
-			function ( $blocks ) {
+			function( $blocks ) {
 				if ( 'core/template-part' === $blocks[0]['blockName'] ) {
 					return $blocks;
 				}
@@ -306,7 +306,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	private static function inject_custom_attributes_to_first_and_last_block_single_product_template( $wrapped_blocks ) {
 		$template_with_custom_attributes = array_reduce(
 			$wrapped_blocks,
-			function ( $carry, $item ) {
+			function( $carry, $item ) {
 
 				$index          = $carry['index'];
 				$carry['index'] = $carry['index'] + 1;
@@ -379,6 +379,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 		$new_block['innerBlocks'] = $blocks;
 
 		return $new_block;
+
 	}
 
 	/**
@@ -420,7 +421,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	private static function group_blocks( $parsed_blocks ) {
 		return array_reduce(
 			$parsed_blocks,
-			function ( array $carry, array $block ) {
+			function( array $carry, array $block ) {
 				if ( 'core/template-part' === $block['blockName'] ) {
 					$carry[] = array( $block );
 					return $carry;
@@ -479,7 +480,7 @@ class SingleProductTemplateCompatibility extends AbstractTemplateCompatibility {
 	private static function serialize_blocks( $parsed_blocks ) {
 		return array_reduce(
 			$parsed_blocks,
-			function ( $carry, $item ) {
+			function( $carry, $item ) {
 				if ( is_array( $item ) ) {
 					return $carry . serialize_blocks( $item );
 				}

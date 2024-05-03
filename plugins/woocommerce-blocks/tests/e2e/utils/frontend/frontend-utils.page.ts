@@ -13,12 +13,8 @@ export class FrontendUtils {
 		this.requestUtils = requestUtils;
 	}
 
-	async getBlockByName( name: string, parentSelector?: string ) {
-		let selector = `[data-block-name="${ name }"]`;
-		if ( parentSelector ) {
-			selector = `${ parentSelector } [data-block-name="${ name }"]`;
-		}
-		return this.page.locator( selector );
+	async getBlockByName( name: string ) {
+		return this.page.locator( `[data-block-name="${ name }"]` );
 	}
 
 	async getBlockByClassWithParent( blockClass: string, parentName: string ) {
@@ -52,18 +48,10 @@ export class FrontendUtils {
 		await this.page.goto( '/checkout', {
 			waitUntil: 'domcontentloaded',
 		} );
-
-		await this.page.waitForSelector( '#email' );
 	}
 
 	async goToCart() {
 		await this.page.goto( '/cart', {
-			waitUntil: 'commit',
-		} );
-	}
-
-	async goToCartShortcode() {
-		await this.page.goto( '/cart-shortcode', {
 			waitUntil: 'commit',
 		} );
 	}

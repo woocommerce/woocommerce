@@ -217,7 +217,7 @@ describe( 'AdvancedFilters', () => {
 	test( 'should render', () => {
 		const { getByRole } = render( <AdvancedFiltersComponent /> );
 		expect(
-			getByRole( 'button', { name: 'Add a filter' } )
+			getByRole( 'button', { name: 'Add a Filter' } )
 		).toBeInTheDocument();
 	} );
 
@@ -226,7 +226,7 @@ describe( 'AdvancedFilters', () => {
 
 		// Add a new filter.
 		userEvent.click(
-			screen.getByRole( 'button', { name: 'Add a filter' } )
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
 		);
 
 		// Add a "Before" date filter.
@@ -257,7 +257,7 @@ describe( 'AdvancedFilters', () => {
 
 		// Add a new filter.
 		userEvent.click(
-			screen.getByRole( 'button', { name: 'Add a filter' } )
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
 		);
 
 		// Add a "Before" date filter.
@@ -291,7 +291,7 @@ describe( 'AdvancedFilters', () => {
 
 		// Add a new filter.
 		userEvent.click(
-			screen.getByRole( 'button', { name: 'Add a filter' } )
+			screen.getByRole( 'button', { name: 'Add a Filter' } )
 		);
 
 		// Select Test filter.

@@ -7,25 +7,63 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
-
 /**
  * Rule processor for publishing based on the number of orders.
- *
- * @deprecated 8.8.0
  */
-class OrderCountRuleProcessor extends DeprecatedClassFacade {
-	/**
-	 * The name of the non-deprecated class that this facade covers.
-	 *
-	 * @var string
-	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrderCountRuleProcessor';
+class OrderCountRuleProcessor implements RuleProcessorInterface {
 
 	/**
-	 * The version that this class was deprecated in.
+	 * The orders provider.
 	 *
-	 * @var string
+	 * @var OrdersProvider
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	protected $orders_provider;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param object $orders_provider The orders provider.
+	 */
+	public function __construct( $orders_provider = null ) {
+		$this->orders_provider = null === $orders_provider
+			? new OrdersProvider()
+			: $orders_provider;
+	}
+
+	/**
+	 * Process the rule.
+	 *
+	 * @param object $rule         The rule to process.
+	 * @param object $stored_state Stored state.
+	 *
+	 * @return bool Whether the rule passes or not.
+	 */
+	public function process( $rule, $stored_state ) {
+		$count = $this->orders_provider->get_order_count();
+
+		return ComparisonOperation::compare(
+			$count,
+			$rule->value,
+			$rule->operation
+		);
+	}
+
+	/**
+	 * Validates the rule.
+	 *
+	 * @param object $rule The rule to validate.
+	 *
+	 * @return bool Pass/fail.
+	 */
+	public function validate( $rule ) {
+		if ( ! isset( $rule->value ) ) {
+			return false;
+		}
+
+		if ( ! isset( $rule->operation ) ) {
+			return false;
+		}
+
+		return true;
+	}
 }

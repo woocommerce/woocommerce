@@ -293,11 +293,11 @@ class WC_Admin_Importers {
 					'position'            => 'done',
 					'percentage'          => 100,
 					'url'                 => add_query_arg( array( '_wpnonce' => wp_create_nonce( 'woocommerce-csv-importer' ) ), admin_url( 'edit.php?post_type=product&page=product_importer&step=done' ) ),
-					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
+					'imported'            => count( $results['imported'] ),
+					'imported_variations' => count( $results['imported_variations'] ),
+					'failed'              => count( $results['failed'] ),
+					'updated'             => count( $results['updated'] ),
+					'skipped'             => count( $results['skipped'] ),
 				)
 			);
 		} else {
@@ -305,11 +305,11 @@ class WC_Admin_Importers {
 				array(
 					'position'            => $importer->get_file_position(),
 					'percentage'          => $percent_complete,
-					'imported'            => is_countable( $results['imported'] ) ? count( $results['imported'] ) : 0,
-					'imported_variations' => is_countable( $results['imported_variations'] ) ? count( $results['imported_variations'] ) : 0,
-					'failed'              => is_countable( $results['failed'] ) ? count( $results['failed'] ) : 0,
-					'updated'             => is_countable( $results['updated'] ) ? count( $results['updated'] ) : 0,
-					'skipped'             => is_countable( $results['skipped'] ) ? count( $results['skipped'] ) : 0,
+					'imported'            => count( $results['imported'] ),
+					'imported_variations' => count( $results['imported_variations'] ),
+					'failed'              => count( $results['failed'] ),
+					'updated'             => count( $results['updated'] ),
+					'skipped'             => count( $results['skipped'] ),
 				)
 			);
 		}

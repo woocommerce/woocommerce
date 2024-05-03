@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { assign, spawn } from 'xstate';
-import { getQuery, updateQueryString } from '@woocommerce/navigation';
+import {
+	getQuery,
+	updateQueryString,
+	getNewPath,
+} from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 import { dispatch } from '@wordpress/data';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 
@@ -24,7 +29,7 @@ import {
 	lookAndFeelCompleteEvent,
 	toneOfVoiceCompleteEvent,
 } from './pages';
-import { trackEvent } from '../tracking';
+import { attachIframeListeners, onIframeLoad } from '../utils';
 
 const assignStartLoadingTime = assign<
 	designWithAiStateMachineContext,
@@ -218,7 +223,7 @@ const assignAPICallLoaderError = assign<
 	designWithAiStateMachineEvents
 >( {
 	apiCallLoader: () => {
-		trackEvent( 'customize_your_store_ai_wizard_error' );
+		recordEvent( 'customize_your_store_ai_wizard_error' );
 
 		return {
 			hasErrors: true,
@@ -261,7 +266,7 @@ const recordTracksStepViewed = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	trackEvent( 'customize_your_store_ai_wizard_step_view', {
+	recordEvent( 'customize_your_store_ai_wizard_step_view', {
 		step,
 	} );
 };
@@ -271,7 +276,7 @@ const recordTracksStepClosed = (
 	event: aiWizardClosedBeforeCompletionEvent
 ) => {
 	const { step } = event.payload;
-	trackEvent( `customize_your_store_ai_wizard_step_close`, {
+	recordEvent( `customize_your_store_ai_wizard_step_close`, {
 		step: step.replaceAll( '-', '_' ),
 	} );
 };
@@ -282,21 +287,81 @@ const recordTracksStepCompleted = (
 	{ action }: { action: unknown }
 ) => {
 	const { step } = action as { step: string };
-	trackEvent( 'customize_your_store_ai_wizard_step_complete', {
+	recordEvent( 'customize_your_store_ai_wizard_step_complete', {
 		step,
 	} );
 };
 
-const redirectToAssemblerHub = async () => {
-	// This is a workaround to update the "activeThemeHasMods" in the parent's machine
-	// state context. We should find a better way to do this using xstate actions,
-	// since state machines should rely only on their context.
-	// Will be fixed on: https://github.com/woocommerce/woocommerce/issues/44349
-	// This is needed because the iframe loads the entire Customize Store app.
-	// This means that the iframe instance will have different state machines
-	// than the parent window.
-	// Check https://github.com/woocommerce/woocommerce/pull/44206 for more details.
-	window.parent.__wcCustomizeStore.activeThemeHasMods = true;
+const redirectToAssemblerHub = async (
+	context: designWithAiStateMachineContext
+) => {
+	const assemblerUrl = getNewPath( {}, '/customize-store/assembler-hub', {} );
+	const iframe = document.createElement( 'iframe' );
+	iframe.classList.add( 'cys-fullscreen-iframe' );
+	iframe.src = assemblerUrl;
+
+	const showIframe = () => {
+		if ( iframe.style.opacity === '1' ) {
+			// iframe is already visible
+			return;
+		}
+
+		const loader = document.getElementsByClassName(
+			'woocommerce-onboarding-loader'
+		);
+		if ( loader[ 0 ] ) {
+			( loader[ 0 ] as HTMLElement ).style.display = 'none';
+		}
+
+		iframe.style.opacity = '1';
+
+		if ( context.startLoadingTime ) {
+			const endLoadingTime = performance.now();
+			const timeToLoad = endLoadingTime - context.startLoadingTime;
+			recordEvent( 'customize_your_store_ai_wizard_loading_time', {
+				time_in_s: ( timeToLoad / 1000 ).toFixed( 2 ),
+			} );
+		}
+	};
+
+	iframe.onload = () => {
+		// Hide loading UI
+		attachIframeListeners( iframe );
+		onIframeLoad( showIframe );
+
+		// Ceiling wait time set to 60 seconds
+		setTimeout( showIframe, 60 * 1000 );
+		window.history?.pushState( {}, '', assemblerUrl );
+	};
+
+	document.body.appendChild( iframe );
+
+	// Listen for back button click
+	window.addEventListener(
+		'popstate',
+		() => {
+			const apiLoaderUrl = getNewPath(
+				{},
+				'/customize-store/design-with-ai/api-call-loader',
+				{}
+			);
+
+			// Only catch the back button click when the user is on the main assember hub page
+			// and trying to go back to the api loader page
+			if ( 'admin.php' + window.location.search === apiLoaderUrl ) {
+				iframe.contentWindow?.postMessage(
+					{
+						type: 'assemberBackButtonClicked',
+					},
+					'*'
+				);
+				// When the user clicks the back button, push state changes to the previous step
+				// Set it back to the assember hub
+				window.history?.pushState( {}, '', assemblerUrl );
+			}
+		},
+		false
+	);
 };
 
 export const actions = {

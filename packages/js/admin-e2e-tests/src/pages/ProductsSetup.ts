@@ -8,7 +8,7 @@ export class ProductsSetup extends BasePage {
 	url = 'wp-admin/admin.php?page=wc-admin&task=products';
 
 	async isDisplayed(): Promise< void > {
-		await waitForElementByText( 'h1', 'Add your products' );
+		await waitForElementByText( 'h1', 'Add my products' );
 	}
 
 	async isStartWithATemplateDisplayed(

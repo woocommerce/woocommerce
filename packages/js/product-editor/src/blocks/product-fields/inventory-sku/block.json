@@ -11,10 +11,6 @@
 		"name": {
 			"type": "string",
 			"__experimentalRole": "content"
-		},
-		"disabled": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {

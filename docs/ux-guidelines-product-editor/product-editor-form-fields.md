@@ -5,7 +5,7 @@ menu_title: Fields
 
 Fields are the simplest type of extension. They let users add extra product information, replace or manage the visibility of other fields assigned to a specific product type, and control the contents of other fields.
 
-![Fields example](https://developer.woocommerce.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-fields.png)
+![Fields example](https://developer.woo.com/wp-content/uploads/2023/12/product-editor-ext-guidelines-fields.png)
 
 ## What they are for
 

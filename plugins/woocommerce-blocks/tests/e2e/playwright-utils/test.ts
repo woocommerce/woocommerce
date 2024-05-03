@@ -10,10 +10,10 @@ import {
 	PageUtils,
 	RequestUtils,
 } from '@wordpress/e2e-test-utils-playwright';
+
 import {
 	TemplateApiUtils,
 	STORAGE_STATE_PATH,
-	DB_EXPORT_FILE,
 	EditorUtils,
 	FrontendUtils,
 	StoreApiUtils,
@@ -22,18 +22,7 @@ import {
 	LocalPickupUtils,
 	MiniCartUtils,
 	WPCLIUtils,
-	cli,
 } from '@woocommerce/e2e-utils';
-import { Post } from '@wordpress/e2e-test-utils-playwright/build-types/request-utils/posts';
-
-/**
- * Internal dependencies
- */
-import {
-	PostPayload,
-	createPostFromTemplate,
-	deletePost,
-} from '../utils/create-dynamic-content';
 
 /**
  * Set of console logging types observed to protect against unexpected yet
@@ -135,18 +124,11 @@ const test = base.extend<
 		wpCliUtils: WPCLIUtils;
 	},
 	{
-		requestUtils: RequestUtils & {
-			createPostFromTemplate: (
-				post: PostPayload,
-				templatePath: string,
-				data: unknown
-			) => Promise< Post >;
-			deletePost: ( id: number ) => Promise< void >;
-		};
+		requestUtils: RequestUtils;
 	}
 >( {
-	admin: async ( { page, pageUtils, editor }, use ) => {
-		await use( new Admin( { page, pageUtils, editor } ) );
+	admin: async ( { page, pageUtils }, use ) => {
+		await use( new Admin( { page, pageUtils } ) );
 	},
 	editor: async ( { page }, use ) => {
 		await use( new Editor( { page } ) );
@@ -161,20 +143,15 @@ const test = base.extend<
 			window.localStorage.clear();
 		} );
 
-		const cliOutput = await cli(
-			`npm run wp-env run tests-cli wp db import ${ DB_EXPORT_FILE }`
-		);
-		if ( ! cliOutput.stdout.includes( 'Success: Imported ' ) ) {
-			throw new Error( `Failed to import ${ DB_EXPORT_FILE }` );
-		}
+		await page.close();
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );
 	},
 	templateApiUtils: async ( {}, use ) =>
 		await use( new TemplateApiUtils( baseRequest ) ),
-	editorUtils: async ( { editor, page, admin }, use ) => {
-		await use( new EditorUtils( editor, page, admin ) );
+	editorUtils: async ( { editor, page }, use ) => {
+		await use( new EditorUtils( editor, page ) );
 	},
 	frontendUtils: async ( { page, requestUtils }, use ) => {
 		await use( new FrontendUtils( page, requestUtils ) );
@@ -204,26 +181,7 @@ const test = base.extend<
 				storageStatePath: STORAGE_STATE_PATH,
 			} );
 
-			const utilCreatePostFromTemplate = (
-				post: Partial< PostPayload >,
-				templatePath: string,
-				data: unknown
-			) =>
-				createPostFromTemplate(
-					requestUtils,
-					post,
-					templatePath,
-					data
-				);
-
-			const utilDeletePost = ( id: number ) =>
-				deletePost( requestUtils, id );
-
-			await use( {
-				...requestUtils,
-				createPostFromTemplate: utilCreatePostFromTemplate,
-				deletePost: utilDeletePost,
-			} );
+			await use( requestUtils );
 		},
 		{ scope: 'worker', auto: true },
 	],

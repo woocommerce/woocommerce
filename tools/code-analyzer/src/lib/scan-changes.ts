@@ -36,6 +36,10 @@ const generateVersionDiff = async (
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
 	);
 
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
+
 	const diff = await generateDiff(
 		tmpRepoPath,
 		base,
@@ -115,8 +119,7 @@ export const scanForChanges = async (
 	source: string,
 	base: string,
 	outputStyle: 'cli' | 'github',
-	clonedPath?: string,
-	exclude: string[] = []
+	clonedPath?: string
 ) => {
 	Logger.startTask( `Making temporary clone of ${ source }...` );
 
@@ -131,12 +134,16 @@ export const scanForChanges = async (
 		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
 	);
 
+	Logger.notice(
+		`Temporary clone of ${ source } created at ${ tmpRepoPath }`
+	);
+
 	const diff = await generateDiff(
 		tmpRepoPath,
 		base,
 		compareVersion,
 		Logger.error,
-		[ 'tools', ...( exclude ? exclude : [] ) ]
+		[ 'tools' ]
 	);
 
 	// Only checkout the compare version if we're in CLI mode.

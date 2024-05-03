@@ -84,15 +84,6 @@ final class LoggingUtil {
 	}
 
 	/**
-	 * Get the directory for storing log files.
-	 *
-	 * @return string The full directory path, with trailing slash.
-	 */
-	public static function get_log_directory(): string {
-		return Settings::get_log_directory();
-	}
-
-	/**
 	 * Calculate the size, in bytes, of the log directory.
 	 *
 	 * @return int

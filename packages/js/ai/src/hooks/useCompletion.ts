@@ -7,7 +7,8 @@ import { useRef, useState } from '@wordpress/element';
  * Internal dependencies
  */
 import { getCompletion, createExtendedError } from '../utils/';
-import { ResponseFormat, StopReason } from '../shared/types';
+
+type StopReason = 'abort' | 'finished' | 'error' | 'interrupted';
 
 export type UseCompletionError = Error & { code?: string; cause?: Error };
 
@@ -61,8 +62,7 @@ export const useCompletion = ( {
 
 	const requestCompletion = async (
 		prompt: string,
-		featureOverride?: string,
-		responseFormat?: ResponseFormat
+		featureOverride?: string
 	) => {
 		if (
 			! window.JP_CONNECTION_INITIAL_STATE?.connectionStatus?.isActive
@@ -89,8 +89,7 @@ export const useCompletion = ( {
 		try {
 			const suggestionsSource = await getCompletion(
 				prompt,
-				completionFeature,
-				responseFormat ?? 'text'
+				completionFeature
 			);
 
 			setCompletionActive( true );

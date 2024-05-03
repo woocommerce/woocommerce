@@ -11,7 +11,6 @@ import ProductsHeader from './products';
 import PurchaseHeader from './purchase';
 import PaymentsHeader from './payments';
 import WoocommercePaymentsHeader from './woocommerce-payments';
-import LaunchYourStoreHeader from './launch-your-store';
 
 export const taskHeaders: Record< string, React.ElementType > = {
 	store_details: StoreDetailsHeader,
@@ -24,5 +23,4 @@ export const taskHeaders: Record< string, React.ElementType > = {
 	products: ProductsHeader,
 	purchase: PurchaseHeader,
 	'woocommerce-payments': WoocommercePaymentsHeader,
-	'launch-your-store': LaunchYourStoreHeader,
 };

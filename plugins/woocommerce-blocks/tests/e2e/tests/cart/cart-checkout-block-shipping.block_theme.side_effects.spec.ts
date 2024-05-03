@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
-import { FrontendUtils } from '@woocommerce/e2e-utils';
+import { adminFile, guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -20,6 +20,8 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Merchant → Shipping', () => {
+	test.use( { storageState: adminFile } );
+
 	test( 'Merchant can enable shipping calculator and hide shipping costs before address is entered', async ( {
 		page,
 		shippingUtils,
@@ -41,52 +43,42 @@ test.describe( 'Merchant → Shipping', () => {
 } );
 
 test.describe( 'Shopper → Shipping', () => {
-	test.beforeEach( async ( { shippingUtils } ) => {
-		await shippingUtils.enableShippingCostsRequireAddress();
-	} );
+	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can see shipping calculator on cart page', async ( {
-		requestUtils,
-		browser,
+		frontendUtils,
+		page,
 	} ) => {
-		const guestContext = await browser.newContext();
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCart();
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCart();
 
 		await expect(
-			userPage.getByLabel( 'Add an address for shipping options' )
+			page.getByLabel( 'Add an address for shipping options' )
 		).toBeVisible();
 	} );
 
 	test( 'Guest user does not see shipping rates until full address is entered', async ( {
-		requestUtils,
-		browser,
+		checkoutPageObject,
+		frontendUtils,
+		page,
 	} ) => {
-		const guestContext = await browser.newContext();
-		const userPage = await guestContext.newPage();
-
-		const userFrontendUtils = new FrontendUtils( userPage, requestUtils );
-		const userCheckoutPageObject = new CheckoutPage( { page: userPage } );
-
-		await userFrontendUtils.goToShop();
-		await userFrontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await userFrontendUtils.goToCheckout();
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await frontendUtils.goToCheckout();
 
 		await expect(
-			userPage.getByText(
+			page.getByText(
 				'Shipping options will be displayed here after entering your full shipping addres'
 			)
 		).toBeVisible();
 
-		await userCheckoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.fillInCheckoutWithTestData();
 
 		await expect(
-			userPage.getByText(
+			page.getByText(
 				'Shipping options will be displayed here after entering your full shipping addres'
 			)
 		).toBeHidden();

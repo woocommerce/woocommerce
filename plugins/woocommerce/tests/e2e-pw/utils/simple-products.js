@@ -86,6 +86,7 @@ async function expectBlockProductEditor( page ) {
  */
 async function clickOnTab( tabName, page ) {
 	await page
+		// .locator( '.woocommerce-product-tab__general-content' )
 		.locator( '.woocommerce-product-tabs' )
 		.getByRole( 'button', { name: tabName } )
 		.click();

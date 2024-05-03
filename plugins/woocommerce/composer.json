@@ -1,8 +1,8 @@
 {
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
-	"homepage": "https://woocommerce.com/",
-	"version": "9.0.0",
+	"homepage": "https://woo.com/",
+	"version": "8.7.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -26,7 +26,7 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.7.4"
+		"woocommerce/action-scheduler": "3.7.1"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -35,9 +35,8 @@
 		"mockery/mockery": "1.6.6",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
-		"spatie/phpunit-watcher": "^1.23",
-		"woocommerce/monorepo-plugin": "*",
-		"yoast/phpunit-polyfills": "^2.0"
+		"yoast/phpunit-polyfills": "^2.0",
+		"woocommerce/monorepo-plugin": "*"
 	},
 	"config": {
 		"optimize-autoloader": true,
@@ -113,7 +112,7 @@
 			"phpcbf -p"
 		],
 		"makepot-audit": [
-			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,client,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
+			"wp --allow-root i18n make-pot . --exclude=\".github,.wordpress-org,bin,sample-data,node_modules,tests\" --slug=woocommerce"
 		],
 		"makepot": [
 			"@makepot-audit --skip-audit"

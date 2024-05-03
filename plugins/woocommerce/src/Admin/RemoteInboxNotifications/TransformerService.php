@@ -2,7 +2,8 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+use InvalidArgumentException;
+use stdClass;
 
 /**
  * A simple service class for the Transformer classes.
@@ -10,21 +11,60 @@ use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
  * Class TransformerService
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications
- *
- * @deprecated 8.8.0
  */
-class TransformerService extends DeprecatedClassFacade {
+class TransformerService {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Create a transformer object by name.
 	 *
-	 * @var string
+	 * @param string $name name of the transformer.
+	 *
+	 * @return TransformerInterface|null
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\TransformerService';
+	public static function create_transformer( $name ) {
+		$camel_cased = str_replace( ' ', '', ucwords( str_replace( '_', ' ', $name ) ) );
+
+		$classname = __NAMESPACE__ . '\\Transformers\\' . $camel_cased;
+		if ( ! class_exists( $classname ) ) {
+			return null;
+		}
+
+		return new $classname();
+	}
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Apply transformers to the given value.
 	 *
-	 * @var string
+	 * @param mixed  $target_value a value to transform.
+	 * @param array  $transformer_configs transform configuration.
+	 * @param string $default default value.
+	 *
+	 * @throws InvalidArgumentException Throws when one of the requried arguments is missing.
+	 * @return mixed|null
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public static function apply( $target_value, array $transformer_configs, $default ) {
+		foreach ( $transformer_configs as $transformer_config ) {
+			if ( ! isset( $transformer_config->use ) ) {
+				throw new InvalidArgumentException( 'Missing required config value: use' );
+			}
+
+			if ( ! isset( $transformer_config->arguments ) ) {
+				$transformer_config->arguments = null;
+			}
+
+			$transformer = self::create_transformer( $transformer_config->use );
+			if ( null === $transformer ) {
+				throw new InvalidArgumentException( "Unable to find a transformer by name: {$transformer_config->use}" );
+			}
+
+			$transformed_value = $transformer->transform( $target_value, $transformer_config->arguments, $default );
+			// if the transformer returns null, then return the previously transformed value.
+			if ( null === $transformed_value ) {
+				return $target_value;
+			}
+
+			$target_value = $transformed_value;
+		}
+
+		return $target_value;
+	}
 }

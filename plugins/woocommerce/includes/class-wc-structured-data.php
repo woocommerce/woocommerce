@@ -241,36 +241,6 @@ class WC_Structured_Data {
 						'offerCount' => count( $product->get_children() ),
 					);
 				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
-				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
-					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
-				}
-
-				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-				$children         = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
-				$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
-
-				foreach ( $children as $child ) {
-					if ( '' !== $child->get_price() ) {
-						$child_prices[] = $price_function( $child );
-					}
-				}
-				if ( empty( $child_prices ) ) {
-					$min_price = 0;
-				} else {
-					$min_price = min( $child_prices );
-				}
-
-				$markup_offer = array(
-					'@type'              => 'Offer',
-					'price'              => wc_format_decimal( $min_price, wc_get_price_decimals() ),
-					'priceValidUntil'    => $price_valid_until,
-					'priceSpecification' => array(
-						'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
-						'priceCurrency'         => $currency,
-						'valueAddedTaxIncluded' => wc_prices_include_tax() ? 'true' : 'false',
-					),
-				);
 			} else {
 				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
 					$price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );

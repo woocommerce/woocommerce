@@ -31,7 +31,7 @@
 	"supports": {
 		"align": false,
 		"html": false,
-		"multiple": true,
+		"multiple": false,
 		"reusable": false,
 		"inserter": false,
 		"lock": false,

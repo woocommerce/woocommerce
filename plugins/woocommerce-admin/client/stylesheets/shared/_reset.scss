@@ -11,13 +11,13 @@
 		min-height: calc(100vh - #{$adminbar-height});
 	}
 
-	@include breakpoint( ">782px" ) {
+	@include breakpoint( '>782px' ) {
 		#wpbody-content {
 			padding-left: 0;
 		}
 	}
 
-	@include breakpoint( "<782px" ) {
+	@include breakpoint( '<782px' ) {
 		// WP breakpoint for mobile menu
 		.wp-responsive-open #woocommerce-embedded-root,
 		.wp-responsive-open #wpbody {
@@ -31,7 +31,7 @@
 		}
 	}
 
-	@include breakpoint( ">960px" ) {
+	@include breakpoint( '>960px' ) {
 		#toplevel_page_woocommerce.menu-top > a:focus,
 		#toplevel_page_wcadmin--analytics.menu-top > a:focus {
 			padding-bottom: 1px;
@@ -61,7 +61,7 @@
 	}
 }
 
-@include breakpoint( "<600px" ) {
+@include breakpoint( '<600px' ) {
 	#wpadminbar {
 		position: fixed;
 	}
@@ -73,7 +73,7 @@
 
 // Temporary fix for compatibility with the Jetpack masterbar
 // See https://github.com/Automattic/jetpack/issues/9608
-@include breakpoint( "<782px" ) {
+@include breakpoint( '<782px' ) {
 	.jetpack-masterbar {
 		#wpadminbar #wp-admin-bar-menu-toggle {
 			margin-top: -10px;

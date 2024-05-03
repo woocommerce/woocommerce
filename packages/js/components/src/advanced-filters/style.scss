@@ -136,7 +136,7 @@
 
 	&.is-english {
 		display: grid;
-		grid-template-columns: 120px 150px 1fr;
+		grid-template-columns: 100px 150px 1fr;
 
 		.woocommerce-filters-advanced__fieldset-item {
 			@include set-grid-item-position( 3, 3 );
@@ -193,9 +193,7 @@
 }
 
 .woocommerce-filters-advanced__add-dropdown {
-	padding: 0;
-	margin: 0;
-	white-space: nowrap;
+	padding: $gap-smaller 0;
 
 	li {
 		margin: 0;

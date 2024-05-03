@@ -2302,15 +2302,9 @@ class WC_Order extends WC_Abstract_Order {
 		$refunds = $this->get_refunds();
 		if ( $refunds ) {
 			foreach ( $refunds as $id => $refund ) {
-				$reason = trim( $refund->get_reason() );
-
-				if ( strlen( $reason ) > 0 ) {
-					$reason = "<br><small>$reason</small>";
-				}
-
 				$total_rows[ 'refund_' . $id ] = array(
-					'label' => __( 'Refund', 'woocommerce' ) . ':',
-					'value' => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ) . $reason,
+					'label' => $refund->get_reason() ? $refund->get_reason() : __( 'Refund', 'woocommerce' ) . ':',
+					'value' => wc_price( '-' . $refund->get_amount(), array( 'currency' => $this->get_currency() ) ),
 				);
 			}
 		}

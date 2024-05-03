@@ -13,9 +13,8 @@ jQuery( function ( $ ) {
 				)
 				.on( 'click', 'a.debug-report', this.generateReport )
 				.on( 'click', '#copy-for-support', this.copyReport )
-				.on( 'click', '#copy-for-github', this.copyGithubReport )
-				.on( 'aftercopy', '#copy-for-support, #copy-for-github', this.copySuccess )
-				.on( 'aftercopyfailure', '#copy-for-support, #copy-for-github', this.copyFail )
+				.on( 'aftercopy', '#copy-for-support', this.copySuccess )
+				.on( 'aftercopyfailure', '#copy-for-support', this.copyFail )
 				.on( 'click', '#download-for-support', this.downloadReport );
 		},
 
@@ -96,23 +95,10 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Copy for GitHub report.
-		 *
-		 * @param {Object} event Copy event.
-		 */
-		copyGithubReport: function( event ) {
-			wcClearClipboard();
-			var reportValue = $( '#debug-report' ).find( 'textarea' ).val();
-			var reportForGithub = '<details><summary>System Status Report</summary>\n\n``' + reportValue + '``\n</details>';
-			wcSetClipboard( reportForGithub, $( this ) );
-			event.preventDefault();
-		},
-
-		/**
 		 * Display a "Copied!" tip when success copying
 		 */
-		copySuccess: function( event ) {
-			$( event.target ).tipTip({
+		copySuccess: function() {
+			$( '#copy-for-support' ).tipTip({
 				'attribute':  'data-tip',
 				'activation': 'focus',
 				'fadeIn':     50,

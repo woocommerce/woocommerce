@@ -17,7 +17,6 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
-import { DEFAULT_FILTERS } from '../../constants';
 
 /**
  * Returns:
@@ -36,13 +35,7 @@ function useProducts() {
 	);
 
 	useEffect( () => {
-		getProducts( {
-			selected: [],
-			queryArgs: {
-				// Fetch all products.
-				per_page: 0,
-			},
-		} ).then( ( results ) => {
+		getProducts( { selected: [] } ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -116,19 +109,15 @@ const HandPickedProductsControl = ( {
 		return decodeEntities( product?.name ) || '';
 	};
 
-	const deselectCallback = () => {
-		setQueryAttribute( {
-			woocommerceHandPickedProducts:
-				DEFAULT_FILTERS.woocommerceHandPickedProducts,
-		} );
-	};
-
 	return (
 		<ToolsPanelItem
 			label={ __( 'Hand-picked Products', 'woocommerce' ) }
 			hasValue={ () => !! selectedProductIds?.length }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={ () => {
+				setQueryAttribute( {
+					woocommerceHandPickedProducts: [],
+				} );
+			} }
 		>
 			<FormTokenField
 				disabled={ ! productsMap.size }

@@ -3,7 +3,6 @@ namespace Automattic\WooCommerce\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Domain\Package;
 use Exception;
-use Automattic\Jetpack\Constants;
 /**
  * The Api class provides an interface to various asset registration helpers.
  *
@@ -12,14 +11,6 @@ use Automattic\Jetpack\Constants;
  * @since 2.5.0
  */
 class Api {
-
-	/**
-	 * Stores the prefixed WC version. Used because the WC Blocks version has not been updated since the monorepo merge.
-	 *
-	 * @var string
-	 */
-	public $wc_version;
-
 	/**
 	 * Stores inline scripts already enqueued.
 	 *
@@ -68,8 +59,6 @@ class Api {
 	 * @param Package $package An instance of Package.
 	 */
 	public function __construct( Package $package ) {
-		// Use wc- prefix here to prevent collisions when WC Core version catches up to a version previously used by the WC Blocks feature plugin.
-		$this->wc_version    = 'wc-' . Constants::get_constant( 'WC_VERSION' );
 		$this->package       = $package;
 		$this->disable_cache = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || ! $this->package->feature()->is_production_environment();
 
@@ -95,7 +84,7 @@ class Api {
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $this->package->get_path() . $file ) ) {
 			return filemtime( $this->package->get_path( trim( $file, '/' ) ) );
 		}
-		return $this->wc_version;
+		return $this->package->get_version();
 	}
 
 	/**
@@ -134,7 +123,7 @@ class Api {
 	 * @return string The generated hash.
 	 */
 	private function get_script_data_hash() {
-		return md5( get_option( 'siteurl', '' ) . $this->wc_version . $this->package->get_path() );
+		return md5( get_option( 'siteurl', '' ) . $this->package->get_version() . $this->package->get_path() );
 	}
 
 	/**
@@ -154,7 +143,7 @@ class Api {
 			empty( $transient_value ) ||
 			empty( $transient_value['script_data'] ) ||
 			empty( $transient_value['version'] ) ||
-			$transient_value['version'] !== $this->wc_version ||
+			$transient_value['version'] !== $this->package->get_version() ||
 			empty( $transient_value['hash'] ) ||
 			$transient_value['hash'] !== $this->script_data_hash
 		) {
@@ -176,7 +165,7 @@ class Api {
 			wp_json_encode(
 				array(
 					'script_data' => $this->script_data,
-					'version'     => $this->wc_version,
+					'version'     => $this->package->get_version(),
 					'hash'        => $this->script_data_hash,
 				)
 			),

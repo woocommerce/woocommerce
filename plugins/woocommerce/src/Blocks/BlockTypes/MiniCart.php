@@ -159,13 +159,15 @@ class MiniCart extends AbstractBlock {
 
 			$this->asset_data_registry->add(
 				'taxLabel',
-				$this->tax_label
+				$this->tax_label,
+				''
 			);
 		}
 
 		$this->asset_data_registry->add(
 			'displayCartPricesIncludingTax',
-			$this->display_cart_prices_including_tax
+			$this->display_cart_prices_including_tax,
+			true
 		);
 
 		$template_part_edit_uri = '';
@@ -204,7 +206,8 @@ class MiniCart extends AbstractBlock {
 
 		$this->asset_data_registry->add(
 			'templatePartEditUri',
-			$template_part_edit_uri
+			$template_part_edit_uri,
+			''
 		);
 
 		/**
@@ -473,7 +476,7 @@ class MiniCart extends AbstractBlock {
 			$theme_has_mini_cart   = BlockTemplateUtils::theme_has_template_part( 'mini-cart' );
 			$template_slug_to_load = $theme_has_mini_cart ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 		}
-		$template_part = get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
+		$template_part = BlockTemplateUtils::get_block_template( $template_slug_to_load . '//mini-cart', 'wp_template_part' );
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			$template_part_contents = do_blocks( $template_part->content );

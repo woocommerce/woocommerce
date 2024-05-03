@@ -16,8 +16,6 @@ export interface RadioControlProps {
 	options: RadioControlOption[];
 	// Is the control disabled.
 	disabled?: boolean;
-	// Should the selected option be highlighted with a border?
-	highlightChecked?: boolean;
 }
 
 export interface RadioControlOptionProps {
@@ -26,8 +24,6 @@ export interface RadioControlOptionProps {
 	onChange: ( value: string ) => void;
 	option: RadioControlOption;
 	disabled?: boolean;
-	// Should the selected option be highlighted with a border?
-	highlightChecked?: boolean;
 }
 
 interface RadioControlOptionContent {

@@ -23,7 +23,7 @@
 		"commander": "^9.5.0",
 		"dotenv": "^10.0.0",
 		"simple-git": "^3.21.0",
-		"uuid": "^9.0.1"
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@types/jest": "^27.5.2",
@@ -38,7 +38,7 @@
 		"wireit": "0.14.3"
 	},
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"config": {

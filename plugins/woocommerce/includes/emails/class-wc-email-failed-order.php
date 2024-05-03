@@ -139,7 +139,7 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_additional_content() {
-			return __( 'Hopefully they’ll be back. Read more about <a href="https://woocommerce.com/document/managing-orders/">troubleshooting failed payments</a>.', 'woocommerce' );
+			return __( 'Hopefully they’ll be back. Read more about <a href="https://woo.com/document/managing-orders/">troubleshooting failed payments</a>.', 'woocommerce' );
 		}
 
 		/**

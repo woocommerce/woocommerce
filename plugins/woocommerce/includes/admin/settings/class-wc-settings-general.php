@@ -36,7 +36,7 @@ class WC_Settings_General extends WC_Settings_Page {
 		$currency_code_options = get_woocommerce_currencies();
 
 		foreach ( $currency_code_options as $code => $name ) {
-			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
+			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ')';
 		}
 
 		$settings =

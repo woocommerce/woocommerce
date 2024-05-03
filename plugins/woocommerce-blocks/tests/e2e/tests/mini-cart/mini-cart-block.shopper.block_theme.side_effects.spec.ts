@@ -10,9 +10,15 @@ import { cli } from '@woocommerce/e2e-utils';
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
 test.describe( 'Shopper → Translations', () => {
-	test.beforeEach( async () => {
+	test.beforeAll( async () => {
 		await cli(
-			`npm run wp-env run tests-cli -- wp site switch-language nl_NL`
+			`npm run wp-env run tests-cli -- wp language core activate nl_NL`
+		);
+	} );
+
+	test.afterAll( async () => {
+		await cli(
+			`npm run wp-env run tests-cli -- wp language core activate en_US`
 		);
 	} );
 
@@ -21,6 +27,7 @@ test.describe( 'Shopper → Translations', () => {
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
+		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -57,7 +64,7 @@ test.describe( 'Shopper → Translations', () => {
 } );
 
 test.describe( 'Shopper → Tax', () => {
-	test.beforeEach( async () => {
+	test.beforeAll( async () => {
 		await cli(
 			`npm run wp-env run tests-cli -- wp option set woocommerce_prices_include_tax no`
 		);
@@ -66,10 +73,20 @@ test.describe( 'Shopper → Tax', () => {
 		);
 	} );
 
+	test.afterAll( async () => {
+		await cli(
+			`npm run wp-env run tests-cli -- wp option set woocommerce_prices_include_tax yes`
+		);
+		await cli(
+			`npm run wp-env run tests-cli -- wp option set woocommerce_tax_display_cart excl`
+		);
+	} );
+
 	test( 'User can see tax label and price including tax', async ( {
 		frontendUtils,
 		page,
 	} ) => {
+		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToMiniCart();

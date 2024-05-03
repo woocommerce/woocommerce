@@ -77,25 +77,18 @@ test.describe( 'Grouped Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
-		await expect(
-			page.getByText(
-				'Please choose the quantity of items you wish to add to your cart'
-			)
-		).toBeVisible();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await expect( page.locator( '.is-error' ) ).toContainText(
+			'Please choose the quantity of items you wish to add to your cart…'
+		);
 
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '5' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '5' );
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
-		await expect(
-			page.getByText(
-				`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart`
-			)
-		).toBeVisible();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+		await expect( page.locator( '.is-success' ) ).toContainText(
+			`“${ simpleProduct1 }” and “${ simpleProduct2 }” have been added to your cart.`
+		);
+
 		await page.goto( 'cart/' );
 		await expect(
 			page.locator( 'td.product-name >> nth=0' )
@@ -117,16 +110,14 @@ test.describe( 'Grouped Product Page', () => {
 		await page.goto( `product/${ slug }` );
 		await page.locator( 'div.quantity input.qty >> nth=0' ).fill( '1' );
 		await page.locator( 'div.quantity input.qty >> nth=1' ).fill( '1' );
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove >> nth=1' ).click();
 		await page.locator( 'a.remove >> nth=0' ).click();
 
-		await expect(
-			page.getByText( 'Your cart is currently empty.' )
-		).toBeVisible();
+		await expect( page.locator( '.is-info' ) ).toContainText(
+			'Your cart is currently empty.'
+		);
 	} );
 } );

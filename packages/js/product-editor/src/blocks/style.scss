@@ -1,9 +1,8 @@
 @import "product-fields/attributes/editor.scss";
 @import "product-fields/description/editor.scss";
-@import "product-fields/catalog-visibility/editor.scss";
-@import "product-fields/custom-fields-toggle/editor.scss";
 @import "product-fields/downloads/editor.scss";
 @import "product-fields/images/editor.scss";
+@import "product-fields/inventory-email/editor.scss";
 @import "product-fields/inventory-sku/editor.scss";
 @import "product-fields/name/editor.scss";
 @import "product-fields/notice-has-variations/editor.scss";
@@ -16,6 +15,7 @@
 @import "product-fields/shipping-dimensions/editor.scss";
 @import "product-fields/summary/editor.scss";
 @import "generic/tab/editor.scss";
+@import "product-fields/password/editor.scss";
 @import "product-fields/product-list/editor.scss";
 @import "product-fields/product-details-section-description/editor.scss";
 @import "product-fields/variation-items/editor.scss";

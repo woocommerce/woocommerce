@@ -6,28 +6,61 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Rule processor that performs a comparison operation against the base
  * location - country.
- *
- * @deprecated 8.8.0
  */
-class BaseLocationCountryRuleProcessor extends DeprecatedClassFacade {
+class BaseLocationCountryRuleProcessor implements RuleProcessorInterface {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Performs a comparison operation against the base location - country.
 	 *
-	 * @var string
+	 * @param object $rule         The specific rule being processed by this rule processor.
+	 * @param object $stored_state Stored state.
+	 *
+	 * @return bool The result of the operation.
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\BaseLocationCountryRuleProcessor';
+	public function process( $rule, $stored_state ) {
+		$base_location = wc_get_base_location();
+		if ( ! $base_location ) {
+			return false;
+		}
+
+		$onboarding_profile   = get_option( 'woocommerce_onboarding_profile', array() );
+		$is_address_default   = 'US' === $base_location['country'] && 'CA' === $base_location['state'] && empty( get_option( 'woocommerce_store_address', '' ) );
+		$is_store_country_set = isset( $onboarding_profile['is_store_country_set'] ) && $onboarding_profile['is_store_country_set'];
+
+		// Return false if the location is the default country and if onboarding hasn't been finished or the store address not been updated.
+		if ( $is_address_default && OnboardingProfile::needs_completion() && ! $is_store_country_set ) {
+			return false;
+		}
+
+		return ComparisonOperation::compare(
+			$base_location['country'],
+			$rule->value,
+			$rule->operation
+		);
+	}
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Validates the rule.
 	 *
-	 * @var string
+	 * @param object $rule The rule to validate.
+	 *
+	 * @return bool Pass/fail.
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function validate( $rule ) {
+		if ( ! isset( $rule->value ) ) {
+			return false;
+		}
+
+		if ( ! isset( $rule->operation ) ) {
+			return false;
+		}
+
+		return true;
+	}
 }

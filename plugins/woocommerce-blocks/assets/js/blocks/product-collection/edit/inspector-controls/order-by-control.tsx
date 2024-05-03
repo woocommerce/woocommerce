@@ -51,10 +51,6 @@ const OrderByControl = ( props: QueryControlProps ) => {
 	const { order, orderBy } = query;
 	const defaultQuery = getDefaultQuery( query );
 
-	const deselectCallback = () => {
-		setQueryAttribute( { orderBy: defaultQuery.orderBy } );
-	};
-
 	return (
 		<ToolsPanelItem
 			label={ __( 'Order by', 'woocommerce' ) }
@@ -63,8 +59,9 @@ const OrderByControl = ( props: QueryControlProps ) => {
 				orderBy !== defaultQuery?.orderBy
 			}
 			isShownByDefault
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={ () => {
+				setQueryAttribute( defaultQuery );
+			} }
 		>
 			<SelectControl
 				value={ `${ orderBy }/${ order }` }

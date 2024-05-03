@@ -3,14 +3,15 @@
  */
 import { createContext } from '@wordpress/element';
 import { render, screen } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
+
 /**
  * Internal dependencies
  */
 import { OnboardingTour } from '../index';
 import { FlowType } from '~/customize-store/types';
-import { trackEvent } from '~/customize-store/tracking';
 
-jest.mock( '~/customize-store/tracking', () => ( { trackEvent: jest.fn() } ) );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 jest.mock( '../../', () => ( {
 	CustomizeStoreContext: createContext( {
 		context: {
@@ -101,7 +102,7 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( trackEvent ).toHaveBeenCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'customize_your_store_assembler_hub_tour_close'
 		);
 	} );
@@ -121,7 +122,7 @@ describe( 'OnboardingTour', () => {
 			} )
 			.click();
 
-		expect( trackEvent ).toHaveBeenCalledWith(
+		expect( recordEvent ).toHaveBeenCalledWith(
 			'customize_your_store_assembler_hub_tour_complete'
 		);
 	} );

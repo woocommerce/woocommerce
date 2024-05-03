@@ -9,7 +9,6 @@ import type { FrontendUtils } from '@woocommerce/e2e-utils';
  */
 import { SIMPLE_VIRTUAL_PRODUCT_NAME } from '../checkout/constants';
 import { CheckoutPage } from '../checkout/checkout.page';
-import type { TemplateType } from '../../utils/types';
 
 type TemplateCustomizationTest = {
 	visitPage: ( props: {
@@ -18,12 +17,12 @@ type TemplateCustomizationTest = {
 	} ) => Promise< void | Response | null >;
 	templateName: string;
 	templatePath: string;
-	templateType: TemplateType;
+	templateType: string;
 	fallbackTemplate?: {
 		templateName: string;
 		templatePath: string;
 	};
-	canBeOverriddenByThemes: boolean;
+	canBeOverridenByThemes: boolean;
 };
 
 export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
@@ -33,7 +32,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Catalog',
 		templatePath: 'archive-product',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -41,7 +40,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Product Search Results',
 		templatePath: 'product-search-results',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/color/blue' ),
@@ -52,7 +51,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -64,7 +63,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -76,17 +75,18 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templateName: 'Product Catalog',
 			templatePath: 'archive-product',
 		},
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
 		templateName: 'Single Product',
 		templatePath: 'single-product',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			const block = await frontendUtils.getBlockByName(
@@ -97,7 +97,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Mini-Cart',
 		templatePath: 'mini-cart',
 		templateType: 'wp_template_part',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) =>
@@ -105,10 +105,11 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Cart',
 		templatePath: 'page-cart',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			await frontendUtils.goToCheckout();
@@ -116,10 +117,11 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Page: Checkout',
 		templatePath: 'page-checkout',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 	{
 		visitPage: async ( { frontendUtils } ) => {
+			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart();
 			await frontendUtils.goToCheckout();
@@ -131,7 +133,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		// automatically override the checkout header. That's because the
 		// Page: Checkout template still points to the default `checkout-header`
 		// from WooCommerce.
-		canBeOverriddenByThemes: false,
+		canBeOverridenByThemes: false,
 	},
 	{
 		visitPage: async ( { frontendUtils, page } ) => {
@@ -145,7 +147,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		templateName: 'Order Confirmation',
 		templatePath: 'order-confirmation',
 		templateType: 'wp_template',
-		canBeOverriddenByThemes: true,
+		canBeOverridenByThemes: true,
 	},
 ];
 

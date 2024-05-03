@@ -14,23 +14,19 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
-import { DEFAULT_FILTERS } from '../../constants';
 
 const FeaturedProductsControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
-
-	const deselectCallback = () => {
-		setQueryAttribute( {
-			featured: DEFAULT_FILTERS.featured,
-		} );
-	};
 
 	return (
 		<ToolsPanelItem
 			label={ __( 'Featured', 'woocommerce' ) }
 			hasValue={ () => query.featured === true }
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={ () => {
+				setQueryAttribute( {
+					featured: false,
+				} );
+			} }
 		>
 			<BaseControl
 				id="product-collection-featured-products-control"

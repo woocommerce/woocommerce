@@ -201,7 +201,7 @@
 		margin-bottom: $gap * 2 !important;
 		border-color: $studio-red-50;
 
-		@include breakpoint( "<782px" ) {
+		@include breakpoint( '<782px' ) {
 			margin-bottom: $gap-small + $gap * 2 !important;
 		}
 

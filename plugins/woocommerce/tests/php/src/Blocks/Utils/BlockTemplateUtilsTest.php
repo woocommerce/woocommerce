@@ -5,8 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\Utils;
 use Automattic\WooCommerce\Blocks\Migration;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use WP_UnitTestCase;
 
 /**
@@ -15,24 +13,10 @@ use WP_UnitTestCase;
 class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 	/**
-	 * Holds an instance of the dependency injection container.
-	 *
-	 * @var Container
-	 */
-	private $container;
-
-	/**
 	 * Setup test environment.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-
-		// Switch to a block theme and initialize template logic.
-		switch_theme( 'twentytwentytwo' );
-		$this->container = Package::container();
-		$this->container->get( BlockTemplatesRegistry::class )->init();
-
-		// Reset options.
 		delete_option( Options::WC_BLOCK_USE_BLOCKIFIED_PRODUCT_GRID_BLOCK_AS_TEMPLATE );
 		delete_option( Options::WC_BLOCK_VERSION );
 	}

@@ -46,7 +46,7 @@ export const merchant = {
 
 		await expect( page ).toFill(
 			'input[name="local_pickup_title"]',
-			'Pickup'
+			'Local Pickup'
 		);
 		await merchant.saveLocalPickupSettingsPageWithRefresh();
 	},

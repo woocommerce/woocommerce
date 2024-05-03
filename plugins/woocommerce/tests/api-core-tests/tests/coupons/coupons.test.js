@@ -388,8 +388,10 @@ test.describe( 'Add coupon to order', () => {
 		expect( responseJSON.coupon_lines[ 0 ].meta_data ).toEqual(
 			expect.arrayContaining( [
 				expect.objectContaining( {
-					key: 'coupon_info',
-					value: `[${ testCoupon.id },"${ testCoupon.code }","${ testCoupon.discount_type }",${ testCoupon.amount }]`,
+					key: 'coupon_data',
+					value: expect.objectContaining( {
+						code: testCoupon.code,
+					} ),
 				} ),
 			] )
 		);

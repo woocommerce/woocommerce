@@ -20,11 +20,9 @@ import {
 	updateProduct,
 } from '../../../../utils/functions';
 import { NoticeStatus } from '../../../../contexts/types';
-import InstallWooConnectModal from '../../../woo-update-manager-plugin/install-woo-connect-modal';
 
 interface UpdateProps {
 	subscription: Subscription;
-	wooUpdateManagerActive: boolean;
 }
 
 export default function Update( props: UpdateProps ) {
@@ -36,8 +34,7 @@ export default function Update( props: UpdateProps ) {
 		props.subscription.active &&
 		props.subscription.local &&
 		props.subscription.local.slug &&
-		props.subscription.local.path &&
-		props.wooUpdateManagerActive;
+		props.subscription.local.path;
 
 	function update() {
 		recordEvent( 'marketplace_product_update_button_clicked', {
@@ -155,13 +152,6 @@ export default function Update( props: UpdateProps ) {
 		} else if ( ! props.subscription.active ) {
 			return (
 				<ConnectModal
-					subscription={ props.subscription }
-					onClose={ () => setShowModal( false ) }
-				/>
-			);
-		} else if ( ! props.wooUpdateManagerActive ) {
-			return (
-				<InstallWooConnectModal
 					subscription={ props.subscription }
 					onClose={ () => setShowModal( false ) }
 				/>

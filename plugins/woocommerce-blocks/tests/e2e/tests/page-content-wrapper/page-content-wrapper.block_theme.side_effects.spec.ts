@@ -9,7 +9,6 @@ import type { FrontendUtils } from '@woocommerce/e2e-utils';
 const templates = [
 	{
 		title: 'Cart',
-		slug: 'cart',
 		blockClassName: '.wc-block-cart',
 		visitPage: async ( {
 			frontendUtils,
@@ -21,7 +20,6 @@ const templates = [
 	},
 	{
 		title: 'Checkout',
-		slug: 'checkout',
 		blockClassName: '.wc-block-checkout',
 		visitPage: async ( {
 			frontendUtils,
@@ -36,38 +34,43 @@ const templates = [
 ];
 const userText = 'Hello World in the page';
 
-templates.forEach( async ( template ) => {
-	test.describe( 'Page Content Wrapper', () => {
+test.describe( 'Page Content Wrapper', async () => {
+	templates.forEach( async ( template ) => {
 		test( `the content of the ${ template.title } page is correctly rendered in the ${ template.title } template`, async ( {
-			page,
 			admin,
+			page,
 			editorUtils,
 			frontendUtils,
-			requestUtils,
 		} ) => {
-			const pageData = await requestUtils.rest( {
-				path: 'wp/v2/pages?slug=' + template.slug,
-			} );
-			const pageId = pageData[ 0 ].id;
+			await admin.visitAdminPage( 'edit.php?post_type=page' );
+			page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			await editorUtils.closeWelcomeGuideModal();
 
-			await admin.editPost( pageId );
-
-			// Prevent trying to insert the paragraph block before the editor is
-			// ready.
-			await expect(
-				page.locator( template.blockClassName )
-			).toBeVisible();
+			// Prevent trying to insert the paragraph block before the editor is ready.
+			await page.locator( template.blockClassName ).waitFor();
 
 			await editorUtils.editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-
 			await editorUtils.updatePost();
 
 			// Verify edits are in the template when viewed from the frontend.
 			await template.visitPage( { frontendUtils } );
 			await expect( page.getByText( userText ).first() ).toBeVisible();
+
+			// Clean up the paragraph block added before.
+			await admin.visitAdminPage( 'edit.php?post_type=page' );
+			page.getByLabel( `“${ template.title }” (Edit)` ).click();
+			await editorUtils.closeWelcomeGuideModal();
+
+			// Prevent trying to insert the paragraph block before the editor is ready.
+			await page.locator( template.blockClassName ).waitFor();
+
+			await editorUtils.removeBlocks( {
+				name: 'core/paragraph',
+			} );
+			await editorUtils.updatePost();
 		} );
 	} );
 } );

@@ -12,7 +12,7 @@ import {
 	SelectControl,
 } from '@wordpress/components';
 import { createElement, Component, createRef } from '@wordpress/element';
-import { partial, isEqual } from 'lodash';
+import { partial, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import AddOutlineIcon from 'gridicons/dist/add-outline';
 import {
@@ -66,7 +66,7 @@ class AdvancedFilters extends Component {
 
 		this.onMatchChange = this.onMatchChange.bind( this );
 		this.onFilterChange = this.onFilterChange.bind( this );
-		this.getAvailableFilters = this.getAvailableFilters.bind( this );
+		this.getAvailableFilterKeys = this.getAvailableFilterKeys.bind( this );
 		this.addFilter = this.addFilter.bind( this );
 		this.removeFilter = this.removeFilter.bind( this );
 		this.clearFilters = this.clearFilters.bind( this );
@@ -160,29 +160,20 @@ class AdvancedFilters extends Component {
 		} );
 	}
 
-	getAvailableFilters() {
+	getAvailableFilterKeys() {
 		const { config } = this.props;
 		const activeFilterKeys = this.state.activeFilters.map( ( f ) => f.key );
-
-		// Get filter objects with keys.
-		const allFilters = Object.entries( config.filters ).map(
-			( [ key, value ] ) => ( { key, ...value } )
+		const multipleValueFilterKeys = Object.keys( config.filters ).filter(
+			( f ) => config.filters[ f ].allowMultiple || false
+		);
+		const inactiveFilterKeys = difference(
+			Object.keys( config.filters ),
+			activeFilterKeys,
+			multipleValueFilterKeys
 		);
 
-		// Available filters are those that allow multiple instances or are not already active.
-		const availableFilters = allFilters.filter( ( filter ) => {
-			return (
-				filter.allowMultiple ||
-				! activeFilterKeys.includes( filter.key )
-			);
-		} );
-
-		// Sort filters by their add label.
-		availableFilters.sort( ( a, b ) =>
-			a.labels.add.localeCompare( b.labels.add )
-		);
-
-		return availableFilters;
+		// Ensure filters that allow multiples are alway present.
+		return [ ...inactiveFilterKeys, ...multipleValueFilterKeys ];
 	}
 
 	addFilter( key, onClose ) {
@@ -273,7 +264,7 @@ class AdvancedFilters extends Component {
 	render() {
 		const { config, query, currency } = this.props;
 		const { activeFilters, match } = this.state;
-		const availableFilters = this.getAvailableFilters();
+		const availableFilterKeys = this.getAvailableFilterKeys();
 		const updateHref = this.getUpdateHref( activeFilters, match );
 		const updateDisabled =
 			'admin.php' + window.location.search === updateHref ||
@@ -324,7 +315,7 @@ class AdvancedFilters extends Component {
 						</ul>
 					</CardBody>
 				) }
-				{ availableFilters.length > 0 && (
+				{ availableFilterKeys.length > 0 && (
 					<CardBody>
 						<div className="woocommerce-filters-advanced__add-filter">
 							<Dropdown
@@ -339,21 +330,24 @@ class AdvancedFilters extends Component {
 										aria-expanded={ isOpen }
 									>
 										<AddOutlineIcon />
-										{ __( 'Add a filter', 'woocommerce' ) }
+										{ __( 'Add a Filter', 'woocommerce' ) }
 									</Button>
 								) }
 								renderContent={ ( { onClose } ) => (
 									<ul className="woocommerce-filters-advanced__add-dropdown">
-										{ availableFilters.map( ( filter ) => (
-											<li key={ filter.key }>
+										{ availableFilterKeys.map( ( key ) => (
+											<li key={ key }>
 												<Button
 													onClick={ partial(
 														this.addFilter,
-														filter.key,
+														key,
 														onClose
 													) }
 												>
-													{ filter.labels.add }
+													{
+														config.filters[ key ]
+															.labels.add
+													}
 												</Button>
 											</li>
 										) ) }

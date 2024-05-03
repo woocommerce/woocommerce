@@ -56,20 +56,12 @@ export const CustomerAccountBlock = ( {
 } ): JSX.Element => {
 	const { displayStyle, iconStyle, iconClass } = attributes;
 
-	const ariaAttributes =
-		displayStyle === DisplayStyle.ICON_ONLY
-			? {
-					'aria-label': __( 'My Account', 'woocommerce' ),
-			  }
-			: {};
-
 	return (
 		<a
 			href={ getSetting(
 				'dashboardUrl',
 				getSetting( 'wpLoginUrl', '/wp-login.php' )
 			) }
-			{ ...ariaAttributes }
 		>
 			<AccountIcon
 				iconStyle={ iconStyle }

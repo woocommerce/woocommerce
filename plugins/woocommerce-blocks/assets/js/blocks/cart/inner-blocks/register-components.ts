@@ -202,17 +202,6 @@ registerCheckoutBlock( {
 } );
 
 registerCheckoutBlock( {
-	metadata: metadata.CART_ORDER_SUMMARY_TOTALS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-totals" */
-				'./cart-order-summary-totals/frontend'
-			)
-	),
-} );
-
-registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_TAXES,
 	component: lazy(
 		() =>

@@ -14,7 +14,6 @@ import { PLUGINS_STORE_NAME } from '@woocommerce/data';
  */
 import { PluginCardBody } from '~/marketing/components';
 import { RecommendedPlugin } from '~/marketing/types';
-import { getRecommendationSource } from '~/marketing/utils';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
 import { useIsPluginInstalledNotActivated } from './useIsPluginInstalledNotActivated';
@@ -57,7 +56,6 @@ export const SmartPluginCardBody = ( {
 		try {
 			recordEvent( 'marketing_recommended_extension', {
 				name: plugin.title,
-				source: getRecommendationSource(),
 			} );
 
 			const response = await installAndActivatePlugins( [
@@ -110,7 +108,6 @@ export const SmartPluginCardBody = ( {
 				onClick={ () => {
 					recordEvent( 'marketing_recommended_extension', {
 						name: plugin.title,
-						source: getRecommendationSource(),
 					} );
 				} }
 			>

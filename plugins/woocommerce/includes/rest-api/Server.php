@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\RestApi;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 
 /**
@@ -38,14 +37,9 @@ class Server {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
-		$container    = wc_get_container();
-		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] =
-					$container->has( $controller_class ) ?
-					$container->get( $controller_class ) :
-					$legacy_proxy->get_instance_of( $controller_class );
+				$this->controllers[ $namespace ][ $controller_name ] = new $controller_class();
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}

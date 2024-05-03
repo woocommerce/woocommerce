@@ -1,11 +1,8 @@
 .wc-block-checkout__shipping-option {
 	.wc-block-components-radio-control__option {
+		border-bottom: 1px solid $universal-border-light;
 		margin: 0;
-		padding: 0.875em 0.875em 0.875em em($gap-huge);
-	}
-
-	.wc-block-checkout__shipping-option--free {
-		text-transform: uppercase;
+		padding: em($gap-small) 0 em($gap-small) em($gap-huge);
 	}
 
 	.wc-block-components-shipping-rates-control__no-results-notice {

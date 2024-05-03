@@ -21,27 +21,17 @@ import {
 const validateLocationForm = ( values: FormValues ) => {
 	const errors = defaultValidate( values );
 
-	if (
-		document.getElementById( 'woocommerce-store-address-form-address_1' ) &&
-		! values.addressLine1.trim().length
-	) {
+	if ( ! values.addressLine1.trim().length ) {
 		errors.addressLine1 = __( 'Please enter an address', 'woocommerce' );
 	}
 
-	if (
-		document.getElementById( 'woocommerce-store-address-form-postcode' ) &&
-		! values.postCode.trim().length
-	) {
+	if ( ! values.postCode.trim().length ) {
 		errors.postCode = __( 'Please enter a post code', 'woocommerce' );
 	}
 
-	if (
-		document.getElementById( 'woocommerce-store-address-form-city' ) &&
-		! values.city.trim().length
-	) {
+	if ( ! values.city.trim().length ) {
 		errors.city = __( 'Please enter a city', 'woocommerce' );
 	}
-
 	return errors;
 };
 
@@ -73,14 +63,7 @@ export const StoreLocation: React.FC< {
 		if (
 			isResolving ||
 			isUpdating ||
-			! hasCompleteAddress(
-				generalSettings || {},
-				Boolean(
-					document.getElementById(
-						'woocommerce-store-address-form-postcode'
-					)
-				)
-			)
+			! hasCompleteAddress( generalSettings || {} )
 		) {
 			return;
 		}

@@ -57,7 +57,6 @@ export function Edit( {
 					name={ 'woocommerce-product-sku' }
 					onChange={ setSku }
 					value={ sku || '' }
-					disabled={ attributes.disabled }
 				/>
 			</BaseControl>
 		</div>

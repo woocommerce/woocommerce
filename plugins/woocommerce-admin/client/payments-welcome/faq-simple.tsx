@@ -15,7 +15,7 @@ const FrequentlyAskedQuestionsSimple: React.FC = () => {
 			<Icon icon={ help } />
 			<span>{ strings.faq.haveQuestions } </span>
 			<a
-				href="https://woocommerce.com/my-account/tickets/"
+				href="https://woo.com/my-account/tickets/"
 				target="_blank"
 				rel="noreferrer"
 			>

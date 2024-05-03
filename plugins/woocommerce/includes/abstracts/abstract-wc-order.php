@@ -1365,7 +1365,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			} else {
 
 				// If we do not have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
-				$coupon_object = $this->get_temporary_coupon( $coupon_item );
+				$coupon_object = new WC_Coupon();
+				$coupon_object->set_props( (array) $coupon_item->get_meta( 'coupon_data', true ) );
 				$coupon_object->set_code( $coupon_code );
 				$coupon_object->set_virtual( true );
 
@@ -1399,35 +1400,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Recalculate totals and taxes.
 		$this->calculate_totals( true );
-	}
-
-	/**
-	 * Get a coupon object populated from order line item metadata, to be used when reapplying coupons
-	 * if the original coupon no longer exists.
-	 *
-	 * @since 8.7.0
-	 *
-	 * @param WC_Order_Item_Coupon $coupon_item The order item corresponding to the coupon to reapply.
-	 * @returns WC_Coupon Coupon object populated from order line item metadata, or empty if no such metadata exists (should never happen).
-	 */
-	private function get_temporary_coupon( WC_Order_Item_Coupon $coupon_item ): WC_Coupon {
-		$coupon_object = new WC_Coupon();
-
-		// Since WooCommerce 8.7 a succint 'coupon_info' line item meta entry is created
-		// whenever a coupon is applied to an order. Previously a more verbose 'coupon_data' was created.
-
-		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
-		if ( $coupon_info ) {
-			$coupon_object->set_short_info( $coupon_info );
-			return $coupon_object;
-		}
-
-		$coupon_data = $coupon_item->get_meta( 'coupon_data', true );
-		if ( $coupon_data ) {
-			$coupon_object->set_props( (array) $coupon_data );
-		}
-
-		return $coupon_object;
 	}
 
 	/**
@@ -1489,8 +1461,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
 					$coupon    = new WC_Coupon( $coupon_id );
 
-					$coupon_info = $coupon->get_short_info();
-					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
+					// Avoid storing used_by - it's not needed and can get large.
+					$coupon_data = $coupon->get_data();
+					unset( $coupon_data['used_by'] );
+
+					$coupon_item->add_meta_data( 'coupon_data', $coupon_data );
 				} else {
 					$coupon_item = $this->get_item( $item_id, false );
 				}

@@ -3,6 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
+import {
+	__experimentalRadio as Radio,
+	__experimentalRadioGroup as RadioGroup,
+} from 'wordpress-components';
 import classnames from 'classnames';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { useEffect } from '@wordpress/element';
@@ -18,7 +22,6 @@ import { RatePrice, getLocalPickupPrices, getShippingPrices } from './shared';
 import type { minMaxPrices } from './shared';
 import { defaultLocalPickupText, defaultShippingText } from './constants';
 import { shippingAddressHasValidationErrors } from '../../../../data/cart/utils';
-import Button from '../../../../base/components/button';
 
 const SHIPPING_RATE_ERROR = {
 	hidden: true,
@@ -32,7 +35,6 @@ const LocalPickupSelector = ( {
 	showIcon,
 	toggleText,
 	multiple,
-	onClick,
 }: {
 	checked: string;
 	rate: minMaxPrices;
@@ -40,13 +42,10 @@ const LocalPickupSelector = ( {
 	showIcon: boolean;
 	toggleText: string;
 	multiple: boolean;
-	onClick: () => void;
 } ) => {
 	return (
-		<Button
-			role="radio"
-			removeTextWrap
-			onClick={ onClick }
+		<Radio
+			value="pickup"
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -72,7 +71,7 @@ const LocalPickupSelector = ( {
 					maxRate={ rate.max }
 				/>
 			) }
-		</Button>
+		</Radio>
 	);
 };
 
@@ -82,7 +81,6 @@ const ShippingSelector = ( {
 	showPrice,
 	showIcon,
 	toggleText,
-	onClick,
 	shippingCostRequiresAddress = false,
 }: {
 	checked: string;
@@ -90,7 +88,6 @@ const ShippingSelector = ( {
 	showPrice: boolean;
 	showIcon: boolean;
 	shippingCostRequiresAddress: boolean;
-	onClick: () => void;
 	toggleText: string;
 } ) => {
 	const hasShippableRates = useSelect( ( select ) => {
@@ -131,10 +128,8 @@ const ShippingSelector = ( {
 		);
 
 	return (
-		<Button
-			role="radio"
-			onClick={ onClick }
-			removeTextWrap
+		<Radio
+			value="shipping"
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -154,10 +149,9 @@ const ShippingSelector = ( {
 				{ toggleText }
 			</span>
 			{ showPrice === true && Price }
-		</Button>
+		</Radio>
 	);
 };
-
 const Block = ( {
 	checked,
 	onChange,
@@ -178,23 +172,17 @@ const Block = ( {
 		'shippingCostRequiresAddress',
 		false
 	);
-	const localPickupTextFromSettings = getSetting< string >(
-		'localPickupText',
-		localPickupText || defaultLocalPickupText
-	);
 
 	return (
-		<div
+		<RadioGroup
 			id="shipping-method"
-			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
-			className="components-button-group wc-block-checkout__shipping-method-container"
-			role="radiogroup"
+			className="wc-block-checkout__shipping-method-container"
+			label="options"
+			onChange={ onChange }
+			checked={ checked }
 		>
 			<ShippingSelector
 				checked={ checked }
-				onClick={ () => {
-					onChange( 'shipping' );
-				} }
 				rate={ getShippingPrices( shippingRates[ 0 ]?.shipping_rates ) }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
@@ -203,18 +191,15 @@ const Block = ( {
 			/>
 			<LocalPickupSelector
 				checked={ checked }
-				onClick={ () => {
-					onChange( 'pickup' );
-				} }
 				rate={ getLocalPickupPrices(
 					shippingRates[ 0 ]?.shipping_rates
 				) }
 				multiple={ shippingRates.length > 1 }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
-				toggleText={ localPickupTextFromSettings }
+				toggleText={ localPickupText || defaultLocalPickupText }
 			/>
-		</div>
+		</RadioGroup>
 	);
 };
 

@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import { createInterpolateElement } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -24,22 +24,15 @@ import {
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
 import { Link } from '@woocommerce/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
-import { trackEvent } from '~/customize-store/tracking';
 
 export const SidebarNavigationScreenMain = () => {
-	const {
-		context: { flowType },
-	} = useContext( CustomizeStoreContext );
-	const aiOnline = flowType === FlowType.AIOnline;
-
 	return (
 		<SidebarNavigationScreen
 			isRoot
@@ -53,7 +46,7 @@ export const SidebarNavigationScreenMain = () => {
 					EditorLink: (
 						<Link
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_editor_link_click',
 									{
 										source: 'main',
@@ -84,7 +77,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ siteLogo }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'logo',
@@ -100,7 +93,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ color }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'color-palette',
@@ -108,15 +101,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __(
-										'Change the color palette',
-										'woocommerce'
-								  )
-								: __(
-										'Choose your color palette',
-										'woocommerce'
-								  ) }
+							{ __( 'Change the color palette', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -124,7 +109,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ typography }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'typography',
@@ -132,9 +117,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change fonts', 'woocommerce' )
-								: __( 'Choose fonts', 'woocommerce' ) }
+							{ __( 'Change fonts', 'woocommerce' ) }
 						</NavigatorButton>
 					</ItemGroup>
 					<div className="edit-site-sidebar-navigation-screen-patterns__group-header">
@@ -149,7 +132,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ header }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'header',
@@ -157,9 +140,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your header', 'woocommerce' )
-								: __( 'Choose your header', 'woocommerce' ) }
+							{ __( 'Change your header', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -167,7 +148,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'home',
@@ -175,9 +156,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your homepage', 'woocommerce' )
-								: __( 'Design your homepage', 'woocommerce' ) }
+							{ __( 'Change your homepage', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -185,7 +164,7 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ footer }
 							onClick={ () => {
-								trackEvent(
+								recordEvent(
 									'customize_your_store_assembler_hub_sidebar_item_click',
 									{
 										item: 'footer',
@@ -193,9 +172,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your footer', 'woocommerce' )
-								: __( 'Choose your footer', 'woocommerce' ) }
+							{ __( 'Change your footer', 'woocommerce' ) }
 						</NavigatorButton>
 						{ /* TODO: Turn on this in Phrase 2  */ }
 						{ /* <NavigatorButton

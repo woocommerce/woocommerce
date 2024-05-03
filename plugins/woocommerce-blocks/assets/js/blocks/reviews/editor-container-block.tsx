@@ -10,7 +10,7 @@ import { EditorContainerBlockProps } from '@woocommerce/blocks/reviews/types';
 /**
  * Internal dependencies
  */
-import EditorBlock from './editor-block';
+import EditorBlock from './editor-block.js';
 import { getBlockClassName, getSortArgs } from './utils.js';
 
 const EditorContainerBlock = ( {

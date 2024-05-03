@@ -3,10 +3,10 @@
 	"version": "0.0.2",
 	"main": "index.js",
 	"devDependencies": {
-		"eslint": "^8.55.0"
+		"eslint": "^8.3.0"
 	},
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.13.0",
 		"npm": "^8.0.0"
 	}
 }

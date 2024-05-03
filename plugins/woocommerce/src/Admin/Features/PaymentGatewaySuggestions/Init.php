@@ -9,13 +9,12 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\PaymentGatewaysController;
-use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 /**
  * Remote Payment Methods engine.
  * This goes through the specs and gets eligible payment gateways.
  */
-class Init extends RemoteSpecsEngine {
+class Init {
 	/**
 	 * Option name for dismissed payment method suggestions.
 	 */
@@ -36,31 +35,30 @@ class Init extends RemoteSpecsEngine {
 	 * @return array
 	 */
 	public static function get_suggestions( array $specs = null ) {
-		$locale = get_user_locale();
-
-		$specs           = is_array( $specs ) ? $specs : self::get_specs();
-		$results         = EvaluateSuggestion::evaluate_specs( $specs );
-		$specs_to_return = $results['suggestions'];
-		$specs_to_save   = null;
-
-		if ( empty( $specs_to_return ) ) {
-			// When suggestions is empty, replace it with defaults and save for 3 hours.
-			$specs_to_save   = DefaultPaymentGateways::get_all();
-			$specs_to_return = EvaluateSuggestion::evaluate_specs( $specs_to_save )['suggestions'];
-		} elseif ( count( $results['errors'] ) > 0 ) {
-			// When suggestions is not empty but has errors, save it for 3 hours.
-			$specs_to_save = $specs;
+		$suggestions = array();
+		if ( null === $specs ) {
+			$specs = self::get_specs();
 		}
 
-		if ( count( $results['errors'] ) > 0 ) {
-			self::log_errors( $results['errors'] );
+		foreach ( $specs as $spec ) {
+			try {
+				$suggestion    = EvaluateSuggestion::evaluate( $spec );
+				$suggestions[] = $suggestion;
+				// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			} catch ( \Throwable $e ) {
+				// Ignore errors.
+			}
 		}
 
-		if ( $specs_to_save ) {
-			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
-		}
+		return array_values(
+			array_filter(
+				$suggestions,
+				function( $suggestion ) {
+					return ! property_exists( $suggestion, 'is_visible' ) || $suggestion->is_visible;
+				}
+			)
+		);
 
-		return $specs_to_return;
 	}
 
 	/**

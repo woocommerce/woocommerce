@@ -36,7 +36,7 @@ Store owners will still be able to control aspect ratio and cropping (see below)
 
 ## Customize image sizes in the customizer
 
-The customizer houses the options which control thumbnails in WooCommerce. ![Settings in the customizer](https://woocommerce.files.wordpress.com/2017/12/imagefeature.png?w=712) If the theme is declaring image sizes, the top section will be hidden and only the cropping option will be visible. Changing the cropping option, or widths, will update the preview on the right side to show how things will look. Changes will not be visible to customers until the customizer is  'published' and [the thumbnails have been regenerated to the new dimensions](./thumbnail-image-regeneration.md). The thumbnail cropping section in the customizer allows store owners to select one of three cropping ratio settings for images in the catalog:
+The customizer houses the options which control thumbnails in WooCommerce. ![Settings in the customizer](https://woocommerce.files.wordpress.com/2017/12/imagefeature.png?w=712) If the theme is declaring image sizes, the top section will be hidden and only the cropping option will be visible. Changing the cropping option, or widths, will update the preview on the right side to show how things will look. Changes will not be visible to customers until the customizer is  'published' and [the thumbnails have been regenerated to the new dimensions](/docs/theme-development/thumbnail-image-regeneration.md). The thumbnail cropping section in the customizer allows store owners to select one of three cropping ratio settings for images in the catalog:
 
 - 1:1 (Square cropping)
 - Custom (Store owner can enter a custom aspect ratio)

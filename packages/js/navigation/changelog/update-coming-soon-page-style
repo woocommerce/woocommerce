@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add __experimentalLocationStack prop to history

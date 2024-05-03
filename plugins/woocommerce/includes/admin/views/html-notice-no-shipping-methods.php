@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>">
 			<?php esc_html_e( 'Setup shipping zones', 'woocommerce' ); ?>
 		</a>
-		<a class="button-secondary" href="https://woocommerce.com/document/setting-up-shipping-zones/">
+		<a class="button-secondary" href="https://woo.com/document/setting-up-shipping-zones/">
 			<?php esc_html_e( 'Learn more about shipping zones', 'woocommerce' ); ?>
 		</a>
 	</p>

@@ -1,4 +1,4 @@
-@import "../../stylesheets/_variables.scss";
+@import '../../stylesheets/_variables.scss';
 
 .woocommerce-marketplace__search {
 	grid-area: mktpl-search;
@@ -9,7 +9,7 @@
 	height: 40px;
 	padding: 4px 8px 4px 12px;
 
-	input[type="search"] {
+	input[type='search'] {
 		all: unset;
 		flex-grow: 1;
 	}

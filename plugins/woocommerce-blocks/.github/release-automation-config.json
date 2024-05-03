@@ -1,0 +1,3 @@
+{
+	"labelsToOmit": [ "skip-changelog", "type: build" ]
+}

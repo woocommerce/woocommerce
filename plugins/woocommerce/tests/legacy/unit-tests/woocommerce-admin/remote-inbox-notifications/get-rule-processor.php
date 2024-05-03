@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\GetRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_GetRuleProcessor
@@ -21,6 +21,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_GetRuleProcessor extends WC_Unit_T
 
 		$result = $get_rule_processor->get_processor( 'unknown rule type' );
 
-		$this->assertEquals( 'Automattic\\WooCommerce\\Admin\\RemoteSpecs\\RuleProcessors\\FailRuleProcessor', get_class( $result ) );
+		$this->assertEquals( 'Automattic\\WooCommerce\\Admin\\RemoteInboxNotifications\\FailRuleProcessor', get_class( $result ) );
 	}
 }

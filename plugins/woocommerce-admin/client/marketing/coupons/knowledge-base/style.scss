@@ -12,7 +12,7 @@
 		width: 100%;
 		display: flex;
 
-		@include breakpoint( "<960px" ) {
+		@include breakpoint( '<960px' ) {
 			display: block;
 		}
 	}
@@ -27,7 +27,7 @@
 			margin-bottom: 16px;
 		}
 
-		@include breakpoint( ">960px" ) {
+		@include breakpoint( '>960px' ) {
 			flex-wrap: nowrap;
 			width: 50%;
 
@@ -46,7 +46,7 @@
 			flex: none;
 			border-radius: 3px;
 
-			@include breakpoint( ">960px" ) {
+			@include breakpoint( '>960px' ) {
 				width: 144px;
 				height: 103px;
 				margin-right: 16px;
@@ -60,7 +60,7 @@
 				display: block;
 				width: 100%;
 
-				@include breakpoint( ">960px" ) {
+				@include breakpoint( '>960px' ) {
 					position: absolute;
 					top: 0;
 					right: 0;
@@ -74,7 +74,7 @@
 			margin: 10px 0 0;
 			flex: 1;
 
-			@include breakpoint( ">960px" ) {
+			@include breakpoint( '>960px' ) {
 				margin: 0;
 			}
 		}

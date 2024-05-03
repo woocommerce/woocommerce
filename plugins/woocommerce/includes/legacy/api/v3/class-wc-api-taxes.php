@@ -46,8 +46,8 @@ class WC_API_Taxes extends WC_API_Resource {
 		# GET/PUT/DELETE /taxes/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_tax' ), WC_API_Server::READABLE ),
-			array( array( $this, 'edit_tax' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_tax' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'edit_tax' ), WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'delete_tax' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET/POST /taxes/classes
@@ -63,7 +63,7 @@ class WC_API_Taxes extends WC_API_Resource {
 
 		# GET /taxes/classes/<slug>
 		$routes[ $this->base . '/classes/(?P<slug>\w[\w\s\-]*)' ] = array(
-			array( array( $this, 'delete_tax_class' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'delete_tax_class' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# POST|PUT /taxes/bulk

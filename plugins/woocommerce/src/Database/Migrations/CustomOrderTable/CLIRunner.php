@@ -58,26 +58,15 @@ class CLIRunner {
 	 * Registers commands for CLI.
 	 */
 	public function register_commands() {
-		$legacy_commands = array( 'count_unmigrated', 'sync', 'verify_cot_data', 'enable', 'disable' );
-		foreach ( $legacy_commands as $cmd ) {
-			$new_cmd_name = 'verify_cot_data' === $cmd ? 'verify_data' : $cmd;
-
-			WP_CLI::add_command( "wc hpos {$new_cmd_name}", array( $this, $cmd ) );
-			WP_CLI::add_command(
-				"wc cot {$cmd}",
-				function ( array $args = array(), array $assoc_args = array() ) use ( $cmd, $new_cmd_name ) {
-					WP_CLI::warning( "Command `wc cot {$cmd}` is deprecated since 8.9.0. Please use `wc hpos {$new_cmd_name}` instead." );
-					return call_user_func( array( $this, $cmd ), $args, $assoc_args );
-				}
-			);
-		}
-
+		WP_CLI::add_command( 'wc cot count_unmigrated', array( $this, 'count_unmigrated' ) );
+		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) );
+		WP_CLI::add_command( 'wc cot sync', array( $this, 'sync' ) );
+		WP_CLI::add_command( 'wc cot verify_cot_data', array( $this, 'verify_cot_data' ) );
+		WP_CLI::add_command( 'wc cot enable', array( $this, 'enable' ) );
+		WP_CLI::add_command( 'wc cot disable', array( $this, 'disable' ) );
 		WP_CLI::add_command( 'wc hpos cleanup', array( $this, 'cleanup_post_data' ) );
 		WP_CLI::add_command( 'wc hpos status', array( $this, 'status' ) );
 		WP_CLI::add_command( 'wc hpos diff', array( $this, 'diff' ) );
-		WP_CLI::add_command( 'wc hpos backfill', array( $this, 'backfill' ) );
-
-		WP_CLI::add_command( 'wc cot migrate', array( $this, 'migrate' ) ); // Fully deprecated. No longer works.
 	}
 
 	/**
@@ -87,7 +76,7 @@ class CLIRunner {
 	 *
 	 * @return bool Whether the COT feature is enabled.
 	 */
-	private function is_enabled( $log = true ): bool {
+	private function is_enabled( $log = true ) : bool {
 		if ( ! $this->controller->custom_orders_table_usage_is_enabled() ) {
 			if ( $log ) {
 				WP_CLI::log(
@@ -108,7 +97,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc hpos count_unmigrated
+	 *     wp wc cot count_unmigrated
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 *
@@ -116,7 +105,7 @@ class CLIRunner {
 	 *
 	 * @return int The number of orders to be migrated.*
 	 */
-	public function count_unmigrated( $args = array(), $assoc_args = array() ): int {
+	public function count_unmigrated( $args = array(), $assoc_args = array() ) : int {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$order_count = $this->synchronizer->get_current_orders_pending_sync_count();
 
@@ -157,7 +146,7 @@ class CLIRunner {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp wc hpos sync --batch-size=500
+	 *     wp wc cot sync --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -222,19 +211,13 @@ class CLIRunner {
 				)
 			);
 
-			++$batch_count;
+			$batch_count ++;
 			$total_time += $batch_total_time;
 
 			$progress->tick();
 
 			$orders_remaining = count( $this->synchronizer->get_next_batch_to_process( 1 ) ) > 0;
 			$order_count      = $remaining_count - $batch_size;
-
-			if ( function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_runtime' ) ) {
-				wp_cache_flush_runtime();
-			}
-
-			$GLOBALS['wpdb']->flush();
 		}
 
 		$progress->finish();
@@ -262,7 +245,7 @@ class CLIRunner {
 	}
 
 	/**
-	 * [Deprecated] Use `wp wc hpos sync` instead.
+	 * [Deprecated] Use `wp wc cot sync` instead.
 	 * Copy order data into the postmeta table.
 	 *
 	 * Note that this could dramatically increase the size of your postmeta table, but is recommended
@@ -279,12 +262,12 @@ class CLIRunner {
 	 * ## EXAMPLES
 	 *
 	 *     # Copy all order data into the post meta table, 500 posts at a time.
-	 *     wp wc cot migrate --batch-size=500
+	 *     wp wc cot backfill --batch-size=500
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function migrate( array $args = array(), array $assoc_args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- for backwards compat.
+	public function migrate( $args = array(), $assoc_args = array() ) {
 		WP_CLI::log( __( 'Migrate command is deprecated. Please use `sync` instead.', 'woocommerce' ) );
 	}
 
@@ -324,12 +307,13 @@ class CLIRunner {
 	 *
 	 * [--re-migrate]
 	 * : Attempt to re-migrate orders that failed verification. You should only use this option when you have never run the site with HPOS as authoritative source of order data yet, or you have manually checked the reported errors, otherwise, you risk stale data overwriting the more recent data.
+	 * This option can only be enabled when --verbose flag is also set.
 	 * default: false
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Verify migrated order data, 500 orders at a time.
-	 *     wp wc hpos verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
+	 *     wp wc cot verify_cot_data --batch-size=500 --start-from=0 --end-at=10000
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -386,8 +370,6 @@ class CLIRunner {
 
 		$progress = WP_CLI\Utils\make_progress_bar( 'Order Data Verification', $order_count / $batch_size );
 
-		$error_processing = false;
-
 		if ( ! $order_count ) {
 			return WP_CLI::warning( __( 'There are no orders to verify, aborting.', 'woocommerce' ) );
 		}
@@ -421,70 +403,53 @@ class CLIRunner {
 			$failed_ids_in_current_batch = $this->post_to_cot_migrator->verify_migrated_orders( $order_ids );
 			$failed_ids_in_current_batch = $this->verify_meta_data( $order_ids, $failed_ids_in_current_batch );
 			$failed_ids                  = $verbose ? array() : $failed_ids + $failed_ids_in_current_batch;
-			$error_processing            = $error_processing || ! empty( $failed_ids_in_current_batch );
 			$processed                  += count( $order_ids );
 			$batch_total_time            = microtime( true ) - $batch_start_time;
-			++$batch_count;
+			$batch_count ++;
 			$total_time += $batch_total_time;
 
-			if ( count( $failed_ids_in_current_batch ) > 0 ) {
-				if ( $verbose ) {
-					$errors = wp_json_encode( $failed_ids_in_current_batch, JSON_PRETTY_PRINT );
+			if ( $verbose && count( $failed_ids_in_current_batch ) > 0 ) {
+				$errors = wp_json_encode( $failed_ids_in_current_batch, JSON_PRETTY_PRINT );
+				WP_CLI::warning(
+					sprintf(
+					/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+						_n(
+							'%1$d error found: %2$s. Please review the error above.',
+							'%1$d errors found: %2$s. Please review the errors above.',
+							count( $failed_ids_in_current_batch ),
+							'woocommerce'
+						),
+						count( $failed_ids_in_current_batch ),
+						$errors
+					)
+				);
+				if ( $remigrate ) {
 					WP_CLI::warning(
 						sprintf(
-						/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-							_n(
-								'%1$d error found: %2$s. Please review the error above.',
-								'%1$d errors found: %2$s. Please review the errors above.',
-								count( $failed_ids_in_current_batch ),
-								'woocommerce'
-							),
-							count( $failed_ids_in_current_batch ),
-							$errors
+							__( 'Attempting to remigrate...', 'woocommerce' )
 						)
 					);
-				}
-
-				if ( $remigrate ) {
-					$failed_ids       = $failed_ids ? array_diff_key( $failed_ids, $failed_ids_in_current_batch ) : array();
-					$error_processing = ( ! $verbose ) && $failed_ids;
-
-					$verbose && WP_CLI::warning( sprintf( __( 'Attempting to remigrate...', 'woocommerce' ) ) );
-
-					$failed_ids_in_current_batch_keys = array_keys( $failed_ids_in_current_batch );
-					$this->synchronizer->process_batch( $failed_ids_in_current_batch_keys );
-					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids_in_current_batch_keys );
-					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids_in_current_batch_keys, $errors_in_remigrate_batch );
-
+					$failed_ids = array_keys( $failed_ids_in_current_batch );
+					$this->synchronizer->process_batch( $failed_ids );
+					$errors_in_remigrate_batch = $this->post_to_cot_migrator->verify_migrated_orders( $failed_ids );
+					$errors_in_remigrate_batch = $this->verify_meta_data( $failed_ids, $errors_in_remigrate_batch );
 					if ( count( $errors_in_remigrate_batch ) > 0 ) {
-						$error_processing = true;
 						$formatted_errors = wp_json_encode( $errors_in_remigrate_batch, JSON_PRETTY_PRINT );
-
-						if ( $verbose ) {
-							WP_CLI::warning(
-								sprintf(
-								/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-									_n(
-										'%1$d error found: %2$s when re-migrating order. Please review the error above.',
-										'%1$d errors found: %2$s when re-migrating orders. Please review the errors above.',
-										count( $errors_in_remigrate_batch ),
-										'woocommerce'
-									),
+						WP_CLI::warning(
+							sprintf(
+							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+								_n(
+									'%1$d error found: %2$s when re-migrating order. Please review the error above.',
+									'%1$d errors found: %2$s when re-migrating orders. Please review the errors above.',
 									count( $errors_in_remigrate_batch ),
-									$formatted_errors
-								)
-							);
-						} else {
-							array_walk(
-								$errors_in_remigrate_batch,
-								function ( &$errors_for_order ) {
-									$errors_for_order[] = array( 'remigrate_failed' => true );
-								}
-							);
-							$failed_ids = $failed_ids + $errors_in_remigrate_batch;
-						}
+									'woocommerce'
+								),
+								count( $errors_in_remigrate_batch ),
+								$formatted_errors
+							)
+						);
 					} else {
-						$verbose && WP_CLI::warning( 'Re-migration successful.', 'woocommerce' );
+						WP_CLI::warning( 'Re-migration successful.', 'woocommerce' );
 					}
 				}
 			}
@@ -512,7 +477,11 @@ class CLIRunner {
 		$progress->finish();
 		WP_CLI::log( __( 'Verification completed.', 'woocommerce' ) );
 
-		if ( ! $error_processing ) {
+		if ( $verbose ) {
+			return;
+		}
+
+		if ( 0 === count( $failed_ids ) ) {
 			return WP_CLI::success(
 				sprintf(
 					/* Translators: %1$d is the number of migrated orders and %2$d is time taken. */
@@ -527,6 +496,8 @@ class CLIRunner {
 				)
 			);
 		} else {
+			$errors = wp_json_encode( $failed_ids, JSON_PRETTY_PRINT );
+
 			return WP_CLI::error(
 				sprintf(
 					'%1$s %2$s',
@@ -541,19 +512,17 @@ class CLIRunner {
 						$processed,
 						$total_time
 					),
-					$failed_ids
-						? sprintf(
-							/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
-							_n(
-								'%1$d error found: %2$s. Please review the error above.',
-								'%1$d errors found: %2$s. Please review the errors above.',
-								count( $failed_ids ),
-								'woocommerce'
-							),
+					sprintf(
+						/* Translators: %1$d is number of errors and %2$s is the formatted array of order IDs. */
+						_n(
+							'%1$d error found: %2$s. Please review the error above.',
+							'%1$d errors found: %2$s. Please review the errors above.',
 							count( $failed_ids ),
-							wp_json_encode( $failed_ids, JSON_PRETTY_PRINT )
-						)
-						: __( 'Please review the errors above.', 'woocommerce' )
+							'woocommerce'
+						),
+						count( $failed_ids ),
+						$errors
+					)
 				)
 			);
 		}
@@ -569,7 +538,7 @@ class CLIRunner {
 	 *
 	 * @return int Order count.
 	 */
-	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ): int {
+	private function get_verify_order_count( int $order_id_start, int $order_id_end, array $order_types, bool $log = true ) : int {
 		global $wpdb;
 
 		$order_types_placeholder = implode( ',', array_fill( 0, count( $order_types ), '%s' ) );
@@ -615,7 +584,7 @@ class CLIRunner {
 	 *
 	 * @return array Failed IDs with meta details.
 	 */
-	private function verify_meta_data( array $order_ids, array $failed_ids ): array {
+	private function verify_meta_data( array $order_ids, array $failed_ids ) : array {
 		$meta_keys_to_ignore = $this->synchronizer->get_ignored_order_props();
 
 		global $wpdb;
@@ -695,7 +664,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * @return array Normalized data.
 	 */
-	private function normalize_raw_meta_data( array $data ): array {
+	private function normalize_raw_meta_data( array $data ) : array {
 		$clubbed_data = array();
 		foreach ( $data as $row ) {
 			if ( ! isset( $clubbed_data[ $row['entity_id'] ] ) ) {
@@ -729,7 +698,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ### EXAMPLES
 	 *
 	 *      # Enable HPOS on new shops.
-	 *      wp wc hpos enable --for-new-shop
+	 *      wp wc cot enable --for-new-shop
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -788,7 +757,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				sprintf(
 					// translators: %s is the command to run (wp wc cot sync).
 					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
-					'wp wc hpos sync',
+					'wp wc cot sync',
 				)
 			);
 			$enable_hpos = false;
@@ -836,7 +805,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * ### EXAMPLES
 	 *
 	 *  # Disable HPOS.
-	 *  wp wc hpos disable
+	 *  wp wc cot disable
 	 *
 	 * @param array $args Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
@@ -859,7 +828,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 				sprintf(
 					// translators: %s is the command to run (wp wc cot sync).
 					__( '[Failed] There are orders pending sync. Please run `%s` to sync pending orders.', 'woocommerce' ),
-					'wp wc hpos sync',
+					'wp wc cot sync',
 				)
 			);
 		}
@@ -948,62 +917,36 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			return;
 		}
 
-		$progress   = WP_CLI\Utils\make_progress_bar( __( 'HPOS cleanup', 'woocommerce' ), $order_count );
-		$count      = 0;
-		$failed_ids = array();
+		$progress = WP_CLI\Utils\make_progress_bar( __( 'HPOS cleanup', 'woocommerce' ), $order_count );
+		$count    = 0;
 
 		// translators: %d is the number of orders to clean up.
 		WP_CLI::log( sprintf( _n( 'Starting cleanup for %d order...', 'Starting cleanup for %d orders...', $order_count, 'woocommerce' ), $order_count ) );
 
 		do {
-			$failed_ids_in_batch = array();
-			$order_ids           = $handler->get_orders_for_cleanup( $q_order_ids, $q_limit );
-
-			if ( $failed_ids && empty( array_diff( $order_ids, $failed_ids ) ) ) {
-				break;
-			}
-
-			$order_ids = array_diff( $order_ids, $failed_ids ); // Do not reattempt IDs that have already failed.
+			$order_ids = $handler->get_orders_for_cleanup( $q_order_ids, $q_limit );
 
 			foreach ( $order_ids as $order_id ) {
 				try {
 					$handler->cleanup_post_data( $order_id, $force );
-					++$count;
+					$count++;
 
 					// translators: %d is an order ID.
 					WP_CLI::debug( sprintf( __( 'Cleanup completed for order %d.', 'woocommerce' ), $order_id ) );
 				} catch ( \Exception $e ) {
 					// translators: %1$d is an order ID, %2$s is an error message.
 					WP_CLI::warning( sprintf( __( 'An error occurred while cleaning up order %1$d: %2$s', 'woocommerce' ), $order_id, $e->getMessage() ) );
-					$failed_ids_in_batch[] = $order_id;
 				}
 
 				$progress->tick();
 			}
 
-			$failed_ids = array_merge( $failed_ids, $failed_ids_in_batch );
-
 			if ( ! $all_orders ) {
-				break;
-			}
-
-			if ( $failed_ids_in_batch && ! array_diff( $order_ids, $failed_ids_in_batch ) ) {
-				WP_CLI::warning( __( 'Failed to clean up all orders in a batch. Aborting.', 'woocommerce' ) );
 				break;
 			}
 		} while ( $order_ids );
 
 		$progress->finish();
-
-		if ( $failed_ids ) {
-			return WP_CLI::error(
-				sprintf(
-					// translators: %d is the number of orders that were cleaned up.
-					_n( 'Cleanup completed for %d order. Review errors above.', 'Cleanup completed for %d orders. Review errors above.', $count, 'woocommerce' ),
-					$count
-				)
-			);
-		}
 
 		WP_CLI::success(
 			sprintf(
@@ -1022,7 +965,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 * @param array $args       Positional arguments passed to the command.
 	 * @param array $assoc_args Associative arguments (options) passed to the command.
 	 */
-	public function status( array $args = array(), array $assoc_args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- for backwards compat.
+	public function status( array $args = array(), array $assoc_args = array() ) {
 		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
 
 		// translators: %s is either 'yes' or 'no'.
@@ -1050,7 +993,7 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 	 *
 	 * ## OPTIONS
 	 *
-	 * <order_id>
+	 * <id>
 	 * :The ID of the order.
 	 *
 	 * [--format=<format>]
@@ -1094,14 +1037,10 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 
 		// Format the diff array.
 		$diff = array_map(
-			function ( $key, $hpos_value, $cpt_value ) {
+			function( $key, $hpos_value, $cpt_value ) {
 				// Format for dates.
 				$hpos_value = is_a( $hpos_value, \WC_DateTime::class ) ? $hpos_value->format( DATE_ATOM ) : $hpos_value;
 				$cpt_value  = is_a( $cpt_value, \WC_DateTime::class ) ? $cpt_value->format( DATE_ATOM ) : $cpt_value;
-
-				// Format for NULL.
-				$hpos_value = is_null( $hpos_value ) ? '' : $hpos_value;
-				$cpt_value  = is_null( $cpt_value ) ? '' : $cpt_value;
 
 				return array(
 					'property' => $key,
@@ -1122,95 +1061,6 @@ ORDER BY $meta_table.order_id ASC, $meta_table.meta_key ASC;
 			$assoc_args['format'] ?? 'table',
 			$diff,
 			array( 'property', 'hpos', 'post' )
-		);
-	}
-
-	/**
-	 * Backfills an order from either the HPOS or the posts datastore.
-	 *
-	 * ## OPTIONS
-	 *
-	 * <order_id>
-	 * : The ID of the order.
-	 *
-	 * --from=<datastore>
-	 * : Source datastore. Either 'hpos' or 'posts'.
-	 * ---
-	 * options:
-	 *   - hpos
-	 *   - posts
-	 * ---
-	 *
-	 * --to=<datastore>
-	 * : Destination datastore. Either 'hpos' or 'posts'.
-	 * ---
-	 * options:
-	 *   - hpos
-	 *   - posts
-	 * ---
-	 *
-	 * [--meta_keys=<meta_keys>]
-	 * : Comma separated list of meta keys to backfill.
-	 *
-	 * [--props=<props>]
-	 * : Comma separated list of order properties to backfill.
-	 *
-	 * @since 8.6.0
-	 *
-	 * @param array $args       Positional arguments passed to the command.
-	 * @param array $assoc_args Associative arguments (options) passed to the command.
-	 */
-	public function backfill( array $args = array(), array $assoc_args = array() ) {
-		$legacy_handler = wc_get_container()->get( LegacyDataHandler::class );
-
-		$from     = $assoc_args['from'] ?? '';
-		$to       = $assoc_args['to'] ?? '';
-		$order_id = absint( $args[0] );
-
-		if ( ! $order_id ) {
-			WP_CLI::error( __( 'Please provide a valid order ID.', 'woocommerce' ) );
-		}
-
-		foreach ( array( 'from', 'to' ) as $datastore ) {
-			if ( ! in_array( ${"$datastore"}, array( 'posts', 'hpos' ), true ) ) {
-				// translators: %s is a shell argument representing a datastore name.
-				WP_CLI::error( sprintf( __( '\'%s\' is not a valid datastore.', 'woocommerce' ), ${"$datastore"} ) );
-			}
-		}
-
-		if ( $from === $to ) {
-			WP_CLI::error( __( 'Please use different source (--from) and destination (--to) datastores.', 'woocommerce' ) );
-		}
-
-		$fields = array_intersect_key( $assoc_args, array_flip( array( 'meta_keys', 'props' ) ) );
-		foreach ( $fields as &$field_names ) {
-			$field_names = is_string( $field_names ) ? array_map( 'trim', explode( ',', $field_names ) ) : $field_names;
-			$field_names = array_unique( array_filter( array_filter( $field_names, 'is_string' ) ) );
-		}
-
-		try {
-			$legacy_handler->backfill_order_to_datastore( $order_id, $from, $to, $fields );
-		} catch ( \Exception $e ) {
-			WP_CLI::error(
-				sprintf(
-					// translators: %1$d is an order ID, %2$s and %3$s are datastore names, %4$s is an error message.
-					__( 'An error occurred while backfilling order %1$d from %2$s to %3$s: %4$s', 'woocommerce' ),
-					$order_id,
-					$from,
-					$to,
-					$e->getMessage()
-				)
-			);
-		}
-
-		WP_CLI::success(
-			sprintf(
-				// translators: %1$d is an order ID, %2$s and %3$s are datastore names ("hpos" or "posts" for example).
-				__( 'Order %1$d backfilled from %2$s to %3$s.', 'woocommerce' ),
-				$order_id,
-				$from,
-				$to
-			)
 		);
 	}
 }

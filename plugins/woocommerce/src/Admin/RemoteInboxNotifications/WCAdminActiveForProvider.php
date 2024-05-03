@@ -5,27 +5,20 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
-defined( 'ABSPATH' ) || exit;
+use Automattic\WooCommerce\Admin\WCAdminHelper;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WCAdminActiveForProvider class
- *
- * @deprecated 8.8.0
  */
-class WCAdminActiveForProvider extends DeprecatedClassFacade {
+class WCAdminActiveForProvider {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Get the number of seconds that the store has been active.
 	 *
-	 * @var string
+	 * @return number Number of seconds.
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\WCAdminActiveForProvider';
-
-	/**
-	 * The version that this class was deprecated in.
-	 *
-	 * @var string
-	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function get_wcadmin_active_for_in_seconds() {
+		return WCAdminHelper::get_wcadmin_active_for_in_seconds();
+	}
 }

@@ -74,3 +74,16 @@
 		}
 	}
 }
+
+// Hide "theme" and "default" sections
+.block-editor-color-gradient-control__panel {
+	// Text or Background tab
+	> .components-flex > .components-h-stack.components-v-stack {
+		display: none;
+	}
+
+	// Gradient tab
+	> .components-spacer > .components-flex > .components-h-stack.components-v-stack:not(.components-custom-gradient-picker) {
+		display: none;
+	}
+}

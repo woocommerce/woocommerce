@@ -5,11 +5,11 @@ menu_title: Task list and Inbox
 
 Plugins should choose between implementing a Task or Inbox note based on the following guidelines. Avoid implementing both Task and Inbox note for the same message, which adds clutter and reduces the impact of the message.
 
-Use the Task List and Inbox sparingly. Messages should be clear, concise, and maintain a consistent tone. Follow the [Grammar, Punctuation, and Capitalization guide](https://woocommerce.com/document/grammar-punctuation-style-guide/).
+Use the Task List and Inbox sparingly. Messages should be clear, concise, and maintain a consistent tone. Follow the [Grammar, Punctuation, and Capitalization guide](https://woo.com/document/grammar-punctuation-style-guide/).
 
 ## Task List
 
-![an example of a task in the task list](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list1.png)
+![an example of a task in the task list](https://developer.woo.com/wp-content/uploads/2023/12/task-list1.png)
 
 Anything that **requires** action should go in the task list.
 
@@ -26,13 +26,13 @@ Anything that **requires** action should go in the task list.
 
 Examples:
 
-![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](https://developer.woocommerce.com/wp-content/uploads/2023/12/task-list-example.png)
+![three tasks in the task list under the heading "Things to do next" with the option to expand at the bottom to "show 3 more tasks" ](https://developer.woo.com/wp-content/uploads/2023/12/task-list-example.png)
 
 ## Inbox
 
 The Inbox provides informational, useful, and supplemental content to the user, while important notices and setup tasks have their separate and relevant locations.
 
-![an example of an inbox notification](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox1.png)
+![an example of an inbox notification](https://developer.woo.com/wp-content/uploads/2023/12/inbox1.png)
 
 - *What appears in the Inbox*:
     - Informational notices such as non-critical reminders.
@@ -46,4 +46,4 @@ The Inbox provides informational, useful, and supplemental content to the user, 
 
 Examples:
 
-![an example of two inbox notifications listed under the "Inbox" section of the admin](https://developer.woocommerce.com/wp-content/uploads/2023/12/inbox-examples.png)
+![an example of two inbox notifications listed under the "Inbox" section of the admin](https://developer.woo.com/wp-content/uploads/2023/12/inbox-examples.png)

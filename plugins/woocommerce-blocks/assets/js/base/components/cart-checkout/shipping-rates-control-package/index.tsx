@@ -5,12 +5,10 @@ import classNames from 'classnames';
 import { _n, sprintf } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Label, Panel } from '@woocommerce/blocks-components';
-import { useCallback, useMemo } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
-import { useSelect } from '@wordpress/data';
-import { CART_STORE_KEY } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -27,18 +25,9 @@ export const ShippingRatesControlPackage = ( {
 	packageData,
 	collapsible,
 	showItems,
-	highlightChecked = false,
 }: PackageProps ): ReactElement => {
 	const { selectShippingRate, isSelectingRate } = useShippingData();
-
-	const internalPackageCount = useSelect(
-		( select ) =>
-			select( CART_STORE_KEY )?.getCartData()?.shippingRates?.length
-	);
-
-	// We have no built-in way of checking if other extensions have added packages e.g. if subscriptions has added them.
 	const multiplePackages =
-		internalPackageCount > 1 ||
 		document.querySelectorAll(
 			'.wc-block-components-shipping-rates-control__package'
 		).length > 1;
@@ -113,14 +102,7 @@ export const ShippingRatesControlPackage = ( {
 		),
 		renderOption,
 		disabled: isSelectingRate,
-		highlightChecked,
 	};
-
-	const selectedOptionNumber = useMemo( () => {
-		return packageData?.shipping_rates?.findIndex(
-			( rate ) => rate?.selected
-		);
-	}, [ packageData?.shipping_rates ] );
 
 	if ( shouldBeCollapsible ) {
 		return (
@@ -153,12 +135,6 @@ export const ShippingRatesControlPackage = ( {
 				{
 					'wc-block-components-shipping-rates-control__package--disabled':
 						isSelectingRate,
-					'wc-block-components-shipping-rates-control__package--first-selected':
-						! isSelectingRate && selectedOptionNumber === 0,
-					'wc-block-components-shipping-rates-control__package--last-selected':
-						! isSelectingRate &&
-						selectedOptionNumber ===
-							packageData?.shipping_rates?.length - 1,
 				}
 			) }
 		>

@@ -541,9 +541,7 @@ class WC_Frontend_Scripts {
 					'checkout_url'              => WC_AJAX::get_endpoint( 'checkout' ),
 					'is_checkout'               => is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ? 1 : 0,
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
-					/* translators: %s: Order history URL on My Account section */
-					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
-
+					'i18n_checkout_error'       => esc_attr__( 'Error processing checkout. Please try again.', 'woocommerce' ),
 				);
 				break;
 			case 'wc-address-i18n':

@@ -15,8 +15,7 @@ import {
 } from '../types';
 import { designWithNoAiStateMachineDefinition } from './state-machine';
 import { findComponentMeta } from '~/utils/xstate/find-component';
-import { AssembleHubLoader } from './pages/ApiCallLoader';
-import { useXStateInspect } from '~/xstate';
+import { AssembleHubLoader } from '../design-with-ai/pages';
 
 export type DesignWithoutAiComponent = typeof AssembleHubLoader;
 export type DesignWithoutAiComponentMeta = {
@@ -25,25 +24,15 @@ export type DesignWithoutAiComponentMeta = {
 
 export const DesignWithNoAiController = ( {
 	parentMachine,
-	parentContext,
 }: {
 	parentMachine?: AnyInterpreter;
 	sendEventToParent?: Sender< customizeStoreStateMachineEvents >;
 	parentContext?: customizeStoreStateMachineContext;
 } ) => {
-	const { versionEnabled } = useXStateInspect();
-	const [ , send, service ] = useMachine(
-		designWithNoAiStateMachineDefinition,
-		{
-			devTools: versionEnabled === 'V4',
-			parent: parentMachine,
-			context: {
-				...designWithNoAiStateMachineDefinition.context,
-				isFontLibraryAvailable:
-					parentContext?.isFontLibraryAvailable ?? false,
-			},
-		}
-	);
+	const [ , , service ] = useMachine( designWithNoAiStateMachineDefinition, {
+		devTools: process.env.NODE_ENV === 'development',
+		parent: parentMachine,
+	} );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
@@ -54,7 +43,6 @@ export const DesignWithNoAiController = ( {
 
 	const [ CurrentComponent, setCurrentComponent ] =
 		useState< DesignWithoutAiComponent | null >( null );
-
 	useEffect( () => {
 		if ( currentNodeMeta?.component ) {
 			setCurrentComponent( () => currentNodeMeta?.component );
@@ -64,11 +52,7 @@ export const DesignWithNoAiController = ( {
 	return (
 		<>
 			<div className={ `woocommerce-design-without-ai__container` }>
-				{ CurrentComponent ? (
-					<CurrentComponent sendEvent={ send } />
-				) : (
-					<div />
-				) }
+				{ CurrentComponent ? <CurrentComponent /> : <div /> }
 			</div>
 		</>
 	);

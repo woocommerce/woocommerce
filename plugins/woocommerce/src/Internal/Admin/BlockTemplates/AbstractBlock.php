@@ -202,16 +202,6 @@ class AbstractBlock implements BlockInterface {
 	}
 
 	/**
-	 * Set a block attribute value without replacing the entire attributes object.
-	 *
-	 * @param string $key The attribute key.
-	 * @param mixed  $value The attribute value.
-	 */
-	public function set_attribute( string $key, $value ) {
-		$this->attributes[ $key ] = $value;
-	}
-
-	/**
 	 * Get the template that this block belongs to.
 	 */
 	public function &get_root_template(): BlockTemplateInterface {

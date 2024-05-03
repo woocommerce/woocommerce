@@ -18,7 +18,6 @@ export interface PanelProps {
 	hasBorder?: boolean;
 	title: ReactNode;
 	titleTag?: keyof JSX.IntrinsicElements;
-	state?: [ boolean, React.Dispatch< React.SetStateAction< boolean > > ];
 }
 
 const Panel = ( {
@@ -28,13 +27,8 @@ const Panel = ( {
 	hasBorder = false,
 	title,
 	titleTag: TitleTag = 'div',
-	state,
 }: PanelProps ): ReactElement => {
-	let [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
-	// If state is managed externally, we override the internal state.
-	if ( Array.isArray( state ) && state.length === 2 ) {
-		[ isOpen, setIsOpen ] = state;
-	}
+	const [ isOpen, setIsOpen ] = useState< boolean >( initialOpen );
 
 	return (
 		<div

@@ -8,7 +8,7 @@ export const MobileAppInstallationInfo = () => {
 		<div>
 			<QRCodeSVG
 				value={
-					'https://woocommerce.com/mobile/?utm_source=wc_onboarding_mobile_task'
+					'https://woo.com/mobile/?utm_source=wc_onboarding_mobile_task'
 				}
 				size={ 140 }
 			/>

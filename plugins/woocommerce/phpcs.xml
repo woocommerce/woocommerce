@@ -54,31 +54,6 @@
 		<exclude-pattern>tests/src</exclude-pattern>
 	</rule>
 
-	<rule ref="WordPress.WP.Capabilities">
-		<properties>
-			<property name="custom_capabilities" type="array">
-				<element key="0" value="download_file"/>
-				<element key="1" value="read_product"/>
-				<element key="2" value="edit_products"/>
-				<element key="3" value="edit_private_products"/>
-				<element key="4" value="edit_others_products"/>
-				<element key="5" value="edit_product"/>
-				<element key="6" value="publish_shop_orders"/>
-				<element key="7" value="edit_shop_orders"/>
-				<element key="8" value="edit_others_shop_orders"/>
-				<element key="9" value="view_order"/>
-				<element key="10" value="pay_for_order"/>
-				<element key="11" value="order_again"/>
-				<element key="12" value="cancel_order"/>
-				<element key="13" value="read_private_shop_orders"/>
-				<element key="14" value="customer"/>
-				<element key="15" value="manage_woocommerce"/>
-				<element key="16" value="manage_product_terms"/>
-				<element key="17" value="view_woocommerce_reports"/>
-			</property>
-		</properties>
-	</rule>
-
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
 		<exclude-pattern>tests/</exclude-pattern>
@@ -129,7 +104,7 @@
 	</rule>
 
 	<!-- Temporary -->
-	<rule ref="Universal.Arrays.DisallowShortArraySyntax.Found">
+	<rule ref="Generic.Arrays.DisallowShortArraySyntax.Found">
 		<exclude-pattern>src/Blocks/</exclude-pattern>
 		<exclude-pattern>src/StoreApi/</exclude-pattern>
 	</rule>

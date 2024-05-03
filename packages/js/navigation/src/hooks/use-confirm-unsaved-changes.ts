@@ -15,10 +15,7 @@ export const useConfirmUnsavedChanges = (
 	hasUnsavedChanges: boolean,
 	shouldConfirm?: ( path: URL, fromUrl: Location ) => boolean,
 	/**
-	 * This message is only shown when using history.push() to change the location;
-	 * when handling the onbeforeunload event (which happens when the user navigates
-	 * to a non-react router location, such as a non-WCA page),
-	 * the browser will show a generic message instead.
+	 * Some browsers ignore this message currently on before unload event.
 	 *
 	 * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#compatibility_notes
 	 */
@@ -63,10 +60,8 @@ export const useConfirmUnsavedChanges = (
 		}
 	}, [ history, hasUnsavedChanges, confirmMessage ] );
 
-	// This effect listens to the native beforeunload event to show
-	// a confirmation message; note that the message shown is
-	// a generic browser-specified string; not the custom one shown
-	// when using react router.
+	// This effect listen to the native beforeunload event to show
+	// a confirmation message
 	useEffect( () => {
 		if ( hasUnsavedChanges ) {
 			function onBeforeUnload( event: BeforeUnloadEvent ) {

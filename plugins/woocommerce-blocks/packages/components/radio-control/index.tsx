@@ -3,8 +3,6 @@
  */
 import classnames from 'classnames';
 import { useInstanceId } from '@wordpress/compose';
-import { useMemo } from '@wordpress/element';
-
 /**
  * Internal dependencies
  */
@@ -19,14 +17,9 @@ const RadioControl = ( {
 	onChange,
 	options = [],
 	disabled = false,
-	highlightChecked = false,
 }: RadioControlProps ): JSX.Element | null => {
 	const instanceId = useInstanceId( RadioControl );
 	const radioControlId = id || instanceId;
-
-	const selectedOptionNumber = useMemo( () => {
-		return options.findIndex( ( option ) => option.value === selected );
-	}, [ options, selected ] );
 
 	if ( ! options.length ) {
 		return null;
@@ -36,21 +29,11 @@ const RadioControl = ( {
 		<div
 			className={ classnames(
 				'wc-block-components-radio-control',
-				{
-					'wc-block-components-radio-control--highlight-checked--first-selected':
-						highlightChecked && selectedOptionNumber === 0,
-					'wc-block-components-radio-control--highlight-checked--last-selected':
-						highlightChecked &&
-						selectedOptionNumber === options.length - 1,
-					'wc-block-components-radio-control--highlight-checked':
-						highlightChecked,
-				},
 				className
 			) }
 		>
 			{ options.map( ( option ) => (
 				<RadioControlOption
-					highlightChecked={ highlightChecked }
 					key={ `${ radioControlId }-${ option.value }` }
 					name={ `radio-control-${ radioControlId }` }
 					checked={ option.value === selected }

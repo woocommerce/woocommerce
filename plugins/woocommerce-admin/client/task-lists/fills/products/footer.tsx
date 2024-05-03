@@ -19,10 +19,7 @@ const Footer: React.FC = () => {
 	return (
 		<div className="woocommerce-products-footer">
 			<Text className="woocommerce-products-footer__selling-somewhere-else">
-				{ __(
-					'Are you already selling somewhere else?',
-					'woocommerce'
-				) }
+				Are you already selling somewhere else?
 			</Text>
 			<Text className="woocommerce-products-footer__import-options">
 				{ interpolateComponents( {

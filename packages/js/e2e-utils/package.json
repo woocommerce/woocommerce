@@ -9,7 +9,7 @@
 	},
 	"license": "GPL-3.0+",
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"main": "build/index.js",
@@ -45,7 +45,6 @@
 		"@babel/preset-env": "7.12.7",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
-		"@woocommerce/e2e-environment": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-e2e-builds": "workspace:*",
 		"@wordpress/babel-plugin-import-jsx-pragma": "1.1.3",

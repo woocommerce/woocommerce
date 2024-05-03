@@ -6,7 +6,6 @@ const path = require( 'path' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
-const StyleAssetPlugin = require( './style-asset-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -70,14 +69,12 @@ module.exports = {
 			new RemoveEmptyScriptsPlugin(),
 			new MiniCssExtractPlugin( {
 				filename: '[name]/style.css',
-				chunkFilename: 'chunks/[id].style.css?ver=[contenthash]',
+				chunkFilename: 'chunks/[id].style.css',
 			} ),
 			new WebpackRTLPlugin( {
 				filename: '[name]/style-rtl.css',
 				minify: NODE_ENV === 'development' ? false : { safe: true },
 			} ),
-			new StyleAssetPlugin(),
 		],
 	},
-	StyleAssetPlugin,
 };

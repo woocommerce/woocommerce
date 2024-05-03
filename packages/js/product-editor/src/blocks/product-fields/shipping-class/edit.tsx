@@ -161,7 +161,7 @@ export function Edit( {
 								shippingClasses ?? []
 							),
 						] }
-						disabled={ attributes.disabled || virtual }
+						disabled={ virtual }
 						help={ createInterpolateElement(
 							__(
 								'Manage shipping classes and rates in <Link>global settings</Link>.',

@@ -193,12 +193,10 @@ test.describe( 'Variable Product Page', () => {
 			await page
 				.locator( '#size' )
 				.selectOption( attr.attributes[ 0 ].option );
-			await page
-				.getByRole( 'button', { name: 'Add to cart', exact: true } )
-				.click();
-			await expect(
-				page.getByText( 'has been added to your cart' )
-			).toBeVisible();
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await expect( page.locator( '.is-success' ) ).toContainText(
+				'has been added to your cart.'
+			);
 		}
 
 		await page.goto( 'cart/' );
@@ -225,16 +223,14 @@ test.describe( 'Variable Product Page', () => {
 	} ) => {
 		await page.goto( `product/${ slug }` );
 		await page.locator( '#size' ).selectOption( 'Large' );
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
+		await page.getByRole( 'button', { name: 'Add to cart' } ).click();
 
 		await page.goto( 'cart/' );
 		await page.locator( 'a.remove' ).click();
 
-		await expect(
-			page.getByText( 'Your cart is currently empty' )
-		).toBeVisible();
+		await expect( page.locator( '.is-info' ) ).toContainText(
+			'Your cart is currently empty.'
+		);
 	} );
 } );
 

@@ -3,11 +3,6 @@
  */
 import cookie from 'cookie';
 
-/**
- * Internal dependencies
- */
-import { canTrack } from './assignment';
-
 let initializeAnonIdPromise: null | Promise< string | null > = null;
 const anonIdPollingIntervalMilliseconds = 50;
 const anonIdPollingIntervalMaxAttempts = 100; // 50 * 100 = 5000 = 5 seconds
@@ -58,7 +53,7 @@ export const initializeAnonId = async (): Promise< string | null > => {
 };
 
 export const getAnonId = async (): Promise< string | null > => {
-	if ( ! canTrack ) {
+	if ( ! window.wcTracks?.isEnabled ) {
 		return null;
 	}
 

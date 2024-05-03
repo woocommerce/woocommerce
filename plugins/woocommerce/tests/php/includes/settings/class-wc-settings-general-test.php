@@ -22,7 +22,7 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_general_settings',
-			function ( $settings ) use ( &$actual_settings_via_filter ) {
+			function( $settings ) use ( &$actual_settings_via_filter ) {
 				$actual_settings_via_filter = $settings;
 				return $settings;
 			},
@@ -81,13 +81,13 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_settings__currencies() {
 		FunctionsMockerHack::add_function_mocks(
 			array(
-				'get_woocommerce_currencies'      => function () {
+				'get_woocommerce_currencies'      => function() {
 					return array(
 						'c1' => 'Currency 1',
 						'c2' => 'Currency 2',
 					);
 				},
-				'get_woocommerce_currency_symbol' => function ( $currency = '' ) {
+				'get_woocommerce_currency_symbol' => function( $currency = '' ) {
 					return "symbol for $currency";
 				},
 			)
@@ -100,8 +100,8 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 		$currencies       = $currency_setting['options'];
 
 		$expected = array(
-			'c1' => 'Currency 1 (symbol for c1) — c1',
-			'c2' => 'Currency 2 (symbol for c2) — c2',
+			'c1' => 'Currency 1 (symbol for c1)',
+			'c2' => 'Currency 2 (symbol for c2)',
 		);
 
 		$this->assertEquals( $expected, $currencies );

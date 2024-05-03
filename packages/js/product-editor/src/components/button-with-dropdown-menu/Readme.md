@@ -10,8 +10,8 @@ The `ButtonWithDropdownMenu` is a React component that renders a button with an 
 import { ButtonWithDropdownMenu } from 'path_to_component';
 
 <ButtonWithDropdownMenu
+    text="Add to store"
     variant="secondary"
-    onClick={() => console.log( 'Button clicked' ) }
     controls={ [
         {
             title: 'First Menu Item Label',
@@ -22,7 +22,6 @@ import { ButtonWithDropdownMenu } from 'path_to_component';
             onClick: () => console.log( 'Second option clicked' ).
         },
     ] }
->
-    Add to store
-</ButtonWithDropdownMenu>
+    onButtonClick={() => console.log( 'Button clicked' ) }
+/>
 ```

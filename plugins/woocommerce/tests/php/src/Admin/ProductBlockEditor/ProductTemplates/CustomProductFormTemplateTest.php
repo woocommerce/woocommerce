@@ -54,24 +54,6 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get subsection block by id.
-	 */
-	public function test_get_subsection_by_id() {
-		$template = new CustomProductFormTemplate();
-		$block    = $template->get_subsection_by_id( 'product-stock-subsection' );
-		$this->assertEquals( $block->get_attributes()['title'], 'Stock' );
-	}
-
-	/**
-	 * Test throw error get subsection block with block id.
-	 */
-	public function test_get_subsection_by_id_with_block_id() {
-		$template = new CustomProductFormTemplate();
-		$this->expectException( \UnexpectedValueException::class );
-		$template->get_subsection_by_id( 'product-inventory-sku' );
-	}
-
-	/**
 	 * Test get block by id.
 	 */
 	public function test_get_block_by_id() {
@@ -93,25 +75,6 @@ class CustomProductFormTemplateTest extends WC_Unit_Test_Case {
 				'name' => 'A name'
 			]
 		] );
-
-		$this->assertEquals( $new_block->get_parent(), $block );
-	}
-
-	/**
-	 * Test add custom block to subsection.
-	 */
-	public function test_add_custom_block_to_subsection() {
-		$template  = new CustomProductFormTemplate();
-		$block     = $template->get_subsection_by_id( 'product-stock-subsection' );
-		$new_block = $block->add_block(
-			array(
-				'id'         => 'my-test-block-id',
-				'blockName'  => 'my-test-block-name',
-				'attributes' => array(
-					'name' => 'A block name',
-				),
-			)
-		);
 
 		$this->assertEquals( $new_block->get_parent(), $block );
 	}

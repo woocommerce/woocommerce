@@ -15,7 +15,8 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 ?>
 <div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 	<div id="variable_product_options_inner">
-		<?php if ( ! isset( $variation_attributes ) || ! is_array( $variation_attributes ) || count( $variation_attributes ) === 0 ) : ?>
+
+		<?php if ( ! count( $variation_attributes ) ) : ?>
 
 		<div class="add-attributes-container">
 			<div class="add-attributes-message">
@@ -27,7 +28,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 								/* translators: %1$s: url for attributes tab, %2$s: url for variable product documentation */
 								__( 'Add some attributes in the <a class="variations-add-attributes-link" href="%1$s">Attributes</a> tab to generate variations. Make sure to check the <b>Used for variations</b> box. <a class="variations-learn-more-link" href="%2$s" target="_blank" rel="noreferrer">Learn more</a>', 'woocommerce' ),
 								esc_url( '#product_attributes' ),
-								esc_url( 'https://woocommerce.com/document/variable-product/' )
+								esc_url( 'https://woo.com/document/variable-product/' )
 							)
 						);
 					?>

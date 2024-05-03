@@ -14,11 +14,7 @@ import {
  * Internal dependencies
  */
 import { QueryControlProps } from '../../types';
-import {
-	STOCK_STATUS_OPTIONS,
-	DEFAULT_FILTERS,
-	getDefaultStockStatuses,
-} from '../../constants';
+import { STOCK_STATUS_OPTIONS, getDefaultStockStatuses } from '../../constants';
 
 /**
  * Gets the id of a specific stock status from its text label
@@ -40,12 +36,6 @@ function getStockStatusIdByLabel( statusLabel: FormTokenField.Value ) {
 const StockStatusControl = ( props: QueryControlProps ) => {
 	const { query, setQueryAttribute } = props;
 
-	const deselectCallback = () => {
-		setQueryAttribute( {
-			woocommerceStockStatus: DEFAULT_FILTERS.woocommerceStockStatus,
-		} );
-	};
-
 	return (
 		<ToolsPanelItem
 			label={ __( 'Stock status', 'woocommerce' ) }
@@ -55,8 +45,11 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 					getDefaultStockStatuses()
 				)
 			}
-			onDeselect={ deselectCallback }
-			resetAllFilter={ deselectCallback }
+			onDeselect={ () => {
+				setQueryAttribute( {
+					woocommerceStockStatus: getDefaultStockStatuses(),
+				} );
+			} }
 			isShownByDefault
 		>
 			<FormTokenField

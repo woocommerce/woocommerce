@@ -5,7 +5,7 @@
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"keywords": [
@@ -78,7 +78,7 @@
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
 		"redux": "^4.2.1",
-		"rimraf": "5.0.5",
+		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"wireit": "0.14.3"

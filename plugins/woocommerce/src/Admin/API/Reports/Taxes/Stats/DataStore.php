@@ -77,7 +77,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_tax_lookup_table = self::get_db_table_name();
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$query_args['taxes'] = (array) $query_args['taxes'];
 			$tax_id_placeholders = implode( ',', array_fill( 0, count( $query_args['taxes'] ), '%d' ) );
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$taxes_where_clause .= $wpdb->prepare( " AND {$order_tax_lookup_table}.tax_rate_id IN ({$tax_id_placeholders})", $query_args['taxes'] );
@@ -116,7 +115,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			FROM {$wpdb->prefix}woocommerce_tax_rates
 		";
 		if ( ! empty( $args['include'] ) ) {
-			$args['include'] = (array) $args['include'];
 			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$tax_placeholders = implode( ',', array_fill( 0, count( $args['include'] ), '%d' ) );
 			$query           .= $wpdb->prepare( " WHERE tax_rate_id IN ({$tax_placeholders})", $args['include'] );

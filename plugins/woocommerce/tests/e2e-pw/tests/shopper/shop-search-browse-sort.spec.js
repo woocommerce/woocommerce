@@ -92,7 +92,7 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		} );
 	} );
 
-	test.skip( 'should let user search the store', async ( { page } ) => {
+	test( 'should let user search the store', async ( { page } ) => {
 		await page.goto( 'shop/' );
 
 		await page
@@ -115,21 +115,20 @@ test.describe( 'Search, browse by categories and sort items in the shop', () => 
 		await page.goto( 'shop/' );
 		await page.locator( `text=${ simpleProductName } 2` ).click();
 		await page
-			.getByLabel( 'Breadcrumb' )
-			.getByRole( 'link', { name: categoryB } )
+			.locator( 'span.posted_in > a', { hasText: categoryB } )
 			.click();
 
 		// verify the Audio category page
+		await expect( page.locator( 'h1.page-title' ) ).toContainText(
+			categoryB
+		);
 		await expect(
-			page.getByRole( 'heading', { name: categoryB } )
-		).toBeVisible();
-		await expect(
-			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
-		).toBeVisible();
+			page.locator( 'h2.woocommerce-loop-product__title' )
+		).toContainText( simpleProductName + ' 2' );
 		await page.locator( `text=${ simpleProductName } 2` ).click();
-		await expect(
-			page.getByRole( 'heading', { name: simpleProductName + ' 2' } )
-		).toBeVisible();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			simpleProductName + ' 2'
+		);
 	} );
 
 	test( 'should let user sort the products in the shop', async ( {

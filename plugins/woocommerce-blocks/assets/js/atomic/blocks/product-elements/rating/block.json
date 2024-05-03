@@ -27,6 +27,7 @@
 		}
 	},
 	"usesContext": [ "query", "queryId", "postId" ],
+	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"supports": {
 		"align": true

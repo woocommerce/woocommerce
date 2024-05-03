@@ -13,25 +13,28 @@ $thumbnails-gap: 15px;
 $default-number-of-thumbnails: 3;
 $dialog-header-height: 29px;
 $dialog-header-padding-top: calc(30px / 2);
-$dialog-padding: 16px;
 $admin-bar-desktop-height: 32px;
 $admin-bar-mobile-height: 46px;
 
 // Product Gallery
 #{$gallery} {
-	dialog {
-		&.wc-block-product-gallery--dialog-open {
-			display: flex;
-		}
+	.wc-block-product-gallery-dialog__overlay {
+		height: 100vh;
+		width: 100vw;
+		position: fixed;
+		top: 0;
+		left: 0;
+		background-color: #808080;
+		z-index: 9999;
+	}
 
-		flex-direction: column;
+	dialog {
 		position: fixed;
 		border: none;
 		top: 0;
 		z-index: 9999;
-		padding: $dialog-padding;
+		padding-top: 0;
 		height: 100vh;
-		width: calc(100vw - 2 * ($dialog-padding));
 
 		.admin-bar & {
 			margin-top: $admin-bar-desktop-height;
@@ -47,10 +50,6 @@ $admin-bar-mobile-height: 46px;
 
 		.wc-block-product-gallery-dialog__header {
 			padding-top: $dialog-header-padding-top;
-		}
-
-		.wc-block-product-gallery-dialog__body {
-			align-self: center;
 		}
 
 		.wc-block-product-galler-dialog__header-right {
@@ -146,7 +145,6 @@ $admin-bar-mobile-height: 46px;
 		margin-right: auto;
 		margin-left: auto;
 		max-width: $outside-image-max-width;
-		padding: 5px;
 	}
 
 	.wc-block-product-gallery-large-image__container {
@@ -177,7 +175,6 @@ $admin-bar-mobile-height: 46px;
 		overflow: hidden;
 		margin-right: auto;
 		margin-left: auto;
-		padding: 5px;
 	}
 
 
@@ -204,11 +201,9 @@ $admin-bar-mobile-height: 46px;
 		display: flex;
 		flex-direction: column;
 		position: absolute;
-		width: calc(100% - 10px);
-		height: calc(100% - 10px);
-		top: 5px;
-		left: 5px;
-
+		width: 100%;
+		height: 100%;
+		top: 0;
 
 		// Reset the margin of the inner blocks when the Next/Previous buttons are outside the image.
 		#{$gallery-next-previous-outside-image} & > * {

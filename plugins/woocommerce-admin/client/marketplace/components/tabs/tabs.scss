@@ -1,4 +1,4 @@
-@import "../../stylesheets/_variables.scss";
+@import '../../stylesheets/_variables.scss';
 
 .woocommerce-marketplace {
 	&__tabs {
@@ -27,23 +27,6 @@
 		&.is-active {
 			border-color: var(--wp-admin-theme-color);
 		}
-	}
-
-	&__update-count {
-		display: inline-block;
-		vertical-align: top;
-		box-sizing: border-box;
-		margin: 1px 0 -1px 4px;
-		padding: 0 5px;
-		min-width: 16px;
-		height: 16px;
-		border-radius: 9px;
-		background-color: #d63638;
-		color: #fff;
-		font-size: 10px;
-		line-height: 1.6;
-		text-align: center;
-		z-index: 26;
 	}
 }
 

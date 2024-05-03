@@ -71,8 +71,6 @@ export const DEFAULT_ATTRIBUTES: Partial< ProductCollectionAttributes > = {
 		columns: 3,
 		shrinkColumns: true,
 	},
-	queryContextIncludes: [ 'collection' ],
-	forcePageReload: false,
 };
 
 export const getDefaultQuery = (
@@ -94,25 +92,15 @@ export const getDefaultSettings = (
 	query: getDefaultQuery( currentAttributes.query ),
 } );
 
-export const DEFAULT_FILTERS: Pick<
-	ProductCollectionQuery,
-	| 'woocommerceOnSale'
-	| 'woocommerceStockStatus'
-	| 'woocommerceAttributes'
-	| 'woocommerceHandPickedProducts'
-	| 'taxQuery'
-	| 'featured'
-	| 'timeFrame'
-	| 'priceRange'
-> = {
+export const DEFAULT_FILTERS: Partial< ProductCollectionQuery > = {
 	woocommerceOnSale: DEFAULT_QUERY.woocommerceOnSale,
-	woocommerceStockStatus: DEFAULT_QUERY.woocommerceStockStatus,
-	woocommerceAttributes: DEFAULT_QUERY.woocommerceAttributes,
-	woocommerceHandPickedProducts: DEFAULT_QUERY.woocommerceHandPickedProducts,
+	woocommerceStockStatus: getDefaultStockStatuses(),
+	woocommerceAttributes: [],
 	taxQuery: DEFAULT_QUERY.taxQuery,
+	woocommerceHandPickedProducts: [],
 	featured: DEFAULT_QUERY.featured,
-	timeFrame: DEFAULT_QUERY.timeFrame,
-	priceRange: DEFAULT_QUERY.priceRange,
+	timeFrame: undefined,
+	priceRange: undefined,
 };
 
 /**

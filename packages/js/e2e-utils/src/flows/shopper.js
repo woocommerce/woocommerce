@@ -150,12 +150,10 @@ const shopper = {
 			'#billing_city',
 			customerBillingDetails.city
 		);
-		if ( customerBillingDetails.state ) {
-			await expect( page ).toSelect(
-				'#billing_state',
-				customerBillingDetails.state
-			);
-		}
+		await expect( page ).toSelect(
+			'#billing_state',
+			customerBillingDetails.state
+		);
 		await expect( page ).toFill(
 			'#billing_postcode',
 			customerBillingDetails.postcode
@@ -199,12 +197,10 @@ const shopper = {
 			'#shipping_city',
 			customerShippingDetails.city
 		);
-		if ( customerShippingDetails.state ) {
-			await expect( page ).toSelect(
-				'#shipping_state',
-				customerShippingDetails.state
-			);
-		}
+		await expect( page ).toSelect(
+			'#shipping_state',
+			customerShippingDetails.state
+		);
 		await expect( page ).toFill(
 			'#shipping_postcode',
 			customerShippingDetails.postcode

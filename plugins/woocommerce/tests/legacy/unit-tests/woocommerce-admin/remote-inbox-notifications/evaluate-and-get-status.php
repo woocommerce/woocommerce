@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\EvaluateAndGetStatus;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\EvaluateAndGetStatus;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus

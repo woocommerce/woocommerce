@@ -7,25 +7,30 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
-
 /**
  * Provider for order-related queries and operations.
- *
- * @deprecated 8.8.0
  */
-class OrdersProvider extends DeprecatedClassFacade {
+class OrdersProvider {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Allowed order statuses for calculating milestones.
 	 *
-	 * @var string
+	 * @var array
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\OrdersProvider';
+	protected $allowed_statuses = array(
+		'pending',
+		'processing',
+		'completed',
+	);
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Returns the number of orders.
 	 *
-	 * @var string
+	 * @return integer The number of orders.
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function get_order_count() {
+		$status_counts = array_map( 'wc_orders_count', $this->allowed_statuses );
+		$orders_count  = array_sum( $status_counts );
+
+		return $orders_count;
+	}
 }

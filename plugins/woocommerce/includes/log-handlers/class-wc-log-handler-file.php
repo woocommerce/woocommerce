@@ -6,7 +6,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -252,14 +251,13 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool
 	 */
 	public function remove( $handle ) {
-		$removed       = false;
-		$logs          = $this->get_log_files();
-		$log_directory = LoggingUtil::get_log_directory();
-		$handle        = sanitize_title( $handle );
+		$removed = false;
+		$logs    = $this->get_log_files();
+		$handle  = sanitize_title( $handle );
 
 		if ( isset( $logs[ $handle ] ) && $logs[ $handle ] ) {
-			$file = realpath( trailingslashit( $log_directory ) . $logs[ $handle ] );
-			if ( 0 === stripos( $file, realpath( trailingslashit( $log_directory ) ) ) && is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
+			$file = realpath( trailingslashit( WC_LOG_DIR ) . $logs[ $handle ] );
+			if ( 0 === stripos( $file, realpath( trailingslashit( WC_LOG_DIR ) ) ) && is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
@@ -351,10 +349,8 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return bool|string The log file path or false if path cannot be determined.
 	 */
 	public static function get_log_file_path( $handle ) {
-		$log_directory = LoggingUtil::get_log_directory();
-
 		if ( function_exists( 'wp_hash' ) ) {
-			return trailingslashit( $log_directory ) . self::get_log_file_name( $handle );
+			return trailingslashit( WC_LOG_DIR ) . self::get_log_file_name( $handle );
 		} else {
 			wc_doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'woocommerce' ), '3.0' );
 			return false;
@@ -414,14 +410,13 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 			return;
 		}
 
-		$log_files     = self::get_log_files();
-		$log_directory = LoggingUtil::get_log_directory();
+		$log_files = self::get_log_files();
 
 		foreach ( $log_files as $log_file ) {
-			$last_modified = filemtime( trailingslashit( $log_directory ) . $log_file );
+			$last_modified = filemtime( trailingslashit( WC_LOG_DIR ) . $log_file );
 
 			if ( $last_modified < $timestamp ) {
-				@unlink( trailingslashit( $log_directory ) . $log_file ); // @codingStandardsIgnoreLine.
+				@unlink( trailingslashit( WC_LOG_DIR ) . $log_file ); // @codingStandardsIgnoreLine.
 			}
 		}
 	}
@@ -433,9 +428,7 @@ class WC_Log_Handler_File extends WC_Log_Handler {
 	 * @return array
 	 */
 	public static function get_log_files() {
-		$log_directory = LoggingUtil::get_log_directory();
-
-		$files  = @scandir( $log_directory ); // @codingStandardsIgnoreLine.
+		$files  = @scandir( WC_LOG_DIR ); // @codingStandardsIgnoreLine.
 		$result = array();
 
 		if ( ! empty( $files ) ) {

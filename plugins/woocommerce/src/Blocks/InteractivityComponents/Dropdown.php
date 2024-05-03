@@ -44,7 +44,7 @@ class Dropdown {
 				<div class="wc-interactivity-dropdown__dropdown" tabindex="-1" >
 					<div class="wc-interactivity-dropdown__dropdown-selection" id="options-dropdown" tabindex="0" aria-haspopup="listbox">
 						<span class="wc-interactivity-dropdown__placeholder" data-wc-text="state.placeholderText">
-							<?php echo empty( $selected_items ) ? esc_html( $placeholder ) : ''; ?>
+							<?php echo esc_html( $placeholder ); ?>
 						</span>
 						<?php if ( 'multiple' === $select_type ) { ?>
 							<div class="selected-options">
@@ -98,13 +98,7 @@ class Dropdown {
 							</svg>
 						</span>
 					</div>
-					<div
-						class="wc-interactivity-dropdown__dropdown-list"
-						aria-labelledby="options-dropdown"
-						role="listbox"
-						data-wc-bind--hidden="!context.isOpen"
-						<?php echo esc_attr( $dropdown_context['isOpen'] ? '' : 'hidden' ); ?>
-					>
+					<div data-wc-bind--hidden="!context.isOpen" class="wc-interactivity-dropdown__dropdown-list" aria-labelledby="options-dropdown" role="listbox">
 						<?php
 						foreach ( $items as $item ) :
 							$context = array( 'item' => $item );

@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/dependency-extraction-webpack-plugin",
-	"version": "3.0.0",
+	"version": "2.3.0",
 	"description": "WooCommerce Dependency Extraction Webpack Plugin",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -9,7 +9,7 @@
 		"woocommerce"
 	],
 	"engines": {
-		"node": "^20.11.1",
+		"node": "^16.14.1",
 		"pnpm": "^8.12.1"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin/README.md",
@@ -22,8 +22,7 @@
 	},
 	"main": "src/index.js",
 	"files": [
-		"src/",
-		"assets/"
+		"src/"
 	],
 	"dependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "^3.7.0"
@@ -37,7 +36,7 @@
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
-		"rimraf": "5.0.5",
+		"rimraf": "^3.0.2",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",

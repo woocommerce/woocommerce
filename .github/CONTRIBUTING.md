@@ -7,7 +7,7 @@ There are many ways to contribute to the project!
 - [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
 - Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
 - Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
-- Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woocommerce.com/blog/).
+- Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woo.com/blog/).
 - Submitting fixes, improvements, and enhancements.
 - To disclose a security issue to our team, [please submit a report via HackerOne](https://hackerone.com/automattic/).
 
@@ -17,7 +17,7 @@ We use the `good first issue` label to mark issues that are suitable for new con
 
 WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
-If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woocommerce.com/community-slack/).
+If you have questions about the process to contribute code or want to discuss details of your contribution, you can contact WooCommerce core developers on the #core channel in the [WooCommerce community Slack](https://woo.com/community-slack/).
 
 ## Getting started
 
@@ -49,8 +49,10 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - Please create a change file for your changes by running `pnpm --filter=<project> changelog add`. For example, a change file for the WooCommerce Core project would be added by running `pnpm --filter=@woocommerce/plugin-woocommerce changelog add`. 
 - Please avoid modifying the changelog directly or updating the .pot files. These will be updated by the WooCommerce team. 
 
+If you are contributing code to our (Javascript-driven) Gutenberg blocks, please note that they are developed in their [own repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block) and have their [own issue tracker](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues).
+
 ## Feature Requests 🚀
 
-The best place to submit feature requests is over on our [dedicated feature request page](https://woocommerce.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.
+The best place to submit feature requests is over on our [dedicated feature request page](https://woo.com/feature-requests/woocommerce/). You can easily search and vote for existing requests, or create new requests if necessary.
 
 Alternatively, if you wish to propose a straightforward technical enhancement that is unlikely to require much discussion, you can [open a new issue](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+enhancement%2Cstatus%3A+awaiting+triage&template=2-enhancement.yml&title=%5BEnhancement%5D%3A+) right here on GitHub and, for any that may require more discussion, consider syncing with us during office hours or publishing a thread on [GitHub Discussions](https://github.com/woocommerce/woocommerce/discussions).

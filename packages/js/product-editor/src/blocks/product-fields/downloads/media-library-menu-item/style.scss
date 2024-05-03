@@ -1,0 +1,14 @@
+$media-modal-z-index: calc(z-index(".components-popover") + 10000);
+$media-modal-backdrop-z-index: calc($media-modal-z-index - 1000);
+
+.woocommerce-media-library-menu-item {
+	&__upload_files_modal_wrapper {
+		.media-modal {
+			z-index: $media-modal-z-index;
+		}
+
+		.media-modal-backdrop {
+			z-index: $media-modal-backdrop-z-index;
+		}
+	}
+}

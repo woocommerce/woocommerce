@@ -20,7 +20,7 @@ The extension allows merchants to enter a product identifier, such as ISBN, EAN,
 
 The identifier is a single piece of information that helps merchants describe and categorize the product across their store and other sales channels. It's best suited to be added as a field in the Product catalog section in the Organization group.
 
-[Learn more about fields](./product-editor-form-fields.md)
+[Learn more about fields](./product-editor-form-fields)
 
 ## Ticket extension
 
@@ -32,4 +32,4 @@ Merchants can set up and sell tickets with advanced settings, such as unique inp
 
 With so much advanced functionality, the plugin would best register a new product type and define the structure and appearance of the product form. This could include the tabs at the top of the screen, the subgroups and sections inside, and the default values.
 
-[Learn more about custom product types](./product-editor-form-custom-product-types.md)
+[Learn more about custom product types](./product-editor-form-custom-product-types)

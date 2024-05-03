@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-rating",
 	"version": "1.0.0",
-	"title": "Product Filter: Rating (Beta)",
+	"title": "Product Filter: Rating",
 	"description": "Enable customers to filter the product collection by rating.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],

@@ -39,7 +39,6 @@ export interface Product {
 	averageRating?: number | null;
 	reviewsCount?: number | null;
 	label?: string;
-	primary_color?: string;
 	group?: string;
 	searchTerm?: string;
 	category?: string;

@@ -289,25 +289,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			);
 		}
 
-		// Add additional applied coupon information.
-		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon = new WC_Coupon();
-			$coupon_info = $item->get_meta( 'coupon_info', true );
-			if ( $coupon_info ) {
-				$temp_coupon->set_short_info( $coupon_info );
-			} else {
-				$coupon_meta = $item->get_meta( 'coupon_data', true );
-				if ( $coupon_meta ) {
-					$temp_coupon->set_props( (array) $coupon_meta );
-
-				}
-			}
-
-			$data['discount_type']  = $temp_coupon->get_discount_type();
-			$data['nominal_amount'] = (float) $temp_coupon->get_amount();
-			$data['free_shipping']  = $temp_coupon->get_free_shipping();
-		}
-
 		$data['meta_data'] = array_map(
 			array( $this, 'merge_meta_item_with_formatted_meta_display_attributes' ),
 			$data['meta_data'],
@@ -615,19 +596,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-				$args['customer_id'] = $request['customer'];
-			} else {
-				if ( ! empty( $args['meta_query'] ) ) {
-					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				}
-
-				$args['meta_query'][] = array(
-					'key'   => '_customer_user',
-					'value' => $request['customer'],
-					'type'  => 'NUMERIC',
-				);
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			}
+
+			$args['meta_query'][] = array(
+				'key'   => '_customer_user',
+				'value' => $request['customer'],
+				'type'  => 'NUMERIC',
+			);
 		}
 
 		// Search by product.
@@ -1872,47 +1849,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'             => array(
+							'id'           => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'code'           => array(
+							'code'         => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'discount'       => array(
+							'discount'     => array(
 								'description' => __( 'Discount total.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'discount_tax'   => array(
+							'discount_tax' => array(
 								'description' => __( 'Discount total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'discount_type'  => array(
-								'description' => __( 'Discount type.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view' ),
-								'readonly'    => true,
-							),
-							'nominal_amount' => array(
-								'description' => __( 'Discount amount as defined in the coupon (absolute value or a percent, depending on the discount type).', 'woocommerce' ),
-								'type'        => 'number',
-								'context'     => array( 'view' ),
-								'readonly'    => true,
-							),
-							'free_shipping'  => array(
-								'description' => __( 'Whether the coupon grants free shipping or not.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view' ),
-								'readonly'    => true,
-							),
-							'meta_data'      => array(
+							'meta_data'    => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),

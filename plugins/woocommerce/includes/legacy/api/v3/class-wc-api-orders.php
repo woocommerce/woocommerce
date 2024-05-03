@@ -62,27 +62,27 @@ class WC_API_Orders extends WC_API_Resource {
 		# GET|POST /orders/<id>/notes
 		$routes[ $this->base . '/(?P<order_id>\d+)/notes' ] = array(
 			array( array( $this, 'get_order_notes' ), WC_API_Server::READABLE ),
-			array( array( $this, 'create_order_note' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_order_note' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET|PUT|DELETE /orders/<order_id>/notes/<id>
 		$routes[ $this->base . '/(?P<order_id>\d+)/notes/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order_note' ), WC_API_Server::READABLE ),
-			array( array( $this, 'edit_order_note' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_order_note' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'edit_order_note' ), WC_API_SERVER::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order_note' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET|POST /orders/<order_id>/refunds
 		$routes[ $this->base . '/(?P<order_id>\d+)/refunds' ] = array(
 			array( array( $this, 'get_order_refunds' ), WC_API_Server::READABLE ),
-			array( array( $this, 'create_order_refund' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'create_order_refund' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET|PUT|DELETE /orders/<order_id>/refunds/<id>
 		$routes[ $this->base . '/(?P<order_id>\d+)/refunds/(?P<id>\d+)' ] = array(
 			array( array( $this, 'get_order_refund' ), WC_API_Server::READABLE ),
-			array( array( $this, 'edit_order_refund' ), WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_order_refund' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'edit_order_refund' ), WC_API_SERVER::EDITABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'delete_order_refund' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# POST|PUT /orders/bulk

@@ -30,6 +30,16 @@ test.describe( 'Payment setup task', () => {
 		} );
 	} );
 
+	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
+		page,
+	} ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+		await page.locator( 'text=Set up payments' ).click();
+		await expect(
+			page.locator( '.woocommerce-layout__header-wrapper > h1' )
+		).toHaveText( 'Set up payments' );
+	} );
+
 	test( 'Saving valid bank account transfer details enables the payment method', async ( {
 		page,
 	} ) => {
@@ -73,45 +83,6 @@ test.describe( 'Payment setup task', () => {
 				'//tr[@data-gateway_id="bacs"]/td[@class="status"]/a'
 			)
 		).toHaveClass( 'wc-payment-gateway-method-toggle-enabled' );
-	} );
-
-	test( 'Can visit the payment setup task from the homescreen if the setup wizard has been skipped', async ( {
-		baseURL,
-		page,
-	} ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		// ensure store address is a non supported country
-		await api.post( 'settings/general/batch', {
-			update: [
-				{
-					id: 'woocommerce_store_address',
-					value: 'addr 1',
-				},
-				{
-					id: 'woocommerce_store_city',
-					value: 'San Francisco',
-				},
-				{
-					id: 'woocommerce_default_country',
-					// Morocco: Unsupported country:region
-					value: 'MA:maagd',
-				},
-				{
-					id: 'woocommerce_store_postcode',
-					value: '80000',
-				},
-			],
-		} );
-		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-		await page.locator( 'text=Get paid' ).click();
-		await expect(
-			page.locator( '.woocommerce-layout__header-wrapper > h1' )
-		).toHaveText( 'Get paid' );
 	} );
 
 	test( 'Enabling cash on delivery enables the payment method', async ( {

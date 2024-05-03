@@ -151,11 +151,7 @@ describe( 'paymentMethodDataReducer', () => {
 				isSuccessful: false,
 			},
 			availablePaymentMethods: {},
-			availableExpressPaymentMethods: {
-				'my-new-method': {
-					name: 'My New Method',
-				},
-			},
+			availableExpressPaymentMethods: [ 'my-new-method' ],
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -181,69 +177,6 @@ describe( 'paymentMethodDataReducer', () => {
 			},
 			availablePaymentMethods: {},
 			availableExpressPaymentMethods: {},
-			paymentMethodData: {},
-			paymentMethodsInitialized: false,
-			expressPaymentMethodsInitialized: false,
-			shouldSavePaymentMethod: false,
-			errorMessage: '',
-			activePaymentMethod: '',
-			activeSavedToken: '',
-			incompatiblePaymentMethods: {},
-		} );
-	} );
-	it( 'removes the correct express payment method', () => {
-		const stateWithRegisteredMethod = deepFreeze( {
-			currentStatus: {
-				isPristine: true,
-				isStarted: false,
-				isProcessing: false,
-				isFinished: false,
-				hasError: false,
-				hasFailed: false,
-				isSuccessful: false,
-			},
-			availablePaymentMethods: {},
-			availableExpressPaymentMethods: {
-				'my-new-method': {
-					name: 'My New Method',
-				},
-				'my-other-method': {
-					name: 'My Other Method',
-				},
-			},
-			paymentMethodData: {},
-			paymentMethodsInitialized: false,
-			expressPaymentMethodsInitialized: false,
-			shouldSavePaymentMethod: false,
-			errorMessage: '',
-			activePaymentMethod: '',
-			activeSavedToken: '',
-			incompatiblePaymentMethods: {},
-		} );
-		const nextState = reducer( stateWithRegisteredMethod, {
-			type: ACTION_TYPES.REMOVE_AVAILABLE_EXPRESS_PAYMENT_METHOD,
-			name: 'my-new-method',
-		} );
-		expect( nextState.availableExpressPaymentMethods ).not.toHaveProperty(
-			'my-new-method'
-		);
-
-		expect( nextState ).toEqual( {
-			currentStatus: {
-				isPristine: true,
-				isStarted: false,
-				isProcessing: false,
-				isFinished: false,
-				hasError: false,
-				hasFailed: false,
-				isSuccessful: false,
-			},
-			availablePaymentMethods: {},
-			availableExpressPaymentMethods: {
-				'my-other-method': {
-					name: 'My Other Method',
-				},
-			},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,

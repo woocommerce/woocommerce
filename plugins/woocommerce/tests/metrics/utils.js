@@ -1,6 +1,3 @@
-/**
- * External dependencies
- */
 import { existsSync, readFileSync } from 'fs';
 
 export function median( array ) {

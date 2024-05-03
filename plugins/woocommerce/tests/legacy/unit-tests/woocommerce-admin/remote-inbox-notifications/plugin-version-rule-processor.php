@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Tests\RemoteInboxNotifications
  */
 
-use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\PluginVersionRuleProcessor;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\PluginVersionRuleProcessor;
 
 /**
  * class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor
@@ -57,35 +57,6 @@ class WC_Admin_Tests_RemoteInboxNotifications_PluginVersionRuleProcessor extends
 
 		$result = $processor->process( $rule, new stdClass() );
 
-		$this->assertEquals( false, $result );
-	}
-
-	/**
-	 * Test that the processor does not pass if plugin version does not exist in the data.
-	 * @group fast
-	 */
-	public function test_spec_does_not_pass_if_plugin_version_does_not_exist() {
-		$mock_plugins_provider = new MockPluginsProvider(
-			array(
-				'jetpack',
-			),
-			array(
-				'jetpack/jetpack.php' => array(
-					'name' => 'jetpack',
-				),
-			)
-		);
-		$processor             = new PluginVersionRuleProcessor( $mock_plugins_provider );
-		$rule                  = json_decode(
-			'{
-				"type": "plugin_version",
-				"plugin": "jetpack",
-				"version": "1.2.3",
-				"operator": "="
-			}'
-		);
-
-		$result = $processor->process( $rule, new stdClass() );
 		$this->assertEquals( false, $result );
 	}
 

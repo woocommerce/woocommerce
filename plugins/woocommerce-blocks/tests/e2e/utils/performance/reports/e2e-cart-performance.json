@@ -1,7 +1,0 @@
-{"description":"Cart block loading: (serverResponse)","longest":3549,"shortest":2680,"average":3258.6666666666665}
-{"description":"Cart block loading: (firstPaint)","longest":427,"shortest":352,"average":391.3333333333333}
-{"description":"Cart block loading: (domContentLoaded)","longest":1349,"shortest":1275,"average":1320.6666666666667}
-{"description":"Cart block loading: (loaded)","longest":1742,"shortest":1620,"average":1692.3333333333333}
-{"description":"Cart block loading: (firstContentfulPaint)","longest":427,"shortest":352,"average":391.3333333333333}
-{"description":"Cart block loading: (firstBlock)","longest":1997,"shortest":1851,"average":1935.6666666666667}
-{"description":"Cart block: Coupon entry","longest":5.34,"shortest":4.94,"average":5.133333333333334}

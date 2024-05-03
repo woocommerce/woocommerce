@@ -49,7 +49,7 @@ class MainFile extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Asserts that the bootstrap class is returned from the container.
+	 *  Asserts that the bootstrap class is returned from the container.
 	 */
 	public function wc_blocks_bootstrap() {
 		$this->assertInstanceOf( Bootstrap::class, wc_blocks_bootstrap() );

@@ -74,4 +74,4 @@ addFilter(
 
 Here's a screen shot using our new custom store management link:
 
-![screen shot of custom store management link in wp-admin](https://developer.woocommerce.com/wp-content/uploads/2023/12/yvXeSya.png)
+![screen shot of custom store management link in wp-admin](https://developer.woo.com/wp-content/uploads/2023/12/yvXeSya.png)

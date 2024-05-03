@@ -22,13 +22,6 @@ class RoutesController {
 	protected $routes = [];
 
 	/**
-	 * Namespace for the API.
-	 *
-	 * @var string
-	 */
-	private static $api_namespace = 'wc/store';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param SchemaController $schema_controller Schema controller class passed to each route.
@@ -83,8 +76,8 @@ class RoutesController {
 	 * Register all Store API routes. This includes routes under specific version namespaces.
 	 */
 	public function register_all_routes() {
-		$this->register_routes( 'v1', self::$api_namespace );
-		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
+		$this->register_routes( 'v1', 'wc/store' );
+		$this->register_routes( 'v1', 'wc/store/v1' );
 		$this->register_routes( 'private', 'wc/private' );
 	}
 
@@ -109,35 +102,6 @@ class RoutesController {
 			$this->schema_controller,
 			$this->schema_controller->get( $route::SCHEMA_TYPE, $route::SCHEMA_VERSION )
 		);
-	}
-
-	/**
-	 * Get a route path without instantiating the corresponding RoutesController object.
-	 *
-	 * @throws \Exception If the schema does not exist.
-	 *
-	 * @param string $version API Version being requested.
-	 * @param string $controller Whether to return controller name. If false, returns empty array. Note:
-	 * When $controller param is true, the output should not be used directly in front-end code, to prevent class names from leaking. It's not a security issue necessarily, but it's not a good practice.
-	 * When $controller param is false, it currently returns and empty array. But it can be modified in future to return include more details about the route info that can be used in frontend.
-	 *
-	 * @return string[] List of route paths.
-	 */
-	public function get_all_routes( $version = 'v1', $controller = false ) {
-		$routes = array();
-
-		foreach ( $this->routes[ $version ] as $key => $route_class ) {
-
-			if ( ! method_exists( $route_class, 'get_path_regex' ) ) {
-				throw new \Exception( esc_html( "{$route_class} route does not have a get_path_regex method" ) );
-			}
-
-			$route_path = '/' . trailingslashit( self::$api_namespace ) . $version . $route_class::get_path_regex();
-
-			$routes[ $route_path ] = $controller ? $route_class : array();
-		}
-
-		return $routes;
 	}
 
 	/**

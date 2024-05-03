@@ -87,12 +87,19 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editorUtils } ) => {
+	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
+	} );
+
+	test.afterEach( async ( { requestUtils } ) => {
+		await requestUtils.deleteAllTemplates( 'wp_template' );
+		await requestUtils.deleteAllTemplates( 'wp_template_part' );
 	} );
 
 	// eslint-disable-next-line playwright/no-skipped-test
@@ -121,9 +128,16 @@ test.describe( `${ blockData.name }`, () => {
 	} ) => {
 		await addBlock( admin, editor, editorUtils );
 
-		await editor.saveSiteEditorEntities();
+		await Promise.all( [
+			editor.saveSiteEditorEntities(),
+			page.waitForResponse( ( response ) =>
+				response.url().includes( 'wp-json/wp/v2/templates/' )
+			),
+		] );
 
-		await page.goto( blockData.productPage );
+		await page.goto( blockData.productPage, {
+			waitUntil: 'commit',
+		} );
 
 		const block = await pageObject.getNextPreviousButtonsBlock( {
 			page: 'frontend',
@@ -153,26 +167,30 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( blockData.selectors.editor.noArrowsOption )
 				.click();
 
-			const container = page.locator(
-				'.wc-block-product-gallery-large-image-next-previous-container'
-			);
+			const isVisible = await page
+				.locator(
+					'.wc-block-product-gallery-large-image-next-previous-container'
+				)
+				.isVisible();
 
-			await expect( container ).toBeHidden();
+			expect( isVisible ).toBe( false );
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
-			const leftArrow = page.locator(
-				blockData.selectors.editor.leftArrow.off
-			);
+			const leftArrow = await page
+				.locator( blockData.selectors.editor.leftArrow.off )
+				.isVisible();
 
-			const rightArrow = page.locator(
-				blockData.selectors.editor.rightArrow.off
-			);
+			const rightArrow = await page
+				.locator( blockData.selectors.editor.rightArrow.off )
+				.isVisible();
 
-			await expect( leftArrow ).toBeHidden();
-			await expect( rightArrow ).toBeHidden();
+			expect( leftArrow ).toBe( false );
+			expect( rightArrow ).toBe( false );
 		} );
 
 		// eslint-disable-next-line playwright/no-skipped-test
@@ -227,9 +245,16 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
 				pageObject,
@@ -301,9 +326,16 @@ test.describe( `${ blockData.name }`, () => {
 				editorBoundingClientRect.gallery.right
 			);
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const frontendBoundingClientRect = await getBoundingClientRect( {
 				pageObject,
@@ -361,9 +393,16 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-start' );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{
@@ -415,9 +454,16 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'center' );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{
@@ -464,9 +510,16 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( block ).toHaveCSS( 'align-items', 'flex-end' );
 
-			await editor.saveSiteEditorEntities();
+			await Promise.all( [
+				editor.saveSiteEditorEntities(),
+				page.waitForResponse( ( response ) =>
+					response.url().includes( 'wp-json/wp/v2/templates/' )
+				),
+			] );
 
-			await page.goto( blockData.productPage );
+			await page.goto( blockData.productPage, {
+				waitUntil: 'commit',
+			} );
 
 			const frontendBlock = await pageObject.getNextPreviousButtonsBlock(
 				{

@@ -1,7 +1,5 @@
 const { exec } = require( 'node:child_process' );
 
-export const DEFAULT_THEME = 'twentytwentythree';
-
 export const activateTheme = ( themeName ) => {
 	return new Promise( ( resolve, reject ) => {
 		const command = `wp-env run tests-cli wp theme activate ${ themeName }`;

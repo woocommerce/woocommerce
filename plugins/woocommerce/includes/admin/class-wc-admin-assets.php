@@ -554,22 +554,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
-
-			// Marketplace promotions.
-			if ( in_array( $screen_id, array( 'woocommerce_page_wc-admin' ), true ) ) {
-
-				$promotions = get_transient( WC_Admin_Marketplace_Promotions::TRANSIENT_NAME );
-
-				if ( false === $promotions ) {
-					return;
-				}
-
-				wp_add_inline_script(
-					'wc-admin-app',
-					'window.wcMarketplace = ' . wp_json_encode( array( 'promotions' => $promotions ) ),
-					'before'
-				);
-			}
 		}
 
 		/**
@@ -586,7 +570,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				'wc-admin-' . $script_name,
 				WCAdminAssets::get_url( $script_path_name . '/' . $script_name, 'js' ),
 				$script_assets['dependencies'],
-				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
+				WCAdminAssets::get_file_version( 'js' ),
 				true
 			);
 		}

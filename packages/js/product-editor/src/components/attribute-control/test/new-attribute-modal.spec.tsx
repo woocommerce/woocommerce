@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import {
-	ProductProductAttribute,
-	ProductAttributeTerm,
-} from '@woocommerce/data';
+import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
 import { createElement } from '@wordpress/element';
 
 /**
@@ -13,14 +10,14 @@ import { createElement } from '@wordpress/element';
  */
 import { NewAttributeModal } from '../new-attribute-modal';
 
-let attributeOnChange: ( val: ProductProductAttribute ) => void;
+let attributeOnChange: ( val: ProductAttribute ) => void;
 jest.mock( '../../attribute-input-field', () => ( {
 	AttributeInputField: ( {
 		onChange,
 	}: {
 		onChange: (
 			value?: Omit<
-				ProductProductAttribute,
+				ProductAttribute,
 				'position' | 'visible' | 'variation'
 			>
 		) => void;
@@ -47,7 +44,7 @@ jest.mock( '../../attribute-term-input-field', () => ( {
 	},
 } ) );
 
-const attributeList: ProductProductAttribute[] = [
+const attributeList: ProductAttribute[] = [
 	{
 		id: 15,
 		name: 'Automotive',

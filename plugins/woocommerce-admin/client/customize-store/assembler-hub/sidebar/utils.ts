@@ -24,12 +24,8 @@ export const findPatternByBlock = (
 			''
 		);
 	}
-	return patterns.find( ( pattern ) => {
-		const patternBlocks = pattern.blocks[ 0 ];
-		if ( patternBlocks.innerBlocks.length !== block.innerBlocks.length ) {
-			return false;
-		}
 
-		return isEqual( patternBlocks.attributes, blockAttributes );
-	} );
+	return patterns.find( ( pattern ) =>
+		isEqual( pattern.blocks[ 0 ].attributes, blockAttributes )
+	);
 };

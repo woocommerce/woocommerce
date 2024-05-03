@@ -147,26 +147,6 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$order_variation_1  = wc_get_product( $product_variations[1] ); // Variation: size = large.
 		$order_variation_2  = wc_get_product( $product_variations[3] ); // Variation: size = huge, colour = red, number = 2.
 
-		// Create a simple product.
-		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
-		$large_term   = get_term_by( 'slug', 'large', 'pa_size' );
-
-		$global_attribute = new WC_Product_Attribute();
-		$global_attribute->set_id( $size_attr_id );
-		$global_attribute->set_name( 'pa_size' );
-		$global_attribute->set_options( array( $large_term->term_id ) ); // Set to small.
-		$global_attribute->set_position( 1 );
-		$global_attribute->set_visible( true );
-		$global_attribute->set_variation( false );
-		$attributes['global-size'] = $global_attribute;
-
-		$simple_product = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'attributes' => $attributes,
-			)
-		);
-
 		// Create orders for variations.
 		$variation_order_1 = WC_Helper_Order::create_order( $this->user, $order_variation_1 );
 		$variation_order_1->set_status( 'completed' );
@@ -175,10 +155,6 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$variation_order_2 = WC_Helper_Order::create_order( $this->user, $order_variation_2 );
 		$variation_order_2->set_status( 'completed' );
 		$variation_order_2->save();
-
-		$simple_product_order_1 = WC_Helper_Order::create_order( $this->user, $simple_product );
-		$simple_product_order_1->set_status( 'completed' );
-		$simple_product_order_1->save();
 
 		// Create more orders for simple products.
 		for ( $i = 0; $i < 10; $i++ ) {
@@ -196,14 +172,16 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 
 		// Sanity check before filtering by attribute.
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 13, $response_orders['totals']['orders_count'] );
+		$this->assertEquals( 12, $response_orders['totals']['orders_count'] );
 
 		// Filter by the "size" attribute, with value "large".
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
+		$small_term   = get_term_by( 'slug', 'large', 'pa_size' );
+		$request      = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
 				'attribute_is' => array(
-					array( $size_attr_id, $large_term->term_id ),
+					array( $size_attr_id, $small_term->term_id ),
 				),
 			)
 		);
@@ -211,8 +189,8 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, $response_orders['totals']['orders_count'] );
-		$this->assertEquals( $variation_order_1->get_total() + $simple_product_order_1->get_total(), $response_orders['totals']['total_sales'] );
+		$this->assertEquals( 1, $response_orders['totals']['orders_count'] );
+		$this->assertEquals( $variation_order_1->get_total(), $response_orders['totals']['total_sales'] );
 
 		// Filter by excluding the "size" attribute, with value "large".
 		$size_attr_id = wc_attribute_taxonomy_id_by_name( 'pa_size' );
@@ -229,8 +207,8 @@ class WC_Admin_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 		$response_orders = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 11, $response_orders['totals']['orders_count'] );
+		$this->assertEquals( 1, $response_orders['totals']['orders_count'] );
 		// This should be the second variation order.
-		$this->assertEquals( 11 * $variation_order_2->get_total(), $response_orders['totals']['total_sales'] );
+		$this->assertEquals( $variation_order_2->get_total(), $response_orders['totals']['total_sales'] );
 	}
 }

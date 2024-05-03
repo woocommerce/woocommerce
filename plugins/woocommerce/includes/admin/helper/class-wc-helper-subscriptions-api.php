@@ -300,10 +300,7 @@ class WC_Helper_Subscriptions_API {
 			);
 		}
 
-		$install_url = WC_Helper::get_subscription_install_url(
-			$subscription['product_key'],
-			$subscription['product_slug']
-		);
+		$install_url = WC_Helper::get_subscription_install_url( $subscription['product_key'] );
 
 		if ( ! $install_url ) {
 			wp_send_json_error(

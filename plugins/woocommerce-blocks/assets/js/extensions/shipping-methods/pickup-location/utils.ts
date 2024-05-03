@@ -27,7 +27,7 @@ export const indexLocationsById = (
 
 export const defaultSettings = {
 	enabled: false,
-	title: __( 'Pickup', 'woocommerce' ),
+	title: __( 'Local Pickup', 'woocommerce' ),
 	tax_status: 'taxable',
 	cost: '',
 };
@@ -40,7 +40,7 @@ export const defaultReadyOnlySettings = {
 declare global {
 	const hydratedScreenSettings: {
 		pickupLocationSettings: {
-			enabled: boolean;
+			enabled: string;
 			title: string;
 			tax_status: string;
 			cost: string;
@@ -54,10 +54,9 @@ export const getInitialSettings = (): ShippingMethodSettings => {
 	const settings = hydratedScreenSettings.pickupLocationSettings;
 
 	return {
-		enabled:
-			typeof settings?.enabled === 'boolean'
-				? settings.enabled
-				: defaultSettings.enabled,
+		enabled: settings?.enabled
+			? settings?.enabled === 'yes'
+			: defaultSettings.enabled,
 		title: settings?.title || defaultSettings.title,
 		tax_status: settings?.tax_status || defaultSettings.tax_status,
 		cost: settings?.cost || defaultSettings.cost,

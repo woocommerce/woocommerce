@@ -3,16 +3,17 @@
  */
 import { Button } from '@wordpress/components';
 import type {
-	Dropdown,
 	// @ts-expect-error no exported member.
 	DropdownOption,
 } from '@wordpress/components';
+
+type ButtonVariant = Button.ButtonProps[ 'variant' ];
 
 type PositionYAxis = 'top' | 'middle' | 'bottom';
 type PositionXAxis = 'left' | 'center' | 'right';
 type PositionCorner = 'top' | 'right' | 'bottom' | 'left';
 
-export type PopoverPlacement =
+type PopoverPlacement =
 	| 'left'
 	| 'right'
 	| 'bottom'
@@ -26,24 +27,25 @@ export type PopoverPlacement =
 	| 'top-end'
 	| 'top-start'; // @todo: pick from core
 
-export type PopoverPosition =
+type popoverPosition =
 	| `${ PositionYAxis }`
 	| `${ PositionYAxis } ${ PositionXAxis }`
 	| `${ PositionYAxis } ${ PositionXAxis } ${ PositionCorner }`;
 
-export type PopoverProps = {
+type popoverProps = {
 	placement?: PopoverPlacement;
-	position?: PopoverPosition;
+	position?: popoverPosition;
 	offset?: number;
 };
 
-export type ButtonWithDropdownMenuProps = Omit<
-	Button.ButtonProps,
-	'controls'
-> & {
+export interface ButtonWithDropdownMenuProps {
+	text: string;
 	dropdownButtonLabel?: string;
+	variant?: ButtonVariant;
 	defaultOpen?: boolean;
 	controls?: DropdownOption[];
-	popoverProps?: PopoverProps;
-	renderMenu?( props: Dropdown.RenderProps ): React.ReactElement;
-};
+
+	popoverProps?: popoverProps;
+	onButtonClick?: () => void;
+	className?: string;
+}

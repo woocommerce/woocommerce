@@ -1156,7 +1156,7 @@ function wc_register_default_log_handler( $handlers = array() ) {
 function wc_get_log_file_path( $handle ) {
 	wc_deprecated_function( 'wc_get_log_file_path', '8.6.0' );
 
-	$directory = LoggingUtil::get_log_directory();
+	$directory = trailingslashit( realpath( Constants::get_constant( 'WC_LOG_DIR' ) ) );
 	$file_id   = LoggingUtil::generate_log_file_id( $handle, null, time() );
 	$hash      = LoggingUtil::generate_log_file_hash( $file_id );
 

@@ -3,7 +3,7 @@ const { test, expect } = require( '@playwright/test' );
 test.describe( 'Store owner can complete the core profiler', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.skip( 'Can complete the core profiler skipping extension install', async ( {
+	test( 'Can complete the core profiler skipping extension install', async ( {
 		page,
 	} ) => {
 		await page.goto(
@@ -107,7 +107,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'List your products' )
+				page.getByText( 'Add products to sell' )
 			).toBeVisible();
 			// go to the plugins page to make sure that extensions weren't installed
 			await page.goto( 'wp-admin/plugins.php' );
@@ -147,7 +147,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 		} );
 	} );
 
-	test.skip( 'Can complete the core profiler installing default extensions', async ( {
+	test( 'Can complete the core profiler installing default extensions', async ( {
 		page,
 	} ) => {
 		await page.goto(
@@ -258,7 +258,7 @@ test.describe( 'Store owner can complete the core profiler', () => {
 				} )
 			).toBeVisible();
 			await expect(
-				page.getByText( 'List your products' )
+				page.getByText( 'Add products to sell' )
 			).toBeVisible();
 			// go to the plugins page to make sure that extensions were installed
 			await page.goto( 'wp-admin/plugins.php' );

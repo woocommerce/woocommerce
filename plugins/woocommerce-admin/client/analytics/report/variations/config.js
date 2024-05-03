@@ -154,25 +154,19 @@ export const advancedFilters = applyFilters(
 			attribute: {
 				allowMultiple: true,
 				labels: {
-					add: __( 'Product attribute', 'woocommerce' ),
-					placeholder: __(
-						'Search product attributes',
-						'woocommerce'
-					),
-					remove: __(
-						'Remove product attribute filter',
-						'woocommerce'
-					),
+					add: __( 'Attribute', 'woocommerce' ),
+					placeholder: __( 'Search attributes', 'woocommerce' ),
+					remove: __( 'Remove attribute filter', 'woocommerce' ),
 					rule: __(
 						'Select a product attribute filter match',
 						'woocommerce'
 					),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product attribute</title> <rule/> <filter/>',
+						'<title>Attribute</title> <rule/> <filter/>',
 						'woocommerce'
 					),
-					filter: __( 'Select product attributes', 'woocommerce' ),
+					filter: __( 'Select attributes', 'woocommerce' ),
 				},
 				rules: [
 					{
@@ -196,25 +190,16 @@ export const advancedFilters = applyFilters(
 			},
 			category: {
 				labels: {
-					add: __( 'Product category', 'woocommerce' ),
-					placeholder: __(
-						'Search product categories',
-						'woocommerce'
-					),
-					remove: __(
-						'Remove product category filter',
-						'woocommerce'
-					),
-					rule: __(
-						'Select a product category filter match',
-						'woocommerce'
-					),
+					add: __( 'Categories', 'woocommerce' ),
+					placeholder: __( 'Search categories', 'woocommerce' ),
+					remove: __( 'Remove categories filter', 'woocommerce' ),
+					rule: __( 'Select a category filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Category filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(
-						'<title>Product category</title> <rule/> <filter/>',
+						'<title>Category</title> <rule/> <filter/>',
 						'woocommerce'
 					),
-					filter: __( 'Select product categories', 'woocommerce' ),
+					filter: __( 'Select categories', 'woocommerce' ),
 				},
 				rules: [
 					{
@@ -236,9 +221,9 @@ export const advancedFilters = applyFilters(
 			},
 			product: {
 				labels: {
-					add: __( 'Product', 'woocommerce' ),
+					add: __( 'Products', 'woocommerce' ),
 					placeholder: __( 'Search products', 'woocommerce' ),
-					remove: __( 'Remove product filter', 'woocommerce' ),
+					remove: __( 'Remove products filter', 'woocommerce' ),
 					rule: __( 'Select a product filter match', 'woocommerce' ),
 					/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
 					title: __(

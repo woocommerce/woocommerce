@@ -586,7 +586,6 @@ class TimeInterval {
 		}
 
 		if (
-			! is_array( $value ) ||
 			2 !== count( $value ) ||
 			! is_numeric( $value[0] ) ||
 			! is_numeric( $value[1] )
@@ -619,7 +618,6 @@ class TimeInterval {
 		}
 
 		if (
-			! is_array( $value ) ||
 			2 !== count( $value ) ||
 			! rest_parse_date( $value[0] ) ||
 			! rest_parse_date( $value[1] )

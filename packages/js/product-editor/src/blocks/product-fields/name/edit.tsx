@@ -12,7 +12,11 @@ import {
 import { __ } from '@wordpress/i18n';
 import { starEmpty, starFilled } from '@wordpress/icons';
 import { cleanForSlug } from '@wordpress/url';
-import { Product } from '@woocommerce/data';
+import {
+	PRODUCTS_STORE_NAME,
+	WCDataSelector,
+	Product,
+} from '@woocommerce/data';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import classNames from 'classnames';
 import {
@@ -36,10 +40,10 @@ import { useValidation } from '../../../contexts/validation-context';
 import { useProductEdits } from '../../../hooks/use-product-edits';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { ProductEditorBlockEditProps } from '../../../types';
-import { AUTO_DRAFT_NAME, getPermalinkParts } from '../../../utils';
+import { AUTO_DRAFT_NAME } from '../../../utils';
 import { NameBlockAttributes } from './types';
 
-export function NameBlockEdit( {
+export function Edit( {
 	attributes,
 	clientId,
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
@@ -70,8 +74,21 @@ export function NameBlockEdit( {
 		'name'
 	);
 
-	const { prefix: permalinkPrefix, suffix: permalinkSuffix } =
-		getPermalinkParts( product );
+	const { permalinkPrefix, permalinkSuffix } = useSelect(
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		( select: WCDataSelector ) => {
+			const { getPermalinkParts } = select( PRODUCTS_STORE_NAME );
+			if ( productId ) {
+				const parts = getPermalinkParts( productId );
+				return {
+					permalinkPrefix: parts?.prefix,
+					permalinkSuffix: parts?.suffix,
+				};
+			}
+			return {};
+		}
+	);
 
 	const {
 		ref: nameRef,

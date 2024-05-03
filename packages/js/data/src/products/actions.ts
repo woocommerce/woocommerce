@@ -57,29 +57,6 @@ export function createProductError(
 	};
 }
 
-function duplicateProductStart( id: number ) {
-	return {
-		type: TYPES.DUPLICATE_PRODUCT_START as const,
-		id,
-	};
-}
-
-function duplicateProductSuccess( id: number, product: Partial< Product > ) {
-	return {
-		type: TYPES.DUPLICATE_PRODUCT_SUCCESS as const,
-		id,
-		product,
-	};
-}
-
-export function duplicateProductError( id: number, error: unknown ) {
-	return {
-		type: TYPES.DUPLICATE_PRODUCT_ERROR as const,
-		id,
-		error,
-	};
-}
-
 function updateProductStart( id: number ) {
 	return {
 		type: TYPES.UPDATE_PRODUCT_START as const,
@@ -188,26 +165,6 @@ export function* updateProduct(
 	}
 }
 
-export function* duplicateProduct(
-	id: number,
-	data: Partial< Omit< Product, ReadOnlyProperties > >
-): Generator< unknown, Product, Product > {
-	yield duplicateProductStart( id );
-	try {
-		const product: Product = yield apiFetch( {
-			path: `${ WC_PRODUCT_NAMESPACE }/${ id }/duplicate`,
-			method: 'POST',
-			data,
-		} );
-
-		yield duplicateProductSuccess( product.id, product );
-		return product;
-	} catch ( error ) {
-		yield duplicateProductError( id, error );
-		throw error;
-	}
-}
-
 export function deleteProductStart( id: number ) {
 	return {
 		type: TYPES.DELETE_PRODUCT_START as const,
@@ -283,9 +240,6 @@ export type Actions = ReturnType<
 	| typeof deleteProductStart
 	| typeof deleteProductSuccess
 	| typeof deleteProductError
-	| typeof duplicateProductStart
-	| typeof duplicateProductError
-	| typeof duplicateProductSuccess
 	| typeof setSuggestedProductAction
 >;
 
@@ -293,5 +247,4 @@ export type ActionDispatchers = DispatchFromMap< {
 	createProduct: typeof createProduct;
 	updateProduct: typeof updateProduct;
 	deleteProduct: typeof deleteProduct;
-	duplicateProduct: typeof duplicateProduct;
 } >;

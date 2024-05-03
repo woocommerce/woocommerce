@@ -72,26 +72,17 @@
 	}
 
 	&__payment-methods {
-		display: grid;
-		column-gap: $gap-smaller;
-		row-gap: $gap;
-		grid-template-columns: repeat(auto-fill, minmax(39px, 1fr));
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
 
 		svg {
+			display: inline-block;
 			height: 24px;
 			width: auto;
-			outline: 1px solid rgba(0, 0, 0, 0.25);
-			outline-offset: -1px;
-			border-radius: 3px;
-			display: block;
+			border: 1px solid $gray-300;
+			border-radius: 2px;
 			margin: 0 $gap-smaller $gap-smaller 0;
-		}
-		span {
-			color: $gray-700;
-			font-size: 12px;
-			line-height: 16px;
-			white-space: nowrap;
-			align-self: center;
 		}
 	}
 

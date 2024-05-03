@@ -35,7 +35,7 @@ export const MobileAppLoginInfo = ( {
 					components: {
 						link: (
 							<Link
-								href="https://woocommerce.com/document/android-ios-apps-login-help-faq/"
+								href="https://woo.com/document/android-ios-apps-login-help-faq/"
 								target="_blank"
 								type="external"
 								onClick={ () => {

@@ -12,7 +12,6 @@ type getRelatedProductsOptions = {
 
 const POSTS_NUMBER_TO_RANDOMIZE = 30;
 const POSTS_NUMBER_TO_PICK = 3;
-const POSTS_NUMBER_TO_DISPLAY = 4;
 
 /**
  * Return related products for a given product ID.
@@ -74,7 +73,6 @@ type getSuggestedProductsForOptions = {
 	postId: number;
 	postType?: 'product' | 'post' | 'page';
 	forceRequest?: boolean;
-	exclude?: number[];
 };
 
 /**
@@ -87,7 +85,6 @@ export async function getSuggestedProductsFor( {
 	postId,
 	postType = 'product',
 	forceRequest = false,
-	exclude = [],
 }: getSuggestedProductsForOptions ): Promise< Product[] | undefined > {
 	// @ts-expect-error There are no types for this.
 	const { getEditedEntityRecord } = select( 'core' );
@@ -99,8 +96,6 @@ export async function getSuggestedProductsFor( {
 			? data.categories.map( ( cat ) => cat.id )
 			: [],
 		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
-		exclude: exclude?.length ? exclude : [ postId ],
-		limit: POSTS_NUMBER_TO_DISPLAY,
 	};
 
 	if ( forceRequest ) {

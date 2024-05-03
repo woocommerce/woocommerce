@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\FeatureGating;
  * In the context of this plugin, it handles init and is called from the main
  * plugin file (woocommerce-gutenberg-products-block.php).
  *
- * In the context of WooCommerce core, it handles init and is called from
+ * In the context of WooCommere core, it handles init and is called from
  * WooCommerce's package loader. The main plugin file is _not_ loaded.
  *
  * @since 2.5.0

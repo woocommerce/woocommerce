@@ -36,20 +36,10 @@ export function shopPage() {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'title equals: Shop – WooCommerce Core E2E Test Suite': (
-				response
-			) =>
-				response.html().find( 'head title' ).text() ===
-				'Shop – WooCommerce Core E2E Test Suite',
 			'body contains: woocommerce-products-header': ( response ) =>
 				response.body.includes(
 					'<header class="woocommerce-products-header">'
 				),
-			'body contains: woocommerce-loop-product__title': ( response ) =>
-				response
-					.html()
-					.find( '.woocommerce-loop-product__title' )
-					.toArray().length > 0,
 		} );
 	} );
 

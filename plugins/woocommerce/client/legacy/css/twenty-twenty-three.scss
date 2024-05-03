@@ -1,7 +1,29 @@
 /**
 * Fonts
 */
-@import "fonts";
+@font-face {
+	font-family: star;
+	src: url(../fonts/star.eot);
+	src:
+		url(../fonts/star.eot?#iefix) format("embedded-opentype"),
+		url(../fonts/star.woff) format("woff"),
+		url(../fonts/star.ttf) format("truetype"),
+		url(../fonts/star.svg#star) format("svg");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: WooCommerce;
+	src: url(../fonts/WooCommerce.eot);
+	src:
+		url(../fonts/WooCommerce.eot?#iefix) format("embedded-opentype"),
+		url(../fonts/WooCommerce.woff) format("woff"),
+		url(../fonts/WooCommerce.ttf) format("truetype"),
+		url(../fonts/WooCommerce.svg#WooCommerce) format("svg");
+	font-weight: 400;
+	font-style: normal;
+}
 
 @import "mixins";
 @import "animation";
@@ -418,7 +440,7 @@
 		height: 1em;
 		line-height: 1;
 		width: 5.4rem;
-		font-family: WooCommerce;
+		font-family: star;
 		font-style: normal;
 		color: var(--wp--preset--color--contrast);
 		margin: 1rem auto 0.7rem auto;

@@ -91,8 +91,6 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		$order->delete_meta_data( 'random_other' );
 		$order->delete_meta_data( 'random_other_pre_crud' );
 		$order->save();
-		// Track the number of meta items we originally have for future assertions.
-		$original_meta_count = count( $order->get_meta_data() );
 
 		// Now add one piece of meta
 		$order->add_meta_data( 'random', (string) rand( 0, 0xffffff ) );
@@ -107,13 +105,13 @@ class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
 		// Get a new instance of the same order. It should have both 'random' and 'random_other' set on it
 		$new_order = wc_get_order( $this->order_id );
 
-		// The original $order should have $original_meta_count + 1 item of meta - random.
-		$this->assertCount( $original_meta_count + 1, $order->get_meta_data() );
+		// The original $order should have 1 item of meta - random.
+		$this->assertCount( 1, $order->get_meta_data() );
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $order->get_meta_data(), 'key' ) ) );
 
-		$expected_new_meta = OrderUtil::custom_orders_table_usage_is_enabled() ? 2 : 3;
+		$expected_count = OrderUtil::custom_orders_table_usage_is_enabled() ? 2 : 3;
 		// The new $order should have 3 items (or 2 in case of HPOS since direct post updates are not read) of meta since it's freshly loaded.
-		$this->assertCount( $expected_new_meta + $original_meta_count, $new_order->get_meta_data() );
+		$this->assertCount( $expected_count, $new_order->get_meta_data() );
 		$this->assertTrue( in_array( 'random', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {

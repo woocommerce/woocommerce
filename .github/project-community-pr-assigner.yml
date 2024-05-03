@@ -1,16 +1,7 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
-"*":
+".github/*":
   - team: vortex
-
-".github/**/*":
-  - team: vortex
-
-"bin/*":
-  - team: vortex
-
-"docs/**/*":
-  - team: developer-advocacy
 
 "packages/js/api/**/*":
   - team: solaris
@@ -72,9 +63,6 @@
 "packages/js/onboarding/**/*":
   - team: ghidorah
 
-"packages/js/product-editor/**/*":
-  - team: mothra
-
 "packages/js/tracks/**/*":
   - team: mothra
 
@@ -85,34 +73,13 @@
   - team: mothra
   - team: ghidorah
 
-"plugins/woocommerce/src/Blocks/**/*":
-  - team: rubik
-  - team: woo-fse
-
 "plugins/woocommerce/src/Internal/Admin/**/*":
   - team: mothra
   - team: ghidorah
-
-"plugins/woocommerce/src/StoreApi/**/*":
-  - team: rubik
-  - team: woo-fse
-
+  
 "plugins/woocommerce-admin/**/*":
   - team: mothra
   - team: ghidorah
 
-"plugins/woocommerce-blocks/**/*":
-  - team: rubik
-  - team: woo-fse
-
 "plugins/woocommerce-beta-tester/**/*":
-  - team: vortex
-
-"tools/**/*":
-  - team: vortex
-
-'**/composer.json':
-  - team: vortex
-
-'**/package.json':
   - team: vortex

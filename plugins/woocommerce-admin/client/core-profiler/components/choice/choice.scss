@@ -39,7 +39,7 @@
 	}
 
 	input + label::before {
-		content: "";
+		content: '';
 		width: 20px;
 		height: 20px;
 		border: 1px solid $gray-600;
@@ -56,7 +56,7 @@
 		background-color: var(--wp-admin-theme-color);
 		align-self: center;
 		border-radius: 50%;
-		content: "";
+		content: '';
 		position: absolute;
 		width: 14px;
 		height: 14px;

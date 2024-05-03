@@ -111,7 +111,7 @@ $border-width: 1px;
 	align-items: center;
 	text-align: center;
 	padding: 0 $gap-large;
-	margin: $gap-larger 0 ( 3.5 * $grid-unit );
+	margin: $gap-large 0;
 
 	&::before {
 		margin-right: 10px;

@@ -26,7 +26,7 @@ export const logError = (
 		if ( isDevelopmentMode ) {
 			console.error( '[ExPlat] ', error.message, error ); // eslint-disable-line no-console
 		} else {
-			if ( ! window.wcTracks?.isEnabled && ! window?._wca?.push ) {
+			if ( ! window.wcTracks?.isEnabled ) {
 				throw new Error(
 					`Tracking is disabled, can't send error to the server`
 				);

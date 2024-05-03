@@ -1,8 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 const { admin } = require( '../../test-data/data' );
-const { getOrderIdFromUrl } = require( '../../utils/order' );
-const { addAProductToCart } = require( '../../utils/cart' );
 
 const billingEmail = 'marge-test-account@example.com';
 
@@ -133,11 +131,12 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await addAProductToCart( page, productId );
+		await page.goto( `shop/?add-to-cart=${ productId }` );
+		await page.waitForLoadState( 'networkidle' );
 	} );
 
 	test( 'can create an account during checkout', async ( { page } ) => {
-		await page.goto( 'checkout/' );
+		await page.goto( 'checkout/', { waitUntil: 'networkidle' } );
 		await page.locator( '#billing_first_name' ).fill( 'Marge' );
 		await page.locator( '#billing_last_name' ).fill( 'Simpson' );
 		await page
@@ -149,21 +148,25 @@ test.describe( 'Shopper Checkout Create Account', () => {
 		await page.locator( '#billing_phone' ).fill( '123456789' );
 		await page.locator( '#billing_email' ).fill( billingEmail );
 
-		await page.getByText( 'Create an account?' ).check();
+		await page.locator( '#createaccount' ).check();
 
 		await page.locator( '#place_order' ).click();
 
-		await expect(
-			page.getByText( 'Your order has been received' )
-		).toBeVisible();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'Order received'
+		);
 
-		orderId = getOrderIdFromUrl( page );
+		// get order ID from the page
+		const orderReceivedText = await page
+			.locator( '.woocommerce-order-overview__order.order' )
+			.textContent();
+		orderId = orderReceivedText.split( /(\s+)/ )[ 6 ].toString();
 
 		await page.goto( '/my-account/' );
 		// confirms that an account was created
-		await expect(
-			page.getByRole( 'heading', { name: 'My account' } )
-		).toBeVisible();
+		await expect( page.locator( 'h1.entry-title' ) ).toContainText(
+			'My account'
+		);
 		await page
 			.getByRole( 'navigation' )
 			.getByRole( 'link', { name: 'Log out' } )

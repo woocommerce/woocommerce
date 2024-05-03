@@ -2,27 +2,37 @@
 
 namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers;
 
-use Automattic\WooCommerce\Admin\DeprecatedClassFacade;
+use Automattic\WooCommerce\Admin\RemoteInboxNotifications\TransformerInterface;
+use stdClass;
 
 /**
  * Prepare site URL for comparison.
  *
  * @package Automattic\WooCommerce\Admin\RemoteInboxNotifications\Transformers
- *
- * @deprecated 8.8.0
  */
-class PrepareUrl extends DeprecatedClassFacade {
+class PrepareUrl implements TransformerInterface {
 	/**
-	 * The name of the non-deprecated class that this facade covers.
+	 * Prepares the site URL by removing the protocol and trailing slash.
 	 *
-	 * @var string
+	 * @param mixed         $value a value to transform.
+	 * @param stdClass|null $arguments arguments.
+	 * @param string|null   $default default value.
+	 *
+	 * @return mixed|null
 	 */
-	protected static $facade_over_classname = 'Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\Transformers\ArrayColumn';
+	public function transform( $value, stdClass $arguments = null, $default = null ) {
+		$url_parts = wp_parse_url( rtrim( $value, '/' ) );
+		return isset( $url_parts['path'] ) ? $url_parts['host'] . $url_parts['path'] : $url_parts['host'];
+	}
 
 	/**
-	 * The version that this class was deprecated in.
+	 * Validate Transformer arguments.
 	 *
-	 * @var string
+	 * @param stdClass|null $arguments arguments to validate.
+	 *
+	 * @return mixed
 	 */
-	protected static $deprecated_in_version = '8.8.0';
+	public function validate( stdClass $arguments = null ) {
+		return true;
+	}
 }

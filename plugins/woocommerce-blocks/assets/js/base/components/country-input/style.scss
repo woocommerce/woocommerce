@@ -4,4 +4,9 @@
 
 .wc-block-components-country-input {
 	margin-top: $gap;
+
+	// Fixes width in the editor.
+	.components-flex {
+		width: 100%;
+	}
 }

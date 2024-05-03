@@ -8,7 +8,7 @@ import { execSync } from 'child_process';
  * Internal dependencies
  */
 import {
-	getAllPackages,
+	getAllPackges,
 	validatePackage,
 	getFilepathFromPackageName,
 	isValidUpdate,
@@ -95,7 +95,7 @@ export default class PackageRelease extends Command {
 		}
 
 		if ( flags.all ) {
-			this.publishPackages( getAllPackages(), flags );
+			this.publishPackages( getAllPackges(), flags );
 			return;
 		}
 
@@ -128,11 +128,6 @@ export default class PackageRelease extends Command {
 				CliUx.ux.action.start( `${ verb } ${ name }` );
 				if ( isValidUpdate( name, initialRelease ) ) {
 					const cwd = getFilepathFromPackageName( name );
-					if ( cwd.includes( 'packages/php' ) ) {
-						this.error(
-							'Publishing PHP packages is not supported just yet.'
-						);
-					}
 					execSync(
 						`pnpm publish ${
 							dryRun ? '--dry-run' : ''

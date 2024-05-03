@@ -114,7 +114,7 @@ class DefaultShippingPartners {
 					'image'    => $asset_base_url . 'envia-column.svg',
 					'features' => $column_layout_features,
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
+				'learn_more_link'   => 'https://woo.com/products/envia-shipping-and-fulfillment/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
@@ -157,7 +157,7 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/easyship-shipping-rates/',
+				'learn_more_link'   => 'https://woo.com/products/easyship-shipping-rates/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
 				),
@@ -282,7 +282,7 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
+				'learn_more_link'   => 'https://woo.com/products/shipping/',
 				'is_visible'        => array(
 					self::get_rules_for_countries( array( 'US' ) ),
 				),

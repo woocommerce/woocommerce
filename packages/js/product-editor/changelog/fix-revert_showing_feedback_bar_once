@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Revert "Show feedback bar only once (#41787)" #43178

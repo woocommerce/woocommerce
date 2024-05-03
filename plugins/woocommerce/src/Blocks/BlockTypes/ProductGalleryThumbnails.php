@@ -48,7 +48,7 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	 * @return string
 	 */
 	protected function generate_view_all_html( $remaining_thumbnails_count ) {
-		$view_all_html = '<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay wc-block-product-gallery-dialog-on-click" data-wc-on--click="actions.openDialog" data-wc-on--keydown="actions.onViewAllImagesKeyDown" tabindex="0">
+		$view_all_html = '<div class="wc-block-product-gallery-thumbnails__thumbnail__overlay wc-block-product-gallery-dialog-on-click" data-wc-on--click="actions.openDialog">
 			<span class="wc-block-product-gallery-thumbnails__thumbnail__remaining-thumbnails-count wc-block-product-gallery-dialog-on-click">+%1$s</span>
 			<span class="wc-block-product-gallery-thumbnails__thumbnail__view-all wc-block-product-gallery-dialog-on-click">%2$s</span>
 			</div>';
@@ -156,9 +156,6 @@ class ProductGalleryThumbnails extends AbstractBlock {
 							$processor = new \WP_HTML_Tag_Processor( $product_gallery_image_html );
 
 							if ( $processor->next_tag( 'img' ) ) {
-
-								$processor->set_attribute( 'data-wc-on--keydown', 'actions.onThumbnailKeyDown' );
-								$processor->set_attribute( 'tabindex', '0' );
 								$processor->set_attribute(
 									'data-wc-on--click',
 									'actions.selectImage'

@@ -258,31 +258,8 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// phpcs:disable Squiz.Commenting
-		$fake_wp_filesystem = new class() {
-			public $created_files = array();
-
-			public function put_contents( string $file, string $contents, $mode = false ): bool {
-				$this->created_files[ $file ] = $contents;
-				return strlen( $contents );
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		$this->register_legacy_proxy_global_mocks(
-			array(
-				'wp_filesystem' => $fake_wp_filesystem,
-			)
-		);
-
 		$this->sut->get_transient_files_directory();
 		$this->assertEquals( '/wordpress/uploads/woocommerce_transient_files', $created_dir );
-
-		$expected_created_files = array(
-			'/wordpress/uploads/woocommerce_transient_files/.htaccess' => 'deny from all',
-			'/wordpress/uploads/woocommerce_transient_files/index.html' => '',
-		);
-		$this->assertEquals( $expected_created_files, $fake_wp_filesystem->created_files );
 	}
 
 	/**
@@ -322,42 +299,6 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 
 		$result = $this->sut->get_transient_file_path( $filename );
 		$this->assertEquals( static::$transient_files_dir . '/2023-12-02/000102030405060708090a0b0c0d0e0f', $result );
-	}
-
-	/**
-	 * @testdox get_expiration_date returns null for file names without a properly encoded expiration date.
-	 *
-	 * @testWith [""]
-	 *           ["123"]
-	 *           ["NOT_HEX_DATE112233"]
-	 *           ["7e8f01"]
-	 *
-	 * @param string $filename Filename to test.
-	 */
-	public function test_get_expiration_date_returns_null_for_wrongly_formatted_date( string $filename ) {
-		$this->assertNull( TransientFilesEngine::get_expiration_date( $filename ) );
-	}
-
-	/**
-	 * @testdox get_expiration_date returns the date encoded in a proper transient file name.
-	 */
-	public function test_get_expiration_date_correctly_extracts_date_from_filename() {
-		$actual = TransientFilesEngine::get_expiration_date( '7e821b00000' );
-		$this->assertEquals( '2024-02-27', $actual );
-	}
-
-	/**
-	 * @testdox get_public_url returns the full public URL of a transient file given its name.
-	 */
-	public function test_get_public_url() {
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'get_site_url' => fn( $blog_id, $path) => 'http://example.com' . $path,
-			)
-		);
-
-		$actual = $this->sut->get_public_url( '1234abcd' );
-		$this->assertEquals( 'http://example.com/wc/file/transient/1234abcd', $actual );
 	}
 
 	/**

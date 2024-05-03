@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Corrected build configuration for packages that weren't outputting minified code.

@@ -501,13 +501,13 @@ jQuery( function( $ ) {
 							var maybe_valid_json = raw_response.match( /{"result.*}/ );
 
 							if ( null === maybe_valid_json ) {
-								console.log( 'Unable to fix malformed JSON #1' );
+								console.log( 'Unable to fix malformed JSON' );
 							} else if ( wc_checkout_form.is_valid_json( maybe_valid_json[0] ) ) {
 								console.log( 'Fixed malformed JSON. Original:' );
 								console.log( raw_response );
 								raw_response = maybe_valid_json[0];
 							} else {
-								console.log( 'Unable to fix malformed JSON #2' );
+								console.log( 'Unable to fix malformed JSON' );
 							}
 						}
 
@@ -560,21 +560,10 @@ jQuery( function( $ ) {
 						// Detach the unload handler that prevents a reload / redirect
 						wc_checkout_form.detachUnloadEventsOnSubmit();
 
-						// This is just a technical error fallback. i18_checkout_error is expected to be always defined and localized.
-						var errorMessage = errorThrown;
-
-						if (
-							typeof wc_checkout_params === 'object' &&
-							wc_checkout_params !== null &&
-							wc_checkout_params.hasOwnProperty( 'i18n_checkout_error' ) &&
-							typeof wc_checkout_params.i18n_checkout_error === 'string' &&
-							wc_checkout_params.i18n_checkout_error.trim() !== ''
-						) {
-							errorMessage = wc_checkout_params.i18n_checkout_error;
-						}
-
 						wc_checkout_form.submit_error(
-							'<div class="woocommerce-error">' + errorMessage + '</div>'
+							'<div class="woocommerce-error">' +
+							( errorThrown || wc_checkout_params.i18n_checkout_error ) +
+							'</div>'
 						);
 					}
 				});
@@ -628,9 +617,8 @@ jQuery( function( $ ) {
 			});
 
 			var data = {
-				security: wc_checkout_params.apply_coupon_nonce,
-				coupon_code: $form.find('input[name="coupon_code"]').val(),
-				billing_email: wc_checkout_form.$checkout_form.find('input[name="billing_email"]').val()
+				security:		wc_checkout_params.apply_coupon_nonce,
+				coupon_code:	$form.find( 'input[name="coupon_code"]' ).val()
 			};
 
 			$.ajax({

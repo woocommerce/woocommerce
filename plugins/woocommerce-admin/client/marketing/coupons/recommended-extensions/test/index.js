@@ -18,7 +18,7 @@ const mockExtensions = [
 	{
 		title: 'AutomateWoo',
 		description: 'Does things.',
-		url: 'https://woocommerce.com/products/automatewoo/',
+		url: 'https://woo.com/products/automatewoo/',
 		icon: 'icons/automatewoo.svg',
 		product: 'automatewoo',
 		plugin: 'automatewoo/automatewoo.php',
@@ -26,7 +26,7 @@ const mockExtensions = [
 	{
 		title: 'Mailchimp for WooCommerce',
 		description: 'Does things.',
-		url: 'https://woocommerce.com/products/mailchimp-for-woocommerce/',
+		url: 'https://woo.com/products/mailchimp-for-woocommerce/',
 		icon: 'icons/mailchimp.svg',
 		product: 'mailchimp-for-woocommerce',
 		plugin: 'mailchimp-for-woocommerce/mailchimp-woocommerce.php',
@@ -160,7 +160,7 @@ describe( 'Click Recommendations', () => {
 				title={ 'AutomateWoo' }
 				description={ 'Does things.' }
 				icon={ 'icons/automatewoo.svg' }
-				url={ 'https://woocommerce.com/products/automatewoo/' }
+				url={ 'https://woo.com/products/automatewoo/' }
 				product={ 'automatewoo' }
 				category={ 'marketing' }
 			/>
@@ -173,7 +173,6 @@ describe( 'Click Recommendations', () => {
 			'marketing_recommended_extension',
 			{
 				name: 'AutomateWoo',
-				source: 'plugin-woocommerce',
 			}
 		);
 	} );

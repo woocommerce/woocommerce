@@ -7,39 +7,21 @@ namespace Automattic\WooCommerce\Blocks\Templates;
  * @internal
  */
 class OrderConfirmationTemplate extends AbstractPageTemplate {
-
 	/**
-	 * The slug of the template.
+	 * Template slug.
 	 *
-	 * @var string
+	 * @return string
 	 */
-	const SLUG = 'order-confirmation';
+	public static function get_slug() {
+		return 'order-confirmation';
+	}
 
 	/**
 	 * Initialization method.
 	 */
-	public function init() {
-		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
-
+	protected function init() {
 		parent::init();
-	}
-
-	/**
-	 * Returns the title of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_title() {
-		return _x( 'Order Confirmation', 'Template name', 'woocommerce' );
-	}
-
-	/**
-	 * Returns the description of the template.
-	 *
-	 * @return string
-	 */
-	public function get_template_description() {
-		return __( 'The Order Confirmation template serves as a receipt and confirmation of a successful purchase. It includes a summary of the ordered items, shipping, billing, and totals.', 'woocommerce' );
+		add_action( 'wp_before_admin_bar_render', array( $this, 'remove_edit_page_link' ) );
 	}
 
 	/**
@@ -68,5 +50,14 @@ class OrderConfirmationTemplate extends AbstractPageTemplate {
 	 */
 	protected function is_active_template() {
 		return is_wc_endpoint_url( 'order-received' );
+	}
+
+	/**
+	 * Should return the title of the page.
+	 *
+	 * @return string
+	 */
+	public static function get_template_title() {
+		return __( 'Order Confirmation', 'woocommerce' );
 	}
 }

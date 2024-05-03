@@ -8,28 +8,24 @@ Radio button field for the product editor.
 
 ### title
 
--   **Type:** `String`
--   **Required:** `Yes`
+- **Type:** `String`
+- **Required:** `Yes`
 
 ### description
 
--   **Type:** `String`
--   **Required:** `No`
+- **Type:** `String`
+- **Required:** `No`
+
 
 ### property
 
--   **Type:** `String`
--   **Required:** `Yes`
+- **Type:** `String`
+- **Required:** `Yes`
 
 ### options
 
--   **Type:** `Array`
--   **Required:** `Yes`
-
-### disabled
-
--   **Type:** `Boolean`
--   **Required:** `No`
+- **Type:** `Array`
+- **Required:** `Yes`
 
 ## Usage
 

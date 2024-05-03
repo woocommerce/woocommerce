@@ -1,21 +1,21 @@
-@import "../../stylesheets/_variables.scss";
+@import '../../stylesheets/_variables.scss';
 
 .woocommerce-marketplace__header {
 	align-items: center;
 	background: #fff;
 	border-bottom: 1px solid $gutenberg-gray-300;
 	display: grid;
-	grid-template: "mktpl-title mktpl-search mktpl-meta" 60px
-		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px 36px;
+	grid-template: 'mktpl-title mktpl-search mktpl-meta' 60px
+		'mktpl-tabs mktpl-tabs mktpl-tabs' auto / 1fr 320px 36px;
 	padding: 0 $content-spacing-large;
 	width: 100%;
 
 	/* On narrow screens, "stack" header items and hide the bottom border */
 	@media (width <= $breakpoint-medium) {
 		border-bottom: 0;
-		grid-template: "mktpl-title mktpl-meta" 60px
-			"mktpl-tabs mktpl-tabs" 48px
-			"mktpl-search mktpl-search" auto / auto 48px;
+		grid-template: 'mktpl-title mktpl-meta' 60px
+			'mktpl-tabs mktpl-tabs' 48px
+			'mktpl-search mktpl-search' auto / auto 48px;
 		padding: 0;
 	}
 
@@ -75,7 +75,7 @@
 	margin-right: $medium-gap;
 	margin-top: 10px;
 
-	input[type="search"] {
+	input[type='search'] {
 		all: unset;
 		flex-grow: 1;
 	}

@@ -58,35 +58,35 @@ class WC_API_Customers extends WC_API_Resource {
 
 		# GET/POST /customers
 		$routes[ $this->base ] = array(
-			array( array( $this, 'get_customers' ),   WC_API_Server::READABLE ),
-			array( array( $this, 'create_customer' ), WC_API_Server::CREATABLE | WC_API_Server::ACCEPT_DATA ),
+			array( array( $this, 'get_customers' ),   WC_API_SERVER::READABLE ),
+			array( array( $this, 'create_customer' ), WC_API_SERVER::CREATABLE | WC_API_Server::ACCEPT_DATA ),
 		);
 
 		# GET /customers/count
 		$routes[ $this->base . '/count' ] = array(
-			array( array( $this, 'get_customers_count' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customers_count' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET/PUT/DELETE /customers/<id>
 		$routes[ $this->base . '/(?P<id>\d+)' ] = array(
-			array( array( $this, 'get_customer' ),    WC_API_Server::READABLE ),
-			array( array( $this, 'edit_customer' ),   WC_API_Server::EDITABLE | WC_API_Server::ACCEPT_DATA ),
-			array( array( $this, 'delete_customer' ), WC_API_Server::DELETABLE ),
+			array( array( $this, 'get_customer' ),    WC_API_SERVER::READABLE ),
+			array( array( $this, 'edit_customer' ),   WC_API_SERVER::EDITABLE | WC_API_SERVER::ACCEPT_DATA ),
+			array( array( $this, 'delete_customer' ), WC_API_SERVER::DELETABLE ),
 		);
 
 		# GET /customers/email/<email>
 		$routes[ $this->base . '/email/(?P<email>.+)' ] = array(
-			array( array( $this, 'get_customer_by_email' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customer_by_email' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/<id>/orders
 		$routes[ $this->base . '/(?P<id>\d+)/orders' ] = array(
-			array( array( $this, 'get_customer_orders' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customer_orders' ), WC_API_SERVER::READABLE ),
 		);
 
 		# GET /customers/<id>/downloads
 		$routes[ $this->base . '/(?P<id>\d+)/downloads' ] = array(
-			array( array( $this, 'get_customer_downloads' ), WC_API_Server::READABLE ),
+			array( array( $this, 'get_customer_downloads' ), WC_API_SERVER::READABLE ),
 		);
 
 		# POST|PUT /customers/bulk

@@ -24,17 +24,17 @@ export type FontCollectionResponse = {
 	} >;
 };
 
-const getInstalledFontFamilyByNameFontFamily = (
+const getInstalledFontFamilyByFontFamilySlug = (
 	installedFontFamilies: Array< {
 		id: number;
 		font_family_settings: FontFamily;
 		font_face: Array< FontFace >;
 	} >,
-	nameFontFamily: string
+	slugFontFamily: string
 ) => {
 	return installedFontFamilies.find(
 		( { font_family_settings } ) =>
-			font_family_settings.slug === nameFontFamily
+			font_family_settings.slug === slugFontFamily
 	);
 };
 
@@ -84,22 +84,19 @@ export const getFontFamiliesAndFontFaceToInstall = (
 ) => {
 	return Object.entries( FONT_FAMILIES_TO_INSTALL ).reduce(
 		( acc, [ slug, fontData ] ) => {
-			const fontFamilyWithFontFaceToInstall = getFontFamiliesToInstall(
-				fontCollection,
-				slug,
-				fontData
-			);
-
-			if ( ! fontFamilyWithFontFaceToInstall ) {
-				return acc;
-			}
-
-			const fontFamily = getInstalledFontFamilyByNameFontFamily(
+			const fontFamily = getInstalledFontFamilyByFontFamilySlug(
 				installedFontFamilies,
-				fontFamilyWithFontFaceToInstall.slug
+				slug
 			);
 
 			if ( ! fontFamily ) {
+				const fontFamilyWithFontFaceToInstall =
+					getFontFamiliesToInstall( fontCollection, slug, fontData );
+
+				if ( ! fontFamilyWithFontFaceToInstall ) {
+					return acc;
+				}
+
 				return {
 					...acc,
 					fontFamiliesWithFontFacesToInstall: [
@@ -187,9 +184,7 @@ export const installFontFace = async (
 	index: number
 ) => {
 	const { fontFamilyId, ...font } = data;
-	const fontFaceAssets = await downloadFontFaceAssets(
-		Array.isArray( font.src ) ? font.src[ 0 ] : font.src
-	);
+	const fontFaceAssets = await downloadFontFaceAssets( font.src );
 	const formData = new FormData();
 
 	const fontFile = await makeFontFacesFormData(
