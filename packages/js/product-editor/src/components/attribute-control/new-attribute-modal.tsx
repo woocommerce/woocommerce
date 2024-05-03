@@ -163,7 +163,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		values: AttributeForm,
 		setValue: (
 			name: string,
-			value: AttributeForm[ keyof AttributeForm ]
+			value: AttributeForm[ keyof AttributeForm ] | null
 		) => void
 	) => {
 		onRemoveItem();
@@ -173,7 +173,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 				values.attributes.filter( ( val, i ) => i !== index )
 			);
 		} else {
-			setValue( `attributes[${ index }]`, [ null ] );
+			setValue( `attributes[${ index }]`, null );
 		}
 	};
 
@@ -308,9 +308,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 */
 					const attributeBelongTo = values.attributes
 						.map( ( attr ) => ( attr ? attr.id : null ) )
-						.filter( ( id ) => id !== null ) as number[];
-
-					console.log( 'attributeBelongTo: ', attributeBelongTo );
+						.filter( ( id ) => typeof id === 'number' );
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
@@ -389,7 +387,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													}
 													removeLabel={ removeLabel }
 													onTermSelect={ setValue }
-													onRemove={ console.log }
+													onRemove={ (
+														removedIndex
+													) =>
+														onRemove(
+															removedIndex,
+															values,
+															setValue
+														)
+													}
 													termsAutoSelection={
 														termsAutoSelection
 													}
