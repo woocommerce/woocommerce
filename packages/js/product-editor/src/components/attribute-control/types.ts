@@ -61,7 +61,7 @@ export type AttributeTableRowProps = {
 	disabledAttributeMessage: string;
 
 	isLoadingAttributes: boolean;
-	attributes: EnhancedProductAttribute[];
+	attributes: AttributesComboboxControlItem[];
 
 	termPlaceholder: string;
 	termLabel?: string;
