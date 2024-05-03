@@ -1272,9 +1272,11 @@ final class WooCommerce {
 	private function maybe_process_wc_api_query_var() {
 		global $wp;
 
-		if ( ! empty( $_GET['wc-api'] ) ) { // WPCS: input var okay, CSRF ok.
-			$wp->query_vars['wc-api'] = sanitize_key( wp_unslash( $_GET['wc-api'] ) ); // WPCS: input var okay, CSRF ok.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $_GET['wc-api'] ) ) {
+			$wp->query_vars['wc-api'] = sanitize_key( wp_unslash( $_GET['wc-api'] ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// wc-api endpoint requests.
 		if ( ! empty( $wp->query_vars['wc-api'] ) ) {
@@ -1329,7 +1331,7 @@ final class WooCommerce {
 		}
 	}
 
-	/*
+	/**
 	 * Converts the WooCommerce slug to the correct slug for the current version.
 	 * This ensures that when the plugin is installed in a different folder name, the correct slug is used so that dependent plugins can be installed/activated.
 	 *

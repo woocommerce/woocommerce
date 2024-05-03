@@ -406,7 +406,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 *
 	 * @param mixed $resource_id First hook argument, typically the resource ID.
 	 * @return mixed              Payload data.
-	 * @throws Exception The webhook is configured to use the Legacy REST API, but the Legacy REST API plugin is not available.
+	 * @throws \Exception The webhook is configured to use the Legacy REST API, but the Legacy REST API plugin is not available.
 	 * @since  2.2.0
 	 */
 	public function build_payload( $resource_id ) {
@@ -424,15 +424,13 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$payload = array(
 				'id' => $resource_id,
 			);
-		} else {
-			if ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
+		} elseif ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
-			} else {
-				if ( is_null( wc()->api ) ) {
-					throw new \Exception( 'The Legacy REST API plugin is not installed on this site. More information: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/ ' );
-				}
-				$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+		} else {
+			if ( is_null( wc()->api ) ) {
+				throw new \Exception( 'The Legacy REST API plugin is not installed on this site. More information: https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/ ' );
 			}
+			$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
 		}
 
 		// Restore the current user.
