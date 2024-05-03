@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { useEntityRecords } from '@wordpress/core-data';
-import { Taxonomy } from '@wordpress/core-data/src/entity-types';
-import { useState, useMemo, useRef } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { FormTokenField } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
+import type { Taxonomy } from '@wordpress/core-data/src/entity-types';
 
 type Term = {
 	id: number;
@@ -20,237 +20,146 @@ interface TaxonomyItemProps {
 	onChange: ( termIds: number[] ) => void;
 }
 
-// A constant empty array that is reused throughout the component.
-const EMPTY_ARRAY: [] = [];
-
-// Base arguments for querying terms.
-const BASE_QUERY_ARGS = {
-	order: 'asc',
+/**
+ * The default arguments to use when querying terms.
+ */
+const DEFAULT_QUERY_ARGS = {
 	_fields: 'id,name,slug',
+	order: 'asc',
+	orderby: 'name',
 	context: 'view',
 };
 
-// Function to get the term id based on user input in the `FormTokenField`.
-const getTermIdByTermValue = (
-	searchTerm: Term | string,
-	termNameToIdMap: Map< string, number >
-): number | undefined => {
-	const termId = ( searchTerm as Term )?.id;
-	if ( termId ) {
-		return termId;
-	}
-
-	return (
-		termNameToIdMap.get( searchTerm as string ) ||
-		termNameToIdMap.get( ( searchTerm as string ).toLocaleLowerCase() )
-	);
+/**
+ * Given a term this will return a name to display in the FormTokenField. Since the
+ * field only allows for string values we need to make sure that the display name
+ * has all of the information needed to identify the term object. We do this by
+ * encoding the term ID in the name. This also has the added benefit of helping
+ * users to identify individual terms when they have the same name.
+ *
+ * @param {Term} term The term to get the display name for.
+ * @return {string} The display name for the term.
+ */
+const getTermDisplayName = ( term: Term ): string => {
+	return `${ term.name } (#${ term.id })`;
 };
 
 /**
- * Creates a map that keeps track of the count of each term name in the provided list of terms.
+ * Given a display name created by getTermDisplayName(), this will return the ID
+ * that is encoded in the string if one is present.
  *
- * @param {Term[]} allTerms - Array of all term objects.
- * @return {Map<string, number>} A map with term names as keys and their counts as values.
+ * @param {string} displayName The display name of the term.
+ * @return {number|null} The ID of the term encoded in the display name.
  */
-const createNameCountMap = ( allTerms: Term[] ): Map< string, number > => {
-	return allTerms.reduce(
-		( accumulator: Map< string, number >, term: Term ) => {
-			const termName = term.name;
-			if ( accumulator.has( termName ) ) {
-				accumulator.set(
-					termName,
-					( accumulator.get( termName ) as number ) + 1
-				);
-			} else {
-				accumulator.set( termName, 1 );
-			}
-			return accumulator;
-		},
-		new Map< string, number >()
-	);
-};
-
-/**
- * Generates a unique name for the term. If there are multiple terms with the same name,
- * appends the term's slug to the name to distinguish them.
- *
- * @param {string}              termName     - Name of the term.
- * @param {string}              termSlug     - Slug of the term.
- * @param {Map<string, number>} nameCountMap - A map storing count of each term name.
- * @return {string} A unique name for the term.
- */
-const generateUniqueName = (
-	termName: string,
-	termSlug: string,
-	nameCountMap: Map< string, number >
-): string => {
-	return nameCountMap.get( termName ) === 1
-		? termName
-		: `${ termName } - ${ termSlug }`;
-};
-
-/**
- * This function generates and returns two mapping structures (Maps) for terms:
- * 1. termIdToNameMap: Map with term IDs as keys and their corresponding term names as values.
- * 2. termNameToIdMap: Map where the keys are term names and their corresponding values are the term IDs.
- *
- * The primary purpose of these Maps is to facilitate quick lookups in either direction (ID to name, or name to ID).
- *
- * In the case of duplicate term names, to ensure uniqueness, the term's slug is appended to the name.
- * This ensures that when the terms are displayed in the `FormTokenField`, each term name remains unique.
- *
- * An illustrative example of how termIdToNameMap might look is as follows:
- * {
- *    "19": "Accessories",
- *    "37": "category1 - category1",
- *    "38": "category1 - category1-clothing",
- *    "39": "category1 - category1-clothing-2",
- *    "16": "Clothing",
- *    "21": "Decor"
- * }
- * In the example above, "category1" is a duplicated term name, so the term's slug is appended for distinction.
- *
- * termNameToIdMap is the inverse of termIdToNameMap, mapping term names back to their respective IDs.
- */
-const useTermMaps = (
-	taxonomy: Taxonomy
-): {
-	termIdToNameMap: Map< number, string >;
-	termNameToIdMap: Map< string, number >;
-	isResolving: boolean;
-} => {
-	// Fetch all terms for the given taxonomy.
-	const { records: allTerms, isResolving: isResolvingAllTerms } =
-		useEntityRecords< Term[] >( 'taxonomy', taxonomy.slug, {
-			...BASE_QUERY_ARGS,
-		} );
-
-	// Memoize the result to avoid re-renders.
-	return useMemo( () => {
-		const termIdToNameMap = new Map< number, string >();
-		const termNameToIdMap = new Map< string, number >();
-
-		if ( ! allTerms )
-			return {
-				termIdToNameMap,
-				termNameToIdMap,
-				isResolving: isResolvingAllTerms,
-			};
-
-		// Count the number of times a term name appears.
-		const nameCountMap = createNameCountMap( allTerms );
-
-		// Create the map with term ids as keys and term names as values.
-		for ( const term of allTerms ) {
-			const termId = term.id;
-			const termName = term.name;
-			const name = generateUniqueName(
-				termName,
-				term.slug,
-				nameCountMap
-			);
-			termIdToNameMap.set( termId, name );
-			termNameToIdMap.set( name, termId );
-			// Add lower case version of the term name to the map as well
-			// Because the search is case insensitive in FormTokenField.
-			termNameToIdMap.set( name.toLocaleLowerCase(), termId );
-		}
-		return {
-			termIdToNameMap,
-			termNameToIdMap,
-			isResolving: isResolvingAllTerms,
-		};
-	}, [ allTerms, isResolvingAllTerms ] );
+const getTermIDFromDisplayName = ( displayName: string ): number | false => {
+	const matches = displayName.match( /\(#(\d+)\)$/ );
+	return matches ? parseInt( matches[ 1 ], 10 ) : false;
 };
 
 const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
-	const [ search, setSearch ] = useState< string | undefined >( undefined );
-	const suggestionsRef = useRef< string[] >( EMPTY_ARRAY );
-	const currentValueRef = useRef<
-		{
-			id: number;
-			value: string;
-		}[]
-	>( EMPTY_ARRAY );
-
-	// Search is debounced to limit the number of API calls as the user types
-	const debouncedSearch = useDebounce( setSearch, 250 );
-
-	const {
-		termIdToNameMap,
-		termNameToIdMap,
-		isResolving: isResolvingTermMaps,
-	} = useTermMaps( taxonomy );
-
-	// Fetch the terms based on the search query.
-	const { records: searchResults, hasResolved: searchHasResolved } =
-		useEntityRecords(
-			'taxonomy',
-			taxonomy.slug,
-			{
-				...BASE_QUERY_ARGS,
-				search,
-				orderby: 'name',
-				exclude: termIds,
-				per_page: 20,
-			},
-			{
-				enabled: search !== undefined,
+	// We need to get the existing terms so that we can store the term object
+	// in the map that we used to render the term name in the FormTokenField.
+	const { existingTerms, isLoadingExistingTerms } = useSelect(
+		( select ) => {
+			// There's no need to load any existing terms when there are no terms set.
+			if ( ! termIds || ! termIds.length ) {
+				return { existingTerms: [], isLoadingExistingTerms: false };
 			}
-		);
 
-	suggestionsRef.current = useMemo( () => {
-		if ( ! searchHasResolved ) return suggestionsRef.current;
+			// @ts-expect-error hasFinishedResolution is untyped.
+			const { getEntityRecords, hasFinishedResolution } =
+				select( 'core' );
 
-		const newSuggestions = searchResults.map(
-			( searchResult: Term ) =>
-				termIdToNameMap.get( searchResult.id ) || searchResult.name
-		);
-		return newSuggestions;
-	}, [ searchHasResolved, searchResults, termIdToNameMap ] );
+			const selectorArgs: [ string, string, Record< string, unknown > ] =
+				[
+					'taxonomy',
+					taxonomy.slug,
+					{
+						...DEFAULT_QUERY_ARGS,
+						include: termIds,
+					},
+				];
 
-	// Fetch the existing terms & set the current value.
-	const { records: existingTerms, hasResolved: hasExistingTermsResolved } =
-		useEntityRecords< Term >(
-			'taxonomy',
-			taxonomy.slug,
-			{
-				...BASE_QUERY_ARGS,
-				include: termIds,
-			},
-			{
-				enabled: termIds?.length > 0,
+			return {
+				existingTerms: getEntityRecords( ...selectorArgs ) as Term[],
+				isLoadingExistingTerms: ! hasFinishedResolution(
+					'getEntityRecords',
+					selectorArgs
+				),
+			};
+		},
+		[ taxonomy, termIds ]
+	);
+
+	// A search query will enable us to populate the FormTokenField's suggestion
+	// list based on the user supplied search string.
+	const [ searchQuery, setSearchQuery ] = useState( '' );
+	const { searchTerms } = useSelect(
+		( select ) => {
+			// The FormTokenField requires at least two characters to start showing
+			// the suggestions. Let's not waste a web request since it won't do
+			// anything useful.
+			if ( searchQuery.length <= 1 ) {
+				return { searchTerms: [] };
 			}
-		);
 
-	currentValueRef.current = useMemo( () => {
-		if ( hasExistingTermsResolved === false ) {
-			return currentValueRef.current;
-		}
+			const { getEntityRecords } = select( 'core' );
+			return {
+				searchTerms: getEntityRecords( 'taxonomy', taxonomy.slug, {
+					...DEFAULT_QUERY_ARGS,
+					exclude: termIds,
+					search: searchQuery,
+				} ) as Term[],
+			};
+		},
+		[ taxonomy, termIds, searchQuery ]
+	);
+	const handleSearch = useDebounce( setSearchQuery, 250 );
 
-		if ( ! existingTerms || ! termIds.length ) return EMPTY_ARRAY;
+	// Take care to transform the term objects into
+	// display names for the FormTokenField control.
+	const existingTermNames = existingTerms
+		? existingTerms.map( getTermDisplayName )
+		: [];
+	const suggestions = searchTerms
+		? searchTerms.map( getTermDisplayName )
+		: [];
 
-		return existingTerms.map( ( { id, name }: Term ) => ( {
-			id,
-			value: termIdToNameMap.get( id ) || name,
-		} ) );
-	}, [ existingTerms, hasExistingTermsResolved, termIdToNameMap, termIds ] );
+	// Since the FormTokenField has the term ID encoded in the display name
+	// we need to pull out the ID in order to update the term IDs.
+	const handleChangeTermIDs = ( displayNames: string[] ) => {
+		const newTermIds = displayNames
+			.map( getTermIDFromDisplayName )
+			.filter( Boolean ) as number[];
 
-	// Update the selected terms when the user selects a suggestion.
-	const onTermsChange = ( newTermValues: FormTokenField.Value[] ) => {
-		const newTermIds = [];
-		for ( const termValue of newTermValues ) {
-			const termId = getTermIdByTermValue(
-				termValue as string | Term,
-				termNameToIdMap
-			);
-			if ( termId ) {
-				newTermIds.push( termId );
-			}
-		}
 		onChange( newTermIds );
 	};
 
+	// It's possible that a term may have been deleted but still
+	// be present in the termIds array. In that case we will
+	// display the ID and an indication it was deleted.
+	if ( existingTerms && termIds.length !== existingTermNames.length ) {
+		// Use a map to make checking for the terms faster.
+		const termMap = existingTerms.reduce(
+			( acc: Record< string, Term >, term: Term ) => {
+				acc[ term.id ] = term;
+				return acc;
+			},
+			{}
+		);
+
+		// Add all of the terms that have been deleted.
+		termIds.forEach( ( termId ) => {
+			if ( termMap[ termId ] ) {
+				return;
+			}
+
+			existingTermNames.push( `DELETED (#${ termId })` );
+		} );
+	}
+
+	// Since both the API and React will attempt to encode HTML entities, we need to
+	// decode them so that React can render them properly.
 	const decodeHTMLEntities = ( value: string ) => {
 		return decodeEntities( value ) || '';
 	};
@@ -259,14 +168,14 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		<div className="wc-block-editor-product-collection-inspector__taxonomy-control">
 			<FormTokenField
 				label={ taxonomy.name }
-				value={ currentValueRef.current }
-				onInputChange={ debouncedSearch }
-				suggestions={ suggestionsRef.current }
-				onChange={ onTermsChange }
-				disabled={ isResolvingTermMaps }
+				value={ existingTermNames }
+				onInputChange={ handleSearch }
+				onChange={ handleChangeTermIDs }
+				suggestions={ suggestions }
+				disabled={ isLoadingExistingTerms }
+				displayTransform={ decodeHTMLEntities }
 				// @ts-expect-error Using experimental features
 				__experimentalShowHowTo={ false }
-				displayTransform={ decodeHTMLEntities }
 			/>
 		</div>
 	);
