@@ -38,7 +38,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Stock Status Block', async () => {
+test.describe( 'Product Filter: Stock Status Block', () => {
 	test.describe( 'With default display style', () => {
 		test( 'renders a checkbox list with the available stock statuses', async ( {
 			page,

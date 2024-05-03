@@ -26,21 +26,11 @@ test.describe( 'Shopper → Coupon', () => {
 		);
 	} );
 
-	test.afterEach( async ( { wpCliUtils } ) => {
-		const couponId = await wpCliUtils.getCouponIDByCode(
-			'single-use-coupon'
-		);
-		await cli(
-			`npm run wp-env run tests-cli -- wp wc shop_coupon delete ${ couponId } --force=1 --user=1`
-		);
-	} );
-
 	test( 'Logged in user can apply single-use coupon and place order', async ( {
 		checkoutPageObject,
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCart();
@@ -89,7 +79,6 @@ test.describe( 'Shopper → Coupon', () => {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();

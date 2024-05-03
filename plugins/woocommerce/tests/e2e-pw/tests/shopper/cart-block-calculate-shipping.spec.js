@@ -1,6 +1,11 @@
-const { test, expect } = require( '@playwright/test' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
 
 const firstProductName = 'First Product';
 const firstProductPrice = '10.00';
@@ -8,28 +13,28 @@ const secondProductName = 'Second Product';
 const secondProductPrice = '20.00';
 const firstProductWithFlatRate = +firstProductPrice + 5;
 
-const cartBlockPageTitle = 'Cart Block';
-const cartBlockPageSlug = cartBlockPageTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
-
 const shippingZoneNameES = 'Netherlands Free Shipping';
 const shippingCountryNL = 'NL';
 const shippingZoneNamePT = 'Portugal Flat Local';
 const shippingCountryPT = 'PT';
 
-test.describe( 'Cart Block Calculate Shipping', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Cart Block Calculate Shipping', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Cart Block',
+		cartBlockPage: async ( { page, testPage }, use ) => {
+			await goToPageEditor( { page } );
+			await fillPageTitle( page, testPage.title );
+			await insertBlockByShortcut( page, '/cart' );
+			await publishPage( page, testPage.title );
+
+			await use( testPage );
+		},
+	} );
+
 	let product1Id, product2Id, shippingZoneNLId, shippingZonePTId;
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
+	test.beforeAll( async ( { api } ) => {
 		// make sure the currency is USD
 		await api.put( 'settings/general/woocommerce_currency', {
 			value: 'USD',
@@ -110,13 +115,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.post( 'products/batch', {
 			delete: [ product1Id, product2Id ],
 		} );
@@ -128,45 +127,15 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		} );
 	} );
 
-	test( 'create Cart Block page', async ( { page } ) => {
-		// create a new page with cart block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( cartBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/cart' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ cartBlockPageTitle } is now live.` )
-		).toBeVisible();
-	} );
-
 	test( 'allows customer to calculate Free Shipping in cart block if in Netherlands', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( cartBlockPageSlug );
+		await addAProductToCart( page, product1Id );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Netherlands
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -188,14 +157,12 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'allows customer to calculate Flat rate and Local pickup in cart block if in Portugal', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( cartBlockPageSlug );
+		await addAProductToCart( page, product1Id );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -210,7 +177,7 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		).toBeVisible();
 		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
-			page.getByText( firstProductWithFlatRate.toString() )
+			page.getByText( `$${ firstProductWithFlatRate }` )
 		).toBeVisible();
 
 		// Set shipping to local pickup instead of flat rate
@@ -226,14 +193,12 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'should show correct total cart block price after updating quantity', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( cartBlockPageSlug );
+		await addAProductToCart( page, product1Id );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -246,11 +211,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await page.getByLabel( 'Increase quantity of First' ).click();
 		await expect(
 			page.getByText(
-				(
+				`$${
 					parseInt( firstProductPrice, 10 ) +
 					parseInt( firstProductPrice, 10 ) +
 					5
-				).toString()
+				}`.toString()
 			)
 		).toBeVisible();
 	} );
@@ -258,18 +223,13 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 	test( 'should show correct total cart block price with 2 different products and flat rate/local pickup', async ( {
 		page,
 		context,
+		cartBlockPage,
 	} ) => {
 		await context.clearCookies();
 
-		await page.goto( `/shop/?add-to-cart=${ product1Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( `/shop/?add-to-cart=${ product2Id }` );
-		// eslint-disable-next-line playwright/no-networkidle
-		await page.waitForLoadState( 'networkidle' );
-
-		await page.goto( cartBlockPageSlug );
+		await addAProductToCart( page, product1Id );
+		await addAProductToCart( page, product2Id );
+		await page.goto( cartBlockPage.slug );
 
 		// Set shipping country to Portugal
 		await page.getByLabel( 'Add an address for shipping' ).click();
@@ -285,11 +245,11 @@ test.describe( 'Cart Block Calculate Shipping', () => {
 		await expect( page.getByText( 'Shipping$5.00Flat' ) ).toBeVisible();
 		await expect(
 			page.getByText(
-				(
+				`$${
 					parseInt( firstProductPrice, 10 ) +
 					parseInt( secondProductPrice, 10 ) +
 					5
-				).toString()
+				}`.toString()
 			)
 		).toBeVisible();
 
