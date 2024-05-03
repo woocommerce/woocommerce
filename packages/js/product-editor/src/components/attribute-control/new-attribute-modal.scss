@@ -63,9 +63,21 @@
 			position: relative;
 		}
 
+		.components-form-token-field__help {
+			position: absolute;
+			top: 32px;
+			z-index: 0;
+		}
+
 		.components-form-token-field__input-container {
 			position: absolute;
 			top: 0;
+			min-height: 34px;
+			z-index: 1;
+
+			> .components-flex {
+				min-height: 34px;
+			}
 
 			&.is-active {
 				z-index: 10;
@@ -80,10 +92,9 @@
 			margin: 1px 0;
 		}
 
-		.components-form-token-field__help {
-			position: absolute;
-			top: 32px;
-			z-index: 0;
+		.components-form-token-field__suggestion {
+			min-height: 36px;
+			padding: 10px 12px;
 		}
 
 		@include breakpoint( '<782px' ) {
