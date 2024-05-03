@@ -148,7 +148,8 @@ class ReceiptRenderingEngine {
 			 *
 			 * $line_item_display_data will be passed (and must be returned) with the following keys:
 			 *
-			 * - inner_html: the HTML text that will go inside a <tr> element.
+			 * - inner_html: the HTML text that will go inside a <tr> element, note that
+			 *               wp_kses_post will be applied to this text before actual rendering.
 			 * - tr_attributes: attributes (e.g. 'class', 'data', 'style') that will be applied to the <tr> element,
 			 *                  as an associative array of attribute name => value.
 			 * - row_index: a number that starts at 0 and increases by one for each processed line item.
@@ -174,7 +175,7 @@ class ReceiptRenderingEngine {
 				$attribute_value = esc_attr( $attribute_value );
 				$attributes     .= " $attribute_name=\"$attribute_value\"";
 			}
-			$formatted_line_items[] = "<tr$attributes>${line_item_display_data['inner_html']}</tr>";
+			$formatted_line_items[] = wp_kses_post( "<tr$attributes>${line_item_display_data['inner_html']}</tr>" );
 		}
 		$data['formatted_line_items'] = $formatted_line_items;
 
