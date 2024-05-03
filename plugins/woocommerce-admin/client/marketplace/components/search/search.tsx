@@ -13,7 +13,7 @@ import './search.scss';
 import { MARKETPLACE_PATH } from '../constants';
 
 const searchPlaceholder = __(
-	'Search for extensions and themes',
+	'Search for extensions, themes, and business services',
 	'woocommerce'
 );
 
