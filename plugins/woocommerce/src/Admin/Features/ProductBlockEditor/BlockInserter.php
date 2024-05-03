@@ -43,15 +43,16 @@ class BlockInserter {
      * @param WP_Post $post Post.
      * @return string
      */
-    private function get_content_with_block_insertions( $content, $post ) {
+    public function get_content_with_block_insertions( $content, $post = null ) {
         $new_content = '';
         $p           = new \WP_HTML_Tag_Processor( $content );
 
         while( $p->next_token() ) {
             switch ( $p->get_token_type() ) {
                 case '#comment':
-                    $block_name = $this->get_block_name_from_comment( $p->get_modifiable_text() );
-                    $is_closer  = strpos( $p->get_modifiable_text(), ' /wp:' ) === 0;
+                    $text       = $p->get_modifiable_text();
+                    $block_name = $this->get_block_name_from_comment( $text );
+                    $is_closer  =  str_starts_with( $text, ' /wp:' );
 
                     if ( $block_name ) {
                         $new_content   .= $this->get_content_with_block_insertions(
@@ -66,7 +67,7 @@ class BlockInserter {
                         );
                     }
 
-                    $new_content   .= '<!--' . $p->get_modifiable_text() . '-->';
+                    $new_content   .= '<!--' . $text . '-->';
 
                     if ( $block_name ) {
                         $new_content   .= $this->get_content_with_block_insertions(
@@ -83,9 +84,7 @@ class BlockInserter {
 
                     break;
                 case '#tag':
-                    $new_content .= ! $p->is_tag_closer()
-                        ? '<' . strtolower( $p->get_tag() ) . $this->get_attributes_string( $p ) . '>'
-                        : '</' . strtolower( $p->get_tag() ) . '>';
+                    $new_content .= $this->normalize_tag( $p );
                     break;
                 case '#text':
                     $new_content .= $p->get_modifiable_text();
@@ -94,6 +93,37 @@ class BlockInserter {
         }
 
         return $new_content;
+    }
+
+    /**
+     * Normalize tag.
+     *
+     * @return string Normalized tag.
+     */
+    private function normalize_tag( $p ) {
+        if ( null === $p->get_tag() ) {
+            return null;
+        }
+    
+        $tag_name = strtolower( $p->get_tag() );
+    
+        if ( $p->is_tag_closer() ) {
+            return "</{$tag_name}>";
+        }
+    
+        $attributes = $p->get_attribute_names_with_prefix( '' );
+
+        if ( null === $attributes ) {
+            return "<{$tag_name}>";
+        }
+
+        $builder = new \WP_HTML_Tag_Processor( "<{$tag_name}>" );
+        $builder->next_tag();
+        foreach ( $attributes as $name ) {
+            $builder->set_attribute( $name, $p->get_attribute( $name ) );
+        }
+
+        return $builder->get_updated_html();
     }
 
     /**
