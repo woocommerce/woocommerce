@@ -34,6 +34,11 @@ import { FlowType } from '~/customize-store/types';
 import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
 import { useSelect } from '@wordpress/data';
 import { trackEvent } from '~/customize-store/tracking';
+import {
+	footerTemplateId,
+	headerTemplateId,
+} from '~/customize-store/data/homepageTemplates';
+import { head } from 'lodash';
 
 export const SidebarNavigationScreenHomepage = () => {
 	const { scroll } = useEditorScroll( {
@@ -51,23 +56,40 @@ export const SidebarNavigationScreenHomepage = () => {
 		[]
 	);
 
+	const [ headerBlocks ] = useEditorBlocks(
+		'wp_template_part',
+		headerTemplateId
+	);
+
 	const [ blocks, , onChange ] = useEditorBlocks(
 		'wp_template',
 		currentTemplate.id
 	);
+
+	const [ footerBlocks ] = useEditorBlocks(
+		'wp_template_part',
+		footerTemplateId
+	);
+
 	const onClickPattern = useCallback(
 		( pattern, selectedBlocks ) => {
 			if ( pattern === selectedPattern ) {
 				return;
 			}
 			setSelectedPattern( pattern );
-			onChange(
-				[ blocks[ 0 ], ...selectedBlocks, blocks[ blocks.length - 1 ] ],
-				{ selection: {} }
-			);
+			onChange( [ ...headerBlocks, ...selectedBlocks, ...footerBlocks ], {
+				selection: {},
+			} );
 			scroll();
 		},
-		[ selectedPattern, setSelectedPattern, onChange, blocks, scroll ]
+		[
+			selectedPattern,
+			setSelectedPattern,
+			onChange,
+			headerBlocks,
+			footerBlocks,
+			scroll,
+		]
 	);
 
 	const isEditorLoading = useIsSiteEditorLoading();

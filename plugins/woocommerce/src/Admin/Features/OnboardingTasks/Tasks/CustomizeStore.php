@@ -228,6 +228,15 @@ class CustomizeStore extends Task {
 		*/
 		do_action( 'enqueue_block_editor_assets' );
 
+		wp_add_inline_script(
+			'wp-api-fetch',
+			sprintf(
+				'wp.apiFetch.use( wp.apiFetch.createThemePreviewMiddleware( %s ) );',
+				wp_json_encode( sanitize_text_field( wp_unslash( 'twentytwentyfour' ) ) )
+			),
+			'after'
+		);
+
 		// Load Jetpack's block editor assets because they are not enqueued by default.
 		if ( class_exists( 'Jetpack_Gutenberg' ) ) {
 			Jetpack_Gutenberg::enqueue_block_editor_assets();
