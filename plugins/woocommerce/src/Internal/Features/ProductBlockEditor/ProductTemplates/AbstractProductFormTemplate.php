@@ -1,11 +1,12 @@
 <?php
 
-namespace Automattic\WooCommerce\Internal\Admin\Features\ProductBlockEditor\ProductTemplates;
+namespace Automattic\WooCommerce\Internal\Features\ProductBlockEditor\ProductTemplates;
 
 use Automattic\WooCommerce\Admin\BlockTemplates\BlockInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\GroupInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\ProductFormTemplateInterface;
 use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SectionInterface;
+use Automattic\WooCommerce\Admin\Features\ProductBlockEditor\ProductTemplates\SubsectionInterface;
 use Automattic\WooCommerce\Internal\Admin\BlockTemplates\AbstractBlockTemplate;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -52,6 +53,20 @@ abstract class AbstractProductFormTemplate extends AbstractBlockTemplate impleme
 			throw new \UnexpectedValueException( 'Block with specified ID is not a section.' );
 		}
 		return $section;
+	}
+
+	/**
+	 * Get a subsection block by ID.
+	 *
+	 * @param string $subsection_id The subsection block ID.
+	 * @throws \UnexpectedValueException If block is not of type SubsectionInterface.
+	 */
+	public function get_subsection_by_id( string $subsection_id ): ?SubsectionInterface {
+		$subsection = $this->get_block( $subsection_id );
+		if ( $subsection && ! $subsection instanceof SubsectionInterface ) {
+			throw new \UnexpectedValueException( 'Block with specified ID is not a subsection.' );
+		}
+		return $subsection;
 	}
 
 	/**

@@ -39,7 +39,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
+			function ( $features_controller ) {
 				$this->reset_features_list( $this->sut );
 
 				$features = array(
@@ -187,7 +187,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		// No option for experimental2.
 
 		$actual = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return array_intersect_key(
 					$feature,
 					array( 'is_enabled' => '' )
@@ -402,7 +402,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->ExpectException( \Exception::class );
-		$this->ExpectExceptionMessage( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" );
+		$this->ExpectExceptionMessage( esc_html( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" ) );
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );
@@ -491,7 +491,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function test_get_compatible_enabled_features_for_registered_plugin() {
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) {
+			function ( $features_controller ) {
 				$this->reset_features_list( $this->sut );
 
 				$features = array(
@@ -813,6 +813,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
 
 		$this->register_legacy_proxy_function_mocks(
@@ -828,7 +832,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
+			function ( $features_controller ) use ( $local_sut ) {
 				$this->reset_features_list( $local_sut );
 
 				$features = array(
@@ -897,6 +901,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
 				return $this->active_plugins;
 			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
 		};
 		// phpcs:enable
 
@@ -912,7 +920,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function( $features_controller ) use ( $local_sut ) {
+			function ( $features_controller ) use ( $local_sut ) {
 				$this->reset_features_list( $local_sut );
 
 				$features = array(

@@ -8,12 +8,14 @@
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"usesContext": [
-		"id",
 		"queryId",
 		"query",
 		"queryContext",
 		"displayLayout",
-		"templateSlug"
+		"templateSlug",
+		"postId",
+		"queryContextIncludes",
+		"collection"
 	],
 	"supports": {
 		"inserter": false,

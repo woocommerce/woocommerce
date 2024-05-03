@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -17,6 +18,7 @@ use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -243,6 +245,12 @@ class WC_Install {
 		'8.6.0' => array(
 			'wc_update_860_remove_recommended_marketing_plugins_transient',
 		),
+		'8.7.0' => array(
+			'wc_update_870_prevent_listing_of_transient_files_directory',
+		),
+		'8.9.0' => array(
+			'wc_update_890_update_connect_to_woocommerce_note',
+		),
 	);
 
 	/**
@@ -277,6 +285,7 @@ class WC_Install {
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		self::add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
+		self::add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
 	}
 
 	/**
@@ -359,7 +368,7 @@ class WC_Install {
 	 * @since 3.6.0
 	 */
 	public static function run_update_callback( $update_callback ) {
-		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
+		include_once __DIR__ . '/wc-update-functions.php';
 
 		if ( is_callable( $update_callback ) ) {
 			self::run_update_callback_start( $update_callback );
@@ -449,12 +458,18 @@ class WC_Install {
 		self::update_wc_version();
 		self::maybe_update_db_version();
 		self::maybe_set_store_id();
+		self::maybe_install_legacy_api_plugin();
 
 		delete_transient( 'wc_installing' );
 
 		// Use add_option() here to avoid overwriting this value with each
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
+
+		// Force a flush of rewrite rules even if the corresponding hook isn't initialized yet.
+		if ( ! has_action( 'woocommerce_flush_rewrite_rules' ) ) {
+			flush_rewrite_rules();
+		}
 
 		/**
 		 * Flush the rewrite rules after install or update.
@@ -541,7 +556,8 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function remove_admin_notices() {
-		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php';
+		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
+
 		WC_Admin_Notices::remove_all_notices();
 	}
 
@@ -557,6 +573,7 @@ class WC_Install {
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
 		WC_Auth::add_endpoint();
+		TransientFilesEngine::add_endpoint();
 	}
 
 	/**
@@ -669,7 +686,7 @@ class WC_Install {
 						),
 						'woocommerce-db-updates'
 					);
-					$loop++;
+					++$loop;
 				}
 			}
 		}
@@ -782,10 +799,14 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
+		// WordPress sets fresh_site to 0 after a page gets published.
+		// Prevent fresh_site option from being set to 0 so that we can use it for further customizations.
+		remove_action( 'publish_page', '_delete_option_fresh_site', 0 );
+
 		// Set the locale to the store locale to ensure pages are created in the correct language.
 		wc_switch_to_site_locale();
 
-		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
+		include_once __DIR__ . '/admin/wc-admin-functions.php';
 
 		/**
 		 * Determines the cart shortcode tag used for the cart page.
@@ -873,7 +894,7 @@ class WC_Install {
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults.
-		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
+		include_once __DIR__ . '/admin/class-wc-admin-settings.php';
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 
@@ -1150,6 +1171,136 @@ class WC_Install {
 	}
 
 	/**
+	 * Install and activate the WooCommerce Legacy REST API plugin from the WordPress.org directory if all the following is true:
+	 *
+	 * 1. We are in a WooCommerce upgrade process (not a new install).
+	 * 2. The 'woocommerce_skip_legacy_rest_api_plugin_auto_install' filter returns false (which is the default).
+	 * 3. The plugin is not installed and active already (but see note about multisite below).
+	 * 4. The Legacy REST API is enabled in the site OR the site has at least one webhook defined that uses the Legacy REST API payload format (disabled webhooks also count).
+	 *
+	 * In multisite setups it could happen that the plugin was installed by an installation process performed in another site.
+	 * In this case we check if the plugin was autoinstalled in such a way, and if so we activate it if the conditions are fulfilled.
+	 */
+	private static function maybe_install_legacy_api_plugin() {
+		if ( self::is_new_install() ) {
+			return;
+		}
+
+		/**
+		 * Filter to skip the automatic installation of the WooCommerce Legacy REST API plugin
+		 * from the WordPress.org plugins directory.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param bool $skip_auto_install False, defaulting to "don't skip the plugin automatic installation".
+		 * @returns bool True to skip the plugin automatic installation, false to install the plugin if necessary.
+		 */
+		if ( apply_filters( 'woocommerce_skip_legacy_rest_api_plugin_auto_install', false ) ) {
+			return;
+		}
+
+		if ( ( 'yes' !== get_option( 'woocommerce_api_enabled' ) &&
+			0 === wc_get_container()->get( Automattic\WooCommerce\Internal\Utilities\WebhookUtil::class )->get_legacy_webhooks_count( true ) ) ) {
+			return;
+		}
+
+		$plugin_name = 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php';
+
+		wp_clean_plugins_cache();
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		if ( isset( get_plugins()[ $plugin_name ] ) ) {
+			if ( ! ( get_site_option( 'woocommerce_autoinstalled_plugins', array() )[ $plugin_name ] ?? null ) ) {
+				// The plugin was installed manually so let's not interfere.
+				return;
+			}
+
+			if ( in_array( $plugin_name, wp_get_active_and_valid_plugins(), true ) ) {
+				return;
+			}
+
+			// The plugin was automatically installed in a different installation process - can happen in multisite.
+			$install_ok = true;
+		} else {
+			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
+				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
+				array(
+					'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
+				)
+			);
+
+			if ( $install_result['already_installing'] ?? null ) {
+				// The plugin is in the process of being installed already (can happen in multisite),
+				// but we still need to activate it for ourselves once it's installed.
+				as_schedule_single_action( time() + 10, 'woocommerce_activate_legacy_rest_api_plugin' );
+				return;
+			}
+
+			$install_ok = $install_result['install_ok'];
+		}
+
+		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
+		$blog_post_url                = 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
+		$site_legacy_api_settings_url = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=legacy_api' );
+		$site_webhooks_settings_url   = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=webhooks' );
+		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
+
+		if ( $install_ok ) {
+			$activation_result = activate_plugin( $plugin_name );
+			if ( $activation_result instanceof \WP_Error ) {
+				$message = sprintf(
+				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of plugins page in current site, 6 = URL of blog post about the Legacy REST API removal */
+					__( '⚠️ WooCommerce installed <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>, but it failed to activate it (see error details in <a href="%4$s">the WooCommerce logs</a>). Please go to <a href="%5$s">the plugins page</a> and activate it manually. <a href="%6$s">More information</a>', 'woocommerce' ),
+					$plugin_page_url,
+					$site_legacy_api_settings_url,
+					$site_webhooks_settings_url,
+					$site_logs_url,
+					get_admin_url( null, '/plugins.php' ),
+					$blog_post_url
+				);
+				$notice_name = 'woocommerce_legacy_rest_api_plugin_activation_failed';
+				wc_get_logger()->error(
+					__( 'WooCommerce installed the Legacy REST API plugin but failed to activate it, see context for more details.', 'woocommerce' ),
+					array(
+						'source' => 'plugin_auto_installs',
+						'error'  => $activation_result,
+					)
+				);
+			} else {
+				$message = sprintf(
+				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of blog post about the Legacy REST API removal */
+					__( 'ℹ️ WooCommerce installed and activated <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>. <a href="%4$s">More information</a>', 'woocommerce' ),
+					$plugin_page_url,
+					$site_legacy_api_settings_url,
+					$site_webhooks_settings_url,
+					$blog_post_url
+				);
+				$notice_name = 'woocommerce_legacy_rest_api_plugin_activated';
+				wc_get_logger()->info( 'WooCommerce activated the Legacy REST API plugin in this site.', array( 'source' => 'plugin_auto_installs' ) );
+			}
+
+			\WC_Admin_Notices::add_custom_notice( $notice_name, $message );
+		} else {
+			$message = sprintf(
+				/* translators: 1 = URL of Legacy REST API plugin page, 2 = URL of Legacy API settings in current site, 3 = URL of webhooks settings in current site, 4 = URL of logs page in current site, 5 = URL of blog post about the Legacy REST API removal */
+				__( '⚠️ WooCommerce attempted to install <a href="%1$s">the Legacy REST API plugin</a> because this site has <a href="%2$s">the Legacy REST API enabled</a> or has <a href="%3$s">legacy webhooks defined</a>, but the installation failed (see error details in <a href="%4$s">the WooCommerce logs</a>). Please install and activate the plugin manually. <a href="%5$s">More information</a>', 'woocommerce' ),
+				$plugin_page_url,
+				$site_legacy_api_settings_url,
+				$site_webhooks_settings_url,
+				$site_logs_url,
+				$blog_post_url
+			);
+
+			\WC_Admin_Notices::add_custom_notice( 'woocommerce_legacy_rest_api_plugin_install_failed', $message );
+
+			// Note that we aren't adding an entry to the error log because PluginInstaller->install_plugin will have done that already.
+		}
+
+		\WC_Admin_Notices::store_notices();
+	}
+
+	/**
 	 * Set up the database tables which the plugin needs to function.
 	 * WARNING: If you are modifying this method, make sure that its safe to call regardless of the state of database.
 	 *
@@ -1358,7 +1509,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_code varchar(200) NOT NULL,
   location_type varchar(40) NOT NULL,
   PRIMARY KEY  (location_id),
-  KEY location_id (location_id),
+  KEY zone_id (zone_id),
   KEY location_type_code (location_type(10),location_code(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
@@ -1447,7 +1598,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_status` (`stock_status`),
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
-  KEY min_max_price (`min_price`, `max_price`)
+  KEY min_max_price (`min_price`, `max_price`),
+  KEY sku (sku(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -1867,16 +2019,6 @@ $hpos_table_schema;
 				'content' => '',
 			),
 			array(
-				'base'    => WC_LOG_DIR,
-				'file'    => '.htaccess',
-				'content' => 'deny from all',
-			),
-			array(
-				'base'    => WC_LOG_DIR,
-				'file'    => 'index.html',
-				'content' => '',
-			),
-			array(
 				'base'    => $upload_dir['basedir'] . '/woocommerce_uploads',
 				'file'    => '.htaccess',
 				'content' => 'redirect' === $download_method ? 'Options -Indexes' : 'deny from all',
@@ -1985,14 +2127,14 @@ $hpos_table_schema;
 		 *
 		 * @since 2.7.0
 		 */
-		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woo.com/documentation/plugins/woocommerce/' );
+		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woocommerce.com/documentation/plugins/woocommerce/' );
 
 		/**
 		 * The WooCommerce API documentation URL.
 		 *
 		 * @since 2.2.0
 		 */
-		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woo.com/wc-apidocs/' );
+		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woocommerce.com/wc-apidocs/' );
 
 		/**
 		 * The community WooCommerce support URL.
@@ -2004,9 +2146,9 @@ $hpos_table_schema;
 		/**
 		 * The premium support URL.
 		 *
-		 * @since
+		 * @since 6.7.0
 		 */
-		$support_url = apply_filters( 'woocommerce_support_url', 'https://woo.com/my-account/create-a-ticket/' );
+		$support_url = apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' );
 
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( $docs_url ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',
@@ -2284,9 +2426,9 @@ $hpos_table_schema;
 <p><b>This is a sample page.</b></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<h3>Overview</h3>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Overview</h2>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Our refund and returns policy lasts 30 days. If 30 days have passed since your purchase, we can’t offer you a full refund or exchange.</p>
@@ -2345,9 +2487,9 @@ $hpos_table_schema;
 <p>If you are approved, then your refund will be processed, and a credit will automatically be applied to your credit card or original method of payment, within a certain amount of days.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<b>Late or missing refunds</b>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h3 class="wp-block-heading">Late or missing refunds</h3>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>If you haven’t received a refund yet, first check your bank account again.</p>
@@ -2365,9 +2507,9 @@ $hpos_table_schema;
 <p>If you’ve done all of this and you still have not received your refund yet, please contact us at {email address}.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:paragraph -->
-<b>Sale items</b>
-<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h3 class="wp-block-heading">Sale items</h3>
+<!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p>Only regular priced items may be refunded. Sale items cannot be refunded.</p>

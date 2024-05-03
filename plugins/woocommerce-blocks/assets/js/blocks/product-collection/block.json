@@ -9,9 +9,6 @@
 	"keywords": [ "WooCommerce", "Products (Beta)" ],
 	"textdomain": "woocommerce",
 	"attributes": {
-		"id": {
-			"type": "string"
-		},
 		"queryId": {
 			"type": "number"
 		},
@@ -34,14 +31,23 @@
 		"hideControls": {
 			"default": [],
 			"type": "array"
+		},
+		"queryContextIncludes": {
+			"type": "array"
+		},
+		"forcePageReload": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"providesContext": {
-		"id": "id",
 		"queryId": "queryId",
 		"query": "query",
-		"displayLayout": "displayLayout"
+		"displayLayout": "displayLayout",
+		"queryContextIncludes": "queryContextIncludes",
+		"collection": "collection"
 	},
+	"usesContext": [ "templateSlug" ],
 	"supports": {
 		"align": [ "wide", "full" ],
 		"anchor": true,

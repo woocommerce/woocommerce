@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Improve return value type checks prior to usage

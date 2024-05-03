@@ -695,10 +695,8 @@ class WC_Checkout {
 				)
 			);
 
-			// Avoid storing used_by - it's not needed and can get large.
-			$coupon_data = $coupon->get_data();
-			unset( $coupon_data['used_by'] );
-			$item->add_meta_data( 'coupon_data', $coupon_data );
+			$coupon_info = $coupon->get_short_info();
+			$item->add_meta_data( 'coupon_info', $coupon_info );
 
 			/**
 			 * Action hook to adjust item before save.
@@ -1052,11 +1050,11 @@ class WC_Checkout {
 			return;
 		}
 
-		// Store Order ID in session so it can be re-used after payment failure.
+		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 
 		// We save the session early because if the payment gateway hangs
-		// the request will never finish, thus the session data will neved be saved,
+		// the request will never finish, thus the session data will never be saved,
 		// and this can lead to duplicate orders if the user submits the order again.
 		WC()->session->save_data();
 
@@ -1075,6 +1073,7 @@ class WC_Checkout {
 				exit;
 			}
 
+			// Using wp_send_json will gracefully handle any problem encoding data.
 			wp_send_json( $result );
 		}
 	}
@@ -1289,6 +1288,7 @@ class WC_Checkout {
 				 * since it could be empty see:
 				 * https://github.com/woocommerce/woocommerce/issues/24631
 				 */
+
 				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
 					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
 				} else {

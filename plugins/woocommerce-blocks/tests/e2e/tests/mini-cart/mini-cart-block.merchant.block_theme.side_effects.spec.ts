@@ -9,19 +9,16 @@ const blockData: BlockData = {
 	slug: 'woocommerce/mini-cart',
 	mainClass: '.wc-block-minicart',
 	selectors: {
+		editor: {
+			block: '.wp-block-woocommerce-mini-cart',
+			insertButton: "//button//span[text()='Mini-Cart']",
+		},
 		frontend: {},
-		editor: {},
 	},
 };
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate(
-				'woocommerce/woocommerce//single-product'
-			);
-		} );
-
 		test( 'can be inserted in FSE area', async ( {
 			editorUtils,
 			editor,
@@ -53,15 +50,20 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await editorUtils.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
+
+			// Await for blocks commercial to be loaded in the Blocks inserter.
+			await expect(
+				editorUtils.page.locator(
+					'.block-directory-downloadable-block-list-item__details'
+				)
+			).toBeVisible();
+
 			const miniCartButton = editorUtils.page.getByRole( 'option', {
 				name: blockData.name,
-				exact: true,
 			} );
 
-			await expect( miniCartButton ).toHaveAttribute(
-				'aria-disabled',
-				'true'
-			);
+			await expect( miniCartButton ).toBeVisible();
+			await expect( miniCartButton ).toBeDisabled();
 		} );
 	} );
 } );

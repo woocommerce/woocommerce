@@ -16,6 +16,12 @@ require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
  * This class adds actions to track usage of WooCommerce Products.
  */
 class WC_Products_Tracking {
+
+	/**
+	 * Tracks source.
+	 */
+	const TRACKS_SOURCE = 'product-legacy-editor';
+
 	/**
 	 * Init tracking.
 	 */
@@ -118,9 +124,13 @@ class WC_Products_Tracking {
 			return;
 		}
 
+		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
+		$source     = apply_filters( 'woocommerce_product_source', self::TRACKS_SOURCE );
 		$properties = array(
 			'product_id' => $product_id,
+			'source'     => $source,
 		);
+		/* phpcs: enable */
 
 		WC_Tracks::record_event( 'product_edit', $properties );
 	}
@@ -331,7 +341,7 @@ class WC_Products_Tracking {
 			'product_type_options' => $product_type_options_string,
 			'purchase_note'        => $product->get_purchase_note() ? 'yes' : 'no',
 			'sale_price'           => $product->get_sale_price() ? 'yes' : 'no',
-			'source'               => apply_filters( 'woocommerce_product_source', '' ),
+			'source'               => apply_filters( 'woocommerce_product_source', self::TRACKS_SOURCE ),
 			'short_description'    => $product->get_short_description() ? 'yes' : 'no',
 			'tags'                 => count( $product->get_tag_ids() ),
 			'upsells'              => ! empty( $product->get_upsell_ids() ) ? 'yes' : 'no',

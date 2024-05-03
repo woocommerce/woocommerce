@@ -29,7 +29,7 @@ export function Edit( {
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
-	const { label, help, tooltip } = attributes;
+	const { label, help, tooltip, disabled } = attributes;
 	const [ regularPrice ] = useEntityProp< string >(
 		'postType',
 		context.postType || 'product',
@@ -102,6 +102,7 @@ export function Edit( {
 							label
 						)
 					}
+					disabled={ disabled }
 					onBlur={ validateSalePrice }
 				/>
 			</BaseControl>

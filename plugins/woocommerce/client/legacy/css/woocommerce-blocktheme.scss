@@ -349,7 +349,8 @@ a.added_to_cart {
 	* Order confirmation
 	*/
 	.woocommerce-thankyou-order-received,
-	h2.woocommerce-column__title {
+	.woocommerce-column__title,
+	.woocommerce-customer-details h2 {
 		font-size: var(--wp--preset--font-size--large);
 		font-weight: 300;
 	}
@@ -383,7 +384,7 @@ a.added_to_cart {
 		// Ensure customer details match order overview.
 		box-sizing: border-box;
 		width: 70%;
-		padding: 2rem;
+		padding: 1rem;
 		border-width: 1px;
 		border-radius: 0;
 	}

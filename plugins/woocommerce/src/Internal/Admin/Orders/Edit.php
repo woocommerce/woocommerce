@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
@@ -250,6 +251,15 @@ class Edit {
 			'high'
 		);
 
+		// Add customer history meta box if analytics is enabled.
+		if ( 'yes' !== get_option( 'woocommerce_analytics_enabled' ) ) {
+			return;
+		}
+
+		if ( ! OrderUtil::is_order_edit_screen() ) {
+			return;
+		}
+
 		/**
 		 * Customer history meta box.
 		 *
@@ -260,7 +270,7 @@ class Edit {
 		add_meta_box(
 			'woocommerce-customer-history',
 			__( 'Customer history', 'woocommerce' ),
-			function( $post_or_order ) use ( $customer_history_meta_box ) {
+			function ( $post_or_order ) use ( $customer_history_meta_box ) {
 				$order = $post_or_order instanceof WC_Order ? $post_or_order : wc_get_order( $post_or_order );
 				if ( $order instanceof WC_Order ) {
 					$customer_history_meta_box->output( $order );

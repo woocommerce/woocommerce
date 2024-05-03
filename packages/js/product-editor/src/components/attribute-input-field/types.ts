@@ -1,15 +1,18 @@
 /**
  * External dependencies
  */
-import { QueryProductAttribute, ProductAttribute } from '@woocommerce/data';
+import { ProductAttribute } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
-export type NarrowedQueryAttribute = Pick<
-	QueryProductAttribute,
+/*
+ * AttributeInputField item props.
+ */
+export type AttributeInputFieldItemProps = Pick<
+	ProductAttribute,
 	'id' | 'name'
 > & {
 	slug?: string;
@@ -18,12 +21,10 @@ export type NarrowedQueryAttribute = Pick<
 
 export type AttributeInputFieldProps = {
 	value?: EnhancedProductAttribute | null;
-	onChange: (
-		value?:
-			| Omit< ProductAttribute, 'position' | 'visible' | 'variation' >
-			| string
-	) => void;
+	onChange: ( value?: AttributeInputFieldItemProps | string ) => void;
 	label?: string;
+	items?: AttributeInputFieldItemProps[];
+	isLoading?: boolean;
 	placeholder?: string;
 	disabled?: boolean;
 	disabledAttributeIds?: number[];
@@ -33,12 +34,12 @@ export type AttributeInputFieldProps = {
 };
 
 export type MenuAttributeListProps = {
-	renderItems: NarrowedQueryAttribute[];
+	renderItems: AttributeInputFieldItemProps[];
 	highlightedIndex: number;
 	disabledAttributeMessage?: string;
 	getItemProps: (
 		options: UseComboboxGetMenuPropsOptions
-	) => getItemPropsType< NarrowedQueryAttribute >;
+	) => getItemPropsType< AttributeInputFieldItemProps >;
 };
 
 export interface GetPropsWithRefKey {

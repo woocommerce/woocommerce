@@ -175,7 +175,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->add_sql_query_params( $query_args );
 			$params = $this->get_limit_params( $query_args );
 
-			if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
+			if ( isset( $query_args['taxes'] ) && is_array( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 				$total_results = count( $query_args['taxes'] );
 				$total_pages   = (int) ceil( $total_results / $params['per_page'] );
 

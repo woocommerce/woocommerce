@@ -147,13 +147,15 @@ const BundleExtensionCheckbox = ( {
 		if (
 			! link ||
 			! event.currentTarget.contains( link ) ||
-			! link.href.startsWith( 'https://woo.com/products/' )
+			! link.href.startsWith( 'https://woocommerce.com/products/' )
 		) {
 			return;
 		}
 
 		recordEvent( 'storeprofiler_store_business_features_link_click', {
-			extension_name: link.href.split( 'https://woo.com/products/' )[ 1 ],
+			extension_name: link.href.split(
+				'https://woocommerce.com/products/'
+			)[ 1 ],
 		} );
 	};
 

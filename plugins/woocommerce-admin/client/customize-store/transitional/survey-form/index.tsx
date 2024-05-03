@@ -11,11 +11,11 @@ import {
 import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
+import { trackEvent } from '~/customize-store/tracking';
 
 interface CloseSurveyFunction {
 	(): void;
@@ -79,7 +79,6 @@ export const SurveyForm = ( {
 
 	const disableSendButton =
 		rating === 0 ||
-		feedbackText === '' ||
 		( ! isStreamlineChecked &&
 			! isDislikeThemesChecked &&
 			! isThemeNoMatchChecked &&
@@ -89,7 +88,7 @@ export const SurveyForm = ( {
 		const surveyCompleteEvent = showAISurvey
 			? 'customize_your_store_transitional_survey_complete'
 			: 'customize_your_store_on_core_transitional_survey_complete';
-		recordEvent( surveyCompleteEvent, {
+		trackEvent( surveyCompleteEvent, {
 			rating,
 			choose_streamline: isStreamlineChecked,
 			choose_dislike_themes: isDislikeThemesChecked,
@@ -114,119 +113,125 @@ export const SurveyForm = ( {
 	return (
 		<>
 			<div className="woocommerce-ai-survey-form">
-				<p className="woocommerce-ai-survey-form__description">
-					{ __(
-						'Our goal is to make sure you have all the right tools to start customizing your store. We’d love to know if we hit our mark and how we can improve.',
-						'woocommerce'
-					) }
-				</p>
+				<div className="content">
+					<p className="woocommerce-ai-survey-form__description">
+						{ __(
+							'Our goal is to make sure you have all the right tools to start customizing your store. We’d love to know if we hit our mark and how we can improve.',
+							'woocommerce'
+						) }
+					</p>
 
-				<h4>
-					{ __(
-						'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience?',
-						'woocommerce'
-					) }
-					<span>*</span>
-				</h4>
-				<StarRating value={ rating } onChange={ setRating } />
+					<h4>
+						{ __(
+							'On a scale of 1 = difficult to 5 = very easy, how would you rate the overall experience?',
+							'woocommerce'
+						) }
+						<span>*</span>
+					</h4>
+					<StarRating value={ rating } onChange={ setRating } />
 
-				<hr />
+					<hr />
 
-				<h4>
-					{ showAISurvey
-						? __(
-								'What motivated you to choose the “Design with AI” option?',
-								'woocommerce'
-						  )
-						: __(
-								'What motivated you to choose the "Design your own theme" option?',
-								'woocommerce'
-						  ) }
-					<span>*</span>
-				</h4>
-				<CheckboxControl
-					label={
-						showAISurvey
+					<h4>
+						{ showAISurvey
 							? __(
-									'I wanted to see how AI could help me streamline the process.',
+									'What motivated you to choose the “Design with AI” option?',
 									'woocommerce'
 							  )
 							: __(
-									'I wanted to design my own theme.',
+									'What motivated you to choose the "Design your own theme" option?',
+									'woocommerce'
+							  ) }
+						<span>*</span>
+					</h4>
+					<CheckboxControl
+						label={
+							showAISurvey
+								? __(
+										'I wanted to see how AI could help me streamline the process.',
+										'woocommerce'
+								  )
+								: __(
+										'I wanted to design my own theme.',
+										'woocommerce'
+								  )
+						}
+						checked={ isStreamlineChecked }
+						onChange={ setStreamlineChecked }
+					/>
+					<CheckboxControl
+						label={ __(
+							"I didn't like any of the available themes.",
+							'woocommerce'
+						) }
+						checked={ isDislikeThemesChecked }
+						onChange={ setDislikeChecked }
+					/>
+					<CheckboxControl
+						label={ __(
+							"I didn't find a theme that matched my needs.",
+							'woocommerce'
+						) }
+						checked={ isThemeNoMatchChecked }
+						onChange={ setThemeNoMatchChecked }
+					/>
+					<CheckboxControl
+						label={ __( 'Other.', 'woocommerce' ) }
+						checked={ isOtherChecked }
+						onChange={ setOtherChecked }
+					/>
+
+					<hr />
+
+					<h4>
+						{ __(
+							'Did you find anything confusing, irrelevant, or not useful?',
+							'woocommerce'
+						) }
+					</h4>
+					<TextareaControl
+						value={ feedbackText }
+						onChange={ setFeedbackText }
+					/>
+
+					<hr />
+
+					<h4>
+						{ showAISurvey
+							? __(
+									'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
 									'woocommerce'
 							  )
-					}
-					checked={ isStreamlineChecked }
-					onChange={ setStreamlineChecked }
-				/>
-				<CheckboxControl
-					label={ __(
-						"I didn't like any of the available themes.",
-						'woocommerce'
-					) }
-					checked={ isDislikeThemesChecked }
-					onChange={ setDislikeChecked }
-				/>
-				<CheckboxControl
-					label={ __(
-						"I didn't find a theme that matched my needs.",
-						'woocommerce'
-					) }
-					checked={ isThemeNoMatchChecked }
-					onChange={ setThemeNoMatchChecked }
-				/>
-				<CheckboxControl
-					label={ __( 'Other.', 'woocommerce' ) }
-					checked={ isOtherChecked }
-					onChange={ setOtherChecked }
-				/>
+							: __(
+									'Feel free to spill the beans here. All suggestions, feedback, or comments about the "Design your own theme" experience are welcome.',
+									'woocommerce'
+							  ) }
+					</h4>
+					<TextareaControl
+						value={ spillBeansText }
+						onChange={ setSpillBeansText }
+					/>
+				</div>
 
-				<hr />
+				<div>
+					<hr />
+					<div className="buttons">
+						<Button
+							className="is-spinner"
+							variant="tertiary"
+							onClick={ closeFunction }
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
 
-				<h4>
-					{ __(
-						'Did you find anything confusing, irrelevant, or not useful?',
-						'woocommerce'
-					) }
-					<span>*</span>
-				</h4>
-				<TextareaControl
-					value={ feedbackText }
-					onChange={ setFeedbackText }
-				/>
-
-				<h4>
-					{ showAISurvey
-						? __(
-								'Feel free to spill the beans here. All suggestions, feedback, or comments about the AI-generated store experience are welcome.',
-								'woocommerce'
-						  )
-						: __(
-								'Feel free to spill the beans here. All suggestions, feedback, or comments about the "Design your own theme" experience are welcome.',
-								'woocommerce'
-						  ) }
-				</h4>
-				<TextareaControl
-					value={ spillBeansText }
-					onChange={ setSpillBeansText }
-				/>
-
-				<div className="buttons">
-					<Button
-						className="is-spinner"
-						variant="tertiary"
-						onClick={ closeFunction }
-					>
-						{ __( 'Cancel', 'woocommerce' ) }
-					</Button>
-
-					<Button
-						variant="primary"
-						onClick={ sendData }
-						disabled={ disableSendButton }
-					>
-						{ __( 'Send', 'woocommerce' ) }
-					</Button>
+						<Button
+							variant="primary"
+							onClick={ sendData }
+							disabled={ disableSendButton }
+						>
+							{ __( 'Send', 'woocommerce' ) }
+						</Button>
+					</div>
 				</div>
 			</div>
 		</>

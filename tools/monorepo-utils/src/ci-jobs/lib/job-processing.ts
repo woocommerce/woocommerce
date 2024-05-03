@@ -4,6 +4,7 @@
 import {
 	CommandVarOptions,
 	JobType,
+	testTypes,
 	LintJobConfig,
 	TestJobConfig,
 } from './config';
@@ -16,6 +17,7 @@ import { TestEnvVars, parseTestEnvConfig } from './test-environment';
  */
 interface LintJob {
 	projectName: string;
+	projectPath: string;
 	command: string;
 }
 
@@ -33,9 +35,11 @@ interface TestJobEnv {
  */
 interface TestJob {
 	projectName: string;
+	projectPath: string;
 	name: string;
 	command: string;
 	testEnv: TestJobEnv;
+	shardNumber: number;
 }
 
 /**
@@ -71,9 +75,41 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
 }
 
 /**
+ * Multiplies a job based on the shards job config. It updates the job names and command - currently only supporting Playwright sharding.
+ *
+ * @param {TestJob}       job       The job to be multiplied.
+ * @param {TestJobConfig} jobConfig The job config.
+ * @return {TestJob[]} The list of sharded jobs.
+ */
+export function getShardedJobs(
+	job: TestJob,
+	jobConfig: TestJobConfig
+): TestJob[] {
+	let createdJobs = [];
+	const shards = jobConfig.shardingArguments.length;
+
+	if ( shards <= 1 ) {
+		createdJobs.push( job );
+	} else {
+		createdJobs = Array( shards )
+			.fill( null )
+			.map( ( _, i ) => {
+				const jobCopy = JSON.parse( JSON.stringify( job ) );
+				jobCopy.shardNumber = i + 1;
+				jobCopy.name = `${ job.name } ${ i + 1 }/${ shards }`;
+				jobCopy.command = `${ job.command } ${ jobConfig.shardingArguments[ i ] }`;
+				return jobCopy;
+			} );
+	}
+
+	return createdJobs;
+}
+
+/**
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the lint job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
@@ -81,6 +117,7 @@ function replaceCommandVars( command: string, options: CreateOptions ): string {
  */
 function createLintJob(
 	projectName: string,
+	projectPath: string,
 	config: LintJobConfig,
 	changes: string[] | true,
 	options: CreateOptions
@@ -114,6 +151,7 @@ function createLintJob(
 
 	return {
 		projectName,
+		projectPath,
 		command: replaceCommandVars( config.command, options ),
 	};
 }
@@ -122,18 +160,22 @@ function createLintJob(
  * Checks the config against the changes and creates one if it should be run.
  *
  * @param {string}              projectName The name of the project that the job is for.
+ * @param {string}              projectPath The path of the project that the job is for.
  * @param {Object}              config      The config object for the test job.
  * @param {Array.<string>|true} changes     The file changes that have occurred for the project or true if all projects should be marked as changed.
  * @param {Object}              options     The options to use when creating the job.
  * @param {Array.<string>}      cascadeKeys The cascade keys that have been triggered in dependencies.
+ * @param {number}              shardNumber The shard number for the job.
  * @return {Promise.<Object|null>} The job that should be run or null if no job should be run.
  */
 async function createTestJob(
 	projectName: string,
+	projectPath: string,
 	config: TestJobConfig,
 	changes: string[] | true,
 	options: CreateOptions,
-	cascadeKeys: string[]
+	cascadeKeys: string[],
+	shardNumber: number
 ): Promise< TestJob | null > {
 	let triggered = false;
 
@@ -179,12 +221,14 @@ async function createTestJob(
 
 	const createdJob: TestJob = {
 		projectName,
+		projectPath,
 		name: config.name,
 		command: replaceCommandVars( config.command, options ),
 		testEnv: {
 			shouldCreate: false,
 			envVars: {},
 		},
+		shardNumber,
 	};
 
 	// We want to make sure that we're including the configuration for
@@ -221,13 +265,17 @@ async function createJobsForProject(
 		test: [],
 	};
 
+	testTypes.forEach( ( type ) => {
+		newJobs[ `${ type }Test` ] = [];
+	} );
+
 	// In order to simplify the way that cascades work we're going to recurse depth-first and check our dependencies
 	// for jobs before ourselves. This lets any cascade keys created in dependencies cascade to dependents.
 	const newCascadeKeys = [];
 	for ( const dependency of node.dependencies ) {
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
 
-		// Keey in mind that arrays are passed by reference in JavaScript. This means that any changes
+		// Keep in mind that arrays are passed by reference in JavaScript. This means that any changes
 		// we make to the cascade keys array will be reflected in the parent scope. We need to copy
 		// the array before recursing our dependencies so that we don't accidentally add keys from
 		// one dependency to a sibling and accidentally trigger jobs that shouldn't be run.
@@ -240,7 +288,12 @@ async function createJobsForProject(
 			dependencyCascade
 		);
 		newJobs.lint.push( ...dependencyJobs.lint );
-		newJobs.test.push( ...dependencyJobs.test );
+
+		testTypes.forEach( ( type ) => {
+			newJobs[ `${ type }Test` ].push(
+				...dependencyJobs[ `${ type }Test` ]
+			);
+		} );
 
 		// Track any new cascade keys added by the dependency.
 		// Since we're filtering out duplicates after the
@@ -270,6 +323,20 @@ async function createJobsForProject(
 			continue;
 		}
 
+		// Do not create a job if:
+		// - there is an event argument in ci-job cli,
+		// - a non-empty list of events is defined in the job config,
+		// - the event argument is not in the defined list of events.
+		if (
+			options.commandVars?.event &&
+			jobConfig.events.length > 0 &&
+			! jobConfig.events
+				.map( ( e ) => e.toLowerCase() )
+				.includes( options.commandVars.event.toLowerCase() )
+		) {
+			continue;
+		}
+
 		// Jobs will check to see whether or not they should trigger based on the files
 		// that have been changed in the project. When "true" is given, however, it
 		// means that we should consider ALL files to have been changed and
@@ -285,6 +352,7 @@ async function createJobsForProject(
 			case JobType.Lint: {
 				const created = createLintJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options
@@ -301,17 +369,22 @@ async function createJobsForProject(
 			case JobType.Test: {
 				const created = await createTestJob(
 					node.name,
+					node.path,
 					jobConfig,
 					projectChanges,
 					options,
-					cascadeKeys
+					cascadeKeys,
+					0
 				);
 				if ( ! created ) {
 					break;
 				}
 
 				jobConfig.jobCreated = true;
-				newJobs.test.push( created );
+
+				newJobs[ `${ jobConfig.testType }Test` ].push(
+					...getShardedJobs( created, jobConfig )
+				);
 
 				// We need to track any cascade keys that this job is associated with so that
 				// dependent projects can trigger jobs with matching keys. We are expecting

@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications as PromotionRuleEngine;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -79,31 +80,19 @@ class WC_Admin_Addons {
 	 * @return array|WP_Error
 	 */
 	public static function fetch_featured() {
+		$transient_name = 'wc_addons_featured';
+		// Important: WCCOM Extensions API v2.0 is used.
+		$url      = 'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured';
 		$locale   = get_user_locale();
-		$featured = self::get_locale_data_from_transient( 'wc_addons_featured', $locale );
+		$featured = self::get_locale_data_from_transient( $transient_name, $locale );
 
 		if ( false === $featured ) {
-			$headers = array();
-			$auth    = WC_Helper_Options::get( 'auth' );
-
-			if ( ! empty( $auth['access_token'] ) ) {
-				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
-			}
-
-			$parameter_string = '?' . http_build_query( array( 'locale' => get_user_locale() ) );
-			$country          = WC()->countries->get_base_country();
-			if ( ! empty( $country ) ) {
-				$parameter_string = $parameter_string . '&' . http_build_query( array( 'country' => $country ) );
-			}
-
-			// Important: WCCOM Extensions API v2.0 is used.
-			$raw_featured = wp_safe_remote_get(
-				'https://woocommerce.com/wp-json/wccom-extensions/2.0/featured' . $parameter_string,
-				array(
-					'headers'    => $headers,
-					'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
-				)
+			$fetch_options = array(
+				'auth'    => true,
+				'locale'  => true,
+				'country' => true,
 			);
+			$raw_featured  = self::fetch( $url, $fetch_options );
 
 			if ( is_wp_error( $raw_featured ) ) {
 				do_action( 'woocommerce_page_wc-addons_connection_error', $raw_featured->get_error_message() );
@@ -143,7 +132,7 @@ class WC_Admin_Addons {
 			}
 
 			if ( $featured ) {
-				self::set_locale_data_in_transient( 'wc_addons_featured', $featured, $locale, DAY_IN_SECONDS );
+				self::set_locale_data_in_transient( $transient_name, $featured, $locale, DAY_IN_SECONDS );
 			}
 		}
 
@@ -327,16 +316,16 @@ class WC_Admin_Addons {
 
 		if ( 'storefront' === $template ) {
 			if ( 'storefront' === $stylesheet ) {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'Need a fresh look? Try Storefront child themes', 'woocommerce' );
 				$utm_content = 'nostorefrontchildtheme';
 			} else {
-				$url         = 'https://woo.com/product-category/themes/storefront-child-theme-themes/';
+				$url         = 'https://woocommerce.com/product-category/themes/storefront-child-theme-themes/';
 				$text        = __( 'View more Storefront child themes', 'woocommerce' );
 				$utm_content = 'hasstorefrontchildtheme';
 			}
 		} else {
-			$url         = 'https://woo.com/storefront/';
+			$url         = 'https://woocommerce.com/storefront/';
 			$text        = __( 'Need a theme? Try Storefront', 'woocommerce' );
 			$utm_content = 'nostorefront';
 		}
@@ -1026,11 +1015,11 @@ class WC_Admin_Addons {
 					wp_kses_post(
 						/* translators: a url */
 						__(
-							'To start growing your business, head over to <a href="%s">Woo.com</a>, where you\'ll find the most popular WooCommerce extensions.',
+							'To start growing your business, head over to <a href="%s">WooCommerce.com</a>, where you\'ll find the most popular WooCommerce extensions.',
 							'woocommerce'
 						)
 					),
-					'https://woo.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
+					'https://woocommerce.com/products/?utm_source=extensionsscreen&utm_medium=product&utm_campaign=connectionerror'
 				);
 				?>
 			</p>
@@ -1087,7 +1076,7 @@ class WC_Admin_Addons {
 		// Check for existence of promotions and evaluate out if we should show them.
 		if ( ! empty( $promotions ) ) {
 			foreach ( $promotions as $promo_id => $promotion ) {
-				$evaluator = new PromotionRuleEngine\RuleEvaluator();
+				$evaluator = new RuleEvaluator();
 				$passed    = $evaluator->evaluate( $promotion->rules );
 				if ( ! $passed ) {
 					unset( $promotions[ $promo_id ] );
@@ -1555,5 +1544,50 @@ class WC_Admin_Addons {
 		$transient_value            = is_array( $transient_value ) ? $transient_value : array();
 		$transient_value[ $locale ] = $value;
 		return set_transient( $transient, $transient_value, $expiration );
+	}
+
+	/**
+	 * Make wp_safe_remote_get request to WooCommerce.com endpoint.
+	 * Optionally pass user auth token, locale or country.
+	 *
+	 * @param string $url     URL to request.
+	 * @param ?array $options Options for the request. For example, to pass auth token, locale and country,
+	 *                        pass array( 'auth' => true, 'locale' => true, 'country' => true, ).
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function fetch( $url, $options = array() ) {
+		$headers = array();
+
+		if ( isset( $options['auth'] ) && $options['auth'] ) {
+			$auth = WC_Helper_Options::get( 'auth' );
+
+			if ( isset( $auth['access_token'] ) && ! empty( $auth['access_token'] ) ) {
+				$headers['Authorization'] = 'Bearer ' . $auth['access_token'];
+			}
+		}
+
+		$parameters = array();
+
+		if ( isset( $options['locale'] ) && $options['locale'] ) {
+			$parameters['locale'] = get_user_locale();
+		}
+
+		if ( isset( $options['country'] ) && $options['country'] ) {
+			$country = WC()->countries->get_base_country();
+			if ( ! empty( $country ) ) {
+				$parameters['country'] = $country;
+			}
+		}
+
+		$query_string = ! empty( $parameters ) ? '?' . http_build_query( $parameters ) : '';
+
+		return wp_safe_remote_get(
+			$url . $query_string,
+			array(
+				'headers'    => $headers,
+				'user-agent' => 'WooCommerce/' . WC()->version . '; ' . get_bloginfo( 'url' ),
+			)
+		);
 	}
 }

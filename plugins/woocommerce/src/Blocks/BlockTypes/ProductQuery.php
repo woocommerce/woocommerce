@@ -132,7 +132,7 @@ class ProductQuery extends AbstractBlock {
 
 		// The `loop_shop_per_page` filter can be found in WC_Query::product_query().
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ), true );
+		$this->asset_data_registry->add( 'loopShopPerPage', apply_filters( 'loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page() ) );
 	}
 
 	/**
@@ -176,9 +176,15 @@ class ProductQuery extends AbstractBlock {
 		$this->parsed_block = $parsed_block;
 
 		if ( self::is_woocommerce_variation( $parsed_block ) ) {
+			// Indicate to interactivity powered components that this block is on the page
+			// and needs refresh to update data.
+			$this->asset_data_registry->add(
+				'needsRefreshForInteractivityAPI',
+				true
+			);
 			// Set this so that our product filters can detect if it's a PHP template.
-			$this->asset_data_registry->add( 'hasFilterableProducts', true, true );
-			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true, true );
+			$this->asset_data_registry->add( 'hasFilterableProducts', true );
+			$this->asset_data_registry->add( 'isRenderingPhpTemplate', true );
 			add_filter(
 				'query_loop_block_query_vars',
 				array( $this, 'build_query' ),
@@ -941,7 +947,7 @@ class ProductQuery extends AbstractBlock {
 		 * Get an array of taxonomy names associated with the "product" post type because
 		 * we also want to include custom taxonomies associated with the "product" post type.
 		 */
-		$product_taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' );
+		$product_taxonomies = array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_visibility', 'product_shipping_class' ) );
 		$result             = array_filter(
 			$tax_query,
 			function( $item ) use ( $product_taxonomies ) {

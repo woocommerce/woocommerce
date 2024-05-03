@@ -61,7 +61,7 @@ export const useHomeTemplates = () => {
 			) => {
 				if ( templateName in recommendedTemplates ) {
 					acc[ templateName ] = getTemplatePatterns(
-						template.blocks.slice( 1, -1 ),
+						template.blocks,
 						patternsByName
 					);
 				}

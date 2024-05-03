@@ -35,6 +35,14 @@ interface ProductFormTemplateInterface extends BlockTemplateInterface {
 	public function get_section_by_id( string $section_id ): ?SectionInterface;
 
 	/**
+	 * Gets subsection block by id.
+	 *
+	 * @param string $subsection_id subsection id.
+	 * @return SubsectionInterface|null
+	 */
+	public function get_subsection_by_id( string $subsection_id ): ?SubsectionInterface;
+
+	/**
 	 * Gets Block by id.
 	 *
 	 * @param string $block_id block id.

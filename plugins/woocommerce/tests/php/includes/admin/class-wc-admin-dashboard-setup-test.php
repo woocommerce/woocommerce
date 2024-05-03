@@ -191,7 +191,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		if ( $completed_tasks_count === $tasks_count ) {
 			$this->assertEmpty( $this->get_widget_output() );
 		} else {
-			$this->assertMatchesRegularExpression( "/Step {$step_number} of 5/", $this->get_widget_output() );
+			$this->assertMatchesRegularExpression( "/Step {$step_number} of {$tasks_count}/", $this->get_widget_output() );
 		}
 	}
 }

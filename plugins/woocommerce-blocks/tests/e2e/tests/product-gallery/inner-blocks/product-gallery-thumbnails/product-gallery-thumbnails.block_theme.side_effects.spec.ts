@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
+import { Locator, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -26,6 +27,15 @@ const blockData = {
 	productPage: '/product/v-neck-t-shirt/',
 };
 
+const changeNumberOfThumbnailsInputValue = async (
+	page: Page,
+	numberOfThumbnailInput: Locator,
+	value: string
+) => {
+	await numberOfThumbnailInput.fill( value );
+	await page.keyboard.press( 'Enter' );
+};
+
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	pageObject: async ( { page, editor, frontendUtils, editorUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
@@ -38,9 +48,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 	},
 } );
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -90,16 +98,9 @@ test.describe( `${ blockData.name }`, () => {
 
 		expect( isThumbnailsBlockEarlier ).toBe( true );
 
-		await Promise.all( [
-			editor.saveSiteEditorEntities(),
-			page.waitForResponse( ( response ) =>
-				response.url().includes( 'wp-json/wp/v2/templates/' )
-			),
-		] );
+		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const groupBlockFrontend = (
 			await frontendUtils.getBlockByClassWithParent(
@@ -140,17 +141,15 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( blockData.selectors.editor.noThumbnailsOption )
 				.click();
 
-			const isVisible = await page
-				.locator( blockData.selectors.editor.thumbnails )
-				.isVisible();
+			const element = page.locator(
+				blockData.selectors.editor.thumbnails
+			);
 
-			expect( isVisible ).toBe( false );
+			await expect( element ).toBeHidden();
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 		} );
 
 		// We can test the left position of thumbnails by cross-checking:
@@ -216,16 +215,9 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( true );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
@@ -313,16 +305,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
-
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await editor.saveSiteEditorEntities();
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
@@ -412,16 +396,8 @@ test.describe( `${ blockData.name }`, () => {
 
 			expect( isThumbnailsBlockEarlier ).toBe( false );
 
-			await Promise.all( [
-				editor.saveSiteEditorEntities(),
-				page.waitForResponse( ( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' )
-				),
-			] );
-
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await editor.saveSiteEditorEntities();
+			await page.goto( blockData.productPage );
 
 			const groupBlockFrontend = (
 				await frontendUtils.getBlockByClassWithParent(
@@ -444,6 +420,49 @@ test.describe( `${ blockData.name }`, () => {
 				);
 
 			expect( isThumbnailsFrontendBlockEarlier ).toBe( false );
+		} );
+
+		test( 'Ensure entered Number of Thumbnails rounds to integer', async ( {
+			page,
+			editor,
+			pageObject,
+		} ) => {
+			await editor.insertBlock( {
+				name: 'woocommerce/product-gallery',
+			} );
+
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'editor',
+			} );
+
+			await editor.openDocumentSettingsSidebar();
+			const numberOfThumbnailInput = page.getByRole( 'spinbutton', {
+				name: 'Number of Thumbnails',
+			} );
+
+			await changeNumberOfThumbnailsInputValue(
+				page,
+				numberOfThumbnailInput,
+				'4.2'
+			);
+
+			let numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
+
+			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 4 );
+
+			await changeNumberOfThumbnailsInputValue(
+				page,
+				numberOfThumbnailInput,
+				'4.7'
+			);
+
+			numberOfThumbnailsOnScreen = thumbnailsBlock.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
+
+			await expect( numberOfThumbnailsOnScreen ).toHaveCount( 5 );
 		} );
 	} );
 } );

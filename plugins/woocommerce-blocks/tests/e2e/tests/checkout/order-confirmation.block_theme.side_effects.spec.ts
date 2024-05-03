@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { adminFile, guestFile } from '@woocommerce/e2e-utils';
+import { guestFile } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -38,8 +38,6 @@ const test = base.extend< { pageObject: CheckoutPage } >( {
 } );
 
 test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
-	test.use( { storageState: adminFile } );
-
 	test.beforeEach( async ( { admin, editorUtils, localPickupUtils } ) => {
 		await localPickupUtils.disableLocalPickup();
 
@@ -48,25 +46,15 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 			postType: 'wp_template',
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test.afterEach( async ( { localPickupUtils } ) => {
-		await localPickupUtils.enableLocalPickup();
-	} );
-
-	test( 'Place order as a logged in user', async ( {
-		frontendUtils,
-		pageObject,
-		page,
-	} ) => {
-		await frontendUtils.emptyCart();
+	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await expect(
+		expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -130,24 +118,19 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
-	test( 'Place order as guest user', async ( {
-		frontendUtils,
-		pageObject,
-		page,
-	} ) => {
-		await page.goto( '/my-account', { waitUntil: 'commit' } );
+	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
+		await page.goto( '/my-account' );
 
-		// Verify that the user is logged out.
 		await expect(
-			page.getByRole( 'heading', { name: 'Login' } )
+			page.getByRole( 'heading', { name: 'Login' } ),
+			'User is not logged out'
 		).toBeVisible();
 
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await expect(
+		expect(
 			await pageObject.selectAndVerifyShippingOption(
 				FREE_SHIPPING_NAME,
 				FREE_SHIPPING_PRICE
@@ -164,8 +147,6 @@ test.describe( 'Shopper → Order Confirmation (guest user)', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
-	test.use( { storageState: adminFile } );
-
 	test( 'Confirm shipping address section is hidden, but billing is visible', async ( {
 		pageObject,
 		frontendUtils,
@@ -198,9 +179,7 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
-		await pageObject.page
-			.getByRole( 'radio', { name: 'Local Pickup free' } )
-			.click();
+		await pageObject.page.getByRole( 'radio', { name: 'Pickup' } ).click();
 		await pageObject.fillInCheckoutWithTestData();
 		await pageObject.placeOrder();
 		await expect(
@@ -213,12 +192,9 @@ test.describe( 'Shopper → Order Confirmation → Local Pickup', () => {
 } );
 
 test.describe( 'Shopper → Order Confirmation → Downloadable Products', () => {
-	test.use( { storageState: adminFile } );
-
 	let confirmationPageUrl: string;
 
 	test.beforeEach( async ( { frontendUtils, pageObject } ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();

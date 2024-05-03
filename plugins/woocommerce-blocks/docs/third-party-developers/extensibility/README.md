@@ -56,7 +56,7 @@ See <https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-pl
 In addition to the reference material below, [please see the `block-checkout` package documentation](../../../packages/checkout/README.md) which is used to extend checkout with Filters, Slot Fills, and Inner Blocks.
 
 | Document                                                                                         | Description                                                                                                       |
-| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+|--------------------------------------------------------------------------------------------------| ----------------------------------------------------------------------------------------------------------------- |
 | [How the Checkout Block processes an order](./checkout-block/how-checkout-processes-an-order.md) | The detailed inner workings of the Checkout Flow.                                                                 |
 | [IntegrationInterface](./checkout-block/integration-interface.md)                                | The `IntegrationInterface` class and how to use it to register scripts, styles, and data with WooCommerce Blocks. |
 | [Available Filters](./checkout-block/available-filters.md)                                       | All about the filters that you may use to change values of certain elements of WooCommerce Blocks.                |
@@ -64,12 +64,13 @@ In addition to the reference material below, [please see the `block-checkout` pa
 | [Available Slot Fills](./checkout-block/available-slot-fills.md)                                 | Available Slots that you can use and their positions in Cart and Checkout.                                        |
 | [DOM Events](./checkout-block/dom-events.md)                                                     | A list of DOM Events used by some blocks to communicate between them and with other parts of WooCommerce.         |
 | [Filter Registry](../../../packages/checkout/filter-registry/README.md)                          | The filter registry allows callbacks to be registered to manipulate certain values.                               |
+| [Additional Checkout Fields](./checkout-block/additional-checkout-fields.md)                     | The filter registry allows callbacks to be registered to manipulate certain values.                               |
 
 <!-- FEEDBACK -->
 
 ---
 
-[We're hiring!](https://woo.com/careers/) Come work with us!
+[We're hiring!](https://woocommerce.com/careers/) Come work with us!
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce-blocks/issues/new?assignees=&labels=type%3A+documentation&template=--doc-feedback.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/README.md)
 

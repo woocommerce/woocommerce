@@ -16,6 +16,7 @@ import { flatMapDeep, uniqBy } from 'lodash';
 import { CardDivider, PluginCardBody } from '~/marketing/components';
 import { useInstalledPluginsWithoutChannels } from '~/marketing/hooks';
 import { RecommendedPlugin } from '~/marketing/types';
+import { getRecommendationSource } from '~/marketing/utils/getRecommendationSource';
 import { getInAppPurchaseUrl } from '~/lib/in-app-purchase';
 import { createNoticesFromResponse } from '~/lib/notices';
 import './DiscoverTools.scss';
@@ -79,6 +80,7 @@ export const PluginsTabPanel = ( {
 		try {
 			recordEvent( 'marketing_recommended_extension', {
 				name: plugin.title,
+				source: getRecommendationSource(),
 			} );
 
 			const response = await installAndActivatePlugins( [
@@ -132,6 +134,7 @@ export const PluginsTabPanel = ( {
 									'marketing_recommended_extension',
 									{
 										name: plugin.title,
+										source: getRecommendationSource(),
 									}
 								);
 							} }

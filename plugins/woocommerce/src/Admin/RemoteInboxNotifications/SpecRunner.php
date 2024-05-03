@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\EvaluateAndGetStatus;
+use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator;
 
 /**
  * Runs a single spec.
@@ -25,7 +27,7 @@ class SpecRunner {
 
 		// Create or update the note.
 		$existing_note_ids = $data_store->get_notes_with_name( $spec->slug );
-		if ( count( $existing_note_ids ) === 0 ) {
+		if ( ! is_countable( $existing_note_ids ) || count( $existing_note_ids ) === 0 ) {
 			$note = new Note();
 			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 		} else {
@@ -45,7 +47,7 @@ class SpecRunner {
 				new RuleEvaluator()
 			);
 		} catch ( \Throwable $e ) {
-			return;
+			return $e;
 		}
 
 		// If the status is changing, update the created date to now.

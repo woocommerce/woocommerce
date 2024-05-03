@@ -1,4 +1,0 @@
-Significance: major
-Type: update
-
-Load layout templates via the REST API. Note that layout template modifications must now be hooked up in an action that is called when REST API endpoints are handled, such as `rest_api_init`.

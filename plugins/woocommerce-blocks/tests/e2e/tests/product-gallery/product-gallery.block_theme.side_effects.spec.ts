@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { test as base, expect } from '@woocommerce/e2e-playwright-utils';
-import { Locator, Page } from '@playwright/test';
+import { Locator } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -67,14 +67,6 @@ export const getIsDialogOpen = async (
 	return productGalleryBlockParsedContext.isDialogOpen;
 };
 
-const waitForJavascriptFrontendFileIsLoaded = async ( page: Page ) => {
-	await page.waitForResponse(
-		( response ) =>
-			response.url().includes( 'product-gallery-frontend' ) &&
-			response.status() === 200
-	);
-};
-
 const getThumbnailImageIdByNth = async (
 	nth: number,
 	thumbnailsLocator: Locator
@@ -91,9 +83,7 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -101,24 +91,17 @@ test.describe( `${ blockData.name }`, () => {
 		await editorUtils.enterEditMode();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test.describe( 'with thumbnails', () => {
 		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
 			const visibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -138,19 +121,14 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should change the image when the user click on a thumbnail image', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const visibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -189,19 +167,14 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'with previous and next buttons', () => {
 		test( 'should change the image when the user click on the previous or next button', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const initialVisibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -255,19 +228,14 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'with pager', () => {
 		test( 'should change the image when the user click on a pager item', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const initialVisibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -330,19 +298,14 @@ test.describe( `${ blockData.name }`, () => {
 	test.describe( 'within pop-up', () => {
 		test( 'should display the same selected image when the pop-up is opened', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const initialVisibleLargeImageId = await getVisibleLargeImageId(
 				await pageObject.getMainImageBlock( {
@@ -381,12 +344,12 @@ test.describe( `${ blockData.name }`, () => {
 			} );
 			largeImageBlock.click();
 
-			const productGalleryPopUp = page.locator(
-				'.wc-block-product-gallery-dialog__overlay'
+			const productGalleryPopUpContent = page.locator(
+				'.wc-block-product-gallery-dialog__body'
 			);
 
 			const popUpSelectedImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
@@ -396,19 +359,14 @@ test.describe( `${ blockData.name }`, () => {
 
 		test( 'should reset to the first thumbnail when the pop-up is closed', async ( {
 			page,
-			editorUtils,
+			editor,
 			pageObject,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'load',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const largeImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -445,17 +403,17 @@ test.describe( `${ blockData.name }`, () => {
 
 			largeImageBlock.click();
 
-			const productGalleryPopUp = page.locator(
-				'.wc-block-product-gallery-dialog__overlay'
+			const productGalleryPopUpContent = page.locator(
+				'.wc-block-product-gallery-dialog__body'
 			);
 
 			const popUpInitialSelectedImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
 
-			const popUpNextButton = productGalleryPopUp
+			const popUpNextButton = productGalleryPopUpContent
 				.locator(
 					'.wc-block-product-gallery-large-image-next-previous--button'
 				)
@@ -463,23 +421,24 @@ test.describe( `${ blockData.name }`, () => {
 			await popUpNextButton.click();
 
 			const popUpNextImageId = await getVisibleLargeImageId(
-				productGalleryPopUp.locator(
+				productGalleryPopUpContent.locator(
 					`[data-block-name="woocommerce/product-gallery-large-image"]`
 				)
 			);
 
 			expect( popUpInitialSelectedImageId ).not.toBe( popUpNextImageId );
 
-			const closePopUpButton = productGalleryPopUp.locator(
+			const productGalleryPopUpHeader = page.locator(
+				'.wc-block-product-gallery-dialog__header'
+			);
+			const closePopUpButton = productGalleryPopUpHeader.locator(
 				'.wc-block-product-gallery-dialog__close'
 			);
 			closePopUpButton.click();
 
 			await page.waitForFunction( () => {
 				const isPopUpOpen = document
-					.querySelector(
-						'.wc-block-product-gallery-dialog__overlay'
-					)
+					.querySelector( '[aria-label="Product gallery"]' )
 					?.checkVisibility();
 
 				return isPopUpOpen === false;
@@ -509,17 +468,12 @@ test.describe( `${ blockData.name }`, () => {
 		test( 'should open dialog on the frontend', async ( {
 			pageObject,
 			page,
-			editorUtils,
+			editor,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'domcontentloaded',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			const mainImageBlock = await pageObject.getMainImageBlock( {
 				page: 'frontend',
@@ -536,19 +490,13 @@ test.describe( `${ blockData.name }`, () => {
 			pageObject,
 			page,
 			editor,
-			editorUtils,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
 			await pageObject.toggleFullScreenOnClickSetting( false );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 
-			await Promise.all( [
-				page.goto( blockData.productPage, {
-					waitUntil: 'domcontentloaded',
-				} ),
-				waitForJavascriptFrontendFileIsLoaded( page ),
-			] );
+			await page.goto( blockData.productPage );
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
@@ -600,7 +548,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editorUtils,
 		} ) => {
-			await admin.createNewPost( { legacyCanvas: true } );
+			await admin.createNewPost();
 			await editorUtils.openGlobalBlockInserter();
 			const productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
@@ -612,30 +560,23 @@ test.describe( `${ blockData.name }`, () => {
 
 	test( 'should show (square) cropped main product images when crop option is enabled', async ( {
 		page,
-		editorUtils,
+		editor,
 		pageObject,
 	} ) => {
+		await editor.openDocumentSettingsSidebar();
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-		const block = await pageObject.getMainImageBlock( {
-			page: 'editor',
-		} );
-
-		await expect( block ).toBeVisible();
 
 		await page
 			.locator( blockData.selectors.editor.settings.cropImagesOption )
 			.click();
 
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 
 		await expect(
 			page.locator( blockData.selectors.editor.settings.cropImagesOption )
 		).toBeChecked();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const image = await page
 			.locator(
@@ -644,8 +585,8 @@ test.describe( `${ blockData.name }`, () => {
 			.first()
 			.boundingBox();
 
-		const height = image?.height;
-		const width = image?.width;
+		const height = image?.height as number;
+		const width = image?.width as number;
 
 		// Allow 1 pixel of difference.
 		expect(

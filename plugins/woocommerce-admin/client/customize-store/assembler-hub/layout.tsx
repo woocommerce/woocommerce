@@ -47,12 +47,12 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { recordEvent } from '@woocommerce/tracks';
 import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
 import { useQuery } from '@woocommerce/navigation';
 import { FlowType } from '../types';
 import { isOfflineAIFlow } from '../guards';
 import { isWooExpress } from '~/utils/is-woo-express';
+import { trackEvent } from '../tracking';
 
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
@@ -89,13 +89,13 @@ export const Layout = () => {
 
 	const takeTour = () => {
 		// Click on "Take a tour" button
-		recordEvent( 'customize_your_store_assembler_hub_tour_start' );
+		trackEvent( 'customize_your_store_assembler_hub_tour_start' );
 		setShowWelcomeTour( false );
 		setShowAiOfflineModal( false );
 	};
 
 	const skipTour = () => {
-		recordEvent( 'customize_your_store_assembler_hub_tour_skip' );
+		trackEvent( 'customize_your_store_assembler_hub_tour_skip' );
 		onClose();
 		setShowAiOfflineModal( false );
 	};
@@ -128,7 +128,6 @@ export const Layout = () => {
 				>
 					<Transitional
 						sendEvent={ sendEvent }
-						editor={ editor }
 						isWooExpress={ isWooExpress() }
 						isSurveyOpen={ isSurveyOpen }
 						setSurveyOpen={ setSurveyOpen }
@@ -143,6 +142,7 @@ export const Layout = () => {
 	}
 
 	return (
+		// This causes the editor to re-render when the logo block ids change. Maybe we can find a better way to do this.
 		<LogoBlockContext.Provider
 			value={ {
 				logoBlockIds,

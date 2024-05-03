@@ -928,11 +928,15 @@ class CartController {
 			);
 		}
 
-		if ( ! $coupon->is_valid() ) {
+		$discounts = new \WC_Discounts( $this->get_cart_instance() );
+		$valid     = $discounts->is_coupon_valid( $coupon );
+
+		if ( is_wp_error( $valid ) ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_coupon_error',
-				wp_strip_all_tags( $coupon->get_error_message() ),
-				400
+				esc_html( wp_strip_all_tags( $valid->get_error_message() ) ),
+				400,
+				$valid->get_error_data() // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			);
 		}
 
@@ -1013,9 +1017,9 @@ class CartController {
 	/**
 	 * Validates an existing cart coupon and returns any errors.
 	 *
-	 * @throws RouteException Exception if invalid data is detected.
-	 *
 	 * @param \WC_Coupon $coupon Coupon object applied to the cart.
+	 *
+	 * @throws RouteException Exception if invalid data is detected.
 	 */
 	protected function validate_cart_coupon( \WC_Coupon $coupon ) {
 		if ( ! $coupon->is_valid() ) {

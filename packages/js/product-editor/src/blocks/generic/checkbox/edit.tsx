@@ -39,7 +39,7 @@ export function Edit( {
 	return (
 		<div { ...blockProps }>
 			<Checkbox
-				value={ value || null }
+				value={ value || false }
 				onChange={ setValue }
 				label={ label || '' }
 				title={ title }

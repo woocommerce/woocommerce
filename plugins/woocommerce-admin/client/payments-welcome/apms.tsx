@@ -35,7 +35,7 @@ export const apms: Apm[] = [
 		title: strings.apms.paypal.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/paypal.png`,
 		description: strings.apms.paypal.description,
-		link: 'https://woo.com/products/woocommerce-paypal-payments/',
+		link: 'https://woocommerce.com/products/woocommerce-paypal-payments/',
 		extension: 'woocommerce-paypal-payments',
 	},
 	{
@@ -43,16 +43,8 @@ export const apms: Apm[] = [
 		title: strings.apms.amazonpay.title,
 		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/amazonpay.png`,
 		description: strings.apms.amazonpay.description,
-		link: 'https://woo.com/products/pay-with-amazon/',
+		link: 'https://woocommerce.com/products/pay-with-amazon/',
 		extension: 'woocommerce-gateway-amazon-payments-advanced',
-	},
-	{
-		id: 'klarna',
-		title: strings.apms.klarna.title,
-		icon: `${ WC_ASSET_URL }images/payment_methods/72x72/klarna.png`,
-		description: strings.apms.klarna.description,
-		link: 'https://woo.com/products/klarna-payments/',
-		extension: 'klarna-payments-for-woocommerce',
 	},
 ];
 
@@ -124,7 +116,7 @@ const ApmList: React.FunctionComponent< ApmListProps > = ( {
 					<List items={ apmsList } />
 				</CardBody>
 				<CardFooter>
-					<ExternalLink href="https://woo.com/product-category/woocommerce-extensions/payment-gateways/wallets/?categoryIds=28682&collections=product&page=1">
+					<ExternalLink href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/wallets/?categoryIds=28682&collections=product&page=1">
 						{ strings.apms.seeMore }
 					</ExternalLink>
 				</CardFooter>

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix refund props not updating properly with HPOS

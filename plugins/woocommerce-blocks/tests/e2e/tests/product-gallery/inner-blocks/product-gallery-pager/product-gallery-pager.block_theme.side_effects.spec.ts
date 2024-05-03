@@ -44,9 +44,7 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 } );
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { requestUtils, admin, editorUtils, editor } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
+	test.beforeEach( async ( { admin, editorUtils, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `woocommerce/woocommerce//${ blockData.slug }`,
 			postType: 'wp_template',
@@ -55,14 +53,9 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
 	test( 'Renders Product Gallery Pager block on the editor and frontend side', async ( {
 		page,
-		editorUtils,
+		editor,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
@@ -73,11 +66,9 @@ test.describe( `${ blockData.name }`, () => {
 
 		await expect( block ).toBeVisible();
 
-		await editorUtils.saveTemplate();
+		await editor.saveSiteEditorEntities();
 
-		await page.goto( blockData.productPage, {
-			waitUntil: 'commit',
-		} );
+		await page.goto( blockData.productPage );
 
 		const blockFrontend = await pageObject.getMainImageBlock( {
 			page: 'frontend',
@@ -111,15 +102,13 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'commit',
-			} );
+			await page.goto( blockData.productPage );
 
-			const pagerBlock = await page
-				.locator( blockData.selectors.frontend.pagerBlock )
-				.isVisible();
+			const pagerBlock = page.locator(
+				blockData.selectors.frontend.pagerBlock
+			);
 
-			expect( pagerBlock ).toBe( false );
+			await expect( pagerBlock ).toBeHidden();
 		} );
 
 		test( 'display pages as dot icons when display mode is set to "Dots"', async ( {
@@ -146,24 +135,20 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'domcontentloaded',
-			} );
+			await page.goto( blockData.productPage );
 
-			const pagerBlock = await page
+			const pagerBlock = page
 				.locator( blockData.selectors.frontend.pagerBlock )
-				.nth( 0 )
-				.isVisible();
+				.first();
 
-			expect( pagerBlock ).toBe( true );
+			await expect( pagerBlock ).toBeVisible();
 
-			const dotIconsAmount = await page
+			const dotIconsAmount = page
 				.locator( blockData.selectors.frontend.pagerListContainer )
-				.nth( 0 )
-				.locator( 'svg' )
-				.count();
+				.first()
+				.locator( 'svg' );
 
-			expect( dotIconsAmount ).toEqual( 3 );
+			await expect( dotIconsAmount ).toHaveCount( 3 );
 		} );
 
 		test( 'display pages as numbers when display mode is set to "Digits"', async ( {
@@ -190,27 +175,21 @@ test.describe( `${ blockData.name }`, () => {
 
 			await editor.saveSiteEditorEntities();
 
-			await page.goto( blockData.productPage, {
-				waitUntil: 'domcontentloaded',
-			} );
+			await page.goto( blockData.productPage );
 
-			const pagerBlock = await page
+			const pagerBlock = page
 				.locator( blockData.selectors.frontend.pagerBlock )
-				.nth( 0 )
-				.isVisible();
+				.first();
 
-			expect( pagerBlock ).toBe( true );
+			await expect( pagerBlock ).toBeVisible();
 
-			const pages = await page
+			const pages = page
 				.locator( blockData.selectors.frontend.pagerListContainer )
-				.nth( 0 )
-				.locator( blockData.selectors.frontend.pagerListItem )
-				.all();
+				.first()
+				.locator( blockData.selectors.frontend.pagerListItem );
 
-			expect( pages.length ).toEqual( 3 );
-			await expect( pages[ 0 ] ).toHaveText( '1' );
-			await expect( pages[ 1 ] ).toHaveText( '2' );
-			await expect( pages[ 2 ] ).toHaveText( '3' );
+			await expect( pages ).toHaveCount( 3 );
+			await expect( pages ).toHaveText( [ '1', '2', '3' ] );
 		} );
 	} );
 } );
