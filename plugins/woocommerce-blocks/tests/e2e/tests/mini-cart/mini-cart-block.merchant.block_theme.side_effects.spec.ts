@@ -51,13 +51,6 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
 
-			// Await for blocks commercial to be loaded in the Blocks inserter.
-			await expect(
-				editorUtils.page.locator(
-					'.block-directory-downloadable-block-list-item__details'
-				)
-			).toBeVisible();
-
 			const miniCartButton = editorUtils.page.getByRole( 'option', {
 				name: blockData.name,
 			} );
