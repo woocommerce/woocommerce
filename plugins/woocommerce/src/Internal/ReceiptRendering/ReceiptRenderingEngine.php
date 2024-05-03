@@ -129,7 +129,7 @@ class ReceiptRenderingEngine {
 		 * @param WC_Order $order The order for which the receipt is being generated.
 		 * @returns array The updated set of data.
 		 *
-		 * @since 8.9.0
+		 * @since 9.0.0
 		 */
 		$data = apply_filters( 'woocommerce_printable_order_receipt_data', $this->get_order_data( $order ), $order );
 
@@ -167,7 +167,7 @@ class ReceiptRenderingEngine {
 			 * @param WC_Order $order The order for which the receipt is being generated.
 			 * @return string The actual data to use to generate the HTML for the line item.
 			 *
-			 * @since 8.9.0
+			 * @since 9.0.0
 			 */
 			$line_item_display_data = apply_filters( 'woocommerce_printable_order_receipt_line_item_display_data', $line_item_display_data, $line_item_data, $order );
 			$attributes             = '';
@@ -194,7 +194,7 @@ class ReceiptRenderingEngine {
 		 * @param WC_Order $order The order for which the receipt is being generated.
 		 * @return string The actual CSS styles that will be used.
 		 *
-		 * @since 8.9.0
+		 * @since 9.0.0
 		 */
 		$data['css'] = apply_filters( 'woocommerce_printable_order_receipt_css', $css, $order );
 
