@@ -1,0 +1,5 @@
+Significance: patch
+Type: added
+Comment: Suppress a PhanUndeclaredMethod with reference to https://github.com/phan/phan/issues/1204.
+
+
