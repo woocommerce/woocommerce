@@ -99,6 +99,8 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/templates/`
 		),
+		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime.js' ),
+		'react/jsx-runtime': require.resolve( 'react/jsx-runtime.js' ),
 	};
 };
 
