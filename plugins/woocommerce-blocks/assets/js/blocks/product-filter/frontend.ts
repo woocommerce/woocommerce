@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { navigate as navigateFn, store } from '@woocommerce/interactivity';
+import { navigate as navigateFn } from '@woocommerce/interactivity';
 import { getSetting } from '@woocommerce/settings';
 
 const isBlockTheme = getSetting< boolean >( 'isBlockTheme' );
@@ -10,12 +10,6 @@ const needsRefresh = getSetting< boolean >(
 	'needsRefreshForInteractivityAPI',
 	false
 );
-
-store( 'woocommerce/product-filter', {
-	state: {
-		hasSelectedFilter: false,
-	},
-} );
 
 export function navigate( href: string, options = {} ) {
 	/**

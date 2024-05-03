@@ -49,7 +49,6 @@ function getSelectedTermsFromUrl( slug: string ) {
 		.split( ',' )
 		.filter( Boolean );
 }
-const { state } = store( 'woocommerce/product-filter' );
 
 store( 'woocommerce/product-filter-attribute', {
 	actions: {
@@ -87,12 +86,6 @@ store( 'woocommerce/product-filter-attribute', {
 				selectedTerms = selectedTerms.filter(
 					( value ) => value !== event.target.value
 				);
-			}
-
-			if ( selectedTerms.length > 0 ) {
-				state.hasSelectedFilter = true;
-			} else {
-				state.hasSelectedFilter = false;
 			}
 
 			navigate(

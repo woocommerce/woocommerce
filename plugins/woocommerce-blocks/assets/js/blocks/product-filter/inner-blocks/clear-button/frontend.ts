@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@woocommerce/interactivity';
+import { store, getContext } from '@woocommerce/interactivity';
 
 /**
  * Internal dependencies
@@ -38,7 +38,9 @@ const getQueryParams = ( e: Event ) => {
 	}
 };
 
-const { state } = store( 'woocommerce/product-filter' );
+type ProductFilterContext = {
+	hasSelectedFilter: boolean;
+};
 
 store( 'woocommerce/product-filter', {
 	actions: {
@@ -56,7 +58,11 @@ store( 'woocommerce/product-filter', {
 				}
 			} );
 
-			state.hasSelectedFilter = false;
+			const productFilterContext = getContext< ProductFilterContext >(
+				'woocommerce/product-filter'
+			);
+
+			productFilterContext.hasSelectedFilter = false;
 
 			if ( needsNavigate ) {
 				navigate( url.href );
