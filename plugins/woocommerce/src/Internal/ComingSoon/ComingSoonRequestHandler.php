@@ -75,12 +75,6 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
-		if ( ! is_front_page() ) {
-			// Optimize search engine by returning 503 status code and set retry-after header to 12 hours.
-			status_header( 503 );
-			header( 'Retry-After: ' . 12 * HOUR_IN_SECONDS );
-		}
-
 		add_theme_support( 'block-templates' );
 		wp_dequeue_style( 'global-styles' );
 		$coming_soon_template = get_query_template( 'coming-soon' );
