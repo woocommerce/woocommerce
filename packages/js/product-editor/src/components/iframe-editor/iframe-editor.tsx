@@ -67,14 +67,6 @@ export function IframeEditor( {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
-	/*
-	 * Set the initial blocks from the store.
-	 * @todo: probably we can get rid of the initialBlocks prop.
-	 */
-	useEffect( () => {
-		setTemporalBlocks( blocks );
-	}, [] ); // eslint-disable-line
-
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
 		useDispatch( productEditorUiStore );
 
@@ -87,6 +79,16 @@ export function IframeEditor( {
 	} = useEditorHistory( {
 		setBlocks: setTemporalBlocks,
 	} );
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		tempAppendEdit( blocks );
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
+
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
 	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
