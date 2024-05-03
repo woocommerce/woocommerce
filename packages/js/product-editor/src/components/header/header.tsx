@@ -55,13 +55,13 @@ export function Header( {
 		'postType',
 		productType,
 		productId,
-		{ enabled: productId !== -1 }
+		{ enabled: productId !== undefined }
 	);
 
 	const lastPersistedProduct = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
-			return productId !== -1
+			return productId !== undefined
 				? getEntityRecord( 'postType', productType, productId )
 				: null;
 		},

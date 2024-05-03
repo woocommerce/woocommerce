@@ -23,7 +23,7 @@ declare module '@wordpress/core-data' {
 	function useEntityRecord< T = unknown >(
 		kind: string,
 		name: string,
-		id: number | string,
+		id?: number | string,
 		options?: { enabled: boolean }
 	): { record: T, editedRecord: T };
 }

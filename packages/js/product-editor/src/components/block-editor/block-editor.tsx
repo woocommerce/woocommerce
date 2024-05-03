@@ -172,7 +172,7 @@ export function BlockEditor( {
 		postType,
 		productId,
 		// Only perform the query when the productId is valid.
-		{ enabled: productId !== -1 }
+		{ enabled: productId !== undefined }
 	);
 
 	const productTemplateId = product?.meta_data?.find(
@@ -192,8 +192,8 @@ export function BlockEditor( {
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		postType,
-		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
-		{ id: productId !== -1 ? productId : 0 }
+		// useEntityBlockEditor will not try to fetch the product if productId is undefined.
+		{ id: productId ?? 0 }
 	);
 
 	const { updateEditorSettings } = useDispatch( 'core/editor' );
@@ -203,7 +203,7 @@ export function BlockEditor( {
 		! layoutTemplate ||
 		// variations don't have a product template
 		( postType !== 'product_variation' && ! productTemplate ) ||
-		productId === -1;
+		productId === undefined;
 
 	useLayoutEffect( () => {
 		if ( isEditorLoading ) {
