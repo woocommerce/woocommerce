@@ -122,10 +122,13 @@ class CustomerAccount extends AbstractBlock {
 			),
 		);
 
+		// Only provide aria-label if the display style is icon only.
+		$aria_label = self::ICON_ONLY === $attributes['displayStyle'] ? 'aria-label="' . esc_attr( $this->render_label() ) . '"' : '';
+
 		$label_markup = self::ICON_ONLY === $attributes['displayStyle'] ? '' : '<span class="label">' . wp_kses( $this->render_label(), array() ) . '</span>';
 
 		return "<div class='wp-block-woocommerce-customer-account " . esc_attr( $classes_and_styles['classes'] ) . "' style='" . esc_attr( $classes_and_styles['styles'] ) . "'>
-			<a href='" . esc_attr( $account_link ) . "'>
+			<a " . $aria_label . " href='" . esc_attr( $account_link ) . "'>
 				" . wp_kses( $this->render_icon( $attributes ), $allowed_svg ) . $label_markup . '
 			</a>
 		</div>';

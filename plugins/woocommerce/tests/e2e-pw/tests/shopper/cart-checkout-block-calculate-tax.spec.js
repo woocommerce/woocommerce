@@ -1,18 +1,24 @@
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin } = require( '../../test-data/data' );
-const { disableWelcomeModal } = require( '../../utils/editor' );
+const {
+	goToPageEditor,
+	fillPageTitle,
+	insertBlockByShortcut,
+	publishPage,
+} = require( '../../utils/editor' );
+const { addAProductToCart } = require( '../../utils/cart' );
+const { random } = require( '../../utils/helpers' );
 
 const productName = 'First Product Cart Block Taxing';
 const productPrice = '100.00';
 const messyProductPrice = '13.47';
 const secondProductName = 'Second Product Cart Block Taxing';
 
-const cartBlockPageTitle = 'Cart Block';
+const cartBlockPageTitle = `Cart Block ${ random() }`;
 const cartBlockPageSlug = cartBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
-const checkoutBlockPageTitle = 'Checkout Block';
+const checkoutBlockPageTitle = `Checkout Block ${ random() }`;
 const checkoutBlockPageSlug = checkoutBlockPageTitle
 	.replace( / /gi, '-' )
 	.toLowerCase();
@@ -99,60 +105,20 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		} );
 	} );
 
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create Cart Block page', async ( { page } ) => {
-		// create a new page with cart block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( cartBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/cart' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ cartBlockPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, cartBlockPageTitle );
+		await insertBlockByShortcut( page, '/cart' );
+		await publishPage( page, cartBlockPageTitle );
 	} );
 
+	// eslint-disable-next-line playwright/expect-expect
 	test( 'can create Checkout Block page', async ( { page } ) => {
-		// create a new page with checkout block
-		await page.goto( 'wp-admin/post-new.php?post_type=page' );
-
-		await disableWelcomeModal( { page } );
-
-		await page
-			.getByRole( 'textbox', { name: 'Add title' } )
-			.fill( checkoutBlockPageTitle );
-		await page.getByRole( 'button', { name: 'Add default block' } ).click();
-		await page
-			.getByRole( 'document', {
-				name: 'Empty block; start writing or type forward slash to choose a block',
-			} )
-			.fill( '/checkout' );
-		await page.keyboard.press( 'Enter' );
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ checkoutBlockPageTitle } is now live.` )
-		).toBeVisible();
+		await goToPageEditor( { page } );
+		await fillPageTitle( page, checkoutBlockPageTitle );
+		await insertBlockByShortcut( page, '/checkout' );
+		await publishPage( page, checkoutBlockPageTitle );
 	} );
 
 	test( 'that inclusive tax is displayed properly in blockbased Cart & Checkout pages', async ( {
@@ -160,9 +126,9 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		context,
 	} ) => {
 		await context.clearCookies();
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+
+		await addAProductToCart( page, productId );
+
 		await test.step( 'Load cart page and confirm price display', async () => {
 			await page.goto( cartBlockPageSlug );
 			await expect(
@@ -218,9 +184,8 @@ test.describe( 'Shopper Cart & Checkout Block Tax Display', () => {
 		} );
 
 		await context.clearCookies();
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await addAProductToCart( page, productId );
+
 		await test.step( 'Load cart page and confirm price display', async () => {
 			await page.goto( cartBlockPageSlug );
 			await expect(
@@ -327,15 +292,9 @@ test.describe( 'Shopper Cart & Checkout Block Tax Rounding', () => {
 		await context.clearCookies();
 
 		// all tests use the same products
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
-		await page.goto( `/shop/?add-to-cart=${ productId2 }`, {
-			waitUntil: 'networkidle',
-		} );
-		await page.goto( `/shop/?add-to-cart=${ productId2 }`, {
-			waitUntil: 'networkidle',
-		} );
+		await addAProductToCart( page, productId );
+		await addAProductToCart( page, productId2 );
+		await addAProductToCart( page, productId2 );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -622,9 +581,7 @@ test.describe( 'Shopper Cart & Checkout Block Tax Levels', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await addAProductToCart( page, productId );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
@@ -894,9 +851,7 @@ test.describe( 'Shipping Cart & Checkout Block Tax', () => {
 		await context.clearCookies();
 
 		// all tests use the first product
-		await page.goto( `/shop/?add-to-cart=${ productId }`, {
-			waitUntil: 'networkidle',
-		} );
+		await addAProductToCart( page, productId );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {

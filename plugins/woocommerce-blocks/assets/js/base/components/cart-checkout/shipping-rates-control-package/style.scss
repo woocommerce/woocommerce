@@ -1,6 +1,10 @@
 .wc-block-components-shipping-rates-control__package {
 	margin: 0;
 
+	.wc-block-components-shipping-rates-control__package__description--free {
+		text-transform: uppercase;
+	}
+
 	&.wc-block-components-panel {
 		margin-bottom: 0;
 	}
@@ -31,9 +35,6 @@
 		padding-bottom: 0;
 	}
 
-	.wc-block-components-radio-control__label-group {
-		@include font-size(small);
-	}
 	.wc-block-components-radio-control__description-group {
 		@include font-size(smaller);
 	}

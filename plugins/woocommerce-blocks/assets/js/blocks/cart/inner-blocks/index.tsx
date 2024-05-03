@@ -13,6 +13,7 @@ import './empty-cart-block';
 import './cart-accepted-payment-methods-block';
 import './cart-order-summary-block';
 import './cart-order-summary-subtotal';
+import './cart-order-summary-totals';
 import './cart-order-summary-fee';
 import './cart-order-summary-discount';
 import './cart-order-summary-shipping';

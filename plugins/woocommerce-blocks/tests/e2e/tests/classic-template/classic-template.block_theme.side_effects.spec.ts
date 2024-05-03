@@ -13,86 +13,94 @@ const blockData: Partial< BlockData > = {
 	name: 'woocommerce/legacy-template',
 };
 
-const templates = {
-	'single-product': {
-		templateTitle: 'Single Product',
+const templates = [
+	{
+		title: 'Single Product',
 		slug: 'single-product',
-		frontendPage: '/product/single/',
+		path: '/product/single/',
 	},
-	// This test is disabled because archives are disabled for attributes by default. This can be uncommented when this is toggled on.
-	//'taxonomy-product_attribute': {
-	//	templateTitle: 'Product Attribute',
+	// This test is disabled because archives are disabled for attributes by
+	// default. This can be uncommented when this is toggled on.
+	//{
+	//	title: 'Product Attribute',
 	//	slug: 'taxonomy-product_attribute',
-	//	frontendPage: '/product-attribute/color/',
+	//	path: '/product-attribute/color/',
 	//},
-	'taxonomy-product_cat': {
-		templateTitle: 'Product Category',
+	{
+		title: 'Product Category',
 		slug: 'taxonomy-product_cat',
-		frontendPage: '/product-category/music/',
+		path: '/product-category/music/',
 	},
-	'taxonomy-product_tag': {
-		templateTitle: 'Product Tag',
+	{
+		title: 'Product Tag',
 		slug: 'taxonomy-product_tag',
-		frontendPage: '/product-tag/recommended/',
+		path: '/product-tag/recommended/',
 	},
-	'archive-product': {
-		templateTitle: 'Product Catalog',
+	{
+		title: 'Product Catalog',
 		slug: 'archive-product',
-		frontendPage: '/shop/',
+		path: '/shop/',
 	},
-	'product-search-results': {
-		templateTitle: 'Product Search Results',
+	{
+		title: 'Product Search Results',
 		slug: 'product-search-results',
-		frontendPage: '/?s=s&post_type=product',
+		path: '/?s=s&post_type=product',
 	},
-};
+];
 
-test.beforeEach( async () => {
-	await cli(
-		'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
-	);
-} );
+test.describe( `${ blockData.name } Block `, () => {
+	test.beforeEach( async () => {
+		await cli(
+			'npm run wp-env run tests-cli -- wp option update wc_blocks_use_blockified_product_grid_block_as_template false'
+		);
+	} );
 
-for ( const { templateTitle, slug } of Object.values( templates ) ) {
-	test.describe( `${ blockData.name } Block `, () => {
-		test( `is rendered on ${ templateTitle } template`, async ( {
+	for ( const template of templates ) {
+		test( `is rendered on ${ template.title } template`, async ( {
 			admin,
-			editorUtils,
+			editor,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ slug }`,
+				postId: `woocommerce/woocommerce//${ template.slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editorUtils.enterEditMode();
-			const block = await editorUtils.getBlockByName( blockData.name );
+
+			const block = editor.canvas.locator(
+				`[data-type="${ blockData.name }"]`
+			);
 
 			await expect( block ).toBeVisible();
 		} );
 
-		// These tests consistently fail due to the default content of the page--potentially the classic block is not being
-		// used after another test runs. Reenable this when we have a solution for this.
+		// These tests consistently fail due to the default content of the
+		// page--potentially the classic block is not being used after
+		// another test runs. Reenable this when we have a solution for
+		// this.
 		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip( `is rendered on ${ templateTitle } template - frontend side`, async ( {
+		test.skip( `is rendered on ${ template.title } template - frontend side`, async ( {
 			admin,
 			editor,
-			editorUtils,
 			page,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ slug }`,
+				postId: `woocommerce/woocommerce//${ template.slug }`,
 				postType: 'wp_template',
+				canvas: 'edit',
 			} );
-			await editorUtils.enterEditMode();
+
 			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: 'Hello World' },
 			} );
+
 			await editor.saveSiteEditorEntities();
-			await page.goto( frontendPage );
+
+			await page.goto( template.path );
 
 			await expect(
 				page.getByText( 'Hello World' ).first()
 			).toBeVisible();
 		} );
-	} );
-}
+	}
+} );

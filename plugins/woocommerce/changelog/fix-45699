@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add index on SKU filed in wc_product_meta_lookup table

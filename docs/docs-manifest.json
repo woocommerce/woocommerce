@@ -560,9 +560,27 @@
       "category_title": "High Performance Order Storage",
       "posts": [
         {
+          "post_title": "HPOS order querying APIs",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "hash": "e6a82fd1551296d1f104cb70921ecf13d63e04760ed2f24a3d57d4b2da2217e3",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/wc-order-query-improvements.md",
+          "id": "94261c0a5d954f409ce6c207c9ae624dd577cf64"
+        },
+        {
+          "post_title": "HPOS extension recipe book",
+          "tags": "how-to",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "hash": "f5dc57939c8278a9de9a7ddd9fdd968ca672e998ba43a080a03203c499d98709",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/recipe-book.md",
+          "id": "991c19edd20b1df6683f31f106d74689248cd102"
+        },
+        {
           "post_title": "A large store's guide to enable HPOS on WooCommerce",
+          "menu_title": "Enable HPOS for large stores",
+          "tags": "how-to",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/guide-large-store.md",
-          "hash": "70e651ff1c1d3c82a034fcc46020c9eda1ca51437b2d4550b7d63ae4df11ee55",
+          "hash": "77c0815ce6044a7e331a9cecd42c7a277392aa10dfe801b689d53880ef72064c",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/guide-large-store.md",
           "id": "b6156ac7b77d75022867e9ebb968bc9c1c35f0da"
         },
@@ -574,6 +592,14 @@
           "hash": "c8c75c274eb52a48729589220cfd6b5c091b6699d3bf44e6c808cf62f1680310",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/enable-hpos.md",
           "id": "9d41c63f3d0cb17ada82a65bf4a26a1978cc34b0"
+        },
+        {
+          "post_title": "HPOS CLI Tools",
+          "tags": "reference",
+          "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "hash": "8cd823759ce20551d582c39f57ae79f9e0227a8cb0131146e6b7dac5e7312708",
+          "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/high-performance-order-storage/cli-tools.md",
+          "id": "cdd9d9ad5777d978ba953e3478fbb61cab8fdf59"
         }
       ],
       "categories": []
@@ -638,7 +664,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "e94d3333e6ec94f6bf430ef0ea19a52142a1c60592060e527712bfd701487b72",
+          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -810,7 +836,7 @@
           "menu_title": "Security best practices",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/security/security-best-practices.md",
-          "hash": "7b0e53d779fe564b8f6c4e1a96567b2aef938ce840997045707ed4d30aa5b361",
+          "hash": "c2fdc86ba61ba0ad33ed2795f4f00eb90b7fc8545b007b2c14dbc1b7aa97a6ed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/security-best-practices.md",
           "id": "d579f1c5174c67421dff64719e001b31a015a3d2"
         },
@@ -1240,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "968bb0b4baf6dbf1d5100de6ab9f3d571aa1e093b20ef45c776a89e1fbda52fd"
+  "hash": "24c95fd5e28dc3e1fd03ffa495e1487bafc1dc8c3ffa91334f05ac2ea3b12e78"
 }
