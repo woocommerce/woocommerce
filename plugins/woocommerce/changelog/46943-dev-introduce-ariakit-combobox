@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Migrate the blocks Combobox component from using `@wordpress/components` ComboboxControl to Ariakit Combobox.
