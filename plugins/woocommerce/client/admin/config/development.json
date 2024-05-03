@@ -6,7 +6,6 @@
 		"coupons": true,
 		"core-profiler": true,
 		"customize-store": true,
-		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
 		"shipping-smart-defaults": true,
