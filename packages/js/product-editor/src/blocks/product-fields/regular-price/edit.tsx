@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { useInstanceId } from '@wordpress/compose';
 import { useEntityProp } from '@wordpress/core-data';
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import {
 	BaseControl,
 	// @ts-expect-error `__experimentalInputControl` does exist.
@@ -24,6 +24,7 @@ export function Edit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< SalePriceBlockAttributes > ) {
+	const [ isTouched, setIsTouched ] = useState< boolean >( false );
 	const blockProps = useWooBlockProps( attributes );
 	const { postType, validationErrors } = context;
 	const error = validationErrors.regular_price;
@@ -48,9 +49,9 @@ export function Edit( {
 		<div { ...blockProps }>
 			<BaseControl
 				id={ regularPriceId }
-				help={ !! error && error.message }
+				help={ isTouched && !! error && error.message }
 				className={ classNames( {
-					'has-error': !! error,
+					'has-error': isTouched && !! error,
 				} ) }
 			>
 				<InputControl
@@ -65,6 +66,7 @@ export function Edit( {
 						)
 					}
 					disabled={ disabled }
+					onBlur={ () => setIsTouched( true ) }
 				/>
 			</BaseControl>
 		</div>
