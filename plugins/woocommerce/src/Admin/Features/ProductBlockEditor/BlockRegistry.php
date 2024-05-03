@@ -27,7 +27,6 @@ class BlockRegistry {
 	const GENERIC_BLOCKS = array(
 		'woocommerce/conditional',
 		'woocommerce/product-checkbox-field',
-		'woocommerce/product-checkbox-field',
 		'woocommerce/product-collapsible',
 		'woocommerce/product-radio-field',
 		'woocommerce/product-pricing-field',
