@@ -34,6 +34,7 @@ interface TaxonomyBlockAttributes extends BlockAttributes {
 	createTitle: string;
 	dialogNameHelpText?: string;
 	parentTaxonomyText?: string;
+	placeholder?: string;
 }
 
 export function Edit( {
@@ -56,6 +57,7 @@ export function Edit( {
 		dialogNameHelpText,
 		parentTaxonomyText,
 		disabled,
+		placeholder,
 	} = attributes;
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ allEntries, setAllEntries ] = useState< Taxonomy[] >( [] );
@@ -114,6 +116,7 @@ export function Edit( {
 					multiple
 					createValue={ searchValue }
 					onInputChange={ searchDelayed }
+					placeholder={ placeholder }
 					shouldNotRecursivelySelect
 					shouldShowCreateButton={ ( typedValue ) =>
 						! typedValue ||

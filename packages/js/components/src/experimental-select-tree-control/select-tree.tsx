@@ -33,7 +33,6 @@ interface SelectTreeProps extends TreeControlProps {
 export const SelectTree = function SelectTree( {
 	items,
 	treeRef: ref,
-	placeholder,
 	isLoading,
 	disabled,
 	initialInputValue,
@@ -91,6 +90,13 @@ export const SelectTree = function SelectTree( {
 			setInputValue( initialInputValue as string );
 		}
 	}, [ isFocused ] );
+
+	let placeholder: string | undefined = '';
+	if ( Array.isArray( props.selected ) ) {
+		placeholder = props.selected.length === 0 ? props.placeholder : '';
+	} else if ( props.selected ) {
+		placeholder = props.placeholder;
+	}
 
 	const inputProps: React.InputHTMLAttributes< HTMLInputElement > = {
 		className: 'woocommerce-experimental-select-control__input',
