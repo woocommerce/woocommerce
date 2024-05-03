@@ -167,6 +167,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		>
 			<td className="woocommerce-new-attribute-modal__table-attribute-column">
 				<AttributesComboboxControl
+					instanceNumber={ index }
 					placeholder={ attributePlaceholder }
 					current={ attribute }
 					items={ filteredAttributes }

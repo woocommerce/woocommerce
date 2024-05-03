@@ -306,9 +306,11 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 * Get the attribute ids that are already selected
 					 * by other form fields.
 					 */
-					const attributeBelongTo = values.attributes.map( ( attr ) =>
-						attr ? attr.id : null
-					);
+					const attributeBelongTo = values.attributes
+						.map( ( attr ) => ( attr ? attr.id : null ) )
+						.filter( ( id ) => id !== null ) as number[];
+
+					console.log( 'attributeBelongTo: ', attributeBelongTo );
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
@@ -327,7 +329,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								attribute.id
 							),
 							takenBy: attributeBelongTo.indexOf( attribute.id ),
-						} ) );
+						} ) ) as AttributesComboboxControlItem[];
 
 					return (
 						<Modal
