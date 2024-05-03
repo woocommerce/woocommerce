@@ -12,6 +12,5 @@
 	"supports": {
 		"interactivity": true,
 		"inserter": false
-	},
-	"usesContext": [ "queryId" ]
+	}
 }
