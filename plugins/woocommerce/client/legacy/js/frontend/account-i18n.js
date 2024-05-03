@@ -1,13 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Select all elements with the class 'wc-block-components-notice-banner'
-    const notices = Array.from(document.querySelectorAll('.wc-block-components-notice-banner')).filter(el => {
-        // Filter elements that contain text
-        return el.textContent.trim().length > 0;
+/* global Cookies */
+jQuery( function( $ ) {	
+    // Select all elements with the class 'wc-block-components-notice-banner' that contain text
+    var notices = $('.wc-block-components-notice-banner').filter(function() {
+        return $(this).text().trim().length > 0;
     });
 
-    // Focus on the first element if any are found
     if (notices.length > 0) {
-        notices[0].setAttribute('tabindex', '-1');
-        notices[0].focus();
+        $(notices[0]).attr('tabindex', '-1').focus();
     }
 });
