@@ -457,6 +457,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		update_comment_meta( $review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
 
+		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
+			update_comment_meta( $review_id, 'verified', $request['verified'] );
+		}
+
 		$review = get_comment( $review_id );
 
 		/**
@@ -569,6 +573,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $id, 'rating', $request['rating'] );
+		}
+
+		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
+			update_comment_meta( $id, 'verified', $request['verified'] );
 		}
 
 		$review = get_comment( $id );
