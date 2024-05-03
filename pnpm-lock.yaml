@@ -3857,6 +3857,9 @@ importers:
 
   plugins/woocommerce-blocks:
     dependencies:
+      '@ariakit/react':
+        specifier: ^0.4.4
+        version: 0.4.5(react-dom@17.0.2)(react@17.0.2)
       '@dnd-kit/core':
         specifier: ^6.1.0
         version: 6.1.0(react-dom@17.0.2)(react@17.0.2)
@@ -5073,6 +5076,10 @@ packages:
   /@ariakit/core@0.3.8:
     resolution: {integrity: sha512-LlSCwbyyozMX4ZEobpYGcv1LFqOdBTdTYPZw3lAVgLcFSNivsazi3NkKM9qNWNIu00MS+xTa0+RuIcuWAjlB2Q==}
 
+  /@ariakit/core@0.4.5:
+    resolution: {integrity: sha512-e294+bEcyzt/H/kO4fS5/czLAlkF7PY+Kul3q2z54VY+GGay8NlVs9UezAB7L4jUBlYRAXwp7/1Sq3R7b+MZ7w==}
+    dev: false
+
   /@ariakit/react-core@0.3.14(react-dom@17.0.2)(react@17.0.2):
     resolution: {integrity: sha512-16Qj6kDPglpdWtU5roY9q+G66naOjauTY5HvUIaL2aLY0187ATaRrABIKoMMzTtJyhvsud4jFlzivz+/zCQ8yw==}
     peerDependencies:
@@ -5098,6 +5105,19 @@ packages:
       react-dom: 17.0.2(react@17.0.2)
       use-sync-external-store: 1.2.0(react@17.0.2)
 
+  /@ariakit/react-core@0.4.5(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-ciTYPwpj/+mdA+EstveEnoygbx5e4PXQJxfkLKy4lkTkDJJUS9GcbYhdnIFJVUta6P1YFvzkIKo+/y9mcbMKJg==}
+    peerDependencies:
+      react: ^17.0.2
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@ariakit/core': 0.4.5
+      '@floating-ui/dom': 1.5.3
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
+      use-sync-external-store: 1.2.0(react@17.0.2)
+    dev: false
+
   /@ariakit/react@0.3.14(react-dom@17.0.2)(react@17.0.2):
     resolution: {integrity: sha512-h71BPMZ2eW+E2ESbdYxSAEMR1DozYzd5eHE5IOzGd9Egi5u7EZxqmuW4CXVXZ1Y6vbaDMV3SudgPh7iHS/ArFw==}
     peerDependencies:
@@ -5118,6 +5138,17 @@ packages:
       '@ariakit/react-core': 0.3.9(react-dom@17.0.2)(react@17.0.2)
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
+
+  /@ariakit/react@0.4.5(react-dom@17.0.2)(react@17.0.2):
+    resolution: {integrity: sha512-GUHxaOY1JZrJUHkuV20IY4NWcgknhqTQM0qCQcVZDCi+pJiWchUjTG+UyIr/Of02hU569qnQ7yovskCf+V3tNg==}
+    peerDependencies:
+      react: ^17.0.2
+      react-dom: ^17.0.0 || ^18.0.0
+    dependencies:
+      '@ariakit/react-core': 0.4.5(react-dom@17.0.2)(react@17.0.2)
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
+    dev: false
 
   /@automattic/calypso-color-schemes@2.1.1:
     resolution: {integrity: sha512-X5gmQEDJVtw8N9NARgZGM/pmalfapV8ZyRzEn2o0sCLmTAXGYg6A28ucLCQdBIn1l9t2rghBDFkY71vyqjyyFQ==}
@@ -44094,7 +44125,7 @@ packages:
       postcss: 8.4.32
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /postcss-loader@4.3.0(postcss@8.4.32)(webpack@5.91.0):
     resolution: {integrity: sha512-M/dSoIiNDOo8Rk0mUqoj4kpGq91gcxCfb9PoyZVdZ76/AuhxylHDYZblNE8o+EQ9AMSASeMFEKxZf5aU6wlx1Q==}
@@ -47611,7 +47642,7 @@ packages:
       sass: 1.69.5
       schema-utils: 3.3.0
       semver: 7.5.4
-      webpack: 5.89.0(webpack-cli@4.10.0)
+      webpack: 5.89.0(webpack-cli@3.3.12)
 
   /sass-loader@10.5.0(sass@1.69.5)(webpack@5.91.0):
     resolution: {integrity: sha512-VsU71W7VR6SChMJZUqtrfLeMSA8ns7QTHbnA7cfevtjb3c392mX93lr0Dmr4uU1ch5uIbEmfmHjdrDYcXXkQ7w==}
