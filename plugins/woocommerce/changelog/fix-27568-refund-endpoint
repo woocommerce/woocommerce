@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Adds a wc/v3/refunds REST API endpoint so refunds can be queried collectively, unconnected to their orders
