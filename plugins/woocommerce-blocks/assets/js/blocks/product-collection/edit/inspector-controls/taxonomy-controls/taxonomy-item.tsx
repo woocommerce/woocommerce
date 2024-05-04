@@ -51,13 +51,13 @@ const getTokenForTerm = ( term: Term ): string => {
  * @return {Term|false} The term if one could be parsed and false if not.
  */
 const getTermFromToken = ( token: string ): Term | false => {
-	const matches = token.match( /^(.+) \(#(\d+)\)$/ );
+	const matches = token.match( /^(?:(.+) )?\(#(\d+)\)$/ );
 	if ( ! matches ) {
 		return false;
 	}
 
 	return {
-		name: matches[ 1 ],
+		name: matches[ 1 ] ?? '',
 		id: parseInt( matches[ 2 ], 10 ),
 	};
 };
@@ -159,13 +159,11 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 			{}
 		);
 
-		// Add all of the terms that have been deleted.
+		// Deleted terms will be displayed as just the ID with no name.
 		termIds.forEach( ( termId ) => {
-			if ( termMap[ termId ] ) {
-				return;
+			if ( ! termMap[ termId ] ) {
+				existingTokens.push( `(#${ termId })` );
 			}
-
-			existingTokens.push( `DELETED (#${ termId })` );
 		} );
 	}
 
@@ -175,7 +173,12 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		// Remove the ID from the term
 		const term = getTermFromToken( display );
 		if ( term ) {
-			display = term.name;
+			// Missing terms will be identified as such.
+			if ( ! term.name ) {
+				display = `(#${ term.id } Missing)`;
+			} else {
+				display = term.name;
+			}
 		}
 
 		// Both the API and React will encode any HTML entities in the term name.
