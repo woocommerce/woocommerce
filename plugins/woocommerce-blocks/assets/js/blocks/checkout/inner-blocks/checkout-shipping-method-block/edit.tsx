@@ -4,12 +4,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import {
-	PanelBody,
-	ToggleControl,
-	__experimentalRadio as Radio,
-	__experimentalRadioGroup as RadioGroup,
-} from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
