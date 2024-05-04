@@ -318,65 +318,34 @@ test.describe( 'Merchant → Checkout', () => {
 				await editor.selectBlocks( blockSelectorInEditor );
 			} );
 
-			test( 'Company input visibility and optional and required can be toggled', async ( {
+			test( 'Company input visibility and required can be toggled in shipping and billing', async ( {
 				editor,
-				editorUtils,
 			} ) => {
 				await editor.selectBlocks(
 					blockSelectorInEditor +
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
+				const checkbox = editor.page.getByRole( 'checkbox', {
+					name: 'Company',
+					exact: true,
+				} );
 
-				const shippingAddressBlock = await editorUtils.getBlockByName(
-					'woocommerce/checkout-shipping-address-block'
-				);
+				await checkbox.check();
+				await expect( checkbox ).toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'div.wc-block-components-address-form__company'
+					)
+				).toBeVisible();
 
-				const shippingCompanyInput =
-					shippingAddressBlock.getByLabel( 'Company' );
+				await checkbox.uncheck();
+				await expect( checkbox ).not.toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
+					)
+				).toBeHidden();
 
-				const shippingCompanyToggle = editor.page.getByRole(
-					'checkbox',
-					{
-						name: 'Company',
-						exact: true,
-					}
-				);
-
-				const shippingCompanyOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Optional"'
-				);
-
-				const shippingCompanyRequiredToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Required"'
-				);
-
-				// Verify that the company field is hidden by default.
-				await expect( shippingCompanyInput ).toBeHidden();
-
-				// Enable the company field.
-				await shippingCompanyToggle.check();
-
-				// Verify that the company field is visible and the field is optional.
-				await expect( shippingCompanyInput ).toBeVisible();
-				await expect( shippingCompanyOptionalToggle ).toBeChecked();
-				await expect( shippingCompanyInput ).not.toHaveAttribute(
-					'required',
-					''
-				);
-
-				// Make the company field required.
-				await shippingCompanyRequiredToggle.check();
-
-				// Verify that the company field is required.
-				await expect( shippingCompanyRequiredToggle ).toBeChecked();
-
-				// Disable the company field.
-				await shippingCompanyToggle.uncheck();
-
-				// Verify that the company field is hidden.
-				await expect( shippingCompanyInput ).toBeHidden();
-
-				// Display the billing address form.
 				await editor.canvas
 					.getByLabel( 'Use same address for billing' )
 					.uncheck();
@@ -385,58 +354,25 @@ test.describe( 'Merchant → Checkout', () => {
 					blockSelectorInEditor +
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
+				const billingCheckbox = editor.page.getByRole( 'checkbox', {
+					name: 'Company',
+					exact: true,
+				} );
+				await billingCheckbox.check();
+				await expect( billingCheckbox ).toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'.wc-block-checkout__billing-fields .wc-block-components-address-form__company'
+					)
+				).toBeVisible();
 
-				const billingAddressBlock = await editorUtils.getBlockByName(
-					'woocommerce/checkout-billing-address-block'
-				);
-
-				const billingCompanyInput =
-					billingAddressBlock.getByLabel( 'Company' );
-
-				const billingCompanyToggle = editor.page.getByRole(
-					'checkbox',
-					{
-						name: 'Company',
-						exact: true,
-					}
-				);
-
-				const billingCompanyOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Optional"'
-				);
-
-				const billingCompanyRequiredToggle = editor.page.locator(
-					'.wc-block-components-require-company-field >> text="Required"'
-				);
-
-				// Enable the company field.
-				await billingCompanyToggle.check();
-
-				// Verify that the company field is visible.
-				await expect( billingCompanyInput ).toBeVisible();
-
-				// Verify that the company field is currently required.
-				await expect( billingCompanyRequiredToggle ).toBeChecked();
-				await expect( billingCompanyInput ).toHaveAttribute(
-					'required',
-					''
-				);
-
-				// Make the company field optional.
-				await billingCompanyOptionalToggle.check();
-
-				// Verify that the company field is optional.
-				await expect( billingCompanyOptionalToggle ).toBeChecked();
-				await expect( billingCompanyInput ).not.toHaveAttribute(
-					'required',
-					''
-				);
-
-				// Disable the company field.
-				await billingCompanyToggle.uncheck();
-
-				// Verify that the company field is hidden.
-				await expect( billingCompanyInput ).toBeHidden();
+				await billingCheckbox.uncheck();
+				await expect( billingCheckbox ).not.toBeChecked();
+				await expect(
+					editor.canvas.locator(
+						'div.wc-block-components-address-form__company'
+					)
+				).toBeHidden();
 			} );
 
 			test( 'Apartment input visibility can be toggled in shipping and billing', async ( {
@@ -450,7 +386,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 				// Turn on apartment field and check it's visible in the fields.
 				const apartmentToggleSelector = editor.page.getByLabel(
-					'Address line 2',
+					'Apartment, suite, etc.',
 					{ exact: true }
 				);
 				await apartmentToggleSelector.check();
@@ -479,7 +415,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 				// Turn on apartment field and check it's visible in the fields.
 				const billingApartmentToggleSelector = editor.page.getByLabel(
-					'Address line 2',
+					'Apartment, suite, etc.',
 					{ exact: true }
 				);
 				await billingApartmentToggleSelector.check();
@@ -498,7 +434,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( billingApartmentInput ).toBeHidden();
 			} );
 
-			test( 'Phone input visibility and optional and required can be toggled', async ( {
+			test( 'Phone input visibility and required can be toggled', async ( {
 				editor,
 				editorUtils,
 			} ) => {
@@ -507,51 +443,36 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
 
+				// Turn on phone field and check it's visible in the fields.
+				const phoneToggleSelector = editor.page.getByLabel( 'Phone', {
+					exact: true,
+				} );
+				await phoneToggleSelector.check();
 				const shippingAddressBlock = await editorUtils.getBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
 
-				const shippingPhoneInput =
-					shippingAddressBlock.getByLabel( 'Phone' );
-
-				const shippingPhoneToggle = editor.page.getByRole( 'checkbox', {
-					name: 'Phone',
-					exact: true,
-				} );
-
-				const shippingPhoneOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Optional"'
+				// Turn on Require phone number? option and check it becomes required in the fields.
+				const phoneRequiredSelector = editor.page.getByLabel(
+					'Require phone number?',
+					{ exact: true }
 				);
-
-				const shippingPhoneRequiredToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Required"'
-				);
-
-				// Verify that the phone field is visible by default and the field is optional.
-				await expect( shippingPhoneInput ).toBeVisible();
-				await expect( shippingPhoneOptionalToggle ).toBeChecked();
-				await expect( shippingPhoneInput ).not.toHaveAttribute(
+				await phoneRequiredSelector.check();
+				const phoneInput = shippingAddressBlock.getByLabel( 'Phone' );
+				await expect( phoneInput ).toHaveAttribute( 'required', '' );
+				await phoneRequiredSelector.uncheck();
+				await expect( phoneInput ).not.toHaveAttribute(
 					'required',
 					''
 				);
 
-				// Make the phone number required.
-				await shippingPhoneRequiredToggle.check();
+				// Turn off phone field and check it's not visible in the fields.
+				await expect( phoneInput ).toBeVisible();
 
-				// Verify that the phone field is required.
-				await expect( shippingPhoneRequiredToggle ).toBeChecked();
-				await expect( shippingPhoneInput ).toHaveAttribute(
-					'required',
-					''
-				);
+				await phoneToggleSelector.uncheck();
 
-				// Disable the phone field.
-				await shippingPhoneToggle.uncheck();
+				await expect( phoneInput ).toBeHidden();
 
-				// Verify that the phone field is hidden.
-				await expect( shippingPhoneInput ).toBeHidden();
-
-				// Display the billing address form.
 				await editor.canvas
 					.getByLabel( 'Use same address for billing' )
 					.uncheck();
@@ -561,53 +482,41 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
 
+				// Turn on phone field and check it's visible in the fields.
+				const billingPhoneToggleSelector = editor.page.getByLabel(
+					'Phone',
+					{
+						exact: true,
+					}
+				);
+				await billingPhoneToggleSelector.check();
 				const billingAddressBlock = await editorUtils.getBlockByName(
 					'woocommerce/checkout-billing-address-block'
 				);
 
+				// Turn on Require phone number? option and check it becomes required in the fields.
+				const billingPhoneRequiredSelector = editor.page.getByLabel(
+					'Require phone number?',
+					{ exact: true }
+				);
+				await billingPhoneRequiredSelector.check();
 				const billingPhoneInput =
 					billingAddressBlock.getByLabel( 'Phone' );
-
-				const billingPhoneToggle = editor.page.getByRole( 'checkbox', {
-					name: 'Phone',
-					exact: true,
-				} );
-
-				const billingPhoneOptionalToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Optional"'
-				);
-
-				const billingPhoneRequiredToggle = editor.page.locator(
-					'.wc-block-components-require-phone-field >> text="Required"'
-				);
-
-				// Enable the phone field.
-				await billingPhoneToggle.check();
-
-				// Verify that the phone field is visible.
-				await expect( billingPhoneInput ).toBeVisible();
-
-				// Verify that the phone field is currently required.
-				await expect( billingPhoneRequiredToggle ).toBeChecked();
 				await expect( billingPhoneInput ).toHaveAttribute(
 					'required',
 					''
 				);
-
-				// Make the phone field optional.
-				billingPhoneOptionalToggle.check();
-
-				// Verify that the phone field is optional.
-				await expect( billingPhoneOptionalToggle ).toBeChecked();
+				await billingPhoneRequiredSelector.uncheck();
 				await expect( billingPhoneInput ).not.toHaveAttribute(
 					'required',
 					''
 				);
 
-				// Disable the phone field.
-				await billingPhoneToggle.uncheck();
+				// Turn off phone field and check it's not visible in the fields.
+				await expect( billingPhoneInput ).toBeVisible();
 
-				// Verify that the phone field is hidden.
+				await billingPhoneToggleSelector.uncheck();
+
 				await expect( billingPhoneInput ).toBeHidden();
 			} );
 		} );
