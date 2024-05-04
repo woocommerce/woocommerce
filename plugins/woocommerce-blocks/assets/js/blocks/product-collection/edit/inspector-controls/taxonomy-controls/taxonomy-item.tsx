@@ -122,12 +122,24 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 	);
 	const handleSearch = useDebounce( setSearchQuery, 250 );
 
-	// Transform the terms into tokens for the FormTokenField control.
+	// Transform the terms for the FormTokenField control and
+	// keep track of any duplicate term names for later.
+	const allTermNames = new Set< string >();
+	const duplicateNames = new Set< string >();
+	const createTokenForTerm = ( term: Term ) => {
+		if ( allTermNames.has( term.name ) ) {
+			duplicateNames.add( term.name );
+		}
+		allTermNames.add( term.name );
+
+		return getTokenForTerm( term );
+	};
+
 	const existingTokens = existingTerms
-		? existingTerms.map( getTokenForTerm )
+		? existingTerms.map( createTokenForTerm )
 		: [];
 	const suggestionTokens = searchTerms
-		? searchTerms.map( getTokenForTerm )
+		? searchTerms.map( createTokenForTerm )
 		: [];
 
 	// Since the FormTokenField has the term ID encoded in the token
@@ -170,13 +182,18 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 	// Since our tokens include some encoding we need to perform some transformations
 	// before they can be displayed in the input and in the suggestion list.
 	const displayTermName = ( display: string ) => {
-		// Remove the ID from the term
 		const term = getTermFromToken( display );
 		if ( term ) {
-			// Missing terms will be identified as such.
+			// Terms that are missing will be identified as such.
 			if ( ! term.name ) {
 				display = `(#${ term.id } Missing)`;
-			} else {
+			}
+			// Terms with names that are non-unique will have the ID appended.
+			else if ( duplicateNames.has( term.name ) ) {
+				display = `${ term.name } (#${ term.id })`;
+			}
+			// Terms that fit neither criteria just display the name.
+			else {
 				display = term.name;
 			}
 		}
