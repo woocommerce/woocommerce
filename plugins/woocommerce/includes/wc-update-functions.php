@@ -2671,13 +2671,6 @@ function wc_update_870_prevent_listing_of_transient_files_directory() {
 }
 
 /**
- * Add woocommerce_show_lys_tour.
- */
-function wc_update_890_add_launch_your_store_tour_option() {
-	update_option( 'woocommerce_show_lys_tour', 'yes' );
-}
-
-/**
  * If it exists, remove and recreate the inbox note that asks users to connect to `Woo.com` so that the domain name is changed to the updated `WooCommerce.com`.
  */
 function wc_update_890_update_connect_to_woocommerce_note() {
