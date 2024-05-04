@@ -1,6 +1,6 @@
 {
 	"extends": "../tsconfig",
-	"include": [ "src/" ],
+	"include": [ "src/", "typings/" ],
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
