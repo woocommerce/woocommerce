@@ -48,7 +48,7 @@ jobs:
                   WOOCOMMERCE_BLOCKS_PHASE: 3
               run: |
 
-                  # Current version must compare greather than any previously used current version for this PR.
+                  # Current version must compare greater than any previously used current version for this PR.
                   # Assume GH run IDs are monotonic.
                   VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
 
@@ -61,16 +61,15 @@ jobs:
                   bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
-                  mkdir "$GITHUB_WORKSPACE/unzips"
+                  mkdir "$GITHUB_WORKSPACE/unzips/woocommerce"
                   cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
                   unzip woocommerce.zip
-                  cp -r woocommerce "$GITHUB_WORKSPACE/unzips/woocommerce"
+                  cp -r woocommerce "$GITHUB_WORKSPACE/unzips/woocommerce/woocommerce"
                   rm woocommerce.zip
                   mv woocommerce woocommerce-dev
                   zip -q -r "woocommerce-dev.zip" "woocommerce-dev/"
                   rm -fR "$GITHUB_WORKSPACE/zips/woocommerce-dev"
-
                   # Plugin data is passed as a JSON object.
                   PLUGIN_DATA="{}"          
                   PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' <<<"$PLUGIN_DATA" )
