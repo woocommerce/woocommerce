@@ -5,7 +5,7 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 		landingPage: '/wp-admin/admin.php?page=wc-admin',
 
 		preferredVersions: {
-			php: '7.4',
+			php: '8',
 			wp: 'latest',
 		},
 
