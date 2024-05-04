@@ -2,6 +2,7 @@ name: Build Live Branch
 on:
     pull_request:
         paths-ignore:
+            - '.github/**'
             - 'docs/**'
             - 'packages/php/**'
             - 'tools/**'
