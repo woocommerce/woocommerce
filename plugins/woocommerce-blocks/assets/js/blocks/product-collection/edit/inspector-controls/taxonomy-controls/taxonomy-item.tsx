@@ -30,7 +30,7 @@ const DEFAULT_QUERY_ARGS = {
 };
 
 /**
- * Given a term this will return a name to use in the FormTokenField. Since the
+ * Given a term this will return a token to use in the FormTokenField. Since the
  * field only allows for string values we need to make sure that the name
  * has all of the information needed to identify the term object. We do
  * this by encoding the term ID in the name.
@@ -39,6 +39,8 @@ const DEFAULT_QUERY_ARGS = {
  * @return {string} The token for the term.
  */
 const getTokenForTerm = ( term: Term ): string => {
+	// Make sure that the ID is AFTER the name so that the matching
+	// in FormTokenField works and the suggestions are rendered.
 	return `${ term.name } (#${ term.id })`;
 };
 
@@ -167,10 +169,19 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 		} );
 	}
 
-	const displayTermName = ( token: string ) => {
-		// Since both the API and React will attempt to encode HTML entities, we need to
-		// decode them so that React can render them properly.
-		return decodeEntities( token ) || '';
+	// Since our tokens include some encoding we need to perform some transformations
+	// before they can be displayed in the input and in the suggestion list.
+	const displayTermName = ( display: string ) => {
+		// Remove the ID from the term
+		const term = getTermFromToken( display );
+		if ( term ) {
+			display = term.name;
+		}
+
+		// Both the API and React will encode any HTML entities in the term name.
+		// We need to decode them before they are rendered to undo the
+		// API's encoding so that React can display them properly.
+		return decodeEntities( display ) || '';
 	};
 
 	return (
