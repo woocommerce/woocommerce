@@ -24,6 +24,7 @@
 	box-shadow: none !important;
 	outline: 1px solid $universal-border-light !important; // Overwriting Gutenberg styles
 	border-radius: $universal-border-radius;
+	cursor: pointer;
 	&.components-button:hover:not(:disabled),
 	&.components-button:focus:not(:disabled),
 	&:focus,
