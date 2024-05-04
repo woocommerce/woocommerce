@@ -431,7 +431,7 @@ class File {
 	 */
 	public function write( string $text ): bool {
 		if ( '' === $text ) {
-			return true;
+			return false;
 		}
 
 		if ( ! $this->is_writable() ) {
