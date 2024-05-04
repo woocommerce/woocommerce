@@ -61,7 +61,7 @@ jobs:
                   bash bin/build-zip.sh
 
                   mkdir "$GITHUB_WORKSPACE/zips"
-                  mkdir "$GITHUB_WORKSPACE/unzips/woocommerce"
+                  mkdir -p "$GITHUB_WORKSPACE/unzips/woocommerce"
                   cp "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.zip" "$GITHUB_WORKSPACE/zips/woocommerce.zip"
                   cd "$GITHUB_WORKSPACE/zips"
                   unzip woocommerce.zip
