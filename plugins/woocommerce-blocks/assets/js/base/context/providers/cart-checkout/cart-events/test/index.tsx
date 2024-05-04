@@ -33,6 +33,9 @@ describe( 'CartEventsProvider', () => {
 				</div>
 			</CartEventsProvider>
 		);
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		expect( screen.getByText( 'Mock observer' ) ).toBeInTheDocument();
 		const button = screen.getByText( 'Proceed to Checkout' );
 
