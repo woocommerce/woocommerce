@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+DISABLE_HPOS="${DISABLE_HPOS:-0}"
+
+echo -e "DISABLE_HPOS: $DISABLE_HPOS"
+if [ $DISABLE_HPOS == 1 ]; then
+	echo -e 'Disabling HPOS\n'
+	wp-env run tests-cli wp option update woocommerce_custom_orders_table_enabled 'no'
+fi
+
 ENABLE_TRACKING="${ENABLE_TRACKING:-0}"
 
 echo -e 'Activate default theme \n'

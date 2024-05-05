@@ -31,6 +31,10 @@
 		"parentTaxonomyText": {
 			"type": "string",
 			"__experimentalRole": "content"
+		},
+		"placeholder": {
+			"type": "string",
+			"__experimentalRole": "content"
 		}
 	},
 	"supports": {
