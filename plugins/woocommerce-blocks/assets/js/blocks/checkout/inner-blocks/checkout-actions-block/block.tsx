@@ -9,18 +9,11 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
-import {
-	StoreNoticesContainer,
-	FormattedMonetaryAmount,
-} from '@woocommerce/blocks-components';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_STORE_KEY } from '@woocommerce/block-data';
 import { select } from '@wordpress/data';
-import {
-	formatPrice,
-	getCurrencyFromPriceResponse,
-} from '@woocommerce/price-format';
-import { createInterpolateElement } from '@wordpress/element';
+import { formatPrice } from '@woocommerce/price-format';
 
 /**
  * Internal dependencies
