@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -340,9 +341,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer ) {
-		global $wpdb;
-		$last_order_key = 'wc_last_order_' . rtrim( $wpdb->get_blog_prefix(), '_' );
-
 		//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filters the id of the last order from a given customer.
@@ -353,7 +351,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 */
 		$last_order_id = apply_filters(
 			'woocommerce_customer_get_last_order',
-			get_user_meta( $customer->get_id(), $last_order_key, true ),
+			Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true ),
 			$customer
 		);
 		//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
@@ -388,7 +386,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			update_user_meta( $customer->get_id(), $last_order_key, $last_order_id );
+			Users::update_site_user_meta( $customer->get_id(), 'wc_last_order', $last_order_id );
 		}
 
 		if ( ! $last_order_id ) {
