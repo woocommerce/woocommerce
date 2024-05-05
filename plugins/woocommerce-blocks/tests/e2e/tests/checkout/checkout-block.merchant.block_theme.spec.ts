@@ -439,7 +439,7 @@ test.describe( 'Merchant → Checkout', () => {
 				await expect( billingCompanyInput ).toBeHidden();
 			} );
 
-			test( 'Apartment input visibility can be toggled in shipping and billing', async ( {
+			test( 'Apartment input visibility and optional and required can be toggled', async ( {
 				editor,
 				editorUtils,
 			} ) => {
@@ -448,26 +448,61 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-shipping-address-block"]'
 				);
 
-				// Turn on apartment field and check it's visible in the fields.
-				const apartmentToggleSelector = editor.page.getByLabel(
-					'Address line 2',
-					{ exact: true }
-				);
-				await apartmentToggleSelector.check();
 				const shippingAddressBlock = await editorUtils.getBlockByName(
 					'woocommerce/checkout-shipping-address-block'
 				);
 
-				const apartmentInput = shippingAddressBlock.getByLabel(
-					'Apartment, suite, etc. (optional)'
+				const shippingApartmentInput =
+					shippingAddressBlock.getByLabel( 'Apartment' );
+
+				const shippingApartmentLink = shippingAddressBlock.getByRole(
+					'button',
+					{
+						name: '+ Add apartment, suite, etc.',
+					}
 				);
-				// Turn off apartment field and check it's not visible in the fields.
-				await expect( apartmentInput ).toBeVisible();
 
-				await apartmentToggleSelector.uncheck();
+				const shippingApartmentToggle = editor.page.getByRole(
+					'checkbox',
+					{
+						name: 'Address line 2',
+						exact: true,
+					}
+				);
 
-				await expect( apartmentInput ).toBeHidden();
+				const shippingApartmentOptionalToggle = editor.page.locator(
+					'.wc-block-components-require-apartment-field >> text="Optional"'
+				);
 
+				const shippingApartmentRequiredToggle = editor.page.locator(
+					'.wc-block-components-require-apartment-field >> text="Required"'
+				);
+
+				// Verify that the apartment link is visible by default.
+				await expect( shippingApartmentLink ).toBeVisible();
+
+				// Verify that the apartment field is hidden by default and the field is optional.
+				await expect( shippingApartmentInput ).toBeHidden();
+				await expect( shippingApartmentOptionalToggle ).toBeChecked();
+
+				// Make the apartment number required.
+				await shippingApartmentRequiredToggle.check();
+
+				// Verify that the apartment field is required.
+				await expect( shippingApartmentRequiredToggle ).toBeChecked();
+				await expect( shippingApartmentInput ).toHaveAttribute(
+					'required',
+					''
+				);
+
+				// Disable the apartment field.
+				await shippingApartmentToggle.uncheck();
+
+				// Verify that the apartment link and the apartment field are hidden.
+				await expect( shippingApartmentLink ).toBeHidden();
+				await expect( shippingApartmentInput ).toBeHidden();
+
+				// Display the billing address form.
 				await editor.canvas
 					.getByLabel( 'Use same address for billing' )
 					.uncheck();
@@ -477,24 +512,67 @@ test.describe( 'Merchant → Checkout', () => {
 						'  [data-type="woocommerce/checkout-billing-address-block"]'
 				);
 
-				// Turn on apartment field and check it's visible in the fields.
-				const billingApartmentToggleSelector = editor.page.getByLabel(
-					'Address line 2',
-					{ exact: true }
-				);
-				await billingApartmentToggleSelector.check();
 				const billingAddressBlock = await editorUtils.getBlockByName(
 					'woocommerce/checkout-billing-address-block'
 				);
 
-				const billingApartmentInput = billingAddressBlock.getByLabel(
-					'Apartment, suite, etc. (optional)'
+				const billingApartmentInput =
+					billingAddressBlock.getByLabel( 'Apartment' );
+
+				const billingApartmentLink = billingAddressBlock.getByRole(
+					'button',
+					{
+						name: '+ Add apartment, suite, etc.',
+					}
 				);
-				// Turn off apartment field and check it's not visible in the fields.
+
+				const billingApartmentToggle = editor.page.getByRole(
+					'checkbox',
+					{
+						name: 'Address line 2',
+						exact: true,
+					}
+				);
+
+				const billingApartmentOptionalToggle = editor.page.locator(
+					'.wc-block-components-require-apartment-field >> text="Optional"'
+				);
+
+				const billingApartmentRequiredToggle = editor.page.locator(
+					'.wc-block-components-require-apartment-field >> text="Required"'
+				);
+
+				// Enable the apartment field.
+				await billingApartmentToggle.check();
+
+				// Verify that the apartment link is hidden.
+				await expect( billingApartmentLink ).toBeHidden();
+
+				// Verify that the apartment field is visible.
 				await expect( billingApartmentInput ).toBeVisible();
 
-				await billingApartmentToggleSelector.uncheck();
+				// Verify that the apartment field is currently required.
+				await expect( billingApartmentRequiredToggle ).toBeChecked();
+				await expect( billingApartmentInput ).toHaveAttribute(
+					'required',
+					''
+				);
 
+				// Make the apartment field optional.
+				billingApartmentOptionalToggle.check();
+
+				// Verify that the apartment link is visible.
+				await expect( billingApartmentLink ).toBeVisible();
+
+				// Verify that the apartment field is hidden and optional.
+				await expect( billingApartmentInput ).toBeHidden();
+				await expect( billingApartmentOptionalToggle ).toBeChecked();
+
+				// Disable the apartment field.
+				await billingApartmentToggle.uncheck();
+
+				// Verify that the apartment link and the apartment field are hidden.
+				await expect( billingApartmentLink ).toBeHidden();
 				await expect( billingApartmentInput ).toBeHidden();
 			} );
 
