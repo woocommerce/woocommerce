@@ -933,7 +933,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	$has_recorded = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
+	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( 'cancelled', 'failed', 'trash' );
 
 	/**
