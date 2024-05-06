@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
  *
- * @package order-confirmation-filters
+ * @package woocommerce-order-confirmation-filters
  */
 
 // Disable the Verify Known Shoppers feature for presenting order details
