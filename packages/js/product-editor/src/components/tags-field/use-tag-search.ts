@@ -1,14 +1,12 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { resolveSelect } from '@wordpress/data';
 import {
 	EXPERIMENTAL_PRODUCT_TAGS_STORE_NAME,
 	ProductTag,
 } from '@woocommerce/data';
-
-export type ProductTagNode = Pick< ProductTag, 'id' | 'name' >;
 
 /**
  * A hook used to handle all the search logic for the tag search component.
