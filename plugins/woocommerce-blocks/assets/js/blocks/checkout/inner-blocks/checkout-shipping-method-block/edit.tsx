@@ -4,12 +4,7 @@
  */
 import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
-import {
-	PanelBody,
-	ToggleControl,
-	__experimentalRadio as Radio,
-	__experimentalRadioGroup as RadioGroup,
-} from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
@@ -18,6 +13,7 @@ import {
 	useBlockProps,
 	RichText,
 } from '@wordpress/block-editor';
+import Button from '@woocommerce/base-components/button';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { innerBlockAreas } from '@woocommerce/blocks-checkout';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -45,17 +41,18 @@ const LocalPickupSelector = ( {
 	showIcon,
 	toggleText,
 	setAttributes,
+	onClick,
 }: {
 	checked: string;
 	rate: minMaxPrices;
 	showPrice: boolean;
 	showIcon: boolean;
 	toggleText: string;
+	onClick: () => void;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
 	return (
-		<Radio
-			value="pickup"
+		<Button
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -63,6 +60,8 @@ const LocalPickupSelector = ( {
 						checked === 'pickup',
 				}
 			) }
+			onClick={ onClick }
+			removeTextWrap
 		>
 			{ showIcon === true && (
 				<Icon
@@ -85,7 +84,7 @@ const LocalPickupSelector = ( {
 			{ showPrice === true && (
 				<RatePrice minRate={ rate.min } maxRate={ rate.max } />
 			) }
-		</Radio>
+		</Button>
 	);
 };
 
@@ -96,6 +95,7 @@ const ShippingSelector = ( {
 	showIcon,
 	toggleText,
 	setAttributes,
+	onClick,
 }: {
 	checked: string;
 	rate: minMaxPrices;
@@ -103,6 +103,7 @@ const ShippingSelector = ( {
 	showIcon: boolean;
 	toggleText: string;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
+	onClick: () => void;
 } ) => {
 	const Price =
 		rate.min === undefined ? (
@@ -114,8 +115,7 @@ const ShippingSelector = ( {
 		);
 
 	return (
-		<Radio
-			value="shipping"
+		<Button
 			className={ classnames(
 				'wc-block-checkout__shipping-method-option',
 				{
@@ -123,6 +123,8 @@ const ShippingSelector = ( {
 						checked === 'shipping',
 				}
 			) }
+			onClick={ onClick }
+			removeTextWrap
 		>
 			{ showIcon === true && (
 				<Icon
@@ -143,7 +145,7 @@ const ShippingSelector = ( {
 				preserveWhiteSpace
 			/>
 			{ showPrice === true && Price }
-		</Radio>
+		</Button>
 	);
 };
 
@@ -271,18 +273,19 @@ export const Edit = ( {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<RadioGroup
+			<div
 				id="shipping-method"
 				className="wc-block-checkout__shipping-method-container"
-				label="options"
-				onChange={ changeView }
-				checked={ prefersCollection ? 'pickup' : 'shipping' }
+				role="radiogroup"
 			>
 				<ShippingSelector
 					checked={ prefersCollection ? 'pickup' : 'shipping' }
 					rate={ getShippingPrices(
 						shippingRates[ 0 ]?.shipping_rates
 					) }
+					onClick={ () => {
+						changeView( 'shipping' );
+					} }
 					showPrice={ showPrice }
 					showIcon={ showIcon }
 					setAttributes={ setAttributes }
@@ -294,11 +297,14 @@ export const Edit = ( {
 						shippingRates[ 0 ]?.shipping_rates
 					) }
 					showPrice={ showPrice }
+					onClick={ () => {
+						changeView( 'pickup' );
+					} }
 					showIcon={ showIcon }
 					setAttributes={ setAttributes }
 					toggleText={ localPickupText }
 				/>
-			</RadioGroup>
+			</div>
 			<AdditionalFields block={ innerBlockAreas.SHIPPING_METHOD } />
 		</FormStepBlock>
 	);

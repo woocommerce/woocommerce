@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Checkout: Fix the rendering of local pickup / shipping buttons in the editor
+
