@@ -215,7 +215,7 @@ class WC_Admin_Tests_RemoteInboxNotifications_EvaluateAndGetStatus extends WC_Un
 
 	/**
 	 * Tests that for an alert note that is unactioned and eval to true,
-	 * status is changed to pending.
+	 * The pending status is returned.
 	 *
 	 * @group fast
 	 */
