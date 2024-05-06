@@ -40,6 +40,7 @@ class PluginsHelper {
 		add_action( 'woocommerce_plugins_activate_callback', array( __CLASS__, 'activate_plugins' ), 10, 2 );
 		add_action( 'admin_notices', array( __CLASS__, 'maybe_show_connect_notice_in_plugin_list' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_enqueue_scripts_for_connect_notice_in_plugins' ) );
 	}
 
 	/**
@@ -600,4 +601,12 @@ class PluginsHelper {
 		wp_enqueue_script( 'woo-connect-notice' );
 	}
 
+	public static function maybe_enqueue_scripts_for_connect_notice_in_plugins() {
+		if ( 'plugins' !== get_current_screen()->id ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
+		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
+	}
 }
