@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { renderHook, cleanup } from '@testing-library/react-hooks';
-import { ProductAttribute, ProductAttributeTerm } from '@woocommerce/data';
+import type {
+	ProductProductAttribute,
+	ProductAttributeTerm,
+} from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
 
 /**
@@ -100,7 +103,7 @@ jest.mock( '@wordpress/data', () => ( {
 	} ),
 } ) );
 
-const testAttributes: ProductAttribute[] = [
+const testAttributes: ProductProductAttribute[] = [
 	{
 		id: 0,
 		name: 'Local',

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Added shouldLoop prop for the Loader component to determine if looping should happen

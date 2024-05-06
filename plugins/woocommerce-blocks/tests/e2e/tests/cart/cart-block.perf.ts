@@ -21,7 +21,6 @@ const test = base.extend< { pageObject: CartPage } >( {
 test.describe( 'Cart performance', () => {
 	test.beforeEach( async ( { frontendUtils } ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 	} );
 
@@ -132,7 +131,7 @@ test.describe( 'Cart performance', () => {
 				'button.wc-block-components-quantity-selector__button--plus'
 			)
 			.waitFor();
-		await page.click( '.wc-block-components-totals-coupon-link' );
+		await page.click( '.wc-block-components-totals-coupon button' );
 
 		const timesForResponse = [];
 		let i = 3;

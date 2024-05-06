@@ -326,7 +326,7 @@ describe( 'crud reducer', () => {
 			};
 
 			const options = {
-				optimisticQueryUpdate: false,
+				optimisticQueryUpdate: {},
 			};
 
 			const resourceName = getRequestIdentifier(

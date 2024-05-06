@@ -664,7 +664,7 @@
           "post_title": "Product editor development handbook",
           "menu_title": "Development handbook",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/product-editor-development/product-editor.md",
-          "hash": "e94d3333e6ec94f6bf430ef0ea19a52142a1c60592060e527712bfd701487b72",
+          "hash": "cc5f82b66e949e3df2928b5e6b1217e8804c43b8e7b75ebc930cd0f90aef7bbe",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/product-editor-development/product-editor.md",
           "id": "59450404de2750d918137e7cf523e52bedfd7214",
           "links": {
@@ -836,7 +836,7 @@
           "menu_title": "Security best practices",
           "tags": "reference",
           "edit_url": "https://github.com/woocommerce/woocommerce/edit/trunk/docs/security/security-best-practices.md",
-          "hash": "7b0e53d779fe564b8f6c4e1a96567b2aef938ce840997045707ed4d30aa5b361",
+          "hash": "c2fdc86ba61ba0ad33ed2795f4f00eb90b7fc8545b007b2c14dbc1b7aa97a6ed",
           "url": "https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/docs/security/security-best-practices.md",
           "id": "d579f1c5174c67421dff64719e001b31a015a3d2"
         },
@@ -1266,5 +1266,5 @@
       "categories": []
     }
   ],
-  "hash": "814c3cc3f8b107aa3e1c160a4dbf81c9d13ac7a14e1ee58d03f149d053217b35"
+  "hash": "24c95fd5e28dc3e1fd03ffa495e1487bafc1dc8c3ffa91334f05ac2ea3b12e78"
 }
