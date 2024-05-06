@@ -184,7 +184,6 @@ function SelectControl< ItemType = DefaultItemType >( {
 		highlightedIndex,
 		getItemProps,
 		selectItem,
-		// @ts-expect-error We're allowed to use the property.
 		selectedItem: comboboxSingleSelectedItem,
 		openMenu,
 		closeMenu,
