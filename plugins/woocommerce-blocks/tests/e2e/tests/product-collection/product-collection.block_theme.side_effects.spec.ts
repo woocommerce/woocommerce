@@ -79,13 +79,11 @@ test.describe( 'Product Collection', () => {
 				},
 			];
 
-			await Promise.all(
-				productElements.map( async ( productElement ) => {
-					await pageObject.insertBlockInProductCollection(
-						productElement
-					);
-				} )
-			);
+			for ( const productElement of productElements ) {
+				await pageObject.insertBlockInProductCollection(
+					productElement
+				);
+			}
 		};
 
 		const verifyProductContent = async ( product: Locator ) => {
