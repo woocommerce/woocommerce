@@ -20,7 +20,7 @@ class Woocommerce_Analytics {
 	/**
 	 * Package version.
 	 */
-	const PACKAGE_VERSION = '0.1.5-alpha';
+	const PACKAGE_VERSION = '0.1.5';
 
 	/**
 	 * Initializer.
@@ -51,7 +51,7 @@ class Woocommerce_Analytics {
 		/**
 		 * Fires after the WooCommerce Analytics package is initialized
 		 *
-		 * @since $$next-version$$
+		 * @since 0.1.5
 		 */
 		do_action( 'woocommerce_analytics_init' );
 	}
