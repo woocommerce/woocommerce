@@ -49,7 +49,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test( 'Place order', async ( { frontendUtils, pageObject, page } ) => {
+	test( 'Place order', async ( { frontendUtils, pageObject, page, requestUtils } ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
@@ -109,9 +109,21 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		// Confirm order details are not visible
 		await pageObject.verifyOrderConfirmationDetails( page, false );
 
-		// The following tests are skipped until the multiple sign in roles is implemented
-		// - Confirm details are hidden when logged out
-		// - Confirm data is hidden without valid session/key
+		// Disable 'woocommerce_order_received_verify_known_shoppers' filter
+		await requestUtils.activatePlugin( 'order-confirmation-filters' );
+
+		// Logout the user and revisit the order received page to verify that details are displayed
+		await page.goto( '/my-account' );
+		await page
+			.locator(
+				'li.woocommerce-MyAccount-navigation-link--customer-logout a'
+			)
+			.click();
+
+		await page.goto( orderReceivedURL );
+
+		await pageObject.verifyOrderConfirmationDetails( page, true );
+
 	} );
 } );
 
