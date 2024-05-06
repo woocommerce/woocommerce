@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Catch NotFoundException before woocommerce_get_batch_processor
