@@ -135,6 +135,26 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		}
 	);
 
+	const BusinessService = () => (
+		<div className="woocommerce-marketplace__business-card">
+			<div
+				className="woocommerce-marketplace__business-card__header"
+				style={ { backgroundColor: product.color } }
+			>
+				<img src={ product.featuredImage } alt="" />
+			</div>
+			<div className="woocommerce-marketplace__business-card__content">
+				<div className="woocommerce-marketplace__business-card__main-content">
+					<h5>{ product.title }</h5>
+					<p>{ product.description }</p>
+				</div>
+				<div className="woocommerce-marketplace__business-card__badge">
+					<span>{ product.productCategory }</span>
+				</div>
+			</div>
+		</div>
+	);
+
 	return (
 		<Card
 			className={ classNames }
@@ -142,23 +162,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			style={ inlineCss() }
 		>
 			{ isBusinessService ? (
-				<div className="woocommerce-marketplace__business-card">
-					<div
-						className="woocommerce-marketplace__business-card__header"
-						style={ { backgroundColor: product.color } }
-					>
-						<img src={ product.featuredImage } alt="" />
-					</div>
-					<div className="woocommerce-marketplace__business-card__content">
-						<div className="woocommerce-marketplace__business-card__main-content">
-							<h5>{ product.title }</h5>
-							<p>{ product.description }</p>
-						</div>
-						<div className="woocommerce-marketplace__business-card__badge">
-							<span>{ product.productCategory }</span>
-						</div>
-					</div>
-				</div>
+				<BusinessService />
 			) : (
 				<div className="woocommerce-marketplace__product-card__content">
 					{ isTheme && (
