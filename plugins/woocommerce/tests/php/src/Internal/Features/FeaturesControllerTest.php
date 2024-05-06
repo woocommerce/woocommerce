@@ -402,7 +402,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->ExpectException( \Exception::class );
-		$this->ExpectExceptionMessage( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" );
+		$this->ExpectExceptionMessage( esc_html( "Plugin the_plugin is trying to declare itself as incompatible with the 'mature1' feature, but it already declared itself as compatible" ) );
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );

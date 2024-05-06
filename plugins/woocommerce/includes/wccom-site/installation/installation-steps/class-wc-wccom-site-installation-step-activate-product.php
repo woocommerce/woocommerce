@@ -79,6 +79,11 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 			throw new Installer_Error( Installer_Error_Codes::UNKNOWN_FILENAME );
 		}
 
+		// If the plugin is already active, make sure we call the registration hook.
+		if ( is_plugin_active( $filename ) ) {
+			WC_Helper::activated_plugin( $filename );
+		}
+
 		$result = activate_plugin( $filename );
 
 		if ( is_wp_error( $result ) ) {

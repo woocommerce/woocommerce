@@ -6,7 +6,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import { recordEvent } from '@woocommerce/tracks';
 import {
 	Button,
 	Modal,
@@ -27,6 +26,7 @@ import { WooCYSSecondaryButtonSlot } from './secondary-button-slot';
 import { SurveyForm } from './survey-form';
 import lessonPlan from '../assets/icons/lesson-plan.js';
 import { Icon, brush, tag } from '@wordpress/icons';
+import { trackEvent } from '../tracking';
 
 export * as actions from './actions';
 export * as services from './services';
@@ -103,7 +103,7 @@ export const Transitional = ( {
 							className="woocommerce-customize-store__transitional-preview-buttonwoocommerce-customize-store__transitional-preview-button"
 							variant="secondary"
 							onClick={ () => {
-								recordEvent(
+								trackEvent(
 									isWooExpress
 										? 'customize_your_store_transitional_survey_click'
 										: 'customize_your_store_on_core_transitional_survey_click'
@@ -119,7 +119,7 @@ export const Transitional = ( {
 						className="woocommerce-customize-store__transitional-preview-button"
 						variant="primary"
 						onClick={ () => {
-							recordEvent(
+							trackEvent(
 								'customize_your_store_transitional_preview_store_click'
 							);
 							window.open( homeUrl, '_blank' );
@@ -152,7 +152,7 @@ export const Transitional = ( {
 							<Button
 								variant="link"
 								onClick={ () => {
-									recordEvent(
+									trackEvent(
 										'customize_your_store_transitional_product_list_click'
 									);
 									navigateOrParent(
@@ -186,7 +186,7 @@ export const Transitional = ( {
 							<Button
 								variant="link"
 								onClick={ () => {
-									recordEvent(
+									trackEvent(
 										'customize_your_store_transitional_editor_click'
 									);
 									navigateOrParent(
@@ -223,7 +223,7 @@ export const Transitional = ( {
 							<Button
 								variant="link"
 								onClick={ () => {
-									recordEvent(
+									trackEvent(
 										'customize_your_store_transitional_home_click'
 									);
 									sendEvent( {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `admin_url` usage in Task List button links for Customize Store and Launch Your Store tasks.
