@@ -22,7 +22,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Rating Filter Block', async () => {
+test.describe( 'Product Filter: Rating Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test( 'Renders a checkbox list with the available ratings', async ( {
 			page,
@@ -31,8 +31,7 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 			await page.goto( defaultBlockPost.link );
 
 			const ratingStars = page.getByLabel( /^Rated \d out of 5/ );
-			const count = await ratingStars.count();
-			expect( count ).toBe( 2 );
+			await expect( ratingStars ).toHaveCount( 2 );
 
 			//  See bin/scripts/parallel/reviews.sh for reviews data.
 			await expect( ratingStars.nth( 0 ) ).toHaveAttribute(
@@ -63,9 +62,7 @@ test.describe( 'Product Filter: Rating Filter Block', async () => {
 			);
 
 			const products = page.locator( '.wc-block-product' );
-			const productCount = await products.count();
-
-			expect( productCount ).toBe( 1 );
+			await expect( products ).toHaveCount( 1 );
 		} );
 	} );
 } );

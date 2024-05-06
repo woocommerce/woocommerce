@@ -53,6 +53,8 @@ class WC_Product_Variable extends WC_Product {
 
 	/**
 	 * Get the aria-describedby description for the add to cart button.
+	 * Note that this is to provide the description, not the describedby attribute
+	 * itself.
 	 *
 	 * @return string
 	 */

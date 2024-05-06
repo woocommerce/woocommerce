@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Options;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
@@ -292,18 +293,45 @@ class BlockTemplateUtils {
 	/**
 	 * Finds all nested template part file paths in a theme's directory.
 	 *
-	 * @param string $base_directory The theme's file path.
+	 * @param string $template_type wp_template or wp_template_part.
 	 * @return array $path_list A list of paths to all template part files.
 	 */
-	public static function get_template_paths( $base_directory ) {
-		$path_list = array();
-		if ( file_exists( $base_directory ) ) {
-			$nested_files      = new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $base_directory ) );
-			$nested_html_files = new \RegexIterator( $nested_files, '/^.+\.html$/i', \RecursiveRegexIterator::GET_MATCH );
-			foreach ( $nested_html_files as $path => $file ) {
-				$path_list[] = $path;
-			}
+	public static function get_template_paths( $template_type ) {
+		$wp_template_filenames = array(
+			'archive-product.html',
+			'order-confirmation.html',
+			'page-cart.html',
+			'page-checkout.html',
+			'product-search-results.html',
+			'single-product.html',
+			'taxonomy-product_attribute.html',
+			'taxonomy-product_cat.html',
+			'taxonomy-product_tag.html',
+		);
+
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$wp_template_filenames[] = 'coming-soon.html';
 		}
+
+		$wp_template_part_filenames = array(
+			'checkout-header.html',
+			'mini-cart.html',
+		);
+
+		/*
+		* This may return the blockified directory for wp_templates.
+		* At the moment every template file has a corresponding blockified file.
+		* If we decide to add a new template file that doesn't, we will need to update this logic.
+		*/
+		$directory = self::get_templates_directory( $template_type );
+
+		$path_list = array_map(
+			function ( $filename ) use ( $directory ) {
+				return $directory . DIRECTORY_SEPARATOR . $filename;
+			},
+			'wp_template' === $template_type ? $wp_template_filenames : $wp_template_part_filenames
+		);
+
 		return $path_list;
 	}
 
@@ -679,16 +707,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Returns whether the passed `$template` has a title, and it's different from the slug.
-	 *
-	 * @param object $template The template object.
-	 * @return boolean
-	 */
-	public static function template_has_title( $template ) {
-		return ! empty( $template->title ) && $template->title !== $template->slug;
-	}
-
-	/**
 	 * Returns whether the passed `$template` has the legacy template block.
 	 *
 	 * @param object $template The template object.
@@ -696,6 +714,37 @@ class BlockTemplateUtils {
 	 */
 	public static function template_has_legacy_template_block( $template ) {
 		return has_block( 'woocommerce/legacy-template', $template->content );
+	}
+
+	/**
+	 * Updates the title, description and area of a template to the correct values and to make them more user-friendly.
+	 * For example, instead of:
+	 * - Title: `Tag (product_tag)`
+	 * - Description: `Displays taxonomy: Tag.`
+	 * we display:
+	 * - Title: `Products by Tag`
+	 * - Description: `Displays products filtered by a tag.`.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 * @param string            $template_type wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template
+	 */
+	public static function update_template_data( $template, $template_type ) {
+		if ( ! $template ) {
+			return $template;
+		}
+		if ( empty( $template->title ) || $template->title === $template->slug ) {
+			$template->title = self::get_block_template_title( $template->slug );
+		}
+		if ( empty( $template->description ) ) {
+			$template->description = self::get_block_template_description( $template->slug );
+		}
+		if ( empty( $template->area ) || 'uncategorized' === $template->area ) {
+			$template->area = self::get_block_template_area( $template->slug, $template_type );
+		}
+
+		return $template;
 	}
 
 	/**

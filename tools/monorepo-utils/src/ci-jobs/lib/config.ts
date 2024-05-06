@@ -22,11 +22,17 @@ export const enum JobType {
 }
 
 /**
+ * The type of the test job.
+ */
+export const testTypes = [ 'default', 'e2e', 'api', 'performance' ] as const;
+
+/**
  * The variables that can be used in tokens on command strings
  * that will be replaced during job creation.
  */
 export enum CommandVarOptions {
 	BaseRef = 'baseRef',
+	Event = 'event',
 }
 
 /**
@@ -47,6 +53,12 @@ interface BaseJobConfig {
 	 * The command to run for the job.
 	 */
 	command: string;
+
+	/**
+	 * The type of GitHub events this job is supposed to run on.
+	 * Example: push, pull_request
+	 */
+	events: string[];
 
 	/**
 	 * Indicates whether or not a job has been created for this config.
@@ -177,6 +189,7 @@ function parseLintJobConfig( raw: any ): LintJobConfig {
 		type: JobType.Lint,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,
+		events: raw.events || [],
 	};
 }
 
@@ -252,9 +265,19 @@ export interface TestJobConfig extends BaseJobConfig {
 	type: JobType.Test;
 
 	/**
+	 * The type of the test.
+	 */
+	testType: ( typeof testTypes )[ number ];
+
+	/**
 	 * The name for the job.
 	 */
 	name: string;
+
+	/**
+	 * The number of shards to be created for this job.
+	 */
+	shardingArguments: string[];
 
 	/**
 	 * The configuration for the test environment if one is needed.
@@ -320,10 +343,21 @@ function parseTestJobConfig( raw: any ): TestJobConfig {
 		);
 	}
 
+	let testType: ( typeof testTypes )[ number ] = 'default';
+	if (
+		raw.testType &&
+		testTypes.includes( raw.testType.toString().toLowerCase() )
+	) {
+		testType = raw.testType.toLowerCase();
+	}
+
 	validateCommandVars( raw.command );
 
 	const config: TestJobConfig = {
 		type: JobType.Test,
+		testType,
+		shardingArguments: raw.shardingArguments || [],
+		events: raw.events || [],
 		name: raw.name,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
 		command: raw.command,

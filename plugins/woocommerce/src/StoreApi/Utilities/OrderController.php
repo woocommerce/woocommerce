@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use \Exception;
+use Exception;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
@@ -79,7 +79,7 @@ class OrderController {
 		 */
 		add_filter(
 			'woocommerce_order_get_tax_location',
-			function( $location ) {
+			function ( $location ) {
 
 				if ( ! is_null( wc()->customer ) ) {
 
@@ -148,14 +148,11 @@ class OrderController {
 					'shipping_phone'      => $order->get_shipping_phone(),
 				)
 			);
-			$order_fields = $this->additional_fields_controller->get_all_fields_from_order( $order );
 
-			$customer_fields = $this->additional_fields_controller->filter_fields_for_customer( $order_fields );
-			foreach ( $customer_fields as $key => $value ) {
-				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer );
-			}
+			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $order, $customer );
+
 			$customer->save();
-		};
+		}
 	}
 
 	/**
@@ -168,7 +165,7 @@ class OrderController {
 	 */
 	public function validate_order_before_payment( \WC_Order $order ) {
 		$needs_shipping          = wc()->cart->needs_shipping();
-		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods' );
+		$chosen_shipping_methods = wc()->session->get( 'chosen_shipping_methods', [] );
 
 		$this->validate_coupons( $order );
 		$this->validate_email( $order );
@@ -202,7 +199,7 @@ class OrderController {
 			try {
 				array_walk(
 					$validators,
-					function( $validator, $index, $params ) {
+					function ( $validator, $index, $params ) {
 						call_user_func_array( array( $this, $validator ), $params );
 					},
 					array( $coupon, $order )
@@ -384,20 +381,15 @@ class OrderController {
 		$address        = $order->get_address( $address_type );
 		$current_locale = isset( $all_locales[ $address['country'] ] ) ? $all_locales[ $address['country'] ] : array();
 
-		$additional_fields = $this->additional_fields_controller->get_all_fields_from_order( $order );
+		$additional_fields = $this->additional_fields_controller->get_all_fields_from_object( $order, $address_type );
 
-		foreach ( $additional_fields as $field_id => $field_value ) {
-			$prefix = '/' . $address_type . '/';
-			if ( strpos( $field_id, $prefix ) === 0 ) {
-				$address[ str_replace( $prefix, '', $field_id ) ] = $field_value;
-			}
-		}
+		$address = array_merge( $address, $additional_fields );
 
 		$fields              = $this->additional_fields_controller->get_additional_fields();
 		$address_fields_keys = $this->additional_fields_controller->get_address_fields_keys();
 		$address_fields      = array_filter(
 			$fields,
-			function( $key ) use ( $address_fields_keys ) {
+			function ( $key ) use ( $address_fields_keys ) {
 				return in_array( $key, $address_fields_keys, true );
 			},
 			ARRAY_FILTER_USE_KEY
@@ -549,18 +541,30 @@ class OrderController {
 	 * @param array   $chosen_shipping_methods Array of shipping methods.
 	 */
 	public function validate_selected_shipping_methods( $needs_shipping, $chosen_shipping_methods = array() ) {
-		if ( ! $needs_shipping || ! is_array( $chosen_shipping_methods ) ) {
+		if ( ! $needs_shipping ) {
 			return;
 		}
 
+		$exception = new RouteException(
+			'woocommerce_rest_invalid_shipping_option',
+			__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
+			400,
+			array()
+		);
+
+		if ( ! is_array( $chosen_shipping_methods ) || empty( $chosen_shipping_methods ) ) {
+			throw $exception;
+		}
+
+		$valid_methods = array_keys( WC()->shipping()->get_shipping_methods() );
+
 		foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
-			if ( false === $chosen_shipping_method ) {
-				throw new RouteException(
-					'woocommerce_rest_invalid_shipping_option',
-					__( 'Sorry, this order requires a shipping option.', 'woocommerce' ),
-					400,
-					array()
-				);
+			if (
+				false === $chosen_shipping_method ||
+				! is_string( $chosen_shipping_method ) ||
+				! ArrayUtils::string_contains_array( $chosen_shipping_method, $valid_methods )
+			) {
+				throw $exception;
 			}
 		}
 	}
@@ -747,9 +751,6 @@ class OrderController {
 				'shipping_phone'      => wc()->customer->get_shipping_phone(),
 			)
 		);
-		$customer_fields = $this->additional_fields_controller->get_all_fields_from_customer( wc()->customer );
-		foreach ( $customer_fields as $key => $value ) {
-			$this->additional_fields_controller->persist_field_for_order( $key, $value, $order, false );
-		}
+		$this->additional_fields_controller->sync_order_additional_fields_with_customer( $order, wc()->customer );
 	}
 }

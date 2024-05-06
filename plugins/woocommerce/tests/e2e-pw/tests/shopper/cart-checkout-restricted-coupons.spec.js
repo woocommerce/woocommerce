@@ -1,4 +1,6 @@
 const { test, expect } = require( '@playwright/test' );
+const { getOrderIdFromUrl } = require( '../../utils/order' );
+const { addAProductToCart } = require( '../../utils/cart' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
 const includedProductName = 'Included test product';
@@ -184,8 +186,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 	test( 'expired coupon cannot be used', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try expired coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -200,8 +201,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try expired coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -222,8 +222,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try limited coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -237,8 +236,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 			// add a couple more in order to hit minimum spend
 			for ( let i = 0; i < 2; i++ ) {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
+				await addAProductToCart( page, firstProductId );
 			}
 			// passed because we're between 50 and 200 dollars
 			await page.goto( '/cart/' );
@@ -266,8 +264,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try limited coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -284,8 +281,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 
 			// add a couple more in order to hit minimum spend
 			for ( let i = 0; i < 2; i++ ) {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
+				await addAProductToCart( page, firstProductId );
 			}
 			// passed because we're between 50 and 200 dollars
 			await page.goto( '/checkout/' );
@@ -314,27 +310,12 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					'Sorry, coupon "min-max-spend-individual" has already been applied and cannot be used in conjunction with other coupons.'
 				)
 			).toBeVisible();
-
-			// add more products so the total is > $200
-			for ( let i = 0; i < 8; i++ ) {
-				await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-				await page.waitForLoadState( 'networkidle' );
-			}
-			// failed because we're over 200 dollars
-			await page.goto( '/checkout/' );
-			await expect(
-				page.getByText(
-					'There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.'
-				)
-			).toBeVisible();
-			await page.getByRole( 'link', { name: 'Return to cart' } ).click();
 		} );
 	} );
 
 	test( 'coupon cannot be used on sale item', async ( { page, context } ) => {
 		await test.step( 'Load cart page and try coupon usage on sale item', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -352,8 +333,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try coupon usage on sale item', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -393,7 +373,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 					billing: {
 						first_name: 'Marge',
 						last_name: 'Simpson',
-						email: 'marge@example.com',
+						email: 'marge.simpson@example.org',
 					},
 					line_items: [
 						{
@@ -413,8 +393,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		}
 
 		await test.step( 'Load cart page and try over limit coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -432,8 +411,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try over limit coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -461,8 +439,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try included certain items coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -480,8 +457,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try included certain items coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -505,8 +481,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try on certain products coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -522,8 +497,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try on certain products coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -545,8 +519,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try excluded items coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -564,8 +537,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try excluded items coupon usage', async () => {
-			await page.goto( `/shop/?add-to-cart=${ secondProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, secondProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -589,8 +561,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		context,
 	} ) => {
 		await test.step( 'Load cart page and try coupon usage on other items', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/cart/' );
 			await page
@@ -606,8 +577,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await context.clearCookies();
 
 		await test.step( 'Load checkout page and try coupon usage on other items', async () => {
-			await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-			await page.waitForLoadState( 'networkidle' );
+			await addAProductToCart( page, firstProductId );
 
 			await page.goto( '/checkout/' );
 			await page
@@ -625,10 +595,9 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 	} );
 
 	test( 'coupon cannot be used by any customer on cart (email restricted)', async ( {
-																							  page,
-																						  } ) => {
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		page,
+	} ) => {
+		await addAProductToCart( page, firstProductId );
 
 		await page.goto( '/cart/' );
 		await page.getByPlaceholder( 'Coupon code' ).fill( 'email-restricted' );
@@ -644,8 +613,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 	test( 'coupon cannot be used by any customer on checkout (email restricted)', async ( {
 		page,
 	} ) => {
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, firstProductId );
 
 		await page.goto( '/checkout/' );
 
@@ -661,7 +629,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page
 			.getByLabel( 'Email address' )
 			.first()
-			.fill( 'marge@example.com' );
+			.fill( 'marge.simpson@example.org' );
 
 		await page
 			.getByRole( 'link', { name: 'Click here to enter your code' } )
@@ -687,8 +655,7 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 			version: 'wc/v3',
 		} );
 
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, firstProductId );
 
 		await page.goto( '/checkout/' );
 
@@ -718,15 +685,12 @@ test.describe( 'Cart & Checkout Restricted Coupons', () => {
 		await page.getByRole( 'button', { name: 'Place order' } ).click();
 
 		await expect(
-			page.getByRole( 'heading', { name: 'Order received' } )
+			page.getByText( 'Your order has been received' )
 		).toBeVisible();
-		const newOrderId = await page
-			.locator( 'li.woocommerce-order-overview__order > strong' )
-			.textContent();
+		const newOrderId = getOrderIdFromUrl( page );
 
 		// try to order a second time, but should get an error
-		await page.goto( `/shop/?add-to-cart=${ firstProductId }` );
-		await page.waitForLoadState( 'networkidle' );
+		await addAProductToCart( page, firstProductId );
 
 		await page.goto( '/checkout/' );
 

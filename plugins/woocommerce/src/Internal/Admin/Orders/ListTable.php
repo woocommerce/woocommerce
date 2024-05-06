@@ -282,7 +282,7 @@ class ListTable extends WP_List_Table {
 				</h2>
 
 				<div class="woocommerce-BlankState-buttons">
-					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woo.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
+					<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin"><?php esc_html_e( 'Learn more about orders', 'woocommerce' ); ?></a>
 				</div>
 
 			<?php
@@ -1352,7 +1352,7 @@ class ListTable extends WP_List_Table {
 			}
 
 			do_action( 'woocommerce_remove_order_personal_data', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1380,7 +1380,7 @@ class ListTable extends WP_List_Table {
 
 			$order->update_status( $new_status, __( 'Order status changed by bulk edit.', 'woocommerce' ), true );
 			do_action( 'woocommerce_order_edit_status', $id, $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$changed++;
+			++$changed;
 		}
 
 		return $changed;
@@ -1403,7 +1403,7 @@ class ListTable extends WP_List_Table {
 			$updated_order = wc_get_order( $id );
 
 			if ( ( $force_delete && false === $updated_order ) || ( ! $force_delete && $updated_order->get_status() === 'trash' ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1423,7 +1423,7 @@ class ListTable extends WP_List_Table {
 
 		foreach ( $ids as $id ) {
 			if ( $orders_store->untrash_order( wc_get_order( $id ) ) ) {
-				$changed++;
+				++$changed;
 			}
 		}
 
@@ -1634,10 +1634,25 @@ class ListTable extends WP_List_Table {
 			'products'       => __( 'Products', 'woocommerce' ),
 			'all'            => __( 'All', 'woocommerce' ),
 		);
+
+		/**
+		 * Filters the search filters available in the admin order search. Can be used to add new or remove existing filters.
+		 * When adding new filters, `woocommerce_hpos_generate_where_for_search_filter` should also be used to generate the WHERE clause for the new filter
+		 *
+		 * @since 8.9.0.
+		 *
+		 * @param $options array List of available filters.
+		 */
+		$options       = apply_filters( 'woocommerce_hpos_admin_search_filters', $options );
+		$saved_setting = get_user_setting( 'wc-search-filter-hpos-admin', 'all' );
+		$selected      = sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? $saved_setting ) );
+		if ( $saved_setting !== $selected ) {
+			set_user_setting( 'wc-search-filter-hpos-admin', $selected );
+		}
 		?>
 		<select name="search-filter" id="order-search-filter">
 			<?php foreach ( $options as $value => $label ) { ?>
-				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $_REQUEST['search-filter'] ?? 'all' ) ) ); ?>><?php echo esc_html( $label ); ?></option>
+				<option value="<?php echo esc_attr( wp_unslash( sanitize_text_field( $value ) ) ); ?>" <?php selected( $value, sanitize_text_field( wp_unslash( $selected ) ) ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php
 			}
 	}

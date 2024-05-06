@@ -14,14 +14,11 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 	const templateTypeName =
 		testData.templateType === 'wp_template' ? 'template' : 'template part';
 
-	test.describe( `${ testData.templateName } template`, async () => {
-		test.afterAll( async ( { requestUtils } ) => {
-			await requestUtils.deleteAllTemplates( testData.templateType );
-		} );
-
+	test.describe( `${ testData.templateName } template`, () => {
 		test( 'can be modified and reverted', async ( {
 			admin,
 			frontendUtils,
+			editor,
 			editorUtils,
 			page,
 		} ) => {
@@ -30,11 +27,11 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 				testData.templateName,
 				testData.templateType
 			);
-			await editorUtils.editor.insertBlock( {
+			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editorUtils.saveTemplate();
+			await editor.saveSiteEditorEntities();
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
 			await expect(
@@ -47,10 +44,9 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			await expect( page.getByText( userText ).first() ).toBeVisible();
 
 			// Verify the edition can be reverted.
-			await admin.visitAdminPage(
-				'site-editor.php',
-				`path=/${ testData.templateType }/all`
-			);
+			await admin.visitSiteEditor( {
+				path: `/${ testData.templateType }/all`,
+			} );
 			await editorUtils.revertTemplateCustomizations(
 				testData.templateName
 			);
@@ -62,6 +58,7 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 			test( `defaults to the ${ testData.fallbackTemplate.templateName } template`, async ( {
 				admin,
 				frontendUtils,
+				editor,
 				editorUtils,
 				page,
 			} ) => {
@@ -70,23 +67,22 @@ CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
 					testData.fallbackTemplate?.templateName || '',
 					testData.templateType
 				);
-				await editorUtils.editor.insertBlock( {
+				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
 						content: fallbackTemplateUserText,
 					},
 				} );
-				await editorUtils.saveTemplate();
+				await editor.saveSiteEditorEntities();
 				await testData.visitPage( { frontendUtils, page } );
 				await expect(
 					page.getByText( fallbackTemplateUserText ).first()
 				).toBeVisible();
 
 				// Verify the edition can be reverted.
-				await admin.visitAdminPage(
-					'site-editor.php',
-					`path=/${ testData.templateType }/all`
-				);
+				await admin.visitSiteEditor( {
+					path: `/${ testData.templateType }/all`,
+				} );
 				await editorUtils.revertTemplateCustomizations(
 					testData.fallbackTemplate?.templateName || ''
 				);

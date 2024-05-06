@@ -12,6 +12,7 @@ import {
 	AnyEventObject,
 	BaseActionObject,
 	Sender,
+	raise,
 } from 'xstate';
 import { useMachine, useSelector } from '@xstate/react';
 import { useEffect, useMemo, useState } from '@wordpress/element';
@@ -72,6 +73,7 @@ import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
 import { getCountryCode } from '~/dashboard/utils';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useXStateInspect } from '~/xstate';
 
 export type InitializationCompleteEvent = {
 	type: 'INITIALIZATION_COMPLETE';
@@ -370,7 +372,12 @@ const handleGeolocation = assign( {
 	},
 } );
 
-const redirectToWooHome = () => {
+const redirectToWooHome = raise( 'REDIRECT_TO_WOO_HOME' );
+
+const exitToWooHome = async () => {
+	if ( window.wcAdminFeatures[ 'launch-your-store' ] ) {
+		await dispatch( ONBOARDING_STORE_NAME ).coreProfilerCompleted();
+	}
 	window.location.href = getNewPath( {}, '/', {} );
 };
 
@@ -698,6 +705,7 @@ const coreProfilerMachineServices = {
 	browserPopstateHandler,
 	updateBusinessInfo,
 	updateTrackingOption,
+	exitToWooHome,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -709,6 +717,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 	on: {
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
+		},
+		REDIRECT_TO_WOO_HOME: {
+			target: 'redirectingToWooHome',
 		},
 	},
 	context: {
@@ -1396,15 +1407,23 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				sendToJetpackAuthPage: {
 					invoke: {
-						src: async () =>
-							await resolveSelect(
+						src: async () => {
+							if (
+								window.wcAdminFeatures[ 'launch-your-store' ]
+							) {
+								await dispatch(
+									ONBOARDING_STORE_NAME
+								).coreProfilerCompleted();
+							}
+							return await resolveSelect(
 								ONBOARDING_STORE_NAME
 							).getJetpackAuthUrl( {
 								redirectUrl: getAdminLink(
 									'admin.php?page=wc-admin'
 								),
 								from: 'woocommerce-core-profiler',
-							} ),
+							} );
+						},
 						onDone: {
 							actions: actions.choose( [
 								{
@@ -1522,6 +1541,11 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			},
 		},
 		settingUpStore: {},
+		redirectingToWooHome: {
+			invoke: {
+				src: 'exitToWooHome',
+			},
+		},
 	},
 } );
 
@@ -1571,8 +1595,10 @@ export const CoreProfilerController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
+	const { versionEnabled } = useXStateInspect();
+
 	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		devTools: process.env.NODE_ENV === 'development',
+		devTools: versionEnabled === 'V4',
 	} );
 
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- false positive due to function name match, this isn't from react std lib

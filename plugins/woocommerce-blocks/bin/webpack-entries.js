@@ -25,6 +25,7 @@ const blocks = {
 	cart: {},
 	'catalog-sorting': {},
 	checkout: {},
+	'coming-soon': {},
 	'customer-account': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -217,8 +218,7 @@ const entries = {
 		wcBlocksSharedContext: './assets/js/shared/context/index.js',
 		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
 		priceFormat: './packages/prices/index.js',
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
+		wcTypes: './assets/js/types/index.ts',
 
 		// interactivity components, exported as separate entries for now
 		'wc-interactivity-dropdown':
@@ -236,6 +236,10 @@ const entries = {
 	frontend: {
 		reviews: './assets/js/blocks/reviews/frontend.ts',
 		...getBlockEntries( 'frontend.{t,j}s{,x}' ),
+
+		blocksCheckout: './packages/checkout/index.js',
+		blocksComponents: './packages/components/index.ts',
+
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'product-button-interactivity':

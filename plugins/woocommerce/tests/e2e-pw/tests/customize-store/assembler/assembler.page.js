@@ -16,7 +16,7 @@ export class AssemblerPage {
 			'.cys-fullscreen-iframe[style="opacity: 1;"]'
 		);
 
-		await frame.getByRole( 'button', { name: 'Done' } ).waitFor();
+		await frame.getByRole( 'button', { name: 'Save' } ).waitFor();
 	}
 
 	/**
@@ -32,5 +32,17 @@ export class AssemblerPage {
 			return this.page.frameLocator( selector );
 		}
 		return this.page;
+	}
+
+	/**
+	 * Get the editor frame locator.
+	 *
+	 * @return {Promise<import('playwright').FrameLocator>} The editor frame locator.
+	 */
+	async getEditor() {
+		const assembler = await this.getAssembler();
+		return assembler.frameLocator(
+			'.woocommerce-customize-store__edit-site-editor [name="editor-canvas"]'
+		);
 	}
 }

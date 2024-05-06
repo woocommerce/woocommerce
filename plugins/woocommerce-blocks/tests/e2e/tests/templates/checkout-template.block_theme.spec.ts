@@ -7,7 +7,7 @@ const permalink = '/checkout';
 const templatePath = 'woocommerce/woocommerce//page-checkout';
 const templateType = 'wp_template';
 
-test.describe( 'Test the checkout template', async () => {
+test.describe( 'Test the checkout template', () => {
 	test( 'Template can be opened in the site editor', async ( {
 		admin,
 		page,
@@ -18,7 +18,6 @@ test.describe( 'Test the checkout template', async () => {
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await expect(
 			page
 				.frameLocator( 'iframe[title="Editor canvas"i]' )
@@ -37,12 +36,11 @@ test.describe( 'Test the checkout template', async () => {
 			postId: templatePath,
 			postType: templateType,
 		} );
-		await admin.visitAdminPage( 'site-editor.php', 'path=%2Fpage' );
+		await admin.visitSiteEditor( { path: '/page' } );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 
 		await expect(
 			editor.canvas.locator( 'h1:has-text("Checkout")' ).first()
@@ -63,7 +61,7 @@ test.describe( 'Test the checkout template', async () => {
 	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart();
-		await admin.page.goto( permalink, { waitUntil: 'load' } );
+		await admin.page.goto( permalink );
 		await admin.page.locator( '#wp-admin-bar-site-editor a' ).click();
 		await expect(
 			admin.page
@@ -74,12 +72,7 @@ test.describe( 'Test the checkout template', async () => {
 	} );
 } );
 
-test.describe( 'Test editing the checkout template', async () => {
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-		await requestUtils.deleteAllTemplates( 'wp_template_part' );
-	} );
-
+test.describe( 'Test editing the checkout template', () => {
 	test( 'Merchant can transform shortcode block into blocks', async ( {
 		admin,
 		editorUtils,
@@ -90,13 +83,12 @@ test.describe( 'Test editing the checkout template', async () => {
 			postType: templateType,
 		} );
 		await editorUtils.enterEditMode();
-		await editorUtils.closeWelcomeGuideModal();
 		await editor.setContent(
 			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
 		);
-		await editor.canvas.waitForSelector(
-			'.wp-block-woocommerce-classic-shortcode'
-		);
+		await editor.canvas
+			.locator( '.wp-block-woocommerce-classic-shortcode' )
+			.waitFor();
 		await editor.canvas
 			.getByRole( 'button', { name: 'Transform into blocks' } )
 			.click();

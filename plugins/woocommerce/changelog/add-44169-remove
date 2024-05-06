@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Ensures to always convert the metas into a string array since it can be anything

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Ensure the CYS task is marked as complete only if the user customized their templates or global styles in the editor

@@ -81,10 +81,9 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
-
-			await expect( textContent ).toMatch( /Product published/ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Product published' );
 
 			const title = page.locator( '.woocommerce-product-header__title' );
 
@@ -133,10 +132,9 @@ test.describe( 'General tab', () => {
 				} )
 				.click();
 
-			const element = page.locator( 'div.components-snackbar__content' );
-			const textContent = await element.innerText();
-
-			await expect( textContent ).toMatch( /Invalid or duplicated SKU./ );
+			await expect(
+				page.getByLabel( 'Dismiss this notice' )
+			).toContainText( 'Invalid or duplicated SKU.' );
 		} );
 
 		test( 'can a shopper add the simple product to the cart', async ( {
@@ -146,24 +144,25 @@ test.describe( 'General tab', () => {
 			await expect(
 				page.getByRole( 'heading', { name: productData.name } )
 			).toBeVisible();
-			const productPriceElements = await page
-				.locator( '.summary .woocommerce-Price-amount' )
-				.all();
 
-			let foundProductPrice = false;
-			let foundSalePrice = false;
-			for ( const element of productPriceElements ) {
-				const textContent = await element.innerText();
-				if ( textContent.includes( productData.productPrice ) ) {
-					foundProductPrice = true;
-				}
-				if ( textContent.includes( productData.salePrice ) ) {
-					foundSalePrice = true;
-				}
-			}
-			await expect( foundProductPrice && foundSalePrice ).toBeTruthy();
+			await expect
+				.soft(
+					await page
+						.locator( 'del' )
+						.getByText( `$${ productData.productPrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
+			await expect
+				.soft(
+					await page
+						.locator( 'ins' )
+						.getByText( `$${ productData.salePrice }` )
+						.count()
+				)
+				.toBeGreaterThan( 0 );
 
-			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+			await page.locator( 'button[name="add-to-cart"]' ).click();
 			await page.getByRole( 'link', { name: 'View cart' } ).click();
 			await expect(
 				page.locator( 'td[data-title=Product]' ).first()

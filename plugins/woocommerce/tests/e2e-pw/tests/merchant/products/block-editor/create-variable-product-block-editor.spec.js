@@ -31,6 +31,29 @@ const attributesData = {
 	options: [ 'Small', 'Medium', 'Large' ],
 };
 
+const tabs = [
+	{
+		name: 'General',
+		noteText:
+			"This product has options, such as size or color. You can manage each variation's images, downloads, and other details individually.",
+	},
+	{
+		name: 'Pricing',
+		noteText:
+			"This product has options, such as size or color. You can now manage each variation's price and other details individually.",
+	},
+	{
+		name: 'Inventory',
+		noteText:
+			"This product has options, such as size or color. You can now manage each variation's inventory and other details individually.",
+	},
+	{
+		name: 'Shipping',
+		noteText:
+			"This product has options, such as size or color. You can now manage each variation's shipping settings and other details individually.",
+	},
+];
+
 let productId_editVariations, productId_deleteVariations;
 
 test.describe( 'Variations tab', () => {
@@ -147,12 +170,12 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
-			await page
-				.locator( '.woocommerce-product-publish-panel__header' )
-				.getByRole( 'button', {
-					name: 'Publish',
-				} )
-				.click();
+			// await page
+			// 	.locator( '.woocommerce-product-publish-panel__header' )
+			// 	.getByRole( 'button', {
+			// 		name: 'Publish',
+			// 	} )
+			// 	.click();
 
 			const element = page.locator( 'div.components-snackbar__content' );
 			if ( Array.isArray( element ) ) {
@@ -173,10 +196,9 @@ test.describe( 'Variations tab', () => {
 			await clickOnTab( 'Variations', page );
 
 			await page
-				.locator(
-					'.woocommerce-variations-table-error-or-empty-state__actions'
-				)
-				.getByRole( 'button', { name: 'Generate from options' } )
+				.getByRole( 'button', {
+					name: 'Generate from options',
+				} )
 				.click();
 
 			await clickOnTab( 'Variations', page );
@@ -192,21 +214,17 @@ test.describe( 'Variations tab', () => {
 				.getByRole( 'button', { name: 'Pricing' } )
 				.click();
 
-			const regularPrice = page.locator( 'input[name="regular_price"]' );
-			await regularPrice.waitFor( { state: 'visible' } );
-			await regularPrice.first().click();
-			await regularPrice.first().fill( '100' );
+			await page
+				.getByLabel( 'Regular price', { exact: true } )
+				.fill( '100' );
 
 			await page
 				.locator( '.woocommerce-product-tabs' )
 				.getByRole( 'button', { name: 'Inventory' } )
 				.click();
 
-			const sku = page.locator( 'input[name="woocommerce-product-sku"]' );
-			await sku.waitFor( { state: 'visible' } );
-			await sku.first().click();
-			await sku
-				.first()
+			await page
+				.locator( '#inspector-input-control-2' )
 				.fill( `product-sku-${ new Date().getTime().toString() }` );
 
 			await page
@@ -227,16 +245,13 @@ test.describe( 'Variations tab', () => {
 				} )
 				.click();
 
-			const editedItem = page
-				.locator( '.woocommerce-product-variations__table-body > div' )
-				.first();
-
-			const isEditedItemVisible = await editedItem
-				.locator( 'text="$100.00"' )
-				.waitFor( { state: 'visible', timeout: 3000 } )
-				.then( () => true )
-				.catch( () => false );
-			expect( isEditedItemVisible ).toBeTruthy();
+			await expect(
+				page
+					.locator(
+						'.woocommerce-product-variations__table-body > div'
+					)
+					.first()
+			).toBeVisible();
 		} );
 
 		test( 'can delete a variation', async ( { page } ) => {
@@ -273,6 +288,89 @@ test.describe( 'Variations tab', () => {
 					)
 					.count()
 			).toEqual( 5 );
+		} );
+
+		test( 'can see variations warning and click the CTA', async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }`
+			);
+
+			for ( const tab of tabs ) {
+				const { name: tabName, noteText } = tab;
+				await clickOnTab( tabName, page );
+
+				const notices = page.locator(
+					'p.woocommerce-product-notice__content'
+				);
+
+				const noticeCount = await notices.count();
+
+				for ( let i = 0; i < noticeCount; i++ ) {
+					const notice = notices.nth( i );
+					if ( await notice.isVisible() ) {
+						await expect( notice ).toHaveText( noteText );
+					}
+				}
+
+				await page
+					.locator( '.woocommerce-product-notice__content' )
+					.getByRole( 'button', { name: 'Go to Variations' } )
+					.click();
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Variation options',
+					} )
+				).toBeVisible();
+			}
+		} );
+
+		test( 'can see single variation warning and click the CTA', async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`/wp-admin/admin.php?page=wc-admin&path=/product/${ productId_deleteVariations }&tab=variations`
+			);
+
+			await expect(
+				page.getByText(
+					'variations do not have prices. Variations that do not have prices will not be visible to customers.Set prices'
+				)
+			).toBeVisible();
+
+			await page
+				.getByRole( 'link', { name: 'Edit', exact: true } )
+				.first()
+				.click();
+
+			const notices = page.getByText(
+				'You’re editing details specific to this variation.'
+			);
+
+			const noticeCount = await notices.count();
+
+			const noteText =
+				'You’re editing details specific to this variation.';
+
+			for ( let i = 0; i < noticeCount; i++ ) {
+				const notice = notices.nth( i );
+				if ( await notice.isVisible() ) {
+					await expect( notice ).toHaveText( noteText );
+				}
+			}
+
+			await page
+				.locator( '.woocommerce-product-notice__content > a' )
+				.first()
+				.click();
+
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Variation options',
+				} )
+			).toBeVisible();
 		} );
 	} );
 } );

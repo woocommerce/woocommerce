@@ -15,6 +15,7 @@ const Option = ( {
 	onChange,
 	option,
 	disabled = false,
+	highlightChecked = false,
 }: RadioControlOptionProps ): JSX.Element => {
 	const { value, label, description, secondaryLabel, secondaryDescription } =
 		option;
@@ -29,6 +30,8 @@ const Option = ( {
 				{
 					'wc-block-components-radio-control__option-checked':
 						checked,
+					'wc-block-components-radio-control__option--checked-option-highlighted':
+						checked && highlightChecked,
 				}
 			) }
 			htmlFor={ `${ name }-${ value }` }

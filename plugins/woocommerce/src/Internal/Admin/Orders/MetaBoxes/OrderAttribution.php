@@ -66,12 +66,6 @@ class OrderAttribution {
 	public function output( WC_Order $order ) {
 		$meta = $this->filter_meta_data( $order->get_meta_data() );
 
-		// If we don't have any meta to show, return.
-		if ( empty( $meta ) ) {
-			esc_html_e( 'No order source data available.', 'woocommerce' );
-			return;
-		}
-
 		$this->format_meta_data( $meta );
 
 		// No more details if there is only the origin value - this is for unknown source types.

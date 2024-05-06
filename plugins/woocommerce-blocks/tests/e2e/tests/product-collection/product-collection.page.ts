@@ -218,7 +218,7 @@ class ProductCollectionPage {
 			postType: 'wp_template',
 		} );
 		await this.editorUtils.waitForSiteEditorFinishLoading();
-		await this.editor.canvas.click( 'body' );
+		await this.page.click( 'body' );
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		await this.refreshLocators( 'editor' );
@@ -250,7 +250,8 @@ class ProductCollectionPage {
 		name:
 			| 'Show Hand-picked Products'
 			| 'Keyword'
-			| 'Show Taxonomies'
+			| 'Show product categories'
+			| 'Show product tags'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'

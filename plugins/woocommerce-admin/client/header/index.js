@@ -29,14 +29,29 @@ import {
 
 export const PAGE_TITLE_FILTER = 'woocommerce_admin_header_page_title';
 
+export const getPageTitle = ( sections ) => {
+	let pageTitle;
+	const pagesWithTabs = [ 'Settings', 'Reports', 'Status' ];
+
+	if (
+		sections.length > 2 &&
+		Array.isArray( sections[ 1 ] ) &&
+		pagesWithTabs.includes( sections[ 1 ][ 1 ] )
+	) {
+		pageTitle = sections[ 1 ][ 1 ];
+	} else {
+		pageTitle = sections[ sections.length - 1 ];
+	}
+	return pageTitle;
+};
+
 export const Header = ( { sections, isEmbedded = false, query } ) => {
 	const headerElement = useRef( null );
 	const activeSetupList = useActiveSetupTasklist();
 	const siteTitle = getSetting( 'siteTitle', '' );
-	const pageTitle = sections.slice( -1 )[ 0 ];
+	const pageTitle = getPageTitle( sections );
 	const { isScrolled } = useIsScrolled();
 	let debounceTimer = null;
-
 	const className = classnames( 'woocommerce-layout__header', {
 		'is-scrolled': isScrolled,
 	} );
@@ -101,7 +116,8 @@ export const Header = ( { sections, isEmbedded = false, query } ) => {
 		}
 	}, [ isEmbedded, sections, siteTitle ] );
 
-	const isHomescreen = isWCAdmin() && getScreenFromPath() === 'homescreen';
+	const isHomescreen =
+		isWCAdmin() && getScreenFromPath() === 'homescreen' && ! query.task;
 	const { isLoading, launchYourStoreEnabled, comingSoon, storePagesOnly } =
 		useLaunchYourStore();
 	const showLaunchYourStoreStatus =

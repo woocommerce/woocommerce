@@ -1,5 +1,8 @@
-const { test: base, expect } = require( '@playwright/test' );
+const { test: base, expect, request } = require( '@playwright/test' );
 const { AssemblerPage } = require( '../assembler/assembler.page' );
+const { setOption } = require( '../../../utils/options' );
+const { activateTheme } = require( '../../../utils/themes' );
+
 const {
 	createRequestsToSetupStoreDictionary,
 	setupRequestInterceptor,
@@ -20,6 +23,42 @@ const steps = [
 
 test.describe( 'Assembler - Loading Page', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
+
+	test.beforeAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'yes'
+			);
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
+	} );
+
+	test.afterAll( async ( { baseURL } ) => {
+		try {
+			// In some environments the tour blocks clicking other elements.
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_customize_store_onboarding_tour_hidden',
+				'no'
+			);
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_admin_customize_store_completed',
+				'no'
+			);
+
+			await activateTheme( 'twentynineteen' );
+		} catch ( error ) {
+			console.log( 'Store completed option not updated' );
+		}
+	} );
 
 	test( 'should display loading screen and steps on first run', async ( {
 		pageObject,
@@ -84,8 +123,7 @@ test.describe( 'Assembler - Loading Page', () => {
 		await pageObject.waitForLoadingScreenFinish();
 
 		const assembler = await pageObject.getAssembler();
-		await assembler.getByRole( 'button', { name: 'Skip' } ).click();
-		await assembler.getByRole( 'button', { name: 'Done' } ).click();
+		await assembler.getByRole( 'button', { name: 'Save' } ).click();
 		await pageObject.setupSite( baseURL );
 
 		const requestToSetupStore = createRequestsToSetupStoreDictionary();

@@ -16,7 +16,7 @@ Because WooCommerce uses custom post types, you can also use many of WordPress' 
 
 All conditional tags test whether a condition is met, and then return either `TRUE` or `FALSE`. **Conditions under which tags output `TRUE` are listed below the conditional tags**.
 
-The list below holds the main conditional tags. To see all conditional tags, visit the [WooCommerce API Docs](https://woo.com/wc-apidocs/).
+The list below holds the main conditional tags. To see all conditional tags, visit the [WooCommerce API Docs](https://woocommerce.com/wc-apidocs/).
 
 ### WooCommerce page
 

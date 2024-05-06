@@ -43,7 +43,7 @@ const blockData: BlockData = {
 test.describe( 'Shopper → Account (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeAll( async ( { requestUtils } ) => {
+	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
 		await requestUtils.rest( {
 			method: 'PUT',
 			path: 'wc/v3/settings/account/woocommerce_enable_guest_checkout',
@@ -54,9 +54,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 			path: 'wc/v3/settings/account/woocommerce_enable_checkout_login_reminder',
 			data: { value: 'yes' },
 		} );
-	} );
-	test.beforeEach( async ( { frontendUtils } ) => {
-		await frontendUtils.emptyCart();
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -105,7 +103,7 @@ test.describe( 'Shopper → Account (guest user)', () => {
 	} );
 } );
 
-test.describe( 'shopper → Local pickup', () => {
+test.describe( 'Shopper → Local pickup', () => {
 	test.beforeEach( async ( { admin } ) => {
 		// Enable local pickup.
 		await admin.visitAdminPage(
@@ -129,32 +127,16 @@ test.describe( 'shopper → Local pickup', () => {
 			.click();
 	} );
 
-	test.afterEach( async ( { admin } ) => {
-		// Enable local pickup.
-		await admin.visitAdminPage(
-			'admin.php',
-			'page=wc-settings&tab=shipping&section=pickup_location'
-		);
-		await admin.page.getByRole( 'button', { name: 'Edit' } ).last().click();
-		await admin.page
-			.getByRole( 'button', { name: 'Delete location' } )
-			.click();
-		await admin.page
-			.getByRole( 'button', { name: 'Save changes' } )
-			.click();
-	} );
-
 	test( 'The shopper can choose a local pickup option', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
 		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
 		await page.getByLabel( 'Testing' ).last().check();
 
@@ -172,12 +154,13 @@ test.describe( 'shopper → Local pickup', () => {
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page
+			.getByRole( 'radio', { name: 'Pickup', exact: true } )
+			.click();
 		await page
 			.getByLabel( 'Email address' )
 			.fill( 'thisShouldRemainHere@mail.com' );
@@ -185,31 +168,32 @@ test.describe( 'shopper → Local pickup', () => {
 			'thisShouldRemainHere@mail.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Shipping from free' } ).click();
+		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'thisShouldRemainHere@mail.com'
 		);
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 
-		await page.getByRole( 'radio', { name: 'Local Pickup free' } ).click();
+		await page
+			.getByRole( 'radio', { name: 'Pickup', exact: true } )
+			.click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Shipping from free' } ).click();
+		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 	} );
 } );
 
-test.describe( 'Payment Methods', () => {
+test.describe( 'Shopper → Payment Methods', () => {
 	test( 'User can change payment methods', async ( {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -228,7 +212,7 @@ test.describe( 'Payment Methods', () => {
 	} );
 } );
 
-test.describe( 'Shipping and Billing Addresses', () => {
+test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	const billingTestData = {
 		firstname: 'John',
 		lastname: 'Doe',
@@ -257,37 +241,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach(
-		async ( { editor, frontendUtils, admin, editorUtils } ) => {
-			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//page-checkout',
-				postType: 'wp_template',
-			} );
-			await editorUtils.enterEditMode();
-			await editor.openDocumentSettingsSidebar();
-			await editor.selectBlocks(
-				blockSelectorInEditor +
-					'  [data-type="woocommerce/checkout-shipping-address-block"]'
-			);
-
-			const checkbox = editor.page.getByRole( 'checkbox', {
-				name: 'Company',
-				exact: true,
-			} );
-			await checkbox.check();
-			await expect( checkbox ).toBeChecked();
-			await expect(
-				editor.canvas.locator(
-					'div.wc-block-components-address-form__company'
-				)
-			).toBeVisible();
-			await editorUtils.saveSiteEditorEntities();
-			await frontendUtils.emptyCart();
-		}
-	);
-
-	test.afterEach( async ( { frontendUtils, admin, editorUtils, editor } ) => {
-		await frontendUtils.emptyCart();
+	test.beforeEach( async ( { editor, admin, editorUtils, page } ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
@@ -298,17 +252,18 @@ test.describe( 'Shipping and Billing Addresses', () => {
 			blockSelectorInEditor +
 				'  [data-type="woocommerce/checkout-shipping-address-block"]'
 		);
-		const checkbox = editor.page.getByRole( 'checkbox', {
+
+		const checkbox = page.getByRole( 'checkbox', {
 			name: 'Company',
 			exact: true,
 		} );
-		await checkbox.uncheck();
-		await expect( checkbox ).not.toBeChecked();
+		await checkbox.check();
+		await expect( checkbox ).toBeChecked();
 		await expect(
 			editor.canvas.locator(
-				'.wc-block-checkout__shipping-fields .wc-block-components-address-form__company'
+				'div.wc-block-components-address-form__company'
 			)
-		).toBeHidden();
+		).toBeVisible();
 		await editorUtils.saveSiteEditorEntities();
 	} );
 
@@ -331,7 +286,7 @@ test.describe( 'Shipping and Billing Addresses', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => {
+test.describe( 'Shopper → Shipping (customer user)', () => {
 	test.use( { storageState: customerFile } );
 
 	test( 'Shopper can choose free shipping, flat rate shipping, and can have different billing and shipping addresses', async ( {
@@ -340,7 +295,6 @@ test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => 
 		page,
 	} ) => {
 		await frontendUtils.goToShop();
-		await frontendUtils.emptyCart();
 		await frontendUtils.addToCart( 'Beanie' );
 		await frontendUtils.goToCheckout();
 		await expect(
@@ -404,7 +358,7 @@ test.describe( 'Shopper → Checkout block → Shipping (customer user)', () => 
 	} );
 } );
 
-test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => {
+test.describe( 'Shopper → Place Guest Order', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'Guest user can place order', async ( {
@@ -412,7 +366,6 @@ test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => 
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -430,14 +383,85 @@ test.describe( 'Shopper → Checkout block → Place Order (guest user)', () => 
 	} );
 } );
 
-test.describe( 'Checkout Form Errors (guest user)', () => {
+test.describe( 'Shopper → Place Virtual Order', () => {
+	test.beforeEach( async ( { requestUtils } ) => {
+		await requestUtils.rest( {
+			method: 'PUT',
+			path: 'wc/v3/settings/general/woocommerce_ship_to_countries',
+			data: { value: 'disabled' },
+		} );
+	} );
+
+	test( 'can place a digital order when shipping is disabled', async ( {
+		checkoutPageObject,
+		frontendUtils,
+		localPickupUtils,
+		page,
+	} ) => {
+		await localPickupUtils.disableLocalPickup();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await localPickupUtils.enableLocalPickup();
+	} );
+
+	test( 'can place a digital order when shipping is disabled, but Local Pickup is still enabled', async ( {
+		checkoutPageObject,
+		frontendUtils,
+		localPickupUtils,
+		page,
+	} ) => {
+		await localPickupUtils.enableLocalPickup();
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await frontendUtils.goToCheckout();
+
+		await expect(
+			page.getByText( 'Shipping', { exact: true } )
+		).toBeHidden();
+
+		await checkoutPageObject.fillInCheckoutWithTestData();
+		await checkoutPageObject.placeOrder();
+
+		await expect(
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+	} );
+} );
+
+test.describe( 'Shopper → Checkout Form Errors (guest user)', () => {
 	test.use( { storageState: guestFile } );
 
 	test( 'can see errors when form is incomplete', async ( {
 		frontendUtils,
 		page,
 	} ) => {
-		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
@@ -470,36 +494,40 @@ test.describe( 'Checkout Form Errors (guest user)', () => {
 test.describe( 'Billing Address Form', () => {
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test( 'Enable company field', async ( { editor, admin, editorUtils } ) => {
+	test( 'Enable company field', async ( {
+		page,
+		editor,
+		admin,
+		editorUtils,
+	} ) => {
 		await admin.visitSiteEditor( {
 			postId: 'woocommerce/woocommerce//page-checkout',
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
-		await editorUtils.enterEditMode();
+
 		await editor.openDocumentSettingsSidebar();
+
 		await editor.selectBlocks(
 			blockSelectorInEditor +
 				'  [data-type="woocommerce/checkout-shipping-address-block"]'
 		);
 
-		const checkbox = editor.page.getByRole( 'checkbox', {
-			name: 'Company',
+		const companyCheckbox = page.getByLabel( 'Company', {
 			exact: true,
 		} );
-		await checkbox.check();
-		await expect( checkbox ).toBeChecked();
-		await expect(
-			editor.canvas.locator(
-				'div.wc-block-components-address-form__company'
-			)
-		).toBeVisible();
+		await companyCheckbox.check();
+		await expect( companyCheckbox ).toBeChecked();
+
+		const companyInput = editor.canvas.getByLabel( 'Company (optional)' );
+		await expect( companyInput ).toBeVisible();
+
 		await editorUtils.saveSiteEditorEntities();
 	} );
 
 	const shippingTestData = {
 		firstname: 'John',
 		lastname: 'Doe',
-		company: 'Automattic',
 		addressfirstline: '123 Easy Street',
 		addresssecondline: 'Testville',
 		country: 'United States (US)',
@@ -511,7 +539,6 @@ test.describe( 'Billing Address Form', () => {
 	const billingTestData = {
 		first_name: '',
 		last_name: '',
-		company: '',
 		address_1: '',
 		address_2: '',
 		country: 'United States (US)',
@@ -529,10 +556,10 @@ test.describe( 'Billing Address Form', () => {
 			page,
 			checkoutPageObject,
 		} ) => {
-			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.fillShippingDetails( shippingTestData );
 			await page.getByLabel( 'Use same address for billing' ).uncheck();
 
@@ -591,10 +618,6 @@ test.describe( 'Billing Address Form', () => {
 							page.locator( '#billing-state input' )
 						).toHaveValue( value );
 						break;
-					default:
-						await expect(
-							page.locator( `#billing-${ key }` )
-						).toHaveValue( value );
 				}
 			}
 		} );

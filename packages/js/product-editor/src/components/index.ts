@@ -63,6 +63,7 @@ export {
 export {
 	BlockFill as __experimentalBlockFill,
 	BlockSlot as __experimentalBlockSlot,
+	SectionActions as __experimentalSectionActions,
 	BlockFillProps,
 	BlockSlotProps,
 } from './block-slot-fill';

@@ -248,6 +248,9 @@ class WC_Install {
 		'8.7.0' => array(
 			'wc_update_870_prevent_listing_of_transient_files_directory',
 		),
+		'8.9.0' => array(
+			'wc_update_890_update_connect_to_woocommerce_note',
+		),
 	);
 
 	/**
@@ -1223,7 +1226,7 @@ class WC_Install {
 			$install_result = wc_get_container()->get( PluginInstaller::class )->install_plugin(
 				'https://downloads.wordpress.org/plugin/woocommerce-legacy-rest-api.latest-stable.zip',
 				array(
-					'info_link' => 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
+					'info_link' => 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/',
 				)
 			);
 
@@ -1238,7 +1241,7 @@ class WC_Install {
 		}
 
 		$plugin_page_url              = 'https://wordpress.org/plugins/woocommerce-legacy-rest-api/';
-		$blog_post_url                = 'https://developer.woo.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
+		$blog_post_url                = 'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/';
 		$site_legacy_api_settings_url = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=legacy_api' );
 		$site_webhooks_settings_url   = get_admin_url( null, '/admin.php?page=wc-settings&tab=advanced&section=webhooks' );
 		$site_logs_url                = get_admin_url( null, '/admin.php?page=wc-status&tab=logs' );
@@ -1595,7 +1598,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_status` (`stock_status`),
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
-  KEY min_max_price (`min_price`, `max_price`)
+  KEY min_max_price (`min_price`, `max_price`),
+  KEY sku (sku(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2123,14 +2127,14 @@ $hpos_table_schema;
 		 *
 		 * @since 2.7.0
 		 */
-		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woo.com/documentation/plugins/woocommerce/' );
+		$docs_url = apply_filters( 'woocommerce_docs_url', 'https://woocommerce.com/documentation/plugins/woocommerce/' );
 
 		/**
 		 * The WooCommerce API documentation URL.
 		 *
 		 * @since 2.2.0
 		 */
-		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woo.com/wc-apidocs/' );
+		$api_docs_url = apply_filters( 'woocommerce_apidocs_url', 'https://woocommerce.com/wc-apidocs/' );
 
 		/**
 		 * The community WooCommerce support URL.
@@ -2142,9 +2146,9 @@ $hpos_table_schema;
 		/**
 		 * The premium support URL.
 		 *
-		 * @since
+		 * @since 6.7.0
 		 */
-		$support_url = apply_filters( 'woocommerce_support_url', 'https://woo.com/my-account/create-a-ticket/' );
+		$support_url = apply_filters( 'woocommerce_support_url', 'https://woocommerce.com/my-account/create-a-ticket/' );
 
 		$row_meta = array(
 			'docs'    => '<a href="' . esc_url( $docs_url ) . '" aria-label="' . esc_attr__( 'View WooCommerce documentation', 'woocommerce' ) . '">' . esc_html__( 'Docs', 'woocommerce' ) . '</a>',

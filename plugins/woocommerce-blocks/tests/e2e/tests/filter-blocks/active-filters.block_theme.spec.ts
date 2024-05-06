@@ -22,7 +22,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Active Filters Block', async () => {
+test.describe( 'Product Filter: Active Filters Block', () => {
 	test.describe( 'frontend', () => {
 		test( 'Without any filters selected, only a wrapper block is rendered', async ( {
 			page,
@@ -46,20 +46,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 		} ) => {
 			await page.goto( `${ defaultBlockPost.link }?rating_filter=1,2,5` );
 
-			const hasTitle =
-				( await page.locator( 'text=Rating:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [
-				'Rated 1 out of 5',
-				'Rated 2 out of 5',
-				'Rated 5 out of 5',
-			] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Rating:' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 1 out of 5' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 2 out of 5' ) ).toBeVisible();
+			await expect( page.getByText( 'Rated 5 out of 5' ) ).toBeVisible();
 		} );
 
 		test( 'With stock filters applied it shows the correct active filters', async ( {
@@ -70,16 +60,9 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 				`${ defaultBlockPost.link }?filter_stock_status=instock,onbackorder`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Stock Status:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [ 'In stock', 'On backorder' ] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Stock Status:' ) ).toBeVisible();
+			await expect( page.getByText( 'In stock' ) ).toBeVisible();
+			await expect( page.getByText( 'On backorder' ) ).toBeVisible();
 		} );
 
 		test( 'With attribute filters applied it shows the correct active filters', async ( {
@@ -90,16 +73,9 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 				`${ defaultBlockPost.link }?filter_color=blue,gray&query_type_color=or`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Color:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			for ( const text of [ 'Blue', 'Gray' ] ) {
-				const hasFilter =
-					( await page.locator( `text=${ text }` ).count() ) === 1;
-				expect( hasFilter ).toBe( true );
-			}
+			await expect( page.getByText( 'Color:' ) ).toBeVisible();
+			await expect( page.getByText( 'Blue' ) ).toBeVisible();
+			await expect( page.getByText( 'Gray' ) ).toBeVisible();
 		} );
 
 		test( 'With price filters applied it shows the correct active filters', async ( {
@@ -110,15 +86,10 @@ test.describe( 'Product Filter: Active Filters Block', async () => {
 				`${ defaultBlockPost.link }?min_price=17&max_price=71`
 			);
 
-			const hasTitle =
-				( await page.locator( 'text=Price:' ).count() ) === 1;
-
-			expect( hasTitle ).toBe( true );
-
-			const hasFilter =
-				( await page.locator( `text=Between $17 and $71` ).count() ) ===
-				1;
-			expect( hasFilter ).toBe( true );
+			await expect( page.getByText( 'Price:' ) ).toBeVisible();
+			await expect(
+				page.getByText( 'Between $17 and $71' )
+			).toBeVisible();
 		} );
 	} );
 } );

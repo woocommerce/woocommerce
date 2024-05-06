@@ -3,10 +3,6 @@
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { guestFile } from '@woocommerce/e2e-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -26,19 +22,12 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Guest shopper', () => {
 		test.use( { storageState: guestFile } );
-		test.beforeAll( async () => {
-			await installPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
-		test.afterAll( async () => {
-			await uninstallPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
 
-		test.beforeEach( async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
+		test.beforeEach( async ( { frontendUtils, requestUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-additional-checkout-fields'
+			);
+
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
@@ -55,7 +44,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{
 					contact: {
 						'Enter a gift message to include in the package':
-							'This is for you!',
+							'For my non-ascii named friend: niño',
 					},
 					address: {
 						shipping: {
@@ -67,7 +56,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -105,7 +94,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				{
 					contact: {
 						'Enter a gift message to include in the package':
-							'This is for you!',
+							'For my non-ascii named friend: niño',
 						'Is this a personal purchase or a business purchase?':
 							'business',
 					},
@@ -119,7 +108,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -166,9 +155,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.check();
 
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByRole( 'group', {
@@ -177,9 +164,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByLabel( 'Can a truck fit down your road?' )
 				.uncheck();
 
-			await checkoutPageObject.page.waitForRequest( ( req ) => {
-				return req.url().includes( 'batch' );
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.waitForCheckoutToFinishUpdating();
 
@@ -192,7 +177,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					[ 'What is your favourite colour?', 'Blue' ],
 					[
 						'Enter a gift message to include in the package',
-						'This is for you!',
+						'For my non-ascii named friend: niño',
 					],
 					[ 'Do you want to subscribe to our newsletter?', 'Yes' ],
 					[ 'Would you like a free gift with your order?', 'Yes' ],
@@ -224,7 +209,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					.getByLabel(
 						'Enter a gift message to include in the package'
 					)
-			).toHaveValue( 'This is for you!' );
+			).toHaveValue( 'For my non-ascii named friend: niño' );
 			await expect(
 				checkoutPageObject.page
 					.getByRole( 'group', {

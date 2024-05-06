@@ -8,7 +8,7 @@
 		"url": "git://github.com/woocommerce/woo-ai.git"
 	},
 	"title": "Woo AI",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"homepage": "http://github.com/woocommerce/woo-ai",
 	"devDependencies": {
 		"@babel/preset-react": "7.23.3",
@@ -27,7 +27,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/data": "wp-6.0",
-		"@wordpress/env": "^8.13.0",
+		"@wordpress/env": "^9.0.7",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"babel-jest": "~27.5.1",
@@ -93,7 +93,7 @@
 		"react-dom": "^17.0.2"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"lint-staged": {

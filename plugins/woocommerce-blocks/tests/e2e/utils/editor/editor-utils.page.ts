@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, expect, Admin } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
@@ -13,9 +13,11 @@ import type { TemplateType } from '../../utils/types';
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
-	constructor( editor: Editor, page: Page ) {
+	admin: Admin;
+	constructor( editor: Editor, page: Page, admin: Admin ) {
 		this.editor = editor;
 		this.page = page;
+		this.admin = admin;
 	}
 
 	/**
@@ -37,8 +39,22 @@ export class EditorUtils {
 		return true;
 	}
 
+	/**
+	 * Checks if the editor is inside an iframe.
+	 */
+	private async isEditorInsideIframe() {
+		try {
+			return ( await this.editor.canvas.locator( '*' ).count() ) > 0;
+		} catch ( e ) {
+			return false;
+		}
+	}
+
 	async getBlockByName( name: string ) {
-		return this.editor.canvas.locator( `[data-type="${ name }"]` );
+		if ( await this.isEditorInsideIframe() ) {
+			return this.editor.canvas.locator( `[data-type="${ name }"]` );
+		}
+		return this.page.locator( `[data-type="${ name }"]` );
 	}
 
 	async getBlockByTypeWithParent( name: string, parentName: string ) {
@@ -110,6 +126,17 @@ export class EditorUtils {
 		);
 	}
 
+	async removeBlockByClientId( clientId: string ) {
+		await this.page.evaluate(
+			( { clientId: _clientId } ) => {
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( _clientId );
+			},
+			{ clientId }
+		);
+	}
+
 	async closeModalByName( name: string ) {
 		const isModalOpen = await this.page.getByLabel( name ).isVisible();
 
@@ -160,17 +187,9 @@ export class EditorUtils {
 	 * Toggles the global inserter.
 	 */
 	async toggleGlobalBlockInserter() {
-		// "Add block" selector is required to make sure performance comparison
-		// doesn't fail on older branches where we still had "Add block" as label.
-		await this.page.click(
-			'.edit-post-header [aria-label="Add block"],' +
-				'.edit-site-header [aria-label="Add block"],' +
-				'.edit-post-header [aria-label="Toggle block inserter"],' +
-				'.edit-site-header [aria-label="Toggle block inserter"],' +
-				'.edit-widgets-header [aria-label="Add block"],' +
-				'.edit-widgets-header [aria-label="Toggle block inserter"],' +
-				'.edit-site-header-edit-mode__inserter-toggle'
-		);
+		await this.page
+			.getByRole( 'button', { name: 'Toggle block inserter' } )
+			.click();
 	}
 
 	/**
@@ -179,20 +198,11 @@ export class EditorUtils {
 	 * @return {Promise<boolean>} Whether the inserter is open or not.
 	 */
 	async isGlobalInserterOpen() {
-		return await this.page.evaluate( () => {
-			// "Add block" selector is required to make sure performance comparison
-			// doesn't fail on older branches where we still had "Add block" as
-			// label.
-			return !! document.querySelector(
-				'.edit-post-header [aria-label="Add block"].is-pressed,' +
-					'.edit-site-header-edit-mode [aria-label="Add block"].is-pressed,' +
-					'.edit-post-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-site-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-widgets-header [aria-label="Toggle block inserter"].is-pressed,' +
-					'.edit-widgets-header [aria-label="Add block"].is-pressed,' +
-					'.edit-site-header-edit-mode__inserter-toggle.is-pressed'
-			);
+		const button = this.page.getByRole( 'button', {
+			name: 'Toggle block inserter',
 		} );
+
+		return ( await button.getAttribute( 'aria-pressed' ) ) === 'true';
 	}
 
 	/**
@@ -211,7 +221,11 @@ export class EditorUtils {
 				name: 'Edit',
 				exact: true,
 			} )
-			.click();
+			.dispatchEvent( 'click' );
+
+		await this.page.locator( '.edit-site-layout__sidebar' ).waitFor( {
+			state: 'hidden',
+		} );
 	}
 
 	async isBlockEarlierThan< T >(
@@ -295,34 +309,45 @@ export class EditorUtils {
 		await this.page.getByText( option ).click();
 	}
 
-	async saveTemplate() {
-		await Promise.all( [
-			this.editor.saveSiteEditorEntities(),
-			this.editor.page.waitForResponse(
-				( response ) =>
-					response.url().includes( 'wp-json/wp/v2/templates/' ) ||
-					response.url().includes( 'wp-json/wp/v2/template-parts/' )
-			),
-		] );
-	}
-
 	async closeWelcomeGuideModal() {
-		const isModalOpen = await this.page
-			.getByRole( 'dialog', { name: 'Welcome to the site editor' } )
-			.locator( 'div' )
-			.filter( {
-				hasText:
-					'Edit your siteDesign everything on your site — from the header right down to the',
-			} )
-			.nth( 2 )
-			.isVisible();
+		await this.page.waitForFunction( () => {
+			return (
+				window.wp &&
+				window.wp.data &&
+				window.wp.data.dispatch( 'core/preferences' )
+			);
+		} );
 
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( isModalOpen ) {
-			await this.page
-				.getByRole( 'button', { name: 'Get started' } )
-				.click();
-		}
+		// Disable the welcome guide for the site editor.
+		await this.page.evaluate( () => {
+			return Promise.all( [
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuidePage', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuidePage', false ),
+
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
+			] );
+		} );
 	}
 
 	async transformIntoBlocks() {
@@ -382,6 +407,9 @@ export class EditorUtils {
 		templateType: TemplateType
 	) {
 		if ( templateType === 'wp_template_part' ) {
+			await this.admin.visitSiteEditor( {
+				path: `/${ templateType }/all`,
+			} );
 			await this.page.goto(
 				`/wp-admin/site-editor.php?path=/${ templateType }/all`
 			);
@@ -391,9 +419,9 @@ export class EditorUtils {
 			} );
 			await templateLink.click();
 		} else {
-			await this.page.goto(
-				`/wp-admin/site-editor.php?path=/${ templateType }`
-			);
+			await this.admin.visitSiteEditor( {
+				path: '/' + templateType,
+			} );
 			const templateButton = this.page.getByRole( 'button', {
 				name: templateName,
 				exact: true,
@@ -402,7 +430,6 @@ export class EditorUtils {
 		}
 
 		await this.enterEditMode();
-		await this.closeWelcomeGuideModal();
 		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
@@ -416,18 +443,15 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCreation( templateName: string ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+
 		const templateRow = this.page.getByRole( 'row' ).filter( {
-			has: this.page.getByRole( 'heading', {
+			has: this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
 			} ),
 		} );
-		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-		await this.page
-			.getByRole( 'menuitem', {
-				name: 'Delete',
-			} )
-			.click();
+		await templateRow.getByRole( 'button', { name: 'Delete' } ).click();
 		await this.page
 			.getByRole( 'button', {
 				name: 'Delete',
@@ -440,26 +464,28 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCustomizations( templateName: string ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+
 		const templateRow = this.page.getByRole( 'row' ).filter( {
-			has: this.page.getByRole( 'heading', {
+			has: this.page.getByRole( 'link', {
 				name: templateName,
 				exact: true,
 			} ),
 		} );
-		templateRow.getByRole( 'button', { name: 'Actions' } ).click();
-		await this.page
-			.getByRole( 'menuitem', {
-				name: 'Clear customizations',
-			} )
-			.click();
-		await this.page
-			.getByRole( 'button', { name: 'Dismiss this notice' } )
-			.getByText( `"${ templateName }" reverted.` )
-			.waitFor();
+		const resetButton = templateRow.getByLabel( 'Reset', { exact: true } );
+		const revertedNotice = this.page
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( `"${ templateName }" reverted.` );
+		const savedButton = this.page.getByRole( 'button', { name: 'Saved' } );
+
+		await resetButton.click();
+
+		await expect( revertedNotice ).toBeVisible();
+		await expect( savedButton ).toBeVisible();
 	}
 
 	async updatePost() {
-		await this.page.click( 'role=button[name="Update"i]' );
+		await this.page.getByRole( 'button', { name: 'Update' } ).click();
 
 		await this.page
 			.getByRole( 'button', { name: 'Dismiss this notice' } )
@@ -506,7 +532,7 @@ export class EditorUtils {
 		productSlug: string,
 		createIfDoesntExist = true
 	) {
-		await this.page.goto( '/wp-admin/site-editor.php' );
+		await this.admin.visitSiteEditor();
 		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
 
 		const templateButton = this.page.getByRole( 'button', {

@@ -3,10 +3,6 @@
  */
 import { expect, test as base } from '@woocommerce/e2e-playwright-utils';
 import { customerFile } from '@woocommerce/e2e-utils';
-import {
-	installPluginFromPHPFile,
-	uninstallPluginFromPHPFile,
-} from '@woocommerce/e2e-mocks/custom-plugins';
 
 /**
  * Internal dependencies
@@ -26,19 +22,12 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
-		test.beforeAll( async () => {
-			await installPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
-		test.afterAll( async () => {
-			await uninstallPluginFromPHPFile(
-				`${ __dirname }/additional-checkout-fields-plugin.php`
-			);
-		} );
 
-		test.beforeEach( async ( { frontendUtils } ) => {
-			await frontendUtils.emptyCart();
+		test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-additional-checkout-fields'
+			);
+
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
@@ -70,7 +59,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -258,7 +247,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -280,9 +269,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'narrow' );
-			await checkoutPageObject.page.waitForResponse( ( response ) => {
-				return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			// Change the shipping and billing select fields again.
 			await checkoutPageObject.page
@@ -297,10 +284,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				} )
 				.getByLabel( 'How wide is your road?' )
 				.fill( 'super-wide' );
-
-			await checkoutPageObject.page.waitForResponse( ( response ) => {
-				return response.url().indexOf( 'wc/store/v1/batch' ) !== -1;
-			} );
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.page
 				.getByLabel( 'Would you like a free gift with your order?' )
@@ -356,7 +340,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '43210',
 						},
 					},
-					additional: {
+					order: {
 						'What is your favourite colour?': 'Red',
 					},
 				}
@@ -366,13 +350,17 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					name: 'Additional order information',
 				} )
 				.getByLabel( 'How did you hear about us?' )
-				.fill( '' );
+				.click();
 			await checkoutPageObject.page
+				.getByRole( 'group', {
+					name: 'Additional order information',
+				} )
 				.locator(
 					'ul.components-form-token-field__suggestions-list > li'
 				)
 				.first()
 				.click();
+			await checkoutPageObject.waitForCustomerDataUpdate();
 
 			await checkoutPageObject.placeOrder();
 
@@ -443,7 +431,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '543 21',
 						},
 					},
-					additional: {
+					order: {
 						'How did you hear about us?': 'Other',
 						'What is your favourite colour?': 'Blue',
 					},
@@ -630,7 +618,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '12345',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 
@@ -683,7 +671,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 
@@ -744,7 +732,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 							'Confirm government ID': '54321',
 						},
 					},
-					additional: { 'How did you hear about us?': 'Other' },
+					order: { 'How did you hear about us?': 'Other' },
 				}
 			);
 
