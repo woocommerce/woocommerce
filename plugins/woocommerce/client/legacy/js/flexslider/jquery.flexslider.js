@@ -816,7 +816,7 @@
       if (slider.transitions) {
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + (parseInt(target)+'px') + ",0,0)";
       } else {
-        slider.container.css("transition-timing-funciton", easing);
+        slider.container.css("transition-timing-function", easing);
       }
 
       slider.args[slider.prop] = target;
