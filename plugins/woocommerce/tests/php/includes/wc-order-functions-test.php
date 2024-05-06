@@ -117,8 +117,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	 * Tests the fix for issue #31245
 	 */
 	public function test_wc_update_coupon_usage_counts() {
-
-		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
+		$coupon   = WC_Helper_Coupon::create_coupon( 'test' );
 		$order_id = WC_Checkout::instance()->create_order(
 			array(
 				'billing_email'  => 'a@b.com',
