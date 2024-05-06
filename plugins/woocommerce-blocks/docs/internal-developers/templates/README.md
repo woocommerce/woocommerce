@@ -40,7 +40,7 @@ The BlockTemplateController.php is primarily responsible for hooking into both W
 
 ### Some things to be aware of
 
--   For each template, we have a version represented by a placeholder block and the blockified one, which uses more granular blocks. That was done to keep backwards compatibility for extensions in existing stores.
+-   For each template, we have a version represented by a placeholder block and a blockified one, which uses more granular blocks. That was done to keep backwards compatibility for extensions in existing stores.
 -   At the beginning of the project, we unintentionally used the incorrect WooCommerce plugin slug. This has resulted in us maintaining both the incorrect and correct slugs. We reference these via `BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG` and `BlockTemplateUtils::PLUGIN_SLUG`. More information on that [here](https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5423).
 -   If a theme has a `archive-product.html` template file, but does not have any taxonomy related files. The `archive-product.html` template will be applied to all product taxonomy archives. Themes can override product taxonomy archive templates with `taxonomy-product_cat.html` and `taxonomy-product_tag.html` templates.
 
