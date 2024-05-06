@@ -406,7 +406,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_order_count( &$customer ) {
 		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
-			get_user_meta( $customer->get_id(), '_order_count', true ),
+			Users::get_site_user_meta( $customer->get_id(), 'wc_order_count', true ),
 			$customer
 		);
 
@@ -437,7 +437,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			update_user_meta( $customer->get_id(), '_order_count', $count );
+			Users::update_site_user_meta( $customer->get_id(), 'wc_order_count', $count );
 		}
 
 		return absint( $count );
@@ -453,7 +453,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_total_spent( &$customer ) {
 		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
-			get_user_meta( $customer->get_id(), '_money_spent', true ),
+			Users::get_site_user_meta( $customer->get_id(), 'wc_money_spent', true ),
 			$customer
 		);
 
@@ -500,7 +500,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			if ( ! $spent ) {
 				$spent = 0;
 			}
-			update_user_meta( $customer->get_id(), '_money_spent', $spent );
+			Users::update_site_user_meta( $customer->get_id(), 'wc_money_spent', $spent );
 		}
 
 		return wc_format_decimal( $spent, 2 );
