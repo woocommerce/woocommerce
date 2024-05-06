@@ -24,14 +24,6 @@
 				margin-left: auto;
 			}
 		}
-		.wc-block-components-radio-control__description-group {
-			display: none;
-		}
-		.wc-block-components-radio-control__option-checked {
-			.wc-block-components-radio-control__description-group {
-				display: block;
-			}
-		}
 		.wc-block-components-radio-control__label-group {
 			em {
 				text-transform: uppercase;
@@ -39,13 +31,26 @@
 			}
 		}
 		.wc-block-components-radio-control__description-group {
-			width: 100%;
+			display: block;
+			width: calc(100% + em($gap-huge));
 			box-sizing: border-box;
-			background-color: $universal-background;
 			border-radius: $universal-border-radius;
 			padding: 1px em($gap-small);
+			margin-left: -(em($gap-huge));
 			margin-top: em($gap-smaller);
 			@include font-size(regular);
+
+			.read-more-content {
+				div {
+					margin-right: em($gap-larger);
+				}
+				a.read-more-content__read_more {
+					position: relative;
+					bottom: 20px;
+					float: right;
+					right: 0;
+				}
+			}
 		}
 		.wc-block-components-radio-control__description,
 		.wc-block-components-radio-control__secondary-description {
@@ -54,7 +59,7 @@
 			margin: em($gap-small) 0;
 			display: block;
 		}
-		.wc-block-components-radio-control__secondary-description {
+		.wc-block-components-radio-control__description {
 			color: $gray-700;
 
 			> svg {
