@@ -63,5 +63,6 @@ export enum ProductType {
 export enum SearchResultType {
 	theme = 'theme',
 	extension = 'extension',
+	businessService = 'businessService',
 	all = 'all',
 }

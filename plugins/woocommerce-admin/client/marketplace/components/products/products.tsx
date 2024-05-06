@@ -132,10 +132,19 @@ export default function Products( props: ProductsProps ) {
 	);
 
 	if ( products.length === 0 ) {
-		const type =
-			props.type === ProductType.extension
-				? SearchResultType.extension
-				: SearchResultType.theme;
+		let type = SearchResultType.all;
+
+		switch ( props.type ) {
+			case ProductType.extension:
+				type = SearchResultType.extension;
+				break;
+			case ProductType.theme:
+				type = SearchResultType.theme;
+				break;
+			case ProductType.businessService:
+				type = SearchResultType.businessService;
+				break;
+		}
 
 		return <NoResults type={ type } showHeading={ false } />;
 	}

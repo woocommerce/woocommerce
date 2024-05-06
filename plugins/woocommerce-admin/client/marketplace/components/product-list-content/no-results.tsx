@@ -28,6 +28,7 @@ export default function NoResults( props: {
 		[ SearchResultType.all ]: [ 'most-popular', 'popular-themes' ],
 		[ SearchResultType.theme ]: [ 'popular-themes' ],
 		[ SearchResultType.extension ]: [ 'most-popular' ],
+		[ SearchResultType.businessService ]: [ 'business-services' ],
 	};
 
 	useEffect( () => {
@@ -68,6 +69,8 @@ export default function NoResults( props: {
 	function productListTitle( groupId: string ) {
 		if ( groupId === 'popular-themes' ) {
 			return __( 'Our favorite themes', 'woocommerce' );
+		} else if ( groupId === 'business-services' ) {
+			return __( 'Services to help your business grow', 'woocommerce' );
 		}
 
 		return __( 'Most popular extensions', 'woocommerce' );
@@ -83,6 +86,10 @@ export default function NoResults( props: {
 					/>
 					<ProductLoader
 						type={ ProductType.theme }
+						placeholderCount={ 4 }
+					/>
+					<ProductLoader
+						type={ ProductType.businessService }
 						placeholderCount={ 4 }
 					/>
 				</>
@@ -124,6 +131,10 @@ export default function NoResults( props: {
 
 		if ( props.type === SearchResultType.theme ) {
 			categorySelectorType = ProductType.theme;
+		}
+
+		if ( props.type === SearchResultType.businessService ) {
+			categorySelectorType = ProductType.businessService;
 		}
 
 		return <CategorySelector type={ categorySelectorType } />;
