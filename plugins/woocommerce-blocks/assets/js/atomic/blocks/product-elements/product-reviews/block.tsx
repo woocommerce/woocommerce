@@ -6,14 +6,11 @@
  */
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
 import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
 import { Notice } from '@wordpress/components';
 
 export const ProductReviews = () => {
-	const blockProps = useBlockProps();
-
 	return (
-		<div { ...blockProps }>
+		<>
 			<Notice
 				className={ 'wc-block-editor-related-products__notice' }
 				status={ 'info' }
@@ -47,7 +44,7 @@ export const ProductReviews = () => {
 					value={ __( 'Submit', 'woocommerce' ) }
 				/>
 			</div>
-		</div>
+		</>
 	);
 };
 
