@@ -41,9 +41,9 @@ jobs:
                       if ( baseRef ) {
                         baseRef = `--base-ref origin/${ baseRef }`;
                       }
-                    
+
                       let githubEvent = ${{ toJson( github.event_name ) }};
-                    
+
                       const child_process = require( 'node:child_process' );
                       child_process.execSync( `pnpm utils ci-jobs ${ baseRef } --event ${ githubEvent }` );
 
@@ -122,6 +122,8 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_ANALYTICS_TOKEN }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
