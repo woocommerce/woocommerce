@@ -47,7 +47,7 @@ class EvaluateAndGetStatus {
 		}
 
 		// If the spec is an alert type and the note is unactioned, set to pending if the spec no longer applies.
-		if ( in_array( $spec->type, array( 'error', 'update' ), true )
+		if ( isset( $spec->type ) && in_array( $spec->type, array( 'error', 'update' ), true )
 			&& Note::E_WC_ADMIN_NOTE_UNACTIONED === $current_status
 			&& ! $evaluated_result ) {
 			return Note::E_WC_ADMIN_NOTE_PENDING;
