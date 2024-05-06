@@ -55,7 +55,7 @@ const test = baseTest.extend( {
 async function userDeletionTest( page, username ) {
 	await page.goto( `wp-admin/users.php?s=${ username }` );
 
-	await test.step( 'hover the the username and delete', async () => {
+	await test.step( 'hover the username and delete', async () => {
 		await page.getByRole( 'link', { name: username, exact: true } ).hover();
 		await page.getByRole( 'link', { name: 'Delete' } ).click();
 	} );

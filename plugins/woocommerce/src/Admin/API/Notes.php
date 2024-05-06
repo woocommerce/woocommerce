@@ -385,7 +385,7 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
-	 * Prepare an array with the the requested updates.
+	 * Prepare an array with the requested updates.
 	 *
 	 * @param WP_REST_Request $request  Request object.
 	 * @return array A list of the requested updates values.
