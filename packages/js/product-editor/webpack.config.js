@@ -12,6 +12,7 @@ const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
  */
 const {
 	webpackConfig,
+	plugin,
 	StyleAssetPlugin,
 } = require( '@woocommerce/internal-style-build' );
 const {
@@ -37,7 +38,7 @@ module.exports = {
 	},
 	plugins: [
 		new RemoveEmptyScriptsPlugin(),
-		new MiniCssExtractPlugin( {
+		new plugin( {
 			filename: ( data ) => {
 				return data.chunk.name.startsWith( '/build/blocks' )
 					? `[name].css`
