@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useEffect,
+	useState,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import {
 	TreeItemType,
 	__experimentalSelectTreeControl as SelectTree,
@@ -24,6 +29,7 @@ import { CreateTagModal } from './create-tag-modal';
 
 type TagFieldProps = {
 	id: string;
+	isVisible?: boolean;
 	label: string;
 	placeholder: string;
 	value?: ProductTagNode[];
@@ -58,6 +64,7 @@ export function mapFromTreeItemsToTags(
 
 export const TagField: React.FC< TagFieldProps > = ( {
 	id,
+	isVisible = false,
 	label,
 	placeholder,
 	value = [],
@@ -79,6 +86,12 @@ export const TagField: React.FC< TagFieldProps > = ( {
 		searchTags( searchString || '' );
 		setNewInputValue( searchString );
 	};
+
+	useEffect( () => {
+		if ( isVisible ) {
+			searchTags();
+		}
+	}, [ isVisible ] );
 
 	const searchDelayed = useDebounce( onInputChange, 150 );
 

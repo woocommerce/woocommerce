@@ -30,8 +30,6 @@ export const useTagSearch = () => {
 			} );
 	};
 
-	useEffect( fetchProductTags, [] );
-
 	return {
 		searchTags: fetchProductTags,
 		tagsSelectList: fetchedTags,
