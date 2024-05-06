@@ -40,7 +40,22 @@ const slugFontMap = {
 		'System Sans-serif',
 };
 
+const skipTestIfWPIs64 = () => {
+	const skipMessage = `Skipping this test because on WordPress 6.4, because the font picker is not available`;
+
+	test.skip( () => {
+		const shouldSkip = process.env.WP_ENV_CORE.includes( '6.4' );
+
+		if ( shouldSkip ) {
+			console.log( skipMessage );
+		}
+
+		return shouldSkip;
+	}, skipMessage );
+};
+
 test.describe( 'Assembler -> Font Picker', () => {
+	skipTestIfWPIs64();
 	test.use( { storageState: process.env.ADMINSTATE } );
 
 	test.beforeAll( async ( { baseURL } ) => {
