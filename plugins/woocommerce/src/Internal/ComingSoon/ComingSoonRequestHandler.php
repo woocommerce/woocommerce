@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\Internal\ComingSoon;
 use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
- * Handles the parse_request hook to determine whether the current page needs
+ * Handles the template_include hook to determine whether the current page needs
  * to be replaced with a comiing soon screen.
  */
 class ComingSoonRequestHandler {
@@ -27,6 +27,7 @@ class ComingSoonRequestHandler {
 		$this->coming_soon_helper = $coming_soon_helper;
 		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'deregister_unnecessary_styles' ), 100 );
+		add_filter( 'wp_robots', array( $this, 'disable_seo_indexing' ) );
 	}
 
 	/**
@@ -74,10 +75,6 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Don't cache this response.
 		nocache_headers();
 
-		// Optimize search engine by returning 503 status code and set retry-after header to 12 hours.
-		status_header( 503 );
-		header( 'Retry-After: ' . 12 * HOUR_IN_SECONDS );
-
 		add_theme_support( 'block-templates' );
 		wp_dequeue_style( 'global-styles' );
 		$coming_soon_template = get_query_template( 'coming-soon' );
@@ -100,6 +97,27 @@ class ComingSoonRequestHandler {
 			// We need to exit to prevent further processing.
 			exit();
 		}
+	}
+
+	/**
+	 * Disable search engines in coming soon pages
+	 *
+	 * @since 9.0.0
+	 * @param array $robots Associative array of robots directives.
+	 * @return array Filtered robots directives.
+	 */
+	public function disable_seo_indexing( $robots ) {
+		// Early exit if LYS feature is disabled.
+		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
+			return $robots;
+		}
+
+		// Set no index when site is in coming soon mode.
+		if ( ! $this->coming_soon_helper->is_site_live() ) {
+			return wp_robots_no_robots( $robots );
+		}
+
+		return $robots;
 	}
 
 	/**
