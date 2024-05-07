@@ -250,7 +250,7 @@ abstract class CustomMetaDataStore {
 		$query = "SELECT DISTINCT meta_key FROM {$db_info['table']} ";
 
 		if ( ! $include_private ) {
-			$query .= $wpdb->prepare( 'WHERE meta_key != \'\' AND meta_key NOT LIKE %s ', $wpdb->esc_like( '_' ) . '%' );
+			$query .= $wpdb->prepare( "WHERE meta_key !='' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ", $wpdb->esc_like( '_' ) . '%' );
 		} else {
 			$query .= "WHERE meta_key != '' ";
 		}

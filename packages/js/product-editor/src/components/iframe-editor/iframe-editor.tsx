@@ -67,20 +67,8 @@ export function IframeEditor( {
 		return select( productEditorUiStore ).getModalEditorBlocks();
 	}, [] );
 
-	/*
-	 * Set the initial blocks from the store.
-	 * @todo: probably we can get rid of the initialBlocks prop.
-	 */
-	useEffect( () => {
-		setTemporalBlocks( blocks );
-	}, [] ); // eslint-disable-line
-
 	const { setModalEditorBlocks: setBlocks, setModalEditorContentHasChanged } =
 		useDispatch( productEditorUiStore );
-
-	const { appendEdit } = useEditorHistory( {
-		setBlocks,
-	} );
 
 	const {
 		appendEdit: tempAppendEdit,
@@ -91,6 +79,16 @@ export function IframeEditor( {
 	} = useEditorHistory( {
 		setBlocks: setTemporalBlocks,
 	} );
+
+	/*
+	 * Set the initial blocks from the store.
+	 * @todo: probably we can get rid of the initialBlocks prop.
+	 */
+	useEffect( () => {
+		tempAppendEdit( blocks );
+		setTemporalBlocks( blocks );
+	}, [] ); // eslint-disable-line
+
 	const [ isInserterOpened, setIsInserterOpened ] = useState( false );
 	const [ isListViewOpened, setIsListViewOpened ] = useState( false );
 	const [ isSidebarOpened, setIsSidebarOpened ] = useState( true );
@@ -148,7 +146,7 @@ export function IframeEditor( {
 							hasFixedToolbar || ! inlineFixedBlockToolbar,
 						templateLock: false,
 					} }
-					value={ blocks }
+					value={ temporalBlocks }
 					onChange={ ( updatedBlocks: BlockInstance[] ) => {
 						tempAppendEdit( updatedBlocks );
 						setTemporalBlocks( updatedBlocks );
@@ -163,14 +161,12 @@ export function IframeEditor( {
 				>
 					<HeaderToolbar
 						onSave={ () => {
-							appendEdit( temporalBlocks );
 							setBlocks( temporalBlocks );
 							setModalEditorContentHasChanged( true );
 							onChange( temporalBlocks );
 							onClose?.();
 						} }
 						onCancel={ () => {
-							appendEdit( blocks );
 							setBlocks( blocks );
 							onChange( blocks );
 							setTemporalBlocks( blocks );

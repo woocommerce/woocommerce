@@ -104,6 +104,10 @@ class Init {
 			$product_form_controllers[] = 'Automattic\WooCommerce\Admin\API\ProductForm';
 		}
 
+		if ( Features::is_enabled( 'launch-your-store' ) ) {
+			$controllers[] = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+		}
+
 		if ( Features::is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
 				'Automattic\WooCommerce\Admin\API\Customers',

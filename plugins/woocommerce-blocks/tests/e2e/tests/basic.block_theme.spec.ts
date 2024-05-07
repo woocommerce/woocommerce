@@ -4,7 +4,7 @@
 import { test, expect } from '@woocommerce/e2e-playwright-utils';
 import { customerFile, guestFile } from '@woocommerce/e2e-utils';
 
-test.describe( 'Basic role-based functionality tests', async () => {
+test.describe( 'Basic role-based functionality tests', () => {
 	test.describe( 'As admin', () => {
 		// Admin is the default user, so no need to set storage state.
 		test( 'Load Dashboard page', async ( { page } ) => {

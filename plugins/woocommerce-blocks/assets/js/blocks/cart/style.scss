@@ -105,7 +105,8 @@
 	table.wc-block-cart-items {
 		margin: 0;
 	}
-	.wc-block-components-shipping-rates-control .wc-block-components-radio-control__option {
+	.wc-block-components-shipping-rates-control
+	.wc-block-components-radio-control__option {
 		padding: 0 0 0 em($gap-huge);
 	}
 }
@@ -132,16 +133,12 @@
 
 	.wc-block-cart__totals-title {
 		@include text-heading();
-		@include font-size( smaller );
+		@include font-size(smaller);
 		display: block;
 		font-weight: 700;
 		padding: $gap-smaller $gap $gap-smaller 0;
-		text-align: right;
+		text-align: left;
 		text-transform: uppercase;
-
-		textarea {
-			font-weight: 700; // Ensure correct font-weight in site-editor.
-		}
 	}
 
 	.wc-block-components-sidebar {
@@ -227,7 +224,7 @@
 }
 
 // Skeleton is shown before mobile classes are appended.
-@media only screen and ( max-width: 700px ) {
+@media only screen and (max-width: 700px) {
 	.wp-block-woocommerce-cart.is-loading {
 		padding-top: $gap;
 

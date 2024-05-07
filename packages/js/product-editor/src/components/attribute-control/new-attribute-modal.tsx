@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
-import { resolveSelect } from '@wordpress/data';
+import { resolveSelect, useSelect, useDispatch } from '@wordpress/data';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Form,
@@ -11,10 +11,13 @@ import {
 } from '@woocommerce/components';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttribute,
-	ProductAttributeTerm,
+	EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME,
+	type ProductAttributesActions,
+	type WPDataActions,
+	type ProductAttributeTerm,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -24,8 +27,9 @@ import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
 } from '../attribute-term-input-field';
-import { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
-import { getProductAttributeObject } from './utils';
+import { TRACKS_SOURCE } from '../../constants';
+import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
+import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -208,6 +212,27 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
+	const sortCriteria = { order_by: 'name' };
+
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	const { attributes, isLoading } = useSelect( ( select: WCDataSelector ) => {
+		const { getProductAttributes, hasFinishedResolution } = select(
+			EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+		);
+		return {
+			isLoading: ! hasFinishedResolution( 'getProductAttributes', [
+				sortCriteria,
+			] ),
+			attributes: getProductAttributes( sortCriteria ),
+		};
+	} );
+
+	const { createErrorNotice } = useDispatch( 'core/notices' );
+	const { createProductAttribute } = useDispatch(
+		EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME
+	) as unknown as ProductAttributesActions & WPDataActions;
+
 	return (
 		<>
 			<Form< AttributeForm >
@@ -223,65 +248,164 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					function getAttributeOnChange( index: number ) {
-						return function handleAttributeChange(
-							value?:
-								| Omit<
-										ProductAttribute,
-										'position' | 'visible' | 'variation'
-								  >
-								| string
-						) {
-							if (
-								termsAutoSelection &&
-								value &&
-								! ( typeof value === 'string' )
-							) {
-								const selectedAttribute =
-									getProductAttributeObject(
-										value
-									) as EnhancedProductAttribute;
+					/**
+					 * Set the attribute values in the form state,
+					 * and populate the terms if termsAutoSelection is enabled.
+					 *
+					 * @param {AttributeInputFieldItemProps} attribute - The attribute value.
+					 * @param {number}                       index     - The index of the attribute in the form state.
+					 */
+					function setAttributeValues(
+						attribute: AttributeInputFieldItemProps,
+						index: number,
+						populateTerms = true
+					) {
+						/*
+						 * When the attribute exists,
+						 * set the attribute in the form state and populate the terms.
+						 */
+						if ( termsAutoSelection && populateTerms ) {
+							const selectedAttribute =
+								attribute as EnhancedProductAttribute;
 
-								setValue( 'attributes[' + index + ']', {
-									...selectedAttribute,
-								} );
+							setValue( 'attributes[' + index + ']', {
+								...selectedAttribute,
+							} );
 
-								resolveSelect(
-									EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-								)
-									.getProductAttributeTerms<
-										ProductAttributeTerm[]
-									>( {
-										// Send search parameter as empty to avoid a second
-										// request when focusing the attribute-term-input-field
-										// which perform the same request to get all the terms
-										search: '',
-										attribute_id: value.id,
-									} )
-									.then( ( terms ) => {
-										if ( termsAutoSelection === 'all' ) {
-											selectedAttribute.terms = terms;
-										} else if ( terms.length > 0 ) {
-											selectedAttribute.terms = [
-												terms[ 0 ],
-											];
-										}
-										setValue( 'attributes[' + index + ']', {
-											...selectedAttribute,
-										} );
-										focusValueField( index );
+							return resolveSelect(
+								EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
+							)
+								.getProductAttributeTerms<
+									ProductAttributeTerm[]
+								>( {
+									// Send search parameter as empty to avoid a second
+									// request when focusing the attribute-term-input-field
+									// which perform the same request to get all the terms
+									search: '',
+									attribute_id: attribute.id,
+								} )
+								.then( ( terms ) => {
+									if ( termsAutoSelection === 'all' ) {
+										selectedAttribute.terms = terms;
+									} else if ( terms.length > 0 ) {
+										selectedAttribute.terms = [
+											terms[ 0 ],
+										];
+									}
+									setValue( 'attributes[' + index + ']', {
+										...selectedAttribute,
 									} );
-							} else {
-								setValue(
-									'attributes[' + index + ']',
-									value && getProductAttributeObject( value )
-								);
-								if ( value ) {
 									focusValueField( index );
-								}
-							}
-						};
+								} );
+						}
+
+						/*
+						 * When the attribute does not exist,
+						 * set the attribute in the form state without terms.
+						 */
+						setValue( 'attributes[' + index + ']', attribute );
+						focusValueField( index );
 					}
+
+					function selectAttributeHandler(
+						nextAttribute: AttributeInputFieldItemProps,
+						index: number
+					) {
+						recordEvent( 'product_attribute_add_custom_attribute', {
+							source: TRACKS_SOURCE,
+						} );
+
+						const attributeExists = nextAttribute.id !== -99;
+
+						/*
+						 * When the attribute exists,
+						 * set the attribute values.
+						 */
+						if ( attributeExists ) {
+							return setAttributeValues( nextAttribute, index );
+						}
+
+						/*
+						 * When the attribute does not exist,
+						 * and it should not be created as a global attribute,
+						 * only set the attribute values.
+						 */
+						if ( ! createNewAttributesAsGlobal ) {
+							return setAttributeValues(
+								{
+									id: 0,
+									name: nextAttribute.name,
+									slug: nextAttribute.name,
+								},
+								index,
+								false
+							);
+						}
+
+						/*
+						 * If the attribute does not exist,
+						 * and it should be created as a global attribute,
+						 * create the new attribute and set the attribute values.
+						 */
+						createProductAttribute(
+							{
+								name: nextAttribute.name,
+								generate_slug: true,
+							},
+							{
+								optimisticQueryUpdate: sortCriteria,
+							}
+						)
+							.then( ( newAttribute ) => {
+								setAttributeValues( newAttribute, index );
+							} )
+							.catch( ( error ) => {
+								let message = __(
+									'Failed to create new attribute.',
+									'woocommerce'
+								);
+								if (
+									error.code ===
+									'woocommerce_rest_cannot_create'
+								) {
+									message = error.message;
+								}
+
+								createErrorNotice( message, {
+									explicitDismiss: true,
+								} );
+							} );
+					}
+
+					/*
+					 * Get the attribute ids that should be ignored when filtering the attributes
+					 * to show in the attribute input field.
+					 */
+					const ignoredAttributeIds = [
+						...selectedAttributeIds,
+						...values.attributes
+							.map( ( attr ) => attr?.id )
+							.filter(
+								( attrId ): attrId is number =>
+									attrId !== undefined
+							),
+					];
+
+					/*
+					 * Compute the available attributes to show in the attribute input field,
+					 * filtering out the ignored attributes and marking the disabled ones.
+					 */
+					const availableAttributes = attributes
+						?.filter(
+							( attribute: EnhancedProductAttribute ) =>
+								! ignoredAttributeIds.includes( attribute.id )
+						)
+						.map( ( attribute: EnhancedProductAttribute ) => ( {
+							...attribute,
+							isDisabled: disabledAttributeIds.includes(
+								attribute.id
+							),
+						} ) );
 
 					return (
 						<Modal
@@ -327,31 +451,22 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																attributePlaceholder
 															}
 															value={ attribute }
+															items={
+																availableAttributes
+															}
+															isLoading={
+																isLoading
+															}
 															label={
 																attributeLabel
 															}
-															onChange={ getAttributeOnChange(
-																index
-															) }
-															ignoredAttributeIds={ [
-																...selectedAttributeIds,
-																...values.attributes
-																	.map(
-																		(
-																			attr
-																		) =>
-																			attr?.id
-																	)
-																	.filter(
-																		(
-																			attrId
-																		): attrId is number =>
-																			attrId !==
-																			undefined
-																	),
-															] }
-															createNewAttributesAsGlobal={
-																createNewAttributesAsGlobal
+															onChange={ (
+																nextAttribute
+															) =>
+																selectAttributeHandler(
+																	nextAttribute,
+																	index
+																)
 															}
 															disabledAttributeIds={
 																disabledAttributeIds

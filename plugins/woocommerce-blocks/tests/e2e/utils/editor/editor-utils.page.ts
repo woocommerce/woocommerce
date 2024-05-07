@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, expect } from '@wordpress/e2e-test-utils-playwright';
+import { Editor, expect, Admin } from '@wordpress/e2e-test-utils-playwright';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
 
 /**
@@ -13,9 +13,11 @@ import type { TemplateType } from '../../utils/types';
 export class EditorUtils {
 	editor: Editor;
 	page: Page;
-	constructor( editor: Editor, page: Page ) {
+	admin: Admin;
+	constructor( editor: Editor, page: Page, admin: Admin ) {
 		this.editor = editor;
 		this.page = page;
+		this.admin = admin;
 	}
 
 	/**
@@ -121,6 +123,17 @@ export class EditorUtils {
 					.removeBlocks( matchingBlocksClientIds );
 			},
 			{ name }
+		);
+	}
+
+	async removeBlockByClientId( clientId: string ) {
+		await this.page.evaluate(
+			( { clientId: _clientId } ) => {
+				window.wp.data
+					.dispatch( 'core/block-editor' )
+					.removeBlocks( _clientId );
+			},
+			{ clientId }
 		);
 	}
 
@@ -297,22 +310,44 @@ export class EditorUtils {
 	}
 
 	async closeWelcomeGuideModal() {
-		const isModalOpen = await this.page
-			.getByRole( 'dialog', { name: 'Welcome to the site editor' } )
-			.locator( 'div' )
-			.filter( {
-				hasText:
-					'Edit your siteDesign everything on your site — from the header right down to the',
-			} )
-			.nth( 2 )
-			.isVisible();
+		await this.page.waitForFunction( () => {
+			return (
+				window.wp &&
+				window.wp.data &&
+				window.wp.data.dispatch( 'core/preferences' )
+			);
+		} );
 
-		// eslint-disable-next-line playwright/no-conditional-in-test
-		if ( isModalOpen ) {
-			await this.page
-				.getByRole( 'button', { name: 'Get started' } )
-				.click();
-		}
+		// Disable the welcome guide for the site editor.
+		await this.page.evaluate( () => {
+			return Promise.all( [
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuidePage', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuide', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideStyles', false ),
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuidePage', false ),
+
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
+			] );
+		} );
 	}
 
 	async transformIntoBlocks() {
@@ -372,6 +407,9 @@ export class EditorUtils {
 		templateType: TemplateType
 	) {
 		if ( templateType === 'wp_template_part' ) {
+			await this.admin.visitSiteEditor( {
+				path: `/${ templateType }/all`,
+			} );
 			await this.page.goto(
 				`/wp-admin/site-editor.php?path=/${ templateType }/all`
 			);
@@ -381,9 +419,9 @@ export class EditorUtils {
 			} );
 			await templateLink.click();
 		} else {
-			await this.page.goto(
-				`/wp-admin/site-editor.php?path=/${ templateType }`
-			);
+			await this.admin.visitSiteEditor( {
+				path: '/' + templateType,
+			} );
 			const templateButton = this.page.getByRole( 'button', {
 				name: templateName,
 				exact: true,
@@ -392,7 +430,6 @@ export class EditorUtils {
 		}
 
 		await this.enterEditMode();
-		await this.closeWelcomeGuideModal();
 		await this.waitForSiteEditorFinishLoading();
 
 		// Verify we are editing the correct template and it has the correct title.
@@ -406,6 +443,8 @@ export class EditorUtils {
 	}
 
 	async revertTemplateCreation( templateName: string ) {
+		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
+
 		const templateRow = this.page.getByRole( 'row' ).filter( {
 			has: this.page.getByRole( 'link', {
 				name: templateName,
@@ -493,7 +532,7 @@ export class EditorUtils {
 		productSlug: string,
 		createIfDoesntExist = true
 	) {
-		await this.page.goto( '/wp-admin/site-editor.php' );
+		await this.admin.visitSiteEditor();
 		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
 
 		const templateButton = this.page.getByRole( 'button', {

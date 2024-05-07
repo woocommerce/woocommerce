@@ -23,6 +23,10 @@ describe( 'Proceed to checkout block', () => {
 		render(
 			<Block checkoutPageId={ 0 } buttonLabel={ '' } className={ '' } />
 		);
+
+		// TODO: Fix a recent deprecation of showSpinner prop of Button called in this component.
+		expect( console ).toHaveWarned();
+
 		expect( screen.getByText( 'Proceed to step two' ) ).toBeInTheDocument();
 	} );
 	it( 'allows the link to be filtered', () => {
