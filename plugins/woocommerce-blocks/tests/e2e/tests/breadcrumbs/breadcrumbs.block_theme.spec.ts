@@ -58,9 +58,10 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.visitSiteEditor( {
 			postId: template.id,
 			postType: 'wp_template',
+			canvas: 'edit',
 		} );
 
-		await editorUtils.enterEditMode();
+		await expect( editor.canvas.getByText( 'howdy' ) ).toBeVisible();
 
 		await editor.insertBlock( {
 			name: blockData.slug,
