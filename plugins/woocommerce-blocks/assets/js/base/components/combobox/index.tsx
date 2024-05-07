@@ -62,9 +62,10 @@ const Combobox = ( {
 	onChange,
 	errorId: incomingErrorId,
 	required = false,
-	autoComplete = 'off',
+	autoComplete = 'list',
 	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
 	className,
+	...restOfProps
 }: WCComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
@@ -127,7 +128,7 @@ const Combobox = ( {
 		'wc-block-components-combobox',
 		className || '',
 		{
-			'is-active': value,
+			'is-active': selectedOption?.value,
 			'has-error': error?.message && ! error?.hidden,
 		}
 	);
@@ -161,11 +162,12 @@ const Combobox = ( {
 	] );
 
 	return (
-		<div className={ outerWrapperClasses }>
-			<div
-				className="components-combobox-control components-base-control wc-block-components-combobox-control"
-				ref={ controlRef }
-			>
+		<div
+			ref={ controlRef }
+			id={ controlId }
+			className={ outerWrapperClasses }
+		>
+			<div className="components-combobox-control components-base-control wc-block-components-combobox-control">
 				<ComboboxProvider
 					store={ store }
 					value={ searchTerm }
@@ -214,14 +216,14 @@ const Combobox = ( {
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
 								className="components-combobox-control__input components-form-token-field__input"
-								autoComplete={ autoComplete }
+								autoComplete="list"
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
-								id={ controlId }
 								onFocus={ () => {
 									setSearchTerm( '' );
 								} }
+								{ ...restOfProps }
 							/>
 							<ComboboxPopover
 								className="components-form-token-field__suggestions-list"
