@@ -184,12 +184,11 @@ export const useSetPreviewState = ( {
 				} );
 			}
 		}
-
-		// We want this to run only once, adding deps will cause performance issues.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		attributes?.query?.inherit,
 		location.sourceData?.termId,
 		location.type,
+		setAttributes,
+		setPreviewState,
 	] );
 };
