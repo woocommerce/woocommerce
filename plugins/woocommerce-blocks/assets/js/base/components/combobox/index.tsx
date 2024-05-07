@@ -73,12 +73,19 @@ const Combobox = ( {
 	const controlId = id || 'control-' + fallbackId;
 	const errorId = incomingErrorId || controlId;
 
-	if ( ! [ 'list', 'inline', 'both', 'none' ].includes( autoComplete ) ) {
+	let autoCompleteValue = autoComplete;
+
+	if (
+		! [ 'list', 'inline', 'both', 'none' ].includes( autoCompleteValue )
+	) {
 		deprecated( `Passing browser autocomplete hints to combobox`, {
 			since: '9.0.0',
 			plugin: '@woocommerce/components',
 			hint: 'Passing autocomplete hints to combobox has no effect, please use the values supported by Ariakit combobox: https://ariakit.org/reference/combobox#autocomplete',
 		} );
+
+		// Reset the value to the default.
+		autoCompleteValue = 'list';
 	}
 
 	const { setValidationErrors, clearValidationError } =
@@ -225,7 +232,7 @@ const Combobox = ( {
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
 								className="components-combobox-control__input components-form-token-field__input"
-								autoComplete={ autoComplete }
+								autoComplete={ autoCompleteValue }
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
