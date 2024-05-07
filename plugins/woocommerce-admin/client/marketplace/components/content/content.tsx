@@ -55,10 +55,10 @@ export default function Content(): JSX.Element {
 			);
 		} else if ( query?.tab === 'themes' ) {
 			params.append( 'category', 'themes' );
-		} else if ( query?.tab === 'search' ) {
-			params.append( 'category', 'extensions-themes' );
 		} else if ( query?.tab === 'business-services' ) {
 			params.append( 'category', 'business-services' );
+		} else if ( query?.tab === 'search' ) {
+			params.append( 'category', 'extensions-themes-business-services' );
 		}
 
 		const wccomSettings = getAdminSetting( 'wccomHelper', false );
