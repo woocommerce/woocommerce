@@ -537,4 +537,21 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return $should_load;
 	}
+
+	/**
+	 * Checks if the store has at least one PayPal Standand order.
+	 *
+	 * @return bool
+	 */
+	public function has_paypal_orders() {
+		$paypal_orders = wc_get_orders(
+			array(
+				'limit'          => 1,
+				'return'         => 'ids',
+				'payment_method' => 'paypal',
+			)
+		);
+
+		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
+	}
 }
