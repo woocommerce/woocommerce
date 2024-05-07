@@ -176,6 +176,7 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
 
+	// @ts-expect-error No types for this exist yet.
 	const { user } = useContext( GlobalStylesContext );
 
 	const isActive = useMemo(
