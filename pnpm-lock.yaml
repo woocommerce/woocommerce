@@ -5195,46 +5195,6 @@ packages:
   /@automattic/color-studio@2.5.0:
     resolution: {integrity: sha512-gZWaJbx3p1oennAIoJtMGluTmoM95Efk4rc44TSBxWSZZ8gH3Am2eh1o3i1NhrZmg2Zt3AiVFeZZ4AJccIpBKQ==}
 
-  /@automattic/components@2.1.0(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2):
-    resolution: {integrity: sha512-bra4W1uF6C9rQwa4lHHwe+x8JUQRUizpOwFjOaGUFFAFSLUCHCwPtEx9AyLJIWcK/Dbb/pOnkNem0MxfNOlRng==}
-    peerDependencies:
-      '@wordpress/data': ^9.18.0
-      react: ^17.0.2
-      react-dom: ^18.2.0
-    dependencies:
-      '@automattic/calypso-analytics': 1.1.1
-      '@automattic/calypso-url': 1.1.0
-      '@automattic/format-currency': 2.0.0
-      '@automattic/typography': 1.0.0
-      '@automattic/viewport-react': 1.0.0(react@17.0.2)
-      '@wordpress/base-styles': 4.48.0
-      '@wordpress/components': 25.16.0(@types/react@17.0.71)(react-dom@17.0.2)(react@17.0.2)
-      '@wordpress/data': 6.6.1(react@17.0.2)
-      '@wordpress/icons': 9.48.0
-      '@wordpress/react-i18n': 3.55.0
-      canvas-confetti: 1.9.2
-      classnames: 2.3.2
-      gridicons: 3.4.2(react@17.0.2)
-      i18n-calypso: 7.0.0(@types/react@17.0.71)(react@17.0.2)
-      lodash: 4.17.21
-      prop-types: 15.8.1
-      react: 17.0.2
-      react-dom: 17.0.2(react@17.0.2)
-      react-modal: 3.16.1(react-dom@17.0.2)(react@17.0.2)
-      react-router-dom: 6.23.0(react-dom@17.0.2)(react@17.0.2)
-      react-slider: 2.0.6(react@17.0.2)
-      utility-types: 3.10.0
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - '@babel/helper-module-imports'
-      - '@babel/types'
-      - '@types/react'
-      - aslemammad-vite-plugin-macro
-      - babel-plugin-macros
-      - supports-color
-      - vite
-    dev: false
-
   /@automattic/components@2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2):
     resolution: {integrity: sha512-PqGwe1CI0PtQIaTka5cbX/gKqEkhk4GYTdkExigHdzifnYtPZSmuLsw5mlPdfA8qY141s8wokARU7cDIZE0DCw==}
     peerDependencies:
@@ -5377,7 +5337,7 @@ packages:
       react-dom: ^18.2.0
       redux: ^4.2.1
     dependencies:
-      '@automattic/components': 2.1.0(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
+      '@automattic/components': 2.1.1(@types/react@17.0.71)(@wordpress/data@6.6.1)(react-dom@17.0.2)(react@17.0.2)
       '@automattic/viewport': 1.1.0
       '@automattic/viewport-react': 1.0.0(react@17.0.2)
       '@popperjs/core': 2.11.8
