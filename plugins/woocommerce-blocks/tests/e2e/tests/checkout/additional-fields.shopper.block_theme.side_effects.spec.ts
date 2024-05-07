@@ -355,9 +355,7 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 				.getByRole( 'group', {
 					name: 'Additional order information',
 				} )
-				.locator(
-					'ul.components-form-token-field__suggestions-list > li'
-				)
+				.getByRole( 'option' )
 				.first()
 				.click();
 			await checkoutPageObject.waitForCustomerDataUpdate();
