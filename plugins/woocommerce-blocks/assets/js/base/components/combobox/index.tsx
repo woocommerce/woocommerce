@@ -24,6 +24,7 @@ import {
 import { ValidationInputError } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -71,6 +72,14 @@ const Combobox = ( {
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
 	const errorId = incomingErrorId || controlId;
+
+	if ( ! [ 'list', 'inline', 'both', 'none' ].includes( autoComplete ) ) {
+		deprecated( `Passing browser autocomplete hints to combobox`, {
+			since: '9.0.0',
+			plugin: '@woocommerce/components',
+			hint: 'Passing autocomplete hints to combobox has no effect, please use the values supported by Ariakit combobox: https://ariakit.org/reference/combobox#autocomplete',
+		} );
+	}
 
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( VALIDATION_STORE_KEY );
