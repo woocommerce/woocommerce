@@ -232,6 +232,7 @@ export const ShippingTour: React.FC< {
 					mutation: true,
 					resize: true,
 				},
+				autoScroll: true,
 			},
 			callbacks: {
 				onNextStep: ( newStepIndex ) => {
