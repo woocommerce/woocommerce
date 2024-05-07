@@ -47,7 +47,7 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
-	test.describe.only( 'Renders correctly with all Product Elements', () => {
+	test.describe( 'Renders correctly with all Product Elements', () => {
 		const insertProductElements = async (
 			pageObject: ProductCollectionPage
 		) => {
