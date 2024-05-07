@@ -1,21 +1,17 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	useEffect,
-	useMemo,
-	useState,
-} from '@wordpress/element';
+import { createElement, useEffect, useState } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
 import {
 	Button,
 	FormTokenField as CoreFormTokenField,
 } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { cleanForSlug } from '@wordpress/url';
 import {
 	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
-	ProductAttributeTerm,
+	type ProductAttributeTerm,
 } from '@woocommerce/data';
 
 /**
@@ -44,7 +40,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 	termLabel = undefined,
 	termPlaceholder,
-	onTermSelect,
+	onTermsSelect,
 
 	termsAutoSelection,
 
@@ -54,27 +50,24 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 } ) => {
 	const attributeId = attribute ? attribute.id : undefined;
 
+	const { createProductAttributeTerm, invalidateResolutionForStoreSelector } =
+		useDispatch( EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME );
+
 	const { terms } = useSelect(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		( select: WCDataSelector ) => {
-			const { getProductAttributeTerms, hasFinishedResolution } = select(
+			const { getProductAttributeTerms } = select(
 				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
 			);
 
-			if ( ! attributeId ) {
-				return {
-					terms: [],
-					hasLoadedTerms: true,
-				};
-			}
-
 			return {
-				terms: getProductAttributeTerms( {
-					search: '',
-					attribute_id: attributeId,
-				} ) as ProductAttributeTerm[],
-				hasLoadedTerms: hasFinishedResolution,
+				terms: attributeId
+					? ( getProductAttributeTerms( {
+							search: '',
+							attribute_id: attributeId,
+					  } ) as ProductAttributeTerm[] )
+					: [],
 			};
 		},
 		[ attributeId ]
@@ -82,21 +75,18 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 	const attributeTermPropName: 'terms' | 'options' = 'terms';
 
-	// Memoize the terms.
-	const memoizedTerms = useMemo( () => terms, [ terms ] );
-
 	// Map the terms to suggestions to populate the token field.
 	const suggestions = terms
 		? terms.map( ( term: ProductAttributeTerm ) => term.name )
 		: undefined;
 
-	// Get the selected options.
-	const selectedOptions = attribute?.[ attributeTermPropName ]?.map(
+	/*
+	 * Get the selected options,
+	 * used to populate the token field.
+	 */
+	const selectedValues = attribute?.[ attributeTermPropName ]?.map(
 		( option ) => option.name
 	);
-
-	// The field name for the terms.
-	const termsFieldName = `attributes[${ index }].${ attributeTermPropName }`;
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
@@ -121,31 +111,31 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		}
 
 		// If the terms are not loaded, bail early.
-		if ( ! memoizedTerms ) {
+		if ( ! terms?.length ) {
 			return;
 		}
 
+		// Set the flag to true.
+		setInitiallyPopulated( true );
+
 		/*
 		 * If terms auto selection is set to 'first',
-		 * and there are terms,
-		 * select the first term.
+		 * and there are terms, select the first term,
+		 * and bail early.
 		 */
-		if ( termsAutoSelection === 'first' && memoizedTerms.length ) {
-			return onTermSelect( termsFieldName, [ memoizedTerms[ 0 ] ] );
+		if ( termsAutoSelection === 'first' ) {
+			return onTermsSelect( [ terms[ 0 ] ], index, attribute );
 		}
 
 		// auto select all terms
-		onTermSelect( termsFieldName, memoizedTerms );
-
-		// Set the flag to true.
-		setInitiallyPopulated( true );
+		onTermsSelect( terms, index, attribute );
 	}, [
 		termsAutoSelection,
 		initiallyPopulated,
 		attribute,
-		memoizedTerms,
-		onTermSelect,
-		termsFieldName,
+		terms,
+		onTermsSelect,
+		index,
 	] );
 
 	/*
@@ -155,10 +145,43 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 	 */
 	const filteredAttributes = attributes?.filter( ( item ) => {
 		return (
-			item.id === attribute?.id ||
+			item.id === attributeId ||
 			( typeof item?.takenBy !== 'undefined' ? item.takenBy < 0 : true )
 		);
 	} );
+
+	async function addNewTerms(
+		termNames: string[],
+		itemsSelection: ProductAttributeTerm[]
+	) {
+		if ( ! attribute ) {
+			return;
+		}
+
+		// Create the new terms.
+		const promises = termNames.map( async ( termName ) => {
+			const newTerm = ( await createProductAttributeTerm( {
+				name: termName,
+				slug: cleanForSlug( termName ),
+				attribute_id: attributeId,
+			} ) ) as ProductAttributeTerm;
+
+			return newTerm;
+		} );
+
+		const newItems = await Promise.all( promises );
+
+		/*
+		 * Refresh attribute terms, invalidating the resolution
+		 * to include the newly created terms.
+		 * ToDo: Implement it optimally.
+		 */
+		invalidateResolutionForStoreSelector( 'getProductAttributeTerms', [
+			{ search: '', attribute_id: attributeId },
+		] );
+
+		onTermsSelect( [ ...itemsSelection, ...newItems ], index, attribute );
+	}
 
 	return (
 		<tr
@@ -173,7 +196,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					items={ filteredAttributes }
 					isLoading={ isLoadingAttributes }
 					onChange={ ( nextAttribute ) => {
-						if ( nextAttribute.id === attribute?.id ) {
+						if ( nextAttribute.id === attributeId ) {
 							return;
 						}
 
@@ -190,13 +213,32 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					placeholder={ termPlaceholder }
 					disabled={ ! attribute }
 					suggestions={ suggestions }
-					value={ selectedOptions }
-					onChange={ ( stringTerms ) => {
-						const selectedterms = terms.filter( ( term ) =>
+					value={ selectedValues }
+					onChange={ ( stringTerms: string[] ) => {
+						if ( ! attribute ) {
+							return;
+						}
+
+						// Extract new terms from the terms (string[])
+						const newStringTerms = stringTerms.filter(
+							( term ) => ! suggestions?.includes( term )
+						);
+
+						// Get the current selected terms.
+						const itemsSelection = terms.filter( ( term ) =>
 							stringTerms.includes( term.name )
 						);
 
-						onTermSelect( termsFieldName, selectedterms );
+						// Select the terms
+						onTermsSelect( itemsSelection, index, attribute );
+
+						// Create new terms, in case there are any.
+						if ( newStringTerms.length ) {
+							return addNewTerms(
+								newStringTerms,
+								itemsSelection
+							);
+						}
 					} }
 					__experimentalExpandOnFocus={ true }
 					__experimentalAutoSelectFirstMatch={ true }

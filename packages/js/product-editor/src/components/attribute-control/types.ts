@@ -75,7 +75,11 @@ export type AttributeTableRowProps = {
 		index: number
 	) => void;
 
-	onTermSelect: ( formInput: string, value: ProductAttributeTerm[] ) => void;
+	onTermsSelect: (
+		terms: ProductAttributeTerm[],
+		index: number,
+		attribute: EnhancedProductAttribute
+	) => void;
 
-	onRemove: ( index: number ) => void;
+	onRemove?: ( index: number ) => void;
 };

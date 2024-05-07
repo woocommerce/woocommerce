@@ -234,10 +234,20 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					setValue: ( name: string, value: any ) => void;
 				} ) => {
-					function selectAttributeHandler(
+					/**
+					 * Select the attribute in the form field.
+					 * If the attribute does not exist, create it.
+					 * ToDo: Improve Id. Adding a attribute with id -99
+					 * does not seem a good idea.
+					 *
+					 * @param {AttributesComboboxControlItem} nextAttribute - The attribute to select.
+					 * @param { number }                      index         - The index of the attribute in the form field.
+					 * @return { void }
+					 */
+					function selectAttribute(
 						nextAttribute: AttributesComboboxControlItem,
 						index: number
-					) {
+					): void {
 						recordEvent( 'product_attribute_add_custom_attribute', {
 							source: TRACKS_SOURCE,
 						} );
@@ -281,9 +291,9 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 								optimisticQueryUpdate: attributeSortCriteria,
 							}
 						)
-							.then( ( newAttribute ) =>
-								setValue( fieldName, newAttribute )
-							)
+							.then( ( newAttribute ) => {
+								setValue( fieldName, newAttribute );
+							} )
 							.catch( ( error ) => {
 								let message = __(
 									'Failed to create new attribute.',
@@ -302,6 +312,18 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							} );
 					}
 
+					const attributeTermPropName: 'terms' | 'options' = 'terms';
+
+					function selectTerms(
+						terms: ProductAttributeTerm[],
+						index: number
+					) {
+						setValue(
+							`attributes[${ index }].${ attributeTermPropName }`,
+							terms
+						);
+					}
+
 					/*
 					 * Get the attribute ids that are already selected
 					 * by other form fields.
@@ -314,7 +336,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					 * Compute the available attributes to show in the attribute input field,
 					 * filtering out the ignored attributes,
 					 * marking the disabled ones,
-					 * and setting the takenBy property.
+					 * and setting the `takenBy` property.
 					 */
 					const availableAttributes = attributes
 						?.filter(
@@ -380,13 +402,15 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 														availableAttributes
 													}
 													onAttributeSelect={
-														selectAttributeHandler
+														selectAttribute
 													}
 													termPlaceholder={
 														termPlaceholder
 													}
 													removeLabel={ removeLabel }
-													onTermSelect={ setValue }
+													onTermsSelect={
+														selectTerms
+													}
 													onRemove={ (
 														removedIndex
 													) =>
