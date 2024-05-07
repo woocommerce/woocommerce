@@ -26,7 +26,6 @@
 	&__body {
 		min-height: 200px;
 		flex: 1 1 auto;
-		overflow: auto;
 	}
 
 	&__table {
@@ -82,7 +81,7 @@
 	&__table-attribute-trash-column {
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		align-items:flex-start;
 
 		@include breakpoint( '<782px' ) {
 			position: absolute;

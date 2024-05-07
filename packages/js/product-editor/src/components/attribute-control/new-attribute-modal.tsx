@@ -15,6 +15,7 @@ import {
 	type ProductAttributesActions,
 	type WPDataActions,
 	type ProductAttributeTerm,
+	type ProductAttribute,
 } from '@woocommerce/data';
 import { Button, Modal, Notice } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -22,7 +23,6 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { AttributeInputField } from '../attribute-input-field';
 import {
 	AttributeTermInputField,
 	CustomAttributeTermInputField,
@@ -30,6 +30,8 @@ import {
 import { TRACKS_SOURCE } from '../../constants';
 import type { AttributeInputFieldItemProps } from '../attribute-input-field/types';
 import type { EnhancedProductAttribute } from '../../hooks/use-product-attributes';
+import AttributesComboboxControl from '../attribute-combobox-field';
+import { AttributesComboboxControlItem } from '../attribute-combobox-field/types';
 
 type NewAttributeModalProps = {
 	title?: string;
@@ -308,7 +310,7 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					}
 
 					function selectAttributeHandler(
-						nextAttribute: AttributeInputFieldItemProps,
+						nextAttribute: AttributesComboboxControlItem,
 						index: number
 					) {
 						recordEvent( 'product_attribute_add_custom_attribute', {
@@ -378,33 +380,30 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 					}
 
 					/*
-					 * Get the attribute ids that should be ignored when filtering the attributes
-					 * to show in the attribute input field.
+					 * Get the attribute ids that are already selected
+					 * by other form fields.
 					 */
-					const ignoredAttributeIds = [
-						...selectedAttributeIds,
-						...values.attributes
-							.map( ( attr ) => attr?.id )
-							.filter(
-								( attrId ): attrId is number =>
-									attrId !== undefined
-							),
-					];
+					const attributeBelongTo = values.attributes.map( ( attr ) =>
+						attr ? attr.id : null
+					);
 
 					/*
 					 * Compute the available attributes to show in the attribute input field,
-					 * filtering out the ignored attributes and marking the disabled ones.
+					 * filtering out the ignored attributes,
+					 * marking the disabled ones,
+					 * and setting the takenBy property.
 					 */
 					const availableAttributes = attributes
 						?.filter(
-							( attribute: EnhancedProductAttribute ) =>
-								! ignoredAttributeIds.includes( attribute.id )
+							( attribute: ProductAttribute ) =>
+								! selectedAttributeIds.includes( attribute.id )
 						)
-						.map( ( attribute: EnhancedProductAttribute ) => ( {
+						?.map( ( attribute: ProductAttribute ) => ( {
 							...attribute,
 							isDisabled: disabledAttributeIds.includes(
 								attribute.id
 							),
+							takenBy: attributeBelongTo.indexOf( attribute.id ),
 						} ) );
 
 					return (
@@ -446,19 +445,28 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 													className={ `woocommerce-new-attribute-modal__table-row woocommerce-new-attribute-modal__table-row-${ index }` }
 												>
 													<td className="woocommerce-new-attribute-modal__table-attribute-column">
-														<AttributeInputField
+														<AttributesComboboxControl
 															placeholder={
 																attributePlaceholder
 															}
-															value={ attribute }
-															items={
-																availableAttributes
+															current={
+																attribute
 															}
+															instanceNumber={
+																index
+															}
+															items={ availableAttributes?.filter(
+																(
+																	attr: AttributesComboboxControlItem
+																) =>
+																	( attr.takenBy &&
+																		attr.takenBy <
+																			0 ) ||
+																	attr.takenBy ===
+																		index
+															) }
 															isLoading={
 																isLoading
-															}
-															label={
-																attributeLabel
 															}
 															onChange={ (
 																nextAttribute
@@ -467,9 +475,6 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 																	nextAttribute,
 																	index
 																)
-															}
-															disabledAttributeIds={
-																disabledAttributeIds
 															}
 															disabledAttributeMessage={
 																disabledAttributeMessage
