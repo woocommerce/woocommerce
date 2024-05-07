@@ -564,7 +564,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 						),
 					),
 				),
-				'tax_lines'            => array(
+				'tax_lines'        => array(
 					'description' => __( 'Tax lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -643,7 +643,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 						),
 					),
 				),
-				'shipping_lines'       => array(
+				'shipping_lines'   => array(
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -734,7 +734,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 						),
 					),
 				),
-				'fee_lines'            => array(
+				'fee_lines'        => array(
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
