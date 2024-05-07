@@ -4,7 +4,10 @@
  * External dependencies
  */
 // @ts-expect-error No types for this exist yet.
-import { store as blockEditorStore } from '@wordpress/block-editor';
+import {
+	store as blockEditorStore,
+	privateApis as blockEditorPrivateApis,
+} from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -32,6 +35,8 @@ import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
 import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
+import { isEqual } from 'lodash';
+import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -69,6 +74,8 @@ const findPageIdByBlockClientId = ( event: MouseEvent ) => {
 // We only show the edit option when page count is <= MAX_PAGE_COUNT
 // Performance of Navigation Links is not good past this value.
 const MAX_PAGE_COUNT = 100;
+
+const { GlobalStylesContext } = unlock( blockEditorPrivateApis );
 
 export const BlockEditorContainer = () => {
 	const history = useHistory();
@@ -168,6 +175,47 @@ export const BlockEditorContainer = () => {
 
 	// @ts-expect-error No types for this exist yet.
 	const { updateBlockAttributes } = useDispatch( blockEditorStore );
+
+	const { user } = useContext( GlobalStylesContext );
+
+	const isActive = useMemo(
+		() =>
+			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
+		[ user ]
+	);
+
+	/**
+	 * This is temporary solution to change the button color on the cover block when the color palette is New - Neutral.
+	 * The real fix should be done on Gutenberg side: https://github.com/WordPress/gutenberg/issues/58004
+	 *
+	 */
+	useEffect( () => {
+		const coverBlock = blocks.find(
+			( block ) =>
+				block.name === 'core/cover' &&
+				block.attributes.url.includes(
+					'music-black-and-white-white-photography.jpg'
+				)
+		);
+
+		const buttonsBlock = coverBlock?.innerBlocks[ 0 ].innerBlocks.find(
+			( block ) => block.name === 'core/buttons'
+		);
+
+		const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
+		const clientId = buttonBlock?.clientId;
+
+		if ( ! isActive ) {
+			updateBlockAttributes( clientId, {
+				style: {},
+			} );
+			return;
+		}
+
+		updateBlockAttributes( clientId, {
+			style: { color: { background: '#ffffff', text: '#000000' } },
+		} );
+	}, [ blocks, isActive, updateBlockAttributes ] );
 
 	useEffect( () => {
 		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(
