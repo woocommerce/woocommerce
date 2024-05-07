@@ -250,7 +250,8 @@ class ProductCollectionPage {
 		name:
 			| 'Show Hand-picked Products'
 			| 'Keyword'
-			| 'Show Taxonomies'
+			| 'Show product categories'
+			| 'Show product tags'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'

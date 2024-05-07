@@ -275,7 +275,7 @@ async function createJobsForProject(
 	for ( const dependency of node.dependencies ) {
 		// Each dependency needs to have its own cascade keys so that they don't cross-contaminate.
 
-		// Keey in mind that arrays are passed by reference in JavaScript. This means that any changes
+		// Keep in mind that arrays are passed by reference in JavaScript. This means that any changes
 		// we make to the cascade keys array will be reflected in the parent scope. We need to copy
 		// the array before recursing our dependencies so that we don't accidentally add keys from
 		// one dependency to a sibling and accidentally trigger jobs that shouldn't be run.
@@ -320,6 +320,20 @@ async function createJobsForProject(
 	for ( const jobConfig of node.ciConfig.jobs ) {
 		// Make sure that we don't queue the same job more than once.
 		if ( jobConfig.jobCreated ) {
+			continue;
+		}
+
+		// Do not create a job if:
+		// - there is an event argument in ci-job cli,
+		// - a non-empty list of events is defined in the job config,
+		// - the event argument is not in the defined list of events.
+		if (
+			options.commandVars?.event &&
+			jobConfig.events.length > 0 &&
+			! jobConfig.events
+				.map( ( e ) => e.toLowerCase() )
+				.includes( options.commandVars.event.toLowerCase() )
+		) {
 			continue;
 		}
 

@@ -1,5 +1,3 @@
-/* eslint-disable playwright/no-networkidle */
-/* eslint-disable jest/valid-expect */
 const { test, expect } = require( '@playwright/test' );
 const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
 
@@ -122,6 +120,11 @@ test.describe( 'Single Product Page', () => {
 
 	test( 'should be able to see product description', async ( { page } ) => {
 		await page.goto( `product/${ simpleProductSlug }` );
+
+		expect( await page.title() ).toBe(
+			simpleProductName + ' – WooCommerce Core E2E Test Suite'
+		);
+
 		await page.getByRole( 'tab', { name: 'Description' } ).click();
 
 		await expect(

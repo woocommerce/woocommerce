@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "8.9.0",
+	"version": "9.0.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -28,15 +28,19 @@
 		"env:restart": "pnpm wp-env destroy && pnpm wp-env start --update",
 		"env:start": "pnpm wp-env start",
 		"env:stop": "pnpm wp-env stop",
-		"env:test": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='./tests/e2e-pw/bin/test-env-setup.sh' && pnpm env:dev && pnpm playwright install chromium",
-		"env:test:cot": "WP_ENV_LIFECYCLE_SCRIPT_AFTER_START='ENABLE_HPOS=1 ./tests/e2e-pw/bin/test-env-setup.sh' && ENABLE_HPOS=1 pnpm env:dev",
+		"env:test": "pnpm env:dev && pnpm playwright install chromium",
+		"env:test:no-hpos": "DISABLE_HPOS=1 pnpm env:test",
 		"env:perf:install-k6": "curl https://github.com/grafana/k6/releases/download/v0.33.0/k6-v0.33.0-linux-amd64.tar.gz -L | tar xvz --strip-components 1",
 		"env:perf": "pnpm env:dev && pnpm env:performance-init && pnpm env:perf:install-k6",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "composer install",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:changes:branch": "pnpm '/^lint:changes:branch:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
+		"lint:changes:branch:js": "bash ./bin/eslint-branch.sh",
+		"lint:changes:branch:php": "pnpm lint:php:changes:branch",
+		"lint:lang:js": "eslint . --ext=js,ts",
 		"lint:lang:php": "composer run-script phpcs",
 		"lint:php": "composer run-script phpcs",
 		"lint:php:changes": "composer run-script lint",
@@ -55,6 +59,7 @@
 		"test:php": "./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
+		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:unit": "pnpm test:php",
@@ -80,7 +85,7 @@
 		"build_step": "pnpm build:zip",
 		"ci": {
 			"lint": {
-				"command": "lint:php:changes:branch <baseRef>",
+				"command": "lint:changes:branch <baseRef>",
 				"changes": [
 					"composer.lock",
 					"includes/**/*.php",
@@ -89,7 +94,8 @@
 					"templates/**/*.php",
 					"tests/php/**/*.php",
 					"tests/legacy/unit-tests/**/*.php",
-					"tests/unit-tests/**/*.php"
+					"tests/unit-tests/**/*.php",
+					"tests/**/*.js"
 				]
 			},
 			"tests": [
@@ -202,6 +208,34 @@
 					}
 				},
 				{
+					"name": "Core e2e tests - HPOS disabled",
+					"testType": "e2e",
+					"command": "test:e2e-pw",
+					"shardingArguments": [
+						"--shard=1/5",
+						"--shard=2/5",
+						"--shard=3/5",
+						"--shard=4/5",
+						"--shard=5/5"
+					],
+					"events": [
+						"push"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/e2e-pw/**"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core API tests",
 					"testType": "api",
 					"command": "test:api-pw",
@@ -222,6 +256,27 @@
 					}
 				},
 				{
+					"name": "Core API tests - HPOS disabled",
+					"testType": "api",
+					"command": "test:api-pw",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/php/**/*.php",
+						"tests/api-core-tests/**"
+					],
+					"events": [
+						"push"
+					],
+					"testEnv": {
+						"start": "env:test:no-hpos"
+					}
+				},
+				{
 					"name": "Core Performance tests (K6)",
 					"testType": "performance",
 					"command": "test:perf",
@@ -239,6 +294,21 @@
 					"testEnv": {
 						"start": "env:perf"
 					}
+				},
+				{
+					"name": "Metrics",
+					"testType": "performance",
+					"command": "test:metrics:ci",
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.lock",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html",
+						"tests/metrics/**"
+					]
 				}
 			]
 		}
@@ -286,14 +356,14 @@
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"stylelint": "^14.16.1",
 		"typescript": "^5.3.3",
-		"uuid": "^8.3.2",
+		"uuid": "^9.0.1",
 		"webpack": "5.70.0",
 		"webpack-cli": "3.3.12",
 		"wireit": "0.14.3",
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"browserslist": [

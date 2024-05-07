@@ -10,6 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -39,7 +41,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '8.9.0';
+	public $version = '9.0.0';
 
 	/**
 	 * WooCommerce Schema version.
@@ -254,8 +256,8 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
-		add_action( 'woocommerce_newly_installed', array( $this, 'add_lys_default_values' ) );
-		add_action( 'woocommerce_updated', array( $this, 'add_lys_default_values' ) );
+
+		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
 
 		// These classes set up hooks on instantiation.
 		$container = wc_get_container();
@@ -273,6 +275,8 @@ final class WooCommerce {
 		$container->get( WebhookUtil::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
+		$container->get( ComingSoonCacheInvalidator::class );
+		$container->get( ComingSoonRequestHandler::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -308,39 +312,6 @@ final class WooCommerce {
 		$config_name = 'woocommerce_remote_variant_assignment';
 		if ( false === get_option( $config_name, false ) ) {
 			update_option( $config_name, wp_rand( 1, 120 ) );
-		}
-	}
-
-	/**
-	 * Set default option values for launch your store task.
-	 */
-	public function add_lys_default_values() {
-		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
-			return;
-		}
-
-		$is_new_install = current_action() === 'woocommerce_newly_installed';
-
-		$coming_soon      = $is_new_install ? 'yes' : 'no';
-		$launch_status    = $is_new_install ? 'unlaunched' : 'launched';
-		$store_pages_only = WCAdminHelper::is_site_fresh() ? 'no' : 'yes';
-		$private_link     = 'yes';
-		$share_key        = wp_generate_password( 32, false );
-
-		if ( false === get_option( 'woocommerce_coming_soon', false ) ) {
-			update_option( 'woocommerce_coming_soon', $coming_soon );
-		}
-		if ( false === get_option( 'woocommerce_store_pages_only', false ) ) {
-			update_option( 'woocommerce_store_pages_only', $store_pages_only );
-		}
-		if ( false === get_option( 'woocommerce_private_link', false ) ) {
-			update_option( 'woocommerce_private_link', $private_link );
-		}
-		if ( false === get_option( 'woocommerce_share_key', false ) ) {
-			update_option( 'woocommerce_share_key', $share_key );
-		}
-		if ( false === get_option( 'launch-status', false ) ) {
-			update_option( 'launch-status', $launch_status );
 		}
 	}
 
@@ -1023,7 +994,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the activated plugin.
 	 */
 	public function activated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		if ( '/woocommerce.php' === substr( $filename, -16 ) ) {
 			set_transient( 'woocommerce_activated_plugin', $filename );
@@ -1039,7 +1010,7 @@ final class WooCommerce {
 	 * @param string $filename The filename of the deactivated plugin.
 	 */
 	public function deactivated_plugin( $filename ) {
-		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
 
 		WC_Helper::deactivated_plugin( $filename );
 	}
@@ -1202,5 +1173,21 @@ final class WooCommerce {
 	 */
 	public function get_global( string $global_name ) {
 		return wc_get_container()->get( LegacyProxy::class )->get_global( $global_name );
+	}
+
+	/**
+	 * Converts the WooCommerce slug to the correct slug for the current version.
+	 * This ensures that when the plugin is installed in a different folder name, the correct slug is used so that dependent plugins can be installed/activated.
+	 *
+	 * @since 9.0.0
+	 * @param string $slug The plugin slug to convert.
+	 *
+	 * @return string
+	 */
+	public function convert_woocommerce_slug( $slug ) {
+		if ( 'woocommerce' === $slug ) {
+			$slug = dirname( WC_PLUGIN_BASENAME );
+		}
+		return $slug;
 	}
 }

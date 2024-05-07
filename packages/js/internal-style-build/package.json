@@ -5,7 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^16.14.1",
+		"node": "^20.11.1",
 		"pnpm": "^8.12.1"
 	},
 	"keywords": [
@@ -55,7 +55,7 @@
 		"eslint": "^8.55.0",
 		"jest": "~27.5.1",
 		"jest-cli": "~27.5.1",
-		"rimraf": "^3.0.2",
+		"rimraf": "5.0.5",
 		"ts-jest": "~29.1.1",
 		"typescript": "^5.3.3",
 		"webpack": "^5.89.0",

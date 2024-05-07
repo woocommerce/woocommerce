@@ -19,6 +19,10 @@
 	border-radius: 4px;
 	height: 24px;
 
+	svg {
+		margin-left: 4px;
+	}
+
 	&.is-live {
 		background-color: #e6f2e8;
 		color: #005c12;

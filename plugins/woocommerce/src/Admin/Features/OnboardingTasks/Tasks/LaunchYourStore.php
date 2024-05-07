@@ -65,7 +65,7 @@ class LaunchYourStore extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'wp-admin/admin.php?page=wc-admin&path=%2Flaunch-your-store' );
+		return admin_url( 'admin.php?page=wc-admin&path=%2Flaunch-your-store' );
 	}
 
 	/**
@@ -74,15 +74,7 @@ class LaunchYourStore extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
-		$launch_status = get_option( 'launch-status' );
-
-		// The site is launched when the launch status is 'launched' or missing.
-		$launched_values = array(
-			'launched',
-			'',
-			false,
-		);
-		return in_array( $launch_status, $launched_values, true );
+		return 'yes' !== get_option( 'woocommerce_coming_soon' );
 	}
 
 	/**

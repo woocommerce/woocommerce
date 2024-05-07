@@ -1,7 +1,8 @@
+/* eslint-disable playwright/no-standalone-expect */
 /**
  * External dependencies
  */
-import { BLOCK_THEME_SLUG, cli } from '@woocommerce/e2e-utils';
+import { BLOCK_THEME_SLUG, DB_EXPORT_FILE, cli } from '@woocommerce/e2e-utils';
 import { test as setup, expect } from '@woocommerce/e2e-playwright-utils';
 
 setup( 'Sets up the block theme', async () => {
@@ -21,4 +22,9 @@ setup( 'Sets up the block theme', async () => {
 
 	expect( cliOutput.stdout ).toContain( 'Success: Rewrite structure set' );
 	expect( cliOutput.stdout ).toContain( 'Success: Rewrite rules flushed' );
+
+	cliOutput = await cli(
+		`npm run wp-env run tests-cli wp db export ${ DB_EXPORT_FILE }`
+	);
+	expect( cliOutput.stdout ).toContain( 'Success: Exported' );
 } );

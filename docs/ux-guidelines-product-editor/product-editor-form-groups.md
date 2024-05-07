@@ -18,4 +18,4 @@ If a tab doesn't contain any sections, it won't be shown to merchants.
 
 Custom product types manage the visibility of the default groups and add new ones. This is particularly useful if a custom product has a unique structure and requires extra information that isn't included in the default groups.
 
-[Learn more about custom product types](./product-editor-form-custom-product-types)
+[Learn more about custom product types](./product-editor-form-custom-product-types.md)
