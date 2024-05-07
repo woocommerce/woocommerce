@@ -147,6 +147,9 @@ const Combobox = ( {
 			} else {
 				setSearchTerm( selectedOption?.label || '' );
 			}
+			// Search term was cleared, reselect the last selected option
+		} else {
+			setSearchTerm( selectedOption?.label || '' );
 		}
 	}, [
 		searchTerm,
