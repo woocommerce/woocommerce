@@ -19,12 +19,6 @@ const blockData: BlockData = {
 
 test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
-		test.afterAll( async ( { templateApiUtils } ) => {
-			await templateApiUtils.revertTemplate(
-				'woocommerce/woocommerce//single-product'
-			);
-		} );
-
 		test( 'can be inserted in FSE area', async ( {
 			editorUtils,
 			editor,
@@ -56,13 +50,6 @@ test.describe( 'Merchant → Mini Cart', () => {
 			await editorUtils.page
 				.getByLabel( 'Search for blocks and patterns' )
 				.fill( blockData.slug );
-
-			// Await for blocks commercial to be loaded in the Blocks inserter.
-			await expect(
-				editorUtils.page.locator(
-					'.block-directory-downloadable-block-list-item__details'
-				)
-			).toBeVisible();
 
 			const miniCartButton = editorUtils.page.getByRole( 'option', {
 				name: blockData.name,

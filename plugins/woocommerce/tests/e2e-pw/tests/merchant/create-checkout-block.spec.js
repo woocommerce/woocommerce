@@ -1,33 +1,25 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	getCanvas,
 	fillPageTitle,
 	insertBlock,
 	transformIntoBlocks,
+	publishPage,
 } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
-const transformedCheckoutBlockTitle = `Transformed Checkout ${ Date.now() }`;
-const transformedCheckoutBlockSlug = transformedCheckoutBlockTitle
-	.replace( / /gi, '-' )
-	.toLowerCase();
 
 const simpleProductName = 'Very Simple Product';
 const singleProductPrice = '999.00';
 
 let productId, shippingZoneId;
 
-test.describe( 'Transform Classic Checkout To Checkout Block', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Transform Classic Checkout To Checkout Block', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Transformed checkout',
+	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// enable COD
 		await api.put( 'payment_gateways/cod', {
 			enabled: true,
@@ -55,13 +47,7 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
@@ -78,18 +64,12 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 
 	test( 'can transform classic checkout to checkout block', async ( {
 		page,
-		baseURL,
+		api,
+		testPage,
 	} ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-
 		await goToPageEditor( { page } );
 
-		await fillPageTitle( page, transformedCheckoutBlockTitle );
+		await fillPageTitle( page, testPage.title );
 		await insertBlock( page, 'Classic Checkout' );
 		await transformIntoBlocks( page );
 
@@ -100,17 +80,7 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		await canvas.getByLabel( 'Block: Terms and Conditions' ).click();
 		await page.getByLabel( 'Require checkbox' ).check();
 
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ transformedCheckoutBlockTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// add additional payment option after page creation
 		await api.put( 'payment_gateways/bacs', {
@@ -151,9 +121,9 @@ test.describe( 'Transform Classic Checkout To Checkout Block', () => {
 		// go to frontend to verify transformed checkout block
 		// before that add product to cart to be able to visit checkout page
 		await page.goto( `/cart/?add-to-cart=${ productId }` );
-		await page.goto( transformedCheckoutBlockSlug );
+		await page.goto( testPage.slug );
 		await expect(
-			page.getByRole( 'heading', { name: transformedCheckoutBlockTitle } )
+			page.getByRole( 'heading', { name: testPage.title } )
 		).toBeVisible();
 		await expect(
 			page

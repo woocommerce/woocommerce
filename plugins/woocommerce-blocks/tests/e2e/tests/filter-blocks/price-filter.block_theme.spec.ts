@@ -22,7 +22,7 @@ const test = base.extend< {
 	},
 } );
 
-test.describe( 'Product Filter: Price Filter Block', async () => {
+test.describe( 'Product Filter: Price Filter Block', () => {
 	test.describe( 'frontend', () => {
 		test( 'With price filters applied it shows the correct price', async ( {
 			page,

@@ -1,13 +1,11 @@
-const { test, expect } = require( '@playwright/test' );
+const { test: baseTest, expect } = require( '../../fixtures/fixtures' );
 const {
 	goToPageEditor,
 	fillPageTitle,
 	insertBlock,
 	getCanvas,
+	publishPage,
 } = require( '../../utils/editor' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
-const allWooBlocksPageTitle = `Insert All Woo Blocks ${ Date.now() }`;
 
 const simpleProductName = 'Simplest Product';
 const singleProductPrice = '555.00';
@@ -91,16 +89,13 @@ const blocks = [
 
 let productId, shippingZoneId, productTagId, attributeId, productCategoryId;
 
-test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
-	test.use( { storageState: process.env.ADMINSTATE } );
+baseTest.describe( 'Add WooCommerce Blocks Into Page', () => {
+	const test = baseTest.extend( {
+		storageState: process.env.ADMINSTATE,
+		testPageTitlePrefix: 'Woocommerce Blocks',
+	} );
 
-	test.beforeAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.beforeAll( async ( { api } ) => {
 		// add product attribute
 		await api
 			.post( 'products/attributes', {
@@ -170,13 +165,7 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 		} );
 	} );
 
-	test.afterAll( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
+	test.afterAll( async ( { api } ) => {
 		await api.delete( `products/${ productId }`, {
 			force: true,
 		} );
@@ -194,10 +183,13 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 		} );
 	} );
 
-	test( `can insert all WooCommerce blocks into page`, async ( { page } ) => {
+	test( `can insert all WooCommerce blocks into page`, async ( {
+		page,
+		testPage,
+	} ) => {
 		await goToPageEditor( { page } );
 
-		await fillPageTitle( page, allWooBlocksPageTitle );
+		await fillPageTitle( page, testPage.title );
 
 		for ( let i = 0; i < blocks.length; i++ ) {
 			await test.step( `Insert ${ blocks[ i ].name } block`, async () => {
@@ -225,17 +217,7 @@ test.describe( 'Insert All WooCommerce Blocks Into Page', () => {
 			} );
 		}
 
-		// save and publish the page
-		await page
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await page
-			.getByRole( 'region', { name: 'Editor publish' } )
-			.getByRole( 'button', { name: 'Publish', exact: true } )
-			.click();
-		await expect(
-			page.getByText( `${ allWooBlocksPageTitle } is now live.` )
-		).toBeVisible();
+		await publishPage( page, testPage.title );
 
 		// check all blocks inside the page after publishing
 		// except the product price due to invisibility and false-positive

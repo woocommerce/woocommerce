@@ -23,6 +23,7 @@ const config = {
 		'playwright/prefer-web-first-assertions': 'error',
 		'playwright/valid-expect': 'error',
 		'rulesdir/no-raw-playwright-test-import': 'error',
+		'playwright/no-hooks': [ 'error', { allow: [ 'beforeEach' ] } ],
 	},
 };
 

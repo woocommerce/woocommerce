@@ -35,16 +35,14 @@ class PatternsHelper {
 	 * @return \WP_Post|null
 	 */
 	public static function get_patterns_ai_data_post() {
-		$arg = array(
-			'post_type'      => 'patterns_ai_data',
-			'posts_per_page' => 1,
-			'no_found_rows'  => true,
-			'cache_results'  => true,
+		$posts = get_posts(
+			array(
+				'post_type'      => 'patterns_ai_data',
+				'posts_per_page' => 1,
+				'cache_results'  => true,
+			)
 		);
 
-		$query = new \WP_Query( $arg );
-
-		$posts = $query->get_posts();
 		return $posts[0] ?? null;
 	}
 
@@ -106,13 +104,17 @@ class PatternsHelper {
 			return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
 		}
 
-		$patterns_ai_data_post = self::get_patterns_ai_data_post();
 		$patterns_dictionary   = '';
-		if ( ! empty( $patterns_ai_data_post->post_content ) ) {
-			$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
+		$ai_connection_allowed = get_option( 'woocommerce_blocks_allow_ai_connection' );
 
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
+		if ( $ai_connection_allowed ) {
+			$patterns_ai_data_post = self::get_patterns_ai_data_post();
+			if ( ! empty( $patterns_ai_data_post->post_content ) ) {
+				$patterns_dictionary = json_decode( $patterns_ai_data_post->post_content, true );
+
+				if ( json_last_error() !== JSON_ERROR_NONE ) {
+					return new WP_Error( 'json_decode_error', __( 'Error decoding JSON.', 'woocommerce' ) );
+				}
 			}
 		}
 

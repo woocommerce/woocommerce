@@ -19,6 +19,7 @@ export interface ProductEditorContext {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;
+	isInSelectedTab?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
