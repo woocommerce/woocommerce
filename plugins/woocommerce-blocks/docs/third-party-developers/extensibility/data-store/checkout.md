@@ -250,7 +250,7 @@ const isProcessing = store.isProcessing();
 
 ### isAfterProcessing
 
-When the checkout status is `AFTER_PROCESSING` this flag is true. Checkout will have this status after the the block receives the response from the server side processing request.
+When the checkout status is `AFTER_PROCESSING` this flag is true. Checkout will have this status after the block receives the response from the server side processing request.
 
 #### _Returns_ <!-- omit in toc -->
 

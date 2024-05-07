@@ -11,6 +11,11 @@
 	flex-direction: column;
 	position: relative;
 
+	&__attributes-cell {
+		display: flex;
+		align-items: center;
+	}
+
 	&__table {
 		&-header {
 			.woocommerce-product-variations__table-row {
@@ -180,5 +185,22 @@
 		.components-button--hidden {
 			color: $alert-red;
 		}
+	}
+	&__add-image-button {
+		border-radius: 2px;
+		border: 1px dashed $gray-400;
+		margin-right: $gap-small;
+		width: 32px;
+		padding: 0;
+	}
+	&__image-button {
+		margin-right: $gap-small;
+		width: 32px;
+		max-height: 32px;
+		padding: 0;
+	}
+	&__image {
+		width: 32px;
+		max-height: 32px;
 	}
 }
