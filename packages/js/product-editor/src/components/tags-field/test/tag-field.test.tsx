@@ -10,7 +10,7 @@ import { createElement } from '@wordpress/element';
  * Internal dependencies
  */
 import { TagField } from '../tag-field';
-import { ProductTagNode } from '../use-tag-search';
+import { ProductTagNodeProps } from '../types';
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
@@ -37,9 +37,10 @@ describe( 'TagField', () => {
 				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
 						id="tag-field"
+						isVisible={ true }
 						label="Tags"
 						placeholder="Search or create tag…"
-						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
+						{ ...getInputProps< ProductTagNodeProps[] >( 'tags' ) }
 					/>
 				) }
 			</Form>
@@ -61,9 +62,10 @@ describe( 'TagField', () => {
 				{ ( { getInputProps }: FormContextType< Product > ) => (
 					<TagField
 						id="another-tag-field"
+						isVisible={ true }
 						label="Tags"
 						placeholder="Search or create tag…"
-						{ ...getInputProps< ProductTagNode[] >( 'tags' ) }
+						{ ...getInputProps< ProductTagNodeProps[] >( 'tags' ) }
 					/>
 				) }
 			</Form>
