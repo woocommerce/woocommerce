@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WooCommerce Blocks Order Confirmation template filters
+ * Plugin Name: WooCommerce Order Confirmation Filters
  * Description: used to modify filters and actions present in the new Order Confirmation Template
  * Plugin URI: https://github.com/woocommerce/woocommerce
  * Author: WooCommerce
