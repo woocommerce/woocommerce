@@ -81,5 +81,5 @@ export type AttributeTableRowProps = {
 		attribute: EnhancedProductAttribute
 	) => void;
 
-	onRemove?: ( index: number ) => void;
+	onRemove: ( index: number ) => void;
 };
