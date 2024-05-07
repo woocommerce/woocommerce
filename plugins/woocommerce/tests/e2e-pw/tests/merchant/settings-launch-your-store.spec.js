@@ -13,7 +13,9 @@ test.describe( 'WooCommerce Shipping Settings', () => {
 		} );
 	} );
 
-	test( 'site visibility settings are all good', async ( { page } ) => {
+	test( 'merchant sees visibility controls on homescreen', async ( {
+		page,
+	} ) => {
 		await page.goto(
 			'wp-admin/admin.php?page=wc-settings&tab=site-visibility'
 		);
@@ -32,7 +34,6 @@ test.describe( 'WooCommerce Shipping Settings', () => {
 		await page
 			.getByRole( 'checkbox', {
 				name: 'Restrict to store pages only',
-				exact: true,
 			} )
 			.uncheck();
 
