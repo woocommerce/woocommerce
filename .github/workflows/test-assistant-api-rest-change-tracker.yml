@@ -40,7 +40,8 @@ jobs:
 
       - name: Determine Milestone Date
         id: get_milestone_date
-        run: ./scripts/determine_milestone_date.sh
+        working-directory: .github/workflows/scripts
+        run: bash determine_milestone_date.sh
         env:
           GITHUB_EVENT_PATH_PULL_REQUEST_MILESTONE_TITLE: ${{ github.event.pull_request.milestone.title }}
 
