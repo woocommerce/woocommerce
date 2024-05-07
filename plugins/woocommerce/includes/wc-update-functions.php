@@ -2713,7 +2713,7 @@ function wc_update_890_update_paypal_standard_load_eligibility() {
 
 		WC_Admin_Notices::add_custom_notice(
 			'legacy_unused_paypal_standard_disabled_on_upgrade_error',
-			__( '<strong>⚠️ We have disabled the WooCommerce PayPal Standard on your store</strong>. This payment method was not setup or used by your store and been deprecated since WooCommerce 5.5. If you\'d like to offer PayPal as a payment option please <a href="https://woocommerce.com/products/woocommerce-paypal-payments/?utm_source=pps_disabled_notice&utm_medium=product">install PayPal Payments</a>.', 'woocommerce' ),
+			__( '<strong>⚠️ We have disabled the WooCommerce PayPal Standard on your store</strong>. This payment method was not setup or used by your store and been deprecated since WooCommerce 5.5. If you\'d like to offer PayPal as a payment option please <a href="https://woocommerce.com/products/woocommerce-paypal-payments/?utm_source=pps_disabled_notice&utm_medium=product">install PayPal Payments</a>.', 'woocommerce' )
 		);
 	}
 }
