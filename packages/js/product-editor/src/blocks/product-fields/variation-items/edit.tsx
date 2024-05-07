@@ -33,11 +33,7 @@ import { EmptyState } from './empty-state';
 export function Edit( {
 	attributes,
 	context,
-}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > & {
-	context: {
-		isInSelectedTab?: boolean;
-	};
-} ) {
+}: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
 	const noticeDimissed = useRef( false );
 	const { invalidateResolution } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -48,6 +44,11 @@ export function Edit( {
 		'postType',
 		'product',
 		'status'
+	);
+	const [ productHasOptions ] = useEntityProp< string >(
+		'postType',
+		'product',
+		'has_options'
 	);
 	const [ productAttributes ] =
 		useProductEntityProp< Product[ 'attributes' ] >( 'attributes' );
@@ -78,13 +79,14 @@ export function Edit( {
 			);
 
 			return {
-				totalCountWithoutPrice:
-					getProductVariationsTotalCount< number >(
-						totalCountWithoutPriceRequestParams
-					),
+				totalCountWithoutPrice: productHasOptions
+					? getProductVariationsTotalCount< number >(
+							totalCountWithoutPriceRequestParams
+					  )
+					: 0,
 			};
 		},
-		[ totalCountWithoutPriceRequestParams ]
+		[ productHasOptions, totalCountWithoutPriceRequestParams ]
 	);
 
 	const {
