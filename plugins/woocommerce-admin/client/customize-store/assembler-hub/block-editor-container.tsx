@@ -206,6 +206,7 @@ export const BlockEditorContainer = () => {
 			( block: BlockInstance ) => {
 				updateBlockAttributes( block.clientId, {
 					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+					// This is necessary; otherwise, the style won't be applied on the frontend during the style variation change.
 					className: '',
 				} );
 			}
