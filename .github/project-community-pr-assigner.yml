@@ -13,22 +13,22 @@
   - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-utils/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-environment/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/api-core-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/e2e-core-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/admin-e2e-tests/**/*":
-  - team: solaris
+  - team: vortex
 
 "packages/js/components/**/*":
   - team: mothra
@@ -51,10 +51,10 @@
   - team: mothra
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - team: mothra
+  - team: vortex
 
 "packages/js/eslint-plugin/**/*":
-  - team: mothra
+  - team: vortex
 
 "packages/js/experimental/**/*":
   - team: mothra
