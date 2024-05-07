@@ -159,7 +159,7 @@
 	&.is-active,
 	&:focus-within {
 		.wc-block-components-combobox-control
-			label.components-base-control__label {
+		label.components-base-control__label {
 			transform: translateY(em($gap-smaller)) scale(0.875);
 		}
 	}
