@@ -154,37 +154,8 @@ const Combobox = ( {
 	const activeValue = store.useState( 'activeValue' );
 
 	const onClose = useCallback( () => {
-		if ( searchTerm.length ) {
-			const bestMatch = findBestMatchByLabel( searchTerm, options );
-			const exactValueMatch = findExactMatchBy(
-				'value',
-				searchTerm,
-				options
-			);
-
-			const match =
-				exactValueMatch || bestMatch || matchingSuggestions[ 0 ];
-
-			if ( match ) {
-				setSearchTerm( match.label );
-				setSelectedOption( match );
-				onChange( match.value );
-			} else {
-				setSearchTerm( selectedOption?.label || '' );
-			}
-			// Search term was cleared, reselect the last selected option
-		} else {
-			setSearchTerm( selectedOption?.label || '' );
-		}
-	}, [
-		searchTerm,
-		options,
-		onChange,
-		setSelectedOption,
-		setSearchTerm,
-		selectedOption,
-		matchingSuggestions,
-	] );
+		setSearchTerm( selectedOption?.label || '' );
+	}, [ setSearchTerm, selectedOption ] );
 
 	return (
 		<div
@@ -213,10 +184,6 @@ const Combobox = ( {
 									exactLabelMatch.value !==
 										selectedOption?.value
 								) {
-									store.setState(
-										'selectedValue',
-										exactLabelMatch.value
-									);
 									setSelectedOption( exactLabelMatch );
 									onChange( exactLabelMatch.value );
 								}
@@ -267,12 +234,7 @@ const Combobox = ( {
 												: ''
 										}` }
 										key={ option.label }
-										value={ option.value }
-										setValueOnClick={ () => {
-											setSearchTerm( option.label );
-
-											return false;
-										} }
+										value={ option.label }
 									>
 										{ option.label }
 									</ComboboxItem>
