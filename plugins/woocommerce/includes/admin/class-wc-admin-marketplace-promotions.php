@@ -38,6 +38,9 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function init() {
+		add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
+		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
+
 		/**
 		 * Filter to suppress the requests for and showing of marketplace promotions.
 		 *
@@ -47,16 +50,12 @@ class WC_Admin_Marketplace_Promotions {
 			return;
 		}
 
-		register_deactivation_hook( WC_PLUGIN_FILE, array( __CLASS__, 'clear_scheduled_event' ) );
-
-		// Add the callback for our scheduled action.
-		if ( ! has_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) ) ) {
-			add_action( self::SCHEDULED_ACTION_HOOK, array( __CLASS__, 'fetch_marketplace_promotions' ) );
+		if ( ! is_admin() ) {
+			return;
 		}
 
-		if ( is_admin() ) {
-			add_action( 'init', array( __CLASS__, 'schedule_promotion_fetch' ), 12 );
-		}
+		// Schedule (using Action Scheduler) the action to fetch promotions data.
+		self::schedule_promotion_fetch();
 
 		if (
 			defined( 'DOING_AJAX' ) && DOING_AJAX
@@ -91,6 +90,15 @@ class WC_Admin_Marketplace_Promotions {
 	 * @return void
 	 */
 	public static function fetch_marketplace_promotions() {
+		/**
+		 * Filter to suppress the requests for and showing of marketplace promotions.
+		 *
+		 * @since 8.8
+		 */
+		if ( apply_filters( 'woocommerce_marketplace_suppress_promotions', false ) ) {
+			return;
+		}
+
 		// Fetch promotions from the API.
 		$fetch_options  = array(
 			'auth'    => true,
