@@ -157,16 +157,8 @@ export interface PreviewState {
 	previewMessage: string;
 }
 
-/**
- * These are the arguments passed to the setPreviewState function
- * provided while registering a collection.
- */
-export interface SetPreviewStateArgs {
+export type SetPreviewState = ( args: {
 	setState: ( previewState: PreviewState ) => void;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-}
-
-export type SetPreviewState = (
-	args: SetPreviewStateArgs
-) => void | ( () => void );
+} ) => void | ( () => void );
