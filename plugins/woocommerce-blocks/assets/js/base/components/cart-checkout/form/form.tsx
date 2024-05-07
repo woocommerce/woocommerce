@@ -104,6 +104,9 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 		[]
 	);
 
+	const [ userChangedAddress2Field, setUserChangedAddress2Field ] =
+		useState( false );
+
 	// Stores refs for rendered fields so we can access them later.
 	const fieldsRef = useRef<
 		Record< string, ValidatedTextInputHandle | null >
@@ -112,9 +115,15 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 	// Toggle address 2 visibility.
 	useEffect( () => {
 		setIsAddress2FieldVisible(
-			isAddress2FieldRequired || hasAddress2FieldValue()
+			isAddress2FieldRequired ||
+				hasAddress2FieldValue() ||
+				userChangedAddress2Field
 		);
-	}, [ isAddress2FieldRequired, hasAddress2FieldValue ] );
+	}, [
+		isAddress2FieldRequired,
+		hasAddress2FieldValue,
+		userChangedAddress2Field,
+	] );
 
 	// Clear values for hidden fields.
 	useEffect( () => {
@@ -201,12 +210,13 @@ const Form = < T extends AddressFormValues | ContactFormValues >( {
 									{ ...fieldProps }
 									type={ field.type }
 									value={ values[ field.key ] }
-									onChange={ ( newValue: string ) =>
+									onChange={ ( newValue: string ) => {
 										onChange( {
 											...values,
 											[ field.key ]: newValue,
-										} )
-									}
+										} );
+										setUserChangedAddress2Field( true );
+									} }
 									customValidation={ (
 										inputObject: HTMLInputElement
 									) =>
