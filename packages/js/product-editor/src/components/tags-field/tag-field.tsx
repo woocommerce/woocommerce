@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, createElement, Fragment } from '@wordpress/element';
+import {
+	useEffect,
+	useState,
+	createElement,
+	Fragment,
+} from '@wordpress/element';
 import {
 	TreeItemType,
 	__experimentalSelectTreeControl as SelectTree,
@@ -18,26 +23,19 @@ import { useDebounce } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { useTagSearch, ProductTagNode } from './use-tag-search';
+import { useTagSearch } from './use-tag-search';
 import { TRACKS_SOURCE } from '../../constants';
 import { CreateTagModal } from './create-tag-modal';
+import { ProductTagNodeProps, TagFieldProps } from './types';
 
-type TagFieldProps = {
-	id: string;
-	label: string;
-	placeholder: string;
-	value?: ProductTagNode[];
-	onChange: ( value: ProductTagNode[] ) => void;
-};
-
-export function mapFromTagToTreeItem( val: ProductTagNode ): TreeItemType {
+export function mapFromTagToTreeItem( val: ProductTagNodeProps ): TreeItemType {
 	return {
 		value: String( val.id ),
 		label: val.name,
 	};
 }
 
-export function mapFromTreeItemToTag( val: TreeItemType ): ProductTagNode {
+export function mapFromTreeItemToTag( val: TreeItemType ): ProductTagNodeProps {
 	return {
 		id: +val.value,
 		name: val.label,
@@ -45,19 +43,20 @@ export function mapFromTreeItemToTag( val: TreeItemType ): ProductTagNode {
 }
 
 export function mapFromTagsToTreeItems(
-	tags: ProductTagNode[]
+	tags: ProductTagNodeProps[]
 ): TreeItemType[] {
 	return tags.map( mapFromTagToTreeItem );
 }
 
 export function mapFromTreeItemsToTags(
 	tags: TreeItemType[]
-): ProductTagNode[] {
+): ProductTagNodeProps[] {
 	return tags.map( mapFromTreeItemToTag );
 }
 
 export const TagField: React.FC< TagFieldProps > = ( {
 	id,
+	isVisible = false,
 	label,
 	placeholder,
 	value = [],
@@ -79,6 +78,12 @@ export const TagField: React.FC< TagFieldProps > = ( {
 		searchTags( searchString || '' );
 		setNewInputValue( searchString );
 	};
+
+	useEffect( () => {
+		if ( isVisible ) {
+			searchTags();
+		}
+	}, [ isVisible ] );
 
 	const searchDelayed = useDebounce( onInputChange, 150 );
 
@@ -132,7 +137,7 @@ export const TagField: React.FC< TagFieldProps > = ( {
 				selected={ mapFromTagsToTreeItems( value ) }
 				onSelect={ ( selectedItems ) => {
 					if ( Array.isArray( selectedItems ) ) {
-						const newItems: ProductTagNode[] =
+						const newItems: ProductTagNodeProps[] =
 							mapFromTreeItemsToTags(
 								selectedItems.filter(
 									( { value: selectedItemValue } ) =>
