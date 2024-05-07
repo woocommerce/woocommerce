@@ -3,6 +3,11 @@
  */
 import { BlockInstance } from '@wordpress/blocks';
 
+/**
+ * This is temporary solution to change the button color on the cover block when the color palette is New - Neutral.
+ * The real fix should be done on Gutenberg side: https://github.com/WordPress/gutenberg/issues/58004
+ *
+ */
 export const findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate = (
 	blocks: BlockInstance[],
 	callback: ( buttonBlock: BlockInstance ) => void
