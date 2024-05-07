@@ -127,13 +127,13 @@ export function Edit( {
 			const { getProductShippingClasses } = select(
 				EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 			);
-			let classes: ProductShippingClass[] = [];
-			if ( isInSelectedTab ) {
-				classes =
-					getProductShippingClasses< ProductShippingClass[] >() ?? [];
-			}
 			return {
-				shippingClasses: classes,
+				shippingClasses:
+					( isInSelectedTab &&
+						getProductShippingClasses<
+							ProductShippingClass[]
+						>() ) ||
+					[],
 			};
 		},
 		[ isInSelectedTab ]
