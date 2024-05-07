@@ -59,9 +59,6 @@ class WC_Unit_Tests_Bootstrap {
 		// load test function so tests_add_filter() is available.
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
-		// Always load PayPal Standard for unit tests.
-		tests_add_filter( 'woocommerce_should_load_paypal_standard', '__return_true' );
-
 		// load WC.
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
@@ -210,6 +207,12 @@ class WC_Unit_Tests_Bootstrap {
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
+
+		// Always load PayPal Standard for unit tests.
+		$paypal = class_exists( 'WC_Payment_Gateway' ) ? new WC_Payment_Gateway() : null;
+		if ( $paypal ) {
+			$paypal->update_option( '_should_load', wc_bool_to_string( true ) );
+		}
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
