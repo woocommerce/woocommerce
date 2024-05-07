@@ -20,7 +20,6 @@ export const CountryInput = ( {
 	label,
 	onChange,
 	value = '',
-	autoComplete = 'off',
 	required = false,
 	errorId,
 	errorMessage = __( 'Please select a country', 'woocommerce' ),
