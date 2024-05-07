@@ -297,9 +297,13 @@
 					align-items: center;
 					display: flex;
 					justify-content: center;
+					height: 288px;
 					min-height: 288px;
 					border-radius: $grid-unit-05 $grid-unit-05 0 0;
+					border-bottom: 1px solid $studio-gray-5;
+
 					> img {
+						max-height: 100%;
 						max-width: 100%;
 					}
 				}

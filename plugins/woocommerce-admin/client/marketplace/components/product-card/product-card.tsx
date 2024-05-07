@@ -6,6 +6,7 @@ import { Card } from '@wordpress/components';
 import classnames from 'classnames';
 import { ExtraProperties, queueRecordEvent } from '@woocommerce/tracks';
 import { useQuery } from '@woocommerce/navigation';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -47,6 +48,25 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		color: '',
 		productCategory: '',
 	};
+
+	const [ headerImgsrc, setHeaderImgSrc ] = useState( product.featuredImage );
+
+	useEffect( () => {
+		const img = new Image();
+		img.src = product.featuredImage || '';
+
+		img.onload = function () {
+			// Get the natural height of the image
+			const naturalHeight = img.naturalHeight;
+
+			// Check if the natural height is greater than 288px
+			if ( naturalHeight > 288 ) {
+				setHeaderImgSrc( `${ product.featuredImage }?h=288` );
+			} else {
+				setHeaderImgSrc( product.featuredImage );
+			}
+		};
+	}, [ product.featuredImage ] );
 
 	function isSponsored(): boolean {
 		return SPONSORED_PRODUCT_LABEL === product.label;
@@ -141,7 +161,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 				className="woocommerce-marketplace__business-card__header"
 				style={ { backgroundColor: product.color } }
 			>
-				<img src={ product.featuredImage } alt="" />
+				<img src={ headerImgsrc } alt="" />
 			</div>
 			<div className="woocommerce-marketplace__business-card__content">
 				<div className="woocommerce-marketplace__business-card__main-content">
