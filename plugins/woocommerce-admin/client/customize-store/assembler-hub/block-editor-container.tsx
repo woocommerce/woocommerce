@@ -37,6 +37,11 @@ import { useEditorBlocks } from './hooks/use-editor-blocks';
 import { useScrollOpacity } from './hooks/use-scroll-opacity';
 import { isEqual } from 'lodash';
 import { COLOR_PALETTES } from './sidebar/global-styles/color-palette-variations/constants';
+import { BlockInstance } from '@wordpress/blocks';
+import {
+	PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+	findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate,
+} from './utils/hero-pattern';
 
 const { useHistory } = unlock( routerPrivateApis );
 
@@ -179,7 +184,7 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { user } = useContext( GlobalStylesContext );
 
-	const isActive = useMemo(
+	const isActiveNewNeutralVariation = useMemo(
 		() =>
 			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
 		[ user ]
@@ -206,17 +211,30 @@ export const BlockEditorContainer = () => {
 		const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
 		const clientId = buttonBlock?.clientId;
 
-		if ( ! isActive ) {
+		if ( ! isActiveNewNeutralVariation ) {
+			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+				blocks,
+				( block: BlockInstance ) => {
+					updateBlockAttributes( block.clientId, {
+						style: {},
+					} );
+				}
+			);
 			updateBlockAttributes( clientId, {
 				style: {},
 			} );
 			return;
 		}
 
-		updateBlockAttributes( clientId, {
-			style: { color: { background: '#ffffff', text: '#000000' } },
-		} );
-	}, [ blocks, isActive, updateBlockAttributes ] );
+		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
+			blocks,
+			( block: BlockInstance ) => {
+				updateBlockAttributes( block.clientId, {
+					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+				} );
+			}
+		);
+	}, [ blocks, isActiveNewNeutralVariation, updateBlockAttributes ] );
 
 	useEffect( () => {
 		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(
