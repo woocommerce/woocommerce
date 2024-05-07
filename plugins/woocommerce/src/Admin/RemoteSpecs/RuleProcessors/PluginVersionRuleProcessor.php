@@ -45,12 +45,13 @@ class PluginVersionRuleProcessor implements RuleProcessorInterface {
 	 */
 	public function process( $rule, $stored_state ) {
 		$active_plugin_slugs = $this->plugins_provider->get_active_plugin_slugs();
+		$plugin_name = apply_filter( 'wp_plugin_dependencies_slug', $rule->plugin );
 
-		if ( ! in_array( $rule->plugin, $active_plugin_slugs, true ) ) {
+		if ( ! in_array( $plugin_name, $active_plugin_slugs, true ) ) {
 			return false;
 		}
 
-		$plugin_data = $this->plugins_provider->get_plugin_data( $rule->plugin );
+		$plugin_data = $this->plugins_provider->get_plugin_data( $plugin_name );
 
 		if ( ! is_array( $plugin_data ) || ! array_key_exists( 'Version', $plugin_data ) ) {
 			return false;
