@@ -79,7 +79,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		// Open order we created
 		const orderId = pageObject.getOrderId();
 		await page.goto( `wp-admin/post.php?post=${ orderId }&action=edit` );
-		// Update order status to Processing
+		// Update order status to 'Processing'
 		await page.locator( '#order_status' ).selectOption( 'wc-processing' );
 		await page.locator( 'button.save_order' ).click();
 		// Go back to order received page
@@ -114,21 +114,19 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		// Confirm order details are not visible
 		await pageObject.verifyOrderConfirmationDetails( page, false );
 
-		// Logout the user and revisit the order received page to verify that details are displayed
-		// When 'woocommerce_order_received_verify_known_shoppers' filter is disabled
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-order-confirmation-filters'
-		);
-		await page.goto( '/my-account' );
-		await page
-			.locator(
-				'li.woocommerce-MyAccount-navigation-link--customer-logout a'
-			)
-			.click();
-
-		await page.goto( orderReceivedURL );
-
-		await pageObject.verifyOrderConfirmationDetails( page, true );
+		await test.step( 'Logout the user and revisit the order received page to verify that details are displayed when woocommerce_order_received_verify_known_shoppers is disabled', async () => {
+			await requestUtils.activatePlugin(
+				'woocommerce-order-confirmation-filters'
+			);
+			await page.goto( '/my-account' );
+			await page
+				.locator(
+					'li.woocommerce-MyAccount-navigation-link--customer-logout a'
+				)
+				.click();
+			await page.goto( orderReceivedURL );
+			await pageObject.verifyOrderConfirmationDetails( page, true );
+		} );
 	} );
 } );
 
