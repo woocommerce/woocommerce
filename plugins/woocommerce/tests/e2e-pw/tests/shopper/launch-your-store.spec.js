@@ -4,7 +4,47 @@ const { setOption } = require( '../../utils/options' );
 test.describe( 'LYS', () => {
 	test.use( { storageState: process.env.ADMINSTATE } );
 
-	test.beforeEach( async ( { baseURL } ) => {
+	// test.beforeAll( async ( { baseURL } ) => {
+	// 	try {
+	// 		await setOption(
+	// 			request,
+	// 			baseURL,
+	// 			'woocommerce_coming_soon',
+	// 			'yes'
+	// 		);
+
+	// 		await setOption(
+	// 			request,
+	// 			baseURL,
+	// 			'woocommerce_store_pages_only',
+	// 			'no'
+	// 		);
+	// 	} catch ( error ) {
+	// 		console.log( 'Options not initialized' );
+	// 	}
+	// } );
+
+	// test.beforeEach( async ( { baseURL } ) => {
+	// 	try {
+	// 		await setOption(
+	// 			request,
+	// 			baseURL,
+	// 			'woocommerce_coming_soon',
+	// 			'yes'
+	// 		);
+
+	// 		await setOption(
+	// 			request,
+	// 			baseURL,
+	// 			'woocommerce_store_pages_only',
+	// 			'no'
+	// 		);
+	// 	} catch ( error ) {
+	// 		console.log( error );
+	// 	}
+	// } );
+
+	test( 'Options set correctly', async ( { page, baseURL } ) => {
 		try {
 			await setOption(
 				request,
@@ -22,18 +62,12 @@ test.describe( 'LYS', () => {
 		} catch ( error ) {
 			console.log( error );
 		}
-	} );
 
-	test( 'Options set correctly', async ( { page, context } ) => {
-		await page.goto(
-			'wp-admin/admin.php?page=wc-settings&tab=site-visibility'
-		);
-
-		await page.goto( '/wp-admin/admin.php?page=wc-admin' );
+		await page.goto( baseURL );
 
 		await expect(
-			page.getByRole( 'button', {
-				name: 'Site coming soon',
+			page.getByRole( 'heading', {
+				name: "Pardon our dust! We're working on something amazing -- check back soon!",
 				exact: true,
 			} )
 		).toBeVisible();
