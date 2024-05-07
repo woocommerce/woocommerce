@@ -154,8 +154,27 @@ const Combobox = ( {
 	const activeValue = store.useState( 'activeValue' );
 
 	const onClose = useCallback( () => {
-		setSearchTerm( selectedOption?.label || '' );
-	}, [ setSearchTerm, selectedOption ] );
+		// If the search term doesn't match the selected option, try do an exact value match.
+		// e.g. if the user leaves "NZ" in the search box, select "New Zealand" on close.
+		// If not just leave the last selected value.
+		if ( searchTerm && selectedOption?.label !== searchTerm ) {
+			const exactValueMatch = findExactMatchBy(
+				'value',
+				searchTerm,
+				options
+			);
+
+			if ( exactValueMatch ) {
+				setSelectedOption( exactValueMatch );
+				onChange( exactValueMatch.value );
+				setSearchTerm( exactValueMatch.label );
+			} else {
+				setSearchTerm( selectedOption?.label || '' );
+			}
+		} else {
+			setSearchTerm( selectedOption?.label || '' );
+		}
+	}, [ setSearchTerm, selectedOption, searchTerm, onChange, options ] );
 
 	return (
 		<div
