@@ -1,3 +1,5 @@
+@include wordpress-admin-schemes;
+
 // Import our wp-admin reset.
 @import "./shared/_reset.scss";
 
@@ -27,7 +29,3 @@
 
 // Import the embed-specific styles.
 @import "./shared/_embed.scss";
-
-:root {
-	@include admin-scheme( #007cba );
-}
