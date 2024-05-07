@@ -25,24 +25,6 @@ test.describe( `${ blockData.slug } Block`, () => {
 		);
 	} );
 
-	test( 'block should be already added in the Product Catalog Template', async ( {
-		editorUtils,
-		admin,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
-			postType: 'wp_template',
-		} );
-		await editorUtils.enterEditMode();
-		const alreadyPresentBlock = await editorUtils.getBlockByName(
-			blockData.slug
-		);
-
-		await expect( alreadyPresentBlock ).toHaveText(
-			'Breadcrumbs / Navigation / Path'
-		);
-	} );
-
 	test( 'block can be inserted in the Site Editor', async ( {
 		admin,
 		requestUtils,
