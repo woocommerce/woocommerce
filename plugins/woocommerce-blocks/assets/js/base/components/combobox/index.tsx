@@ -229,7 +229,7 @@ const Combobox = ( {
 									<ComboboxItem
 										// For backwards compatibility we retain the is-selected class, in future we could target aria or data attributes in CSS instead.
 										className={ `components-form-token-field__suggestion ${
-											activeValue === option.value
+											activeValue === option.label
 												? 'is-selected'
 												: ''
 										}` }
