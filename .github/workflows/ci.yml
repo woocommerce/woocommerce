@@ -162,6 +162,9 @@ jobs:
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}'
 
             - name: 'Run tests'
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_API_ANALYTICS_TOKEN }}
+                  BUILDKITE_ANALYTICS_MESSAGE: ${{ github.event.pull_request.title }}
               run: 'pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }}'
 
             - name: 'Upload artifacts'
