@@ -15,13 +15,6 @@ use Automattic\WooCommerce\Caching\WPCacheEngine;
 abstract class CustomMetaDataStore {
 
 	/**
-	 * Returns the cache group to store cached data in.
-	 *
-	 * @return string
-	 */
-	abstract protected function get_cache_group();
-
-	/**
 	 * Returns the name of the table used for storage.
 	 *
 	 * @return string
@@ -57,6 +50,15 @@ abstract class CustomMetaDataStore {
 			'meta_id_field'   => $this->get_meta_id_field(),
 			'object_id_field' => $this->get_object_id_field(),
 		);
+	}
+
+	/**
+	 * Returns the cache group to store cached data in. This should be unique for the underlying data storage, e.g. table.
+	 *
+	 * @return string
+	 */
+	protected function get_cache_group() {
+		return $this->get_table_name();
 	}
 
 	/**
