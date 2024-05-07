@@ -73,6 +73,7 @@
 		"@types/jest": "^27.5.2",
 		"@types/react": "^17.0.71",
 		"@types/testing-library__jest-dom": "^5.14.9",
+		"@types/wordpress__core-data": "2.4.5",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",

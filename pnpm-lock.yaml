@@ -329,6 +329,9 @@ importers:
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
+      '@types/wordpress__core-data':
+        specifier: 2.4.5
+        version: 2.4.5
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
