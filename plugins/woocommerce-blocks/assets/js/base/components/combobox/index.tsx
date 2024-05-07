@@ -192,7 +192,7 @@ const Combobox = ( {
 						startTransition( () => {
 							setSearchTerm( val );
 
-							if ( val && val.length ) {
+							if ( val?.length ) {
 								const exactMatch = findExactMatchByLabel(
 									val,
 									options
