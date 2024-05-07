@@ -41,8 +41,15 @@ class CustomerAccount extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
-		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-		add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+		/**
+		 * The hooked_block_{$hooked_block_type} filter was added in WordPress 6.5.
+		 * We are the only code adding the filter 'hooked_block_woocommerce/customer-account'.
+		 * Using has_filter() for a compatibility check won't work because add_filter() is used in the same file.
+		 */
+		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
+			add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
+			add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+		}
 	}
 
 	/**
