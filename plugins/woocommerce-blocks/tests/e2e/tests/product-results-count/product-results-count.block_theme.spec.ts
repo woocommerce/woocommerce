@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { expect, test } from '@woocommerce/e2e-playwright-utils';
-import exp from 'constants';
 
 const blockData = {
 	name: 'Product Results Count',
