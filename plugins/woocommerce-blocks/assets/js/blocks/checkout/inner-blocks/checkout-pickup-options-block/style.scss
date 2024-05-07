@@ -42,7 +42,7 @@
 
 			.read-more-content {
 				div {
-					margin-right: em($gap-larger);
+					margin-right: em(5 * $grid-unit);
 				}
 				a.read-more-content__read_more {
 					position: relative;
