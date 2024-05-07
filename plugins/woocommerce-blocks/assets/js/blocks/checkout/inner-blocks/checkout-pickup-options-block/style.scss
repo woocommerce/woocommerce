@@ -30,6 +30,18 @@
 				font-style: inherit;
 			}
 		}
+
+		.wc-block-components-radio-control__option-checked {
+			.wc-block-components-radio-control__description-group {
+				.read-more-content {
+					visibility: visible;
+					position: initial;
+					z-index: initial;
+					width: 100%;
+				}
+			}
+		}
+
 		.wc-block-components-radio-control__description-group {
 			display: block;
 			width: calc(100% + em($gap-huge));
@@ -41,6 +53,11 @@
 			@include font-size(regular);
 
 			.read-more-content {
+				visibility: hidden;
+				position: absolute;
+				z-index: -1;
+				width: 99%;
+
 				div {
 					margin-right: em(5 * $grid-unit);
 				}
