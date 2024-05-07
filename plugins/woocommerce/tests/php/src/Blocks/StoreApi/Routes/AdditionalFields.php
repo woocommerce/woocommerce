@@ -138,11 +138,11 @@ class AdditionalFields extends MockeryTestCase {
 			array(
 				'id'       => 'plugin-namespace/leave-on-porch',
 				'label'    => __( 'Please leave my package on the porch if I\'m not home', 'woocommerce' ),
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'checkbox',
 			),
 		);
-		array_map( '__experimental_woocommerce_blocks_register_checkout_field', $this->fields );
+		array_map( 'woocommerce_register_additional_checkout_field', $this->fields );
 	}
 
 	/**
@@ -287,11 +287,11 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_optional_field_in_schema() {
 		$id = 'plugin-namespace/optional-field';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Optional Field',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'text',
 				'required' => false,
 			)
@@ -324,7 +324,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				'A checkout field cannot be registered without an id.',
 			)
 		)->once();
@@ -338,10 +338,10 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'label'    => 'Invalid ID',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'text',
 				'required' => false,
 			)
@@ -366,7 +366,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( \sprintf( 'Unable to register field with id: "%s". A checkout field id must consist of namespace/name.', $id ) ),
 
 			)
@@ -381,11 +381,11 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid ID',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'text',
 				'required' => false,
 			)
@@ -410,7 +410,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field label is required.', $id ) ),
 			)
 		)->once();
@@ -424,10 +424,10 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'text',
 				'required' => false,
 			)
@@ -452,7 +452,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field location is required.', $id ) ),
 			)
 		)->once();
@@ -466,7 +466,7 @@ class AdditionalFields extends MockeryTestCase {
 			10,
 			2
 		);
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'    => $id,
 				'label' => 'Missing Location',
@@ -493,7 +493,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field location is invalid.', $id ) ),
 			)
 		)->once();
@@ -508,7 +508,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Location',
@@ -538,7 +538,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( \sprintf( 'Unable to register field with id: "%s". The field is already registered.', $id ) ),
 			)
 		)->once();
@@ -553,7 +553,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Government ID',
@@ -580,7 +580,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html(
 					sprintf(
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
@@ -602,11 +602,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Type',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'invalid',
 				'required' => false,
 			)
@@ -632,7 +632,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Unable to register field with id: "%s". %s', $id, 'The sanitize_callback must be a valid callback.' ) ),
 			)
 		)->once();
@@ -647,11 +647,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Invalid Sanitize',
-				'location'          => 'additional',
+				'location'          => 'order',
 				'type'              => 'text',
 				'sanitize_callback' => 'invalid_sanitize_callback',
 				'required'          => false,
@@ -678,7 +678,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Unable to register field with id: "%s". %s', $id, 'The validate_callback must be a valid callback.' ) ),
 			)
 		)->once();
@@ -693,11 +693,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Invalid Validate',
-				'location'          => 'additional',
+				'location'          => 'order',
 				'type'              => 'text',
 				'validate_callback' => 'invalid_validate_callback',
 				'required'          => false,
@@ -724,7 +724,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'An invalid attributes value was supplied when registering field with id: "%s". %s', $id, 'Attributes must be a non-empty array.' ) ),
 			)
 		)->once();
@@ -739,11 +739,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => $id,
 				'label'      => 'Invalid Attribute',
-				'location'   => 'additional',
+				'location'   => 'order',
 				'attributes' => 'invalid',
 			)
 		);
@@ -794,7 +794,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Invalid attribute found when registering field with id: "%s". Attributes: %s are not allowed.', $id, implode( ', ', $invalid_attributes ) ) ),
 			)
 		)->once();
@@ -809,11 +809,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => $id,
 				'label'      => 'Invalid Attribute Values',
-				'location'   => 'additional',
+				'location'   => 'order',
 				'attributes' => array(
 					'title'            => 'title',
 					'maxLength'        => '20',
@@ -868,7 +868,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options".' ) ),
 			)
 		)->once();
@@ -883,11 +883,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Missing Options',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'required' => false,
 			)
@@ -913,7 +913,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Unable to register field with id: "%s". %s', $id, 'Fields of type "select" must have an array of "options" and each option must contain a "value" and "label" member.' ) ),
 			)
 		)->once();
@@ -928,11 +928,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Invalid Options',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'options'  => array( // numeric array instead of associative array.
 					'invalidValue',
@@ -960,7 +960,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Duplicate key found when registering field with id: "%s". The value in each option of "select" fields must be unique. Duplicate value "%s" found. The duplicate key will be removed.', $id, 'duplicate' ) ),
 			)
 		)->once();
@@ -975,11 +975,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Duplicate Options',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'options'  => array(
 					array(
@@ -1026,11 +1026,11 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_optional_select_has_empty_value() {
 		$id = 'plugin-namespace/optional-select';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Optional Select',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'select',
 				'options'  => array(
 					array(
@@ -1068,7 +1068,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Registering checkbox fields as required is not supported. "%s" will be registered as optional.', $id ) ),
 			)
 		)->once();
@@ -1083,11 +1083,11 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Checkbox Only Optional',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'checkbox',
 				'required' => true,
 			)
@@ -1127,7 +1127,7 @@ class AdditionalFields extends MockeryTestCase {
 		$doing_it_wrong_mocker = \Mockery::mock( 'ActionCallback' );
 		$doing_it_wrong_mocker->shouldReceive( 'doing_it_wrong_run' )->withArgs(
 			array(
-				'__experimental_woocommerce_blocks_register_checkout_field',
+				'woocommerce_register_additional_checkout_field',
 				\esc_html( sprintf( 'Registering a field with hidden set to true is not supported. The field "%s" will be registered as visible.', $id ) ),
 			)
 		)->once();
@@ -1142,7 +1142,7 @@ class AdditionalFields extends MockeryTestCase {
 			2
 		);
 
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Hidden Field',
@@ -1168,7 +1168,7 @@ class AdditionalFields extends MockeryTestCase {
 			)
 		);
 
-			\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
 
 		// Ensures the field isn't registered.
 		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
@@ -1280,11 +1280,11 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_placing_order_sanitize_text() {
 		$id = 'plugin-namespace/sanitize-text';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Sanitize Text',
-				'location'          => 'additional',
+				'location'          => 'order',
 				'type'              => 'text',
 				'sanitize_callback' => function ( $value ) {
 					return 'sanitized-' . $value;
@@ -1346,11 +1346,11 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_placing_order_validate_text() {
 		$id = 'plugin-namespace/validate-text';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'                => $id,
 				'label'             => 'Validate Text',
-				'location'          => 'additional',
+				'location'          => 'order',
 				'type'              => 'text',
 				'validate_callback' => function ( $value ) {
 					if ( 'invalid' === $value ) {
@@ -1415,17 +1415,17 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_sanitize_filter() {
 		$id = 'plugin-namespace/filter-sanitize';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Filter Sanitize',
-				'location' => 'additional',
+				'location' => 'order',
 				'type'     => 'text',
 			)
 		);
 
 		add_filter(
-			'__experimental_woocommerce_blocks_sanitize_additional_field',
+			'woocommerce_sanitize_additional_field',
 			function ( $value, $key ) use ( $id ) {
 				if ( $key === $id ) {
 					return 'sanitized-' . $value;
@@ -1492,7 +1492,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_validate_filter() {
 		$id = 'plugin-namespace/filter-validate';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'Filter Validate',
@@ -1503,7 +1503,7 @@ class AdditionalFields extends MockeryTestCase {
 		);
 
 		add_action(
-			'__experimental_woocommerce_blocks_validate_additional_field',
+			'woocommerce_validate_additional_field',
 			function ( \WP_Error $errors, $key, $value ) use ( $id ) {
 				if ( $key === $id && 'invalid' === $value ) {
 					$errors->add( 'my_invalid_value', 'Invalid value provided.' );
@@ -1569,7 +1569,7 @@ class AdditionalFields extends MockeryTestCase {
 	public function test_place_order_required_address_field() {
 		$id    = 'plugin-namespace/my-required-field';
 		$label = 'My Required Field';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => $label,
@@ -1633,7 +1633,7 @@ class AdditionalFields extends MockeryTestCase {
 	 */
 	public function test_place_order_required_contact_field() {
 		$id = 'plugin-namespace/my-required-contact-field';
-		\__experimental_woocommerce_blocks_register_checkout_field(
+		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'       => $id,
 				'label'    => 'My Required Field',
@@ -1862,5 +1862,200 @@ class AdditionalFields extends MockeryTestCase {
 		$this->assertEquals( 'shipping-saved-gov-id', ( (array) $data['shipping_address'] )['plugin-namespace/gov-id'], print_r( $data, true ) );
 		$this->assertEquals( 'engineering', ( (array) $data['additional_fields'] )['plugin-namespace/job-function'], print_r( $data, true ) );
 		$this->assertArrayNotHasKey( 'plugin-namespace/leave-on-porch', $data['additional_fields'], print_r( $data, true ) );
+	}
+
+	/**
+	 * Ensures we can provide a default value if a field is not set.
+	 */
+	public function test_reading_values_externally() {
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		add_filter(
+			"woocommerce_get_default_value_for_{$id}",
+			function () {
+				return 'external-value';
+			},
+			10,
+			2
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'external-value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
+
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+
+		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
+	}
+
+	/**
+	 * Ensures that we cannot overwrite existing fields.
+	 */
+	public function test_not_overwriting_values() {
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		add_filter(
+			"woocommerce_get_default_value_for_{$id}",
+			function () {
+				return 'external-value';
+			},
+			10,
+			2
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'email'                   => 'testaccount@test.com',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'shipping_address'  => (object) array(
+					'first_name'              => 'test',
+					'last_name'               => 'test',
+					'company'                 => '',
+					'address_1'               => 'test',
+					'address_2'               => '',
+					'city'                    => 'test',
+					'state'                   => '',
+					'postcode'                => 'cb241ab',
+					'country'                 => 'GB',
+					'phone'                   => '',
+					'plugin-namespace/gov-id' => 'gov id',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					'plugin-namespace/job-function' => 'engineering',
+					$id                             => 'value',
+				),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertEquals( 'value', ( (array) $data['additional_fields'] )[ $id ], print_r( $data, true ) );
+
+		\__internal_woocommerce_blocks_deregister_checkout_field( $id );
+		\remove_all_filters( "woocommerce_get_default_value_for_{$id}" );
+	}
+
+	/**
+	 * Ensures that we can react to saving a field.
+	 */
+	public function test_reacting_to_value_save() {
+		$this->unregister_fields();
+		$id = 'plugin-namespace/my-external-field';
+		\woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $id,
+				'label'    => 'My Required Field',
+				'location' => 'order',
+				'type'     => 'text',
+				'required' => true,
+			)
+		);
+
+		$set_value_mocker = \Mockery::mock( 'ActionCallback' );
+		$set_value_mocker->shouldReceive( 'woocommerce_set_additional_field_value' )->withArgs(
+			array(
+				$id,
+				'my-value',
+				'other',
+				\Mockery::type( 'WC_Order' ),
+			)
+		)->atLeast( 1 );
+
+		add_action(
+			'woocommerce_set_additional_field_value',
+			array(
+				$set_value_mocker,
+				'woocommerce_set_additional_field_value',
+			),
+			10,
+			4
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'   => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'    => 'bacs',
+				'additional_fields' => array(
+					$id => 'my-value',
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+
+		\remove_action(
+			'woocommerce_set_additional_field_value',
+			array(
+				$set_value_mocker,
+				'woocommerce_set_additional_field_value',
+			)
+		);
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Product Details: not use `useBlockProps`  twice
+

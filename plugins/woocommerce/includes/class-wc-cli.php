@@ -1,6 +1,6 @@
 <?php
 /**
- * Enables WooCommerce, via the the command line.
+ * Enables WooCommerce, via the command line.
  *
  * @package WooCommerce\CLI
  * @version 3.0.0

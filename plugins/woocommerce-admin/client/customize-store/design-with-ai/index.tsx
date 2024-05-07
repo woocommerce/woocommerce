@@ -27,6 +27,7 @@ import './style.scss';
 import { isAIFlow } from '../guards';
 import { navigateOrParent } from '../utils';
 import { useXStateInspect } from '~/xstate';
+import './entrepreneur-flow';
 
 export type events = { type: 'THEME_SUGGESTED' };
 export type DesignWithAiComponent =

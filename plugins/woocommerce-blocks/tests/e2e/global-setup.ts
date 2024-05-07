@@ -41,45 +41,6 @@ const prepareAttributes = async () => {
 		.getByRole( 'button' )
 		.click();
 
-	await page.goto( BASE_URL + '/wp-admin/post-new.php' );
-
-	await page.waitForFunction( () => {
-		return window.wp.data !== undefined;
-	} );
-
-	// Disable the welcome guide for the site editor.
-	await page.evaluate( () => {
-		return Promise.all( [
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuide', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuideStyles', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuidePage', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-site', 'welcomeGuideTemplate', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-post', 'welcomeGuide', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-post', 'welcomeGuideStyles', false ),
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-post', 'welcomeGuidePage', false ),
-
-			window.wp.data
-				.dispatch( 'core/preferences' )
-				.set( 'core/edit-post', 'welcomeGuideTemplate', false ),
-		] );
-	} );
-
-	await page.context().storageState( { path: adminFile } );
-
 	await context.close();
 	await browser.close();
 
