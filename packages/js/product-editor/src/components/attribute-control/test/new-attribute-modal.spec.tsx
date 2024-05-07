@@ -84,7 +84,6 @@ describe( 'NewAttributeModal', () => {
 				selectedAttributeIds={ [] }
 			/>
 		);
-		// expect( queryAllByText( 'attribute_input_field' ).length ).toEqual( 1 );
 		expect(
 			queryAllByText( 'attribute_term_input_field: disabled:true' ).length
 		).toEqual( 1 );
