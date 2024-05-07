@@ -3,10 +3,10 @@
 /**
  * External dependencies
  */
-// @ts-expect-error No types for this exist yet.
 import {
 	store as blockEditorStore,
 	privateApis as blockEditorPrivateApis,
+	// @ts-expect-error No types for this exist yet.
 } from '@wordpress/block-editor';
 // @ts-expect-error No types for this exist yet.
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
