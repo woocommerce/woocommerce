@@ -218,6 +218,7 @@ const Combobox = ( {
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
+								id={ controlId }
 								onFocus={ () => {
 									setSearchTerm( '' );
 								} }
