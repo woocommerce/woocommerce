@@ -52,7 +52,6 @@ export const CountryInput = ( {
 				errorId={ errorId }
 				errorMessage={ errorMessage }
 				required={ required }
-				autoComplete={ autoComplete }
 			/>
 		</div>
 	);

@@ -104,7 +104,6 @@ const StateInput = ( {
 				errorMessage={ __( 'Please select a state.', 'woocommerce' ) }
 				errorId={ errorId }
 				required={ required }
-				autoComplete={ autoComplete }
 			/>
 		);
 	}
