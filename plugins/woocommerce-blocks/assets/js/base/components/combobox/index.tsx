@@ -225,7 +225,7 @@ const Combobox = ( {
 						<div className="components-combobox-control__suggestions-container">
 							<AriakitCombobox
 								className="components-combobox-control__input components-form-token-field__input"
-								autoComplete="list"
+								autoComplete={ autoComplete }
 								aria-invalid={ ariaInvalid }
 								aria-errormessage={ validationErrorId }
 								type="text"
