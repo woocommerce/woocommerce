@@ -90,7 +90,7 @@ jobs:
               with:
                   name: plugins-${{ github.run_id }}
                   path: unzips/woocommerce
-                  retention-days: 7
+                  retention-days: 30
 
             - name: Inform Beta Download webhook
               if: steps.prepare.outputs.plugin-data != '{}'

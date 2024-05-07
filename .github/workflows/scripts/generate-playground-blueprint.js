@@ -72,6 +72,9 @@ The changes in this pull request can be previewed and tested using a [WordPress 
 [WordPress Playground](https://developer.wordpress.org/playground/) is an experimental project that creates a full WordPress instance entirely within the browser.
 
 [Test this pull request with WordPress Playground](${ url }).
+
+Note that this URL is valid for 30 days from when this comment was last updated. You can update it by closing/reopening the PR
+or pushing a new commit.
 `;
 
 	if ( existingCommentId ) {
