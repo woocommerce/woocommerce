@@ -2688,3 +2688,32 @@ function wc_update_890_update_connect_to_woocommerce_note() {
 	$new_note = WooSubscriptionsNotes::get_note();
 	$new_note->save();
 }
+
+/**
+ * Disables the PayPal Standard gateway for stores that aren't using it.
+ *
+ * PayPal Standard has been deprecated since WooCommerce 5.5, but there are some stores that have it showing up in their
+ * list of available Payment methods even if it's not setup. In WooComerce 8.9 we will disable PayPal Standard for those stores
+ * to reduce the amount of new connections to the legacy gateway.
+ *
+ * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
+ */
+function wc_update_890_update_paypal_standard_load_eligibility() {
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+
+	if ( ! $paypal ) {
+		return;
+	}
+
+	$is_setup = $paypal->get_option( 'sandbox_api_username' ) || $paypal->get_option( 'api_username' );
+
+	// If PayPal is enabled or set to load, but the store hasn't setup PayPal standard and doesn't have any PayPal Orders, disable it and show a notice to Admin.
+	if ( ( 'yes' === $paypal->enabled || 'yes' === $paypal->get_option( '_should_load' ) ) && ! $is_setup && ! $paypal->has_paypal_orders() ) {
+		$paypal->update_option( '_should_load', wc_bool_to_string( false ) );
+
+		WC_Admin_Notices::add_custom_notice(
+			'legacy_unused_paypal_standard_disabled_on_upgrade_error',
+			__( '<strong>⚠️ We have disabled the WooCommerce PayPal Standard on your store</strong>. This payment method was not setup or used by your store and been deprecated since WooCommerce 5.5. If you\'d like to offer PayPal as a payment option please <a href="https://woocommerce.com/products/woocommerce-paypal-payments/?utm_source=pps_disabled_notice&utm_medium=product">install PayPal Payments</a>.', 'woocommerce' ),
+		);
+	}
+}
