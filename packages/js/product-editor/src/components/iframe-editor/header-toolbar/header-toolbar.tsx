@@ -36,6 +36,10 @@ import {
 	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore No types for this exist yet.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { PinnedItems } from '@wordpress/interface';
 
 /**
  * Internal dependencies
@@ -44,9 +48,9 @@ import { EditorContext } from '../context';
 import EditorHistoryRedo from './editor-history-redo';
 import EditorHistoryUndo from './editor-history-undo';
 import { DocumentOverview } from './document-overview';
-import { ShowBlockInspectorPanel } from './show-block-inspector-panel';
 import { MoreMenu } from './more-menu';
 import { getGutenbergVersion } from '../../../utils/get-gutenberg-version';
+import { SIDEBAR_COMPLEMENTARY_AREA_SCOPE } from '../constants';
 
 type HeaderToolbarProps = {
 	onSave?: () => void;
@@ -217,10 +221,7 @@ export function HeaderToolbar( {
 					onClick={ onSave }
 					text={ __( 'Done', 'woocommerce' ) }
 				/>
-				<ToolbarItem
-					as={ ShowBlockInspectorPanel }
-					className="woocommerce-show-block-inspector-panel"
-				/>
+				<PinnedItems.Slot scope={ SIDEBAR_COMPLEMENTARY_AREA_SCOPE } />
 				<ToolbarItem as={ MoreMenu } />
 			</div>
 		</NavigableToolbar>
