@@ -49,7 +49,12 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 		await editorUtils.transformIntoBlocks();
 	} );
 
-	test( 'Place order', async ( { frontendUtils, pageObject, page, requestUtils } ) => {
+	test( 'Place order', async ( {
+		frontendUtils,
+		pageObject,
+		page,
+		requestUtils,
+	} ) => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
