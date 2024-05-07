@@ -155,6 +155,23 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 		}
 	);
 
+	const CardLink = () => (
+		<a
+			className="woocommerce-marketplace__product-card__link"
+			href={ productUrl() }
+			rel="noopener noreferrer"
+			onClick={ () => {
+				recordTracksEvent( 'marketplace_product_card_clicked', {
+					product: product.title,
+					vendor: product.vendorName,
+					product_type: type,
+				} );
+			} }
+		>
+			{ isLoading ? ' ' : product.title }
+		</a>
+	);
+
 	const BusinessService = () => (
 		<div className="woocommerce-marketplace__business-card">
 			<div
@@ -165,7 +182,9 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 			</div>
 			<div className="woocommerce-marketplace__business-card__content">
 				<div className="woocommerce-marketplace__business-card__main-content">
-					<h5>{ product.title }</h5>
+					<h2>
+						<CardLink />
+					</h2>
 					<p>{ product.description }</p>
 				</div>
 				<div className="woocommerce-marketplace__business-card__badge">
@@ -214,23 +233,7 @@ function ProductCard( props: ProductCardProps ): JSX.Element {
 							) }
 							<div className="woocommerce-marketplace__product-card__meta">
 								<h2 className="woocommerce-marketplace__product-card__title">
-									<a
-										className="woocommerce-marketplace__product-card__link"
-										href={ productUrl() }
-										rel="noopener noreferrer"
-										onClick={ () => {
-											recordTracksEvent(
-												'marketplace_product_card_clicked',
-												{
-													product: product.title,
-													vendor: product.vendorName,
-													product_type: type,
-												}
-											);
-										} }
-									>
-										{ isLoading ? ' ' : product.title }
-									</a>
+									<CardLink />
 								</h2>
 								{ isLoading && (
 									<p className="woocommerce-marketplace__product-card__vendor-details">
