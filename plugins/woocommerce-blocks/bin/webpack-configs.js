@@ -38,7 +38,7 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
-	// Override dewp handlers if needed.
+	// Override Dependency Extraction Webpack Plugin handlers if needed.
 	requestToExternalFn = requestToExternal,
 	requestToHandleFn = requestToHandle,
 } ) =>
