@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Update coupon_usage for failed & trashed orders.
