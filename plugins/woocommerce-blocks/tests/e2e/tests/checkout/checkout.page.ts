@@ -504,9 +504,9 @@ export class CheckoutPage {
 				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage
-					.getByRole( 'link', { name: SIMPLE_VIRTUAL_PRODUCT_NAME } )
-					.nth( 1 )
+				currentPage.getByRole( 'link', {
+					name: SIMPLE_VIRTUAL_PRODUCT_NAME,
+				} )
 			).toBeVisible();
 			await expect(
 				currentPage
