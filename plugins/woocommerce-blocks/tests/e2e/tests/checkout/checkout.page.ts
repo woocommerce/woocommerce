@@ -501,9 +501,7 @@ export class CheckoutPage {
 				currentPage.getByText( FREE_SHIPPING_NAME )
 			).toBeVisible();
 			await expect(
-				currentPage
-					.getByRole( 'link', { name: SIMPLE_PHYSICAL_PRODUCT_NAME } )
-					.nth( 1 )
+				currentPage.getByText( SIMPLE_PHYSICAL_PRODUCT_NAME )
 			).toBeVisible();
 			await expect(
 				currentPage
