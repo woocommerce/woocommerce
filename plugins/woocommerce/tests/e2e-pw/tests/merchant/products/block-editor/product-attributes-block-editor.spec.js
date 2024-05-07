@@ -114,6 +114,8 @@ test( 'can create and add attributes', async ( { page, product } ) => {
 	await test.step( 'add new attributes', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
 
+		await page.waitForLoadState( 'domcontentloaded' );
+
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();
 
@@ -213,6 +215,8 @@ test( 'can add existing attributes', async ( {
 
 	await test.step( 'add an existing attribute', async () => {
 		await page.getByRole( 'button', { name: 'Add new' } ).click();
+
+		await page.waitForLoadState( 'domcontentloaded' );
 
 		// Add attributes that do not exist
 		await page.getByPlaceholder( 'Search or create attribute' ).click();

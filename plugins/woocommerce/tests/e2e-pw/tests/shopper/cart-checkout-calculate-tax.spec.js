@@ -157,11 +157,8 @@ test.describe.serial( 'Tax rates in the cart and checkout', () => {
 						name: 'Subtotal $250.00 (incl. tax)',
 					} )
 				).toBeVisible();
-				await page.waitForSelector( '#order_review' );
 				await expect(
-					page.getByRole( 'cell', {
-						name: '$250.00 (includes $50.00 Nasty Tax)',
-					} )
+					page.getByText( '$250.00 (includes $50.00 Nasty Tax)' )
 				).toBeVisible();
 			} );
 
