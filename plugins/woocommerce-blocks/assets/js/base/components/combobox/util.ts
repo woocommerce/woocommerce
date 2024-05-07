@@ -5,13 +5,14 @@ import { ComboboxControlOption } from '.';
 import { normalizeTextString } from '../../utils/string';
 
 // Find an option based on whether it's label is an exact match to the search term.
-export const findExactMatchByLabel = (
+export const findExactMatchBy = (
+	by: keyof ComboboxControlOption,
 	searchTerm: string,
 	options: ComboboxControlOption[]
 ) => {
 	return options.find(
 		( option ) =>
-			normalizeTextString( option.label ) ===
+			normalizeTextString( option[ by ] ) ===
 			normalizeTextString( searchTerm )
 	);
 };

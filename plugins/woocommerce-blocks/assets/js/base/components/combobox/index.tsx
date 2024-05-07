@@ -32,7 +32,7 @@ import deprecated from '@wordpress/deprecated';
 import './style.scss';
 import {
 	findBestMatchByLabel,
-	findExactMatchByLabel,
+	findExactMatchBy,
 	findMatchingSuggestions,
 } from './util';
 
@@ -156,11 +156,19 @@ const Combobox = ( {
 	const onClose = useCallback( () => {
 		if ( searchTerm.length ) {
 			const bestMatch = findBestMatchByLabel( searchTerm, options );
+			const exactValueMatch = findExactMatchBy(
+				'value',
+				searchTerm,
+				options
+			);
 
-			if ( bestMatch ) {
-				setSearchTerm( bestMatch.label );
-				setSelectedOption( bestMatch );
-				onChange( bestMatch.value );
+			const match =
+				exactValueMatch || bestMatch || matchingSuggestions[ 0 ];
+
+			if ( match ) {
+				setSearchTerm( match.label );
+				setSelectedOption( match );
+				onChange( match.value );
 			} else {
 				setSearchTerm( selectedOption?.label || '' );
 			}
@@ -175,6 +183,7 @@ const Combobox = ( {
 		setSelectedOption,
 		setSearchTerm,
 		selectedOption,
+		matchingSuggestions,
 	] );
 
 	return (
@@ -193,21 +202,23 @@ const Combobox = ( {
 							setSearchTerm( val );
 
 							if ( val?.length ) {
-								const exactMatch = findExactMatchByLabel(
+								const exactLabelMatch = findExactMatchBy(
+									'label',
 									val,
 									options
 								);
 
 								if (
-									exactMatch &&
-									exactMatch.value !== selectedOption?.value
+									exactLabelMatch &&
+									exactLabelMatch.value !==
+										selectedOption?.value
 								) {
 									store.setState(
 										'selectedValue',
-										exactMatch.value
+										exactLabelMatch.value
 									);
-									setSelectedOption( exactMatch );
-									onChange( exactMatch.value );
+									setSelectedOption( exactLabelMatch );
+									onChange( exactLabelMatch.value );
 								}
 							}
 						} );

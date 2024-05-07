@@ -3,7 +3,7 @@
  */
 import {
 	findBestMatchByLabel,
-	findExactMatchByLabel,
+	findExactMatchBy,
 	findMatchingSuggestions,
 } from '../util';
 
@@ -203,9 +203,9 @@ export const OPTIONS = [
 ];
 
 describe( 'Combobox option matching utilities', () => {
-	describe( 'findExactMatchByLabel', () => {
+	describe( 'findExactMatchBy label', () => {
 		test( 'When providing a search term that is an exact label match it returns one item', () => {
-			const result = findExactMatchByLabel( 'Algiers', OPTIONS );
+			const result = findExactMatchBy( 'label', 'Algiers', OPTIONS );
 			expect( result ).toEqual( {
 				value: 'DZ-16',
 				label: 'Algiers',
@@ -213,16 +213,31 @@ describe( 'Combobox option matching utilities', () => {
 		} );
 
 		test( 'When providing a search term that is a non-exact label match it returns no match', () => {
-			const result = findExactMatchByLabel( 'Algier', OPTIONS );
+			const result = findExactMatchBy( 'label', 'Algier', OPTIONS );
 			expect( result ).toBeUndefined();
 		} );
 
 		test( 'It makes an exact match even when the option has special characters', () => {
-			const result = findExactMatchByLabel( 'Ain Defla', OPTIONS );
+			const result = findExactMatchBy( 'label', 'Ain Defla', OPTIONS );
 			expect( result ).toEqual( {
 				value: 'DZ-44',
 				label: 'Aïn Defla',
 			} );
+		} );
+	} );
+
+	describe( 'findExactMatchBy value', () => {
+		test( 'When providing a search term that is an exact value match it returns one item', () => {
+			const result = findExactMatchBy( 'value', 'DZ-16', OPTIONS );
+			expect( result ).toEqual( {
+				value: 'DZ-16',
+				label: 'Algiers',
+			} );
+		} );
+
+		test( 'When providing a search term that is a non-exact value match it returns no match', () => {
+			const result = findExactMatchBy( 'label', 'xx', OPTIONS );
+			expect( result ).toBeUndefined();
 		} );
 	} );
 
