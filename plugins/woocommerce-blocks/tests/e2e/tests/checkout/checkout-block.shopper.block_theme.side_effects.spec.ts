@@ -344,7 +344,6 @@ test.describe( 'Shopper → Shipping (customer user)', () => {
 			country: 'ES',
 			city: 'Madrid',
 			postcode: '08830',
-			state: 'M',
 			phone: '0987654321',
 			email: 'juan.perez@test.com',
 		};
