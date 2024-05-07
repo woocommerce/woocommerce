@@ -459,7 +459,7 @@ class ShippingController {
 
 		$data = array(
 			'local_pickup_enabled'     => 'yes' === $settings['enabled'] ? true : false,
-			'title'                    => __( 'Local Pickup', 'woocommerce' ) === $settings['title'],
+			'title'                    => __( 'Pickup', 'woocommerce' ) === $settings['title'],
 			'price'                    => '' === $settings['cost'] ? true : false,
 			'cost'                     => '' === $settings['cost'] ? 0 : $settings['cost'],
 			'taxes'                    => $settings['tax_status'],

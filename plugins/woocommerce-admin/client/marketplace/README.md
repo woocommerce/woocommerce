@@ -9,13 +9,14 @@ The page contains two parts, the WooCommerce.com marketplace and a list of produ
 - **Discover**: A curated list of extensions and themes.
 - **Browse**: All extensions.
 - **Themes**: All themes.
+- **Business Services**: All business services
 - **Search**: Search results.
 
 ### Marketplace API
 
 The data for the Discover section is fetched from the `/wc/v3/marketplace/featured` endpoint. This behaves as a proxy to fetch and cache the content from the `woocommerce.com/wp-json/wccom-extensions` endpoint.
 
-Themes, extensions, and search results are fetched directly from WooCommerce.com.
+Themes, extensions, business services and search results are fetched directly from WooCommerce.com.
 
 ## My Subscriptions
 
