@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "8.9.0",
+	"version": "9.0.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
 	"prefer-stable": true,
@@ -36,7 +36,6 @@
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
-		"squizlabs/php_codesniffer": "^3.9.1",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},

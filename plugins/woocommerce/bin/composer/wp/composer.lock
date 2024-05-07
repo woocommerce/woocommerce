@@ -222,16 +222,16 @@
         },
         {
             "name": "mck89/peast",
-            "version": "v1.16.2",
+            "version": "v1.16.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mck89/peast.git",
-                "reference": "2791b08ffcc1862fe18eef85675da3aa58c406fe"
+                "reference": "f6e681062bb25c8dacbd30e079f4ad3fd890d7ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mck89/peast/zipball/2791b08ffcc1862fe18eef85675da3aa58c406fe",
-                "reference": "2791b08ffcc1862fe18eef85675da3aa58c406fe",
+                "url": "https://api.github.com/repos/mck89/peast/zipball/f6e681062bb25c8dacbd30e079f4ad3fd890d7ad",
+                "reference": "f6e681062bb25c8dacbd30e079f4ad3fd890d7ad",
                 "shasum": ""
             },
             "require": {
@@ -244,7 +244,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.16.2-dev"
+                    "dev-master": "1.16.1-dev"
                 }
             },
             "autoload": {
@@ -265,9 +265,9 @@
             "description": "Peast is PHP library that generates AST for JavaScript code",
             "support": {
                 "issues": "https://github.com/mck89/peast/issues",
-                "source": "https://github.com/mck89/peast/tree/v1.16.2"
+                "source": "https://github.com/mck89/peast/tree/v1.16.1"
             },
-            "time": "2024-03-05T09:16:03+00:00"
+            "time": "2024-02-14T08:15:19+00:00"
         },
         {
             "name": "mustache/mustache",
@@ -373,16 +373,16 @@
         },
         {
             "name": "wp-cli/i18n-command",
-            "version": "2.6.1",
+            "version": "v2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-cli/i18n-command.git",
-                "reference": "7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1"
+                "reference": "ca7a44a1f8b09d533621b4006e739974212860ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1",
-                "reference": "7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1",
+                "url": "https://api.github.com/repos/wp-cli/i18n-command/zipball/ca7a44a1f8b09d533621b4006e739974212860ee",
+                "reference": "ca7a44a1f8b09d533621b4006e739974212860ee",
                 "shasum": ""
             },
             "require": {
@@ -436,9 +436,9 @@
             "homepage": "https://github.com/wp-cli/i18n-command",
             "support": {
                 "issues": "https://github.com/wp-cli/i18n-command/issues",
-                "source": "https://github.com/wp-cli/i18n-command/tree/2.6.1"
+                "source": "https://github.com/wp-cli/i18n-command/tree/v2.6.0"
             },
-            "time": "2024-02-28T11:27:34+00:00"
+            "time": "2024-02-01T14:25:11+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",

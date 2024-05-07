@@ -193,7 +193,9 @@
 }
 
 .woocommerce-filters-advanced__add-dropdown {
-	padding: $gap-smaller 0;
+	padding: 0;
+	margin: 0;
+	white-space: nowrap;
 
 	li {
 		margin: 0;

@@ -47,7 +47,7 @@ test.describe( 'Product Collection', () => {
 		await expect( pageObject.addToCartButtons ).toHaveCount( 9 );
 	} );
 
-	test.describe( 'Renders correctly with all Product Elements', async () => {
+	test.describe( 'Renders correctly with all Product Elements', () => {
 		const insertProductElements = async (
 			pageObject: ProductCollectionPage
 		) => {
@@ -177,21 +177,23 @@ test.describe( 'Product Collection', () => {
 		test( 'Order By - sort products by title in descending order correctly', async ( {
 			pageObject,
 		} ) => {
-			await pageObject.setOrderBy( 'title/desc' );
-			const allTitles = await pageObject.productTitles.allInnerTexts();
-			const expectedTitles = [ ...allTitles ].sort().reverse();
+			const sortedTitles = [
+				'WordPress Pennant',
+				'V-Neck T-Shirt',
+				'T-Shirt with Logo',
+				'T-Shirt',
+				/Sunglasses/, // In the frontend it's "Protected: Sunglasses"
+				'Single',
+				'Polo',
+				'Long Sleeve Tee',
+				'Logo Collection',
+			];
 
-			expect( allTitles ).toStrictEqual( expectedTitles );
+			await pageObject.setOrderBy( 'title/desc' );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 
 			await pageObject.publishAndGoToFrontend();
-
-			const frontendTitles =
-				await pageObject.productTitles.allInnerTexts();
-			expect(
-				frontendTitles.map( ( title ) =>
-					title.replace( 'Protected: ', '' )
-				)
-			).toStrictEqual( expectedTitles );
+			await expect( pageObject.productTitles ).toHaveText( sortedTitles );
 		} );
 
 		// Products can be filtered based on 'on sale' status.

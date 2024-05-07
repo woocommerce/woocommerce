@@ -10,6 +10,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Traits\AccessiblePrivateMethods;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -217,7 +218,7 @@ class WC_Admin_Notices {
 	 * or if the Legacy REST API extension is installed, and remove the notice about Legacy webhooks
 	 * if no such webhooks exist anymore or if the Legacy REST API extension is installed.
 	 *
-	 * TODO: Change this method in WooCommerce 9.0 so that the notice gets removed if the Legacy REST API extension is installed and active.
+	 * TODO: Change this method in WooCommerce 9.0 so that the notice get removed if the Legacy REST API extension is installed and active.
 	 */
 	private static function maybe_remove_legacy_api_removal_notice() {
 		$plugin_is_active = is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' );
@@ -228,6 +229,11 @@ class WC_Admin_Notices {
 
 		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( $plugin_is_active || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
 			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
+		}
+
+		if ( self::has_notice( 'legacy_rest_api_is_incompatible_with_hpos' ) &&
+			! ( 'yes' === get_option( 'woocommerce_api_enabled' ) && 'yes' === get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) ) ) {
+			self::remove_notice( 'legacy_rest_api_is_incompatible_with_hpos' );
 		}
 	}
 
