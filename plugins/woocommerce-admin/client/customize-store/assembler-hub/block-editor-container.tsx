@@ -184,27 +184,11 @@ export const BlockEditorContainer = () => {
 	// @ts-expect-error No types for this exist yet.
 	const { user } = useContext( GlobalStylesContext );
 
-	const isActiveNewNeutralVariation = useMemo(
-		() =>
-			isEqual( COLOR_PALETTES[ 0 ].settings.color, user.settings.color ),
-		[ user ]
-	);
-
 	useEffect( () => {
-		const coverBlock = blocks.find(
-			( block ) =>
-				block.name === 'core/cover' &&
-				block.attributes.url.includes(
-					'music-black-and-white-white-photography.jpg'
-				)
+		const isActiveNewNeutralVariation = isEqual(
+			COLOR_PALETTES[ 0 ].settings.color,
+			user.settings.color
 		);
-
-		const buttonsBlock = coverBlock?.innerBlocks[ 0 ].innerBlocks.find(
-			( block ) => block.name === 'core/buttons'
-		);
-
-		const buttonBlock = buttonsBlock?.innerBlocks[ 0 ];
-		const clientId = buttonBlock?.clientId;
 
 		if ( ! isActiveNewNeutralVariation ) {
 			findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
@@ -215,21 +199,18 @@ export const BlockEditorContainer = () => {
 					} );
 				}
 			);
-			updateBlockAttributes( clientId, {
-				style: {},
-			} );
 			return;
 		}
-
 		findButtonBlockInsideCoverBlockProductHeroPatternAndUpdate(
 			blocks,
 			( block: BlockInstance ) => {
 				updateBlockAttributes( block.clientId, {
 					style: PRODUCT_HERO_PATTERN_BUTTON_STYLE,
+					className: '',
 				} );
 			}
 		);
-	}, [ blocks, isActiveNewNeutralVariation, updateBlockAttributes ] );
+	}, [ blocks, updateBlockAttributes, user.settings.color ] );
 
 	useEffect( () => {
 		const { blockIdToHighlight, restOfBlockIds } = clientIds.reduce(
