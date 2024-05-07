@@ -47,6 +47,24 @@ class LaunchYourStore {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/update-survey-status',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'update_survey_status' ),
+					'permission_callback' => array( $this, 'must_be_shop_manager_or_admin' ),
+					'args' => array(
+						'status' => array(
+							'type' => 'string',
+							'enum' => array( 'yes', 'no' ),
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -94,5 +112,10 @@ class LaunchYourStore {
 		);
 
 		return true;
+	}
+
+	public function update_survey_status( \WP_REST_Request $request ) {
+		update_option( 'woocommerce_admin_launch_your_store_survey_completed', $request->get_param( 'status' ) );
+		return new \WP_REST_Response();
 	}
 }

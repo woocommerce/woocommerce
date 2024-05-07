@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { DoneActorEvent } from 'xstate5';
-import { dispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME, TaskListType } from '@woocommerce/data';
+import { TaskListType } from '@woocommerce/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -12,8 +12,12 @@ import type { MainContentMachineContext } from '../../../main-content/xstate';
 
 export const assignCompleteSurvey = {
 	congratsScreen: ( { context }: { context: MainContentMachineContext } ) => {
-		dispatch( OPTIONS_STORE_NAME ).updateOptions( {
-			woocommerce_admin_launch_your_store_survey_completed: 'yes',
+		apiFetch( {
+			path: '/wc-admin/launch-your-store/update-survey-status',
+			data: {
+				status: 'yes',
+			},
+			method: 'POST',
 		} );
 
 		return {
