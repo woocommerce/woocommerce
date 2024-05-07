@@ -535,14 +535,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$should_load = wc_string_to_bool( $should_load );
 		}
 
-		/**
-		 * Allow third-parties to filter whether PayPal Standard should be loaded or not.
-		 *
-		 * @since 5.5.0
-		 *
-		 * @param bool              $should_load Whether PayPal Standard should be loaded.
-		 * @param WC_Gateway_Paypal $this        The WC_Gateway_Paypal instance.
-		 */
-		return apply_filters( 'woocommerce_should_load_paypal_standard', $should_load, $this );
+		return $should_load;
 	}
 }
