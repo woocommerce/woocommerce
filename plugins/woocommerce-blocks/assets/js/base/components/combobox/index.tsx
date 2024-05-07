@@ -41,7 +41,7 @@ export interface ComboboxControlOption {
 	value: string;
 }
 
-type WCComboboxProps = Omit< AriakitComboboxProps, 'onChange' > & {
+export type ComboboxProps = Omit< AriakitComboboxProps, 'onChange' > & {
 	errorId: string | null;
 	errorMessage?: string | undefined;
 	instanceId?: string;
@@ -67,7 +67,7 @@ const Combobox = ( {
 	errorMessage = __( 'Please select a valid option', 'woocommerce' ),
 	className,
 	...restOfProps
-}: WCComboboxProps ): JSX.Element => {
+}: ComboboxProps ): JSX.Element => {
 	const controlRef = useRef< HTMLDivElement >( null );
 	const fallbackId = useId();
 	const controlId = id || 'control-' + fallbackId;
