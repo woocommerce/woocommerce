@@ -125,7 +125,7 @@ test.describe( 'Shopper → Order Confirmation (logged in user)', () => {
 				)
 				.click();
 			await page.goto( orderReceivedURL );
-			await pageObject.verifyOrderConfirmationDetails( page, true );
+			await pageObject.verifyOrderConfirmationDetails( page );
 		} );
 	} );
 } );
