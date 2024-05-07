@@ -10,7 +10,7 @@ import ForcePageReloadControl from './force-page-reload-control';
 import type { ProductCollectionEditComponentProps } from '../../types';
 
 export default function ProductCollectionAdvancedInspectorControls(
-	props: ProductCollectionEditComponentProps
+	props: Omit< ProductCollectionEditComponentProps, 'preview' >
 ) {
 	const { clientId, attributes, setAttributes } = props;
 	const { forcePageReload } = attributes;

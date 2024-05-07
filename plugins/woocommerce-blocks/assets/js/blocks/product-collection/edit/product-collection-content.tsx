@@ -19,7 +19,6 @@ import type {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
 	ProductCollectionEditComponentProps,
-	PreviewState,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
 import {
@@ -91,11 +90,9 @@ const ProductCollectionContent = ( {
 				},
 				...( attributes as Partial< ProductCollectionAttributes > ),
 				queryId,
-				// If initialPreviewState is provided, use it, otherwise use default preview state.
+				// If initialPreviewState is provided, set it as previewState.
 				...( !! attributes.collection && {
-					previewState:
-						initialPreviewState ||
-						( DEFAULT_ATTRIBUTES.previewState as PreviewState ),
+					previewState: initialPreviewState,
 				} ),
 			} );
 
