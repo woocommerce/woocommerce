@@ -73,20 +73,36 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 		[ attributeId ]
 	);
 
-	const attributeTermPropName: 'terms' | 'options' = 'terms';
+	/**
+	 * Local terms to handle not global attributes.
+	 * Set initially with the attribute options.
+	 */
+	const [ localTerms, setLocalTerms ] = useState< string[] | undefined >(
+		attribute?.options
+	);
 
-	// Map the terms to suggestions to populate the token field.
-	const suggestions = terms
-		? terms.map( ( term: ProductAttributeTerm ) => term.name )
-		: undefined;
+	// By convention, it's a global attribute if the attribute ID is 0.
+	const isGlobalAttribute = attribute?.id === 0;
 
 	/*
-	 * Get the selected options,
-	 * used to populate the token field.
+	 * Set initially the the FormTokenField suggestions
+	 * with the attribute options (localTerms), but
+	 * if it's not a global attribute
+	 * set the suggestions with the terms names.
 	 */
-	const selectedValues = attribute?.[ attributeTermPropName ]?.map(
-		( option ) => option.name
-	);
+	const suggestions = isGlobalAttribute
+		? localTerms
+		: terms?.map( ( term: ProductAttributeTerm ) => term.name );
+
+	/*
+	 * Build selected options object from the attribute,
+	 * used to populate the token field.
+	 * When the attribute is global, uses straigh the attribute options.
+	 * Otherwise, maps the terms to their names.
+	 */
+	const selectedValues = isGlobalAttribute
+		? attribute.options
+		: attribute?.terms?.map( ( option ) => option.name );
 
 	// Flag to track if the terms are initially populated.
 	const [ initiallyPopulated, setInitiallyPopulated ] = useState( false );
@@ -152,7 +168,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 
 	async function addNewTerms(
 		termNames: string[],
-		itemsSelection: ProductAttributeTerm[]
+		selectedTerms: ProductAttributeTerm[]
 	) {
 		if ( ! attribute ) {
 			return;
@@ -180,7 +196,7 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 			{ search: '', attribute_id: attributeId },
 		] );
 
-		onTermsSelect( [ ...itemsSelection, ...newItems ], index, attribute );
+		onTermsSelect( [ ...selectedTerms, ...newItems ], index, attribute );
 	}
 
 	return (
@@ -214,29 +230,48 @@ export const AttributeTableRow: React.FC< AttributeTableRowProps > = ( {
 					disabled={ ! attribute }
 					suggestions={ suggestions }
 					value={ selectedValues }
-					onChange={ ( stringTerms: string[] ) => {
+					onChange={ ( newSelectedTerms: string[] ) => {
 						if ( ! attribute ) {
 							return;
 						}
 
-						// Extract new terms from the terms (string[])
-						const newStringTerms = stringTerms.filter(
+						/*
+						 * Extract new terms (string[]) from the selected terms,
+						 * by extracting the terms that are not in the suggestions.
+						 * If the new terms are not in the suggestions, they are new ones.
+						 */
+						const newStringTerms = newSelectedTerms.filter(
 							( term ) => ! suggestions?.includes( term )
 						);
 
-						// Get the current selected terms.
-						const itemsSelection = terms.filter( ( term ) =>
-							stringTerms.includes( term.name )
-						);
+						/*
+						 * Selected terms are the selected ones when it is a global attribute,
+						 * otherwise, the selected terms are the terms that are in ProductAttributeTerm[].
+						 */
+						const selectedTerms = isGlobalAttribute
+							? newSelectedTerms
+							: terms.filter( ( term ) =>
+									newSelectedTerms.includes( term.name )
+							  );
 
-						// Select the terms
-						onTermsSelect( itemsSelection, index, attribute );
+						onTermsSelect( selectedTerms, index, attribute );
 
-						// Create new terms, in case there are any.
+						// If it is a global attribute, set the local terms.
+						if ( isGlobalAttribute ) {
+							return setLocalTerms( ( prevTerms = [] ) => [
+								...prevTerms,
+								...newStringTerms,
+							] );
+						}
+
+						/*
+						 * Create new terms, in case there are any,
+						 * when it is not a global attribute.
+						 */
 						if ( newStringTerms.length ) {
-							return addNewTerms(
+							addNewTerms(
 								newStringTerms,
-								itemsSelection
+								selectedTerms as ProductAttributeTerm[]
 							);
 						}
 					} }

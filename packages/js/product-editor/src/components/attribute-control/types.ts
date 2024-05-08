@@ -76,7 +76,7 @@ export type AttributeTableRowProps = {
 	) => void;
 
 	onTermsSelect: (
-		terms: ProductAttributeTerm[],
+		terms: ProductAttributeTerm[] | string[],
 		index: number,
 		attribute: EnhancedProductAttribute
 	) => void;

@@ -312,16 +312,30 @@ export const NewAttributeModal: React.FC< NewAttributeModalProps > = ( {
 							} );
 					}
 
-					const attributeTermPropName: 'terms' | 'options' = 'terms';
-
+					/**
+					 * Set the attribute terms in the form field.
+					 *
+					 * @param {ProductAttributeTerm[] | string[]} terms     - The terms to set.
+					 * @param {number}                            index     - The index of the attribute in the form field.
+					 * @param {EnhancedProductAttribute}          attribute - The attribute to set the terms.
+					 */
 					function selectTerms(
-						terms: ProductAttributeTerm[],
-						index: number
+						terms: ProductAttributeTerm[] | string[],
+						index: number,
+						attribute?: EnhancedProductAttribute
 					) {
-						setValue(
-							`attributes[${ index }].${ attributeTermPropName }`,
-							terms
-						);
+						/*
+						 * By convention, it's a global attribute if the attribute ID is 0.
+						 * For global attributes, the field name suffix
+						 * to set the attribute terms is 'options',
+						 * for local attributes, the field name suffix is 'terms'.
+						 */
+						const attributeTermPropName =
+							attribute?.id === 0 ? 'options' : 'terms';
+
+						const fieldName = `attributes[${ index }].${ attributeTermPropName }`;
+
+						setValue( fieldName, terms );
 					}
 
 					/*
