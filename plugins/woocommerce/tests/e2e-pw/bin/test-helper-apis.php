@@ -90,11 +90,17 @@ function api_update_option( WP_REST_Request $request ) {
 	$option_name  = sanitize_text_field( $request['option_name'] );
 	$option_value = sanitize_text_field( $request['option_value'] );
 
-	if ( update_option( $option_name, $option_value ) ) {
-		return new WP_REST_Response( 'Option updated', 200 );
+	$existing_value = get_option( $option_name );
+
+	if ( $existing_value === $option_value ) {
+		return new WP_REST_Response( 'Option already set to: ' . $option_value, 200 );
 	}
 
-	return new WP_REST_Response( 'Invalid request body', 400 );
+	if ( update_option( $option_name, $option_value ) ) {
+		return new WP_REST_Response( 'Update option SUCCESS: ' . $option_name . ' => ' . $option_value, 200 );
+	}
+
+	return new WP_REST_Response( 'Update option failed: ' . $option_name . ' => ' . $option_value, 400 );
 }
 
 /**

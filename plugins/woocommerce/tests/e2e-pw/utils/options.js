@@ -17,8 +17,12 @@ export const setOption = async (
 		},
 	} );
 
-	await apiContext.post( '/wp-json/e2e-options/update', {
-		failOnStatusCode: true,
-		data: { option_name: optionName, option_value: optionValue },
-	} );
+	return await apiContext
+		.post( '/wp-json/e2e-options/update', {
+			failOnStatusCode: true,
+			data: { option_name: optionName, option_value: optionValue },
+		} )
+		.then( ( response ) => {
+			return response.json();
+		} );
 };
