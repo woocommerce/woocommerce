@@ -30,7 +30,7 @@ import { handlePrompt } from '../../../utils/handle-prompt';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { EmptyState } from './empty-state';
 
-export function VariationItemsBlockEdit( {
+export function Edit( {
 	attributes,
 	context,
 }: ProductEditorBlockEditProps< VariationOptionsBlockAttributes > ) {
